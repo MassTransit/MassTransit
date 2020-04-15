@@ -42,7 +42,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
             using var delivery = Tracker.BeginDelivery();
 
-            await _messageReceiver.Handle(message, context => AddReceiveContextPayloads(context, messageSession, message)).ConfigureAwait(false);
+            await _messageReceiver.Handle(message, cancellationToken, context => AddReceiveContextPayloads(context, messageSession, message))
+                .ConfigureAwait(false);
         }
 
         void AddReceiveContextPayloads(ReceiveContext receiveContext, IMessageSession messageSession, Message message)

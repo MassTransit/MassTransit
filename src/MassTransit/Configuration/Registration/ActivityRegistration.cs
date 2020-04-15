@@ -74,7 +74,7 @@ namespace MassTransit.Registration
             return _definition;
         }
 
-        void ConfigureCompensate(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider)
+        public void ConfigureCompensate(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider)
         {
             var activityScopeProvider = configurationServiceProvider.GetRequiredService<ICompensateActivityScopeProvider<TActivity, TLog>>();
 
@@ -82,7 +82,7 @@ namespace MassTransit.Registration
 
             var specification = new CompensateActivityHostSpecification<TActivity, TLog>(activityFactory, configurator);
 
-            LogContext.Debug?.Log("Configuring {Endpoint}, Compensate Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
+            LogContext.Debug?.Log("Configuring endpoint {Endpoint}, Compensate Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
                 TypeMetadataCache<TActivity>.ShortName);
 
             GetActivityDefinition(configurationServiceProvider)
@@ -94,7 +94,7 @@ namespace MassTransit.Registration
             configurator.AddEndpointSpecification(specification);
         }
 
-        void ConfigureExecute(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider, Uri compensateAddress)
+        public void ConfigureExecute(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider, Uri compensateAddress)
         {
             var activityScopeProvider = configurationServiceProvider.GetRequiredService<IExecuteActivityScopeProvider<TActivity, TArguments>>();
 
@@ -102,7 +102,7 @@ namespace MassTransit.Registration
 
             var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(activityFactory, compensateAddress, configurator);
 
-            LogContext.Debug?.Log("Configuring {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
+            LogContext.Debug?.Log("Configuring endpoint {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
                 TypeMetadataCache<TActivity>.ShortName);
 
             GetActivityDefinition(configurationServiceProvider)

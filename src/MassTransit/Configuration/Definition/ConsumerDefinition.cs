@@ -2,6 +2,7 @@ namespace MassTransit.Definition
 {
     using System;
     using ConsumeConfigurators;
+    using Registration;
 
 
     /// <summary>
@@ -55,6 +56,19 @@ namespace MassTransit.Definition
             return string.IsNullOrWhiteSpace(_endpointName)
                 ? _endpointName = EndpointDefinition?.GetEndpointName(formatter) ?? formatter.Consumer<TConsumer>()
                 : _endpointName;
+        }
+
+        /// <summary>
+        /// Configure the consumer endpoint
+        /// </summary>
+        /// <param name="configure"></param>
+        protected void Endpoint(Action<IConsumerEndpointRegistrationConfigurator<TConsumer>> configure)
+        {
+            var configurator = new ConsumerEndpointRegistrationConfigurator<TConsumer>();
+
+            configure?.Invoke(configurator);
+
+            EndpointDefinition = new ConsumerEndpointDefinition<TConsumer>(configurator.Settings);
         }
 
         /// <summary>

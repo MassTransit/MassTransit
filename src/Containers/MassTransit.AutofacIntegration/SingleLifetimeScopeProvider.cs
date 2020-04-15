@@ -6,23 +6,33 @@
     public class SingleLifetimeScopeProvider :
         ILifetimeScopeProvider
     {
-        readonly ILifetimeScope _scope;
-
-        public SingleLifetimeScopeProvider(ILifetimeScope scope)
+        public SingleLifetimeScopeProvider(ILifetimeScope lifetimeScope)
         {
-            _scope = scope;
+            LifetimeScope = lifetimeScope;
         }
 
-        public ILifetimeScope LifetimeScope => _scope;
+        public ILifetimeScope LifetimeScope { get; }
+
+        public ILifetimeScope GetLifetimeScope<T>(SendContext<T> context)
+            where T : class
+        {
+            return LifetimeScope;
+        }
+
+        public ILifetimeScope GetLifetimeScope<T>(PublishContext<T> context)
+            where T : class
+        {
+            return LifetimeScope;
+        }
 
         public ILifetimeScope GetLifetimeScope(ConsumeContext context)
         {
-            return _scope;
+            return LifetimeScope;
         }
 
         ILifetimeScope ILifetimeScopeProvider.GetLifetimeScope<T>(ConsumeContext<T> context)
         {
-            return _scope;
+            return LifetimeScope;
         }
     }
 }

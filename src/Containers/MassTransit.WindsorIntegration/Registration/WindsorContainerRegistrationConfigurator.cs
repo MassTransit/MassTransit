@@ -24,6 +24,8 @@ namespace MassTransit.WindsorIntegration.Registration
             container.RegisterScopedContextProviderIfNotPresent();
 
             container.Register(
+                Component.For<ISendScopeProvider>().ImplementedBy<WindsorSendScopeProvider>().LifestyleTransient(),
+                Component.For<IPublishScopeProvider>().ImplementedBy<WindsorPublishScopeProvider>().LifestyleTransient(),
                 Component.For<IConsumerScopeProvider>().ImplementedBy<WindsorConsumerScopeProvider>().LifestyleTransient(),
                 Component.For<IConfigurationServiceProvider>()
                     .ImplementedBy<WindsorConfigurationServiceProvider>()

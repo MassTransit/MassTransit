@@ -21,6 +21,14 @@ namespace MassTransit.AutofacIntegration.Registration
 
             ScopeName = "message";
 
+            builder.Register(CreateSendScopeProvider)
+                .As<ISendScopeProvider>()
+                .SingleInstance();
+
+            builder.Register(CreatePublishScopeProvider)
+                .As<IPublishScopeProvider>()
+                .SingleInstance();
+
             builder.Register(CreateConsumerScopeProvider)
                 .As<IConsumerScopeProvider>()
                 .SingleInstance();
@@ -98,6 +106,20 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IMediator>()
                 .As<IClientFactory>()
                 .SingleInstance();
+        }
+
+        ISendScopeProvider CreateSendScopeProvider(IComponentContext context)
+        {
+            var lifetimeScopeProvider = new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());
+
+            return new AutofacSendScopeProvider(lifetimeScopeProvider, ScopeName);
+        }
+
+        IPublishScopeProvider CreatePublishScopeProvider(IComponentContext context)
+        {
+            var lifetimeScopeProvider = new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());
+
+            return new AutofacPublishScopeProvider(lifetimeScopeProvider, ScopeName);
         }
 
         IConsumerScopeProvider CreateConsumerScopeProvider(IComponentContext context)

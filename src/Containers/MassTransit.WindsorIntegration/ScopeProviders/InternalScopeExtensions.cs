@@ -26,6 +26,20 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             return beginScope;
         }
 
+        public static IDisposable CreateNewMessageScope<T>(this IKernel kernel, SendContext<T> sendContext)
+            where T : class
+        {
+            var beginScope = kernel.BeginScope();
+            return beginScope;
+        }
+
+        public static IDisposable CreateNewMessageScope<T>(this IKernel kernel, PublishContext<T> publishContext)
+            where T : class
+        {
+            var beginScope = kernel.BeginScope();
+            return beginScope;
+        }
+
         public static void UpdateScope(this IKernel kernel, ConsumeContext context)
         {
             kernel.Resolve<ScopedConsumeContextProvider>().SetContext(context);

@@ -93,6 +93,22 @@ namespace MassTransit.Registration
             activity.Configure(executeEndpointConfigurator, compensateEndpointConfigurator, _configurationServiceProvider);
         }
 
+        public void ConfigureActivityExecute(Type activityType, IReceiveEndpointConfigurator executeEndpointConfigurator, Uri compensateAddress)
+        {
+            if (!_activities.TryGetValue(activityType, out var activity))
+                throw new ArgumentException($"The activity type was not found: {TypeMetadataCache.GetShortName(activityType)}", nameof(activityType));
+
+            activity.ConfigureExecute(executeEndpointConfigurator, _configurationServiceProvider, compensateAddress);
+        }
+
+        public void ConfigureActivityCompensate(Type activityType, IReceiveEndpointConfigurator compensateEndpointConfigurator)
+        {
+            if (!_activities.TryGetValue(activityType, out var activity))
+                throw new ArgumentException($"The activity type was not found: {TypeMetadataCache.GetShortName(activityType)}", nameof(activityType));
+
+            activity.ConfigureCompensate(compensateEndpointConfigurator, _configurationServiceProvider);
+        }
+
         public void ConfigureEndpoints<T>(IReceiveConfigurator<T> configurator, IEndpointNameFormatter endpointNameFormatter)
             where T : IReceiveEndpointConfigurator
         {
@@ -134,7 +150,7 @@ namespace MassTransit.Registration
                     Definition = x,
                     Name = x.GetEndpointName(endpointNameFormatter)
                 })
-                .GroupBy(x => x.Name, (name,values) => new
+                .GroupBy(x => x.Name, (name, values) => new
                 {
                     Name = name,
                     Definition = values.Select(x => x.Definition).Combine()

@@ -26,7 +26,7 @@
             Action<ContainerBuilder, ConsumeContext> configureScope = null)
         {
             var scopeProvider = new AutofacConsumerScopeProvider(new SingleLifetimeScopeProvider(lifetimeScope), name, configureScope);
-            var specification = new FilterPipeSpecification<ConsumeContext>(new ScopeFilter(scopeProvider));
+            var specification = new FilterPipeSpecification<ConsumeContext>(new ScopeConsumeFilter(scopeProvider));
 
             configurator.AddPipeSpecification(specification);
         }

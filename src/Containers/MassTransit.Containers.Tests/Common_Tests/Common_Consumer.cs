@@ -91,6 +91,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_receive_on_the_custom_endpoint()
         {
+            var client = Bus.CreateRequestClient<PingMessage>(new Uri("queue:shared"));
+
+            await client.GetResponse<PongMessage>(new PingMessage());
+
+            var clientB = Bus.CreateRequestClient<Request>(new Uri("queue:shared"));
+
+            await clientB.GetResponse<Response>(new Request());
         }
 
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
@@ -100,6 +107,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             configurator.AddConsumer<ConsumerB>(typeof(ConsumerBDefinition))
                 .Endpoint(x => x.Name = "shared");
+
+            configurator.AddConsumer<ConsumerC>(typeof(ConsumerCDefinition));
 
             configurator.AddBus(provider => BusControl);
         }
@@ -129,17 +138,51 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
 
         class ConsumerB :
-            IConsumer<PongMessage>
+            IConsumer<Request>
         {
-            public Task Consume(ConsumeContext<PongMessage> context)
+            public Task Consume(ConsumeContext<Request> context)
             {
-                return TaskUtil.Completed;
+                return context.RespondAsync(new Response());
             }
         }
 
 
         class ConsumerBDefinition :
             ConsumerDefinition<ConsumerB>
+        {
+            public ConsumerBDefinition()
+            {
+                Endpoint(x => x.Name = "broken");
+            }
+        }
+
+
+        class ConsumerC :
+            IConsumer<PingMessage>
+        {
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                return context.RespondAsync(new PongMessage(context.Message.CorrelationId));
+            }
+        }
+
+
+        class ConsumerCDefinition :
+            ConsumerDefinition<ConsumerC>
+        {
+            public ConsumerCDefinition()
+            {
+                Endpoint(e => e.Name = "shared");
+            }
+        }
+
+
+        class Request
+        {
+        }
+
+
+        class Response
         {
         }
     }

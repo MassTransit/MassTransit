@@ -8,7 +8,6 @@ namespace MassTransit
     using Microsoft.Extensions.DependencyInjection;
     using Pipeline.Filters;
     using Saga;
-    using Scoping;
 
 
     public static class DependencyInjectionExtensions
@@ -21,7 +20,7 @@ namespace MassTransit
         public static void UseServiceScope(this IPipeConfigurator<ConsumeContext> configurator, IServiceProvider serviceProvider)
         {
             var scopeProvider = new DependencyInjectionConsumerScopeProvider(serviceProvider);
-            var specification = new FilterPipeSpecification<ConsumeContext>(new ScopeFilter(scopeProvider));
+            var specification = new FilterPipeSpecification<ConsumeContext>(new ScopeConsumeFilter(scopeProvider));
 
             configurator.AddPipeSpecification(specification);
         }

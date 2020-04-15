@@ -15,7 +15,7 @@
 
         bool DeployTopologyOnly { get; set; }
 
-        IServiceBusHost Proxy { get; }
+        IServiceBusHostControl Proxy { get; }
 
         /// <summary>
         /// Apply the endpoint definition to the receive endpoint configurator

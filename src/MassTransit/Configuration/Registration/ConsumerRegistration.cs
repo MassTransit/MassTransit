@@ -39,7 +39,7 @@ namespace MassTransit.Registration
             var consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory, configurator);
 
-            LogContext.Debug?.Log("Configuring {Endpoint}, Consumer: {ConsumerType}", configurator.InputAddress.GetLastPart(),
+            LogContext.Debug?.Log("Configuring endpoint {Endpoint}, Consumer: {ConsumerType}", configurator.InputAddress.GetLastPart(),
                 TypeMetadataCache<TConsumer>.ShortName);
 
             GetConsumerDefinition(configurationServiceProvider)

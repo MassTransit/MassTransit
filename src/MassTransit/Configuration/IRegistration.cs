@@ -76,13 +76,28 @@ namespace MassTransit
         void ConfigureExecuteActivity(Type activityType, IReceiveEndpointConfigurator configurator);
 
         /// <summary>
-        /// Configure the specified  activity type
+        /// Configure the specified activity type
         /// </summary>
         /// <param name="activityType"></param>
         /// <param name="executeEndpointConfigurator">The configurator for the execute activity endpoint</param>
         /// <param name="compensateEndpointConfigurator">The configurator for the compensate activity endpoint</param>
         void ConfigureActivity(Type activityType, IReceiveEndpointConfigurator executeEndpointConfigurator,
             IReceiveEndpointConfigurator compensateEndpointConfigurator);
+
+        /// <summary>
+        /// Configure the specified activity type
+        /// </summary>
+        /// <param name="activityType"></param>
+        /// <param name="executeEndpointConfigurator">The configurator for the execute activity endpoint</param>
+        /// <param name="compensateAddress"></param>
+        void ConfigureActivityExecute(Type activityType, IReceiveEndpointConfigurator executeEndpointConfigurator, Uri compensateAddress);
+
+        /// <summary>
+        /// Configure the specified activity type
+        /// </summary>
+        /// <param name="activityType"></param>
+        /// <param name="compensateEndpointConfigurator">The configurator for the compensate activity endpoint</param>
+        void ConfigureActivityCompensate(Type activityType, IReceiveEndpointConfigurator compensateEndpointConfigurator);
 
         /// <summary>
         /// Configure the endpoints for all defined consumer, saga, and activity types using an optional

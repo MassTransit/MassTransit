@@ -11,6 +11,7 @@ public class Tests
         {
             { "MassTransit.Tests", null },
             { "MassTransit.Containers.Tests", null },
+            { "MassTransit.AspNetCoreIntegraion.Tests", null },
             { "MassTransit.QuartzIntegration.Tests", null },
             { "MassTransit.HangfireIntegration.Tests", null },
             { "MassTransit.HttpTransport.Tests", null },

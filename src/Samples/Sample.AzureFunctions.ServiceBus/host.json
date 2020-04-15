@@ -1,0 +1,29 @@
+{
+  "version": "2.0",
+  "logging": {
+    "applicationInsights": {
+      "samplingSettings": {
+        "isEnabled": true
+      }
+    },
+    "logLevel": {
+      "MassTransit": "Debug",
+      "Sample.AzureFunctions.ServiceBus": "Information"
+    }
+  },
+  "extensions": {
+    "serviceBus": {
+      "prefetchCount": 32,
+      "messageHandlerOptions": {
+        "autoComplete": true,
+        "maxConcurrentCalls": 32,
+        "maxAutoRenewDuration": "00:30:00"
+      }
+    },
+    "eventHub": {
+      "maxBatchSize": 64,
+      "prefetchCount": 256,
+      "batchCheckpointFrequency": 1
+    }
+  }
+}

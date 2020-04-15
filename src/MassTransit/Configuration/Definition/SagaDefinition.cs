@@ -1,6 +1,7 @@
 namespace MassTransit.Definition
 {
     using System;
+    using Registration;
     using Saga;
 
 
@@ -71,6 +72,19 @@ namespace MassTransit.Definition
         /// <param name="sagaConfigurator">The saga configurator</param>
         protected virtual void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<TSaga> sagaConfigurator)
         {
+        }
+
+        /// <summary>
+        /// Configure the saga endpoint
+        /// </summary>
+        /// <param name="configure"></param>
+        protected void Endpoint(Action<ISagaEndpointRegistrationConfigurator<TSaga>> configure)
+        {
+            var configurator = new SagaEndpointRegistrationConfigurator<TSaga>();
+
+            configure?.Invoke(configurator);
+
+            EndpointDefinition = new SagaEndpointDefinition<TSaga>(configurator.Settings);
         }
 
         /// <summary>

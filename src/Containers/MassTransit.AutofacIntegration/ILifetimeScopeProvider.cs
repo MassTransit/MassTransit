@@ -7,6 +7,12 @@
     {
         ILifetimeScope LifetimeScope { get; }
 
+        ILifetimeScope GetLifetimeScope<T>(SendContext<T> context)
+            where T : class;
+
+        ILifetimeScope GetLifetimeScope<T>(PublishContext<T> context)
+            where T : class;
+
         ILifetimeScope GetLifetimeScope(ConsumeContext context);
 
         ILifetimeScope GetLifetimeScope<T>(ConsumeContext<T> context)

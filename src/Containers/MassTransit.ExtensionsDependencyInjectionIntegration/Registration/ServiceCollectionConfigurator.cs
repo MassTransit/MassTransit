@@ -75,6 +75,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             collection.AddScoped(provider => (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ??
                 provider.GetRequiredService<IBus>());
 
+            collection.AddSingleton<ISendScopeProvider>(provider => new DependencyInjectionSendScopeProvider(provider));
+            collection.AddSingleton<IPublishScopeProvider>(provider => new DependencyInjectionPublishScopeProvider(provider));
             collection.AddSingleton<IConsumerScopeProvider>(provider => new DependencyInjectionConsumerScopeProvider(provider));
             collection.AddSingleton<ISagaRepositoryFactory>(provider => new DependencyInjectionSagaRepositoryFactory(provider));
             collection.AddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));

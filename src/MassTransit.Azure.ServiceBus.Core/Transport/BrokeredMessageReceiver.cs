@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Transport
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using Contexts;
@@ -46,10 +47,14 @@
             return _context.ConnectSendObserver(observer);
         }
 
-        async Task IBrokeredMessageReceiver.Handle(Message message, Action<ReceiveContext> contextCallback)
+        async Task IBrokeredMessageReceiver.Handle(Message message, CancellationToken cancellationToken, Action<ReceiveContext> contextCallback)
         {
             var context = new ServiceBusReceiveContext(message, _context);
             contextCallback?.Invoke(context);
+
+            CancellationTokenRegistration registration = default;
+            if (cancellationToken.CanBeCanceled)
+                registration = cancellationToken.Register(context.Cancel);
 
             var receiveLock = context.TryGetPayload<MessageLockContext>(out var lockContext)
                 ? new MessageLockContextReceiveLock(lockContext, context)
@@ -79,6 +84,7 @@
             }
             finally
             {
+                registration.Dispose();
                 context.Dispose();
             }
         }

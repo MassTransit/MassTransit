@@ -22,5 +22,9 @@ namespace MassTransit.Registration
             IReceiveEndpointConfigurator compensateEndpointConfigurator, IConfigurationServiceProvider scopeProvider);
 
         IActivityDefinition GetDefinition(IConfigurationServiceProvider provider);
+
+        void ConfigureCompensate(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider);
+
+        void ConfigureExecute(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider, Uri compensateAddress);
     }
 }

@@ -18,6 +18,14 @@ namespace MassTransit.StructureMapIntegration.Registration
         {
             _expression = expression;
 
+            expression.For<ISendScopeProvider>()
+                .Use(context => CreateSendScopeProvider(context))
+                .Singleton();
+
+            expression.For<IPublishScopeProvider>()
+                .Use(context => CreatePublishScopeProvider(context))
+                .Singleton();
+
             expression.For<IConsumerScopeProvider>()
                 .Use(context => CreateConsumerScopeProvider(context))
                 .Singleton();
@@ -95,6 +103,16 @@ namespace MassTransit.StructureMapIntegration.Registration
 
                 ConfigureMediator(cfg, provider);
             });
+        }
+
+        ISendScopeProvider CreateSendScopeProvider(IContext context)
+        {
+            return new StructureMapSendScopeProvider(context.GetInstance<IContainer>());
+        }
+
+        IPublishScopeProvider CreatePublishScopeProvider(IContext context)
+        {
+            return new StructureMapPublishScopeProvider(context.GetInstance<IContainer>());
         }
 
         IConsumerScopeProvider CreateConsumerScopeProvider(IContext context)

@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../../netfx.props" />
+
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <AzureFunctionsVersion>v2</AzureFunctionsVersion>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AzureFunctionsVersion>v3</AzureFunctionsVersion>
     <IsPackable>false</IsPackable>
     <NoWarn>CS0618,CS1998,CS1591</NoWarn>
   </PropertyGroup>
@@ -11,16 +12,16 @@
     <ProjectReference Include="..\..\MassTransit.WebJobs.ServiceBusIntegration\MassTransit.WebJobs.ServiceBusIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit.WebJobs.EventHubsIntegration\MassTransit.WebJobs.EventHubsIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.6" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="function.json">
+    <None Update="host.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="host.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="local.settings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
   </ItemGroup>
 </Project>

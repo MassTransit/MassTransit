@@ -3,6 +3,8 @@ namespace MassTransit.PrometheusIntegration
     using System;
     using System.Collections.Concurrent;
     using System.Linq;
+    using System.Reflection;
+    using System.Text;
     using Courier;
     using Metadata;
     using Prometheus;
@@ -222,33 +224,6 @@ namespace MassTransit.PrometheusIntegration
             return _handlerInProgress.Labels(_serviceLabel, messageType).TrackInProgress();
         }
 
-        static string GetMessageTypeLabel<TMessage>()
-            where TMessage : class
-        {
-            var messageType = typeof(TMessage).Name;
-            return messageType;
-        }
-
-        static string GetConsumerTypeLabel(string consumerType)
-        {
-            return _labelCache.GetOrAdd(consumerType, type => type.Split('.', '+').Last().Replace("<", "_").Replace(">", "_"));
-        }
-
-        static string GetArgumentTypeLabel<TArguments>()
-        {
-            return _labelCache.GetOrAdd(TypeMetadataCache<TArguments>.ShortName, type => typeof(TArguments).Name.Replace("Arguments", ""));
-        }
-
-        static string GetLogTypeLabel<TLog>()
-        {
-            return _labelCache.GetOrAdd(TypeMetadataCache<TLog>.ShortName, type => typeof(TLog).Name.Replace("Log", ""));
-        }
-
-        static string GetEndpointLabel(Uri inputAddress)
-        {
-            return inputAddress?.AbsolutePath.Split('/').LastOrDefault()?.Replace(".", "_").Replace("/", "_");
-        }
-
         public static void TryConfigure(string serviceName, PrometheusMetricsOptions options)
         {
             if (_isConfigured)
@@ -430,6 +405,79 @@ namespace MassTransit.PrometheusIntegration
                 });
 
             _isConfigured = true;
+        }
+
+        static string GetConsumerTypeLabel(string consumerType)
+        {
+            return _labelCache.GetOrAdd(consumerType, type =>
+            {
+                if (type.StartsWith("MassTransit.MessageHandler<"))
+                {
+                    return "Handler";
+                }
+
+                return type.Split('.', '+').Last().Replace("<", "_").Replace(">", "_");
+            });
+        }
+
+        static string GetArgumentTypeLabel<TArguments>()
+        {
+            return _labelCache.GetOrAdd(TypeMetadataCache<TArguments>.ShortName, type => FormatTypeName(new StringBuilder(), typeof(TArguments))
+                .Replace("Arguments", ""));
+        }
+
+        static string GetLogTypeLabel<TLog>()
+        {
+            return _labelCache.GetOrAdd(TypeMetadataCache<TLog>.ShortName, type => FormatTypeName(new StringBuilder(), typeof(TLog)).Replace("Log", ""));
+        }
+
+        static string GetEndpointLabel(Uri inputAddress)
+        {
+            return inputAddress?.AbsolutePath.Split('/').LastOrDefault()?.Replace(".", "_").Replace("/", "_");
+        }
+
+        static string GetMessageTypeLabel<TMessage>()
+        {
+            return _labelCache.GetOrAdd(TypeMetadataCache<TMessage>.ShortName, type => FormatTypeName(new StringBuilder(), typeof(TMessage)));
+        }
+
+        static string FormatTypeName(StringBuilder sb, Type type)
+        {
+            if (type.IsGenericParameter)
+                return "";
+
+            if (type.IsNested)
+            {
+                FormatTypeName(sb, type.DeclaringType);
+                sb.Append('_');
+            }
+
+            if (type.GetTypeInfo().IsGenericType)
+            {
+                string name = type.GetGenericTypeDefinition().Name;
+
+                //remove `1
+                int index = name.IndexOf('`');
+                if (index > 0)
+                    name = name.Remove(index);
+
+                sb.Append(name);
+                sb.Append('_');
+                Type[] arguments = type.GetTypeInfo().GenericTypeArguments;
+                for (int i = 0; i < arguments.Length; i++)
+                {
+                    if (i > 0)
+                        sb.Append('_');
+
+                    FormatTypeName(sb, arguments[i]);
+                }
+            }
+            else
+            {
+                sb.Append(type.Name);
+            }
+
+            return sb.ToString();
         }
     }
 }

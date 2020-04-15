@@ -22,8 +22,8 @@ namespace MassTransit.Configuration
 
             InputAddress = endpointConfiguration.InputAddress;
 
-            RethrowExceptions();
-            ThrowOnDeadLetter();
+            this.ThrowOnSkippedMessages();
+            this.RethrowFaultedMessages();
         }
 
         public Uri InputAddress { get; }
