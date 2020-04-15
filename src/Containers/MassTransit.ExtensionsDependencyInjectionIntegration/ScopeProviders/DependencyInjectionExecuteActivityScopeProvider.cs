@@ -39,7 +39,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             if (!context.TryGetPayload(out IServiceProvider serviceProvider))
                 serviceProvider = _serviceProvider;
 
-            var serviceScope = serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
+            var serviceScope = serviceProvider.CreateScope();
             try
             {
                 serviceScope.UpdateScope(context);

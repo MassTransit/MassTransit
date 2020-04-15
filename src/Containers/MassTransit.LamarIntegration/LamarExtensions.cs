@@ -15,6 +15,26 @@
             return nestedContainer;
         }
 
+        internal static INestedContainer GetNestedContainer<T>(this IContainer container, SendContext<T> context)
+            where T : class
+        {
+            var nestedContainer = container.GetNestedContainer();
+            nestedContainer.Inject(context);
+            nestedContainer.Inject<SendContext>(context);
+
+            return nestedContainer;
+        }
+
+        internal static INestedContainer GetNestedContainer<T>(this IContainer container, PublishContext<T> context)
+            where T : class
+        {
+            var nestedContainer = container.GetNestedContainer();
+            nestedContainer.Inject(context);
+            nestedContainer.Inject<PublishContext>(context);
+
+            return nestedContainer;
+        }
+
         /// <summary>
         /// Register the InMemory saga repository for the specified saga type
         /// </summary>

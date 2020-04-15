@@ -32,6 +32,20 @@ namespace MassTransit.AutofacIntegration
             return new ConsumerConsumeContextScope<TConsumer, TMessage>(consumeContext, consumer, lifetimeScope);
         }
 
+        public static SendContext<TMessage> GetSendScope<TMessage>(this ILifetimeScope lifetimeScope,
+            SendContext<TMessage> sendContext)
+            where TMessage : class
+        {
+            return new SendContextScope<TMessage>(sendContext, lifetimeScope);
+        }
+
+        public static PublishContext<TMessage> GetPublishScope<TMessage>(this ILifetimeScope lifetimeScope,
+            PublishContext<TMessage> publishContext)
+            where TMessage : class
+        {
+            return new PublishContextScope<TMessage>(publishContext, lifetimeScope);
+        }
+
         public static ILifetimeScope GetLifetimeScope<TMessage, TId>(this ILifetimeScopeRegistry<TId> registry, ConsumeContext<TMessage> context)
             where TMessage : class
         {
@@ -58,6 +72,22 @@ namespace MassTransit.AutofacIntegration
 
             // okay, give up, default it is
             return scopeId;
+        }
+
+        public static void ConfigureScope<T>(this ContainerBuilder builder, SendContext<T> context)
+            where T : class
+        {
+            builder.RegisterInstance(context)
+                .As<SendContext>()
+                .ExternallyOwned();
+        }
+
+        public static void ConfigureScope<T>(this ContainerBuilder builder, PublishContext<T> context)
+            where T : class
+        {
+            builder.RegisterInstance(context)
+                .As<PublishContext>()
+                .ExternallyOwned();
         }
 
         public static void ConfigureScope(this ContainerBuilder builder, ConsumeContext context)

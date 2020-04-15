@@ -94,6 +94,8 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext(), Lifestyle.Scoped);
 
+            container.RegisterSingleton<ISendScopeProvider>(() => new SimpleInjectorSendScopeProvider(container));
+            container.RegisterSingleton<IPublishScopeProvider>(() => new SimpleInjectorPublishScopeProvider(container));
             container.RegisterSingleton<IConsumerScopeProvider>(() => new SimpleInjectorConsumerScopeProvider(container));
             container.RegisterSingleton<ISagaRepositoryFactory>(() => new SimpleInjectorSagaRepositoryFactory(container));
             container.RegisterSingleton<IConfigurationServiceProvider>(() => new SimpleInjectorConfigurationServiceProvider(container));

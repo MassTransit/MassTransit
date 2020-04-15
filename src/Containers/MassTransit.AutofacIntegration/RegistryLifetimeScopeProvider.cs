@@ -15,6 +15,18 @@
 
         public ILifetimeScope LifetimeScope => _registry.GetLifetimeScope(default);
 
+        public ILifetimeScope GetLifetimeScope<T>(SendContext<T> context)
+            where T : class
+        {
+            return _registry.GetLifetimeScope(default);
+        }
+
+        public ILifetimeScope GetLifetimeScope<T>(PublishContext<T> context)
+            where T : class
+        {
+            return _registry.GetLifetimeScope(default);
+        }
+
         public ILifetimeScope GetLifetimeScope(ConsumeContext context)
         {
             return _registry.GetLifetimeScope(default);
