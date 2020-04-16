@@ -6,6 +6,7 @@ namespace MassTransit
     using Azure.ServiceBus.Core.Configurators;
     using ExtensionsDependencyInjectionIntegration;
     using MassTransit;
+    using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.Azure.WebJobs.ServiceBus;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -28,6 +29,8 @@ namespace MassTransit
         {
             var topologyConfiguration = new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology);
             var busConfiguration = new ServiceBusBusConfiguration(topologyConfiguration);
+
+            ConfigureApplicationInsights(services);
 
             services.AddSingleton<IServiceBusBusConfiguration>(busConfiguration)
                 .AddSingleton<IMessageReceiver, MessageReceiver>()
@@ -60,6 +63,14 @@ namespace MassTransit
                 configure?.Invoke(busFactoryConfigurator);
 
                 return busFactoryConfigurator.Build();
+            });
+        }
+
+        static void ConfigureApplicationInsights(IServiceCollection services)
+        {
+            services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>((module, o) =>
+            {
+                module.IncludeDiagnosticSourceActivities.Add("MassTransit");
             });
         }
     }
