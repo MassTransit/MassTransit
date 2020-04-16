@@ -1,25 +1,48 @@
 namespace MassTransit.Configuration
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using Internals.Extensions;
+    using Transports;
 
 
     public class ReceiverConfiguration :
-        EndpointConfiguration
+        EndpointConfiguration,
+        IReceiveEndpointConfigurator
     {
+        readonly IReceiveEndpointConfiguration _configuration;
         protected readonly IList<IReceiveEndpointSpecification> Specifications;
 
-        protected ReceiverConfiguration(IEndpointConfiguration endpointConfiguration)
+        protected ReceiverConfiguration(IReceiveEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)
         {
+            _configuration = endpointConfiguration;
+
             Specifications = new List<IReceiveEndpointSpecification>();
 
             if (LogContext.Current == null)
                 LogContext.ConfigureCurrentLogContext();
+
+            this.ThrowOnSkippedMessages();
+            this.RethrowFaultedMessages();
+        }
+
+        public Uri InputAddress => _configuration.InputAddress;
+
+        public bool ConfigureConsumeTopology
+        {
+            set { }
+        }
+
+        public void AddDependency(IReceiveEndpointObserverConnector connector)
+        {
+        }
+
+        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _configuration.ConnectReceiveEndpointObserver(observer);
         }
 
         public void AddEndpointSpecification(IReceiveEndpointSpecification specification)
@@ -31,54 +54,6 @@ namespace MassTransit.Configuration
         {
             return base.Validate()
                 .Concat(Specifications.SelectMany(x => x.Validate()));
-        }
-
-        /// <summary>
-        /// Configures the error pipe to rethrow exceptions from consumers, suppresses the default error queue behavior
-        /// </summary>
-        protected void RethrowExceptions()
-        {
-            ConfigureError(pipe => pipe.UseFilter(new RethrowExceptionFilter()));
-        }
-
-        /// <summary>
-        /// Configures the dead letter pipe to throw an exception, suppressing the default skipped queue behavior
-        /// </summary>
-        protected void ThrowOnDeadLetter()
-        {
-            ConfigureDeadLetter(pipe => pipe.UseFilter(new FaultDeadLetterFilter()));
-        }
-
-
-        class FaultDeadLetterFilter :
-            IFilter<ReceiveContext>
-        {
-            public Task Send(ReceiveContext context, IPipe<ReceiveContext> next)
-            {
-                throw new MessageNotConsumedException(context.InputAddress, "The message was not consumed");
-            }
-
-            public void Probe(ProbeContext context)
-            {
-                context.CreateScope("fault-not-consumed");
-            }
-        }
-
-
-        class RethrowExceptionFilter :
-            IFilter<ExceptionReceiveContext>
-        {
-            public async Task Send(ExceptionReceiveContext context, IPipe<ExceptionReceiveContext> next)
-            {
-                await context.NotifyFaulted(context.Exception).ConfigureAwait(false);
-
-                context.Exception.Rethrow();
-            }
-
-            public void Probe(ProbeContext context)
-            {
-                context.CreateScope("log-fault");
-            }
         }
     }
 }

@@ -1,0 +1,12 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "AzureWebJobsStorage": "",
+    "AzureWebJobsServiceBus": "",
+    "AzureWebJobsEventHub": "",
+    "FUNCTIONS_EXTENSION_VERSION": "~3",
+    "APPINSIGHTS_INSTRUMENTATIONKEY": "",
+    "APPLICATIONINSIGHTS_CONNECTION_STRING": "InstrumentationKey="
+  }
+}

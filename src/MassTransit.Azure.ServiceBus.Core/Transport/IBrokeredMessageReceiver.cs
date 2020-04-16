@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Transport
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit.Pipeline;
@@ -20,8 +21,9 @@
         /// Handles the <paramref name="message"/>
         /// </summary>
         /// <param name="message"></param>
+        /// <param name="cancellationToken">Specify an optional cancellationToken</param>
         /// <param name="contextCallback">Callback to adjust the context</param>
         /// <returns></returns>
-        Task Handle(Message message, Action<ReceiveContext> contextCallback = null);
+        Task Handle(Message message, CancellationToken cancellationToken = default, Action<ReceiveContext> contextCallback = null);
     }
 }

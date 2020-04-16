@@ -50,5 +50,26 @@ namespace MassTransit
                 x.UseFilter(new DiscardErrorTransportFilter());
             });
         }
+
+        /// <summary>
+        /// Messages that fault should throw exceptions, suppressing the default error queue behavior
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void RethrowFaultedMessages(this IReceivePipelineConfigurator configurator)
+        {
+            configurator.ConfigureError(x =>
+            {
+                x.UseFilter(new RethrowErrorTransportFilter());
+            });
+        }
+
+        /// <summary>
+        /// Messages that are not consumed should throw an exception, forcing the default dead letter behavior
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void ThrowOnSkippedMessages(this IReceivePipelineConfigurator configurator)
+        {
+            configurator.ConfigureDeadLetter(x => x.UseFilter(new FaultDeadLetterFilter()));
+        }
     }
 }

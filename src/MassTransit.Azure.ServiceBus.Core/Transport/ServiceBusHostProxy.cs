@@ -1,8 +1,11 @@
 namespace MassTransit.Azure.ServiceBus.Core.Transport
 {
     using System;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Configuration;
     using GreenPipes;
+    using GreenPipes.Agents;
     using Pipeline;
     using Topology;
     using Transports;
@@ -10,17 +13,17 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
     public class ServiceBusHostProxy :
         BaseHostProxy,
-        IServiceBusHost
+        IServiceBusHostControl
     {
         readonly IServiceBusHostConfiguration _configuration;
-        IServiceBusHost _host;
+        IServiceBusHostControl _host;
 
         public ServiceBusHostProxy(IServiceBusHostConfiguration configuration)
         {
             _configuration = configuration;
         }
 
-        public void SetComplete(IServiceBusHost host)
+        public void SetComplete(IServiceBusHostControl host)
         {
             _host = host;
 
@@ -78,5 +81,118 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             return _host.ConnectReceiveEndpoint(queueName, configure);
         }
 
+        Task IAgent.Stop(StopContext context)
+        {
+            if (_host == null)
+                throw new InvalidOperationException("The host is not ready.");
+
+            return _host.Stop(context);
+        }
+
+        Task IAgent.Ready
+        {
+            get
+            {
+                if (_host == null)
+                    throw new InvalidOperationException("The host is not ready.");
+
+                return _host.Ready;
+            }
+        }
+
+        Task IAgent.Completed
+        {
+            get
+            {
+                if (_host == null)
+                    throw new InvalidOperationException("The host is not ready.");
+
+                return _host.Completed;
+            }
+        }
+
+        CancellationToken IAgent.Stopping
+        {
+            get
+            {
+                if (_host == null)
+                    throw new InvalidOperationException("The host is not ready.");
+
+                return _host.Stopping;
+            }
+        }
+
+        CancellationToken IAgent.Stopped
+        {
+            get
+            {
+                if (_host == null)
+                    throw new InvalidOperationException("The host is not ready.");
+
+                return _host.Stopped;
+            }
+        }
+
+        void ISupervisor.Add(IAgent agent)
+        {
+            if (_host == null)
+                throw new InvalidOperationException("The host is not ready.");
+
+            _host.Add(agent);
+        }
+
+        int ISupervisor.PeakActiveCount
+        {
+            get
+            {
+                if (_host == null)
+                    throw new InvalidOperationException("The host is not ready.");
+
+                return _host.PeakActiveCount;
+            }
+        }
+
+        long ISupervisor.TotalCount
+        {
+            get
+            {
+                if (_host == null)
+                    throw new InvalidOperationException("The host is not ready.");
+
+                return _host.TotalCount;
+            }
+        }
+
+        Task<HostHandle> IBusHostControl.Start(CancellationToken cancellationToken)
+        {
+            if (_host == null)
+                throw new InvalidOperationException("The host is not ready.");
+
+            return _host.Start(cancellationToken);
+        }
+
+        void IBusHostControl.AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
+        {
+            if (_host == null)
+                throw new InvalidOperationException("The host is not ready.");
+
+            _host.AddReceiveEndpoint(endpointName, receiveEndpoint);
+        }
+
+        Task<ISendTransport> IServiceBusHostControl.CreateSendTransport(ServiceBusEndpointAddress address)
+        {
+            if (_host == null)
+                throw new InvalidOperationException("The host is not ready.");
+
+            return _host.CreateSendTransport(address);
+        }
+
+        Task<ISendTransport> IServiceBusHostControl.CreatePublishTransport<T>()
+        {
+            if (_host == null)
+                throw new InvalidOperationException("The host is not ready.");
+
+            return _host.CreatePublishTransport<T>();
+        }
     }
 }

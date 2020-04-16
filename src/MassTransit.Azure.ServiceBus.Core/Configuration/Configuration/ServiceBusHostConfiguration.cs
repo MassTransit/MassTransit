@@ -39,7 +39,7 @@
 
         public bool DeployTopologyOnly { get; set; }
 
-        public IServiceBusHost Proxy => _proxy;
+        public IServiceBusHostControl Proxy => _proxy;
 
         public ServiceBusHostSettings Settings
         {

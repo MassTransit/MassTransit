@@ -1,6 +1,7 @@
-﻿namespace MassTransit.WebJobs.EventHubsIntegration
+﻿namespace MassTransit.WebJobs.EventHubsIntegration.Transport
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
     using Microsoft.Azure.EventHubs;
@@ -20,8 +21,9 @@
         /// Handles the <paramref name="message"/>
         /// </summary>
         /// <param name="message"></param>
+        /// <param name="cancellationToken"></param>
         /// <param name="contextCallback">Callback to adjust the context</param>
         /// <returns></returns>
-        Task Handle(EventData message, Action<ReceiveContext> contextCallback = null);
+        Task Handle(EventData message, CancellationToken cancellationToken, Action<ReceiveContext> contextCallback = null);
     }
 }

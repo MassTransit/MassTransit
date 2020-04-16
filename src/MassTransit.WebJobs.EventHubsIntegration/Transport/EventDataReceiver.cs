@@ -1,6 +1,7 @@
-﻿namespace MassTransit.WebJobs.EventHubsIntegration
+﻿namespace MassTransit.WebJobs.EventHubsIntegration.Transport
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using Contexts;
@@ -19,7 +20,8 @@
         public EventDataReceiver(ReceiveEndpointContext context)
         {
             _context = context;
-            _dispatcher = new ReceivePipeDispatcher(_context.ReceivePipe, _context.ReceiveObservers, _context.LogContext);
+
+            _dispatcher = context.CreateReceivePipeDispatcher();
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -43,10 +45,15 @@
             return _context.ConnectSendObserver(observer);
         }
 
-        async Task IEventDataReceiver.Handle(EventData message, Action<ReceiveContext> contextCallback)
+        async Task IEventDataReceiver.Handle(EventData message, CancellationToken cancellationToken, Action<ReceiveContext> contextCallback)
         {
             var context = new EventDataReceiveContext(message, _context);
             contextCallback?.Invoke(context);
+
+            CancellationTokenRegistration registration;
+            if (cancellationToken.CanBeCanceled)
+                registration = cancellationToken.Register(context.Cancel);
+
 
             try
             {
@@ -54,6 +61,7 @@
             }
             finally
             {
+                registration.Dispose();
                 context.Dispose();
             }
         }

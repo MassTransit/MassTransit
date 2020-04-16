@@ -3,8 +3,8 @@
   <Import Project="../signing.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
-    <AzureFunctionsVersion>v2</AzureFunctionsVersion>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AzureFunctionsVersion>v3</AzureFunctionsVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -17,6 +17,7 @@
   <ItemGroup>
       <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="4.1.1" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+      <ProjectReference Include="..\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
       <ProjectReference Include="..\MassTransit.Azure.ServiceBus.Core\MassTransit.Azure.ServiceBus.Core.csproj" />
       <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>

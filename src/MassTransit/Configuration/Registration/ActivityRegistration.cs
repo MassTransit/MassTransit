@@ -74,7 +74,7 @@ namespace MassTransit.Registration
             return _definition;
         }
 
-        void ConfigureCompensate(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider)
+        public void ConfigureCompensate(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider)
         {
             var activityScopeProvider = configurationServiceProvider.GetRequiredService<ICompensateActivityScopeProvider<TActivity, TLog>>();
 
@@ -94,7 +94,7 @@ namespace MassTransit.Registration
             configurator.AddEndpointSpecification(specification);
         }
 
-        void ConfigureExecute(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider, Uri compensateAddress)
+        public void ConfigureExecute(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider, Uri compensateAddress)
         {
             var activityScopeProvider = configurationServiceProvider.GetRequiredService<IExecuteActivityScopeProvider<TActivity, TArguments>>();
 
