@@ -23,23 +23,23 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public override CancellationToken CancellationToken { get; }
 
-        Uri ClientContext.InputAddress => _context.InputAddress;
+        public ConnectionContext ConnectionContext => _context.ConnectionContext;
 
-        string ClientContext.EntityPath => _context.EntityPath;
+        public Uri InputAddress => _context.InputAddress;
 
-        void ClientContext.OnMessageAsync(Func<IReceiverClient, Message, CancellationToken, Task> callback,
-            Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
+        public string EntityPath => _context.EntityPath;
+
+        public void OnMessageAsync(Func<IReceiverClient, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
         {
             _context.OnMessageAsync(callback, exceptionHandler);
         }
 
-        void ClientContext.OnSessionAsync(Func<IMessageSession, Message, CancellationToken, Task> callback,
-            Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
+        public void OnSessionAsync(Func<IMessageSession, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
         {
             _context.OnSessionAsync(callback, exceptionHandler);
         }
 
-        Task ClientContext.CloseAsync(CancellationToken cancellationToken)
+        public Task CloseAsync(CancellationToken cancellationToken)
         {
             return _context.CloseAsync(cancellationToken);
         }

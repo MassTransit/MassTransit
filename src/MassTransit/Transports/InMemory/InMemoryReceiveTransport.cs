@@ -129,7 +129,7 @@ namespace MassTransit.Transports.InMemory
 
                 _consumerHandle.Disconnect();
 
-                var completed = new ReceiveTransportCompletedEvent(_transport._inputAddress, _transport._dispatcher.GetDeliveryMetrics());
+                var completed = new ReceiveTransportCompletedEvent(_transport._inputAddress, _transport._dispatcher.GetMetrics());
 
                 await _transport._context.TransportObservers.Completed(completed).ConfigureAwait(false);
             }

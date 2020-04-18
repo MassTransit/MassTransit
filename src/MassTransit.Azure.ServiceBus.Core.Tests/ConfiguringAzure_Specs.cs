@@ -3,12 +3,16 @@
     namespace ConfiguringAzure_Specs
     {
         using System;
+        using System.Threading;
         using System.Threading.Tasks;
         using GreenPipes;
+        using GreenPipes.Internals.Extensions;
         using Hosting;
         using MassTransit.Testing;
+        using Microsoft.Azure.ServiceBus;
         using NUnit.Framework;
         using TestFramework;
+        using TestFramework.Messages;
         using Util;
 
 
@@ -76,6 +80,84 @@
                 //
                 //                    await endpoint.Send(new A());
                 //                }
+            }
+
+            [Test]
+            public async Task Should_not_create_bus_endpoint_queue_on_startup()
+            {
+                ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
+
+                Uri serviceUri = AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace);
+
+                IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
+                {
+                    BusTestFixture.ConfigureBusDiagnostics(x);
+                    x.Host(serviceUri, h => h.SharedAccessSignature(s =>
+                    {
+                        s.KeyName = settings.KeyName;
+                        s.SharedAccessKey = settings.SharedAccessKey;
+                        s.TokenTimeToLive = settings.TokenTimeToLive;
+                        s.TokenScope = settings.TokenScope;
+                    }));
+                });
+
+                BusHandle busHandle = await bus.StartAsync();
+                try
+                {
+                }
+                finally
+                {
+                    await busHandle.StopAsync();
+                }
+            }
+
+            [Test]
+            public async Task Should_create_receive_endpoint_and_start()
+            {
+                ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
+
+                Uri serviceUri = AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace);
+
+                TaskCompletionSource<PingMessage> handled = new TaskCompletionSource<PingMessage>();
+
+                IBusControl bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
+                {
+                    BusTestFixture.ConfigureBusDiagnostics(x);
+                    x.Host(serviceUri, h =>
+                    {
+                    #if NET461
+                        h.TransportType = TransportType.AmqpWebSockets;
+                    #endif
+                        h.SharedAccessSignature(s =>
+                        {
+                            s.KeyName = settings.KeyName;
+                            s.SharedAccessKey = settings.SharedAccessKey;
+                            s.TokenTimeToLive = settings.TokenTimeToLive;
+                            s.TokenScope = settings.TokenScope;
+                        });
+                    });
+
+                    x.ReceiveEndpoint("test-input-queue", e =>
+                    {
+                        e.Handler<PingMessage>(async context =>
+                        {
+                            handled.TrySetResult(context.Message);
+                        });
+                    });
+                });
+
+                BusHandle busHandle = await bus.StartAsync();
+                try
+                {
+                    var endpoint = await bus.GetSendEndpoint(new Uri("queue:test-input-queue"));
+                    await endpoint.Send(new PingMessage());
+
+                    await handled.Task.OrTimeout(TimeSpan.FromSeconds(10000));
+                }
+                finally
+                {
+                    await busHandle.StopAsync(new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                }
             }
 
             [Test]

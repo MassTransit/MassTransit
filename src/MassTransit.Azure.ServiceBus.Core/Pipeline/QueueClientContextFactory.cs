@@ -2,7 +2,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 {
     using System;
     using Contexts;
-    using GreenPipes;
     using Transport;
 
 
@@ -11,20 +10,18 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     {
         readonly ReceiveSettings _settings;
 
-        public QueueClientContextFactory(IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor,
-            INamespaceContextSupervisor namespaceContextSupervisor, IPipe<MessagingFactoryContext> messagingFactoryPipe,
-            IPipe<NamespaceContext> namespacePipe, ReceiveSettings settings)
-            : base(messagingFactoryContextSupervisor, namespaceContextSupervisor, messagingFactoryPipe, namespacePipe, settings)
+        public QueueClientContextFactory(IConnectionContextSupervisor supervisor, ReceiveSettings settings)
+            : base(supervisor, settings)
         {
             _settings = settings;
         }
 
-        protected override ClientContext CreateClientContext(MessagingFactoryContext connectionContext, Uri inputAddress)
+        protected override ClientContext CreateClientContext(ConnectionContext connectionContext, Uri inputAddress)
         {
-            var queueClient = connectionContext.MessagingFactory.CreateQueueClient(_settings.Path);
+            var queueClient = connectionContext.CreateQueueClient(_settings.Path);
             queueClient.PrefetchCount = _settings.PrefetchCount;
 
-            return new QueueClientContext(queueClient, inputAddress, _settings);
+            return new QueueClientContext(connectionContext, queueClient, inputAddress, _settings);
         }
     }
 }

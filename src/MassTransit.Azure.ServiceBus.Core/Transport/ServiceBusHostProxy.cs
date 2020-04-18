@@ -34,11 +34,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         IServiceBusHostTopology IServiceBusHost.Topology => _host?.Topology ?? throw new InvalidOperationException("The host is not ready.");
 
-        IMessagingFactoryContextSupervisor IServiceBusHost.MessagingFactoryContextSupervisor =>
-            _host?.MessagingFactoryContextSupervisor ?? throw new InvalidOperationException("The host is not ready.");
-
-        INamespaceContextSupervisor IServiceBusHost.NamespaceContextSupervisor =>
-            _host?.NamespaceContextSupervisor ?? throw new InvalidOperationException("The host is not ready.");
+        IConnectionContextSupervisor IServiceBusHost.ConnectionContextSupervisor =>
+            _host?.ConnectionContextSupervisor ?? throw new InvalidOperationException("The host is not ready.");
 
         IRetryPolicy IServiceBusHost.RetryPolicy => _host?.RetryPolicy ?? throw new InvalidOperationException("The host is not ready.");
 

@@ -10,6 +10,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     {
         Uri Address { get; }
 
-        ISendEndpointContextSupervisor Source { get; }
+        ISendEndpointContextSupervisor Supervisor { get; }
     }
 }

@@ -2,6 +2,7 @@ namespace MassTransit.Metadata
 {
     using System;
     using System.Diagnostics;
+    using System.IO;
     using System.Reflection;
 
 
@@ -21,8 +22,11 @@ namespace MassTransit.Metadata
             var currentProcess = Process.GetCurrentProcess();
             MachineName = Environment.MachineName;
             MassTransitVersion = typeof(IBus).GetTypeInfo().Assembly.GetName().Version.ToString();
+
             ProcessId = currentProcess.Id;
             ProcessName = currentProcess.ProcessName;
+            if ("dotnet".Equals(ProcessName, StringComparison.OrdinalIgnoreCase))
+                ProcessName = GetUsefulProcessName(ProcessName);
 
             var assemblyName = entryAssembly.GetName();
             Assembly = assemblyName.Name;
@@ -62,6 +66,15 @@ namespace MassTransit.Metadata
             }
 
             return GetAssemblyFileVersion(assembly);
+        }
+
+        static string GetUsefulProcessName(string defaultProcessName)
+        {
+            string entryAssemblyLocation = System.Reflection.Assembly.GetEntryAssembly()?.Location;
+
+            return string.IsNullOrWhiteSpace(entryAssemblyLocation)
+                ? defaultProcessName
+                : Path.GetFileNameWithoutExtension(entryAssemblyLocation);
         }
     }
 }

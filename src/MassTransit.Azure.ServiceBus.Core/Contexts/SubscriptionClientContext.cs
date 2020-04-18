@@ -18,12 +18,17 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         readonly ISubscriptionClient _subscriptionClient;
         readonly SubscriptionSettings _settings;
 
-        public SubscriptionClientContext(ISubscriptionClient subscriptionClient, Uri inputAddress, SubscriptionSettings settings)
+        public SubscriptionClientContext(ConnectionContext connectionContext, ISubscriptionClient subscriptionClient, Uri inputAddress,
+            SubscriptionSettings settings)
         {
             _subscriptionClient = subscriptionClient;
             _settings = settings;
+
+            ConnectionContext = connectionContext;
             InputAddress = inputAddress;
         }
+
+        public ConnectionContext ConnectionContext { get; }
 
         public string EntityPath => _settings.TopicDescription.Path;
         public Uri InputAddress { get; }

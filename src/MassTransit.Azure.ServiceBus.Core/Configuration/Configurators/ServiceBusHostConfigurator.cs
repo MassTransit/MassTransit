@@ -17,9 +17,30 @@
             _settings = new HostSettings {ServiceUri = hostAddress};
         }
 
+        public ServiceBusHostConfigurator(string connectionString)
+        {
+            var builder = new ServiceBusConnectionStringBuilder(connectionString);
+
+            var serviceUri = new Uri(builder.Endpoint);
+
+            _settings = new HostSettings
+            {
+                ServiceUri = serviceUri,
+                OperationTimeout = builder.OperationTimeout,
+                TransportType = builder.TransportType
+            };
+
+            if (builder.SasToken != null)
+                _settings.TokenProvider = TokenProvider.CreateSharedAccessSignatureTokenProvider(builder.SasToken);
+            else if (builder.SasKeyName != null && builder.SasKey != null)
+                _settings.TokenProvider = TokenProvider.CreateSharedAccessSignatureTokenProvider(builder.SasKeyName, builder.SasKey);
+            else
+                throw new Exception("The connection string did not contain an SAS token or an SAS key name and SAS key pair.");
+        }
+
         public ServiceBusHostSettings Settings => _settings;
 
-        public ITokenProvider TokenProvider
+        ITokenProvider IServiceBusHostConfigurator.TokenProvider
         {
             set => _settings.TokenProvider = value;
         }

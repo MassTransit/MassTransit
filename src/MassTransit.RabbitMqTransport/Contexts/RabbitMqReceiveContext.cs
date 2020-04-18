@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Net.Mime;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
@@ -44,6 +45,11 @@
         public override Stream GetBodyStream()
         {
             return new MemoryStream(_body, false);
+        }
+
+        protected override ContentType GetContentType()
+        {
+            return !string.IsNullOrWhiteSpace(Properties.ContentType) ? new ContentType(Properties.ContentType) : base.GetContentType();
         }
 
         protected override ISendEndpointProvider GetSendEndpointProvider()
