@@ -13,10 +13,10 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             : base(logContext)
         {
             Address = address;
-            Source = source;
+            Supervisor = source;
         }
 
         public Uri Address { get; }
-        public ISendEndpointContextSupervisor Source { get; }
+        public ISendEndpointContextSupervisor Supervisor { get; }
     }
 }

@@ -27,6 +27,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         public async Task Faulted(Exception exception)
         {
+            if (exception is MessageLockExpiredException)
+                return;
+            if (exception is MessageTimeToLiveExpiredException)
+                return;
+
             try
             {
                 await _lockContext.Abandon(exception).ConfigureAwait(false);

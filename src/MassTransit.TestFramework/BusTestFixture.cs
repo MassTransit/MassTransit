@@ -24,10 +24,10 @@ namespace MassTransit.TestFramework
             BusTestHarness = harness;
 
             harness.OnConnectObservers += ConnectObservers;
-            harness.OnConfigureBus += ConfigureBus;
+            harness.OnConfigureBus += ConfigureBusDiagnostics;
         }
 
-        void ConfigureBus(IBusFactoryConfigurator configurator)
+        public static void ConfigureBusDiagnostics(IBusFactoryConfigurator configurator)
         {
             var loggerFactory = new TestOutputLoggerFactory(true);
 

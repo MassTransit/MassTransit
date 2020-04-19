@@ -9,6 +9,7 @@
     using MassTransit.Pipeline;
     using Microsoft.Azure.ServiceBus;
     using Transports;
+    using Transports.Metrics;
 
 
     public class BrokeredMessageReceiver :
@@ -97,6 +98,23 @@
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
         {
             return _context.ReceivePipe.ConnectConsumeObserver(observer);
+        }
+
+        public int ActiveDispatchCount => _dispatcher.ActiveDispatchCount;
+
+        public long DispatchCount => _dispatcher.DispatchCount;
+
+        public int MaxConcurrentDispatchCount => _dispatcher.MaxConcurrentDispatchCount;
+
+        public event ZeroActiveDispatchHandler ZeroActivity
+        {
+            add => _dispatcher.ZeroActivity += value;
+            remove => _dispatcher.ZeroActivity -= value;
+        }
+
+        public DeliveryMetrics GetMetrics()
+        {
+            return _dispatcher.GetMetrics();
         }
     }
 }

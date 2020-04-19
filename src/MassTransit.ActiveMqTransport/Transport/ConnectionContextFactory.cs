@@ -37,7 +37,7 @@
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
-            var context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopping);
+            var context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopped);
 
             IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
 

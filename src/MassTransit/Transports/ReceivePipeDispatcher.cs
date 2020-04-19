@@ -33,7 +33,7 @@ namespace MassTransit.Transports
         public long DispatchCount => _dispatchCount;
         public int MaxConcurrentDispatchCount => _maxConcurrentDispatchCount;
 
-        public DeliveryMetrics GetDeliveryMetrics()
+        public DeliveryMetrics GetMetrics()
         {
             return new Metrics(_dispatchCount, _maxConcurrentDispatchCount);
         }
@@ -120,7 +120,7 @@ namespace MassTransit.Transports
         }
 
 
-        struct ActiveDispatch
+        readonly struct ActiveDispatch
         {
             readonly long _id;
             readonly Func<long, Task> _complete;

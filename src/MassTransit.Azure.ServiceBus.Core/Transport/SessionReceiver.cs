@@ -4,7 +4,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using System.Threading.Tasks;
     using Context;
     using Contexts;
-    using GreenPipes;
     using Microsoft.Azure.ServiceBus;
 
 
@@ -34,13 +33,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         {
             if (IsStopping)
             {
-                await WaitAndAbandonMessage(messageSession, message).ConfigureAwait(false);
+                await WaitForDeliveryComplete().ConfigureAwait(false);
                 return;
             }
 
             LogContext.Debug?.Log("Receiving {SessionId}:{MessageId}({EntityPath})", message.SessionId, message.MessageId, _context.EntityPath);
-
-            using var delivery = Tracker.BeginDelivery();
 
             await _messageReceiver.Handle(message, cancellationToken, context => AddReceiveContextPayloads(context, messageSession, message))
                 .ConfigureAwait(false);
@@ -53,7 +50,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
             receiveContext.GetOrAddPayload(() => sessionContext);
             receiveContext.GetOrAddPayload(() => lockContext);
-            receiveContext.GetOrAddPayload(() => _context.GetPayload<NamespaceContext>());
+            receiveContext.GetOrAddPayload(() => _context);
         }
     }
 }

@@ -7,9 +7,11 @@
     using MassTransit.Pipeline;
     using Microsoft.Azure.ServiceBus;
     using Transports;
+    using Transports.Metrics;
 
 
     public interface IBrokeredMessageReceiver :
+        IDispatchMetrics,
         IReceiveObserverConnector,
         IPublishObserverConnector,
         ISendObserverConnector,

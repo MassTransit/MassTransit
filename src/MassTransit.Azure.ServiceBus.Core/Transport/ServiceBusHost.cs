@@ -46,9 +46,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 x.Interval(5, TimeSpan.FromSeconds(10));
             });
 
-            MessagingFactoryContextSupervisor = new MessagingFactoryContextSupervisor(hostConfiguration);
-
-            NamespaceContextSupervisor = new NamespaceContextSupervisor(hostConfiguration);
+            ConnectionContextSupervisor = new ConnectionContextSupervisor(hostConfiguration);
 
             var cacheSettings = new CacheSettings(SendEndpointCacheDefaults.Capacity, SendEndpointCacheDefaults.MinAge, SendEndpointCacheDefaults.MaxAge);
 
@@ -56,8 +54,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             _index = cache.AddIndex("key", x => x.Address);
         }
 
-        public IMessagingFactoryContextSupervisor MessagingFactoryContextSupervisor { get; }
-        public INamespaceContextSupervisor NamespaceContextSupervisor { get; }
+        public IConnectionContextSupervisor ConnectionContextSupervisor { get; }
         public IRetryPolicy RetryPolicy { get; }
         public ServiceBusHostSettings Settings => _hostConfiguration.Settings;
         public IServiceBusHostTopology Topology => _hostTopology;
@@ -71,9 +68,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
                 _hostConfiguration.Settings.OperationTimeout
             });
 
-            NamespaceContextSupervisor.Probe(context);
-
-            MessagingFactoryContextSupervisor.Probe(context);
+            ConnectionContextSupervisor.Probe(context);
         }
 
         public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
@@ -190,34 +185,30 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         ISendEndpointContextSupervisor CreateQueueSendEndpointContextSupervisor(SendSettings settings)
         {
-            IPipe<NamespaceContext> namespacePipe = CreateConfigureTopologyPipe(settings);
-
-            var contextFactory = new QueueSendEndpointContextFactory(MessagingFactoryContextSupervisor, NamespaceContextSupervisor,
-                Pipe.Empty<MessagingFactoryContext>(), namespacePipe, settings);
-
-            return new SendEndpointContextSupervisor(contextFactory);
+            var contextFactory = new QueueSendEndpointContextFactory(ConnectionContextSupervisor, CreateSendTopologyPipe(settings), settings);
+            return CreateContextSupervisor(contextFactory);
         }
 
         ISendEndpointContextSupervisor CreateTopicSendEndpointContextSupervisor(SendSettings settings)
         {
-            IPipe<NamespaceContext> namespacePipe = CreateConfigureTopologyPipe(settings);
+            var contextFactory = new TopicSendEndpointContextFactory(ConnectionContextSupervisor, CreateSendTopologyPipe(settings), settings);
 
-            var contextFactory = new TopicSendEndpointContextFactory(MessagingFactoryContextSupervisor, NamespaceContextSupervisor,
-                Pipe.Empty<MessagingFactoryContext>(), namespacePipe, settings);
+            return CreateContextSupervisor(contextFactory);
+        }
 
+        ISendEndpointContextSupervisor CreateContextSupervisor(IPipeContextFactory<SendEndpointContext> contextFactory)
+        {
             return new SendEndpointContextSupervisor(contextFactory);
         }
 
-        IPipe<NamespaceContext> CreateConfigureTopologyPipe(SendSettings settings)
+        IPipe<SendEndpointContext> CreateSendTopologyPipe(SendSettings settings)
         {
-            var configureTopologyFilter = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), false, Stopping);
-
-            return configureTopologyFilter.ToPipe();
+            return new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), false, Stopping).ToPipe<SendEndpointContext>();
         }
 
         protected override IAgent[] GetAgentHandles()
         {
-            return new IAgent[] {NamespaceContextSupervisor, MessagingFactoryContextSupervisor};
+            return new IAgent[] {ConnectionContextSupervisor};
         }
     }
 }

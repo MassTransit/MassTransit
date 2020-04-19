@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using Context;
     using Contexts;
-    using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
     using Microsoft.Azure.ServiceBus;
@@ -22,20 +21,20 @@
         readonly ClientContext _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IBrokeredMessageReceiver _messageReceiver;
-        protected readonly IDeliveryTracker Tracker;
 
         public Receiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
         {
             _context = context;
             _messageReceiver = messageReceiver;
 
-            Tracker = new DeliveryTracker(HandleDeliveryComplete);
+            messageReceiver.ZeroActivity += HandleDeliveryComplete;
+
             _deliveryComplete = TaskUtil.GetTask<bool>();
         }
 
         public DeliveryMetrics GetDeliveryMetrics()
         {
-            return Tracker.GetDeliveryMetrics();
+            return _messageReceiver.GetMetrics();
         }
 
         public virtual Task Start()
@@ -53,7 +52,7 @@
                 LogContext.Error?.Log(args.Exception, "Exception on Receiver {InputAddress} during {Action}", _context.InputAddress,
                     args.ExceptionReceivedContext.Action);
 
-            if (Tracker.ActiveDeliveryCount == 0)
+            if (_messageReceiver.ActiveDispatchCount == 0)
             {
                 LogContext.Debug?.Log("Receiver shutdown completed: {InputAddress}", _context.InputAddress);
 
@@ -65,7 +64,7 @@
             return Task.CompletedTask;
         }
 
-        void HandleDeliveryComplete()
+        async Task HandleDeliveryComplete()
         {
             if (IsStopping)
             {
@@ -88,7 +87,7 @@
         {
             await Task.WhenAll(context.Agents.Select(x => Completed)).OrCanceled(context.CancellationToken).ConfigureAwait(false);
 
-            if (Tracker.ActiveDeliveryCount > 0)
+            if (_messageReceiver.ActiveDispatchCount > 0)
                 try
                 {
                     await _deliveryComplete.Task.OrCanceled(context.CancellationToken).ConfigureAwait(false);
@@ -99,18 +98,12 @@
                 }
         }
 
-        async Task OnMessage(IReceiverClient messageReceiver, Message message, CancellationToken cancellationToken)
+        Task OnMessage(IReceiverClient messageReceiver, Message message, CancellationToken cancellationToken)
         {
             if (IsStopping)
-            {
-                await WaitAndAbandonMessage(messageReceiver, message).ConfigureAwait(false);
-                return;
-            }
+                return WaitForDeliveryComplete();
 
-            using var delivery = Tracker.BeginDelivery();
-
-            await _messageReceiver.Handle(message, cancellationToken, context => AddReceiveContextPayloads(context, messageReceiver, message))
-                .ConfigureAwait(false);
+            return _messageReceiver.Handle(message, cancellationToken, context => AddReceiveContextPayloads(context, messageReceiver, message));
         }
 
         void AddReceiveContextPayloads(ReceiveContext receiveContext, IReceiverClient receiverClient, Message message)
@@ -118,16 +111,14 @@
             MessageLockContext lockContext = new ReceiverClientMessageLockContext(receiverClient, message);
 
             receiveContext.GetOrAddPayload(() => lockContext);
-            receiveContext.GetOrAddPayload(() => _context.GetPayload<NamespaceContext>());
+            receiveContext.GetOrAddPayload(() => _context);
         }
 
-        protected async Task WaitAndAbandonMessage(IReceiverClient receiverClient, Message message)
+        protected async Task WaitForDeliveryComplete()
         {
             try
             {
                 await _deliveryComplete.Task.ConfigureAwait(false);
-
-                await receiverClient.AbandonAsync(message.SystemProperties.LockToken).ConfigureAwait(false);
             }
             catch (Exception exception)
             {

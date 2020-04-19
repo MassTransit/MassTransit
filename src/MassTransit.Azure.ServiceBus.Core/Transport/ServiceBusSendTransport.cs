@@ -28,14 +28,14 @@
         {
             _context = context;
 
-            Add(context.Source);
+            Add(context.Supervisor);
         }
 
         Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
             var sendPipe = new SendPipe<T>(_context, message, pipe, cancellationToken);
 
-            return _context.Source.Send(sendPipe, cancellationToken);
+            return _context.Supervisor.Send(sendPipe, cancellationToken);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -51,7 +51,7 @@
         }
 
 
-        struct SendPipe<T> :
+        readonly struct SendPipe<T> :
             IPipe<SendEndpointContext>
             where T : class
         {

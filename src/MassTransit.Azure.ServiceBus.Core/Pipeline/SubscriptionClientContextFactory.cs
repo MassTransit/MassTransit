@@ -2,7 +2,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 {
     using System;
     using Contexts;
-    using GreenPipes;
     using Transport;
 
 
@@ -11,22 +10,20 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     {
         readonly SubscriptionSettings _settings;
 
-        public SubscriptionClientContextFactory(IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor,
-            INamespaceContextSupervisor namespaceContextSupervisor, IPipe<MessagingFactoryContext> messagingFactoryPipe,
-            IPipe<NamespaceContext> namespacePipe, SubscriptionSettings settings)
-            : base(messagingFactoryContextSupervisor, namespaceContextSupervisor, messagingFactoryPipe, namespacePipe, settings)
+        public SubscriptionClientContextFactory(IConnectionContextSupervisor supervisor, SubscriptionSettings settings)
+            : base(supervisor, settings)
         {
             _settings = settings;
         }
 
-        protected override ClientContext CreateClientContext(MessagingFactoryContext connectionContext, Uri inputAddress)
+        protected override ClientContext CreateClientContext(ConnectionContext connectionContext, Uri inputAddress)
         {
-            var subscriptionClient = connectionContext.MessagingFactory.CreateSubscriptionClient(_settings.TopicDescription.Path,
+            var subscriptionClient = connectionContext.CreateSubscriptionClient(_settings.TopicDescription.Path,
                 _settings.SubscriptionDescription.SubscriptionName);
 
             subscriptionClient.PrefetchCount = _settings.PrefetchCount;
 
-            return new SubscriptionClientContext(subscriptionClient, inputAddress, _settings);
+            return new SubscriptionClientContext(connectionContext, subscriptionClient, inputAddress, _settings);
         }
     }
 }

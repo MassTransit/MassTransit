@@ -22,6 +22,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public override CancellationToken CancellationToken { get; }
 
+        public ConnectionContext ConnectionContext => _context.ConnectionContext;
+
         string SendEndpointContext.EntityPath => _context.EntityPath;
 
         Task SendEndpointContext.Send(Message message)

@@ -18,12 +18,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         readonly IQueueClient _queueClient;
         readonly ClientSettings _settings;
 
-        public QueueClientContext(IQueueClient queueClient, Uri inputAddress, ClientSettings settings)
+        public QueueClientContext(ConnectionContext connectionContext, IQueueClient queueClient, Uri inputAddress, ClientSettings settings)
         {
             _queueClient = queueClient;
             _settings = settings;
+            ConnectionContext = connectionContext;
             InputAddress = inputAddress;
         }
+
+        public ConnectionContext ConnectionContext { get; }
 
         public string EntityPath => _queueClient.Path;
 

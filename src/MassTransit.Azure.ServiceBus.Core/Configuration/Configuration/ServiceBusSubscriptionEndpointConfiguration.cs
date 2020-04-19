@@ -67,7 +67,7 @@
 
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
-            NamespacePipeConfigurator.UseFilter(new ConfigureTopologyFilter<SubscriptionSettings>(_settings, receiveEndpointContext.BrokerTopology,
+            ClientPipeConfigurator.UseFilter(new ConfigureTopologyFilter<SubscriptionSettings>(_settings, receiveEndpointContext.BrokerTopology,
                 _settings.RemoveSubscriptions, host.Stopping));
 
             CreateReceiveEndpoint(host, receiveEndpointContext);
@@ -87,11 +87,9 @@
             return new BrokeredMessageDeadLetterTransport(CreateSendEndpointContextSupervisor(host, settings));
         }
 
-        protected override IClientContextSupervisor CreateClientCache(IMessagingFactoryContextSupervisor messagingFactoryContextSupervisor,
-            INamespaceContextSupervisor namespaceContextSupervisor)
+        protected override IClientContextSupervisor CreateClientContextSupervisor(IConnectionContextSupervisor supervisor)
         {
-            return new ClientContextSupervisor(new SubscriptionClientContextFactory(messagingFactoryContextSupervisor, namespaceContextSupervisor,
-                MessagingFactoryPipeConfigurator.Build(), NamespacePipeConfigurator.Build(), _settings));
+            return new ClientContextSupervisor(new SubscriptionClientContextFactory(supervisor, _settings));
         }
     }
 }

@@ -44,7 +44,6 @@
 
         public DateTime LockedUntil => _message.SystemProperties.LockedUntilUtc;
 
-
         public string SessionId => _message.SessionId;
 
         public long Size => _message.Size;
@@ -75,10 +74,7 @@
 
         protected override ContentType GetContentType()
         {
-            if (!string.IsNullOrWhiteSpace(_message.ContentType))
-                return new ContentType(_message.ContentType);
-
-            return base.GetContentType();
+            return !string.IsNullOrWhiteSpace(_message.ContentType) ? new ContentType(_message.ContentType) : base.GetContentType();
         }
     }
 }

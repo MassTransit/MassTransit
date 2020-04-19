@@ -5,13 +5,15 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using Contexts;
     using GreenPipes;
     using Topology;
     using Topology.Entities;
 
 
     public class ConfigureTopologyFilter<TSettings> :
-        IFilter<NamespaceContext>
+        IFilter<ClientContext>,
+        IFilter<SendEndpointContext>
         where TSettings : class
     {
         readonly BrokerTopology _brokerTopology;
@@ -28,11 +30,25 @@
             _cancellationToken = cancellationToken;
         }
 
-        public async Task Send(NamespaceContext context, IPipe<NamespaceContext> next)
+        public async Task Send(ClientContext context, IPipe<ClientContext> next)
+        {
+            await ConfigureTopology(context).ConfigureAwait(false);
+
+            await next.Send(context).ConfigureAwait(false);
+        }
+
+        public async Task Send(SendEndpointContext context, IPipe<SendEndpointContext> next)
+        {
+            await ConfigureTopology(context).ConfigureAwait(false);
+
+            await next.Send(context).ConfigureAwait(false);
+        }
+
+        async Task ConfigureTopology(NamespaceContext context)
         {
             await context.OneTimeSetup<ConfigureTopologyContext<TSettings>>(async payload =>
             {
-                await ConfigureTopology(context).ConfigureAwait(false);
+                await ConfigureTopology(context.ConnectionContext).ConfigureAwait(false);
 
                 context.GetOrAddPayload(() => _settings);
 
@@ -41,7 +57,7 @@
                     {
                         try
                         {
-                            await RemoveSubscriptions(context).ConfigureAwait(false);
+                            await RemoveSubscriptions(context.ConnectionContext).ConfigureAwait(false);
                         }
                         catch (Exception ex)
                         {
@@ -49,8 +65,6 @@
                         }
                     });
             }, () => new Context()).ConfigureAwait(false);
-
-            await next.Send(context).ConfigureAwait(false);
         }
 
         public void Probe(ProbeContext context)
@@ -60,7 +74,7 @@
             _brokerTopology.Probe(scope);
         }
 
-        async Task ConfigureTopology(NamespaceContext context)
+        async Task ConfigureTopology(ConnectionContext context)
         {
             await Task.WhenAll(_brokerTopology.Topics.Select(topic => Create(context, topic))).ConfigureAwait(false);
 
@@ -73,38 +87,38 @@
             await Task.WhenAll(_brokerTopology.TopicSubscriptions.Select(subscription => Create(context, subscription))).ConfigureAwait(false);
         }
 
-        async Task RemoveSubscriptions(NamespaceContext context)
+        async Task RemoveSubscriptions(ConnectionContext context)
         {
             await Task.WhenAll(_brokerTopology.QueueSubscriptions.Select(subscription => Delete(context, subscription))).ConfigureAwait(false);
         }
 
-        Task Create(NamespaceContext context, Topic topic)
+        Task Create(ConnectionContext context, Topic topic)
         {
             return context.CreateTopic(topic.TopicDescription);
         }
 
-        Task Create(NamespaceContext context, Queue queue)
+        Task Create(ConnectionContext context, Queue queue)
         {
             return context.CreateQueue(queue.QueueDescription);
         }
 
-        Task Create(NamespaceContext context, Subscription subscription)
+        Task Create(ConnectionContext context, Subscription subscription)
         {
             return context.CreateTopicSubscription(subscription.SubscriptionDescription, subscription.Rule, subscription.Filter);
         }
 
-        Task Create(NamespaceContext context, QueueSubscription subscription)
+        Task Create(ConnectionContext context, QueueSubscription subscription)
         {
             return context.CreateTopicSubscription(subscription.Subscription.SubscriptionDescription, subscription.Subscription.Rule,
                 subscription.Subscription.Filter);
         }
 
-        Task Delete(NamespaceContext context, QueueSubscription subscription)
+        Task Delete(ConnectionContext context, QueueSubscription subscription)
         {
             return context.DeleteTopicSubscription(subscription.Subscription.SubscriptionDescription);
         }
 
-        Task Create(NamespaceContext context, TopicSubscription subscription)
+        Task Create(ConnectionContext context, TopicSubscription subscription)
         {
             return context.CreateTopicSubscription(subscription.Subscription.SubscriptionDescription, subscription.Subscription.Rule,
                 subscription.Subscription.Filter);
