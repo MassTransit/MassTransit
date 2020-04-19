@@ -52,16 +52,14 @@ namespace MassTransit.AutofacIntegration
         {
             var scope = _registry.GetLifetimeScope(context);
 
-            using (var consumerScope = scope.BeginLifetimeScope(_name, builder =>
+            await using var consumerScope = scope.BeginLifetimeScope(_name, builder =>
             {
                 builder.ConfigureScope(context);
                 _configureScope?.Invoke(builder, context);
-            }))
-            {
-                ConsumerConsumeContext<TConsumer, TMessage> consumerContext = consumerScope.GetConsumerScope<TConsumer, TMessage>(context);
+            });
+            ConsumerConsumeContext<TConsumer, TMessage> consumerContext = consumerScope.GetConsumerScope<TConsumer, TMessage>(context);
 
-                await next.Send(consumerContext).ConfigureAwait(false);
-            }
+            await next.Send(consumerContext).ConfigureAwait(false);
         }
     }
 }

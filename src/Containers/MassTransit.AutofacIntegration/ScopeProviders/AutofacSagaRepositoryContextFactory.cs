@@ -39,7 +39,7 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
 
         public void Probe(ProbeContext context)
         {
-            context.Add("provider", "dependencyInjection");
+            context.Add("provider", "autofac");
             context.Add("scopeTag", _name);
         }
 
@@ -58,7 +58,7 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
         public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken)
             where T : class
         {
-            using var scope = _scopeProvider.LifetimeScope.BeginLifetimeScope(_name);
+            await using var scope = _scopeProvider.LifetimeScope.BeginLifetimeScope(_name);
 
             var factory = scope.Resolve<ISagaRepositoryContextFactory<TSaga>>();
 
@@ -81,7 +81,7 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
 
             async Task CreateScope()
             {
-                using var scope = parentLifetimeScope.BeginLifetimeScope(_name, builder => builder.ConfigureScope(context));
+                await using var scope = parentLifetimeScope.BeginLifetimeScope(_name, builder => builder.ConfigureScope(context));
 
                 var activityFactory = scope.ResolveOptional<IStateMachineActivityFactory>() ?? AutofacStateMachineActivityFactory.Instance;
 
