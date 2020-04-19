@@ -22,7 +22,6 @@ namespace MassTransit.Scheduling
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
-
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
@@ -34,10 +33,8 @@ namespace MassTransit.Scheduling
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
-
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -49,10 +46,8 @@ namespace MassTransit.Scheduling
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
-
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -64,10 +59,8 @@ namespace MassTransit.Scheduling
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
-
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             var messageType = message.GetType();
 
             return MessageSchedulerConverterCache.ScheduleSend(this, destinationAddress, scheduledTime, message, messageType, cancellationToken);
@@ -78,10 +71,8 @@ namespace MassTransit.Scheduling
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
-
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
@@ -93,10 +84,8 @@ namespace MassTransit.Scheduling
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
-
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -110,13 +99,10 @@ namespace MassTransit.Scheduling
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
-
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -128,7 +114,6 @@ namespace MassTransit.Scheduling
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
-
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
@@ -142,10 +127,8 @@ namespace MassTransit.Scheduling
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
-
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -159,10 +142,8 @@ namespace MassTransit.Scheduling
         {
             if (destinationAddress == null)
                 throw new ArgumentNullException(nameof(destinationAddress));
-
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 

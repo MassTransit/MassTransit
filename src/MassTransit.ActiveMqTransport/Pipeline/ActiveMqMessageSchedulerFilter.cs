@@ -20,9 +20,9 @@
         {
             MessageSchedulerContext PayloadFactory()
             {
-                var scheduler = new MessageScheduler(new ActiveMqScheduleMessageProvider(context));
+                IMessageScheduler Factory() => new MessageScheduler(new ActiveMqScheduleMessageProvider(context));
 
-                return new ConsumeMessageSchedulerContext(scheduler, context.ReceiveContext.InputAddress);
+                return new ConsumeMessageSchedulerContext(Factory, context.ReceiveContext.InputAddress);
             }
 
             context.GetOrAddPayload(PayloadFactory);

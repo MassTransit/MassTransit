@@ -22,11 +22,14 @@
         {
             MessageSchedulerContext PayloadFactory()
             {
-                var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
+                IMessageScheduler Factory()
+                {
+                    var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
 
-                var scheduler = new MessageScheduler(new DelayedExchangeScheduleMessageProvider(context, modelContext.ConnectionContext.Topology));
+                    return new MessageScheduler(new DelayedExchangeScheduleMessageProvider(context, modelContext.ConnectionContext.Topology));
+                }
 
-                return new ConsumeMessageSchedulerContext(scheduler, context.ReceiveContext.InputAddress);
+                return new ConsumeMessageSchedulerContext(Factory, context.ReceiveContext.InputAddress);
             }
 
             context.GetOrAddPayload(PayloadFactory);
