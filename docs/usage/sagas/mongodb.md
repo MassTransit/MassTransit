@@ -51,3 +51,46 @@ container.AddMassTransit(cfg =>
 });
 ```
 
+Container integration gives you ability to configure class map based on saga type. You can use `Action<BsonClassMap>` explicitly:
+
+```csharp
+container.AddMassTransit(cfg =>
+{
+    cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
+        .MongoDbRepository(r =>
+        {
+            r.Connection = "mongodb://127.0.0.1";
+            r.DatabaseName = "orderdb";
+
+            r.ClassMap(cfg => {/*Your configuration*/})
+        });
+});
+```
+
+`BsonClassMap<TSaga>` registered inside container will be used by default for `TSaga` configuration:
+
+```csharp
+class OrderStateClassMap : BsonClassMap<OrderState>
+{
+  	public OrderStateClassMap()
+    {
+      	AutoMap();
+      	/*
+      	Your other configuration
+      	*/
+    }
+}
+
+container.AddSingleton<BsonClassMap<OrderState>>(new OrderStateClassMap());
+
+container.AddMassTransit(cfg =>
+{
+    cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
+        .MongoDbRepository(r =>
+        {
+            r.Connection = "mongodb://127.0.0.1";
+            r.DatabaseName = "orderdb";
+        });
+});
+```
+

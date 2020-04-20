@@ -18,11 +18,17 @@ namespace MassTransit.MongoDbIntegration.Configurators
     {
         Func<IConfigurationServiceProvider, ICollectionNameFormatter> _collectionNameFormatterFactory;
         Func<IConfigurationServiceProvider, IMongoDatabase> _databaseFactory;
+        Func<IConfigurationServiceProvider, BsonClassMap<TSaga>> _classMapFactory;
         string _databaseName;
 
         public MongoDbSagaRepositoryConfigurator()
         {
             CollectionNameFormatter(_ => DotCaseCollectionNameFormatter.Instance);
+            ClassMap(provider => provider.GetService<BsonClassMap<TSaga>>() ?? new BsonClassMap<TSaga>(cfg =>
+            {
+                cfg.AutoMap();
+                cfg.MapIdProperty(x => x.CorrelationId);
+            }));
         }
 
         public string Connection
@@ -56,6 +62,11 @@ namespace MassTransit.MongoDbIntegration.Configurators
             set { CollectionNameFormatter(_ => new DefaultCollectionNameFormatter(value)); }
         }
 
+        public void ClassMap(Func<IConfigurationServiceProvider, BsonClassMap<TSaga>> classMapFactory)
+        {
+            _classMapFactory = classMapFactory;
+        }
+
         public void CollectionNameFormatter(Func<IConfigurationServiceProvider, ICollectionNameFormatter> collectionNameFormatterFactory)
         {
             _collectionNameFormatterFactory = collectionNameFormatterFactory;
@@ -74,6 +85,9 @@ namespace MassTransit.MongoDbIntegration.Configurators
             if (_collectionNameFormatterFactory == null)
                 yield return this.Failure("CollectionNameFormatterFactory", "must be specified");
 
+            if (_classMapFactory == null)
+                yield return this.Failure("ClassMapFactory", "must be specified");
+
             if (string.IsNullOrWhiteSpace(_databaseName))
                 yield return this.Failure("DatabaseName", "must be specified");
         }
@@ -84,11 +98,7 @@ namespace MassTransit.MongoDbIntegration.Configurators
             IMongoCollection<TSaga> MongoCollectionFactory(IConfigurationServiceProvider provider)
             {
                 if (!BsonClassMap.IsClassMapRegistered(typeof(TSaga)))
-                    BsonClassMap.RegisterClassMap<TSaga>(cfg =>
-                    {
-                        cfg.AutoMap();
-                        cfg.MapIdProperty(x => x.CorrelationId);
-                    });
+                    BsonClassMap.RegisterClassMap(_classMapFactory(provider));
 
                 var database = _databaseFactory(provider);
                 var collectionNameFormatter = _collectionNameFormatterFactory(provider);
