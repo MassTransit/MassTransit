@@ -51,7 +51,7 @@ namespace Example
 
             var loggerOptions = new ApplicationInsightsLoggerOptions();
 
-            var applicationInsightsLoggerProvider = new ApplicationInsightsLoggerProvider(Options.Create(_configuration),
+            var applicationInsightsLoggerProvider = new ApplicationInsightsLoggerProvider(Options.Create(configuration),
                 Options.Create(loggerOptions));
 
             ILoggerFactory factory = new LoggerFactory();
