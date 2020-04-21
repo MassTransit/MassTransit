@@ -6,9 +6,9 @@ namespace MassTransit.RabbitMqTransport
     public readonly struct ClusterNode
     {
         public readonly string HostName;
-        public readonly int Port;
+        public readonly int? Port;
 
-        public ClusterNode(string hostName, int port = -1)
+        ClusterNode(string hostName, int? port = default)
         {
             HostName = hostName;
             Port = port;
@@ -25,17 +25,13 @@ namespace MassTransit.RabbitMqTransport
                 throw new ArgumentNullException(nameof(address), "Address must not be null or empty");
 
             string[] elements = address.Split(':');
-            switch (elements.Length)
+
+            return elements.Length switch
             {
-                case 1:
-                    return new ClusterNode(elements[0]);
-                    break;
-                case 2 when int.TryParse(elements[1], out var port):
-                    return new ClusterNode(elements[0], port);
-                    break;
-                default:
-                    throw new ArgumentException($"Invalid node address: {address}", nameof(address));
-            }
+                1 => new ClusterNode(elements[0]),
+                2 when int.TryParse(elements[1], out var port) => new ClusterNode(elements[0], port),
+                _ => throw new ArgumentException($"Invalid node address: {address}", nameof(address))
+            };
         }
     }
 }

@@ -70,27 +70,7 @@ namespace MassTransit.RabbitMqTransport
                     factory.Password = settings.Password;
             }
 
-            factory.Ssl.Enabled = settings.Ssl;
-            factory.Ssl.Version = settings.SslProtocol;
-            factory.Ssl.AcceptablePolicyErrors = settings.AcceptablePolicyErrors;
-            factory.Ssl.ServerName = settings.SslServerName;
-            factory.Ssl.Certs = settings.ClientCertificate == null ? null : new X509Certificate2Collection {settings.ClientCertificate};
-            factory.Ssl.CertificateSelectionCallback = settings.CertificateSelectionCallback;
-            factory.Ssl.CertificateValidationCallback = settings.CertificateValidationCallback;
-
-            if (string.IsNullOrWhiteSpace(factory.Ssl.ServerName))
-                factory.Ssl.AcceptablePolicyErrors |= SslPolicyErrors.RemoteCertificateNameMismatch;
-
-            if (string.IsNullOrEmpty(settings.ClientCertificatePath))
-            {
-                factory.Ssl.CertPath = "";
-                factory.Ssl.CertPassphrase = "";
-            }
-            else
-            {
-                factory.Ssl.CertPath = settings.ClientCertificatePath;
-                factory.Ssl.CertPassphrase = settings.ClientCertificatePassphrase;
-            }
+            ApplySslOptions(settings, factory.Ssl);
 
             factory.ClientProperties ??= new Dictionary<string, object>();
 
@@ -110,6 +90,31 @@ namespace MassTransit.RabbitMqTransport
                 factory.ClientProperties["assembly_version"] = hostInfo.AssemblyVersion;
 
             return factory;
+        }
+
+        public static void ApplySslOptions(this RabbitMqHostSettings settings, SslOption option)
+        {
+            option.Enabled = settings.Ssl;
+            option.Version = settings.SslProtocol;
+            option.AcceptablePolicyErrors = settings.AcceptablePolicyErrors;
+            option.ServerName = settings.SslServerName;
+            option.Certs = settings.ClientCertificate == null ? null : new X509Certificate2Collection {settings.ClientCertificate};
+            option.CertificateSelectionCallback = settings.CertificateSelectionCallback;
+            option.CertificateValidationCallback = settings.CertificateValidationCallback;
+
+            if (string.IsNullOrWhiteSpace(option.ServerName))
+                option.AcceptablePolicyErrors |= SslPolicyErrors.RemoteCertificateNameMismatch;
+
+            if (string.IsNullOrEmpty(settings.ClientCertificatePath))
+            {
+                option.CertPath = "";
+                option.CertPassphrase = "";
+            }
+            else
+            {
+                option.CertPath = settings.ClientCertificatePath;
+                option.CertPassphrase = settings.ClientCertificatePassphrase;
+            }
         }
 
         public static RabbitMqHostSettings GetHostSettings(this Uri address)

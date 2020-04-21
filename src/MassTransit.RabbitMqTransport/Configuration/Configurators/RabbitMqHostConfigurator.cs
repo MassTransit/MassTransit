@@ -83,7 +83,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public void UseCluster(Action<IRabbitMqClusterConfigurator> configureCluster)
         {
-            var configurator = new RabbitMqClusterConfigurator();
+            var configurator = new RabbitMqClusterConfigurator(_settings);
             configureCluster(configurator);
 
             _settings.EndpointResolver = configurator.GetEndpointResolver();

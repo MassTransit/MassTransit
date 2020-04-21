@@ -7,10 +7,12 @@
     public class RabbitMqClusterConfigurator :
         IRabbitMqClusterConfigurator
     {
+        readonly RabbitMqHostSettings _settings;
         readonly List<ClusterNode> _nodes;
 
-        public RabbitMqClusterConfigurator()
+        public RabbitMqClusterConfigurator(RabbitMqHostSettings settings)
         {
+            _settings = settings;
             _nodes = new List<ClusterNode>();
         }
 
@@ -26,7 +28,7 @@
             if (_nodes.Count <= 0)
                 return null;
 
-            return new SequentialEndpointResolver(ClusterMembers);
+            return new SequentialEndpointResolver(ClusterMembers, _settings);
         }
     }
 }

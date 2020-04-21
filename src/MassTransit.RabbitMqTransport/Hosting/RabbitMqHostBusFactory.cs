@@ -27,7 +27,7 @@ namespace MassTransit.RabbitMqTransport.Hosting
 
             if (!string.IsNullOrWhiteSpace(settings.ClusterMembers))
             {
-                var configurator = new RabbitMqClusterConfigurator();
+                var configurator = new RabbitMqClusterConfigurator(_hostSettings);
                 foreach (var nodeAddress in settings.ClusterMembers.Split(','))
                     configurator.Node(nodeAddress);
 
