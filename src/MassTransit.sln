@@ -125,33 +125,29 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.SignalR", "Mass
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.SignalR.Tests", "MassTransit.SignalR.Tests\MassTransit.SignalR.Tests.csproj", "{4A454D43-616F-40A2-ACCD-6BC82CE14340}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.SignalR.SampleConsole", "Samples\MassTransit.SignalR.SampleConsole\MassTransit.SignalR.SampleConsole.csproj", "{FFF06059-6B7B-4136-AF76-BE86BC41D0E9}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.SignalR.Sample", "Samples\MassTransit.SignalR.Sample\MassTransit.SignalR.Sample.csproj", "{7F01D669-493D-473E-84AE-452BC38F0328}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.WebJobs.EventHubsIntegration", "MassTransit.WebJobs.EventHubsIntegration\MassTransit.WebJobs.EventHubsIntegration.csproj", "{56E9DB90-C063-49CA-BAF7-FFCFE963E44C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Monitoring", "Monitoring", "{DE40BDEC-6277-4E14-8EB6-D0B6863571BC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.ApplicationInsights.Tests", "MassTransit.ApplicationInsights.Tests\MassTransit.ApplicationInsights.Tests.csproj", "{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.ApplicationInsights.Tests", "MassTransit.ApplicationInsights.Tests\MassTransit.ApplicationInsights.Tests.csproj", "{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Azure.Storage", "Persistence\MassTransit.Azure.Storage\MassTransit.Azure.Storage.csproj", "{C81070F9-908B-4A76-A96F-CFD4F67A93AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Azure.Storage", "Persistence\MassTransit.Azure.Storage\MassTransit.Azure.Storage.csproj", "{C81070F9-908B-4A76-A96F-CFD4F67A93AB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "Analyzers", "{393B7B0C-52F4-41E8-A9E9-EE867A0E6448}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Analyzers", "MassTransit.Analyzers\MassTransit.Analyzers.csproj", "{3DD99432-4505-4FA6-BD0D-A599733E2168}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Analyzers", "MassTransit.Analyzers\MassTransit.Analyzers.csproj", "{3DD99432-4505-4FA6-BD0D-A599733E2168}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Analyzers.Tests", "MassTransit.Analyzers.Tests\MassTransit.Analyzers.Tests.csproj", "{1F71C6D2-17AE-4C7B-878D-BB7B295D3B3D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Analyzers.Tests", "MassTransit.Analyzers.Tests\MassTransit.Analyzers.Tests.csproj", "{1F71C6D2-17AE-4C7B-878D-BB7B295D3B3D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.HangfireIntegration", "MassTransit.HangfireIntegration\MassTransit.HangfireIntegration.csproj", "{CF2D2B2E-2C34-4E8C-970F-4CB07DB0457B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.HangfireIntegration", "MassTransit.HangfireIntegration\MassTransit.HangfireIntegration.csproj", "{CF2D2B2E-2C34-4E8C-970F-4CB07DB0457B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.HangfireIntegration.Tests", "MassTransit.HangfireIntegration.Tests\MassTransit.HangfireIntegration.Tests.csproj", "{D4ED7C0B-DADE-45FA-BCCB-9E5D6C27D714}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.HangfireIntegration.Tests", "MassTransit.HangfireIntegration.Tests\MassTransit.HangfireIntegration.Tests.csproj", "{D4ED7C0B-DADE-45FA-BCCB-9E5D6C27D714}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.PrometheusIntegration", "MassTransit.PrometheusIntegration\MassTransit.PrometheusIntegration.csproj", "{1AF687AB-41DE-4B2A-97F5-E9BBF5E51C75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.PrometheusIntegration", "MassTransit.PrometheusIntegration\MassTransit.PrometheusIntegration.csproj", "{1AF687AB-41DE-4B2A-97F5-E9BBF5E51C75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.PrometheusIntegration.Tests", "MassTransit.PrometheusIntegration.Tests\MassTransit.PrometheusIntegration.Tests.csproj", "{A29B1D94-6F11-487E-B4A1-3460928EC2C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.PrometheusIntegration.Tests", "MassTransit.PrometheusIntegration.Tests\MassTransit.PrometheusIntegration.Tests.csproj", "{A29B1D94-6F11-487E-B4A1-3460928EC2C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.AspNetCoreIntegration.Tests", "Containers\MassTransit.AspNetCoreIntegration.Tests\MassTransit.AspNetCoreIntegration.Tests.csproj", "{2004BF15-1F8A-4535-B043-59444A1F1FAD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.AspNetCoreIntegration.Tests", "Containers\MassTransit.AspNetCoreIntegration.Tests\MassTransit.AspNetCoreIntegration.Tests.csproj", "{2004BF15-1F8A-4535-B043-59444A1F1FAD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -690,30 +686,6 @@ Global
 		{4A454D43-616F-40A2-ACCD-6BC82CE14340}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
 		{4A454D43-616F-40A2-ACCD-6BC82CE14340}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
 		{4A454D43-616F-40A2-ACCD-6BC82CE14340}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
-		{FFF06059-6B7B-4136-AF76-BE86BC41D0E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FFF06059-6B7B-4136-AF76-BE86BC41D0E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FFF06059-6B7B-4136-AF76-BE86BC41D0E9}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FFF06059-6B7B-4136-AF76-BE86BC41D0E9}.Debug|x86.Build.0 = Debug|Any CPU
-		{FFF06059-6B7B-4136-AF76-BE86BC41D0E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FFF06059-6B7B-4136-AF76-BE86BC41D0E9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FFF06059-6B7B-4136-AF76-BE86BC41D0E9}.Release|x86.ActiveCfg = Release|Any CPU
-		{FFF06059-6B7B-4136-AF76-BE86BC41D0E9}.Release|x86.Build.0 = Release|Any CPU
-		{FFF06059-6B7B-4136-AF76-BE86BC41D0E9}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{FFF06059-6B7B-4136-AF76-BE86BC41D0E9}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
-		{FFF06059-6B7B-4136-AF76-BE86BC41D0E9}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
-		{FFF06059-6B7B-4136-AF76-BE86BC41D0E9}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
-		{7F01D669-493D-473E-84AE-452BC38F0328}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F01D669-493D-473E-84AE-452BC38F0328}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F01D669-493D-473E-84AE-452BC38F0328}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{7F01D669-493D-473E-84AE-452BC38F0328}.Debug|x86.Build.0 = Debug|Any CPU
-		{7F01D669-493D-473E-84AE-452BC38F0328}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F01D669-493D-473E-84AE-452BC38F0328}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7F01D669-493D-473E-84AE-452BC38F0328}.Release|x86.ActiveCfg = Release|Any CPU
-		{7F01D669-493D-473E-84AE-452BC38F0328}.Release|x86.Build.0 = Release|Any CPU
-		{7F01D669-493D-473E-84AE-452BC38F0328}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
-		{7F01D669-493D-473E-84AE-452BC38F0328}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
-		{7F01D669-493D-473E-84AE-452BC38F0328}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
-		{7F01D669-493D-473E-84AE-452BC38F0328}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 		{56E9DB90-C063-49CA-BAF7-FFCFE963E44C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{56E9DB90-C063-49CA-BAF7-FFCFE963E44C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{56E9DB90-C063-49CA-BAF7-FFCFE963E44C}.Debug|x86.ActiveCfg = Debug|Any CPU
@@ -884,8 +856,6 @@ Global
 		{9C0F8E16-564A-4DA9-A8E0-12FA31B172B7} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{BCEC7EAA-7E8F-4146-977D-346869F3BA34} = {50867E77-BDA5-43B9-AC92-81CEDB338B83}
 		{4A454D43-616F-40A2-ACCD-6BC82CE14340} = {50867E77-BDA5-43B9-AC92-81CEDB338B83}
-		{FFF06059-6B7B-4136-AF76-BE86BC41D0E9} = {C0CD5A16-BD57-429A-8E9A-0DED4DD507F3}
-		{7F01D669-493D-473E-84AE-452BC38F0328} = {C0CD5A16-BD57-429A-8E9A-0DED4DD507F3}
 		{56E9DB90-C063-49CA-BAF7-FFCFE963E44C} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{5AA54AD0-14FC-4EBE-8400-F4DCF97032FF} = {DE40BDEC-6277-4E14-8EB6-D0B6863571BC}
 		{C81070F9-908B-4A76-A96F-CFD4F67A93AB} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
@@ -898,7 +868,7 @@ Global
 		{2004BF15-1F8A-4535-B043-59444A1F1FAD} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {43D3A7D5-0945-435E-8D03-1E631E5CDBA8}
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35
+		SolutionGuid = {43D3A7D5-0945-435E-8D03-1E631E5CDBA8}
 	EndGlobalSection
 EndGlobal
