@@ -22,9 +22,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             where T : class, ISaga
         {
             var repository = _container.GetInstance<ISagaRepository<T>>();
-            if (repository is SagaRepository<T>)
-                return repository;
-
             var scopeProvider = new SimpleInjectorSagaScopeProvider<T>(_container);
             if (scopeAction != null)
                 scopeProvider.AddScopeAction(scopeAction);

@@ -54,10 +54,6 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
         {
             if (context.TryGetPayload<IKernel>(out var existingKernel))
             {
-                existingKernel.UpdateScope(context);
-
-                context.GetOrAddPayload(() => existingKernel.TryResolve<IStateMachineActivityFactory>() ?? WindsorStateMachineActivityFactory.Instance);
-
                 var factory = existingKernel.Resolve<ISagaRepositoryContextFactory<TSaga>>();
 
                 return send(context, factory);

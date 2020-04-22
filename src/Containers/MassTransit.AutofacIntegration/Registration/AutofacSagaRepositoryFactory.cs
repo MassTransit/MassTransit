@@ -26,9 +26,6 @@ namespace MassTransit.AutofacIntegration.Registration
         ISagaRepository<T> ISagaRepositoryFactory.CreateSagaRepository<T>(Action<ConsumeContext> scopeAction)
         {
             var repository = _scopeProvider.LifetimeScope.Resolve<ISagaRepository<T>>();
-            if (repository is SagaRepository<T>)
-                return repository;
-
             var scopeProvider = new AutofacSagaScopeProvider<T>(_scopeProvider, _name, _configureScope);
             if (scopeAction != null)
                 scopeProvider.AddScopeAction(scopeAction);

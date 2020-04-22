@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using Automatonymous;
     using Context;
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
@@ -45,7 +46,10 @@
             {
                 serviceScope.UpdateScope(context);
 
-                var proxy = new ConsumeContextScope<T>(context, serviceScope, serviceScope.ServiceProvider);
+                var factory = serviceScope.ServiceProvider.GetService<IStateMachineActivityFactory>()
+                    ?? DependencyInjectionStateMachineActivityFactory.Instance;
+
+                var proxy = new ConsumeContextScope<T>(context, serviceScope, serviceScope.ServiceProvider, factory);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);

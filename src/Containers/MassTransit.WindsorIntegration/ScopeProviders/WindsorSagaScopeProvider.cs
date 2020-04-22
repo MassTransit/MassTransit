@@ -17,14 +17,11 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
     {
         readonly IKernel _kernel;
         readonly IList<Action<ConsumeContext>> _scopeActions;
-        readonly IStateMachineActivityFactory _factory;
 
         public WindsorSagaScopeProvider(IKernel kernel)
         {
             _kernel = kernel;
             _scopeActions = new List<Action<ConsumeContext>>();
-
-            _factory = new WindsorStateMachineActivityFactory();
         }
 
         public ISagaScopeContext<T> GetScope<T>(ConsumeContext<T> context)
@@ -40,7 +37,9 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
             try
             {
-                var proxy = new ConsumeContextScope<T>(context, _kernel, _factory);
+                var factory = _kernel.TryResolve<IStateMachineActivityFactory>() ?? WindsorStateMachineActivityFactory.Instance;
+
+                var proxy = new ConsumeContextScope<T>(context, _kernel, factory);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);

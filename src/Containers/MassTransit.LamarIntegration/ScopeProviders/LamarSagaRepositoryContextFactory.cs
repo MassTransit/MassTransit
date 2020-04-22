@@ -53,11 +53,6 @@ namespace MassTransit.LamarIntegration.ScopeProviders
         {
             if (context.TryGetPayload<INestedContainer>(out var existingContainer))
             {
-                existingContainer.Inject<ConsumeContext>(context);
-
-                context.GetOrAddPayload(() => existingContainer.TryGetInstance<IStateMachineActivityFactory>()
-                    ?? LamarStateMachineActivityFactory.Instance);
-
                 var factory = existingContainer.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
 
                 return send(context, factory);

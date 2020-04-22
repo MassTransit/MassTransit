@@ -70,8 +70,6 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
         {
             if (context.TryGetPayload<ILifetimeScope>(out var existingScope))
             {
-                context.GetOrAddPayload(() => existingScope.ResolveOptional<IStateMachineActivityFactory>() ?? AutofacStateMachineActivityFactory.Instance);
-
                 var factory = existingScope.Resolve<ISagaRepositoryContextFactory<TSaga>>();
 
                 return send(context, factory);

@@ -42,7 +42,8 @@ namespace MassTransit.LamarIntegration.ScopeProviders
             var nestedContainer = _container.GetNestedContainer(context);
             try
             {
-                IStateMachineActivityFactory factory = new LamarStateMachineActivityFactory();
+                var factory = nestedContainer.TryGetInstance<IStateMachineActivityFactory>()
+                    ?? LamarStateMachineActivityFactory.Instance;
 
                 var proxy = new ConsumeContextScope<T>(context, nestedContainer, factory);
 

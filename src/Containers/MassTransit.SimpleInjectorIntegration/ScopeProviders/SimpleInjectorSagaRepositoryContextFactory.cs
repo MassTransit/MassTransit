@@ -54,11 +54,6 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
         {
             if (context.TryGetPayload<Scope>(out var existingScope))
             {
-                existingScope.UpdateScope(context);
-
-                context.GetOrAddPayload(() => existingScope.TryGetInstance<IStateMachineActivityFactory>()
-                    ?? SimpleInjectorStateMachineActivityFactory.Instance);
-
                 var factory = existingScope.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
 
                 return send(context, factory);

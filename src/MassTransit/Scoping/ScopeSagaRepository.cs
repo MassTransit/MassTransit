@@ -44,19 +44,15 @@ namespace MassTransit.Scoping
 
         async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            using (ISagaScopeContext<T> scope = _scopeProvider.GetScope(context))
-            {
-                await _repository.Send(scope.Context, policy, next).ConfigureAwait(false);
-            }
+            using ISagaScopeContext<T> scope = _scopeProvider.GetScope(context);
+            await _repository.Send(scope.Context, policy, next).ConfigureAwait(false);
         }
 
         async Task ISagaRepository<TSaga>.SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, ISagaPolicy<TSaga, T> policy,
             IPipe<SagaConsumeContext<TSaga, T>> next)
         {
-            using (ISagaScopeContext<T> scope = _scopeProvider.GetScope(context))
-            {
-                await _repository.SendQuery(scope.Context, query, policy, next).ConfigureAwait(false);
-            }
+            using ISagaScopeContext<T> scope = _scopeProvider.GetScope(context);
+            await _repository.SendQuery(scope.Context, query, policy, next).ConfigureAwait(false);
         }
     }
 }

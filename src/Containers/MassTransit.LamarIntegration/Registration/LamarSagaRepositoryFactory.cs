@@ -21,9 +21,6 @@ namespace MassTransit.LamarIntegration.Registration
         ISagaRepository<T> ISagaRepositoryFactory.CreateSagaRepository<T>(Action<ConsumeContext> scopeAction)
         {
             var repository = _container.GetInstance<ISagaRepository<T>>();
-            if (repository is SagaRepository<T>)
-                return repository;
-
             var scopeProvider = new LamarSagaScopeProvider<T>(_container);
             if (scopeAction != null)
                 scopeProvider.AddScopeAction(scopeAction);

@@ -42,7 +42,7 @@
             });
             try
             {
-                IStateMachineActivityFactory factory = new AutofacStateMachineActivityFactory();
+                var factory = lifetimeScope.ResolveOptional<IStateMachineActivityFactory>() ?? AutofacStateMachineActivityFactory.Instance;
 
                 var proxy = new ConsumeContextScope<T>(context, lifetimeScope, factory);
 

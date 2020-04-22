@@ -59,11 +59,6 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
         {
             if (context.TryGetPayload<IContainer>(out var existingContainer))
             {
-                existingContainer.Inject<ConsumeContext>(context);
-
-                context.GetOrAddPayload(() => existingContainer.TryGetInstance<IStateMachineActivityFactory>()
-                    ?? StructureMapStateMachineActivityFactory.Instance);
-
                 var factory = existingContainer.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
 
                 return send(context, factory);

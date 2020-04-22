@@ -2,6 +2,7 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
 {
     using System;
     using System.Collections.Generic;
+    using Automatonymous;
     using Context;
     using GreenPipes;
     using Saga;
@@ -44,7 +45,9 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
             {
                 scope.UpdateScope(context);
 
-                var proxy = new ConsumeContextScope<T>(context, scope, scope.Container);
+                var factory = scope.TryGetInstance<IStateMachineActivityFactory>() ?? SimpleInjectorStateMachineActivityFactory.Instance;
+
+                var proxy = new ConsumeContextScope<T>(context, scope, scope.Container, factory);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(proxy);

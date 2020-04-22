@@ -51,20 +51,15 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
         Task Send<T>(ConsumeContext<T> context, Func<ConsumeContext<T>, ISagaRepositoryContextFactory<TSaga>, Task> send)
             where T : class
         {
-            if (!context.TryGetPayload(out IServiceProvider serviceProvider))
-                serviceProvider = _serviceProvider;
-
             if (context.TryGetPayload<IServiceScope>(out var existingScope))
             {
-                existingScope.UpdateScope(context);
-
-                context.GetOrAddPayload(() => existingScope.ServiceProvider.GetService<IStateMachineActivityFactory>()
-                    ?? DependencyInjectionStateMachineActivityFactory.Instance);
-
                 var factory = existingScope.ServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
 
                 return send(context, factory);
             }
+
+            if (!context.TryGetPayload(out IServiceProvider serviceProvider))
+                serviceProvider = _serviceProvider;
 
             async Task CreateScope()
             {
