@@ -14,6 +14,15 @@ namespace MassTransit.AspNetCoreIntegration
         public static void UseHttpContextSendScope(this IBusFactoryConfigurator configurator, IServiceProvider serviceProvider)
         {
             configurator.UseSendScope(new AspNetCoreSendScopeProvider(serviceProvider));
+        }
+
+        /// <summary>
+        /// Use HttpContext scope for send / publish message, if HttpContext is not exists new scope will be created
+        /// </summary>
+        /// <param name="configurator">IBusFactoryConfigurator</param>
+        /// <param name="serviceProvider">IServiceProvider</param>
+        public static void UseHttpContextPublishScope(this IBusFactoryConfigurator configurator, IServiceProvider serviceProvider)
+        {
             configurator.UsePublishScope(new AspNetCorePublishScopeProvider(serviceProvider));
         }
     }
