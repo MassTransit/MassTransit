@@ -18,22 +18,12 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
         readonly string _name;
 
         readonly ILifetimeScopeProvider _scopeProvider;
+        readonly Action<ContainerBuilder, ConsumeContext> _configureScope;
 
-        public AutofacSagaRepositoryContextFactory(ILifetimeScope lifetimeScope)
-        {
-            _scopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
-            _name = DefaultScopeName;
-        }
-
-        public AutofacSagaRepositoryContextFactory(ILifetimeScopeProvider scopeProvider)
+        public AutofacSagaRepositoryContextFactory(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configureScope)
         {
             _scopeProvider = scopeProvider;
-            _name = DefaultScopeName;
-        }
-
-        public AutofacSagaRepositoryContextFactory(ILifetimeScopeProvider scopeProvider, string name)
-        {
-            _scopeProvider = scopeProvider;
+            _configureScope = configureScope;
             _name = name ?? DefaultScopeName;
         }
 
@@ -81,7 +71,11 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
 
             async Task CreateScope()
             {
-                await using var scope = parentLifetimeScope.BeginLifetimeScope(_name, builder => builder.ConfigureScope(context));
+                await using var scope = parentLifetimeScope.BeginLifetimeScope(_name, builder =>
+                {
+                    builder.ConfigureScope(context);
+                    _configureScope?.Invoke(builder, context);
+                });
 
                 var activityFactory = scope.ResolveOptional<IStateMachineActivityFactory>() ?? AutofacStateMachineActivityFactory.Instance;
 

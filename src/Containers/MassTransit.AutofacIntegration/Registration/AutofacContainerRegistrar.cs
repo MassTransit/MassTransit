@@ -21,6 +21,9 @@ namespace MassTransit.AutofacIntegration.Registration
             _builder = builder;
         }
 
+        public Action<ContainerBuilder, ConsumeContext> ConfigureScope { get; set; }
+        public string ScopeName { get; set; }
+
         public void RegisterConsumer<T>()
             where T : class, IConsumer
         {
@@ -70,7 +73,14 @@ namespace MassTransit.AutofacIntegration.Registration
             _builder.RegisterType<TConsumeContextFactory>().As<ISagaConsumeContextFactory<TContext, TSaga>>();
             _builder.RegisterType<TRepositoryContextFactory>().As<ISagaRepositoryContextFactory<TSaga>>();
 
-            _builder.RegisterType<AutofacSagaRepositoryContextFactory<TSaga>>();
+            _builder.Register(context =>
+            {
+                var lifetimeScopeProvider = context.ResolveOptional<ILifetimeScopeProvider>()
+                    ?? new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());
+
+                return new AutofacSagaRepositoryContextFactory<TSaga>(lifetimeScopeProvider, ScopeName, ConfigureScope);
+            });
+
             _builder.Register<ISagaRepository<TSaga>>(context => new SagaRepository<TSaga>(context.Resolve<AutofacSagaRepositoryContextFactory<TSaga>>()))
                 .SingleInstance();
         }

@@ -12,12 +12,18 @@ namespace MassTransit.AutofacIntegration.Registration
         IContainerBuilderConfigurator
     {
         readonly ContainerBuilder _builder;
-        Action<ContainerBuilder, ConsumeContext> _configureScope;
+        readonly AutofacContainerRegistrar _registrar;
 
         public ContainerBuilderRegistrationConfigurator(ContainerBuilder builder)
-            : base(new AutofacContainerRegistrar(builder))
+            : this(builder, new AutofacContainerRegistrar(builder))
+        {
+        }
+
+        ContainerBuilderRegistrationConfigurator(ContainerBuilder builder, AutofacContainerRegistrar registrar)
+            : base(registrar)
         {
             _builder = builder;
+            _registrar = registrar;
 
             ScopeName = "message";
 
@@ -48,13 +54,21 @@ namespace MassTransit.AutofacIntegration.Registration
                 .SingleInstance();
         }
 
-        public string ScopeName { private get; set; }
+        public string ScopeName
+        {
+            private get => _registrar.ScopeName;
+            set => _registrar.ScopeName = value;
+        }
 
         ContainerBuilder IContainerBuilderConfigurator.Builder => _builder;
 
+        public Action<ContainerBuilder, SendContext> ConfigureSendScope { get; set; }
+        public Action<ContainerBuilder, PublishContext> ConfigurePublishScope { get; set; }
+
         public Action<ContainerBuilder, ConsumeContext> ConfigureScope
         {
-            set => _configureScope = value;
+            get => _registrar.ConfigureScope;
+            set => _registrar.ConfigureScope = value;
         }
 
         public void AddBus(Func<IComponentContext, IBusControl> busFactory)
@@ -112,28 +126,28 @@ namespace MassTransit.AutofacIntegration.Registration
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());
 
-            return new AutofacSendScopeProvider(lifetimeScopeProvider, ScopeName);
+            return new AutofacSendScopeProvider(lifetimeScopeProvider, ScopeName, ConfigureSendScope);
         }
 
         IPublishScopeProvider CreatePublishScopeProvider(IComponentContext context)
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());
 
-            return new AutofacPublishScopeProvider(lifetimeScopeProvider, ScopeName);
+            return new AutofacPublishScopeProvider(lifetimeScopeProvider, ScopeName, ConfigurePublishScope);
         }
 
         IConsumerScopeProvider CreateConsumerScopeProvider(IComponentContext context)
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());
 
-            return new AutofacConsumerScopeProvider(lifetimeScopeProvider, ScopeName, _configureScope);
+            return new AutofacConsumerScopeProvider(lifetimeScopeProvider, ScopeName, ConfigureScope);
         }
 
         ISagaRepositoryFactory CreateSagaRepositoryFactory(IComponentContext context)
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());
 
-            return new AutofacSagaRepositoryFactory(lifetimeScopeProvider, ScopeName, _configureScope);
+            return new AutofacSagaRepositoryFactory(lifetimeScopeProvider, ScopeName, ConfigureScope);
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IComponentContext context)

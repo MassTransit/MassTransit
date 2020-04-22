@@ -1,5 +1,6 @@
 namespace MassTransit.AutofacIntegration.ScopeProviders
 {
+    using System;
     using Autofac;
     using GreenPipes;
     using Scoping;
@@ -10,12 +11,14 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
         IPublishScopeProvider
     {
         readonly string _name;
+        readonly Action<ContainerBuilder, PublishContext> _configureScope;
         readonly ILifetimeScopeProvider _scopeProvider;
 
-        public AutofacPublishScopeProvider(ILifetimeScopeProvider scopeProvider, string name)
+        public AutofacPublishScopeProvider(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, PublishContext> configureScope)
         {
             _scopeProvider = scopeProvider;
             _name = name;
+            _configureScope = configureScope;
         }
 
         IPublishScopeContext<T> IPublishScopeProvider.GetScope<T>(PublishContext<T> context)
@@ -26,7 +29,11 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
 
             var parentLifetimeScope = _scopeProvider.GetLifetimeScope(context);
 
-            var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder => builder.ConfigureScope(context));
+            var lifetimeScope = parentLifetimeScope.BeginLifetimeScope(_name, builder =>
+            {
+                builder.ConfigureScope(context);
+                _configureScope?.Invoke(builder, context);
+            });
 
             try
             {
