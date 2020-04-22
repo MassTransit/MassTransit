@@ -225,6 +225,7 @@ module.exports = {
         children: [
           '/architecture/packages',
           '/architecture/interoperability',
+          '/architecture/nservicebus',
           '/architecture/versioning',
           '/architecture/newid',
           '/architecture/encrypted-messages',

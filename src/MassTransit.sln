@@ -149,6 +149,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.PrometheusInteg
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.AspNetCoreIntegration.Tests", "Containers\MassTransit.AspNetCoreIntegration.Tests\MassTransit.AspNetCoreIntegration.Tests.csproj", "{2004BF15-1F8A-4535-B043-59444A1F1FAD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interoperability", "Interoperability", "{4F40E08B-7C24-4D2A-8476-B7F93D0A2910}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Interop.NServiceBus", "Interoperability\MassTransit.Interop.NServiceBus\MassTransit.Interop.NServiceBus.csproj", "{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -806,6 +810,18 @@ Global
 		{2004BF15-1F8A-4535-B043-59444A1F1FAD}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
 		{2004BF15-1F8A-4535-B043-59444A1F1FAD}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
 		{2004BF15-1F8A-4535-B043-59444A1F1FAD}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
+		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.Debug|x86.Build.0 = Debug|Any CPU
+		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.Release|x86.ActiveCfg = Release|Any CPU
+		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.Release|x86.Build.0 = Release|Any CPU
+		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.ReleaseUnsigned|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
+		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
+		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -866,6 +882,7 @@ Global
 		{1AF687AB-41DE-4B2A-97F5-E9BBF5E51C75} = {DE40BDEC-6277-4E14-8EB6-D0B6863571BC}
 		{A29B1D94-6F11-487E-B4A1-3460928EC2C0} = {DE40BDEC-6277-4E14-8EB6-D0B6863571BC}
 		{2004BF15-1F8A-4535-B043-59444A1F1FAD} = {6C61507E-FF16-45C8-8FE4-350069D9B4C1}
+		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7} = {4F40E08B-7C24-4D2A-8476-B7F93D0A2910}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.2\lib\NET35

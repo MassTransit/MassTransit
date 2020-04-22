@@ -54,6 +54,7 @@ The officially supported MassTransit packages include:
 ### Scheduling
 
 * [MassTransit.Quartz](https://nuget.org/packages/MassTransit.Quartz/)
+* [MassTransit.Hangfire](https://nuget.org/packages/MassTransit.Hangfire/)
 
 ### Other
 
@@ -61,6 +62,10 @@ The officially supported MassTransit packages include:
 * [MassTransit.Host](https://nuget.org/packages/MassTransit.Host/)
 * [MassTransit.Reactive](https://nuget.org/packages/MassTransit.Reactive/)
 * [MassTransit.TestFramework](https://nuget.org/packages/MassTransit.TestFramework/)
+
+### Interoperability
+
+* [MassTransit.Interop.NServiceBus](https://nuget.org/packages/MassTransit.Interop.NServiceBus/)
 
 ### Topshelf
 
