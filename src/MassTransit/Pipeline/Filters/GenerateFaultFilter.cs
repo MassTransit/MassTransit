@@ -45,7 +45,7 @@ namespace MassTransit.Pipeline.Filters
             }
             else
             {
-                messageId = context.TransportHeaders.Get("MessageId", default(Guid?));
+                messageId = context.GetMessageId();
                 requestId = context.TransportHeaders.Get("RequestId", default(Guid?));
             }
 

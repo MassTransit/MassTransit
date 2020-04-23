@@ -20,8 +20,8 @@
 
         public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
-            yield return new KeyValuePair<string, object>(MessageHeaders.MessageId, _message.NMSMessageId);
-            yield return new KeyValuePair<string, object>("CorrelationId", _message.NMSCorrelationID);
+            yield return new KeyValuePair<string, object>(MessageHeaders.TransportMessageId, _message.NMSMessageId);
+            yield return new KeyValuePair<string, object>(nameof(MessageContext.CorrelationId), _message.NMSCorrelationID);
 
             foreach (var header in _adapter.GetAll())
                 yield return header;
@@ -29,13 +29,13 @@
 
         public bool TryGetHeader(string key, out object value)
         {
-            if ("MessageId".Equals(key, StringComparison.OrdinalIgnoreCase))
+            if (MessageHeaders.TransportMessageId.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _message.NMSMessageId;
                 return true;
             }
 
-            if ("CorrelationId".Equals(key, StringComparison.OrdinalIgnoreCase))
+            if (nameof(MessageContext.CorrelationId).Equals(key, StringComparison.OrdinalIgnoreCase))
             {
                 value = _message.NMSCorrelationID;
                 return true;

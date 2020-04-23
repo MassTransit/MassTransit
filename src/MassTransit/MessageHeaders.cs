@@ -83,6 +83,11 @@
         public const string MessageId = "MessageId";
 
         /// <summary>
+        /// The Transport message ID, which is a string, because we can't assume anything
+        /// </summary>
+        public const string TransportMessageId = "TransportMessageId";
+
+        /// <summary>
         /// When a transport header is used, this is the name
         /// </summary>
         public const string ContentType = "Content-Type";

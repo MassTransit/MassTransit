@@ -36,7 +36,7 @@ namespace MassTransit.Transports.InMemory
 
         static Guid GetMessageId(ReceiveContext context)
         {
-            return context.TransportHeaders.TryGetHeader("MessageId", out var messageIdValue)
+            return context.TransportHeaders.TryGetHeader(MessageHeaders.MessageId, out var messageIdValue)
                 ? new Guid(messageIdValue.ToString())
                 : NewId.NextGuid();
         }

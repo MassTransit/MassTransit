@@ -12,7 +12,7 @@ namespace MassTransit
         /// <returns></returns>
         public static Guid? GetMessageId(this ReceiveContext context)
         {
-            return context.TransportHeaders.Get<Guid>("MessageId");
+            return context.TransportHeaders.Get<Guid>(MessageHeaders.MessageId);
         }
     }
 }

@@ -15,10 +15,10 @@ namespace MassTransit.Transports
         static readonly LogMessage<Uri, Guid?, string, string, TimeSpan> _logConsumeFault = LogContext.Define<Uri, Guid?, string, string, TimeSpan>(
             LogLevel.Error, "R-FAULT {InputAddress} {MessageId} {MessageType} {ConsumerType}({Duration})");
 
-        static readonly LogMessage<Uri, Guid?, string, string> _logMoved = LogContext.Define<Uri, Guid?, string, string>(LogLevel.Information,
+        static readonly LogMessage<Uri, string, string, string> _logMoved = LogContext.Define<Uri, string, string, string>(LogLevel.Information,
             "MOVE {InputAddress} {MessageId} {DestinationAddress} {Reason}");
 
-        static readonly LogMessage<Uri, Guid?, TimeSpan> _logReceiveFault = LogContext.Define<Uri, Guid?, TimeSpan>(LogLevel.Error,
+        static readonly LogMessage<Uri, string, TimeSpan> _logReceiveFault = LogContext.Define<Uri, string, TimeSpan>(LogLevel.Error,
             "R-FAULT {InputAddress} {MessageId} {Duration}");
 
         static readonly LogMessage<Uri, Guid?, string> _logSent = LogContext.Define<Uri, Guid?, string>(LogLevel.Debug,
@@ -27,13 +27,13 @@ namespace MassTransit.Transports
         static readonly LogMessage<Uri, Guid?, string> _logSendFault = LogContext.Define<Uri, Guid?, string>(LogLevel.Error,
             "S-FAULT {DestinationAddress} {MessageId} {MessageType}");
 
-        static readonly LogMessage<Uri, Guid?> _logSkipped = LogContext.Define<Uri, Guid?>(LogLevel.Debug,
+        static readonly LogMessage<Uri, string> _logSkipped = LogContext.Define<Uri, string>(LogLevel.Debug,
             "SKIP {InputAddress} {MessageId}");
 
         static readonly LogMessage<Uri, Guid?> _logRetry = LogContext.Define<Uri, Guid?>(LogLevel.Warning,
             "R-RETRY {InputAddress} {MessageId}");
 
-        static readonly LogMessage<Uri, Guid?> _logFault = LogContext.Define<Uri, Guid?>(LogLevel.Error,
+        static readonly LogMessage<Uri, string> _logFault = LogContext.Define<Uri, string>(LogLevel.Error,
             "T-FAULT {InputAddress} {MessageId}");
 
         static readonly LogMessage<Uri, Guid?, string, DateTime, Guid?> _logScheduled = LogContext.Define<Uri, Guid?, String, DateTime, Guid?>(LogLevel.Debug,
@@ -121,9 +121,16 @@ namespace MassTransit.Transports
             _logScheduled(context.DestinationAddress, context.MessageId, TypeMetadataCache<T>.ShortName, deliveryTime, context.ScheduledMessageId);
         }
 
-        static Guid? GetMessageId(ReceiveContext context)
+        static string GetMessageId(ReceiveContext context)
         {
-            return context.TransportHeaders.Get<Guid>("MessageId");
+            try
+            {
+                return context.GetMessageId()?.ToString() ?? context.TransportHeaders.Get<string>(MessageHeaders.TransportMessageId);
+            }
+            catch (Exception)
+            {
+                return default;
+            }
         }
     }
 }
