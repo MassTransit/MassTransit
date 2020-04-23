@@ -96,6 +96,7 @@ module.exports = {
             path: '/usage/containers/',
             collapsable: true,
             children: [
+              ['/usage/containers/definitions', 'Definitions'],
               ['/usage/containers/msdi', 'Microsoft'],
               ['/usage/containers/autofac', 'Autofac'],
               ['/usage/containers/castlewindsor', 'Castle Windsor'],
