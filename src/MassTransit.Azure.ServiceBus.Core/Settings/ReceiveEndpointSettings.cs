@@ -3,8 +3,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
     using System;
     using System.Collections.Generic;
     using Microsoft.Azure.ServiceBus.Management;
-    using Topology.Configuration;
-    using Topology.Configuration.Configurators;
+    using Topology;
+    using Topology.Configurators;
     using Transport;
 
 

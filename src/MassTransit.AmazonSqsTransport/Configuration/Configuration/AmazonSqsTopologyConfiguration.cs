@@ -20,7 +20,6 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
     using MassTransit.Topology.Observers;
     using MassTransit.Topology.Topologies;
     using Topology;
-    using Topology.Configuration;
     using Topology.Topologies;
 
 

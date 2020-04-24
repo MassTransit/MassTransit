@@ -2,9 +2,8 @@
 {
     using System;
     using System.Text;
+    using Configurators;
     using Configuration;
-    using Configuration.Configurators;
-    using Core.Configuration;
     using MassTransit.Topology.Topologies;
     using Metadata;
     using Transports;

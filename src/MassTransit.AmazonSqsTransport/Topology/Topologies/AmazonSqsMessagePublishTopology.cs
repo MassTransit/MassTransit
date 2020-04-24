@@ -4,8 +4,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
     using System.Collections.Generic;
     using AmazonSqsTransport.Configuration;
     using Builders;
-    using Configuration;
-    using Configuration.Configurators;
+    using Configurators;
     using Entities;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;

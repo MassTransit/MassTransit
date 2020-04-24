@@ -1,4 +1,4 @@
-namespace MassTransit.Azure.ServiceBus.Core.Topology.Configuration.Configurators
+namespace MassTransit.Azure.ServiceBus.Core.Topology.Configurators
 {
     using System;
     using System.Collections.Generic;

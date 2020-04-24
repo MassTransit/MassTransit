@@ -6,7 +6,7 @@
     using Configuration;
     using GreenPipes;
     using MassTransit.Builders;
-    using Topology.Configuration;
+    using Topology;
     using Topology.Settings;
 
 

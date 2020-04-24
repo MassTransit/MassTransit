@@ -14,18 +14,7 @@
         /// </summary>
         ushort PrefetchCount { get; }
 
-        /// <summary>
-        /// True if the queue receive should be exclusive and not shared
-        /// </summary>
-        bool Exclusive { get; }
-
         string Selector { get; }
-
-        /// <summary>
-        /// If True, and a queue name is specified, if the queue exists and has messages, they are purged at startup
-        /// If the connection is reset, messages are not purged until the service is reset
-        /// </summary>
-        bool PurgeOnStartup { get; }
 
         /// <summary>
         /// Get the input address for the transport on the specified host

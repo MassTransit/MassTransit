@@ -10,12 +10,8 @@
         SendTopology,
         IActiveMqSendTopologyConfigurator
     {
-        public ActiveMqSendTopology(IEntityNameValidator validator)
-        {
-            EntityNameValidator = validator;
-        }
-
-        public IEntityNameValidator EntityNameValidator { get; }
+        public Action<IQueueConfigurator> ConfigureErrorSettings { get; set; }
+        public Action<IQueueConfigurator> ConfigureDeadLetterSettings { get; set; }
 
         IActiveMqMessageSendTopologyConfigurator<T> IActiveMqSendTopology.GetMessageTopology<T>()
         {
@@ -34,12 +30,20 @@
 
         public ErrorSettings GetErrorSettings(EntitySettings settings)
         {
-            return new ActiveMqErrorSettings(settings, settings.EntityName + "_error");
+            var errorSettings = new ActiveMqErrorSettings(settings, settings.EntityName + "_error");
+
+            ConfigureErrorSettings?.Invoke(errorSettings);
+
+            return errorSettings;
         }
 
         public DeadLetterSettings GetDeadLetterSettings(EntitySettings settings)
         {
-            return new ActiveMqDeadLetterSettings(settings, settings.EntityName + "_skipped");
+            var deadLetterSetting = new ActiveMqDeadLetterSettings(settings, settings.EntityName + "_skipped");
+
+            ConfigureDeadLetterSettings?.Invoke(deadLetterSetting);
+
+            return deadLetterSetting;
         }
 
         protected override IMessageSendTopologyConfigurator CreateMessageTopology<T>(Type type)

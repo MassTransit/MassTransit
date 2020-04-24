@@ -12,7 +12,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
 {
-    using Configuration;
     using MassTransit.Topology.Topologies;
 
 

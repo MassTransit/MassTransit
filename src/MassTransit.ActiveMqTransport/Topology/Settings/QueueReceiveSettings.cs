@@ -16,10 +16,6 @@ namespace MassTransit.ActiveMqTransport.Topology.Settings
 
         public ushort PrefetchCount { get; set; }
 
-        public bool Exclusive { get; set; }
-
-        public bool PurgeOnStartup { get; set; }
-
         public Uri GetInputAddress(Uri hostAddress)
         {
             return GetEndpointAddress(hostAddress);

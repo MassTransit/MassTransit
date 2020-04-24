@@ -13,7 +13,7 @@
 namespace MassTransit.Azure.ServiceBus.Core.Configuration
 {
     using MassTransit.Configuration;
-    using Topology.Configuration;
+    using Topology;
 
 
     public interface IServiceBusTopologyConfiguration :

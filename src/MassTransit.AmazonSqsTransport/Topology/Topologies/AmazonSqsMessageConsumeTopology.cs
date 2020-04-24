@@ -5,12 +5,11 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
     using System.Linq;
     using AmazonSqsTransport.Configuration;
     using Builders;
-    using Configuration;
-    using Configuration.Specifications;
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Metadata;
+    using Specifications;
 
 
     public class AmazonSqsMessageConsumeTopology<TMessage> :

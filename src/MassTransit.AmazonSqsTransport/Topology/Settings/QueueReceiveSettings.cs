@@ -1,7 +1,7 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Settings
 {
     using System;
-    using Configuration.Configurators;
+    using Configurators;
 
 
     public class QueueReceiveSettings :

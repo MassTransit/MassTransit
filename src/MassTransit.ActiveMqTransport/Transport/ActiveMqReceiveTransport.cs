@@ -45,7 +45,6 @@
                 _settings.Durable,
                 _settings.AutoDelete,
                 _settings.PrefetchCount,
-                _settings.PurgeOnStartup,
             });
             var topologyScope = scope.CreateScope("topology");
             _context.BrokerTopology.Probe(topologyScope);

@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
-    using Topology.Configuration;
+    using Topology;
 
 
     /// <summary>

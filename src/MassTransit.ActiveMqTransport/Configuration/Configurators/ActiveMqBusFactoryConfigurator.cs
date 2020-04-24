@@ -68,11 +68,6 @@
             set => _settings.AutoDelete = value;
         }
 
-        public bool Lazy
-        {
-            set => _settings.Lazy = value;
-        }
-
         public bool DeployTopologyOnly
         {
             set => _busConfiguration.HostConfiguration.DeployTopologyOnly = value;

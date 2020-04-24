@@ -2,7 +2,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
 {
     using System;
     using System.Collections.Generic;
-    using Configuration.Configurators;
+    using Configurators;
 
 
     public class TopicPublishSettings :

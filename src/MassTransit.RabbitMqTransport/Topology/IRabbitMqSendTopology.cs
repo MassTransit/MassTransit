@@ -6,6 +6,10 @@
     public interface IRabbitMqSendTopology :
         ISendTopology
     {
+        IExchangeTypeSelector ExchangeTypeSelector { get; }
+
+        IEntityNameValidator EntityNameValidator { get; }
+
         new IRabbitMqMessageSendTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class;
 

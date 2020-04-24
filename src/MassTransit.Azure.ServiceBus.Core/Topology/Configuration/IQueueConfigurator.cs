@@ -1,6 +1,5 @@
-﻿namespace MassTransit.Azure.ServiceBus.Core.Topology.Configuration
+﻿namespace MassTransit.Azure.ServiceBus.Core.Topology
 {
-    using System;
     using GreenPipes;
     using Microsoft.Azure.ServiceBus.Management;
 
@@ -25,12 +24,5 @@
         /// </summary>
         /// <returns></returns>
         QueueDescription GetQueueDescription();
-
-        /// <summary>
-        /// Returns the address of the queue
-        /// </summary>
-        /// <param name="hostAddress"></param>
-        /// <returns></returns>
-        Uri GetQueueAddress(Uri hostAddress);
     }
 }

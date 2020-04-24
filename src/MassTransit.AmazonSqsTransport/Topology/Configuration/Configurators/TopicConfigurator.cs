@@ -1,7 +1,7 @@
-namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
+namespace MassTransit.AmazonSqsTransport.Topology.Configurators
 {
     using System.Collections.Generic;
-    using AmazonSqsTransport.Configuration;
+    using Configuration;
     using Entities;
 
 
@@ -24,12 +24,12 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configuration.Configurators
         {
         }
 
-        public IDictionary<string, object> TopicAttributes { get; private set; }
-        public IDictionary<string, object> TopicSubscriptionAttributes { get; private set; }
-        public IDictionary<string, string> TopicTags { get; private set; }
-
         public IDictionary<string, string> Tags => TopicTags;
 
         protected override AmazonSqsEndpointAddress.AddressType AddressType => AmazonSqsEndpointAddress.AddressType.Topic;
+
+        public IDictionary<string, object> TopicAttributes { get; private set; }
+        public IDictionary<string, object> TopicSubscriptionAttributes { get; private set; }
+        public IDictionary<string, string> TopicTags { get; private set; }
     }
 }

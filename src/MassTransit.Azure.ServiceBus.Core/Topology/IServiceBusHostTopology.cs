@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Topology
 {
     using System;
-    using Configuration;
     using MassTransit.Topology;
 
 

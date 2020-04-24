@@ -104,9 +104,6 @@
             if (!ActiveMqEntityNameValidator.Validator.IsValidEntityName(_settings.EntityName))
                 yield return this.Failure(queueName, "must be a valid queue name");
 
-            if (_settings.PurgeOnStartup)
-                yield return this.Warning(queueName, "Existing messages in the queue will be purged on service start");
-
             foreach (var result in base.Validate())
                 yield return result.WithParentKey(queueName);
         }
@@ -134,11 +131,6 @@
 
                 Changed("AutoDelete");
             }
-        }
-
-        public bool Lazy
-        {
-            set => _settings.Lazy = value;
         }
 
         public void Bind(string topicName, Action<ITopicBindingConfigurator> configure = null)

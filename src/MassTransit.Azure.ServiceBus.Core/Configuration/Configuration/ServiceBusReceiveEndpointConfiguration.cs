@@ -7,7 +7,7 @@
     using GreenPipes;
     using Pipeline;
     using Settings;
-    using Topology.Configuration;
+    using Topology;
     using Transport;
     using Transports;
 

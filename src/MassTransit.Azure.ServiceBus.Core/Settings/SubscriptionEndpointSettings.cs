@@ -5,8 +5,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Management;
     using Topology;
-    using Topology.Configuration;
-    using Topology.Configuration.Configurators;
+    using Topology.Configurators;
     using Transport;
 
 

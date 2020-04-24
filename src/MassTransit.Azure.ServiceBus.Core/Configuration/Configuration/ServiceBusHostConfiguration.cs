@@ -7,7 +7,7 @@
     using MassTransit.Topology.EntityNameFormatters;
     using Microsoft.Azure.ServiceBus.Primitives;
     using Settings;
-    using Topology.Configuration.Configurators;
+    using Topology.Configurators;
     using Topology.Topologies;
     using Transport;
     using Transports;

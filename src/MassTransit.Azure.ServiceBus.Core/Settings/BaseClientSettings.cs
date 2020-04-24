@@ -2,7 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 {
     using System;
     using System.Collections.Generic;
-    using Topology.Configuration;
+    using Topology;
     using Transport;
 
 

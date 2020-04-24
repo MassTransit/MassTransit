@@ -12,7 +12,7 @@
     using MassTransit.Pipeline.Filters;
     using Pipeline;
     using Settings;
-    using Topology.Configuration;
+    using Topology;
     using Transport;
     using Transports;
     using Util;

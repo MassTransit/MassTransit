@@ -6,8 +6,8 @@
     using Configuration;
     using MassTransit.Builders;
     using Settings;
-    using Topology.Configuration;
-    using Topology.Configuration.Configurators;
+    using Topology;
+    using Topology.Configurators;
 
 
     public class ServiceBusBusFactoryConfigurator :

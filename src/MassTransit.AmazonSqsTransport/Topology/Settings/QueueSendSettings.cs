@@ -3,7 +3,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
     using System;
     using System.Collections.Generic;
     using Builders;
-    using Configuration.Configurators;
+    using Configurators;
 
 
     public class QueueSendSettings :

@@ -16,13 +16,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
-    using Configuration;
-    using Configuration.Configurators;
-    using Configuration.Specifications;
+    using Configurators;
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Metadata;
+    using Specifications;
     using Util;
 
 

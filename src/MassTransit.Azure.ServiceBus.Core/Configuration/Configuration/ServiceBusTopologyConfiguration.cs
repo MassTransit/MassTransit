@@ -7,7 +7,7 @@
     using MassTransit.Topology;
     using MassTransit.Topology.Observers;
     using MassTransit.Topology.Topologies;
-    using Topology.Configuration;
+    using Topology;
     using Topology.Conventions.PartitionKey;
     using Topology.Conventions.SessionId;
     using Topology.Topologies;

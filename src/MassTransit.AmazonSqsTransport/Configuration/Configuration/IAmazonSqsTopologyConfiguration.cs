@@ -13,7 +13,7 @@
 namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
 {
     using MassTransit.Configuration;
-    using Topology.Configuration;
+    using Topology;
 
 
     public interface IAmazonSqsTopologyConfiguration :
