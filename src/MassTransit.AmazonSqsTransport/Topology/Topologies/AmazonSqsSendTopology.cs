@@ -30,6 +30,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
         }
 
         public IEntityNameValidator EntityNameValidator { get; }
+        public Action<QueueErrorSettings> ConfigureErrorSettings { get; set; }
+        public Action<QueueDeadLetterSettings> ConfigureDeadLetterSettings { get; set; }
 
         IAmazonSqsMessageSendTopologyConfigurator<T> IAmazonSqsSendTopology.GetMessageTopology<T>()
         {
@@ -45,12 +47,20 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         public ErrorSettings GetErrorSettings(EntitySettings settings)
         {
-            return new QueueErrorSettings(settings, BuildEntityName(settings.EntityName, "_error"));
+            var errorSettings = new QueueErrorSettings(settings, BuildEntityName(settings.EntityName, "_error"));
+
+            ConfigureErrorSettings?.Invoke(errorSettings);
+
+            return errorSettings;
         }
 
         public DeadLetterSettings GetDeadLetterSettings(EntitySettings settings)
         {
-            return new QueueDeadLetterSettings(settings, BuildEntityName(settings.EntityName, "_skipped"));
+            var deadLetterSetting = new QueueDeadLetterSettings(settings, BuildEntityName(settings.EntityName, "_skipped"));
+
+            ConfigureDeadLetterSettings?.Invoke(deadLetterSetting);
+
+            return deadLetterSetting;
         }
 
         protected override IMessageSendTopologyConfigurator CreateMessageTopology<T>(Type type)
