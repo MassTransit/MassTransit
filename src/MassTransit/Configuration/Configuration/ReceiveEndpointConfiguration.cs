@@ -60,9 +60,14 @@
 
         public override IEnumerable<ValidationResult> Validate()
         {
-            return base.Validate()
-                .Concat(_specifications.SelectMany(x => x.Validate()))
-                .Concat(_lateConfigurationKeys.Select(x => this.Failure(x, "was modified after being used")));
+            foreach (var result in _specifications.SelectMany(x => x.Validate()))
+                yield return result;
+
+            foreach (var result in _lateConfigurationKeys.Select(x => this.Failure(x, "was modified after being used")))
+                yield return result;
+
+            foreach (var result in base.Validate())
+                yield return result;
         }
 
         public IConsumePipe ConsumePipe => _consumePipe.Value;

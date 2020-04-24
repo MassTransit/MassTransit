@@ -52,8 +52,8 @@ namespace MassTransit.Configuration
 
         public override IEnumerable<ValidationResult> Validate()
         {
-            return base.Validate()
-                .Concat(Specifications.SelectMany(x => x.Validate()));
+            return Specifications.SelectMany(x => x.Validate())
+                .Concat(base.Validate());
         }
     }
 }

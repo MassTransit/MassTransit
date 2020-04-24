@@ -154,9 +154,14 @@ namespace MassTransit.ConsumePipeSpecifications
 
         public IEnumerable<ValidationResult> Validate()
         {
-            return _specifications.SelectMany(x => x.Validate())
-                .Concat(_consumePipeConfigurator.Validate())
-                .Concat(_messageSpecifications.Values.SelectMany(x => x.Validate()));
+            foreach (var result in _specifications.SelectMany(x => x.Validate()))
+                yield return result;
+
+            foreach (var result in _consumePipeConfigurator.Validate())
+                yield return result;
+
+            foreach (var result in _messageSpecifications.Values.SelectMany(x => x.Validate()))
+                yield return result;
         }
 
         public IMessageConsumePipeSpecification<T> GetMessageSpecification<T>()

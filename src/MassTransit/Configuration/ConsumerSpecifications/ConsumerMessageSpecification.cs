@@ -2,6 +2,7 @@ namespace MassTransit.ConsumerSpecifications
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using ConsumeConfigurators;
     using GreenPipes;
     using GreenPipes.Builders;
@@ -39,7 +40,8 @@ namespace MassTransit.ConsumerSpecifications
                 return true;
             });
 
-            return _configurator.Validate();
+            return _configurator.Validate()
+                .Concat(_messagePipeConfigurator.Validate());
         }
 
         public Type MessageType => typeof(TMessage);

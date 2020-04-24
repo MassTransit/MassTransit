@@ -24,7 +24,7 @@ namespace MassTransit.Tests
 
                     e.Consumer<Consumer>();
                 });
-            }), Throws.TypeOf<ConfigurationException>());
+            }), Throws.TypeOf<ConfigurationException>().With.InnerException.Null);
         }
 
         [Test]
@@ -40,7 +40,7 @@ namespace MassTransit.Tests
 
                     e.Consumer<Consumer>();
                 });
-            }), Throws.TypeOf<ConfigurationException>());
+            }), Throws.TypeOf<ConfigurationException>().With.InnerException.Null);
         }
 
         [Test]
@@ -57,31 +57,7 @@ namespace MassTransit.Tests
                         });
                     });
                 });
-            }), Throws.TypeOf<ConfigurationException>());
-        }
-
-        [Test]
-        public void Should_throw_for_consumer_retry_extra()
-        {
-            try
-            {
-                Bus.Factory.CreateUsingInMemory(cfg =>
-                {
-                    cfg.ReceiveEndpoint("Hello", e =>
-                    {
-                        e.Consumer<Consumer>(cc =>
-                        {
-                            cc.UseRetry(r =>
-                            {
-                            });
-                        });
-                    });
-                });
-            }
-            catch (Exception exception)
-            {
-                Assert.That(exception, Is.TypeOf<ConfigurationException>());
-            }
+            }), Throws.TypeOf<ConfigurationException>().With.InnerException.Null);
         }
 
         [Test]
@@ -98,7 +74,7 @@ namespace MassTransit.Tests
                         }));
                     });
                 });
-            }), Throws.TypeOf<ConfigurationException>());
+            }), Throws.TypeOf<ConfigurationException>().With.InnerException.Null);
         }
 
         [Test]
