@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Lamar;
-    using LamarIntegration;
     using NUnit.Framework;
     using Scenarios;
     using Shouldly;

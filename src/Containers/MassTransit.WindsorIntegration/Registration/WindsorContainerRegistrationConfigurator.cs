@@ -5,9 +5,11 @@ namespace MassTransit.WindsorIntegration.Registration
     using Castle.MicroKernel.Lifestyle.Scoped;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
+    using MassTransit.Pipeline.PayloadInjector;
     using MassTransit.Registration;
     using ScopeProviders;
     using Scoping;
+    using Transports;
 
 
     public class WindsorContainerRegistrationConfigurator :
@@ -24,8 +26,6 @@ namespace MassTransit.WindsorIntegration.Registration
             container.RegisterScopedContextProviderIfNotPresent();
 
             container.Register(
-                Component.For<ISendScopeProvider>().ImplementedBy<WindsorSendScopeProvider>().LifestyleTransient(),
-                Component.For<IPublishScopeProvider>().ImplementedBy<WindsorPublishScopeProvider>().LifestyleTransient(),
                 Component.For<IConsumerScopeProvider>().ImplementedBy<WindsorConsumerScopeProvider>().LifestyleTransient(),
                 Component.For<IConfigurationServiceProvider>()
                     .ImplementedBy<WindsorConfigurationServiceProvider>()
@@ -96,18 +96,18 @@ namespace MassTransit.WindsorIntegration.Registration
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IKernel context)
         {
-            var currentScope = CallContextLifetimeScope.ObtainCurrentScope();
-            return currentScope != null
-                ? context.Resolve<ConsumeContext>()
-                : (ISendEndpointProvider)context.Resolve<IBus>();
+            ISendEndpointProvider sendEndpointProvider = null;
+            if (CallContextLifetimeScope.ObtainCurrentScope() != null)
+                sendEndpointProvider = context.Resolve<ScopedConsumeContextProvider>()?.GetContext();
+            return sendEndpointProvider ?? new PayloadSendEndpointProvider<IKernel>(context.Resolve<IBus>(), () => context);
         }
 
         static IPublishEndpoint GetCurrentPublishEndpoint(IKernel context)
         {
-            var currentScope = CallContextLifetimeScope.ObtainCurrentScope();
-            return currentScope != null
-                ? context.Resolve<ConsumeContext>()
-                : (IPublishEndpoint)context.Resolve<IBus>();
+            IPublishEndpoint publishEndpoint = null;
+            if (CallContextLifetimeScope.ObtainCurrentScope() != null)
+                publishEndpoint = context.Resolve<ScopedConsumeContextProvider>()?.GetContext();
+            return publishEndpoint ?? new PublishEndpoint(new PayloadPublishEndpointProvider<IKernel>(context.Resolve<IBus>(), () => context));
         }
     }
 }

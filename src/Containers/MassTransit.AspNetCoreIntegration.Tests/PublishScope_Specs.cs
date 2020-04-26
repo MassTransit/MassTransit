@@ -58,7 +58,6 @@ namespace MassTransit.AspNetCoreIntegration.Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseHttpContextSendScope(GetServiceProvider());
             configurator.ConfigurePublish(cfg => cfg.UseFilter(new TestScopeFilter(_sendContextIdTask)));
         }
 

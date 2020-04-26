@@ -5,8 +5,10 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Pipeline.PayloadInjector;
     using ScopeProviders;
     using Scoping;
+    using Transports;
 
 
     public class ServiceCollectionConfigurator :
@@ -69,17 +71,24 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             collection.AddScoped<ScopedConsumeContextProvider>();
             collection.AddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext());
 
-            collection.AddScoped(provider => (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ??
-                provider.GetRequiredService<IBus>());
+            collection.AddScoped(GetCurrentSendEndpointProvider);
+            collection.AddScoped(GetCurrentPublishEndpoint);
 
-            collection.AddScoped(provider => (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ??
-                provider.GetRequiredService<IBus>());
-
-            collection.AddSingleton<ISendScopeProvider>(provider => new DependencyInjectionSendScopeProvider(provider));
-            collection.AddSingleton<IPublishScopeProvider>(provider => new DependencyInjectionPublishScopeProvider(provider));
             collection.AddSingleton<IConsumerScopeProvider>(provider => new DependencyInjectionConsumerScopeProvider(provider));
             collection.AddSingleton<ISagaRepositoryFactory>(provider => new DependencyInjectionSagaRepositoryFactory(provider));
             collection.AddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
+        }
+
+        static ISendEndpointProvider GetCurrentSendEndpointProvider(IServiceProvider provider)
+        {
+            return (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext()
+                ?? new PayloadSendEndpointProvider<IServiceProvider>(provider.GetRequiredService<IBus>(), () => provider);
+        }
+
+        static IPublishEndpoint GetCurrentPublishEndpoint(IServiceProvider provider)
+        {
+            return (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ?? new PublishEndpoint(
+                new PayloadPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<IBus>(), () => provider));
         }
     }
 }

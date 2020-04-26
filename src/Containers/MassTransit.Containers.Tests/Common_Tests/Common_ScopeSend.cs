@@ -4,7 +4,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using GreenPipes;
     using NUnit.Framework;
     using Scenarios;
-    using Scoping;
     using TestFramework;
 
 
@@ -14,7 +13,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
     {
         readonly TaskCompletionSource<SendContext> _taskCompletionSource;
 
-
         protected Common_ScopeSend()
         {
             _taskCompletionSource = GetTask<SendContext>();
@@ -23,14 +21,18 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_contains_scope_on_send()
         {
-            await InputQueueSendEndpoint.Send(new SimpleMessageClass("test"));
+            var provider = GetSendEndpointProvider();
+            var endpoint = await provider.GetSendEndpoint(InputQueueAddress);
+            await endpoint.Send(new SimpleMessageClass("test"));
 
             SendContext sent = await _taskCompletionSource.Task;
 
-            Assert.IsTrue(sent.TryGetPayload<TScope>(out _));
+            Assert.IsTrue(sent.TryGetPayload<TScope>(out var scope));
+            AssetScopeAreEquals(scope);
         }
 
-        protected abstract ISendScopeProvider GetSendScopeProvider();
+        protected abstract ISendEndpointProvider GetSendEndpointProvider();
+        protected abstract void AssetScopeAreEquals(TScope actual);
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -39,7 +41,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseSendScope(GetSendScopeProvider());
             configurator.ConfigureSend(cfg => cfg.UseFilter(new TestScopeFilter(_taskCompletionSource)));
         }
 

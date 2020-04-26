@@ -4,14 +4,14 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
     using Common_Tests;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
-    using Scoping;
 
 
     [TestFixture]
     public class DependencyInjection_ScopeSend :
-        Common_ScopeSend<IServiceScope>
+        Common_ScopeSend<IServiceProvider>
     {
         readonly IServiceProvider _provider;
+        readonly IServiceScope _childContainer;
 
         public DependencyInjection_ScopeSend()
         {
@@ -22,11 +22,23 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             });
 
             _provider = collection.BuildServiceProvider(true);
+            _childContainer = _provider.CreateScope();
         }
 
-        protected override ISendScopeProvider GetSendScopeProvider()
+        [OneTimeTearDown]
+        public void Close_container()
         {
-            return _provider.GetRequiredService<ISendScopeProvider>();
+            _childContainer.Dispose();
+        }
+
+        protected override ISendEndpointProvider GetSendEndpointProvider()
+        {
+            return _childContainer.ServiceProvider.GetRequiredService<ISendEndpointProvider>();
+        }
+
+        protected override void AssetScopeAreEquals(IServiceProvider actual)
+        {
+            Assert.AreEqual(_childContainer.ServiceProvider, actual);
         }
     }
 }

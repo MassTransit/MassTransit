@@ -3,9 +3,11 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using System;
     using Context;
     using MassTransit.Registration;
+    using Pipeline.PayloadInjector;
     using ScopeProviders;
     using Scoping;
     using SimpleInjector;
+    using Transports;
 
 
     public class SimpleInjectorRegistrationConfigurator :
@@ -80,12 +82,14 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         ISendEndpointProvider GetSendEndpointProvider()
         {
-            return (ISendEndpointProvider)Container.GetConsumeContext() ?? Container.GetInstance<IBus>();
+            return (ISendEndpointProvider)Container.GetConsumeContext()
+                ?? new PayloadSendEndpointProvider<Container>(Container.GetInstance<IBus>(), () => Container);
         }
 
         IPublishEndpoint GetPublishEndpoint()
         {
-            return (IPublishEndpoint)Container.GetConsumeContext() ?? Container.GetInstance<IBus>();
+            return (IPublishEndpoint)Container.GetConsumeContext()
+                ?? new PublishEndpoint(new PayloadPublishEndpointProvider<Container>(Container.GetInstance<IBus>(), () => Container));
         }
 
         static void AddMassTransitComponents(Container container)
@@ -94,8 +98,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext(), Lifestyle.Scoped);
 
-            container.RegisterSingleton<ISendScopeProvider>(() => new SimpleInjectorSendScopeProvider(container));
-            container.RegisterSingleton<IPublishScopeProvider>(() => new SimpleInjectorPublishScopeProvider(container));
             container.RegisterSingleton<IConsumerScopeProvider>(() => new SimpleInjectorConsumerScopeProvider(container));
             container.RegisterSingleton<ISagaRepositoryFactory>(() => new SimpleInjectorSagaRepositoryFactory(container));
             container.RegisterSingleton<IConfigurationServiceProvider>(() => new SimpleInjectorConfigurationServiceProvider(container));

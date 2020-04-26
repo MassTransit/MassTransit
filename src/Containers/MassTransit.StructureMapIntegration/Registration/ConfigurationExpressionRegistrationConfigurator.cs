@@ -1,10 +1,13 @@
 namespace MassTransit.StructureMapIntegration.Registration
 {
     using System;
+    using GreenPipes;
     using MassTransit.Registration;
+    using Pipeline.PayloadInjector;
     using ScopeProviders;
     using Scoping;
     using StructureMap;
+    using Transports;
 
 
     public class ConfigurationExpressionRegistrationConfigurator :
@@ -18,13 +21,6 @@ namespace MassTransit.StructureMapIntegration.Registration
         {
             _expression = expression;
 
-            expression.For<ISendScopeProvider>()
-                .Use(context => CreateSendScopeProvider(context))
-                .Singleton();
-
-            expression.For<IPublishScopeProvider>()
-                .Use(context => CreatePublishScopeProvider(context))
-                .Singleton();
 
             expression.For<IConsumerScopeProvider>()
                 .Use(context => CreateConsumerScopeProvider(context))
@@ -71,7 +67,7 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Singleton();
         }
 
-        IBusControl BusFactory(IContext context, Func<IContext, IBusControl> busFactory)
+        static IBusControl BusFactory(IContext context, Func<IContext, IBusControl> busFactory)
         {
             var provider = context.GetInstance<IConfigurationServiceProvider>();
 
@@ -91,7 +87,7 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Singleton();
         }
 
-        IMediator MediatorFactory(IContext context, Action<IContext, IReceiveEndpointConfigurator> configure)
+        static IMediator MediatorFactory(IContext context, Action<IContext, IReceiveEndpointConfigurator> configure)
         {
             var provider = context.GetInstance<IConfigurationServiceProvider>();
 
@@ -105,34 +101,31 @@ namespace MassTransit.StructureMapIntegration.Registration
             });
         }
 
-        ISendScopeProvider CreateSendScopeProvider(IContext context)
-        {
-            return new StructureMapSendScopeProvider(context.GetInstance<IContainer>());
-        }
-
-        IPublishScopeProvider CreatePublishScopeProvider(IContext context)
-        {
-            return new StructureMapPublishScopeProvider(context.GetInstance<IContainer>());
-        }
-
-        IConsumerScopeProvider CreateConsumerScopeProvider(IContext context)
+        static IConsumerScopeProvider CreateConsumerScopeProvider(IContext context)
         {
             return new StructureMapConsumerScopeProvider(context.GetInstance<IContainer>());
         }
 
-        ISagaRepositoryFactory CreateSagaRepositoryFactory(IContext context)
+        static ISagaRepositoryFactory CreateSagaRepositoryFactory(IContext context)
         {
             return new StructureMapSagaRepositoryFactory(context.GetInstance<IContainer>());
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IContext context)
         {
-            return context.TryGetInstance<ConsumeContext>() ?? (ISendEndpointProvider)context.GetInstance<IBus>();
+            return (ISendEndpointProvider)context.TryGetInstance<ConsumeContext>()
+                ?? new PayloadSendEndpointProvider<IContainer>(context.GetInstance<IBus>(), GetPayloadFactory(context));
         }
 
         static IPublishEndpoint GetCurrentPublishEndpoint(IContext context)
         {
-            return context.TryGetInstance<ConsumeContext>() ?? (IPublishEndpoint)context.GetInstance<IBus>();
+            return (IPublishEndpoint)context.TryGetInstance<ConsumeContext>()
+                ?? new PublishEndpoint(new PayloadPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), GetPayloadFactory(context)));
+        }
+
+        static PayloadFactory<IContainer> GetPayloadFactory(IContext context)
+        {
+            return context.GetInstance<Func<IContainer>>().Invoke;
         }
     }
 }

@@ -3,14 +3,14 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
     using Common_Tests;
     using Lamar;
     using NUnit.Framework;
-    using Scoping;
 
 
     [TestFixture]
     public class Lamar_ScopeSend :
-        Common_ScopeSend<INestedContainer>
+        Common_ScopeSend<IContainer>
     {
         readonly IContainer _container;
+        readonly INestedContainer _childContainer;
 
         public Lamar_ScopeSend()
         {
@@ -21,17 +21,24 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
                     cfg.AddBus(context => BusControl);
                 });
             });
+            _childContainer = _container.GetNestedContainer();
         }
 
         [OneTimeTearDown]
         public void Close_container()
         {
+            _childContainer.Dispose();
             _container.Dispose();
         }
 
-        protected override ISendScopeProvider GetSendScopeProvider()
+        protected override ISendEndpointProvider GetSendEndpointProvider()
         {
-            return _container.GetInstance<ISendScopeProvider>();
+            return _childContainer.GetInstance<ISendEndpointProvider>();
+        }
+
+        protected override void AssetScopeAreEquals(IContainer actual)
+        {
+            Assert.AreEqual(_childContainer, actual);
         }
     }
 }

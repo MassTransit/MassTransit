@@ -1,9 +1,9 @@
 namespace MassTransit.Containers.Tests.Autofac_Tests
 {
+    using System.Threading.Tasks;
     using Autofac;
     using Common_Tests;
     using NUnit.Framework;
-    using Scoping;
 
 
     [TestFixture]
@@ -11,6 +11,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
         Common_ScopeSend<ILifetimeScope>
     {
         readonly IContainer _container;
+        readonly ILifetimeScope _childContainer;
 
         public Autofac_ScopeSend()
         {
@@ -21,17 +22,24 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             });
 
             _container = builder.Build();
+            _childContainer = _container.BeginLifetimeScope();
         }
 
         [OneTimeTearDown]
-        public void Close_container()
+        public async Task Close_container()
         {
-            _container.Dispose();
+            await _childContainer.DisposeAsync();
+            await _container.DisposeAsync();
         }
 
-        protected override ISendScopeProvider GetSendScopeProvider()
+        protected override ISendEndpointProvider GetSendEndpointProvider()
         {
-            return _container.Resolve<ISendScopeProvider>();
+            return _childContainer.Resolve<ISendEndpointProvider>();
+        }
+
+        protected override void AssetScopeAreEquals(ILifetimeScope actual)
+        {
+            Assert.AreEqual(_childContainer, actual);
         }
     }
 }

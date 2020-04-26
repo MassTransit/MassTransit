@@ -4,7 +4,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using GreenPipes;
     using NUnit.Framework;
     using Scenarios;
-    using Scoping;
     using TestFramework;
 
 
@@ -22,14 +21,18 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_contains_scope_on_publish()
         {
-            await Bus.Publish(new SimpleMessageClass("test"));
+            var endpoint = GetPublishEndpoint();
+            await endpoint.Publish(new SimpleMessageClass("test"));
 
             PublishContext published = await _taskCompletionSource.Task;
 
-            Assert.IsTrue(published.TryGetPayload<TScope>(out _));
+            Assert.IsTrue(published.TryGetPayload<TScope>(out var scope));
+            AssetScopeAreEquals(scope);
         }
 
-        protected abstract IPublishScopeProvider GetPublishScopeProvider();
+        protected abstract IPublishEndpoint GetPublishEndpoint();
+
+        protected abstract void AssetScopeAreEquals(TScope actual);
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -38,7 +41,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UsePublishScope(GetPublishScopeProvider());
             configurator.ConfigurePublish(cfg => cfg.UseFilter(new TestScopeFilter(_taskCompletionSource)));
         }
 

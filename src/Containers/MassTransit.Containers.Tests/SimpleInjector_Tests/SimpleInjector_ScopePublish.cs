@@ -4,16 +4,16 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     using Common_Tests;
     using GreenPipes;
     using NUnit.Framework;
-    using Scoping;
     using SimpleInjector;
     using SimpleInjector.Lifestyles;
 
 
     [TestFixture]
     public class SimpleInjector_ScopePublish :
-        Common_ScopePublish<Scope>
+        Common_ScopePublish<Container>
     {
         readonly Container _container;
+        readonly Scope _childContainer;
 
         public SimpleInjector_ScopePublish()
         {
@@ -24,11 +24,13 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             {
                 cfg.AddBus(() => BusControl);
             });
+            _childContainer = AsyncScopedLifestyle.BeginScope(_container);
         }
 
         [OneTimeTearDown]
         public void Close_container()
         {
+            _childContainer.Dispose();
             _container.Dispose();
         }
 
@@ -46,9 +48,14 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             base.ConfigureInMemoryBus(configurator);
         }
 
-        protected override IPublishScopeProvider GetPublishScopeProvider()
+        protected override IPublishEndpoint GetPublishEndpoint()
         {
-            return _container.GetInstance<IPublishScopeProvider>();
+            return _childContainer.GetInstance<IPublishEndpoint>();
+        }
+
+        protected override void AssetScopeAreEquals(Container actual)
+        {
+            Assert.AreEqual(_childContainer.Container, actual);
         }
     }
 }

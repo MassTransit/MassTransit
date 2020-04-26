@@ -1,10 +1,13 @@
 namespace MassTransit.LamarIntegration.Registration
 {
     using System;
+    using GreenPipes;
     using Lamar;
     using MassTransit.Registration;
+    using Pipeline.PayloadInjector;
     using ScopeProviders;
     using Scoping;
+    using Transports;
 
 
     public class ServiceRegistryRegistrationConfigurator :
@@ -17,14 +20,6 @@ namespace MassTransit.LamarIntegration.Registration
             : base(new LamarContainerRegistrar(registry))
         {
             _registry = registry;
-
-            registry.For<ISendScopeProvider>()
-                .Use(CreateSendScopeProvider)
-                .Singleton();
-
-            registry.For<IPublishScopeProvider>()
-                .Use(CreatePublishScopeProvider)
-                .Singleton();
 
             registry.For<IConsumerScopeProvider>()
                 .Use(CreateConsumerScopeProvider)
@@ -107,34 +102,31 @@ namespace MassTransit.LamarIntegration.Registration
                 .Singleton();
         }
 
-        IConsumerScopeProvider CreateConsumerScopeProvider(IServiceContext context)
+        static IConsumerScopeProvider CreateConsumerScopeProvider(IServiceContext context)
         {
             return new LamarConsumerScopeProvider(context.GetInstance<IContainer>());
         }
 
-        ISendScopeProvider CreateSendScopeProvider(IServiceContext context)
-        {
-            return new LamarSendScopeProvider(context.GetInstance<IContainer>());
-        }
-
-        IPublishScopeProvider CreatePublishScopeProvider(IServiceContext context)
-        {
-            return new LamarPublishScopeProvider(context.GetInstance<IContainer>());
-        }
-
-        ISagaRepositoryFactory CreateSagaRepositoryFactory(IServiceContext context)
+        static ISagaRepositoryFactory CreateSagaRepositoryFactory(IServiceContext context)
         {
             return new LamarSagaRepositoryFactory(context.GetInstance<IContainer>());
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IServiceContext context)
         {
-            return context.TryGetInstance<ConsumeContext>() ?? (ISendEndpointProvider)context.GetInstance<IBus>();
+            return (ISendEndpointProvider)context.TryGetInstance<ConsumeContext>()
+                ?? new PayloadSendEndpointProvider<IContainer>(context.GetInstance<IBus>(), GetPayloadFactory(context));
         }
 
         static IPublishEndpoint GetCurrentPublishEndpoint(IServiceContext context)
         {
-            return context.TryGetInstance<ConsumeContext>() ?? (IPublishEndpoint)context.GetInstance<IBus>();
+            return (IPublishEndpoint)context.TryGetInstance<ConsumeContext>()
+                ?? new PublishEndpoint(new PayloadPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), GetPayloadFactory(context)));
+        }
+
+        static PayloadFactory<IContainer> GetPayloadFactory(IServiceContext context)
+        {
+            return context.GetInstance<Func<IContainer>>().Invoke;
         }
     }
 }

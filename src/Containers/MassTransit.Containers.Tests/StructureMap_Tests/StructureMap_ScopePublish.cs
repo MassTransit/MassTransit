@@ -2,7 +2,6 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
 {
     using Common_Tests;
     using NUnit.Framework;
-    using Scoping;
     using StructureMap;
 
 
@@ -11,6 +10,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
         Common_ScopePublish<IContainer>
     {
         readonly IContainer _container;
+        readonly IContainer _childContainer;
 
         public StructureMap_ScopePublish()
         {
@@ -21,11 +21,24 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
                     cfg.AddBus(context => BusControl);
                 });
             });
+            _childContainer = _container.GetNestedContainer();
         }
 
-        protected override IPublishScopeProvider GetPublishScopeProvider()
+        [OneTimeTearDown]
+        public void Close_container()
         {
-            return _container.GetInstance<IPublishScopeProvider>();
+            _childContainer.Dispose();
+            _container.Dispose();
+        }
+
+        protected override IPublishEndpoint GetPublishEndpoint()
+        {
+            return _childContainer.GetInstance<IPublishEndpoint>();
+        }
+
+        protected override void AssetScopeAreEquals(IContainer actual)
+        {
+            Assert.AreEqual(_childContainer, actual);
         }
     }
 }
