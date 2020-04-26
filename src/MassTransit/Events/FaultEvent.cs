@@ -40,9 +40,9 @@
             var aggregateException = exception as AggregateException;
 
             return aggregateException?.InnerExceptions
-                .Where(x => x != null)
-                .Select(x => (ExceptionInfo)new FaultExceptionInfo(x))
-                .ToArray()
+                    .Where(x => x != null)
+                    .Select(x => (ExceptionInfo)new FaultExceptionInfo(x))
+                    .ToArray()
                 ?? new ExceptionInfo[] {new FaultExceptionInfo(exception)};
         }
     }

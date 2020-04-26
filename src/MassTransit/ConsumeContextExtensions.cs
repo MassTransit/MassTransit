@@ -25,6 +25,22 @@
         }
 
         /// <summary>
+        /// Returns the endpoint for a fault, either directly to the requester, or published
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="faultAddress"></param>
+        /// <param name="requestId"></param>
+        /// <typeparam name="T">The response type</typeparam>
+        /// <returns></returns>
+        public static Task<ISendEndpoint> GetFaultEndpoint<T>(this ConsumeContext context, Uri faultAddress, Guid? requestId = default)
+            where T : class
+        {
+            var destinationAddress = faultAddress ?? context.FaultAddress ?? context.ResponseAddress;
+
+            return GetEndpoint<T>(context.ReceiveContext, context, destinationAddress, requestId ?? context.RequestId);
+        }
+
+        /// <summary>
         /// Returns the endpoint for a receive fault, either directly to the requester, or published
         /// </summary>
         /// <param name="context"></param>
@@ -48,6 +64,20 @@
             where T : class
         {
             return GetEndpoint<T>(context.ReceiveContext, context, context.ResponseAddress, context.RequestId);
+        }
+
+        /// <summary>
+        /// Returns the endpoint for a response, either directly to the requester, or published
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="responseAddress"></param>
+        /// <param name="requestId"></param>
+        /// <typeparam name="T">The response type</typeparam>
+        /// <returns></returns>
+        public static Task<ISendEndpoint> GetResponseEndpoint<T>(this ConsumeContext context, Uri responseAddress, Guid? requestId = default)
+            where T : class
+        {
+            return GetEndpoint<T>(context.ReceiveContext, context, responseAddress ?? context.ResponseAddress, requestId ?? context.RequestId);
         }
 
         /// <summary>
