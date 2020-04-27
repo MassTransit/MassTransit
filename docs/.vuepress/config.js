@@ -222,6 +222,14 @@ module.exports = {
         ]
       },
       {
+        title: "Platform",
+        path: '/platform/',
+        collapsable: true,
+        children: [
+          '/platform/configuration'
+        ]
+      },
+      {
         title: "Reference",
         children: [
           '/architecture/packages',
