@@ -1,4 +1,4 @@
-namespace MassTransit.Pipeline.PayloadInjector
+namespace MassTransit.Scoping
 {
     using System;
     using System.Threading;
@@ -7,16 +7,17 @@ namespace MassTransit.Pipeline.PayloadInjector
     using GreenPipes;
     using GreenPipes.Util;
     using Initializers;
+    using Pipeline;
 
 
-    public class PayloadSendEndpoint<TPayload> :
+    public class ScopedSendEndpoint<TScope> :
         ISendEndpoint
-        where TPayload : class
+        where TScope : class
     {
         readonly ISendEndpoint _endpoint;
-        readonly TPayload _payload;
+        readonly TScope _payload;
 
-        public PayloadSendEndpoint(ISendEndpoint endpoint, TPayload payload)
+        public ScopedSendEndpoint(ISendEndpoint endpoint, TScope payload)
         {
             _endpoint = endpoint;
             _payload = payload;
@@ -129,10 +130,10 @@ namespace MassTransit.Pipeline.PayloadInjector
             ISendContextPipe
             where TMessage : class
         {
-            readonly TPayload _payload;
+            readonly TScope _payload;
             readonly IPipe<SendContext<TMessage>> _pipe;
 
-            public PayloadPipe(TPayload payload, IPipe<SendContext<TMessage>> pipe = default)
+            public PayloadPipe(TScope payload, IPipe<SendContext<TMessage>> pipe = default)
             {
                 _payload = payload;
                 _pipe = pipe;

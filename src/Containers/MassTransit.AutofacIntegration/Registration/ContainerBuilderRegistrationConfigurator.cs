@@ -4,7 +4,6 @@ namespace MassTransit.AutofacIntegration.Registration
     using Autofac;
     using GreenPipes;
     using MassTransit.Registration;
-    using Pipeline.PayloadInjector;
     using ScopeProviders;
     using Scoping;
     using Transports;
@@ -136,7 +135,7 @@ namespace MassTransit.AutofacIntegration.Registration
             if (context.TryResolve(out ConsumeContext consumeContext))
                 return consumeContext;
 
-            return new PayloadSendEndpointProvider<ILifetimeScope>(context.Resolve<IBus>(), GetPayloadFactory(context));
+            return new ScopedSendEndpointProvider<ILifetimeScope>(context.Resolve<IBus>(), context.Resolve<ILifetimeScope>());
         }
 
         static IPublishEndpoint GetCurrentPublishEndpoint(IComponentContext context)
@@ -144,12 +143,7 @@ namespace MassTransit.AutofacIntegration.Registration
             if (context.TryResolve(out ConsumeContext consumeContext))
                 return consumeContext;
 
-            return new PublishEndpoint(new PayloadPublishEndpointProvider<ILifetimeScope>(context.Resolve<IBus>(), GetPayloadFactory(context)));
-        }
-
-        static PayloadFactory<ILifetimeScope> GetPayloadFactory(IComponentContext context)
-        {
-            return context.Resolve<Func<ILifetimeScope>>().Invoke;
+            return new PublishEndpoint(new ScopedPublishEndpointProvider<ILifetimeScope>(context.Resolve<IBus>(), context.Resolve<ILifetimeScope>()));
         }
     }
 }

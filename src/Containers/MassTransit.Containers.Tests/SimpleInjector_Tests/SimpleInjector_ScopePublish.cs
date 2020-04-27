@@ -53,7 +53,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             return _childContainer.GetInstance<IPublishEndpoint>();
         }
 
-        protected override void AssetScopeAreEquals(Container actual)
+        protected override void AssertScopesAreEqual(Container actual)
         {
             Assert.AreEqual(_childContainer.Container, actual);
         }

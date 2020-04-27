@@ -1,9 +1,7 @@
 namespace MassTransit.StructureMapIntegration.Registration
 {
     using System;
-    using GreenPipes;
     using MassTransit.Registration;
-    using Pipeline.PayloadInjector;
     using ScopeProviders;
     using Scoping;
     using StructureMap;
@@ -114,18 +112,13 @@ namespace MassTransit.StructureMapIntegration.Registration
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IContext context)
         {
             return (ISendEndpointProvider)context.TryGetInstance<ConsumeContext>()
-                ?? new PayloadSendEndpointProvider<IContainer>(context.GetInstance<IBus>(), GetPayloadFactory(context));
+                ?? new ScopedSendEndpointProvider<IContainer>(context.GetInstance<IBus>(), context.GetInstance<IContainer>());
         }
 
         static IPublishEndpoint GetCurrentPublishEndpoint(IContext context)
         {
             return (IPublishEndpoint)context.TryGetInstance<ConsumeContext>()
-                ?? new PublishEndpoint(new PayloadPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), GetPayloadFactory(context)));
-        }
-
-        static PayloadFactory<IContainer> GetPayloadFactory(IContext context)
-        {
-            return context.GetInstance<Func<IContainer>>().Invoke;
+                ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), context.GetInstance<IContainer>()));
         }
     }
 }

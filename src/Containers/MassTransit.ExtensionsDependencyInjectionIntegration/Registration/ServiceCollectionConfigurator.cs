@@ -5,7 +5,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
-    using Pipeline.PayloadInjector;
     using ScopeProviders;
     using Scoping;
     using Transports;
@@ -82,13 +81,13 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IServiceProvider provider)
         {
             return (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext()
-                ?? new PayloadSendEndpointProvider<IServiceProvider>(provider.GetRequiredService<IBus>(), () => provider);
+                ?? new ScopedSendEndpointProvider<IServiceProvider>(provider.GetRequiredService<IBus>(), provider);
         }
 
         static IPublishEndpoint GetCurrentPublishEndpoint(IServiceProvider provider)
         {
             return (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ?? new PublishEndpoint(
-                new PayloadPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<IBus>(), () => provider));
+                new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<IBus>(), provider));
         }
     }
 }

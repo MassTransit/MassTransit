@@ -36,7 +36,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             return _childContainer.ServiceProvider.GetRequiredService<ISendEndpointProvider>();
         }
 
-        protected override void AssetScopeAreEquals(IServiceProvider actual)
+        protected override void AssertScopesAreEqual(IServiceProvider actual)
         {
             Assert.AreEqual(_childContainer.ServiceProvider, actual);
         }

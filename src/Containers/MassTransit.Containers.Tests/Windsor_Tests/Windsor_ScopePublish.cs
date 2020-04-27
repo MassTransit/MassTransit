@@ -36,7 +36,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
         {
             return _container.Resolve<IPublishEndpoint>();
         }
-        protected override void AssetScopeAreEquals(IKernel actual)
+        protected override void AssertScopesAreEqual(IKernel actual)
         {
             Assert.AreEqual(_container.Kernel, actual);
         }

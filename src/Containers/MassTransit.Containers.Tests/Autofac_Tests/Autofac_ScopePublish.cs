@@ -37,7 +37,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             return _childContainer.Resolve<IPublishEndpoint>();
         }
 
-        protected override void AssetScopeAreEquals(ILifetimeScope actual)
+        protected override void AssertScopesAreEqual(ILifetimeScope actual)
         {
             Assert.AreEqual(_childContainer, actual);
         }

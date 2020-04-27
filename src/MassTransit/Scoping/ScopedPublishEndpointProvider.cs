@@ -1,20 +1,20 @@
-namespace MassTransit.Pipeline.PayloadInjector
+namespace MassTransit.Scoping
 {
     using System.Threading.Tasks;
     using GreenPipes;
 
 
-    public class PayloadPublishEndpointProvider<TPayload> :
+    public class ScopedPublishEndpointProvider<TScope> :
         IPublishEndpointProvider
-        where TPayload : class
+        where TScope : class
     {
         readonly IPublishEndpointProvider _provider;
-        readonly PayloadFactory<TPayload> _payloadFactory;
+        readonly TScope _scope;
 
-        public PayloadPublishEndpointProvider(IPublishEndpointProvider provider, PayloadFactory<TPayload> payloadFactory)
+        public ScopedPublishEndpointProvider(IPublishEndpointProvider provider, TScope scope)
         {
             _provider = provider;
-            _payloadFactory = payloadFactory;
+            _scope = scope;
         }
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
@@ -27,9 +27,7 @@ namespace MassTransit.Pipeline.PayloadInjector
         {
             var endpoint = await _provider.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
-            var payload = _payloadFactory();
-
-            return new PayloadSendEndpoint<TPayload>(endpoint, payload);
+            return new ScopedSendEndpoint<TScope>(endpoint, _scope);
         }
     }
 }

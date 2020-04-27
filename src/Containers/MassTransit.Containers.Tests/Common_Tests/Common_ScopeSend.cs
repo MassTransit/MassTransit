@@ -28,11 +28,11 @@ namespace MassTransit.Containers.Tests.Common_Tests
             SendContext sent = await _taskCompletionSource.Task;
 
             Assert.IsTrue(sent.TryGetPayload<TScope>(out var scope));
-            AssetScopeAreEquals(scope);
+            AssertScopesAreEqual(scope);
         }
 
         protected abstract ISendEndpointProvider GetSendEndpointProvider();
-        protected abstract void AssetScopeAreEquals(TScope actual);
+        protected abstract void AssertScopesAreEqual(TScope actual);
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -45,7 +45,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
 
-        class TestScopeFilter : IFilter<SendContext>
+        class TestScopeFilter :
+            IFilter<SendContext>
         {
             readonly TaskCompletionSource<SendContext> _taskCompletionSource;
 

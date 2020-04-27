@@ -36,7 +36,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             return _childContainer.GetInstance<IPublishEndpoint>();
         }
 
-        protected override void AssetScopeAreEquals(IContainer actual)
+        protected override void AssertScopesAreEqual(IContainer actual)
         {
             Assert.AreEqual(_childContainer, actual);
         }

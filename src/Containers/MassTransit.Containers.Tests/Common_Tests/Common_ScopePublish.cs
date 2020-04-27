@@ -27,12 +27,12 @@ namespace MassTransit.Containers.Tests.Common_Tests
             PublishContext published = await _taskCompletionSource.Task;
 
             Assert.IsTrue(published.TryGetPayload<TScope>(out var scope));
-            AssetScopeAreEquals(scope);
+            AssertScopesAreEqual(scope);
         }
 
         protected abstract IPublishEndpoint GetPublishEndpoint();
 
-        protected abstract void AssetScopeAreEquals(TScope actual);
+        protected abstract void AssertScopesAreEqual(TScope actual);
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -45,7 +45,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
 
-        class TestScopeFilter : IFilter<PublishContext>
+        class TestScopeFilter :
+            IFilter<PublishContext>
         {
             readonly TaskCompletionSource<PublishContext> _taskCompletionSource;
 

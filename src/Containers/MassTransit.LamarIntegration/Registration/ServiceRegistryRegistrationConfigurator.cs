@@ -4,7 +4,6 @@ namespace MassTransit.LamarIntegration.Registration
     using GreenPipes;
     using Lamar;
     using MassTransit.Registration;
-    using Pipeline.PayloadInjector;
     using ScopeProviders;
     using Scoping;
     using Transports;
@@ -115,18 +114,13 @@ namespace MassTransit.LamarIntegration.Registration
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IServiceContext context)
         {
             return (ISendEndpointProvider)context.TryGetInstance<ConsumeContext>()
-                ?? new PayloadSendEndpointProvider<IContainer>(context.GetInstance<IBus>(), GetPayloadFactory(context));
+                ?? new ScopedSendEndpointProvider<IContainer>(context.GetInstance<IBus>(), context.GetInstance<IContainer>());
         }
 
         static IPublishEndpoint GetCurrentPublishEndpoint(IServiceContext context)
         {
             return (IPublishEndpoint)context.TryGetInstance<ConsumeContext>()
-                ?? new PublishEndpoint(new PayloadPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), GetPayloadFactory(context)));
-        }
-
-        static PayloadFactory<IContainer> GetPayloadFactory(IServiceContext context)
-        {
-            return context.GetInstance<Func<IContainer>>().Invoke;
+                ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), context.GetInstance<IContainer>()));
         }
     }
 }

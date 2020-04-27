@@ -3,7 +3,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using System;
     using Context;
     using MassTransit.Registration;
-    using Pipeline.PayloadInjector;
     using ScopeProviders;
     using Scoping;
     using SimpleInjector;
@@ -83,13 +82,13 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         ISendEndpointProvider GetSendEndpointProvider()
         {
             return (ISendEndpointProvider)Container.GetConsumeContext()
-                ?? new PayloadSendEndpointProvider<Container>(Container.GetInstance<IBus>(), () => Container);
+                ?? new ScopedSendEndpointProvider<Container>(Container.GetInstance<IBus>(), Container);
         }
 
         IPublishEndpoint GetPublishEndpoint()
         {
             return (IPublishEndpoint)Container.GetConsumeContext()
-                ?? new PublishEndpoint(new PayloadPublishEndpointProvider<Container>(Container.GetInstance<IBus>(), () => Container));
+                ?? new PublishEndpoint(new ScopedPublishEndpointProvider<Container>(Container.GetInstance<IBus>(), Container));
         }
 
         static void AddMassTransitComponents(Container container)
