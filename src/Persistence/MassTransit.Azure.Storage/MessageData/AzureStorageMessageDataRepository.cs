@@ -1,23 +1,24 @@
 namespace MassTransit.Azure.Storage.MessageData
 {
+    using System;
+    using System.IO;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Context;
     using MassTransit.MessageData;
     using Microsoft.Azure.Storage;
     using Microsoft.Azure.Storage.Auth;
     using Microsoft.Azure.Storage.Blob;
-    using System;
-    using System.IO;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Util;
+
 
     public class AzureStorageMessageDataRepository :
         IMessageDataRepository,
         IBusObserver
     {
-        private readonly Uri _containerUri;
-        private readonly StorageCredentials _credentials;
-        private readonly IBlobNameGenerator _nameGenerator;
+        readonly StorageCredentials _credentials;
+        readonly IBlobNameGenerator _nameGenerator;
+        readonly Uri _containerUri;
 
         public AzureStorageMessageDataRepository(Uri storageEndpoint, string containerName, StorageCredentials credentials, IBlobNameGenerator nameGenerator)
         {
@@ -27,11 +28,6 @@ namespace MassTransit.Azure.Storage.MessageData
             var containerUriBase = $"{storageEndpoint}".TrimEnd('/');
 
             _containerUri = new Uri($"{containerUriBase}/{containerName}");
-        }
-
-        public Task CreateFaulted(Exception exception)
-        {
-            return TaskUtil.Completed;
         }
 
         public async Task<Stream> Get(Uri address, CancellationToken cancellationToken = default)
@@ -47,17 +43,41 @@ namespace MassTransit.Azure.Storage.MessageData
             }
         }
 
+        public async Task<Uri> Put(Stream stream, TimeSpan? timeToLive = default, CancellationToken cancellationToken = default)
+        {
+            var blobName = _nameGenerator.GenerateBlobName();
+            var blobAddress = new Uri($"{_containerUri}/{blobName}");
+            var blob = new CloudBlockBlob(blobAddress, _credentials);
+
+            SetBlobExpiration(blob, timeToLive);
+
+            await blob.UploadFromStreamAsync(stream, cancellationToken).ConfigureAwait(false);
+
+            LogContext.Debug?.Log("MessageData:Put {Blob} {Address}", blob.Name, blob.Uri);
+
+            return blob.Uri;
+        }
+
+        static void SetBlobExpiration(CloudBlockBlob blob, TimeSpan? timeToLive)
+        {
+            if (timeToLive.HasValue)
+            {
+                var utcNow = DateTime.UtcNow;
+
+                var expirationDate = utcNow + timeToLive.Value;
+                if (expirationDate <= utcNow)
+                    expirationDate = utcNow + TimeSpan.FromMinutes(1);
+
+                blob.Metadata["ValidUntilUtc"] = expirationDate.ToString("O");
+            }
+        }
+
         public Task PostCreate(IBus bus)
         {
             return TaskUtil.Completed;
         }
 
-        public Task PostStart(IBus bus, Task<BusReady> busReady)
-        {
-            return TaskUtil.Completed;
-        }
-
-        public Task PostStop(IBus bus)
+        public Task CreateFaulted(Exception exception)
         {
             return TaskUtil.Completed;
         }
@@ -80,24 +100,9 @@ namespace MassTransit.Azure.Storage.MessageData
             }
         }
 
-        public Task PreStop(IBus bus)
+        public Task PostStart(IBus bus, Task<BusReady> busReady)
         {
             return TaskUtil.Completed;
-        }
-
-        public async Task<Uri> Put(Stream stream, TimeSpan? timeToLive = default, CancellationToken cancellationToken = default)
-        {
-            var blobName = _nameGenerator.GenerateBlobName();
-            var blobAddress = new Uri($"{_containerUri}/{blobName}");
-            var blob = new CloudBlockBlob(blobAddress, _credentials);
-
-            SetBlobExpiration(blob, timeToLive);
-
-            await blob.UploadFromStreamAsync(stream, cancellationToken).ConfigureAwait(false);
-
-            LogContext.Debug?.Log("MessageData:Put {Blob} {Address}", blob.Name, blob.Uri);
-
-            return blob.Uri;
         }
 
         public Task StartFaulted(IBus bus, Exception exception)
@@ -105,23 +110,19 @@ namespace MassTransit.Azure.Storage.MessageData
             return TaskUtil.Completed;
         }
 
-        public Task StopFaulted(IBus bus, Exception exception)
+        public Task PreStop(IBus bus)
         {
             return TaskUtil.Completed;
         }
 
-        private static void SetBlobExpiration(CloudBlockBlob blob, TimeSpan? timeToLive)
+        public Task PostStop(IBus bus)
         {
-            if (timeToLive.HasValue)
-            {
-                var utcNow = DateTime.UtcNow;
+            return TaskUtil.Completed;
+        }
 
-                var expirationDate = utcNow + timeToLive.Value;
-                if (expirationDate <= utcNow)
-                    expirationDate = utcNow + TimeSpan.FromMinutes(1);
-
-                blob.Metadata["ValidUntilUtc"] = expirationDate.ToString("O");
-            }
+        public Task StopFaulted(IBus bus, Exception exception)
+        {
+            return TaskUtil.Completed;
         }
     }
 }
