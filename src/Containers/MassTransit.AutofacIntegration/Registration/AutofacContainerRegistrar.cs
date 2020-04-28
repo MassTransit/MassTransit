@@ -3,6 +3,7 @@ namespace MassTransit.AutofacIntegration.Registration
     using System;
     using Autofac;
     using Automatonymous;
+    using Clients;
     using Courier;
     using Definition;
     using MassTransit.Registration;
@@ -140,10 +141,12 @@ namespace MassTransit.AutofacIntegration.Registration
             {
                 var clientFactory = context.Resolve<IClientFactory>();
 
-                return context.TryResolve(out ConsumeContext consumeContext)
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
-                    : clientFactory.CreateRequestClient<T>(timeout);
-            });
+                if (context.TryResolve(out ConsumeContext consumeContext))
+                    return clientFactory.CreateRequestClient<T>(consumeContext, timeout);
+
+                return new ClientFactory(new ScopedClientFactoryContext<ILifetimeScope>(clientFactory, context.Resolve<ILifetimeScope>()))
+                    .CreateRequestClient<T>(timeout);
+            }).InstancePerLifetimeScope();
         }
 
         public void RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
@@ -153,10 +156,12 @@ namespace MassTransit.AutofacIntegration.Registration
             {
                 var clientFactory = context.Resolve<IClientFactory>();
 
-                return context.TryResolve(out ConsumeContext consumeContext)
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
-                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
-            });
+                if (context.TryResolve(out ConsumeContext consumeContext))
+                    return clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
+
+                return new ClientFactory(new ScopedClientFactoryContext<ILifetimeScope>(clientFactory, context.Resolve<ILifetimeScope>()))
+                    .CreateRequestClient<T>(destinationAddress, timeout);
+            }).InstancePerLifetimeScope();
         }
 
         public void Register<T, TImplementation>()

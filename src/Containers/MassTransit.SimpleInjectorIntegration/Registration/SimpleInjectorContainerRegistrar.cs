@@ -3,6 +3,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using System;
     using System.Linq;
     using Automatonymous;
+    using Clients;
     using Courier;
     using Definition;
     using MassTransit.Registration;
@@ -135,11 +136,13 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             _container.Register(() =>
             {
                 var clientFactory = _container.GetInstance<IClientFactory>();
-
                 var consumeContext = _container.GetConsumeContext();
-                return consumeContext != null
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
-                    : clientFactory.CreateRequestClient<T>(timeout);
+
+                if (consumeContext != null)
+                    return clientFactory.CreateRequestClient<T>(consumeContext, timeout);
+
+                return new ClientFactory(new ScopedClientFactoryContext<Container>(clientFactory, _container))
+                    .CreateRequestClient<T>(timeout);
             }, _hybridLifestyle);
         }
 
@@ -149,11 +152,13 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             _container.Register(() =>
             {
                 var clientFactory = _container.GetInstance<IClientFactory>();
-
                 var consumeContext = _container.GetConsumeContext();
-                return consumeContext != null
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
-                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
+
+                if (consumeContext != null)
+                    return clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
+
+                return new ClientFactory(new ScopedClientFactoryContext<Container>(clientFactory, _container))
+                    .CreateRequestClient<T>(destinationAddress, timeout);
             }, _hybridLifestyle);
         }
 

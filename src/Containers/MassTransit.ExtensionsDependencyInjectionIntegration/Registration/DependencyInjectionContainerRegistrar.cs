@@ -2,6 +2,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 {
     using System;
     using Automatonymous;
+    using Clients;
     using Definition;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
@@ -107,11 +108,13 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             _collection.AddScoped(context =>
             {
                 var clientFactory = context.GetRequiredService<IClientFactory>();
-
                 var consumeContext = context.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
-                return consumeContext != null
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
-                    : clientFactory.CreateRequestClient<T>(timeout);
+
+                if (consumeContext != null)
+                    return clientFactory.CreateRequestClient<T>(consumeContext, timeout);
+
+                return new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(clientFactory, context))
+                    .CreateRequestClient<T>(timeout);
             });
         }
 
@@ -120,11 +123,13 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             _collection.AddScoped(context =>
             {
                 var clientFactory = context.GetRequiredService<IClientFactory>();
-
                 var consumeContext = context.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
-                return consumeContext != null
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
-                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
+
+                if (consumeContext != null)
+                    return clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
+
+                return new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(clientFactory, context))
+                    .CreateRequestClient<T>(destinationAddress, timeout);
             });
         }
 

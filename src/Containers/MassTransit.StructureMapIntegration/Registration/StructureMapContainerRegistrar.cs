@@ -2,6 +2,7 @@ namespace MassTransit.StructureMapIntegration.Registration
 {
     using System;
     using Automatonymous;
+    using Clients;
     using Courier;
     using Definition;
     using MassTransit.Registration;
@@ -165,22 +166,26 @@ namespace MassTransit.StructureMapIntegration.Registration
             where T : class
         {
             var clientFactory = context.GetInstance<IClientFactory>();
-
             var consumeContext = context.TryGetInstance<ConsumeContext>();
-            return consumeContext != null
-                ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
-                : clientFactory.CreateRequestClient<T>(timeout);
+
+            if (consumeContext != null)
+                return clientFactory.CreateRequestClient<T>(consumeContext, timeout);
+
+            return new ClientFactory(new ScopedClientFactoryContext<IContainer>(clientFactory, context.GetInstance<IContainer>()))
+                .CreateRequestClient<T>(timeout);
         }
 
         static IRequestClient<T> CreateRequestClient<T>(Uri destinationAddress, RequestTimeout timeout, IContext context)
             where T : class
         {
             var clientFactory = context.GetInstance<IClientFactory>();
-
             var consumeContext = context.TryGetInstance<ConsumeContext>();
-            return consumeContext != null
-                ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
-                : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
+
+            if (consumeContext != null)
+                return clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
+
+            return new ClientFactory(new ScopedClientFactoryContext<IContainer>(clientFactory, context.GetInstance<IContainer>()))
+                .CreateRequestClient<T>(destinationAddress, timeout);
         }
 
         IExecuteActivityScopeProvider<TActivity, TArguments> CreateExecuteActivityScopeProvider<TActivity, TArguments>(IContext context)

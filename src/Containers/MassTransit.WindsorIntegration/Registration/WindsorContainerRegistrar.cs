@@ -2,9 +2,10 @@ namespace MassTransit.WindsorIntegration.Registration
 {
     using System;
     using Automatonymous;
-    using Castle.MicroKernel.Lifestyle.Scoped;
+    using Castle.MicroKernel;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
+    using Clients;
     using Courier;
     using Definition;
     using MassTransit.Registration;
@@ -147,11 +148,13 @@ namespace MassTransit.WindsorIntegration.Registration
             _container.Register(Component.For<IRequestClient<T>>().UsingFactoryMethod(kernel =>
             {
                 var clientFactory = kernel.Resolve<IClientFactory>();
-
                 var consumeContext = kernel.GetConsumeContext();
-                return consumeContext != null
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
-                    : clientFactory.CreateRequestClient<T>(timeout);
+
+                if (consumeContext != null)
+                    return clientFactory.CreateRequestClient<T>(consumeContext, timeout);
+
+                return new ClientFactory(new ScopedClientFactoryContext<IKernel>(clientFactory, kernel))
+                    .CreateRequestClient<T>(timeout);
             }));
         }
 
@@ -161,11 +164,13 @@ namespace MassTransit.WindsorIntegration.Registration
             _container.Register(Component.For<IRequestClient<T>>().UsingFactoryMethod(kernel =>
             {
                 var clientFactory = kernel.Resolve<IClientFactory>();
-
                 var consumeContext = kernel.GetConsumeContext();
-                return consumeContext != null
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
-                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
+
+                if (consumeContext != null)
+                    return clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
+
+                return new ClientFactory(new ScopedClientFactoryContext<IKernel>(clientFactory, kernel))
+                    .CreateRequestClient<T>(destinationAddress, timeout);
             }));
         }
 

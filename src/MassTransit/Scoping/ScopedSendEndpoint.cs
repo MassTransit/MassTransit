@@ -15,12 +15,12 @@ namespace MassTransit.Scoping
         where TScope : class
     {
         readonly ISendEndpoint _endpoint;
-        readonly TScope _payload;
+        readonly TScope _scope;
 
-        public ScopedSendEndpoint(ISendEndpoint endpoint, TScope payload)
+        public ScopedSendEndpoint(ISendEndpoint endpoint, TScope scope)
         {
             _endpoint = endpoint;
-            _payload = payload;
+            _scope = scope;
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
@@ -30,17 +30,17 @@ namespace MassTransit.Scoping
 
         Task ISendEndpoint.Send<T>(T message, CancellationToken cancellationToken)
         {
-            return _endpoint.Send(message, new PayloadPipe<T>(_payload), cancellationToken);
+            return _endpoint.Send(message, new PayloadPipe<T>(_scope), cancellationToken);
         }
 
         Task ISendEndpoint.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
-            return _endpoint.Send(message, new PayloadPipe<T>(_payload, pipe), cancellationToken);
+            return _endpoint.Send(message, new PayloadPipe<T>(_scope, pipe), cancellationToken);
         }
 
         Task ISendEndpoint.Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
-            return _endpoint.Send(message, new PayloadPipe<T>(_payload, pipe), cancellationToken);
+            return _endpoint.Send(message, new PayloadPipe<T>(_scope, pipe), cancellationToken);
         }
 
         public Task Send(object message, CancellationToken cancellationToken)

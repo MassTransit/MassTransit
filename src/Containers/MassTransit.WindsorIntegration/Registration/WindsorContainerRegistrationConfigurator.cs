@@ -2,7 +2,6 @@ namespace MassTransit.WindsorIntegration.Registration
 {
     using System;
     using Castle.MicroKernel;
-    using Castle.MicroKernel.Lifestyle.Scoped;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
     using MassTransit.Registration;
@@ -95,18 +94,14 @@ namespace MassTransit.WindsorIntegration.Registration
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IKernel context)
         {
-            ISendEndpointProvider sendEndpointProvider = null;
-            if (CallContextLifetimeScope.ObtainCurrentScope() != null)
-                sendEndpointProvider = context.Resolve<ScopedConsumeContextProvider>()?.GetContext();
-            return sendEndpointProvider ?? new ScopedSendEndpointProvider<IKernel>(context.Resolve<IBus>(), context);
+            return (ISendEndpointProvider)context.GetConsumeContext()
+                ?? new ScopedSendEndpointProvider<IKernel>(context.Resolve<IBus>(), context);
         }
 
         static IPublishEndpoint GetCurrentPublishEndpoint(IKernel context)
         {
-            IPublishEndpoint publishEndpoint = null;
-            if (CallContextLifetimeScope.ObtainCurrentScope() != null)
-                publishEndpoint = context.Resolve<ScopedConsumeContextProvider>()?.GetContext();
-            return publishEndpoint ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IKernel>(context.Resolve<IBus>(), context));
+            return (IPublishEndpoint)context.GetConsumeContext()
+                ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IKernel>(context.Resolve<IBus>(), context));
         }
     }
 }

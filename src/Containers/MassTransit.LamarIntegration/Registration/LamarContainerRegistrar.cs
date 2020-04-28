@@ -2,6 +2,7 @@ namespace MassTransit.LamarIntegration.Registration
 {
     using System;
     using Automatonymous;
+    using Clients;
     using Courier;
     using Definition;
     using Lamar;
@@ -137,11 +138,13 @@ namespace MassTransit.LamarIntegration.Registration
             _registry.For<IRequestClient<T>>().Use(context =>
             {
                 var clientFactory = context.GetInstance<IClientFactory>();
-
                 var consumeContext = context.TryGetInstance<ConsumeContext>();
-                return consumeContext != null
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, timeout)
-                    : clientFactory.CreateRequestClient<T>(timeout);
+
+                if (consumeContext != null)
+                    return clientFactory.CreateRequestClient<T>(consumeContext, timeout);
+
+                return new ClientFactory(new ScopedClientFactoryContext<IContainer>(clientFactory, context.GetInstance<IContainer>()))
+                    .CreateRequestClient<T>(timeout);
             }).Scoped();
         }
 
@@ -151,11 +154,13 @@ namespace MassTransit.LamarIntegration.Registration
             _registry.For<IRequestClient<T>>().Use(context =>
             {
                 var clientFactory = context.GetInstance<IClientFactory>();
-
                 var consumeContext = context.TryGetInstance<ConsumeContext>();
-                return consumeContext != null
-                    ? clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout)
-                    : clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
+
+                if (consumeContext != null)
+                    return clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
+
+                return new ClientFactory(new ScopedClientFactoryContext<IContainer>(clientFactory, context.GetInstance<IContainer>()))
+                    .CreateRequestClient<T>(destinationAddress, timeout);
             }).Scoped();
         }
 
