@@ -35,7 +35,7 @@ The saga repositories have been completely refactored, to eliminate duplicate lo
 
 ## Azure Service Bus
 
-The previous (now legacy) **MassTransit.AzureServiceBus** package, which was only maintained to continue support for .NET 4.5.2, has been deprecated. Going forward, the **MassTransit.Azure.ServiceBus.Core** package should be used. The package supports both .NET 4.6.1 and .NET Standard 2.0.
+The previous (now legacy) **MassTransit.AzureServiceBus** package, which was only maintained to continue support for .NET 4.5.2, has been deprecated. Going forward, the **MassTransit.Azure.ServiceBus.Core** package should be used. The package supports both .NET 4.6.1 and .NET Standard 2.0. With the new package, the .NET Messaging protocol is no longer supported. The new package includes both AMQP and WebSocket support. Certain corporate firewall configurations that previously used .NET Messaging instead of AMQP may need to specify the web socket protocol to connect to Azure Service Bus.
 
 ## Logging
 
