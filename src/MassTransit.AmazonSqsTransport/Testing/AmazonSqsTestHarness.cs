@@ -42,12 +42,12 @@ namespace MassTransit.AmazonSqsTransport.Testing
             AccessKey = "admin";
             SecretKey = "admin";
 
-            AmazonSqsConfig = new AmazonSQSConfig {ServiceURL = "http://docker.localhost:4576"};
-            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://docker.localhost:4575"};
+            AmazonSqsConfig = new AmazonSQSConfig {ServiceURL = "http://localhost:4576"};
+            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4575"};
 
             InputQueueName = "input_queue";
 
-            HostAddress = new Uri("amazonsqs://docker.localhost:4576");
+            HostAddress = new Uri("amazonsqs://localhost:4576");
         }
 
         public Uri HostAddress

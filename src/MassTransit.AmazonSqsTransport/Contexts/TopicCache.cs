@@ -1,5 +1,6 @@
 namespace MassTransit.AmazonSqsTransport.Contexts
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -13,26 +14,40 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         readonly IAmazonSimpleNotificationService _client;
         readonly ICache<TopicInfo> _cache;
         readonly IIndex<string, TopicInfo> _nameIndex;
+        readonly IDictionary<string, TopicInfo> _durableTopics;
 
         public TopicCache(IAmazonSimpleNotificationService client)
         {
             _client = client;
             _cache = new GreenCache<TopicInfo>(ClientContextCacheDefaults.GetCacheSettings());
             _nameIndex = _cache.AddIndex("entityName", x => x.EntityName);
+
+            _durableTopics = new Dictionary<string, TopicInfo>();
         }
 
         public Task<TopicInfo> Get(Topology.Entities.Topic topic, CancellationToken cancellationToken)
         {
+            lock (_durableTopics)
+                if (_durableTopics.TryGetValue(topic.EntityName, out var queueInfo))
+                    return Task.FromResult(queueInfo);
+
             return _nameIndex.Get(topic.EntityName, key => CreateMissingTopic(topic, cancellationToken));
         }
 
         public Task<TopicInfo> GetByName(string entityName)
         {
+            lock (_durableTopics)
+                if (_durableTopics.TryGetValue(entityName, out var queueInfo))
+                    return Task.FromResult(queueInfo);
+
             return _nameIndex.Get(entityName);
         }
 
         public void RemoveByName(string entityName)
         {
+            lock(_durableTopics)
+                _durableTopics.Remove(entityName);
+
             _nameIndex.Remove(entityName);
         }
 
@@ -60,7 +75,13 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             attributesResponse.EnsureSuccessfulResponse();
 
-            return new TopicInfo(topic.EntityName, topicArn, attributesResponse.Attributes);
+            var missingTopic = new TopicInfo(topic.EntityName, topicArn, attributesResponse.Attributes);
+
+            if (topic.Durable && topic.AutoDelete == false)
+                lock (_durableTopics)
+                    _durableTopics[missingTopic.EntityName] = missingTopic;
+
+            return missingTopic;
         }
 
         public void Clear()

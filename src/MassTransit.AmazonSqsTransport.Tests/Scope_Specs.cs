@@ -68,7 +68,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             var entityName = new AmazonSqsMessageNameFormatter().GetMessageName(typeof(Ping));
 
-            Assert.That(context.DestinationAddress, Is.EqualTo(new Uri($"amazonsqs://docker.localhost/test/{entityName}")));
+            Assert.That(context.DestinationAddress, Is.EqualTo(new Uri($"amazonsqs://localhost/test/{entityName}")));
         }
     }
 }

@@ -1,5 +1,7 @@
 namespace MassTransit.AmazonSqsTransport.Contexts
 {
+    using System;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
     using System.Threading;
@@ -16,26 +18,40 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         readonly IAmazonSQS _client;
         readonly ICache<QueueInfo> _cache;
         readonly IIndex<string, QueueInfo> _nameIndex;
+        readonly IDictionary<string, QueueInfo> _durableQueues;
 
         public QueueCache(IAmazonSQS client)
         {
             _client = client;
             _cache = new GreenCache<QueueInfo>(ClientContextCacheDefaults.GetCacheSettings());
             _nameIndex = _cache.AddIndex("entityName", x => x.EntityName);
+
+            _durableQueues = new Dictionary<string, QueueInfo>();
         }
 
         public Task<QueueInfo> Get(Queue queue, CancellationToken cancellationToken)
         {
+            lock (_durableQueues)
+                if (_durableQueues.TryGetValue(queue.EntityName, out var queueInfo))
+                    return Task.FromResult(queueInfo);
+
             return _nameIndex.Get(queue.EntityName, key => CreateMissingQueue(queue, cancellationToken));
         }
 
         public Task<QueueInfo> GetByName(string entityName)
         {
+            lock (_durableQueues)
+                if (_durableQueues.TryGetValue(entityName, out var queueInfo))
+                    return Task.FromResult(queueInfo);
+
             return _nameIndex.Get(entityName);
         }
 
         public void RemoveByName(string entityName)
         {
+            lock (_durableQueues)
+                _durableQueues.Remove(entityName);
+
             _nameIndex.Remove(entityName);
         }
 
@@ -64,7 +80,13 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             var queueAttributes = await _client.GetAttributesAsync(queueUrl).ConfigureAwait(false);
 
-            return new QueueInfo(queue.EntityName, queueUrl, queueAttributes);
+            var missingQueue = new QueueInfo(queue.EntityName, queueUrl, queueAttributes);
+
+            if (queue.Durable && queue.AutoDelete == false)
+                lock (_durableQueues)
+                    _durableQueues[missingQueue.EntityName] = missingQueue;
+
+            return missingQueue;
         }
 
         public void Clear()
