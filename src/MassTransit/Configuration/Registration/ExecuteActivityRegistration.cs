@@ -40,6 +40,8 @@ namespace MassTransit.Registration
             LogContext.Debug?.Log("Configuring endpoint {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
                 TypeMetadataCache<TActivity>.ShortName);
 
+            configurator.ConfigureConsumeTopology = false;
+
             GetActivityDefinition(configurationServiceProvider)
                 .Configure(configurator, specification);
 
