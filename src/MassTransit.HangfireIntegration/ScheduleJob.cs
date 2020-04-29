@@ -17,11 +17,12 @@ namespace MassTransit.HangfireIntegration
             _bus = bus;
         }
 
+        [SchedulerJobData]
         public async Task SendMessage(HangfireScheduledMessageData messageData, PerformContext performContext)
         {
             try
             {
-                IPipe<SendContext> sendPipe = CreateMessageContext(messageData, _bus.Address, performContext);
+                IPipe<SendContext> sendPipe = CreateMessageContext(messageData, _bus.Address);
 
                 var endpoint = await _bus.GetSendEndpoint(messageData.Destination).ConfigureAwait(false);
 
@@ -41,12 +42,13 @@ namespace MassTransit.HangfireIntegration
             }
         }
 
+        [SchedulerJobData]
         [RecurringScheduleDateTimeInterval]
         public async Task SendMessage(HangfireRecurringScheduledMessageData messageData, PerformContext performContext)
         {
             try
             {
-                IPipe<SendContext> sendPipe = CreateMessageContext(messageData, _bus.Address, performContext, messageData.JobKey);
+                IPipe<SendContext> sendPipe = CreateMessageContext(messageData, _bus.Address, messageData.JobKey);
 
                 var endpoint = await _bus.GetSendEndpoint(messageData.Destination).ConfigureAwait(false);
 
@@ -66,17 +68,12 @@ namespace MassTransit.HangfireIntegration
             }
         }
 
-        static IPipe<SendContext> CreateMessageContext(SerializedMessage message, Uri sourceAddress, PerformContext performContext, string jobKey = null)
+        static IPipe<SendContext> CreateMessageContext(SerializedMessage message, Uri sourceAddress, string jobKey = null)
         {
-            IPipe<SendContext> sendPipe = Pipe.New<SendContext>(x =>
+            IPipe<SendContext> sendPipe = Pipe.Execute<SendContext>(context =>
             {
-                x.UseExecute(context =>
-                {
-                    if (!string.IsNullOrEmpty(jobKey))
-                        context.Headers.Set(MessageHeaders.QuartzTriggerKey, jobKey);
-                    context.Headers.Set(MessageHeaders.Quartz.Scheduled, performContext.BackgroundJob.CreatedAt.ToString("O"));
-                    context.Headers.Set(MessageHeaders.Quartz.Sent, ((DateTime)InVar.Timestamp).ToString("O"));
-                });
+                if (!string.IsNullOrEmpty(jobKey))
+                    context.Headers.Set(HangfireMessageHeaders.TriggerKey, jobKey);
             });
 
             return new SerializedMessageContextAdapter(sendPipe, message, sourceAddress);

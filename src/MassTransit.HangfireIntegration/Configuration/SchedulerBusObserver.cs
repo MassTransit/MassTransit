@@ -8,7 +8,7 @@
 
 
     /// <summary>
-    /// Used to start and stop an in-memory scheduler using Quartz
+    /// Used to start and stop an in-memory scheduler using Hangfire
     /// </summary>
     class SchedulerBusObserver :
         IBusObserver
@@ -55,11 +55,11 @@
                 backgroundJobServerOptions,
                 _hangfireComponentResolver.JobStorage,
                 _hangfireComponentResolver.BackgroundProcesses);
-            LogContext.Debug?.Log("Quartz Scheduler Starting: {InputAddress}", _schedulerEndpointAddress);
+            LogContext.Debug?.Log("Hangfire Scheduler Starting: {InputAddress}", _schedulerEndpointAddress);
 
             await busReady.ConfigureAwait(false);
 
-            LogContext.Debug?.Log("Quartz Scheduler Started: {InputAddress}", _schedulerEndpointAddress);
+            LogContext.Debug?.Log("Hangfire Scheduler Started: {InputAddress}", _schedulerEndpointAddress);
         }
 
         public Task StartFaulted(IBus bus, Exception exception)
@@ -71,7 +71,7 @@
         {
             _server.SendStop();
 
-            LogContext.Debug?.Log("Quartz Scheduler Paused: {InputAddress}", _schedulerEndpointAddress);
+            LogContext.Debug?.Log("Hangfire Scheduler Paused: {InputAddress}", _schedulerEndpointAddress);
 
             return TaskUtil.Completed;
         }
@@ -80,7 +80,7 @@
         {
             _server.Dispose();
 
-            LogContext.Debug?.Log("Quartz Scheduler Stopped: {InputAddress}", _schedulerEndpointAddress);
+            LogContext.Debug?.Log("Hangfire Scheduler Stopped: {InputAddress}", _schedulerEndpointAddress);
 
             return TaskUtil.Completed;
         }
