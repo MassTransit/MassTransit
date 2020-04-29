@@ -150,12 +150,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
                 var settings = _hostTopology.SendTopology.GetSendSettings(address);
 
-                var endpointContextSupervisor = CreateQueueSendEndpointContextSupervisor(settings);
-
-                var transportContext = new HostServiceBusSendTransportContext(address, endpointContextSupervisor, SendLogContext);
-
-                var transport = new ServiceBusSendTransport(transportContext);
-                Add(transport);
+                var transport = CreateSendTransport(address, settings);
 
                 return Task.FromResult(new CachedSendTransport(transportAddress, transport));
             }
@@ -168,42 +163,35 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         {
             var publishTopology = _hostTopology.Publish<T>();
 
-            if (!publishTopology.TryGetPublishAddress(_hostConfiguration.HostAddress, out Uri publishAddress))
+            if (!publishTopology.TryGetPublishAddress(_hostConfiguration.HostAddress, out var publishAddress))
                 throw new ArgumentException($"The type did not return a valid publish address: {TypeMetadataCache<T>.ShortName}");
 
             var settings = publishTopology.GetSendSettings();
 
-            var endpointContextSupervisor = CreateTopicSendEndpointContextSupervisor(settings);
+            var transport = CreateSendTransport(publishAddress, settings);
 
-            var transportContext = new HostServiceBusSendTransportContext(publishAddress, endpointContextSupervisor, SendLogContext);
+            return Task.FromResult(transport);
+        }
+
+        ISendTransport CreateSendTransport(Uri address, SendSettings settings)
+        {
+            var endpointContextSupervisor = CreateSendEndpointContextSupervisor(settings);
+
+            var transportContext = new HostServiceBusSendTransportContext(address, endpointContextSupervisor, SendLogContext);
 
             var transport = new ServiceBusSendTransport(transportContext);
             Add(transport);
 
-            return Task.FromResult<ISendTransport>(transport);
+            return transport;
         }
 
-        ISendEndpointContextSupervisor CreateQueueSendEndpointContextSupervisor(SendSettings settings)
+        ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(SendSettings settings)
         {
-            var contextFactory = new QueueSendEndpointContextFactory(ConnectionContextSupervisor, CreateSendTopologyPipe(settings), settings);
-            return CreateContextSupervisor(contextFactory);
-        }
+            var topologyPipe = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), false, Stopping);
 
-        ISendEndpointContextSupervisor CreateTopicSendEndpointContextSupervisor(SendSettings settings)
-        {
-            var contextFactory = new TopicSendEndpointContextFactory(ConnectionContextSupervisor, CreateSendTopologyPipe(settings), settings);
+            var contextFactory = new SendEndpointContextFactory(ConnectionContextSupervisor, topologyPipe.ToPipe<SendEndpointContext>(), settings);
 
-            return CreateContextSupervisor(contextFactory);
-        }
-
-        ISendEndpointContextSupervisor CreateContextSupervisor(IPipeContextFactory<SendEndpointContext> contextFactory)
-        {
             return new SendEndpointContextSupervisor(contextFactory);
-        }
-
-        IPipe<SendEndpointContext> CreateSendTopologyPipe(SendSettings settings)
-        {
-            return new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), false, Stopping).ToPipe<SendEndpointContext>();
         }
 
         protected override IAgent[] GetAgentHandles()

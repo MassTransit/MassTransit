@@ -7,21 +7,22 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
     using Internals.Extensions;
+    using Transport;
 
 
-    public abstract class SendEndpointContextFactory :
+    public class SendEndpointContextFactory :
         IPipeContextFactory<SendEndpointContext>
     {
         readonly IConnectionContextSupervisor _supervisor;
         readonly IPipe<SendEndpointContext> _pipe;
+        readonly SendSettings _settings;
 
-        protected SendEndpointContextFactory(IConnectionContextSupervisor supervisor, IPipe<SendEndpointContext> pipe)
+        public SendEndpointContextFactory(IConnectionContextSupervisor supervisor, IPipe<SendEndpointContext> pipe, SendSettings settings)
         {
             _supervisor = supervisor;
             _pipe = pipe;
+            _settings = settings;
         }
-
-        protected abstract SendEndpointContext CreateSendEndpointContext(ConnectionContext context);
 
         public IPipeContextAgent<SendEndpointContext> CreateContext(ISupervisor supervisor)
         {
@@ -42,7 +43,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
         {
             async Task<SendEndpointContext> Create(ConnectionContext context, CancellationToken createCancellationToken)
             {
-                var sendEndpointContext = CreateSendEndpointContext(context);
+                var messageSender = context.CreateMessageSender(_settings.EntityPath);
+
+                var sendEndpointContext = new MessageSendEndpointContext(context, messageSender);
 
                 if (_pipe.IsNotEmpty())
                     await _pipe.Send(sendEndpointContext).ConfigureAwait(false);

@@ -7,19 +7,20 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     using Microsoft.Azure.ServiceBus.Core;
 
 
-    public class TopicSendEndpointContext :
+    public class MessageSendEndpointContext :
         BasePipeContext,
         SendEndpointContext
     {
         readonly IMessageSender _client;
 
-        public TopicSendEndpointContext(ConnectionContext connectionContext, IMessageSender client)
+        public MessageSendEndpointContext(ConnectionContext connectionContext, IMessageSender client)
         {
             _client = client;
             ConnectionContext = connectionContext;
         }
 
         public ConnectionContext ConnectionContext { get; }
+
         public string EntityPath => _client.Path;
 
         public Task Send(Message message)

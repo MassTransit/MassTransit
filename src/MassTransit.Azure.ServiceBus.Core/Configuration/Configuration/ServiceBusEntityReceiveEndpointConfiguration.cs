@@ -188,7 +188,7 @@
             var configureTopologyPipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology, false, host.Stopping)
                 .ToPipe<SendEndpointContext>();
 
-            var contextFactory = new QueueSendEndpointContextFactory(host.ConnectionContextSupervisor, configureTopologyPipe, settings);
+            var contextFactory = new SendEndpointContextFactory(host.ConnectionContextSupervisor, configureTopologyPipe, settings);
             var supervisor = new SendEndpointContextSupervisor(contextFactory);
 
             // TODO this should be owned by the transport
