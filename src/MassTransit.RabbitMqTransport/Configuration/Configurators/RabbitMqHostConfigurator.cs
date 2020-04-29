@@ -66,6 +66,16 @@ namespace MassTransit.RabbitMqTransport.Configurators
             _settings.CertificateValidationCallback = configurator.CertificateValidationCallback;
         }
 
+        public void ConfigureBatchPublish(Action<IBatchPublishConfigurator> configure)
+        {
+            _settings.ConfigureBatch(settings =>
+            {
+                var configurator = new BatchPublishConfigurator(settings);
+
+                configure?.Invoke(configurator);
+            });
+        }
+
         public void Heartbeat(ushort requestedHeartbeat)
         {
             _settings.Heartbeat = requestedHeartbeat;

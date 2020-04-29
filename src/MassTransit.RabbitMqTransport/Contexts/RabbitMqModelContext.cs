@@ -6,6 +6,7 @@
     using System.Linq;
     using System.Text;
     using System.Threading;
+    using System.Threading.Channels;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
@@ -23,8 +24,11 @@
         readonly ConnectionContext _connectionContext;
         readonly IModel _model;
         readonly CancellationToken _cancellationToken;
-        readonly ConcurrentDictionary<ulong, PendingPublish> _published;
+        readonly ConcurrentDictionary<ulong, IPendingPublish> _published;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
+        readonly Channel<Publish> _publishChannel;
+        readonly Task _publishTask;
+        readonly BatchSettings _batchSettings;
         ulong _publishTagMax;
 
         public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, CancellationToken cancellationToken)
@@ -33,8 +37,9 @@
             _connectionContext = connectionContext;
             _model = model;
             _cancellationToken = cancellationToken;
+            _batchSettings = connectionContext.BatchSettings;
 
-            _published = new ConcurrentDictionary<ulong, PendingPublish>();
+            _published = new ConcurrentDictionary<ulong, IPendingPublish>();
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
 
             _model.ModelShutdown += OnModelShutdown;
@@ -43,10 +48,26 @@
             _model.BasicReturn += OnBasicReturn;
 
             if (_connectionContext.PublisherConfirmation)
+            {
                 _model.ConfirmSelect();
+
+                if (_batchSettings.Enabled)
+                {
+                    var channelOptions = new BoundedChannelOptions(100)
+                    {
+                        AllowSynchronousContinuations = false,
+                        FullMode = BoundedChannelFullMode.Wait,
+                        SingleReader = true,
+                        SingleWriter = false
+                    };
+
+                    _publishChannel = Channel.CreateBounded<Publish>(channelOptions);
+                    _publishTask = Task.Run(WaitForBatch);
+                }
+            }
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public async Task DisposeAsync(CancellationToken cancellationToken)
         {
             LogContext.Debug?.Log("Closing model: {ChannelNumber} {Host}", _model.ChannelNumber, _connectionContext.Description);
 
@@ -70,6 +91,12 @@
                     }
                     while (timedOut);
                 }
+
+                if (!CancellationToken.IsCancellationRequested)
+                    LogContext.Error?.Log("The CancellationToken should be requested at this point");
+
+                if (_publishTask != null)
+                    await _publishTask.ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -77,9 +104,9 @@
                     _connectionContext.Description);
             }
 
-            _model.Cleanup(200, "ModelContext Disposed");
+            const string message = "ModelContext Disposed";
 
-            return TaskUtil.Completed;
+            _model.Cleanup(200, message);
         }
 
         CancellationToken PipeContext.CancellationToken => _cancellationToken;
@@ -93,19 +120,26 @@
         {
             if (_connectionContext.PublisherConfirmation)
             {
-                var pendingPublish = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, basicProperties, body),
-                    CancellationToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
+                Task publishTask;
+                if (mandatory || _batchSettings.Enabled == false)
+                {
+                    publishTask = await Task.Factory.StartNew(() => PublishAsync(exchange, routingKey, mandatory, basicProperties, body),
+                        CancellationToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
+                }
+                else
+                {
+                    publishTask = await EnqueuePublish(exchange, routingKey, basicProperties, body).ConfigureAwait(false);
+                }
 
                 if (awaitAck)
                 {
-                    await pendingPublish.Task.ConfigureAwait(false);
-
+                    await publishTask.ConfigureAwait(false);
                     await Task.Yield();
                 }
             }
             else
             {
-                await Task.Factory.StartNew(() => Publish(exchange, routingKey, mandatory, basicProperties, body),
+                await Task.Factory.StartNew(() => PublishWithoutConfirmation(exchange, routingKey, mandatory, basicProperties, body),
                     CancellationToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
             }
         }
@@ -197,7 +231,7 @@
             }
         }
 
-        PendingPublish PublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body)
+        Task PublishAsync(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body)
         {
             var publishTag = _model.NextPublishSeqNo;
             _publishTagMax = Math.Max(_publishTagMax, publishTag);
@@ -222,10 +256,150 @@
                 throw;
             }
 
-            return pendingPublish;
+            return pendingPublish.Task;
         }
 
-        void Publish(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body)
+        async Task<Task> EnqueuePublish(string exchange, string routingKey, IBasicProperties basicProperties, byte[] body)
+        {
+            var publish = new Publish(exchange, routingKey, basicProperties, body);
+
+            await _publishChannel.Writer.WriteAsync(publish, CancellationToken).ConfigureAwait(false);
+
+            return publish.Task;
+        }
+
+        async Task WaitForBatch()
+        {
+            while (CancellationToken.IsCancellationRequested == false)
+            {
+                try
+                {
+                    while (await _publishChannel.Reader.WaitToReadAsync(CancellationToken).ConfigureAwait(false))
+                    {
+                        await ReadBatch().ConfigureAwait(false);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (Exception exception)
+                {
+                    LogContext.Error?.Log(exception, "PublishBatch Faulted");
+                }
+            }
+
+            try
+            {
+                while (_publishChannel.Reader.TryRead(out var publish))
+                    publish.PublishNotConfirmed("Model Context Canceled");
+            }
+            catch (Exception exception)
+            {
+                LogContext.Error?.Log(exception, "Publish Channel Cleanup Faulted");
+            }
+        }
+
+        async Task ReadBatch()
+        {
+            var batchToken = new CancellationTokenSource(_batchSettings.Timeout);
+            List<Publish> batch = new List<Publish>();
+            try
+            {
+                try
+                {
+                    for (int i = 0,
+                        batchLength = 0;
+                        i < _batchSettings.MessageLimit && batchLength < _batchSettings.SizeLimit;
+                        i++)
+                    {
+                        var publish = await _publishChannel.Reader.ReadAsync(batchToken.Token).ConfigureAwait(false);
+
+                        batch.Add(publish);
+                        batchLength += publish.Length;
+
+                        if (await _publishChannel.Reader.WaitToReadAsync(batchToken.Token).ConfigureAwait(false) == false)
+                            break;
+                    }
+                }
+                catch (OperationCanceledException exception) when (exception.CancellationToken == batchToken.Token && batch.Count > 0)
+                {
+                }
+
+                await Task.Factory.StartNew(() => PublishBatch(batch), CancellationToken, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException exception) when (exception.CancellationToken == batchToken.Token)
+            {
+            }
+            catch (OperationCanceledException exception) when (CancellationToken.IsCancellationRequested)
+            {
+                // make sure batch items are cancelled, since the PublishBatch method may not have executed
+                for (int i = 0; i < batch.Count; i++)
+                    batch[i].PublishNotConfirmed(exception.Message);
+            }
+            finally
+            {
+                batchToken.Dispose();
+            }
+        }
+
+        async Task PublishBatch(IList<Publish> batch)
+        {
+            var publishTag = _model.NextPublishSeqNo;
+            try
+            {
+                if (batch.Count == 1)
+                {
+                    var published = batch[0];
+                    _published.AddOrUpdate(publishTag, key => published, (key, existing) =>
+                    {
+                        existing.PublishNotConfirmed($"Duplicate key: {key}");
+
+                        return published;
+                    });
+
+                    published.PublishOne(_model, publishTag);
+                    _publishTagMax = Math.Max(_publishTagMax, publishTag);
+                }
+                else
+                {
+                    var publishBatch = _model.CreateBasicPublishBatch();
+
+                    for (int i = 0; i < batch.Count; i++, publishTag++)
+                    {
+                        batch[i].Append(publishBatch, publishTag);
+
+                        var published = batch[i];
+                        _published.AddOrUpdate(publishTag, key => published, (key, existing) =>
+                        {
+                            existing.PublishNotConfirmed($"Duplicate key: {key}");
+
+                            return published;
+                        });
+                    }
+
+                    publishBatch.Publish();
+
+                    _publishTagMax = Math.Max(_publishTagMax, publishTag);
+
+                    var nextPublishTag = _model.NextPublishSeqNo;
+                    if (nextPublishTag <= publishTag)
+                    {
+                        LogContext.Warning?.Log("Batch Publish SeqNo Mismatch: {Expected} != {Actual}", publishTag + 1, nextPublishTag);
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                for (int i = 0; i < batch.Count; i++)
+                {
+                    _published.TryRemove(batch[i].Tag, out _);
+
+                    batch[i].PublishNotConfirmed(exception.Message);
+                }
+            }
+        }
+
+        void PublishWithoutConfirmation(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body)
         {
             var publishTag = _model.NextPublishSeqNo;
             _publishTagMax = Math.Max(_publishTagMax, publishTag);
@@ -269,11 +443,15 @@
                     if (_published.TryRemove(id, out var value))
                         value.Nack();
                 }
+
+                Console.WriteLine($"Negative Acknowledgement: {string.Join(",", ids.Select(x => x.ToString()))}, Remaining: {_published.Count}");
             }
             else
             {
                 if (_published.TryRemove(args.DeliveryTag, out var value))
                     value.Nack();
+
+                Console.WriteLine($"Negative Acknowledgement: {args.DeliveryTag}, Remaining: {_published.Count}");
             }
         }
 
@@ -287,11 +465,15 @@
                     if (_published.TryRemove(id, out var value))
                         value.Ack();
                 }
+
+                Console.WriteLine($"Acknowledged: {string.Join(",", ids.Select(x => x.ToString()))}, Remaining: {_published.Count}");
             }
             else
             {
                 if (_published.TryRemove(args.DeliveryTag, out var value))
                     value.Ack();
+
+                Console.WriteLine($"Acknowledged: {args.DeliveryTag}, Remaining: {_published.Count}");
             }
         }
     }

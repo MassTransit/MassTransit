@@ -15,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     namespace Batching
     {
         using System;
+        using System.Linq;
         using System.Threading.Tasks;
         using NUnit.Framework;
         using TestFramework.Messages;
@@ -28,8 +29,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             [Test]
             public async Task Should_receive_the_message_batch()
             {
-                for (int i = 0; i < 5; i++)
-                    await InputQueueSendEndpoint.Send(new PingMessage());
+                await Task.WhenAll(Enumerable.Range(0, 5).Select(x => InputQueueSendEndpoint.Send(new PingMessage())));
 
                 Batch<PingMessage> batch = await _consumer[0];
 

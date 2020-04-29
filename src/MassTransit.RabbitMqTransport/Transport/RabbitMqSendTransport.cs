@@ -135,7 +135,8 @@
                     var publishTask = modelContext.BasicPublishAsync(exchange, context.RoutingKey ?? "", context.Mandatory, context.BasicProperties, body,
                         context.AwaitAck);
 
-                    await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
+//                    await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
+                    await publishTask.OrTimeout(3000).ConfigureAwait(false);
 
                     context.LogSent();
 
@@ -144,6 +145,7 @@
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine("FUCK: {0}", ex.Message);
                     context.LogFaulted(ex);
 
                     if (_context.SendObservers.Count > 0)

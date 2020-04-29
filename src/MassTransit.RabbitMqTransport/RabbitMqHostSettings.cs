@@ -127,5 +127,10 @@
         /// The requested connection timeout, in milliseconds
         /// </summary>
         int RequestedConnectionTimeout { get; }
+
+        /// <summary>
+        /// Batch settings used for the batch publish
+        /// </summary>
+        BatchSettings BatchSettings { get; }
     }
 }

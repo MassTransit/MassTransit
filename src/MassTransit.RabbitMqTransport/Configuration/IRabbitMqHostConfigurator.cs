@@ -54,5 +54,11 @@
         /// </summary>
         /// <param name="milliseconds"></param>
         void RequestedConnectionTimeout(int milliseconds);
+
+        /// <summary>
+        /// Configure the RabbitMQ Batch Publish transport settings
+        /// </summary>
+        /// <param name="configure"></param>
+        void ConfigureBatchPublish(Action<IBatchPublishConfigurator> configure);
     }
 }

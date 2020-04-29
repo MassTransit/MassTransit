@@ -18,6 +18,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// </summary>
         bool PublisherConfirmation { get; }
 
+        BatchSettings BatchSettings { get; }
+
         /// <summary>
         /// If true, only the broker topology will be deployed
         /// </summary>

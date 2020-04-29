@@ -54,7 +54,7 @@ namespace MassTransit.Context
             _cancellationTokenSource.Dispose();
         }
 
-        CancellationToken PipeContext.CancellationToken => _cancellationTokenSource.Token;
+        public override CancellationToken CancellationToken => _cancellationTokenSource.Token;
 
         public bool IsDelivered { get; private set; }
         public bool IsFaulted { get; private set; }

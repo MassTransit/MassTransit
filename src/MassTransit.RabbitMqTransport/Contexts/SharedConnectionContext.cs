@@ -23,19 +23,21 @@
 
         public override CancellationToken CancellationToken { get; }
 
-        IConnection ConnectionContext.Connection => _context.Connection;
+        public IConnection Connection => _context.Connection;
         public string Description => _context.Description;
         public Uri HostAddress => _context.HostAddress;
-        bool ConnectionContext.PublisherConfirmation => _context.PublisherConfirmation;
-        TimeSpan ConnectionContext.StopTimeout => _context.StopTimeout;
+        public bool PublisherConfirmation => _context.PublisherConfirmation;
+        public BatchSettings BatchSettings => _context.BatchSettings;
+
+        public TimeSpan StopTimeout => _context.StopTimeout;
         public IRabbitMqHostTopology Topology => _context.Topology;
 
-        Task<IModel> ConnectionContext.CreateModel(CancellationToken cancellationToken)
+        public Task<IModel> CreateModel(CancellationToken cancellationToken)
         {
             return _context.CreateModel(cancellationToken);
         }
 
-        Task<ModelContext> ConnectionContext.CreateModelContext(CancellationToken cancellationToken)
+        public Task<ModelContext> CreateModelContext(CancellationToken cancellationToken)
         {
             return _context.CreateModelContext(cancellationToken);
         }

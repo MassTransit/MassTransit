@@ -4,6 +4,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
     using System.Net.Security;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
+    using MassTransit.Configuration;
     using Metadata;
     using RabbitMQ.Client;
 
@@ -11,6 +12,9 @@ namespace MassTransit.RabbitMqTransport.Configurators
     class ConfigurationHostSettings :
         RabbitMqHostSettings
     {
+        static readonly bool _batchPublishEnabled = !AppContext.TryGetSwitch(AppContextSwitches.RabbitMqBatchPublish, out var isEnabled) || !isEnabled;
+
+        readonly ConfigurationBatchSettings _batchSettings;
         readonly Lazy<Uri> _hostAddress;
 
         public ConfigurationHostSettings()
@@ -21,6 +25,8 @@ namespace MassTransit.RabbitMqTransport.Configurators
             AcceptablePolicyErrors = defaultOptions.AcceptablePolicyErrors | SslPolicyErrors.RemoteCertificateChainErrors;
 
             PublisherConfirmation = true;
+
+            _batchSettings = new ConfigurationBatchSettings();
 
             RequestedConnectionTimeout = 10000;
 
@@ -52,9 +58,34 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public ushort RequestedChannelMax { get; set; }
         public int RequestedConnectionTimeout { get; set; }
 
+        public BatchSettings BatchSettings => _batchSettings;
+
+        public void ConfigureBatch(Action<ConfigurationBatchSettings> configure)
+        {
+            configure?.Invoke(_batchSettings);
+        }
+
         Uri FormatHostAddress()
         {
             return new RabbitMqHostAddress(Host, Port, VirtualHost);
+        }
+
+
+        public class ConfigurationBatchSettings :
+            BatchSettings
+        {
+            public ConfigurationBatchSettings()
+            {
+                Enabled = _batchPublishEnabled;
+                MessageLimit = 100;
+                SizeLimit = 64 * 1024;
+                Timeout = TimeSpan.FromMilliseconds(4);
+            }
+
+            public bool Enabled { get; set; }
+            public int MessageLimit { get; set; }
+            public int SizeLimit { get; set; }
+            public TimeSpan Timeout { get; set; }
         }
     }
 }

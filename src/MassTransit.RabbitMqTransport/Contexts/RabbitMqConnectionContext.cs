@@ -27,7 +27,10 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
             Description = description;
             HostAddress = configuration.HostAddress;
+
             PublisherConfirmation = configuration.PublisherConfirmation;
+            BatchSettings = configuration.BatchSettings;
+
             Topology = hostTopology;
 
             StopTimeout = TimeSpan.FromSeconds(30);
@@ -41,7 +44,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public string Description { get; }
         public Uri HostAddress { get; }
         public bool PublisherConfirmation { get; }
+
+        public BatchSettings BatchSettings { get; }
+
         public TimeSpan StopTimeout { get; }
+
         public IRabbitMqHostTopology Topology { get; }
 
         public async Task<IModel> CreateModel(CancellationToken cancellationToken)

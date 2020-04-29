@@ -8,7 +8,8 @@ namespace MassTransit.RabbitMqTransport.Integration
     /// <summary>
     /// A pending BasicPublish to RabbitMQ, waiting for an ACK/NAK from the broker
     /// </summary>
-    public class PendingPublish
+    public class PendingPublish :
+        IPendingPublish
     {
         readonly ConnectionContext _connectionContext;
         readonly string _exchange;

@@ -1,6 +1,7 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
+    using System.Collections.Generic;
     using Configurators;
     using Definition;
     using GreenPipes;
@@ -45,6 +46,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public IRabbitMqHost Proxy => _proxy;
 
         public bool PublisherConfirmation => _hostSettings.PublisherConfirmation;
+
+        public BatchSettings BatchSettings => _hostSettings.BatchSettings;
+
         public bool DeployTopologyOnly { get; set; }
 
         public RabbitMqHostSettings Settings
@@ -142,6 +146,24 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public void ReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint)
         {
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
+        }
+
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            foreach (var result in base.Validate())
+                yield return result;
+
+            if (_hostSettings.BatchSettings.Enabled)
+            {
+                if (_hostSettings.BatchSettings.Timeout < TimeSpan.Zero || _hostSettings.BatchSettings.Timeout > TimeSpan.FromSeconds(1))
+                    yield return this.Failure("BatchTimeout", "must be >= 0 and <= 1s");
+
+                if (_hostSettings.BatchSettings.MessageLimit <= 1 || _hostSettings.BatchSettings.MessageLimit > 100)
+                    yield return this.Failure("BatchMessageLimit", "must be >= 1 and <= 100");
+
+                if (_hostSettings.BatchSettings.SizeLimit < 1024 || _hostSettings.BatchSettings.MessageLimit > 256 * 1024)
+                    yield return this.Failure("BatchSizeLimit", "must be >= 1K and <= 256K");
+            }
         }
 
         public override IBusHostControl Build()

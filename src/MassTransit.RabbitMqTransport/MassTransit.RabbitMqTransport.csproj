@@ -24,6 +24,7 @@
   <ItemGroup>
     <PackageReference Include="RabbitMQ.Client" Version="[5.2.0,6.0)" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+    <PackageReference Include="System.Threading.Channels" Version="4.7.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
