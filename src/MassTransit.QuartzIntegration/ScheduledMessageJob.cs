@@ -65,18 +65,13 @@
 
         IPipe<SendContext> CreateMessageContext(Uri sourceAddress, string triggerKey)
         {
-            IPipe<SendContext> sendPipe = Pipe.New<SendContext>(x =>
+            IPipe<SendContext> sendPipe = Pipe.Execute<SendContext>(context =>
             {
-                x.UseExecute(context =>
-                {
-                    Guid? tokenId = ConvertIdToGuid(TokenId);
-                    if (tokenId.HasValue)
-                    {
-                        context.Headers.Set(MessageHeaders.SchedulingTokenId, tokenId.Value.ToString("N"));
-                    }
+                Guid? tokenId = ConvertIdToGuid(TokenId);
+                if (tokenId.HasValue)
+                    context.Headers.Set(MessageHeaders.SchedulingTokenId, tokenId.Value.ToString("N"));
 
-                    context.Headers.Set(MessageHeaders.QuartzTriggerKey, triggerKey);
-                });
+                context.Headers.Set(MessageHeaders.QuartzTriggerKey, triggerKey);
             });
 
             return new SerializedMessageContextAdapter(sendPipe, this, sourceAddress);
