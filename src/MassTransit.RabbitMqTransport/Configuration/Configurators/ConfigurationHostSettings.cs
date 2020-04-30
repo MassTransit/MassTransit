@@ -16,7 +16,8 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public ConfigurationHostSettings()
         {
             var defaultOptions = new SslOption();
-            SslProtocol = defaultOptions.Version;
+            SslProtocol = SslProtocols.Tls;
+
             AcceptablePolicyErrors = defaultOptions.AcceptablePolicyErrors | SslPolicyErrors.RemoteCertificateChainErrors;
 
             PublisherConfirmation = true;

@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
-    <PackageReference Include="dapper.contrib" Version="2.0.30" />
+    <PackageReference Include="dapper.contrib" Version="2.0.35" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
   </ItemGroup>
 
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="1.0.19269.1"/>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="1.1.2"/>
   </ItemGroup>
 
 </Project>
