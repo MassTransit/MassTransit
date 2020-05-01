@@ -58,7 +58,7 @@
         }
 
 
-        struct SendPipe<T> :
+        readonly struct SendPipe<T> :
             IPipe<ModelContext>
             where T : class
         {
@@ -108,8 +108,7 @@
                     if (context.TryGetPayload(out PublishContext publishContext))
                         context.Mandatory = context.Mandatory || publishContext.Mandatory;
 
-                    if (properties.Headers == null)
-                        properties.Headers = new Dictionary<string, object>();
+                    properties.Headers ??= new Dictionary<string, object>();
 
                     properties.ContentType = context.ContentType.MediaType;
 
@@ -135,8 +134,7 @@
                     var publishTask = modelContext.BasicPublishAsync(exchange, context.RoutingKey ?? "", context.Mandatory, context.BasicProperties, body,
                         context.AwaitAck);
 
-//                    await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
-                    await publishTask.OrTimeout(3000).ConfigureAwait(false);
+                    await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
 
                     context.LogSent();
 
@@ -145,7 +143,6 @@
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("FUCK: {0}", ex.Message);
                     context.LogFaulted(ex);
 
                     if (_context.SendObservers.Count > 0)
