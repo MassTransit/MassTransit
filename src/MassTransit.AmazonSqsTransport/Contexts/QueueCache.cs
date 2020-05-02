@@ -1,6 +1,5 @@
 namespace MassTransit.AmazonSqsTransport.Contexts
 {
-    using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
@@ -9,20 +8,24 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using Amazon.SQS;
     using Amazon.SQS.Model;
     using Context;
+    using GreenPipes;
     using GreenPipes.Caching;
     using Topology.Entities;
 
 
-    public class QueueCache
+    public class QueueCache :
+        IAsyncDisposable
     {
         readonly IAmazonSQS _client;
+        readonly CancellationToken _cancellationToken;
         readonly ICache<QueueInfo> _cache;
         readonly IIndex<string, QueueInfo> _nameIndex;
         readonly IDictionary<string, QueueInfo> _durableQueues;
 
-        public QueueCache(IAmazonSQS client)
+        public QueueCache(IAmazonSQS client, CancellationToken cancellationToken)
         {
             _client = client;
+            _cancellationToken = cancellationToken;
             _cache = new GreenCache<QueueInfo>(ClientContextCacheDefaults.GetCacheSettings());
             _nameIndex = _cache.AddIndex("entityName", x => x.EntityName);
 
@@ -80,7 +83,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             var queueAttributes = await _client.GetAttributesAsync(queueUrl).ConfigureAwait(false);
 
-            var missingQueue = new QueueInfo(queue.EntityName, queueUrl, queueAttributes);
+            var missingQueue = new QueueInfo(queue.EntityName, queueUrl, queueAttributes, _client, _cancellationToken);
 
             if (queue.Durable && queue.AutoDelete == false)
                 lock (_durableQueues)
@@ -89,8 +92,19 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             return missingQueue;
         }
 
-        public void Clear()
+        public async Task DisposeAsync(CancellationToken cancellationToken)
         {
+            QueueInfo[] queueInfos;
+            lock (_durableQueues)
+            {
+                queueInfos = _durableQueues.Values.ToArray();
+
+                _durableQueues.Clear();
+            }
+
+            foreach (var queueInfo in queueInfos)
+                await queueInfo.DisposeAsync(cancellationToken).ConfigureAwait(false);
+
             _cache.Clear();
         }
     }

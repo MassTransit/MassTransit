@@ -135,7 +135,7 @@ namespace MassTransit.AmazonSqsTransport.Testing
                 {
                     e.PrefetchCount = 1;
                     e.WaitTimeSeconds = 0;
-                   // e.PurgeOnStartup = true;
+                    e.PurgeOnStartup = true;
 
                     ConfigureReceiveEndpoint(e);
 

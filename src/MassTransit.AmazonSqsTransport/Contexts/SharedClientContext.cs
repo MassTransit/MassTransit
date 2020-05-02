@@ -68,6 +68,11 @@
             return _context.Publish(request, cancellationToken);
         }
 
+        Task ClientContext.SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken)
+        {
+            return _context.SendMessage(queueName, request, cancellationToken);
+        }
+
         Task ClientContext.DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken)
         {
             return _context.DeleteMessage(queueUrl, receiptHandle, cancellationToken);
@@ -76,16 +81,6 @@
         Task ClientContext.PurgeQueue(string queueName, CancellationToken cancellationToken)
         {
             return _context.PurgeQueue(queueName, cancellationToken);
-        }
-
-        Task<SendMessageRequest> ClientContext.CreateSendRequest(string queueName, byte[] body)
-        {
-            return _context.CreateSendRequest(queueName, body);
-        }
-
-        Task ClientContext.SendMessage(SendMessageRequest request, CancellationToken cancellationToken)
-        {
-            return _context.SendMessage(request, cancellationToken);
         }
 
         public Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())

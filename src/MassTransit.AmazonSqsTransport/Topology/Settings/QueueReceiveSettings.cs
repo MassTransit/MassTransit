@@ -12,7 +12,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
             : base(queueName, durable, autoDelete)
         {
             PrefetchCount = Math.Min(Environment.ProcessorCount * 2, 10);
-            WaitTimeSeconds = 0;
+            WaitTimeSeconds = 1;
         }
 
         public int PrefetchCount { get; set; }

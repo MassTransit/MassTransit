@@ -7,7 +7,6 @@ namespace MassTransit.RabbitMqTransport.Integration
     using System.Threading.Tasks;
     using Context;
     using Contexts;
-    using GreenPipes.Internals.Extensions;
     using RabbitMQ.Client;
 
 
@@ -54,7 +53,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             {
                 await _publishChannel.Writer.WriteAsync(publish).ConfigureAwait(false);
 
-                await publish.Confirmed.OrTimeout(3000).ConfigureAwait(false);
+                await publish.Confirmed.ConfigureAwait(false);
             }
 
             return PublishAsync();

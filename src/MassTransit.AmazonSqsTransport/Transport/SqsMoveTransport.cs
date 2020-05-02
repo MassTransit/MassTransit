@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Text;
     using System.Threading.Tasks;
     using Amazon.SQS.Model;
     using GreenPipes;
@@ -18,20 +19,20 @@
             _destination = destination;
         }
 
-        protected async Task Move(ReceiveContext context, Action<SendMessageRequest, IDictionary<string, MessageAttributeValue>> preSend)
+        protected async Task Move(ReceiveContext context, Action<SendMessageBatchRequestEntry, IDictionary<string, MessageAttributeValue>> preSend)
         {
             if (!context.TryGetPayload(out ClientContext clientContext))
                 throw new ArgumentException("The ReceiveContext must contain a ClientContext (from Amazon SQS)", nameof(context));
 
             await _topologyFilter.Send(clientContext, Pipe.Empty<ClientContext>()).ConfigureAwait(false);
 
-            var message = await clientContext.CreateSendRequest(_destination, context.GetBody()).ConfigureAwait(false);
+            var message = new SendMessageBatchRequestEntry("", Encoding.UTF8.GetString(context.GetBody()));
 
             CopyReceivedMessageHeaders(context, message.MessageAttributes);
 
             preSend(message, message.MessageAttributes);
 
-            var task = clientContext.SendMessage(message, context.CancellationToken);
+            var task = clientContext.SendMessage(_destination, message, context.CancellationToken);
 
             context.AddReceiveTask(task);
         }

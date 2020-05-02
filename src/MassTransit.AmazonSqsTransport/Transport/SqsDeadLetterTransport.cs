@@ -21,7 +21,7 @@
 
         public Task Send(ReceiveContext context, string reason)
         {
-            void PreSend(SendMessageRequest sendMessageRequest, IDictionary<string, MessageAttributeValue> headers)
+            void PreSend(SendMessageBatchRequestEntry entry, IDictionary<string, MessageAttributeValue> headers)
             {
                 _headerAdapter.Set(headers, MessageHeaders.Reason, reason ?? "Unspecified");
             }

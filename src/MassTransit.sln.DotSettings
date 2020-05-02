@@ -254,6 +254,7 @@ public async System.Threading.Tasks.Task $TESTNAME$()
 	<s:Boolean x:Key="/Default/ReSpeller/DontCheckInheritedMembers/@EntryValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Autofac/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Automatonymous/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Batcher/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=codefix/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=codefixes/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Hangfire/@EntryIndexedValue">True</s:Boolean>

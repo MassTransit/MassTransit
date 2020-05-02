@@ -21,7 +21,7 @@
 
         public Task Send(ExceptionReceiveContext context)
         {
-            void PreSend(SendMessageRequest sendMessageRequest, IDictionary<string, MessageAttributeValue> headers)
+            void PreSend(SendMessageBatchRequestEntry entry, IDictionary<string, MessageAttributeValue> headers)
             {
                 _headerAdapter.SetExceptionHeaders(headers, context);
             }

@@ -33,9 +33,7 @@
 
         Task Publish(PublishRequest request, CancellationToken cancellationToken = default);
 
-        Task<SendMessageRequest> CreateSendRequest(string queueName, byte[] body);
-
-        Task SendMessage(SendMessageRequest request, CancellationToken cancellationToken);
+        Task SendMessage(string queueName, SendMessageBatchRequestEntry request, CancellationToken cancellationToken);
 
         Task DeleteMessage(string queueUrl, string receiptHandle, CancellationToken cancellationToken = default);
 

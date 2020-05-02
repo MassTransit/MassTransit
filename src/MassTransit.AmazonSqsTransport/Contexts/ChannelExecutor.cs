@@ -1,4 +1,4 @@
-namespace MassTransit.RabbitMqTransport.Contexts
+namespace MassTransit.AmazonSqsTransport.Contexts
 {
     using System;
     using System.Threading;
@@ -15,11 +15,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public ChannelExecutor(int prefetchCount, int concurrencyLimit)
         {
-            if (prefetchCount <= 0)
-                throw new ArgumentOutOfRangeException(nameof(prefetchCount));
-            if (concurrencyLimit <= 0)
-                throw new ArgumentOutOfRangeException(nameof(concurrencyLimit));
-
             var channelOptions = new BoundedChannelOptions(prefetchCount)
             {
                 AllowSynchronousContinuations = true,
@@ -58,6 +53,20 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _channel.Writer.Complete();
 
             return Task.WhenAll(_runTasks);
+        }
+
+        public async Task Push(Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            async Task<bool> RunMethod()
+            {
+                await method().ConfigureAwait(false);
+
+                return true;
+            }
+
+            var future = new Future<bool>(RunMethod, cancellationToken);
+
+            await _channel.Writer.WriteAsync(future, cancellationToken).ConfigureAwait(false);
         }
 
         public Task Run(Func<Task> method, CancellationToken cancellationToken = default)

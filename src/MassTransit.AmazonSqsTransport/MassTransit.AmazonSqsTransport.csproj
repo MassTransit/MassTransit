@@ -17,12 +17,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-        <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.101.158" />
-        <PackageReference Include="AWSSDK.SQS" Version="3.3.102.101" />
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.101.158" />
+    <PackageReference Include="AWSSDK.SQS" Version="3.3.102.101" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+    <PackageReference Include="System.Threading.Channels" Version="4.7.0" />
   </ItemGroup>
 
   <ItemGroup>
-        <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

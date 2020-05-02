@@ -1,8 +1,10 @@
 ﻿namespace MassTransit.AmazonSqsTransport.Transport
 {
     using System;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Amazon.SQS.Model;
     using Context;
     using Contexts;
     using GreenPipes;
@@ -73,23 +75,23 @@
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
-                    var request = await clientContext.CreateSendRequest(_context.EntityName, context.Body).ConfigureAwait(false);
+                    var message = new SendMessageBatchRequestEntry("", Encoding.UTF8.GetString(context.Body));
 
-                    _context.SqsSetHeaderAdapter.Set(request.MessageAttributes, context.Headers);
+                    _context.SqsSetHeaderAdapter.Set(message.MessageAttributes, context.Headers);
 
-                    _context.SqsSetHeaderAdapter.Set(request.MessageAttributes, "Content-Type", context.ContentType.MediaType);
-                    _context.SqsSetHeaderAdapter.Set(request.MessageAttributes, nameof(context.CorrelationId), context.CorrelationId);
+                    _context.SqsSetHeaderAdapter.Set(message.MessageAttributes, "Content-Type", context.ContentType.MediaType);
+                    _context.SqsSetHeaderAdapter.Set(message.MessageAttributes, nameof(context.CorrelationId), context.CorrelationId);
 
                     if (!string.IsNullOrEmpty(context.DeduplicationId))
-                        request.MessageDeduplicationId = context.DeduplicationId;
+                        message.MessageDeduplicationId = context.DeduplicationId;
 
                     if (!string.IsNullOrEmpty(context.GroupId))
-                        request.MessageGroupId = context.GroupId;
+                        message.MessageGroupId = context.GroupId;
 
                     if (context.DelaySeconds.HasValue)
-                        request.DelaySeconds = context.DelaySeconds.Value;
+                        message.DelaySeconds = context.DelaySeconds.Value;
 
-                    await clientContext.SendMessage(request, context.CancellationToken).ConfigureAwait(false);
+                    await clientContext.SendMessage(_context.EntityName, message, context.CancellationToken).ConfigureAwait(false);
 
                     context.LogSent();
 
