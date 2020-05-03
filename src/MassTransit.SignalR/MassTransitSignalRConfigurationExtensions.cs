@@ -1,18 +1,30 @@
 ﻿namespace MassTransit.SignalR
 {
-    using MassTransit;
-    using MassTransit.ExtensionsDependencyInjectionIntegration;
-    using Microsoft.AspNetCore.SignalR;
     using System;
+    using Consumers;
+    using Contracts;
     using Definition;
-    using MassTransit.SignalR.Consumers;
-    using MassTransit.MessageData;
+    using ExtensionsDependencyInjectionIntegration;
+    using MessageData;
+    using Microsoft.AspNetCore.SignalR;
+    using Microsoft.Extensions.DependencyInjection;
+
 
     public static class MassTransitSignalRConfigurationExtensions
     {
-        public static void AddSignalRHubConsumers<THub>(this IServiceCollectionConfigurator configurator)
+        public static void AddSignalRHubConsumers<THub>(this IServiceCollectionConfigurator configurator,
+            Action<IHubLifetimeManagerOptions<THub>> configureHubLifetimeOptions = null)
             where THub : Hub
         {
+            var options = new HubLifetimeManagerOptions<THub>();
+            configureHubLifetimeOptions?.Invoke(options);
+
+            configurator.Collection.AddSingleton(options);
+            configurator.Collection.AddScoped(GetLifetimeManager<THub>);
+
+            configurator.AddRequestClient<GroupManagement<THub>>(options.RequestTimeout);
+
+            //TODO: check if use options.UseMessageData
             // Add Registrations for Regular Consumers
             configurator.AddConsumer<AllConsumer<THub>>();
             configurator.AddConsumer<ConnectionConsumer<THub>>();
@@ -28,46 +40,31 @@
             configurator.AddConsumer<UserMessageDataConsumer<THub>>();
         }
 
-        public static void AddSignalRHubEndpoints<THub>(
-            this IBusFactoryConfigurator configurator,
+        static HubLifetimeManager<THub> GetLifetimeManager<THub>(IServiceProvider provider)
+            where THub : Hub
+        {
+            var options = provider.GetRequiredService<MassTransitSignalROptions>();
+            var hubLifetimeManagerOptions = provider.GetRequiredService<HubLifetimeManagerOptions<THub>>();
+            var endpoint = provider.GetRequiredService<IPublishEndpoint>();
+            var requestClient = provider.GetRequiredService<IRequestClient<GroupManagement<THub>>>();
+            var hubProtocolResolver = provider.GetRequiredService<IHubProtocolResolver>();
+
+            if (options.UseMessageData || hubLifetimeManagerOptions.UseMessageData)
+                return new MassTransitMessageDataHubLifetimeManager<THub>(hubLifetimeManagerOptions, endpoint, requestClient, hubProtocolResolver,
+                    provider.GetRequiredService<IMessageDataRepository>());
+            return new MassTransitHubLifetimeManager<THub>(hubLifetimeManagerOptions, endpoint, requestClient, hubProtocolResolver);
+        }
+
+        public static void AddSignalRHubEndpoints<THub>(this IBusFactoryConfigurator configurator,
             IServiceProvider serviceProvider,
             Action<IReceiveEndpointConfigurator> configureEndpoint = null)
             where THub : Hub
         {
             // Get the configuration options
-            var options = serviceProvider.GetService(typeof(MassTransitSignalROptions)) as MassTransitSignalROptions;
+            var options = serviceProvider.GetRequiredService<MassTransitSignalROptions>();
+            var hubLifetimeManagerOptions = serviceProvider.GetRequiredService<HubLifetimeManagerOptions<THub>>();
 
-            if (!options.UseMessageData)
-            {
-                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
-                {
-                    configureEndpoint?.Invoke(e);
-
-                    e.ConfigureConsumer<AllConsumer<THub>>(serviceProvider);
-                });
-
-                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
-                {
-                    configureEndpoint?.Invoke(e);
-
-                    e.ConfigureConsumer<ConnectionConsumer<THub>>(serviceProvider);
-                });
-
-                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
-                {
-                    configureEndpoint?.Invoke(e);
-
-                    e.ConfigureConsumer<GroupConsumer<THub>>(serviceProvider);
-                });
-
-                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
-                {
-                    configureEndpoint?.Invoke(e);
-
-                    e.ConfigureConsumer<UserConsumer<THub>>(serviceProvider);
-                });
-            }
-            else
+            if (options.UseMessageData || hubLifetimeManagerOptions.UseMessageData)
             {
                 configurator.UseMessageData(serviceProvider.GetService(typeof(IMessageDataRepository)) as IMessageDataRepository);
                 configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
@@ -98,6 +95,36 @@
                     e.ConfigureConsumer<UserMessageDataConsumer<THub>>(serviceProvider);
                 });
             }
+            else
+            {
+                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
+                {
+                    configureEndpoint?.Invoke(e);
+
+                    e.ConfigureConsumer<AllConsumer<THub>>(serviceProvider);
+                });
+
+                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
+                {
+                    configureEndpoint?.Invoke(e);
+
+                    e.ConfigureConsumer<ConnectionConsumer<THub>>(serviceProvider);
+                });
+
+                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
+                {
+                    configureEndpoint?.Invoke(e);
+
+                    e.ConfigureConsumer<GroupConsumer<THub>>(serviceProvider);
+                });
+
+                configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
+                {
+                    configureEndpoint?.Invoke(e);
+
+                    e.ConfigureConsumer<UserConsumer<THub>>(serviceProvider);
+                });
+            }
 
             // Common Receive Endpoint
             configurator.ReceiveEndpoint(new HubEndpointDefinition<THub>(), null, e =>
@@ -107,6 +134,7 @@
                 e.ConfigureConsumer<GroupManagementConsumer<THub>>(serviceProvider);
             });
         }
+
 
         class HubEndpointDefinition<THub> :
             DefaultEndpointDefinition

@@ -1,10 +1,10 @@
 ﻿namespace MassTransit.SignalR.Consumers
 {
-    using MassTransit.Logging;
-    using MassTransit.SignalR.Contracts;
-    using Microsoft.AspNetCore.SignalR;
     using System;
     using System.Threading.Tasks;
+    using Contracts;
+    using Microsoft.AspNetCore.SignalR;
+
 
     public class GroupManagementConsumer<THub> : IConsumer<GroupManagement<THub>> where THub : Hub
     {

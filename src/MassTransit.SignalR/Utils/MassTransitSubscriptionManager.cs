@@ -1,34 +1,35 @@
 ﻿namespace MassTransit.SignalR.Utils
 {
-    using Microsoft.AspNetCore.SignalR;
     using System;
     using System.Collections.Concurrent;
+    using Microsoft.AspNetCore.SignalR;
+
 
     public class MassTransitSubscriptionManager
     {
-        public readonly ConcurrentDictionary<string, HubConnectionStore> Subscriptions = new ConcurrentDictionary<string, HubConnectionStore>(StringComparer.Ordinal);
+        readonly ConcurrentDictionary<string, HubConnectionStore> _subscriptions = new ConcurrentDictionary<string, HubConnectionStore>(StringComparer.Ordinal);
 
         public HubConnectionStore this[string identifier]
         {
             get
             {
-                Subscriptions.TryGetValue(identifier, out var connectionStore);
+                _subscriptions.TryGetValue(identifier, out var connectionStore);
                 return connectionStore;
             }
         }
 
-        public int Count => Subscriptions.Count;
+        public int Count => _subscriptions.Count;
 
         public void AddSubscription(string id, HubConnectionContext connection)
         {
-            var subscription = Subscriptions.GetOrAdd(id, _ => new HubConnectionStore());
+            var subscription = _subscriptions.GetOrAdd(id, _ => new HubConnectionStore());
 
             subscription.Add(connection);
         }
 
         public void RemoveSubscription(string id, HubConnectionContext connection)
         {
-            if (!Subscriptions.TryGetValue(id, out var subscription))
+            if (!_subscriptions.TryGetValue(id, out var subscription))
             {
                 return;
             }

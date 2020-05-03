@@ -1,13 +1,14 @@
 ﻿namespace MassTransit.SignalR.Utils
 {
-    using MassTransit.MessageData;
-    using Microsoft.AspNetCore.SignalR;
-    using Microsoft.AspNetCore.SignalR.Protocol;
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Threading.Tasks;
+    using MessageData;
+    using Microsoft.AspNetCore.SignalR;
+    using Microsoft.AspNetCore.SignalR.Protocol;
+
 
     public static class SerializedHubMessageExtensions
     {

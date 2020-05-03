@@ -1,9 +1,10 @@
 ﻿namespace MassTransit.SignalR.Consumers
 {
-    using MassTransit.SignalR.Contracts;
-    using MassTransit.SignalR.Utils;
-    using Microsoft.AspNetCore.SignalR;
     using System.Threading.Tasks;
+    using Contracts;
+    using Microsoft.AspNetCore.SignalR;
+    using Utils;
+
 
     public class GroupMessageDataConsumer<THub> : GroupBaseConsumer<THub>, IConsumer<GroupMessageData<THub>>
         where THub : Hub

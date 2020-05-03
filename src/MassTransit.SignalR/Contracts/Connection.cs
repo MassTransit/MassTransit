@@ -1,9 +1,8 @@
 ﻿namespace MassTransit.SignalR.Contracts
 {
-    using Microsoft.AspNetCore.SignalR;
-    using System;
     using System.Collections.Generic;
-    using System.Text;
+    using Microsoft.AspNetCore.SignalR;
+
 
     public interface Connection<THub> where THub : Hub
     {

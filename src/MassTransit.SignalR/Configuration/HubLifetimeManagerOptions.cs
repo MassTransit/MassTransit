@@ -1,0 +1,29 @@
+namespace MassTransit.SignalR
+{
+    using System;
+    using Microsoft.AspNetCore.SignalR;
+    using Utils;
+
+
+    public class HubLifetimeManagerOptions<THub> :
+        IHubLifetimeManagerOptions<THub>
+        where THub : Hub
+    {
+        public HubLifetimeManagerOptions()
+        {
+            ServerName = $"{Environment.MachineName}_{NewId.NextGuid():N}";
+            UseMessageData = false;
+            RequestTimeout = TimeSpan.FromSeconds(20);
+            ConnectionStore = new HubConnectionStore();
+            GroupsSubscriptionManager = new MassTransitSubscriptionManager();
+            UsersSubscriptionManager = new MassTransitSubscriptionManager();
+        }
+
+        public bool UseMessageData { get; set; }
+        public string ServerName { get; set; }
+        public RequestTimeout RequestTimeout { get; set; }
+        public HubConnectionStore ConnectionStore { get; set; }
+        public MassTransitSubscriptionManager GroupsSubscriptionManager { get; set; }
+        public MassTransitSubscriptionManager UsersSubscriptionManager { get; set; }
+    }
+}

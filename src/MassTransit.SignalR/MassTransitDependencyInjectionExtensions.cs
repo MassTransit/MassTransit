@@ -12,10 +12,12 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.SignalR
 {
+    using System;
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.Extensions.DependencyInjection;
-    using System;
 
+
+    [Obsolete("Replaced with HubLifetimeManagerOptions<THub>")]
     public static class MassTransitDependencyInjectionExtensions
     {
         /// <summary>
@@ -27,15 +29,9 @@ namespace MassTransit.SignalR
             Action<MassTransitSignalROptions> configureOptions = null)
         {
             var options = new MassTransitSignalROptions();
-
             configureOptions?.Invoke(options);
 
             signalRServerBuilder.Services.AddSingleton(options);
-
-            if (options.UseMessageData)
-                signalRServerBuilder.Services.AddSingleton(typeof(HubLifetimeManager<>), typeof(MassTransitMessageDataHubLifetimeManager<>));
-            else
-                signalRServerBuilder.Services.AddSingleton(typeof(HubLifetimeManager<>), typeof(MassTransitHubLifetimeManager<>));
 
             return signalRServerBuilder;
         }
