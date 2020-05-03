@@ -1,4 +1,4 @@
-namespace MassTransit.Transports.Mediator
+namespace MassTransit.Mediator
 {
     using System;
     using System.Threading;
@@ -8,23 +8,24 @@ namespace MassTransit.Transports.Mediator
     using Context;
     using Context.Converters;
     using Contexts;
+    using Endpoints;
     using GreenPipes;
-    using InMemory.Configuration;
     using Pipeline;
     using Pipeline.Observables;
+    using Transports;
 
 
     /// <summary>
     /// Sends messages directly to the <see cref="IReceivePipe"/>, without serialization
     /// </summary>
-    public class Mediator :
+    public class MassTransitMediator :
         IMediator
     {
         readonly IClientFactory _clientFactory;
         readonly MediatorSendEndpoint _endpoint;
 
-        public Mediator(ILogContext logContext, IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher,
-            IInMemoryReceiveEndpointConfiguration responseConfiguration, IReceivePipeDispatcher responseDispatcher)
+        public MassTransitMediator(ILogContext logContext, IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher,
+            IReceiveEndpointConfiguration responseConfiguration, IReceivePipeDispatcher responseDispatcher)
         {
             var sendObservable = new SendObservable();
 

@@ -2,6 +2,7 @@ namespace MassTransit.StructureMapIntegration.Registration
 {
     using System;
     using MassTransit.Registration;
+    using Mediator;
     using ScopeProviders;
     using Scoping;
     using StructureMap;

@@ -4,6 +4,7 @@ namespace MassTransit.LamarIntegration.Registration
     using GreenPipes;
     using Lamar;
     using MassTransit.Registration;
+    using Mediator;
     using ScopeProviders;
     using Scoping;
     using Transports;

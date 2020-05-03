@@ -1,6 +1,7 @@
 namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 {
     using Common_Tests;
+    using Mediator;
     using NUnit.Framework;
     using SimpleInjector;
     using SimpleInjector.Lifestyles;

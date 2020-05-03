@@ -1,4 +1,4 @@
-namespace MassTransit.Transports.Mediator
+namespace MassTransit.Mediator.Endpoints
 {
     using System;
     using System.Threading;
@@ -12,6 +12,7 @@ namespace MassTransit.Transports.Mediator
     using Pipeline;
     using Pipeline.Observables;
     using Topology;
+    using Transports;
 
 
     public class MediatorSendEndpoint :

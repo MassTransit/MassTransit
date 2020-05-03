@@ -2,6 +2,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
 {
     using Castle.Windsor;
     using Common_Tests;
+    using Mediator;
     using NUnit.Framework;
 
 

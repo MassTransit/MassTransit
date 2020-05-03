@@ -3,6 +3,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
     using System;
     using Context;
     using MassTransit.Registration;
+    using Mediator;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using ScopeProviders;

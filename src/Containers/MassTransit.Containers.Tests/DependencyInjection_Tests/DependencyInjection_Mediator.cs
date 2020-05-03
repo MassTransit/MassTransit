@@ -2,6 +2,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 {
     using System;
     using Common_Tests;
+    using Mediator;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
 

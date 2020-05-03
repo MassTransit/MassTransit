@@ -4,6 +4,7 @@ namespace MassTransit.AutofacIntegration.Registration
     using Autofac;
     using GreenPipes;
     using MassTransit.Registration;
+    using Mediator;
     using ScopeProviders;
     using Scoping;
     using Transports;

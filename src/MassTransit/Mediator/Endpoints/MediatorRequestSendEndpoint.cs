@@ -1,4 +1,4 @@
-namespace MassTransit.Transports.Mediator
+namespace MassTransit.Mediator.Endpoints
 {
     using System;
     using System.Threading;

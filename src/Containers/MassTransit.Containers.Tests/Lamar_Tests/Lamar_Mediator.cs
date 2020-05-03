@@ -2,6 +2,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
 {
     using Common_Tests;
     using Lamar;
+    using Mediator;
     using NUnit.Framework;
 
 

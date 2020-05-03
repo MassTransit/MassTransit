@@ -1,4 +1,4 @@
-namespace MassTransit.Transports.Mediator.Contexts
+namespace MassTransit.Mediator.Contexts
 {
     using System;
     using System.Diagnostics;
@@ -11,6 +11,7 @@ namespace MassTransit.Transports.Mediator.Contexts
     using Metadata;
     using Serialization;
     using Topology;
+    using Transports;
     using Util;
 
 

@@ -5,6 +5,7 @@ namespace MassTransit.WindsorIntegration.Registration
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
     using MassTransit.Registration;
+    using Mediator;
     using ScopeProviders;
     using Scoping;
     using Transports;

@@ -1,6 +1,7 @@
 namespace MassTransit.Containers.Tests.StructureMap_Tests
 {
     using Common_Tests;
+    using Mediator;
     using NUnit.Framework;
     using StructureMap;
 

@@ -3,8 +3,8 @@ namespace MassTransit
     using System;
     using Configuration;
     using Context;
+    using Mediator;
     using Transports.InMemory.Configuration;
-    using Transports.Mediator;
 
 
     public static class MediatorConfigurationExtensions
@@ -38,7 +38,7 @@ namespace MassTransit
 
             var responseDispatcher = responseConfigurator.Build();
 
-            return new Mediator(LogContext.Current, endpointConfiguration, mediatorDispatcher, responseEndpointConfiguration, responseDispatcher);
+            return new MassTransitMediator(LogContext.Current, endpointConfiguration, mediatorDispatcher, responseEndpointConfiguration, responseDispatcher);
         }
     }
 }

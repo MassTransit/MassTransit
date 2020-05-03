@@ -3,6 +3,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using System;
     using Context;
     using MassTransit.Registration;
+    using Mediator;
     using ScopeProviders;
     using Scoping;
     using SimpleInjector;

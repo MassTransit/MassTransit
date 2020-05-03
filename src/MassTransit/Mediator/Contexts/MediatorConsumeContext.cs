@@ -1,4 +1,4 @@
-namespace MassTransit.Transports.Mediator.Contexts
+namespace MassTransit.Mediator.Contexts
 {
     using System;
     using System.Collections.Generic;

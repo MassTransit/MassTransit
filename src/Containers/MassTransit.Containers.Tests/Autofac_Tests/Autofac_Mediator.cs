@@ -2,6 +2,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 {
     using Autofac;
     using Common_Tests;
+    using Mediator;
     using NUnit.Framework;
     using Saga;
 

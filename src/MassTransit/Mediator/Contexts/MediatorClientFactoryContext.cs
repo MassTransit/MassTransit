@@ -1,7 +1,8 @@
-namespace MassTransit.Transports.Mediator.Contexts
+namespace MassTransit.Mediator.Contexts
 {
     using System;
     using Clients;
+    using Endpoints;
     using GreenPipes;
     using Pipeline;
 

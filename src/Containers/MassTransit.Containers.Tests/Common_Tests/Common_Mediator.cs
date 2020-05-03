@@ -3,6 +3,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using System;
     using System.Threading.Tasks;
     using GreenPipes.Internals.Extensions;
+    using Mediator;
     using NUnit.Framework;
     using Saga;
     using Scenarios;

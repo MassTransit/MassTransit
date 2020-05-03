@@ -1,4 +1,4 @@
-namespace MassTransit
+namespace MassTransit.Mediator
 {
     public interface IMediator :
         ISendEndpoint,
