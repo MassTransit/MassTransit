@@ -28,10 +28,9 @@ namespace MassTransit.SignalR
         where THub : Hub
     {
         public MassTransitHubLifetimeManager(HubLifetimeManagerOptions<THub> hubLifetimeManagerOptions,
-            IPublishEndpoint publishEndpoint,
-            IRequestClient<GroupManagement<THub>> groupManagementRequestClient,
+            IBus bus,
             IHubProtocolResolver hubProtocolResolver)
-            : base(hubLifetimeManagerOptions, publishEndpoint, groupManagementRequestClient, hubProtocolResolver)
+            : base(hubLifetimeManagerOptions, bus, bus.CreateClientFactory().CreateRequestClient<GroupManagement<THub>>(), hubProtocolResolver)
         {
         }
 

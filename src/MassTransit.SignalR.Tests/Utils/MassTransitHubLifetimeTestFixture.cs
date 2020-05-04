@@ -2,7 +2,6 @@
 {
     using System;
     using Consumers;
-    using Contracts;
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.AspNetCore.SignalR.Internal;
     using Microsoft.AspNetCore.SignalR.Protocol;
@@ -47,7 +46,6 @@
             var manager = new MassTransitHubLifetimeManager<THub>(
                 new HubLifetimeManagerOptions<THub> {ServerName = $"{_prefix}_{Guid.NewGuid():N}"},
                 Harness.Bus,
-                Harness.Bus.CreateClientFactory().CreateRequestClient<GroupManagement<THub>>(TimeSpan.FromSeconds(5)),
                 new DefaultHubProtocolResolver(
                     new IHubProtocol[] {new JsonHubProtocol(Options.Create(jsonOptions)), new MessagePackHubProtocol(Options.Create(messagePackOptions)),},
                     NullLogger<DefaultHubProtocolResolver>.Instance)

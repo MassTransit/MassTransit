@@ -31,11 +31,10 @@ namespace MassTransit.SignalR
         readonly IMessageDataRepository _repository;
 
         public MassTransitMessageDataHubLifetimeManager(HubLifetimeManagerOptions<THub> hubLifetimeManagerOptions,
-            IPublishEndpoint publishEndpoint,
-            IRequestClient<GroupManagement<THub>> groupManagementRequestClient,
+            IBus bus,
             IHubProtocolResolver hubProtocolResolver,
             IMessageDataRepository repository)
-            : base(hubLifetimeManagerOptions, publishEndpoint, groupManagementRequestClient, hubProtocolResolver)
+            : base(hubLifetimeManagerOptions, bus, bus.CreateClientFactory().CreateRequestClient<GroupManagement<THub>>(), hubProtocolResolver)
         {
             _repository = repository;
         }
