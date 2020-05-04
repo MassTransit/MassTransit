@@ -12,10 +12,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using Amazon.SimpleNotificationService.Model;
     using Amazon.SQS;
     using Amazon.SQS.Model;
-    using Context;
     using GreenPipes;
-    using Pipeline;
-    using Topology;
     using Topology.Entities;
     using Transports;
 
@@ -143,29 +140,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             _queueCache.RemoveByName(queue.EntityName);
         }
 
-        async Task ClientContext.BasicConsume(ReceiveSettings receiveSettings, IBasicConsumer consumer)
-        {
-            var queueInfo = await _queueCache.GetByName(receiveSettings.EntityName).ConfigureAwait(false);
-
-            Task.Run(async () =>
-            {
-                // TODO add ConcurrencyLimit for receive settings
-                var executor = new ChannelExecutor(receiveSettings.PrefetchCount, receiveSettings.PrefetchCount);
-                try
-                {
-                    await PollMessages(queueInfo.Url, receiveSettings, executor, consumer).ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                {
-                    LogContext.Error?.Log(exception, "BasicConsume Faulted in Polling Loop");
-                }
-                finally
-                {
-                    await executor.DisposeAsync(CancellationToken.None).ConfigureAwait(false);
-                }
-            });
-        }
-
         async Task<PublishRequest> ClientContext.CreatePublishRequest(string topicName, byte[] body)
         {
             var topicInfo = await _topicCache.GetByName(topicName).ConfigureAwait(false);
@@ -217,56 +191,23 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 c.Values.Contains(topicArnPattern));
         }
 
-        /// <summary>
-        /// SQS can only be polled for 10 messages at a time.
-        /// Make multiple poll requests, if necessary, to achieve up to PrefetchCount number of messages
-        /// </summary>
-        async Task PollMessages(string queueUrl, ReceiveSettings receiveSettings, ChannelExecutor executor, IBasicConsumer consumer)
+        public async Task<IList<Message>> ReceiveMessages(string queueName, int messageLimit, int waitTime, CancellationToken cancellationToken)
         {
-            var maxReceiveCount = (receiveSettings.PrefetchCount + 9) / 10;
-            var receiveCount = 1;
+            var queueInfo = await _queueCache.GetByName(queueName).ConfigureAwait(false);
 
-            while (CancellationToken.IsCancellationRequested == false)
+            var request = new ReceiveMessageRequest(queueInfo.Url)
             {
-                int[] counts = await Task.WhenAll(Enumerable.Repeat(0, receiveCount)
-                    .Select(_ => ReceiveMessages(queueUrl, 10, receiveSettings.WaitTimeSeconds, executor, consumer))).ConfigureAwait(false);
+                MaxNumberOfMessages = messageLimit,
+                WaitTimeSeconds = waitTime,
+                AttributeNames = new List<string> {"All"},
+                MessageAttributeNames = new List<string> {"All"}
+            };
 
-                var received = counts.Sum();
+            var response = await _amazonSqs.ReceiveMessageAsync(request, cancellationToken).ConfigureAwait(false);
 
-                if (received == receiveCount * 10) // ramp up receivers when busy
-                    receiveCount = Math.Min(maxReceiveCount, receiveCount + (maxReceiveCount - receiveCount) / 2);
-                else if (received / 10 < receiveCount - 1) // dial it back when not so busy
-                    receiveCount = Math.Max(1, (received + 9) / 10);
-            }
-        }
+            response.EnsureSuccessfulResponse();
 
-        async Task<int> ReceiveMessages(string queueUrl, int messageLimit, int waitTime, ChannelExecutor executor, IBasicConsumer consumer)
-        {
-            try
-            {
-                var request = new ReceiveMessageRequest(queueUrl)
-                {
-                    MaxNumberOfMessages = messageLimit,
-                    WaitTimeSeconds = waitTime,
-                    AttributeNames = new List<string> {"All"},
-                    MessageAttributeNames = new List<string> {"All"}
-                };
-
-                var response = await _amazonSqs.ReceiveMessageAsync(request, CancellationToken).ConfigureAwait(false);
-
-                response.EnsureSuccessfulResponse();
-
-                await Task.WhenAll(response.Messages.Select(message => executor.Push(() => consumer.HandleMessage(message), CancellationToken)))
-                    .ConfigureAwait(false);
-
-                return response.Messages.Count;
-            }
-            catch (Exception exception)
-            {
-                LogContext.Error?.Log(exception, "ReceiveMessages Faulted: {QueueUrl}", queueUrl);
-            }
-
-            return 0;
+            return response.Messages;
         }
     }
 }

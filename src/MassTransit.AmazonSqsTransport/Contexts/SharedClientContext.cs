@@ -1,12 +1,11 @@
 ﻿namespace MassTransit.AmazonSqsTransport.Contexts
 {
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService.Model;
     using Amazon.SQS.Model;
     using GreenPipes;
-    using Pipeline;
-    using Topology;
     using Topology.Entities;
     using Util;
 
@@ -53,11 +52,6 @@
             return _context.DeleteQueue(queue);
         }
 
-        Task ClientContext.BasicConsume(ReceiveSettings receiveSettings, IBasicConsumer consumer)
-        {
-            return _context.BasicConsume(receiveSettings, consumer);
-        }
-
         Task<PublishRequest> ClientContext.CreatePublishRequest(string topicName, byte[] body)
         {
             return _context.CreatePublishRequest(topicName, body);
@@ -81,6 +75,11 @@
         Task ClientContext.PurgeQueue(string queueName, CancellationToken cancellationToken)
         {
             return _context.PurgeQueue(queueName, cancellationToken);
+        }
+
+        Task<IList<Message>> ClientContext.ReceiveMessages(string queueName, int messageLimit, int waitTime, CancellationToken cancellationToken)
+        {
+            return _context.ReceiveMessages(queueName, messageLimit, waitTime, cancellationToken);
         }
 
         public Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())

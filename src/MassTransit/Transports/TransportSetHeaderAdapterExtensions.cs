@@ -88,6 +88,15 @@ namespace MassTransit.Transports
             }
         }
 
+        public static bool TryGetInt(this IDictionary<string, string> dictionary, string key, out int value)
+        {
+            if (dictionary.TryGetValue(key, out var text))
+                return int.TryParse(text, out value);
+
+            value = default;
+            return false;
+        }
+
         public static void Set(this IDictionary<string, object> dictionary, params HeaderValue[] headerValues)
         {
             foreach (HeaderValue header in headerValues)
