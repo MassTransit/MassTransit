@@ -5,7 +5,6 @@ namespace MassTransit.SignalR
 
     public interface IHubLifetimeManagerOptions
     {
-        bool UseMessageData { set; }
         string ServerName { set; }
         RequestTimeout RequestTimeout { set; }
     }

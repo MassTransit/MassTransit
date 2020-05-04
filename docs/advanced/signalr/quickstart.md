@@ -15,7 +15,7 @@ public void ConfigureServices(IServiceCollection services)
     services.AddMassTransit(x =>
     {
         // Add this for each Hub you have
-        x.AddSignalRHubConsumers<ChatHub>(cfg => {/*Configure hub lifetime manager*/});
+        x.AddSignalRHub<ChatHub>(cfg => {/*Configure hub lifetime manager*/});
 
         x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
         {
@@ -24,9 +24,9 @@ public void ConfigureServices(IServiceCollection services)
                 h.Username("guest");
                 h.Password("guest");
             });
-
-            // Register endpoint for each hub you have
-            cfg.AddSignalRHubEndpoints<ChatHub>(context);
+          
+            // register consumer' and hub' endpoints
+            cfg.ConfigureEndpoints(context);
         }));
     });
 

@@ -1,15 +1,16 @@
 ﻿namespace MassTransit.SignalR.Tests
 {
-    using MassTransit.SignalR.Contracts;
-    using MassTransit.SignalR.Tests.OfficialFramework;
-    using Microsoft.AspNetCore.SignalR.Protocol;
-    using NUnit.Framework;
     using System.Linq;
     using System.Threading.Tasks;
+    using Contracts;
+    using Microsoft.AspNetCore.SignalR.Protocol;
+    using NUnit.Framework;
+    using OfficialFramework;
+
 
     public class HubLifeTimeManagerTests : SingleScaleoutBackplaneTestFixture<MyHub>
     {
-        private async Task AssertMessageAsync(TestClient client)
+        async Task AssertMessageAsync(TestClient client)
         {
             var message = await client.ReadAsync().OrTimeout() as InvocationMessage;
             Assert.NotNull(message);

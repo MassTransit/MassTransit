@@ -20,6 +20,7 @@
         {
             _prefix = Environment.MachineName;
         }
+
         protected abstract BusTestHarness Harness { get; set; }
 
         protected SignalRBackplaneConsumersTestHarness<THub> RegisterBusEndpoint(string queueName = "receiveEndpoint")
@@ -37,7 +38,7 @@
             return consumersTestHarness;
         }
 
-        protected HubLifetimeManager<THub> CreateLifetimeManager(MessagePackHubProtocolOptions messagePackOptions = null,
+        protected MassTransitHubLifetimeManager<THub> CreateLifetimeManager(MessagePackHubProtocolOptions messagePackOptions = null,
             JsonHubProtocolOptions jsonOptions = null)
         {
             messagePackOptions ??= new MessagePackHubProtocolOptions();
@@ -45,7 +46,7 @@
 
             var manager = new MassTransitHubLifetimeManager<THub>(
                 new HubLifetimeManagerOptions<THub> {ServerName = $"{_prefix}_{Guid.NewGuid():N}"},
-                Harness.Bus,
+                new BusHubLifetimeScopeProvider(Harness.Bus),
                 new DefaultHubProtocolResolver(
                     new IHubProtocol[] {new JsonHubProtocol(Options.Create(jsonOptions)), new MessagePackHubProtocol(Options.Create(messagePackOptions)),},
                     NullLogger<DefaultHubProtocolResolver>.Instance)

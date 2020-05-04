@@ -1,11 +1,13 @@
 ﻿namespace MassTransit.SignalR.Contracts
 {
-    using Microsoft.AspNetCore.SignalR;
     using System.Collections.Generic;
+    using Microsoft.AspNetCore.SignalR;
 
-    public interface All<THub> where THub : Hub
+
+    public interface All<THub>
+        where THub : Hub
     {
-        string[] ExcludedConnectionIds { get; set; }
-        IDictionary<string, byte[]> Messages { get; set; }
+        string[] ExcludedConnectionIds { get; }
+        IReadOnlyDictionary<string, byte[]> Messages { get; }
     }
 }

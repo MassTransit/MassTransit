@@ -1,18 +1,19 @@
 ﻿namespace MassTransit.SignalR.Consumers
 {
-    using System;
     using System.Threading.Tasks;
     using Contracts;
     using Microsoft.AspNetCore.SignalR;
 
 
-    public class GroupManagementConsumer<THub> : IConsumer<GroupManagement<THub>> where THub : Hub
+    public class GroupManagementConsumer<THub> :
+        IConsumer<GroupManagement<THub>>
+        where THub : Hub
     {
-        private readonly MassTransitHubLifetimeManager<THub> _hubLifetimeManager;
+        readonly MassTransitHubLifetimeManager<THub> _hubLifetimeManager;
 
-        public GroupManagementConsumer(HubLifetimeManager<THub> hubLifetimeManager)
+        public GroupManagementConsumer(MassTransitHubLifetimeManager<THub> hubLifetimeManager)
         {
-            _hubLifetimeManager = hubLifetimeManager as MassTransitHubLifetimeManager<THub> ?? throw new ArgumentNullException(nameof(hubLifetimeManager), "HubLifetimeManager<> must be of type MassTransitHubLifetimeManager<>");
+            _hubLifetimeManager = hubLifetimeManager;
         }
 
         public Task Consume(ConsumeContext<GroupManagement<THub>> context)
