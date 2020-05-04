@@ -43,7 +43,7 @@
         static HubLifetimeManager<THub> GetLifetimeManager<THub>(IServiceProvider provider)
             where THub : Hub
         {
-            var options = provider.GetRequiredService<MassTransitSignalROptions>();
+            var options = provider.GetService<MassTransitSignalROptions>() ?? new MassTransitSignalROptions();
             var hubLifetimeManagerOptions = provider.GetRequiredService<HubLifetimeManagerOptions<THub>>();
             var endpoint = provider.GetRequiredService<IPublishEndpoint>();
             var requestClient = provider.GetRequiredService<IRequestClient<GroupManagement<THub>>>();
@@ -61,7 +61,7 @@
             where THub : Hub
         {
             // Get the configuration options
-            var options = serviceProvider.GetRequiredService<MassTransitSignalROptions>();
+            var options = serviceProvider.GetService<MassTransitSignalROptions>() ?? new MassTransitSignalROptions();
             var hubLifetimeManagerOptions = serviceProvider.GetRequiredService<HubLifetimeManagerOptions<THub>>();
 
             if (options.UseMessageData || hubLifetimeManagerOptions.UseMessageData)

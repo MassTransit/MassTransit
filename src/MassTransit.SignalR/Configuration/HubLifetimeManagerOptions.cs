@@ -22,8 +22,8 @@ namespace MassTransit.SignalR
         public bool UseMessageData { get; set; }
         public string ServerName { get; set; }
         public RequestTimeout RequestTimeout { get; set; }
-        public HubConnectionStore ConnectionStore { get; set; }
-        public MassTransitSubscriptionManager GroupsSubscriptionManager { get; set; }
-        public MassTransitSubscriptionManager UsersSubscriptionManager { get; set; }
+        public HubConnectionStore ConnectionStore { get; }
+        public MassTransitSubscriptionManager GroupsSubscriptionManager { get; }
+        public MassTransitSubscriptionManager UsersSubscriptionManager { get; }
     }
 }
