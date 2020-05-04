@@ -1,6 +1,8 @@
 ﻿namespace MassTransit.RabbitMqTransport.Topology
 {
+    using System;
     using MassTransit.Topology;
+    using Settings;
 
 
     public interface IRabbitMqSendTopology :
@@ -8,6 +10,9 @@
     {
         new IRabbitMqMessageSendTopologyConfigurator<T> GetMessageTopology<T>()
             where T : class;
+
+        Action<RabbitMqErrorSettings> ConfigureErrorSettings { get; }
+        Action<RabbitMqDeadLetterSettings> ConfigureDeadLetterSettings { get; }
 
         /// <summary>
         /// Return the send settings for the specified <paramref name="address"/>

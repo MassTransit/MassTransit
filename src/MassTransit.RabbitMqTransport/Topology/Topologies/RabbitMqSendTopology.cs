@@ -18,6 +18,8 @@
 
         public IExchangeTypeSelector ExchangeTypeSelector { get; }
         public IEntityNameValidator EntityNameValidator { get; }
+        public Action<RabbitMqErrorSettings> ConfigureErrorSettings { get; set; }
+        public Action<RabbitMqDeadLetterSettings> ConfigureDeadLetterSettings { get; set; }
 
         IRabbitMqMessageSendTopologyConfigurator<T> IRabbitMqSendTopology.GetMessageTopology<T>()
         {
@@ -33,12 +35,20 @@
 
         public ErrorSettings GetErrorSettings(EntitySettings settings)
         {
-            return new RabbitMqErrorSettings(settings, settings.ExchangeName + "_error");
+            var errorSettings = new RabbitMqErrorSettings(settings, settings.ExchangeName + "_error");
+
+            ConfigureErrorSettings?.Invoke(errorSettings);
+
+            return errorSettings;
         }
 
         public DeadLetterSettings GetDeadLetterSettings(EntitySettings settings)
         {
-            return new RabbitMqDeadLetterSettings(settings, settings.ExchangeName + "_skipped");
+            var deadLetterSetting = new RabbitMqDeadLetterSettings(settings, settings.ExchangeName + "_skipped");
+
+            ConfigureDeadLetterSettings?.Invoke(deadLetterSetting);
+
+            return deadLetterSetting;
         }
 
         protected override IMessageSendTopologyConfigurator CreateMessageTopology<T>(Type type)

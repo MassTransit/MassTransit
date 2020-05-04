@@ -3,6 +3,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology
     using System;
     using Configuration;
     using MassTransit.Topology;
+    using Settings;
     using Transport;
 
 
@@ -11,6 +12,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology
     {
         new IServiceBusMessageSendTopology<T> GetMessageTopology<T>()
             where T : class;
+
+        Action<QueueSendSettings> ConfigureErrorSettings { get; }
+        Action<QueueSendSettings> ConfigureDeadLetterSettings { get; }
 
         SendSettings GetSendSettings(ServiceBusEndpointAddress address);
 

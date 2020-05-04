@@ -17,6 +17,9 @@
         const string ErrorQueueSuffix = "_error";
         const string DeadLetterQueueSuffix = "_skipped";
 
+        public Action<QueueSendSettings> ConfigureErrorSettings { get; set; }
+        public Action<QueueSendSettings> ConfigureDeadLetterSettings { get; set; }
+
         IServiceBusMessageSendTopology<T> IServiceBusSendTopology.GetMessageTopology<T>()
         {
             return GetMessageTopology<T>() as IServiceBusMessageSendTopologyConfigurator<T>;
@@ -49,7 +52,11 @@
             var description = configurator.GetQueueDescription();
             description.Path = description.Path + ErrorQueueSuffix;
 
-            return new QueueSendSettings(description);
+            var errorSettings = new QueueSendSettings(description);
+
+            ConfigureErrorSettings?.Invoke(errorSettings);
+
+            return errorSettings;
         }
 
         public SendSettings GetErrorSettings(ISubscriptionConfigurator configurator, Uri hostAddress)
@@ -62,7 +69,11 @@
             queueDescription.DefaultMessageTimeToLive = description.DefaultMessageTimeToLive;
             queueDescription.AutoDeleteOnIdle = description.AutoDeleteOnIdle;
 
-            return new QueueSendSettings(queueDescription);
+            var errorSettings = new QueueSendSettings(queueDescription);
+
+            ConfigureErrorSettings?.Invoke(errorSettings);
+
+            return errorSettings;
         }
 
         public SendSettings GetDeadLetterSettings(IQueueConfigurator configurator)
@@ -70,7 +81,11 @@
             var description = configurator.GetQueueDescription();
             description.Path = description.Path + DeadLetterQueueSuffix;
 
-            return new QueueSendSettings(description);
+            var deadLetterSetting = new QueueSendSettings(description);
+
+            ConfigureDeadLetterSettings?.Invoke(deadLetterSetting);
+
+            return deadLetterSetting;
         }
 
         public SendSettings GetDeadLetterSettings(ISubscriptionConfigurator configurator, Uri hostAddress)
@@ -83,7 +98,11 @@
             queueDescription.DefaultMessageTimeToLive = description.DefaultMessageTimeToLive;
             queueDescription.AutoDeleteOnIdle = description.AutoDeleteOnIdle;
 
-            return new QueueSendSettings(queueDescription);
+            var deadLetterSetting = new QueueSendSettings(queueDescription);
+
+            ConfigureDeadLetterSettings?.Invoke(deadLetterSetting);
+
+            return deadLetterSetting;
         }
 
         protected override IMessageSendTopologyConfigurator CreateMessageTopology<T>(Type type)
