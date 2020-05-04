@@ -2,7 +2,9 @@
 {
     using Microsoft.AspNetCore.SignalR;
 
-    public interface GroupManagement<THub> where THub : Hub
+
+    public interface GroupManagement<THub>
+        where THub : Hub
     {
         /// <summary>
         /// Gets the ServerName of the group command.

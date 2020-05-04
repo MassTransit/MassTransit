@@ -1,9 +1,9 @@
 ﻿namespace MassTransit.SignalR.Tests
 {
-    using MassTransit.SignalR.Consumers;
-    using MassTransit.Testing;
-    using Microsoft.AspNetCore.SignalR;
     using System.Collections.Generic;
+    using Consumers;
+    using Microsoft.AspNetCore.SignalR;
+    using Testing;
     using Utils;
 
 
@@ -18,7 +18,7 @@
 
         readonly IList<IHubManagerConsumerFactory<THub>> _hubManagerConsumerFactories;
 
-        public HubLifetimeManager<THub> HubLifetimeManager { get; private set; }
+        public MassTransitHubLifetimeManager<THub> HubLifetimeManager { get; private set; }
 
         readonly string _queuePrefix;
         readonly BusTestHarness _testHarness;
@@ -65,7 +65,7 @@
             _hubManagerConsumerFactories.Add(hubConsumerFactory);
         }
 
-        public void SetHubLifetimeManager(HubLifetimeManager<THub> hubLifetimeManager)
+        public void SetHubLifetimeManager(MassTransitHubLifetimeManager<THub> hubLifetimeManager)
         {
             foreach (var factory in _hubManagerConsumerFactories)
             {

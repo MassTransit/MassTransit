@@ -14,11 +14,11 @@
         where TConsumer : class, IConsumer
         where THub : Hub
     {
-        readonly Func<HubLifetimeManager<THub>, TConsumer> _factoryMethod;
+        readonly Func<MassTransitHubLifetimeManager<THub>, TConsumer> _factoryMethod;
 
-        public HubLifetimeManager<THub> HubLifetimeManager { get; set; }
+        public MassTransitHubLifetimeManager<THub> HubLifetimeManager { get; set; }
 
-        public HubLifetimeManagerConsumerFactory(Func<HubLifetimeManager<THub>, TConsumer> factoryMethod)
+        public HubLifetimeManagerConsumerFactory(Func<MassTransitHubLifetimeManager<THub>, TConsumer> factoryMethod)
         {
             _factoryMethod = factoryMethod;
         }
