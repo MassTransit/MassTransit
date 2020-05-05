@@ -76,16 +76,24 @@ namespace MassTransit.Topology.Topologies
             return _observers.Connect(observer);
         }
 
-        public void AddConvention(IConsumeTopologyConvention convention)
+        public bool TryAddConvention(IConsumeTopologyConvention convention)
         {
             lock (_lock)
             {
-                _conventions.Add(convention);
+                var result = false;
+                if (_conventions.All(x => x.GetType() != convention.GetType()))
+                {
+                    _conventions.Add(convention);
+                    result = true;
+                }
 
                 foreach (var messageConsumeTopologyConfigurator in _messageTypes.Values)
                 {
-                    messageConsumeTopologyConfigurator.AddConvention(convention);
+                    if (messageConsumeTopologyConfigurator.TryAddConvention(convention))
+                        result = true;
                 }
+
+                return result;
             }
         }
 
@@ -197,7 +205,7 @@ namespace MassTransit.Topology.Topologies
 
             foreach (var convention in conventions)
                 if (convention.TryGetMessageConsumeTopologyConvention(out IMessageConsumeTopologyConvention<T> messageConsumeTopologyConvention))
-                    messageTopology.AddConvention(messageConsumeTopologyConvention);
+                    messageTopology.TryAddConvention(messageConsumeTopologyConvention);
         }
     }
 }

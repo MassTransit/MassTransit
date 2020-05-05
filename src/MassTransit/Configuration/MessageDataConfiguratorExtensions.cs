@@ -27,11 +27,12 @@ namespace MassTransit
         /// <param name="repository"></param>
         public static void UseMessageData(this IBusFactoryConfigurator configurator, IMessageDataRepository repository)
         {
-            configurator.ConsumeTopology.AddConvention(new MessageDataConsumeTopologyConvention(repository));
-            configurator.SendTopology.AddConvention(new MessageDataSendTopologyConvention(repository));
-
-            // Courier does not use ConsumeContext, so it needs to be special
-            var observer = new CourierMessageDataConfigurationObserver(configurator, repository, false);
+            if (configurator.ConsumeTopology.TryAddConvention(new MessageDataConsumeTopologyConvention(repository))
+                && configurator.SendTopology.TryAddConvention(new MessageDataSendTopologyConvention(repository)))
+            {
+                // Courier does not use ConsumeContext, so it needs to be special
+                var observer = new CourierMessageDataConfigurationObserver(configurator, repository, false);
+            }
         }
 
         /// <summary>

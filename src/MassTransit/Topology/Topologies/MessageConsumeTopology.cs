@@ -52,9 +52,12 @@ namespace MassTransit.Topology.Topologies
                 _topologies[index].Apply(builder);
         }
 
-        public void AddConvention(IMessageConsumeTopologyConvention<TMessage> convention)
+        public bool TryAddConvention(IMessageConsumeTopologyConvention<TMessage> convention)
         {
+            if (_conventions.Any(x => x.GetType() == convention.GetType()))
+                return false;
             _conventions.Add(convention);
+            return true;
         }
 
         public void UpdateConvention<TConvention>(Func<TConvention, TConvention> update)
@@ -89,10 +92,10 @@ namespace MassTransit.Topology.Topologies
                 _conventions.Add(addedConvention);
         }
 
-        public void AddConvention(IConsumeTopologyConvention convention)
+        public bool TryAddConvention(IConsumeTopologyConvention convention)
         {
-            if (convention.TryGetMessageConsumeTopologyConvention(out IMessageConsumeTopologyConvention<TMessage> messageConsumeTopologyConvention))
-                AddConvention(messageConsumeTopologyConvention);
+            return convention.TryGetMessageConsumeTopologyConvention(out IMessageConsumeTopologyConvention<TMessage> messageConsumeTopologyConvention)
+                && TryAddConvention(messageConsumeTopologyConvention);
         }
 
         public virtual IEnumerable<ValidationResult> Validate()
