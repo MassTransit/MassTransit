@@ -1,19 +1,12 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests
+﻿namespace MassTransit.Tests
 {
     using System;
+    using System.Threading;
+    using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Util;
+    using MassTransit.Testing;
+    using MassTransit.Testing.Indicators;
     using NUnit.Framework;
     using TestFramework;
 
@@ -22,16 +15,74 @@ namespace MassTransit.Tests
     public class Using_the_circuit_breaker :
         InMemoryTestFixture
     {
+        int _faultCount;
+        IBusActivityMonitor _activityMonitor;
+
         [Test]
-        public void Should_work()
-        {            
+        public async Task Should_work()
+        {
+            for (var i = 1; i <= 30; i++)
+            {
+                await Bus.Publish(new BreakingMessage {MessageIndex = i});
+                await Task.Delay(50);
+            }
+
+            await _activityMonitor.AwaitBusInactivity();
+
+            // this is broken, because the faults aren't produced by an open circuit breaker
+            Assert.That(_faultCount, Is.GreaterThanOrEqualTo(3));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             base.ConfigureInMemoryReceiveEndpoint(configurator);
 
-            configurator.UseCircuitBreaker(x => x.ResetInterval = TimeSpan.FromSeconds(30));
+            configurator.UseCircuitBreaker(x =>
+            {
+                x.ActiveThreshold = 5;
+                x.ResetInterval = TimeSpan.FromSeconds(15);
+                x.TrackingPeriod = TimeSpan.FromSeconds(10);
+                x.TripThreshold = 20;
+            });
+
+            configurator.Consumer(() => new BreakingConsumer());
+        }
+
+        protected override void ConnectObservers(IBus bus)
+        {
+            _activityMonitor = bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(500));
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ReceiveEndpoint("faults", cfg =>
+            {
+                cfg.Handler<Fault<BreakingMessage>>(context =>
+                {
+                    Interlocked.Increment(ref _faultCount);
+
+                    return TaskUtil.Completed;
+                });
+            });
+        }
+
+
+        public class BreakingMessage
+        {
+            public int MessageIndex { get; set; }
+        }
+
+
+        class BreakingConsumer :
+            IConsumer<BreakingMessage>
+        {
+            public Task Consume(ConsumeContext<BreakingMessage> context)
+            {
+                if (context.Message.MessageIndex % 2 == 0)
+                    throw new IntentionalTestException("Every other message seems to fail");
+
+                return TaskUtil.Completed;
+            }
         }
     }
 }

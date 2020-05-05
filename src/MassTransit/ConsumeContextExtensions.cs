@@ -110,7 +110,9 @@
 
             Task<ISendEndpoint> publishSendEndpointTask = receiveContext.PublishEndpointProvider.GetPublishSendEndpoint<T>();
             if (publishSendEndpointTask.IsCompletedSuccessfully())
-                return Task.FromResult<ISendEndpoint>(new ConsumeSendEndpoint(publishSendEndpointTask.Result, consumeContext, requestId));
+                return consumeContext != null
+                    ? Task.FromResult<ISendEndpoint>(new ConsumeSendEndpoint(publishSendEndpointTask.Result, consumeContext, requestId))
+                    : publishSendEndpointTask;
 
             async Task<ISendEndpoint> GetPublishSendEndpointAsync()
             {
