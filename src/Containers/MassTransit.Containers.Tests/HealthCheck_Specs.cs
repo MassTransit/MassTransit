@@ -42,10 +42,11 @@ namespace MassTransit.Containers.Tests
 
             var healthChecks = provider.GetService<HealthCheckService>();
 
+            var hostedServices = provider.GetRequiredService<IEnumerable<IHostedService>>();
+
             var result = await healthChecks.CheckHealthAsync(TestCancellationToken);
             Assert.That(result.Status == HealthStatus.Unhealthy);
 
-            var hostedServices = provider.GetRequiredService<IEnumerable<IHostedService>>();
             await Task.WhenAll(hostedServices.Select(x => x.StartAsync(TestCancellationToken)));
             try
             {

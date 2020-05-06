@@ -2,7 +2,7 @@ namespace MassTransit.AutofacIntegration.Registration
 {
     using System;
     using Autofac;
-    using GreenPipes;
+    using Autofac.Core;
     using MassTransit.Registration;
     using Mediator;
     using ScopeProviders;
@@ -57,9 +57,6 @@ namespace MassTransit.AutofacIntegration.Registration
 
         ContainerBuilder IContainerBuilderConfigurator.Builder => _builder;
 
-        public Action<ContainerBuilder, SendContext> ConfigureSendScope { get; set; }
-        public Action<ContainerBuilder, PublishContext> ConfigurePublishScope { get; set; }
-
         public Action<ContainerBuilder, ConsumeContext> ConfigureScope
         {
             get => _registrar.ConfigureScope;
@@ -77,6 +74,12 @@ namespace MassTransit.AutofacIntegration.Registration
                 return busFactory(context);
             }
 
+            if (_builder.ComponentRegistryBuilder.IsRegistered(new TypedService(typeof(IBusControl))))
+            {
+                throw new ConfigurationException(
+                    "AddBus() was already called. To configure multiple bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");
+            }
+
             _builder.Register(BusFactory)
                 .As<IBusControl>()
                 .As<IBus>()
@@ -90,7 +93,7 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IPublishEndpoint>()
                 .InstancePerLifetimeScope();
 
-            _builder.Register(context => ClientFactoryProvider(context.Resolve<IConfigurationServiceProvider>()))
+            _builder.Register(context => ClientFactoryProvider(context.Resolve<IConfigurationServiceProvider>(), context.Resolve<IBus>()))
                 .As<IClientFactory>()
                 .SingleInstance();
         }

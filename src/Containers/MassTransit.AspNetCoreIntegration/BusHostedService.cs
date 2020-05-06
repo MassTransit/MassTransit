@@ -3,33 +3,32 @@ namespace MassTransit.AspNetCoreIntegration
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Hosting;
-    using Registration;
     using Util;
 
 
-    public class MassTransitHostedService :
+    public class BusHostedService :
         IHostedService
     {
-        readonly IBusRegistry _registry;
-        Task _startTask;
+        readonly IBusControl _bus;
+        Task<BusHandle> _startTask;
 
-        public MassTransitHostedService(IBusRegistry registry)
+        public BusHostedService(IBusControl bus)
         {
-            _registry = registry;
+            _bus = bus;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _startTask = _registry.Start(cancellationToken);
+            _startTask = _bus.StartAsync(cancellationToken);
 
             return _startTask.IsCompleted
                 ? _startTask
                 : TaskUtil.Completed;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            return _registry.Stop(cancellationToken);
+            await _bus.StopAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

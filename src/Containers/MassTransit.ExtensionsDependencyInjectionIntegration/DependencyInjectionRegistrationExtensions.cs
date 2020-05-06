@@ -7,6 +7,7 @@ namespace MassTransit
     using ExtensionsDependencyInjectionIntegration;
     using ExtensionsDependencyInjectionIntegration.Registration;
     using Microsoft.Extensions.DependencyInjection;
+    using Monitoring.Health;
     using Saga;
 
 
@@ -28,6 +29,14 @@ namespace MassTransit
             configure?.Invoke(configurator);
 
             return collection;
+        }
+
+        public static void UseHealthCheck(this IBusFactoryConfigurator configurator, IServiceProvider provider)
+        {
+            var busHealth = provider.GetRequiredService<BusHealth>();
+
+            configurator.ConnectBusObserver(busHealth);
+            configurator.ConnectEndpointConfigurationObserver(busHealth);
         }
 
         /// <summary>

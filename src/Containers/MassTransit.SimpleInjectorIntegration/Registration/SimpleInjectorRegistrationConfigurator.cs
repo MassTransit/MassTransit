@@ -56,7 +56,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             Container.Register(GetPublishEndpoint, _hybridLifestyle);
 
-            Container.RegisterSingleton(() => ClientFactoryProvider(Container.GetInstance<IConfigurationServiceProvider>()));
+            Container.RegisterSingleton(() => ClientFactoryProvider(Container.GetInstance<IConfigurationServiceProvider>(), Container.GetInstance<IBus>()));
         }
 
         public void AddMediator(Action<Container, IReceiveEndpointConfigurator> configure = null)
@@ -96,7 +96,8 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         {
             container.Register<ScopedConsumeContextProvider>(Lifestyle.Scoped);
 
-            container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext(), Lifestyle.Scoped);
+            container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext(),
+                Lifestyle.Scoped);
 
             container.RegisterSingleton<IConsumerScopeProvider>(() => new SimpleInjectorConsumerScopeProvider(container));
             container.RegisterSingleton<ISagaRepositoryFactory>(() => new SimpleInjectorSagaRepositoryFactory(container));

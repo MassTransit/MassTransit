@@ -65,13 +65,15 @@ namespace MassTransit.Registration
             where T : class, ISaga
         {
             bool _doNotRegister;
+            IContainerRegistrar _registrar;
 
             public void Register(IContainerRegistrar registrar)
             {
+                _registrar = registrar;
                 if (_doNotRegister)
                     return;
 
-                registrar.RegisterSaga<T>();
+                _registrar.RegisterSaga<T>();
             }
 
             public ISagaRegistration CreateRegistration(Type sagaDefinitionType, IContainerRegistrar registrar)

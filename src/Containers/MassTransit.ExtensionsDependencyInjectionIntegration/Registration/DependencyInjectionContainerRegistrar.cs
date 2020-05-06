@@ -105,30 +105,30 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         void IContainerRegistrar.RegisterRequestClient<T>(RequestTimeout timeout)
         {
-            _collection.AddScoped(context =>
+            _collection.AddScoped(provider =>
             {
-                var clientFactory = context.GetRequiredService<IClientFactory>();
-                var consumeContext = context.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
+                var clientFactory = GetClientFactory(provider);
+                var consumeContext = provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
 
                 if (consumeContext != null)
                     return clientFactory.CreateRequestClient<T>(consumeContext, timeout);
 
-                return new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(clientFactory, context))
+                return new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(clientFactory, provider))
                     .CreateRequestClient<T>(timeout);
             });
         }
 
         void IContainerRegistrar.RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout)
         {
-            _collection.AddScoped(context =>
+            _collection.AddScoped(provider =>
             {
-                var clientFactory = context.GetRequiredService<IClientFactory>();
-                var consumeContext = context.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
+                var clientFactory = GetClientFactory(provider);
+                var consumeContext = provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
 
                 if (consumeContext != null)
                     return clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
 
-                return new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(clientFactory, context))
+                return new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(clientFactory, provider))
                     .CreateRequestClient<T>(destinationAddress, timeout);
             });
         }
@@ -154,6 +154,26 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         void IContainerRegistrar.RegisterSingleInstance<T>(T instance)
         {
             _collection.TryAddSingleton(instance);
+        }
+
+        protected virtual IClientFactory GetClientFactory(IServiceProvider provider)
+        {
+            return provider.GetRequiredService<IClientFactory>();
+        }
+    }
+
+
+    public class DependencyInjectionContainerRegistrar<TBus> :
+        DependencyInjectionContainerRegistrar
+    {
+        public DependencyInjectionContainerRegistrar(IServiceCollection collection)
+            : base(collection)
+        {
+        }
+
+        protected override IClientFactory GetClientFactory(IServiceProvider provider)
+        {
+            return provider.GetRequiredService<Bind<TBus, IClientFactory>>().Value;
         }
     }
 }

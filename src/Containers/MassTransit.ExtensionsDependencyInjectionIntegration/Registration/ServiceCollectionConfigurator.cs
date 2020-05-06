@@ -1,11 +1,13 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 {
     using System;
+    using System.Linq;
     using Context;
     using MassTransit.Registration;
     using Mediator;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
     using Transports;
@@ -16,19 +18,23 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         IServiceCollectionConfigurator
     {
         public ServiceCollectionConfigurator(IServiceCollection collection)
-            : base(new DependencyInjectionContainerRegistrar(collection))
+            : this(collection, new DependencyInjectionContainerRegistrar(collection))
         {
-            Collection = collection;
-
-            AddMassTransitComponents(collection);
-
             collection.AddSingleton<IRegistrationConfigurator>(this);
             collection.AddSingleton(provider => CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()));
         }
 
+        protected ServiceCollectionConfigurator(IServiceCollection collection, IContainerRegistrar registrar)
+            : base(registrar)
+        {
+            Collection = collection;
+
+            AddMassTransitComponents(collection);
+        }
+
         public IServiceCollection Collection { get; }
 
-        public void AddBus(Func<IServiceProvider, IBusControl> busFactory)
+        public virtual void AddBus(Func<IServiceProvider, IBusControl> busFactory)
         {
             IBusControl BusFactory(IServiceProvider serviceProvider)
             {
@@ -39,11 +45,21 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
                 return busFactory(serviceProvider);
             }
 
-            Collection.TryAddSingleton(BusFactory);
+            if (Collection.All(d => d.ServiceType == typeof(IBusControl)))
+            {
+                throw new ConfigurationException(
+                    "AddBus() was already called. To configure multiple bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");
+            }
 
+            Collection.AddSingleton(BusFactory);
             Collection.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
+            Collection.AddSingleton(provider => ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>(),
+                provider.GetRequiredService<IBus>()));
 
-            Collection.AddSingleton(provider => ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>()));
+            Collection.AddSingleton(provider => new BusHealth(nameof(IBus)));
+            Collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<BusHealth>());
+
+            Collection.AddSingleton<IBusRegistryInstance, BusRegistryInstance>();
         }
 
         public void AddMediator(Action<IServiceProvider, IReceiveEndpointConfigurator> configure = null)
@@ -66,17 +82,19 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.AddSingleton<IClientFactory>(provider => provider.GetRequiredService<IMediator>());
         }
 
-        static void AddMassTransitComponents(IServiceCollection collection)
+        void AddMassTransitComponents(IServiceCollection collection)
         {
-            collection.AddScoped<ScopedConsumeContextProvider>();
-            collection.AddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext());
+            Collection.TryAddSingleton<IBusRegistry, BusRegistry>();
 
-            collection.AddScoped(GetCurrentSendEndpointProvider);
-            collection.AddScoped(GetCurrentPublishEndpoint);
+            collection.TryAddScoped<ScopedConsumeContextProvider>();
+            collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext());
 
-            collection.AddSingleton<IConsumerScopeProvider>(provider => new DependencyInjectionConsumerScopeProvider(provider));
-            collection.AddSingleton<ISagaRepositoryFactory>(provider => new DependencyInjectionSagaRepositoryFactory(provider));
-            collection.AddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
+            Collection.TryAddScoped(GetCurrentSendEndpointProvider);
+            Collection.TryAddScoped(GetCurrentPublishEndpoint);
+
+            collection.TryAddSingleton<IConsumerScopeProvider>(provider => new DependencyInjectionConsumerScopeProvider(provider));
+            collection.TryAddSingleton<ISagaRepositoryFactory>(provider => new DependencyInjectionSagaRepositoryFactory(provider));
+            collection.TryAddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IServiceProvider provider)

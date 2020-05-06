@@ -45,6 +45,22 @@
                 yield return info;
         }
 
+        public static IEnumerable<Type> GetAllInterfaces(this Type type)
+        {
+            TypeInfo typeInfo = type.GetTypeInfo();
+
+            return GetAllInterfaces(typeInfo);
+        }
+
+        public static IEnumerable<Type> GetAllInterfaces(this TypeInfo typeInfo)
+        {
+            if (typeInfo.IsInterface)
+                yield return typeInfo;
+
+            foreach (var interfaceType in typeInfo.GetInterfaces())
+                yield return interfaceType;
+        }
+
         public static IEnumerable<PropertyInfo> GetAllStaticProperties(this Type type)
         {
             TypeInfo info = type.GetTypeInfo();

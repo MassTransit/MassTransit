@@ -1,7 +1,6 @@
 namespace MassTransit.LamarIntegration.Registration
 {
     using System;
-    using GreenPipes;
     using Lamar;
     using MassTransit.Registration;
     using Mediator;
@@ -73,7 +72,7 @@ namespace MassTransit.LamarIntegration.Registration
                 .Scoped();
 
             _registry.For<IClientFactory>()
-                .Use(context => ClientFactoryProvider(context.GetInstance<IConfigurationServiceProvider>()))
+                .Use(context => ClientFactoryProvider(context.GetInstance<IConfigurationServiceProvider>(), context.GetInstance<IBus>()))
                 .Singleton();
         }
 
