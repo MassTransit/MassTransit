@@ -22,10 +22,13 @@ namespace MassTransit.Registration
         readonly List<Action<IConsumerConfigurator<TConsumer>>> _configureActions;
         IConsumerDefinition<TConsumer> _definition;
 
-        public ConsumerRegistration()
+        public ConsumerRegistration(string name)
         {
+            Name = name;
             _configureActions = new List<Action<IConsumerConfigurator<TConsumer>>>();
         }
+
+        public string Name { get; }
 
         void IConsumerRegistration.AddConfigureAction<T>(Action<IConsumerConfigurator<T>> configure)
         {
@@ -35,8 +38,8 @@ namespace MassTransit.Registration
 
         void IConsumerRegistration.Configure(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider)
         {
-            var scopeProvider = configurationServiceProvider.GetRequiredService<IConsumerScopeProvider>();
-            var consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
+            var scopeProvider = configurationServiceProvider.GetRequiredService<Func<string, IConsumerScopeProvider>>();
+            var consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider(Name));
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory, configurator);
 
             LogContext.Debug?.Log("Configuring endpoint {Endpoint}, Consumer: {ConsumerType}", configurator.InputAddress.GetLastPart(),

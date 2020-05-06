@@ -14,10 +14,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
         where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
+        readonly string _name;
         readonly IServiceProvider _serviceProvider;
 
-        public DependencyInjectionCompensateActivityScopeProvider(IServiceProvider serviceProvider)
+        public DependencyInjectionCompensateActivityScopeProvider(string name, IServiceProvider serviceProvider)
         {
+            _name = name;
             _serviceProvider = serviceProvider;
         }
 
@@ -25,7 +27,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
-                existingServiceScope.UpdateScope(context);
+                existingServiceScope.UpdateScope(_name, context);
 
                 var activity = existingServiceScope.ServiceProvider.GetService<TActivity>();
                 if (activity == null)
@@ -42,7 +44,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             var serviceScope = serviceProvider.CreateScope();
             try
             {
-                serviceScope.UpdateScope(context);
+                serviceScope.UpdateScope(_name, context);
 
                 var activity = serviceScope.ServiceProvider.GetService<TActivity>();
                 if (activity == null)

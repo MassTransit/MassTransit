@@ -25,7 +25,7 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static void AddMassTransit(this ConfigurationExpression expression, Action<IConfigurationExpressionConfigurator> configure = null)
         {
-            var configurator = new ConfigurationExpressionRegistrationConfigurator(expression);
+            var configurator = new ConfigurationExpressionRegistrationConfigurator("default", expression);
 
             configure?.Invoke(configurator);
         }

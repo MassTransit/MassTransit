@@ -1,6 +1,7 @@
 namespace MassTransit
 {
     using System;
+    using ExtensionsDependencyInjectionIntegration;
     using ExtensionsDependencyInjectionIntegration.Registration;
     using ExtensionsDependencyInjectionIntegration.ScopeProviders;
     using GreenPipes;
@@ -19,7 +20,7 @@ namespace MassTransit
         /// <param name="serviceProvider"></param>
         public static void UseServiceScope(this IPipeConfigurator<ConsumeContext> configurator, IServiceProvider serviceProvider)
         {
-            var scopeProvider = new DependencyInjectionConsumerScopeProvider(serviceProvider);
+            var scopeProvider = new DependencyInjectionConsumerScopeProvider(ComponentRegistry.DefaultName, serviceProvider);
             var specification = new FilterPipeSpecification<ConsumeContext>(new ScopeConsumeFilter(scopeProvider));
 
             configurator.AddPipeSpecification(specification);
@@ -33,7 +34,7 @@ namespace MassTransit
         public static void RegisterInMemorySagaRepository<T>(this IServiceCollection collection)
             where T : class, ISaga
         {
-            var registrar = new DependencyInjectionContainerRegistrar(collection);
+            var registrar = new DependencyInjectionContainerRegistrar(ComponentRegistry.DefaultName, collection);
 
             registrar.RegisterInMemorySagaRepository<T>();
         }

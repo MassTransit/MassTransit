@@ -19,10 +19,13 @@ namespace MassTransit.WindsorIntegration.Registration
     {
         readonly IWindsorContainer _container;
 
-        public WindsorContainerRegistrar(IWindsorContainer container)
+        public WindsorContainerRegistrar(string name, IWindsorContainer container)
         {
+            Name = name;
             _container = container;
         }
+
+        public string Name { get; }
 
         public void RegisterConsumer<T>()
             where T : class, IConsumer

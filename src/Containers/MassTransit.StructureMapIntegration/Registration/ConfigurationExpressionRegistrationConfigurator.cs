@@ -13,11 +13,13 @@ namespace MassTransit.StructureMapIntegration.Registration
         RegistrationConfigurator,
         IConfigurationExpressionConfigurator
     {
+        readonly string _name;
         readonly ConfigurationExpression _expression;
 
-        public ConfigurationExpressionRegistrationConfigurator(ConfigurationExpression expression)
-            : base(new StructureMapContainerRegistrar(expression))
+        public ConfigurationExpressionRegistrationConfigurator(string name, ConfigurationExpression expression)
+            : base(new StructureMapContainerRegistrar(name, expression))
         {
+            _name = name;
             _expression = expression;
 
 
@@ -37,7 +39,7 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Use(this);
 
             expression.For<IRegistration>()
-                .Use(provider => CreateRegistration(provider.GetInstance<IConfigurationServiceProvider>()))
+                .Use(provider => CreateRegistration(_name, provider.GetInstance<IConfigurationServiceProvider>()))
                 .Singleton();
         }
 
@@ -62,7 +64,7 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .ContainerScoped();
 
             _expression.For<IClientFactory>()
-                .Use(context => ClientFactoryProvider(context.GetInstance<IConfigurationServiceProvider>()))
+                .Use(context => ClientFactoryProvider(context.GetInstance<IBus>()))
                 .Singleton();
         }
 
@@ -86,7 +88,7 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Singleton();
         }
 
-        static IMediator MediatorFactory(IContext context, Action<IContext, IReceiveEndpointConfigurator> configure)
+        IMediator MediatorFactory(IContext context, Action<IContext, IReceiveEndpointConfigurator> configure)
         {
             var provider = context.GetInstance<IConfigurationServiceProvider>();
 
@@ -96,7 +98,7 @@ namespace MassTransit.StructureMapIntegration.Registration
             {
                 configure?.Invoke(context, cfg);
 
-                ConfigureMediator(cfg, provider);
+                ConfigureMediator(_name, cfg, provider);
             });
         }
 

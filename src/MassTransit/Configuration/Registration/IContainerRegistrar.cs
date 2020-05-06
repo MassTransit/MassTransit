@@ -9,6 +9,8 @@ namespace MassTransit.Registration
 
     public interface IContainerRegistrar
     {
+        string Name { get; }
+
         void RegisterConsumer<T>()
             where T : class, IConsumer;
 

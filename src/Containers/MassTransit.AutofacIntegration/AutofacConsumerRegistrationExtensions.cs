@@ -48,7 +48,7 @@
         public static void RegisterInMemorySagaRepository<T>(this ContainerBuilder builder)
             where T : class, ISaga
         {
-            var registrar = new AutofacContainerRegistrar(builder);
+            var registrar = new AutofacContainerRegistrar("default", builder);
 
             registrar.RegisterInMemorySagaRepository<T>();
         }

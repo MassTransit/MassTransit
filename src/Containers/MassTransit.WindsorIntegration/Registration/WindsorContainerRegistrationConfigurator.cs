@@ -15,11 +15,13 @@ namespace MassTransit.WindsorIntegration.Registration
         RegistrationConfigurator,
         IWindsorContainerConfigurator
     {
+        readonly string _name;
         readonly IWindsorContainer _container;
 
-        public WindsorContainerRegistrationConfigurator(IWindsorContainer container)
-            : base(new WindsorContainerRegistrar(container))
+        public WindsorContainerRegistrationConfigurator(string name, IWindsorContainer container)
+            : base(new WindsorContainerRegistrar(name, container))
         {
+            _name = name;
             _container = container;
 
             container.RegisterScopedContextProviderIfNotPresent();
@@ -36,7 +38,7 @@ namespace MassTransit.WindsorIntegration.Registration
                     .Instance(this)
                     .LifestyleSingleton(),
                 Component.For<MassTransit.IRegistration>()
-                    .UsingFactoryMethod(provider => CreateRegistration(provider.Resolve<IConfigurationServiceProvider>()))
+                    .UsingFactoryMethod(provider => CreateRegistration(_name, provider.Resolve<IConfigurationServiceProvider>()))
                     .LifestyleSingleton()
             );
         }
@@ -65,7 +67,7 @@ namespace MassTransit.WindsorIntegration.Registration
                     .UsingFactoryMethod(GetCurrentPublishEndpoint)
                     .LifestyleTransient(),
                 Component.For<IClientFactory>()
-                    .UsingFactoryMethod(kernel => ClientFactoryProvider(kernel.Resolve<IConfigurationServiceProvider>()))
+                    .UsingFactoryMethod(kernel => ClientFactoryProvider(kernel.Resolve<IBus>()))
                     .LifestyleSingleton()
             );
         }
@@ -82,7 +84,7 @@ namespace MassTransit.WindsorIntegration.Registration
                 {
                     configure?.Invoke(kernel, cfg);
 
-                    ConfigureMediator(cfg, provider);
+                    ConfigureMediator(_name, cfg, provider);
                 });
             }
 

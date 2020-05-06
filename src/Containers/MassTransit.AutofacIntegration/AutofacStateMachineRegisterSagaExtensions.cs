@@ -17,7 +17,7 @@
         /// <param name="type">The state machine saga type</param>
         public static void RegisterSagaStateMachine(this ContainerBuilder builder, Type type)
         {
-            var registrar = new AutofacContainerRegistrar(builder);
+            var registrar = new AutofacContainerRegistrar("default", builder);
 
             SagaStateMachineRegistrationCache.Register(type, registrar);
         }
@@ -30,7 +30,7 @@
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
-            var registrar = new AutofacContainerRegistrar(builder);
+            var registrar = new AutofacContainerRegistrar("default", builder);
 
             SagaStateMachineRegistrationCache.Register(typeof(TStateMachine), registrar);
         }
@@ -42,7 +42,7 @@
         /// <param name="assemblies">If specified, only the specified assemblies are scanned</param>
         public static void RegisterSagaStateMachines(this ContainerBuilder builder, params Assembly[] assemblies)
         {
-            var registrar = new AutofacContainerRegistrar(builder);
+            var registrar = new AutofacContainerRegistrar("default", builder);
 
             registrar.RegisterSagaStateMachines(assemblies);
         }
@@ -54,7 +54,7 @@
         /// <param name="types">If specified, only the specified assemblies are scanned</param>
         public static void RegisterSagaStateMachines(this ContainerBuilder builder, params Type[] types)
         {
-            var registrar = new AutofacContainerRegistrar(builder);
+            var registrar = new AutofacContainerRegistrar("default", builder);
 
             registrar.RegisterSagaStateMachines(types);
         }

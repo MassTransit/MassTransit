@@ -15,7 +15,7 @@ namespace MassTransit
         public static void RegisterInMemorySagaRepository<T>(this Container registry)
             where T : class, ISaga
         {
-            var registrar = new SimpleInjectorContainerRegistrar(registry);
+            var registrar = new SimpleInjectorContainerRegistrar("default",registry);
 
             registrar.RegisterInMemorySagaRepository<T>();
         }

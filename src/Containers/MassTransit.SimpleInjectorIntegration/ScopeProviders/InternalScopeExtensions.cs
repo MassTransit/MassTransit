@@ -9,7 +9,7 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
     {
         public static void UpdateScope(this Scope scope, ConsumeContext context)
         {
-            scope.Container.GetInstance<ScopedConsumeContextProvider>().SetContext(context);
+            scope.Container.GetInstance<ScopedConsumeContextProvider>().SetContext("default",context);
         }
 
         public static void UpdatePayload(this PipeContext context, Scope scope)

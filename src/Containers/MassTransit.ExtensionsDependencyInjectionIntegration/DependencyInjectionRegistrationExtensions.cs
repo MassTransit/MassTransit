@@ -23,7 +23,22 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static IServiceCollection AddMassTransit(this IServiceCollection collection, Action<IServiceCollectionConfigurator> configure = null)
         {
-            var configurator = new ServiceCollectionConfigurator(collection);
+            var configurator = new ServiceCollectionConfigurator(ComponentRegistry.DefaultName, collection);
+
+            configure?.Invoke(configurator);
+
+            return collection;
+        }
+
+        /// <summary>
+        /// Adds the required services to the service collection, and allows consumers to be added and/or discovered
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="configure"></param>
+        public static IServiceCollection AddMassTransit<TBus>(this IServiceCollection collection, Action<IServiceCollectionConfigurator<TBus>> configure = null)
+            where TBus : class
+        {
+            var configurator = new ServiceCollectionConfigurator<TBus>(collection);
 
             configure?.Invoke(configurator);
 

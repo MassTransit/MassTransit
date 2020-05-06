@@ -1,7 +1,6 @@
 namespace MassTransit.LamarIntegration.Registration
 {
     using System;
-    using GreenPipes;
     using Lamar;
     using MassTransit.Registration;
     using Mediator;
@@ -14,11 +13,13 @@ namespace MassTransit.LamarIntegration.Registration
         RegistrationConfigurator,
         IServiceRegistryConfigurator
     {
+        readonly string _name;
         readonly ServiceRegistry _registry;
 
-        public ServiceRegistryRegistrationConfigurator(ServiceRegistry registry)
-            : base(new LamarContainerRegistrar(registry))
+        public ServiceRegistryRegistrationConfigurator(string name, ServiceRegistry registry)
+            : base(new LamarContainerRegistrar(name, registry))
         {
+            _name = name;
             _registry = registry;
 
             registry.For<IConsumerScopeProvider>()
@@ -37,7 +38,7 @@ namespace MassTransit.LamarIntegration.Registration
                 .Use(this);
 
             registry.For<IRegistration>()
-                .Use(provider => CreateRegistration(provider.GetInstance<IConfigurationServiceProvider>()))
+                .Use(provider => CreateRegistration(_name, provider.GetInstance<IConfigurationServiceProvider>()))
                 .Singleton();
 
             registry.Injectable<ConsumeContext>();
@@ -73,7 +74,7 @@ namespace MassTransit.LamarIntegration.Registration
                 .Scoped();
 
             _registry.For<IClientFactory>()
-                .Use(context => ClientFactoryProvider(context.GetInstance<IConfigurationServiceProvider>()))
+                .Use(context => ClientFactoryProvider(context.GetInstance<IBus>()))
                 .Singleton();
         }
 
@@ -89,7 +90,7 @@ namespace MassTransit.LamarIntegration.Registration
                 {
                     configure?.Invoke(context, cfg);
 
-                    ConfigureMediator(cfg, provider);
+                    ConfigureMediator(_name, cfg, provider);
                 });
             }
 

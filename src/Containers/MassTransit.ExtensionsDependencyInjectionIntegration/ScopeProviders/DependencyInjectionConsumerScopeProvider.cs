@@ -12,10 +12,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
     public class DependencyInjectionConsumerScopeProvider :
         IConsumerScopeProvider
     {
+        readonly string _name;
         readonly IServiceProvider _serviceProvider;
 
-        public DependencyInjectionConsumerScopeProvider(IServiceProvider serviceProvider)
+        public DependencyInjectionConsumerScopeProvider(string name,IServiceProvider serviceProvider)
         {
+            _name = name;
             _serviceProvider = serviceProvider;
         }
 
@@ -28,7 +30,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
-                existingServiceScope.UpdateScope(context);
+                existingServiceScope.UpdateScope(_name,context);
 
                 return new ExistingConsumerScopeContext(context);
             }
@@ -39,7 +41,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             var serviceScope = serviceProvider.CreateScope();
             try
             {
-                serviceScope.UpdateScope(context);
+                serviceScope.UpdateScope(_name,context);
 
                 var consumeContext = new ConsumeContextScope(context, serviceScope, serviceScope.ServiceProvider);
 
@@ -57,7 +59,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
-                existingServiceScope.UpdateScope(context);
+                existingServiceScope.UpdateScope(_name,context);
 
                 var consumer = existingServiceScope.ServiceProvider.GetService<TConsumer>();
                 if (consumer == null)
@@ -74,7 +76,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             var serviceScope = serviceProvider.CreateScope();
             try
             {
-                serviceScope.UpdateScope(context);
+                serviceScope.UpdateScope(_name,context);
 
                 var consumer = serviceScope.ServiceProvider.GetService<TConsumer>();
                 if (consumer == null)

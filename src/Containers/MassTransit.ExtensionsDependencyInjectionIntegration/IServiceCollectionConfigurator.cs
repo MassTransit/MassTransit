@@ -9,4 +9,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
     {
         IServiceCollection Collection { get; }
     }
+
+
+    public interface IServiceCollectionConfigurator<in TBus> :
+        IServiceCollectionConfigurator,
+        IRegistrationConfigurator<TBus, IServiceProvider>
+        where TBus : class
+    {
+    }
 }

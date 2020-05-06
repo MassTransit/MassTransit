@@ -24,6 +24,7 @@ namespace MassTransit
     /// </summary>
     public interface IRegistration
     {
+        string Name { get; }
         /// <summary>
         /// Configure a consumer on the receive endpoint
         /// </summary>

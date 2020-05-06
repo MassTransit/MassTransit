@@ -17,10 +17,13 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
     {
         readonly IServiceCollection _collection;
 
-        public DependencyInjectionContainerRegistrar(IServiceCollection collection)
+        public DependencyInjectionContainerRegistrar(string name, IServiceCollection collection)
         {
+            Name = name;
             _collection = collection;
         }
+
+        public string Name { get; }
 
         void IContainerRegistrar.RegisterConsumer<T>()
         {
@@ -107,8 +110,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         {
             _collection.AddScoped(context =>
             {
-                var clientFactory = context.GetRequiredService<IClientFactory>();
-                var consumeContext = context.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
+                var clientFactory = context.GetRequiredService<INamedComponentFactory>().GetClientFactory(Name);
+                var consumeContext = context.GetRequiredService<ScopedConsumeContextProvider>().GetContext(Name);
 
                 if (consumeContext != null)
                     return clientFactory.CreateRequestClient<T>(consumeContext, timeout);
@@ -122,8 +125,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         {
             _collection.AddScoped(context =>
             {
-                var clientFactory = context.GetRequiredService<IClientFactory>();
-                var consumeContext = context.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
+                var clientFactory = context.GetRequiredService<INamedComponentFactory>().GetClientFactory(Name);
+                var consumeContext = context.GetRequiredService<ScopedConsumeContextProvider>().GetContext(Name);
 
                 if (consumeContext != null)
                     return clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);

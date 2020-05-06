@@ -17,13 +17,16 @@ namespace MassTransit.AutofacIntegration.Registration
     {
         readonly ContainerBuilder _builder;
 
-        public AutofacContainerRegistrar(ContainerBuilder builder)
+        public AutofacContainerRegistrar(string name, ContainerBuilder builder)
         {
+            Name = name;
             _builder = builder;
         }
 
         public Action<ContainerBuilder, ConsumeContext> ConfigureScope { get; set; }
         public string ScopeName { get; set; }
+
+        public string Name { get; }
 
         public void RegisterConsumer<T>()
             where T : class, IConsumer

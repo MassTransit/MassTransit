@@ -339,7 +339,7 @@ namespace MassTransit
             {
                 container.Register(Component.For<ScopedConsumeContextProvider>().LifestyleScoped(),
                     Component.For<ConsumeContext>()
-                        .UsingFactoryMethod(kernel => kernel.Resolve<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext())
+                        .UsingFactoryMethod(kernel => kernel.Resolve<ScopedConsumeContextProvider>().GetContext("default") ?? new MissingConsumeContext())
                         .LifestyleScoped());
             }
         }

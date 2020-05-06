@@ -2,7 +2,6 @@ namespace MassTransit.AutofacIntegration.Registration
 {
     using System;
     using Autofac;
-    using GreenPipes;
     using MassTransit.Registration;
     using Mediator;
     using ScopeProviders;
@@ -14,17 +13,19 @@ namespace MassTransit.AutofacIntegration.Registration
         RegistrationConfigurator,
         IContainerBuilderConfigurator
     {
+        readonly string _name;
         readonly ContainerBuilder _builder;
         readonly AutofacContainerRegistrar _registrar;
 
-        public ContainerBuilderRegistrationConfigurator(ContainerBuilder builder)
-            : this(builder, new AutofacContainerRegistrar(builder))
+        public ContainerBuilderRegistrationConfigurator(string name, ContainerBuilder builder)
+            : this(name, builder, new AutofacContainerRegistrar(name, builder))
         {
         }
 
-        ContainerBuilderRegistrationConfigurator(ContainerBuilder builder, AutofacContainerRegistrar registrar)
+        ContainerBuilderRegistrationConfigurator(string name, ContainerBuilder builder, AutofacContainerRegistrar registrar)
             : base(registrar)
         {
+            _name = name;
             _builder = builder;
             _registrar = registrar;
 
@@ -44,7 +45,7 @@ namespace MassTransit.AutofacIntegration.Registration
 
             builder.RegisterInstance<IRegistrationConfigurator>(this);
 
-            builder.Register(provider => CreateRegistration(provider.Resolve<IConfigurationServiceProvider>()))
+            builder.Register(provider => CreateRegistration(name, provider.Resolve<IConfigurationServiceProvider>()))
                 .As<IRegistration>()
                 .SingleInstance();
         }
@@ -90,7 +91,7 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IPublishEndpoint>()
                 .InstancePerLifetimeScope();
 
-            _builder.Register(context => ClientFactoryProvider(context.Resolve<IConfigurationServiceProvider>()))
+            _builder.Register(context => ClientFactoryProvider(context.Resolve<IBus>()))
                 .As<IClientFactory>()
                 .SingleInstance();
         }
@@ -107,7 +108,7 @@ namespace MassTransit.AutofacIntegration.Registration
                 {
                     configure?.Invoke(context, cfg);
 
-                    ConfigureMediator(cfg, provider);
+                    ConfigureMediator(_name, cfg, provider);
                 });
             }
 

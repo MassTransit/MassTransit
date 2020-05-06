@@ -25,7 +25,7 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static Container AddMassTransit(this Container container, Action<ISimpleInjectorConfigurator> configure = null)
         {
-            var configurator = new SimpleInjectorRegistrationConfigurator(container);
+            var configurator = new SimpleInjectorRegistrationConfigurator("default",container);
 
             configure?.Invoke(configurator);
 

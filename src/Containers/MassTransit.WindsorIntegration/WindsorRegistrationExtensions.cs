@@ -25,7 +25,7 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static IWindsorContainer AddMassTransit(this IWindsorContainer container, Action<IWindsorContainerConfigurator> configure = null)
         {
-            var configurator = new WindsorContainerRegistrationConfigurator(container);
+            var configurator = new WindsorContainerRegistrationConfigurator("default", container);
 
             configure?.Invoke(configurator);
 

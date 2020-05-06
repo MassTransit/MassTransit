@@ -219,4 +219,11 @@ namespace MassTransit
         /// <param name="configure">Optionally configure the pipeline used by the mediator</param>
         void AddMediator(Action<TContainerContext, IReceiveEndpointConfigurator> configure = null);
     }
+
+
+    public interface IRegistrationConfigurator<in TBus, out TContainerContext> :
+        IRegistrationConfigurator<TContainerContext>
+        where TBus : class
+    {
+    }
 }

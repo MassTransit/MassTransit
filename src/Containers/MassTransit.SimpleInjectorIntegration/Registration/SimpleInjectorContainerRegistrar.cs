@@ -19,12 +19,15 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         readonly Container _container;
         readonly Lifestyle _hybridLifestyle;
 
-        public SimpleInjectorContainerRegistrar(Container container)
+        public SimpleInjectorContainerRegistrar(string name, Container container)
         {
+            Name = name;
             _container = container;
 
             _hybridLifestyle = Lifestyle.CreateHybrid(_container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
         }
+
+        public string Name { get; }
 
         public void RegisterConsumer<T>()
             where T : class, IConsumer

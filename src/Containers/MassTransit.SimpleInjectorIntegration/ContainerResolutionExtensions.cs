@@ -25,7 +25,7 @@ namespace MassTransit.SimpleInjectorIntegration
         {
             var scope = Lifestyle.Scoped.GetCurrentScope(container);
 
-            return scope?.Container.GetInstance<ScopedConsumeContextProvider>().GetContext();
+            return scope?.Container.GetInstance<ScopedConsumeContextProvider>().GetContext("default");
         }
     }
 }

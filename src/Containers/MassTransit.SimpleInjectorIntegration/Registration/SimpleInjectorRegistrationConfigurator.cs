@@ -14,11 +14,13 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         RegistrationConfigurator,
         ISimpleInjectorConfigurator
     {
+        readonly string _name;
         readonly Lifestyle _hybridLifestyle;
 
-        public SimpleInjectorRegistrationConfigurator(Container container)
-            : base(new SimpleInjectorContainerRegistrar(container))
+        public SimpleInjectorRegistrationConfigurator(string name, Container container)
+            : base(new SimpleInjectorContainerRegistrar(name, container))
         {
+            _name = name;
             Container = container;
 
             _hybridLifestyle = Lifestyle.CreateHybrid(container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
@@ -27,7 +29,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             Container.RegisterInstance<IRegistrationConfigurator>(this);
 
-            Container.RegisterSingleton(() => CreateRegistration(container.GetInstance<IConfigurationServiceProvider>()));
+            Container.RegisterSingleton(() => CreateRegistration(_name, container.GetInstance<IConfigurationServiceProvider>()));
         }
 
         public Container Container { get; }
@@ -56,7 +58,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             Container.Register(GetPublishEndpoint, _hybridLifestyle);
 
-            Container.RegisterSingleton(() => ClientFactoryProvider(Container.GetInstance<IConfigurationServiceProvider>()));
+            Container.RegisterSingleton(() => ClientFactoryProvider(Container.GetInstance<IBus>()));
         }
 
         public void AddMediator(Action<Container, IReceiveEndpointConfigurator> configure = null)
@@ -71,7 +73,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
                 {
                     configure?.Invoke(Container, cfg);
 
-                    ConfigureMediator(cfg, provider);
+                    ConfigureMediator(_name, cfg, provider);
                 });
             }
 
@@ -96,7 +98,8 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         {
             container.Register<ScopedConsumeContextProvider>(Lifestyle.Scoped);
 
-            container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext(), Lifestyle.Scoped);
+            container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext("default") ?? new MissingConsumeContext(),
+                Lifestyle.Scoped);
 
             container.RegisterSingleton<IConsumerScopeProvider>(() => new SimpleInjectorConsumerScopeProvider(container));
             container.RegisterSingleton<ISagaRepositoryFactory>(() => new SimpleInjectorSagaRepositoryFactory(container));

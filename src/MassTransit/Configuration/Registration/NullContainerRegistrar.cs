@@ -10,6 +10,8 @@ namespace MassTransit.Registration
     public class NullContainerRegistrar :
         IContainerRegistrar
     {
+        public string Name => "";
+
         public void RegisterConsumer<T>()
             where T : class, IConsumer
         {

@@ -14,10 +14,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
         ISagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISaga
     {
+        readonly string _name;
         readonly IServiceProvider _serviceProvider;
 
-        public DependencyInjectionSagaRepositoryContextFactory(IServiceProvider serviceProvider)
+        public DependencyInjectionSagaRepositoryContextFactory(string name, IServiceProvider serviceProvider)
         {
+            _name = name;
             _serviceProvider = serviceProvider;
         }
 
@@ -56,7 +58,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 
             if (context.TryGetPayload<IServiceScope>(out var existingScope))
             {
-                existingScope.UpdateScope(context);
+                existingScope.UpdateScope(_name, context);
 
                 context.GetOrAddPayload(() => existingScope.ServiceProvider.GetService<IStateMachineActivityFactory>()
                     ?? DependencyInjectionStateMachineActivityFactory.Instance);
@@ -70,7 +72,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             {
                 using var serviceScope = serviceProvider.CreateScope();
 
-                serviceScope.UpdateScope(context);
+                serviceScope.UpdateScope(_name, context);
 
                 var scopeServiceProvider = serviceScope.ServiceProvider;
 

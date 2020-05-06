@@ -19,10 +19,13 @@ namespace MassTransit.LamarIntegration.Registration
     {
         readonly ServiceRegistry _registry;
 
-        public LamarContainerRegistrar(ServiceRegistry registry)
+        public LamarContainerRegistrar(string name, ServiceRegistry registry)
         {
+            Name = name;
             _registry = registry;
         }
+
+        public string Name { get; }
 
         public void RegisterConsumer<T>()
             where T : class, IConsumer

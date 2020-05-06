@@ -18,7 +18,7 @@ namespace MassTransit
         public static void RegisterInMemorySagaRepository<T>(this IWindsorContainer container)
             where T : class, ISaga
         {
-            var registrar = new WindsorContainerRegistrar(container);
+            var registrar = new WindsorContainerRegistrar("default", container);
 
             registrar.RegisterInMemorySagaRepository<T>();
         }

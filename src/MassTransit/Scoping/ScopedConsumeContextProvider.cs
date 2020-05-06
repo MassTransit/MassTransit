@@ -12,7 +12,7 @@ namespace MassTransit.Scoping
         ConsumeContext _context;
         ScopedConsumeContext _marker;
 
-        public void SetContext(ConsumeContext context)
+        public void SetContext(string name, ConsumeContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
@@ -36,7 +36,7 @@ namespace MassTransit.Scoping
             }
         }
 
-        public ConsumeContext GetContext()
+        public ConsumeContext GetContext(string name)
         {
             return _context;
         }

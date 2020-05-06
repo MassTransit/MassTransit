@@ -11,10 +11,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
     public class DependencyInjectionSagaRepositoryFactory :
         ISagaRepositoryFactory
     {
+        readonly string _name;
         readonly IServiceProvider _serviceProvider;
 
-        public DependencyInjectionSagaRepositoryFactory(IServiceProvider serviceProvider)
+        public DependencyInjectionSagaRepositoryFactory(string name, IServiceProvider serviceProvider)
         {
+            _name = name;
             _serviceProvider = serviceProvider;
         }
 
@@ -24,7 +26,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             if (repository is SagaRepository<T>)
                 return repository;
 
-            var scopeProvider = new DependencyInjectionSagaScopeProvider<T>(_serviceProvider);
+            var scopeProvider = new DependencyInjectionSagaScopeProvider<T>(_name, _serviceProvider);
             if (scopeAction != null)
                 scopeProvider.AddScopeAction(scopeAction);
 

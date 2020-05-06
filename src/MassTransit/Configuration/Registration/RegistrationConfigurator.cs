@@ -2,6 +2,7 @@ namespace MassTransit.Registration
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
     using Automatonymous;
     using ConsumeConfigurators;
@@ -27,7 +28,7 @@ namespace MassTransit.Registration
         readonly ConcurrentDictionary<Type, ISagaRegistration> _sagaRegistrations;
         readonly ConcurrentDictionary<Type, IEndpointRegistration> _endpointRegistrations;
 
-        protected Func<IConfigurationServiceProvider, IClientFactory> ClientFactoryProvider { get; private set; } = BusClientFactoryProvider;
+        protected Func<IBus, IClientFactory> ClientFactoryProvider { get; private set; } = BusClientFactoryProvider;
 
         public RegistrationConfigurator(IContainerRegistrar containerRegistrar = null)
         {
@@ -59,7 +60,7 @@ namespace MassTransit.Registration
                 if (consumerDefinitionType != null)
                     ConsumerDefinitionRegistrationCache.Register(consumerDefinitionType, _containerRegistrar);
 
-                return new ConsumerRegistration<T>();
+                return new ConsumerRegistration<T>(_containerRegistrar.Name);
             }
 
             var registration = _consumerRegistrations.GetOrAdd(typeof(T), ValueFactory);
@@ -280,9 +281,9 @@ namespace MassTransit.Registration
             _containerRegistrar.RegisterSingleInstance(endpointNameFormatter);
         }
 
-        public IRegistration CreateRegistration(IConfigurationServiceProvider configurationServiceProvider)
+        public IRegistration CreateRegistration(string name, IConfigurationServiceProvider configurationServiceProvider)
         {
-            return new Registration(configurationServiceProvider, _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value),
+            return new Registration(name, configurationServiceProvider, _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value),
                 _sagaRegistrations.ToDictionary(x => x.Key, x => x.Value), _executeActivityRegistrations.ToDictionary(x => x.Key, x => x.Value),
                 _activityRegistrations.ToDictionary(x => x.Key, x => x.Value), _endpointRegistrations.ToDictionary(x => x.Key, x => x.Value));
         }
@@ -294,22 +295,23 @@ namespace MassTransit.Registration
                 LogContext.ConfigureCurrentLogContext(loggerFactory);
         }
 
-        protected static void ConfigureMediator(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider provider)
+        protected static void ConfigureMediator(string name, IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider provider)
         {
-            var registration = provider.GetRequiredService<IRegistration>();
+            var registration = provider.GetRequiredService<IEnumerable<IRegistration>>()
+                .Single(x => x.Name == name);
 
             registration.ConfigureConsumers(configurator);
             registration.ConfigureSagas(configurator);
         }
 
-        static IClientFactory BusClientFactoryProvider(IConfigurationServiceProvider provider)
+        static IClientFactory BusClientFactoryProvider(IBus bus)
         {
-            return provider.GetRequiredService<IBus>().CreateClientFactory();
+            return bus.CreateClientFactory();
         }
 
-        static IClientFactory ServiceClientClientFactoryProvider(IConfigurationServiceProvider provider)
+        static IClientFactory ServiceClientClientFactoryProvider(IBus bus)
         {
-            return provider.GetRequiredService<IBus>().CreateServiceClient();
+            return bus.CreateServiceClient();
         }
     }
 }

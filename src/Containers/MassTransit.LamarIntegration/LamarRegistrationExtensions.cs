@@ -25,7 +25,7 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static void AddMassTransit(this ServiceRegistry registry, Action<IServiceRegistryConfigurator> configure = null)
         {
-            var configurator = new ServiceRegistryRegistrationConfigurator(registry);
+            var configurator = new ServiceRegistryRegistrationConfigurator("default", registry);
 
             configure?.Invoke(configurator);
         }

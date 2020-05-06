@@ -15,7 +15,7 @@ namespace MassTransit
         public static void RegisterInMemorySagaRepository<T>(this ConfigurationExpression registry)
             where T : class, ISaga
         {
-            var registrar = new StructureMapContainerRegistrar(registry);
+            var registrar = new StructureMapContainerRegistrar("default", registry);
 
             registrar.RegisterInMemorySagaRepository<T>();
         }

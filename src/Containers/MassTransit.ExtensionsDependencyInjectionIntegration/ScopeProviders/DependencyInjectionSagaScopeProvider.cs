@@ -15,10 +15,12 @@
         where TSaga : class, ISaga
     {
         readonly IList<Action<ConsumeContext>> _scopeActions;
+        readonly string _name;
         readonly IServiceProvider _serviceProvider;
 
-        public DependencyInjectionSagaScopeProvider(IServiceProvider serviceProvider)
+        public DependencyInjectionSagaScopeProvider(string name, IServiceProvider serviceProvider)
         {
+            _name = name;
             _serviceProvider = serviceProvider;
             _scopeActions = new List<Action<ConsumeContext>>();
         }
@@ -32,7 +34,7 @@
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
-                existingServiceScope.UpdateScope(context);
+                existingServiceScope.UpdateScope(_name, context);
 
                 return new ExistingSagaScopeContext<T>(context);
             }
@@ -43,7 +45,7 @@
             var serviceScope = serviceProvider.CreateScope();
             try
             {
-                serviceScope.UpdateScope(context);
+                serviceScope.UpdateScope(_name, context);
 
                 var proxy = new ConsumeContextScope<T>(context, serviceScope, serviceScope.ServiceProvider);
 

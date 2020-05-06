@@ -18,10 +18,11 @@ namespace MassTransit.Registration
         readonly IDictionary<Type, IActivityRegistration> _activities;
         readonly IDictionary<Type, IEndpointRegistration> _endpoints;
 
-        public Registration(IConfigurationServiceProvider configurationServiceProvider, IDictionary<Type, IConsumerRegistration> consumers,
+        public Registration(string name, IConfigurationServiceProvider configurationServiceProvider, IDictionary<Type, IConsumerRegistration> consumers,
             IDictionary<Type, ISagaRegistration> sagas, IDictionary<Type, IExecuteActivityRegistration> executeActivities,
             IDictionary<Type, IActivityRegistration> activities, IDictionary<Type, IEndpointRegistration> endpoints)
         {
+            Name = name;
             _configurationServiceProvider = configurationServiceProvider;
             _consumers = consumers;
             _sagas = sagas;
@@ -29,6 +30,8 @@ namespace MassTransit.Registration
             _activities = activities;
             _endpoints = endpoints;
         }
+
+        public string Name { get; }
 
         public void ConfigureConsumer(Type consumerType, IReceiveEndpointConfigurator configurator)
         {

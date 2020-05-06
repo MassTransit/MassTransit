@@ -36,7 +36,7 @@
             foreach (var sagaType in sagaTypes)
                 ((IRegistrationConfigurator)registrationConfigurator).AddSagaStateMachine(sagaType);
 
-            var registration = registrationConfigurator.CreateRegistration(new SimpleInjectorConfigurationServiceProvider(container));
+            var registration = registrationConfigurator.CreateRegistration("default", new SimpleInjectorConfigurationServiceProvider(container));
 
             registration.ConfigureSagas(configurator);
         }

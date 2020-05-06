@@ -7,9 +7,9 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 
     static class InternalScopeExtensions
     {
-        public static void UpdateScope(this IServiceScope scope, ConsumeContext context)
+        public static void UpdateScope(this IServiceScope scope, string name, ConsumeContext context)
         {
-            scope.ServiceProvider.GetRequiredService<ScopedConsumeContextProvider>().SetContext(context);
+            scope.ServiceProvider.GetRequiredService<ScopedConsumeContextProvider>().SetContext(name, context);
         }
 
         public static void UpdatePayload(this PipeContext context, IServiceScope scope)

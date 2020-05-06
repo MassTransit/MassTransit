@@ -15,13 +15,13 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             var currentScope = CallContextLifetimeScope.ObtainCurrentScope();
             if (currentScope is MessageLifetimeScope scope)
             {
-                kernel.Resolve<ScopedConsumeContextProvider>().SetContext(scope.ConsumeContext);
+                kernel.Resolve<ScopedConsumeContextProvider>().SetContext("default", scope.ConsumeContext);
                 return null;
             }
 
             var beginScope = kernel.BeginScope();
 
-            kernel.Resolve<ScopedConsumeContextProvider>().SetContext(consumeContext);
+            kernel.Resolve<ScopedConsumeContextProvider>().SetContext("default", consumeContext);
 
             return beginScope;
         }
@@ -42,7 +42,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
 
         public static void UpdateScope(this IKernel kernel, ConsumeContext context)
         {
-            kernel.Resolve<ScopedConsumeContextProvider>().SetContext(context);
+            kernel.Resolve<ScopedConsumeContextProvider>().SetContext("default", context);
         }
 
         public static void UpdatePayload(this PipeContext context, IKernel kernel)
@@ -59,7 +59,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
         public static ConsumeContext GetConsumeContext(this IKernel kernel)
         {
             return CallContextLifetimeScope.ObtainCurrentScope() != null
-                ? kernel.Resolve<ScopedConsumeContextProvider>().GetContext()
+                ? kernel.Resolve<ScopedConsumeContextProvider>().GetContext("default")
                 : null;
         }
     }

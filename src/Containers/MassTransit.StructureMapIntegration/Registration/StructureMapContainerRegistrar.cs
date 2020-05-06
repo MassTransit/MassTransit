@@ -17,10 +17,13 @@ namespace MassTransit.StructureMapIntegration.Registration
     {
         readonly ConfigurationExpression _expression;
 
-        public StructureMapContainerRegistrar(ConfigurationExpression expression)
+        public StructureMapContainerRegistrar(string name, ConfigurationExpression expression)
         {
+            Name = name;
             _expression = expression;
         }
+
+        public string Name { get; }
 
         public void RegisterConsumer<T>()
             where T : class, IConsumer

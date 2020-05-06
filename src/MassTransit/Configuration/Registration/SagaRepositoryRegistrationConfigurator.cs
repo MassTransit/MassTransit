@@ -26,6 +26,8 @@ namespace MassTransit.Registration
             _registrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>();
         }
 
+        public string Name => _registrar.Name;
+
         void IContainerRegistrar.RegisterConsumer<T>()
         {
             _registrar.RegisterConsumer<T>();

@@ -36,7 +36,7 @@
 
             registrationConfigurator.AddSagaStateMachines(FindStateMachineSagaTypes(container));
 
-            var registration = registrationConfigurator.CreateRegistration(new StructureMapConfigurationServiceProvider(container));
+            var registration = registrationConfigurator.CreateRegistration("default", new StructureMapConfigurationServiceProvider(container));
 
             registration.ConfigureSagas(configurator);
         }

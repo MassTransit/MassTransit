@@ -26,7 +26,7 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static ContainerBuilder AddMassTransit(this ContainerBuilder builder, Action<IContainerBuilderConfigurator> configure = null)
         {
-            var configurator = new ContainerBuilderRegistrationConfigurator(builder);
+            var configurator = new ContainerBuilderRegistrationConfigurator("default", builder);
 
             configure?.Invoke(configurator);
 

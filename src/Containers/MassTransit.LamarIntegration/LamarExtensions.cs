@@ -43,7 +43,7 @@
         public static void RegisterInMemorySagaRepository<T>(this ServiceRegistry registry)
             where T : class, ISaga
         {
-            var registrar = new LamarContainerRegistrar(registry);
+            var registrar = new LamarContainerRegistrar("default", registry);
 
             registrar.RegisterInMemorySagaRepository<T>();
         }
