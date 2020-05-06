@@ -4,7 +4,6 @@ namespace MassTransit
     using Automatonymous;
     using ConsumeConfigurators;
     using Courier;
-    using ExtensionsDependencyInjectionIntegration;
     using ExtensionsDependencyInjectionIntegration.Registration;
     using ExtensionsDependencyInjectionIntegration.ScopeProviders;
     using GreenPipes;
@@ -29,7 +28,7 @@ namespace MassTransit
             Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
-            IConsumerScopeProvider scopeProvider = new DependencyInjectionConsumerScopeProvider(ComponentRegistry.DefaultName, provider);
+            IConsumerScopeProvider scopeProvider = new DependencyInjectionConsumerScopeProvider("default", provider);
 
             var consumerFactory = new ScopeConsumerFactory<T>(scopeProvider);
 
@@ -50,7 +49,7 @@ namespace MassTransit
             where TConsumer : class, IConsumer<Batch<TMessage>>
             where TMessage : class
         {
-            IConsumerScopeProvider scopeProvider = new DependencyInjectionConsumerScopeProvider(ComponentRegistry.DefaultName, provider);
+            IConsumerScopeProvider scopeProvider = new DependencyInjectionConsumerScopeProvider("default", provider);
 
             IConsumerFactory<TConsumer> consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
 
@@ -133,7 +132,7 @@ namespace MassTransit
         static ISagaRepository<TInstance> CreateSagaRepository<TInstance>(IServiceProvider provider)
             where TInstance : class, ISaga
         {
-            ISagaRepositoryFactory repositoryFactory = new DependencyInjectionSagaRepositoryFactory(ComponentRegistry.DefaultName, provider);
+            ISagaRepositoryFactory repositoryFactory = new DependencyInjectionSagaRepositoryFactory("default", provider);
 
             return repositoryFactory.CreateSagaRepository<TInstance>();
         }
@@ -150,7 +149,7 @@ namespace MassTransit
             where TArguments : class
         {
             var executeActivityScopeProvider =
-                new DependencyInjectionExecuteActivityScopeProvider<TActivity, TArguments>(ComponentRegistry.DefaultName, provider);
+                new DependencyInjectionExecuteActivityScopeProvider<TActivity, TArguments>("default", provider);
 
             var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 
@@ -163,7 +162,7 @@ namespace MassTransit
             where TArguments : class
         {
             var executeActivityScopeProvider =
-                new DependencyInjectionExecuteActivityScopeProvider<TActivity, TArguments>(ComponentRegistry.DefaultName, provider);
+                new DependencyInjectionExecuteActivityScopeProvider<TActivity, TArguments>("default", provider);
 
             var factory = new ScopeExecuteActivityFactory<TActivity, TArguments>(executeActivityScopeProvider);
 
@@ -176,7 +175,7 @@ namespace MassTransit
             where TLog : class
         {
             var compensateActivityScopeProvider =
-                new DependencyInjectionCompensateActivityScopeProvider<TActivity, TLog>(ComponentRegistry.DefaultName, provider);
+                new DependencyInjectionCompensateActivityScopeProvider<TActivity, TLog>("default", provider);
 
             var factory = new ScopeCompensateActivityFactory<TActivity, TLog>(compensateActivityScopeProvider);
 

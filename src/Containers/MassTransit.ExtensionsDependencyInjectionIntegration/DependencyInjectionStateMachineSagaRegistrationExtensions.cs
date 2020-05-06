@@ -3,7 +3,6 @@ namespace MassTransit
     using System;
     using System.Reflection;
     using Automatonymous;
-    using ExtensionsDependencyInjectionIntegration;
     using ExtensionsDependencyInjectionIntegration.Registration;
     using Microsoft.Extensions.DependencyInjection;
     using Registration;
@@ -18,7 +17,7 @@ namespace MassTransit
         /// <param name="type">The state machine saga type</param>
         public static void RegisterSagaStateMachine(this IServiceCollection collection, Type type)
         {
-            var registrar = new DependencyInjectionContainerRegistrar(ComponentRegistry.DefaultName, collection);
+            var registrar = new DependencyInjectionContainerRegistrar("default", collection);
 
             SagaStateMachineRegistrationCache.Register(type, registrar);
         }
@@ -31,7 +30,7 @@ namespace MassTransit
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
-            var registrar = new DependencyInjectionContainerRegistrar(ComponentRegistry.DefaultName, collection);
+            var registrar = new DependencyInjectionContainerRegistrar("default", collection);
 
             SagaStateMachineRegistrationCache.Register(typeof(TStateMachine), registrar);
         }
@@ -43,7 +42,7 @@ namespace MassTransit
         /// <param name="assemblies">If specified, only the specified assemblies are scanned</param>
         public static void RegisterSagaStateMachines(this IServiceCollection collection, params Assembly[] assemblies)
         {
-            var registrar = new DependencyInjectionContainerRegistrar(ComponentRegistry.DefaultName, collection);
+            var registrar = new DependencyInjectionContainerRegistrar("default", collection);
 
             registrar.RegisterSagaStateMachines(assemblies);
         }
@@ -55,7 +54,7 @@ namespace MassTransit
         /// <param name="types">If specified, only the specified assemblies are scanned</param>
         public static void RegisterSagaStateMachines(this IServiceCollection collection, params Type[] types)
         {
-            var registrar = new DependencyInjectionContainerRegistrar(ComponentRegistry.DefaultName, collection);
+            var registrar = new DependencyInjectionContainerRegistrar("default", collection);
 
             registrar.RegisterSagaStateMachines(types);
         }

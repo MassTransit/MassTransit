@@ -1,6 +1,7 @@
 namespace MassTransit.Scoping
 {
     using System;
+    using System.Collections.Generic;
 
 
     /// <summary>
@@ -9,24 +10,21 @@ namespace MassTransit.Scoping
     /// </summary>
     public class ScopedConsumeContextProvider
     {
-        ConsumeContext _context;
-        ScopedConsumeContext _marker;
+        readonly IDictionary<string, ConsumeContext> _contexts = new Dictionary<string, ConsumeContext>();
 
         public void SetContext(string name, ConsumeContext context)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            lock (this)
+            lock (_contexts)
             {
-                if (_context == null)
+                if (!_contexts.TryGetValue(name, out var current))
                 {
-                    _context = context;
-                    _marker = new ScopedConsumeContext();
-
-                    context.GetOrAddPayload(() => _marker);
+                    _contexts[name] = context;
+                    context.GetOrAddPayload(() => new ScopedConsumeContext());
                 }
-                else if (ReferenceEquals(_context, context))
+                else if (ReferenceEquals(current, context))
                 {
                 }
                 else if (!context.TryGetPayload<ScopedConsumeContext>(out _))
@@ -38,7 +36,12 @@ namespace MassTransit.Scoping
 
         public ConsumeContext GetContext(string name)
         {
-            return _context;
+            lock (_contexts)
+            {
+                if (!_contexts.TryGetValue(name, out var context))
+                    throw new ArgumentException(nameof(name), $"The ConsumeContext ({name}) not found");
+                return context;
+            }
         }
 
 

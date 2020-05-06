@@ -297,11 +297,15 @@ namespace MassTransit.Registration
 
         protected static void ConfigureMediator(string name, IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider provider)
         {
-            var registration = provider.GetRequiredService<IEnumerable<IRegistration>>()
-                .Single(x => x.Name == name);
+            IRegistration[] registrations = provider.GetRequiredService<IEnumerable<IRegistration>>()
+                .Where(x => x.Name == name)
+                .ToArray();
 
-            registration.ConfigureConsumers(configurator);
-            registration.ConfigureSagas(configurator);
+            foreach (var registration in registrations)
+            {
+                registration.ConfigureConsumers(configurator);
+                registration.ConfigureSagas(configurator);
+            }
         }
 
         static IClientFactory BusClientFactoryProvider(IBus bus)

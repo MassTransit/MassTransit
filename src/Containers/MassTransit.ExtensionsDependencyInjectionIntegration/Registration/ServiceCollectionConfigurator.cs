@@ -15,18 +15,23 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         RegistrationConfigurator,
         IServiceCollectionConfigurator
     {
-        protected readonly string Name;
+        readonly string _name;
 
         public ServiceCollectionConfigurator(string name, IServiceCollection collection)
-            : base(new DependencyInjectionContainerRegistrar(name, collection))
+            : this(name, collection, new DependencyInjectionContainerRegistrar(name, collection))
         {
-            Name = name;
+        }
+
+        protected ServiceCollectionConfigurator(string name, IServiceCollection collection, IContainerRegistrar registrar)
+            : base(registrar)
+        {
+            _name = name;
             Collection = collection;
 
             AddMassTransitComponents(collection);
 
             collection.AddSingleton<IRegistrationConfigurator>(this);
-            collection.AddSingleton(provider => CreateRegistration(Name, provider.GetRequiredService<IConfigurationServiceProvider>()));
+            collection.AddSingleton(provider => CreateRegistration(_name, provider.GetRequiredService<IConfigurationServiceProvider>()));
         }
 
         public IServiceCollection Collection { get; }
@@ -42,17 +47,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
                 return busFactory(serviceProvider);
             }
 
-            Collection.AddSingleton<IComponentRegistry>(provider => new ComponentRegistry(Name, BusFactory(provider)));
-            Collection.AddSingleton(provider =>
-            {
-                var componentFactory = provider.GetRequiredService<INamedComponentFactory>();
-                return componentFactory.GetBus(Name);
-            });
+            Collection.AddSingleton(BusFactory);
             Collection.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
             Collection.AddSingleton(provider => ClientFactoryProvider(provider.GetRequiredService<IBus>()));
 
-            Collection.AddScoped(GetCurrentSendEndpointProvider);
-            Collection.AddScoped(GetCurrentPublishEndpoint);
+            Collection.AddScoped(GetCurrentSendEndpointProvider<IBus>);
+            Collection.AddScoped(GetCurrentPublishEndpoint<IBus>);
         }
 
         public void AddMediator(Action<IServiceProvider, IReceiveEndpointConfigurator> configure = null)
@@ -67,7 +67,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
                 {
                     configure?.Invoke(serviceProvider, cfg);
 
-                    ConfigureMediator(Name, cfg, provider);
+                    ConfigureMediator(_name, cfg, provider);
                 });
             }
 
@@ -77,24 +77,26 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         void AddMassTransitComponents(IServiceCollection collection)
         {
-            collection.TryAddSingleton<INamedComponentFactory, NamedComponentFactory>();
             collection.TryAddScoped<ScopedConsumeContextProvider>();
-            collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext(Name) ?? new MissingConsumeContext());
+            collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext(_name) ?? new MissingConsumeContext());
+
             collection.TryAddSingleton<Func<string, IConsumerScopeProvider>>(provider => name => new DependencyInjectionConsumerScopeProvider(name, provider));
 
             collection.TryAddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
         }
 
-        protected ISendEndpointProvider GetCurrentSendEndpointProvider(IServiceProvider provider)
+        protected ISendEndpointProvider GetCurrentSendEndpointProvider<TBus>(IServiceProvider provider)
+            where TBus : IBus
         {
-            return (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(Name)
-                ?? new ScopedSendEndpointProvider<IServiceProvider>(provider.GetRequiredService<INamedComponentFactory>().GetBus(Name), provider);
+            return (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(_name)
+                ?? new ScopedSendEndpointProvider<IServiceProvider>(provider.GetRequiredService<TBus>(), provider);
         }
 
-        protected IPublishEndpoint GetCurrentPublishEndpoint(IServiceProvider provider)
+        protected IPublishEndpoint GetCurrentPublishEndpoint<TBus>(IServiceProvider provider)
+            where TBus : IBus
         {
-            return (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(Name) ?? new PublishEndpoint(
-                new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<INamedComponentFactory>().GetBus(Name), provider));
+            return (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(_name) ?? new PublishEndpoint(
+                new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<TBus>(), provider));
         }
     }
 
@@ -104,8 +106,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         IServiceCollectionConfigurator<TBus>
         where TBus : class
     {
-        public ServiceCollectionConfigurator(IServiceCollection collection)
-            : base(typeof(TBus).Name, collection)
+        public ServiceCollectionConfigurator(string name, IServiceCollection collection)
+            : base(name, collection, new DependencyInjectionContainerRegistrar<IClientFactory<TBus>>(name, collection))
         {
         }
 
@@ -120,18 +122,13 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
                 return busFactory(serviceProvider);
             }
 
-            Collection.AddSingleton<IComponentRegistry>(provider => new ComponentRegistry(Name, BusFactory(provider)));
-            Collection.AddSingleton<IBusControl<TBus>>(provider =>
-            {
-                var componentFactory = provider.GetRequiredService<INamedComponentFactory>();
-                return new BusControl<TBus>(componentFactory.GetBus(Name));
-            });
+            Collection.AddSingleton<IBusControl<TBus>>(provider => new BusControl<TBus>(BusFactory(provider)));
             Collection.AddSingleton<IBus<TBus>>(provider => provider.GetRequiredService<IBusControl<TBus>>());
             Collection.AddSingleton<IClientFactory<TBus>>(provider =>
                 new ClientFactory<TBus>(ClientFactoryProvider(provider.GetRequiredService<IBus<TBus>>())));
 
-            Collection.AddScoped<ISendEndpointProvider<TBus>>(provider => new SendEndpointProvider<TBus>(GetCurrentSendEndpointProvider(provider)));
-            Collection.AddScoped<IPublishEndpoint<TBus>>(provider => new PublishEndpoint<TBus>(GetCurrentPublishEndpoint(provider)));
+            Collection.AddScoped<ISendEndpointProvider<TBus>>(provider => new SendEndpointProvider<TBus>(GetCurrentSendEndpointProvider<IBus<TBus>>(provider)));
+            Collection.AddScoped<IPublishEndpoint<TBus>>(provider => new PublishEndpoint<TBus>(GetCurrentPublishEndpoint<IBus<TBus>>(provider)));
         }
     }
 }
