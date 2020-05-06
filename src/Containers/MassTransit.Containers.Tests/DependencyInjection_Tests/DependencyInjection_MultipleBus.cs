@@ -80,7 +80,8 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             readonly IPublishEndpoint<Bus2> _publishEndpoint;
             readonly TaskCompletionSource<ConsumeContext<SimpleMessageInterface>> _taskCompletionSource;
 
-            public Consumer1(IPublishEndpoint<Bus2> publishEndpoint, TaskCompletionSource<ConsumeContext<SimpleMessageInterface>> taskCompletionSource)
+            public Consumer1(IPublishEndpoint publishEndpointDefault, IPublishEndpoint<Bus2> publishEndpoint,
+                TaskCompletionSource<ConsumeContext<SimpleMessageInterface>> taskCompletionSource)
             {
                 _publishEndpoint = publishEndpoint;
                 _taskCompletionSource = taskCompletionSource;
@@ -99,7 +100,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
         {
             readonly TaskCompletionSource<ConsumeContext<PingMessage>> _taskCompletionSource;
 
-            public Consumer2(TaskCompletionSource<ConsumeContext<PingMessage>> taskCompletionSource)
+            public Consumer2(IPublishEndpoint publishEndpoint, TaskCompletionSource<ConsumeContext<PingMessage>> taskCompletionSource)
             {
                 _taskCompletionSource = taskCompletionSource;
             }

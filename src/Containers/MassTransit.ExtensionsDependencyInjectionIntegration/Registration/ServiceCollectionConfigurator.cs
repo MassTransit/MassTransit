@@ -50,9 +50,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.AddSingleton(BusFactory);
             Collection.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
             Collection.AddSingleton(provider => ClientFactoryProvider(provider.GetRequiredService<IBus>()));
-
-            Collection.AddScoped(GetCurrentSendEndpointProvider<IBus>);
-            Collection.AddScoped(GetCurrentPublishEndpoint<IBus>);
         }
 
         public void AddMediator(Action<IServiceProvider, IReceiveEndpointConfigurator> configure = null)
@@ -80,22 +77,25 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             collection.TryAddScoped<ScopedConsumeContextProvider>();
             collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext(Name) ?? new MissingConsumeContext());
 
+            Collection.TryAddScoped(provider => GetCurrentSendEndpointProvider<IBus>(provider, ScopedConsumeContextProvider.Any));
+            Collection.TryAddScoped(provider => GetCurrentPublishEndpoint<IBus>(provider, ScopedConsumeContextProvider.Any));
+
             collection.TryAddSingleton<Func<string, IConsumerScopeProvider>>(provider => name => new DependencyInjectionConsumerScopeProvider(name, provider));
 
             collection.TryAddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
         }
 
-        protected ISendEndpointProvider GetCurrentSendEndpointProvider<TBus>(IServiceProvider provider)
+        protected ISendEndpointProvider GetCurrentSendEndpointProvider<TBus>(IServiceProvider provider, string name)
             where TBus : IBus
         {
-            return (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(Name)
+            return (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(name)
                 ?? new ScopedSendEndpointProvider<IServiceProvider>(provider.GetRequiredService<TBus>(), provider);
         }
 
-        protected IPublishEndpoint GetCurrentPublishEndpoint<TBus>(IServiceProvider provider)
+        protected IPublishEndpoint GetCurrentPublishEndpoint<TBus>(IServiceProvider provider, string name)
             where TBus : IBus
         {
-            return (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(Name) ?? new PublishEndpoint(
+            return (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(name) ?? new PublishEndpoint(
                 new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<TBus>(), provider));
         }
     }
@@ -127,8 +127,9 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.AddSingleton<IClientFactory<TBus>>(provider =>
                 new ClientFactory<TBus>(ClientFactoryProvider(provider.GetRequiredService<IBus<TBus>>())));
 
-            Collection.AddScoped<ISendEndpointProvider<TBus>>(provider => new SendEndpointProvider<TBus>(GetCurrentSendEndpointProvider<IBus<TBus>>(provider)));
-            Collection.AddScoped<IPublishEndpoint<TBus>>(provider => new PublishEndpoint<TBus>(GetCurrentPublishEndpoint<IBus<TBus>>(provider)));
+            Collection.AddScoped<ISendEndpointProvider<TBus>>(provider =>
+                new SendEndpointProvider<TBus>(GetCurrentSendEndpointProvider<IBus<TBus>>(provider, Name)));
+            Collection.AddScoped<IPublishEndpoint<TBus>>(provider => new PublishEndpoint<TBus>(GetCurrentPublishEndpoint<IBus<TBus>>(provider, Name)));
         }
     }
 }
