@@ -50,6 +50,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.AddSingleton(BusFactory);
             Collection.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
             Collection.AddSingleton(provider => ClientFactoryProvider(provider.GetRequiredService<IBus>()));
+            Collection.AddSingleton<IBusRegistration>(provider => new BusRegistration(Name, provider.GetRequiredService<IBusControl>()));
         }
 
         public void AddMediator(Action<IServiceProvider, IReceiveEndpointConfigurator> configure = null)
@@ -85,14 +86,14 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             collection.TryAddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
         }
 
-        protected ISendEndpointProvider GetCurrentSendEndpointProvider<TBus>(IServiceProvider provider, string name)
+        protected static ISendEndpointProvider GetCurrentSendEndpointProvider<TBus>(IServiceProvider provider, string name)
             where TBus : IBus
         {
             return (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(name)
                 ?? new ScopedSendEndpointProvider<IServiceProvider>(provider.GetRequiredService<TBus>(), provider);
         }
 
-        protected IPublishEndpoint GetCurrentPublishEndpoint<TBus>(IServiceProvider provider, string name)
+        protected static IPublishEndpoint GetCurrentPublishEndpoint<TBus>(IServiceProvider provider, string name)
             where TBus : IBus
         {
             return (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(name) ?? new PublishEndpoint(
@@ -130,6 +131,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.AddScoped<ISendEndpointProvider<TBus>>(provider =>
                 new SendEndpointProvider<TBus>(GetCurrentSendEndpointProvider<IBus<TBus>>(provider, Name)));
             Collection.AddScoped<IPublishEndpoint<TBus>>(provider => new PublishEndpoint<TBus>(GetCurrentPublishEndpoint<IBus<TBus>>(provider, Name)));
+
+            Collection.AddSingleton<IBusRegistration>(provider => new BusRegistration(Name, provider.GetRequiredService<IBusControl<TBus>>()));
         }
     }
 }

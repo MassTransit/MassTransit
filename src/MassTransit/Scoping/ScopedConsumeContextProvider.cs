@@ -42,9 +42,7 @@ namespace MassTransit.Scoping
 
         public ConsumeContext GetContext(string name)
         {
-            if (name == Any)
-                return _context;
-            return name == _name ? _context : null;
+            return name == Any || name == _name ? _context : null;
         }
 
 
