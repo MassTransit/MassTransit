@@ -66,7 +66,7 @@ namespace MassTransit.Registration
                 if (activityDefinitionType != null)
                     ExecuteActivityDefinitionRegistrationCache.Register(activityDefinitionType, registrar);
 
-                return new ExecuteActivityRegistration<TActivity, TArguments>();
+                return new ExecuteActivityRegistration<TActivity, TArguments>(registrar.Name);
             }
         }
     }

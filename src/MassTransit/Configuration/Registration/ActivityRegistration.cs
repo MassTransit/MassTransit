@@ -16,12 +16,14 @@ namespace MassTransit.Registration
         where TArguments : class
         where TLog : class
     {
+        readonly string _name;
         readonly List<Action<IExecuteActivityConfigurator<TActivity, TArguments>>> _executeActions;
         readonly List<Action<ICompensateActivityConfigurator<TActivity, TLog>>> _compensateActions;
         IActivityDefinition<TActivity, TArguments, TLog> _definition;
 
-        public ActivityRegistration()
+        public ActivityRegistration(string name)
         {
+            _name = name;
             _executeActions = new List<Action<IExecuteActivityConfigurator<TActivity, TArguments>>>();
             _compensateActions = new List<Action<ICompensateActivityConfigurator<TActivity, TLog>>>();
         }

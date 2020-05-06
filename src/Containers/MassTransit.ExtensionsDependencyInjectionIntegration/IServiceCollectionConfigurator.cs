@@ -7,6 +7,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
     public interface IServiceCollectionConfigurator :
         IRegistrationConfigurator<IServiceProvider>
     {
+        string Name { get; }
         IServiceCollection Collection { get; }
     }
 

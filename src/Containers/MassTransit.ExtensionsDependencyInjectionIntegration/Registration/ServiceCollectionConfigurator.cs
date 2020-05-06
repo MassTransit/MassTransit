@@ -15,8 +15,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         RegistrationConfigurator,
         IServiceCollectionConfigurator
     {
-        readonly string _name;
-
         public ServiceCollectionConfigurator(string name, IServiceCollection collection)
             : this(name, collection, new DependencyInjectionContainerRegistrar(name, collection))
         {
@@ -25,14 +23,16 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         protected ServiceCollectionConfigurator(string name, IServiceCollection collection, IContainerRegistrar registrar)
             : base(registrar)
         {
-            _name = name;
+            Name = name;
             Collection = collection;
 
             AddMassTransitComponents(collection);
 
             collection.AddSingleton<IRegistrationConfigurator>(this);
-            collection.AddSingleton(provider => CreateRegistration(_name, provider.GetRequiredService<IConfigurationServiceProvider>()));
+            collection.AddSingleton(provider => CreateRegistration(Name, provider.GetRequiredService<IConfigurationServiceProvider>()));
         }
+
+        public string Name { get; }
 
         public IServiceCollection Collection { get; }
 
@@ -67,7 +67,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
                 {
                     configure?.Invoke(serviceProvider, cfg);
 
-                    ConfigureMediator(_name, cfg, provider);
+                    ConfigureMediator(Name, cfg, provider);
                 });
             }
 
@@ -78,7 +78,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         void AddMassTransitComponents(IServiceCollection collection)
         {
             collection.TryAddScoped<ScopedConsumeContextProvider>();
-            collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext(_name) ?? new MissingConsumeContext());
+            collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext(Name) ?? new MissingConsumeContext());
 
             collection.TryAddSingleton<Func<string, IConsumerScopeProvider>>(provider => name => new DependencyInjectionConsumerScopeProvider(name, provider));
 
@@ -88,14 +88,14 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         protected ISendEndpointProvider GetCurrentSendEndpointProvider<TBus>(IServiceProvider provider)
             where TBus : IBus
         {
-            return (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(_name)
+            return (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(Name)
                 ?? new ScopedSendEndpointProvider<IServiceProvider>(provider.GetRequiredService<TBus>(), provider);
         }
 
         protected IPublishEndpoint GetCurrentPublishEndpoint<TBus>(IServiceProvider provider)
             where TBus : IBus
         {
-            return (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(_name) ?? new PublishEndpoint(
+            return (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext(Name) ?? new PublishEndpoint(
                 new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<TBus>(), provider));
         }
     }

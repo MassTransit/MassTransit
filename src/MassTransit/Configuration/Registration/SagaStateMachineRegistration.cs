@@ -19,11 +19,13 @@ namespace MassTransit.Registration
         ISagaRegistration
         where TInstance : class, SagaStateMachineInstance
     {
+        readonly string _name;
         readonly List<Action<ISagaConfigurator<TInstance>>> _configureActions;
         ISagaDefinition<TInstance> _definition;
 
-        public SagaStateMachineRegistration()
+        public SagaStateMachineRegistration(string name)
         {
+            _name = name;
             _configureActions = new List<Action<ISagaConfigurator<TInstance>>>();
         }
 

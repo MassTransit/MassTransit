@@ -1,6 +1,8 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Conductor.Configuration;
     using ConsumeConfigurators;
     using Definition;
@@ -63,6 +65,29 @@ namespace MassTransit
             var registration = provider.GetRequiredService<IRegistration>();
 
             registration.ConfigureEndpoints(configurator, endpointNameFormatter);
+        }
+
+        /// <summary>
+        /// Configure the endpoints for all defined consumer, saga, and activity types using an optional
+        /// endpoint name formatter. If no endpoint name formatter is specified and an <see cref="IEndpointNameFormatter"/>
+        /// is registered in the container, it is resolved from the container. Otherwise, the <see cref="DefaultEndpointNameFormatter"/>
+        /// is used.
+        /// </summary>
+        /// <param name="configurator">The <see cref="IBusFactoryConfigurator"/> for the bus being configured</param>
+        /// <param name="provider">The container reference</param>
+        /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
+        /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
+        public static void ConfigureEndpoints<T>(this IReceiveConfigurator<T> configurator, IServiceProvider provider, string name,
+            IEndpointNameFormatter endpointNameFormatter = null)
+            where T : IReceiveEndpointConfigurator
+        {
+            var registrations = provider.GetRequiredService<IEnumerable<IRegistration>>()
+                .Where(x => x.Name == name)
+                .ToArray();
+            foreach (var registration in registrations)
+            {
+                registration.ConfigureEndpoints(configurator, endpointNameFormatter);
+            }
         }
 
         /// <summary>

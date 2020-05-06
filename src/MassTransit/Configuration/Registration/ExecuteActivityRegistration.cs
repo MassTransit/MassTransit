@@ -15,11 +15,13 @@ namespace MassTransit.Registration
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
+        readonly string _name;
         readonly List<Action<IExecuteActivityConfigurator<TActivity, TArguments>>> _configureActions;
         IExecuteActivityDefinition<TActivity, TArguments> _definition;
 
-        public ExecuteActivityRegistration()
+        public ExecuteActivityRegistration(string name)
         {
+            _name = name;
             _configureActions = new List<Action<IExecuteActivityConfigurator<TActivity, TArguments>>>();
         }
 

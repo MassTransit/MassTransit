@@ -83,7 +83,7 @@ namespace MassTransit.Registration
                 if (consumerDefinitionType != null)
                     ConsumerDefinitionRegistrationCache.Register(consumerDefinitionType, _containerRegistrar);
 
-                return (IConsumerRegistration)Activator.CreateInstance(typeof(ConsumerRegistration<>).MakeGenericType(type));
+                return (IConsumerRegistration)Activator.CreateInstance(typeof(ConsumerRegistration<>).MakeGenericType(type), new {_containerRegistrar.Name});
             }
 
             _consumerRegistrations.GetOrAdd(consumerType, ValueFactory);
@@ -108,7 +108,7 @@ namespace MassTransit.Registration
                 if (sagaDefinitionType != null)
                     SagaDefinitionRegistrationCache.Register(sagaDefinitionType, _containerRegistrar);
 
-                return new SagaRegistration<T>();
+                return new SagaRegistration<T>(_containerRegistrar.Name);
             }
 
             var registration = _sagaRegistrations.GetOrAdd(typeof(T), ValueFactory);
@@ -144,7 +144,7 @@ namespace MassTransit.Registration
                 if (sagaDefinitionType != null)
                     SagaDefinitionRegistrationCache.Register(sagaDefinitionType, _containerRegistrar);
 
-                return new SagaStateMachineRegistration<T>();
+                return new SagaStateMachineRegistration<T>(_containerRegistrar.Name);
             }
 
             var registration = _sagaRegistrations.GetOrAdd(typeof(T), ValueFactory);
@@ -179,7 +179,7 @@ namespace MassTransit.Registration
                 if (executeActivityDefinitionType != null)
                     ExecuteActivityDefinitionRegistrationCache.Register(executeActivityDefinitionType, _containerRegistrar);
 
-                return new ExecuteActivityRegistration<TActivity, TArguments>();
+                return new ExecuteActivityRegistration<TActivity, TArguments>(_containerRegistrar.Name);
             }
 
             var registration = _executeActivityRegistrations.GetOrAdd(typeof(TActivity), ValueFactory);
@@ -219,7 +219,7 @@ namespace MassTransit.Registration
                 if (activityDefinitionType != null)
                     ActivityDefinitionRegistrationCache.Register(activityDefinitionType, _containerRegistrar);
 
-                return new ActivityRegistration<TActivity, TArguments, TLog>();
+                return new ActivityRegistration<TActivity, TArguments, TLog>(_containerRegistrar.Name);
             }
 
             var registration = _activityRegistrations.GetOrAdd(typeof(TActivity), ValueFactory);

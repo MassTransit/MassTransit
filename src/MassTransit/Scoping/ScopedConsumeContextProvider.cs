@@ -38,9 +38,7 @@ namespace MassTransit.Scoping
         {
             lock (_contexts)
             {
-                if (!_contexts.TryGetValue(name, out var context))
-                    throw new ArgumentException(nameof(name), $"The ConsumeContext ({name}) not found");
-                return context;
+                return !_contexts.TryGetValue(name, out var context) ? null : context;
             }
         }
 
