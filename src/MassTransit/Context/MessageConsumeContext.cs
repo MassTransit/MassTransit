@@ -2,6 +2,7 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -35,21 +36,33 @@ namespace MassTransit.Context
 
         bool PipeContext.HasPayloadType(Type payloadType)
         {
-            return _context.HasPayloadType(payloadType);
+            return payloadType.GetTypeInfo().IsInstanceOfType(this) || _context.HasPayloadType(payloadType);
         }
 
         bool PipeContext.TryGetPayload<T>(out T payload)
         {
+            if (this is T context)
+            {
+                payload = context;
+                return true;
+            }
+
             return _context.TryGetPayload(out payload);
         }
 
         T PipeContext.GetOrAddPayload<T>(PayloadFactory<T> payloadFactory)
         {
+            if (this is T context)
+                return context;
+
             return _context.GetOrAddPayload(payloadFactory);
         }
 
         T PipeContext.AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
         {
+            if (this is T context)
+                return context;
+
             return _context.AddOrUpdatePayload(addFactory, updateFactory);
         }
 

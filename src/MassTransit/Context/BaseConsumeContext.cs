@@ -37,7 +37,7 @@ namespace MassTransit.Context
         public abstract T AddOrUpdatePayload<T>(PayloadFactory<T> addFactory, UpdatePayloadFactory<T> updateFactory)
             where T : class;
 
-        public virtual ReceiveContext ReceiveContext { get; }
+        public ReceiveContext ReceiveContext { get; protected set; }
 
         public abstract Task ConsumeCompleted { get; }
 

@@ -17,7 +17,10 @@ namespace MassTransit.Context
         public InMemoryOutboxConsumeContext(ConsumeContext context)
             : base(context)
         {
-            ReceiveContext = new InMemoryOutboxReceiveContext(this, context.ReceiveContext);
+            var outboxReceiveContext = new InMemoryOutboxReceiveContext(this, context.ReceiveContext);
+
+            ReceiveContext = outboxReceiveContext;
+            PublishEndpointProvider = outboxReceiveContext.PublishEndpointProvider;
 
             _pendingActions = new List<Func<Task>>();
             _clearToSend = TaskUtil.GetTask<InMemoryOutboxConsumeContext>();
@@ -36,8 +39,6 @@ namespace MassTransit.Context
             lock (_pendingActions)
                 _pendingActions.Add(method);
         }
-
-        public override ReceiveContext ReceiveContext { get; }
 
         public async Task ExecutePendingActions()
         {

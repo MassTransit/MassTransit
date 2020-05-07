@@ -14,12 +14,12 @@ namespace MassTransit.Transports
     public class PublishEndpoint :
         IPublishEndpoint
     {
-        readonly IPublishEndpointProvider _provider;
-
         public PublishEndpoint(IPublishEndpointProvider provider)
         {
-            _provider = provider;
+            PublishEndpointProvider = provider;
         }
+
+        protected IPublishEndpointProvider PublishEndpointProvider { get; set;}
 
         public Task Publish<T>(T message, CancellationToken cancellationToken)
             where T : class
@@ -98,13 +98,13 @@ namespace MassTransit.Transports
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _provider.ConnectPublishObserver(observer);
+            return PublishEndpointProvider.ConnectPublishObserver(observer);
         }
 
         protected virtual Task<ISendEndpoint> GetPublishSendEndpoint<T>()
             where T : class
         {
-            return _provider.GetPublishSendEndpoint<T>();
+            return PublishEndpointProvider.GetPublishSendEndpoint<T>();
         }
 
         Task PublishInternal<T>(CancellationToken cancellationToken, T message, IPipe<PublishContext<T>> pipe = default)
