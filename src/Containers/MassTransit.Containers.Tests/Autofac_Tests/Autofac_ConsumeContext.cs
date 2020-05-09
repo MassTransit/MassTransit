@@ -36,7 +36,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             await _container.DisposeAsync();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistrationContext<IComponentContext>>();
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
         protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
         protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
         protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
@@ -72,7 +72,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             await _container.DisposeAsync();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistrationContext<IComponentContext>>();
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
         protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
         protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
         protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
@@ -106,7 +106,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             await _container.DisposeAsync();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistrationContext<IComponentContext>>();
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
         protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
         protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
         protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;

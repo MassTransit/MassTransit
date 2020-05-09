@@ -55,6 +55,6 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
         {
             return _container.Resolve<IRequestClient<PingMessage>>();
         }
-        protected override IRegistration Registration => _container.Resolve<IRegistrationContext<IComponentContext>>();
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
     }
 }

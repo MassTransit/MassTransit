@@ -53,7 +53,7 @@ namespace MassTransit.LamarIntegration.Registration
 
                 ConfigureLogContext(provider);
 
-                var context = serviceContext.GetInstance<IRegistrationContext<IServiceContext>>();
+                IRegistrationContext<IServiceContext> context = GetRegistrationContext(serviceContext);
 
                 return busFactory(context);
             }
@@ -88,10 +88,6 @@ namespace MassTransit.LamarIntegration.Registration
 
             _registry.For<IBusRegistryInstance>()
                 .Use<BusRegistryInstance>()
-                .Singleton();
-
-            _registry.For<IRegistrationContext<IServiceContext>>()
-                .Use<RegistrationContext<IServiceContext>>()
                 .Singleton();
         }
 
@@ -140,6 +136,15 @@ namespace MassTransit.LamarIntegration.Registration
         {
             return (IPublishEndpoint)context.TryGetInstance<ConsumeContext>()
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), context.GetInstance<IContainer>()));
+        }
+
+        static IRegistrationContext<IServiceContext> GetRegistrationContext(IServiceContext context)
+        {
+            return new RegistrationContext<IServiceContext>(
+                context.GetInstance<IRegistration>(),
+                context.GetInstance<BusHealth>(),
+                context
+            );
         }
     }
 }

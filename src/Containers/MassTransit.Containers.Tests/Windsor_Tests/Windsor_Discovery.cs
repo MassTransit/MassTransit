@@ -13,7 +13,6 @@
 namespace MassTransit.Containers.Tests.Windsor_Tests
 {
     using System;
-    using Castle.MicroKernel;
     using Castle.Windsor;
     using Common_Tests;
     using Common_Tests.Discovery;
@@ -56,6 +55,6 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             return _container.Resolve<IRequestClient<PingMessage>>();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistrationContext<IKernel>>();
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
     }
 }

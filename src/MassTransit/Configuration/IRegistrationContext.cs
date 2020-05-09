@@ -8,12 +8,4 @@ namespace MassTransit
 
         void UseHealthCheck(IBusFactoryConfigurator configurator);
     }
-
-
-    public interface IRegistrationContext<in TBus, out TContainerContext> :
-        IRegistrationContext<TContainerContext>
-        where TBus : IBus
-        where TContainerContext : class
-    {
-    }
 }

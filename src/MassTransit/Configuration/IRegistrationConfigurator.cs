@@ -232,14 +232,9 @@ namespace MassTransit
     /// <typeparam name="TBus"></typeparam>
     /// <typeparam name="TContainerContext"></typeparam>
     public interface IRegistrationConfigurator<in TBus, out TContainerContext> :
-        IRegistrationConfigurator
+        IRegistrationConfigurator<TContainerContext>
         where TBus : class, IBus
         where TContainerContext : class
     {
-        /// <summary>
-        /// Add the bus to the container, configured properly
-        /// </summary>
-        /// <param name="busFactory"></param>
-        void AddBus(Func<IRegistrationContext<TBus, TContainerContext>, IBusControl> busFactory);
     }
 }

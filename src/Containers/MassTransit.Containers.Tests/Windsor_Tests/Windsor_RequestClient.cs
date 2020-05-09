@@ -24,7 +24,6 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Windsor_Tests
 {
-    using Castle.MicroKernel;
     using Castle.Windsor;
     using Common_Tests;
     using NUnit.Framework;
@@ -53,6 +52,6 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
 
         protected override IRequestClient<InitialRequest> RequestClient => _container.Resolve<IRequestClient<InitialRequest>>();
 
-        protected override IRegistration Registration => _container.Resolve<IRegistrationContext<IKernel>>();
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
     }
 }

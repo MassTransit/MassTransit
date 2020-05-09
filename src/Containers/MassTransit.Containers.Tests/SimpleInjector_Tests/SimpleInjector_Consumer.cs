@@ -43,7 +43,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Dispose();
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<Container>>();
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -81,6 +81,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Dispose();
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<Container>>();
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 }

@@ -41,7 +41,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         {
             _container.Verify();
         }
-        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<Container>>();
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 
 
@@ -70,7 +70,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Verify();
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<Container>>();
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 
 
@@ -96,7 +96,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         {
             _container.Verify();
         }
-        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<Container>>();
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 
 
@@ -124,6 +124,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         {
             _container.Verify();
         }
-        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<Container>>();
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 }

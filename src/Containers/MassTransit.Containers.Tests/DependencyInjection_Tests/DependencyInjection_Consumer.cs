@@ -40,7 +40,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             _provider = collection.BuildServiceProvider(true);
         }
 
-        protected override IRegistration Registration => _provider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
     }
 
 
@@ -67,7 +67,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             _provider = collection.BuildServiceProvider();
         }
 
-        protected override IRegistration Registration => _provider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
     }
 
 
@@ -84,6 +84,6 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
                 .BuildServiceProvider();
         }
 
-        protected override IRegistration Registration => _provider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
     }
 }

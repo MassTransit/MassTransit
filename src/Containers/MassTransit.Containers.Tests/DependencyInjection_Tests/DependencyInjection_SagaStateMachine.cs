@@ -21,6 +21,6 @@
                 .BuildServiceProvider(true);
         }
 
-        protected override IRegistration Registration => _provider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
     }
 }

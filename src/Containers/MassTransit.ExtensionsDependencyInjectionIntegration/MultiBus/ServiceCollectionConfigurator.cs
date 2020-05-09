@@ -22,7 +22,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             Collection.AddSingleton(provider => Bind<TBus>.Create(CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>())));
         }
 
-        public void AddBus(Func<IRegistrationContext<TBus, IServiceProvider>, IBusControl> busFactory)
+        public override void AddBus(Func<IRegistrationContext<IServiceProvider>, IBusControl> busFactory)
         {
             IBusControl BusFactory(IServiceProvider serviceProvider)
             {
@@ -30,15 +30,10 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
 
                 ConfigureLogContext(provider);
 
-                var context = serviceProvider.GetRequiredService<IRegistrationContext<TBus, IServiceProvider>>();
+                IRegistrationContext<IServiceProvider> context = GetRegistrationContext(serviceProvider);
 
                 return busFactory(context);
             }
-
-            Collection.AddSingleton<IRegistrationContext<TBus, IServiceProvider>>(provider => new RegistrationContext<TBus, IServiceProvider>(
-                provider.GetRequiredService<Bind<TBus, IRegistration>>(),
-                provider.GetRequiredService<Bind<TBus, BusHealth>>(),
-                provider));
 
             Collection.AddSingleton(provider => Bind<TBus>.Create(BusFactory(provider)));
 
@@ -69,6 +64,15 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
         static IPublishEndpoint GetPublishEndpoint(IServiceProvider provider)
         {
             return new PublishEndpoint(new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<TBus>(), provider));
+        }
+
+        static IRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
+        {
+            return new RegistrationContext<IServiceProvider>(
+                provider.GetRequiredService<Bind<TBus, IRegistration>>().Value,
+                provider.GetRequiredService<Bind<TBus, BusHealth>>().Value,
+                provider
+            );
         }
     }
 }

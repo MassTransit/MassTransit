@@ -52,7 +52,7 @@ namespace MassTransit.WindsorIntegration.Registration
 
                 ConfigureLogContext(provider);
 
-                var context = kernel.Resolve<IRegistrationContext<IKernel>>();
+                IRegistrationContext<IKernel> context = GetRegistrationContext(kernel);
 
                 return busFactory(context);
             }
@@ -77,9 +77,6 @@ namespace MassTransit.WindsorIntegration.Registration
                     .LifestyleSingleton(),
                 Component.For<IBusRegistryInstance>()
                     .ImplementedBy<BusRegistryInstance>()
-                    .LifestyleSingleton(),
-                Component.For<IRegistrationContext<IKernel>>()
-                    .ImplementedBy<RegistrationContext<IKernel>>()
                     .LifestyleSingleton()
             );
         }
@@ -117,6 +114,15 @@ namespace MassTransit.WindsorIntegration.Registration
         {
             return (IPublishEndpoint)context.GetConsumeContext()
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IKernel>(context.Resolve<IBus>(), context));
+        }
+
+        static IRegistrationContext<IKernel> GetRegistrationContext(IKernel context)
+        {
+            return new RegistrationContext<IKernel>(
+                context.Resolve<MassTransit.IRegistration>(),
+                context.Resolve<BusHealth>(),
+                context
+            );
         }
     }
 }

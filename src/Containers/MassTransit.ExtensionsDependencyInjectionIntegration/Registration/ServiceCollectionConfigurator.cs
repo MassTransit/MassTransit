@@ -42,7 +42,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
                 ConfigureLogContext(provider);
 
-                var context = serviceProvider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
+                IRegistrationContext<IServiceProvider> context = GetRegistrationContext(provider);
 
                 return busFactory(context);
             }
@@ -60,9 +60,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
             Collection.AddSingleton(provider => new BusHealth(nameof(IBus)));
             Collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<BusHealth>());
-
             Collection.AddSingleton<IBusRegistryInstance, BusRegistryInstance>();
-            Collection.AddSingleton<IRegistrationContext<IServiceProvider>, RegistrationContext<IServiceProvider>>();
         }
 
         public void AddMediator(Action<IServiceProvider, IReceiveEndpointConfigurator> configure = null)
@@ -110,6 +108,15 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         {
             return (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ?? new PublishEndpoint(
                 new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<IBus>(), provider));
+        }
+
+        static IRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
+        {
+            return new RegistrationContext<IServiceProvider>(
+                provider.GetRequiredService<IRegistration>(),
+                provider.GetRequiredService<BusHealth>(),
+                provider
+            );
         }
     }
 }

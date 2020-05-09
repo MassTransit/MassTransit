@@ -77,10 +77,6 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<IBusRegistryInstance>()
                 .Use<BusRegistryInstance>()
                 .Singleton();
-
-            _expression.For<IRegistrationContext<IContext>>()
-                .Use(context => new RegistrationContext<IContext>(context.GetInstance<IRegistration>(), context.GetInstance<BusHealth>(), context))
-                .Singleton();
         }
 
         static IBusControl BusFactory(IContext context, Func<IRegistrationContext<IContext>, IBusControl> busFactory)
@@ -89,7 +85,7 @@ namespace MassTransit.StructureMapIntegration.Registration
 
             ConfigureLogContext(provider);
 
-            var registrationContext = context.GetInstance<IRegistrationContext<IContext>>();
+            IRegistrationContext<IContext> registrationContext = GetRegistrationContext(context);
 
             return busFactory(registrationContext);
         }
@@ -105,7 +101,7 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Singleton();
         }
 
-        IMediator MediatorFactory(IContext context, Action<IContext, IReceiveEndpointConfigurator> configure)
+        static IMediator MediatorFactory(IContext context, Action<IContext, IReceiveEndpointConfigurator> configure)
         {
             var provider = context.GetInstance<IConfigurationServiceProvider>();
 
@@ -139,6 +135,15 @@ namespace MassTransit.StructureMapIntegration.Registration
         {
             return (IPublishEndpoint)context.TryGetInstance<ConsumeContext>()
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), context.GetInstance<IContainer>()));
+        }
+
+        static IRegistrationContext<IContext> GetRegistrationContext(IContext context)
+        {
+            return new RegistrationContext<IContext>(
+                context.GetInstance<IRegistration>(),
+                context.GetInstance<BusHealth>(),
+                context
+            );
         }
     }
 }

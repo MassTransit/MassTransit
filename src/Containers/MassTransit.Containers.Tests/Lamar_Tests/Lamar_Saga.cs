@@ -24,7 +24,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             _container.Dispose();
         }
 
-        protected override IRegistration Registration => _container.GetRequiredService<IRegistrationContext<IServiceContext>>();
+        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {
@@ -50,7 +50,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             _container.Dispose();
         }
 
-        protected override IRegistration Registration => _container.GetRequiredService<IRegistrationContext<IServiceContext>>();
+        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {

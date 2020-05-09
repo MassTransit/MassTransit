@@ -50,6 +50,6 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
         {
             return _provider.CreateRequestClient<PingMessage>();
         }
-        protected override IRegistration Registration => _provider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
     }
 }

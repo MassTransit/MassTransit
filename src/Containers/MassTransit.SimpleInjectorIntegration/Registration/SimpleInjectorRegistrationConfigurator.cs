@@ -46,7 +46,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
                 ConfigureLogContext(provider);
 
-                var context = Container.GetInstance<IRegistrationContext<Container>>();
+                IRegistrationContext<Container> context = GetRegistrationContext();
 
                 return busFactory(context);
             }
@@ -66,8 +66,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             Container.RegisterSingleton<IBusHealth>(() => Container.GetInstance<BusHealth>());
 
             Container.RegisterSingleton<IBusRegistryInstance, BusRegistryInstance>();
-
-            Container.RegisterSingleton<IRegistrationContext<Container>, RegistrationContext<Container>>();
         }
 
         public void AddMediator(Action<Container, IReceiveEndpointConfigurator> configure = null)
@@ -101,6 +99,15 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         {
             return (IPublishEndpoint)Container.GetConsumeContext()
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<Container>(Container.GetInstance<IBus>(), Container));
+        }
+
+        IRegistrationContext<Container> GetRegistrationContext()
+        {
+            return new RegistrationContext<Container>(
+                Container.GetInstance<IRegistration>(),
+                Container.GetInstance<BusHealth>(),
+                Container
+            );
         }
 
         static void AddMassTransitComponents(Container container)

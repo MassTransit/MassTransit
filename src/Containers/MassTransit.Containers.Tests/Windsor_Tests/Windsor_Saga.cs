@@ -1,6 +1,5 @@
 namespace MassTransit.Containers.Tests.Windsor_Tests
 {
-    using Castle.MicroKernel;
     using Castle.Windsor;
     using Common_Tests;
     using NUnit.Framework;
@@ -25,7 +24,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override MassTransit.IRegistration Registration => _container.Resolve<IRegistrationContext<IKernel>>();
+        protected override MassTransit.IRegistration Registration => _container.Resolve<IRegistration>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {
@@ -52,7 +51,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistrationContext<IKernel>>();
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {

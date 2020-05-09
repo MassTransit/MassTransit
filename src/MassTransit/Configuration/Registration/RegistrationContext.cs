@@ -88,17 +88,4 @@ namespace MassTransit.Registration
             _registration.ConfigureEndpoints(configurator, endpointNameFormatter);
         }
     }
-
-
-    public class RegistrationContext<TBus, TContainerContext> :
-        RegistrationContext<TContainerContext>,
-        IRegistrationContext<TBus, TContainerContext>
-        where TBus : IBus
-        where TContainerContext : class
-    {
-        public RegistrationContext(Bind<TBus, IRegistration> registration, Bind<TBus, BusHealth> busHealth, TContainerContext container)
-            : base(registration.Value, busHealth.Value, container)
-        {
-        }
-    }
 }

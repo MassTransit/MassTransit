@@ -56,6 +56,6 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             return _container.GetInstance<IRequestClient<PingMessage>>();
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<IContext>>();
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 }

@@ -36,7 +36,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             });
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<IContext>>();
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 
 
@@ -60,7 +60,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             });
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<IContext>>();
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 
 
@@ -82,7 +82,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             });
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<IContext>>();
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 
 
@@ -106,6 +106,6 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             });
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<IContext>>();
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 }

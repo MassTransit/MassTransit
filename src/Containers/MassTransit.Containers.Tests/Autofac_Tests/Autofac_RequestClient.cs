@@ -53,6 +53,6 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
         protected override IRequestClient<InitialRequest> RequestClient => _container.Resolve<IRequestClient<InitialRequest>>();
 
-        protected override IRegistration Registration => _container.Resolve<IRegistrationContext<IComponentContext>>();
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
     }
 }
