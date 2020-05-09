@@ -160,6 +160,7 @@ module.exports = {
                 ]
               },
               '/usage/mediator',
+              '/usage/containers/multibus',
               '/usage/message-data',
               {
                 title: 'Monitoring',
