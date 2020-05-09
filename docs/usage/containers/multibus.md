@@ -54,7 +54,7 @@ There are several interfaces added to the container using this configuration:
 | `IRequestClient<SubmitOrder>` | Scoped | Used to send requests
 | `ConsumeContext` | Scoped | Available in any message scope, such as a consumer, saga, or activity
 
-When a consumer, sags, or an activity is consuming a message the _ConsumeContext_ is available in the container scope. When the consumer is created using the container, the consumer and any dependencies are created within that scope. If a dependency includes _ISendEndpontProvider_, _IPublishEndpoint_, or even _ConsumeContext_ (should not be the first choice, but totally okay) on the constructor, all three of those interfaces result in the same reference – which is great because it ensures that messages sent and/or published by the consumer or its dependencies includes the proper correlation identifiers and monitoring activity headers.
+When a consumer, a saga, or an activity is consuming a message the _ConsumeContext_ is available in the container scope. When the consumer is created using the container, the consumer and any dependencies are created within that scope. If a dependency includes _ISendEndpontProvider_, _IPublishEndpoint_, or even _ConsumeContext_ (should not be the first choice, but totally okay) on the constructor, all three of those interfaces result in the same reference – which is great because it ensures that messages sent and/or published by the consumer or its dependencies includes the proper correlation identifiers and monitoring activity headers.
 
 ### MultiBus Configuration
 
