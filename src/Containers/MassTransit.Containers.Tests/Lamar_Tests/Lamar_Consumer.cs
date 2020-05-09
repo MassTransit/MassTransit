@@ -14,6 +14,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
 {
     using Common_Tests;
     using Lamar;
+    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Scenarios;
 
@@ -48,10 +49,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureConsumer(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumer<SimpleConsumer>(_container);
-        }
+        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
     }
 
 
@@ -81,9 +79,6 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
     }
 }

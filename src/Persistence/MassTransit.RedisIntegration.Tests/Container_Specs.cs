@@ -1,17 +1,17 @@
 namespace MassTransit.RedisIntegration.Tests
 {
-    using System;
-    using System.Threading.Tasks;
-    using Automatonymous;
-    using GreenPipes;
-    using Microsoft.Extensions.DependencyInjection;
-    using NUnit.Framework;
-    using TestFramework;
-    using TestFramework.Sagas;
-
-
     namespace ContainerTests
     {
+        using System;
+        using System.Threading.Tasks;
+        using Automatonymous;
+        using GreenPipes;
+        using Microsoft.Extensions.DependencyInjection;
+        using NUnit.Framework;
+        using TestFramework;
+        using TestFramework.Sagas;
+
+
         public class Using_optimistic_concurrency :
             InMemoryTestFixture
         {
@@ -50,6 +50,7 @@ namespace MassTransit.RedisIntegration.Tests
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+                where T : class
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .RedisRepository();
@@ -103,6 +104,7 @@ namespace MassTransit.RedisIntegration.Tests
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+                where T : class
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .RedisRepository(r => r.ConcurrencyMode = ConcurrencyMode.Pessimistic);

@@ -29,7 +29,11 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             _correlationId = NewId.NextGuid();
 
-            Response<InitialResponse> response = await client.GetResponse<InitialResponse>(new {CorrelationId = _correlationId, Value = "World"});
+            Response<InitialResponse> response = await client.GetResponse<InitialResponse>(new
+            {
+                CorrelationId = _correlationId,
+                Value = "World"
+            });
 
             Assert.That(response.Message.Value, Is.EqualTo("Hello, World"));
             Assert.That(response.ConversationId.Value, Is.EqualTo(response.Message.OriginalConversationId));
@@ -39,16 +43,15 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.ReceiveEndpoint(SubsequentQueueName, ConfigureSubsequentConsumer);
+            configurator.ReceiveEndpoint(SubsequentQueueName, cfg => cfg.ConfigureConsumer<SubsequentConsumer>(Registration));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            ConfigureInitialConsumer(configurator);
+            configurator.ConfigureConsumer<InitialConsumer>(Registration);
         }
 
-        protected abstract void ConfigureInitialConsumer(IInMemoryReceiveEndpointConfigurator configurator);
-        protected abstract void ConfigureSubsequentConsumer(IInMemoryReceiveEndpointConfigurator configurator);
+        protected abstract IRegistration Registration { get; }
 
 
         protected class InitialConsumer :

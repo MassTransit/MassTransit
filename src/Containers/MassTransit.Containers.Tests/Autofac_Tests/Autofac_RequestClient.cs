@@ -53,14 +53,6 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
         protected override IRequestClient<InitialRequest> RequestClient => _container.Resolve<IRequestClient<InitialRequest>>();
 
-        protected override void ConfigureInitialConsumer(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumer<InitialConsumer>(_container);
-        }
-
-        protected override void ConfigureSubsequentConsumer(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumer<SubsequentConsumer>(_container);
-        }
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
     }
 }

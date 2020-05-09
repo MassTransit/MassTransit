@@ -2,6 +2,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
 {
     using Common_Tests;
     using Lamar;
+    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework.Sagas;
 
@@ -28,9 +29,6 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureSagaStateMachine(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureSaga<TestInstance>(_container);
-        }
+        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
     }
 }

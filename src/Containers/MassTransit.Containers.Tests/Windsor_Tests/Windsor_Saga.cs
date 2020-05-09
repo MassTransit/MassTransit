@@ -4,7 +4,6 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
     using Common_Tests;
     using NUnit.Framework;
     using Saga;
-    using Scenarios;
 
 
     [TestFixture]
@@ -25,10 +24,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureSaga(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureSaga<SimpleSaga>(_container);
-        }
+        protected override MassTransit.IRegistration Registration => _container.Resolve<IRegistration>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {
@@ -55,10 +51,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {

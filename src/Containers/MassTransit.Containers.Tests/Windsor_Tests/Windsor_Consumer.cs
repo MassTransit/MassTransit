@@ -47,10 +47,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureConsumer(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumer<SimpleConsumer>(_container);
-        }
+        protected override MassTransit.IRegistration Registration => _container.Resolve<MassTransit.IRegistration>();
     }
 
 
@@ -84,9 +81,6 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override MassTransit.IRegistration Registration => _container.Resolve<MassTransit.IRegistration>();
     }
 }

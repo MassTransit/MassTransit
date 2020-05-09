@@ -3,6 +3,8 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
     using System;
     using Common_Tests;
     using Microsoft.Extensions.DependencyInjection;
+    using Monitoring.Health;
+    using Registration;
 
 
     public class DependencyInjection_Conductor :
@@ -20,7 +22,12 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 
         protected override void ConfigureServiceEndpoints(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
-            configurator.ConfigureServiceEndpoints(_provider, Options);
+            configurator.ConfigureServiceEndpoints(GetRegistrationContext(), Options);
+        }
+
+        IRegistrationContext<IServiceProvider> GetRegistrationContext()
+        {
+            return new RegistrationContext<IServiceProvider>(_provider.GetRequiredService<IRegistration>(), _provider.GetRequiredService<BusHealth>(), _provider);
         }
 
         protected override IClientFactory GetClientFactory()

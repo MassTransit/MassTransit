@@ -96,6 +96,20 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure the specified activity type
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="compensateEndpointConfigurator">The configurator for the compensate activity endpoint</param>
+        /// <param name="registration">The registration for this bus instance</param>
+        /// <param name="activityType"></param>
+        public static void ConfigureActivity(this IReceiveEndpointConfigurator configurator, IReceiveEndpointConfigurator compensateEndpointConfigurator,
+            IRegistration registration,
+            Type activityType)
+        {
+            registration.ConfigureActivity(activityType, configurator, compensateEndpointConfigurator);
+        }
+
+        /// <summary>
         /// Configure the specified execute activity type
         /// </summary>
         /// <param name="configurator"></param>

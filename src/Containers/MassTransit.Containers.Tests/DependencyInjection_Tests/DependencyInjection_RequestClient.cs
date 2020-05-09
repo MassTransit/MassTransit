@@ -45,14 +45,6 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 
         protected override IRequestClient<InitialRequest> RequestClient => _provider.CreateRequestClient<InitialRequest>();
 
-        protected override void ConfigureInitialConsumer(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumer<InitialConsumer>(_provider);
-        }
-
-        protected override void ConfigureSubsequentConsumer(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumer<SubsequentConsumer>(_provider);
-        }
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
     }
 }

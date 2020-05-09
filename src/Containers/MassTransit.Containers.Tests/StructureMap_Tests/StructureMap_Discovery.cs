@@ -56,9 +56,6 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             return _container.GetInstance<IRequestClient<PingMessage>>();
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 }

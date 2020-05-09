@@ -27,7 +27,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 
         protected override void ConfigureServiceEndpoints(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
-            configurator.ConfigureServiceEndpoints(_container, Options);
+            configurator.ConfigureServiceEndpoints(_container.GetInstance<Container>(), Options);
         }
 
         protected override IClientFactory GetClientFactory()

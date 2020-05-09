@@ -1,25 +1,22 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Automatonymous;
-    using EntityFrameworkCoreIntegration;
-    using GreenPipes;
-    using Mappings;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Design;
-    using Microsoft.EntityFrameworkCore.Metadata.Builders;
-    using Microsoft.Extensions.DependencyInjection;
-    using NUnit.Framework;
-    using Shared;
-    using TestFramework.Sagas;
-
-
     namespace ContainerTests
     {
+        using System;
+        using System.Collections.Generic;
         using System.Linq;
+        using System.Threading.Tasks;
+        using Automatonymous;
+        using GreenPipes;
+        using Mappings;
+        using Microsoft.EntityFrameworkCore;
+        using Microsoft.EntityFrameworkCore.Design;
+        using Microsoft.EntityFrameworkCore.Metadata.Builders;
+        using Microsoft.Extensions.DependencyInjection;
         using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
+        using NUnit.Framework;
+        using Shared;
+        using TestFramework.Sagas;
 
 
         [TestFixture(typeof(SqlServerTestDbParameters))]
@@ -85,6 +82,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+                where T : class
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .EntityFrameworkRepository(r =>
@@ -166,6 +164,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+                where T : class
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .EntityFrameworkRepository(r =>

@@ -1,8 +1,7 @@
 namespace MassTransit
 {
-    public interface IRegistrationContext<in TBus, out TContainerContext> :
+    public interface IRegistrationContext<out TContainerContext> :
         IRegistration
-        where TBus : IBus
         where TContainerContext : class
     {
         TContainerContext Container { get; }

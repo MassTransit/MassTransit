@@ -5,7 +5,6 @@ namespace MassTransit
     using ConsumeConfigurators;
     using Courier;
     using Definition;
-    using Registration;
     using Saga;
 
 
@@ -211,12 +210,13 @@ namespace MassTransit
     /// <typeparam name="TContainerContext">The container context type (IServiceProvider, etc.)</typeparam>
     public interface IRegistrationConfigurator<out TContainerContext> :
         IRegistrationConfigurator
+        where TContainerContext : class
     {
         /// <summary>
         /// Add the bus to the container, configured properly
         /// </summary>
         /// <param name="busFactory"></param>
-        void AddBus(Func<TContainerContext, IBusControl> busFactory);
+        void AddBus(Func<IRegistrationContext<TContainerContext>, IBusControl> busFactory);
 
         /// <summary>
         /// Add a mediator to the container
@@ -232,14 +232,9 @@ namespace MassTransit
     /// <typeparam name="TBus"></typeparam>
     /// <typeparam name="TContainerContext"></typeparam>
     public interface IRegistrationConfigurator<in TBus, out TContainerContext> :
-        IRegistrationConfigurator
+        IRegistrationConfigurator<TContainerContext>
         where TBus : class, IBus
         where TContainerContext : class
     {
-        /// <summary>
-        /// Add the bus to the container, configured properly
-        /// </summary>
-        /// <param name="busFactory"></param>
-        void AddBus(Func<IRegistrationContext<TBus, TContainerContext>, IBusControl> busFactory);
     }
 }

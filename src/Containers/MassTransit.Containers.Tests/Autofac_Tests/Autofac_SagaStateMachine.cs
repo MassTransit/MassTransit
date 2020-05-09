@@ -28,9 +28,6 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureSagaStateMachine(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureSaga<TestInstance>(_container);
-        }
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
     }
 }

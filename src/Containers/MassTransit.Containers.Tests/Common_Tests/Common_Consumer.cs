@@ -51,10 +51,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            ConfigureConsumer(configurator);
+            configurator.ConfigureConsumer<SimpleConsumer>(Registration);
         }
 
-        protected abstract void ConfigureConsumer(IInMemoryReceiveEndpointConfigurator configurator);
+        protected abstract IRegistration Registration { get; }
     }
 
 
@@ -78,10 +78,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            ConfigureEndpoints(configurator);
+            configurator.ConfigureEndpoints(Registration);
         }
 
-        protected abstract void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator);
+        protected abstract IRegistration Registration { get; }
     }
 
 
@@ -101,6 +101,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+            where T : class
         {
             configurator.AddConsumer<ConsumerA>(typeof(ConsumerADefinition))
                 .Endpoint(x => x.Name = "shared");
@@ -115,10 +116,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            ConfigureEndpoints(configurator);
+            configurator.ConfigureEndpoints(Registration);
         }
 
-        protected abstract void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator);
+        protected abstract IRegistration Registration { get; }
 
 
         class ConsumerA :
@@ -212,9 +213,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            ConfigureEndpoints(configurator);
+            configurator.ServiceInstance(x => x.ConfigureEndpoints(Registration));
         }
-
-        protected abstract void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator);
+        protected abstract IRegistration Registration { get; }
     }
 }

@@ -4,6 +4,7 @@ namespace MassTransit.LamarIntegration.Registration
     using Lamar;
     using MassTransit.Registration;
     using Mediator;
+    using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
     using Transports;
@@ -44,13 +45,15 @@ namespace MassTransit.LamarIntegration.Registration
 
         ServiceRegistry IServiceRegistryConfigurator.Builder => _registry;
 
-        public void AddBus(Func<IServiceContext, IBusControl> busFactory)
+        public void AddBus(Func<IRegistrationContext<IServiceContext>, IBusControl> busFactory)
         {
-            IBusControl BusFactory(IServiceContext context)
+            IBusControl BusFactory(IServiceContext serviceContext)
             {
-                var provider = context.GetInstance<IConfigurationServiceProvider>();
+                var provider = serviceContext.GetInstance<IConfigurationServiceProvider>();
 
                 ConfigureLogContext(provider);
+
+                IRegistrationContext<IServiceContext> context = GetRegistrationContext(serviceContext);
 
                 return busFactory(context);
             }
@@ -73,6 +76,18 @@ namespace MassTransit.LamarIntegration.Registration
 
             _registry.For<IClientFactory>()
                 .Use(context => ClientFactoryProvider(context.GetInstance<IConfigurationServiceProvider>(), context.GetInstance<IBus>()))
+                .Singleton();
+
+            _registry.For<BusHealth>()
+                .Use(context => new BusHealth(nameof(IBus)))
+                .Singleton();
+
+            _registry.For<IBusHealth>()
+                .Use<BusHealth>()
+                .Singleton();
+
+            _registry.For<IBusRegistryInstance>()
+                .Use<BusRegistryInstance>()
                 .Singleton();
         }
 
@@ -121,6 +136,15 @@ namespace MassTransit.LamarIntegration.Registration
         {
             return (IPublishEndpoint)context.TryGetInstance<ConsumeContext>()
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), context.GetInstance<IContainer>()));
+        }
+
+        static IRegistrationContext<IServiceContext> GetRegistrationContext(IServiceContext context)
+        {
+            return new RegistrationContext<IServiceContext>(
+                context.GetInstance<IRegistration>(),
+                context.GetInstance<BusHealth>(),
+                context
+            );
         }
     }
 }

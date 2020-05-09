@@ -36,10 +36,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             });
         }
 
-        protected override void ConfigureExecuteActivity(IReceiveEndpointConfigurator endpointConfigurator)
-        {
-            endpointConfigurator.ConfigureExecuteActivity(_container, typeof(SetVariableActivity));
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 
 
@@ -63,10 +60,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             });
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 
 
@@ -88,11 +82,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             });
         }
 
-        protected override void ConfigureActivity(IReceiveEndpointConfigurator executeEndpointConfigurator,
-            IReceiveEndpointConfigurator compensateEndpointConfigurator)
-        {
-            executeEndpointConfigurator.ConfigureActivity(compensateEndpointConfigurator, _container, typeof(TestActivity));
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 
 
@@ -116,9 +106,6 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             });
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 }

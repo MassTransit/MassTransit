@@ -27,9 +27,6 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureSagaStateMachine(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureSaga<TestInstance>(_container);
-        }
+        protected override MassTransit.IRegistration Registration => _container.Resolve<MassTransit.IRegistration>();
     }
 }

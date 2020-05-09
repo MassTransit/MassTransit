@@ -42,10 +42,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureExecuteActivity(IReceiveEndpointConfigurator endpointConfigurator)
-        {
-            endpointConfigurator.ConfigureExecuteActivity(_container, typeof(SetVariableActivity));
-        }
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
     }
 
 
@@ -75,10 +72,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
     }
 
 
@@ -106,11 +100,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureActivity(IReceiveEndpointConfigurator executeEndpointConfigurator,
-            IReceiveEndpointConfigurator compensateEndpointConfigurator)
-        {
-            executeEndpointConfigurator.ConfigureActivity(compensateEndpointConfigurator, _container, typeof(TestActivity));
-        }
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
     }
 
 
@@ -139,10 +129,6 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
         {
             _container.Dispose();
         }
-
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
     }
 }

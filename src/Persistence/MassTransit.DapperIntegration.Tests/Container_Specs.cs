@@ -1,26 +1,24 @@
 namespace MassTransit.MartenIntegration.Tests
 {
-    using System;
-    using System.Threading.Tasks;
-    using Automatonymous;
-    using GreenPipes;
-    using Microsoft.Extensions.DependencyInjection;
-    using NUnit.Framework;
-    using TestFramework;
-    using TestFramework.Sagas;
-
-
     namespace ContainerTests
     {
+        using System;
+        using System.Threading.Tasks;
+        using Automatonymous;
+        using Dapper;
+        using Dapper.Contrib.Extensions;
+        using DapperIntegration;
+        using DapperIntegration.Tests;
+        using GreenPipes;
+        using Microsoft.Extensions.DependencyInjection;
+        using NUnit.Framework;
+        using TestFramework;
+        using TestFramework.Sagas;
     #if NETCOREAPP
         using Microsoft.Data.SqlClient;
     #else
         using System.Data.SqlClient;
     #endif
-        using Dapper;
-        using Dapper.Contrib.Extensions;
-        using DapperIntegration;
-        using DapperIntegration.Tests;
 
 
         public class Using_the_container_integration :
@@ -80,6 +78,7 @@ namespace MassTransit.MartenIntegration.Tests
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+                where T : class
             {
                 _connectionString = LocalDbConnectionStringProvider.GetLocalDbConnectionString();
 

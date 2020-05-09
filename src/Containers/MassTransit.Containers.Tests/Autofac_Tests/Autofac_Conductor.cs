@@ -2,7 +2,9 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 {
     using Autofac;
     using Common_Tests;
+    using Monitoring.Health;
     using NUnit.Framework;
+    using Registration;
 
 
     public class Autofac_Conductor :
@@ -26,7 +28,12 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
         protected override void ConfigureServiceEndpoints(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
-            configurator.ConfigureServiceEndpoints(_container, Options);
+            configurator.ConfigureServiceEndpoints(GetRegistrationContext(), Options);
+        }
+
+        IRegistrationContext<IComponentContext> GetRegistrationContext()
+        {
+            return new RegistrationContext<IComponentContext>(_container.Resolve<IRegistration>(), _container.Resolve<BusHealth>(), _container);
         }
 
         protected override IClientFactory GetClientFactory()

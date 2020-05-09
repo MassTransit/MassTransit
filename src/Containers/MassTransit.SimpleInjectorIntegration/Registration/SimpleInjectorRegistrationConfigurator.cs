@@ -4,6 +4,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using Context;
     using MassTransit.Registration;
     using Mediator;
+    using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
     using SimpleInjector;
@@ -37,7 +38,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             AddBus(_ => busFactory());
         }
 
-        public void AddBus(Func<Container, IBusControl> busFactory)
+        public void AddBus(Func<IRegistrationContext<Container>, IBusControl> busFactory)
         {
             IBusControl BusFactory()
             {
@@ -45,7 +46,9 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
                 ConfigureLogContext(provider);
 
-                return busFactory(Container);
+                IRegistrationContext<Container> context = GetRegistrationContext();
+
+                return busFactory(context);
             }
 
             Container.RegisterSingleton(BusFactory);
@@ -57,6 +60,12 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             Container.Register(GetPublishEndpoint, _hybridLifestyle);
 
             Container.RegisterSingleton(() => ClientFactoryProvider(Container.GetInstance<IConfigurationServiceProvider>(), Container.GetInstance<IBus>()));
+
+            Container.RegisterSingleton(() => new BusHealth(nameof(IBus)));
+
+            Container.RegisterSingleton<IBusHealth>(() => Container.GetInstance<BusHealth>());
+
+            Container.RegisterSingleton<IBusRegistryInstance, BusRegistryInstance>();
         }
 
         public void AddMediator(Action<Container, IReceiveEndpointConfigurator> configure = null)
@@ -90,6 +99,15 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         {
             return (IPublishEndpoint)Container.GetConsumeContext()
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<Container>(Container.GetInstance<IBus>(), Container));
+        }
+
+        IRegistrationContext<Container> GetRegistrationContext()
+        {
+            return new RegistrationContext<Container>(
+                Container.GetInstance<IRegistration>(),
+                Container.GetInstance<BusHealth>(),
+                Container
+            );
         }
 
         static void AddMassTransitComponents(Container container)

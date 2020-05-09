@@ -42,10 +42,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             });
         }
 
-        protected override void ConfigureConsumer(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumer<SimpleConsumer>(_container);
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 
 
@@ -75,9 +72,6 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             });
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 }

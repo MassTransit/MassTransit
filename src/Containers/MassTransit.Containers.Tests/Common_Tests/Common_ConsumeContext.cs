@@ -32,6 +32,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+            where T : class
         {
             configurator.AddConsumer<DependentConsumer>();
             configurator.AddBus(provider => BusControl);
@@ -39,11 +40,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            ConfigureConsumers(configurator);
+            configurator.ConfigureConsumers(Registration);
         }
 
-        protected abstract void ConfigureConsumers(IInMemoryReceiveEndpointConfigurator configurator);
-
+        protected abstract IRegistration Registration { get; }
         protected abstract Task<ConsumeContext> ConsumeContext { get; }
         protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
         protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
@@ -83,6 +83,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+            where T : class
         {
             configurator.AddConsumer<DependentConsumer>();
             configurator.AddBus(provider => BusControl);
@@ -92,11 +93,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.UseInMemoryOutbox();
 
-            ConfigureConsumers(configurator);
+            configurator.ConfigureConsumers(Registration);
         }
 
-        protected abstract void ConfigureConsumers(IInMemoryReceiveEndpointConfigurator configurator);
-
+        protected abstract IRegistration Registration { get; }
         protected abstract Task<ConsumeContext> ConsumeContext { get; }
         protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
         protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
@@ -136,6 +136,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+            where T : class
         {
             configurator.AddConsumer<FlyingSoloConsumer>();
             configurator.AddBus(provider => BusControl);
@@ -145,11 +146,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.UseInMemoryOutbox();
 
-            ConfigureConsumers(configurator);
+            configurator.ConfigureConsumers(Registration);
         }
 
-        protected abstract void ConfigureConsumers(IInMemoryReceiveEndpointConfigurator configurator);
-
+        protected abstract IRegistration Registration { get; }
         protected abstract Task<ConsumeContext> ConsumeContext { get; }
         protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
         protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
@@ -158,6 +158,9 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
     namespace ConsumeContextTestSubjects
     {
+        using TestFramework.Messages;
+
+
         class DependentConsumer :
             IConsumer<PingMessage>
         {

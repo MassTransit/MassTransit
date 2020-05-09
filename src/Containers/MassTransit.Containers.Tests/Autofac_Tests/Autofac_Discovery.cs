@@ -55,10 +55,6 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
         {
             return _container.Resolve<IRequestClient<PingMessage>>();
         }
-
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
     }
 }

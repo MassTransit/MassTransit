@@ -43,15 +43,6 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
         }
 
         protected override IRequestClient<InitialRequest> RequestClient => _container.GetInstance<IRequestClient<InitialRequest>>();
-
-        protected override void ConfigureInitialConsumer(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumer<InitialConsumer>(_container);
-        }
-
-        protected override void ConfigureSubsequentConsumer(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumer<SubsequentConsumer>(_container);
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
     }
 }

@@ -1,21 +1,19 @@
 namespace MassTransit.EntityFrameworkIntegration.Tests
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Automatonymous;
-    using GreenPipes;
-    using NUnit.Framework;
-    using TestFramework.Sagas;
-
-
     namespace ContainerTests
     {
+        using System;
+        using System.Collections.Generic;
         using System.Data.Entity;
         using System.Data.Entity.ModelConfiguration;
+        using System.Threading.Tasks;
+        using Automatonymous;
+        using GreenPipes;
         using Mappings;
         using Microsoft.Extensions.DependencyInjection;
+        using NUnit.Framework;
         using TestFramework;
+        using TestFramework.Sagas;
 
 
         public class Using_pessimistic_concurrency :
@@ -61,6 +59,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+                where T : class
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .EntityFrameworkRepository(r =>
@@ -127,6 +126,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+                where T : class
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .EntityFrameworkRepository(r =>

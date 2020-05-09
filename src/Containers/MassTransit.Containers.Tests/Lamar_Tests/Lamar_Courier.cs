@@ -14,6 +14,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
 {
     using Common_Tests;
     using Lamar;
+    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework.Courier;
 
@@ -36,10 +37,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             });
         }
 
-        protected override void ConfigureExecuteActivity(IReceiveEndpointConfigurator endpointConfigurator)
-        {
-            endpointConfigurator.ConfigureExecuteActivity(_container, typeof(SetVariableActivity));
-        }
+        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
     }
 
 
@@ -63,10 +61,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             });
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
     }
 
 
@@ -88,11 +83,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             });
         }
 
-        protected override void ConfigureActivity(IReceiveEndpointConfigurator executeEndpointConfigurator,
-            IReceiveEndpointConfigurator compensateEndpointConfigurator)
-        {
-            executeEndpointConfigurator.ConfigureActivity(compensateEndpointConfigurator, _container, typeof(TestActivity));
-        }
+        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
     }
 
 
@@ -116,9 +107,6 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             });
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
     }
 }

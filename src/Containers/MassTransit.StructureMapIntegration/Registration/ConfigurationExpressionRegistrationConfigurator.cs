@@ -3,6 +3,7 @@ namespace MassTransit.StructureMapIntegration.Registration
     using System;
     using MassTransit.Registration;
     using Mediator;
+    using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
     using StructureMap;
@@ -43,7 +44,7 @@ namespace MassTransit.StructureMapIntegration.Registration
 
         ConfigurationExpression IConfigurationExpressionConfigurator.Builder => _expression;
 
-        public void AddBus(Func<IContext, IBusControl> busFactory)
+        public void AddBus(Func<IRegistrationContext<IContext>, IBusControl> busFactory)
         {
             _expression.For<IBusControl>()
                 .Use(context => BusFactory(context, busFactory))
@@ -64,15 +65,29 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<IClientFactory>()
                 .Use(context => ClientFactoryProvider(context.GetInstance<IConfigurationServiceProvider>(), context.GetInstance<IBus>()))
                 .Singleton();
+
+            _expression.For<BusHealth>()
+                .Use(context => new BusHealth(nameof(IBus)))
+                .Singleton();
+
+            _expression.For<IBusHealth>()
+                .Use<BusHealth>()
+                .Singleton();
+
+            _expression.For<IBusRegistryInstance>()
+                .Use<BusRegistryInstance>()
+                .Singleton();
         }
 
-        static IBusControl BusFactory(IContext context, Func<IContext, IBusControl> busFactory)
+        static IBusControl BusFactory(IContext context, Func<IRegistrationContext<IContext>, IBusControl> busFactory)
         {
             var provider = context.GetInstance<IConfigurationServiceProvider>();
 
             ConfigureLogContext(provider);
 
-            return busFactory(context);
+            IRegistrationContext<IContext> registrationContext = GetRegistrationContext(context);
+
+            return busFactory(registrationContext);
         }
 
         public void AddMediator(Action<IContext, IReceiveEndpointConfigurator> configure = null)
@@ -86,7 +101,7 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Singleton();
         }
 
-        IMediator MediatorFactory(IContext context, Action<IContext, IReceiveEndpointConfigurator> configure)
+        static IMediator MediatorFactory(IContext context, Action<IContext, IReceiveEndpointConfigurator> configure)
         {
             var provider = context.GetInstance<IConfigurationServiceProvider>();
 
@@ -120,6 +135,15 @@ namespace MassTransit.StructureMapIntegration.Registration
         {
             return (IPublishEndpoint)context.TryGetInstance<ConsumeContext>()
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), context.GetInstance<IContainer>()));
+        }
+
+        static IRegistrationContext<IContext> GetRegistrationContext(IContext context)
+        {
+            return new RegistrationContext<IContext>(
+                context.GetInstance<IRegistration>(),
+                context.GetInstance<BusHealth>(),
+                context
+            );
         }
     }
 }
