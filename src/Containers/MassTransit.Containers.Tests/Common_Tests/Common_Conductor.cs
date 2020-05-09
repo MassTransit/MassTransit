@@ -9,6 +9,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using NUnit.Framework;
     using TestFramework;
 
+
     [TestFixture(true)]
     [TestFixture(false)]
     public abstract class Common_Conductor :
@@ -50,6 +51,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         protected abstract IClientFactory GetClientFactory();
 
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+            where T : class
         {
             configurator.SetKebabCaseEndpointNameFormatter();
 

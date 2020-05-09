@@ -72,6 +72,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+            where T : class
         {
             configurator.AddSaga<SimpleSaga>()
                 .InMemoryRepository();
@@ -84,10 +85,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            ConfigureSaga(configurator);
+            configurator.ConfigureSaga<SimpleSaga>(Registration);
         }
 
-        protected abstract void ConfigureSaga(IInMemoryReceiveEndpointConfigurator configurator);
+        protected abstract IRegistration Registration { get; }
     }
 
 
@@ -127,6 +128,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+            where T : class
         {
             configurator.AddSaga<SimpleSaga>()
                 .Endpoint(e => e.Name = "custom-endpoint-name")
@@ -144,9 +146,9 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            ConfigureEndpoints(configurator);
+            configurator.ConfigureEndpoints(Registration);
         }
 
-        protected abstract void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator);
+        protected abstract IRegistration Registration { get; }
     }
 }

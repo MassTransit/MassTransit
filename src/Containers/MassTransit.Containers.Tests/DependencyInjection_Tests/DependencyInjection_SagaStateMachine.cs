@@ -21,9 +21,6 @@
                 .BuildServiceProvider(true);
         }
 
-        protected override void ConfigureSagaStateMachine(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureSaga<TestInstance>(_provider);
-        }
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
     }
 }

@@ -26,7 +26,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
         protected override void ConfigureServiceEndpoints(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
-            configurator.ConfigureServiceEndpoints(_container, Options);
+            configurator.ConfigureServiceEndpoints(_container.Resolve<IRegistrationContext<IComponentContext>>(), Options);
         }
 
         protected override IClientFactory GetClientFactory()

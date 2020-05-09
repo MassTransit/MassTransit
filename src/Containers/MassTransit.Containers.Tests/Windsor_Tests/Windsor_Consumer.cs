@@ -12,6 +12,7 @@
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Windsor_Tests
 {
+    using Castle.MicroKernel;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
     using Common_Tests;
@@ -47,10 +48,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureConsumer(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumer<SimpleConsumer>(_container);
-        }
+        protected override MassTransit.IRegistration Registration => _container.Resolve<IRegistrationContext<IKernel>>();
     }
 
 
@@ -84,9 +82,6 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override MassTransit.IRegistration Registration => _container.Resolve<IRegistrationContext<IKernel>>();
     }
 }

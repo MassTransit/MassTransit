@@ -35,9 +35,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Verify();
         }
 
-        protected override void ConfigureSagaStateMachine(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureSaga<TestInstance>(_container);
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<Container>>();
     }
 }

@@ -20,7 +20,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 
         protected override void ConfigureServiceEndpoints(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
-            configurator.ConfigureServiceEndpoints(_provider, Options);
+            configurator.ConfigureServiceEndpoints(_provider.GetRequiredService<IRegistrationContext<IServiceProvider>>(), Options);
         }
 
         protected override IClientFactory GetClientFactory()

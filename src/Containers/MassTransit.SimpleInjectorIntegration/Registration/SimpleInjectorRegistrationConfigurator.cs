@@ -4,6 +4,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using Context;
     using MassTransit.Registration;
     using Mediator;
+    using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
     using SimpleInjector;
@@ -37,7 +38,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             AddBus(_ => busFactory());
         }
 
-        public void AddBus(Func<Container, IBusControl> busFactory)
+        public void AddBus(Func<IRegistrationContext<Container>, IBusControl> busFactory)
         {
             IBusControl BusFactory()
             {
@@ -45,7 +46,9 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
                 ConfigureLogContext(provider);
 
-                return busFactory(Container);
+                var context = Container.GetInstance<IRegistrationContext<Container>>();
+
+                return busFactory(context);
             }
 
             Container.RegisterSingleton(BusFactory);
@@ -57,6 +60,14 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             Container.Register(GetPublishEndpoint, _hybridLifestyle);
 
             Container.RegisterSingleton(() => ClientFactoryProvider(Container.GetInstance<IConfigurationServiceProvider>(), Container.GetInstance<IBus>()));
+
+            Container.RegisterSingleton(() => new BusHealth(nameof(IBus)));
+
+            Container.RegisterSingleton<IBusHealth>(() => Container.GetInstance<BusHealth>());
+
+            Container.RegisterSingleton<IBusRegistryInstance, BusRegistryInstance>();
+
+            Container.RegisterSingleton<IRegistrationContext<Container>, RegistrationContext<Container>>();
         }
 
         public void AddMediator(Action<Container, IReceiveEndpointConfigurator> configure = null)

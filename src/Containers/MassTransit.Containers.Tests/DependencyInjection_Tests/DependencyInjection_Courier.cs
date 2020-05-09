@@ -37,10 +37,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             _container = builder.BuildServiceProvider(true);
         }
 
-        protected override void ConfigureExecuteActivity(IReceiveEndpointConfigurator endpointConfigurator)
-        {
-            endpointConfigurator.ConfigureExecuteActivity(_container, typeof(SetVariableActivity));
-        }
+        protected override IRegistration Registration => _container.GetRequiredService<IRegistrationContext<IServiceProvider>>();
     }
 
 
@@ -64,10 +61,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             _container = builder.BuildServiceProvider();
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.GetRequiredService<IRegistrationContext<IServiceProvider>>();
     }
 
 
@@ -89,11 +83,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             _container = builder.BuildServiceProvider();
         }
 
-        protected override void ConfigureActivity(IReceiveEndpointConfigurator executeEndpointConfigurator,
-            IReceiveEndpointConfigurator compensateEndpointConfigurator)
-        {
-            executeEndpointConfigurator.ConfigureActivity(compensateEndpointConfigurator, _container, typeof(TestActivity));
-        }
+        protected override IRegistration Registration => _container.GetRequiredService<IRegistrationContext<IServiceProvider>>();
     }
 
 
@@ -117,9 +107,6 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             _container = builder.BuildServiceProvider();
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.GetRequiredService<IRegistrationContext<IServiceProvider>>();
     }
 }

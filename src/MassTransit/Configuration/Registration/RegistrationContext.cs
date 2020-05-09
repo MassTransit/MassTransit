@@ -6,20 +6,19 @@ namespace MassTransit.Registration
     using Saga;
 
 
-    public class RegistrationContext<TBus, TContainerContext> :
-        IRegistrationContext<TBus, TContainerContext>
-        where TBus : IBus
+    public class RegistrationContext<TContainerContext> :
+        IRegistrationContext<TContainerContext>
         where TContainerContext : class
     {
         readonly IRegistration _registration;
         readonly BusHealth _busHealth;
 
-        public RegistrationContext(Bind<TBus, IRegistration> registration, Bind<TBus, BusHealth> busHealth, TContainerContext container)
+        public RegistrationContext(IRegistration registration, BusHealth busHealth, TContainerContext container)
         {
             Container = container;
 
-            _registration = registration.Value;
-            _busHealth = busHealth.Value;
+            _registration = registration;
+            _busHealth = busHealth;
         }
 
         public TContainerContext Container { get; }
@@ -87,6 +86,19 @@ namespace MassTransit.Registration
             where T : IReceiveEndpointConfigurator
         {
             _registration.ConfigureEndpoints(configurator, endpointNameFormatter);
+        }
+    }
+
+
+    public class RegistrationContext<TBus, TContainerContext> :
+        RegistrationContext<TContainerContext>,
+        IRegistrationContext<TBus, TContainerContext>
+        where TBus : IBus
+        where TContainerContext : class
+    {
+        public RegistrationContext(Bind<TBus, IRegistration> registration, Bind<TBus, BusHealth> busHealth, TContainerContext container)
+            : base(registration.Value, busHealth.Value, container)
+        {
         }
     }
 }

@@ -1,5 +1,6 @@
 namespace MassTransit.Containers.Tests.Windsor_Tests
 {
+    using Castle.MicroKernel;
     using Castle.Windsor;
     using Common_Tests;
     using NUnit.Framework;
@@ -25,7 +26,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
 
         protected override void ConfigureServiceEndpoints(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
-            configurator.ConfigureServiceEndpoints(_container, Options);
+            configurator.ConfigureServiceEndpoints(_container.Resolve<IRegistrationContext<IKernel>>(), Options);
         }
 
         protected override IClientFactory GetClientFactory()

@@ -1,18 +1,17 @@
 namespace MassTransit.DocumentDbIntegration.Tests
 {
-    using System;
-    using System.Threading.Tasks;
-    using Automatonymous;
-    using DocumentDbIntegration;
-    using GreenPipes;
-    using Microsoft.Extensions.DependencyInjection;
-    using NUnit.Framework;
-    using TestFramework;
-    using TestFramework.Sagas;
-
-
     namespace ContainerTests
     {
+        using System;
+        using System.Threading.Tasks;
+        using Automatonymous;
+        using GreenPipes;
+        using Microsoft.Extensions.DependencyInjection;
+        using NUnit.Framework;
+        using TestFramework;
+        using TestFramework.Sagas;
+
+
         public class Using_the_container_integration :
             InMemoryTestFixture
         {
@@ -51,6 +50,7 @@ namespace MassTransit.DocumentDbIntegration.Tests
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+                where T : class
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .DocumentDbRepository(r =>

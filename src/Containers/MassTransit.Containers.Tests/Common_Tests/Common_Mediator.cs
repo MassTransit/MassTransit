@@ -32,6 +32,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         protected abstract IMediator Mediator { get; }
 
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+            where T : class
         {
             configurator.AddConsumer<SimplerConsumer>();
 
@@ -66,6 +67,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             where T : class;
 
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+            where T : class
         {
             configurator.AddConsumer<InitialConsumer>();
             configurator.AddConsumer<SubsequentConsumer>();
@@ -168,6 +170,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             where T : class, ISaga;
 
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+            where T : class
         {
             configurator.AddConsumer<OrderConsumer>();
             configurator.AddSaga<OrderSaga>()

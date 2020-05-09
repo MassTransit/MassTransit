@@ -35,11 +35,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
                 disposable.Dispose();
         }
 
-        protected override void ConfigureConsumers(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumers(_provider);
-        }
-
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
         protected override Task<ConsumeContext> ConsumeContext => _provider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
         protected override Task<IPublishEndpoint> PublishEndpoint => _provider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
         protected override Task<ISendEndpointProvider> SendEndpointProvider => _provider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
@@ -73,11 +69,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
                 disposable.Dispose();
         }
 
-        protected override void ConfigureConsumers(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumers(_provider);
-        }
-
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
         protected override Task<ConsumeContext> ConsumeContext => _provider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
         protected override Task<IPublishEndpoint> PublishEndpoint => _provider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
         protected override Task<ISendEndpointProvider> SendEndpointProvider => _provider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
@@ -110,11 +102,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
                 disposable.Dispose();
         }
 
-        protected override void ConfigureConsumers(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumers(_provider);
-        }
-
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
         protected override Task<ConsumeContext> ConsumeContext => _provider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
         protected override Task<IPublishEndpoint> PublishEndpoint => _provider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
         protected override Task<ISendEndpointProvider> SendEndpointProvider => _provider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;

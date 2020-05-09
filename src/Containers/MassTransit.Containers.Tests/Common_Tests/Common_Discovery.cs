@@ -28,7 +28,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
         using System.Threading.Tasks;
         using Automatonymous;
         using ConsumeConfigurators;
-        using Courier;
         using Definition;
         using GreenPipes;
         using Saga;
@@ -280,9 +279,9 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            ConfigureEndpoints(configurator);
+            configurator.ConfigureEndpoints(Registration);
         }
 
-        protected abstract void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator);
+        protected abstract IRegistration Registration { get; }
     }
 }

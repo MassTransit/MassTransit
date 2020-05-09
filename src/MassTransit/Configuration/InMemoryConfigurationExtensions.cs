@@ -35,9 +35,10 @@
         /// <param name="configure">The configure callback method</param>
         /// <typeparam name="TContainerContext"></typeparam>
         public static void AddInMemoryBus<TContainerContext>(this IRegistrationConfigurator<TContainerContext> configurator,
-            Action<TContainerContext, IInMemoryBusFactoryConfigurator> configure)
+            Action<IRegistrationContext<TContainerContext>, IInMemoryBusFactoryConfigurator> configure)
+            where TContainerContext : class
         {
-            IBusControl BusFactory(TContainerContext context)
+            IBusControl BusFactory(IRegistrationContext<TContainerContext> context)
             {
                 return InMemoryBus.Create(cfg =>
                 {

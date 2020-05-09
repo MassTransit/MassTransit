@@ -5,6 +5,7 @@ namespace MassTransit.AutofacIntegration.Registration
     using Autofac.Core;
     using MassTransit.Registration;
     using Mediator;
+    using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
     using Transports;
@@ -63,13 +64,15 @@ namespace MassTransit.AutofacIntegration.Registration
             set => _registrar.ConfigureScope = value;
         }
 
-        public void AddBus(Func<IComponentContext, IBusControl> busFactory)
+        public void AddBus(Func<IRegistrationContext<IComponentContext>, IBusControl> busFactory)
         {
-            IBusControl BusFactory(IComponentContext context)
+            IBusControl BusFactory(IComponentContext componentContext)
             {
-                var provider = context.Resolve<IConfigurationServiceProvider>();
+                var provider = componentContext.Resolve<IConfigurationServiceProvider>();
 
                 ConfigureLogContext(provider);
+
+                var context = componentContext.Resolve<IRegistrationContext<IComponentContext>>();
 
                 return busFactory(context);
             }
@@ -95,6 +98,19 @@ namespace MassTransit.AutofacIntegration.Registration
 
             _builder.Register(context => ClientFactoryProvider(context.Resolve<IConfigurationServiceProvider>(), context.Resolve<IBus>()))
                 .As<IClientFactory>()
+                .SingleInstance();
+
+            _builder.Register(context => new BusHealth(nameof(IBus)))
+                .As<BusHealth>()
+                .As<IBusHealth>()
+                .SingleInstance();
+
+            _builder.RegisterType<BusRegistryInstance>()
+                .As<IBusRegistryInstance>()
+                .SingleInstance();
+
+            _builder.RegisterType<RegistrationContext<IComponentContext>>()
+                .As<IRegistrationContext<IComponentContext>>()
                 .SingleInstance();
         }
 

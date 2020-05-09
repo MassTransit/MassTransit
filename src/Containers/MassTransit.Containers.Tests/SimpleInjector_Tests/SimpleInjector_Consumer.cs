@@ -43,10 +43,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureConsumer(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumer<SimpleConsumer>(_container);
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<Container>>();
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -84,9 +81,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<Container>>();
     }
 }

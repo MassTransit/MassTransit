@@ -1,8 +1,8 @@
 namespace MassTransit.Containers.Tests.StructureMap_Tests
 {
     using Common_Tests;
-    using StructureMap;
     using NUnit.Framework;
+    using StructureMap;
     using TestFramework.Sagas;
 
 
@@ -28,9 +28,6 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureSagaStateMachine(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureSaga<TestInstance>(_container);
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<IContext>>();
     }
 }

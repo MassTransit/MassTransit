@@ -1,5 +1,6 @@
 namespace MassTransit.Containers.Tests.Windsor_Tests
 {
+    using Castle.MicroKernel;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
     using Common_Tests;
@@ -27,9 +28,6 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureSagaStateMachine(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureSaga<TestInstance>(_container);
-        }
+        protected override MassTransit.IRegistration Registration => _container.Resolve<IRegistrationContext<IKernel>>();
     }
 }

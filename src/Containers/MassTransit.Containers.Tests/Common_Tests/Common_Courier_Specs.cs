@@ -18,6 +18,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using Courier.Contracts;
     using NUnit.Framework;
     using TestFramework;
+    using TestFramework.Courier;
 
 
     public abstract class Courier_ExecuteActivity :
@@ -54,13 +55,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.ReceiveEndpoint("execute_testactivity", endpointConfigurator =>
             {
-                ConfigureExecuteActivity(endpointConfigurator);
+                endpointConfigurator.ConfigureExecuteActivity(Registration, typeof(SetVariableActivity));
 
                 _executeAddress = endpointConfigurator.InputAddress;
             });
         }
 
-        protected abstract void ConfigureExecuteActivity(IReceiveEndpointConfigurator endpointConfigurator);
+        protected abstract IRegistration Registration { get; }
     }
 
 
@@ -95,10 +96,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            ConfigureEndpoints(configurator);
+            configurator.ConfigureEndpoints(Registration);
         }
 
-        protected abstract void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator);
+        protected abstract IRegistration Registration { get; }
     }
 
 
@@ -120,10 +121,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             var builder = new RoutingSlipBuilder(_trackingNumber);
             builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
 
-            builder.AddActivity("TestActivity", _executeAddress, new
-            {
-                Value = "Hello"
-            });
+            builder.AddActivity("TestActivity", _executeAddress, new {Value = "Hello"});
 
             await Bus.Execute(builder.Build());
 
@@ -137,15 +135,14 @@ namespace MassTransit.Containers.Tests.Common_Tests
             {
                 configurator.ReceiveEndpoint("compensate_testactivity", compensateConfigurator =>
                 {
-                    ConfigureActivity(endpointConfigurator, compensateConfigurator);
+                    endpointConfigurator.ConfigureActivity(compensateConfigurator, Registration, typeof(TestActivity));
                 });
 
                 _executeAddress = endpointConfigurator.InputAddress;
             });
         }
 
-        protected abstract void ConfigureActivity(IReceiveEndpointConfigurator executeEndpointConfigurator,
-            IReceiveEndpointConfigurator compensateEndpointConfigurator);
+        protected abstract IRegistration Registration { get; }
     }
 
 
@@ -166,10 +163,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             var builder = new RoutingSlipBuilder(_trackingNumber);
             builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
 
-            builder.AddActivity("TestActivity", new Uri("loopback://localhost/custom-testactivity-execute"), new
-            {
-                Value = "Hello"
-            });
+            builder.AddActivity("TestActivity", new Uri("loopback://localhost/custom-testactivity-execute"), new {Value = "Hello"});
 
             await Bus.Execute(builder.Build());
 
@@ -179,9 +173,9 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            ConfigureEndpoints(configurator);
+            configurator.ConfigureEndpoints(Registration);
         }
 
-        protected abstract void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator);
+        protected abstract IRegistration Registration { get; }
     }
 }

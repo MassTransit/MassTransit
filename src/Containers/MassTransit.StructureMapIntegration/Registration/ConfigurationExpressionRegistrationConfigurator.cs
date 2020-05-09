@@ -3,6 +3,7 @@ namespace MassTransit.StructureMapIntegration.Registration
     using System;
     using MassTransit.Registration;
     using Mediator;
+    using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
     using StructureMap;
@@ -43,7 +44,7 @@ namespace MassTransit.StructureMapIntegration.Registration
 
         ConfigurationExpression IConfigurationExpressionConfigurator.Builder => _expression;
 
-        public void AddBus(Func<IContext, IBusControl> busFactory)
+        public void AddBus(Func<IRegistrationContext<IContext>, IBusControl> busFactory)
         {
             _expression.For<IBusControl>()
                 .Use(context => BusFactory(context, busFactory))
@@ -64,15 +65,33 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<IClientFactory>()
                 .Use(context => ClientFactoryProvider(context.GetInstance<IConfigurationServiceProvider>(), context.GetInstance<IBus>()))
                 .Singleton();
+
+            _expression.For<BusHealth>()
+                .Use(context => new BusHealth(nameof(IBus)))
+                .Singleton();
+
+            _expression.For<IBusHealth>()
+                .Use<BusHealth>()
+                .Singleton();
+
+            _expression.For<IBusRegistryInstance>()
+                .Use<BusRegistryInstance>()
+                .Singleton();
+
+            _expression.For<IRegistrationContext<IContext>>()
+                .Use(context => new RegistrationContext<IContext>(context.GetInstance<IRegistration>(), context.GetInstance<BusHealth>(), context))
+                .Singleton();
         }
 
-        static IBusControl BusFactory(IContext context, Func<IContext, IBusControl> busFactory)
+        static IBusControl BusFactory(IContext context, Func<IRegistrationContext<IContext>, IBusControl> busFactory)
         {
             var provider = context.GetInstance<IConfigurationServiceProvider>();
 
             ConfigureLogContext(provider);
 
-            return busFactory(context);
+            var registrationContext = context.GetInstance<IRegistrationContext<IContext>>();
+
+            return busFactory(registrationContext);
         }
 
         public void AddMediator(Action<IContext, IReceiveEndpointConfigurator> configure = null)

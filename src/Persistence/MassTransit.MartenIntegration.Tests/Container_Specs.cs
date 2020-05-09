@@ -1,17 +1,17 @@
 namespace MassTransit.MartenIntegration.Tests
 {
-    using System;
-    using System.Threading.Tasks;
-    using Automatonymous;
-    using GreenPipes;
-    using Microsoft.Extensions.DependencyInjection;
-    using NUnit.Framework;
-    using TestFramework;
-    using TestFramework.Sagas;
-
-
     namespace ContainerTests
     {
+        using System;
+        using System.Threading.Tasks;
+        using Automatonymous;
+        using GreenPipes;
+        using Microsoft.Extensions.DependencyInjection;
+        using NUnit.Framework;
+        using TestFramework;
+        using TestFramework.Sagas;
+
+
         public class Using_the_container_integration :
             InMemoryTestFixture
         {
@@ -50,6 +50,7 @@ namespace MassTransit.MartenIntegration.Tests
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+                where T : class
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .MartenRepository("server=localhost;port=5432;database=MartenTest;user id=postgres;password=Password12!;");

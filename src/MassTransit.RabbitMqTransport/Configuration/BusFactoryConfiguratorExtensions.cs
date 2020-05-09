@@ -21,9 +21,10 @@
         /// <param name="configure">The configure callback method</param>
         /// <typeparam name="TContainerContext"></typeparam>
         public static void AddRabbitMqBus<TContainerContext>(this IRegistrationConfigurator<TContainerContext> configurator,
-            Action<TContainerContext, IRabbitMqBusFactoryConfigurator> configure)
+            Action<IRegistrationContext<TContainerContext>, IRabbitMqBusFactoryConfigurator> configure)
+            where TContainerContext : class
         {
-            IBusControl BusFactory(TContainerContext context)
+            IBusControl BusFactory(IRegistrationContext<TContainerContext> context)
             {
                 return RabbitMqBusFactory.Create(cfg =>
                 {

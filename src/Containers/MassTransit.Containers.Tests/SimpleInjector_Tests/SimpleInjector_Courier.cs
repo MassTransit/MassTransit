@@ -13,8 +13,8 @@
 namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 {
     using Common_Tests;
-    using SimpleInjector;
     using NUnit.Framework;
+    using SimpleInjector;
     using SimpleInjector.Lifestyles;
     using TestFramework.Courier;
 
@@ -41,11 +41,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         {
             _container.Verify();
         }
-
-        protected override void ConfigureExecuteActivity(IReceiveEndpointConfigurator endpointConfigurator)
-        {
-            endpointConfigurator.ConfigureExecuteActivity(_container, typeof(SetVariableActivity));
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<Container>>();
     }
 
 
@@ -74,10 +70,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Verify();
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<Container>>();
     }
 
 
@@ -103,12 +96,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         {
             _container.Verify();
         }
-
-        protected override void ConfigureActivity(IReceiveEndpointConfigurator executeEndpointConfigurator,
-            IReceiveEndpointConfigurator compensateEndpointConfigurator)
-        {
-            executeEndpointConfigurator.ConfigureActivity(compensateEndpointConfigurator, _container, typeof(TestActivity));
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<Container>>();
     }
 
 
@@ -136,10 +124,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         {
             _container.Verify();
         }
-
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_container);
-        }
+        protected override IRegistration Registration => _container.GetInstance<IRegistrationContext<Container>>();
     }
 }

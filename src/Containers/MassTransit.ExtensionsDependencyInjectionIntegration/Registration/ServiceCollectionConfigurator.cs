@@ -34,7 +34,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         public IServiceCollection Collection { get; }
 
-        public virtual void AddBus(Func<IServiceProvider, IBusControl> busFactory)
+        public virtual void AddBus(Func<IRegistrationContext<IServiceProvider>, IBusControl> busFactory)
         {
             IBusControl BusFactory(IServiceProvider serviceProvider)
             {
@@ -42,7 +42,9 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
                 ConfigureLogContext(provider);
 
-                return busFactory(serviceProvider);
+                var context = serviceProvider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
+
+                return busFactory(context);
             }
 
             if (Collection.All(d => d.ServiceType == typeof(IBusControl)))
@@ -60,6 +62,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<BusHealth>());
 
             Collection.AddSingleton<IBusRegistryInstance, BusRegistryInstance>();
+            Collection.AddSingleton<IRegistrationContext<IServiceProvider>, RegistrationContext<IServiceProvider>>();
         }
 
         public void AddMediator(Action<IServiceProvider, IReceiveEndpointConfigurator> configure = null)

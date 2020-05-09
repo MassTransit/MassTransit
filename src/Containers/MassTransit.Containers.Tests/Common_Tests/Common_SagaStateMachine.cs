@@ -29,6 +29,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+            where T : class
         {
             configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                 .InMemoryRepository();
@@ -38,9 +39,9 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            ConfigureSagaStateMachine(configurator);
+            configurator.ConfigureSaga<TestInstance>(Registration);
         }
 
-        protected abstract void ConfigureSagaStateMachine(IInMemoryReceiveEndpointConfigurator configurator);
+        protected abstract IRegistration Registration { get; }
     }
 }

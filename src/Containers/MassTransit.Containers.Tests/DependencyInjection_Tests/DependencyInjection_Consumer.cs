@@ -40,10 +40,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             _provider = collection.BuildServiceProvider(true);
         }
 
-        protected override void ConfigureConsumer(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumer<SimpleConsumer>(_provider);
-        }
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
     }
 
 
@@ -70,10 +67,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             _provider = collection.BuildServiceProvider();
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_provider);
-        }
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
     }
 
 
@@ -90,9 +84,6 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
                 .BuildServiceProvider();
         }
 
-        protected override void ConfigureEndpoints(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(_provider);
-        }
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistrationContext<IServiceProvider>>();
     }
 }
