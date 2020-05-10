@@ -20,7 +20,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         public ServiceCollectionConfigurator(IServiceCollection collection)
             : this(collection, new DependencyInjectionContainerRegistrar(collection))
         {
-            collection.AddSingleton<IRegistrationConfigurator>(this);
             collection.AddSingleton(provider => CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()));
         }
 
@@ -36,6 +35,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         public virtual void AddBus(Func<IRegistrationContext<IServiceProvider>, IBusControl> busFactory)
         {
+            ThrowIfAlreadyConfigured();
+
             IBusControl BusFactory(IServiceProvider serviceProvider)
             {
                 var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
@@ -47,7 +48,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
                 return busFactory(context);
             }
 
-            if (Collection.All(d => d.ServiceType == typeof(IBusControl)))
+            if (Collection.Any(d => d.ServiceType == typeof(IBusControl)))
             {
                 throw new ConfigurationException(
                     "AddBus() was already called. To configure multiple bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");
@@ -65,6 +66,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         public void AddMediator(Action<IServiceProvider, IReceiveEndpointConfigurator> configure = null)
         {
+            ThrowIfAlreadyConfigured();
+
             IMediator MediatorFactory(IServiceProvider serviceProvider)
             {
                 var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
@@ -110,10 +113,10 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
                 new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<IBus>(), provider));
         }
 
-        static IRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
+        IRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
         {
             return new RegistrationContext<IServiceProvider>(
-                provider.GetRequiredService<IRegistration>(),
+                CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),
                 provider.GetRequiredService<BusHealth>(),
                 provider
             );

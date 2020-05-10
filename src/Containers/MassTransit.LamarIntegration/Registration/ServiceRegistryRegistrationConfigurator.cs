@@ -47,6 +47,8 @@ namespace MassTransit.LamarIntegration.Registration
 
         public void AddBus(Func<IRegistrationContext<IServiceContext>, IBusControl> busFactory)
         {
+            ThrowIfAlreadyConfigured();
+
             IBusControl BusFactory(IServiceContext serviceContext)
             {
                 var provider = serviceContext.GetInstance<IConfigurationServiceProvider>();
@@ -93,6 +95,8 @@ namespace MassTransit.LamarIntegration.Registration
 
         public void AddMediator(Action<IServiceContext, IReceiveEndpointConfigurator> configure = null)
         {
+            ThrowIfAlreadyConfigured();
+
             IMediator MediatorFactory(IServiceContext context)
             {
                 var provider = context.GetInstance<IConfigurationServiceProvider>();
@@ -138,10 +142,10 @@ namespace MassTransit.LamarIntegration.Registration
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), context.GetInstance<IContainer>()));
         }
 
-        static IRegistrationContext<IServiceContext> GetRegistrationContext(IServiceContext context)
+        IRegistrationContext<IServiceContext> GetRegistrationContext(IServiceContext context)
         {
             return new RegistrationContext<IServiceContext>(
-                context.GetInstance<IRegistration>(),
+                CreateRegistration(context.GetInstance<IConfigurationServiceProvider>()),
                 context.GetInstance<BusHealth>(),
                 context
             );

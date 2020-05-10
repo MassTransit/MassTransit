@@ -1,6 +1,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Linq;
     using Conductor.Configuration;
     using ConsumeConfigurators;
     using Definition;
@@ -23,6 +24,12 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static IServiceCollection AddMassTransit(this IServiceCollection collection, Action<IServiceCollectionConfigurator> configure = null)
         {
+            if (collection.Any(d => d.ServiceType == typeof(IRegistration)))
+            {
+                throw new ConfigurationException(
+                    "AddMassTransit() was already called and may only be called once per container. To configure additional bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");
+            }
+
             var configurator = new ServiceCollectionConfigurator(collection);
 
             configure?.Invoke(configurator);

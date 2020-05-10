@@ -6,6 +6,7 @@ namespace MassTransit.Registration
     using ConsumeConfigurators;
     using Definition;
     using Metadata;
+    using Saga;
 
 
     public class Registration :
@@ -38,7 +39,8 @@ namespace MassTransit.Registration
             consumer.Configure(configurator, _configurationServiceProvider);
         }
 
-        void IRegistration.ConfigureConsumer<T>(IReceiveEndpointConfigurator configurator, Action<IConsumerConfigurator<T>> configure)
+        public void ConfigureConsumer<T>(IReceiveEndpointConfigurator configurator, Action<IConsumerConfigurator<T>> configure)
+            where T : class, IConsumer
         {
             if (!_consumers.TryGetValue(typeof(T), out var consumer))
                 throw new ArgumentException($"The consumer type was not found: {TypeMetadataCache.GetShortName(typeof(T))}", nameof(T));
@@ -61,7 +63,8 @@ namespace MassTransit.Registration
             saga.Configure(configurator, _configurationServiceProvider);
         }
 
-        void IRegistration.ConfigureSaga<T>(IReceiveEndpointConfigurator configurator, Action<ISagaConfigurator<T>> configure)
+        public void ConfigureSaga<T>(IReceiveEndpointConfigurator configurator, Action<ISagaConfigurator<T>> configure)
+            where T : class, ISaga
         {
             if (!_sagas.TryGetValue(typeof(T), out var saga))
                 throw new ArgumentException($"The saga type was not found: {TypeMetadataCache.GetShortName(typeof(T))}", nameof(T));
@@ -70,7 +73,7 @@ namespace MassTransit.Registration
             saga.Configure(configurator, _configurationServiceProvider);
         }
 
-        void IRegistration.ConfigureSagas(IReceiveEndpointConfigurator configurator)
+        public void ConfigureSagas(IReceiveEndpointConfigurator configurator)
         {
             foreach (var saga in _sagas.Values)
                 saga.Configure(configurator, _configurationServiceProvider);

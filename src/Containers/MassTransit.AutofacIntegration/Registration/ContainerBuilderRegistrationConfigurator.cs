@@ -66,6 +66,8 @@ namespace MassTransit.AutofacIntegration.Registration
 
         public void AddBus(Func<IRegistrationContext<IComponentContext>, IBusControl> busFactory)
         {
+            ThrowIfAlreadyConfigured();
+
             IBusControl BusFactory(IComponentContext componentContext)
             {
                 var provider = componentContext.Resolve<IConfigurationServiceProvider>();
@@ -112,6 +114,8 @@ namespace MassTransit.AutofacIntegration.Registration
 
         public void AddMediator(Action<IComponentContext, IReceiveEndpointConfigurator> configure = null)
         {
+            ThrowIfAlreadyConfigured();
+
             IMediator MediatorFactory(IComponentContext context)
             {
                 var provider = context.Resolve<IConfigurationServiceProvider>();
@@ -162,10 +166,10 @@ namespace MassTransit.AutofacIntegration.Registration
             return new PublishEndpoint(new ScopedPublishEndpointProvider<ILifetimeScope>(context.Resolve<IBus>(), context.Resolve<ILifetimeScope>()));
         }
 
-        static IRegistrationContext<IComponentContext> GetRegistrationContext(IComponentContext context)
+        IRegistrationContext<IComponentContext> GetRegistrationContext(IComponentContext context)
         {
             return new RegistrationContext<IComponentContext>(
-                context.Resolve<IRegistration>(),
+                CreateRegistration(context.Resolve<IConfigurationServiceProvider>()),
                 context.Resolve<BusHealth>(),
                 context
             );

@@ -40,6 +40,8 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         public void AddBus(Func<IRegistrationContext<Container>, IBusControl> busFactory)
         {
+            ThrowIfAlreadyConfigured();
+
             IBusControl BusFactory()
             {
                 var provider = Container.GetInstance<IConfigurationServiceProvider>();
@@ -70,6 +72,8 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         public void AddMediator(Action<Container, IReceiveEndpointConfigurator> configure = null)
         {
+            ThrowIfAlreadyConfigured();
+
             IMediator MediatorFactory()
             {
                 var provider = Container.GetInstance<IConfigurationServiceProvider>();
@@ -104,7 +108,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         IRegistrationContext<Container> GetRegistrationContext()
         {
             return new RegistrationContext<Container>(
-                Container.GetInstance<IRegistration>(),
+                CreateRegistration(Container.GetInstance<IConfigurationServiceProvider>()),
                 Container.GetInstance<BusHealth>(),
                 Container
             );

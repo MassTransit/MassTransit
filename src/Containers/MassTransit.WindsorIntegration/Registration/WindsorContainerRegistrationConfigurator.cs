@@ -46,6 +46,8 @@ namespace MassTransit.WindsorIntegration.Registration
 
         public void AddBus(Func<IRegistrationContext<IKernel>, IBusControl> busFactory)
         {
+            ThrowIfAlreadyConfigured();
+
             IBusControl BusFactory(IKernel kernel)
             {
                 var provider = kernel.Resolve<IConfigurationServiceProvider>();
@@ -83,6 +85,8 @@ namespace MassTransit.WindsorIntegration.Registration
 
         public void AddMediator(Action<IKernel, IReceiveEndpointConfigurator> configure = null)
         {
+            ThrowIfAlreadyConfigured();
+
             IMediator MediatorFactory(IKernel kernel)
             {
                 var provider = kernel.Resolve<IConfigurationServiceProvider>();
@@ -116,10 +120,10 @@ namespace MassTransit.WindsorIntegration.Registration
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IKernel>(context.Resolve<IBus>(), context));
         }
 
-        static IRegistrationContext<IKernel> GetRegistrationContext(IKernel context)
+        IRegistrationContext<IKernel> GetRegistrationContext(IKernel context)
         {
             return new RegistrationContext<IKernel>(
-                context.Resolve<MassTransit.IRegistration>(),
+                CreateRegistration(context.Resolve<IConfigurationServiceProvider>()),
                 context.Resolve<BusHealth>(),
                 context
             );

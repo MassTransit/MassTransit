@@ -26,6 +26,7 @@ namespace MassTransit.Registration
         readonly ConcurrentDictionary<Type, IActivityRegistration> _activityRegistrations;
         readonly ConcurrentDictionary<Type, ISagaRegistration> _sagaRegistrations;
         readonly ConcurrentDictionary<Type, IEndpointRegistration> _endpointRegistrations;
+        bool _configured;
 
         protected Func<IConfigurationServiceProvider, IBus, IClientFactory> ClientFactoryProvider { get; private set; } = BusClientFactoryProvider;
 
@@ -287,6 +288,14 @@ namespace MassTransit.Registration
                 _activityRegistrations.ToDictionary(x => x.Key, x => x.Value), _endpointRegistrations.ToDictionary(x => x.Key, x => x.Value));
         }
 
+        protected void ThrowIfAlreadyConfigured()
+        {
+            if (_configured)
+                throw new ConfigurationException("Either AddBus or AddMediator can be called, and only once.");
+
+            _configured = true;
+        }
+
         protected static void ConfigureLogContext(IConfigurationServiceProvider provider)
         {
             var loggerFactory = provider.GetService<ILoggerFactory>();
@@ -294,9 +303,11 @@ namespace MassTransit.Registration
                 LogContext.ConfigureCurrentLogContext(loggerFactory);
         }
 
-        protected static void ConfigureMediator(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider provider)
+        protected void ConfigureMediator(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider provider)
         {
-            var registration = provider.GetRequiredService<IRegistration>();
+            var registration = new Registration(provider, _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value),
+                _sagaRegistrations.ToDictionary(x => x.Key, x => x.Value), _executeActivityRegistrations.ToDictionary(x => x.Key, x => x.Value),
+                _activityRegistrations.ToDictionary(x => x.Key, x => x.Value), _endpointRegistrations.ToDictionary(x => x.Key, x => x.Value));
 
             registration.ConfigureConsumers(configurator);
             registration.ConfigureSagas(configurator);

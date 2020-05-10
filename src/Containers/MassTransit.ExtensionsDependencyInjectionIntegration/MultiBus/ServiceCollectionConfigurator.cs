@@ -18,12 +18,13 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
         public ServiceCollectionConfigurator(IServiceCollection collection)
             : base(collection, new DependencyInjectionContainerRegistrar<TBus>(collection))
         {
-            Collection.AddSingleton(provider => Bind<TBus>.Create<IRegistrationConfigurator>(this));
             Collection.AddSingleton(provider => Bind<TBus>.Create(CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>())));
         }
 
         public override void AddBus(Func<IRegistrationContext<IServiceProvider>, IBusControl> busFactory)
         {
+            ThrowIfAlreadyConfigured();
+
             IBusControl BusFactory(IServiceProvider serviceProvider)
             {
                 var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
@@ -63,10 +64,10 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             return new PublishEndpoint(new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<TBus>(), provider));
         }
 
-        static IRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
+        IRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
         {
             return new RegistrationContext<IServiceProvider>(
-                provider.GetRequiredService<Bind<TBus, IRegistration>>().Value,
+                CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),
                 provider.GetRequiredService<Bind<TBus, BusHealth>>().Value,
                 provider
             );
