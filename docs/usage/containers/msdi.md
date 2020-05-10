@@ -44,7 +44,7 @@ public class Startup
             }));
 
             x.AddRequestClient<SubmitOrder>();
-        }));
+        });
 
         services.AddSingleton<IHostedService, BusService>();
     }

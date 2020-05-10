@@ -29,15 +29,15 @@ The following packages are available for the supported containers:
 - MassTransit.Unity (no registration support)
 - MassTransit.Windsor
 
-## Saga Repository Update (v6.1+)
+### Saga Repository Update (v6.1+)
 
 The saga repositories have been completely refactored, to eliminate duplicate logic and increase consistency across the various storage engines. All repositories also now support the container registration extensions, which provides a consistent syntax for registering and configuring saga repositories for use with dependency injection containers. When using the `.AddMassTransit()` container registration method, a repository can now be registered with the saga. For details, see the updated [documentation](/usage/sagas/persistence).
 
-## Azure Service Bus
+### Azure Service Bus
 
 The previous (now legacy) **MassTransit.AzureServiceBus** package, which was only maintained to continue support for .NET 4.5.2, has been deprecated. Going forward, the **MassTransit.Azure.ServiceBus.Core** package should be used. The package supports both .NET 4.6.1 and .NET Standard 2.0. With the new package, the .NET Messaging protocol is no longer supported. The new package includes both AMQP and WebSocket support. Certain corporate firewall configurations that previously used .NET Messaging instead of AMQP may need to specify the web socket protocol to connect to Azure Service Bus.
 
-## Logging
+### Logging
 
 The previous log abstraction used by MassTransit has been replaced with `Microsoft.Extensions.Logging.Abstractions`.
 
@@ -48,7 +48,11 @@ configured for MassTransit by calling:
 LogContext.ConfigureCurrentLogContext(loggerFactory);
 ```
 
-This should be done prior to configuring the bus.
+This should be done prior to configuring the bus. 
+
+::: tip
+If you are using the new `.AddMassTransit()` configuration, combined with `.AddBus()`, then _ILoggerFactory_ is automatically configured for you. In this case, the statement above is not required.
+:::
 
 ### DiagnosticSource
 
@@ -57,7 +61,7 @@ created for each operation, and context-relevant tags and baggage are added.
 
 MassTransit follows the [guidance](https://github.com/dotnet/runtime/blob/master/src/libraries/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md) from Microsoft. To connect listeners, look at the [section](https://github.com/dotnet/runtime/blob/master/src/libraries/System.Diagnostics.DiagnosticSource/src/ActivityUserGuide.md#subscribe-to-diagnosticsource) that explains how to connect.
 
-## Receive Endpoint Configuration
+### Receive Endpoint Configuration
 
 When MassTransit underwent a major overhaul, and multiple host support was added, that seemed like a great idea. A single bus talking to more than one broker, doing messaging. *Reality* &emdot; nobody used it. It added a lot of complexity, that wasn't used. 
 
@@ -65,12 +69,12 @@ With version 6, a single bus has a single host. That's it. Simple. And with this
 
 So, enjoy the simplicity. Under the covers some other things were also made simple &emdot; but I doubt you'll notice.
 
-## Courier
+### Courier
 
 To be consistent with the rest of MassTransit, many of the interfaces in Courier has been renamed. For example, `ExecuteActivity<TArguments>` is now
 `IExecuteActivity<TArguments>`. The previous interfaces are still supported, but have been marked obsolete. 
 
-## Conductor (coming soon)
+### Conductor (coming soon)
 
 Hard things are hard. Building distributed applications at scale is a hard thing, and it's hard. In fact, it is really hard.
 
@@ -79,16 +83,8 @@ So hard that it isn't ready yet - but there is enough other stuff to warrant rel
 _Conductor wants to make it easier, with less complexity._
 
 
-## MassTransit Host Service (coming later, but soon)
+### MassTransit Platform
 
-Previous version of MassTransit provided a generalized service host, built using Topshelf, to get started with your first project. But the world has changed. With ASP.NET Core 3.0, and all the goodness that is the generic host, the developer community has moved to a new place.
+Previous version of MassTransit provided a generalized service host, built using Topshelf, to get started with your first project. But the world has changed. With ASP.NET Core 3.1, and all the goodness that is the generic host, the developer community has moved to a new place.
 
-The latest version of the host is built entirely from scratch, and takes advantage of:
-
-- Microsoft Dependency Injection
-- .NET Core Generic Host
-- Microsoft Extensions Logging
-- MassTransit's most excellent container registration/discovery extensions
-
-Once it's built, the details will all be... revealed!
-
+MassTransit.Host is being replaced with the new [Platform](/platform), which is a Docker-based solution for consistent service deployment using MassTransit.

@@ -141,9 +141,9 @@ public void ConfigureServices(IServiceCollection services)
     {
         x.AddConsumer<CheckOrderStatusConsumer>();
 
-        x.AddBus(provider => Bus.Factory.CreateUsingInMemory(cfg =>
+        x.AddBus(context => Bus.Factory.CreateUsingInMemory(cfg =>
         {
-            cfg.ConfigureEndpoints(provider);
+            cfg.ConfigureEndpoints(context);
         }));
 
         x.AddRequestClient<CheckOrderStatus>();

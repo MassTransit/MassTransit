@@ -113,9 +113,9 @@ services.AddMassTransit(cfg =>
     cfg.AddSaga<OrderSaga>()
         .InMemoryRepository();
 
-    cfg.AddBus(provider => Bus.Factory.CreateUsingInMemory(cfg =>
+    cfg.AddBus(context => Bus.Factory.CreateUsingInMemory(cfg =>
     {
-        cfg.ConfigureEndpoints(provider);
+        cfg.ConfigureEndpoints(context);
     }));
 });
 ```

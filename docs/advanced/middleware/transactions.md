@@ -91,7 +91,7 @@ While the [In Memory Outbox](/usage/exceptions#outbox) is the best choice for an
 ```cs
 services.AddMassTransit(x =>
 {
-    x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+    x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
     {
         var host = cfg.Host("localhost", "/");
     }));

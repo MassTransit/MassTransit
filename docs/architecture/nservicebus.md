@@ -103,11 +103,11 @@ services.AddMassTransit(x =>
 {
     x.AddConsumer<TimeConsumer>();
 
-    x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+    x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
     {
         cfg.UseNServiceBusJsonSerializer();
 
-        cfg.ConfigureEndpoints(provider);
+        cfg.ConfigureEndpoints(context);
     }));
 });
 ```

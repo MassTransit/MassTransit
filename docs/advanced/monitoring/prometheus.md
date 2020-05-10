@@ -17,7 +17,7 @@ public void ConfigureServices(IServiceCollection services)
     services.AddMassTransit(x =>
     {
 
-        x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+        x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
         {
             cfg.UsePrometheusMetrics(serviceName: "order_service");
         }));
