@@ -47,13 +47,13 @@ namespace MassTransit
 
         static void AddBus(this IRegistrationConfigurator<IServiceProvider> configurator, Action<IServiceBusBusFactoryConfigurator> configure = null)
         {
-            configurator.AddBus(provider =>
+            configurator.AddBus(context =>
             {
-                IOptions<ServiceBusOptions> options = provider.GetRequiredService<IOptions<ServiceBusOptions>>();
+                IOptions<ServiceBusOptions> options = context.Container.GetRequiredService<IOptions<ServiceBusOptions>>();
 
                 options.Value.MessageHandlerOptions.AutoComplete = true;
 
-                IServiceBusBusConfiguration busConfiguration = provider.GetRequiredService<IServiceBusBusConfiguration>();
+                IServiceBusBusConfiguration busConfiguration = context.Container.GetRequiredService<IServiceBusBusConfiguration>();
 
                 var busFactoryConfigurator = new ServiceBusBusFactoryConfigurator(busConfiguration);
 

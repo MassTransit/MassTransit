@@ -19,22 +19,6 @@ namespace MassTransit.Configuration
             : base(endpointConfiguration)
         {
             _endpointConfiguration = endpointConfiguration;
-
-            InputAddress = endpointConfiguration.InputAddress;
-
-            this.ThrowOnSkippedMessages();
-            this.RethrowFaultedMessages();
-        }
-
-        public Uri InputAddress { get; }
-
-        public bool ConfigureConsumeTopology
-        {
-            set { }
-        }
-
-        public void AddDependency(IReceiveEndpointObserverConnector connector)
-        {
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)

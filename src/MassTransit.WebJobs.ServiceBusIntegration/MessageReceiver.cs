@@ -15,12 +15,12 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     {
         readonly IServiceBusBusConfiguration _busConfiguration;
         readonly IAsyncBusHandle _busHandle;
-        readonly IServiceProvider _provider;
+        readonly IRegistration _registration;
         readonly ConcurrentDictionary<string, IBrokeredMessageReceiver> _receivers;
 
-        public MessageReceiver(IServiceProvider provider, IAsyncBusHandle busHandle, IServiceBusBusConfiguration busConfiguration)
+        public MessageReceiver(IRegistration registration, IAsyncBusHandle busHandle, IServiceBusBusConfiguration busConfiguration)
         {
-            _provider = provider;
+            _registration = registration;
             _busHandle = busHandle;
             _busConfiguration = busConfiguration;
 
@@ -31,8 +31,8 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
         {
             var receiver = CreateBrokeredMessageReceiver(entityName, cfg =>
             {
-                cfg.ConfigureConsumers(_provider);
-                cfg.ConfigureSagas(_provider);
+                cfg.ConfigureConsumers(_registration);
+                cfg.ConfigureSagas(_registration);
             });
 
             return receiver.Handle(message, cancellationToken);
@@ -43,7 +43,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
         {
             var receiver = CreateBrokeredMessageReceiver(entityName, cfg =>
             {
-                cfg.ConfigureConsumer<TConsumer>(_provider);
+                cfg.ConfigureConsumer<TConsumer>(_registration);
             });
 
             return receiver.Handle(message, cancellationToken);
@@ -54,7 +54,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
         {
             var receiver = CreateBrokeredMessageReceiver(entityName, cfg =>
             {
-                cfg.ConfigureSaga<TSaga>(_provider);
+                cfg.ConfigureSaga<TSaga>(_registration);
             });
 
             return receiver.Handle(message, cancellationToken);
@@ -65,7 +65,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
         {
             var receiver = CreateBrokeredMessageReceiver(entityName, cfg =>
             {
-                cfg.ConfigureExecuteActivity(_provider, typeof(TActivity));
+                cfg.ConfigureExecuteActivity(_registration, typeof(TActivity));
             });
 
             return receiver.Handle(message, cancellationToken);

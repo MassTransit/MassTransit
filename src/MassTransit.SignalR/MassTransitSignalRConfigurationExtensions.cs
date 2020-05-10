@@ -55,44 +55,44 @@
         }
 
         public static void AddSignalRHubEndpoints<THub>(this IBusFactoryConfigurator configurator,
-            IServiceProvider serviceProvider,
+            IRegistrationContext<IServiceProvider> context,
             Action<IReceiveEndpointConfigurator> configureEndpoint = null)
             where THub : Hub
         {
             // Get the configuration options
-            var options = serviceProvider.GetService<MassTransitSignalROptions>() ?? new MassTransitSignalROptions();
-            var hubLifetimeManagerOptions = serviceProvider.GetRequiredService<HubLifetimeManagerOptions<THub>>();
+            var options = context.Container.GetService<MassTransitSignalROptions>() ?? new MassTransitSignalROptions();
+            var hubLifetimeManagerOptions = context.Container.GetRequiredService<HubLifetimeManagerOptions<THub>>();
             var endpointDefinition = new HubEndpointDefinition<THub>();
 
             if (options.UseMessageData || hubLifetimeManagerOptions.UseMessageData)
             {
-                configurator.UseMessageData(serviceProvider.GetService<IMessageDataRepository>());
+                configurator.UseMessageData(context.Container.GetService<IMessageDataRepository>());
                 configurator.ReceiveEndpoint(endpointDefinition, null, e =>
                 {
                     configureEndpoint?.Invoke(e);
 
-                    e.ConfigureConsumer<AllMessageDataConsumer<THub>>(serviceProvider);
+                    e.ConfigureConsumer<AllMessageDataConsumer<THub>>(context);
                 });
 
                 configurator.ReceiveEndpoint(endpointDefinition, null, e =>
                 {
                     configureEndpoint?.Invoke(e);
 
-                    e.ConfigureConsumer<ConnectionMessageDataConsumer<THub>>(serviceProvider);
+                    e.ConfigureConsumer<ConnectionMessageDataConsumer<THub>>(context);
                 });
 
                 configurator.ReceiveEndpoint(endpointDefinition, null, e =>
                 {
                     configureEndpoint?.Invoke(e);
 
-                    e.ConfigureConsumer<GroupMessageDataConsumer<THub>>(serviceProvider);
+                    e.ConfigureConsumer<GroupMessageDataConsumer<THub>>(context);
                 });
 
                 configurator.ReceiveEndpoint(endpointDefinition, null, e =>
                 {
                     configureEndpoint?.Invoke(e);
 
-                    e.ConfigureConsumer<UserMessageDataConsumer<THub>>(serviceProvider);
+                    e.ConfigureConsumer<UserMessageDataConsumer<THub>>(context);
                 });
             }
             else
@@ -101,28 +101,28 @@
                 {
                     configureEndpoint?.Invoke(e);
 
-                    e.ConfigureConsumer<AllConsumer<THub>>(serviceProvider);
+                    e.ConfigureConsumer<AllConsumer<THub>>(context);
                 });
 
                 configurator.ReceiveEndpoint(endpointDefinition, null, e =>
                 {
                     configureEndpoint?.Invoke(e);
 
-                    e.ConfigureConsumer<ConnectionConsumer<THub>>(serviceProvider);
+                    e.ConfigureConsumer<ConnectionConsumer<THub>>(context);
                 });
 
                 configurator.ReceiveEndpoint(endpointDefinition, null, e =>
                 {
                     configureEndpoint?.Invoke(e);
 
-                    e.ConfigureConsumer<GroupConsumer<THub>>(serviceProvider);
+                    e.ConfigureConsumer<GroupConsumer<THub>>(context);
                 });
 
                 configurator.ReceiveEndpoint(endpointDefinition, null, e =>
                 {
                     configureEndpoint?.Invoke(e);
 
-                    e.ConfigureConsumer<UserConsumer<THub>>(serviceProvider);
+                    e.ConfigureConsumer<UserConsumer<THub>>(context);
                 });
             }
 
@@ -131,7 +131,7 @@
             {
                 configureEndpoint?.Invoke(e);
 
-                e.ConfigureConsumer<GroupManagementConsumer<THub>>(serviceProvider);
+                e.ConfigureConsumer<GroupManagementConsumer<THub>>(context);
             });
         }
 

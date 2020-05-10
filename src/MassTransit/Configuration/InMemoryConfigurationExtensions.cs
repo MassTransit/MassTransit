@@ -27,26 +27,5 @@
         {
             return InMemoryBus.Create(baseAddress, configure);
         }
-
-        /// <summary>
-        /// Add a RabbitMQ bus
-        /// </summary>
-        /// <param name="configurator">The registration configurator</param>
-        /// <param name="configure">The configure callback method</param>
-        /// <typeparam name="TContainerContext"></typeparam>
-        public static void AddInMemoryBus<TContainerContext>(this IRegistrationConfigurator<TContainerContext> configurator,
-            Action<IRegistrationContext<TContainerContext>, IInMemoryBusFactoryConfigurator> configure)
-            where TContainerContext : class
-        {
-            IBusControl BusFactory(IRegistrationContext<TContainerContext> context)
-            {
-                return InMemoryBus.Create(cfg =>
-                {
-                    configure(context, cfg);
-                });
-            }
-
-            configurator.AddBus(BusFactory);
-        }
     }
 }
