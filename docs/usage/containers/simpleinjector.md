@@ -27,7 +27,7 @@ public static void Main(string[] args)
         x.AddConsumers(typeof(ConsumerOne), typeof(ConsumerTwo));
 
         // add the bus to the container
-        x.AddBus(() => Bus.Factory.CreateUsingRabbitMq(cfg =>
+        x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
         {
             var host = cfg.Host(new Uri("rabbitmq://localhost"), hostConfigurator =>
             {
@@ -36,17 +36,17 @@ public static void Main(string[] args)
             cfg.ReceiveEndpoint("customer_update", ec =>
             {
                 // Configure a single consumer
-                ec.ConfigureConsumer<UpdateCustomerConsumer>(container);
+                ec.ConfigureConsumer<UpdateCustomerConsumer>(context);
 
                 // configure all consumers
-                ec.ConfigureConsumers(container);
+                ec.ConfigureConsumers(context);
 
                 // configure consumer by type
-                ec.ConfigureConsumer(typeof(ConsumerOne), container);
+                ec.ConfigureConsumer(typeof(ConsumerOne), context);
             });
 
             // or, configure the endpoints by convention
-            cfg.ConfigureEndpoints(container);
+            cfg.ConfigureEndpoints(context);
         }));
     });
 
