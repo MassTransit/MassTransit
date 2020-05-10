@@ -47,9 +47,9 @@ build_script:
       createdb MartenTest
   - ps: .\Build.ps1
   - sh: >-
-      wget https://dl.bintray.com/rabbitmq/community-plugins/3.6.x/rabbitmq_delayed_message_exchange/rabbitmq_delayed_message_exchange-20171215-3.6.x.zip
+      wget https://dl.bintray.com/rabbitmq/community-plugins/3.8.x/rabbitmq_delayed_message_exchange/rabbitmq_delayed_message_exchange-20191008-3.8.x.zip
 
-      sudo unzip ./rabbitmq_delayed_message_exchange-20171215-3.6.x.zip -d /usr/lib/rabbitmq/plugins
+      sudo unzip ./rabbitmq_delayed_message_exchange-20191008-3.8.x.zip -d /usr/lib/rabbitmq/plugins
 
       sudo rabbitmqctl add_vhost test
 

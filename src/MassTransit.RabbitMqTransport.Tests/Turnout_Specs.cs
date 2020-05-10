@@ -178,8 +178,6 @@
         {
             configurator.UseDelayedExchangeMessageScheduler();
 
-            base.ConfigureRabbitMqBusHost(configurator, host);
-
             configurator.TurnoutEndpoint<ProcessFile>("process_queue", endpoint =>
             {
                 endpoint.SuperviseInterval = TimeSpan.FromSeconds(1);

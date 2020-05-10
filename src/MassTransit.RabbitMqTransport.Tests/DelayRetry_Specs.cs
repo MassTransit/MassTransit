@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Tests
+﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Diagnostics;
@@ -19,7 +7,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using Context;
     using GreenPipes;
     using GreenPipes.Introspection;
-    using Logging;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -96,6 +83,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         int _count;
 
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.AutoStart = true;
+        }
+
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _count = 0;
@@ -129,6 +121,11 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         int _count;
+
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.AutoStart = true;
+        }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
@@ -167,6 +164,11 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         Consumer _consumer;
+
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.AutoStart = true;
+        }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
@@ -228,6 +230,11 @@ namespace MassTransit.RabbitMqTransport.Tests
             Console.WriteLine(result.ToJsonString());
         }
 
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.AutoStart = true;
+        }
+
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             configurator.UseDelayedRedelivery(r => r.Intervals(100));
@@ -279,6 +286,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         int _count;
 
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.AutoStart = true;
+        }
+
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _count = 0;
@@ -327,7 +339,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 {
                     Console.WriteLine("{0} now is not a good time", DateTime.UtcNow);
 
-                    await context.Defer(TimeSpan.FromMilliseconds(1000));
+                    await context.Defer(TimeSpan.FromMilliseconds(2000));
                     return;
                 }
 

@@ -51,9 +51,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
 
             Collection.AddSingleton<BusRegistryInstance<TBus>>();
             Collection.AddSingleton<IBusRegistryInstance>(provider => provider.GetRequiredService<BusRegistryInstance<TBus>>());
-
-            Collection.AddScoped(GetSendEndpointProvider);
-            Collection.AddScoped(GetPublishEndpoint);
         }
 
         static ISendEndpointProvider GetSendEndpointProvider(IServiceProvider provider)
