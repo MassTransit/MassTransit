@@ -28,12 +28,12 @@ public void ConfigureServices(IServiceCollection services)
         x.AddConsumer<SubmitOrderConsumer>();
         x.AddRequestClient<SubmitOrder>();
 
-        x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+        x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
         {
             cfg.Host("localhost");
-            cfg.UseHealthCheck(provider);
+            cfg.UseHealthCheck(context);
 
-            cfg.ConfigureEndpoints(provider);
+            cfg.ConfigureEndpoints(context);
         }));
     });
     services.AddMassTransitHostedService();

@@ -25,7 +25,7 @@ public class Startup
         {
             x.AddConsumer<OrderConsumer>();
 
-            x.AddBus(provider => Bus.Factory.CreateUsingRabbitMq(cfg =>
+            x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
             {
                 cfg.Host("localhost");
 
@@ -34,13 +34,13 @@ public class Startup
                     e.PrefetchCount = 16;
                     e.UseMessageRetry(x => x.Interval(2, 100));
 
-                    e.ConfigureConsumer<OrderConsumer>(provider);
+                    e.ConfigureConsumer<OrderConsumer>(context);
                     
                     EndpointConvention.Map<SubmitOrder>(e.InputAddress);
                 });
 
                 // or, configure the endpoints by convention
-                cfg.ConfigureEndpoints(provider);
+                cfg.ConfigureEndpoints(context);
             }));
 
             x.AddRequestClient<SubmitOrder>();
