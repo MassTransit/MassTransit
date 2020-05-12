@@ -3,14 +3,13 @@
     using System;
     using System.Threading.Tasks;
     using Configuration;
-    using Configuration.Configuration;
-    using Configurators;
     using Context;
     using Contexts;
     using Definition;
     using Exceptions;
     using GreenPipes;
     using GreenPipes.Agents;
+    using MassTransit.Configurators;
     using Pipeline;
     using Topology;
     using Topology.Builders;

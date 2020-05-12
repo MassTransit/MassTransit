@@ -1,4 +1,4 @@
-﻿namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
+﻿namespace MassTransit.AmazonSqsTransport.Configuration
 {
     using System;
     using System.Collections.Generic;
@@ -22,11 +22,11 @@
         IAmazonSqsReceiveEndpointConfiguration,
         IAmazonSqsReceiveEndpointConfigurator
     {
+        readonly IBuildPipeConfigurator<ClientContext> _clientConfigurator;
         readonly IBuildPipeConfigurator<ConnectionContext> _connectionConfigurator;
         readonly IAmazonSqsEndpointConfiguration _endpointConfiguration;
         readonly IAmazonSqsHostConfiguration _hostConfiguration;
         readonly Lazy<Uri> _inputAddress;
-        readonly IBuildPipeConfigurator<ClientContext> _clientConfigurator;
         readonly QueueReceiveSettings _settings;
 
         public AmazonSqsReceiveEndpointConfiguration(IAmazonSqsHostConfiguration hostConfiguration, QueueReceiveSettings settings,
@@ -42,11 +42,6 @@
             _clientConfigurator = new PipeConfigurator<ClientContext>();
 
             _inputAddress = new Lazy<Uri>(FormatInputAddress);
-        }
-
-        public bool SubscribeMessageTopics
-        {
-            set => ConfigureConsumeTopology = value;
         }
 
         public ReceiveSettings Settings => _settings;
@@ -114,6 +109,11 @@
                 yield return result.WithParentKey(queueName);
         }
 
+        public bool SubscribeMessageTopics
+        {
+            set => ConfigureConsumeTopology = value;
+        }
+
         public bool Durable
         {
             set
@@ -154,11 +154,6 @@
         public IDictionary<string, object> QueueSubscriptionAttributes => _settings.QueueSubscriptionAttributes;
         public IDictionary<string, string> QueueTags => _settings.QueueTags;
 
-        public AmazonSqsEndpointAddress GetEndpointAddress(Uri hostAddress)
-        {
-            return _settings.GetEndpointAddress(hostAddress);
-        }
-
         public void Subscribe(string topicName, Action<ITopicSubscriptionConfigurator> configure = null)
         {
             if (topicName == null)
@@ -181,6 +176,11 @@
         public void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>> configure)
         {
             configure?.Invoke(_connectionConfigurator);
+        }
+
+        public AmazonSqsEndpointAddress GetEndpointAddress(Uri hostAddress)
+        {
+            return _settings.GetEndpointAddress(hostAddress);
         }
 
         Uri FormatInputAddress()

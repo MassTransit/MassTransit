@@ -1,4 +1,4 @@
-namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
+namespace MassTransit.AmazonSqsTransport.Configurators
 {
     using System;
     using Amazon;
@@ -13,17 +13,13 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         AmazonSqsHostSettings
     {
         readonly Lazy<Uri> _hostAddress;
-        ImmutableCredentials _immutableCredentials;
         AWSCredentials _credentials;
+        ImmutableCredentials _immutableCredentials;
 
         public ConfigurationHostSettings()
         {
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
         }
-
-        public RegionEndpoint Region { get; set; }
-        public string AccessKey => (_immutableCredentials ??= GetImmutableCredentials()).AccessKey;
-        public string SecretKey => (_immutableCredentials ??= GetImmutableCredentials()).SecretKey;
 
         public AWSCredentials Credentials
         {
@@ -40,6 +36,10 @@ namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
         public AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get; set; }
 
         public string Scope { get; set; }
+
+        public RegionEndpoint Region { get; set; }
+        public string AccessKey => (_immutableCredentials ??= GetImmutableCredentials()).AccessKey;
+        public string SecretKey => (_immutableCredentials ??= GetImmutableCredentials()).SecretKey;
 
         public AllowTransportHeader AllowTransportHeader { get; set; }
 

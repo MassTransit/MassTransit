@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.AmazonSqsTransport
 {
-    using Configuration;
     using GreenPipes;
     using Topology;
     using Transport;

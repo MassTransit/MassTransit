@@ -1,4 +1,4 @@
-namespace MassTransit.AmazonSqsTransport.Configuration
+namespace MassTransit.AmazonSqsTransport
 {
     public interface IQueueSubscriptionConfigurator :
         IQueueConfigurator

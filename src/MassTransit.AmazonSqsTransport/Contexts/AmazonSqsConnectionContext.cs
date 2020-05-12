@@ -2,7 +2,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 {
     using System;
     using System.Threading;
-    using Configuration.Configuration;
+    using Configuration;
     using GreenPipes;
     using Topology;
     using Transport;

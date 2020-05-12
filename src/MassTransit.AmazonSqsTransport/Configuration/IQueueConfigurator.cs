@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.AmazonSqsTransport
 {
-    using System;
     using System.Collections.Generic;
 
 

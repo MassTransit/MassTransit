@@ -3,7 +3,7 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Configuration.Configuration;
+    using Configuration;
     using Contexts;
     using Exceptions;
     using GreenPipes;

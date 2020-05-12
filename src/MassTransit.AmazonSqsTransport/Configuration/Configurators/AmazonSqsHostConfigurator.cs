@@ -1,4 +1,4 @@
-namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
+namespace MassTransit.AmazonSqsTransport.Configurators
 {
     using System;
     using Amazon;

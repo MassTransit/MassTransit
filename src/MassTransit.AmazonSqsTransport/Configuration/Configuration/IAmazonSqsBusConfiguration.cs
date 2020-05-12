@@ -1,4 +1,4 @@
-﻿namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
+﻿namespace MassTransit.AmazonSqsTransport.Configuration
 {
     using MassTransit.Configuration;
 

@@ -1,4 +1,4 @@
-﻿namespace MassTransit.AmazonSqsTransport.Configuration.Builders
+﻿namespace MassTransit.AmazonSqsTransport.Builders
 {
     using Amazon.SQS.Model;
     using Configuration;
@@ -15,9 +15,9 @@
     public class AmazonSqsReceiveEndpointBuilder :
         ReceiveEndpointBuilder
     {
+        readonly IAmazonSqsReceiveEndpointConfiguration _configuration;
         readonly IAmazonSqsHostControl _host;
         readonly AmazonSqsHostSettings _hostSettings;
-        readonly IAmazonSqsReceiveEndpointConfiguration _configuration;
 
         public AmazonSqsReceiveEndpointBuilder(IAmazonSqsHostControl host, AmazonSqsHostSettings hostSettings,
             IAmazonSqsReceiveEndpointConfiguration configuration)
@@ -47,9 +47,9 @@
             var headerAdapter = new TransportSetHeaderAdapter<MessageAttributeValue>(new SqsHeaderValueConverter(_hostSettings.AllowTransportHeader),
                 TransportHeaderOptions.IncludeFaultMessage);
 
-            IDeadLetterTransport deadLetterTransport = CreateDeadLetterTransport(headerAdapter);
+            var deadLetterTransport = CreateDeadLetterTransport(headerAdapter);
 
-            IErrorTransport errorTransport = CreateErrorTransport(headerAdapter);
+            var errorTransport = CreateErrorTransport(headerAdapter);
 
             var receiveEndpointContext = new SqsQueueReceiveEndpointContext(_host, _configuration, brokerTopology);
 

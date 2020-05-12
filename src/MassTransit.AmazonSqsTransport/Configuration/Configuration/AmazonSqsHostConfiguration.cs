@@ -1,4 +1,4 @@
-﻿namespace MassTransit.AmazonSqsTransport.Configuration.Configuration
+﻿namespace MassTransit.AmazonSqsTransport.Configuration
 {
     using System;
     using Configurators;
@@ -16,8 +16,8 @@
         IAmazonSqsHostConfiguration
     {
         readonly IAmazonSqsBusConfiguration _busConfiguration;
-        readonly IAmazonSqsTopologyConfiguration _topologyConfiguration;
         readonly AmazonSqsHostProxy _proxy;
+        readonly IAmazonSqsTopologyConfiguration _topologyConfiguration;
         AmazonSqsHostSettings _hostSettings;
 
         public AmazonSqsHostConfiguration(IAmazonSqsBusConfiguration busConfiguration, IAmazonSqsTopologyConfiguration
@@ -53,9 +53,7 @@
             }
 
             if (definition.PrefetchCount.HasValue)
-            {
                 configurator.PrefetchCount = (ushort)definition.PrefetchCount.Value;
-            }
 
             if (definition.ConcurrentMessageLimit.HasValue)
             {
@@ -144,9 +142,7 @@
             var host = new AmazonSqsHost(this, hostTopology);
 
             foreach (var endpointConfiguration in Endpoints)
-            {
                 endpointConfiguration.Build(host);
-            }
 
             _proxy.SetComplete(host);
 

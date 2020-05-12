@@ -15,7 +15,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
     using System;
     using System.Text;
     using AmazonSqsTransport.Configuration;
-    using AmazonSqsTransport.Configuration.Configuration;
     using MassTransit.Topology.Topologies;
     using Metadata;
     using Settings;

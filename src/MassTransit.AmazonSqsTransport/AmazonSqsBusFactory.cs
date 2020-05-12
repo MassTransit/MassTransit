@@ -3,8 +3,7 @@
     using System;
     using System.Threading;
     using Configuration;
-    using Configuration.Configuration;
-    using Configuration.Configurators;
+    using Configurators;
     using MassTransit.Topology;
     using MassTransit.Topology.EntityNameFormatters;
     using MassTransit.Topology.Topologies;

@@ -1,4 +1,4 @@
-﻿namespace MassTransit.AmazonSqsTransport.Configuration.Configurators
+﻿namespace MassTransit.AmazonSqsTransport.Configurators
 {
     using System;
     using System.Collections.Generic;
@@ -27,30 +27,6 @@
 
             var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
             _settings = new QueueReceiveSettings(queueName, false, true);
-        }
-
-        public IBusControl CreateBus()
-        {
-            void ConfigureBusEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
-            {
-                configurator.ConfigureConsumeTopology = false;
-            }
-
-            var busReceiveEndpointConfiguration = _busConfiguration.HostConfiguration
-                .CreateReceiveEndpointConfiguration(_settings, _busConfiguration.BusEndpointConfiguration, ConfigureBusEndpoint);
-
-            var builder = new ConfigurationBusBuilder(_busConfiguration, busReceiveEndpointConfiguration);
-
-            return builder.Build();
-        }
-
-        public override IEnumerable<ValidationResult> Validate()
-        {
-            foreach (var result in base.Validate())
-                yield return result;
-
-            if (string.IsNullOrWhiteSpace(_settings.EntityName))
-                yield return this.Failure("Bus", "The bus queue name must not be null or empty");
         }
 
         public ushort PrefetchCount
@@ -86,10 +62,6 @@
         public IDictionary<string, object> QueueAttributes => _settings.QueueAttributes;
         public IDictionary<string, object> QueueSubscriptionAttributes => _settings.QueueSubscriptionAttributes;
         public IDictionary<string, string> QueueTags => _settings.QueueTags;
-        public AmazonSqsEndpointAddress GetEndpointAddress(Uri hostAddress)
-        {
-            return _settings.GetEndpointAddress(hostAddress);
-        }
 
         public bool DeployTopologyOnly
         {
@@ -151,6 +123,30 @@
         public void ReceiveEndpoint(IAmazonSqsHost host, string queueName, Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
+        }
+
+        public IBusControl CreateBus()
+        {
+            void ConfigureBusEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
+            {
+                configurator.ConfigureConsumeTopology = false;
+            }
+
+            var busReceiveEndpointConfiguration = _busConfiguration.HostConfiguration
+                .CreateReceiveEndpointConfiguration(_settings, _busConfiguration.BusEndpointConfiguration, ConfigureBusEndpoint);
+
+            var builder = new ConfigurationBusBuilder(_busConfiguration, busReceiveEndpointConfiguration);
+
+            return builder.Build();
+        }
+
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            foreach (var result in base.Validate())
+                yield return result;
+
+            if (string.IsNullOrWhiteSpace(_settings.EntityName))
+                yield return this.Failure("Bus", "The bus queue name must not be null or empty");
         }
     }
 }
