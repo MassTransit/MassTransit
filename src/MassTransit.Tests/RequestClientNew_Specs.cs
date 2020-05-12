@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests
+﻿namespace MassTransit.Tests
 {
     using System;
     using System.Linq;
@@ -20,9 +8,9 @@ namespace MassTransit.Tests
     using GreenPipes.Internals.Extensions;
     using Metadata;
     using NUnit.Framework;
+    using RequestClientMessages;
     using TestFramework;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]
@@ -144,18 +132,6 @@ namespace MassTransit.Tests
                         throw new InvalidOperationException("Expected to find a ConsumeContext there");
                 });
             });
-        }
-
-
-        public class GetValue
-        {
-            public bool Discard { get; set; }
-            public bool BlowUp { get; set; }
-        }
-
-
-        public class Value
-        {
         }
     }
 
@@ -294,6 +270,154 @@ namespace MassTransit.Tests
                 await Task.Delay(500);
                 await context.RespondAsync(new PongMessage(), responseContext =>
                 {
+                });
+            });
+        }
+    }
+
+
+    namespace RequestClientMessages
+    {
+        public class GetValue
+        {
+            public bool Discard { get; set; }
+            public bool BlowUp { get; set; }
+        }
+
+
+        public class Value
+        {
+        }
+
+
+        public class ReturnedValue
+        {
+        }
+
+
+        public class AuditGetValue
+        {
+        }
+    }
+
+
+    [TestFixture]
+    public class Sending_a_request_with_a_timeout :
+        InMemoryTestFixture
+    {
+        Uri _auditEndpointAddress;
+        Task<ConsumeContext<AuditGetValue>> _audited;
+        Task<ConsumeContext<ReturnedValue>> _returned;
+        Response<Value> _response;
+
+        [Test]
+        public async Task Should_not_copy_the_time_to_live_to_sent_messages()
+        {
+            ConsumeContext<ReturnedValue> consumeContext = await _returned;
+
+            Assert.That(consumeContext.ExpirationTime.HasValue, Is.False);
+        }
+
+        [Test]
+        public async Task Should_not_copy_the_time_to_live_to_published_messages()
+        {
+            ConsumeContext<AuditGetValue> consumeContext = await _audited;
+
+            Assert.That(consumeContext.ExpirationTime.HasValue, Is.False);
+        }
+
+        [Test]
+        public async Task Should_copy_the_time_to_live_to_the_response()
+        {
+            Assert.That(_response.ExpirationTime.HasValue, Is.True);
+        }
+
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
+
+            _response = await client.GetResponse<Value>(new GetValue());
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ReceiveEndpoint("audit_queue", cfg =>
+            {
+                _audited = Handled<AuditGetValue>(cfg);
+                _returned = Handled<ReturnedValue>(cfg);
+
+                _auditEndpointAddress = cfg.InputAddress;
+            });
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            Handler<GetValue>(configurator, async context =>
+            {
+                if (context.Message.Discard)
+                    return;
+
+                if (context.Message.BlowUp)
+                    throw new IntentionalTestException("I hate it when this happens");
+
+                await context.Publish(new ReturnedValue());
+
+                await context.Send(_auditEndpointAddress, new AuditGetValue());
+
+                await context.RespondAsync(new Value(), responseContext =>
+                {
+                    if (!responseContext.TryGetPayload(out ConsumeContext _))
+                        throw new InvalidOperationException("Expected to find a ConsumeContext there");
+                });
+            });
+        }
+    }
+
+
+    [TestFixture]
+    public class Sending_a_request_that_faults_with_a_timeout :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_copy_the_expiration_time_to_the_sent_fault()
+        {
+            var handler = SubscribeHandler<Fault<GetValue>>();
+
+            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
+
+            try
+            {
+                await client.GetResponse<Value>(new GetValue {BlowUp = true});
+
+                Assert.Fail("Should have thrown");
+            }
+            catch (RequestFaultException)
+            {
+            }
+
+            ConsumeContext<Fault<GetValue>> consumeContext = await handler;
+
+            Assert.That(consumeContext.ExpirationTime.HasValue);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            Handler<GetValue>(configurator, async context =>
+            {
+                if (context.Message.Discard)
+                    return;
+
+                if (context.Message.BlowUp)
+                    throw new IntentionalTestException("I hate it when this happens");
+
+                await context.Publish(new ReturnedValue());
+
+
+                await context.RespondAsync(new Value(), responseContext =>
+                {
+                    if (!responseContext.TryGetPayload(out ConsumeContext _))
+                        throw new InvalidOperationException("Expected to find a ConsumeContext there");
                 });
             });
         }

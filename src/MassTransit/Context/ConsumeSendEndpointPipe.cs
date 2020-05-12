@@ -51,7 +51,8 @@ namespace MassTransit.Context
             {
                 context.TransferConsumeContextHeaders(_consumeContext);
 
-                if (_requestId.HasValue && _consumeContext.ExpirationTime.HasValue)
+                if (_requestId.HasValue && _consumeContext.ExpirationTime.HasValue
+                    && _consumeContext.ResponseAddress != null && _consumeContext.ResponseAddress == context.DestinationAddress)
                 {
                     context.TimeToLive = _consumeContext.ExpirationTime.Value - DateTime.UtcNow;
                     if (context.TimeToLive.Value <= TimeSpan.Zero)
