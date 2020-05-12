@@ -126,11 +126,6 @@
             _settings.SetExchangeArgument(key, value);
         }
 
-        public RabbitMqEndpointAddress GetEndpointAddress(Uri hostAddress)
-        {
-            return _settings.GetEndpointAddress(hostAddress);
-        }
-
         public void EnablePriority(byte maxPriority)
         {
             _settings.EnablePriority(maxPriority);
