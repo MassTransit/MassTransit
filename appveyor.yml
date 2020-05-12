@@ -1,4 +1,4 @@
-version: 6.3.1.{build}
+version: 6.3.2.{build}
 
 branches:
   only:

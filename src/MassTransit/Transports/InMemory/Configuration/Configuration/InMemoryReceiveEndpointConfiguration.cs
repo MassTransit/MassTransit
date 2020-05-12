@@ -22,7 +22,7 @@
 
             HostAddress = hostConfiguration?.HostAddress ?? throw new ArgumentNullException(nameof(hostConfiguration.HostAddress));
 
-            InputAddress = new Uri(hostConfiguration.HostAddress, queueName);
+            InputAddress = new InMemoryEndpointAddress(hostConfiguration.HostAddress, queueName);
         }
 
         IInMemoryReceiveEndpointConfigurator IInMemoryReceiveEndpointConfiguration.Configurator => this;

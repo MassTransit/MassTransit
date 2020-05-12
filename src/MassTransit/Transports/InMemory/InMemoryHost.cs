@@ -94,11 +94,11 @@ namespace MassTransit.Transports.InMemory
         {
             LogContext.SetCurrentIfNull(DefaultLogContext);
 
-            var exchangeName = address.GetQueueOrExchangeName();
+            var endpointAddress = new InMemoryEndpointAddress(_hostConfiguration.HostAddress, address);
 
             TransportLogMessages.CreateSendTransport(address);
 
-            var exchange = _messageFabric.GetExchange(exchangeName);
+            var exchange = _messageFabric.GetExchange(endpointAddress.Name);
 
             var context = new ExchangeInMemorySendTransportContext(exchange, SendLogContext);
 
@@ -107,7 +107,7 @@ namespace MassTransit.Transports.InMemory
 
         public Uri NormalizeAddress(Uri address)
         {
-            return address;
+            return new InMemoryEndpointAddress(_hostConfiguration.HostAddress, address);
         }
 
         IInMemoryPublishTopologyBuilder IInMemoryHostControl.CreatePublishTopologyBuilder(PublishEndpointTopologyBuilder.Options options)
