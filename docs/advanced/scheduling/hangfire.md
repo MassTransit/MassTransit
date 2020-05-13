@@ -2,6 +2,10 @@
 
 ### Configuring Hangfire Scheduler
 
+::: warning
+MassTransit will create own Hangfire Server which will be only listening to its related jobs.
+:::
+
 By default MassTransit is using static Hangfire configuration
 
 ```csharp
@@ -46,7 +50,8 @@ Once configured, messages may be scheduled.
 If you are using Hangfire integration with ASP.NET Core or non static configuration you can provide your configuration for MassTransit implementing `IHangfireComponentResolver`. For example using `IServiceProvider`:
 
 ```csharp
-public class ServiceProviderHangfireComponentResolver : IHangfireComponentResolver
+public class ServiceProviderHangfireComponentResolver : 
+    IHangfireComponentResolver
 {
     readonly IServiceProvider _serviceProvider;
 
@@ -74,7 +79,6 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
     cfg.UseHangfireScheduler(resolver, "hangfire", options => 
     { 
       	/*configure background server*/
-      	options.Activator = your_job_activator;
     });
 });
 ```

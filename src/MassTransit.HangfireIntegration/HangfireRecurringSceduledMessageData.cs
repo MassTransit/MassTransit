@@ -4,7 +4,8 @@ namespace MassTransit.HangfireIntegration
     using Scheduling;
 
 
-    class HangfireRecurringScheduledMessageData : HangfireScheduledMessageData
+    class HangfireRecurringScheduledMessageData :
+        HangfireScheduledMessageData
     {
         public string JobKey { get; set; }
         public DateTimeOffset StartTime { get; set; }

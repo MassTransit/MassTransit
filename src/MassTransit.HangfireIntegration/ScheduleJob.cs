@@ -2,12 +2,15 @@ namespace MassTransit.HangfireIntegration
 {
     using System;
     using System.Threading.Tasks;
+    using Configuration;
     using Context;
     using GreenPipes;
+    using Hangfire;
     using Hangfire.Server;
     using Serialization;
 
 
+    [Queue(SchedulerBusObserver.DefaultQueueName)]
     class ScheduleJob
     {
         readonly IBus _bus;

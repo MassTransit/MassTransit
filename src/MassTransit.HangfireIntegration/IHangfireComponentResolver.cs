@@ -20,7 +20,8 @@ namespace MassTransit.HangfireIntegration
     }
 
 
-    class DefaultHangfireComponentResolver : IHangfireComponentResolver
+    class DefaultHangfireComponentResolver :
+        IHangfireComponentResolver
     {
         readonly Lazy<IBackgroundJobClient> _backgroundJobClient;
         readonly Lazy<IRecurringJobManager> _recurringJobManager;

@@ -12,7 +12,8 @@ namespace MassTransit.HangfireIntegration
     using Serialization;
 
 
-    class HangfireScheduledMessageData : SerializedMessage
+    class HangfireScheduledMessageData :
+        SerializedMessage
     {
         public string DestinationAddress { get; set; }
         public Uri Destination => new Uri(DestinationAddress);
