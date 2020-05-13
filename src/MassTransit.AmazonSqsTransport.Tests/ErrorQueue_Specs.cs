@@ -158,10 +158,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
         protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {
-            Handler<PingMessage>(configurator, context =>
-            {
-                throw new SerializationException("This is fine, forcing death");
-            });
+            Handler<PingMessage>(configurator, context => throw new SerializationException("This is fine, forcing death"));
         }
     }
 }

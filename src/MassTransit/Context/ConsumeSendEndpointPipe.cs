@@ -7,7 +7,7 @@ namespace MassTransit.Context
     using Pipeline;
 
 
-    public readonly struct ConsumeSendEndpointPipe<TMessage> :
+    public class ConsumeSendEndpointPipe<TMessage> :
         IPipe<SendContext<TMessage>>,
         ISendContextPipe
         where TMessage : class

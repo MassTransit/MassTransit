@@ -150,7 +150,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         }
 
 
-        struct ReplyToPipe<TMessage> :
+        class ReplyToPipe<TMessage> :
             IPipe<SendContext<TMessage>>,
             ISendContextPipe
             where TMessage : class

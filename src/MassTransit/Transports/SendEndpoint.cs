@@ -162,7 +162,7 @@
         }
 
 
-        readonly struct SendEndpointPipe<T> :
+        class SendEndpointPipe<T> :
             IPipe<SendContext<T>>
             where T : class
         {

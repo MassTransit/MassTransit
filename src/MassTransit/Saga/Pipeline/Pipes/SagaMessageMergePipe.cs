@@ -11,7 +11,7 @@
     /// </summary>
     /// <typeparam name="TSaga"></typeparam>
     /// <typeparam name="TMessage"></typeparam>
-    public struct SagaMessageMergePipe<TSaga, TMessage> :
+    public class SagaMessageMergePipe<TSaga, TMessage> :
         IPipe<ConsumeContext<TMessage>>
         where TMessage : class
         where TSaga : class, ISaga

@@ -5,7 +5,7 @@ namespace MassTransit.Saga
     using GreenPipes;
 
 
-    public readonly struct SendSagaPipe<TSaga, T> :
+    public class SendSagaPipe<TSaga, T> :
         IPipe<SagaRepositoryContext<TSaga, T>>
         where TSaga : class, ISaga
         where T : class

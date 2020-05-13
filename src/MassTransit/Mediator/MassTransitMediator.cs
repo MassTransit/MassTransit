@@ -95,25 +95,25 @@ namespace MassTransit.Mediator
             return _endpoint.ConnectPublishObserver(observer);
         }
 
-        public  Task Publish<T>(T message, CancellationToken cancellationToken)
+        public Task Publish<T>(T message, CancellationToken cancellationToken)
             where T : class
         {
             return PublishInternal(cancellationToken, message);
         }
 
-        public  Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
+        public Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
             where T : class
         {
             return PublishInternal(cancellationToken, message, publishPipe);
         }
 
-        public  Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        public Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
             where T : class
         {
             return PublishInternal(cancellationToken, message, publishPipe);
         }
 
-        public  Task Publish(object message, CancellationToken cancellationToken)
+        public Task Publish(object message, CancellationToken cancellationToken)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -123,7 +123,7 @@ namespace MassTransit.Mediator
             return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
         }
 
-        public  Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        public Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
@@ -133,17 +133,17 @@ namespace MassTransit.Mediator
             return PublishEndpointConverterCache.Publish(this, message, messageType, publishPipe, cancellationToken);
         }
 
-        public  Task Publish(object message, Type messageType, CancellationToken cancellationToken)
+        public Task Publish(object message, Type messageType, CancellationToken cancellationToken)
         {
             return PublishEndpointConverterCache.Publish(this, message, messageType, cancellationToken);
         }
 
-        public  Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        public Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
             return PublishEndpointConverterCache.Publish(this, message, messageType, publishPipe, cancellationToken);
         }
 
-        public  Task Publish<T>(object values, CancellationToken cancellationToken)
+        public Task Publish<T>(object values, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
@@ -152,7 +152,7 @@ namespace MassTransit.Mediator
             return PublishInternal<T>(cancellationToken, values);
         }
 
-        public  Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
+        public Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
@@ -161,7 +161,7 @@ namespace MassTransit.Mediator
             return PublishInternal(cancellationToken, values, publishPipe);
         }
 
-        public  Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
+        public Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
@@ -176,7 +176,7 @@ namespace MassTransit.Mediator
             var sendEndpoint = await _endpoint.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
             if (pipe.IsNotEmpty())
-                await sendEndpoint.Send(message, new PublishPipe<T>(pipe), cancellationToken).ConfigureAwait(false);
+                await sendEndpoint.Send(message, new PublishContextPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
             else
                 await sendEndpoint.Send(message, cancellationToken).ConfigureAwait(false);
         }
@@ -187,7 +187,7 @@ namespace MassTransit.Mediator
             var sendEndpoint = await _endpoint.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
             if (pipe.IsNotEmpty())
-                await sendEndpoint.Send(values, new PublishPipe<T>(pipe), cancellationToken).ConfigureAwait(false);
+                await sendEndpoint.Send(values, new PublishContextPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
             else
                 await sendEndpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);
         }
@@ -239,30 +239,5 @@ namespace MassTransit.Mediator
         }
 
         ClientFactoryContext IClientFactory.Context => _clientFactory.Context;
-
-
-        readonly struct PublishPipe<T> :
-            IPipe<SendContext<T>>
-            where T : class
-        {
-            readonly IPipe<PublishContext<T>> _pipe;
-
-            public PublishPipe(IPipe<PublishContext<T>> pipe)
-            {
-                _pipe = pipe;
-            }
-
-            void IProbeSite.Probe(ProbeContext context)
-            {
-                _pipe.Probe(context);
-            }
-
-            public Task Send(SendContext<T> context)
-            {
-                var publishContext = context.GetPayload<PublishContext<T>>();
-
-                return _pipe.Send(publishContext);
-            }
-        }
     }
 }

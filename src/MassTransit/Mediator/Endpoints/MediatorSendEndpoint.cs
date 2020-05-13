@@ -215,7 +215,7 @@ namespace MassTransit.Mediator.Endpoints
         }
 
 
-        readonly struct MediatorPipe<TMessage> :
+        class MediatorPipe<TMessage> :
             IPipe<SendContext<TMessage>>
             where TMessage : class
         {

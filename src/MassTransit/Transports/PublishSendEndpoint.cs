@@ -160,7 +160,7 @@ namespace MassTransit.Transports
         }
 
 
-        readonly struct PublishPipeAdapter<T> :
+        class PublishPipeAdapter<T> :
             IPipe<SendContext<T>>
             where T : class
         {

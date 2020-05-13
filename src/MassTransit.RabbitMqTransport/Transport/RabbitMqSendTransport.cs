@@ -58,7 +58,7 @@
         }
 
 
-        readonly struct SendPipe<T> :
+        class SendPipe<T> :
             IPipe<ModelContext>
             where T : class
         {
@@ -160,7 +160,7 @@
             {
             }
 
-            void SetHeaders(IDictionary<string, object> dictionary, SendHeaders headers)
+            static void SetHeaders(IDictionary<string, object> dictionary, SendHeaders headers)
             {
                 foreach (var header in headers.GetAll())
                 {

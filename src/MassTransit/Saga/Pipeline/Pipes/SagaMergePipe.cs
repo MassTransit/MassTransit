@@ -11,7 +11,7 @@ namespace MassTransit.Saga.Pipeline.Pipes
     /// </summary>
     /// <typeparam name="TSaga"></typeparam>
     /// <typeparam name="TMessage"></typeparam>
-    public struct SagaMergePipe<TSaga, TMessage> :
+    public class SagaMergePipe<TSaga, TMessage> :
         IPipe<SagaConsumeContext<TSaga>>
         where TMessage : class
         where TSaga : class, ISaga

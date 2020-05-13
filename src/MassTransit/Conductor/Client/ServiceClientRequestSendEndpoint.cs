@@ -59,7 +59,7 @@ namespace MassTransit.Conductor.Client
         }
 
 
-        readonly struct ClientIdPipe<T> :
+        class ClientIdPipe<T> :
             IPipe<SendContext<T>>
             where T : class
         {

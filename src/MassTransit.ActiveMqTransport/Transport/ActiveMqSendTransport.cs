@@ -55,7 +55,7 @@
         }
 
 
-        struct SendPipe<T> :
+        class SendPipe<T> :
             IPipe<SessionContext>
             where T : class
         {

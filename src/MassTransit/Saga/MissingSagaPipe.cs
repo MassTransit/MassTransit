@@ -10,7 +10,7 @@ namespace MassTransit.Saga
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
     /// <typeparam name="TSaga"></typeparam>
-    public readonly struct MissingSagaPipe<TSaga, TMessage> :
+    public class MissingSagaPipe<TSaga, TMessage> :
         IPipe<SagaConsumeContext<TSaga, TMessage>>
         where TSaga : class, ISaga
         where TMessage : class

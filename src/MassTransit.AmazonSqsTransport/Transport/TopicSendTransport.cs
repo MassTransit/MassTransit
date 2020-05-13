@@ -40,7 +40,7 @@
         }
 
 
-        struct SendPipe<T> :
+        class SendPipe<T> :
             IPipe<ClientContext>
             where T : class
         {
@@ -57,42 +57,42 @@
                 _cancellationToken = cancellationToken;
             }
 
-            public async Task Send(ClientContext clientContext)
+            public async Task Send(ClientContext context)
             {
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
-                await _context.ConfigureTopologyPipe.Send(clientContext).ConfigureAwait(false);
+                await _context.ConfigureTopologyPipe.Send(context).ConfigureAwait(false);
 
-                var context = new TransportAmazonSqsSendContext<T>(_message, _cancellationToken);
+                var sendContext = new TransportAmazonSqsSendContext<T>(_message, _cancellationToken);
 
-                await _pipe.Send(context).ConfigureAwait(false);
+                await _pipe.Send(sendContext).ConfigureAwait(false);
 
-                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
+                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(sendContext);
                 try
                 {
                     if (_context.SendObservers.Count > 0)
-                        await _context.SendObservers.PreSend(context).ConfigureAwait(false);
+                        await _context.SendObservers.PreSend(sendContext).ConfigureAwait(false);
 
-                    var request = await clientContext.CreatePublishRequest(_context.EntityName, context.Body).ConfigureAwait(false);
+                    var request = await context.CreatePublishRequest(_context.EntityName, sendContext.Body).ConfigureAwait(false);
 
-                    _context.SnsSetHeaderAdapter.Set(request.MessageAttributes, context.Headers);
+                    _context.SnsSetHeaderAdapter.Set(request.MessageAttributes, sendContext.Headers);
 
-                    _context.SnsSetHeaderAdapter.Set(request.MessageAttributes, "Content-Type", context.ContentType.MediaType);
-                    _context.SnsSetHeaderAdapter.Set(request.MessageAttributes, nameof(context.CorrelationId), context.CorrelationId);
+                    _context.SnsSetHeaderAdapter.Set(request.MessageAttributes, "Content-Type", sendContext.ContentType.MediaType);
+                    _context.SnsSetHeaderAdapter.Set(request.MessageAttributes, nameof(sendContext.CorrelationId), sendContext.CorrelationId);
 
-                    await clientContext.Publish(request, context.CancellationToken).ConfigureAwait(false);
+                    await context.Publish(request, sendContext.CancellationToken).ConfigureAwait(false);
 
-                    context.LogSent();
+                    sendContext.LogSent();
 
                     if (_context.SendObservers.Count > 0)
-                        await _context.SendObservers.PostSend(context).ConfigureAwait(false);
+                        await _context.SendObservers.PostSend(sendContext).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    context.LogFaulted(ex);
+                    sendContext.LogFaulted(ex);
 
                     if (_context.SendObservers.Count > 0)
-                        await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);
+                        await _context.SendObservers.SendFault(sendContext, ex).ConfigureAwait(false);
 
                     throw;
                 }

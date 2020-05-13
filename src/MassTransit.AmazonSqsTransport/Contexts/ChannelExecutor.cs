@@ -28,7 +28,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             _runTasks = new Task[concurrencyLimit];
 
             for (var i = 0; i < concurrencyLimit; i++)
-                _runTasks[i] = Task.Run(RunFromChannel);
+                _runTasks[i] = Task.Run(() => RunFromChannel());
         }
 
         public ChannelExecutor(int concurrencyLimit)
@@ -45,7 +45,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             _runTasks = new Task[concurrencyLimit];
 
             for (var i = 0; i < concurrencyLimit; i++)
-                _runTasks[i] = Task.Run(RunFromChannel);
+                _runTasks[i] = Task.Run(() => RunFromChannel());
         }
 
         public Task DisposeAsync(CancellationToken cancellationToken)
@@ -64,7 +64,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 return true;
             }
 
-            var future = new Future<bool>(RunMethod, cancellationToken);
+            var future = new Future<bool>(() => RunMethod(), cancellationToken);
 
             await _channel.Writer.WriteAsync(future, cancellationToken).ConfigureAwait(false);
         }
@@ -113,7 +113,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         async Task RunFromChannel()
         {
-            while (await _channel.Reader.WaitToReadAsync())
+            while (await _channel.Reader.WaitToReadAsync().ConfigureAwait(false))
             {
                 if (_channel.Reader.TryRead(out var future))
                 {
@@ -133,7 +133,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         }
 
 
-        readonly struct Future<T> :
+        class Future<T> :
             IFuture
         {
             readonly Func<Task<T>> _method;
@@ -178,7 +178,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         }
 
 
-        readonly struct SynchronousFuture<T> :
+        class SynchronousFuture<T> :
             IFuture
         {
             readonly Func<T> _method;

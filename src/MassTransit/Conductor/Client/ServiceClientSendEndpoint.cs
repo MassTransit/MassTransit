@@ -154,7 +154,7 @@ namespace MassTransit.Conductor.Client
         }
 
 
-        struct InstancePipe<TMessage> :
+        class InstancePipe<TMessage> :
             IPipe<SendContext<TMessage>>,
             ISendContextPipe
             where TMessage : class
