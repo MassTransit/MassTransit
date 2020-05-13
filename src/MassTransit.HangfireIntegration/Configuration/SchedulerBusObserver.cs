@@ -13,6 +13,8 @@
     class SchedulerBusObserver :
         IBusObserver
     {
+        public const string DefaultQueueName = "mt-message-queue";
+
         readonly IHangfireComponentResolver _hangfireComponentResolver;
         readonly Uri _schedulerEndpointAddress;
         readonly Action<BackgroundJobServerOptions> _configureServer;
@@ -45,11 +47,15 @@
         {
             var backgroundJobServerOptions = new BackgroundJobServerOptions
             {
-                Activator = new MassTransitJobActivator(bus),
                 TimeZoneResolver = _hangfireComponentResolver.TimeZoneResolver,
-                FilterProvider = _hangfireComponentResolver.JobFilterProvider
+                FilterProvider = _hangfireComponentResolver.JobFilterProvider,
+                ServerName = $"MT-Server-{NewId.NextGuid():N}"
             };
+            
             _configureServer?.Invoke(backgroundJobServerOptions);
+
+            backgroundJobServerOptions.Activator = new MassTransitJobActivator(bus);
+            backgroundJobServerOptions.Queues = new[] {DefaultQueueName};
 
             _server = new BackgroundJobServer(
                 backgroundJobServerOptions,
@@ -69,7 +75,7 @@
 
         public Task PreStop(IBus bus)
         {
-            _server.SendStop();
+            _server?.SendStop();
 
             LogContext.Debug?.Log("Hangfire Scheduler Paused: {InputAddress}", _schedulerEndpointAddress);
 
@@ -78,7 +84,7 @@
 
         public Task PostStop(IBus bus)
         {
-            _server.Dispose();
+            _server?.Dispose();
 
             LogContext.Debug?.Log("Hangfire Scheduler Stopped: {InputAddress}", _schedulerEndpointAddress);
 

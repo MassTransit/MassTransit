@@ -8,7 +8,8 @@ namespace MassTransit.HangfireIntegration
     using Hangfire.Server;
 
 
-    class RecurringScheduleDateTimeIntervalAttribute : JobFilterAttribute,
+    class RecurringScheduleDateTimeIntervalAttribute :
+        JobFilterAttribute,
         IClientFilter,
         IServerFilter
     {

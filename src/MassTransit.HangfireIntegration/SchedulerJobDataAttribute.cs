@@ -8,7 +8,8 @@ namespace MassTransit.HangfireIntegration
     using Newtonsoft.Json;
 
 
-    class SchedulerJobDataAttribute : JobFilterAttribute,
+    class SchedulerJobDataAttribute :
+        JobFilterAttribute,
         IServerFilter
     {
         public void OnPerforming(PerformingContext filterContext)
