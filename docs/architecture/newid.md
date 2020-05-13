@@ -1,6 +1,6 @@
 # NewId
 
-NewId generates sequential unique identifiers that are 128-bit (16-bits) and fit nicely into a `Guid`. It was inspired from [Snowflake][1] and [flake][2].
+NewId generates sequential unique identifiers that are 128-bit (16-bytes) and fit nicely into a `Guid`. It was inspired from [Snowflake][1] and [flake][2].
 
 ## The Problem
 
