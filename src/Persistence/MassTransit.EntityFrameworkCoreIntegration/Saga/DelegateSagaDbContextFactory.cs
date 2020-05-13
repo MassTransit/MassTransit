@@ -1,6 +1,7 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Saga
 {
     using System;
+    using System.Threading.Tasks;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
 
@@ -27,9 +28,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             return _dbContextFactory();
         }
 
-        public void Release(DbContext dbContext)
+        public async Task ReleaseAsync(DbContext dbContext)
         {
-            dbContext.Dispose();
+            await dbContext.DisposeAsync();
         }
     }
 }

@@ -1,5 +1,6 @@
 namespace MassTransit.EntityFrameworkCoreIntegration
 {
+    using System.Threading.Tasks;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
 
@@ -29,6 +30,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         /// Release the DbContext once it is no longer needed
         /// </summary>
         /// <param name="dbContext"></param>
-        void Release(DbContext dbContext);
+        Task ReleaseAsync(DbContext dbContext);
     }
 }

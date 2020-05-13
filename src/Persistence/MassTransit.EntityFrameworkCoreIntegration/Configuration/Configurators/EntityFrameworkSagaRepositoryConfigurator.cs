@@ -141,7 +141,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Configurators
         static void CheckContextConstructors<TContext>()
             where TContext : DbContext
         {
-            var declaredConstructors = typeof(TContext).GetTypeInfo().DeclaredConstructors.ToList();
+            List<ConstructorInfo> declaredConstructors = typeof(TContext).GetTypeInfo().DeclaredConstructors.ToList();
             if (declaredConstructors.Count == 1 && declaredConstructors[0].GetParameters().Length == 0)
             {
                 throw new ArgumentException(CoreStrings.DbContextMissingConstructor(typeof(TContext).ShortDisplayName()));

@@ -31,7 +31,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
 
         public async Task<IList<TSaga>> Load()
         {
-            List<TSaga> loaded = new List<TSaga>();
+            var loaded = new List<TSaga>();
 
             foreach (var correlationId in _instances)
             {

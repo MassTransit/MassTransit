@@ -1,6 +1,7 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -67,7 +68,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             }
             finally
             {
-                _dbContextFactory.Release(dbContext);
+                await _dbContextFactory.ReleaseAsync(dbContext).ConfigureAwait(false);
             }
         }
 
@@ -79,13 +80,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             {
                 async Task Send()
                 {
-                    var lockContext = await _lockStrategy.CreateLockContext(dbContext, query, context.CancellationToken).ConfigureAwait(false);
+                    SagaLockContext<TSaga> lockContext = await _lockStrategy.CreateLockContext(dbContext, query, context.CancellationToken).ConfigureAwait(false);
 
                     var repositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _consumeContextFactory, _lockStrategy);
 
                     await WithinTransaction(dbContext, context.CancellationToken, async () =>
                     {
-                        var instances = await lockContext.Load().ConfigureAwait(false);
+                        IList<TSaga> instances = await lockContext.Load().ConfigureAwait(false);
 
                         var queryContext = new LoadedSagaRepositoryQueryContext<TSaga, T>(repositoryContext, instances);
 
@@ -105,7 +106,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             }
             finally
             {
-                _dbContextFactory.Release(dbContext);
+                await _dbContextFactory.ReleaseAsync(dbContext).ConfigureAwait(false);
             }
         }
 
@@ -135,58 +136,30 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             }
             finally
             {
-                _dbContextFactory.Release(dbContext);
+                await _dbContextFactory.ReleaseAsync(dbContext).ConfigureAwait(false);
             }
         }
 
-        async Task WithinTransaction(DbContext context, CancellationToken cancellationToken, Func<Task> callback)
+        Task WithinTransaction(DbContext context, CancellationToken cancellationToken, Func<Task> callback)
         {
-            await using var transaction = await context.Database.BeginTransactionAsync(_lockStrategy.IsolationLevel, cancellationToken).ConfigureAwait(false);
-
-            void Rollback()
+            async Task<bool> Create()
             {
-                try
-                {
-                    transaction.Rollback();
-                }
-                catch (Exception innerException)
-                {
-                    LogContext.Warning?.Log(innerException, "Transaction rollback failed");
-                }
+                await callback();
+                return true;
             }
 
-            try
-            {
-                await callback().ConfigureAwait(false);
-
-                transaction.Commit();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                Rollback();
-                throw;
-            }
-            catch (DbUpdateException)
-            {
-                Rollback();
-                throw;
-            }
-            catch (Exception)
-            {
-                Rollback();
-                throw;
-            }
+            return WithinTransaction(context, cancellationToken, Create);
         }
 
         async Task<T> WithinTransaction<T>(DbContext context, CancellationToken cancellationToken, Func<Task<T>> callback)
         {
             await using var transaction = await context.Database.BeginTransactionAsync(_lockStrategy.IsolationLevel, cancellationToken).ConfigureAwait(false);
 
-            void Rollback()
+            static async Task Rollback(IDbContextTransaction transaction)
             {
                 try
                 {
-                    transaction.Rollback();
+                    await transaction.RollbackAsync();
                 }
                 catch (Exception innerException)
                 {
@@ -198,23 +171,23 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             {
                 var result = await callback().ConfigureAwait(false);
 
-                transaction.Commit();
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 
                 return result;
             }
             catch (DbUpdateConcurrencyException)
             {
-                Rollback();
+                await Rollback(transaction).ConfigureAwait(false);
                 throw;
             }
             catch (DbUpdateException)
             {
-                Rollback();
+                await Rollback(transaction).ConfigureAwait(false);
                 throw;
             }
             catch (Exception)
             {
-                Rollback();
+                await Rollback(transaction).ConfigureAwait(false);
                 throw;
             }
         }

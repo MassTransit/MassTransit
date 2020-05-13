@@ -31,11 +31,11 @@
 
         public Task DisposeAsync(CancellationToken cancellationToken)
         {
-            Task Add()
+            async Task Add()
             {
-                _dbContext.Set<TSaga>().Add(Saga);
+                await _dbContext.Set<TSaga>().AddAsync(Saga, cancellationToken);
 
-                return _dbContext.SaveChangesAsync(cancellationToken);
+                await _dbContext.SaveChangesAsync(cancellationToken);
             }
 
             return _isCompleted
