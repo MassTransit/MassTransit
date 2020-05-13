@@ -8,7 +8,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Configuration
     using Microsoft.EntityFrameworkCore;
 
 
-    class EntityFrameworkSagaRepository : IEntityFrameworkSagaRepository
+    class EntityFrameworkSagaRepository :
+        IEntityFrameworkSagaRepository
     {
         readonly DbContextOptions _dbContextOptions;
         readonly ConcurrentDictionary<Type, ISagaClassMap> _configurations;
