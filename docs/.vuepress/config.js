@@ -148,7 +148,8 @@ module.exports = {
                   '/advanced/middleware/circuit-breaker',
                   '/advanced/middleware/rate-limiter',
                   '/advanced/middleware/transactions',
-                  '/advanced/middleware/custom'
+                  '/advanced/middleware/custom',
+                  '/advanced/middleware/scoped'
                 ]
               },
               {

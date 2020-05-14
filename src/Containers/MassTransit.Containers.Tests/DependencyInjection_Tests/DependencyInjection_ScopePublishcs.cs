@@ -41,4 +41,42 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             Assert.AreEqual(_childContainer.ServiceProvider, actual);
         }
     }
+
+
+    [TestFixture]
+    public class DependencyInjection_Publish_Filter :
+        Common_Publish_Filter
+    {
+        readonly IServiceProvider _provider;
+        readonly IServiceScope _scope;
+
+        public DependencyInjection_Publish_Filter()
+        {
+            var services = new ServiceCollection();
+            services.AddScoped(_ => new MyId(Guid.NewGuid()));
+            services.AddSingleton(TaskCompletionSource);
+            services.AddScoped(typeof(ScopedFilter<>));
+
+            services.AddMassTransit(ConfigureRegistration);
+
+            _provider = services.BuildServiceProvider();
+            _scope = _provider.CreateScope();
+        }
+
+        [OneTimeTearDown]
+        public void Close_container()
+        {
+            _scope.Dispose();
+        }
+
+        protected override void ConfigureFilter(IPublishPipelineConfigurator configurator)
+        {
+            DependencyInjectionFilterExtensions.UsePublishFilter(configurator, typeof(ScopedFilter<>), Registration);
+        }
+
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
+        protected override MyId MyId => _scope.ServiceProvider.GetRequiredService<MyId>();
+
+        protected override IPublishEndpoint PublishEndpoint => _scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+    }
 }

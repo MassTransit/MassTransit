@@ -1,5 +1,7 @@
 namespace MassTransit.Containers.Tests.Autofac_Tests
 {
+    using System;
+    using System.Threading.Tasks;
     using Autofac;
     using Common_Tests;
     using NUnit.Framework;
@@ -94,6 +96,37 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
         public void Close_container()
         {
             _container.Dispose();
+        }
+
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+    }
+
+
+    [TestFixture]
+    public class Autofac_Consume_Filter :
+        Common_Consume_Filter
+    {
+        readonly IContainer _container;
+
+        public Autofac_Consume_Filter()
+        {
+            var builder = new ContainerBuilder();
+            builder.Register(_ => new MyId(Guid.NewGuid())).InstancePerLifetimeScope();
+            builder.RegisterGeneric(typeof(ScopedFilter<>)).InstancePerLifetimeScope();
+            builder.RegisterInstance(TaskCompletionSource);
+            builder.AddMassTransit(ConfigureRegistration);
+            _container = builder.Build();
+        }
+
+        [OneTimeTearDown]
+        public async Task Close_container()
+        {
+            await _container.DisposeAsync();
+        }
+
+        protected override void ConfigureFilter(IConsumePipeConfigurator configurator)
+        {
+            AutofacFilterExtensions.UseConsumeFilter(configurator, typeof(ScopedFilter<>), Registration);
         }
 
         protected override IRegistration Registration => _container.Resolve<IRegistration>();

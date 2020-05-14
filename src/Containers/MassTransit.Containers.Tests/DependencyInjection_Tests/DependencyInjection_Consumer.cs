@@ -74,4 +74,29 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 
         protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
     }
+
+
+    [TestFixture]
+    public class DependencyInjection_Consume_Filter :
+        Common_Consume_Filter
+    {
+        readonly IServiceProvider _provider;
+
+        public DependencyInjection_Consume_Filter()
+        {
+            var services = new ServiceCollection();
+            services.AddScoped(_ => new MyId(Guid.NewGuid()));
+            services.AddScoped(typeof(ScopedFilter<>));
+            services.AddSingleton(TaskCompletionSource);
+            services.AddMassTransit(ConfigureRegistration);
+            _provider = services.BuildServiceProvider(true);
+        }
+
+        protected override void ConfigureFilter(IConsumePipeConfigurator configurator)
+        {
+            DependencyInjectionFilterExtensions.UseConsumeFilter(configurator, typeof(ScopedFilter<>), Registration);
+        }
+
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
+    }
 }
