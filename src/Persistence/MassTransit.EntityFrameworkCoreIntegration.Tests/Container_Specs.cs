@@ -81,8 +81,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                     .BuildServiceProvider();
             }
 
-            protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-                where T : class
+            protected void ConfigureRegistration<TContainerContext>(IRegistrationConfigurator<TContainerContext> configurator)
+                where TContainerContext : class
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .EntityFrameworkRepository(r =>

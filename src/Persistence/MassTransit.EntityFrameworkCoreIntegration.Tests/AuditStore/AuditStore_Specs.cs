@@ -53,7 +53,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.AuditStore
         }
 
         InMemoryTestHarness _harness;
-        ConsumerTestHarness<TestConsumer> _consumer;
         EntityFrameworkAuditStore _store;
 
         [OneTimeSetUp]
