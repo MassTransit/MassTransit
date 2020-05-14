@@ -1,6 +1,5 @@
 namespace MassTransit
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
 
@@ -81,28 +80,5 @@ namespace MassTransit
             RequestTimeout timeout = default)
             where T1 : class
             where T2 : class;
-    }
-
-
-    /// <summary>
-    /// The legacy request client interface, which combines the request and response type into a single interface. This will eventually
-    /// be marked obsolete.
-    /// </summary>
-    /// <typeparam name="TRequest">The request type</typeparam>
-    /// <typeparam name="TResponse">The response type</typeparam>
-    [Obsolete("This will be deprecated in the next release")]
-    public interface IRequestClient<in TRequest, TResponse>
-        where TRequest : class
-        where TResponse : class
-    {
-        /// <summary>
-        /// Send the request, and complete the response task when the response is received. If
-        /// the request times out, a RequestTimeoutException is thrown. If the remote service
-        /// returns a fault, the task is set to exception status.
-        /// </summary>
-        /// <param name="request">The request message</param>
-        /// <param name="cancellationToken">A cancellation token for the request</param>
-        /// <returns>The response Task</returns>
-        Task<TResponse> Request(TRequest request, CancellationToken cancellationToken = default);
     }
 }

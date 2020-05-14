@@ -2,7 +2,7 @@
   <Import Project="../netfx.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -12,15 +12,10 @@
     <Description>MassTransit ActiveMQ transport support; $(Description)</Description>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.101.158" />
-    <PackageReference Include="AWSSDK.SQS" Version="3.3.102.101" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
-    <PackageReference Include="System.Threading.Channels" Version="4.7.0" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.3.101.166" />
+    <PackageReference Include="AWSSDK.SQS" Version="3.3.102.109" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>

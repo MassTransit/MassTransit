@@ -13,7 +13,9 @@
     using Util;
 
 
-    internal class TestClient : ITransferFormatFeature, IConnectionHeartbeatFeature, IDisposable
+    internal class TestClient : ITransferFormatFeature,
+        IConnectionHeartbeatFeature,
+        IDisposable
     {
         private readonly object _heartbeatLock = new object();
         private List<(Action<object> handler, object state)> _heartbeatHandlers;
@@ -42,7 +44,7 @@
             Connection.Features.Set<IConnectionHeartbeatFeature>(this);
 
             var claimValue = Interlocked.Increment(ref _id).ToString();
-            var claims = new List<Claim> { new Claim(ClaimTypes.Name, claimValue) };
+            var claims = new List<Claim> {new Claim(ClaimTypes.Name, claimValue)};
             if (userIdentifier != null)
             {
                 claims.Add(new Claim(ClaimTypes.NameIdentifier, userIdentifier));
@@ -269,6 +271,7 @@
                 {
                     _heartbeatHandlers = new List<(Action<object> handler, object state)>();
                 }
+
                 _heartbeatHandlers.Add((action, state));
             }
         }
@@ -288,12 +291,19 @@
                 }
             }
         }
+
+
         private class DefaultInvocationBinder : IInvocationBinder
         {
             public IReadOnlyList<Type> GetParameterTypes(string methodName)
             {
                 // TODO: Possibly support actual client methods
-                return new[] { typeof(object) };
+                return new[] {typeof(object)};
+            }
+
+            public Type GetStreamItemType(string streamId)
+            {
+                return typeof(object);
             }
 
             public Type GetReturnType(string invocationId)

@@ -152,11 +152,6 @@ namespace MassTransit.Scheduling
             return _provider.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
-        public Task CancelScheduledSend(Guid tokenId)
-        {
-            return _provider.CancelScheduledSend(tokenId);
-        }
-
         public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
         {
             return _provider.CancelScheduledSend(destinationAddress, tokenId);

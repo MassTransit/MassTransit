@@ -100,13 +100,6 @@ namespace MassTransit.Tests.Serialization
                 Serializer = new EncryptedMessageSerializerV2(streamProvider);
                 Deserializer = new EncryptedMessageDeserializerV2(BsonMessageSerializer.Deserializer, streamProvider);
             }
-        #if !NETCORE
-            else if (_serializerType == typeof(BinaryMessageSerializer))
-            {
-                Serializer = new BinaryMessageSerializer();
-                Deserializer = new BinaryMessageDeserializer();
-            }
-        #endif
             else
                 throw new ArgumentException("The serializer type is unknown");
         }

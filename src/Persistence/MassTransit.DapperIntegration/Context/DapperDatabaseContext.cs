@@ -7,11 +7,7 @@ namespace MassTransit.DapperIntegration.Context
     using System.Threading.Tasks;
     using Dapper;
     using Dapper.Contrib.Extensions;
-    #if NETCORE
-        using Microsoft.Data.SqlClient;
-    #else
-        using System.Data.SqlClient;
-    #endif
+    using Microsoft.Data.SqlClient;
     using Saga;
     using Sql;
 

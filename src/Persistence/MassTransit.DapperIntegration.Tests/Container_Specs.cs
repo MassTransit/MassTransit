@@ -14,11 +14,7 @@ namespace MassTransit.MartenIntegration.Tests
         using NUnit.Framework;
         using TestFramework;
         using TestFramework.Sagas;
-    #if NETCOREAPP
         using Microsoft.Data.SqlClient;
-    #else
-        using System.Data.SqlClient;
-    #endif
 
 
         public class Using_the_container_integration :

@@ -13,15 +13,15 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_be_received()
         {
-            await _requestClient.Request(new PingMessage());
+            await _requestClient.GetResponse<PongMessage>(new PingMessage());
         }
 
-        IRequestClient<PingMessage, PongMessage> _requestClient;
+        IRequestClient<PingMessage> _requestClient;
 
         [OneTimeSetUp]
         public void Setup()
         {
-            _requestClient = CreateRequestClient<PingMessage, PongMessage>();
+            _requestClient = CreateRequestClient<PingMessage>();
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

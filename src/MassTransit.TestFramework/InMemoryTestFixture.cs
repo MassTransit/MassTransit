@@ -78,17 +78,16 @@ namespace MassTransit.TestFramework
 
         protected Uri InputQueueAddress => InMemoryTestHarness.InputQueueAddress;
 
-        protected IRequestClient<TRequest, TResponse> CreateRequestClient<TRequest, TResponse>()
-            where TRequest : class
-            where TResponse : class
-        {
-            return InMemoryTestHarness.CreateRequestClient<TRequest, TResponse>();
-        }
-
         protected IRequestClient<TRequest> CreateRequestClient<TRequest>()
             where TRequest : class
         {
             return InMemoryTestHarness.CreateRequestClient<TRequest>();
+        }
+
+        protected IRequestClient<TRequest> CreateRequestClient<TRequest>(Uri destinationAddress)
+            where TRequest : class
+        {
+            return InMemoryTestHarness.CreateRequestClient<TRequest>(destinationAddress);
         }
 
         protected Task<IRequestClient<TRequest>> ConnectRequestClient<TRequest>()

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.AutomatonymousIntegration
+﻿namespace MassTransit.Tests.AutomatonymousIntegration
 {
     using System;
     using System.Threading.Tasks;
@@ -28,7 +16,7 @@ namespace MassTransit.Tests.AutomatonymousIntegration
         [Test]
         public async Task Should_receive_the_response_message()
         {
-            StartupComplete complete = await _client.Request(new Start(), TestCancellationToken);
+            Response<StartupComplete> complete = await _client.GetResponse<StartupComplete>(new Start(), TestCancellationToken);
         }
 
         [Test]
@@ -36,26 +24,26 @@ namespace MassTransit.Tests.AutomatonymousIntegration
         {
             var start = new Start();
 
-            StartupComplete complete = await _client.Request(start, TestCancellationToken);
+            Response<StartupComplete> complete = await _client.GetResponse<StartupComplete>(start, TestCancellationToken);
 
-            var status = await _statusClient.Request(new StatusRequested(start.CorrelationId), TestCancellationToken);
+            var response = await _statusClient.GetResponse<StatusReport>(new StatusRequested(start.CorrelationId), TestCancellationToken);
 
-            status.Status.ShouldBe(_machine.Running.Name);
+            response.Message.Status.ShouldBe(_machine.Running.Name);
         }
 
         [Test]
         public void Should_fault_on_a_missing_instance()
         {
             Assert.That(
-                async () => await _statusClient.Request(new StatusRequested(NewId.NextGuid()), TestCancellationToken), 
+                async () => await _statusClient.GetResponse<StatusReport>(new StatusRequested(NewId.NextGuid()), TestCancellationToken),
                 Throws.TypeOf<RequestFaultException>());
         }
 
         [OneTimeSetUp]
         public void Setup()
         {
-            _client = new MessageRequestClient<Start, StartupComplete>(Bus, InputQueueAddress, TestTimeout);
-            _statusClient = new MessageRequestClient<StatusRequested, StatusReport>(Bus, InputQueueAddress, TestTimeout);
+            _client = Bus.CreateRequestClient<Start>(InputQueueAddress, TestTimeout);
+            _statusClient = Bus.CreateRequestClient<StatusRequested>(InputQueueAddress, TestTimeout);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -68,8 +56,8 @@ namespace MassTransit.Tests.AutomatonymousIntegration
 
         TestStateMachine _machine;
         InMemorySagaRepository<Instance> _repository;
-        IRequestClient<Start, StartupComplete> _client;
-        IRequestClient<StatusRequested, StatusReport> _statusClient;
+        IRequestClient<Start> _client;
+        IRequestClient<StatusRequested> _statusClient;
 
 
         class Instance :
@@ -122,6 +110,7 @@ namespace MassTransit.Tests.AutomatonymousIntegration
             public Guid CorrelationId { get; private set; }
         }
 
+
         public class StatusRequested :
             CorrelatedBy<Guid>
         {
@@ -146,6 +135,7 @@ namespace MassTransit.Tests.AutomatonymousIntegration
             public Guid CorrelationId { get; private set; }
             public string Status { get; private set; }
         }
+
 
         class StartupComplete
         {

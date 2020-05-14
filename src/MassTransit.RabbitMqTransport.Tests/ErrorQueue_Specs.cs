@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Tests
+﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.IO;
@@ -23,7 +11,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using RabbitMQ.Client;
     using Shouldly;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]
@@ -126,10 +113,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            Handler<PingMessage>(configurator, context =>
-            {
-                throw new SerializationException("This is fine, forcing death");
-            });
+            Handler<PingMessage>(configurator, context => throw new SerializationException("This is fine, forcing death"));
         }
     }
 
@@ -334,14 +318,14 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         Task<ConsumeContext<PingMessage>> _errorHandler;
-        Task<PongMessage> _responseTask;
+        Task<Response<PongMessage>> _responseTask;
 
         [OneTimeSetUp]
         public async Task Setup()
         {
-            var client = Bus.CreateRequestClient<PingMessage, PongMessage>(InputQueueAddress, TestTimeout);
+            var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
 
-            _responseTask = client.Request(new PingMessage());
+            _responseTask = client.GetResponse<PongMessage>(new PingMessage());
         }
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
@@ -356,10 +340,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            Handler<PingMessage>(configurator, context =>
-            {
-                throw new Exception("Request is so bad, I'm dying here!");
-            });
+            Handler<PingMessage>(configurator, context => throw new Exception("Request is so bad, I'm dying here!"));
         }
     }
 
@@ -383,14 +364,14 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         Task<ConsumeContext<PingMessage>> _errorHandler;
-        Task<PongMessage> _responseTask;
+        Task<Response<PongMessage>> _responseTask;
 
         [OneTimeSetUp]
         public async Task Setup()
         {
-            var client = Bus.CreateRequestClient<PingMessage, PongMessage>(InputQueueAddress, TestTimeout);
+            var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
 
-            _responseTask = client.Request(new PingMessage());
+            _responseTask = client.GetResponse<PongMessage>(new PingMessage());
         }
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)

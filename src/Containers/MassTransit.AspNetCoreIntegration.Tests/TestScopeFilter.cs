@@ -1,3 +1,0 @@
-namespace MassTransit.AspNetCoreIntegration.Tests
-{
-}

@@ -220,51 +220,5 @@ namespace MassTransit
         {
             configurator.SetMessageSerializer(() => new XmlMessageSerializer());
         }
-
-    #if !NETCORE
-        /// <summary>
-        /// Serialize message using the .NET binary formatter (also adds support for the binary deserializer)
-        /// </summary>
-        /// <param name="configurator"></param>
-        public static void UseBinarySerializer(this IBusFactoryConfigurator configurator)
-        {
-            configurator.SetMessageSerializer(() => new BinaryMessageSerializer());
-
-            configurator.SupportBinaryMessageDeserializer();
-        }
-
-        /// <summary>
-        /// Serialize message using the .NET binary formatter (also adds support for the binary deserializer)
-        /// </summary>
-        /// <param name="configurator"></param>
-        public static void UseBinarySerializer(this IReceiveEndpointConfigurator configurator)
-        {
-            configurator.SetMessageSerializer(() => new BinaryMessageSerializer());
-
-            configurator.SupportBinaryMessageDeserializer();
-        }
-
-        /// <summary>
-        /// Add support for the binary message deserializer to the bus. This serializer is not supported
-        /// by default.
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <returns></returns>
-        public static void SupportBinaryMessageDeserializer(this IBusFactoryConfigurator configurator)
-        {
-            configurator.AddMessageDeserializer(BinaryMessageSerializer.BinaryContentType, () => new BinaryMessageDeserializer());
-        }
-
-        /// <summary>
-        /// Add support for the binary message deserializer to the bus. This serializer is not supported
-        /// by default.
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <returns></returns>
-        public static void SupportBinaryMessageDeserializer(this IReceiveEndpointConfigurator configurator)
-        {
-            configurator.AddMessageDeserializer(BinaryMessageSerializer.BinaryContentType, () => new BinaryMessageDeserializer());
-        }
-    #endif
     }
 }

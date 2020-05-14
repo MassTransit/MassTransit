@@ -60,24 +60,10 @@
 
         protected abstract IBusControl CreateBus();
 
-        public virtual IRequestClient<TRequest, TResponse> CreateRequestClient<TRequest, TResponse>()
-            where TRequest : class
-            where TResponse : class
-        {
-            return CreateRequestClient<TRequest, TResponse>(InputQueueAddress);
-        }
-
         public virtual IRequestClient<TRequest> CreateRequestClient<TRequest>()
             where TRequest : class
         {
             return CreateRequestClient<TRequest>(InputQueueAddress);
-        }
-
-        public virtual IRequestClient<TRequest, TResponse> CreateRequestClient<TRequest, TResponse>(Uri destinationAddress)
-            where TRequest : class
-            where TResponse : class
-        {
-            return Bus.CreateRequestClient<TRequest, TResponse>(destinationAddress, TestTimeout);
         }
 
         public virtual IRequestClient<TRequest> CreateRequestClient<TRequest>(Uri destinationAddress)

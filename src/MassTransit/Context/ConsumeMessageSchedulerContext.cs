@@ -20,11 +20,6 @@
             _scheduler = new Lazy<IMessageScheduler>(schedulerFactory);
         }
 
-        Task IMessageScheduler.CancelScheduledSend(Guid tokenId)
-        {
-            return _scheduler.Value.CancelScheduledSend(_inputAddress, tokenId);
-        }
-
         public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
         {
             return _scheduler.Value.CancelScheduledSend(destinationAddress, tokenId);
