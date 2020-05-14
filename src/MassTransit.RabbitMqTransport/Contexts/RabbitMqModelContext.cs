@@ -49,7 +49,7 @@
             _model.BasicReturn += OnBasicReturn;
         }
 
-        public async Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
             LogContext.Debug?.Log("Closing model: {ChannelNumber} {Host}", _model.ChannelNumber, _connectionContext.Description);
 
@@ -57,18 +57,10 @@
             {
                 if (_confirmations != null && _model.IsOpen)
                 {
-                    bool timedOut;
-                    do
-                    {
-                        if (cancellationToken.IsCancellationRequested)
-                            break;
-
-                        _model.WaitForConfirms(_connectionContext.StopTimeout, out timedOut);
-                        if (timedOut)
-                            LogContext.Warning?.Log("Timeout waiting for pending confirms:  {ChannelNumber} {Host}", _model.ChannelNumber,
-                                _connectionContext.Description);
-                    }
-                    while (timedOut);
+                    _model.WaitForConfirms(_connectionContext.StopTimeout, out var timedOut);
+                    if (timedOut)
+                        LogContext.Warning?.Log("Timeout waiting for pending confirms:  {ChannelNumber} {Host}", _model.ChannelNumber,
+                            _connectionContext.Description);
                 }
             }
             catch (Exception ex)
@@ -77,8 +69,8 @@
                     _connectionContext.Description);
             }
 
-            await _publisher.DisposeAsync(cancellationToken).ConfigureAwait(false);
-            await _executor.DisposeAsync(cancellationToken).ConfigureAwait(false);
+            await _publisher.DisposeAsync().ConfigureAwait(false);
+            await _executor.DisposeAsync().ConfigureAwait(false);
 
             const string message = "ModelContext Disposed";
 

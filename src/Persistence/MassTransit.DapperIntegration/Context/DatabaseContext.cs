@@ -19,10 +19,10 @@ namespace MassTransit.DapperIntegration.Context
         Task<IEnumerable<T>> QueryAsync<T>(Expression<Func<T, bool>> filterExpression, CancellationToken cancellationToken)
             where T : class, ISaga;
 
-        Task InsertAsync<T>(T instance, CancellationToken cancellationToken)
+        Task InsertAsync<T>(T instance, CancellationToken cancellationToken = default)
             where T : class, ISaga;
 
-        Task UpdateAsync<T>(T instance, CancellationToken cancellationToken)
+        Task UpdateAsync<T>(T instance, CancellationToken cancellationToken = default)
             where T : class, ISaga;
     }
 }

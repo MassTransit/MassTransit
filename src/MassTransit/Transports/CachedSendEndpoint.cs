@@ -22,12 +22,12 @@ namespace MassTransit.Transports
 
         public TKey Key { get; }
 
-        async Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        async ValueTask IAsyncDisposable.DisposeAsync()
         {
             switch (_endpoint)
             {
                 case IAsyncDisposable disposable:
-                    await disposable.DisposeAsync(cancellationToken).ConfigureAwait(false);
+                    await disposable.DisposeAsync().ConfigureAwait(false);
                     break;
 
                 case IDisposable disposable:

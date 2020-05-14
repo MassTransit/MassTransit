@@ -80,7 +80,7 @@
 
             await Completed.ConfigureAwait(false);
 
-            await _context.CloseAsync(context.CancellationToken).ConfigureAwait(false);
+            await _context.CloseAsync().ConfigureAwait(false);
         }
 
         async Task ActiveAndActualAgentsCompleted(StopSupervisorContext context)

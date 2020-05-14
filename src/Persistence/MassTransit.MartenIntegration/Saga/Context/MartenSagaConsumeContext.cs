@@ -1,18 +1,16 @@
 ﻿namespace MassTransit.MartenIntegration.Saga.Context
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Marten;
     using MassTransit.Context;
     using MassTransit.Saga;
-    using Util;
 
 
     public class MartenSagaConsumeContext<TSaga, TMessage> :
         ConsumeContextScope<TMessage>,
         SagaConsumeContext<TSaga, TMessage>,
-        GreenPipes.IAsyncDisposable
+        IAsyncDisposable
         where TMessage : class
         where TSaga : class, ISaga
     {
@@ -28,15 +26,15 @@
             Saga = instance;
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
-            if (_isCompleted)
-                return TaskUtil.Completed;
-
-            if (_mode == SagaConsumeContextMode.Add)
-                _session.Store(Saga);
-
-            return _session.SaveChangesAsync(cancellationToken);
+            if (!_isCompleted)
+            {
+                if (_mode == SagaConsumeContextMode.Add)
+                    _session.Store(Saga);
+                else
+                    await _session.SaveChangesAsync().ConfigureAwait(false);
+            }
         }
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;

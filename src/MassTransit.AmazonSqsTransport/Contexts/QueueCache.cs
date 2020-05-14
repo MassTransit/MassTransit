@@ -1,5 +1,6 @@
 namespace MassTransit.AmazonSqsTransport.Contexts
 {
+    using System;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
@@ -92,7 +93,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             return missingQueue;
         }
 
-        public async Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
             QueueInfo[] queueInfos;
             lock (_durableQueues)
@@ -103,7 +104,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             }
 
             foreach (var queueInfo in queueInfos)
-                await queueInfo.DisposeAsync(cancellationToken).ConfigureAwait(false);
+                await queueInfo.DisposeAsync().ConfigureAwait(false);
 
             _cache.Clear();
         }

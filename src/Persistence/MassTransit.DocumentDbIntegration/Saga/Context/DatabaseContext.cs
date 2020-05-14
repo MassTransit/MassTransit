@@ -15,9 +15,9 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
         FeedOptions FeedOptions { get; }
         RequestOptions RequestOptions { get; }
 
-        Task Add(TSaga instance, CancellationToken cancellationToken);
+        Task Add(TSaga instance, CancellationToken cancellationToken = default);
         Task<TSaga> Load(Guid correlationId, CancellationToken cancellationToken);
-        Task Update(TSaga instance, CancellationToken cancellationToken);
+        Task Update(TSaga instance, CancellationToken cancellationToken = default);
         Task Delete(TSaga instance, CancellationToken cancellationToken);
         Task<TSaga> Insert(TSaga instance, CancellationToken cancellationToken);
     }

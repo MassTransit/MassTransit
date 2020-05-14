@@ -1,18 +1,16 @@
 ﻿namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Context;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
-    using Util;
 
 
     public class EntityFrameworkSagaConsumeContext<TSaga, TMessage> :
         ConsumeContextScope<TMessage>,
         SagaConsumeContext<TSaga, TMessage>,
-        GreenPipes.IAsyncDisposable
+        IAsyncDisposable
         where TMessage : class
         where TSaga : class, ISaga
     {
@@ -29,20 +27,22 @@
             Saga = instance;
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
             async Task Add()
             {
-                await _dbContext.Set<TSaga>().AddAsync(Saga, cancellationToken);
+                await _dbContext.Set<TSaga>().AddAsync(Saga);
 
-                await _dbContext.SaveChangesAsync(cancellationToken);
+                await _dbContext.SaveChangesAsync();
             }
 
-            return _isCompleted
-                ? TaskUtil.Completed
-                : _mode == SagaConsumeContextMode.Add
-                    ? Add()
-                    : _dbContext.SaveChangesAsync(cancellationToken);
+            if (!_isCompleted)
+            {
+                if (_mode == SagaConsumeContextMode.Add)
+                    await Add().ConfigureAwait(false);
+                else
+                    await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+            }
         }
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;

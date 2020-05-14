@@ -103,13 +103,13 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             }
         }
 
-        public async Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
             _channel.Writer.Complete();
 
             await _batchTask.ConfigureAwait(false);
 
-            await _executor.DisposeAsync(cancellationToken).ConfigureAwait(false);
+            await _executor.DisposeAsync().ConfigureAwait(false);
         }
 
         protected abstract int AddingEntry(TEntry entry, string entryId);

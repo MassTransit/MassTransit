@@ -93,13 +93,15 @@
 
         public bool IsCompleted => _isCompleted;
 
-        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
-            return IsCompleted
-                ? TaskUtil.Completed
-                : _mode == SagaConsumeContextMode.Add
-                    ? Add()
-                    : Update();
+            if (!_isCompleted)
+            {
+                if (_mode == SagaConsumeContextMode.Add)
+                    await Add().ConfigureAwait(false);
+                else
+                    await Update().ConfigureAwait(false);
+            }
         }
     }
 }

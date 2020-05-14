@@ -4,7 +4,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using System.Threading;
     using System.Threading.Channels;
     using System.Threading.Tasks;
-    using GreenPipes;
 
 
     public class ChannelExecutor :
@@ -53,11 +52,11 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 _runTasks[i] = Task.Run(RunFromChannel);
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
             _channel.Writer.Complete();
 
-            return Task.WhenAll(_runTasks);
+            await Task.WhenAll(_runTasks).ConfigureAwait(false);
         }
 
         public Task Run(Func<Task> method, CancellationToken cancellationToken = default)
