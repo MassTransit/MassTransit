@@ -66,4 +66,74 @@ namespace MassTransit.Containers.Tests.Common_Tests
             }
         }
     }
+
+
+    public abstract class Common_Publish_Filter :
+        InMemoryTestFixture
+    {
+        protected readonly TaskCompletionSource<MyId> TaskCompletionSource;
+
+        protected Common_Publish_Filter()
+        {
+            TaskCompletionSource = GetTask<MyId>();
+        }
+
+        [Test]
+        public async Task Should_use_scope()
+        {
+            await PublishEndpoint.Publish<SimpleMessageInterface>(new {Name = "test"});
+
+            var result = await TaskCompletionSource.Task;
+            Assert.AreEqual(MyId, result);
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            ConfigureFilter(configurator);
+        }
+
+        protected abstract void ConfigureFilter(IPublishPipelineConfigurator publishPipelineConfigurator);
+        protected abstract IRegistration Registration { get; }
+
+        protected abstract MyId MyId { get; }
+
+        protected abstract IPublishEndpoint PublishEndpoint { get; }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.ConfigureConsumer<SimplerConsumer>(Registration);
+        }
+
+        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+            where T : class
+        {
+            configurator.AddConsumer<SimplerConsumer>();
+            configurator.AddBus(provider => BusControl);
+        }
+
+
+        protected class ScopedFilter<T> :
+            IFilter<PublishContext<T>>
+            where T : class
+        {
+            readonly TaskCompletionSource<MyId> _taskCompletionSource;
+            readonly MyId _myId;
+
+            public ScopedFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId)
+            {
+                _taskCompletionSource = taskCompletionSource;
+                _myId = myId;
+            }
+
+            public Task Send(PublishContext<T> context, IPipe<PublishContext<T>> next)
+            {
+                _taskCompletionSource.TrySetResult(_myId);
+                return next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+        }
+    }
 }

@@ -4,6 +4,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using System.Threading.Tasks;
     using Courier;
     using Courier.Contracts;
+    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;
@@ -130,6 +131,82 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
                 _executeAddress = endpointConfigurator.InputAddress;
             });
+        }
+    }
+
+
+    public abstract class Common_Activity_Filter :
+        InMemoryTestFixture
+    {
+        protected readonly TaskCompletionSource<MyId> ExecuteTaskCompletionSource;
+        Uri _executeAddress;
+
+        protected Common_Activity_Filter()
+        {
+            ExecuteTaskCompletionSource = GetTask<MyId>();
+        }
+
+        [Test]
+        public async Task Should_use_scope()
+        {
+            var trackingNumber = NewId.NextGuid();
+            var builder = new RoutingSlipBuilder(trackingNumber);
+            builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
+
+            builder.AddActivity("TestActivity", _executeAddress, new {Value = "Hello"});
+
+            await Bus.Execute(builder.Build());
+
+            var result = await ExecuteTaskCompletionSource.Task;
+            Assert.IsNotNull(result);
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ReceiveEndpoint("execute_testactivity", endpointConfigurator =>
+            {
+                configurator.ReceiveEndpoint("compensate_testactivity", compensateConfigurator =>
+                {
+                    endpointConfigurator.ConfigureActivity(compensateConfigurator, Registration, typeof(TestActivity));
+                });
+
+                _executeAddress = endpointConfigurator.InputAddress;
+            });
+            ConfigureFilter(configurator);
+        }
+
+        protected abstract void ConfigureFilter(IConsumePipeConfigurator configurator);
+        protected abstract IRegistration Registration { get; }
+
+        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+            where T : class
+        {
+            configurator.AddActivity<TestActivity, TestArguments, TestLog>();
+            configurator.AddBus(provider => BusControl);
+        }
+
+        protected class ScopedFilter<T> :
+            IFilter<ExecuteContext<T>>
+            where T : class
+        {
+            readonly TaskCompletionSource<MyId> _taskCompletionSource;
+            readonly MyId _myId;
+
+            public ScopedFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId)
+            {
+                _taskCompletionSource = taskCompletionSource;
+                _myId = myId;
+            }
+
+            public Task Send(ExecuteContext<T> context, IPipe<ExecuteContext<T>> next)
+            {
+                _taskCompletionSource.TrySetResult(_myId);
+                return next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
         }
     }
 

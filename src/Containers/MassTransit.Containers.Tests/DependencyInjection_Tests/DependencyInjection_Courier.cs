@@ -97,4 +97,31 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 
         protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
     }
+
+
+    [TestFixture]
+    public class DependencyInjection_Courier_Activity_Filter :
+        Common_Activity_Filter
+    {
+        readonly IServiceProvider _provider;
+
+        public DependencyInjection_Courier_Activity_Filter()
+        {
+            var services = new ServiceCollection();
+            services.AddScoped(_ => new MyId(Guid.NewGuid()));
+            services.AddScoped(typeof(ScopedFilter<>));
+            services.AddSingleton(ExecuteTaskCompletionSource);
+
+            services.AddMassTransit(ConfigureRegistration);
+
+            _provider = services.BuildServiceProvider();
+        }
+
+        protected override void ConfigureFilter(IConsumePipeConfigurator configurator)
+        {
+            DependencyInjectionFilterExtensions.UseExecuteActivityFilter(configurator, typeof(ScopedFilter<>), Registration);
+        }
+
+        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
+    }
 }
