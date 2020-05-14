@@ -27,9 +27,9 @@
             Add(context.SessionContextSupervisor);
         }
 
-        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
-            return this.Stop("Disposed", cancellationToken);
+            await this.Stop("Disposed").ConfigureAwait(false);
         }
 
         Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)

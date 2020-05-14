@@ -3,7 +3,6 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
     using Amazon.SQS.Model;
     using Context;
@@ -73,7 +72,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             }
             finally
             {
-                await executor.DisposeAsync(CancellationToken.None).ConfigureAwait(false);
+                await executor.DisposeAsync().ConfigureAwait(false);
             }
 
             SetCompleted(TaskUtil.Completed);

@@ -46,7 +46,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             _subscriptionClient.RegisterSessionHandler(callback, _settings.GetSessionHandlerOptions(exceptionHandler));
         }
 
-        public async Task CloseAsync(CancellationToken cancellationToken)
+        public async Task CloseAsync()
         {
             LogContext.Debug?.Log("Closing client: {InputAddress}", InputAddress);
 
@@ -63,9 +63,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             }
         }
 
-        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
-            return CloseAsync(cancellationToken);
+            await CloseAsync().ConfigureAwait(false);
         }
     }
 }

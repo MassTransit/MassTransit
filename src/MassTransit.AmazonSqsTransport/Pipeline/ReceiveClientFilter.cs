@@ -1,6 +1,5 @@
 namespace MassTransit.AmazonSqsTransport.Pipeline
 {
-    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
 
@@ -35,7 +34,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             }
             finally
             {
-                await clientContext.DisposeAsync(CancellationToken.None).ConfigureAwait(false);
+                await clientContext.DisposeAsync().ConfigureAwait(false);
             }
 
             await next.Send(context).ConfigureAwait(false);

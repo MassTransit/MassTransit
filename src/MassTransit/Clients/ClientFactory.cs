@@ -3,7 +3,6 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
     using Util;
 
 
@@ -84,12 +83,12 @@
             return new RequestClient<T>(_context, _context.GetRequestEndpoint<T>(destinationAddress, consumeContext), timeout.Or(_context.DefaultTimeout));
         }
 
-        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        ValueTask IAsyncDisposable.DisposeAsync()
         {
             if (_context is IAsyncDisposable asyncDisposable)
-                return asyncDisposable.DisposeAsync(cancellationToken);
+                return asyncDisposable.DisposeAsync();
 
-            return TaskUtil.Completed;
+            return default;
         }
     }
 }

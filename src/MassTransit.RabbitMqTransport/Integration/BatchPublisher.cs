@@ -164,11 +164,11 @@ namespace MassTransit.RabbitMqTransport.Integration
             }
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
+        public async ValueTask DisposeAsync()
         {
             _publishChannel.Writer.Complete();
 
-            return _publishTask;
+            await _publishTask.ConfigureAwait(false);
         }
     }
 }

@@ -28,9 +28,9 @@ namespace MassTransit.RedisIntegration.Contexts
             _factory = factory;
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public ValueTask DisposeAsync()
         {
-            return _context.DisposeAsync(cancellationToken);
+            return _context.DisposeAsync();
         }
 
         public Task<SagaConsumeContext<TSaga, TMessage>> Add(TSaga instance)
@@ -87,9 +87,9 @@ namespace MassTransit.RedisIntegration.Contexts
             _context = context;
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public ValueTask DisposeAsync()
         {
-            return _context.DisposeAsync(cancellationToken);
+            return _context.DisposeAsync();
         }
 
         public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)

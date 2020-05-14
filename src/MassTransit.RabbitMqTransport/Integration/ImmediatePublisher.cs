@@ -1,7 +1,6 @@
 namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
     using RabbitMQ.Client;
@@ -42,9 +41,9 @@ namespace MassTransit.RabbitMqTransport.Integration
             });
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public ValueTask DisposeAsync()
         {
-            return Task.CompletedTask;
+            return default;
         }
     }
 }

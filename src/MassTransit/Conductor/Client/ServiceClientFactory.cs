@@ -84,10 +84,10 @@ namespace MassTransit.Conductor.Client
             return _clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
         }
 
-        async Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
-            await _serviceClient.DisposeAsync(cancellationToken).ConfigureAwait(false);
-            await _clientFactory.DisposeAsync(cancellationToken).ConfigureAwait(false);
+            await _serviceClient.DisposeAsync().ConfigureAwait(false);
+            await _clientFactory.DisposeAsync().ConfigureAwait(false);
         }
     }
 }

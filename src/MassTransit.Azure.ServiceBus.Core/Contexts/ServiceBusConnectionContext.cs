@@ -35,7 +35,7 @@
 
         public Uri Endpoint => _connection.Endpoint;
 
-        public async Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
             var address = _connection.Endpoint.ToString();
 

@@ -57,7 +57,7 @@ namespace MassTransit.RedisIntegration.Contexts
             }
             finally
             {
-                await databaseContext.DisposeAsync(CancellationToken.None).ConfigureAwait(false);
+                await databaseContext.DisposeAsync().ConfigureAwait(false);
             }
         }
 
@@ -81,7 +81,7 @@ namespace MassTransit.RedisIntegration.Contexts
             }
             finally
             {
-                await databaseContext.DisposeAsync(CancellationToken.None).ConfigureAwait(false);
+                await databaseContext.DisposeAsync().ConfigureAwait(false);
             }
         }
     }
