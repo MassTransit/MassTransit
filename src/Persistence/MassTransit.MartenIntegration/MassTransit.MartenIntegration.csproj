@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../netfx.props" />
+  <Import Project="../../netfx.props"/>
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -12,23 +12,9 @@
     <Description>MassTransit Marten persistence support; $(Description)</Description>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-        <Reference Include="System" />
-        <Reference Include="System.Core" />
-        <Reference Include="System.Data" />
-        <Reference Include="System.ComponentModel.Composition" />
-        <Reference Include="System.IO.Compression.FileSystem" />
-        <Reference Include="System.Xml.Linq" />
-        <Reference Include="System.Xml" />
-  </ItemGroup>
-
   <ItemGroup>
-        <PackageReference Include="Marten" Version="3.11.0" />
-        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
-        <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <PackageReference Include="Marten" Version="3.11.0"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
   </ItemGroup>
 </Project>

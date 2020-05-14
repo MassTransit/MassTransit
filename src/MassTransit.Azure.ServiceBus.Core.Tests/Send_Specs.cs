@@ -1,14 +1,14 @@
 // Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
@@ -48,7 +48,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             await _handler;
         }
     }
-    
+
+
     [TestFixture, Explicit]
     public class A_fault_on_the_receive_endpoint :
         AzureServiceBusTestFixture
@@ -64,7 +65,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         public async Task Setup()
         {
             await Task.Delay(30000);
-            
+
             await InputQueueSendEndpoint.Send(new PingMessage());
         }
 
@@ -87,15 +88,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         AzureServiceBusTestFixture
     {
         Task<ConsumeContext<PingMessage>> _ping;
-        Task<PongMessage> _response;
-        IRequestClient<PingMessage, PongMessage> _requestClient;
+        Task<Response<PongMessage>> _response;
+        IRequestClient<PingMessage> _requestClient;
 
         [OneTimeSetUp]
         public void Setup()
         {
-            _requestClient = new MessageRequestClient<PingMessage, PongMessage>(Bus, InputQueueAddress, TestTimeout);
+            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
 
-            _response = _requestClient.Request(new PingMessage());
+            _response = _requestClient.GetResponse<PongMessage>(new PingMessage());
         }
 
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
@@ -106,54 +107,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         [Test]
         public async Task Should_receive_the_response()
         {
-            PongMessage message = await _response;
+            Response<PongMessage> message = await _response;
 
-            Assert.AreEqual(message.CorrelationId, _ping.Result.Message.CorrelationId);
-        }
-    }
-
-    [TestFixture]
-    public class Sending_a_request_using_the_request_client_with_response_endpoint :
-        AzureServiceBusTestFixture
-    {
-        Task<ConsumeContext<PingMessage>> _ping;
-        Task<PongMessage> _response;
-        IRequestClient<PingMessage, PongMessage> _requestClient;
-
-        [OneTimeSetUp]
-        public async Task Setup()
-        {
-            _requestClient = await Host.CreateRequestClient<PingMessage, PongMessage>(InputQueueAddress, TestTimeout);
-
-            _response = _requestClient.Request(new PingMessage());
-        }
-
-        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
-        {
-            _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
-        }
-
-        [Test]
-        public async Task Should_receive_the_response()
-        {
-            PongMessage message = await _response;
-
-            Assert.AreEqual(message.CorrelationId, _ping.Result.Message.CorrelationId);
-        }
-
-        [Test]
-        public async Task Should_be_quick_on_the_subsequent_calls()
-        {
-            await _requestClient.Request(new PingMessage());
-            await _requestClient.Request(new PingMessage());
-            await _requestClient.Request(new PingMessage());
-            await _requestClient.Request(new PingMessage());
-            await _requestClient.Request(new PingMessage());
-            await _requestClient.Request(new PingMessage());
-            await _requestClient.Request(new PingMessage());
-            await _requestClient.Request(new PingMessage());
-            await _requestClient.Request(new PingMessage());
-            await _requestClient.Request(new PingMessage());
+            Assert.AreEqual(message.Message.CorrelationId, _ping.Result.Message.CorrelationId);
         }
     }
 }

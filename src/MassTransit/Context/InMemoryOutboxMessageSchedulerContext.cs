@@ -45,11 +45,6 @@
             return tasks.Completed();
         }
 
-        Task IMessageScheduler.CancelScheduledSend(Guid tokenId)
-        {
-            return _context.CancelScheduledSend(tokenId);
-        }
-
         public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
         {
             return _context.CancelScheduledSend(destinationAddress, tokenId);

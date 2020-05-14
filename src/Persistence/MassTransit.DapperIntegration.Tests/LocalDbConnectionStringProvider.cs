@@ -1,11 +1,7 @@
 ﻿namespace MassTransit.DapperIntegration.Tests
 {
     using System;
-#if NETCOREAPP
     using Microsoft.Data.SqlClient;
-#else
-        using System.Data.SqlClient;
-#endif
 
 
     public static class LocalDbConnectionStringProvider
