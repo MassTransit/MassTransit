@@ -3,7 +3,7 @@
   <Import Project="../../signing.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netstandard2.1</TargetFrameworks>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -14,8 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EntityFramework" Version="6.4.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+    <PackageReference Include="EntityFramework" Version="6.4.4" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 

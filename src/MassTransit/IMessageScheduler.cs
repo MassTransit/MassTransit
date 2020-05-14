@@ -151,13 +151,6 @@
         /// <summary>
         /// Cancel a scheduled message by TokenId
         /// </summary>
-        /// <param name="tokenId">The tokenId of the scheduled message</param>
-        [Obsolete("This method will be removed soon, use the overload with the destinationAddress instead")]
-        Task CancelScheduledSend(Guid tokenId);
-
-        /// <summary>
-        /// Cancel a scheduled message by TokenId
-        /// </summary>
         /// <param name="destinationAddress">The destination address of the scheduled message</param>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
         Task CancelScheduledSend(Uri destinationAddress, Guid tokenId);

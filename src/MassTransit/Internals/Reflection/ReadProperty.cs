@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Internals.Reflection
 {
     using System;
-    using System.Diagnostics;
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Threading;
@@ -51,17 +50,9 @@
 
                 Interlocked.Exchange(ref _getMethod, method);
             }
-        #if NETCORE
             catch (Exception)
             {
             }
-        #else
-            catch (Exception ex)
-            {
-                if (Trace.Listeners.Count > 0)
-                    Trace.WriteLine(ex.Message);
-            }
-        #endif
         }
 
         static Func<T, TProperty> CompileGetMethod(MethodInfo getMethod)

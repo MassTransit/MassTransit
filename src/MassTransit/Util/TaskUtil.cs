@@ -54,10 +54,7 @@
         /// <returns></returns>
         public static TaskCompletionSource<T> GetTask<T>(TaskCreationOptions options = TaskCreationOptions.None)
         {
-        #if NETSTD
-            options |= TaskCreationOptions.RunContinuationsAsynchronously;
-        #endif
-            return new TaskCompletionSource<T>(options);
+            return new TaskCompletionSource<T>(options | TaskCreationOptions.RunContinuationsAsynchronously);
         }
 
         /// <summary>
@@ -68,10 +65,7 @@
         /// <returns></returns>
         public static TaskCompletionSource<bool> GetTask(TaskCreationOptions options = TaskCreationOptions.None)
         {
-        #if NETSTD
-            options |= TaskCreationOptions.RunContinuationsAsynchronously;
-        #endif
-            return new TaskCompletionSource<bool>(options);
+            return new TaskCompletionSource<bool>(options | TaskCreationOptions.RunContinuationsAsynchronously);
         }
 
         /// <summary>

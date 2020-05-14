@@ -206,6 +206,7 @@
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/PredefinedNamingRules/=PrivateInstanceFields/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="_" Suffix="" Style="aaBb" /&gt;</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/PredefinedNamingRules/=PrivateStaticReadonly/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="" Suffix="" Style="AaBb"&gt;&lt;ExtraRule Prefix="_" Suffix="" Style="aaBb" /&gt;&lt;/Policy&gt;</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/PredefinedNamingRules/=TypesAndNamespaces/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="" Suffix="" Style="AaBb"&gt;&lt;ExtraRule Prefix="" Suffix="" Style="AaBb_aaBb" /&gt;&lt;ExtraRule Prefix="" Suffix="" Style="AaBb_AaBb" /&gt;&lt;/Policy&gt;</s:String>
+	<s:String x:Key="/Default/CustomTools/CustomToolsData/@EntryValue"></s:String>
 	<s:String x:Key="/Default/Environment/Editor/MatchingBraceHighlighting/Position/@EntryValue">BOTH_SIDES</s:String>
 	<s:String x:Key="/Default/Environment/Editor/MatchingBraceHighlighting/Style/@EntryValue">OUTLINE</s:String>
 	<s:String x:Key="/Default/Environment/Editor/StructuralNavigationBehavior/@EntryValue">Forced</s:String>
@@ -216,8 +217,8 @@
 	<s:String x:Key="/Default/Environment/ErrorStripe/ErrorStripeWidth/@EntryValue">Narrow</s:String>
 	<s:String x:Key="/Default/Environment/GutterMargin/ContextActionsIndication/@EntryValue">NoIndication</s:String>
 	<s:Boolean x:Key="/Default/Environment/GutterMargin/UseGutterMargin/@EntryValue">False</s:Boolean>
-	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/msbuild/15.0/bin/MSBuild.dll</s:String>
-	<s:Int64 x:Key="/Default/Environment/Hierarchy/Build/BuildTool/MsbuildVersion/@EntryValue">4294967293</s:Int64>
+	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">/usr/local/share/dotnet/sdk/3.1.103/MSBuild.dll</s:String>
+	<s:Int64 x:Key="/Default/Environment/Hierarchy/Build/BuildTool/MsbuildVersion/@EntryValue">1048576</s:Int64>
 	<s:String x:Key="/Default/Environment/Hierarchy/PsiConfigurationSettingsKey/CustomLocation/@EntryValue">C:\Users\egqdspc\AppData\Local\JetBrains\Transient\ReSharperPlatformVs14\v08\SolutionCaches</s:String>
 	<s:String x:Key="/Default/Environment/SearchAndNavigation/GenericFindUsagesBehaviour/@EntryValue">UseCommonCandidate</s:String>
 	<s:Boolean x:Key="/Default/Environment/SettingsMigration/IsMigratorApplied/=JetBrains_002EReSharper_002EPsi_002ECSharp_002ECodeStyle_002ECSharpAttributeForSingleLineMethodUpgrade/@EntryIndexedValue">True</s:Boolean>

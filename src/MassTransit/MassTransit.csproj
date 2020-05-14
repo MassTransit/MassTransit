@@ -3,7 +3,7 @@
   <Import Project="../signing.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -11,47 +11,22 @@
     <Description>$(Description)</Description>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);NETCORE;NETSTD</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <DefineConstants>$(DefineConstants);NETSTD</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
-    <Compile Remove="Configuration/BusConfigurators/PerformanceCounterBusFactorySpecification.cs" />
-    <Compile Remove="Serialization/StaticHeaders.cs" />
-    <Compile Remove="Serialization/StaticConsumeContext.cs" />
-    <Compile Remove="Serialization/ExtensionsForBinaryMessageSerializer.cs" />
-    <Compile Remove="Serialization/BinaryMessageSerializer.cs" />
-    <Compile Remove="Serialization/BinaryMessageDeserializer.cs" />
-    <Compile Remove="Monitoring/Performance/Windows/**" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)'=='net461'">
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Transactions" />
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="Automatonymous" Version="4.2.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.4" />
     <PackageReference Include="NewId" Version="3.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.1" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.7.0" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="System.Threading.Channels" Version="4.7.1" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.Reflection.Emit" Version="4.7.0" />
     <PackageReference Include="System.Reflection.Extensions" Version="4.3.0" />
     <PackageReference Include="System.Xml.ReaderWriter" Version="4.3.1" />
     <PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
-  
+
 </Project>

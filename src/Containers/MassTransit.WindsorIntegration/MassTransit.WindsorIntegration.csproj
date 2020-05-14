@@ -3,7 +3,7 @@
   <Import Project="../../signing.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -19,7 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="Castle.Windsor" Version="5.0.1" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

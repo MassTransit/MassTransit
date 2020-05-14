@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-#if !NETCORE
-using System.Diagnostics;
-#endif
-
-namespace MassTransit.Monitoring.Performance
+﻿namespace MassTransit.Monitoring.Performance
 {
     public class CounterData
     {
@@ -53,14 +43,8 @@ namespace MassTransit.Monitoring.Performance
         //     You have specified a type that is not a member of the System.Diagnostics.PerformanceCounterType
         //     enumeration.
         public CounterType CounterType { get; set; }
-
-#if !NETCORE
-        public CounterCreationData ToCounterCreationData()
-        {
-            return new CounterCreationData(CounterName, CounterDescription, (PerformanceCounterType)CounterType);
-        }
-#endif
     }
+
 
     public enum CounterType
     {
@@ -71,7 +55,7 @@ namespace MassTransit.Monitoring.Performance
         //     It is the same as NumberOfItems32 except that it uses larger fields to accommodate
         //     larger values.
         NumberOfItems64 = 65792,
-        
+
         //
         // Summary:
         //     A difference counter that shows the average number of operations completed during
@@ -87,7 +71,7 @@ namespace MassTransit.Monitoring.Performance
         //     number of items processed during the last interval to the number of operations
         //     completed during the last interval.
         AverageCount64 = 1073874176,
-      
+
         //
         // Summary:
         //     A base counter that is used in the calculation of time or count averages, such

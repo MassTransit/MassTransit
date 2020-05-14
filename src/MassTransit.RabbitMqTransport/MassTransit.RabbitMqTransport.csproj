@@ -3,7 +3,7 @@
   <Import Project="../netfx.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -13,19 +13,11 @@
     <Description>MassTransit RabbitMQ transport support; $(Description)</Description>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-    <Reference Include="System.Runtime" />
-  </ItemGroup>
-
   <ItemGroup>
     <PackageReference Include="RabbitMQ.Client" Version="[5.2.0,6.0)" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
-    <PackageReference Include="System.Threading.Channels" Version="4.7.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>

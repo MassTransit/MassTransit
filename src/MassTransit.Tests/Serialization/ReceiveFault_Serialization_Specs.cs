@@ -13,9 +13,6 @@
     [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializerV2))]
-#if !NETCORE
-    [TestFixture(typeof(BinaryMessageSerializer))]
-#endif
     public class ReceiveFault_Serialization_Specs :
         SerializationTest
     {

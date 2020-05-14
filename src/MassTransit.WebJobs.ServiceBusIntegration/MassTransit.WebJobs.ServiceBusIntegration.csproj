@@ -17,7 +17,7 @@
   <ItemGroup>
       <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.14.0" />
       <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="4.1.1" />
-      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
       <ProjectReference Include="..\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
       <ProjectReference Include="..\MassTransit.Azure.ServiceBus.Core\MassTransit.Azure.ServiceBus.Core.csproj" />
       <ProjectReference Include="..\MassTransit\MassTransit.csproj" />

@@ -412,20 +412,22 @@
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            return CancelScheduledSend(endpoint, message.TokenId);
+            IMessageScheduler scheduler = new MessageScheduler(new EndpointScheduleMessageProvider(() => Task.FromResult(endpoint)));
+
+            return scheduler.CancelScheduledSend(message.Destination, message.TokenId);
         }
 
         /// <summary>
         /// Cancel a scheduled message using the tokenId that was returned when the message was scheduled.
         /// </summary>
         /// <param name="endpoint">The endpoint of the scheduling service</param>
+        /// <param name="destinationAddress"></param>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
-        public static Task CancelScheduledSend(this ISendEndpoint endpoint, Guid tokenId)
+        public static Task CancelScheduledSend(this ISendEndpoint endpoint, Uri destinationAddress, Guid tokenId)
         {
             IMessageScheduler scheduler = new MessageScheduler(new EndpointScheduleMessageProvider(() => Task.FromResult(endpoint)));
 
-
-            return scheduler.CancelScheduledSend(tokenId);
+            return scheduler.CancelScheduledSend(destinationAddress, tokenId);
         }
     }
 }

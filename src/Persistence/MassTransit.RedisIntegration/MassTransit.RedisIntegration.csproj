@@ -2,7 +2,7 @@
   <Import Project="../../netfx.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -15,7 +15,7 @@
   <ItemGroup>
     <PackageReference Include="StackExchange.Redis" Version="1.2.6" Condition="'$(TargetFramework)' == 'net461'" />
     <PackageReference Include="StackExchange.Redis" Version="2.0.601" Condition="'$(TargetFramework)' != 'net461'" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 

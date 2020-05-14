@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../netfx.props" />
+  <Import Project="../../netfx.props"/>
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -12,23 +12,11 @@
     <Description>MassTransit MongoDb persistence support; $(Description)</Description>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-      <DefineConstants>$(DefineConstants);NETCORE</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
-      <PackageReference Include="MongoDB.Driver" Version="2.10.3" />
-      <PackageReference Include="MongoDB.Driver.GridFS" Version="2.10.3" />
-      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
-      <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <PackageReference Include="MongoDB.Driver" Version="2.10.3"/>
+    <PackageReference Include="MongoDB.Driver.GridFS" Version="2.10.3"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
-      <Reference Include="System" />
-      <Reference Include="System.Core" />
-      <Reference Include="System.Data" />
-  </ItemGroup>
 </Project>
