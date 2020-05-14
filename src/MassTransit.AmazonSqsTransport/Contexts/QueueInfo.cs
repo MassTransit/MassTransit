@@ -6,7 +6,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using System.Threading.Tasks;
     using Amazon.SQS;
     using Amazon.SQS.Model;
-    using GreenPipes;
 
 
     public class QueueInfo :
@@ -46,10 +45,10 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             return _batchDeleter.Execute(entry, cancellationToken);
         }
 
-        public async Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
-            await _batchSender.DisposeAsync(cancellationToken).ConfigureAwait(false);
-            await _batchDeleter.DisposeAsync(cancellationToken).ConfigureAwait(false);
+            await _batchSender.DisposeAsync().ConfigureAwait(false);
+            await _batchDeleter.DisposeAsync().ConfigureAwait(false);
         }
     }
 }

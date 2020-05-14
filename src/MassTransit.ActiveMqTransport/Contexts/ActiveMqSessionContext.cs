@@ -34,7 +34,7 @@
             _messageProducerCache = new MessageProducerCache();
         }
 
-        public async Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
             LogContext.Debug?.Log("Closing session: {Host}", _connectionContext.Description);
 
@@ -42,7 +42,7 @@
             {
                 try
                 {
-                    await _messageProducerCache.Stop(cancellationToken).ConfigureAwait(false);
+                    await _messageProducerCache.Stop().ConfigureAwait(false);
 
                     _session.Close();
                 }

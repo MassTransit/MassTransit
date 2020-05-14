@@ -39,9 +39,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             _context.OnSessionAsync(callback, exceptionHandler);
         }
 
-        public Task CloseAsync(CancellationToken cancellationToken)
+        public Task CloseAsync()
         {
-            return _context.CloseAsync(cancellationToken);
+            return _context.CloseAsync();
         }
     }
 }

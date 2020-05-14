@@ -1,11 +1,8 @@
 ﻿namespace MassTransit.NHibernateIntegration.Saga
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using GreenPipes;
-    using GreenPipes.Util;
     using MassTransit.Saga;
     using NHibernate;
 
@@ -29,11 +26,12 @@
             _mode = mode;
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
-            return _isCompleted
-                ? TaskUtil.Completed
-                : _session.SaveAsync(Saga, cancellationToken);
+            if (!_isCompleted)
+                await _session.SaveAsync(Saga).ConfigureAwait(false);
+
+            //                : _session.SaveAsync(Saga, cancellationToken);
         }
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;

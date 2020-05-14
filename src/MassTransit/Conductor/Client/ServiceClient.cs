@@ -64,7 +64,7 @@ namespace MassTransit.Conductor.Client
             return new ServiceClientRequestSendEndpoint<T>(messageClient, _clientFactory.Context);
         }
 
-        async Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        async public ValueTask DisposeAsync()
         {
             _disposed.Cancel();
 
@@ -91,7 +91,7 @@ namespace MassTransit.Conductor.Client
             foreach (var handle in _handles)
                 handle.Disconnect();
 
-            await _clientFactory.DisposeAsync(cancellationToken).ConfigureAwait(false);
+            await _clientFactory.DisposeAsync().ConfigureAwait(false);
         }
 
         async Task<IServiceClientMessageCache<T>> GetMessageClient<T>()

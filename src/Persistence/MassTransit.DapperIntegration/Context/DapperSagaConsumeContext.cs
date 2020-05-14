@@ -1,11 +1,9 @@
 ﻿namespace MassTransit.DapperIntegration.Context
 {
-    using System.Threading;
+    using System;
     using System.Threading.Tasks;
-    using GreenPipes;
     using MassTransit.Context;
     using Saga;
-    using Util;
 
 
     public class DapperSagaConsumeContext<TSaga, TMessage> :
@@ -28,13 +26,15 @@
             Saga = instance;
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
-            return _isCompleted
-                ? TaskUtil.Completed
-                : _mode == SagaConsumeContextMode.Add
-                    ? _context.InsertAsync(Saga, cancellationToken)
-                    : _context.UpdateAsync(Saga, cancellationToken);
+            if (!_isCompleted)
+            {
+                if (_mode == SagaConsumeContextMode.Add)
+                    await _context.InsertAsync(Saga).ConfigureAwait(false);
+                else
+                    await _context.UpdateAsync(Saga).ConfigureAwait(false);
+            }
         }
 
         public TSaga Saga { get; }

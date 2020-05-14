@@ -192,9 +192,9 @@ namespace MassTransit.Mediator
                 await sendEndpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);
         }
 
-        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        public ValueTask DisposeAsync()
         {
-            return _clientFactory.DisposeAsync(cancellationToken);
+            return _clientFactory.DisposeAsync();
         }
 
         RequestHandle<T> IClientFactory.CreateRequest<T>(T message, CancellationToken cancellationToken, RequestTimeout timeout)

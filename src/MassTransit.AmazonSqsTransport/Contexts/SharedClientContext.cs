@@ -82,9 +82,9 @@
             return _context.ReceiveMessages(queueName, messageLimit, waitTime, cancellationToken);
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken = new CancellationToken())
+        public ValueTask DisposeAsync()
         {
-            return TaskUtil.Completed;
+            return default;
         }
     }
 }

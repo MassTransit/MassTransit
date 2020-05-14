@@ -41,9 +41,9 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             _topicCache = new TopicCache(amazonSns);
         }
 
-        public async Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
-            await _queueCache.DisposeAsync(cancellationToken).ConfigureAwait(false);
+            await _queueCache.DisposeAsync().ConfigureAwait(false);
 
             _topicCache.Clear();
 

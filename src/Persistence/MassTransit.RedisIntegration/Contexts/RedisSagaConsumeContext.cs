@@ -1,12 +1,9 @@
 ﻿namespace MassTransit.RedisIntegration.Contexts
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using GreenPipes;
     using Saga;
-    using Util;
 
 
     public class RedisSagaConsumeContext<TSaga, TMessage> :
@@ -29,13 +26,15 @@
             Saga = instance;
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
-            return _isCompleted
-                ? TaskUtil.Completed
-                : _mode == SagaConsumeContextMode.Add
-                    ? _database.Add(this)
-                    : _database.Update(this);
+            if (!_isCompleted)
+            {
+                if (_mode == SagaConsumeContextMode.Add)
+                    await _database.Add(this).ConfigureAwait(false);
+                else
+                    await _database.Update(this).ConfigureAwait(false);
+            }
         }
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;

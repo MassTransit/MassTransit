@@ -35,14 +35,14 @@
 
         Uri SourceAddress { get; }
 
-        public async Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
             _observerHandle?.Disconnect();
 
             switch (_transport)
             {
                 case IAsyncDisposable disposable:
-                    await disposable.DisposeAsync(cancellationToken).ConfigureAwait(false);
+                    await disposable.DisposeAsync().ConfigureAwait(false);
                     break;
 
                 case IDisposable disposable:

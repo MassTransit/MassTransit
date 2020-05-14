@@ -2,17 +2,15 @@
 {
     using System;
     using System.Data.Entity;
-    using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Context;
     using MassTransit.Saga;
-    using Util;
 
 
     public class EntityFrameworkSagaConsumeContext<TSaga, TMessage> :
         ConsumeContextScope<TMessage>,
         SagaConsumeContext<TSaga, TMessage>,
-        GreenPipes.IAsyncDisposable
+        IAsyncDisposable
         where TMessage : class
         where TSaga : class, ISaga
     {
@@ -29,20 +27,22 @@
             Saga = instance;
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
             Task Add()
             {
                 _dbContext.Set<TSaga>().Add(Saga);
 
-                return _dbContext.SaveChangesAsync(cancellationToken);
+                return _dbContext.SaveChangesAsync();
             }
 
-            return _isCompleted
-                ? TaskUtil.Completed
-                : _mode == SagaConsumeContextMode.Add
-                    ? Add()
-                    : _dbContext.SaveChangesAsync(cancellationToken);
+            if (!_isCompleted)
+            {
+                if (_mode == SagaConsumeContextMode.Add)
+                    await Add().ConfigureAwait(false);
+                else
+                    await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+            }
         }
 
         Guid? MessageContext.CorrelationId => Saga.CorrelationId;

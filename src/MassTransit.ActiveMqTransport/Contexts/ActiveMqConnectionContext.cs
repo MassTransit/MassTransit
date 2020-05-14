@@ -49,7 +49,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
             return session;
         }
 
-        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        public ValueTask DisposeAsync()
         {
             TransportLogMessages.DisconnectHost(Description);
 
@@ -66,7 +66,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
             TransportLogMessages.DisconnectedHost(Description);
 
-            return TaskUtil.Completed;
+            return default;
         }
     }
 }

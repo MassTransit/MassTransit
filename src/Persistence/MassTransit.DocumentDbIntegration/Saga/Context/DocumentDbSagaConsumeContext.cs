@@ -1,12 +1,9 @@
 ﻿namespace MassTransit.DocumentDbIntegration.Saga.Context
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
     using MassTransit.Context;
     using MassTransit.Saga;
-    using Util;
 
 
     public class DocumentDbSagaConsumeContext<TSaga, TMessage> :
@@ -51,13 +48,15 @@
             set => _isCompleted = value;
         }
 
-        Task IAsyncDisposable.DisposeAsync(CancellationToken cancellationToken)
+        public async ValueTask DisposeAsync()
         {
-            return IsCompleted
-                ? TaskUtil.Completed
-                : _mode == SagaConsumeContextMode.Add
-                    ? _databaseContext.Add(Saga, cancellationToken)
-                    : _databaseContext.Update(Saga, cancellationToken);
+            if (!_isCompleted)
+            {
+                if (_mode == SagaConsumeContextMode.Add)
+                    await _databaseContext.Add(Saga).ConfigureAwait(false);
+                else
+                    await _databaseContext.Update(Saga).ConfigureAwait(false);
+            }
         }
     }
 }

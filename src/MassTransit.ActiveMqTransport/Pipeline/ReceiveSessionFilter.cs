@@ -1,7 +1,6 @@
 namespace MassTransit.ActiveMqTransport.Pipeline
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
@@ -38,7 +37,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             void HandleException(Exception exception)
             {
             #pragma warning disable 4014
-                sessionContext.DisposeAsync(CancellationToken.None);
+                sessionContext.DisposeAsync();
             #pragma warning restore 4014
             }
 
@@ -52,7 +51,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             {
                 context.Connection.ExceptionListener -= HandleException;
 
-                await sessionContext.DisposeAsync(CancellationToken.None).ConfigureAwait(false);
+                await sessionContext.DisposeAsync().ConfigureAwait(false);
             }
 
             await next.Send(context).ConfigureAwait(false);

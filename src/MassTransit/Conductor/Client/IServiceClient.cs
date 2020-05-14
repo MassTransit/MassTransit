@@ -1,7 +1,7 @@
 namespace MassTransit.Conductor.Client
 {
+    using System;
     using Clients;
-    using GreenPipes;
 
 
     public interface IServiceClient :

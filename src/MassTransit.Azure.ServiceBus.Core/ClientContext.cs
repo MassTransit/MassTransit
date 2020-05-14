@@ -40,8 +40,7 @@ namespace MassTransit.Azure.ServiceBus.Core
         /// <summary>
         /// Close down the message handler on the received
         /// </summary>
-        /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task CloseAsync(CancellationToken cancellationToken);
+        Task CloseAsync();
     }
 }

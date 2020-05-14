@@ -4,11 +4,9 @@ namespace MassTransit.RedisIntegration.Contexts
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using GreenPipes;
     using Metadata;
     using Policies;
     using StackExchange.Redis;
-    using Util;
 
 
     public class RedisDatabaseContext<TSaga> :
@@ -93,7 +91,7 @@ namespace MassTransit.RedisIntegration.Contexts
             finally
             {
                 if (updateLock != null)
-                    await updateLock.DisposeAsync(CancellationToken.None).ConfigureAwait(false);
+                    await updateLock.DisposeAsync().ConfigureAwait(false);
             }
         }
 
@@ -112,11 +110,9 @@ namespace MassTransit.RedisIntegration.Contexts
             }
         }
 
-        public Task DisposeAsync(CancellationToken cancellationToken = default)
+        public ValueTask DisposeAsync()
         {
-            return _lock != null
-                ? _lock.DisposeAsync(cancellationToken)
-                : TaskUtil.Completed;
+            return _lock?.DisposeAsync() ?? default;
         }
 
         /// <summary>
@@ -177,7 +173,7 @@ namespace MassTransit.RedisIntegration.Contexts
                 _token = $"{HostMetadataCache.Host.MachineName}:{NewId.NextGuid()}";
             }
 
-            public async Task DisposeAsync(CancellationToken cancellationToken)
+            public async ValueTask DisposeAsync()
             {
                 try
                 {
