@@ -1,5 +1,6 @@
 namespace MassTransit.Containers.Tests.Autofac_Tests
 {
+    using System;
     using System.Threading.Tasks;
     using Autofac;
     using Common_Tests;
@@ -41,5 +42,43 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
         {
             Assert.AreEqual(_childContainer, actual);
         }
+    }
+
+
+    [TestFixture]
+    public class Autofac_Publish_Filter :
+        Common_Publish_Filter
+    {
+        readonly IContainer _container;
+        readonly ILifetimeScope _scope;
+
+        public Autofac_Publish_Filter()
+        {
+            var builder = new ContainerBuilder();
+            builder.Register(_ => new MyId(Guid.NewGuid())).InstancePerLifetimeScope();
+            builder.RegisterGeneric(typeof(ScopedFilter<>)).InstancePerLifetimeScope();
+            builder.RegisterInstance(TaskCompletionSource);
+
+            builder.AddMassTransit(ConfigureRegistration);
+
+            _container = builder.Build();
+            _scope = _container.BeginLifetimeScope();
+        }
+
+        [OneTimeTearDown]
+        public async Task Close_container()
+        {
+            await _scope.DisposeAsync();
+            await _container.DisposeAsync();
+        }
+
+        protected override void ConfigureFilter(IPublishPipelineConfigurator configurator)
+        {
+            AutofacFilterExtensions.UsePublishFilter(configurator, typeof(ScopedFilter<>), Registration);
+        }
+
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override MyId MyId => _scope.Resolve<MyId>();
+        protected override IPublishEndpoint PublishEndpoint => _scope.Resolve<IPublishEndpoint>();
     }
 }
