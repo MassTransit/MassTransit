@@ -12,12 +12,6 @@
         IQueueEndpointConfigurator
     {
         /// <summary>
-        /// If true, binds the message type exchanges to the queue exchange
-        /// </summary>
-        [Obsolete("Use ConfigureConsumeTopology instead. In the meantime, this property sets that property as well.")]
-        bool BindMessageExchanges { set; }
-
-        /// <summary>
         /// If false, deploys only exchange, without queue
         /// </summary>
         bool BindQueue { set; }

@@ -87,5 +87,20 @@ namespace MassTransit.Registration
         {
             _registration.ConfigureEndpoints(configurator, endpointNameFormatter);
         }
+
+        object IServiceProvider.GetService(Type serviceType)
+        {
+            return _registration.GetService(serviceType);
+        }
+
+        T IConfigurationServiceProvider.GetRequiredService<T>()
+        {
+            return _registration.GetRequiredService<T>();
+        }
+
+        T IConfigurationServiceProvider.GetService<T>()
+        {
+            return _registration.GetService<T>();
+        }
     }
 }

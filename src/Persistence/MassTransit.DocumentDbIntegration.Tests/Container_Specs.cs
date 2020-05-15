@@ -66,7 +66,7 @@ namespace MassTransit.DocumentDbIntegration.Tests
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 configurator.UseInMemoryOutbox();
-                configurator.ConfigureSaga<TestInstance>(_provider);
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IRegistration>());
             }
         }
 

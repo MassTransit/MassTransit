@@ -6,11 +6,7 @@ namespace MassTransit
     using Autofac.Core;
     using AutofacIntegration;
     using AutofacIntegration.Registration;
-    using Conductor.Configuration;
-    using ConsumeConfigurators;
-    using Definition;
     using Metadata;
-    using Saga;
 
 
     /// <summary>
@@ -58,108 +54,6 @@ namespace MassTransit
                 .Where(rs => filter(rs.s.ServiceType))
                 .Select(rs => rs.s.ServiceType)
                 .ToArray();
-        }
-
-        [Obsolete("Please use IRegistrationContext instead")]
-        /// <summary>
-        /// Configure the endpoints for all defined consumer, saga, and activity types using an optional
-        /// endpoint name formatter. If no endpoint name formatter is specified and an <see cref="IEndpointNameFormatter"/>
-        /// is registered in the container, it is resolved from the container. Otherwise, the <see cref="DefaultEndpointNameFormatter"/>
-        /// is used.
-        /// </summary>
-        /// <param name="configurator">The <see cref="IBusFactoryConfigurator"/> for the bus being configured</param>
-        /// <param name="context">The container reference</param>
-        /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
-        /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
-        public static void ConfigureEndpoints<T>(this IReceiveConfigurator<T> configurator, IComponentContext context,
-            IEndpointNameFormatter endpointNameFormatter = null)
-            where T : IReceiveEndpointConfigurator
-        {
-            var registration = context.Resolve<IRegistration>();
-
-            registration.ConfigureEndpoints(configurator, endpointNameFormatter);
-        }
-
-        /// <summary>
-        /// Configure service endpoints for all defined consumer, saga, and activity types using an optional
-        /// endpoint name formatter. If no endpoint name formatter is specified, and an <see cref="IEndpointNameFormatter"/>
-        /// is registered in the container, it is resolved from the container. Otherwise, the <see cref="DefaultEndpointNameFormatter"/>
-        /// is used.
-        /// </summary>
-        /// <param name="configurator">The <see cref="IBusFactoryConfigurator"/> for the bus being configured</param>
-        /// <param name="registration">The container registration</param>
-        /// <param name="options">The service instance options</param>
-        /// <typeparam name="TEndpointConfigurator">The ReceiveEndpointConfigurator type for the transport</typeparam>
-        public static void ConfigureServiceEndpoints<TEndpointConfigurator>(this IReceiveConfigurator<TEndpointConfigurator> configurator,
-            IRegistrationContext<IComponentContext> registration, ServiceInstanceOptions options = null)
-            where TEndpointConfigurator : IReceiveEndpointConfigurator
-        {
-            options ??= new ServiceInstanceOptions();
-            if (options.EndpointNameFormatter is DefaultEndpointNameFormatter && registration.Container.TryResolve<IEndpointNameFormatter>(out var formatter))
-                options.SetEndpointNameFormatter(formatter);
-
-            configurator.ServiceInstance(options, instanceConfigurator =>
-            {
-                registration.ConfigureEndpoints(instanceConfigurator, instanceConfigurator.EndpointNameFormatter);
-            });
-        }
-
-        [Obsolete("Please use IRegistrationContext instead")]
-        /// <summary>
-        /// Configure a consumer on the receive endpoint, with an optional configuration action
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="context"></param>
-        /// <param name="configure"></param>
-        public static void ConfigureConsumer<T>(this IReceiveEndpointConfigurator configurator, IComponentContext context,
-            Action<IConsumerConfigurator<T>> configure = null)
-            where T : class, IConsumer
-        {
-            var registration = context.Resolve<IRegistration>();
-
-            registration.ConfigureConsumer(configurator, configure);
-        }
-
-        [Obsolete("Please use IRegistrationContext instead")]
-        /// <summary>
-        /// Configure all registered consumers on the receive endpoint
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="context"></param>
-        public static void ConfigureConsumers(this IReceiveEndpointConfigurator configurator, IComponentContext context)
-        {
-            var registration = context.Resolve<IRegistration>();
-
-            registration.ConfigureConsumers(configurator);
-        }
-
-        [Obsolete("Please use IRegistrationContext instead")]
-        /// <summary>
-        /// Configure a saga on the receive endpoint, with an optional configuration action
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="context"></param>
-        /// <param name="configure"></param>
-        public static void ConfigureSaga<T>(this IReceiveEndpointConfigurator configurator, IComponentContext context,
-            Action<ISagaConfigurator<T>> configure = null)
-            where T : class, ISaga
-        {
-            var registration = context.Resolve<IRegistration>();
-
-            registration.ConfigureSaga(configurator, configure);
-        }
-
-        [Obsolete("Please use IRegistrationContext instead")]
-        /// <summary>
-        /// Configure all registered sagas on the receive endpoint
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="context"></param>
-        public static void ConfigureSagas(this IReceiveEndpointConfigurator configurator, IComponentContext context)
-        {
-            var registration = context.Resolve<IRegistration>();
-
-            registration.ConfigureSagas(configurator);
         }
     }
 }

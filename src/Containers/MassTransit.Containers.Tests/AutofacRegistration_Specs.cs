@@ -101,7 +101,7 @@ namespace MassTransit.Containers.Tests
             {
                 builder.Register(context =>
                 {
-                    return Bus.Factory.CreateUsingInMemory(x => x.ReceiveEndpoint("input_queue", e => e.ConfigureConsumers(context)));
+                    return Bus.Factory.CreateUsingInMemory(x => x.ReceiveEndpoint("input_queue", e => e.ConfigureConsumers(context.Resolve<IRegistration>())));
                 })
                     .As<IBus>()
                     .As<IBusControl>()

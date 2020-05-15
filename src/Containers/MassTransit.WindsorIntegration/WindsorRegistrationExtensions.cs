@@ -2,13 +2,8 @@ namespace MassTransit
 {
     using System;
     using System.Linq;
-    using Castle.MicroKernel;
     using Castle.Windsor;
-    using Conductor.Configuration;
-    using ConsumeConfigurators;
-    using Definition;
     using Metadata;
-    using Saga;
     using WindsorIntegration;
     using WindsorIntegration.Registration;
 
@@ -57,30 +52,6 @@ namespace MassTransit
                 .Where(rs => rs.ComponentModel.Services.Any(filter))
                 .Select(rs => rs.ComponentModel.Implementation)
                 .ToArray();
-        }
-
-        /// <summary>
-        /// Configure service endpoints for all defined consumer, saga, and activity types using an optional
-        /// endpoint name formatter. If no endpoint name formatter is specified, and an <see cref="IEndpointNameFormatter"/>
-        /// is registered in the container, it is resolved from the container. Otherwise, the <see cref="DefaultEndpointNameFormatter"/>
-        /// is used.
-        /// </summary>
-        /// <param name="configurator">The <see cref="IBusFactoryConfigurator"/> for the bus being configured</param>
-        /// <param name="registration">The container registration</param>
-        /// <param name="options">The service instance options</param>
-        /// <typeparam name="TEndpointConfigurator">The ReceiveEndpointConfigurator type for the transport</typeparam>
-        public static void ConfigureServiceEndpoints<TEndpointConfigurator>(this IReceiveConfigurator<TEndpointConfigurator> configurator,
-            IRegistrationContext<IKernel> registration, ServiceInstanceOptions options = null)
-            where TEndpointConfigurator : IReceiveEndpointConfigurator
-        {
-            options ??= new ServiceInstanceOptions();
-            if (options.EndpointNameFormatter is DefaultEndpointNameFormatter && registration.Container.HasComponent(typeof(IEndpointNameFormatter)))
-                options.SetEndpointNameFormatter(registration.Container.Resolve<IEndpointNameFormatter>());
-
-            configurator.ServiceInstance(options, instanceConfigurator =>
-            {
-                registration.ConfigureEndpoints(instanceConfigurator, instanceConfigurator.EndpointNameFormatter);
-            });
         }
     }
 }

@@ -5,9 +5,7 @@ namespace MassTransit
     using ConsumeConfigurators;
     using Courier;
     using ExtensionsDependencyInjectionIntegration.ScopeProviders;
-    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
-    using Pipeline;
     using Saga;
     using Scoping;
 
@@ -105,26 +103,6 @@ namespace MassTransit
             var repository = provider.GetRequiredService<ISagaRepository<TInstance>>();
 
             configurator.StateMachineSaga(stateMachine, repository, configure);
-        }
-
-        public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector bus, SagaStateMachine<TInstance> stateMachine,
-            IServiceProvider provider, Action<ISagaConfigurator<TInstance>> configure = null)
-            where TInstance : class, SagaStateMachineInstance
-        {
-            var repository = provider.GetRequiredService<ISagaRepository<TInstance>>();
-
-            return bus.ConnectStateMachineSaga(stateMachine, repository, configure);
-        }
-
-        public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector bus, IServiceProvider provider,
-            Action<ISagaConfigurator<TInstance>> configure = null)
-            where TInstance : class, SagaStateMachineInstance
-        {
-            var stateMachine = provider.GetRequiredService<SagaStateMachine<TInstance>>();
-
-            var repository = provider.GetRequiredService<ISagaRepository<TInstance>>();
-
-            return bus.ConnectStateMachineSaga(stateMachine, repository, configure);
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,

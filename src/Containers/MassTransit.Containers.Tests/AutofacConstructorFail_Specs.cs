@@ -5,12 +5,23 @@ namespace MassTransit.Containers.Tests
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
+    using Util;
 
 
     [TestFixture]
     public class Autofac_missing_dependency :
         InMemoryTestFixture
     {
+        [Test]
+        public async Task Should_receive_using_the_first_consumer()
+        {
+            Task<ConsumeContext<Fault<PingMessage>>> fault = ConnectPublishHandler<Fault<PingMessage>>();
+
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            await fault;
+        }
+
         readonly IContainer _container;
 
         public Autofac_missing_dependency()
@@ -24,16 +35,6 @@ namespace MassTransit.Containers.Tests
                 }).Build();
         }
 
-        [Test]
-        public async Task Should_receive_using_the_first_consumer()
-        {
-            var fault = ConnectPublishHandler<Fault<PingMessage>>();
-
-            await InputQueueSendEndpoint.Send(new PingMessage());
-
-            await fault;
-        }
-
         [OneTimeTearDown]
         public void Close_container()
         {
@@ -42,7 +43,7 @@ namespace MassTransit.Containers.Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureConsumers(_container);
+            configurator.ConfigureConsumers(_container.Resolve<IRegistration>());
         }
 
 
@@ -60,7 +61,7 @@ namespace MassTransit.Containers.Tests
 
             public Task Consume(ConsumeContext<PingMessage> context)
             {
-                return MassTransit.Util.TaskUtil.Completed;
+                return TaskUtil.Completed;
             }
         }
     }

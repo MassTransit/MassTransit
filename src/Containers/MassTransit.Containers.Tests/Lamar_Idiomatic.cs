@@ -46,7 +46,8 @@
 
         public Lamar_Idiomatic()
             : base(new InMemoryTestHarness())
-        { }
+        {
+        }
 
         Container _container;
 
@@ -77,8 +78,9 @@
         {
             public BusServiceRegistry()
             {
-                For<IBusControl>().Use(context => Bus.Factory.CreateUsingInMemory(x => x.ReceiveEndpoint("input_queue", e => e.ConfigureConsumers(context))))
-                .Singleton();
+                For<IBusControl>().Use(context => Bus.Factory.CreateUsingInMemory(x =>
+                        x.ReceiveEndpoint("input_queue", e => e.ConfigureConsumers(context.GetInstance<IRegistration>()))))
+                    .Singleton();
             }
         }
 

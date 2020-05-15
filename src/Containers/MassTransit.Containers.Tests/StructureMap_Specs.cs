@@ -29,7 +29,7 @@ namespace MassTransit.Containers.Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureSagas(_container);
+            configurator.ConfigureSagas(_container.GetInstance<IRegistration>());
         }
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
