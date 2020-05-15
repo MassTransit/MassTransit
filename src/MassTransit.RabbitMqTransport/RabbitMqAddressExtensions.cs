@@ -122,6 +122,14 @@ namespace MassTransit.RabbitMqTransport
             return GetConfigurationHostSettings(address);
         }
 
+        public static IRabbitMqHostTopology GetRabbitMqHostTopology(this IBus bus)
+        {
+            if (bus.Topology is IRabbitMqHostTopology hostTopology)
+                return hostTopology;
+
+            throw new ArgumentException("The bus is not a RabbitMQ bus", nameof(bus));
+        }
+
         internal static ConfigurationHostSettings GetConfigurationHostSettings(this Uri address)
         {
             var hostAddress = new RabbitMqHostAddress(address);

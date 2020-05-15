@@ -18,7 +18,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IRabbitMqHostConfiguration
     {
         readonly IRabbitMqBusConfiguration _busConfiguration;
-        readonly RabbitMqHostProxy _proxy;
         readonly IRabbitMqTopologyConfiguration _topologyConfiguration;
         RabbitMqHostSettings _hostSettings;
 
@@ -35,15 +34,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 Username = "guest",
                 Password = "guest"
             };
-
-            _proxy = new RabbitMqHostProxy(this);
         }
 
         public string Description => _hostSettings.ToDescription();
 
         public override Uri HostAddress => _hostSettings.HostAddress;
-
-        public IRabbitMqHost Proxy => _proxy;
 
         public bool PublisherConfirmation => _hostSettings.PublisherConfirmation;
 
@@ -179,8 +174,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
             {
                 endpointConfiguration.Build(host);
             }
-
-            _proxy.SetComplete(host);
 
             return host;
         }

@@ -58,12 +58,12 @@
         async Task<HostReceiveEndpointHandle> Subscribe(string key)
         {
             var queueName = $"Stock-{key}";
-            var handle = Host.ConnectReceiveEndpoint(queueName, x =>
+            var handle = Bus.ConnectReceiveEndpoint(queueName, x =>
             {
                 x.ConfigureConsumeTopology = false;
                 x.Consumer<Consumer>();
 
-                x.Bind<Message>(e =>
+                ((IRabbitMqReceiveEndpointConfigurator)x).Bind<Message>(e =>
                 {
                     e.RoutingKey = GetRoutingKey(key);
                     e.ExchangeType = ExchangeType.Topic;
@@ -75,10 +75,8 @@
             return handle;
         }
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            base.ConfigureRabbitMqBusHost(configurator, host);
-
             configurator.Message<Message>(x => x.SetEntityName(ExchangeName));
             configurator.Publish<Message>(x => x.ExchangeType = ExchangeType.Topic);
 

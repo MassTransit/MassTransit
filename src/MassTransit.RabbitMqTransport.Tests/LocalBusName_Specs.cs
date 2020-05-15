@@ -18,10 +18,8 @@
             await client.GetResponse<PongMessage>(new PingMessage(), TestCancellationToken);
         }
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            base.ConfigureRabbitMqBusHost(configurator, host);
-
             configurator.OverrideDefaultBusEndpointQueueName($"super-bus-{NewId.NextGuid():N}");
         }
 

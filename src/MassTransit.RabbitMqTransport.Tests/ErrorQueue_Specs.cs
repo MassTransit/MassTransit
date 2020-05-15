@@ -101,7 +101,7 @@
             }));
         }
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("input_queue_error", x =>
             {
@@ -143,14 +143,13 @@
             header.ShouldBe("fault");
         }
 
-        IRabbitMqHost _host;
         string _body;
         BasicGetResult _basicGetResult;
 
         [OneTimeSetUp]
         public async Task Setup()
         {
-            var connectionFactory = _host.Settings.GetConnectionFactory();
+            var connectionFactory = GetHostSettings().GetConnectionFactory();
             using (var connection = connectionFactory.CreateConnection())
             using (var model = connection.CreateModel())
             {
@@ -167,11 +166,6 @@
                 model.Close(200, "Cleanup complete");
                 connection.Close(200, "Cleanup complete");
             }
-        }
-
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
-        {
-            _host = host;
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -206,14 +200,13 @@
             header.ShouldBe("fault");
         }
 
-        IRabbitMqHost _host;
         string _body;
         BasicGetResult _basicGetResult;
 
         [OneTimeSetUp]
         public async Task Setup()
         {
-            var connectionFactory = _host.Settings.GetConnectionFactory();
+            var connectionFactory = GetHostSettings().GetConnectionFactory();
             using (var connection = connectionFactory.CreateConnection())
             using (var model = connection.CreateModel())
             {
@@ -228,11 +221,6 @@
                 model.Close(200, "Cleanup complete");
                 connection.Close(200, "Cleanup complete");
             }
-        }
-
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
-        {
-            _host = host;
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -328,7 +316,7 @@
             _responseTask = client.GetResponse<PongMessage>(new PingMessage());
         }
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("input_queue_error", x =>
             {
@@ -374,7 +362,7 @@
             _responseTask = client.GetResponse<PongMessage>(new PingMessage());
         }
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("input_queue_error", x =>
             {

@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using Clients;
     using Clients.Contexts;
+    using Definition;
 
 
     public static class ClientFactoryExtensions
@@ -125,16 +126,15 @@
         /// Connects a new receive endpoint to the host, and creates a <see cref="IClientFactory"/>.
         /// </summary>
         /// <param name="connector">The host to connect the new receive endpoint</param>
-        /// <param name="destinationAddress">The request service address</param>
         /// <param name="timeout">The default request timeout</param>
         /// <returns></returns>
-        public static async Task<IRequestClient<T>> CreateRequestClient<T>(this IReceiveConnector connector, Uri destinationAddress,
-            RequestTimeout timeout = default)
-            where T : class
+        public static Task<IClientFactory> ConnectClientFactory(this IReceiveConnector connector, RequestTimeout timeout = default)
         {
-            var clientFactory = await CreateClientFactory(connector, timeout).ConfigureAwait(false);
+            var endpointDefinition = new TemporaryEndpointDefinition();
 
-            return clientFactory.CreateRequestClient<T>(destinationAddress);
+            var receiveEndpointHandle = connector.ConnectReceiveEndpoint(endpointDefinition, KebabCaseEndpointNameFormatter.Instance);
+
+            return receiveEndpointHandle.CreateClientFactory(timeout);
         }
     }
 }

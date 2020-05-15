@@ -15,7 +15,7 @@
             {
                 Bus.Factory.CreateUsingRabbitMq(x =>
                 {
-                    var host = x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
+                    x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
                     {
                         h.RequestedConnectionTimeout(2000);
                     });
@@ -37,7 +37,7 @@
             {
                 Bus.Factory.CreateUsingRabbitMq(x =>
                 {
-                    var host = x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
+                    x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
                     {
                     });
 
@@ -62,7 +62,7 @@
             {
                 Bus.Factory.CreateUsingRabbitMq(x =>
                 {
-                    var host = x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
+                    x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
                     {
                     });
 
@@ -86,7 +86,7 @@
             {
                 Bus.Factory.CreateUsingRabbitMq(x =>
                 {
-                    var host = x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
+                    x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
                     {
                     });
 
@@ -105,7 +105,7 @@
             {
                 Bus.Factory.CreateUsingRabbitMq(x =>
                 {
-                    var host = x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
+                    x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
                     {
                     });
 
@@ -124,7 +124,7 @@
         {
             Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                var host = x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
+                x.Host(new Uri("rabbitmq://[::1]/test/"), h =>
                 {
                 });
 

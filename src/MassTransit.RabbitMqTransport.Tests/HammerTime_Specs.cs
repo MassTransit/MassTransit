@@ -76,10 +76,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             configurator.PublisherConfirmation = false;
         }
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            base.ConfigureRabbitMqBusHost(configurator, host);
-
             _completed = GetTask<int>();
 
             configurator.ReceiveEndpoint("input_queue_express", x =>
