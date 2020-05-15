@@ -41,6 +41,6 @@
         /// </summary>
         /// <param name="settings"></param>
         /// <returns></returns>
-        IAmazonSqsHost Host(AmazonSqsHostSettings settings);
+        void Host(AmazonSqsHostSettings settings);
     }
 }

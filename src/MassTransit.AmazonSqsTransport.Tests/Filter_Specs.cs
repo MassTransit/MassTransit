@@ -52,15 +52,15 @@ namespace MassTransit.AmazonSqsTransport.Tests
         async Task<HostReceiveEndpointHandle> Subscribe(string key)
         {
             var queueName = $"TestCase-R-{key}";
-            var handle = Host.ConnectReceiveEndpoint(queueName, x =>
+            var handle = Bus.ConnectReceiveEndpoint(queueName, x =>
             {
                 x.ConfigureConsumeTopology = false;
 
                 x.Consumer(() => new Consumer(_foo, _bar));
 
-                x.Subscribe<Message>(m =>
+                ((IAmazonSqsReceiveEndpointConfigurator)x).Subscribe<Message>(m =>
                 {
-                    x.QueueSubscriptionAttributes["FilterPolicy"] = $"{{\"RoutingKey\": [\"{key}\"]}}";
+                    ((IAmazonSqsReceiveEndpointConfigurator)x).QueueSubscriptionAttributes["FilterPolicy"] = $"{{\"RoutingKey\": [\"{key}\"]}}";
                 });
             });
 

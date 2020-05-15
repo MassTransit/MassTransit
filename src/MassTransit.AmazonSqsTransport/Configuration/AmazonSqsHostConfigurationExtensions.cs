@@ -14,7 +14,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="hostAddress">The URI host address of the AmazonSQS host (amazonsqs://region)</param>
         /// <param name="configure"></param>
-        public static IAmazonSqsHost Host(this IAmazonSqsBusFactoryConfigurator configurator, Uri hostAddress, Action<IAmazonSqsHostConfigurator> configure)
+        public static void Host(this IAmazonSqsBusFactoryConfigurator configurator, Uri hostAddress, Action<IAmazonSqsHostConfigurator> configure)
         {
             if (hostAddress == null)
                 throw new ArgumentNullException(nameof(hostAddress));
@@ -23,7 +23,7 @@ namespace MassTransit
 
             configure(hostConfigurator);
 
-            return configurator.Host(hostConfigurator.Settings);
+            configurator.Host(hostConfigurator.Settings);
         }
 
         /// <summary>
@@ -32,9 +32,9 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="hostName">The host name of the broker</param>
         /// <param name="configure">The configuration callback</param>
-        public static IAmazonSqsHost Host(this IAmazonSqsBusFactoryConfigurator configurator, string hostName, Action<IAmazonSqsHostConfigurator> configure)
+        public static void Host(this IAmazonSqsBusFactoryConfigurator configurator, string hostName, Action<IAmazonSqsHostConfigurator> configure)
         {
-            return configurator.Host(new UriBuilder("amazonsqs", hostName).Uri, configure);
+             configurator.Host(new UriBuilder("amazonsqs", hostName).Uri, configure);
         }
 
         /// <summary>

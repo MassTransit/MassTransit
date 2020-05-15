@@ -1,6 +1,7 @@
-﻿namespace MassTransit.AmazonSqsTransport.Configuration
+﻿namespace MassTransit
 {
     using System;
+    using AmazonSqsTransport;
 
 
     public static class BusFactoryConfiguratorExtensions

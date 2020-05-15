@@ -16,8 +16,6 @@
         /// </summary>
         bool DeployTopologyOnly { get; set; }
 
-        IAmazonSqsHost Proxy { get; }
-
         /// <summary>
         /// Apply the endpoint definition to the receive endpoint configurator
         /// </summary>

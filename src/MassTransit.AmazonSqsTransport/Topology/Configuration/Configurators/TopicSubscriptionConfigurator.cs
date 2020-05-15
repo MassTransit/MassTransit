@@ -1,6 +1,5 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Configurators
 {
-    using Configuration;
     using Entities;
 
 

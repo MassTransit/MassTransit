@@ -1,7 +1,7 @@
-﻿namespace MassTransit.AmazonSqsTransport.Configuration
+﻿namespace MassTransit
 {
     using System;
-    using Specifications;
+    using AmazonSqsTransport.Specifications;
 
 
     public static class AmazonSqsMessageSchedulerExtensions
