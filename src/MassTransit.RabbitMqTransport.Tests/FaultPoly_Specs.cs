@@ -24,7 +24,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             await _handled;
         }
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint(e =>
             {

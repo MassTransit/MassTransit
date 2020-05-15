@@ -22,7 +22,7 @@
         const string AlternateExchangeName = "publish-not-delivered";
         const string AlternateQueueName = "world-examiner";
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             configurator.PublishTopology.GetMessageTopology<TheWorldImploded>()
                 .BindAlternateExchangeQueue(AlternateExchangeName);

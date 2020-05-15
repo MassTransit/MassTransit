@@ -170,7 +170,7 @@
         {
             IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                IRabbitMqHost host = x.Host(new Uri("rabbitmq://localhost/"), h =>
+                x.Host(new Uri("rabbitmq://localhost/"), h =>
                 {
                 });
 

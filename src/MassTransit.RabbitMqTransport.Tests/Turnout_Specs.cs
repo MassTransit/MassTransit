@@ -44,11 +44,9 @@
         Uri _commandEndpointAddress;
         Task<ConsumeContext<JobCompleted>> _completed2;
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             configurator.UseDelayedExchangeMessageScheduler();
-
-            base.ConfigureRabbitMqBusHost(configurator, host);
 
             configurator.TurnoutEndpoint<ProcessFile>("process_queue", endpoint =>
             {
@@ -97,11 +95,9 @@
         Task<ConsumeContext<JobStarted>> _started;
         Uri _commandEndpointAddress;
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             configurator.UseDelayedExchangeMessageScheduler();
-
-            base.ConfigureRabbitMqBusHost(configurator, host);
 
             configurator.TurnoutEndpoint<ProcessFile>("process_queue", endpoint =>
             {
@@ -174,7 +170,7 @@
         Uri _commandEndpointAddress;
         Task<ConsumeContext<JobCanceled<ProcessFile>>> _canceled;
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             configurator.UseDelayedExchangeMessageScheduler();
 

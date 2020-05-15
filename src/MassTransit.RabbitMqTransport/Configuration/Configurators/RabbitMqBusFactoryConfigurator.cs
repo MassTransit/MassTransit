@@ -131,11 +131,9 @@
             _settings.EnablePriority(maxPriority);
         }
 
-        public IRabbitMqHost Host(RabbitMqHostSettings settings)
+        public void Host(RabbitMqHostSettings settings)
         {
             _busConfiguration.HostConfiguration.Settings = settings;
-
-            return _busConfiguration.HostConfiguration.Proxy;
         }
 
         void IRabbitMqBusFactoryConfigurator.Send<T>(Action<IRabbitMqMessageSendTopologyConfigurator<T>> configureTopology)

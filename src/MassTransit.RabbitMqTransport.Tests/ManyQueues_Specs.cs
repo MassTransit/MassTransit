@@ -26,7 +26,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
         }
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             for (var i = 0; i < 50; i++)
             {

@@ -18,7 +18,7 @@
         ConsumerTestHarness<TestConsumer> _consumerA;
         IRabbitMqBusFactoryConfigurator _configurator;
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             _configurator = configurator;
             _consumerA = RabbitMqTestHarness.Consumer<TestConsumer>();

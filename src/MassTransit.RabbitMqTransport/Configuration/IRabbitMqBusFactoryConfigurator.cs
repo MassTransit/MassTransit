@@ -41,6 +41,6 @@
         /// </summary>
         /// <param name="settings"></param>
         /// <returns></returns>
-        IRabbitMqHost Host(RabbitMqHostSettings settings);
+        void Host(RabbitMqHostSettings settings);
     }
 }
