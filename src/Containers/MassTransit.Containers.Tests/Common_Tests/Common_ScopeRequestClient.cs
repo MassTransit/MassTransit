@@ -22,10 +22,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_contains_scope_on_send()
         {
-            var client = GetSendRequestClient();
+            IRequestClient<SimpleMessageClass> client = GetSendRequestClient();
             await client.GetResponse<ISimpleMessageResponse>(new SimpleMessageClass("test"));
 
-            SendContext sent = await _taskCompletionSource.Task;
+            var sent = await _taskCompletionSource.Task;
 
             Assert.IsTrue(sent.TryGetPayload<TScope>(out var scope));
             AssertScopesAreEqual(scope);
@@ -34,10 +34,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_contains_scope_on_publish()
         {
-            var client = GetPublishRequestClient();
+            IRequestClient<PingMessage> client = GetPublishRequestClient();
             await client.GetResponse<PongMessage>(new PingMessage(NewId.NextGuid()));
 
-            SendContext sent = await _taskCompletionSource.Task;
+            var sent = await _taskCompletionSource.Task;
 
             Assert.IsTrue(sent.TryGetPayload<TScope>(out var scope));
             AssertScopesAreEqual(scope);
@@ -76,13 +76,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 _taskCompletionSource = taskCompletionSource;
             }
 
-            public async Task Send(SendContext context, IPipe<SendContext> next)
+            public async Task Send(PublishContext context, IPipe<PublishContext> next)
             {
                 _taskCompletionSource.TrySetResult(context);
                 await next.Send(context);
             }
 
-            public async Task Send(PublishContext context, IPipe<PublishContext> next)
+            public async Task Send(SendContext context, IPipe<SendContext> next)
             {
                 _taskCompletionSource.TrySetResult(context);
                 await next.Send(context);

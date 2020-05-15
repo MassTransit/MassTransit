@@ -14,6 +14,33 @@ namespace MassTransit.Containers.Tests
     public class DependencyInjection_ServiceScope :
         InMemoryTestFixture
     {
+        [Test]
+        public async Task Should_receive_using_the_first_consumer()
+        {
+            const string name = "Joe";
+
+            await InputQueueSendEndpoint.Send(new SimpleMessageClass(name));
+
+            var lastConsumer = await SimpleConsumer.LastConsumer.OrCanceled(TestCancellationToken);
+            lastConsumer.ShouldNotBe(null);
+
+            var last = await lastConsumer.Last;
+            last.Name
+                .ShouldBe(name);
+
+            var wasDisposed = await lastConsumer.Dependency.WasDisposed;
+            wasDisposed
+                .ShouldBe(true); //Dependency was not disposed");
+
+            lastConsumer.Dependency.SomethingDone
+                .ShouldBe(true); //Dependency was disposed before consumer executed");
+
+            var lasterConsumer = await SimplerConsumer.LastConsumer.OrCanceled(TestCancellationToken);
+            lasterConsumer.ShouldNotBe(null);
+
+            var laster = await lasterConsumer.Last.OrCanceled(TestCancellationToken);
+        }
+
         readonly IServiceProvider _provider;
 
         public DependencyInjection_ServiceScope()
@@ -38,34 +65,6 @@ namespace MassTransit.Containers.Tests
 
             configurator.ConfigureConsumer<SimpleConsumer>(registration);
             configurator.ConfigureConsumer<SimplerConsumer>(registration);
-        }
-
-        [Test]
-        public async Task Should_receive_using_the_first_consumer()
-        {
-            const string name = "Joe";
-
-            await InputQueueSendEndpoint.Send(new SimpleMessageClass(name));
-
-            SimpleConsumer lastConsumer = await SimpleConsumer.LastConsumer.OrCanceled(TestCancellationToken);
-            lastConsumer.ShouldNotBe(null);
-
-            SimpleMessageInterface last = await lastConsumer.Last;
-            last.Name
-                .ShouldBe(name);
-
-            var wasDisposed = await lastConsumer.Dependency.WasDisposed;
-            wasDisposed
-                .ShouldBe(true); //Dependency was not disposed");
-
-            lastConsumer.Dependency.SomethingDone
-                .ShouldBe(true); //Dependency was disposed before consumer executed");
-
-            SimplerConsumer lasterConsumer = await SimplerConsumer.LastConsumer.OrCanceled(TestCancellationToken);
-            lasterConsumer.ShouldNotBe(null);
-
-            SimpleMessageInterface laster = await lasterConsumer.Last.OrCanceled(TestCancellationToken);
-
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

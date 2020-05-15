@@ -30,7 +30,7 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_respond_successfully()
         {
-            var client = Bus.CreateRequestClient<PingMessage>();
+            IRequestClient<PingMessage> client = Bus.CreateRequestClient<PingMessage>();
 
             await client.GetResponse<PongMessage>(new PingMessage());
         }

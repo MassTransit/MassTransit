@@ -13,10 +13,12 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_Saga :
         InMemoryTestFixture
     {
+        protected abstract IRegistration Registration { get; }
+
         [Test]
         public async Task Should_handle_first_message()
         {
-            Guid sagaId = NewId.NextGuid();
+            var sagaId = NewId.NextGuid();
 
             var message = new FirstSagaMessage {CorrelationId = sagaId};
 
@@ -30,7 +32,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_handle_second_message()
         {
-            Guid sagaId = NewId.NextGuid();
+            var sagaId = NewId.NextGuid();
 
             var message = new FirstSagaMessage {CorrelationId = sagaId};
 
@@ -52,7 +54,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_handle_third_message()
         {
-            Guid sagaId = NewId.NextGuid();
+            var sagaId = NewId.NextGuid();
 
             var message = new FirstSagaMessage {CorrelationId = sagaId};
 
@@ -87,18 +89,18 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.ConfigureSaga<SimpleSaga>(Registration);
         }
-
-        protected abstract IRegistration Registration { get; }
     }
 
 
     public abstract class Common_Saga_Endpoint :
         InMemoryTestFixture
     {
+        protected abstract IRegistration Registration { get; }
+
         [Test]
         public async Task Should_handle_the_message()
         {
-            Guid sagaId = NewId.NextGuid();
+            var sagaId = NewId.NextGuid();
 
             var message = new FirstSagaMessage {CorrelationId = sagaId};
 
@@ -114,7 +116,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_use_custom_endpoint_and_definition_together()
         {
-            Guid sagaId = NewId.NextGuid();
+            var sagaId = NewId.NextGuid();
 
             var message = new FirstSagaMessage {CorrelationId = sagaId};
 
@@ -148,7 +150,5 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.ConfigureEndpoints(Registration);
         }
-
-        protected abstract IRegistration Registration { get; }
     }
 }

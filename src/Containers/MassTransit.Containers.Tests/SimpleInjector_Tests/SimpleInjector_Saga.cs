@@ -11,6 +11,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     public class SimpleInjector_Saga :
         Common_Saga
     {
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
         readonly Container _container;
 
         public SimpleInjector_Saga()
@@ -27,12 +33,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Dispose();
         }
 
-        [Test]
-        public void Should_be_a_valid_container()
-        {
-            _container.Verify();
-        }
-
         protected override IRegistration Registration => _container.GetInstance<IRegistration>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
@@ -46,6 +46,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     public class SimpleInjector_Saga_Endpoint :
         Common_Saga_Endpoint
     {
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
         readonly Container _container;
 
         public SimpleInjector_Saga_Endpoint()
@@ -54,12 +60,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
 
             _container.AddMassTransit(ConfigureRegistration);
-        }
-
-        [Test]
-        public void Should_be_a_valid_container()
-        {
-            _container.Verify();
         }
 
         protected override IRegistration Registration => _container.GetInstance<IRegistration>();

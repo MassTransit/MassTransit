@@ -24,11 +24,11 @@
         public async Task Throw_them_under_the_bus()
         {
             var container = new ContainerBuilder().AddMassTransit(cfg =>
-                {
-                    cfg.AddConsumersFromNamespaceContaining<AutofacContainer_RegistrationExtension>();
-                    cfg.AddSaga<SimpleSaga>()
-                        .InMemoryRepository();
-                }).Build();
+            {
+                cfg.AddConsumersFromNamespaceContaining<AutofacContainer_RegistrationExtension>();
+                cfg.AddSaga<SimpleSaga>()
+                    .InMemoryRepository();
+            }).Build();
 
             var busControl = Bus.Factory.CreateUsingInMemory(x =>
             {

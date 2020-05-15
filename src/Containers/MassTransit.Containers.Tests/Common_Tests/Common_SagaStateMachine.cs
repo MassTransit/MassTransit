@@ -9,6 +9,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_SagaStateMachine :
         InMemoryTestFixture
     {
+        protected abstract IRegistration Registration { get; }
+
         [Test]
         public async Task Should_handle_the_first_event()
         {
@@ -41,7 +43,5 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.ConfigureSaga<TestInstance>(Registration);
         }
-
-        protected abstract IRegistration Registration { get; }
     }
 }

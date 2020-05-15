@@ -24,7 +24,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override MassTransit.IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {

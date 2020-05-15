@@ -15,6 +15,22 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_Conductor :
         InMemoryTestFixture
     {
+        [Test]
+        public async Task Should_resolve_an_use_the_service()
+        {
+            var clientFactory = GetClientFactory();
+
+            IRequestClient<SubmitOrder> client = clientFactory.CreateRequestClient<SubmitOrder>();
+
+            Response<OrderSubmissionAccepted> response = await client.GetResponse<OrderSubmissionAccepted>(new
+            {
+                OrderId = NewId.NextGuid(),
+                InVar.Timestamp
+            });
+
+            Assert.That(response.SourceAddress, Is.EqualTo(new Uri(BaseAddress, KebabCaseEndpointNameFormatter.Instance.Consumer<SubmitOrderConsumer>())));
+        }
+
         protected Common_Conductor(bool instanceEndpoint)
         {
             Options = new ServiceInstanceOptions();
@@ -24,22 +40,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
         protected ServiceInstanceOptions Options { get; private set; }
-
-        [Test]
-        public async Task Should_resolve_an_use_the_service()
-        {
-            var clientFactory = GetClientFactory();
-
-            var client = clientFactory.CreateRequestClient<SubmitOrder>();
-
-            var response = await client.GetResponse<OrderSubmissionAccepted>(new
-            {
-                OrderId = NewId.NextGuid(),
-                InVar.Timestamp
-            });
-
-            Assert.That(response.SourceAddress, Is.EqualTo(new Uri(Host.Address, KebabCaseEndpointNameFormatter.Instance.Consumer<SubmitOrderConsumer>())));
-        }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -118,7 +118,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             public async Task Consume(ConsumeContext<SubmitOrder> context)
             {
-                var authorization = await _authorizeClient.GetResponse<OrderAuthorized>(new
+                Response<OrderAuthorized> authorization = await _authorizeClient.GetResponse<OrderAuthorized>(new
                 {
                     context.Message.OrderId,
                     InVar.Timestamp

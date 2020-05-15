@@ -47,6 +47,19 @@
     public class Autofac_Consumer_with_endpoint :
         InMemoryTestFixture
     {
+        [Test]
+        public async Task Should_receive_using_the_first_consumer()
+        {
+            const string name = "Joe";
+
+            var sendEndpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/frankly-simple"));
+
+            await sendEndpoint.Send(new SimpleMessageClass(name));
+
+            var lastConsumer = await SimpleConsumer.LastConsumer;
+            lastConsumer.ShouldNotBe(null);
+        }
+
         readonly IContainer _container;
 
         public Autofac_Consumer_with_endpoint()
@@ -72,19 +85,6 @@
                 .As<AnotherMessageConsumer>();
 
             _container = builder.Build();
-        }
-
-        [Test]
-        public async Task Should_receive_using_the_first_consumer()
-        {
-            const string name = "Joe";
-
-            var sendEndpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/frankly-simple"));
-
-            await sendEndpoint.Send(new SimpleMessageClass(name));
-
-            SimpleConsumer lastConsumer = await SimpleConsumer.LastConsumer;
-            lastConsumer.ShouldNotBe(null);
         }
 
         [OneTimeTearDown]

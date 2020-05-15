@@ -13,6 +13,11 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_ConsumeContext :
         InMemoryTestFixture
     {
+        protected abstract IRegistration Registration { get; }
+        protected abstract Task<ConsumeContext> ConsumeContext { get; }
+        protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
+        protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
+
         [Test]
         public async Task Should_provide_the_consume_context()
         {
@@ -20,7 +25,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             var consumeContext = await ConsumeContext;
 
-            Assert.That(consumeContext.TryGetPayload<MessageConsumeContext<PingMessage>>(out var messageConsumeContext), "Is MessageConsumeContext");
+            Assert.That(consumeContext.TryGetPayload<MessageConsumeContext<PingMessage>>(out MessageConsumeContext<PingMessage> messageConsumeContext),
+                "Is MessageConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
@@ -42,11 +48,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.ConfigureConsumers(Registration);
         }
-
-        protected abstract IRegistration Registration { get; }
-        protected abstract Task<ConsumeContext> ConsumeContext { get; }
-        protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
-        protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
     }
 
 
@@ -58,16 +59,23 @@ namespace MassTransit.Containers.Tests.Common_Tests
             TestTimeout = TimeSpan.FromSeconds(3);
         }
 
+        protected abstract IRegistration Registration { get; }
+        protected abstract Task<ConsumeContext> ConsumeContext { get; }
+        protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
+        protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
+
         [Test]
         public async Task Should_provide_the_outbox()
         {
-            var fault = ConnectPublishHandler<Fault<PingMessage>>();
+            Task<ConsumeContext<Fault<PingMessage>>> fault = ConnectPublishHandler<Fault<PingMessage>>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
 
             var consumeContext = await ConsumeContext;
 
-            Assert.That(consumeContext.TryGetPayload<InMemoryOutboxConsumeContext<PingMessage>>(out var outboxConsumeContext), "Is ConsumerConsumeContext");
+            Assert.That(
+                consumeContext.TryGetPayload<InMemoryOutboxConsumeContext<PingMessage>>(out InMemoryOutboxConsumeContext<PingMessage> outboxConsumeContext),
+                "Is ConsumerConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
@@ -95,11 +103,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             configurator.ConfigureConsumers(Registration);
         }
-
-        protected abstract IRegistration Registration { get; }
-        protected abstract Task<ConsumeContext> ConsumeContext { get; }
-        protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
-        protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
     }
 
 
@@ -111,16 +114,23 @@ namespace MassTransit.Containers.Tests.Common_Tests
             TestTimeout = TimeSpan.FromSeconds(3);
         }
 
+        protected abstract IRegistration Registration { get; }
+        protected abstract Task<ConsumeContext> ConsumeContext { get; }
+        protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
+        protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
+
         [Test]
         public async Task Should_provide_the_outbox_to_the_consumer()
         {
-            var fault = ConnectPublishHandler<Fault<PingMessage>>();
+            Task<ConsumeContext<Fault<PingMessage>>> fault = ConnectPublishHandler<Fault<PingMessage>>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
 
             var consumeContext = await ConsumeContext;
 
-            Assert.That(consumeContext.TryGetPayload<InMemoryOutboxConsumeContext<PingMessage>>(out var outboxConsumeContext), "Is ConsumerConsumeContext");
+            Assert.That(
+                consumeContext.TryGetPayload<InMemoryOutboxConsumeContext<PingMessage>>(out InMemoryOutboxConsumeContext<PingMessage> outboxConsumeContext),
+                "Is ConsumerConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
@@ -148,11 +158,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             configurator.ConfigureConsumers(Registration);
         }
-
-        protected abstract IRegistration Registration { get; }
-        protected abstract Task<ConsumeContext> ConsumeContext { get; }
-        protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
-        protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
     }
 
 
@@ -164,8 +169,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
         class DependentConsumer :
             IConsumer<PingMessage>
         {
-            readonly IService _service;
             readonly TaskCompletionSource<ConsumeContext> _consumeContextTask;
+            readonly IService _service;
 
             public DependentConsumer(IService service, TaskCompletionSource<ConsumeContext> consumeContextTask)
             {
@@ -187,8 +192,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
         class FlyingSoloConsumer :
             IConsumer<PingMessage>
         {
-            readonly IPublishEndpoint _publishEndpoint;
             readonly TaskCompletionSource<ConsumeContext> _consumeContextTask;
+            readonly IPublishEndpoint _publishEndpoint;
 
             public FlyingSoloConsumer(IPublishEndpoint publishEndpoint, ISendEndpointProvider sendEndpointProvider,
                 TaskCompletionSource<ConsumeContext> consumeContextTask,

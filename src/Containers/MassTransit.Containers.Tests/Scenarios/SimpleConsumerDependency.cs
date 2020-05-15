@@ -9,9 +9,9 @@
         ISimpleConsumerDependency,
         IDisposable
     {
-        readonly ISendEndpointProvider _sendEndpointProvider;
         readonly ConsumeContext _consumeContext;
         readonly TaskCompletionSource<bool> _disposed;
+        readonly ISendEndpointProvider _sendEndpointProvider;
 
         public SimpleConsumerDependency(ISendEndpointProvider sendEndpointProvider, ConsumeContext consumeContext)
         {
@@ -27,10 +27,7 @@
             _disposed.TrySetResult(true);
         }
 
-        public Task<bool> WasDisposed
-        {
-            get { return _disposed.Task; }
-        }
+        public Task<bool> WasDisposed => _disposed.Task;
 
         public void DoSomething()
         {

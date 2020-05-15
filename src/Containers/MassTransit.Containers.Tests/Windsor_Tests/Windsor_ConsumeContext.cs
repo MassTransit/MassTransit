@@ -29,16 +29,16 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             );
         }
 
+        protected override MassTransit.IRegistration Registration => _container.Resolve<MassTransit.IRegistration>();
+        protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
+        protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
+        protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
         [OneTimeTearDown]
         public void TearDown()
         {
             _container.Dispose();
         }
-
-        protected override MassTransit.IRegistration Registration => _container.Resolve<MassTransit.IRegistration>();
-        protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
-        protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
-        protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
     }
 
 
@@ -63,16 +63,16 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             );
         }
 
+        protected override MassTransit.IRegistration Registration => _container.Resolve<MassTransit.IRegistration>();
+        protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
+        protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
+        protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
         [OneTimeTearDown]
         public void TearDown()
         {
             _container.Dispose();
         }
-
-        protected override MassTransit.IRegistration Registration => _container.Resolve<MassTransit.IRegistration>();
-        protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
-        protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
-        protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
     }
 
 
@@ -96,15 +96,15 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             );
         }
 
+        protected override MassTransit.IRegistration Registration => _container.Resolve<MassTransit.IRegistration>();
+        protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
+        protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
+        protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
         [OneTimeTearDown]
         public void TearDown()
         {
             _container.Dispose();
         }
-
-        protected override MassTransit.IRegistration Registration => _container.Resolve<MassTransit.IRegistration>();
-        protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
-        protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
-        protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
     }
 }

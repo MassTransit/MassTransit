@@ -12,6 +12,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     public class SimpleInjector_ScopeSend :
         Common_ScopeSend<Container>
     {
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
         readonly Container _container;
         readonly Scope _childContainer;
 
@@ -34,12 +40,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Dispose();
         }
 
-        [Test]
-        public void Should_be_a_valid_container()
-        {
-            _container.Verify();
-        }
-
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseExecute(context => Console.WriteLine(
@@ -52,6 +52,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         {
             return _childContainer.GetInstance<ISendEndpointProvider>();
         }
+
         protected override void AssertScopesAreEqual(Container actual)
         {
             Assert.AreEqual(_childContainer.Container, actual);

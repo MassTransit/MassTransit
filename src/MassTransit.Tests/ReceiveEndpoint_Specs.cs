@@ -28,7 +28,7 @@ namespace MassTransit.Tests
         {
             Task<ConsumeContext<PingMessage>> pingHandled = null;
 
-            var handle = Host.ConnectReceiveEndpoint("second_queue", x =>
+            var handle = Bus.ConnectReceiveEndpoint("second_queue", x =>
             {
                 pingHandled = Handled<PingMessage>(x);
             });
@@ -57,7 +57,7 @@ namespace MassTransit.Tests
         public async Task Should_not_be_allowed_twice()
         {
             Task<ConsumeContext<PingMessage>> pingHandled = null;
-            var handle = Host.ConnectReceiveEndpoint("second_queue", x =>
+            var handle = Bus.ConnectReceiveEndpoint("second_queue", x =>
             {
                 pingHandled = Handled<PingMessage>(x);
             });
@@ -66,7 +66,7 @@ namespace MassTransit.Tests
             {
                 Assert.That(async () =>
                 {
-                    var unused = Host.ConnectReceiveEndpoint("second_queue", x =>
+                    var unused = Bus.ConnectReceiveEndpoint("second_queue", x =>
                     {
                     });
                     await unused.Ready;

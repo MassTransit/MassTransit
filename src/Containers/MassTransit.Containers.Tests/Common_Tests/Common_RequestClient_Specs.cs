@@ -22,10 +22,12 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected abstract IRequestClient<InitialRequest> RequestClient { get; }
 
+        protected abstract IRegistration Registration { get; }
+
         [Test]
         public async Task Should_receive_the_response()
         {
-            var client = RequestClient;
+            IRequestClient<InitialRequest> client = RequestClient;
 
             _correlationId = NewId.NextGuid();
 
@@ -50,8 +52,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.ConfigureConsumer<InitialConsumer>(Registration);
         }
-
-        protected abstract IRegistration Registration { get; }
 
 
         protected class InitialConsumer :

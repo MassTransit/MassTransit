@@ -30,16 +30,16 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             _container = builder.Build();
         }
 
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
+        protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
+        protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
         [OneTimeTearDown]
         public async Task TearDown()
         {
             await _container.DisposeAsync();
         }
-
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
-        protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
-        protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
-        protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
     }
 
 
@@ -66,16 +66,16 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             _container = builder.Build();
         }
 
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
+        protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
+        protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
         [OneTimeTearDown]
         public async Task TearDown()
         {
             await _container.DisposeAsync();
         }
-
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
-        protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
-        protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
-        protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
     }
 
 
@@ -100,15 +100,15 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             _container = builder.Build();
         }
 
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
+        protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
+        protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
         [OneTimeTearDown]
         public async Task TearDown()
         {
             await _container.DisposeAsync();
         }
-
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
-        protected override Task<ConsumeContext> ConsumeContext => _container.Resolve<TaskCompletionSource<ConsumeContext>>().Task;
-        protected override Task<IPublishEndpoint> PublishEndpoint => _container.Resolve<TaskCompletionSource<IPublishEndpoint>>().Task;
-        protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.Resolve<TaskCompletionSource<ISendEndpointProvider>>().Task;
     }
 }

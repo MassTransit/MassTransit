@@ -18,13 +18,13 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
                 .Build();
         }
 
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+
         [OneTimeTearDown]
         public void Close_container()
         {
             _container.Dispose();
         }
-
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {
@@ -45,13 +45,13 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
                 .Build();
         }
 
+        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+
         [OneTimeTearDown]
         public void Close_container()
         {
             _container.Dispose();
         }
-
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {

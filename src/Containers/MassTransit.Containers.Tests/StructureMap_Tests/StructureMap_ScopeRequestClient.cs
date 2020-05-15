@@ -34,6 +34,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             _childContainer.Dispose();
             _container.Dispose();
         }
+
         protected override IRequestClient<SimpleMessageClass> GetSendRequestClient()
         {
             return _childContainer.GetInstance<IRequestClient<SimpleMessageClass>>();

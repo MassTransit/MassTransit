@@ -13,6 +13,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     public class SimpleInjector_Discovery :
         Common_Discovery
     {
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
         readonly Container _container;
 
         public SimpleInjector_Discovery()
@@ -33,12 +39,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 
             _container.RegisterInMemorySagaRepository<DiscoveryPingSaga>();
             _container.RegisterInMemorySagaRepository<DiscoveryPingState>();
-        }
-
-        [Test]
-        public void Should_be_a_valid_container()
-        {
-            _container.Verify();
         }
 
         protected override IRequestClient<PingMessage> GetRequestClient()

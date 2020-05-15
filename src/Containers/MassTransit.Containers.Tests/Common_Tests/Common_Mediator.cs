@@ -16,6 +16,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_Mediator :
         InMemoryTestFixture
     {
+        protected abstract IMediator Mediator { get; }
+
         [Test]
         public async Task Should_dispatch_to_the_consumer()
         {
@@ -23,13 +25,11 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             await Mediator.Send(new SimpleMessageClass(name));
 
-            SimplerConsumer lastConsumer = await SimplerConsumer.LastConsumer.OrCanceled(TestCancellationToken);
+            var lastConsumer = await SimplerConsumer.LastConsumer.OrCanceled(TestCancellationToken);
             lastConsumer.ShouldNotBe(null);
 
             await lastConsumer.Last.OrCanceled(TestCancellationToken);
         }
-
-        protected abstract IMediator Mediator { get; }
 
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
             where T : class
@@ -148,6 +148,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     {
         Guid _correlationId;
 
+        protected abstract IMediator Mediator { get; }
+
         [Test]
         public async Task Should_receive_the_response()
         {
@@ -163,8 +165,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             Assert.That(foundId.HasValue, Is.True);
         }
-
-        protected abstract IMediator Mediator { get; }
 
         protected abstract ISagaRepository<T> GetSagaRepository<T>()
             where T : class, ISaga;
@@ -194,6 +194,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
             ISaga,
             InitiatedBy<OrderSubmitted>
         {
+            public string OrderNumber { get; set; }
+
             public Task Consume(ConsumeContext<OrderSubmitted> context)
             {
                 OrderNumber = context.Message.OrderNumber;
@@ -202,7 +204,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             }
 
             public Guid CorrelationId { get; set; }
-            public string OrderNumber { get; set; }
         }
 
 

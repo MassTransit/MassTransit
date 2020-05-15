@@ -25,7 +25,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             var endpoint = await provider.GetSendEndpoint(InputQueueAddress);
             await endpoint.Send(new SimpleMessageClass("test"));
 
-            SendContext sent = await _taskCompletionSource.Task;
+            var sent = await _taskCompletionSource.Task;
 
             Assert.IsTrue(sent.TryGetPayload<TScope>(out var scope));
             AssertScopesAreEqual(scope);

@@ -12,6 +12,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     public class SimpleInjector_Scope :
         Common_Scope
     {
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
         readonly Container _container;
 
         public SimpleInjector_Scope()
@@ -29,12 +35,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public void Close_container()
         {
             _container.Dispose();
-        }
-
-        [Test]
-        public void Should_be_a_valid_container()
-        {
-            _container.Verify();
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

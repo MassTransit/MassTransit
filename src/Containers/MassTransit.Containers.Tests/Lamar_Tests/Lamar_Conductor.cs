@@ -36,6 +36,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
         {
             return new RegistrationContext<IServiceContext>(_container.GetInstance<IRegistration>(), _container.GetInstance<BusHealth>(), _container);
         }
+
         protected override IClientFactory GetClientFactory()
         {
             return _container.GetInstance<IClientFactory>();
