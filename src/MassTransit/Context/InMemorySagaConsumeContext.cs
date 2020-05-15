@@ -13,13 +13,11 @@
         where TMessage : class
         where TSaga : class, ISaga
     {
-        readonly IndexedSagaDictionary<TSaga> _sagas;
         readonly SagaInstance<TSaga> _instance;
 
-        public InMemorySagaConsumeContext(ConsumeContext<TMessage> context, SagaInstance<TSaga> instance, IndexedSagaDictionary<TSaga> sagas)
+        public InMemorySagaConsumeContext(ConsumeContext<TMessage> context, SagaInstance<TSaga> instance)
             : base(context)
         {
-            _sagas = sagas;
             _instance = instance;
         }
 
@@ -31,21 +29,7 @@
 
         public async Task SetCompleted()
         {
-            _instance.Remove();
-
-            await _sagas.MarkInUse(CancellationToken).ConfigureAwait(false);
-            try
-            {
-                _sagas.Remove(_instance);
-            }
-            finally
-            {
-                _sagas.Release();
-            }
-
             IsCompleted = true;
-
-            this.LogRemoved();
         }
 
         public void Dispose()

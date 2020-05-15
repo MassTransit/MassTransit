@@ -36,7 +36,7 @@ namespace MassTransit.Saga.InMemoryRepository
                     throw new ArgumentOutOfRangeException(nameof(mode));
             }
 
-            return new InMemorySagaConsumeContext<TSaga, T>(consumeContext, sagaInstance, context);
+            return new InMemorySagaConsumeContext<TSaga, T>(consumeContext, sagaInstance);
         }
     }
 }

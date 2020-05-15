@@ -24,49 +24,24 @@ namespace MassTransit.RedisIntegration.Contexts
             _options = options;
         }
 
-        public async Task Add<T>(SagaConsumeContext<TSaga, T> context)
-            where T : class
+        public Task Add(SagaConsumeContext<TSaga> context)
         {
             var instance = context.Saga;
 
-            try
-            {
-                await Put(instance).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                throw new SagaException("Saga update failed", typeof(TSaga), typeof(T), instance.CorrelationId, exception);
-            }
+            return Put(instance);
         }
 
-        public async Task Insert<T>(TSaga instance)
-            where T : class
+        public Task Insert(TSaga instance)
         {
-            try
-            {
-                await Put(instance).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                throw new SagaException("Saga insert failed", typeof(TSaga), typeof(T), instance.CorrelationId, exception);
-            }
+            return Put(instance);
         }
 
-        public async Task<TSaga> Load<T>(Guid correlationId)
-            where T : class
+        public Task<TSaga> Load(Guid correlationId)
         {
-            try
-            {
-                return await Get(correlationId).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                throw new SagaException("Saga load failed", typeof(TSaga), typeof(T), correlationId, exception);
-            }
+            return Get(correlationId);
         }
 
-        public async Task Update<T>(SagaConsumeContext<TSaga, T> context)
-            where T : class
+        public async Task Update(SagaConsumeContext<TSaga> context)
         {
             var instance = context.Saga;
 
@@ -80,13 +55,13 @@ namespace MassTransit.RedisIntegration.Contexts
 
                 var existingInstance = await Get(instance.CorrelationId).ConfigureAwait(false);
                 if (existingInstance.Version >= instance.Version)
-                    throw new RedisSagaConcurrencyException("Saga version conflict", typeof(TSaga), typeof(T), instance.CorrelationId);
+                    throw new RedisSagaConcurrencyException("Saga version conflict", typeof(TSaga), instance.CorrelationId);
 
                 await Put(instance).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
-                throw new SagaException("Saga update failed", typeof(TSaga), typeof(T), instance.CorrelationId, exception);
+                throw new SagaException("Saga update failed", typeof(TSaga), instance.CorrelationId, exception);
             }
             finally
             {
@@ -95,19 +70,9 @@ namespace MassTransit.RedisIntegration.Contexts
             }
         }
 
-        public async Task Delete<T>(SagaConsumeContext<TSaga, T> context)
-            where T : class
+        public Task Delete(SagaConsumeContext<TSaga> context)
         {
-            var instance = context.Saga;
-
-            try
-            {
-                await Delete(instance.CorrelationId).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                throw new SagaException("Saga update failed", typeof(TSaga), typeof(T), instance.CorrelationId, exception);
-            }
+            return Delete(context.Saga.CorrelationId);
         }
 
         public ValueTask DisposeAsync()

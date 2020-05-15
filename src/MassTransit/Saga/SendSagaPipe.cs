@@ -32,9 +32,7 @@ namespace MassTransit.Saga
             if (_policy.PreInsertInstance(context, out var instance))
                 sagaConsumeContext = await context.Insert(instance).ConfigureAwait(false);
 
-            if (sagaConsumeContext == null)
-                sagaConsumeContext = await context.Load(_correlationId).ConfigureAwait(false);
-
+            sagaConsumeContext ??= await context.Load(_correlationId).ConfigureAwait(false);
             if (sagaConsumeContext != null)
             {
                 try
@@ -42,6 +40,15 @@ namespace MassTransit.Saga
                     sagaConsumeContext.LogUsed();
 
                     await _policy.Existing(sagaConsumeContext, _next).ConfigureAwait(false);
+
+                    if (sagaConsumeContext.IsCompleted)
+                    {
+                        await context.Delete(sagaConsumeContext).ConfigureAwait(false);
+
+                        sagaConsumeContext.LogRemoved();
+                    }
+                    else
+                        await context.Update(sagaConsumeContext).ConfigureAwait(false);
                 }
                 finally
                 {
@@ -58,9 +65,7 @@ namespace MassTransit.Saga
             }
             else
             {
-                var missingPipe = new MissingSagaPipe<TSaga, T>(context, _next);
-
-                await _policy.Missing(context, missingPipe).ConfigureAwait(false);
+                await _policy.Missing(context, new MissingSagaPipe<TSaga, T>(context, _next)).ConfigureAwait(false);
             }
         }
     }

@@ -3,7 +3,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
     using System.Threading.Tasks;
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
-    using Util;
 
 
     public class ContainerSagaDbContextFactory<TContext, TSaga> :
@@ -29,9 +28,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             return _dbContext;
         }
 
-        public Task ReleaseAsync(DbContext dbContext)
+        public ValueTask ReleaseAsync(DbContext dbContext)
         {
-            return TaskUtil.Completed;
+            return default;
         }
     }
 }

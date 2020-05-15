@@ -30,6 +30,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         /// Release the DbContext once it is no longer needed
         /// </summary>
         /// <param name="dbContext"></param>
-        Task ReleaseAsync(DbContext dbContext);
+        ValueTask ReleaseAsync(DbContext dbContext);
     }
 }

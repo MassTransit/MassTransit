@@ -11,8 +11,8 @@ namespace MassTransit.RedisIntegration
         {
         }
 
-        public RedisSagaConcurrencyException(string message, Type sagaType, Type messageType, Guid correlationId)
-            : base(message, sagaType, messageType, correlationId)
+        public RedisSagaConcurrencyException(string message, Type sagaType, Guid correlationId)
+            : base(message, sagaType, correlationId)
         {
         }
     }

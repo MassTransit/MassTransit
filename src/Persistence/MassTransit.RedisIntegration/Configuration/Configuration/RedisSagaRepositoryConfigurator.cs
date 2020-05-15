@@ -5,6 +5,7 @@ namespace MassTransit.RedisIntegration.Configuration
     using Contexts;
     using GreenPipes;
     using Registration;
+    using Saga;
     using StackExchange.Redis;
 
 
@@ -75,8 +76,10 @@ namespace MassTransit.RedisIntegration.Configuration
             where T : class, IVersionedSaga
         {
             configurator.RegisterSingleInstance(_connectionFactory);
-            configurator.RegisterSingleInstance(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix, _databaseSelector, Expiry));
-            configurator.RegisterSagaRepository<T, DatabaseContext<T>, RedisSagaConsumeContextFactory<T>, RedisSagaRepositoryContextFactory<T>>();
+            configurator.RegisterSingleInstance(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix, _databaseSelector,
+                Expiry));
+            configurator.RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>,
+                RedisSagaRepositoryContextFactory<T>>();
         }
 
         static IDatabase SelectDefaultDatabase(IConnectionMultiplexer multiplexer)

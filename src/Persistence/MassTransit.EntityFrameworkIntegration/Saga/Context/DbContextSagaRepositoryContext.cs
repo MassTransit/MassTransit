@@ -9,6 +9,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
     using GreenPipes;
     using MassTransit.Context;
     using MassTransit.Saga;
+    using Util;
 
 
     public class DbContextSagaRepositoryContext<TSaga, TMessage> :
@@ -68,6 +69,30 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
                 return default;
 
             return await _factory.CreateSagaConsumeContext(_dbContext, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
+        }
+
+        public async Task Save(SagaConsumeContext<TSaga> context)
+        {
+            _dbContext.Set<TSaga>().Add(context.Saga);
+
+            await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
+        }
+
+        public Task Update(SagaConsumeContext<TSaga> context)
+        {
+            return _dbContext.SaveChangesAsync(CancellationToken);
+        }
+
+        public Task Delete(SagaConsumeContext<TSaga> context)
+        {
+            _dbContext.Set<TSaga>().Remove(context.Saga);
+
+            return _dbContext.SaveChangesAsync(CancellationToken);
+        }
+
+        public Task Discard(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
         }
 
         public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)

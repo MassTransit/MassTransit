@@ -2,26 +2,20 @@ namespace MassTransit.RedisIntegration.Contexts
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
 
 
     public interface DatabaseContext<TSaga> :
         IAsyncDisposable
         where TSaga : class, IVersionedSaga
     {
-        Task Add<T>(SagaConsumeContext<TSaga, T> context)
-            where T : class;
+        Task Add(SagaConsumeContext<TSaga> context);
 
-        Task Insert<T>(TSaga instance)
-            where T : class;
+        Task Insert(TSaga instance);
 
-        Task<TSaga> Load<T>(Guid correlationId)
-            where T : class;
+        Task<TSaga> Load(Guid correlationId);
 
-        Task Update<T>(SagaConsumeContext<TSaga, T> context)
-            where T : class;
+        Task Update(SagaConsumeContext<TSaga> context);
 
-        Task Delete<T>(SagaConsumeContext<TSaga, T> context)
-            where T : class;
+        Task Delete(SagaConsumeContext<TSaga> context);
     }
 }

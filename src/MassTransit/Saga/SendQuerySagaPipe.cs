@@ -38,6 +38,15 @@ namespace MassTransit.Saga
                         try
                         {
                             await _policy.Existing(sagaConsumeContext, _next).ConfigureAwait(false);
+
+                            if (sagaConsumeContext.IsCompleted)
+                            {
+                                await context.Delete(sagaConsumeContext).ConfigureAwait(false);
+
+                                sagaConsumeContext.LogRemoved();
+                            }
+                            else
+                                await context.Update(sagaConsumeContext).ConfigureAwait(false);
                         }
                         finally
                         {

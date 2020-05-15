@@ -2,6 +2,8 @@
 {
     using System;
     using System.Threading.Tasks;
+    using MassTransit.Saga;
+    using MongoDB.Driver;
     using MongoDbIntegration.Saga.Context;
     using Moq;
     using NUnit.Framework;
@@ -27,7 +29,7 @@
             await SagaRepository.InsertSaga(new SimpleSaga {CorrelationId = _correlationId});
 
             var repository = new MongoDbSagaRepositoryContext<SimpleSaga, InitiateSimpleSaga>(SagaRepository.Instance.GetCollection<SimpleSaga>("sagas"),
-                Mock.Of<ConsumeContext<InitiateSimpleSaga>>(), new MongoDbSagaConsumeContextFactory<SimpleSaga>());
+                Mock.Of<ConsumeContext<InitiateSimpleSaga>>(), new SagaConsumeContextFactory<IMongoCollection<SimpleSaga>, SimpleSaga>());
 
             _result = await repository.Load(_correlationId);
         }

@@ -28,9 +28,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
             return _dbContextFactory();
         }
 
-        public async Task ReleaseAsync(DbContext dbContext)
+        public async ValueTask ReleaseAsync(DbContext dbContext)
         {
-            await dbContext.DisposeAsync();
+            await dbContext.DisposeAsync().ConfigureAwait(false);
         }
     }
 }

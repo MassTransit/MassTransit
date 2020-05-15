@@ -27,7 +27,7 @@
 
             found.ShouldNotBeNull();
 
-            var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
+            var nextMessage = new CompleteSimpleSaga {CorrelationId = sagaId};
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
@@ -60,7 +60,7 @@
             var redis = ConnectionMultiplexer.Connect("127.0.0.1");
             redis.PreserveAsyncOrder = false;
 
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new RedisSagaRepository<SimpleSaga>(() => redis.GetDatabase()));
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => RedisSagaRepository<SimpleSaga>.Create(() => redis.GetDatabase()));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -68,6 +68,7 @@
             configurator.Saga(_sagaRepository.Value);
         }
     }
+
 
     [TestFixture]
     [Category("Integration")]
@@ -86,7 +87,7 @@
 
             found.ShouldNotBeNull();
 
-            var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
+            var nextMessage = new CompleteSimpleSaga {CorrelationId = sagaId};
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
@@ -119,7 +120,7 @@
             var redis = ConnectionMultiplexer.Connect("127.0.0.1");
             redis.PreserveAsyncOrder = false;
 
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new RedisSagaRepository<SimpleSaga>(() => redis.GetDatabase(), optimistic: false));
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => RedisSagaRepository<SimpleSaga>.Create(() => redis.GetDatabase(), optimistic: false));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -128,10 +129,11 @@
         }
     }
 
+
     [TestFixture]
     [Category("Integration")]
     public class LocatingAnExistingSagaWithKeyPrefix :
-       InMemoryTestFixture
+        InMemoryTestFixture
     {
         [Test]
         public async Task A_correlated_message_should_find_the_correct_saga()
@@ -145,7 +147,7 @@
 
             found.ShouldNotBeNull();
 
-            var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
+            var nextMessage = new CompleteSimpleSaga {CorrelationId = sagaId};
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
@@ -178,7 +180,7 @@
             var redis = ConnectionMultiplexer.Connect("127.0.0.1");
             redis.PreserveAsyncOrder = false;
 
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new RedisSagaRepository<SimpleSaga>(() => redis.GetDatabase(), keyPrefix: "test"));
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => RedisSagaRepository<SimpleSaga>.Create(() => redis.GetDatabase(), keyPrefix: "test"));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

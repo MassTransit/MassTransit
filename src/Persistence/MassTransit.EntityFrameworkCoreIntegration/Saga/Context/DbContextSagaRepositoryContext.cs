@@ -10,6 +10,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
     using MassTransit.Saga;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
+    using Util;
 
 
     public class DbContextSagaRepositoryContext<TSaga, TMessage> :
@@ -69,6 +70,30 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
                 return default;
 
             return await _factory.CreateSagaConsumeContext(_dbContext, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
+        }
+
+        public async Task Save(SagaConsumeContext<TSaga> context)
+        {
+            await _dbContext.Set<TSaga>().AddAsync(context.Saga).ConfigureAwait(false);
+
+            await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
+        }
+
+        public Task Update(SagaConsumeContext<TSaga> context)
+        {
+            return _dbContext.SaveChangesAsync(CancellationToken);
+        }
+
+        public Task Delete(SagaConsumeContext<TSaga> context)
+        {
+            _dbContext.Set<TSaga>().Remove(context.Saga);
+
+            return _dbContext.SaveChangesAsync(CancellationToken);
+        }
+
+        public Task Discard(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
         }
 
         public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
