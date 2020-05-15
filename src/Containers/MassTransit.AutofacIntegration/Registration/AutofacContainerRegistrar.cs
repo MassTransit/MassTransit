@@ -48,14 +48,6 @@ namespace MassTransit.AutofacIntegration.Registration
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
-            _builder.RegisterType<AutofacStateMachineActivityFactory>()
-                .As<IStateMachineActivityFactory>()
-                .SingleInstance();
-
-            _builder.RegisterType<AutofacSagaStateMachineFactory>()
-                .As<ISagaStateMachineFactory>()
-                .SingleInstance();
-
             _builder.RegisterType<TStateMachine>()
                 .AsSelf()
                 .As<SagaStateMachine<TInstance>>()

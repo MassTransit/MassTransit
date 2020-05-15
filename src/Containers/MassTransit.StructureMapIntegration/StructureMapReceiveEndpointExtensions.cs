@@ -1,6 +1,8 @@
 namespace MassTransit
 {
     using System;
+    using Automatonymous;
+    using Automatonymous.SagaConfigurators;
     using ConsumeConfigurators;
     using Courier;
     using Registration;
@@ -134,11 +136,79 @@ namespace MassTransit
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            ISagaRepositoryFactory factory = new StructureMapSagaRepositoryFactory(container);
-
-            ISagaRepository<T> sagaRepository = factory.CreateSagaRepository<T>();
+            var sagaRepository = container.GetInstance<ISagaRepository<T>>();
 
             configurator.Saga(sagaRepository, configure);
+        }
+
+        /// <summary>
+        /// Subscribe a state machine saga to the endpoint
+        /// </summary>
+        /// <typeparam name="TInstance">The state machine instance type</typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="context">The StructureMap root container to resolve the repository</param>
+        /// <param name="configure">Optionally configure the saga</param>
+        /// <returns></returns>
+        public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, IContext context,
+            Action<ISagaConfigurator<TInstance>> configure = null)
+            where TInstance : class, SagaStateMachineInstance
+        {
+            StateMachineSaga(configurator, context.GetInstance<IContainer>(), configure);
+        }
+
+        /// <summary>
+        /// Subscribe a state machine saga to the endpoint
+        /// </summary>
+        /// <typeparam name="TInstance">The state machine instance type</typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="container">The StructureMap Lifetime Container to resolve the repository</param>
+        /// <param name="configure">Optionally configure the saga</param>
+        /// <returns></returns>
+        public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, IContainer container,
+            Action<ISagaConfigurator<TInstance>> configure = null)
+            where TInstance : class, SagaStateMachineInstance
+        {
+            SagaStateMachine<TInstance> stateMachine = container.GetInstance<SagaStateMachine<TInstance>>();
+
+            StateMachineSaga(configurator, stateMachine, container, configure);
+        }
+
+        /// <summary>
+        /// Subscribe a state machine saga to the endpoint
+        /// </summary>
+        /// <typeparam name="TInstance">The state machine instance type</typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="stateMachine">The state machine</param>
+        /// <param name="context">The StructureMap root container to resolve the repository</param>
+        /// <param name="configure">Optionally configure the saga</param>
+        /// <returns></returns>
+        public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, SagaStateMachine<TInstance> stateMachine,
+            IContext context, Action<ISagaConfigurator<TInstance>> configure = null)
+            where TInstance : class, SagaStateMachineInstance
+        {
+            StateMachineSaga(configurator, stateMachine, context.GetInstance<IContainer>(), configure);
+        }
+
+        /// <summary>
+        /// Subscribe a state machine saga to the endpoint
+        /// </summary>
+        /// <typeparam name="TInstance">The state machine instance type</typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="stateMachine">The state machine</param>
+        /// <param name="container">The StructureMap Lifetime container to resolve the repository</param>
+        /// <param name="configure">Optionally configure the saga</param>
+        /// <returns></returns>
+        public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, SagaStateMachine<TInstance> stateMachine,
+            IContainer container, Action<ISagaConfigurator<TInstance>> configure = null)
+            where TInstance : class, SagaStateMachineInstance
+        {
+            ISagaRepository<TInstance> repository = container.GetInstance<ISagaRepository<TInstance>>();
+
+            var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, repository, configurator);
+
+            configure?.Invoke(stateMachineConfigurator);
+
+            configurator.AddEndpointSpecification(stateMachineConfigurator);
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,

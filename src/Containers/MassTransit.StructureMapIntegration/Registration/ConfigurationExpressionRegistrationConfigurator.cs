@@ -29,10 +29,6 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Use(context => CreateConsumerScopeProvider(context))
                 .Singleton();
 
-            expression.For<ISagaRepositoryFactory>()
-                .Use(context => CreateSagaRepositoryFactory(context))
-                .Singleton();
-
             expression.For<IConfigurationServiceProvider>()
                 .Use(context => new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>()))
                 .Singleton();
@@ -125,11 +121,6 @@ namespace MassTransit.StructureMapIntegration.Registration
         static IConsumerScopeProvider CreateConsumerScopeProvider(IContext context)
         {
             return new StructureMapConsumerScopeProvider(context.GetInstance<IContainer>());
-        }
-
-        static ISagaRepositoryFactory CreateSagaRepositoryFactory(IContext context)
-        {
-            return new StructureMapSagaRepositoryFactory(context.GetInstance<IContainer>());
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IContext context)

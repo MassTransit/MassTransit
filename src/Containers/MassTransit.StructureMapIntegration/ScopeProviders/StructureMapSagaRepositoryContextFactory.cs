@@ -74,7 +74,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
                 using var nestedContainer = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
 
                 var activityFactory = nestedContainer.TryGetInstance<IStateMachineActivityFactory>()
-                    ?? new StructureMapStateMachineActivityFactory();
+                    ?? StructureMapStateMachineActivityFactory.Instance;
 
                 var consumeContextScope = new ConsumeContextScope<T>(context, nestedContainer, activityFactory);
 

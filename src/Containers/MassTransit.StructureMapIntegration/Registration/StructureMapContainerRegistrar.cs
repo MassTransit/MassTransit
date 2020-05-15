@@ -45,9 +45,6 @@ namespace MassTransit.StructureMapIntegration.Registration
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
-            _expression.For<ISagaStateMachineFactory>().Use<StructureMapSagaStateMachineFactory>().Singleton();
-            _expression.For<IStateMachineActivityFactory>().Use<StructureMapStateMachineActivityFactory>().Singleton();
-
             _expression.For<TStateMachine>().Singleton();
             _expression.For<SagaStateMachine<TInstance>>().Use(provider => provider.GetInstance<TStateMachine>()).Singleton();
         }

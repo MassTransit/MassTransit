@@ -33,9 +33,6 @@ namespace MassTransit.WindsorIntegration.Registration
                 Component.For<IConfigurationServiceProvider>()
                     .ImplementedBy<WindsorConfigurationServiceProvider>()
                     .LifestyleSingleton(),
-                Component.For<ISagaRepositoryFactory>()
-                    .ImplementedBy<WindsorSagaRepositoryFactory>()
-                    .LifestyleSingleton(),
                 Component.For<IRegistrationConfigurator>()
                     .Instance(this)
                     .LifestyleSingleton(),
