@@ -39,7 +39,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             configurator.Bind<PingMessage>();
         }
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("monitor", e =>
             {

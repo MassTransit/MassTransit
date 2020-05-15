@@ -269,9 +269,9 @@
         [OneTimeSetUp]
         public async Task Setup()
         {
-            _clientFactory = await Host.CreateClientFactory(RequestTimeout.After(s: 8));
+            _clientFactory = await Bus.ConnectClientFactory(RequestTimeout.After(s: 8));
 
-            _requestClient = await Host.CreateRequestClient<PingMessage>(InputQueueAddress, RequestTimeout.After(s: 8));
+            _requestClient = _clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, RequestTimeout.After(s: 8));
 
             _response = _requestClient.GetResponse<PongMessage>(new PingMessage());
         }

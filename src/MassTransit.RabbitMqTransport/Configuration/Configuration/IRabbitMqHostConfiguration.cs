@@ -25,8 +25,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         /// </summary>
         bool DeployTopologyOnly { get; set; }
 
-        IRabbitMqHost Proxy { get; }
-
         /// <summary>
         /// Apply the endpoint definition to the receive endpoint configurator
         /// </summary>

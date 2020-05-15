@@ -16,7 +16,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_be_allowed()
         {
-            Uri serviceAddress = new UriBuilder(Host.Address + "/" + ServiceQueue) {Query = "bind=true"}.Uri;
+            Uri serviceAddress = new UriBuilder(HostAddress + "/" + ServiceQueue) {Query = "bind=true"}.Uri;
 
             var endpoint = await Bus.GetSendEndpoint(serviceAddress);
 
@@ -24,7 +24,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Task<ConsumeContext<PingMessage>> pingHandled = null;
 
-            var handle = Host.ConnectReceiveEndpoint(ServiceQueue, x =>
+            var handle = Bus.ConnectReceiveEndpoint(ServiceQueue, x =>
             {
                 pingHandled = Handled<PingMessage>(x);
             });

@@ -26,7 +26,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             var jsonText = JsonConvert.SerializeObject(contract, JsonMessageSerializer.SerializerSettings);
             var body = Encoding.UTF8.GetBytes(jsonText);
 
-            SendRawMessage(Host, body);
+            SendRawMessage(body);
 
             ConsumeContext<RawContract> received = await _receivedA;
 
@@ -45,14 +45,15 @@ namespace MassTransit.RabbitMqTransport.Tests
             _receivedA = Handled<RawContract>(configurator);
         }
 
-        void SendRawMessage(IRabbitMqHost host, byte[] body)
+        void SendRawMessage(byte[] body)
         {
             try
             {
-                var connectionFactory = host.Settings.GetConnectionFactory();
+                var settings = GetHostSettings();
+                var connectionFactory = settings.GetConnectionFactory();
 
-                using var connection = host.Settings.EndpointResolver != null
-                    ? connectionFactory.CreateConnection(host.Settings.EndpointResolver, host.Settings.Host)
+                using var connection = settings.EndpointResolver != null
+                    ? connectionFactory.CreateConnection(settings.EndpointResolver, settings.Host)
                     : connectionFactory.CreateConnection();
 
                 using var model = connection.CreateModel();

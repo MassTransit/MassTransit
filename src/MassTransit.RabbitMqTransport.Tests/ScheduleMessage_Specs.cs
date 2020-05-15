@@ -19,10 +19,8 @@
             await _second;
         }
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            base.ConfigureRabbitMqBusHost(configurator, host);
-
             configurator.UseDelayedExchangeMessageScheduler();
         }
 
@@ -70,10 +68,8 @@
             Assert.That(timer.Elapsed, Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2)));
         }
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            base.ConfigureRabbitMqBusHost(configurator, host);
-
             configurator.UseDelayedExchangeMessageScheduler();
         }
 
@@ -115,10 +111,8 @@
             await _second;
         }
 
-        protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            base.ConfigureRabbitMqBusHost(configurator, host);
-
             configurator.UseDelayedExchangeMessageScheduler();
         }
 

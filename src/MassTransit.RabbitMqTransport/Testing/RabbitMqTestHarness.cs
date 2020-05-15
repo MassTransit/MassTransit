@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.RabbitMqTransport.Testing
 {
     using System;
+    using Configurators;
     using MassTransit.Testing;
     using RabbitMQ.Client;
     using Transports;
@@ -26,7 +27,7 @@
 
         public Uri HostAddress
         {
-            get { return _hostAddress; }
+            get => _hostAddress;
             set
             {
                 _hostAddress = value;
@@ -38,13 +39,11 @@
         public string Password { get; set; }
         public override string InputQueueName { get; }
         public string NodeHostName { get; set; }
-        public IRabbitMqHost Host { get; private set; }
         public IMessageNameFormatter NameFormatter { get; }
 
         public override Uri InputQueueAddress => _inputQueueAddress;
 
         public event Action<IRabbitMqBusFactoryConfigurator> OnConfigureRabbitMqBus;
-        public event Action<IRabbitMqBusFactoryConfigurator, IRabbitMqHost> OnConfigureRabbitMqBusHost;
         public event Action<IRabbitMqReceiveEndpointConfigurator> OnConfigureRabbitMqReceiveEndpoint;
         public event Action<IRabbitMqHostConfigurator> OnConfigureRabbitMqHost;
         public event Action<IModel> OnCleanupVirtualHost;
@@ -52,11 +51,6 @@
         protected virtual void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             OnConfigureRabbitMqBus?.Invoke(configurator);
-        }
-
-        protected virtual void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
-        {
-            OnConfigureRabbitMqBusHost?.Invoke(configurator, host);
         }
 
         protected virtual void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -74,31 +68,32 @@
             OnCleanupVirtualHost?.Invoke(model);
         }
 
-        protected virtual IRabbitMqHost ConfigureHost(IRabbitMqBusFactoryConfigurator configurator)
+        protected virtual void ConfigureHost(IRabbitMqBusFactoryConfigurator configurator)
         {
-            return configurator.Host(HostAddress, h =>
-            {
-                h.Username(Username);
-                h.Password(Password);
+             configurator.Host(HostAddress, h =>
+             {
+                 ConfigureHostConfigurator(h);
+             });
+        }
 
-                if (!string.IsNullOrWhiteSpace(NodeHostName))
-                    h.UseCluster(c => c.Node(NodeHostName));
+        public RabbitMqHostSettings GetHostSettings()
+        {
+            var host = new RabbitMqHostConfigurator(HostAddress);
 
-                ConfigureRabbitMqHost(h);
-            });
+            ConfigureHostConfigurator(host);
+
+            return host.Settings;
         }
 
         protected override IBusControl CreateBus()
         {
             var busControl = MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                Host = ConfigureHost(x);
+                ConfigureHost(x);
 
                 ConfigureBus(x);
 
                 ConfigureRabbitMqBus(x);
-
-                ConfigureRabbitMqBusHost(x, Host);
 
                 x.ReceiveEndpoint(InputQueueName, e =>
                 {
@@ -113,19 +108,32 @@
                 });
             });
 
-            CleanUpVirtualHost(Host);
+            CleanUpVirtualHost();
 
             return busControl;
         }
 
-        void CleanUpVirtualHost(IRabbitMqHost host)
+        void ConfigureHostConfigurator(IRabbitMqHostConfigurator configurator)
+        {
+            configurator.Username(Username);
+            configurator.Password(Password);
+
+            if (!string.IsNullOrWhiteSpace(NodeHostName))
+                configurator.UseCluster(c => c.Node(NodeHostName));
+
+            ConfigureRabbitMqHost(configurator);
+        }
+
+        void CleanUpVirtualHost()
         {
             try
             {
-                var connectionFactory = host.Settings.GetConnectionFactory();
+                var settings = GetHostSettings();
 
-                using var connection = host.Settings.EndpointResolver != null
-                    ? connectionFactory.CreateConnection(host.Settings.EndpointResolver, host.Settings.Host)
+                var connectionFactory = settings.GetConnectionFactory();
+
+                using var connection = settings.EndpointResolver != null
+                    ? connectionFactory.CreateConnection(settings.EndpointResolver, settings.Host)
                     : connectionFactory.CreateConnection();
 
                 using var model = connection.CreateModel();

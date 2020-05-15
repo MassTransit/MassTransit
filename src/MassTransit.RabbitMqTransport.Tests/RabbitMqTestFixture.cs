@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Tests
+﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
@@ -45,11 +33,9 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             RabbitMqTestHarness.OnConfigureRabbitMqHost += ConfigureRabbitMqHost;
             RabbitMqTestHarness.OnConfigureRabbitMqBus += ConfigureRabbitMqBus;
-            RabbitMqTestHarness.OnConfigureRabbitMqBusHost += ConfigureRabbitMqBusHost;
             RabbitMqTestHarness.OnConfigureRabbitMqReceiveEndpoint += ConfigureRabbitMqReceiveEndpoint;
             RabbitMqTestHarness.OnCleanupVirtualHost += OnCleanupVirtualHost;
         }
-
 
         /// <summary>
         /// The sending endpoint for the InputQueue
@@ -61,13 +47,15 @@ namespace MassTransit.RabbitMqTransport.Tests
         protected Uri HostAddress => RabbitMqTestHarness.HostAddress;
 
         /// <summary>
-        /// The sending endpoint for the Bus 
+        /// The sending endpoint for the Bus
         /// </summary>
         protected ISendEndpoint BusSendEndpoint => RabbitMqTestHarness.BusSendEndpoint;
 
         protected ISentMessageList Sent => RabbitMqTestHarness.Sent;
 
         protected Uri BusAddress => RabbitMqTestHarness.BusAddress;
+
+        protected RabbitMqHostSettings GetHostSettings() => RabbitMqTestHarness.GetHostSettings();
 
         [OneTimeSetUp]
         public Task SetupInMemoryTestFixture()
@@ -89,10 +77,6 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
         }
 
-        protected virtual void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
-        {
-        }
-
         protected virtual void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
         }
@@ -100,8 +84,6 @@ namespace MassTransit.RabbitMqTransport.Tests
         protected virtual void OnCleanupVirtualHost(IModel model)
         {
         }
-
-        protected IRabbitMqHost Host => RabbitMqTestHarness.Host;
 
         protected IMessageNameFormatter NameFormatter => RabbitMqTestHarness.NameFormatter;
     }

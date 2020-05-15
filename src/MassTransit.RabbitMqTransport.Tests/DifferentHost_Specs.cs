@@ -14,7 +14,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             IBusControl bus = Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                IRabbitMqHost host = x.Host("localhost", "test", h =>
+                x.Host("localhost", "test", h =>
                 {
                 });
 
@@ -31,7 +31,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             IBusControl clientBus = Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                IRabbitMqHost host = x.Host("127.0.0.1", "test", h =>
+                x.Host("127.0.0.1", "test", h =>
                 {
                 });
 

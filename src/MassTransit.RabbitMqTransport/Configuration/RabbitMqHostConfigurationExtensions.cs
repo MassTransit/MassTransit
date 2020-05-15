@@ -14,10 +14,10 @@
         /// <param name="configurator"></param>
         /// <param name="hostAddress">The URI host address of the RabbitMQ host (rabbitmq://host:port/vhost)</param>
         /// <param name="configure"></param>
-        public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, Uri hostAddress,
+        public static void Host(this IRabbitMqBusFactoryConfigurator configurator, Uri hostAddress,
             Action<IRabbitMqHostConfigurator> configure = null)
         {
-            return configurator.Host(hostAddress, null, configure);
+            configurator.Host(hostAddress, null, configure);
         }
 
         /// <summary>
@@ -26,13 +26,13 @@
         /// <param name="configurator"></param>
         /// <param name="host">The host name of the broker, or a well-formed URI host address</param>
         /// <param name="configure">The configuration callback</param>
-        public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, string host,
+        public static void Host(this IRabbitMqBusFactoryConfigurator configurator, string host,
             Action<IRabbitMqHostConfigurator> configure = null)
         {
             if (Uri.IsWellFormedUriString(host, UriKind.Absolute))
-                return configurator.Host(new Uri(host), null, configure);
-
-            return configurator.Host(host, "/", null, configure);
+                configurator.Host(new Uri(host), null, configure);
+            else
+                configurator.Host(host, "/", null, configure);
         }
 
         /// <summary>
@@ -42,14 +42,14 @@
         /// <param name="hostAddress">The URI host address of the RabbitMQ host (rabbitmq://host:port/vhost)</param>
         /// <param name="connectionName">The client-provided connection name</param>
         /// <param name="configure"></param>
-        public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, Uri hostAddress, string connectionName,
+        public static void Host(this IRabbitMqBusFactoryConfigurator configurator, Uri hostAddress, string connectionName,
             Action<IRabbitMqHostConfigurator> configure = null)
         {
             var hostConfigurator = new RabbitMqHostConfigurator(hostAddress, connectionName);
 
             configure?.Invoke(hostConfigurator);
 
-            return configurator.Host(hostConfigurator.Settings);
+            configurator.Host(hostConfigurator.Settings);
         }
 
         /// <summary>
@@ -59,10 +59,10 @@
         /// <param name="host">The host name of the broker</param>
         /// <param name="virtualHost">The virtual host to use</param>
         /// <param name="configure">The configuration callback</param>
-        public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, string host, string virtualHost,
+        public static void Host(this IRabbitMqBusFactoryConfigurator configurator, string host, string virtualHost,
             Action<IRabbitMqHostConfigurator> configure = null)
         {
-            return configurator.Host(host, virtualHost, null, configure);
+            configurator.Host(host, virtualHost, null, configure);
         }
 
         /// <summary>
@@ -73,7 +73,7 @@
         /// <param name="virtualHost">The virtual host to use</param>
         /// <param name="connectionName">The client-provided connection name</param>
         /// <param name="configure">The configuration callback</param>
-        public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, string host, string virtualHost, string connectionName,
+        public static void Host(this IRabbitMqBusFactoryConfigurator configurator, string host, string virtualHost, string connectionName,
             Action<IRabbitMqHostConfigurator> configure = null)
         {
             if (host == null)
@@ -85,7 +85,7 @@
 
             configure?.Invoke(hostConfigurator);
 
-            return configurator.Host(hostConfigurator.Settings);
+            configurator.Host(hostConfigurator.Settings);
         }
 
         /// <summary>
@@ -96,10 +96,10 @@
         /// <param name="port">The port to connect to the broker</param>
         /// <param name="virtualHost">The virtual host to use</param>
         /// <param name="configure">The configuration callback</param>
-        public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, string host, ushort port, string virtualHost,
+        public static void Host(this IRabbitMqBusFactoryConfigurator configurator, string host, ushort port, string virtualHost,
             Action<IRabbitMqHostConfigurator> configure)
         {
-            return configurator.Host(host, port, virtualHost, null, configure);
+            configurator.Host(host, port, virtualHost, null, configure);
         }
 
         /// <summary>
@@ -111,7 +111,7 @@
         /// <param name="virtualHost">The virtual host to use</param>
         /// <param name="connectionName">The client-provided connection name</param>
         /// <param name="configure">The configuration callback</param>
-        public static IRabbitMqHost Host(this IRabbitMqBusFactoryConfigurator configurator, string host, ushort port, string virtualHost,
+        public static void Host(this IRabbitMqBusFactoryConfigurator configurator, string host, ushort port, string virtualHost,
             string connectionName, Action<IRabbitMqHostConfigurator> configure = null)
         {
             if (host == null)
@@ -123,7 +123,7 @@
 
             configure?.Invoke(hostConfigurator);
 
-            return configurator.Host(hostConfigurator.Settings);
+            configurator.Host(hostConfigurator.Settings);
         }
 
         /// <summary>

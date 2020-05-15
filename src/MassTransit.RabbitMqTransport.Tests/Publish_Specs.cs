@@ -201,7 +201,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             Task<ConsumeContext<A>> _receivedA;
             Task<ConsumeContext<Fault<A>>> _faultA;
 
-            protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+            protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
             {
                 configurator.ReceiveEndpoint("handle-fault", x =>
                 {
@@ -241,10 +241,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             Task<ConsumeContext<A>> _temporaryA;
             Task<ConsumeContext<A>> _temporaryB;
 
-            protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+            protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
             {
-                base.ConfigureRabbitMqBusHost(configurator, host);
-
                 configurator.ReceiveEndpoint(x =>
                 {
                     _temporaryA = Handled<A>(x);
@@ -298,10 +296,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                 _receivedA = Handler<A>(configurator, context => context.Publish(new GotA {Id = context.Message.Id}));
             }
 
-            protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
+            protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
             {
-                base.ConfigureRabbitMqBusHost(configurator, host);
-
                 configurator.ReceiveEndpoint("ack_queue", x =>
                 {
                     _receivedGotA = Handled<GotA>(x);
