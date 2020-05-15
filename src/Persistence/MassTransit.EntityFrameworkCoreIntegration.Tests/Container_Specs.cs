@@ -99,7 +99,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
             {
                 configurator.UseMessageRetry(r => r.Immediate(5));
                 configurator.UseInMemoryOutbox();
-                configurator.ConfigureSaga<TestInstance>(_provider);
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IRegistration>());
             }
         }
 
@@ -189,7 +189,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 if (DbContextOptionsBuilder.Options.Extensions.Any(x => x is NpgsqlOptionsExtension))
                     configurator.UseInMemoryOutbox();
 
-                configurator.ConfigureSaga<TestInstance>(_provider);
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IRegistration>());
             }
         }
 

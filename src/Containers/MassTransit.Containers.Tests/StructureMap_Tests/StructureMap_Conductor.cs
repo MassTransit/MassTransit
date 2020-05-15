@@ -24,7 +24,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
 
         protected override void ConfigureServiceEndpoints(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
-            configurator.ConfigureServiceEndpoints(_container, Options);
+            configurator.ConfigureServiceEndpoints(_container.GetInstance<IRegistration>(), Options);
         }
 
         protected override IClientFactory GetClientFactory()

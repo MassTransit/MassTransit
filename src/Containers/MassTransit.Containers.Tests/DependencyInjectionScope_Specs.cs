@@ -34,8 +34,10 @@ namespace MassTransit.Containers.Tests
 
         protected void ConfigureConsumer(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureConsumer<SimpleConsumer>(_provider);
-            configurator.ConfigureConsumer<SimplerConsumer>(_provider);
+            var registration = _provider.GetRequiredService<IRegistration>();
+
+            configurator.ConfigureConsumer<SimpleConsumer>(registration);
+            configurator.ConfigureConsumer<SimplerConsumer>(registration);
         }
 
         [Test]

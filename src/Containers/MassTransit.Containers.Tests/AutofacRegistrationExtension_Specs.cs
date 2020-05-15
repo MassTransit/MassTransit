@@ -34,8 +34,10 @@
             {
                 x.ReceiveEndpoint("input_queue", e =>
                 {
-                    e.ConfigureConsumers(container);
-                    e.ConfigureSagas(container);
+                    var registration = container.Resolve<IRegistration>();
+
+                    e.ConfigureConsumers(registration);
+                    e.ConfigureSagas(registration);
                 });
             });
 

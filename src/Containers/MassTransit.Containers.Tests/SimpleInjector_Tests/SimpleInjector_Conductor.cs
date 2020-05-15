@@ -1,6 +1,7 @@
 namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 {
     using Common_Tests;
+    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using SimpleInjector;
     using SimpleInjector.Lifestyles;
@@ -27,7 +28,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 
         protected override void ConfigureServiceEndpoints(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
-            configurator.ConfigureServiceEndpoints(_container.GetInstance<Container>(), Options);
+            configurator.ConfigureServiceEndpoints(_container.GetRequiredService<IRegistration>(), Options);
         }
 
         protected override IClientFactory GetClientFactory()

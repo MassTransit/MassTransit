@@ -1,6 +1,7 @@
 namespace MassTransit
 {
     using System;
+    using Conductor.Configuration;
     using ConsumeConfigurators;
     using Definition;
     using Saga;
@@ -23,6 +24,31 @@ namespace MassTransit
             where T : IReceiveEndpointConfigurator
         {
             registration.ConfigureEndpoints(configurator, endpointNameFormatter);
+        }
+
+        /// <summary>
+        /// Configure the Conductor service endpoints for all defined consumer, saga, and activity types.
+        /// </summary>
+        /// <param name="configurator">The <see cref="IBusFactoryConfigurator"/> for the bus being configured</param>
+        /// <param name="registration">The registration for this bus instance</param>
+        /// <param name="options">Optional service instance options to start</param>
+        /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
+        public static void ConfigureServiceEndpoints<T>(this IReceiveConfigurator<T> configurator,
+            IRegistration registration, ServiceInstanceOptions options = null)
+            where T : IReceiveEndpointConfigurator
+        {
+            options ??= new ServiceInstanceOptions();
+            if (options.EndpointNameFormatter is DefaultEndpointNameFormatter)
+            {
+                var formatter = registration.GetService<IEndpointNameFormatter>();
+                if (formatter != null)
+                    options.SetEndpointNameFormatter(formatter);
+            }
+
+            configurator.ServiceInstance(options, instanceConfigurator =>
+            {
+                registration.ConfigureEndpoints(instanceConfigurator, instanceConfigurator.EndpointNameFormatter);
+            });
         }
 
         /// <summary>

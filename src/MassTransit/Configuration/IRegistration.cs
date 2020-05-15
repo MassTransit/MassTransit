@@ -3,6 +3,7 @@ namespace MassTransit
     using System;
     using ConsumeConfigurators;
     using Definition;
+    using Registration;
     using Saga;
 
 
@@ -10,7 +11,8 @@ namespace MassTransit
     /// Registration contains the consumers and sagas that have been registered, allowing them to be configured on one or more
     /// receive endpoints.
     /// </summary>
-    public interface IRegistration
+    public interface IRegistration :
+        IConfigurationServiceProvider
     {
         /// <summary>
         /// Configure a consumer on the receive endpoint
