@@ -39,7 +39,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            configurator.ReceiveEndpoint(host, "input-fault", endpointConfigurator =>
+            configurator.ReceiveEndpoint("input-fault", endpointConfigurator =>
             {
                 _faulted = Handled<Fault<TestCommand>>(endpointConfigurator);
             });
@@ -112,7 +112,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            configurator.ReceiveEndpoint(host, "input-fault", endpointConfigurator =>
+            configurator.ReceiveEndpoint("input-fault", endpointConfigurator =>
             {
                 _faulted = Handled<Fault<TestCommand>>(endpointConfigurator);
             });
@@ -185,7 +185,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            configurator.ReceiveEndpoint(host, "input-fault", endpointConfigurator =>
+            configurator.ReceiveEndpoint("input-fault", endpointConfigurator =>
             {
                 _faulted = Handled<Fault<TestCommand>>(endpointConfigurator);
             });

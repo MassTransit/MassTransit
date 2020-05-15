@@ -102,7 +102,7 @@
 
         protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
-            configurator.ReceiveEndpoint(host, "input_queue_error", x =>
+            configurator.ReceiveEndpoint("input_queue_error", x =>
             {
                 x.ConfigureConsumeTopology = false;
 

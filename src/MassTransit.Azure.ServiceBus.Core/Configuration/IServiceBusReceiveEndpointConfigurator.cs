@@ -12,12 +12,6 @@
         IServiceBusQueueEndpointConfigurator
     {
         /// <summary>
-        /// If true, adds subscriptions for the message types to the related topics.
-        /// </summary>
-        [Obsolete("Use ConfigureConsumeTopology instead. In the meantime, this property sets that property as well.")]
-        bool SubscribeMessageTopics { set; }
-
-        /// <summary>
         /// If true, on shutdown, the subscriptions added are removed. This is used to avoid auto-delete
         /// queues from creating abandoned subscriptions on the topic, resulting in a quota overflow.
         /// </summary>

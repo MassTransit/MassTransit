@@ -6,17 +6,11 @@
 
     public interface IRabbitMqBusFactoryConfigurator :
         IBusFactoryConfigurator<IRabbitMqReceiveEndpointConfigurator>,
-        IReceiveConfigurator<IRabbitMqHost, IRabbitMqReceiveEndpointConfigurator>,
         IQueueEndpointConfigurator
     {
         new IRabbitMqSendTopologyConfigurator SendTopology { get; }
 
         new IRabbitMqPublishTopologyConfigurator PublishTopology { get; }
-
-        /// <summary>
-        /// Set to true if the topology should be deployed only
-        /// </summary>
-        bool DeployTopologyOnly { set; }
 
         /// <summary>
         /// Configure the send topology of the message type

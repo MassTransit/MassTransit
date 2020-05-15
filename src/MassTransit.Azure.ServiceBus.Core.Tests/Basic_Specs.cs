@@ -15,7 +15,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Hosting;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;

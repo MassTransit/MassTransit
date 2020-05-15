@@ -103,7 +103,7 @@
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            configurator.ReceiveEndpoint(host, "input_queue_error", x =>
+            configurator.ReceiveEndpoint("input_queue_error", x =>
             {
                 x.PurgeOnStartup = true;
 
@@ -330,7 +330,7 @@
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            configurator.ReceiveEndpoint(host, "input_queue_error", x =>
+            configurator.ReceiveEndpoint("input_queue_error", x =>
             {
                 x.PurgeOnStartup = true;
 
@@ -376,7 +376,7 @@
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            configurator.ReceiveEndpoint(host, "input_queue_error", x =>
+            configurator.ReceiveEndpoint("input_queue_error", x =>
             {
                 x.PurgeOnStartup = true;
 

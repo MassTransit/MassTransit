@@ -41,7 +41,7 @@
                     {
                     });
 
-                    x.ReceiveEndpoint(host, "input_queue", e =>
+                    x.ReceiveEndpoint("input_queue", e =>
                     {
                         var inputAddress = e.InputAddress;
 
@@ -66,7 +66,7 @@
                     {
                     });
 
-                    x.ReceiveEndpoint(host, "input_queue", e =>
+                    x.ReceiveEndpoint("input_queue", e =>
                     {
                         e.UseRetry(r =>
                         {
@@ -109,7 +109,7 @@
                     {
                     });
 
-                    x.ReceiveEndpoint(host, "0(*!)@((*#&!(*&@#/", e =>
+                    x.ReceiveEndpoint("0(*!)@((*#&!(*&@#/", e =>
                     {
                     });
                 });
@@ -128,7 +128,7 @@
                 {
                 });
 
-                x.ReceiveEndpoint(host, "input_queue", e =>
+                x.ReceiveEndpoint("input_queue", e =>
                 {
                     e.PurgeOnStartup = true;
                 });

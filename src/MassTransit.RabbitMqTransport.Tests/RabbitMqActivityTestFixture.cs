@@ -26,6 +26,7 @@
             SetupActivities(harness);
         }
 
+
         class BusFactoryConfigurator :
             ActivityTestContextConfigurator
         {
@@ -40,7 +41,7 @@
 
             public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configure)
             {
-                _configurator.ReceiveEndpoint(_host, queueName, x =>
+                _configurator.ReceiveEndpoint(queueName, x =>
                 {
                     x.PrefetchCount = 1;
                     x.PurgeOnStartup = true;

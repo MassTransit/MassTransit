@@ -174,7 +174,7 @@
                 {
                 });
 
-                x.ReceiveEndpoint(host, "input_queue", e =>
+                x.ReceiveEndpoint("input_queue", e =>
                 {
                     e.Handler<Test>(async context =>
                     {

@@ -85,7 +85,7 @@ async Task Main()
 			h.Password("guest");
 		});
 
-		sbc.ReceiveEndpoint(host, "my_queue", endpoint =>
+		sbc.ReceiveEndpoint("my_queue", endpoint =>
 		{
 			endpoint.Handler<MyMessage>(async context =>
 			{

@@ -134,7 +134,7 @@ namespace MassTransit.ActiveMqTransport.Tests
                     h.UseSsl();
                 });
 
-                cfg.ReceiveEndpoint(host, "input-queue", x =>
+                cfg.ReceiveEndpoint("input-queue", x =>
                 {
                     x.Handler<PingMessage>(async context =>
                     {
@@ -144,7 +144,7 @@ namespace MassTransit.ActiveMqTransport.Tests
                     sendAddress = x.InputAddress;
                 });
 
-                cfg.ReceiveEndpoint(host, "input-queue-too", x =>
+                cfg.ReceiveEndpoint("input-queue-too", x =>
                 {
                     x.Handler<PongMessage>(async context =>
                     {
@@ -177,7 +177,7 @@ namespace MassTransit.ActiveMqTransport.Tests
                     h.UseSsl();
                 });
 
-                sbc.ReceiveEndpoint(host, "test", e =>
+                sbc.ReceiveEndpoint("test", e =>
                 {
                     e.Handler<PingMessage>(async context => await context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
                 });
@@ -338,7 +338,7 @@ namespace MassTransit.ActiveMqTransport.Tests
                     h.UseSsl();
                 });
 
-                sbc.ReceiveEndpoint(host, "test", e =>
+                sbc.ReceiveEndpoint("test", e =>
                 {
                     e.Handler<PingMessage>(async context => await context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
                 });
