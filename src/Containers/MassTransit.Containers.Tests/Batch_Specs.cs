@@ -14,6 +14,19 @@ namespace MassTransit.Containers.Tests
     public class When_a_batch_limit_is_reached :
         InMemoryTestFixture
     {
+        [Test]
+        public async Task Should_receive_the_message_batch()
+        {
+            Task<ConsumeContext<BatchResult>> finished = ConnectPublishHandler<BatchResult>();
+
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+
+            ConsumeContext<BatchResult> finishedContext = await finished;
+
+            Assert.That(finishedContext.Message.Count, Is.EqualTo(2));
+        }
+
         readonly IServiceProvider _provider;
 
         public When_a_batch_limit_is_reached()
@@ -28,19 +41,6 @@ namespace MassTransit.Containers.Tests
             _provider = collection.BuildServiceProvider(true);
         }
 
-        [Test]
-        public async Task Should_receive_the_message_batch()
-        {
-            var finished = ConnectPublishHandler<BatchResult>();
-
-            await InputQueueSendEndpoint.Send(new BatchItem());
-            await InputQueueSendEndpoint.Send(new BatchItem());
-
-            var finishedContext = await finished;
-
-            Assert.That(finishedContext.Message.Count, Is.EqualTo(2));
-        }
-
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.ConfigureConsumers(_provider.GetRequiredService<IRegistration>());
@@ -52,6 +52,23 @@ namespace MassTransit.Containers.Tests
     public class When_a_batch_limit_is_configured :
         InMemoryTestFixture
     {
+        [Test]
+        public async Task Should_receive_the_message_batch()
+        {
+            Task<ConsumeContext<BatchResult>> finished = ConnectPublishHandler<BatchResult>();
+
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.Send(new BatchItem());
+
+            ConsumeContext<BatchResult> finishedContext = await finished;
+
+            Assert.That(finishedContext.Message.Count, Is.EqualTo(5));
+        }
+
         readonly IServiceProvider _provider;
 
         public When_a_batch_limit_is_configured()
@@ -68,23 +85,6 @@ namespace MassTransit.Containers.Tests
             _provider = collection.BuildServiceProvider(true);
         }
 
-        [Test]
-        public async Task Should_receive_the_message_batch()
-        {
-            var finished = ConnectPublishHandler<BatchResult>();
-
-            await InputQueueSendEndpoint.Send(new BatchItem());
-            await InputQueueSendEndpoint.Send(new BatchItem());
-            await InputQueueSendEndpoint.Send(new BatchItem());
-            await InputQueueSendEndpoint.Send(new BatchItem());
-            await InputQueueSendEndpoint.Send(new BatchItem());
-            await InputQueueSendEndpoint.Send(new BatchItem());
-
-            var finishedContext = await finished;
-
-            Assert.That(finishedContext.Message.Count, Is.EqualTo(5));
-        }
-
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.ConfigureConsumers(_provider.GetRequiredService<IRegistration>());
@@ -96,6 +96,24 @@ namespace MassTransit.Containers.Tests
     public class When_a_batch_limit_is_configured_using_a_definition :
         InMemoryTestFixture
     {
+        [Test]
+        public async Task Should_receive_the_message_batch()
+        {
+            Task<ConsumeContext<BatchResult>> finished = ConnectPublishHandler<BatchResult>();
+
+            await Bus.Publish(new BatchItem());
+            await Bus.Publish(new BatchItem());
+            await Bus.Publish(new BatchItem());
+            await Bus.Publish(new BatchItem());
+            await Bus.Publish(new BatchItem());
+            await Bus.Publish(new BatchItem());
+
+            ConsumeContext<BatchResult> finishedContext = await finished;
+
+            Assert.That(finishedContext.Message.Count, Is.EqualTo(5));
+            Assert.That(finishedContext.Message.Mode, Is.EqualTo(BatchCompletionMode.Size));
+        }
+
         readonly IServiceProvider _provider;
 
         public When_a_batch_limit_is_configured_using_a_definition()
@@ -110,24 +128,6 @@ namespace MassTransit.Containers.Tests
             });
 
             _provider = collection.BuildServiceProvider(true);
-        }
-
-        [Test]
-        public async Task Should_receive_the_message_batch()
-        {
-            var finished = ConnectPublishHandler<BatchResult>();
-
-            await Bus.Publish(new BatchItem());
-            await Bus.Publish(new BatchItem());
-            await Bus.Publish(new BatchItem());
-            await Bus.Publish(new BatchItem());
-            await Bus.Publish(new BatchItem());
-            await Bus.Publish(new BatchItem());
-
-            var finishedContext = await finished;
-
-            Assert.That(finishedContext.Message.Count, Is.EqualTo(5));
-            Assert.That(finishedContext.Message.Mode, Is.EqualTo(BatchCompletionMode.Size));
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

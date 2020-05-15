@@ -13,6 +13,18 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     public class SimpleInjector_Consumer :
         Common_Consumer
     {
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
+        [TearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
         readonly Container _container;
 
         public SimpleInjector_Consumer()
@@ -31,18 +43,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Register<AnotherMessageConsumer, AnotherMessageConsumerImpl>(Lifestyle.Scoped);
         }
 
-        [Test]
-        public void Should_be_a_valid_container()
-        {
-            _container.Verify();
-        }
-
-        [TearDown]
-        public void Close_container()
-        {
-            _container.Dispose();
-        }
-
         protected override IRegistration Registration => _container.GetInstance<IRegistration>();
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -59,6 +59,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     public class SimpleInjector_Consumer_Endpoint :
         Common_Consumer_Endpoint
     {
+        [TearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
         readonly Container _container;
 
         public SimpleInjector_Consumer_Endpoint()
@@ -73,12 +79,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 
                 cfg.AddBus(() => BusControl);
             });
-        }
-
-        [TearDown]
-        public void Close_container()
-        {
-            _container.Dispose();
         }
 
         protected override IRegistration Registration => _container.GetInstance<IRegistration>();

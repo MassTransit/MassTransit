@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Containers.Tests.Common_Tests
+﻿namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
     using System.Threading.Tasks;
@@ -27,6 +15,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_Consumer :
         InMemoryTestFixture
     {
+        protected abstract IRegistration Registration { get; }
+
         [Test]
         public async Task Should_receive_using_the_first_consumer()
         {
@@ -34,10 +24,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             await InputQueueSendEndpoint.Send(new SimpleMessageClass(name));
 
-            SimpleConsumer lastConsumer = await SimpleConsumer.LastConsumer;
+            var lastConsumer = await SimpleConsumer.LastConsumer;
             lastConsumer.ShouldNotBe(null);
 
-            SimpleMessageInterface last = await lastConsumer.Last;
+            var last = await lastConsumer.Last;
             last.Name
                 .ShouldBe(name);
 
@@ -53,14 +43,14 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.ConfigureConsumer<SimpleConsumer>(Registration);
         }
-
-        protected abstract IRegistration Registration { get; }
     }
 
 
     public abstract class Common_Consumer_Endpoint :
         InMemoryTestFixture
     {
+        protected abstract IRegistration Registration { get; }
+
         [Test]
         public async Task Should_receive_on_the_custom_endpoint()
         {
@@ -70,32 +60,32 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             await sendEndpoint.Send(new SimpleMessageClass(name));
 
-            SimplerConsumer lastConsumer = await SimplerConsumer.LastConsumer.OrCanceled(TestCancellationToken);
+            var lastConsumer = await SimplerConsumer.LastConsumer.OrCanceled(TestCancellationToken);
             lastConsumer.ShouldNotBe(null);
 
-            SimpleMessageInterface last = await lastConsumer.Last.OrCanceled(TestCancellationToken);
+            var last = await lastConsumer.Last.OrCanceled(TestCancellationToken);
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.ConfigureEndpoints(Registration);
         }
-
-        protected abstract IRegistration Registration { get; }
     }
 
 
     public abstract class Common_Consumers_Endpoint :
         InMemoryTestFixture
     {
+        protected abstract IRegistration Registration { get; }
+
         [Test]
         public async Task Should_receive_on_the_custom_endpoint()
         {
-            var client = Bus.CreateRequestClient<PingMessage>(new Uri("queue:shared"));
+            IRequestClient<PingMessage> client = Bus.CreateRequestClient<PingMessage>(new Uri("queue:shared"));
 
             await client.GetResponse<PongMessage>(new PingMessage());
 
-            var clientB = Bus.CreateRequestClient<Request>(new Uri("queue:shared"));
+            IRequestClient<Request> clientB = Bus.CreateRequestClient<Request>(new Uri("queue:shared"));
 
             await clientB.GetResponse<Response>(new Request());
         }
@@ -118,8 +108,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.ConfigureEndpoints(Registration);
         }
-
-        protected abstract IRegistration Registration { get; }
 
 
         class ConsumerA :
@@ -192,16 +180,18 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_Consumer_ServiceEndpoint :
         InMemoryTestFixture
     {
+        protected abstract IRegistration Registration { get; }
+
         [Test]
         public async Task Should_handle_the_request()
         {
             var serviceClient = Bus.CreateServiceClient();
 
-            var requestClient = serviceClient.CreateRequestClient<PingMessage>();
+            IRequestClient<PingMessage> requestClient = serviceClient.CreateRequestClient<PingMessage>();
 
             var pingId = NewId.NextGuid();
 
-            var response = await requestClient.GetResponse<PongMessage>(new PingMessage(pingId));
+            Response<PongMessage> response = await requestClient.GetResponse<PongMessage>(new PingMessage(pingId));
 
             Assert.That(response.Message.CorrelationId, Is.EqualTo(pingId));
         }
@@ -215,6 +205,5 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.ServiceInstance(x => x.ConfigureEndpoints(Registration));
         }
-        protected abstract IRegistration Registration { get; }
     }
 }

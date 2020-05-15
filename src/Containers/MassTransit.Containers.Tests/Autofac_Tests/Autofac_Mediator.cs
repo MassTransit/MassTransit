@@ -50,8 +50,10 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
         }
 
         protected override IRequestClient<T> GetRequestClient<T>()
-            where T : class =>
-            _container.Resolve<IRequestClient<T>>();
+            where T : class
+        {
+            return _container.Resolve<IRequestClient<T>>();
+        }
     }
 
 

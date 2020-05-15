@@ -11,6 +11,22 @@ namespace MassTransit.Containers.Tests
     public class Autofac_SagaScope :
         InMemoryTestFixture
     {
+        [Test]
+        public async Task Should_configure_scope()
+        {
+            Task<ConsumeContext<TestStarted>> started = ConnectPublishHandler<TestStarted>();
+
+            await InputQueueSendEndpoint.Send(new StartTest
+            {
+                CorrelationId = NewId.NextGuid(),
+                TestKey = "Unique"
+            });
+
+            await started;
+
+            Assert.IsTrue(_isCalled);
+        }
+
         readonly IContainer _container;
         bool _isCalled;
 
@@ -40,22 +56,6 @@ namespace MassTransit.Containers.Tests
         public void Close_container()
         {
             _container.Dispose();
-        }
-
-        [Test]
-        public async Task Should_configure_scope()
-        {
-            Task<ConsumeContext<TestStarted>> started = ConnectPublishHandler<TestStarted>();
-
-            await InputQueueSendEndpoint.Send(new StartTest
-            {
-                CorrelationId = NewId.NextGuid(),
-                TestKey = "Unique"
-            });
-
-            await started;
-
-            Assert.IsTrue(_isCalled);
         }
     }
 }

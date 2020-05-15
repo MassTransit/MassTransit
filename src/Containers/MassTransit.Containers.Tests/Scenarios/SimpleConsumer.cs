@@ -23,20 +23,11 @@ namespace MassTransit.Containers.Tests.Scenarios
             _consumerCreated.TrySetResult(this);
         }
 
-        public Task<SimpleMessageInterface> Last
-        {
-            get { return _received.Task; }
-        }
+        public Task<SimpleMessageInterface> Last => _received.Task;
 
-        public ISimpleConsumerDependency Dependency
-        {
-            get { return _dependency; }
-        }
+        public ISimpleConsumerDependency Dependency => _dependency;
 
-        public static Task<SimpleConsumer> LastConsumer
-        {
-            get { return _consumerCreated.Task; }
-        }
+        public static Task<SimpleConsumer> LastConsumer => _consumerCreated.Task;
 
         public async Task Consume(ConsumeContext<SimpleMessageInterface> message)
         {
@@ -61,15 +52,9 @@ namespace MassTransit.Containers.Tests.Scenarios
             _consumerCreated.TrySetResult(this);
         }
 
-        public Task<SimpleMessageInterface> Last
-        {
-            get { return _received.Task; }
-        }
+        public Task<SimpleMessageInterface> Last => _received.Task;
 
-        public static Task<SimplerConsumer> LastConsumer
-        {
-            get { return _consumerCreated.Task; }
-        }
+        public static Task<SimplerConsumer> LastConsumer => _consumerCreated.Task;
 
         public async Task Consume(ConsumeContext<SimpleMessageInterface> message)
         {

@@ -29,18 +29,18 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             });
         }
 
-        [OneTimeTearDown]
-        public void TearDown()
-        {
-            _container.Dispose();
-        }
-
         protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
         protected override Task<ConsumeContext> ConsumeContext => _container.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
         protected override Task<IPublishEndpoint> PublishEndpoint => _container.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
 
         protected override Task<ISendEndpointProvider> SendEndpointProvider =>
             _container.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
+        [OneTimeTearDown]
+        public void TearDown()
+        {
+            _container.Dispose();
+        }
     }
 
 
@@ -65,18 +65,18 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             });
         }
 
-        [OneTimeTearDown]
-        public void TearDown()
-        {
-            _container.Dispose();
-        }
-
         protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
         protected override Task<ConsumeContext> ConsumeContext => _container.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
         protected override Task<IPublishEndpoint> PublishEndpoint => _container.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
 
         protected override Task<ISendEndpointProvider> SendEndpointProvider =>
             _container.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
+        [OneTimeTearDown]
+        public void TearDown()
+        {
+            _container.Dispose();
+        }
     }
 
 
@@ -100,17 +100,17 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             });
         }
 
-        [OneTimeTearDown]
-        public void TearDown()
-        {
-            _container.Dispose();
-        }
-
         protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
         protected override Task<ConsumeContext> ConsumeContext => _container.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
         protected override Task<IPublishEndpoint> PublishEndpoint => _container.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
 
         protected override Task<ISendEndpointProvider> SendEndpointProvider =>
             _container.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
+        [OneTimeTearDown]
+        public void TearDown()
+        {
+            _container.Dispose();
+        }
     }
 }

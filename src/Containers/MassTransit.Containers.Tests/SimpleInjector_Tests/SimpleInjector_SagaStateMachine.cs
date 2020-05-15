@@ -11,6 +11,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     public class SimpleInjector_SagaStateMachine :
         Common_SagaStateMachine
     {
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
         readonly Container _container;
 
         public SimpleInjector_SagaStateMachine()
@@ -27,12 +33,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public void Close_container()
         {
             _container.Dispose();
-        }
-
-        [Test]
-        public void Should_be_a_valid_container()
-        {
-            _container.Verify();
         }
 
         protected override IRegistration Registration => _container.GetInstance<IRegistration>();

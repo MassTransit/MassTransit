@@ -1,7 +1,6 @@
 namespace MassTransit
 {
     using System;
-    using Transports.InMemory;
     using Transports.InMemory.Topology.Configurators;
 
 
@@ -30,7 +29,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configure"></param>
         /// <returns></returns>
-        IInMemoryHost Host(Action<IInMemoryHostConfigurator> configure = null);
+        void Host(Action<IInMemoryHostConfigurator> configure = null);
 
         /// <summary>
         /// Configure the base address for the host
@@ -38,6 +37,6 @@ namespace MassTransit
         /// <param name="baseAddress">The base address for the in-memory host</param>
         /// <param name="configure"></param>
         /// <returns></returns>
-        IInMemoryHost Host(Uri baseAddress, Action<IInMemoryHostConfigurator> configure = null);
+        void Host(Uri baseAddress, Action<IInMemoryHostConfigurator> configure = null);
     }
 }

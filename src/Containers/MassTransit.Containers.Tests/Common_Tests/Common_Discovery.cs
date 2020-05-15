@@ -1,15 +1,3 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
@@ -44,7 +32,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             public async Task Consume(ConsumeContext<PingMessage> context)
             {
-                await context.Publish(new PingReceived() {CorrelationId = context.Message.CorrelationId});
+                await context.Publish(new PingReceived {CorrelationId = context.Message.CorrelationId});
 
                 await Task.Delay(1000);
 
@@ -94,12 +82,12 @@ namespace MassTransit.Containers.Tests.Common_Tests
             InitiatedBy<PingReceived>,
             Orchestrates<PingAcknowledged>
         {
-            public Guid CorrelationId { get; set; }
-
             public Task Consume(ConsumeContext<PingReceived> context)
             {
                 return Task.CompletedTask;
             }
+
+            public Guid CorrelationId { get; set; }
 
             public Task Consume(ConsumeContext<PingAcknowledged> context)
             {
@@ -111,10 +99,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
         public class PingSagaDefinition :
             SagaDefinition<DiscoveryPingSaga>
         {
-            public PingSagaDefinition()
-            {
-            }
-
             protected override void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<DiscoveryPingSaga> sagaConfigurator)
             {
                 var partition = endpointConfigurator.CreatePartitioner(Environment.ProcessorCount);
@@ -128,8 +112,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
         public class DiscoveryPingState :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -144,7 +128,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
                 During(Pinged,
                     When(Acknowledged)
-                        .Publish(context => new PingCompleted() {CorrelationId = context.Data.CorrelationId})
+                        .Publish(context => new PingCompleted {CorrelationId = context.Data.CorrelationId})
                         .TransitionTo(Ponged));
             }
 
@@ -238,31 +222,33 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_Discovery :
         InMemoryTestFixture
     {
+        protected abstract IRegistration Registration { get; }
+
         [Test]
         public async Task Should_receive_the_response_from_the_consumer()
         {
-            var received = ConnectPublishHandler<PingReceived>();
-            var completed = ConnectPublishHandler<PingCompleted>();
+            Task<ConsumeContext<PingReceived>> received = ConnectPublishHandler<PingReceived>();
+            Task<ConsumeContext<PingCompleted>> completed = ConnectPublishHandler<PingCompleted>();
 
-            var client = GetRequestClient();
+            IRequestClient<PingMessage> client = GetRequestClient();
 
             var pingMessage = new PingMessage();
 
-            var response = await client.GetResponse<PongMessage>(pingMessage);
+            Response<PongMessage> response = await client.GetResponse<PongMessage>(pingMessage);
 
-            await Bus.Publish(new PingAcknowledged() {CorrelationId = response.Message.CorrelationId});
+            await Bus.Publish(new PingAcknowledged {CorrelationId = response.Message.CorrelationId});
 
-            var pingReceived = await received;
+            ConsumeContext<PingReceived> pingReceived = await received;
             Assert.That(pingReceived.Message.CorrelationId, Is.EqualTo(pingMessage.CorrelationId));
 
-            var pingCompleted = await completed;
+            ConsumeContext<PingCompleted> pingCompleted = await completed;
             Assert.That(pingCompleted.Message.CorrelationId, Is.EqualTo(pingMessage.CorrelationId));
         }
 
         [Test]
         public async Task Should_complete_the_routing_slip()
         {
-            var completed = SubscribeHandler<RoutingSlipCompleted>();
+            Task<ConsumeContext<RoutingSlipCompleted>> completed = SubscribeHandler<RoutingSlipCompleted>();
 
             var builder = new RoutingSlipBuilder(NewId.NextGuid());
             builder.AddSubscription(Bus.Address, RoutingSlipEvents.Completed);
@@ -271,7 +257,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             await Bus.Execute(builder.Build());
 
-            var routingSlipCompleted = await completed;
+            ConsumeContext<RoutingSlipCompleted> routingSlipCompleted = await completed;
             Assert.That(routingSlipCompleted.Message.TrackingNumber, Is.EqualTo(builder.TrackingNumber));
         }
 
@@ -281,7 +267,5 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.ConfigureEndpoints(Registration);
         }
-
-        protected abstract IRegistration Registration { get; }
     }
 }
