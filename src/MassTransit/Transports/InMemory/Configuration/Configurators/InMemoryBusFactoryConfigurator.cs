@@ -66,6 +66,8 @@ namespace MassTransit.Transports.InMemory.Configurators
 
         public new IInMemoryPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
 
+        public bool DeployTopologyOnly { private get; set; }
+
         public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint = null)
         {
@@ -78,23 +80,12 @@ namespace MassTransit.Transports.InMemory.Configurators
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IInMemoryHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint = null)
-        {
-            _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
-        }
-
         public void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        public void ReceiveEndpoint(IInMemoryHost host, string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }

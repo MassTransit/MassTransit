@@ -30,7 +30,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             for (var i = 0; i < 50; i++)
             {
-                configurator.ReceiveEndpoint(host, $"receiver_queue{i}", e =>
+                configurator.ReceiveEndpoint($"receiver_queue{i}", e =>
                 {
                     e.Consumer<TestConsumer>();
                 });

@@ -27,6 +27,11 @@ namespace MassTransit
         IPublishTopologyConfigurator PublishTopology { get; }
 
         /// <summary>
+        /// Set to true if the topology should be deployed only
+        /// </summary>
+        bool DeployTopologyOnly { set; }
+
+        /// <summary>
         /// Configure the message topology for the message type (global across all bus instances of the same transport type)
         /// </summary>
         /// <param name="configureTopology"></param>

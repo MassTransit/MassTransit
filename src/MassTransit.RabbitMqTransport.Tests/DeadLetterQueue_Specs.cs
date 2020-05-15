@@ -33,7 +33,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            configurator.ReceiveEndpoint(host, QueueName, x =>
+            configurator.ReceiveEndpoint(QueueName, x =>
             {
                 x.BindDeadLetterQueue(DeadLetterQueueName);
             });

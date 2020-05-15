@@ -18,7 +18,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 {
                 });
 
-                x.ReceiveEndpoint(host, "input_queue", e =>
+                x.ReceiveEndpoint("input_queue", e =>
                 {
                     e.PurgeOnStartup = true;
 

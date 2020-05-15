@@ -142,12 +142,6 @@
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IServiceBusHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint = null)
-        {
-            _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
-        }
-
         public void ReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
@@ -156,23 +150,6 @@
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        public void ReceiveEndpoint(IServiceBusHost host, string queueName, Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint)
-        {
-            _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        public void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
-            where T : class
-        {
-            _hostConfiguration.SubscriptionEndpoint<T>(subscriptionName, configure);
-        }
-
-        public void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicPath,
-            Action<IServiceBusSubscriptionEndpointConfigurator> configure)
-        {
-            _hostConfiguration.SubscriptionEndpoint(subscriptionName, topicPath, configure);
         }
 
         public void SubscriptionEndpoint<T>(string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)

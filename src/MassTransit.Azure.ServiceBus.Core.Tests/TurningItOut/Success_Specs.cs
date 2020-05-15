@@ -61,7 +61,7 @@
             _repository = new MessageSessionSagaRepository<TurnoutJobState>();
 
 
-            configurator.ReceiveEndpoint(host, "service_state", endpoint =>
+            configurator.ReceiveEndpoint("service_state", endpoint =>
             {
                 endpoint.RequiresSession = true;
                 endpoint.MessageWaitTimeout = TimeSpan.FromHours(8);

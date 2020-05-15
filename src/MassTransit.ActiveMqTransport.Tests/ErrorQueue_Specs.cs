@@ -112,7 +112,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 
         protected override void ConfigureActiveMqBusHost(IActiveMqBusFactoryConfigurator configurator, IActiveMqHost host)
         {
-            configurator.ReceiveEndpoint(host, "input_queue_error", x =>
+            configurator.ReceiveEndpoint("input_queue_error", x =>
             {
                 x.ConfigureConsumeTopology = false;
 
