@@ -123,11 +123,9 @@
         public new IServiceBusSendTopologyConfigurator SendTopology => _busConfiguration.Topology.Send;
         public new IServiceBusPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
 
-        public IServiceBusHost Host(ServiceBusHostSettings settings)
+        public void Host(ServiceBusHostSettings settings)
         {
             _busConfiguration.HostConfiguration.Settings = settings;
-
-            return _busConfiguration.HostConfiguration.Proxy;
         }
 
         public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,

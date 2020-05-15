@@ -12,7 +12,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         [Test]
         public void Should_get_the_queue_address()
         {
-            var address = Host.Topology.GetDestinationAddress("input_queue");
+            var address = Bus.GetServiceBusHostTopology().GetDestinationAddress("input_queue");
 
             Assert.That(address, Is.EqualTo(InputQueueAddress));
         }
@@ -22,7 +22,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         {
             var queueName = Bus.Address.AbsolutePath.Split('/').Last();
 
-            var address = Host.Topology.GetDestinationAddress(queueName, x => x.AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle);
+            var address = Bus.GetServiceBusHostTopology().GetDestinationAddress(queueName, x => x.AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle);
 
             Assert.That(address, Is.EqualTo(Bus.Address));
         }
@@ -30,7 +30,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         [Test]
         public void Should_have_the_full_path()
         {
-            var address = new ServiceBusEndpointAddress(Host.Address, "input_queue");
+            var address = new ServiceBusEndpointAddress(HostAddress, "input_queue");
 
             Assert.That((Uri)address, Is.EqualTo(InputQueueAddress));
 
