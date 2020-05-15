@@ -13,7 +13,7 @@ namespace MassTransit.ActiveMqTransport
         /// <param name="configurator"></param>
         /// <param name="hostAddress">The URI host address of the ActiveMQ host (activemq://host:port/vhost)</param>
         /// <param name="configure"></param>
-        public static IActiveMqHost Host(this IActiveMqBusFactoryConfigurator configurator, Uri hostAddress, Action<IActiveMqHostConfigurator> configure)
+        public static void Host(this IActiveMqBusFactoryConfigurator configurator, Uri hostAddress, Action<IActiveMqHostConfigurator> configure)
         {
             if (hostAddress == null)
                 throw new ArgumentNullException(nameof(hostAddress));
@@ -22,7 +22,7 @@ namespace MassTransit.ActiveMqTransport
 
             configure(hostConfigurator);
 
-            return configurator.Host(hostConfigurator.Settings);
+            configurator.Host(hostConfigurator.Settings);
         }
 
         /// <summary>
@@ -31,12 +31,12 @@ namespace MassTransit.ActiveMqTransport
         /// <param name="configurator"></param>
         /// <param name="hostName">The host name of the broker</param>
         /// <param name="configure">The configuration callback</param>
-        public static IActiveMqHost Host(this IActiveMqBusFactoryConfigurator configurator, string hostName, Action<IActiveMqHostConfigurator> configure)
+        public static void Host(this IActiveMqBusFactoryConfigurator configurator, string hostName, Action<IActiveMqHostConfigurator> configure)
         {
             if (Uri.IsWellFormedUriString(hostName, UriKind.Absolute))
-                return configurator.Host(new Uri(hostName), configure);
-
-            return configurator.Host(new ActiveMqHostAddress(hostName, default, "/"), configure);
+                configurator.Host(new Uri(hostName), configure);
+            else
+                configurator.Host(new ActiveMqHostAddress(hostName, default, "/"), configure);
         }
 
         /// <summary>
@@ -46,10 +46,10 @@ namespace MassTransit.ActiveMqTransport
         /// <param name="hostName">The host name of the broker</param>
         /// <param name="port">The port to connect to the broker</param>
         /// <param name="configure">The configuration callback</param>
-        public static IActiveMqHost Host(this IActiveMqBusFactoryConfigurator configurator, string hostName, int port,
+        public static void Host(this IActiveMqBusFactoryConfigurator configurator, string hostName, int port,
             Action<IActiveMqHostConfigurator> configure)
         {
-            return configurator.Host(new ActiveMqHostAddress(hostName, port, "/"), configure);
+            configurator.Host(new ActiveMqHostAddress(hostName, port, "/"), configure);
         }
 
         /// <summary>

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.ActiveMqTransport.Tests
+﻿namespace MassTransit.ActiveMqTransport.Tests
 {
     using System;
     using System.Diagnostics;
@@ -31,10 +19,8 @@ namespace MassTransit.ActiveMqTransport.Tests
             await _second;
         }
 
-        protected override void ConfigureActiveMqBusHost(IActiveMqBusFactoryConfigurator configurator, IActiveMqHost host)
+        protected override void ConfigureActiveMqBus(IActiveMqBusFactoryConfigurator configurator)
         {
-            base.ConfigureActiveMqBusHost(configurator, host);
-
             configurator.UseActiveMqMessageScheduler();
         }
 
@@ -64,6 +50,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         }
     }
 
+
     public class Should_schedule_in_the_future :
         ActiveMqTestFixture
     {
@@ -83,10 +70,8 @@ namespace MassTransit.ActiveMqTransport.Tests
             Assert.That(timer.Elapsed, Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2)));
         }
 
-        protected override void ConfigureActiveMqBusHost(IActiveMqBusFactoryConfigurator configurator, IActiveMqHost host)
+        protected override void ConfigureActiveMqBus(IActiveMqBusFactoryConfigurator configurator)
         {
-            base.ConfigureActiveMqBusHost(configurator, host);
-
             configurator.UseActiveMqMessageScheduler();
         }
 

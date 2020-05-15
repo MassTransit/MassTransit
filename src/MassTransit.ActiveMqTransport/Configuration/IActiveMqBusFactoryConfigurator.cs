@@ -34,6 +34,6 @@
         /// </summary>
         /// <param name="settings"></param>
         /// <returns></returns>
-        IActiveMqHost Host(ActiveMqHostSettings settings);
+        void Host(ActiveMqHostSettings settings);
     }
 }

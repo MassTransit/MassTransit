@@ -73,11 +73,9 @@
             set => _busConfiguration.HostConfiguration.DeployTopologyOnly = value;
         }
 
-        public IActiveMqHost Host(ActiveMqHostSettings settings)
+        public void Host(ActiveMqHostSettings settings)
         {
             _busConfiguration.HostConfiguration.Settings = settings;
-
-            return _busConfiguration.HostConfiguration.Proxy;
         }
 
         void IActiveMqBusFactoryConfigurator.Send<T>(Action<IActiveMqMessageSendTopologyConfigurator<T>> configureTopology)
@@ -109,23 +107,12 @@
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IActiveMqHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IActiveMqReceiveEndpointConfigurator> configureEndpoint = null)
-        {
-            _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
-        }
-
         public void ReceiveEndpoint(string queueName, Action<IActiveMqReceiveEndpointConfigurator> configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        public void ReceiveEndpoint(IActiveMqHost host, string queueName, Action<IActiveMqReceiveEndpointConfigurator> configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }

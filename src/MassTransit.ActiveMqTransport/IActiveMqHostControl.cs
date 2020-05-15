@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.ActiveMqTransport
 {
-    using System;
     using System.Threading.Tasks;
     using Transports;
 

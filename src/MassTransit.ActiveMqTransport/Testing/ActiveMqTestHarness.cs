@@ -3,6 +3,7 @@
     using System;
     using Apache.NMS;
     using Apache.NMS.Util;
+    using Configurators;
     using MassTransit.Testing;
 
 
@@ -35,12 +36,10 @@
         public string Username { get; set; }
         public string Password { get; set; }
         public override string InputQueueName { get; }
-        public IActiveMqHost Host { get; private set; }
 
         public override Uri InputQueueAddress => _inputQueueAddress;
 
         public event Action<IActiveMqBusFactoryConfigurator> OnConfigureActiveMqBus;
-        public event Action<IActiveMqBusFactoryConfigurator, IActiveMqHost> OnConfigureActiveMqBusHost;
         public event Action<IActiveMqReceiveEndpointConfigurator> OnConfigureActiveMqReceiveEndpoint;
         public event Action<IActiveMqHostConfigurator> OnConfigureActiveMqHost;
         public event Action<ISession> OnCleanupVirtualHost;
@@ -48,11 +47,6 @@
         protected virtual void ConfigureActiveMqBus(IActiveMqBusFactoryConfigurator configurator)
         {
             OnConfigureActiveMqBus?.Invoke(configurator);
-        }
-
-        protected virtual void ConfigureActiveMqBusHost(IActiveMqBusFactoryConfigurator configurator, IActiveMqHost host)
-        {
-            OnConfigureActiveMqBusHost?.Invoke(configurator, host);
         }
 
         protected virtual void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
@@ -70,28 +64,41 @@
             OnCleanupVirtualHost?.Invoke(session);
         }
 
-        protected virtual IActiveMqHost ConfigureHost(IActiveMqBusFactoryConfigurator configurator)
+        protected virtual void ConfigureHost(IActiveMqBusFactoryConfigurator configurator)
         {
-            return configurator.Host(HostAddress, h =>
+            configurator.Host(HostAddress, h =>
             {
-                h.Username(Username);
-                h.Password(Password);
-
-                ConfigureActiveMqHost(h);
+                ConfigureHostSettings(h);
             });
         }
+
+        void ConfigureHostSettings(IActiveMqHostConfigurator h)
+        {
+            h.Username(Username);
+            h.Password(Password);
+
+            ConfigureActiveMqHost(h);
+        }
+
+        public ActiveMqHostSettings GetHostSettings()
+        {
+            var host = new ActiveMqHostConfigurator(HostAddress);
+
+            ConfigureHostSettings(host);
+
+            return host.Settings;
+        }
+
 
         protected override IBusControl CreateBus()
         {
             var busControl = MassTransit.Bus.Factory.CreateUsingActiveMq(x =>
             {
-                Host = ConfigureHost(x);
+                ConfigureHost(x);
 
                 ConfigureBus(x);
 
                 ConfigureActiveMqBus(x);
-
-                ConfigureActiveMqBusHost(x, Host);
 
                 x.ReceiveEndpoint(InputQueueName, e =>
                 {
@@ -103,16 +110,18 @@
                 });
             });
 
-            CleanUpVirtualHost(Host);
+            CleanUpVirtualHost();
 
             return busControl;
         }
 
-        void CleanUpVirtualHost(IActiveMqHost host)
+        void CleanUpVirtualHost()
         {
             try
             {
-                using (var connection = host.Settings.CreateConnection())
+                var settings = GetHostSettings();
+
+                using (var connection = settings.CreateConnection())
                 using (var model = connection.CreateSession())
                 {
                     CleanUpQueue(model, "input_queue");
