@@ -35,10 +35,6 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IConsumerScopeProvider>()
                 .SingleInstance();
 
-            builder.Register(CreateSagaRepositoryFactory)
-                .As<ISagaRepositoryFactory>()
-                .SingleInstance();
-
             builder.Register(context => new AutofacConfigurationServiceProvider(context.Resolve<ILifetimeScope>()))
                 .As<IConfigurationServiceProvider>()
                 .SingleInstance();
@@ -141,13 +137,6 @@ namespace MassTransit.AutofacIntegration.Registration
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());
 
             return new AutofacConsumerScopeProvider(lifetimeScopeProvider, ScopeName, ConfigureScope);
-        }
-
-        ISagaRepositoryFactory CreateSagaRepositoryFactory(IComponentContext context)
-        {
-            var lifetimeScopeProvider = new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());
-
-            return new AutofacSagaRepositoryFactory(lifetimeScopeProvider, ScopeName, ConfigureScope);
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IComponentContext context)

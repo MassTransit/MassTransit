@@ -50,12 +50,6 @@ namespace MassTransit.WindsorIntegration.Registration
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
-            if (!_container.Kernel.HasComponent(typeof(IStateMachineActivityFactory)))
-                _container.Register(Component.For<IStateMachineActivityFactory>().ImplementedBy<WindsorStateMachineActivityFactory>().LifestyleScoped());
-
-            if (!_container.Kernel.HasComponent(typeof(ISagaStateMachineFactory)))
-                _container.Register(Component.For<ISagaStateMachineFactory>().ImplementedBy<WindsorSagaStateMachineFactory>().LifestyleSingleton());
-
             _container.Register(
                 Component.For<TStateMachine>().LifestyleSingleton(),
                 Component.For<SagaStateMachine<TInstance>>().UsingFactoryMethod(provider => provider.Resolve<TStateMachine>()).LifestyleSingleton()

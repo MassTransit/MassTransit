@@ -3,15 +3,10 @@ namespace MassTransit
     using System;
     using Automatonymous;
     using Automatonymous.SagaConfigurators;
-    using Automatonymous.StateMachineConnectors;
     using ConsumeConfigurators;
     using Courier;
-    using GreenPipes;
     using Lamar;
-    using LamarIntegration.Registration;
     using LamarIntegration.ScopeProviders;
-    using Pipeline;
-    using Registration;
     using Saga;
     using Scoping;
 
@@ -114,7 +109,7 @@ namespace MassTransit
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IContainer container, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            ISagaRepository<T> repository = GetSagaRepository<T>(container);
+            var repository = container.GetInstance<ISagaRepository<T>>();
 
             configurator.Saga(repository, configure);
         }
@@ -127,13 +122,12 @@ namespace MassTransit
         /// <param name="stateMachine">The state machine</param>
         /// <param name="context">The Lamar root container to resolve the repository</param>
         /// <param name="configure">Optionally configure the saga</param>
-        /// <param name="configureScope">Configuration for scope container</param>
         /// <returns></returns>
         public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, SagaStateMachine<TInstance> stateMachine,
-            IServiceContext context, Action<ISagaConfigurator<TInstance>> configure = null, Action<ConsumeContext> configureScope = null)
+            IServiceContext context, Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            StateMachineSaga(configurator, stateMachine, context.GetInstance<IContainer>(), configure, configureScope);
+            StateMachineSaga(configurator, stateMachine, context.GetInstance<IContainer>(), configure);
         }
 
         /// <summary>
@@ -144,13 +138,12 @@ namespace MassTransit
         /// <param name="stateMachine">The state machine</param>
         /// <param name="container">The Lamar Lifetime container to resolve the repository</param>
         /// <param name="configure">Optionally configure the saga</param>
-        /// <param name="configureScope">Configuration for scope container</param>
         /// <returns></returns>
         public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, SagaStateMachine<TInstance> stateMachine,
-            IContainer container, Action<ISagaConfigurator<TInstance>> configure = null, Action<ConsumeContext> configureScope = null)
+            IContainer container, Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            ISagaRepository<TInstance> repository = GetSagaRepository<TInstance>(container, configureScope);
+            var repository = container.GetInstance<ISagaRepository<TInstance>>();
 
             var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, repository, configurator);
 
@@ -166,13 +159,12 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="context">The Lamar root container to resolve the repository</param>
         /// <param name="configure">Optionally configure the saga</param>
-        /// <param name="configureScope">Configuration for scope container</param>
         /// <returns></returns>
         public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, IServiceContext context,
-            Action<ISagaConfigurator<TInstance>> configure = null, Action<ConsumeContext> configureScope = null)
+            Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            StateMachineSaga(configurator, context.GetInstance<IContainer>(), configure, configureScope);
+            StateMachineSaga(configurator, context.GetInstance<IContainer>(), configure);
         }
 
         /// <summary>
@@ -182,51 +174,14 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="container">The Lamar Lifetime Container to resolve the repository</param>
         /// <param name="configure">Optionally configure the saga</param>
-        /// <param name="configureScope">Configuration for scope container</param>
         /// <returns></returns>
         public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, IContainer container,
-            Action<ISagaConfigurator<TInstance>> configure = null, Action<ConsumeContext> configureScope = null)
+            Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            SagaStateMachine<TInstance> stateMachine = GetSagaStateMachine<TInstance>(container);
+            var stateMachine = container.GetInstance<SagaStateMachine<TInstance>>();
 
-            StateMachineSaga(configurator, stateMachine, container, configure, configureScope);
-        }
-
-        public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector pipe, SagaStateMachine<TInstance> stateMachine,
-            IContainer scope, Action<ConsumeContext> configureScope = null)
-            where TInstance : class, SagaStateMachineInstance
-        {
-            var connector = new StateMachineConnector<TInstance>(stateMachine);
-
-            ISagaRepository<TInstance> repository = GetSagaRepository<TInstance>(scope, configureScope);
-
-            ISagaSpecification<TInstance> specification = connector.CreateSagaSpecification<TInstance>();
-
-            return connector.ConnectSaga(pipe, repository, specification);
-        }
-
-        public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector pipe, IContainer container,
-            Action<ConsumeContext> configureScope = null)
-            where TInstance : class, SagaStateMachineInstance
-        {
-            SagaStateMachine<TInstance> stateMachine = GetSagaStateMachine<TInstance>(container);
-
-            return pipe.ConnectStateMachineSaga(stateMachine, container, configureScope);
-        }
-
-        static ISagaRepository<TInstance> GetSagaRepository<TInstance>(IContainer container, Action<ConsumeContext> configureScope = null)
-            where TInstance : class, ISaga
-        {
-            ISagaRepositoryFactory repositoryFactory = new LamarSagaRepositoryFactory(container);
-
-            return repositoryFactory.CreateSagaRepository<TInstance>(configureScope);
-        }
-
-        static SagaStateMachine<TInstance> GetSagaStateMachine<TInstance>(IContainer scope)
-            where TInstance : class, SagaStateMachineInstance
-        {
-            return scope.GetInstance<SagaStateMachine<TInstance>>();
+            StateMachineSaga(configurator, stateMachine, container, configure);
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,

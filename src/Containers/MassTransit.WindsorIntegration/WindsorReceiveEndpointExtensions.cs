@@ -3,7 +3,6 @@ namespace MassTransit
     using System;
     using Automatonymous;
     using Automatonymous.SagaConfigurators;
-    using Automatonymous.StateMachineConnectors;
     using Castle.MicroKernel;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
@@ -108,7 +107,7 @@ namespace MassTransit
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IKernel kernel, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            ISagaRepository<T> repository = ResolveSagaRepository<T>(kernel);
+            ISagaRepository<T> repository = kernel.Resolve<ISagaRepository<T>>();
 
             configurator.Saga(repository, configure);
         }
@@ -142,7 +141,7 @@ namespace MassTransit
             IKernel kernel, Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            ISagaRepository<TInstance> repository = ResolveSagaRepository<TInstance>(kernel);
+            ISagaRepository<TInstance> repository = kernel.Resolve<ISagaRepository<TInstance>>();
 
             var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, repository, configurator);
 
@@ -201,50 +200,6 @@ namespace MassTransit
             RegisterScopedContextProviderIfNotPresent(container);
 
             StateMachineSaga(configurator, container.Kernel, configure);
-        }
-
-        public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector pipe, SagaStateMachine<TInstance> stateMachine,
-            IKernel kernel)
-            where TInstance : class, SagaStateMachineInstance
-        {
-            var connector = new StateMachineConnector<TInstance>(stateMachine);
-
-            ISagaRepository<TInstance> repository = ResolveSagaRepository<TInstance>(kernel);
-
-            ISagaSpecification<TInstance> specification = connector.CreateSagaSpecification<TInstance>();
-
-            return connector.ConnectSaga(pipe, repository, specification);
-        }
-
-        public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector pipe, SagaStateMachine<TInstance> stateMachine,
-            IWindsorContainer container)
-            where TInstance : class, SagaStateMachineInstance
-        {
-            RegisterScopedContextProviderIfNotPresent(container);
-
-            return ConnectStateMachineSaga(pipe, stateMachine, container.Kernel);
-        }
-
-        public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector pipe, IKernel kernel)
-            where TInstance : class, SagaStateMachineInstance
-        {
-            SagaStateMachine<TInstance> stateMachine = kernel.ResolveSagaStateMachine<TInstance>();
-
-            return pipe.ConnectStateMachineSaga(stateMachine, kernel);
-        }
-
-        public static ConnectHandle ConnectStateMachineSaga<TInstance>(this IConsumePipeConnector pipe, IWindsorContainer container)
-            where TInstance : class, SagaStateMachineInstance
-        {
-            return ConnectStateMachineSaga<TInstance>(pipe, container.Kernel);
-        }
-
-        static ISagaRepository<TInstance> ResolveSagaRepository<TInstance>(this IKernel kernel)
-            where TInstance : class, ISaga
-        {
-            ISagaRepositoryFactory repositoryFactory = new WindsorSagaRepositoryFactory(kernel);
-
-            return repositoryFactory.CreateSagaRepository<TInstance>();
         }
 
         static SagaStateMachine<TInstance> ResolveSagaStateMachine<TInstance>(this IKernel kernel)

@@ -47,9 +47,6 @@ namespace MassTransit.LamarIntegration.Registration
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
-            _registry.TryAddSingleton<IStateMachineActivityFactory, LamarStateMachineActivityFactory>();
-            _registry.TryAddSingleton<ISagaStateMachineFactory, LamarSagaStateMachineFactory>();
-
             _registry.AddSingleton<TStateMachine>();
             _registry.AddSingleton<SagaStateMachine<TInstance>>(provider => provider.GetRequiredService<TStateMachine>());
         }

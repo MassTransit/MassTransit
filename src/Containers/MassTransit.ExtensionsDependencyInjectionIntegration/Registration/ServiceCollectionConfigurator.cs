@@ -97,7 +97,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.TryAddScoped(GetCurrentPublishEndpoint);
 
             collection.TryAddSingleton<IConsumerScopeProvider>(provider => new DependencyInjectionConsumerScopeProvider(provider));
-            collection.TryAddSingleton<ISagaRepositoryFactory>(provider => new DependencyInjectionSagaRepositoryFactory(provider));
             collection.TryAddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
         }
 

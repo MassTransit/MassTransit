@@ -25,10 +25,6 @@ namespace MassTransit.LamarIntegration.Registration
                 .Use(CreateConsumerScopeProvider)
                 .Singleton();
 
-            registry.For<ISagaRepositoryFactory>()
-                .Use(CreateSagaRepositoryFactory)
-                .Singleton();
-
             registry.For<IConfigurationServiceProvider>()
                 .Use(context => new LamarConfigurationServiceProvider(context.GetInstance<IContainer>()))
                 .Singleton();
@@ -123,11 +119,6 @@ namespace MassTransit.LamarIntegration.Registration
         static IConsumerScopeProvider CreateConsumerScopeProvider(IServiceContext context)
         {
             return new LamarConsumerScopeProvider(context.GetInstance<IContainer>());
-        }
-
-        static ISagaRepositoryFactory CreateSagaRepositoryFactory(IServiceContext context)
-        {
-            return new LamarSagaRepositoryFactory(context.GetInstance<IContainer>());
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IServiceContext context)

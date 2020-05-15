@@ -48,9 +48,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             where TStateMachine : class, SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
-            _container.RegisterSingleton<IStateMachineActivityFactory, SimpleInjectorStateMachineActivityFactory>();
-            _container.RegisterSingleton<ISagaStateMachineFactory, SimpleInjectorSagaStateMachineFactory>();
-
             _container.RegisterSingleton<TStateMachine>();
             _container.RegisterSingleton<SagaStateMachine<TInstance>>(() => _container.GetInstance<TStateMachine>());
         }

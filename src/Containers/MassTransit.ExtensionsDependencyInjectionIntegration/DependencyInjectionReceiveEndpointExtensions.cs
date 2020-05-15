@@ -4,12 +4,10 @@ namespace MassTransit
     using Automatonymous;
     using ConsumeConfigurators;
     using Courier;
-    using ExtensionsDependencyInjectionIntegration.Registration;
     using ExtensionsDependencyInjectionIntegration.ScopeProviders;
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Pipeline;
-    using Registration;
     using Saga;
     using Scoping;
 
@@ -67,7 +65,7 @@ namespace MassTransit
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IServiceProvider provider, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            ISagaRepository<T> repository = CreateSagaRepository<T>(provider);
+            var repository = provider.GetRequiredService<ISagaRepository<T>>();
 
             configurator.Saga(repository, configure);
         }
@@ -85,7 +83,7 @@ namespace MassTransit
             IServiceProvider serviceProvider, Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            ISagaRepository<TInstance> repository = CreateSagaRepository<TInstance>(serviceProvider);
+            var repository = serviceProvider.GetRequiredService<ISagaRepository<TInstance>>();
 
             configurator.StateMachineSaga(stateMachine, repository, configure);
         }
@@ -102,9 +100,9 @@ namespace MassTransit
             Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            var stateMachine = ResolveSagaStateMachine<TInstance>(provider);
+            var stateMachine = provider.GetRequiredService<SagaStateMachine<TInstance>>();
 
-            ISagaRepository<TInstance> repository = CreateSagaRepository<TInstance>(provider);
+            var repository = provider.GetRequiredService<ISagaRepository<TInstance>>();
 
             configurator.StateMachineSaga(stateMachine, repository, configure);
         }
@@ -113,7 +111,7 @@ namespace MassTransit
             IServiceProvider provider, Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            ISagaRepository<TInstance> repository = CreateSagaRepository<TInstance>(provider);
+            var repository = provider.GetRequiredService<ISagaRepository<TInstance>>();
 
             return bus.ConnectStateMachineSaga(stateMachine, repository, configure);
         }
@@ -122,25 +120,11 @@ namespace MassTransit
             Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            var stateMachine = ResolveSagaStateMachine<TInstance>(provider);
+            var stateMachine = provider.GetRequiredService<SagaStateMachine<TInstance>>();
 
-            ISagaRepository<TInstance> repository = CreateSagaRepository<TInstance>(provider);
+            var repository = provider.GetRequiredService<ISagaRepository<TInstance>>();
 
             return bus.ConnectStateMachineSaga(stateMachine, repository, configure);
-        }
-
-        static ISagaRepository<TInstance> CreateSagaRepository<TInstance>(IServiceProvider provider)
-            where TInstance : class, ISaga
-        {
-            ISagaRepositoryFactory repositoryFactory = new DependencyInjectionSagaRepositoryFactory(provider);
-
-            return repositoryFactory.CreateSagaRepository<TInstance>();
-        }
-
-        static SagaStateMachine<TInstance> ResolveSagaStateMachine<TInstance>(IServiceProvider provider)
-            where TInstance : class, SagaStateMachineInstance
-        {
-            return provider.GetRequiredService<SagaStateMachine<TInstance>>();
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,

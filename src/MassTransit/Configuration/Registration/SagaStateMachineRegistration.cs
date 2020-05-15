@@ -36,11 +36,8 @@ namespace MassTransit.Registration
 
         public void Configure(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider)
         {
-            ISagaStateMachineFactory stateMachineFactory = configurationServiceProvider.GetRequiredService<ISagaStateMachineFactory>();
-            SagaStateMachine<TInstance> stateMachine = stateMachineFactory.CreateStateMachine<TInstance>();
-
-            var repositoryFactory = configurationServiceProvider.GetRequiredService<ISagaRepositoryFactory>();
-            ISagaRepository<TInstance> repository = repositoryFactory.CreateSagaRepository<TInstance>();
+            var stateMachine = configurationServiceProvider.GetRequiredService<SagaStateMachine<TInstance>>();
+            var repository = configurationServiceProvider.GetRequiredService<ISagaRepository<TInstance>>();
             var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, repository, configurator);
 
             LogContext.Debug?.Log("Configuring endpoint {Endpoint}, Saga: {SagaType}, State Machine: {StateMachineType}",

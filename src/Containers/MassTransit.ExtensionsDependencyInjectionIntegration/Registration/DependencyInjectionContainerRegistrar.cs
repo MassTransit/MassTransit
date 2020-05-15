@@ -38,9 +38,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         void IContainerRegistrar.RegisterSagaStateMachine<TStateMachine, TInstance>()
         {
-            _collection.TryAddSingleton<IStateMachineActivityFactory, DependencyInjectionStateMachineActivityFactory>();
-            _collection.TryAddSingleton<ISagaStateMachineFactory, DependencyInjectionSagaStateMachineFactory>();
-
             _collection.AddSingleton<TStateMachine>();
             _collection.AddSingleton<SagaStateMachine<TInstance>>(provider => provider.GetRequiredService<TStateMachine>());
         }

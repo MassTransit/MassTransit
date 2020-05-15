@@ -34,11 +34,11 @@ namespace MassTransit.Registration
 
         void ISagaRegistration.Configure(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider)
         {
-            var repositoryFactory = configurationServiceProvider.GetRequiredService<ISagaRepositoryFactory>();
-            ISagaRepository<TSaga> sagaRepository = repositoryFactory.CreateSagaRepository<TSaga>();
-            var sagaConfigurator = new SagaConfigurator<TSaga>(sagaRepository, configurator);
+            var repository = configurationServiceProvider.GetRequiredService<ISagaRepository<TSaga>>();
+            var sagaConfigurator = new SagaConfigurator<TSaga>(repository, configurator);
 
-            LogContext.Debug?.Log("Configuring endpoint {Endpoint}, Saga: {SagaType}", configurator.InputAddress.GetLastPart(), TypeMetadataCache<TSaga>.ShortName);
+            LogContext.Debug?.Log("Configuring endpoint {Endpoint}, Saga: {SagaType}", configurator.InputAddress.GetLastPart(),
+                TypeMetadataCache<TSaga>.ShortName);
 
             GetSagaDefinition(configurationServiceProvider)
                 .Configure(configurator, sagaConfigurator);
