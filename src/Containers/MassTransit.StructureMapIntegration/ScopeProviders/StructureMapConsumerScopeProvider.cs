@@ -13,7 +13,6 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
         IConsumerScopeProvider
     {
         readonly IContainer _container;
-        readonly IContext _context;
 
         public StructureMapConsumerScopeProvider(IContainer container)
         {
@@ -21,14 +20,6 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
                 throw new ArgumentNullException(nameof(container));
 
             _container = container;
-        }
-
-        public StructureMapConsumerScopeProvider(IContext context)
-        {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
-
-            _context = context;
         }
 
         public void Probe(ProbeContext context)
@@ -45,7 +36,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
                 return new ExistingConsumerScopeContext(context);
             }
 
-            var nestedContainer = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
+            var nestedContainer = _container.CreateNestedContainer(context);
             try
             {
                 var proxy = new ConsumeContextScope(context, nestedContainer);
@@ -76,7 +67,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
                 return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext);
             }
 
-            var nestedContainer = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
+            var nestedContainer = _container.CreateNestedContainer(context);
             try
             {
                 var consumer = nestedContainer.GetInstance<TConsumer>();

@@ -1,14 +1,13 @@
 namespace MassTransit
 {
     using System;
+    using Automatonymous;
     using ConsumeConfigurators;
     using Courier;
     using PipeConfigurators;
-    using Registration;
     using Saga;
     using Scoping;
     using SimpleInjector;
-    using SimpleInjectorIntegration.Registration;
     using SimpleInjectorIntegration.ScopeProviders;
 
 
@@ -37,11 +36,40 @@ namespace MassTransit
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, Container container, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            ISagaRepositoryFactory factory = new SimpleInjectorSagaRepositoryFactory(container);
+            configurator.Saga(container.GetInstance<ISagaRepository<T>>(), configure);
+        }
 
-            ISagaRepository<T> sagaRepository = factory.CreateSagaRepository<T>();
+        /// <summary>
+        /// Subscribe a state machine saga to the endpoint
+        /// </summary>
+        /// <typeparam name="TInstance">The state machine instance type</typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="stateMachine"></param>
+        /// <param name="container">The SimpleInjector Container to resolve the repository</param>
+        /// <param name="configure">Optionally configure the saga</param>
+        /// <returns></returns>
+        public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, SagaStateMachine<TInstance> stateMachine,
+            Container container, Action<ISagaConfigurator<TInstance>> configure = null)
+            where TInstance : class, SagaStateMachineInstance
+        {
+            configurator.StateMachineSaga(stateMachine, container.GetInstance<ISagaRepository<TInstance>>(), configure);
+        }
 
-            configurator.Saga(sagaRepository, configure);
+        /// <summary>
+        /// Subscribe a state machine saga to the endpoint
+        /// </summary>
+        /// <typeparam name="TInstance">The state machine instance type</typeparam>
+        /// <param name="configurator"></param>
+        /// <param name="container">The SimpleInjector Container to resolve the repository</param>
+        /// <param name="configure">Optionally configure the saga</param>
+        /// <returns></returns>
+        public static void StateMachineSaga<TInstance>(this IReceiveEndpointConfigurator configurator, Container container,
+            Action<ISagaConfigurator<TInstance>> configure = null)
+            where TInstance : class, SagaStateMachineInstance
+        {
+            var stateMachine = container.GetInstance<SagaStateMachine<TInstance>>();
+
+            configurator.StateMachineSaga(stateMachine, container.GetInstance<ISagaRepository<TInstance>>(), configure);
         }
 
         public static void ExecuteActivityHost<TActivity, TArguments>(this IReceiveEndpointConfigurator configurator, Uri compensateAddress,

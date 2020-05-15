@@ -1,5 +1,6 @@
 namespace MassTransit.StructureMapIntegration.ScopeProviders
 {
+    using System;
     using Courier;
     using GreenPipes;
     using Scoping;
@@ -13,15 +14,12 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
         where TArguments : class
     {
         readonly IContainer _container;
-        readonly IContext _context;
-
-        public StructureMapExecuteActivityScopeProvider(IContext context)
-        {
-            _context = context;
-        }
 
         public StructureMapExecuteActivityScopeProvider(IContainer container)
         {
+            if (container == null)
+                throw new ArgumentNullException(nameof(container));
+
             _container = container;
         }
 
@@ -40,7 +38,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
                 return new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext);
             }
 
-            var nestedContainer = _container?.CreateNestedContainer(context) ?? _context?.CreateNestedContainer(context);
+            var nestedContainer = _container.CreateNestedContainer(context);
             try
             {
                 var activity = nestedContainer

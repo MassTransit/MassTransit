@@ -7,7 +7,8 @@
     using Scoping.CourierContexts;
 
 
-    public class LamarCompensateActivityScopeProvider<TActivity, TLog> : ICompensateActivityScopeProvider<TActivity, TLog>
+    public class LamarCompensateActivityScopeProvider<TActivity, TLog> :
+        ICompensateActivityScopeProvider<TActivity, TLog>
         where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
