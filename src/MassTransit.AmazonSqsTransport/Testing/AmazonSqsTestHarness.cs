@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AmazonSqsTransport.Testing
+﻿namespace MassTransit.AmazonSqsTransport.Testing
 {
     using System;
     using System.Threading.Tasks;
@@ -18,6 +6,7 @@ namespace MassTransit.AmazonSqsTransport.Testing
     using Amazon.SQS;
     using Amazon.SQS.Model;
     using Configuration;
+    using Configurators;
     using MassTransit.Testing;
 
 
@@ -65,12 +54,10 @@ namespace MassTransit.AmazonSqsTransport.Testing
         public AmazonSQSConfig AmazonSqsConfig { get; private set; }
         public AmazonSimpleNotificationServiceConfig AmazonSnsConfig { get; private set; }
         public override string InputQueueName { get; }
-        public IAmazonSqsHost Host { get; private set; }
 
         public override Uri InputQueueAddress => _inputQueueAddress;
 
         public event Action<IAmazonSqsBusFactoryConfigurator> OnConfigureAmazonSqsBus;
-        public event Action<IAmazonSqsBusFactoryConfigurator, IAmazonSqsHost> OnConfigureAmazonSqsBusHost;
         public event Action<IAmazonSqsReceiveEndpointConfigurator> OnConfigureAmazonSqsReceiveEndpoint;
         public event Action<IAmazonSqsHostConfigurator> OnConfigureAmazonSqsHost;
         public event Action<IAmazonSQS, IAmazonSimpleNotificationService> OnCleanupVirtualHost;
@@ -78,11 +65,6 @@ namespace MassTransit.AmazonSqsTransport.Testing
         protected virtual void ConfigureAmazonSqsBus(IAmazonSqsBusFactoryConfigurator configurator)
         {
             OnConfigureAmazonSqsBus?.Invoke(configurator);
-        }
-
-        protected virtual void ConfigureAmazonSqsBusHost(IAmazonSqsBusFactoryConfigurator configurator, IAmazonSqsHost host)
-        {
-            OnConfigureAmazonSqsBusHost?.Invoke(configurator, host);
         }
 
         protected virtual void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
@@ -100,36 +82,34 @@ namespace MassTransit.AmazonSqsTransport.Testing
             OnCleanupVirtualHost?.Invoke(amazonSqs, amazonSns);
         }
 
-        protected virtual IAmazonSqsHost ConfigureHost(IAmazonSqsBusFactoryConfigurator configurator)
+        protected virtual void ConfigureHost(IAmazonSqsBusFactoryConfigurator configurator)
         {
-            return configurator.Host(HostAddress, h =>
+            configurator.Host(HostAddress, h =>
             {
-                h.AccessKey(AccessKey);
-                h.SecretKey(SecretKey);
-
-                if (AmazonSqsConfig != null)
-                    h.Config(AmazonSqsConfig);
-
-                if (AmazonSnsConfig != null)
-                    h.Config(AmazonSnsConfig);
-
-                ConfigureAmazonSqsHost(h);
+                ConfigureHostSettings(h);
             });
+        }
+
+        public AmazonSqsHostSettings GetHostSettings()
+        {
+            var host = new AmazonSqsHostConfigurator(HostAddress);
+
+            ConfigureHostSettings(host);
+
+            return host.Settings;
         }
 
         protected override IBusControl CreateBus()
         {
             return MassTransit.Bus.Factory.CreateUsingAmazonSqs(x =>
             {
-                Host = ConfigureHost(x);
+                ConfigureHost(x);
 
-                // CleanUpVirtualHost(Host);
+                // CleanUpVirtualHost();
 
                 ConfigureBus(x);
 
                 ConfigureAmazonSqsBus(x);
-
-                ConfigureAmazonSqsBusHost(x, Host);
 
                 x.ReceiveEndpoint(InputQueueName, e =>
                 {
@@ -146,11 +126,26 @@ namespace MassTransit.AmazonSqsTransport.Testing
             });
         }
 
-        void CleanUpVirtualHost(IAmazonSqsHost host)
+        void ConfigureHostSettings(IAmazonSqsHostConfigurator configurator)
+        {
+            configurator.AccessKey(AccessKey);
+            configurator.SecretKey(SecretKey);
+
+            if (AmazonSqsConfig != null)
+                configurator.Config(AmazonSqsConfig);
+
+            if (AmazonSnsConfig != null)
+                configurator.Config(AmazonSnsConfig);
+
+            ConfigureAmazonSqsHost(configurator);
+        }
+
+        void CleanUpVirtualHost()
         {
             try
             {
-                var connection = host.Settings.CreateConnection();
+                var settings = GetHostSettings();
+                var connection = settings.CreateConnection();
 
                 using (var amazonSqs = connection.CreateAmazonSqsClient())
                 using (var amazonSns = connection.CreateAmazonSnsClient())

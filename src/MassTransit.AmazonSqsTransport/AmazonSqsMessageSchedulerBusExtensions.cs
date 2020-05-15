@@ -1,6 +1,6 @@
-namespace MassTransit.AmazonSqsTransport
+namespace MassTransit
 {
-    using MassTransit.Scheduling;
+    using AmazonSqsTransport.Scheduling;
     using Scheduling;
 
 

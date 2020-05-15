@@ -68,11 +68,9 @@
             set => _hostConfiguration.DeployTopologyOnly = value;
         }
 
-        public IAmazonSqsHost Host(AmazonSqsHostSettings settings)
+        public void Host(AmazonSqsHostSettings settings)
         {
             _busConfiguration.HostConfiguration.Settings = settings;
-
-            return _busConfiguration.HostConfiguration.Proxy;
         }
 
         void IAmazonSqsBusFactoryConfigurator.Send<T>(Action<IAmazonSqsMessageSendTopologyConfigurator<T>> configureTopology)

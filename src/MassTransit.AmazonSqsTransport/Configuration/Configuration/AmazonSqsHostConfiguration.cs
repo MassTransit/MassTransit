@@ -16,7 +16,6 @@
         IAmazonSqsHostConfiguration
     {
         readonly IAmazonSqsBusConfiguration _busConfiguration;
-        readonly AmazonSqsHostProxy _proxy;
         readonly IAmazonSqsTopologyConfiguration _topologyConfiguration;
         AmazonSqsHostSettings _hostSettings;
 
@@ -27,13 +26,10 @@
             _busConfiguration = busConfiguration;
             _topologyConfiguration = topologyConfiguration;
             _hostSettings = new ConfigurationHostSettings();
-
-            _proxy = new AmazonSqsHostProxy(this);
         }
 
         public override Uri HostAddress => _hostSettings.HostAddress;
 
-        public IAmazonSqsHost Proxy => _proxy;
         public bool DeployTopologyOnly { get; set; }
 
         public AmazonSqsHostSettings Settings
@@ -143,8 +139,6 @@
 
             foreach (var endpointConfiguration in Endpoints)
                 endpointConfiguration.Build(host);
-
-            _proxy.SetComplete(host);
 
             return host;
         }

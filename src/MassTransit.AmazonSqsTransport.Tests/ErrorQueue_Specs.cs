@@ -145,7 +145,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
             configurator.AllowTransportHeader(TransportHeaderCondition);
         }
 
-        protected override void ConfigureAmazonSqsBusHost(IAmazonSqsBusFactoryConfigurator configurator, IAmazonSqsHost host)
+        protected override void ConfigureAmazonSqsBus(IAmazonSqsBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("input_queue_error", x =>
             {

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AmazonSqsTransport.Tests
+﻿namespace MassTransit.AmazonSqsTransport.Tests
 {
     using System;
     using System.Diagnostics;
@@ -146,16 +134,14 @@ namespace MassTransit.AmazonSqsTransport.Tests
                 DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
         }
 
-        [Test]
+        [Test, Category("SlowAF")]
         public async Task Should_succeed_and_connect_when_properly_configured()
         {
             TaskCompletionSource<bool> received = new TaskCompletionSource<bool>();
 
-            IAmazonSqsHost host = null;
-
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
             {
-                host = cfg.Host("us-east-2", h =>
+                cfg.Host("us-east-2", h =>
                 {
                     h.AccessKey(AwsAccessKey);
                     h.SecretKey(AwsSecretKey);
@@ -193,12 +179,12 @@ namespace MassTransit.AmazonSqsTransport.Tests
             }
         }
 
-        [Test]
+        [Test, Category("SlowAF")]
         public async Task Should_do_a_bunch_of_requests_and_responses()
         {
             var bus = Bus.Factory.CreateUsingAmazonSqs(sbc =>
             {
-                var host = sbc.Host("us-east-2", h =>
+                sbc.Host("us-east-2", h =>
                 {
                     h.AccessKey(AwsAccessKey);
                     h.SecretKey(AwsSecretKey);
@@ -307,7 +293,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
             await harness.Stop();
         }
 
-        [Test]
+        [Test, Category("SlowAF")]
         public async Task Should_connect_with_accessKey_and_secretKey()
         {
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
@@ -329,7 +315,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
             }
         }
 
-        [Test]
+        [Test, Category("SlowAF")]
         public async Task Should_connect_with_credentials()
         {
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
@@ -351,7 +337,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
             }
         }
 
-        [Test]
+        [Test, Category("SlowAF")]
         public async Task Should_create_queue_with_multiple_subscriptions()
         {
             var messageTypes = new[]
@@ -364,11 +350,9 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             var tasksCompleted = messageTypes.ToDictionary(k => k, v => new TaskCompletionSource<bool>());
 
-            IAmazonSqsHost host = null;
-
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
             {
-                host = cfg.Host("ap-southeast-2", h =>
+                cfg.Host("ap-southeast-2", h =>
                 {
                     h.AccessKey(AwsAccessKey);
                     h.SecretKey(AwsSecretKey);
