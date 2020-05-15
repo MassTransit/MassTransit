@@ -61,7 +61,7 @@ namespace MassTransit.RedisIntegration.Tests
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 configurator.UseInMemoryOutbox();
-                configurator.ConfigureSaga<TestInstance>(_provider);
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IRegistration>());
             }
         }
 
@@ -114,7 +114,7 @@ namespace MassTransit.RedisIntegration.Tests
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
-                configurator.ConfigureSaga<TestInstance>(_provider);
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IRegistration>());
             }
         }
 

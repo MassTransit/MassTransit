@@ -33,7 +33,7 @@
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureConsumers(_container);
+            configurator.ConfigureConsumers(_container.GetInstance<IRegistration>());
         }
     }
 

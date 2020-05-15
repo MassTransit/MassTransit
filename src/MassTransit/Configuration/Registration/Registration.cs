@@ -236,5 +236,20 @@ namespace MassTransit.Registration
                 });
             }
         }
+
+        object IServiceProvider.GetService(Type serviceType)
+        {
+            return _configurationServiceProvider.GetService(serviceType);
+        }
+
+        T IConfigurationServiceProvider.GetRequiredService<T>()
+        {
+            return _configurationServiceProvider.GetRequiredService<T>();
+        }
+
+        T IConfigurationServiceProvider.GetService<T>()
+        {
+            return _configurationServiceProvider.GetService<T>();
+        }
     }
 }

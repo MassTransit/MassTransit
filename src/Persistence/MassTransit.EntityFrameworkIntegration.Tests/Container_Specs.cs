@@ -76,7 +76,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
             {
                 configurator.UseMessageRetry(r => r.Immediate(5));
                 configurator.UseInMemoryOutbox();
-                configurator.ConfigureSaga<TestInstance>(_provider);
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IRegistration>());
             }
         }
 
@@ -143,7 +143,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
             {
                 configurator.UseMessageRetry(r => r.Immediate(5));
                 configurator.UseInMemoryOutbox();
-                configurator.ConfigureSaga<TestInstance>(_provider);
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IRegistration>());
             }
         }
 
