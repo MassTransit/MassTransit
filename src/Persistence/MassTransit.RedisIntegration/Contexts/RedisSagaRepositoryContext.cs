@@ -6,6 +6,7 @@ namespace MassTransit.RedisIntegration.Contexts
     using Context;
     using GreenPipes;
     using Saga;
+    using Util;
 
 
     public class RedisSagaRepositoryContext<TSaga, TMessage> :
@@ -42,7 +43,7 @@ namespace MassTransit.RedisIntegration.Contexts
         {
             try
             {
-                await _context.Insert<TMessage>(instance).ConfigureAwait(false);
+                await _context.Insert(instance).ConfigureAwait(false);
 
                 _consumeContext.LogInsert<TSaga, TMessage>(instance.CorrelationId);
 
@@ -58,11 +59,31 @@ namespace MassTransit.RedisIntegration.Contexts
 
         public async Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId)
         {
-            var instance = await _context.Load<TMessage>(correlationId).ConfigureAwait(false);
+            var instance = await _context.Load(correlationId).ConfigureAwait(false);
             if (instance == null)
                 return default;
 
             return await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
+        }
+
+        public Task Save(SagaConsumeContext<TSaga> context)
+        {
+            return _context.Add(context);
+        }
+
+        public Task Update(SagaConsumeContext<TSaga> context)
+        {
+            return _context.Update(context);
+        }
+
+        public Task Delete(SagaConsumeContext<TSaga> context)
+        {
+            return _context.Delete(context);
+        }
+
+        public Task Discard(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
         }
 
         public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
@@ -99,7 +120,7 @@ namespace MassTransit.RedisIntegration.Contexts
 
         public Task<TSaga> Load(Guid correlationId)
         {
-            return _context.Load<TSaga>(correlationId);
+            return _context.Load(correlationId);
         }
     }
 }

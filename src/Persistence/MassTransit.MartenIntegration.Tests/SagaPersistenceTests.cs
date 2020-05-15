@@ -38,7 +38,7 @@
         public async Task An_observed_message_should_find_and_update_the_correct_saga()
         {
             Guid sagaId = NewId.NextGuid();
-            var message = new InitiateSimpleSaga(sagaId) { Name = "MySimpleSaga" };
+            var message = new InitiateSimpleSaga(sagaId) {Name = "MySimpleSaga"};
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -46,7 +46,7 @@
 
             found.ShouldBe(sagaId);
 
-            var nextMessage = new ObservableSagaMessage { Name = "MySimpleSaga" };
+            var nextMessage = new ObservableSagaMessage {Name = "MySimpleSaga"};
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
@@ -73,8 +73,23 @@
         {
             var connectionString =
                 "server=localhost;port=5432;database=MartenTest;user id=postgres;password=Password12!;";
-            var store = DocumentStore.For(connectionString);
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new MartenSagaRepository<SimpleSaga>(store));
+
+            var store = DocumentStore.For(x =>
+            {
+                x.Connection(connectionString);
+                x.PLV8Enabled = false;
+                x.CreateDatabasesForTenants(c =>
+                {
+                    c.ForTenant()
+                        .CheckAgainstPgDatabase()
+                        .WithOwner("postgres")
+                        .WithEncoding("UTF-8")
+                        .ConnectionLimit(-1);
+                });
+            });
+            store.Schema.ApplyAllConfiguredChangesToDatabase();
+            store.Schema.AssertDatabaseMatchesConfiguration();
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => MartenSagaRepository<SimpleSaga>.Create(store));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

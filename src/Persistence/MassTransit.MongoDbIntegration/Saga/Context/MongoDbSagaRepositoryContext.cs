@@ -8,6 +8,7 @@ namespace MassTransit.MongoDbIntegration.Saga.Context
     using MassTransit.Context;
     using MassTransit.Saga;
     using MongoDB.Driver;
+    using Util;
 
 
     public class MongoDbSagaRepositoryContext<TSaga, TMessage> :
@@ -70,6 +71,35 @@ namespace MassTransit.MongoDbIntegration.Saga.Context
                 return default;
 
             return await _factory.CreateSagaConsumeContext(_mongoCollection, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
+        }
+
+        public Task Save(SagaConsumeContext<TSaga> context)
+        {
+            return _mongoCollection.InsertOneAsync(context.Saga, null, CancellationToken);
+        }
+
+        public async Task Update(SagaConsumeContext<TSaga> context)
+        {
+            context.Saga.Version++;
+            var result = await _mongoCollection.FindOneAndReplaceAsync(x => x.CorrelationId == context.Saga.CorrelationId && x.Version < context.Saga.Version,
+                context.Saga, cancellationToken: CancellationToken).ConfigureAwait(false);
+
+            if (result == null)
+                throw new MongoDbConcurrencyException("Unable to update saga. It may not have been found or may have been updated by another process.");
+        }
+
+        public async Task Delete(SagaConsumeContext<TSaga> context)
+        {
+            var result = await _mongoCollection.DeleteOneAsync(x => x.CorrelationId == context.Saga.CorrelationId && x.Version <= context.Saga.Version,
+                CancellationToken).ConfigureAwait(false);
+
+            if (result.DeletedCount == 0)
+                throw new MongoDbConcurrencyException("Unable to delete saga. It may not have been found or may have been updated.");
+        }
+
+        public Task Discard(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
         }
     }
 

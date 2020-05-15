@@ -8,6 +8,7 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
     using GreenPipes;
     using MassTransit.Context;
     using MassTransit.Saga;
+    using Util;
 
 
     public class DocumentDbSagaRepositoryContext<TSaga, TMessage> :
@@ -65,6 +66,26 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
                 return null;
 
             return await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
+        }
+
+        public Task Save(SagaConsumeContext<TSaga> context)
+        {
+            return _context.Add(context.Saga, CancellationToken);
+        }
+
+        public Task Discard(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
+        }
+
+        public Task Update(SagaConsumeContext<TSaga> context)
+        {
+            return _context.Update(context.Saga, CancellationToken);
+        }
+
+        public Task Delete(SagaConsumeContext<TSaga> context)
+        {
+            return _context.Delete(context.Saga, CancellationToken);
         }
     }
 

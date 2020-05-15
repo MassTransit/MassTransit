@@ -32,6 +32,34 @@ namespace MassTransit.Saga
         /// <param name="correlationId"></param>
         /// <returns>A valid <see cref="SagaConsumeContext{TSaga,T}"/> if the instance loaded successfully, otherwise default</returns>
         Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId);
+
+        /// <summary>
+        /// Save the saga, called after an Add, without an insert
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        Task Save(SagaConsumeContext<TSaga> context);
+
+        /// <summary>
+        /// Update the saga, called after a load or insert where the saga has not completed
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        Task Update(SagaConsumeContext<TSaga> context);
+
+        /// <summary>
+        /// Delete the saga, called after a Load when the saga is completed
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        Task Delete(SagaConsumeContext<TSaga> context);
+
+        /// <summary>
+        /// Discard the saga, called after an Add when the saga is completed within the same transaction
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        Task Discard(SagaConsumeContext<TSaga> context);
     }
 
 

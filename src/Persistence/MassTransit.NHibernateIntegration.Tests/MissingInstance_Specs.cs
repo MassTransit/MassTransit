@@ -79,7 +79,7 @@ namespace MassTransit.NHibernateIntegration.Tests
             {
                 _provider = new SQLiteSessionFactoryProvider(false, typeof(MissingInstanceMap));
                 _sessionFactory = _provider.GetSessionFactory();
-                _sagaRepository = new Lazy<ISagaRepository<MissingInstance>>(() => new NHibernateSagaRepository<MissingInstance>(_sessionFactory));
+                _sagaRepository = new Lazy<ISagaRepository<MissingInstance>>(() => NHibernateSagaRepository<MissingInstance>.Create(_sessionFactory));
 
                 _machine = new TestStateMachine();
 

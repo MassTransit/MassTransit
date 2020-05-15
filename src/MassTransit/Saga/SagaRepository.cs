@@ -2,7 +2,6 @@ namespace MassTransit.Saga
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Threading.Tasks;
     using GreenPipes;
 
@@ -24,13 +23,6 @@ namespace MassTransit.Saga
             _repositoryContextFactory = repositoryContextFactory;
         }
 
-        public void Probe(ProbeContext context)
-        {
-            var scope = context.CreateScope("sagaRepository");
-
-            _repositoryContextFactory.Probe(scope);
-        }
-
         public Task<TSaga> Load(Guid correlationId)
         {
             return _repositoryContextFactory.Execute(context => context.Load(correlationId));
@@ -39,6 +31,13 @@ namespace MassTransit.Saga
         public Task<IEnumerable<Guid>> Find(ISagaQuery<TSaga> query)
         {
             return _repositoryContextFactory.Execute<IEnumerable<Guid>>(async context => await context.Query(query).ConfigureAwait(false));
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("sagaRepository");
+
+            _repositoryContextFactory.Probe(scope);
         }
 
         public Task Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)

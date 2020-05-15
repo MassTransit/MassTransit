@@ -85,7 +85,7 @@ namespace MassTransit.EntityFrameworkIntegration.Configurators
             else
                 configurator.RegisterSingleInstance(provider => CreatePessimisticLockStrategy());
 
-            configurator.RegisterSagaRepository<TSaga, DbContext, EntityFrameworkSagaConsumeContextFactory<TSaga>,
+            configurator.RegisterSagaRepository<TSaga, DbContext, SagaConsumeContextFactory<DbContext, TSaga>,
                 EntityFrameworkSagaRepositoryContextFactory<TSaga>>();
         }
 

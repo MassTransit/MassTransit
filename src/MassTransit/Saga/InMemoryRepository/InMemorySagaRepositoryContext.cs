@@ -6,6 +6,7 @@ namespace MassTransit.Saga.InMemoryRepository
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using GreenPipes.Util;
 
 
     public class InMemorySagaRepositoryContext<TSaga, TMessage> :
@@ -118,6 +119,36 @@ namespace MassTransit.Saga.InMemoryRepository
             }
 
             return await _factory.CreateSagaConsumeContext(_sagas, _context, saga.Instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
+        }
+
+        public Task Save(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
+        }
+
+        public Task Update(SagaConsumeContext<TSaga> context)
+        {
+            return Save(context);
+        }
+
+        public async Task Delete(SagaConsumeContext<TSaga> context)
+        {
+            await _sagas.MarkInUse(CancellationToken).ConfigureAwait(false);
+            try
+            {
+                SagaInstance<TSaga> instance = _sagas[context.Saga.CorrelationId];
+
+                _sagas.Remove(instance);
+            }
+            finally
+            {
+                _sagas.Release();
+            }
+        }
+
+        public Task Discard(SagaConsumeContext<TSaga> context)
+        {
+            return Delete(context);
         }
 
         public void Dispose()

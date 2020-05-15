@@ -26,7 +26,7 @@
 
             _sessionFactory = new SQLiteSessionFactoryProvider(typeof(ShoppingChoreMap))
                 .GetSessionFactory();
-            _repository = new NHibernateSagaRepository<ShoppingChore>(_sessionFactory);
+            _repository = NHibernateSagaRepository<ShoppingChore>.Create(_sessionFactory);
 
             configurator.StateMachineSaga(_machine, _repository);
         }

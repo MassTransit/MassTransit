@@ -38,6 +38,17 @@ namespace MassTransit.Saga
             try
             {
                 await _next.Send(sagaConsumeContext).ConfigureAwait(false);
+
+                if (sagaConsumeContext.IsCompleted)
+                    await _repositoryContext.Discard(sagaConsumeContext).ConfigureAwait(false);
+                else
+                    await _repositoryContext.Save(sagaConsumeContext).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+                await _repositoryContext.Discard(sagaConsumeContext).ConfigureAwait(false);
+
+                throw;
             }
             finally
             {

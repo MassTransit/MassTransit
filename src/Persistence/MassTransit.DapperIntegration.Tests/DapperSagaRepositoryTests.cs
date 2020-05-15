@@ -92,12 +92,12 @@
         }
 
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;
-        string _connectionString;
+        readonly string _connectionString;
 
         public DapperSagaRepositoryTests()
         {
             _connectionString = LocalDbConnectionStringProvider.GetLocalDbConnectionString();
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => new DapperSagaRepository<SimpleSaga>(_connectionString));
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => DapperSagaRepository<SimpleSaga>.Create(_connectionString));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

@@ -125,7 +125,7 @@
                 _sessionFactory = new SQLiteSessionFactoryProvider(typeof(InstanceMap))
                     .GetSessionFactory();
 
-                _repository = new NHibernateSagaRepository<Instance>(_sessionFactory);
+                _repository = NHibernateSagaRepository<Instance>.Create(_sessionFactory);
 
                 configurator.StateMachineSaga(_machine, _repository);
             }
@@ -209,7 +209,7 @@
                 _sessionFactory = new SQLiteSessionFactoryProvider(typeof(InstanceMap))
                     .GetSessionFactory();
 
-                _repository = new NHibernateSagaRepository<Instance>(_sessionFactory);
+                _repository = NHibernateSagaRepository<Instance>.Create(_sessionFactory);
 
                 configurator.StateMachineSaga(_machine, _repository);
             }

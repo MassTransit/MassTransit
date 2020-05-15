@@ -3,6 +3,7 @@ namespace MassTransit.MongoDbIntegration.Configurators
     using System;
     using System.Collections.Generic;
     using GreenPipes;
+    using MassTransit.Saga;
     using MongoDB.Bson.Serialization;
     using MongoDB.Driver;
     using Registration;
@@ -106,7 +107,8 @@ namespace MassTransit.MongoDbIntegration.Configurators
             }
 
             configurator.RegisterSingleInstance(MongoCollectionFactory);
-            configurator.RegisterSagaRepository<T, IMongoCollection<T>, MongoDbSagaConsumeContextFactory<T>, MongoDbSagaRepositoryContextFactory<T>>();
+            configurator.RegisterSagaRepository<T, IMongoCollection<T>, SagaConsumeContextFactory<IMongoCollection<T>, T>,
+                MongoDbSagaRepositoryContextFactory<T>>();
         }
     }
 }

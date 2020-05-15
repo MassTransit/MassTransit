@@ -9,6 +9,7 @@ namespace MassTransit.MartenIntegration.Saga.Context
     using Marten;
     using MassTransit.Context;
     using MassTransit.Saga;
+    using Util;
 
 
     public class MartenSagaRepositoryContext<TSaga, TMessage> :
@@ -72,6 +73,30 @@ namespace MassTransit.MartenIntegration.Saga.Context
                 return default;
 
             return await _factory.CreateSagaConsumeContext(_session, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
+        }
+
+        public Task Save(SagaConsumeContext<TSaga> context)
+        {
+            _session.Store(context.Saga);
+
+            return _session.SaveChangesAsync(CancellationToken);
+        }
+
+        public Task Update(SagaConsumeContext<TSaga> context)
+        {
+            return _session.SaveChangesAsync(CancellationToken);
+        }
+
+        public Task Delete(SagaConsumeContext<TSaga> context)
+        {
+            _session.Delete(context.Saga);
+
+            return _session.SaveChangesAsync(CancellationToken);
+        }
+
+        public Task Discard(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
         }
     }
 

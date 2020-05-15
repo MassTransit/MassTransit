@@ -7,6 +7,7 @@ namespace MassTransit.DapperIntegration.Context
     using GreenPipes;
     using MassTransit.Context;
     using Saga;
+    using Util;
 
 
     public class DapperSagaRepositoryContext<TSaga, TMessage> :
@@ -53,6 +54,26 @@ namespace MassTransit.DapperIntegration.Context
                 return default;
 
             return await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
+        }
+
+        public Task Save(SagaConsumeContext<TSaga> context)
+        {
+            return _context.InsertAsync(context.Saga, CancellationToken);
+        }
+
+        public Task Update(SagaConsumeContext<TSaga> context)
+        {
+            return _context.UpdateAsync(context.Saga, CancellationToken);
+        }
+
+        public Task Delete(SagaConsumeContext<TSaga> context)
+        {
+            return _context.DeleteAsync(context.Saga, CancellationToken);
+        }
+
+        public Task Discard(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
         }
     }
 

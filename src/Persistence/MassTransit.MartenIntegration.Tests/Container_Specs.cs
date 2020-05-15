@@ -53,7 +53,17 @@ namespace MassTransit.MartenIntegration.Tests
                 where T : class
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
-                    .MartenRepository("server=localhost;port=5432;database=MartenTest;user id=postgres;password=Password12!;");
+                    .MartenRepository("server=localhost;port=5432;database=MartenTest;user id=postgres;password=Password12!;", r =>
+                    {
+                        r.CreateDatabasesForTenants(c =>
+                        {
+                            c.ForTenant()
+                                .CheckAgainstPgDatabase()
+                                .WithOwner("postgres")
+                                .WithEncoding("UTF-8")
+                                .ConnectionLimit(-1);
+                        });
+                    });
 
                 configurator.AddBus(provider => BusControl);
             }

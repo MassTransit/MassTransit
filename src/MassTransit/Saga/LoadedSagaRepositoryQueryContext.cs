@@ -56,6 +56,26 @@ namespace MassTransit.Saga
             return _repositoryContext.Load(correlationId);
         }
 
+        public Task Save(SagaConsumeContext<TSaga> context)
+        {
+            return _repositoryContext.Save(context);
+        }
+
+        public Task Discard(SagaConsumeContext<TSaga> context)
+        {
+            return _repositoryContext.Discard(context);
+        }
+
+        public Task Update(SagaConsumeContext<TSaga> context)
+        {
+            return _repositoryContext.Update(context);
+        }
+
+        public Task Delete(SagaConsumeContext<TSaga> context)
+        {
+            return _repositoryContext.Delete(context);
+        }
+
         public IEnumerator<Guid> GetEnumerator()
         {
             return _instances.Select(x => x.CorrelationId).GetEnumerator();

@@ -9,6 +9,7 @@ namespace MassTransit.NHibernateIntegration.Saga
     using MassTransit.Saga;
     using NHibernate;
     using NHibernate.Exceptions;
+    using Util;
 
 
     public class NHibernateSagaRepositoryContext<TSaga, TMessage> :
@@ -61,6 +62,26 @@ namespace MassTransit.NHibernateIntegration.Saga
                 return default;
 
             return await _factory.CreateSagaConsumeContext(_session, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
+        }
+
+        public Task Save(SagaConsumeContext<TSaga> context)
+        {
+            return _session.SaveAsync(context.Saga, CancellationToken);
+        }
+
+        public Task Update(SagaConsumeContext<TSaga> context)
+        {
+            return _session.SaveAsync(context.Saga, CancellationToken);
+        }
+
+        public Task Delete(SagaConsumeContext<TSaga> context)
+        {
+            return _session.DeleteAsync(context.Saga, CancellationToken);
+        }
+
+        public Task Discard(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
         }
 
         public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
