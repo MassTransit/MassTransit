@@ -15,14 +15,14 @@
         /// <param name="hostAddress">The host address, in MassTransit format (sb://namespace.servicebus.windows.net/scope)</param>
         /// <param name="configure">A callback to further configure the service bus</param>
         /// <returns>The service bus host</returns>
-        public static IServiceBusHost Host(this IServiceBusBusFactoryConfigurator configurator, Uri hostAddress,
+        public static void Host(this IServiceBusBusFactoryConfigurator configurator, Uri hostAddress,
             Action<IServiceBusHostConfigurator> configure)
         {
             var hostConfigurator = new ServiceBusHostConfigurator(hostAddress);
 
             configure(hostConfigurator);
 
-            return configurator.Host(hostConfigurator.Settings);
+            configurator.Host(hostConfigurator.Settings);
         }
 
         /// <summary>
@@ -32,7 +32,7 @@
         /// <param name="connectionString">The connection string in the proper format</param>
         /// <param name="configure">A callback to further configure the service bus</param>
         /// <returns>The service bus host</returns>
-        public static IServiceBusHost Host(this IServiceBusBusFactoryConfigurator configurator, string connectionString,
+        public static void Host(this IServiceBusBusFactoryConfigurator configurator, string connectionString,
             Action<IServiceBusHostConfigurator> configure = null)
         {
             // in case they pass a URI by mistake (it happens)
@@ -40,14 +40,16 @@
             {
                 var hostAddress = new Uri(connectionString);
 
-                return Host(configurator, hostAddress, configure);
+                Host(configurator, hostAddress, configure);
             }
+            else
+            {
+                var hostConfigurator = new ServiceBusHostConfigurator(connectionString);
 
-            var hostConfigurator = new ServiceBusHostConfigurator(connectionString);
+                configure?.Invoke(hostConfigurator);
 
-            configure?.Invoke(hostConfigurator);
-
-            return configurator.Host(hostConfigurator.Settings);
+                configurator.Host(hostConfigurator.Settings);
+            }
         }
 
         public static void SharedAccessSignature(this IServiceBusHostConfigurator configurator,

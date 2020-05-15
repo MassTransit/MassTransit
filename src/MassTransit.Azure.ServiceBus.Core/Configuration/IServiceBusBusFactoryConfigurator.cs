@@ -51,7 +51,7 @@
         /// </summary>
         /// <param name="settings"></param>
         /// <returns></returns>
-        IServiceBusHost Host(ServiceBusHostSettings settings);
+        void Host(ServiceBusHostSettings settings);
 
         /// <summary>
         /// Declare a subscription endpoint on the broker and configure the endpoint settings and message consumers

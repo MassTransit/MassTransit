@@ -107,7 +107,7 @@
 
                 var bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {
-                    var host = x.Host(serviceUri, h =>
+                    x.Host(serviceUri, h =>
                     {
                         h.SharedAccessSignature(s =>
                         {
@@ -154,7 +154,7 @@
 
                 var bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {
-                    var host = x.Host(serviceUri, h =>
+                    x.Host(serviceUri, h =>
                     {
                         h.SharedAccessSignature(s =>
                         {

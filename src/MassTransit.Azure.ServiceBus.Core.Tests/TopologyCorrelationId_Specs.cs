@@ -65,7 +65,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         Task<ConsumeContext<OtherMessage>> _otherHandled;
         Task<ConsumeContext<LegacyMessage>> _legacyHandled;
 
-        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
             MessageCorrelation.UseCorrelationId<LegacyMessage>(x => x.TransactionId);
 
@@ -127,7 +127,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
         Task<ConsumeContext<PartitionedMessage>> _otherHandled;
 
-        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
             configurator.Send<PartitionedMessage>(x =>
             {
@@ -178,7 +178,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
         Task<ConsumeContext<PartitionedMessage>> _otherHandled;
 
-        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
             configurator.Send<PartitionedMessage>(x =>
             {

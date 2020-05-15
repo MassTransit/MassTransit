@@ -62,7 +62,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
         Task<ConsumeContext<PingMessage>> _handler;
 
-        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("test_endpoint_scope/input_queue", e =>
             {
@@ -163,9 +163,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     {
         Task<ConsumeContext<PingMessage>> _consumer;
 
-        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
-            base.ConfigureServiceBusBusHost(configurator, host);
             configurator.ReceiveEndpoint(e =>
             {
                 e.RemoveSubscriptions = true;

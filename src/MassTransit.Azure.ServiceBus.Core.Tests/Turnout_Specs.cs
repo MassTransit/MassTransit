@@ -44,12 +44,8 @@
         Uri _commandEndpointAddress;
         Task<ConsumeContext<JobCompleted>> _completed2;
 
-        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
-            configurator.UseServiceBusMessageScheduler();
-
-            base.ConfigureServiceBusBusHost(configurator, host);
-
             configurator.TurnoutEndpoint<ProcessFile>("process_queue", endpoint =>
             {
                 endpoint.SuperviseInterval = TimeSpan.FromSeconds(1);
@@ -65,6 +61,7 @@
             _completed2 = Handled<JobCompleted>(configurator, context => context.Message.GetArguments<ProcessFile>().Size == 2);
         }
     }
+
 
     [TestFixture]
     public class Stopping_the_bus_before_the_job_is_done :
@@ -97,12 +94,8 @@
         Task<ConsumeContext<JobStarted>> _started;
         Uri _commandEndpointAddress;
 
-        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
-            configurator.UseServiceBusMessageScheduler();
-
-            base.ConfigureServiceBusBusHost(configurator, host);
-
             configurator.TurnoutEndpoint<ProcessFile>("process_queue", endpoint =>
             {
                 endpoint.SuperviseInterval = TimeSpan.FromSeconds(1);
@@ -128,6 +121,7 @@
             _started = Handled<JobStarted>(configurator);
         }
     }
+
 
     [TestFixture]
     public class Cancelling_a_job_using_the_management_address :
@@ -174,12 +168,8 @@
         Uri _commandEndpointAddress;
         Task<ConsumeContext<JobCanceled<ProcessFile>>> _canceled;
 
-        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
-            configurator.UseServiceBusMessageScheduler();
-
-            base.ConfigureServiceBusBusHost(configurator, host);
-
             configurator.TurnoutEndpoint<ProcessFile>("process_queue", endpoint =>
             {
                 endpoint.SuperviseInterval = TimeSpan.FromSeconds(1);

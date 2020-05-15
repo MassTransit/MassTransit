@@ -117,10 +117,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         {
         }
 
-        protected virtual void ConfigureSecondBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
-        {
-        }
-
         protected virtual void ConfigureSecondInputQueueEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
         }
@@ -133,7 +129,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 
-                var host = x.Host(_secondServiceUri, h =>
+                x.Host(_secondServiceUri, h =>
                 {
                     h.SharedAccessSignature(s =>
                     {
@@ -143,8 +139,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
                         s.TokenScope = settings.TokenScope;
                     });
                 });
-
-                ConfigureSecondBusHost(x, host);
 
                 x.ReceiveEndpoint("input_queue", e =>
                 {

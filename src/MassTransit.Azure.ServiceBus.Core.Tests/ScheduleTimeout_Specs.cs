@@ -81,12 +81,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
                 return _machine.GetState(state).Result;
             }
 
-            protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+            protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
             {
-                base.ConfigureServiceBusBus(configurator);
-
-                configurator.UseServiceBusMessageScheduler();
-
                 configurator.SubscriptionEndpoint<CartRemoved>("second_queue", x =>
                 {
                     _cartRemoved = Handled<CartRemoved>(x);
@@ -95,8 +91,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
             {
-                base.ConfigureServiceBusReceiveEndpoint(configurator);
-
                 _repository = new InMemorySagaRepository<TestState>();
 
                 _machine = new TestStateMachine();

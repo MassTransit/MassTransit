@@ -36,12 +36,8 @@
             _handler = Handled<TurnoutJobCompleted>(configurator);
         }
 
-        protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
+        protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
-            configurator.UseServiceBusMessageScheduler();
-
-            base.ConfigureServiceBusBusHost(configurator, host);
-
             configurator.TurnoutEndpoint<LongTimeJob>("service_queue", endpoint =>
             {
                 endpoint.SuperviseInterval = TimeSpan.FromSeconds(1);
@@ -59,7 +55,6 @@
 
             _stateMachine = new TurnoutJobStateMachine();
             _repository = new MessageSessionSagaRepository<TurnoutJobState>();
-
 
             configurator.ReceiveEndpoint("service_state", endpoint =>
             {
