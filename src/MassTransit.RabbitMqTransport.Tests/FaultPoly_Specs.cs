@@ -26,7 +26,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
         {
-            configurator.ReceiveEndpoint(host, e =>
+            configurator.ReceiveEndpoint(e =>
             {
                 _handled = Handled<Fault<MemberUpdateCommand>>(e);
             });

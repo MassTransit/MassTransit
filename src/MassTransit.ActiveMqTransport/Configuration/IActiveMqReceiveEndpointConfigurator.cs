@@ -12,13 +12,6 @@
         IQueueEndpointConfigurator
     {
         /// <summary>
-        /// If true, creates message consumers for the message types in consumers, handlers, etc.
-        /// With ActiveMQ, these are virtual consumers tied to the virtual topics
-        /// </summary>
-        [Obsolete("Use ConfigureConsumeTopology instead. In the meantime, this property sets that property as well.")]
-        bool BindMessageTopics { set; }
-
-        /// <summary>
         /// Bind an existing exchange for the message type to the receive endpoint by name
         /// </summary>
         /// <typeparam name="T"></typeparam>

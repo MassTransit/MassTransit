@@ -6,8 +6,7 @@ namespace MassTransit
 
 
     public interface IInMemoryBusFactoryConfigurator :
-        IBusFactoryConfigurator<IInMemoryReceiveEndpointConfigurator>,
-        IReceiveConfigurator<IInMemoryHost, IInMemoryReceiveEndpointConfigurator>
+        IBusFactoryConfigurator<IInMemoryReceiveEndpointConfigurator>
     {
         /// <summary>
         /// Sets the maximum number of threads used by an in-memory transport, for partitioning

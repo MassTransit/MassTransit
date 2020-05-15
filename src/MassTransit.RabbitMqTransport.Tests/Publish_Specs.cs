@@ -203,7 +203,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             protected override void ConfigureRabbitMqBusHost(IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host)
             {
-                configurator.ReceiveEndpoint(host, "handle-fault", x =>
+                configurator.ReceiveEndpoint("handle-fault", x =>
                 {
                     _faultA = Handled<Fault<A>>(x);
                 });
@@ -245,12 +245,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 base.ConfigureRabbitMqBusHost(configurator, host);
 
-                configurator.ReceiveEndpoint(host, x =>
+                configurator.ReceiveEndpoint(x =>
                 {
                     _temporaryA = Handled<A>(x);
                 });
 
-                configurator.ReceiveEndpoint(host, x =>
+                configurator.ReceiveEndpoint(x =>
                 {
                     _temporaryB = Handled<A>(x);
                 });
@@ -302,7 +302,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 base.ConfigureRabbitMqBusHost(configurator, host);
 
-                configurator.ReceiveEndpoint(host, "ack_queue", x =>
+                configurator.ReceiveEndpoint("ack_queue", x =>
                 {
                     _receivedGotA = Handled<GotA>(x);
 

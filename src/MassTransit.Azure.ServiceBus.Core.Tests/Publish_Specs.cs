@@ -16,7 +16,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Introspection;
-    using Hosting;
     using NUnit.Framework;
     using Serialization;
     using TestFramework;
@@ -65,7 +64,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
         protected override void ConfigureServiceBusBusHost(IServiceBusBusFactoryConfigurator configurator, IServiceBusHost host)
         {
-            configurator.ReceiveEndpoint(host, "test_endpoint_scope/input_queue", e =>
+            configurator.ReceiveEndpoint("test_endpoint_scope/input_queue", e =>
             {
                 _handler = Handled<PingMessage>(e);
             });

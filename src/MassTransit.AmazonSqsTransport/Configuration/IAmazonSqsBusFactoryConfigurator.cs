@@ -6,17 +6,11 @@
 
     public interface IAmazonSqsBusFactoryConfigurator :
         IBusFactoryConfigurator<IAmazonSqsReceiveEndpointConfigurator>,
-        IReceiveConfigurator<IAmazonSqsHost, IAmazonSqsReceiveEndpointConfigurator>,
         IQueueEndpointConfigurator
     {
         new IAmazonSqsSendTopologyConfigurator SendTopology { get; }
 
         new IAmazonSqsPublishTopologyConfigurator PublishTopology { get; }
-
-        /// <summary>
-        /// Set to true if the topology should be deployed only
-        /// </summary>
-        bool DeployTopologyOnly { set; }
 
         /// <summary>
         /// Configure the send topology of the message type

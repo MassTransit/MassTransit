@@ -16,7 +16,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using Hosting;
     using NUnit.Framework;
 
 
@@ -147,7 +146,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
                 ConfigureSecondBusHost(x, host);
 
-                x.ReceiveEndpoint(host, "input_queue", e =>
+                x.ReceiveEndpoint("input_queue", e =>
                 {
                     _secondInputQueueAddress = e.InputAddress;
 

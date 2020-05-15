@@ -6,17 +6,11 @@
 
     public interface IActiveMqBusFactoryConfigurator :
         IBusFactoryConfigurator<IActiveMqReceiveEndpointConfigurator>,
-        IReceiveConfigurator<IActiveMqHost, IActiveMqReceiveEndpointConfigurator>,
         IQueueEndpointConfigurator
     {
         new IActiveMqSendTopologyConfigurator SendTopology { get; }
 
         new IActiveMqPublishTopologyConfigurator PublishTopology { get; }
-
-        /// <summary>
-        /// Set to true if the topology should be deployed only
-        /// </summary>
-        bool DeployTopologyOnly { set; }
 
         /// <summary>
         /// Configure the send topology of the message type

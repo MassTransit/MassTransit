@@ -1,4 +1,4 @@
-namespace MassTransit.Azure.ServiceBus.Core.Hosting
+namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
 

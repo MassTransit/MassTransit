@@ -6,17 +6,11 @@
 
     public interface IServiceBusBusFactoryConfigurator :
         IBusFactoryConfigurator<IServiceBusReceiveEndpointConfigurator>,
-        IReceiveConfigurator<IServiceBusHost, IServiceBusReceiveEndpointConfigurator>,
         IServiceBusQueueEndpointConfigurator
     {
         new IServiceBusSendTopologyConfigurator SendTopology { get; }
 
         new IServiceBusPublishTopologyConfigurator PublishTopology { get; }
-
-        /// <summary>
-        /// Set to true if the topology should be deployed only
-        /// </summary>
-        bool DeployTopologyOnly { set; }
 
         /// <summary>
         /// Configure the send topology of the message type
@@ -58,28 +52,6 @@
         /// <param name="settings"></param>
         /// <returns></returns>
         IServiceBusHost Host(ServiceBusHostSettings settings);
-
-        /// <summary>
-        /// Declare a subscription endpoint on the broker and configure the endpoint settings and message consumers
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="host"></param>
-        /// <param name="subscriptionName"></param>
-        /// <param name="configure"></param>
-        [Obsolete("The host parameter is no longer required, and can be removed")]
-        void SubscriptionEndpoint<T>(IServiceBusHost host, string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
-            where T : class;
-
-        /// <summary>
-        /// Declare a subscription endpoint on the broker and configure the endpoint settings and message consumers
-        /// </summary>
-        /// <param name="host">The host for this endpoint</param>
-        /// <param name="subscriptionName">The name of the subscription</param>
-        /// <param name="topicPath">The topic name to subscribe</param>
-        /// <param name="configure"></param>
-        [Obsolete("The host parameter is no longer required, and can be removed")]
-        void SubscriptionEndpoint(IServiceBusHost host, string subscriptionName, string topicPath,
-            Action<IServiceBusSubscriptionEndpointConfigurator> configure);
 
         /// <summary>
         /// Declare a subscription endpoint on the broker and configure the endpoint settings and message consumers

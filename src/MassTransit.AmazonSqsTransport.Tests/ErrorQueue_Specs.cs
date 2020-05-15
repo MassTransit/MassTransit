@@ -147,7 +147,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
         protected override void ConfigureAmazonSqsBusHost(IAmazonSqsBusFactoryConfigurator configurator, IAmazonSqsHost host)
         {
-            configurator.ReceiveEndpoint(host, "input_queue_error", x =>
+            configurator.ReceiveEndpoint("input_queue_error", x =>
             {
                 x.ConfigureConsumeTopology = false;
                 x.PurgeOnStartup = true;

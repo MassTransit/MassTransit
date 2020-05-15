@@ -1,14 +1,14 @@
 ﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
@@ -45,13 +45,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             {
                 base.ConfigureServiceBusBusHost(configurator, host);
 
-                configurator.SubscriptionEndpoint<MessageB>(host, "phatboyg_you_know_me", x =>
+                configurator.SubscriptionEndpoint<MessageB>("phatboyg_you_know_me", x =>
                 {
                     _handledB = Handled<MessageB>(x);
                 });
             }
         }
-        
+
         [TestFixture]
         public class Using_a_subscription_endpoint_that_faults :
             AzureServiceBusTestFixture
@@ -79,17 +79,17 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             {
                 base.ConfigureServiceBusBusHost(configurator, host);
 
-                configurator.SubscriptionEndpoint<MessageB>(host, "phatboyg_you_know_me", x =>
+                configurator.SubscriptionEndpoint<MessageB>("phatboyg_you_know_me", x =>
                 {
                     _handledB = Handler<MessageB>(x, async context =>
                     {
                         await context.Publish(new MessageA());
-                        
+
                         throw new IntentionalTestException("Oh, dang.");
                     });
                 });
-                
-                configurator.SubscriptionEndpoint<MessageC>(host, "no_handlers", x =>
+
+                configurator.SubscriptionEndpoint<MessageC>("no_handlers", x =>
                 {
                 });
             }
@@ -106,7 +106,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         {
             public string Value { get; set; }
         }
-        
+
         public class MessageC
         {
             public string Value { get; set; }
@@ -149,12 +149,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             {
                 base.ConfigureServiceBusBusHost(configurator, host);
 
-                configurator.SubscriptionEndpoint<MessageA>(host, "phatboyg_you_know_me", x =>
+                configurator.SubscriptionEndpoint<MessageA>("phatboyg_you_know_me", x =>
                 {
                     x.Consumer<Consumer>();
                 });
 
-                configurator.SubscriptionEndpoint<MessageB>(host, "phatboyg_you_know_me", x =>
+                configurator.SubscriptionEndpoint<MessageB>("phatboyg_you_know_me", x =>
                 {
                     x.Consumer<Consumer>();
                 });

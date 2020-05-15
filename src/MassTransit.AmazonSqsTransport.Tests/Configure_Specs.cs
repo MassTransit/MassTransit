@@ -161,7 +161,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
                     h.SecretKey(AwsSecretKey);
                 });
 
-                cfg.ReceiveEndpoint(host, "input-queue", x =>
+                cfg.ReceiveEndpoint("input-queue", x =>
                 {
                     x.Handler<PingMessage>(async context =>
                     {
@@ -169,7 +169,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
                     });
                 });
 
-                cfg.ReceiveEndpoint(host, "input-queue-too", x =>
+                cfg.ReceiveEndpoint("input-queue-too", x =>
                 {
                     x.Handler<PongMessage>(async context =>
                     {
@@ -204,7 +204,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
                     h.SecretKey(AwsSecretKey);
                 });
 
-                sbc.ReceiveEndpoint(host, "test", e =>
+                sbc.ReceiveEndpoint("test", e =>
                 {
                     e.Handler<PingMessage>(async context =>
                     {
@@ -380,7 +380,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
                     return Util.TaskUtil.Completed;
                 };
 
-                cfg.ReceiveEndpoint(host, "long_multi_subs_queue", e =>
+                cfg.ReceiveEndpoint("long_multi_subs_queue", e =>
                 {
                     e.Handler<Message0>(async c => await receiveTask(c.Message));
                     e.Handler<Message1>(async c => await receiveTask(c.Message));

@@ -178,23 +178,12 @@
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IRabbitMqHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
-        {
-            _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
-        }
-
         public void ReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        public void ReceiveEndpoint(IRabbitMqHost host, string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }

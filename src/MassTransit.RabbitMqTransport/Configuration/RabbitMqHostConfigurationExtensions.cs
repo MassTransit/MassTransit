@@ -128,37 +128,6 @@
 
         /// <summary>
         /// Declare a ReceiveEndpoint using a unique generated queue name. This queue defaults to auto-delete
-        /// and non-durable. By default, all services bus instances include a default receiveEndpoint that is
-        /// of this type (created automatically upon the first receiver binding).
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="host"></param>
-        /// <param name="configure"></param>
-        [Obsolete("The host parameter is no longer required, and can be removed")]
-        public static void ReceiveEndpoint(this IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host,
-            Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
-        {
-            configurator.ReceiveEndpoint(host, new TemporaryEndpointDefinition(), DefaultEndpointNameFormatter.Instance, configure);
-        }
-
-        /// <summary>
-        /// Declare a ReceiveEndpoint using a unique generated queue name. This queue defaults to auto-delete
-        /// and non-durable. By default, all services bus instances include a default receiveEndpoint that is
-        /// of this type (created automatically upon the first receiver binding).
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="host"></param>
-        /// <param name="definition"></param>
-        /// <param name="configure"></param>
-        [Obsolete("The host parameter is no longer required, and can be removed")]
-        public static void ReceiveEndpoint(this IRabbitMqBusFactoryConfigurator configurator, IRabbitMqHost host, IEndpointDefinition definition,
-            Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
-        {
-            configurator.ReceiveEndpoint(host, definition, DefaultEndpointNameFormatter.Instance, configure);
-        }
-
-        /// <summary>
-        /// Declare a ReceiveEndpoint using a unique generated queue name. This queue defaults to auto-delete
         /// and non-durable. By default all services bus instances include a default receiveEndpoint that is
         /// of this type (created automatically upon the first receiver binding).
         /// </summary>

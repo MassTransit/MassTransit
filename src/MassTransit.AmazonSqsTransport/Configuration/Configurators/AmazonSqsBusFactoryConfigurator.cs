@@ -104,23 +104,12 @@
             _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
-        public void ReceiveEndpoint(IAmazonSqsHost host, IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint = null)
-        {
-            _hostConfiguration.ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
-        }
-
         public void ReceiveEndpoint(string queueName, Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }
 
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        public void ReceiveEndpoint(IAmazonSqsHost host, string queueName, Action<IAmazonSqsReceiveEndpointConfigurator> configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }
