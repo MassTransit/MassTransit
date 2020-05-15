@@ -117,7 +117,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         };
 
 
-        [Test]
+        [Test, Category("SlowAF")]
         public async Task Should_succeed_and_connect_when_properly_configured()
         {
             TaskCompletionSource<bool> received = TaskUtil.GetTask<bool>();
@@ -126,7 +126,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
-                var host = cfg.Host(TestBrokerHost, 61617, h =>
+                cfg.Host(TestBrokerHost, 61617, h =>
                 {
                     h.Username(TestUsername);
                     h.Password(TestPassword);
@@ -164,12 +164,12 @@ namespace MassTransit.ActiveMqTransport.Tests
             await busControl.StopAsync();
         }
 
-        [Test]
+        [Test, Category("SlowAF")]
         public async Task Should_do_a_bunch_of_requests_and_responses()
         {
             var bus = Bus.Factory.CreateUsingActiveMq(sbc =>
             {
-                var host = sbc.Host(TestBrokerHost, 61617, h =>
+                sbc.Host(TestBrokerHost, 61617, h =>
                 {
                     h.Username(TestUsername);
                     h.Password(TestPassword);
@@ -283,7 +283,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             await harness.Stop();
         }
 
-        [Test]
+        [Test, Category("SlowAF")]
         public void Should_succeed_when_properly_configured()
         {
             var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
@@ -314,7 +314,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             Assert.That(settings.BrokerAddress, Is.EqualTo(new Uri("activemq:failover:(tcp://failover1:61616/,tcp://failover2:61616/)")));
         }
 
-        [Test]
+        [Test, Category("SlowAF")]
         public async Task Should_do_a_bunch_of_requests_and_responses_on_failover_transport()
         {
             if (FailoverHosts.Length == 0)
@@ -325,7 +325,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             var bus = Bus.Factory.CreateUsingActiveMq(sbc =>
             {
-                var host = sbc.Host("activemq-cluster", 61617, h =>
+                sbc.Host("activemq-cluster", 61617, h =>
                 {
                     h.Username(TestUsername);
                     h.Password(TestPassword);

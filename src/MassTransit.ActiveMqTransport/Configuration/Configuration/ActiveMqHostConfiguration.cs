@@ -16,7 +16,6 @@
         IActiveMqHostConfiguration
     {
         readonly IActiveMqBusConfiguration _busConfiguration;
-        readonly ActiveMqHostProxy _proxy;
         readonly IActiveMqTopologyConfiguration _topologyConfiguration;
         ActiveMqHostSettings _hostSettings;
 
@@ -28,12 +27,10 @@
             _topologyConfiguration = topologyConfiguration;
             _hostSettings = new ConfigurationHostSettings(new Uri("activemq://localhost"));
 
-            _proxy = new ActiveMqHostProxy(this);
         }
 
         public string Description => _hostSettings.ToDescription();
         public override Uri HostAddress => _hostSettings.HostAddress;
-        public IActiveMqHost Proxy => _proxy;
         public bool DeployTopologyOnly { get; set; }
 
         public ActiveMqHostSettings Settings
@@ -147,8 +144,6 @@
             {
                 endpointConfiguration.Build(host);
             }
-
-            _proxy.SetComplete(host);
 
             return host;
         }

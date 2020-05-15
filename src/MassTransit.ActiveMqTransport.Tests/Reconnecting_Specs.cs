@@ -66,7 +66,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 
                 Console.Write($"{i}. ");
 
-                IClientFactory clientFactory = await Host.CreateClientFactory(TestTimeout);
+                IClientFactory clientFactory = Bus.CreateClientFactory(TestTimeout);
 
                 RequestHandle<PingMessage> request = clientFactory.CreateRequest(new PingMessage());
 

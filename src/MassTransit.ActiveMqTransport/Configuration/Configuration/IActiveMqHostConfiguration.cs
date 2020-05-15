@@ -18,8 +18,6 @@
         /// </summary>
         bool DeployTopologyOnly { get; set; }
 
-        IActiveMqHost Proxy { get; }
-
         /// <summary>
         /// Apply the endpoint definition to the receive endpoint configurator
         /// </summary>

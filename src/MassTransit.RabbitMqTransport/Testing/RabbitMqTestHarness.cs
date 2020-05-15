@@ -72,7 +72,7 @@
         {
              configurator.Host(HostAddress, h =>
              {
-                 ConfigureHostConfigurator(h);
+                 ConfigureHostSettings(h);
              });
         }
 
@@ -80,7 +80,7 @@
         {
             var host = new RabbitMqHostConfigurator(HostAddress);
 
-            ConfigureHostConfigurator(host);
+            ConfigureHostSettings(host);
 
             return host.Settings;
         }
@@ -113,7 +113,7 @@
             return busControl;
         }
 
-        void ConfigureHostConfigurator(IRabbitMqHostConfigurator configurator)
+        void ConfigureHostSettings(IRabbitMqHostConfigurator configurator)
         {
             configurator.Username(Username);
             configurator.Password(Password);
