@@ -48,20 +48,16 @@ namespace MassTransit.Transports.InMemory.Configurators
             configureTopology?.Invoke(configurator);
         }
 
-        public IInMemoryHost Host(Action<IInMemoryHostConfigurator> configure = null)
+        public void Host(Action<IInMemoryHostConfigurator> configure = null)
         {
             configure?.Invoke(_hostConfiguration.Configurator);
-
-            return _hostConfiguration.Proxy;
         }
 
-        public IInMemoryHost Host(Uri baseAddress, Action<IInMemoryHostConfigurator> configure = null)
+        public void Host(Uri baseAddress, Action<IInMemoryHostConfigurator> configure = null)
         {
             _hostConfiguration.BaseAddress = baseAddress;
 
             configure?.Invoke(_hostConfiguration.Configurator);
-
-            return _hostConfiguration.Proxy;
         }
 
         public new IInMemoryPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;

@@ -25,8 +25,6 @@
 
         CacheSettings SendTransportCacheSettings { get; }
 
-        IInMemoryHost Proxy { get; }
-
         void ApplyEndpointDefinition(IInMemoryReceiveEndpointConfigurator configurator, IEndpointDefinition definition);
 
         IInMemoryReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,

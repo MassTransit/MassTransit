@@ -26,20 +26,11 @@ namespace MassTransit.Containers.Tests.Scenarios
         {
         }
 
-        public Task<FirstSagaMessage> First
-        {
-            get { return _first.Task; }
-        }
+        public Task<FirstSagaMessage> First => _first.Task;
 
-        public Task<SecondSagaMessage> Second
-        {
-            get { return _second.Task; }
-        }
+        public Task<SecondSagaMessage> Second => _second.Task;
 
-        public Task<ThirdSagaMessage> Third
-        {
-            get { return _third.Task; }
-        }
+        public Task<ThirdSagaMessage> Third => _third.Task;
 
         public async Task Consume(ConsumeContext<FirstSagaMessage> context)
         {

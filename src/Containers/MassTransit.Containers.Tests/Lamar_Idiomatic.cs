@@ -19,11 +19,11 @@
         {
             var bus = _container.GetInstance<IBusControl>();
 
-            BusHandle busHandle = await bus.StartAsync();
+            var busHandle = await bus.StartAsync();
 
             await busHandle.Ready;
 
-            ISendEndpoint endpoint = await bus.GetSendEndpoint(new Uri("loopback://localhost/input_queue"));
+            var endpoint = await bus.GetSendEndpoint(new Uri("loopback://localhost/input_queue"));
 
             const string name = "Joe";
 

@@ -24,7 +24,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             var endpoint = GetPublishEndpoint();
             await endpoint.Publish(new SimpleMessageClass("test"));
 
-            PublishContext published = await _taskCompletionSource.Task;
+            var published = await _taskCompletionSource.Task;
 
             Assert.IsTrue(published.TryGetPayload<TScope>(out var scope));
             AssertScopesAreEqual(scope);

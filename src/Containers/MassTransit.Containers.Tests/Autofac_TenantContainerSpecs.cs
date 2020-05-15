@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Containers.Tests
+﻿namespace MassTransit.Containers.Tests
 {
     using System.Collections.Concurrent;
     using System.Threading.Tasks;
@@ -29,11 +17,36 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_create_separate_scope_for_each_customer()
         {
-            await InputQueueSendEndpoint.Send(new UpdateOrder {CustomerId = "A", OrderId = "123", OrderStatus = "Pending"});
-            await InputQueueSendEndpoint.Send(new UpdateOrder {CustomerId = "B", OrderId = "456", OrderStatus = "Pending"});
-            await InputQueueSendEndpoint.Send(new UpdateOrder {CustomerId = "A", OrderId = "456", OrderStatus = "Processed"});
-            await InputQueueSendEndpoint.Send(new UpdateOrder {CustomerId = "C", OrderId = "789", OrderStatus = "Pending"});
-            await InputQueueSendEndpoint.Send(new UpdateOrder {CustomerId = "A", OrderId = "123", OrderStatus = "Processed"});
+            await InputQueueSendEndpoint.Send(new UpdateOrder
+            {
+                CustomerId = "A",
+                OrderId = "123",
+                OrderStatus = "Pending"
+            });
+            await InputQueueSendEndpoint.Send(new UpdateOrder
+            {
+                CustomerId = "B",
+                OrderId = "456",
+                OrderStatus = "Pending"
+            });
+            await InputQueueSendEndpoint.Send(new UpdateOrder
+            {
+                CustomerId = "A",
+                OrderId = "456",
+                OrderStatus = "Processed"
+            });
+            await InputQueueSendEndpoint.Send(new UpdateOrder
+            {
+                CustomerId = "C",
+                OrderId = "789",
+                OrderStatus = "Pending"
+            });
+            await InputQueueSendEndpoint.Send(new UpdateOrder
+            {
+                CustomerId = "A",
+                OrderId = "123",
+                OrderStatus = "Processed"
+            });
 
             await _updated;
 
@@ -41,7 +54,7 @@ namespace MassTransit.Containers.Tests
 
             Assert.AreEqual(2, orderInventory.Count);
 
-             orderInventory = _container.Resolve<ILifetimeScopeRegistry<string>>().GetLifetimeScope("B").Resolve<IOrderInventory>();
+            orderInventory = _container.Resolve<ILifetimeScopeRegistry<string>>().GetLifetimeScope("B").Resolve<IOrderInventory>();
             Assert.AreEqual(1, orderInventory.Count);
         }
 
@@ -89,10 +102,7 @@ namespace MassTransit.Containers.Tests
                 _orders.AddOrUpdate(orderId, n => orderStatus, (n, u) => orderStatus);
             }
 
-            public int Count
-            {
-                get { return _orders.Count; }
-            }
+            public int Count => _orders.Count;
         }
 
 
@@ -126,7 +136,11 @@ namespace MassTransit.Containers.Tests
             {
                 _inventory.UpdateOrder(context.Message.OrderId, context.Message.OrderStatus);
 
-                context.Publish(new OrderUpdated {OrderId = context.Message.OrderId, OrderStatus = context.Message.OrderStatus});
+                context.Publish(new OrderUpdated
+                {
+                    OrderId = context.Message.OrderId,
+                    OrderStatus = context.Message.OrderStatus
+                });
 
                 return TaskUtil.Completed;
             }

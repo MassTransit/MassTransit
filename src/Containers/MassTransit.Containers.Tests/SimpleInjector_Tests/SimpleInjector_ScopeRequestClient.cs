@@ -14,6 +14,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     public class SimpleInjector_ScopeRequestClient :
         Common_ScopeRequestClient<Container>
     {
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
         readonly Container _container;
         readonly Scope _childContainer;
 
@@ -36,12 +42,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         {
             _childContainer.Dispose();
             _container.Dispose();
-        }
-
-        [Test]
-        public void Should_be_a_valid_container()
-        {
-            _container.Verify();
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

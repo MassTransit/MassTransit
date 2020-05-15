@@ -14,6 +14,19 @@
     public class Using_message_scope_with_two_consumers :
         InMemoryTestFixture
     {
+        readonly IWindsorContainer _container;
+
+        public Using_message_scope_with_two_consumers()
+        {
+            _container = new WindsorContainer();
+            _container.Register(
+                Component.For<FirstConsumer>(),
+                Component.For<SecondConsumer>(),
+                Component.For<IScopedDependency>()
+                    .ImplementedBy<Dependency>()
+                    .LifestyleScoped<MessageScope>());
+        }
+
         [Test]
         public async Task Should_receive_a_message_in_scope()
         {
@@ -28,19 +41,6 @@
         public void Close_container()
         {
             _container.Dispose();
-        }
-
-        readonly IWindsorContainer _container;
-
-        public Using_message_scope_with_two_consumers()
-        {
-            _container = new WindsorContainer();
-            _container.Register(
-                Component.For<FirstConsumer>(),
-                Component.For<SecondConsumer>(),
-                Component.For<IScopedDependency>()
-                    .ImplementedBy<Dependency>()
-                    .LifestyleScoped<MessageScope>());
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
