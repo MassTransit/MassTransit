@@ -43,8 +43,8 @@ namespace MassTransit.ActiveMqTransport.Contexts
         {
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
 
-            var session = await Task.Factory.StartNew(() => _connection.CreateSession(), tokenSource.Token, TaskCreationOptions.None, _taskScheduler)
-                .ConfigureAwait(false);
+            var session = await Task.Factory.StartNew(() => _connection.CreateSession(AcknowledgementMode.ClientAcknowledge),
+                    tokenSource.Token, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
 
             return session;
         }

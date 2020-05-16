@@ -1,7 +1,7 @@
 version: '3'
 services:
   activemq:
-    image: webcenter/activemq:latest
+    image: masstransit/activemq:latest
     environment:
       - "ACTIVEMQ_ADMIN_LOGIN=admin"
       - "ACTIVEMQ_ADMIN_PASSWORD=admin"

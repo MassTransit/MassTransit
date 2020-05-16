@@ -1,7 +1,6 @@
 namespace MassTransit.ActiveMqTransport.Pipeline
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading.Tasks;
     using Apache.NMS;
@@ -26,7 +25,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly SessionContext _session;
         readonly IMessageConsumer _messageConsumer;
-        readonly ConcurrentDictionary<string, ActiveMqReceiveContext> _pending;
         readonly ReceiveSettings _receiveSettings;
         readonly ActiveMqReceiveEndpointContext _context;
         readonly IReceivePipeDispatcher _dispatcher;
@@ -44,8 +42,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             _context = context;
 
             _receiveSettings = session.GetPayload<ReceiveSettings>();
-
-            _pending = new ConcurrentDictionary<string, ActiveMqReceiveContext>();
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
 
@@ -70,8 +66,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 }
 
                 var context = new ActiveMqReceiveContext(message, _context, _receiveSettings, _session, _session.ConnectionContext);
-                if (!_pending.TryAdd(message.NMSMessageId, context))
-                    LogContext.Warning?.Log("Duplicate message: {MessageId}", message.NMSMessageId);
 
                 try
                 {
@@ -83,8 +77,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 }
                 finally
                 {
-                    _pending.TryRemove(message.NMSMessageId, out _);
-
                     context.Dispose();
                 }
             });
