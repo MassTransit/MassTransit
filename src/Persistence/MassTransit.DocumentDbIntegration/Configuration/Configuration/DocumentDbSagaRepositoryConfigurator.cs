@@ -5,6 +5,7 @@ namespace MassTransit.DocumentDbIntegration.Configuration
     using System.Linq;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
+    using MassTransit.Saga;
     using Metadata;
     using Microsoft.Azure.Documents.Client;
     using Newtonsoft.Json;
@@ -51,7 +52,7 @@ namespace MassTransit.DocumentDbIntegration.Configuration
         {
             configurator.RegisterSingleInstance(Factory);
 
-            configurator.RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, DocumentDbSagaConsumeContextFactory<TSaga>,
+            configurator.RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>,
                 DocumentDbSagaRepositoryContextFactory<TSaga>>();
         }
 

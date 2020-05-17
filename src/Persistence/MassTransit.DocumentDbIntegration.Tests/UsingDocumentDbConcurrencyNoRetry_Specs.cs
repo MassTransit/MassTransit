@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Configuration;
     using DocumentDbIntegration.Saga;
     using MassTransit.Saga;
     using Microsoft.Azure.Documents;
@@ -35,9 +34,10 @@
         {
             _databaseName = "choirSagas";
             _collectionName = "sagas";
-            _documentClient = new DocumentClient(EmulatorConstants.EndpointUri, EmulatorConstants.Key);
+            _documentClient = new DocumentClient(Configuration.EndpointUri, Configuration.Key);
 
-            _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() => new DocumentDbSagaRepository<ChoirStateOptimistic>(_documentClient, _databaseName, JsonSerializerSettingsExtensions.GetSagaRenameSettings<ChoirStateOptimistic>()));
+            _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() => DocumentDbSagaRepository<ChoirStateOptimistic>.Create(_documentClient,
+                _databaseName, JsonSerializerSettingsExtensions.GetSagaRenameSettings<ChoirStateOptimistic>()));
 
             TestTimeout = TimeSpan.FromMinutes(3);
         }
@@ -46,8 +46,10 @@
         public async Task Setup()
         {
             await _documentClient.OpenAsync();
-            await _documentClient.CreateDatabaseIfNotExistsAsync(new Database { Id = _databaseName }).ConfigureAwait(false);
-            await _documentClient.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(_databaseName), new DocumentCollection { Id = _collectionName }).ConfigureAwait(false);
+            await _documentClient.CreateDatabaseIfNotExistsAsync(new Database {Id = _databaseName}).ConfigureAwait(false);
+            await _documentClient
+                .CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(_databaseName), new DocumentCollection {Id = _collectionName})
+                .ConfigureAwait(false);
         }
 
         [OneTimeTearDown]
@@ -81,7 +83,8 @@
                     var document = await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
                     var saga = JsonConvert.DeserializeObject<ChoirStateOptimistic>(document.Resource.ToString());
 
-                    if (filterExpression?.Invoke(saga) == false) continue;
+                    if (filterExpression?.Invoke(saga) == false)
+                        continue;
                     return saga;
                 }
                 catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -103,7 +106,7 @@
             {
                 Guid correlationId = NewId.NextGuid();
 
-                await InputQueueSendEndpoint.Send(new RehersalBegins { CorrelationId = correlationId });
+                await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
 
                 sagaIds[i] = correlationId;
             }
@@ -116,10 +119,26 @@
 
             for (int i = 0; i < 20; i++)
             {
-                tasks.Add(InputQueueSendEndpoint.Send(new Bass { CorrelationId = sagaIds[i], Name = "John" }));
-                tasks.Add(InputQueueSendEndpoint.Send(new Baritone { CorrelationId = sagaIds[i], Name = "Mark" }));
-                tasks.Add(InputQueueSendEndpoint.Send(new Tenor { CorrelationId = sagaIds[i], Name = "Anthony" }));
-                tasks.Add(InputQueueSendEndpoint.Send(new Countertenor { CorrelationId = sagaIds[i], Name = "Tom" }));
+                tasks.Add(InputQueueSendEndpoint.Send(new Bass
+                {
+                    CorrelationId = sagaIds[i],
+                    Name = "John"
+                }));
+                tasks.Add(InputQueueSendEndpoint.Send(new Baritone
+                {
+                    CorrelationId = sagaIds[i],
+                    Name = "Mark"
+                }));
+                tasks.Add(InputQueueSendEndpoint.Send(new Tenor
+                {
+                    CorrelationId = sagaIds[i],
+                    Name = "Anthony"
+                }));
+                tasks.Add(InputQueueSendEndpoint.Send(new Countertenor
+                {
+                    CorrelationId = sagaIds[i],
+                    Name = "Tom"
+                }));
             }
 
             await Task.WhenAll(tasks);
@@ -145,18 +164,34 @@
         {
             Guid correlationId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new RehersalBegins { CorrelationId = correlationId });
+            await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
 
             var saga = await GetSagaRetry(correlationId, TestTimeout);
 
             Assert.IsNotNull(saga);
 
             await Task.WhenAll(
-                InputQueueSendEndpoint.Send(new Bass { CorrelationId = correlationId, Name = "John" }),
-                InputQueueSendEndpoint.Send(new Baritone { CorrelationId = correlationId, Name = "Mark" }),
-                InputQueueSendEndpoint.Send(new Tenor { CorrelationId = correlationId, Name = "Anthony" }),
-                InputQueueSendEndpoint.Send(new Countertenor { CorrelationId = correlationId, Name = "Tom" })
-                );
+                InputQueueSendEndpoint.Send(new Bass
+                {
+                    CorrelationId = correlationId,
+                    Name = "John"
+                }),
+                InputQueueSendEndpoint.Send(new Baritone
+                {
+                    CorrelationId = correlationId,
+                    Name = "Mark"
+                }),
+                InputQueueSendEndpoint.Send(new Tenor
+                {
+                    CorrelationId = correlationId,
+                    Name = "Anthony"
+                }),
+                InputQueueSendEndpoint.Send(new Countertenor
+                {
+                    CorrelationId = correlationId,
+                    Name = "Tom"
+                })
+            );
 
             // Because concurrency exception's happened without retry middleware configured, we aren't in our final state/
             ChoirStateOptimistic instance = await GetSaga(correlationId);
