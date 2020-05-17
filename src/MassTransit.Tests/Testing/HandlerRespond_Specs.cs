@@ -1,15 +1,3 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Testing
 {
     using System.Linq;
@@ -28,7 +16,7 @@ namespace MassTransit.Tests.Testing
         public async Task A_handler_responds_to_a_message()
         {
             _harness = new InMemoryTestHarness();
-            _handler = _harness.Handler<A>(async context => context.Respond(new B()));
+            _handler = _harness.Handler<A>(async context => await context.RespondAsync(new B()));
 
             await _harness.Start();
 
@@ -42,15 +30,15 @@ namespace MassTransit.Tests.Testing
         }
 
         [Test]
-        public void Should_have_sent_a_message_of_type_b()
+        public async Task Should_have_sent_a_message_of_type_b()
         {
-            _harness.Sent.Select<B>().Any().ShouldBe(true);
+            Assert.That(await _harness.Sent.Any<B>());
         }
 
         [Test]
-        public void Should_have_sent_message_to_bus_address()
+        public async Task Should_have_sent_message_to_bus_address()
         {
-            var message = _harness.Sent.Select<B>().First();
+            var message = await _harness.Sent.SelectAsync<B>().First();
             message.ShouldNotBeNull();
 
             message.Context.DestinationAddress.ShouldBe(_harness.BusAddress);

@@ -3,32 +3,54 @@ namespace MassTransit.Testing.MessageObservers
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Saga;
 
 
-    public class SagaList<TSaga> :
-        MessageList<ISagaInstance<TSaga>>,
-        ISagaList<TSaga>
-        where TSaga : class, ISaga
+    public class SagaList<T> :
+        AsyncElementList<ISagaInstance<T>>,
+        ISagaList<T>
+        where T : class, ISaga
     {
-        public SagaList(TimeSpan timeout)
-            : base((int)timeout.TotalMilliseconds)
+        public SagaList(TimeSpan timeout, CancellationToken testCompleted = default)
+            : base(timeout, testCompleted)
         {
         }
 
-        public IEnumerable<ISagaInstance<TSaga>> Select(Func<TSaga, bool> filter)
+        public IEnumerable<ISagaInstance<T>> Select(FilterDelegate<T> filter, CancellationToken cancellationToken = default)
         {
-            return base.Select(x => filter(x.Saga));
+            return Select(x => filter(x.Saga), cancellationToken);
         }
 
-        public TSaga Contains(Guid sagaId)
+        public T Contains(Guid sagaId)
         {
             return Select(x => x.Saga.CorrelationId == sagaId).Select(x => x.Saga).FirstOrDefault();
         }
 
-        public void Add(SagaConsumeContext<TSaga> context)
+        public IAsyncEnumerable<ISagaInstance<T>> SelectAsync(CancellationToken cancellationToken = default)
         {
-            Add(new SagaInstance<TSaga>(context.Saga), context.Saga.CorrelationId);
+            return SelectAsync(x => true, cancellationToken);
+        }
+
+        public IAsyncEnumerable<ISagaInstance<T>> SelectAsync(FilterDelegate<T> filter, CancellationToken cancellationToken = default)
+        {
+            return SelectAsync(x => filter(x.Saga), cancellationToken);
+        }
+
+        public Task<bool> Any(CancellationToken cancellationToken = default)
+        {
+            return Any(x => true, cancellationToken);
+        }
+
+        public Task<bool> Any(FilterDelegate<T> filter, CancellationToken cancellationToken = default)
+        {
+            return Any(x => filter(x.Saga), cancellationToken);
+        }
+
+        public void Add(SagaConsumeContext<T> context)
+        {
+            Add(new SagaInstance<T>(context.Saga));
         }
     }
 }
