@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
     using MessageObservers;
@@ -11,15 +12,17 @@
 
     public class MultiTestConsumer
     {
+        readonly CancellationToken _testCompleted;
         readonly IList<IConsumerConfigurator> _configures;
         readonly ReceivedMessageList _received;
 
-        public MultiTestConsumer(TimeSpan timeout)
+        public MultiTestConsumer(TimeSpan timeout, CancellationToken testCompleted = default)
         {
+            _testCompleted = testCompleted;
             Timeout = timeout;
             _configures = new List<IConsumerConfigurator>();
 
-            _received = new ReceivedMessageList(timeout);
+            _received = new ReceivedMessageList(timeout, testCompleted);
         }
 
         public IReceivedMessageList Received => _received;
@@ -114,7 +117,7 @@
             public Of(MultiTestConsumer multiConsumer)
             {
                 _multiConsumer = multiConsumer;
-                _received = new ReceivedMessageList<T>(multiConsumer.Timeout);
+                _received = new ReceivedMessageList<T>(multiConsumer.Timeout, multiConsumer._testCompleted);
             }
 
             public ReceivedMessageList<T> Received => _received;
@@ -139,7 +142,7 @@
             public FaultOf(MultiTestConsumer multiConsumer)
             {
                 _multiConsumer = multiConsumer;
-                _received = new ReceivedMessageList<T>(multiConsumer.Timeout);
+                _received = new ReceivedMessageList<T>(multiConsumer.Timeout, multiConsumer._testCompleted);
             }
 
             public ReceivedMessageList<T> Received => _received;

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+﻿namespace MassTransit.Testing
 {
     using System;
     using System.Diagnostics;
@@ -23,6 +11,7 @@ namespace MassTransit.Testing
     public abstract class AsyncTestHarness :
         IDisposable
     {
+        readonly Lazy<AsyncInactivityObserver> _inactivityObserver;
         CancellationToken _cancellationToken;
         CancellationTokenSource _cancellationTokenSource;
         Task<bool> _cancelledTask;
@@ -30,6 +19,9 @@ namespace MassTransit.Testing
         protected AsyncTestHarness()
         {
             TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(50) : TimeSpan.FromSeconds(30);
+            TestInactivityTimeout = TimeSpan.FromSeconds(1);
+
+            _inactivityObserver = new Lazy<AsyncInactivityObserver>(() => new AsyncInactivityObserver(TestInactivityTimeout, TestCancellationToken));
         }
 
         /// <summary>
@@ -56,7 +48,7 @@ namespace MassTransit.Testing
                     _cancellationTokenSource = new CancellationTokenSource((int)TestTimeout.TotalMilliseconds);
                     _cancellationToken = _cancellationTokenSource.Token;
 
-                    var source = TaskUtil.GetTask<bool>();
+                    TaskCompletionSource<bool> source = TaskUtil.GetTask<bool>();
                     _cancelledTask = source.Task;
 
                     _cancellationToken.Register(() => source.TrySetCanceled());
@@ -67,9 +59,26 @@ namespace MassTransit.Testing
         }
 
         /// <summary>
+        /// Task that is completed when the bus inactivity timeout has elapsed with no bus activity
+        /// </summary>
+        public Task InactivityTask => _inactivityObserver.Value.InactivityTask;
+
+        /// <summary>
+        /// CancellationToken that is cancelled when the test inactivity timeout has elapsed with no bus activity
+        /// </summary>
+        public CancellationToken InactivityToken => _inactivityObserver.Value.InactivityToken;
+
+        public IInactivityObserver InactivityObserver => _inactivityObserver.Value;
+
+        /// <summary>
         /// Timeout for the test, used for any delay timers
         /// </summary>
         public TimeSpan TestTimeout { get; set; }
+
+        /// <summary>
+        /// Timeout specifying the elapsed time with no bus activity after which the test could be completed
+        /// </summary>
+        public TimeSpan TestInactivityTimeout { get; set; }
 
         public virtual void Dispose()
         {
@@ -91,7 +100,7 @@ namespace MassTransit.Testing
         /// <returns></returns>
         public TaskCompletionSource<T> GetTask<T>()
         {
-            var source = TaskUtil.GetTask<T>();
+            TaskCompletionSource<T> source = TaskUtil.GetTask<T>();
 
             TestCancelledTask.ContinueWith(x => source.TrySetCanceled(), TaskContinuationOptions.OnlyOnCanceled);
 
@@ -107,55 +116,6 @@ namespace MassTransit.Testing
         public TestConsumeObserver GetConsumeObserver()
         {
             return new TestConsumeObserver(TestTimeout);
-        }
-
-        public TestObserver<T> GetObserver<T>()
-            where T : class
-        {
-            return new TestObserver<T>(GetTask<ConsumeContext<T>>(), GetTask<Exception>(), GetTask<bool>());
-        }
-
-        public TestSendObserver GetSendObserver()
-        {
-            return new TestSendObserver(TestTimeout);
-        }
-
-        /// <summary>
-        /// Await a task in a test method that is not asynchronous, such as a test fixture setup
-        /// </summary>
-        /// <param name="taskFactory"></param>
-        public void Await(Func<Task> taskFactory)
-        {
-            TaskUtil.Await(taskFactory, CancellationToken.None);
-        }
-
-        /// <summary>
-        /// Await a task in a test method that is not asynchronous, such as a test fixture setup
-        /// </summary>
-        /// <param name="taskFactory"></param>
-        /// <param name="cancellationToken"></param>
-        public void Await(Func<Task> taskFactory, CancellationToken cancellationToken)
-        {
-            TaskUtil.Await(taskFactory, cancellationToken);
-        }
-
-        /// <summary>
-        /// Await a task in a test method that is not asynchronous, such as a test fixture setup
-        /// </summary>
-        /// <param name="taskFactory"></param>
-        public T Await<T>(Func<Task<T>> taskFactory)
-        {
-            return TaskUtil.Await(taskFactory, TestCancellationToken);
-        }
-
-        /// <summary>
-        /// Await a task in a test method that is not asynchronous, such as a test fixture setup
-        /// </summary>
-        /// <param name="taskFactory"></param>
-        /// <param name="cancellationToken"></param>
-        public T Await<T>(Func<Task<T>> taskFactory, CancellationToken cancellationToken)
-        {
-            return TaskUtil.Await(taskFactory, cancellationToken);
         }
     }
 }

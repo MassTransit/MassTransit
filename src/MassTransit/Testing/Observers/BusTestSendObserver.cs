@@ -1,6 +1,7 @@
 namespace MassTransit.Testing.Observers
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using MessageObservers;
 
@@ -8,14 +9,14 @@ namespace MassTransit.Testing.Observers
     /// <summary>
     /// Observes sent messages for test fixtures
     /// </summary>
-    public class TestSendObserver :
+    public class BusTestSendObserver :
         ISendObserver
     {
         readonly SentMessageList _messages;
 
-        public TestSendObserver(TimeSpan timeout)
+        public BusTestSendObserver(TimeSpan timeout, CancellationToken testCompleted = default)
         {
-            _messages = new SentMessageList(timeout);
+            _messages = new SentMessageList(timeout, testCompleted);
         }
 
         public ISentMessageList Messages => _messages;

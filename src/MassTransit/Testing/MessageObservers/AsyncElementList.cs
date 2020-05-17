@@ -64,10 +64,23 @@ namespace MassTransit.Testing.MessageObservers
 
             try
             {
-                while (await channel.Reader.WaitToReadAsync(timeoutTokenSource.Token).ConfigureAwait(false))
+                var more = true;
+                while (more)
                 {
-                    if (channel.Reader.TryRead(out var entry) && filter(entry))
-                        yield return entry;
+                    try
+                    {
+                        more = await channel.Reader.WaitToReadAsync(timeoutTokenSource.Token).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        more = false;
+                    }
+
+                    if (more)
+                    {
+                        if (channel.Reader.TryRead(out var entry) && filter(entry))
+                            yield return entry;
+                    }
                 }
             }
             finally
@@ -113,21 +126,47 @@ namespace MassTransit.Testing.MessageObservers
                 var monitorTimeout = _timeout;
                 var endTime = DateTime.Now + monitorTimeout;
 
-                while (Monitor.Wait(_messages, monitorTimeout))
+                void Cancel()
                 {
-                    for (; index < _messages.Count; index++)
+                    endTime = DateTime.Now;
+
+                    lock (_messages)
                     {
-                        var element = _messages[index];
-                        if (filter(element))
-                            yield return element;
+                        Monitor.PulseAll(_messages);
                     }
+                }
 
-                    monitorTimeout = endTime - DateTime.Now;
-                    if (monitorTimeout <= TimeSpan.Zero)
-                        break;
+                CancellationTokenRegistration cancellationTokenRegistration = default;
+                if (cancellationToken.CanBeCanceled)
+                    cancellationTokenRegistration = cancellationToken.Register(() => Cancel());
 
-                    if (cancellationToken.IsCancellationRequested || _testCompleted.IsCancellationRequested)
-                        yield break;
+                CancellationTokenRegistration timeoutTokenRegistration = default;
+                if (_testCompleted.CanBeCanceled)
+                    timeoutTokenRegistration = _testCompleted.Register(() => Cancel());
+
+                try
+                {
+                    while (Monitor.Wait(_messages, monitorTimeout))
+                    {
+                        for (; index < _messages.Count; index++)
+                        {
+                            var element = _messages[index];
+                            if (filter(element))
+                                yield return element;
+                        }
+
+                        monitorTimeout = endTime - DateTime.Now;
+                        if (monitorTimeout <= TimeSpan.Zero)
+                            break;
+
+                        if (cancellationToken.IsCancellationRequested || _testCompleted.IsCancellationRequested)
+                            yield break;
+                    }
+                }
+                finally
+                {
+                    cancellationTokenRegistration.Dispose();
+                    timeoutTokenRegistration.Dispose();
                 }
             }
         }
