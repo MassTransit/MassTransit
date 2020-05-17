@@ -55,7 +55,8 @@ namespace MassTransit.DocumentDbIntegration.Tests
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .DocumentDbRepository(r =>
                     {
-                        r.ConfigureEmulator();
+                        r.EndpointUri = Configuration.EndpointUri;
+                        r.Key = Configuration.Key;
 
                         r.DatabaseId = "sagaTest";
                     });

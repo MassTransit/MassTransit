@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Configuration;
     using DocumentDbIntegration.Saga;
     using GreenPipes;
     using MassTransit.Saga;
@@ -39,17 +38,20 @@
         {
             _databaseName = "shoppingChoreSagas";
             _collectionName = "sagas";
-            _documentClient = new DocumentClient(EmulatorConstants.EndpointUri, EmulatorConstants.Key);
+            _documentClient = new DocumentClient(Configuration.EndpointUri, Configuration.Key);
 
-            _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => new DocumentDbSagaRepository<ShoppingChore>(_documentClient, _databaseName, JsonSerializerSettingsExtensions.GetSagaRenameSettings<ShoppingChore>()));
+            _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => DocumentDbSagaRepository<ShoppingChore>.Create(_documentClient, _databaseName,
+                JsonSerializerSettingsExtensions.GetSagaRenameSettings<ShoppingChore>()));
         }
 
         [OneTimeSetUp]
         public async Task Setup()
         {
             await _documentClient.OpenAsync();
-            await _documentClient.CreateDatabaseIfNotExistsAsync(new Database { Id = _databaseName }).ConfigureAwait(false);
-            await _documentClient.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(_databaseName), new DocumentCollection { Id = _collectionName }).ConfigureAwait(false);
+            await _documentClient.CreateDatabaseIfNotExistsAsync(new Database {Id = _databaseName}).ConfigureAwait(false);
+            await _documentClient
+                .CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(_databaseName), new DocumentCollection {Id = _collectionName})
+                .ConfigureAwait(false);
         }
 
         [OneTimeTearDown]
@@ -107,7 +109,8 @@
                     var document = await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
                     var saga = JsonConvert.DeserializeObject<ShoppingChore>(document.Resource.ToString());
 
-                    if (filterExpression?.Invoke(saga) == false) continue;
+                    if (filterExpression?.Invoke(saga) == false)
+                        continue;
                     return saga;
                 }
                 catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -124,18 +127,12 @@
         {
             Guid correlationId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling
-            {
-                CorrelationId = correlationId
-            });
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
 
             var saga = await GetSagaRetry(correlationId, TestTimeout);
             Assert.IsNotNull(saga);
 
-            await InputQueueSendEndpoint.Send(new SodOff
-            {
-                CorrelationId = correlationId
-            });
+            await InputQueueSendEndpoint.Send(new SodOff {CorrelationId = correlationId});
 
             saga = await GetNoSagaRetry(correlationId, TestTimeout);
             Assert.IsNull(saga);
@@ -146,21 +143,15 @@
         {
             Guid correlationId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling
-            {
-                CorrelationId = correlationId
-            });
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
 
             var saga = await GetSagaRetry(correlationId, TestTimeout);
 
             Assert.IsNotNull(saga);
 
-            await InputQueueSendEndpoint.Send(new GotHitByACar
-            {
-                CorrelationId = correlationId
-            });
+            await InputQueueSendEndpoint.Send(new GotHitByACar {CorrelationId = correlationId});
 
-            saga = await GetSagaRetry(correlationId, TestTimeout, x=>x.CurrentState == _machine.Dead.Name);
+            saga = await GetSagaRetry(correlationId, TestTimeout, x => x.CurrentState == _machine.Dead.Name);
 
             Assert.IsNotNull(saga);
             Assert.IsTrue(saga.CurrentState == _machine.Dead.Name);
