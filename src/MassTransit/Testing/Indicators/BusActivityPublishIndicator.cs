@@ -1,14 +1,14 @@
 // Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
+//
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
+// this file except in compliance with the License. You may obtain a copy of the
+// License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
 // Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Indicators
 {
@@ -22,8 +22,7 @@ namespace MassTransit.Testing.Indicators
     /// An activity indicator for publish endpoints. Utilizes a timer that restarts on publish activity.
     /// </summary>
     public class BusActivityPublishIndicator : BaseBusActivityIndicatorConnectable,
-        ISignalResource,
-        IPublishObserver
+        ISignalResource
     {
         readonly RollingTimer _receiveIdleTimer;
         readonly ISignalResource _signalResource;
@@ -56,20 +55,23 @@ namespace MassTransit.Testing.Indicators
         public override bool IsMet => _receiveIdleTimer.Triggered ||
             Interlocked.CompareExchange(ref _activityStarted, int.MinValue, int.MinValue) == 0;
 
-        Task IPublishObserver.PrePublish<T>(PublishContext<T> context)
+        public Task PrePublish<T>(PublishContext<T> context)
+            where T : class
         {
             Interlocked.CompareExchange(ref _activityStarted, 1, 0);
             _receiveIdleTimer.Restart();
             return TaskUtil.Completed;
         }
 
-        Task IPublishObserver.PostPublish<T>(PublishContext<T> context)
+        public Task PostPublish<T>(PublishContext<T> context)
+            where T : class
         {
             _receiveIdleTimer.Restart();
             return TaskUtil.Completed;
         }
 
-        Task IPublishObserver.PublishFault<T>(PublishContext<T> context, Exception exception)
+        public Task PublishFault<T>(PublishContext<T> context, Exception exception)
+            where T : class
         {
             _receiveIdleTimer.Restart();
             return TaskUtil.Completed;

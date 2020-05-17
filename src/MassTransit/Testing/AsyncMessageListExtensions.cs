@@ -27,6 +27,18 @@ namespace MassTransit.Testing
             throw new InvalidOperationException("Message List was empty, or timed out");
         }
 
+        public static async Task<int> Count<TElement>(this IAsyncEnumerable<TElement> elements)
+            where TElement : class, IAsyncListElement
+        {
+            int count = 0;
+            await foreach (var element in elements.ConfigureAwait(false))
+            {
+                count++;
+            }
+
+            return count;
+        }
+
         public static async Task<TElement> FirstOrDefault<TElement>(this IAsyncEnumerable<TElement> elements)
             where TElement : class, IAsyncListElement
         {

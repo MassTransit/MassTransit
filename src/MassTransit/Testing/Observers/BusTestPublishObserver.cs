@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Testing.Observers
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using MessageObservers;
     using Testing;
@@ -12,9 +13,9 @@
     {
         readonly PublishedMessageList _messages;
 
-        public BusTestPublishObserver(TimeSpan timeout)
+        public BusTestPublishObserver(TimeSpan timeout, CancellationToken testCompleted = default)
         {
-            _messages = new PublishedMessageList(timeout);
+            _messages = new PublishedMessageList(timeout, testCompleted);
         }
 
         public IPublishedMessageList Messages => _messages;

@@ -24,7 +24,10 @@
         ConnectHandle _inputQueueSendObserver;
         BusTestPublishObserver _published;
         ConnectHandle _receiveEndpointObserver;
-        TestSendObserver _sent;
+        BusTestSendObserver _sent;
+        BusTestReceiveObserver _received;
+        ConnectHandle _receiveInactivityHandle;
+        ConnectHandle _busReceiveObserver;
 
         public IBus Bus => _bus;
         public IBusControl BusControl => _bus;
@@ -96,9 +99,12 @@
 
         public virtual async Task Start(CancellationToken cancellationToken = default)
         {
-            _sent = new TestSendObserver(TestTimeout);
-            _consumed = new BusTestConsumeObserver(TestTimeout);
-            _published = new BusTestPublishObserver(TestTimeout);
+            _received = new BusTestReceiveObserver(TestInactivityTimeout);
+            _receiveInactivityHandle = _received.ConnectInactivityObserver(InactivityObserver);
+
+            _consumed = new BusTestConsumeObserver(TestTimeout, InactivityToken);
+            _published = new BusTestPublishObserver(TestTimeout, InactivityToken);
+            _sent = new BusTestSendObserver(TestTimeout, InactivityToken);
 
             PreCreateBus?.Invoke(this);
 
@@ -115,9 +121,8 @@
             _inputQueueSendObserver = InputQueueSendEndpoint.ConnectSendObserver(_sent);
 
             _busConsumeObserver = _bus.ConnectConsumeObserver(_consumed);
-
             _busPublishObserver = _bus.ConnectPublishObserver(_published);
-
+            _busReceiveObserver = _bus.ConnectReceiveObserver(_received);
             _busSendObserver = _bus.ConnectSendObserver(_sent);
         }
 
@@ -140,9 +145,14 @@
                 _busConsumeObserver?.Disconnect();
                 _busConsumeObserver = null;
 
-                using (var tokenSource = new CancellationTokenSource(TestTimeout))
+                _busReceiveObserver?.Disconnect();
+                _receiveInactivityHandle?.Disconnect();
+
+                if (_busHandle != null)
                 {
-                    await (_busHandle?.StopAsync(tokenSource.Token) ?? TaskUtil.Completed).ConfigureAwait(false);
+                    using var tokenSource = new CancellationTokenSource(TestTimeout);
+
+                    await _busHandle.StopAsync(tokenSource.Token).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)

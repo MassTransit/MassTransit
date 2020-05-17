@@ -63,54 +63,5 @@ namespace MassTransit.TestFramework
         {
             return AsyncTestHarness.GetConsumeObserver();
         }
-
-        protected TestObserver<T> GetObserver<T>()
-            where T : class
-        {
-            return AsyncTestHarness.GetObserver<T>();
-        }
-
-        protected TestSendObserver GetSendObserver()
-        {
-            return AsyncTestHarness.GetSendObserver();
-        }
-
-        /// <summary>
-        /// Await a task in a test method that is not asynchronous, such as a test fixture setup
-        /// </summary>
-        /// <param name="taskFactory"></param>
-        protected void Await(Func<Task> taskFactory)
-        {
-            AsyncTestHarness.Await(taskFactory);
-        }
-
-        /// <summary>
-        /// Await a task in a test method that is not asynchronous, such as a test fixture setup
-        /// </summary>
-        /// <param name="taskFactory"></param>
-        /// <param name="cancellationToken"></param>
-        protected void Await(Func<Task> taskFactory, CancellationToken cancellationToken)
-        {
-            AsyncTestHarness.Await(taskFactory, cancellationToken);
-        }
-
-        /// <summary>
-        /// Await a task in a test method that is not asynchronous, such as a test fixture setup
-        /// </summary>
-        /// <param name="taskFactory"></param>
-        protected T Await<T>(Func<Task<T>> taskFactory)
-        {
-            return AsyncTestHarness.Await(taskFactory);
-        }
-
-        /// <summary>
-        /// Await a task in a test method that is not asynchronous, such as a test fixture setup
-        /// </summary>
-        /// <param name="taskFactory"></param>
-        /// <param name="cancellationToken"></param>
-        protected T Await<T>(Func<Task<T>> taskFactory, CancellationToken cancellationToken)
-        {
-            return AsyncTestHarness.Await(taskFactory, cancellationToken);
-        }
     }
 }

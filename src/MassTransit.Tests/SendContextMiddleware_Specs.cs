@@ -144,7 +144,7 @@ namespace MassTransit.Tests
         {
             EndpointConvention.Map<B>(InputQueueAddress);
 
-            var sendObserver = new TestSendObserver(TimeSpan.FromSeconds(3));
+            var sendObserver = new BusTestSendObserver(TimeSpan.FromSeconds(3));
 
             using (Bus.ConnectSendObserver(sendObserver))
             {
