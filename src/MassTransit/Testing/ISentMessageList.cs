@@ -1,31 +1,35 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Testing
+﻿namespace MassTransit.Testing
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using MessageObservers;
 
 
     public interface ISentMessageList :
-        IEnumerable<ISentMessage>
+        IAsyncElementList<ISentMessage>
     {
-        IEnumerable<ISentMessage> Select();
-        IEnumerable<ISentMessage> Select(Func<ISentMessage, bool> filter);
-
-        IEnumerable<ISentMessage<T>> Select<T>()
+        IEnumerable<ISentMessage<T>> Select<T>(CancellationToken cancellationToken = default)
             where T : class;
 
-        IEnumerable<ISentMessage<T>> Select<T>(Func<ISentMessage<T>, bool> filter)
+        IEnumerable<ISentMessage<T>> Select<T>(FilterDelegate<ISentMessage<T>> filter, CancellationToken cancellationToken = default)
+            where T : class;
+
+        IAsyncEnumerable<ISentMessage> SelectAsync(Action<SentMessageFilter> apply, CancellationToken cancellationToken = default);
+
+        IAsyncEnumerable<ISentMessage<T>> SelectAsync<T>(CancellationToken cancellationToken = default)
+            where T : class;
+
+        IAsyncEnumerable<ISentMessage<T>> SelectAsync<T>(FilterDelegate<ISentMessage<T>> filter, CancellationToken cancellationToken = default)
+            where T : class;
+
+        Task<bool> Any(Action<SentMessageFilter> apply = default, CancellationToken cancellationToken = default);
+
+        Task<bool> Any<T>(CancellationToken cancellationToken = default)
+            where T : class;
+
+        Task<bool> Any<T>(FilterDelegate<ISentMessage<T>> filter, CancellationToken cancellationToken = default)
             where T : class;
     }
 }
