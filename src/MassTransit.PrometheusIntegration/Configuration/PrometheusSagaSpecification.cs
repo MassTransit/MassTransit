@@ -1,4 +1,4 @@
-namespace MassTransit.PrometheusIntegration.Configuration
+namespace MassTransit.PrometheusIntegration
 {
     using System.Collections.Generic;
     using System.Linq;

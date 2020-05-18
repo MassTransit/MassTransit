@@ -94,7 +94,9 @@ namespace MassTransit.Tests.Testing
         {
             var messageList = new SentMessageList(TimeSpan.FromSeconds(10));
 
+        #pragma warning disable 4014
             Task.Run(async () =>
+        #pragma warning restore 4014
             {
                 await Task.Delay(1000);
 

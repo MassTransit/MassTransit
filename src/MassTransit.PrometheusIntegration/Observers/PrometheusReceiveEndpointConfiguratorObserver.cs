@@ -1,6 +1,5 @@
 namespace MassTransit.PrometheusIntegration.Observers
 {
-    using Configuration;
     using EndpointConfigurators;
 
 

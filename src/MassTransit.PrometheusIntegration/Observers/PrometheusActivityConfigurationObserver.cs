@@ -1,7 +1,6 @@
 namespace MassTransit.PrometheusIntegration.Observers
 {
     using System;
-    using Configuration;
     using ConsumeConfigurators;
     using Courier;
 

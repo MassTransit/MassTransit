@@ -1,7 +1,6 @@
 namespace MassTransit.PrometheusIntegration.Observers
 {
     using Automatonymous;
-    using Configuration;
     using Saga;
     using SagaConfigurators;
 
