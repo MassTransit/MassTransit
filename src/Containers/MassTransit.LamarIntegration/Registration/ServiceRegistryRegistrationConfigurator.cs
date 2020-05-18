@@ -21,6 +21,10 @@ namespace MassTransit.LamarIntegration.Registration
         {
             _registry = registry;
 
+            registry.For<IBusRegistry>()
+                .Use<BusRegistry>()
+                .Singleton();
+
             registry.For<IConsumerScopeProvider>()
                 .Use(CreateConsumerScopeProvider)
                 .Singleton();

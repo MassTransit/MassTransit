@@ -21,6 +21,9 @@ namespace MassTransit.StructureMapIntegration.Registration
         {
             _expression = expression;
 
+            expression.For<IBusRegistry>()
+                .Use<BusRegistry>()
+                .Singleton();
 
             expression.For<IConsumerScopeProvider>()
                 .Use(context => CreateConsumerScopeProvider(context))

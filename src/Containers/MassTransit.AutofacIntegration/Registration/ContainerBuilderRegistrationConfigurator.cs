@@ -31,6 +31,8 @@ namespace MassTransit.AutofacIntegration.Registration
 
             ScopeName = "message";
 
+            builder.RegisterType<BusRegistry>().As<IBusRegistry>().SingleInstance();
+
             builder.Register(CreateConsumerScopeProvider)
                 .As<IConsumerScopeProvider>()
                 .SingleInstance();

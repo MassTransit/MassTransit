@@ -116,6 +116,8 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         static void AddMassTransitComponents(Container container)
         {
+            container.RegisterSingleton<IBusRegistry, BusRegistry>();
+
             container.Register<ScopedConsumeContextProvider>(Lifestyle.Scoped);
 
             container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext(),

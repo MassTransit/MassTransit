@@ -23,6 +23,9 @@ namespace MassTransit.WindsorIntegration.Registration
         {
             _container = container;
 
+            if (!container.Kernel.HasComponent(typeof(IBusRegistry)))
+                container.Register(Component.For<IBusRegistry>().ImplementedBy<BusRegistry>().LifestyleSingleton());
+
             container.RegisterScopedContextProviderIfNotPresent();
 
             container.Register(
