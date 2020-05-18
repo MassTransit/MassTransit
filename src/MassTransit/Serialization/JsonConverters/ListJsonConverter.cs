@@ -57,18 +57,14 @@ namespace MassTransit.Serialization.JsonConverters
                 }
             }
 
-            if (typeInfo.IsArray)
+            if (typeInfo.IsArray && typeInfo.HasElementType && typeInfo.GetArrayRank() == 1)
             {
                 elementType = typeInfo.GetElementType();
+                if (elementType == typeof(byte))
+                    return false;
 
-                if (typeInfo.HasElementType)
-                {
-                    if (elementType == typeof(byte))
-                        return false;
-
-                    if (elementType.IsAbstract)
-                        return false;
-                }
+                if (elementType.IsAbstract)
+                    return false;
 
                 return objectType.HasInterface<IEnumerable>();
             }
@@ -85,7 +81,7 @@ namespace MassTransit.Serialization.JsonConverters
 
             object IConverter.Deserialize(JsonReader reader, Type objectType, JsonSerializer serializer)
             {
-                var contract = _contract ?? (_contract = ResolveContract(objectType, serializer));
+                var contract = _contract ??= ResolveContract(objectType, serializer);
 
                 if (reader.TokenType == JsonToken.Null)
                     return null;
