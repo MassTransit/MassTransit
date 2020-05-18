@@ -11,5 +11,3 @@ Topology also defines how things are named, including RabbitMQ exchanges and Azu
 * [Conventions](conventions)
 * [RabbitMQ](rabbitmq)
 * [Azure Service Bus](servicebus)
-
-You can also view a visual representation of the [default broker topologies](/understand/default-topology.md) created.
