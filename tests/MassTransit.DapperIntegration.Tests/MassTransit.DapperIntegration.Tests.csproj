@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1"/>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.4"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MassTransit.Tests\MassTransit.Tests.csproj" />
+    <ProjectReference Include="..\..\src\Persistence\MassTransit.DapperIntegration\MassTransit.DapperIntegration.csproj" />
+    <ProjectReference Include="..\..\src\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj"/>
+  </ItemGroup>
+
+</Project>

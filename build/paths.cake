@@ -13,7 +13,7 @@ public class BuildPaths
 
 
         var rootDir = context.MakeAbsolute(context.Directory("./"));
-        var solutionDir = rootDir.Combine("src");
+        var solutionDir = rootDir;
         var artifactsDir = rootDir.Combine("artifacts");
 
         // Directories

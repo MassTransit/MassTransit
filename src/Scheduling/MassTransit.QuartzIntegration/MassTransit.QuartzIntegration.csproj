@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../signing.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MassTransit.Quartz</PackageId>
+    <Title>MassTransit.Quartz</Title>
+    <PackageTags>MassTransit;Quartz;Scheduler;Scheduling</PackageTags>
+    <Description>MassTransit Quartz.NET scheduler support; $(Description)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <PackageReference Include="Quartz" Version="3.0.7"/>
+      <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+  </ItemGroup>
+</Project>

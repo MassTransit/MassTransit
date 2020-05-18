@@ -34,10 +34,8 @@ packages
 # Tests
 TestResult.xml
 submit.xml
-tests/*
 SolutionVersion.cs
 src/SolutionVersion.cs
-tests
 doc/build/*
 *.[lm]df
 *.runsettings
