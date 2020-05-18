@@ -35,9 +35,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Automatonymous" Version="4.2.1" />
+    <PackageReference Include="Automatonymous" Version="[4.2.1,5.0.0)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
-    <PackageReference Include="NewId" Version="3.0.2" />
+    <PackageReference Include="NewId" Version="[3.0.2,4.0.0)" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.1" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.7.0" />
