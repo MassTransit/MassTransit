@@ -120,7 +120,7 @@ The registered interfaces are slightly different for additional bus instances.
 For consumers or dependencies that need to send or publish messages to a different bus instance, a dependency on that specific bus interface (such as _IBus_, or _ISecondBus_) would be added.
 
 ::: warning
-Soem things do not work across bus instances. As stated above, calling Send or Publish on an IBus (or other bus instance interface) starts a new conversation. Middleware components such as the _InMemoryOutbox_ currently do not buffer messages across bus instances.
+Some things do not work across bus instances. As stated above, calling Send or Publish on an IBus (or other bus instance interface) starts a new conversation. Middleware components such as the _InMemoryOutbox_ currently do not buffer messages across bus instances.
 :::
 
 #### Bus Interface Types
