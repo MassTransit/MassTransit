@@ -5,6 +5,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
     using Clients;
     using Definition;
     using MassTransit.Registration;
+    using Mediator;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Saga;
@@ -171,6 +172,20 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         protected override IClientFactory GetClientFactory(IServiceProvider provider)
         {
             return provider.GetRequiredService<Bind<TBus, IClientFactory>>().Value;
+        }
+    }
+
+    public class DependencyInjectionMediatorContainerRegistrar :
+        DependencyInjectionContainerRegistrar
+    {
+        public DependencyInjectionMediatorContainerRegistrar(IServiceCollection collection)
+            : base(collection)
+        {
+        }
+
+        protected override IClientFactory GetClientFactory(IServiceProvider provider)
+        {
+            return provider.GetRequiredService<IMediator>();
         }
     }
 }

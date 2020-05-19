@@ -16,7 +16,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
         {
             _container = new Container(registry =>
             {
-                registry.AddMassTransit(ConfigureRegistration);
+                registry.AddMediator(ConfigureRegistration);
             });
         }
 

@@ -31,12 +31,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
             await lastConsumer.Last.OrCanceled(TestCancellationToken);
         }
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+        protected void ConfigureRegistration<T>(IMediatorRegistrationConfigurator<T> configurator)
             where T : class
         {
             configurator.AddConsumer<SimplerConsumer>();
-
-            configurator.AddMediator();
         }
     }
 
@@ -66,7 +64,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         protected abstract IRequestClient<T> GetRequestClient<T>()
             where T : class;
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+        protected void ConfigureRegistration<T>(IMediatorRegistrationConfigurator<T> configurator)
             where T : class
         {
             configurator.AddConsumer<InitialConsumer>();
@@ -74,7 +72,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             configurator.AddRequestClient<InitialRequest>();
             configurator.AddRequestClient<SubsequentRequest>();
-            configurator.AddMediator();
         }
 
 
@@ -169,14 +166,12 @@ namespace MassTransit.Containers.Tests.Common_Tests
         protected abstract ISagaRepository<T> GetSagaRepository<T>()
             where T : class, ISaga;
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
+        protected void ConfigureRegistration<T>(IMediatorRegistrationConfigurator<T> configurator)
             where T : class
         {
             configurator.AddConsumer<OrderConsumer>();
             configurator.AddSaga<OrderSaga>()
                 .InMemoryRepository();
-
-            configurator.AddMediator();
         }
 
 

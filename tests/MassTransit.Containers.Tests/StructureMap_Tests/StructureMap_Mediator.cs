@@ -14,7 +14,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
 
         public StructureMap_Mediator()
         {
-            _container = new Container(expression => expression.AddMassTransit(ConfigureRegistration));
+            _container = new Container(expression => expression.AddMediator(ConfigureRegistration));
         }
 
         [OneTimeTearDown]

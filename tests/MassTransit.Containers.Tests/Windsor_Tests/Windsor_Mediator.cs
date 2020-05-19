@@ -15,7 +15,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
         public Windsor_Mediator()
         {
             _container = new WindsorContainer();
-            _container.AddMassTransit(ConfigureRegistration);
+            _container.AddMediator(ConfigureRegistration);
         }
 
         [OneTimeTearDown]

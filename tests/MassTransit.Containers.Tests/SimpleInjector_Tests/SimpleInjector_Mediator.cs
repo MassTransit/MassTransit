@@ -17,7 +17,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         {
             _container = new Container();
             _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
-            _container.AddMassTransit(ConfigureRegistration);
+            _container.AddMediator(ConfigureRegistration);
         }
 
         [OneTimeTearDown]

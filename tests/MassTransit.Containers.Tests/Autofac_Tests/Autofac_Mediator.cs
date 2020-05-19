@@ -17,7 +17,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
         public Autofac_Mediator()
         {
             _container = new ContainerBuilder()
-                .AddMassTransit(ConfigureRegistration)
+                .AddMediator(ConfigureRegistration)
                 .Build();
         }
 
@@ -40,7 +40,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
         public Autofac_Mediator_Request()
         {
             _container = new ContainerBuilder()
-                .AddMassTransit(ConfigureRegistration)
+                .AddMediator(ConfigureRegistration)
                 .Build();
         }
 
@@ -67,7 +67,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
         public Autofac_Mediator_Saga()
         {
             _container = new ContainerBuilder()
-                .AddMassTransit(ConfigureRegistration)
+                .AddMediator(ConfigureRegistration)
                 .Build();
         }
 

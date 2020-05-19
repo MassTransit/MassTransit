@@ -3,6 +3,7 @@ namespace MassTransit
     using System;
     using System.Linq;
     using Castle.Windsor;
+    using Mediator;
     using Metadata;
     using WindsorIntegration;
     using WindsorIntegration.Registration;
@@ -21,7 +22,32 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static IWindsorContainer AddMassTransit(this IWindsorContainer container, Action<IWindsorContainerConfigurator> configure = null)
         {
-            var configurator = new WindsorContainerRegistrationConfigurator(container);
+            if (container.Kernel.HasComponent(typeof(IRegistration)))
+            {
+                throw new ConfigurationException(
+                    "AddBus() was already called. To configure multiple bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");
+            }
+
+            var configurator = new WindsorContainerConfigurator(container);
+
+            configure?.Invoke(configurator);
+
+            return container;
+        }
+
+        /// <summary>
+        /// Adds the required services to the service collection, and allows consumers to be added and/or discovered
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="configure"></param>
+        public static IWindsorContainer AddMediator(this IWindsorContainer container, Action<IWindsorContainerMediatorConfigurator> configure = null)
+        {
+            if (container.Kernel.HasComponent(typeof(IMediator)))
+            {
+                throw new ConfigurationException("AddMediator() was already called and may only be called once per container.");
+            }
+
+            var configurator = new WindsorContainerMediatorConfigurator(container);
 
             configure?.Invoke(configurator);
 

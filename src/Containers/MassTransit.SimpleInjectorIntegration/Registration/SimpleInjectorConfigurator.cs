@@ -3,7 +3,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using System;
     using Context;
     using MassTransit.Registration;
-    using Mediator;
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
@@ -11,13 +10,13 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using Transports;
 
 
-    public class SimpleInjectorRegistrationConfigurator :
+    public class SimpleInjectorConfigurator :
         RegistrationConfigurator,
         ISimpleInjectorConfigurator
     {
         readonly Lifestyle _hybridLifestyle;
 
-        public SimpleInjectorRegistrationConfigurator(Container container)
+        public SimpleInjectorConfigurator(Container container)
             : base(new SimpleInjectorContainerRegistrar(container))
         {
             Container = container;
@@ -26,20 +25,32 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             AddMassTransitComponents(Container);
 
-            Container.RegisterInstance<IRegistrationConfigurator>(this);
+            Container.RegisterSingleton(() => new BusHealth(nameof(IBus)));
+
+            Container.RegisterSingleton<IBusHealth>(() => Container.GetInstance<BusHealth>());
+
+            Container.RegisterSingleton<IBusRegistryInstance, BusRegistryInstance>();
 
             Container.RegisterSingleton(() => CreateRegistration(container.GetInstance<IConfigurationServiceProvider>()));
+
+            Container.RegisterSingleton(() => ClientFactoryProvider(Container.GetInstance<IConfigurationServiceProvider>(), Container.GetInstance<IBus>()));
         }
 
         public Container Container { get; }
 
         public void AddBus(Func<IBusControl> busFactory)
         {
+            if (busFactory == null)
+                throw new ArgumentNullException(nameof(busFactory));
+
             AddBus(_ => busFactory());
         }
 
         public void AddBus(Func<IRegistrationContext<Container>, IBusControl> busFactory)
         {
+            if (busFactory == null)
+                throw new ArgumentNullException(nameof(busFactory));
+
             ThrowIfAlreadyConfigured();
 
             IBusControl BusFactory()
@@ -54,43 +65,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             }
 
             Container.RegisterSingleton(BusFactory);
-
             Container.RegisterSingleton<IBus>(() => Container.GetInstance<IBusControl>());
-
-            Container.Register(GetSendEndpointProvider, _hybridLifestyle);
-
-            Container.Register(GetPublishEndpoint, _hybridLifestyle);
-
-            Container.RegisterSingleton(() => ClientFactoryProvider(Container.GetInstance<IConfigurationServiceProvider>(), Container.GetInstance<IBus>()));
-
-            Container.RegisterSingleton(() => new BusHealth(nameof(IBus)));
-
-            Container.RegisterSingleton<IBusHealth>(() => Container.GetInstance<BusHealth>());
-
-            Container.RegisterSingleton<IBusRegistryInstance, BusRegistryInstance>();
-        }
-
-        public void AddMediator(Action<Container, IReceiveEndpointConfigurator> configure = null)
-        {
-            ThrowIfAlreadyConfigured();
-
-            IMediator MediatorFactory()
-            {
-                var provider = Container.GetInstance<IConfigurationServiceProvider>();
-
-                ConfigureLogContext(provider);
-
-                return Bus.Factory.CreateMediator(cfg =>
-                {
-                    configure?.Invoke(Container, cfg);
-
-                    ConfigureMediator(cfg, provider);
-                });
-            }
-
-            Container.RegisterSingleton(MediatorFactory);
-
-            Container.RegisterSingleton<IClientFactory>(() => Container.GetInstance<IMediator>());
         }
 
         ISendEndpointProvider GetSendEndpointProvider()
@@ -114,12 +89,16 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             );
         }
 
-        static void AddMassTransitComponents(Container container)
+        void AddMassTransitComponents(Container container)
         {
             container.Register<ScopedConsumeContextProvider>(Lifestyle.Scoped);
 
             container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext(),
                 Lifestyle.Scoped);
+
+            container.Register(GetSendEndpointProvider, _hybridLifestyle);
+
+            container.Register(GetPublishEndpoint, _hybridLifestyle);
 
             container.RegisterSingleton<IConsumerScopeProvider>(() => new SimpleInjectorConsumerScopeProvider(container));
             container.RegisterSingleton<IConfigurationServiceProvider>(() => new SimpleInjectorConfigurationServiceProvider(container));

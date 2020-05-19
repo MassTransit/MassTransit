@@ -16,7 +16,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
         public DependencyInjection_Mediator()
         {
             _provider = new ServiceCollection()
-                .AddMassTransit(ConfigureRegistration)
+                .AddMediator(ConfigureRegistration)
                 .BuildServiceProvider(true);
         }
 

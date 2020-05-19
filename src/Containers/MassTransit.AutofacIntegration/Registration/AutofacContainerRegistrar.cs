@@ -7,6 +7,7 @@ namespace MassTransit.AutofacIntegration.Registration
     using Courier;
     using Definition;
     using MassTransit.Registration;
+    using Mediator;
     using Saga;
     using ScopeProviders;
     using Scoping;
@@ -131,7 +132,7 @@ namespace MassTransit.AutofacIntegration.Registration
         {
             _builder.Register(context =>
             {
-                var clientFactory = context.Resolve<IClientFactory>();
+                var clientFactory = GetClientFactory(context);
 
                 if (context.TryResolve(out ConsumeContext consumeContext))
                     return clientFactory.CreateRequestClient<T>(consumeContext, timeout);
@@ -146,7 +147,7 @@ namespace MassTransit.AutofacIntegration.Registration
         {
             _builder.Register(context =>
             {
-                var clientFactory = context.Resolve<IClientFactory>();
+                var clientFactory = GetClientFactory(context);
 
                 if (context.TryResolve(out ConsumeContext consumeContext))
                     return clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
@@ -207,6 +208,26 @@ namespace MassTransit.AutofacIntegration.Registration
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());
 
             return new AutofacCompensateActivityScopeProvider<TActivity, TLog>(lifetimeScopeProvider, "message");
+        }
+
+        protected virtual IClientFactory GetClientFactory(IComponentContext componentContext)
+        {
+            return componentContext.Resolve<IClientFactory>();
+        }
+    }
+
+
+    public class AutofacContainerMediatorRegistrar :
+        AutofacContainerRegistrar
+    {
+        public AutofacContainerMediatorRegistrar(ContainerBuilder builder)
+            : base(builder)
+        {
+        }
+
+        protected override IClientFactory GetClientFactory(IComponentContext componentContext)
+        {
+            return componentContext.Resolve<IMediator>();
         }
     }
 }

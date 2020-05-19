@@ -2,7 +2,6 @@ namespace MassTransit.StructureMapIntegration.Registration
 {
     using System;
     using MassTransit.Registration;
-    using Mediator;
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
@@ -10,49 +9,19 @@ namespace MassTransit.StructureMapIntegration.Registration
     using Transports;
 
 
-    public class ConfigurationExpressionRegistrationConfigurator :
+    public class ConfigurationExpressionConfigurator :
         RegistrationConfigurator,
         IConfigurationExpressionConfigurator
     {
         readonly ConfigurationExpression _expression;
 
-        public ConfigurationExpressionRegistrationConfigurator(ConfigurationExpression expression)
+        public ConfigurationExpressionConfigurator(ConfigurationExpression expression)
             : base(new StructureMapContainerRegistrar(expression))
         {
             _expression = expression;
 
             expression.For<IBusRegistry>()
                 .Use<BusRegistry>()
-                .Singleton();
-
-            expression.For<IConsumerScopeProvider>()
-                .Use(context => CreateConsumerScopeProvider(context))
-                .Singleton();
-
-            expression.For<IConfigurationServiceProvider>()
-                .Use(context => new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>()))
-                .Singleton();
-
-            expression.For<IRegistrationConfigurator>()
-                .Use(this);
-
-            expression.For<IRegistration>()
-                .Use(provider => CreateRegistration(provider.GetInstance<IConfigurationServiceProvider>()))
-                .Singleton();
-        }
-
-        ConfigurationExpression IConfigurationExpressionConfigurator.Builder => _expression;
-
-        public void AddBus(Func<IRegistrationContext<IContext>, IBusControl> busFactory)
-        {
-            ThrowIfAlreadyConfigured();
-
-            _expression.For<IBusControl>()
-                .Use(context => BusFactory(context, busFactory))
-                .Singleton();
-
-            _expression.For<IBus>()
-                .Use(context => context.GetInstance<IBusControl>())
                 .Singleton();
 
             _expression.For<ISendEndpointProvider>()
@@ -78,6 +47,36 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<IBusRegistryInstance>()
                 .Use<BusRegistryInstance>()
                 .Singleton();
+
+            expression.For<IConsumerScopeProvider>()
+                .Use(context => CreateConsumerScopeProvider(context))
+                .Singleton();
+
+            expression.For<IConfigurationServiceProvider>()
+                .Use(context => new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>()))
+                .Singleton();
+
+            expression.For<IRegistration>()
+                .Use(provider => CreateRegistration(provider.GetInstance<IConfigurationServiceProvider>()))
+                .Singleton();
+        }
+
+        ConfigurationExpression IConfigurationExpressionConfigurator.Builder => _expression;
+
+        public void AddBus(Func<IRegistrationContext<IContext>, IBusControl> busFactory)
+        {
+            if (busFactory == null)
+                throw new ArgumentNullException(nameof(busFactory));
+
+            ThrowIfAlreadyConfigured();
+
+            _expression.For<IBusControl>()
+                .Use(context => BusFactory(context, busFactory))
+                .Singleton();
+
+            _expression.For<IBus>()
+                .Use(context => context.GetInstance<IBusControl>())
+                .Singleton();
         }
 
         IBusControl BusFactory(IContext context, Func<IRegistrationContext<IContext>, IBusControl> busFactory)
@@ -89,33 +88,6 @@ namespace MassTransit.StructureMapIntegration.Registration
             IRegistrationContext<IContext> registrationContext = GetRegistrationContext(context);
 
             return busFactory(registrationContext);
-        }
-
-        public void AddMediator(Action<IContext, IReceiveEndpointConfigurator> configure = null)
-        {
-            ThrowIfAlreadyConfigured();
-
-            _expression.For<IMediator>()
-                .Use(context => MediatorFactory(context, configure))
-                .Singleton();
-
-            _expression.For<IClientFactory>()
-                .Use(context => context.GetInstance<IMediator>())
-                .Singleton();
-        }
-
-        IMediator MediatorFactory(IContext context, Action<IContext, IReceiveEndpointConfigurator> configure)
-        {
-            var provider = context.GetInstance<IConfigurationServiceProvider>();
-
-            ConfigureLogContext(provider);
-
-            return Bus.Factory.CreateMediator(cfg =>
-            {
-                configure?.Invoke(context, cfg);
-
-                ConfigureMediator(cfg, provider);
-            });
         }
 
         static IConsumerScopeProvider CreateConsumerScopeProvider(IContext context)

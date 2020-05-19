@@ -4,6 +4,7 @@ namespace MassTransit
     using System.Linq;
     using ExtensionsDependencyInjectionIntegration;
     using ExtensionsDependencyInjectionIntegration.Registration;
+    using Mediator;
     using Microsoft.Extensions.DependencyInjection;
 
 
@@ -27,6 +28,25 @@ namespace MassTransit
             }
 
             var configurator = new ServiceCollectionConfigurator(collection);
+
+            configure?.Invoke(configurator);
+
+            return collection;
+        }
+
+        /// <summary>
+        /// Adds the required services to the service collection, and allows consumers to be added and/or discovered
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="configure"></param>
+        public static IServiceCollection AddMediator(this IServiceCollection collection, Action<IServiceCollectionMediatorConfigurator> configure = null)
+        {
+            if (collection.Any(d => d.ServiceType == typeof(IMediator)))
+            {
+                throw new ConfigurationException("AddMediator() was already called and may only be called once per container.");
+            }
+
+            var configurator = new ServiceCollectionMediatorConfigurator(collection);
 
             configure?.Invoke(configurator);
 

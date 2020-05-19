@@ -9,6 +9,7 @@ namespace MassTransit.WindsorIntegration.Registration
     using Courier;
     using Definition;
     using MassTransit.Registration;
+    using Mediator;
     using Saga;
     using ScopeProviders;
     using Scoping;
@@ -141,7 +142,7 @@ namespace MassTransit.WindsorIntegration.Registration
         {
             _container.Register(Component.For<IRequestClient<T>>().UsingFactoryMethod(kernel =>
             {
-                var clientFactory = kernel.Resolve<IClientFactory>();
+                var clientFactory = GetClientFactory(kernel);
                 var consumeContext = kernel.GetConsumeContext();
 
                 if (consumeContext != null)
@@ -157,7 +158,7 @@ namespace MassTransit.WindsorIntegration.Registration
         {
             _container.Register(Component.For<IRequestClient<T>>().UsingFactoryMethod(kernel =>
             {
-                var clientFactory = kernel.Resolve<IClientFactory>();
+                var clientFactory = GetClientFactory(kernel);
                 var consumeContext = kernel.GetConsumeContext();
 
                 if (consumeContext != null)
@@ -203,6 +204,24 @@ namespace MassTransit.WindsorIntegration.Registration
         {
             if (!_container.Kernel.HasComponent(typeof(TActivity)))
                 _container.Register(Component.For<TActivity>().LifestyleScoped());
+        }
+
+        protected virtual IClientFactory GetClientFactory(IKernel kernel)
+        {
+            return kernel.Resolve<IClientFactory>();
+        }
+    }
+    public class WindsorContainerMediatorRegistrar :
+        WindsorContainerRegistrar
+    {
+        public WindsorContainerMediatorRegistrar(IWindsorContainer container)
+            : base(container)
+        {
+        }
+
+        protected override IClientFactory GetClientFactory(IKernel kernel)
+        {
+            return kernel.Resolve<IMediator>();
         }
     }
 }

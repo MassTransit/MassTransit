@@ -7,6 +7,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using Courier;
     using Definition;
     using MassTransit.Registration;
+    using Mediator;
     using Saga;
     using ScopeProviders;
     using Scoping;
@@ -132,7 +133,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         {
             _container.Register(() =>
             {
-                var clientFactory = _container.GetInstance<IClientFactory>();
+                var clientFactory = GetClientFactory(_container);
                 var consumeContext = _container.GetConsumeContext();
 
                 if (consumeContext != null)
@@ -148,7 +149,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         {
             _container.Register(() =>
             {
-                var clientFactory = _container.GetInstance<IClientFactory>();
+                var clientFactory = GetClientFactory(_container);
                 var consumeContext = _container.GetConsumeContext();
 
                 if (consumeContext != null)
@@ -191,6 +192,26 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             if (notExists)
                 _container.Register<TActivity>(Lifestyle.Scoped);
+        }
+
+        protected virtual IClientFactory GetClientFactory(Container container)
+        {
+            return container.GetInstance<IClientFactory>();
+        }
+    }
+
+
+    public class SimpleInjectorContainerMediatorRegistrar :
+        SimpleInjectorContainerRegistrar
+    {
+        public SimpleInjectorContainerMediatorRegistrar(Container container)
+            : base(container)
+        {
+        }
+
+        protected override IClientFactory GetClientFactory(Container container)
+        {
+            return container.GetInstance<IMediator>();
         }
     }
 }

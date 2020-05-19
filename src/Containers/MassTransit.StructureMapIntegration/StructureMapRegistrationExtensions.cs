@@ -21,7 +21,19 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static void AddMassTransit(this ConfigurationExpression expression, Action<IConfigurationExpressionConfigurator> configure = null)
         {
-            var configurator = new ConfigurationExpressionRegistrationConfigurator(expression);
+            var configurator = new ConfigurationExpressionConfigurator(expression);
+
+            configure?.Invoke(configurator);
+        }
+
+        /// <summary>
+        /// Adds the required services to the service collection, and allows consumers to be added and/or discovered
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <param name="configure"></param>
+        public static void AddMediator(this ConfigurationExpression expression, Action<IConfigurationExpressionMediatorConfigurator> configure = null)
+        {
+            var configurator = new ConfigurationExpressionMediatorConfigurator(expression);
 
             configure?.Invoke(configurator);
         }

@@ -1,10 +1,8 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 {
     using System;
-    using System.Linq;
     using Context;
     using MassTransit.Registration;
-    using Mediator;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Monitoring.Health;
@@ -20,6 +18,15 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         public ServiceCollectionConfigurator(IServiceCollection collection)
             : this(collection, new DependencyInjectionContainerRegistrar(collection))
         {
+            collection.AddSingleton(provider => ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>(),
+                provider.GetRequiredService<IBus>()));
+
+            collection.AddSingleton(provider => new BusHealth(nameof(IBus)));
+
+            collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<BusHealth>());
+
+            collection.AddSingleton<IBusRegistryInstance, BusRegistryInstance>();
+
             collection.AddSingleton(provider => CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()));
         }
 
@@ -35,66 +42,35 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         public virtual void AddBus(Func<IRegistrationContext<IServiceProvider>, IBusControl> busFactory)
         {
+            if (busFactory == null)
+                throw new ArgumentNullException(nameof(busFactory));
+
             ThrowIfAlreadyConfigured();
 
-            IBusControl BusFactory(IServiceProvider serviceProvider)
-            {
-                var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
-
-                ConfigureLogContext(provider);
-
-                IRegistrationContext<IServiceProvider> context = GetRegistrationContext(provider);
-
-                return busFactory(context);
-            }
-
-            if (Collection.Any(d => d.ServiceType == typeof(IBusControl)))
-            {
-                throw new ConfigurationException(
-                    "AddBus() was already called. To configure multiple bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");
-            }
-
-            Collection.AddSingleton(BusFactory);
+            Collection.AddSingleton(provider => BusFactory(provider, busFactory));
             Collection.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
-            Collection.AddSingleton(provider => ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>(),
-                provider.GetRequiredService<IBus>()));
-
-            Collection.AddSingleton(provider => new BusHealth(nameof(IBus)));
-            Collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<BusHealth>());
-            Collection.AddSingleton<IBusRegistryInstance, BusRegistryInstance>();
         }
 
-        public void AddMediator(Action<IServiceProvider, IReceiveEndpointConfigurator> configure = null)
+        protected IBusControl BusFactory(IServiceProvider serviceProvider, Func<IRegistrationContext<IServiceProvider>, IBusControl> busFactory)
         {
-            ThrowIfAlreadyConfigured();
+            var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
 
-            IMediator MediatorFactory(IServiceProvider serviceProvider)
-            {
-                var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
+            ConfigureLogContext(provider);
 
-                ConfigureLogContext(provider);
+            IRegistrationContext<IServiceProvider> context = GetRegistrationContext(provider);
 
-                return Bus.Factory.CreateMediator(cfg =>
-                {
-                    configure?.Invoke(serviceProvider, cfg);
-
-                    ConfigureMediator(cfg, provider);
-                });
-            }
-
-            Collection.TryAddSingleton(MediatorFactory);
-            Collection.AddSingleton<IClientFactory>(provider => provider.GetRequiredService<IMediator>());
+            return busFactory(context);
         }
 
-        void AddMassTransitComponents(IServiceCollection collection)
+        static void AddMassTransitComponents(IServiceCollection collection)
         {
-            Collection.TryAddSingleton<IBusRegistry, BusRegistry>();
+            collection.TryAddSingleton<IBusRegistry, BusRegistry>();
 
             collection.TryAddScoped<ScopedConsumeContextProvider>();
             collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext());
 
-            Collection.TryAddScoped(GetCurrentSendEndpointProvider);
-            Collection.TryAddScoped(GetCurrentPublishEndpoint);
+            collection.TryAddScoped(GetCurrentSendEndpointProvider);
+            collection.TryAddScoped(GetCurrentPublishEndpoint);
 
             collection.TryAddSingleton<IConsumerScopeProvider>(provider => new DependencyInjectionConsumerScopeProvider(provider));
             collection.TryAddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
@@ -112,7 +88,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
                 new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<IBus>(), provider));
         }
 
-        IRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
+        protected virtual IRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
         {
             return new RegistrationContext<IServiceProvider>(
                 CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),
