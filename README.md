@@ -18,108 +18,49 @@ develop | [![develop](https://ci.appveyor.com/api/projects/status/hox8dhh5eyy7js
 MassTransit Nuget Packages
 ---------------------------
 
-| Package Name | FullFramework | .NET Standard |
-| ------------ | :-----------: | :-----------: |
+| Package Name | .NET Standard | .NET Core App |
+| ------------ | :-----------: | :----------: |
 | **Main** |
-| [MassTransit][MassTransit.nuget] | 4.6.1 | 2.0 |
+| [MassTransit][MassTransit.nuget] | 2.0 |
 | **Other** |
-| [MassTransit.Host][Host.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.Reactive][Reactive.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.SignalR][SignalR.nuget] | - | 2.0 |
-| [MassTransit.TestFramework][TestFramework.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.SignalR][SignalR.nuget] | 2.0 |
+| [MassTransit.TestFramework][TestFramework.nuget] | 2.0 |
 | **Containers** |
-| [MassTransit.Autofac][Autofac.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.Extensions.DependencyInjection][CoreDI.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.Lamar][Lamar.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.Ninject][Ninject.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.SimpleInjector][SimpleInjector.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.StructureMap][StructureMap.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.Unity][Unity.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.CastleWindsor][Windsor.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.Autofac][Autofac.nuget] | 2.0 |
+| [MassTransit.Extensions.DependencyInjection][CoreDI.nuget] | 2.0 |
+| [MassTransit.Lamar][Lamar.nuget] | 2.0 |
+| [MassTransit.SimpleInjector][SimpleInjector.nuget] | 2.0 |
+| [MassTransit.StructureMap][StructureMap.nuget] | 2.0 |
+| [MassTransit.CastleWindsor][Windsor.nuget] | 2.0 |
+| **ASP.NET Core** |
+| [MassTransit.AspNetCore][AspNetCore.nuget] | - | 3.1 |
 | **Monitoring** |
-| [MassTransit.AspNetCore][AspNetCore.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.Prometheus][Prometheus.nuget] | 2.0 | 
 | **Persistence** |
-| [MassTransit.Dapper][Dapper.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.DocumentDb][DocumentDb.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.EntityFrameworkCore][EFCore.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.EntityFramework][EF.nuget] | 4.6.1 | 2.1 |
-| [MassTransit.Marten][Marten.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.MongoDb][MongoDb.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.NHibernate][NHibernate.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.Redis][Redis.nuget] | 4.6.1 | 2.0 |
+| [MassTransit.Dapper][Dapper.nuget] | 2.0 |
+| [MassTransit.DocumentDb][DocumentDb.nuget] | 2.0 |
+| [MassTransit.EntityFrameworkCore][EFCore.nuget] | 2.0 |
+| [MassTransit.EntityFramework][EF.nuget] | 2.1 |
+| [MassTransit.Marten][Marten.nuget] | 2.0 |
+| [MassTransit.MongoDb][MongoDb.nuget] | 2.0 |
+| [MassTransit.NHibernate][NHibernate.nuget] | 2.0 |
+| [MassTransit.Redis][Redis.nuget] | 2.0 |
 | **Transports** |
-| [MassTransit.ActiveMQ][ActiveMQ.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.AmazonSQS][AmazonSQS.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.Azure.ServiceBus.Core][AzureSbCore.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.Http][Http.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.RabbitMQ][RabbitMQ.nuget] | 4.6.1 | 2.0 |
-| [MassTransit.WebJobs.EventHubs][EventHubs.nuget] | - | 2.0 |
-| [MassTransit.WebJobs.ServiceBus][AzureFunc.nuget] | - | 2.0 |
+| [MassTransit.ActiveMQ][ActiveMQ.nuget] | 2.0 |
+| [MassTransit.AmazonSQS][AmazonSQS.nuget] | 2.0 |
+| [MassTransit.Azure.ServiceBus.Core][AzureSbCore.nuget] | 2.0 |
+| [MassTransit.RabbitMQ][RabbitMQ.nuget] | 2.0 |
+| [MassTransit.WebJobs.EventHubs][EventHubs.nuget] | 2.0 |
+| [MassTransit.WebJobs.ServiceBus][AzureFunc.nuget] | 2.0 |
 
 ## Getting started with MassTransit
 
 In order to get started with MassTransit, you can have a look at the
-documentation, which is located at [http://masstransit-project.com/](http://masstransit-project.com/).
-
-### Simplest possible thing:
-
-`install-package MassTransit.RabbitMq`
-
-and then:
-
-```csharp
-// Message Definition
-class MyMessage
-{
-	public string Value { get; set; }
-}
-
-// Code Snippet for Console Application
-async Task Main()
-{
-	var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
-	{
-		var host = sbc.Host("localhost"), h =>
-		{
-			h.Username("guest");
-			h.Password("guest");
-		});
-
-		sbc.ReceiveEndpoint("my_queue", endpoint =>
-		{
-			endpoint.Handler<MyMessage>(async context =>
-			{
-				await Console.Out.WriteLineAsync($"Received: {context.Message.Value}");
-			});
-		});
-	});
-
-	await bus.StartAsync();
-
-	await bus.Publish(new MyMessage { Value = "Hello, World." });
-
-	Console.ReadLine();
-
-	await bus.StopAsync();
-}
-```
-
-You will also need to set up RabbitMQ; 
-
- 1. **Install Erlang** using the [installer](http://www.erlang.org/download.html). (Next -> Next ...)
- 2. **Install RabbitMQ** using the [installer](http://www.rabbitmq.com/download.html). (Next -> Next ...) You now have a RabbitMQ broker (look in `services.msc` for it) that you can [log into](http://localhost:15672/#/) using `guest`, `guest`. You can see message rates, routings and active consumers using this interface. 
- 
-**Please note** 
-
-You need to add the management interface before you can login. First, from an elevated command prompt, change directory to the sbin folder within the RabbitMQ Server installation directory e.g. `%PROGRAMFILES%\RabbitMQ Server\rabbitmq_server_3.5.3\sbin\`
-
-Next, run the following command to enable the rabbitmq management plugin:
-
-`rabbitmq-plugins.bat enable rabbitmq_management`
+documentation, which is located at [https://masstransit-project.com/](https://masstransit-project.com/).
 
 ### Downloads
 
-Download from NuGet 'MassTransit' [Search NuGet for MassTransit](http://nuget.org/packages?q=masstransit)
+Download from NuGet 'MassTransit' [Search NuGet for MassTransit](https://nuget.org/packages?q=masstransit)
 
 Download the continuously integrated Nuget packages from [AppVeyor](https://ci.appveyor.com/project/phatboyg/masstransit/build/artifacts).
 
@@ -129,19 +70,13 @@ We support RabbitMQ and Azure Service Bus message brokers.
 
 ## Mailing list
 
-[MassTransit Discuss](http://groups.google.com/group/masstransit-discuss)
+[MassTransit Discuss](https://groups.google.com/group/masstransit-discuss)
 
 ## Discord 
 
 Get help live at the MassTransit Discord server.
 
 [![alt Join the conversation](https://img.shields.io/discord/682238261753675864.svg "Discord")](https://discord.gg/rNpQgYn)
-
-## Gitter Chat 
-
-While Discord is preferrred, the Gitter chat room is still available:
-
-[![Join the chat at https://gitter.im/MassTransit/MassTransit](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/MassTransit/MassTransit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## GitHub Issues
 
@@ -177,27 +112,24 @@ enhancements and calls for help from people who forget to check back if they get
 MassTransit is built on [AppVeyor](https://ci.appveyor.com/project/phatboyg/masstransit)
  
 # REQUIREMENTS
-* .Net 4.6.1 or .NET Standard 2.0
+* .NET Core SDK v3.1
 
 # CREDITS
 Logo Design by _The Agile Badger_
 
 [MassTransit.nuget]: https://www.nuget.org/packages/MassTransit
-[Host.nuget]: https://www.nuget.org/packages/MassTransit.Host
-[Reactive.nuget]: https://www.nuget.org/packages/MassTransit.Reactive
 [SignalR.nuget]: https://www.nuget.org/packages/MassTransit.SignalR
 [TestFramework.nuget]: https://www.nuget.org/packages/MassTransit.TestFramework
 
 [Autofac.nuget]: https://www.nuget.org/packages/MassTransit.Autofac
 [CoreDI.nuget]: https://www.nuget.org/packages/MassTransit.Extensions.DependencyInjection
 [Lamar.nuget]: https://www.nuget.org/packages/MassTransit.Lamar
-[Ninject.nuget]: https://www.nuget.org/packages/MassTransit.Ninject
 [SimpleInjector.nuget]: https://www.nuget.org/packages/MassTransit.SimpleInjector
 [StructureMap.nuget]: https://www.nuget.org/packages/MassTransit.StructureMap
-[Unity.nuget]: https://www.nuget.org/packages/MassTransit.Unity
 [Windsor.nuget]: https://www.nuget.org/packages/MassTransit.CastleWindsor
 
 [AspNetCore.nuget]: https://www.nuget.org/packages/MassTransit.AspNetCore
+[Prometheus.nuget]: https://www.nuget.org/packages/MassTransit.Prometheus
 
 [Dapper.nuget]: https://www.nuget.org/packages/MassTransit.Dapper
 [DocumentDb.nuget]: https://www.nuget.org/packages/MassTransit.DocumentDb
@@ -211,7 +143,6 @@ Logo Design by _The Agile Badger_
 [ActiveMQ.nuget]: https://www.nuget.org/packages/MassTransit.ActiveMQ
 [AmazonSQS.nuget]: https://www.nuget.org/packages/MassTransit.AmazonSQS
 [AzureSbCore.nuget]: https://www.nuget.org/packages/MassTransit.Azure.ServiceBus.Core
-[Http.nuget]: https://www.nuget.org/packages/MassTransit.Http
 [RabbitMQ.nuget]: https://www.nuget.org/packages/MassTransit.RabbitMQ
 [EventHubs.nuget]: https://www.nuget.org/packages/MassTransit.WebJobs.EventHubs
 [AzureFunc.nuget]: https://www.nuget.org/packages/MassTransit.WebJobs.ServiceBus

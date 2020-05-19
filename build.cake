@@ -67,7 +67,7 @@ Task("Test")
     .Does<BuildParameters>(data =>
 {
     var hasFailures = false;
-    foreach(var project in GetFiles("./src/**/*.Tests.csproj"))
+    foreach(var project in GetFiles("./tests/**/*.Tests.csproj"))
     {
         var filename = project.GetFilenameWithoutExtension().FullPath;
         if (!data.Tests.Criteria.ContainsKey(filename)) continue;
