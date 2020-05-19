@@ -1,5 +1,6 @@
 namespace MassTransit.Containers.Tests.Autofac_Tests
 {
+    using System.Threading.Tasks;
     using Autofac;
     using Common_Tests;
     using NUnit.Framework;
@@ -34,9 +35,9 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
         }
 
         [OneTimeTearDown]
-        public void Close_container()
+        public async Task Close_container()
         {
-            _container.Dispose();
+            await _container.DisposeAsync();
         }
 
         protected override IRequestClient<InitialRequest> RequestClient => _container.Resolve<IRequestClient<InitialRequest>>();
