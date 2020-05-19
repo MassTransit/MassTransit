@@ -6,6 +6,7 @@ namespace MassTransit.StructureMapIntegration.Registration
     using Courier;
     using Definition;
     using MassTransit.Registration;
+    using Mediator;
     using Saga;
     using ScopeProviders;
     using Scoping;
@@ -159,10 +160,10 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<T>().Use(instance).Singleton();
         }
 
-        static IRequestClient<T> CreateRequestClient<T>(RequestTimeout timeout, IContext context)
+        IRequestClient<T> CreateRequestClient<T>(RequestTimeout timeout, IContext context)
             where T : class
         {
-            var clientFactory = context.GetInstance<IClientFactory>();
+            var clientFactory = GetClientFactory(context);
             var consumeContext = context.TryGetInstance<ConsumeContext>();
 
             if (consumeContext != null)
@@ -172,10 +173,10 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .CreateRequestClient<T>(timeout);
         }
 
-        static IRequestClient<T> CreateRequestClient<T>(Uri destinationAddress, RequestTimeout timeout, IContext context)
+        IRequestClient<T> CreateRequestClient<T>(Uri destinationAddress, RequestTimeout timeout, IContext context)
             where T : class
         {
-            var clientFactory = context.GetInstance<IClientFactory>();
+            var clientFactory = GetClientFactory(context);
             var consumeContext = context.TryGetInstance<ConsumeContext>();
 
             if (consumeContext != null)
@@ -197,6 +198,26 @@ namespace MassTransit.StructureMapIntegration.Registration
             where TLog : class
         {
             return new StructureMapCompensateActivityScopeProvider<TActivity, TLog>(context.GetInstance<IContainer>());
+        }
+
+        protected virtual IClientFactory GetClientFactory(IContext context)
+        {
+            return context.GetInstance<IClientFactory>();
+        }
+    }
+
+
+    public class StructureMapContainerMediatorRegistrar :
+        StructureMapContainerRegistrar
+    {
+        public StructureMapContainerMediatorRegistrar(ConfigurationExpression expression)
+            : base(expression)
+        {
+        }
+
+        protected override IClientFactory GetClientFactory(IContext context)
+        {
+            return context.GetInstance<IMediator>();
         }
     }
 }

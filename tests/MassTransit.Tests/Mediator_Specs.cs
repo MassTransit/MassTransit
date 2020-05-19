@@ -48,6 +48,16 @@ namespace MassTransit.Tests
         }
 
         [Test]
+        public async Task Should_not_throw_when_publishing_without_consumer()
+        {
+            var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
+            {
+            });
+
+            await mediator.Publish(new PingMessage());
+        }
+
+        [Test]
         public async Task Should_handle_request_response()
         {
             var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>

@@ -18,40 +18,33 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
         public ServiceCollectionConfigurator(IServiceCollection collection)
             : base(collection, new DependencyInjectionContainerRegistrar<TBus>(collection))
         {
-            Collection.AddSingleton(provider => Bind<TBus>.Create(CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>())));
+            collection.AddSingleton(provider => Bind<TBus>.Create(GetSendEndpointProvider(provider)));
+            collection.AddSingleton(provider => Bind<TBus>.Create(GetPublishEndpoint(provider)));
+            collection.AddSingleton(provider =>
+                Bind<TBus>.Create(ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>(), provider.GetRequiredService<TBus>())));
+
+            collection.AddSingleton(provider => Bind<TBus>.Create(new BusHealth(typeof(TBus).Name)));
+            collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<Bind<TBus, BusHealth>>().Value);
+
+            collection.AddSingleton<BusRegistryInstance<TBus>>();
+            collection.AddSingleton<IBusRegistryInstance>(provider => provider.GetRequiredService<BusRegistryInstance<TBus>>());
+
+            collection.AddSingleton(provider => Bind<TBus>.Create(CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>())));
         }
 
         public override void AddBus(Func<IRegistrationContext<IServiceProvider>, IBusControl> busFactory)
         {
+            if (busFactory == null)
+                throw new ArgumentNullException(nameof(busFactory));
+
             ThrowIfAlreadyConfigured();
 
-            IBusControl BusFactory(IServiceProvider serviceProvider)
-            {
-                var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
-
-                ConfigureLogContext(provider);
-
-                IRegistrationContext<IServiceProvider> context = GetRegistrationContext(serviceProvider);
-
-                return busFactory(context);
-            }
-
-            Collection.AddSingleton(provider => Bind<TBus>.Create(BusFactory(provider)));
+            Collection.AddSingleton(provider => Bind<TBus>.Create(BusFactory(provider, busFactory)));
 
             Collection.AddSingleton<TBus>(provider => ActivatorUtilities.CreateInstance<TBusInstance>(provider,
                 provider.GetRequiredService<Bind<TBus, IBusControl>>().Value));
 
             Collection.AddSingleton(provider => Bind<TBus>.Create<IBus>(provider.GetRequiredService<TBus>()));
-            Collection.AddSingleton(provider => Bind<TBus>.Create(GetSendEndpointProvider(provider)));
-            Collection.AddSingleton(provider => Bind<TBus>.Create(GetPublishEndpoint(provider)));
-            Collection.AddSingleton(provider => Bind<TBus>.Create(ClientFactoryProvider(
-                provider.GetRequiredService<IConfigurationServiceProvider>(), provider.GetRequiredService<TBus>())));
-
-            Collection.AddSingleton(provider => Bind<TBus>.Create(new BusHealth(typeof(TBus).Name)));
-            Collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<Bind<TBus, BusHealth>>().Value);
-
-            Collection.AddSingleton<BusRegistryInstance<TBus>>();
-            Collection.AddSingleton<IBusRegistryInstance>(provider => provider.GetRequiredService<BusRegistryInstance<TBus>>());
         }
 
         static ISendEndpointProvider GetSendEndpointProvider(IServiceProvider provider)
@@ -64,7 +57,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             return new PublishEndpoint(new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<TBus>(), provider));
         }
 
-        IRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
+        protected override IRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
         {
             return new RegistrationContext<IServiceProvider>(
                 CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),

@@ -64,6 +64,13 @@
             return _factory.Create(baseContext);
         }
 
+        public InitializeContext<TMessage> Create(CancellationToken cancellationToken)
+        {
+            var baseContext = new BaseInitializeContext(cancellationToken);
+
+            return _factory.Create(baseContext);
+        }
+
         public Task<InitializeContext<TMessage>> Initialize(object input, CancellationToken cancellationToken)
         {
             return InitializeMessage((TInput)input, cancellationToken);

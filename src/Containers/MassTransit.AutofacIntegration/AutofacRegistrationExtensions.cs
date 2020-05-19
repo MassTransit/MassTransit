@@ -6,6 +6,7 @@ namespace MassTransit
     using Autofac.Core;
     using AutofacIntegration;
     using AutofacIntegration.Registration;
+    using Mediator;
     using Metadata;
 
 
@@ -22,7 +23,32 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static ContainerBuilder AddMassTransit(this ContainerBuilder builder, Action<IContainerBuilderConfigurator> configure = null)
         {
+            if (builder.ComponentRegistryBuilder.IsRegistered(new TypedService(typeof(IRegistration))))
+            {
+                throw new ConfigurationException(
+                    "AddBus() was already called. To configure multiple bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");
+            }
+
             var configurator = new ContainerBuilderRegistrationConfigurator(builder);
+
+            configure?.Invoke(configurator);
+
+            return builder;
+        }
+
+        /// <summary>
+        /// Adds the required services to the service collection, and allows consumers to be added and/or discovered
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="configure"></param>
+        public static ContainerBuilder AddMediator(this ContainerBuilder builder, Action<IContainerBuilderMediatorConfigurator> configure = null)
+        {
+            if (builder.ComponentRegistryBuilder.IsRegistered(new TypedService(typeof(IMediator))))
+            {
+                throw new ConfigurationException("AddMediator() was already called and may only be called once per container.");
+            }
+
+            var configurator = new ContainerBuilderRegistrationMediatorConfigurator(builder);
 
             configure?.Invoke(configurator);
 

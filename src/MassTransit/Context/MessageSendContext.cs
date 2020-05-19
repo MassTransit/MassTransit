@@ -70,6 +70,11 @@ namespace MassTransit.Context
             }
         }
 
+        /// <summary>
+        /// Set to true if the message is being published
+        /// </summary>
+        public bool IsPublish { get; set; }
+
         public Guid? MessageId { get; set; }
         public Guid? RequestId { get; set; }
         public Guid? CorrelationId { get; set; }

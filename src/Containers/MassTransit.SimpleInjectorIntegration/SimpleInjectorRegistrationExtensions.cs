@@ -2,6 +2,7 @@ namespace MassTransit
 {
     using System;
     using System.Linq;
+    using Mediator;
     using Metadata;
     using SimpleInjector;
     using SimpleInjectorIntegration;
@@ -21,7 +22,32 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static Container AddMassTransit(this Container container, Action<ISimpleInjectorConfigurator> configure = null)
         {
-            var configurator = new SimpleInjectorRegistrationConfigurator(container);
+            if (container.GetCurrentRegistrations().Any(d => d.ServiceType == typeof(IRegistration)))
+            {
+                throw new ConfigurationException(
+                    "AddBus() was already called. To configure multiple bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");
+            }
+
+            var configurator = new SimpleInjectorConfigurator(container);
+
+            configure?.Invoke(configurator);
+
+            return container;
+        }
+
+        /// <summary>
+        /// Adds the required services to the service collection, and allows consumers to be added and/or discovered
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="configure"></param>
+        public static Container AddMediator(this Container container, Action<ISimpleInjectorMediatorConfigurator> configure = null)
+        {
+            if (container.GetCurrentRegistrations().Any(d => d.ServiceType == typeof(IMediator)))
+            {
+                throw new ConfigurationException("AddMediator() was already called and may only be called once per container.");
+            }
+
+            var configurator = new SimpleInjectorMediatorConfigurator(container);
 
             configure?.Invoke(configurator);
 

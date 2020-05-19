@@ -4,13 +4,13 @@ namespace MassTransit.Transports
     using GreenPipes;
 
 
-    public class PublishContextPipeAdapter<T> :
+    public class PublishSendPipeAdapter<T> :
         IPipe<SendContext<T>>
         where T : class
     {
         readonly IPipe<PublishContext<T>> _pipe;
 
-        public PublishContextPipeAdapter(IPipe<PublishContext<T>> pipe)
+        public PublishSendPipeAdapter(IPipe<PublishContext<T>> pipe)
         {
             _pipe = pipe;
         }

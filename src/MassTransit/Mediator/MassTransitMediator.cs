@@ -176,7 +176,7 @@ namespace MassTransit.Mediator
             var sendEndpoint = await _endpoint.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
             if (pipe.IsNotEmpty())
-                await sendEndpoint.Send(message, new PublishContextPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
+                await sendEndpoint.Send(message, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
             else
                 await sendEndpoint.Send(message, cancellationToken).ConfigureAwait(false);
         }
@@ -187,7 +187,7 @@ namespace MassTransit.Mediator
             var sendEndpoint = await _endpoint.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
             if (pipe.IsNotEmpty())
-                await sendEndpoint.Send(values, new PublishContextPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
+                await sendEndpoint.Send(values, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
             else
                 await sendEndpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);
         }

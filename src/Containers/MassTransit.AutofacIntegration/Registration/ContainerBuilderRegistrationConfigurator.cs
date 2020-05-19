@@ -2,9 +2,7 @@ namespace MassTransit.AutofacIntegration.Registration
 {
     using System;
     using Autofac;
-    using Autofac.Core;
     using MassTransit.Registration;
-    using Mediator;
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
@@ -31,17 +29,40 @@ namespace MassTransit.AutofacIntegration.Registration
 
             ScopeName = "message";
 
-            builder.RegisterType<BusRegistry>().As<IBusRegistry>().SingleInstance();
+            builder.RegisterType<BusRegistry>()
+                .As<IBusRegistry>()
+                .SingleInstance();
+
+            _builder.Register(context => new BusHealth(nameof(IBus)))
+                .As<BusHealth>()
+                .As<IBusHealth>()
+                .SingleInstance();
+
+            _builder.RegisterType<BusRegistryInstance>()
+                .As<IBusRegistryInstance>()
+                .SingleInstance();
+
+            _builder.Register(GetCurrentSendEndpointProvider)
+                .As<ISendEndpointProvider>()
+                .InstancePerLifetimeScope();
+
+            _builder.Register(GetCurrentPublishEndpoint)
+                .As<IPublishEndpoint>()
+                .InstancePerLifetimeScope();
+
+            _builder.Register(context => ClientFactoryProvider(context.Resolve<IConfigurationServiceProvider>(), context.Resolve<IBus>()))
+                .As<IClientFactory>()
+                .SingleInstance();
 
             builder.Register(CreateConsumerScopeProvider)
                 .As<IConsumerScopeProvider>()
-                .SingleInstance();
+                .SingleInstance()
+                .IfNotRegistered(typeof(IConsumerScopeProvider));
 
             builder.Register(context => new AutofacConfigurationServiceProvider(context.Resolve<ILifetimeScope>()))
                 .As<IConfigurationServiceProvider>()
-                .SingleInstance();
-
-            builder.RegisterInstance<IRegistrationConfigurator>(this);
+                .SingleInstance()
+                .IfNotRegistered(typeof(IConfigurationServiceProvider));
 
             builder.Register(provider => CreateRegistration(provider.Resolve<IConfigurationServiceProvider>()))
                 .As<IRegistration>()
@@ -64,74 +85,26 @@ namespace MassTransit.AutofacIntegration.Registration
 
         public void AddBus(Func<IRegistrationContext<IComponentContext>, IBusControl> busFactory)
         {
+            if (busFactory == null)
+                throw new ArgumentNullException(nameof(busFactory));
+
             ThrowIfAlreadyConfigured();
 
-            IBusControl BusFactory(IComponentContext componentContext)
-            {
-                var provider = componentContext.Resolve<IConfigurationServiceProvider>();
-
-                ConfigureLogContext(provider);
-
-                IRegistrationContext<IComponentContext> context = GetRegistrationContext(componentContext);
-
-                return busFactory(context);
-            }
-
-            if (_builder.ComponentRegistryBuilder.IsRegistered(new TypedService(typeof(IBusControl))))
-            {
-                throw new ConfigurationException(
-                    "AddBus() was already called. To configure multiple bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");
-            }
-
-            _builder.Register(BusFactory)
+            _builder.Register(context => BusFactory(context, busFactory))
                 .As<IBusControl>()
                 .As<IBus>()
                 .SingleInstance();
-
-            _builder.Register(GetCurrentSendEndpointProvider)
-                .As<ISendEndpointProvider>()
-                .InstancePerLifetimeScope();
-
-            _builder.Register(GetCurrentPublishEndpoint)
-                .As<IPublishEndpoint>()
-                .InstancePerLifetimeScope();
-
-            _builder.Register(context => ClientFactoryProvider(context.Resolve<IConfigurationServiceProvider>(), context.Resolve<IBus>()))
-                .As<IClientFactory>()
-                .SingleInstance();
-
-            _builder.Register(context => new BusHealth(nameof(IBus)))
-                .As<BusHealth>()
-                .As<IBusHealth>()
-                .SingleInstance();
-
-            _builder.RegisterType<BusRegistryInstance>()
-                .As<IBusRegistryInstance>()
-                .SingleInstance();
         }
 
-        public void AddMediator(Action<IComponentContext, IReceiveEndpointConfigurator> configure = null)
+        IBusControl BusFactory(IComponentContext componentContext, Func<IRegistrationContext<IComponentContext>, IBusControl> busFactory)
         {
-            ThrowIfAlreadyConfigured();
+            var provider = componentContext.Resolve<IConfigurationServiceProvider>();
 
-            IMediator MediatorFactory(IComponentContext context)
-            {
-                var provider = context.Resolve<IConfigurationServiceProvider>();
+            ConfigureLogContext(provider);
 
-                ConfigureLogContext(provider);
+            IRegistrationContext<IComponentContext> context = GetRegistrationContext(componentContext);
 
-                return Bus.Factory.CreateMediator(cfg =>
-                {
-                    configure?.Invoke(context, cfg);
-
-                    ConfigureMediator(cfg, provider);
-                });
-            }
-
-            _builder.Register(MediatorFactory)
-                .As<IMediator>()
-                .As<IClientFactory>()
-                .SingleInstance();
+            return busFactory(context);
         }
 
         IConsumerScopeProvider CreateConsumerScopeProvider(IComponentContext context)

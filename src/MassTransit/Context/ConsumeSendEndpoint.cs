@@ -4,157 +4,53 @@ namespace MassTransit.Context
     using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
-    using Converters;
     using GreenPipes;
     using Initializers;
+    using Transports;
 
 
     /// <summary>
     /// Intercepts the ISendEndpoint and makes it part of the current consume context
     /// </summary>
     public class ConsumeSendEndpoint :
-        ISendEndpoint
+        SendEndpointProxy
     {
         readonly ConsumeContext _context;
-        readonly ISendEndpoint _endpoint;
         readonly Guid? _requestId;
 
         public ConsumeSendEndpoint(ISendEndpoint endpoint, ConsumeContext context, Guid? requestId)
+            : base(endpoint)
         {
-            _endpoint = endpoint;
             _context = context;
             _requestId = requestId;
         }
 
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
-        {
-            return _endpoint.ConnectSendObserver(observer);
-        }
-
-        public Task Send<T>(T message, CancellationToken cancellationToken)
+        public override Task Send<T>(T message, CancellationToken cancellationToken)
             where T : class
         {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            var sendContextPipe = new ConsumeSendEndpointPipe<T>(_context, _requestId);
-
-            return ConsumeTask(_endpoint.Send(message, sendContextPipe, cancellationToken));
+            return ConsumeTask(base.Send(message, cancellationToken));
         }
 
-        public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+        public override Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            if (pipe == null)
-                throw new ArgumentNullException(nameof(pipe));
-
-            var sendContextPipe = new ConsumeSendEndpointPipe<T>(_context, pipe, _requestId);
-
-            return ConsumeTask(_endpoint.Send(message, sendContextPipe, cancellationToken));
+            return ConsumeTask(base.Send(message, pipe, cancellationToken));
         }
 
-        public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        public override Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
             where T : class
         {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            if (pipe == null)
-                throw new ArgumentNullException(nameof(pipe));
-
-            var sendContextPipe = new ConsumeSendEndpointPipe<T>(_context, pipe, _requestId);
-
-            return ConsumeTask(_endpoint.Send(message, sendContextPipe, cancellationToken));
+            return ConsumeTask(base.Send(message, pipe, cancellationToken));
         }
 
-        public Task Send(object message, CancellationToken cancellationToken)
+        protected override IPipe<SendContext<T>> GetPipeProxy<T>(IPipe<SendContext<T>> pipe = default)
         {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            var messageType = message.GetType();
-
-            return SendEndpointConverterCache.Send(this, message, messageType, cancellationToken);
+            return new ConsumeSendPipeAdapter<T>(_context, pipe, _requestId);
         }
 
-        public Task Send(object message, Type messageType, CancellationToken cancellationToken)
+        protected override InitializeContext<T> GetInitializeContext<T>(IMessageInitializer<T> initializer, CancellationToken cancellationToken)
         {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            if (messageType == null)
-                throw new ArgumentNullException(nameof(messageType));
-
-            return SendEndpointConverterCache.Send(this, message, messageType, cancellationToken);
-        }
-
-        public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            if (pipe == null)
-                throw new ArgumentNullException(nameof(pipe));
-
-            var messageType = message.GetType();
-
-            return SendEndpointConverterCache.Send(this, message, messageType, pipe, cancellationToken);
-        }
-
-        public Task Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            if (messageType == null)
-                throw new ArgumentNullException(nameof(messageType));
-
-            if (pipe == null)
-                throw new ArgumentNullException(nameof(pipe));
-
-            return SendEndpointConverterCache.Send(this, message, messageType, pipe, cancellationToken);
-        }
-
-        public Task Send<T>(object values, CancellationToken cancellationToken)
-            where T : class
-        {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
-
-            return initializer.Send(this, initializer.Create(_context), values);
-        }
-
-        public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
-            where T : class
-        {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            if (pipe == null)
-                throw new ArgumentNullException(nameof(pipe));
-
-            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
-
-            return initializer.Send(this, initializer.Create(_context), values, pipe);
-        }
-
-        public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
-            where T : class
-        {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            if (pipe == null)
-                throw new ArgumentNullException(nameof(pipe));
-
-            var initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
-
-            return initializer.Send(this, initializer.Create(_context), values, pipe);
+            return initializer.Create(_context);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

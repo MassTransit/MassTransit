@@ -57,7 +57,7 @@ namespace MassTransit.Mediator.Contexts
             AddOrUpdatePayload<ConsumeContext>(() => _consumeContext, existing => _consumeContext);
         }
 
-        public bool IsDelivered { get; private set; }
+        public bool IsDelivered { get; internal set; }
         public bool IsFaulted { get; private set; }
 
         public Stream GetBodyStream()

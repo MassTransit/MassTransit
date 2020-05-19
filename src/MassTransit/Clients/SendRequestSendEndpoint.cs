@@ -33,7 +33,7 @@
             {
                 var initializeContext = initializer.Create(_consumeContext);
 
-                return await initializer.Send(endpoint, initializeContext, values, new ConsumeSendEndpointPipe<TRequest>(_consumeContext, pipe, requestId))
+                return await initializer.Send(endpoint, initializeContext, values, new ConsumeSendPipeAdapter<TRequest>(_consumeContext, pipe, requestId))
                     .ConfigureAwait(false);
             }
 
@@ -45,7 +45,7 @@
             var endpoint = await _provider.GetSendEndpoint(_destinationAddress).ConfigureAwait(false);
 
             IPipe<SendContext<TRequest>> consumePipe = _consumeContext != null
-                ? new ConsumeSendEndpointPipe<TRequest>(_consumeContext, pipe, requestId)
+                ? new ConsumeSendPipeAdapter<TRequest>(_consumeContext, pipe, requestId)
                 : pipe;
 
             await endpoint.Send(message, consumePipe, cancellationToken).ConfigureAwait(false);

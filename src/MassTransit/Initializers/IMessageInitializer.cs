@@ -20,6 +20,13 @@
         InitializeContext<TMessage> Create(PipeContext context);
 
         /// <summary>
+        /// Create a message context
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        InitializeContext<TMessage> Create(CancellationToken cancellationToken);
+
+        /// <summary>
         /// Initialize the message, using the input
         /// </summary>
         /// <param name="input"></param>

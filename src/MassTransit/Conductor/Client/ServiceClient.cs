@@ -64,7 +64,7 @@ namespace MassTransit.Conductor.Client
             return new ServiceClientRequestSendEndpoint<T>(messageClient, _clientFactory.Context);
         }
 
-        async public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             _disposed.Cancel();
 

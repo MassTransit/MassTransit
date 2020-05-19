@@ -1,28 +1,24 @@
-namespace MassTransit.Conductor.Client
+namespace MassTransit.Transports
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Context.Converters;
-    using Contexts;
     using GreenPipes;
-    using MassTransit.Pipeline;
-    using Util;
+    using Initializers;
 
 
     /// <summary>
-    /// For later, when regular Send is also supported by client
+    /// Generalized proxy for ISendEndpoint to intercept pipe/context
     /// </summary>
-    public class ServiceClientSendEndpoint :
+    public abstract class SendEndpointProxy :
         ISendEndpoint
     {
         readonly ISendEndpoint _endpoint;
-        readonly ServiceInstanceContext _context;
 
-        public ServiceClientSendEndpoint(ISendEndpoint endpoint, ServiceInstanceContext context)
+        protected SendEndpointProxy(ISendEndpoint endpoint)
         {
             _endpoint = endpoint;
-            _context = context;
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -30,18 +26,16 @@ namespace MassTransit.Conductor.Client
             return _endpoint.ConnectSendObserver(observer);
         }
 
-        public Task Send<T>(T message, CancellationToken cancellationToken)
+        public virtual Task Send<T>(T message, CancellationToken cancellationToken)
             where T : class
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            var replyToPipe = new InstancePipe<T>(_context);
-
-            return _endpoint.Send(message, replyToPipe, cancellationToken);
+            return _endpoint.Send(message, GetPipeProxy<T>(), cancellationToken);
         }
 
-        public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+        public virtual Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (message == null)
@@ -50,12 +44,10 @@ namespace MassTransit.Conductor.Client
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var replyToPipe = new InstancePipe<T>(_context, pipe);
-
-            return _endpoint.Send(message, replyToPipe, cancellationToken);
+            return _endpoint.Send(message, GetPipeProxy(pipe), cancellationToken);
         }
 
-        public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        public virtual Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (message == null)
@@ -64,9 +56,7 @@ namespace MassTransit.Conductor.Client
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var replyToPipe = new InstancePipe<T>(_context, pipe);
-
-            return _endpoint.Send(message, replyToPipe, cancellationToken);
+            return _endpoint.Send(message, GetPipeProxy<T>(pipe), cancellationToken);
         }
 
         public Task Send(object message, CancellationToken cancellationToken)
@@ -107,6 +97,7 @@ namespace MassTransit.Conductor.Client
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
+
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
@@ -122,9 +113,11 @@ namespace MassTransit.Conductor.Client
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var replyToPipe = new InstancePipe<T>(_context);
+            IMessageInitializer<T> initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
 
-            return _endpoint.Send<T>(values, replyToPipe, cancellationToken);
+            InitializeContext<T> context = GetInitializeContext(initializer, cancellationToken);
+
+            return initializer.Send(this, context, values);
         }
 
         public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -132,12 +125,15 @@ namespace MassTransit.Conductor.Client
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
+
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var replyToPipe = new InstancePipe<T>(_context, pipe);
+            IMessageInitializer<T> initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
 
-            return _endpoint.Send<T>(values, replyToPipe, cancellationToken);
+            InitializeContext<T> context = GetInitializeContext(initializer, cancellationToken);
+
+            return initializer.Send(this, context, values, pipe);
         }
 
         public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
@@ -145,62 +141,24 @@ namespace MassTransit.Conductor.Client
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
+
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var replyToPipe = new InstancePipe<T>(_context, pipe);
+            IMessageInitializer<T> initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
 
-            return _endpoint.Send<T>(values, replyToPipe, cancellationToken);
+            InitializeContext<T> context = GetInitializeContext(initializer, cancellationToken);
+
+            return initializer.Send(this, context, values, pipe);
         }
 
+        protected abstract IPipe<SendContext<T>> GetPipeProxy<T>(IPipe<SendContext<T>> pipe = default)
+            where T : class;
 
-        class InstancePipe<TMessage> :
-            IPipe<SendContext<TMessage>>,
-            ISendContextPipe
-            where TMessage : class
+        protected virtual InitializeContext<T> GetInitializeContext<T>(IMessageInitializer<T> initializer, CancellationToken cancellationToken)
+            where T : class
         {
-            readonly ServiceInstanceContext _context;
-            readonly IPipe<SendContext<TMessage>> _pipe;
-            readonly ISendContextPipe _sendContextPipe;
-
-            public InstancePipe(ServiceInstanceContext context)
-            {
-                _context = context;
-
-                _pipe = default;
-                _sendContextPipe = default;
-            }
-
-            public InstancePipe(ServiceInstanceContext context, IPipe<SendContext<TMessage>> pipe)
-            {
-                _context = context;
-                _pipe = pipe;
-                _sendContextPipe = pipe as ISendContextPipe;
-            }
-
-            void IProbeSite.Probe(ProbeContext context)
-            {
-                _pipe?.Probe(context);
-            }
-
-            public Task Send(SendContext<TMessage> context)
-            {
-                if (_context != null)
-                {
-                    var instanceContext = _context;
-                    context.GetOrAddPayload(() => instanceContext);
-                }
-
-                return _pipe.IsNotEmpty() ? _pipe.Send(context) : TaskUtil.Completed;
-            }
-
-            public Task Send<T>(SendContext<T> context)
-                where T : class
-            {
-                return _sendContextPipe != null
-                    ? _sendContextPipe.Send(context)
-                    : TaskUtil.Completed;
-            }
+            return initializer.Create(cancellationToken);
         }
     }
 }

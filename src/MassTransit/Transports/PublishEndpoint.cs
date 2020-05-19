@@ -116,7 +116,7 @@ namespace MassTransit.Transports
                 var sendEndpoint = sendEndpointTask.Result;
 
                 return pipe.IsNotEmpty()
-                    ? sendEndpoint.Send(message, new PublishContextPipeAdapter<T>(pipe), cancellationToken)
+                    ? sendEndpoint.Send(message, new PublishSendPipeAdapter<T>(pipe), cancellationToken)
                     : sendEndpoint.Send(message, cancellationToken);
             }
 
@@ -125,7 +125,7 @@ namespace MassTransit.Transports
                 var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
 
                 if (pipe.IsNotEmpty())
-                    await sendEndpoint.Send(message, new PublishContextPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
+                    await sendEndpoint.Send(message, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
                 else
                     await sendEndpoint.Send(message, cancellationToken).ConfigureAwait(false);
             }
@@ -142,7 +142,7 @@ namespace MassTransit.Transports
                 var sendEndpoint = sendEndpointTask.Result;
 
                 return pipe.IsNotEmpty()
-                    ? sendEndpoint.Send(values, new PublishContextPipeAdapter<T>(pipe), cancellationToken)
+                    ? sendEndpoint.Send(values, new PublishSendPipeAdapter<T>(pipe), cancellationToken)
                     : sendEndpoint.Send<T>(values, cancellationToken);
             }
 
@@ -151,7 +151,7 @@ namespace MassTransit.Transports
                 var sendEndpoint = await sendEndpointTask.ConfigureAwait(false);
 
                 if (pipe.IsNotEmpty())
-                    await sendEndpoint.Send(values, new PublishContextPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
+                    await sendEndpoint.Send(values, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
                 else
                     await sendEndpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);
             }
