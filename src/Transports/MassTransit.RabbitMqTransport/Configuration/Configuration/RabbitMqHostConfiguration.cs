@@ -44,8 +44,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public BatchSettings BatchSettings => _hostSettings.BatchSettings;
 
-        public bool DeployTopologyOnly { get; set; }
-
         public RabbitMqHostSettings Settings
         {
             get => _hostSettings;

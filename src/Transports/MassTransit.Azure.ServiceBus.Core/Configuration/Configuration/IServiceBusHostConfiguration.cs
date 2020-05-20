@@ -13,8 +13,6 @@
 
         string BasePath { get; }
 
-        bool DeployTopologyOnly { get; set; }
-
         IServiceBusHostControl Proxy { get; }
 
         /// <summary>

@@ -8,6 +8,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
     using RabbitMQ.Client;
     using Topology;
     using Transports;
+    using Util;
 
 
     public class RabbitMqConnectionContext :

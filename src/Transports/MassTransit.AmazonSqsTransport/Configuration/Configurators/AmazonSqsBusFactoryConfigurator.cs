@@ -63,11 +63,6 @@
         public IDictionary<string, object> QueueSubscriptionAttributes => _settings.QueueSubscriptionAttributes;
         public IDictionary<string, string> QueueTags => _settings.QueueTags;
 
-        public bool DeployTopologyOnly
-        {
-            set => _hostConfiguration.DeployTopologyOnly = value;
-        }
-
         public void Host(AmazonSqsHostSettings settings)
         {
             _busConfiguration.HostConfiguration.Settings = settings;

@@ -14,6 +14,11 @@
 
         Uri HostAddress { get; }
 
+        /// <summary>
+        /// If true, only the broker topology will be deployed
+        /// </summary>
+        bool DeployTopologyOnly { get; set; }
+
         IBusHostControl Build();
     }
 }

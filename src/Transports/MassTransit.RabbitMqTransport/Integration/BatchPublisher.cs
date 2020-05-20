@@ -6,8 +6,8 @@ namespace MassTransit.RabbitMqTransport.Integration
     using System.Threading.Channels;
     using System.Threading.Tasks;
     using Context;
-    using Contexts;
     using RabbitMQ.Client;
+    using Util;
 
 
     public class BatchPublisher :

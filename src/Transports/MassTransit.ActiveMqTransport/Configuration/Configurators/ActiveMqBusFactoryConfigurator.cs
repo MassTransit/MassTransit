@@ -68,11 +68,6 @@
             set => _settings.AutoDelete = value;
         }
 
-        public bool DeployTopologyOnly
-        {
-            set => _busConfiguration.HostConfiguration.DeployTopologyOnly = value;
-        }
-
         public void Host(ActiveMqHostSettings settings)
         {
             _busConfiguration.HostConfiguration.Settings = settings;

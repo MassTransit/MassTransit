@@ -10,6 +10,7 @@
     using Integration;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Events;
+    using Util;
 
 
     public class RabbitMqModelContext :

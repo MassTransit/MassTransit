@@ -1,4 +1,4 @@
-namespace MassTransit.RabbitMqTransport.Contexts
+namespace MassTransit.Util
 {
     using System;
     using System.Threading;
@@ -14,11 +14,6 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         public ChannelExecutor(int prefetchCount, int concurrencyLimit)
         {
-            if (prefetchCount <= 0)
-                throw new ArgumentOutOfRangeException(nameof(prefetchCount));
-            if (concurrencyLimit <= 0)
-                throw new ArgumentOutOfRangeException(nameof(concurrencyLimit));
-
             var channelOptions = new BoundedChannelOptions(prefetchCount)
             {
                 AllowSynchronousContinuations = true,
@@ -32,7 +27,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _runTasks = new Task[concurrencyLimit];
 
             for (var i = 0; i < concurrencyLimit; i++)
-                _runTasks[i] = Task.Run(RunFromChannel);
+                _runTasks[i] = Task.Run(() => RunFromChannel());
         }
 
         public ChannelExecutor(int concurrencyLimit)
@@ -49,7 +44,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _runTasks = new Task[concurrencyLimit];
 
             for (var i = 0; i < concurrencyLimit; i++)
-                _runTasks[i] = Task.Run(RunFromChannel);
+                _runTasks[i] = Task.Run(() => RunFromChannel());
         }
 
         public async ValueTask DisposeAsync()
@@ -57,6 +52,20 @@ namespace MassTransit.RabbitMqTransport.Contexts
             _channel.Writer.Complete();
 
             await Task.WhenAll(_runTasks).ConfigureAwait(false);
+        }
+
+        public async Task Push(Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            async Task<bool> RunMethod()
+            {
+                await method().ConfigureAwait(false);
+
+                return true;
+            }
+
+            var future = new Future<bool>(() => RunMethod(), cancellationToken);
+
+            await _channel.Writer.WriteAsync(future, cancellationToken).ConfigureAwait(false);
         }
 
         public Task Run(Func<Task> method, CancellationToken cancellationToken = default)
@@ -68,7 +77,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 return true;
             }
 
-            return Run(RunMethod, cancellationToken);
+            return Run(() => RunMethod(), cancellationToken);
         }
 
         public async Task<T> Run<T>(Func<Task<T>> method, CancellationToken cancellationToken = default)
@@ -89,7 +98,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
                 return true;
             }
 
-            return Run(RunMethod, cancellationToken);
+            return Run(() => RunMethod(), cancellationToken);
         }
 
         public async Task<T> Run<T>(Func<T> method, CancellationToken cancellationToken = default)
@@ -103,7 +112,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
         async Task RunFromChannel()
         {
-            while (await _channel.Reader.WaitToReadAsync())
+            while (await _channel.Reader.WaitToReadAsync().ConfigureAwait(false))
             {
                 if (_channel.Reader.TryRead(out var future))
                 {
@@ -123,7 +132,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         }
 
 
-        readonly struct Future<T> :
+        class Future<T> :
             IFuture
         {
             readonly Func<Task<T>> _method;
@@ -168,7 +177,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         }
 
 
-        readonly struct SynchronousFuture<T> :
+        class SynchronousFuture<T> :
             IFuture
         {
             readonly Func<T> _method;

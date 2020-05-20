@@ -62,8 +62,6 @@ namespace MassTransit.Transports.InMemory.Configurators
 
         public new IInMemoryPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
 
-        public bool DeployTopologyOnly { private get; set; }
-
         public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint = null)
         {

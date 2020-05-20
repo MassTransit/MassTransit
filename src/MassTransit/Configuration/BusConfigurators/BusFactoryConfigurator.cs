@@ -45,6 +45,11 @@
             set => _busConfiguration.BusEndpointConfiguration.Consume.Configurator.AutoStart = value;
         }
 
+        public bool DeployTopologyOnly
+        {
+            set => _busConfiguration.HostConfiguration.DeployTopologyOnly = value;
+        }
+
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
             _busConfiguration.Consume.Configurator.AddPipeSpecification(specification);

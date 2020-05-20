@@ -99,11 +99,6 @@
             _hostConfiguration.SetNamespaceSeparatorTo(separator);
         }
 
-        public bool DeployTopologyOnly
-        {
-            set => _hostConfiguration.DeployTopologyOnly = value;
-        }
-
         public void Send<T>(Action<IServiceBusMessageSendTopologyConfigurator<T>> configureTopology)
             where T : class
         {

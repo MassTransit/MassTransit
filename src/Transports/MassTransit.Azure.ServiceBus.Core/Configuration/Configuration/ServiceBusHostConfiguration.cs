@@ -37,8 +37,6 @@
 
         string IServiceBusHostConfiguration.BasePath => _hostSettings.ServiceUri.AbsolutePath.Trim('/');
 
-        public bool DeployTopologyOnly { get; set; }
-
         public IServiceBusHostControl Proxy => _proxy;
 
         public ServiceBusHostSettings Settings

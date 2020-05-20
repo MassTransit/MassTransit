@@ -31,7 +31,6 @@
 
         public string Description => _hostSettings.ToDescription();
         public override Uri HostAddress => _hostSettings.HostAddress;
-        public bool DeployTopologyOnly { get; set; }
 
         public ActiveMqHostSettings Settings
         {

@@ -30,8 +30,6 @@
 
         public override Uri HostAddress => _hostSettings.HostAddress;
 
-        public bool DeployTopologyOnly { get; set; }
-
         public AmazonSqsHostSettings Settings
         {
             get => _hostSettings;

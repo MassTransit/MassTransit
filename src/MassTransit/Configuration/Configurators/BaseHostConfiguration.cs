@@ -13,8 +13,8 @@ namespace MassTransit.Configurators
         IHostConfiguration
         where TReceiveEndpointConfiguration : IReceiveEndpointConfiguration
     {
-        readonly IList<TReceiveEndpointConfiguration> _endpoints;
         readonly EndpointConfigurationObservable _endpointObservable;
+        readonly IList<TReceiveEndpointConfiguration> _endpoints;
 
         protected BaseHostConfiguration(IBusConfiguration busConfiguration)
         {
@@ -23,15 +23,15 @@ namespace MassTransit.Configurators
             _endpointObservable = new EndpointConfigurationObservable();
         }
 
-        public IBusConfiguration BusConfiguration { get; }
         protected IEndpointConfigurationObserver Observers => _endpointObservable;
 
-        protected void Add(TReceiveEndpointConfiguration configuration)
-        {
-            _endpoints.Add(configuration);
-        }
-
         protected IEnumerable<TReceiveEndpointConfiguration> Endpoints => _endpoints;
+
+        public IBusConfiguration BusConfiguration { get; }
+
+        public abstract Uri HostAddress { get; }
+
+        public bool DeployTopologyOnly { get; set; }
 
         public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
@@ -43,8 +43,11 @@ namespace MassTransit.Configurators
             return _endpoints.SelectMany(x => x.Validate());
         }
 
-        public abstract Uri HostAddress { get; }
-
         public abstract IBusHostControl Build();
+
+        protected void Add(TReceiveEndpointConfiguration configuration)
+        {
+            _endpoints.Add(configuration);
+        }
     }
 }

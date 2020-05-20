@@ -7,6 +7,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using System.Threading.Tasks;
     using Context;
     using Exceptions;
+    using Util;
 
 
     public abstract class Batcher<TEntry> :

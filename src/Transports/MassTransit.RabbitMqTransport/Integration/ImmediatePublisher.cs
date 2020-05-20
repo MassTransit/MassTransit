@@ -2,8 +2,8 @@ namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
     using System.Threading.Tasks;
-    using Contexts;
     using RabbitMQ.Client;
+    using Util;
 
 
     public class ImmediatePublisher :

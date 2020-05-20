@@ -12,11 +12,6 @@
         AmazonSqsHostSettings Settings { get; set; }
 
         /// <summary>
-        /// If true, only the broker topology will be deployed
-        /// </summary>
-        bool DeployTopologyOnly { get; set; }
-
-        /// <summary>
         /// Apply the endpoint definition to the receive endpoint configurator
         /// </summary>
         /// <param name="configurator"></param>

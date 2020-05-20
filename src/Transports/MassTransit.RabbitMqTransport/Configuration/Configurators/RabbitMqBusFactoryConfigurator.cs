@@ -153,11 +153,6 @@
         public new IRabbitMqSendTopologyConfigurator SendTopology => _busConfiguration.Topology.Send;
         public new IRabbitMqPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
 
-        public bool DeployTopologyOnly
-        {
-            set => _hostConfiguration.DeployTopologyOnly = value;
-        }
-
         public void OverrideDefaultBusEndpointQueueName(string queueName)
         {
             _settings.ExchangeName = queueName;
