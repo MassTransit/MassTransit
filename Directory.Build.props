@@ -2,16 +2,9 @@
   <!-- These properties will be shared for all projects -->
 
   <PropertyGroup>
-    <Product>MassTransit</Product>
-    <Copyright>Copyright 2007-2019 Chris Patterson</Copyright>
-    <Authors>Chris Patterson</Authors>
     <LangVersion>8</LangVersion>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <WarningLevel>4</WarningLevel>
     <NoWarn>CS1587,CS1591,CS1998,NU5105</NoWarn>
-    <DebugSymbols>True</DebugSymbols>
-    <DebugType>portable</DebugType>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -22,31 +15,6 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <Optimize>true</Optimize>
     <DefineConstants>TRACE;$(DefineConstants)</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(MSBuildProjectName.Contains(Tests))' == false">
-    <!-- Nuget Package Details -->
-    <PackageIcon>mt-logo-small.png</PackageIcon>
-    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <Description>MassTransit is a message-based distributed application framework for .NET http://masstransit-project.com</Description>
-    <IsPackable>True</IsPackable>
-
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-
-    <!-- SourceLink Config, needs nuget package in each csproj Microsoft.SourceLink.GitHub in order to work -->
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(MSBuildProjectName.Contains(Tests))' == false">
-    <None Include="../mt-logo-small.png" Pack="true" Visible="false" PackagePath=""/>
-  </ItemGroup>
-
-  <PropertyGroup Condition="'$(MSBuildProjectName.Contains(Tests))' == true">
-    <NoWarn>$(NoWarn),CS0618</NoWarn>
-    <IsTestProject>true</IsTestProject>
-    <IsPackable>False</IsPackable>
   </PropertyGroup>
 
 </Project>

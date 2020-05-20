@@ -1,0 +1,34 @@
+<Project>
+  <Import Project="..\Directory.Build.props" />
+
+  <PropertyGroup>
+    <Product>MassTransit</Product>
+    <Copyright>Copyright 2007-2019 Chris Patterson</Copyright>
+    <Authors>Chris Patterson</Authors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <DebugSymbols>True</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <NoWarn>$(NoWarn)</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Nuget Package Details -->
+    <PackageIcon>mt-logo-small.png</PackageIcon>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <Description>MassTransit is a message-based distributed application framework for .NET http://masstransit-project.com</Description>
+    <IsPackable>True</IsPackable>
+
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- SourceLink Config, needs nuget package in each csproj Microsoft.SourceLink.GitHub in order to work -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\mt-logo-small.png" Pack="true" Visible="false" PackagePath=""/>
+  </ItemGroup>
+
+</Project>
