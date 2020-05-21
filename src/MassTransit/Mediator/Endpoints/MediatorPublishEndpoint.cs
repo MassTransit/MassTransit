@@ -15,23 +15,22 @@ namespace MassTransit.Mediator.Endpoints
     using Transports;
 
 
-    public class MediatorSendEndpoint :
+    public class MediatorPublishEndpoint :
         ISendEndpoint,
-        IPublishEndpointProvider,
-        ISendEndpointProvider
+        IPublishObserverConnector
     {
-        readonly Uri _destinationAddress;
+        readonly MediatorSendEndpoint _sendEndpoint;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly ILogContext _logContext;
-        readonly MediatorPublishEndpoint _publishSendEndpoint;
+        readonly SendObservable _sendObservers;
+        readonly PublishObservable _observers;
+        readonly IPublishPipe _publishPipe;
+        readonly Uri _sourceAddress;
+        readonly Uri _destinationAddress;
         readonly IPublishTopologyConfigurator _publishTopology;
         readonly ReceiveObservable _receiveObservers;
-        readonly SendObservable _sendObservers;
-        readonly ISendPipe _sendPipe;
-        readonly Uri _sourceAddress;
-        readonly MediatorSendEndpoint _sourceEndpoint;
 
-        MediatorSendEndpoint(IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher, ILogContext logContext,
+        MediatorPublishEndpoint(IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher, ILogContext logContext,
             SendObservable sendObservers)
         {
             _dispatcher = dispatcher;
@@ -42,32 +41,27 @@ namespace MassTransit.Mediator.Endpoints
             _publishTopology = configuration.Topology.Publish;
             _receiveObservers = configuration.ReceiveObservers;
 
-            _sendPipe = configuration.Send.CreatePipe();
+            _publishPipe = configuration.Publish.CreatePipe();
+
+            _observers = new PublishObservable();
         }
 
-        public MediatorSendEndpoint(IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher, ILogContext logContext,
-            SendObservable sendObservers, IReceiveEndpointConfiguration sourceConfiguration, IReceivePipeDispatcher sourceDispatcher)
+        public MediatorPublishEndpoint(MediatorSendEndpoint sendEndpoint, IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher,
+            ILogContext logContext, SendObservable sendObservers, IReceiveEndpointConfiguration sourceConfiguration)
             : this(configuration, dispatcher, logContext, sendObservers)
         {
             _sourceAddress = sourceConfiguration.InputAddress;
-            _sourceEndpoint = new MediatorSendEndpoint(sourceConfiguration, sourceDispatcher, logContext, sendObservers);
-            _publishSendEndpoint = new MediatorPublishEndpoint(this, configuration, dispatcher, logContext, sendObservers, sourceConfiguration);
+            _sendEndpoint = sendEndpoint;
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
-            return _publishSendEndpoint.ConnectPublishObserver(observer);
-        }
-
-        public Task<ISendEndpoint> GetPublishSendEndpoint<T>()
-            where T : class
-        {
-            return Task.FromResult<ISendEndpoint>(_publishSendEndpoint);
+            return _observers.Connect(observer);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _sendObservers.Connect(observer);
+            return _sendEndpoint.ConnectSendObserver(observer);
         }
 
         public Task Send<T>(T message, CancellationToken cancellationToken)
@@ -175,14 +169,6 @@ namespace MassTransit.Mediator.Endpoints
             return MessageInitializerCache<T>.Send(this, values, pipe, cancellationToken);
         }
 
-        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
-        {
-            if (address.Equals(_sourceAddress))
-                return Task.FromResult<ISendEndpoint>(_sourceEndpoint);
-
-            return Task.FromResult<ISendEndpoint>(this);
-        }
-
         async Task SendMessage<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
@@ -192,7 +178,11 @@ namespace MassTransit.Mediator.Endpoints
 
             await pipe.Send(context).ConfigureAwait(false);
 
-            var receiveContext = new MediatorReceiveContext<T>(context, this, this, _publishTopology, _receiveObservers, cancellationToken);
+            var receiveContext =
+                new MediatorReceiveContext<T>(context, _sendEndpoint, _sendEndpoint, _publishTopology, _receiveObservers, cancellationToken)
+                {
+                    IsDelivered = true
+                };
 
             try
             {
@@ -218,16 +208,16 @@ namespace MassTransit.Mediator.Endpoints
             IPipe<SendContext<TMessage>>
             where TMessage : class
         {
-            readonly MediatorSendEndpoint _endpoint;
+            readonly MediatorPublishEndpoint _endpoint;
             readonly IPipe<SendContext<TMessage>> _pipe;
 
-            public MediatorPipe(MediatorSendEndpoint endpoint)
+            public MediatorPipe(MediatorPublishEndpoint endpoint)
             {
                 _endpoint = endpoint;
                 _pipe = default;
             }
 
-            public MediatorPipe(MediatorSendEndpoint endpoint, IPipe<SendContext<TMessage>> pipe)
+            public MediatorPipe(MediatorPublishEndpoint endpoint, IPipe<SendContext<TMessage>> pipe)
             {
                 _endpoint = endpoint;
                 _pipe = pipe;
@@ -240,7 +230,7 @@ namespace MassTransit.Mediator.Endpoints
 
             public async Task Send(SendContext<TMessage> context)
             {
-                context.DestinationAddress = _endpoint._destinationAddress;
+                context.DestinationAddress ??= _endpoint._destinationAddress;
 
                 context.SourceAddress ??= _endpoint._sourceAddress;
 
@@ -248,7 +238,9 @@ namespace MassTransit.Mediator.Endpoints
                 if (_pipe is ISendContextPipe sendContextPipe)
                     await sendContextPipe.Send(context).ConfigureAwait(false);
 
-                await _endpoint._sendPipe.Send(context).ConfigureAwait(false);
+                var publishContext = context.GetPayload<PublishContext<TMessage>>();
+
+                await _endpoint._publishPipe.Send(publishContext).ConfigureAwait(false);
 
                 if (_pipe.IsNotEmpty())
                     await _pipe.Send(context).ConfigureAwait(false);
