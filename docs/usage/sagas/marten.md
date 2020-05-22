@@ -24,7 +24,7 @@ To configure Marten as the saga repository for a saga, use the code shown below 
 ```cs {6}
 container.AddMassTransit(cfg =>
 {
-    var connectionString = "server=localhost;port=5432;database=orders;user id=web;password=webpw;";
+    var connectionString = "host=localhost;port=5432;database=orders;username=web;password=webpw;";
 
     cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
         .MartenRepository(connectionString);
@@ -38,7 +38,7 @@ To use Marten's built-in Optimistic concurrency, use the configuration options t
 ```cs {8}
 container.AddMassTransit(cfg =>
 {
-    var connectionString = "server=localhost;port=5432;database=orders;user id=web;password=webpw;";
+    var connectionString = "host=localhost;port=5432;database=orders;username=web;password=webpw;";
 
     cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
         .MartenRepository(connectionString, r =>
@@ -80,7 +80,7 @@ public class OrderState :
 ```cs {8}
 container.AddMassTransit(cfg =>
 {
-    var connectionString = "server=localhost;port=5432;database=orders;user id=web;password=webpw;";
+    var connectionString = "host=localhost;port=5432;database=orders;username=web;password=webpw;";
 
     cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
         .MartenRepository(connectionString, r =>
