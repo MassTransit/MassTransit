@@ -15,7 +15,8 @@ namespace MassTransit.MultiBus
     public static class DependencyInjectionMultiBusRegistrationExtensions
     {
         /// <summary>
-        /// Adds the required services to the service collection, and allows consumers to be added and/or discovered
+        /// Configure a MassTransit bus instance, using the specified <typeparamref name="TBus"/> bus type, which must inherit directly from <see cref="IBus"/>.
+        /// A type that implements <typeparamref name="TBus"/> is required, specified by the <typeparamref name="TBusInstance"/> parameter.
         /// </summary>
         /// <param name="collection">The service collection</param>
         /// <param name="configure">Bus instance configuration method</param>

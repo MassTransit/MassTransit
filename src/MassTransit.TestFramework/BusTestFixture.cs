@@ -17,6 +17,7 @@ namespace MassTransit.TestFramework
     {
         static int _subscribedObserver;
         static readonly bool _enableDiagnostics = !bool.TryParse(Environment.GetEnvironmentVariable("CI"), out var isBuildServer) || !isBuildServer;
+        protected static readonly TestOutputLoggerFactory LoggerFactory;
 
         protected BusTestFixture(BusTestHarness harness)
             : base(harness)
@@ -27,11 +28,14 @@ namespace MassTransit.TestFramework
             harness.OnConfigureBus += ConfigureBusDiagnostics;
         }
 
+        static BusTestFixture()
+        {
+            LoggerFactory = new TestOutputLoggerFactory(true);
+        }
+
         public static void ConfigureBusDiagnostics(IBusFactoryConfigurator configurator)
         {
-            var loggerFactory = new TestOutputLoggerFactory(true);
-
-            LogContext.ConfigureCurrentLogContext(loggerFactory);
+            LogContext.ConfigureCurrentLogContext(LoggerFactory);
 
             if (_enableDiagnostics)
             {

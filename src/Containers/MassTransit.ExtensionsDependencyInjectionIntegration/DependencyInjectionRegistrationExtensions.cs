@@ -15,7 +15,7 @@ namespace MassTransit
     public static class DependencyInjectionRegistrationExtensions
     {
         /// <summary>
-        /// Adds the required services to the service collection, and allows consumers to be added and/or discovered
+        /// Adds MassTransit and its dependencies to the <paramref name="collection"/>, and allows consumers, sagas, and activities to be configured
         /// </summary>
         /// <param name="collection"></param>
         /// <param name="configure"></param>
@@ -35,7 +35,8 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Adds the required services to the service collection, and allows consumers to be added and/or discovered
+        /// Adds the MassTransit Mediator to the <paramref name="collection"/>, and allows consumers, sagas, and activities (which are not supported
+        /// by the Mediator) to be configured.
         /// </summary>
         /// <param name="collection"></param>
         /// <param name="configure"></param>

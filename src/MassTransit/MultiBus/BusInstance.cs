@@ -1,4 +1,4 @@
-namespace MassTransit.Registration
+namespace MassTransit.MultiBus
 {
     using System;
     using System.Threading;

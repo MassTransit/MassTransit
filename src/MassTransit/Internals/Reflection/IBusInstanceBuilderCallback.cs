@@ -1,5 +1,6 @@
 namespace MassTransit.Internals.Reflection
 {
+    using MultiBus;
     using Registration;
 
 

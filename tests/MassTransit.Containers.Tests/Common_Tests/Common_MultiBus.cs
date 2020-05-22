@@ -7,8 +7,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using System.Threading.Tasks;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
+    using MultiBus;
     using NUnit.Framework;
-    using Registration;
     using Scenarios;
     using TestFramework;
     using TestFramework.Messages;

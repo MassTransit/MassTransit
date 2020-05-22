@@ -7,18 +7,18 @@ namespace MassTransit.Registration
 
     public static class BusRegistryExtensions
     {
-        public static async Task Start(this IBusRegistry registry, TimeSpan timeout)
+        public static async Task Start(this IBusDepot depot, TimeSpan timeout)
         {
             using var cancellationTokenSource = new CancellationTokenSource(timeout);
 
-            await registry.Start(cancellationTokenSource.Token).ConfigureAwait(false);
+            await depot.Start(cancellationTokenSource.Token).ConfigureAwait(false);
         }
 
-        public static async Task Stop(this IBusRegistry registry, TimeSpan timeout)
+        public static async Task Stop(this IBusDepot depot, TimeSpan timeout)
         {
             using var cancellationTokenSource = new CancellationTokenSource(timeout);
 
-            await registry.Stop(cancellationTokenSource.Token).ConfigureAwait(false);
+            await depot.Stop(cancellationTokenSource.Token).ConfigureAwait(false);
         }
     }
 }

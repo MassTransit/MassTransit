@@ -22,10 +22,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
                 provider.GetRequiredService<IBus>()));
 
             collection.AddSingleton(provider => new BusHealth(nameof(IBus)));
-
             collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<BusHealth>());
-
-            collection.AddSingleton<IBusRegistryInstance, BusRegistryInstance>();
 
             collection.AddSingleton(provider => CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()));
         }
@@ -42,29 +39,27 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         public virtual void AddBus(Func<IRegistrationContext<IServiceProvider>, IBusControl> busFactory)
         {
+            SetBusFactory(new RegistrationBusFactory<IServiceProvider>(busFactory));
+        }
+
+        public virtual void SetBusFactory<T>(T busFactory)
+            where T : IRegistrationBusFactory<IServiceProvider>
+        {
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
 
             ThrowIfAlreadyConfigured();
 
-            Collection.AddSingleton(provider => BusFactory(provider, busFactory));
-            Collection.AddSingleton<IBus>(provider => provider.GetRequiredService<IBusControl>());
-        }
+            Collection.AddSingleton(provider => Bind<IBus>.Create(busFactory.CreateBus(GetRegistrationContext(provider))));
+            Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value);
 
-        protected IBusControl BusFactory(IServiceProvider serviceProvider, Func<IRegistrationContext<IServiceProvider>, IBusControl> busFactory)
-        {
-            var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
-
-            ConfigureLogContext(provider);
-
-            IRegistrationContext<IServiceProvider> context = GetRegistrationContext(provider);
-
-            return busFactory(context);
+            Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.BusControl);
+            Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.Bus);
         }
 
         static void AddMassTransitComponents(IServiceCollection collection)
         {
-            collection.TryAddSingleton<IBusRegistry, BusRegistry>();
+            collection.TryAddSingleton<IBusDepot, BusDepot>();
 
             collection.TryAddScoped<ScopedConsumeContextProvider>();
             collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext());
@@ -88,13 +83,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
                 new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<IBus>(), provider));
         }
 
-        protected virtual IRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
+        IRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
         {
             return new RegistrationContext<IServiceProvider>(
                 CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),
                 provider.GetRequiredService<BusHealth>(),
-                provider
-            );
+                provider);
         }
     }
 }

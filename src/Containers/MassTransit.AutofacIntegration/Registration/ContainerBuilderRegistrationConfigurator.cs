@@ -29,8 +29,8 @@ namespace MassTransit.AutofacIntegration.Registration
 
             ScopeName = "message";
 
-            builder.RegisterType<BusRegistry>()
-                .As<IBusRegistry>()
+            builder.RegisterType<BusDepot>()
+                .As<IBusDepot>()
                 .SingleInstance();
 
             _builder.Register(context => new BusHealth(nameof(IBus)))
@@ -38,8 +38,8 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IBusHealth>()
                 .SingleInstance();
 
-            _builder.RegisterType<BusRegistryInstance>()
-                .As<IBusRegistryInstance>()
+            _builder.RegisterType<DefaultBusInstance>()
+                .As<IBusInstance>()
                 .SingleInstance();
 
             _builder.Register(GetCurrentSendEndpointProvider)
@@ -94,6 +94,12 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IBusControl>()
                 .As<IBus>()
                 .SingleInstance();
+        }
+
+        public void SetBusFactory<T>(T busFactory)
+            where T : IRegistrationBusFactory<IComponentContext>
+        {
+            throw new NotImplementedException();
         }
 
         IBusControl BusFactory(IComponentContext componentContext, Func<IRegistrationContext<IComponentContext>, IBusControl> busFactory)

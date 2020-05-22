@@ -29,7 +29,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             Container.RegisterSingleton<IBusHealth>(() => Container.GetInstance<BusHealth>());
 
-            Container.RegisterSingleton<IBusRegistryInstance, BusRegistryInstance>();
+            Container.RegisterSingleton<IBusInstance, DefaultBusInstance>();
 
             Container.RegisterSingleton(() => CreateRegistration(container.GetInstance<IConfigurationServiceProvider>()));
 
@@ -66,6 +66,12 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             Container.RegisterSingleton(BusFactory);
             Container.RegisterSingleton<IBus>(() => Container.GetInstance<IBusControl>());
+        }
+
+        public void SetBusFactory<T>(T busFactory)
+            where T : IRegistrationBusFactory<Container>
+        {
+            throw new NotImplementedException();
         }
 
         ISendEndpointProvider GetSendEndpointProvider()

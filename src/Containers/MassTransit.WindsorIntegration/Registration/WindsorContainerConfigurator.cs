@@ -20,8 +20,8 @@ namespace MassTransit.WindsorIntegration.Registration
         {
             Container = container;
 
-            if (!container.Kernel.HasComponent(typeof(IBusRegistry)))
-                container.Register(Component.For<IBusRegistry>().ImplementedBy<BusRegistry>().LifestyleSingleton());
+            if (!container.Kernel.HasComponent(typeof(IBusDepot)))
+                container.Register(Component.For<IBusDepot>().ImplementedBy<BusDepot>().LifestyleSingleton());
 
             container.RegisterScopedContextProviderIfNotPresent();
 
@@ -52,8 +52,8 @@ namespace MassTransit.WindsorIntegration.Registration
                     .Forward<IBusHealth>()
                     .UsingFactoryMethod(() => new BusHealth(nameof(IBus)))
                     .LifestyleSingleton(),
-                Component.For<IBusRegistryInstance>()
-                    .ImplementedBy<BusRegistryInstance>()
+                Component.For<IBusInstance>()
+                    .ImplementedBy<DefaultBusInstance>()
                     .LifestyleSingleton()
             );
         }
@@ -72,6 +72,12 @@ namespace MassTransit.WindsorIntegration.Registration
                     .Forward<IBus>()
                     .UsingFactoryMethod(kernel => BusFactory(kernel, busFactory))
                     .LifestyleSingleton());
+        }
+
+        public void SetBusFactory<T>(T busFactory)
+            where T : IRegistrationBusFactory<IKernel>
+        {
+            throw new NotImplementedException();
         }
 
         IBusControl BusFactory(IKernel kernel, Func<IRegistrationContext<IKernel>, IBusControl> busFactory)

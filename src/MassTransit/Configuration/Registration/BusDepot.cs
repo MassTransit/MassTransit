@@ -8,13 +8,13 @@ namespace MassTransit.Registration
     using Microsoft.Extensions.Logging;
 
 
-    public class BusRegistry :
-        IBusRegistry
+    public class BusDepot :
+        IBusDepot
     {
-        readonly ILogger<BusRegistry> _logger;
-        readonly IDictionary<Type, IBusRegistryInstance> _instances;
+        readonly ILogger<BusDepot> _logger;
+        readonly IDictionary<Type, IBusInstance> _instances;
 
-        public BusRegistry(IEnumerable<IBusRegistryInstance> instances, ILogger<BusRegistry> logger)
+        public BusDepot(IEnumerable<IBusInstance> instances, ILogger<BusDepot> logger)
         {
             _logger = logger;
             _instances = instances.ToDictionary(x => x.InstanceType);

@@ -8,6 +8,7 @@ namespace MassTransit.Internals.Reflection
     using System.Reflection.Emit;
     using Extensions;
     using GreenPipes.Internals.Extensions;
+    using MultiBus;
     using Registration;
     using Util;
 

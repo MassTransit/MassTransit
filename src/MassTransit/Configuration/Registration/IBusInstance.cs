@@ -3,7 +3,7 @@ namespace MassTransit.Registration
     using System;
 
 
-    public interface IBusRegistryInstance
+    public interface IBusInstance
     {
         Type InstanceType { get; }
 
@@ -12,8 +12,8 @@ namespace MassTransit.Registration
     }
 
 
-    public interface IBusRegistryInstance<out TBus> :
-        IBusRegistryInstance
+    public interface IBusInstance<out TBus> :
+        IBusInstance
         where TBus : IBus
     {
         TBus BusInstance { get; }

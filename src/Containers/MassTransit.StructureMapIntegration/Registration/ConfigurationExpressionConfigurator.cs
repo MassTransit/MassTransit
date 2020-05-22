@@ -20,8 +20,8 @@ namespace MassTransit.StructureMapIntegration.Registration
         {
             _expression = expression;
 
-            expression.For<IBusRegistry>()
-                .Use<BusRegistry>()
+            expression.For<IBusDepot>()
+                .Use<BusDepot>()
                 .Singleton();
 
             _expression.For<ISendEndpointProvider>()
@@ -44,8 +44,8 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Use<BusHealth>()
                 .Singleton();
 
-            _expression.For<IBusRegistryInstance>()
-                .Use<BusRegistryInstance>()
+            _expression.For<IBusInstance>()
+                .Use<DefaultBusInstance>()
                 .Singleton();
 
             expression.For<IConsumerScopeProvider>()
@@ -77,6 +77,12 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<IBus>()
                 .Use(context => context.GetInstance<IBusControl>())
                 .Singleton();
+        }
+
+        public void SetBusFactory<T>(T busFactory)
+            where T : IRegistrationBusFactory<IContext>
+        {
+            throw new NotImplementedException();
         }
 
         IBusControl BusFactory(IContext context, Func<IRegistrationContext<IContext>, IBusControl> busFactory)

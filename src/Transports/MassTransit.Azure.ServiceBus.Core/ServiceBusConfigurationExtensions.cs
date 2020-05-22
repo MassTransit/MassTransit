@@ -1,18 +1,7 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Azure.ServiceBus.Core
+﻿namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
+    using Configuration;
 
 
     public static class ServiceBusConfigurationExtensions
@@ -26,6 +15,19 @@ namespace MassTransit.Azure.ServiceBus.Core
         public static IBusControl CreateUsingAzureServiceBus(this IBusFactorySelector selector, Action<IServiceBusBusFactoryConfigurator> configure)
         {
             return AzureBusFactory.CreateUsingServiceBus(configure);
+        }
+
+        /// <summary>
+        /// Configure MassTransit to use Azure Service Bus for the transport.
+        /// </summary>
+        /// <param name="configurator">The registration configurator (configured via AddMassTransit)</param>
+        /// <param name="configure">The configuration callback for the bus factory</param>
+        /// <typeparam name="T">The container context type</typeparam>
+        public static void UsingAzureServiceBus<T>(this IRegistrationConfigurator<T> configurator,
+            Action<IRegistrationContext<T>, IServiceBusBusFactoryConfigurator> configure = null)
+            where T : class
+        {
+            configurator.SetBusFactory(new ServiceBusRegistrationBusFactory<T>(configure));
         }
     }
 }

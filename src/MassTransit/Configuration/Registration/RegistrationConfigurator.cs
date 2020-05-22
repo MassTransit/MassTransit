@@ -11,6 +11,7 @@ namespace MassTransit.Registration
     using Internals.Extensions;
     using Metadata;
     using Microsoft.Extensions.Logging;
+    using Monitoring.Health;
     using Saga;
 
 
@@ -281,9 +282,9 @@ namespace MassTransit.Registration
             _containerRegistrar.RegisterSingleInstance(endpointNameFormatter);
         }
 
-        public IRegistration CreateRegistration(IConfigurationServiceProvider configurationServiceProvider)
+        protected IRegistration CreateRegistration(IConfigurationServiceProvider provider)
         {
-            return new Registration(configurationServiceProvider, _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value),
+            return new Registration(provider, _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value),
                 _sagaRegistrations.ToDictionary(x => x.Key, x => x.Value), _executeActivityRegistrations.ToDictionary(x => x.Key, x => x.Value),
                 _activityRegistrations.ToDictionary(x => x.Key, x => x.Value), _endpointRegistrations.ToDictionary(x => x.Key, x => x.Value));
         }

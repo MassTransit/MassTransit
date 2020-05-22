@@ -5,6 +5,7 @@ namespace MassTransit
     using ConsumeConfigurators;
     using Courier;
     using Definition;
+    using Registration;
     using Saga;
 
 
@@ -213,10 +214,19 @@ namespace MassTransit
         where TContainerContext : class
     {
         /// <summary>
-        /// Add the bus to the container, configured properly
+        /// This method is being deprecated. Use the transport-specific UsingRabbitMq, UsingActiveMq, etc. methods instead.
         /// </summary>
         /// <param name="busFactory"></param>
         void AddBus(Func<IRegistrationContext<TContainerContext>, IBusControl> busFactory);
+
+        /// <summary>
+        /// Sets the bus factory. This is used by the transport extension methods (such as UsingRabbitMq, Using ActiveMq, etc.) to
+        /// specify the bus factory. The extension method approach is preferred (since v7) over the AddBus method.
+        /// </summary>
+        /// <param name="busFactory"></param>
+        /// <typeparam name="T"></typeparam>
+        void SetBusFactory<T>(T busFactory)
+            where T : IRegistrationBusFactory<TContainerContext>;
     }
 
 
@@ -235,5 +245,14 @@ namespace MassTransit
         /// </summary>
         /// <param name="busFactory"></param>
         void AddBus(Func<IRegistrationContext<TContainerContext>, IBusControl> busFactory);
+
+        /// <summary>
+        /// Sets the bus factory. This is used by the transport extension methods (such as UsingRabbitMq, Using ActiveMq, etc.) to
+        /// specify the bus factory. The extension method approach is preferred (since v7) over the AddBus method.
+        /// </summary>
+        /// <param name="busFactory"></param>
+        /// <typeparam name="T"></typeparam>
+        void SetBusFactory<T>(T busFactory)
+            where T : IRegistrationBusFactory<TContainerContext>;
     }
 }

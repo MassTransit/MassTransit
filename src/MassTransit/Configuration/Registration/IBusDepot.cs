@@ -4,7 +4,7 @@ namespace MassTransit.Registration
     using System.Threading.Tasks;
 
 
-    public interface IBusRegistry
+    public interface IBusDepot
     {
         Task Start(CancellationToken cancellationToken);
 

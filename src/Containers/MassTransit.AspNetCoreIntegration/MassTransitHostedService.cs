@@ -10,17 +10,17 @@ namespace MassTransit.AspNetCoreIntegration
     public class MassTransitHostedService :
         IHostedService
     {
-        readonly IBusRegistry _registry;
+        readonly IBusDepot _depot;
         Task _startTask;
 
-        public MassTransitHostedService(IBusRegistry registry)
+        public MassTransitHostedService(IBusDepot depot)
         {
-            _registry = registry;
+            _depot = depot;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _startTask = _registry.Start(cancellationToken);
+            _startTask = _depot.Start(cancellationToken);
 
             return _startTask.IsCompleted
                 ? _startTask
@@ -29,7 +29,7 @@ namespace MassTransit.AspNetCoreIntegration
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            return _registry.Stop(cancellationToken);
+            return _depot.Stop(cancellationToken);
         }
     }
 }
