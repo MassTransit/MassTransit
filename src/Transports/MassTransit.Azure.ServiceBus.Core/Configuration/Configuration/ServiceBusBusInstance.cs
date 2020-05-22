@@ -7,16 +7,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
     public class ServiceBusBusInstance :
         IBusInstance
     {
-        readonly IServiceBusHostConfiguration _hostConfiguration;
-
         public ServiceBusBusInstance(IBusControl busControl, IServiceBusHostConfiguration hostConfiguration)
         {
-            _hostConfiguration = hostConfiguration;
             BusControl = busControl;
+            BusConnector = new ServiceBusConnector(hostConfiguration);
         }
 
         public Type InstanceType => typeof(IBus);
         public IBus Bus => BusControl;
         public IBusControl BusControl { get; }
+
+        public IBusConnector BusConnector { get; }
     }
 }

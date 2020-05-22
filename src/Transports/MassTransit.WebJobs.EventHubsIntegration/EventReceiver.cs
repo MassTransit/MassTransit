@@ -4,9 +4,8 @@ namespace MassTransit.WebJobs.EventHubsIntegration
     using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
-    using Azure.ServiceBus.Core.Configuration;
-    using Configuration;
     using Microsoft.Azure.EventHubs;
+    using Registration;
     using Saga;
     using ServiceBusIntegration;
     using Transport;
@@ -15,16 +14,16 @@ namespace MassTransit.WebJobs.EventHubsIntegration
     public class EventReceiver :
         IEventReceiver
     {
-        readonly IServiceBusBusConfiguration _busConfiguration;
         readonly IAsyncBusHandle _busHandle;
+        readonly IBusConnector _busConnector;
         readonly IRegistration _registration;
         readonly ConcurrentDictionary<string, IEventDataReceiver> _receivers;
 
-        public EventReceiver(IRegistration registration, IAsyncBusHandle busHandle, IServiceBusBusConfiguration busConfiguration)
+        public EventReceiver(IRegistration registration, IAsyncBusHandle busHandle, IBusConnector busConnector)
         {
             _registration = registration;
             _busHandle = busHandle;
-            _busConfiguration = busConfiguration;
+            _busConnector = busConnector;
 
             _receivers = new ConcurrentDictionary<string, IEventDataReceiver>();
         }
@@ -82,13 +81,8 @@ namespace MassTransit.WebJobs.EventHubsIntegration
 
             return _receivers.GetOrAdd(entityName, name =>
             {
-                var endpointConfiguration = _busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration(entityName);
-
-                var configurator = new EventDataReceiverConfiguration(_busConfiguration, endpointConfiguration);
-
-                configure(configurator);
-
-                return configurator.Build();
+                var receiveEndpointContext = _busConnector.CreateReceiveEndpointContext(entityName, configure);
+                return new EventDataReceiver(receiveEndpointContext);
             });
         }
 

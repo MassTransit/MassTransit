@@ -14,5 +14,6 @@ namespace MassTransit.Registration
         public Type InstanceType => typeof(IBus);
         public IBus Bus => BusControl;
         public IBusControl BusControl { get; }
+        public IBusConnector BusConnector => DefaultBusConnector.Instance.Value;
     }
 }

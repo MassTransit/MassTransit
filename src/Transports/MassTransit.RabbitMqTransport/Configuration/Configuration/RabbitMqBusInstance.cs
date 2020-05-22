@@ -7,16 +7,16 @@ namespace MassTransit.RabbitMqTransport.Configuration
     public class RabbitMqBusInstance :
         IBusInstance
     {
-        readonly IRabbitMqHostConfiguration _hostConfiguration;
-
         public RabbitMqBusInstance(IBusControl busControl, IRabbitMqHostConfiguration hostConfiguration)
         {
-            _hostConfiguration = hostConfiguration;
             BusControl = busControl;
+            BusConnector = new RabbitMqBusConnector(hostConfiguration);
         }
 
         public Type InstanceType => typeof(IBus);
         public IBus Bus => BusControl;
         public IBusControl BusControl { get; }
+
+        public IBusConnector BusConnector { get; }
     }
 }

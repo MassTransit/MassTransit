@@ -45,7 +45,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             Collection.AddSingleton(provider => Bind<TBus>.Create(CreateBus(busFactory, provider)));
             Collection.AddSingleton<IBusInstance>(provider => provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value);
 
-            Collection.AddSingleton<TBus>(provider => provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value.BusInstance);
+            Collection.AddSingleton(provider => provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value.BusInstance);
+            Collection.AddSingleton(provider => Bind<TBus>.Create(provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value.BusConnector));
         }
 
         IBusInstance<TBus> CreateBus<T>(T busFactory, IServiceProvider provider)

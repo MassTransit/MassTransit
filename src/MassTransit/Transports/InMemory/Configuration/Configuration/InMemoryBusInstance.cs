@@ -7,16 +7,15 @@ namespace MassTransit.Transports.InMemory.Configuration
     public class InMemoryBusInstance :
         IBusInstance
     {
-        readonly IInMemoryHostConfiguration _hostConfiguration;
-
         public InMemoryBusInstance(IBusControl busControl, IInMemoryHostConfiguration hostConfiguration)
         {
-            _hostConfiguration = hostConfiguration;
             BusControl = busControl;
+            BusConnector = new InMemoryBusConnector(hostConfiguration);
         }
 
         public Type InstanceType => typeof(IBus);
         public IBus Bus => BusControl;
         public IBusControl BusControl { get; }
+        public IBusConnector BusConnector { get; }
     }
 }

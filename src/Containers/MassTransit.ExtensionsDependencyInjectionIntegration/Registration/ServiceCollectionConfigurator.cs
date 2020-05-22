@@ -55,6 +55,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.BusControl);
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.Bus);
+            Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.BusConnector);
         }
 
         static void AddMassTransitComponents(IServiceCollection collection)

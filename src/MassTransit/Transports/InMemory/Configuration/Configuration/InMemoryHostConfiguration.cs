@@ -16,6 +16,7 @@
         readonly IInMemoryTopologyConfiguration _topologyConfiguration;
         readonly ICacheConfigurator _sendTransportCacheConfigurator;
         Uri _hostAddress;
+        readonly InMemoryHostProxy _proxy;
 
         public InMemoryHostConfiguration(IInMemoryBusConfiguration busConfiguration, Uri baseAddress, IInMemoryTopologyConfiguration topologyConfiguration)
             : base(busConfiguration)
@@ -28,9 +29,13 @@
             TransportConcurrencyLimit = Environment.ProcessorCount;
 
             _sendTransportCacheConfigurator = new CacheConfigurator();
+
+            _proxy = new InMemoryHostProxy(this);
         }
 
         public IInMemoryHostConfigurator Configurator => this;
+
+        public IInMemoryHostControl Proxy => _proxy;
 
         public CacheSettings SendTransportCacheSettings => _sendTransportCacheConfigurator.Settings;
 
@@ -121,6 +126,8 @@
             {
                 endpointConfiguration.Build(host);
             }
+
+            _proxy.SetComplete(host);
 
             return host;
         }

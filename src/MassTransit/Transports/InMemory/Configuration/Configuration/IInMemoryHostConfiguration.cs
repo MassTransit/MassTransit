@@ -23,6 +23,8 @@
 
         IInMemoryHostConfigurator Configurator { get; }
 
+        IInMemoryHostControl Proxy { get; }
+
         CacheSettings SendTransportCacheSettings { get; }
 
         void ApplyEndpointDefinition(IInMemoryReceiveEndpointConfigurator configurator, IEndpointDefinition definition);

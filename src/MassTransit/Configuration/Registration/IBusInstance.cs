@@ -9,6 +9,7 @@ namespace MassTransit.Registration
 
         IBus Bus { get; }
         IBusControl BusControl { get; }
+        IBusConnector BusConnector { get; }
     }
 
 
