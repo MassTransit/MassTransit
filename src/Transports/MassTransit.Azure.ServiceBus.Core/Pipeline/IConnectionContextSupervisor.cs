@@ -5,7 +5,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
 
     public interface IConnectionContextSupervisor :
-        ISupervisor<ConnectionContext>
+        ISupervisor<ConnectionContext>,
+        ISendTransportProvider,
+        IPublishTransportProvider
     {
     }
 }

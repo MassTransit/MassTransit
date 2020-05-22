@@ -16,15 +16,12 @@
         ReceiveEndpointBuilder
     {
         readonly IAmazonSqsReceiveEndpointConfiguration _configuration;
-        readonly IAmazonSqsHostControl _host;
-        readonly AmazonSqsHostSettings _hostSettings;
+        readonly IAmazonSqsHostConfiguration _hostConfiguration;
 
-        public AmazonSqsReceiveEndpointBuilder(IAmazonSqsHostControl host, AmazonSqsHostSettings hostSettings,
-            IAmazonSqsReceiveEndpointConfiguration configuration)
+        public AmazonSqsReceiveEndpointBuilder(IAmazonSqsHostConfiguration hostConfiguration, IAmazonSqsReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
-            _host = host;
-            _hostSettings = hostSettings;
+            _hostConfiguration = hostConfiguration;
             _configuration = configuration;
         }
 
@@ -44,14 +41,15 @@
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
-            var headerAdapter = new TransportSetHeaderAdapter<MessageAttributeValue>(new SqsHeaderValueConverter(_hostSettings.AllowTransportHeader),
+            var headerAdapter = new TransportSetHeaderAdapter<MessageAttributeValue>(
+                new SqsHeaderValueConverter(_hostConfiguration.Settings.AllowTransportHeader),
                 TransportHeaderOptions.IncludeFaultMessage);
 
             var deadLetterTransport = CreateDeadLetterTransport(headerAdapter);
 
             var errorTransport = CreateErrorTransport(headerAdapter);
 
-            var receiveEndpointContext = new SqsQueueReceiveEndpointContext(_host, _configuration, brokerTopology);
+            var receiveEndpointContext = new SqsQueueReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology);
 
             receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
             receiveEndpointContext.GetOrAddPayload(() => errorTransport);

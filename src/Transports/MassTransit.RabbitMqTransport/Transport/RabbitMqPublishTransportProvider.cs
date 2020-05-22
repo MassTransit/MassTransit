@@ -9,19 +9,19 @@ namespace MassTransit.RabbitMqTransport.Transport
     public class RabbitMqPublishTransportProvider :
         IPublishTransportProvider
     {
-        readonly IRabbitMqHostControl _host;
-        readonly IModelContextSupervisor _modelContextSupervisor;
+        readonly IConnectionContextSupervisor _connectionContextSupervisor;
+        readonly IModelContextSupervisor _supervisor;
 
-        public RabbitMqPublishTransportProvider(IRabbitMqHostControl host, IModelContextSupervisor modelContextSupervisor)
+        public RabbitMqPublishTransportProvider(IConnectionContextSupervisor connectionContextSupervisor, IModelContextSupervisor supervisor)
         {
-            _host = host;
-            _modelContextSupervisor = modelContextSupervisor;
+            _connectionContextSupervisor = connectionContextSupervisor;
+            _supervisor = supervisor;
         }
 
         public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
             where T : class
         {
-            return _host.CreatePublishTransport<T>(_modelContextSupervisor);
+            return _connectionContextSupervisor.CreatePublishTransport<T>(_supervisor);
         }
     }
 }

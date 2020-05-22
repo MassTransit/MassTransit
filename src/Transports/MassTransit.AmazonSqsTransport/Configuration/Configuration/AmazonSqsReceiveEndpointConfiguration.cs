@@ -49,9 +49,9 @@
         public override Uri InputAddress => _inputAddress.Value;
         IAmazonSqsTopologyConfiguration IAmazonSqsEndpointConfiguration.Topology => _endpointConfiguration.Topology;
 
-        public void Build(IAmazonSqsHostControl host)
+        public void Build(IHost host)
         {
-            var builder = new AmazonSqsReceiveEndpointBuilder(host, _hostConfiguration.Settings, this);
+            var builder = new AmazonSqsReceiveEndpointBuilder(_hostConfiguration, this);
 
             ApplySpecifications(builder);
 
@@ -83,7 +83,7 @@
 
             _connectionConfigurator.UseFilter(clientFilter);
 
-            var transport = new SqsReceiveTransport(host, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
+            var transport = new SqsReceiveTransport(_hostConfiguration, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
             transport.Add(consumerAgent);
 
             var receiveEndpoint = new ReceiveEndpoint(transport, receiveEndpointContext);
@@ -107,11 +107,6 @@
 
             foreach (var result in base.Validate())
                 yield return result.WithParentKey(queueName);
-        }
-
-        public bool SubscribeMessageTopics
-        {
-            set => ConfigureConsumeTopology = value;
         }
 
         public bool Durable

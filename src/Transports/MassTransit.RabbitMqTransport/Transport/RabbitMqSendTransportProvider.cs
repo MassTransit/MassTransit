@@ -9,27 +9,23 @@ namespace MassTransit.RabbitMqTransport.Transport
     public class RabbitMqSendTransportProvider :
         ISendTransportProvider
     {
-        readonly IRabbitMqHostControl _host;
+        readonly IConnectionContextSupervisor _connectionContextSupervisor;
         readonly IModelContextSupervisor _modelContextSupervisor;
 
-        public RabbitMqSendTransportProvider(IRabbitMqHostControl host, IModelContextSupervisor modelContextSupervisor)
+        public RabbitMqSendTransportProvider(IConnectionContextSupervisor connectionContextSupervisor, IModelContextSupervisor modelContextSupervisor)
         {
-            _host = host;
+            _connectionContextSupervisor = connectionContextSupervisor;
             _modelContextSupervisor = modelContextSupervisor;
         }
 
         public Uri NormalizeAddress(Uri address)
         {
-            return new RabbitMqEndpointAddress(_host.Address, address);
+            return _connectionContextSupervisor.NormalizeAddress(address);
         }
 
-        async Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
+        Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
         {
-            var endpointAddress = new RabbitMqEndpointAddress(_host.Address, address);
-
-            var transport = await _host.CreateSendTransport(endpointAddress, _modelContextSupervisor).ConfigureAwait(false);
-
-            return transport;
+            return _connectionContextSupervisor.CreateSendTransport(_modelContextSupervisor, address);
         }
     }
 }

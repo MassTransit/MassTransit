@@ -32,9 +32,6 @@
                     BusTestFixture.ConfigureBusDiagnostics(x);
                     x.Host(serviceUri, h =>
                     {
-                    #if NET461
-                        h.TransportType = TransportType.AmqpWebSockets;
-                    #endif
                         h.SharedAccessSignature(s =>
                         {
                             s.KeyName = settings.KeyName;

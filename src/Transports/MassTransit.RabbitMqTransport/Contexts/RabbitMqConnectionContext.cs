@@ -19,19 +19,17 @@ namespace MassTransit.RabbitMqTransport.Contexts
         readonly IConnection _connection;
         readonly ChannelExecutor _executor;
 
-        public RabbitMqConnectionContext(IConnection connection, IRabbitMqHostConfiguration configuration, IRabbitMqHostTopology hostTopology,
-            string description, CancellationToken cancellationToken)
+        public RabbitMqConnectionContext(IConnection connection, IRabbitMqHostConfiguration hostConfiguration, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
             _connection = connection;
 
-            Description = description;
-            HostAddress = configuration.HostAddress;
+            Description = hostConfiguration.Settings.ToDescription();
+            HostAddress = hostConfiguration.HostAddress;
 
-            PublisherConfirmation = configuration.PublisherConfirmation;
-            BatchSettings = configuration.BatchSettings;
-
-            Topology = hostTopology;
+            PublisherConfirmation = hostConfiguration.PublisherConfirmation;
+            BatchSettings = hostConfiguration.BatchSettings;
+            Topology = hostConfiguration.GetHostTopology();
 
             StopTimeout = TimeSpan.FromSeconds(30);
 

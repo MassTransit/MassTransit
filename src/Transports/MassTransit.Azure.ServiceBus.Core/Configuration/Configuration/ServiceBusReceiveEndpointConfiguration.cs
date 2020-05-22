@@ -35,11 +35,6 @@
             _inputAddress = new Lazy<Uri>(FormatInputAddress);
         }
 
-        public bool SubscribeMessageTopics
-        {
-            set => ConfigureConsumeTopology = value;
-        }
-
         public ReceiveSettings Settings => _settings;
 
         public override Uri HostAddress => _hostConfiguration.HostAddress;
@@ -113,32 +108,32 @@
                 .Concat(base.Validate());
         }
 
-        public void Build(IServiceBusHostControl host)
+        public void Build(IHost host)
         {
-            var builder = new ServiceBusReceiveEndpointBuilder(host, this);
+            var builder = new ServiceBusReceiveEndpointBuilder(_hostConfiguration, this);
 
             ApplySpecifications(builder);
 
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
             ClientPipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology,
-                _settings.RemoveSubscriptions, host.Stopping));
+                _settings.RemoveSubscriptions, _hostConfiguration.ConnectionContextSupervisor.Stopping));
 
             CreateReceiveEndpoint(host, receiveEndpointContext);
         }
 
-        protected override IErrorTransport CreateErrorTransport(IServiceBusHostControl host)
+        protected override IErrorTransport CreateErrorTransport()
         {
             var settings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings.QueueConfigurator);
 
-            return new BrokeredMessageErrorTransport(CreateSendEndpointContextSupervisor(host, settings));
+            return new BrokeredMessageErrorTransport(_hostConfiguration.CreateSendEndpointContextSupervisor(settings));
         }
 
-        protected override IDeadLetterTransport CreateDeadLetterTransport(IServiceBusHostControl host)
+        protected override IDeadLetterTransport CreateDeadLetterTransport()
         {
             var settings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings.QueueConfigurator);
 
-            return new BrokeredMessageDeadLetterTransport(CreateSendEndpointContextSupervisor(host, settings));
+            return new BrokeredMessageDeadLetterTransport(_hostConfiguration.CreateSendEndpointContextSupervisor(settings));
         }
 
         protected override IClientContextSupervisor CreateClientContextSupervisor(IConnectionContextSupervisor supervisor)

@@ -10,13 +10,13 @@ namespace MassTransit.Transports.InMemory.Builders
     public class InMemoryReceiveEndpointBuilder :
         ReceiveEndpointBuilder
     {
-        readonly IInMemoryHostControl _host;
         readonly IInMemoryReceiveEndpointConfiguration _configuration;
+        readonly IInMemoryHostConfiguration _hostConfiguration;
 
-        public InMemoryReceiveEndpointBuilder(IInMemoryHostControl host, IInMemoryReceiveEndpointConfiguration configuration)
+        public InMemoryReceiveEndpointBuilder(IInMemoryHostConfiguration hostConfiguration, IInMemoryReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
-            _host = host;
+            _hostConfiguration = hostConfiguration;
             _configuration = configuration;
         }
 
@@ -31,7 +31,7 @@ namespace MassTransit.Transports.InMemory.Builders
 
         public ReceiveEndpointContext CreateReceiveEndpointContext()
         {
-            var builder = _host.CreateConsumeTopologyBuilder();
+            var builder = _hostConfiguration.TransportProvider.CreateConsumeTopologyBuilder();
 
             var queueName = _configuration.InputAddress.GetQueueOrExchangeName();
 
@@ -42,7 +42,7 @@ namespace MassTransit.Transports.InMemory.Builders
 
             _configuration.Topology.Consume.Apply(builder);
 
-            return new InMemoryReceiveEndpointContext(_configuration, _host);
+            return new InMemoryReceiveEndpointContext(_hostConfiguration, _configuration);
         }
     }
 }

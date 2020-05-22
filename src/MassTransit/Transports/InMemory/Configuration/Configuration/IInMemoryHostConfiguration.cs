@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Transports.InMemory.Configuration
 {
     using System;
-    using GreenPipes.Caching;
     using MassTransit.Configuration;
 
 
@@ -23,7 +22,7 @@
 
         IInMemoryHostConfigurator Configurator { get; }
 
-        CacheSettings SendTransportCacheSettings { get; }
+        IInMemoryTransportProvider TransportProvider { get; }
 
         void ApplyEndpointDefinition(IInMemoryReceiveEndpointConfigurator configurator, IEndpointDefinition definition);
 

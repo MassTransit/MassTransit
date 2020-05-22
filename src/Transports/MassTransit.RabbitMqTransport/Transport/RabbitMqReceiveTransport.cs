@@ -3,6 +3,7 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Context;
     using Contexts;
     using Events;
@@ -19,15 +20,15 @@
         IReceiveTransport
     {
         readonly IPipe<ModelContext> _modelPipe;
-        readonly IRabbitMqHost _host;
+        readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly Uri _inputAddress;
         readonly ReceiveSettings _settings;
         readonly RabbitMqReceiveEndpointContext _context;
 
-        public RabbitMqReceiveTransport(IRabbitMqHost host, ReceiveSettings settings, IPipe<ModelContext> modelPipe,
+        public RabbitMqReceiveTransport(IRabbitMqHostConfiguration hostConfiguration, ReceiveSettings settings, IPipe<ModelContext> modelPipe,
             RabbitMqReceiveEndpointContext context)
         {
-            _host = host;
+            _hostConfiguration = hostConfiguration;
             _settings = settings;
             _context = context;
             _modelPipe = modelPipe;
@@ -80,7 +81,7 @@
         {
             while (!IsStopping)
             {
-                await _host.ConnectionRetryPolicy.Retry(async () =>
+                await _hostConfiguration.ConnectionRetryPolicy.Retry(async () =>
                 {
                     try
                     {
@@ -116,7 +117,7 @@
         {
             LogContext.Error?.Log(ex, message);
 
-            var exception = new RabbitMqConnectionException(message + _host.ConnectionContextSupervisor, ex);
+            var exception = new RabbitMqConnectionException(message + _hostConfiguration.Settings.ToDescription(), ex);
 
             await NotifyFaulted(exception).ConfigureAwait(false);
 
@@ -125,7 +126,7 @@
 
         Task NotifyFaulted(RabbitMqConnectionException exception)
         {
-            LogContext.Error?.Log(exception, "RabbitMQ Connect Failed: {Host}", _host.Settings.ToDescription());
+            LogContext.Error?.Log(exception, "RabbitMQ Connect Failed: {Host}", _hostConfiguration.Settings.ToDescription());
 
             return _context.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, exception));
         }

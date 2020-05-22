@@ -11,6 +11,6 @@
 
         int ConcurrencyLimit { get; }
 
-        void Build(IInMemoryHostControl host);
+        void Build(IHost host);
     }
 }

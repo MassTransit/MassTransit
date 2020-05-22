@@ -1,8 +1,11 @@
 ﻿namespace MassTransit.ActiveMqTransport.Configuration
 {
     using System;
+    using GreenPipes;
     using MassTransit.Configuration;
+    using Topology;
     using Topology.Settings;
+    using Transport;
 
 
     public interface IActiveMqHostConfiguration :
@@ -12,6 +15,10 @@
         string Description { get; }
 
         ActiveMqHostSettings Settings { get; set; }
+
+        IConnectionContextSupervisor ConnectionContextSupervisor { get; }
+
+        IRetryPolicy ConnectionRetryPolicy { get; }
 
         /// <summary>
         /// Apply the endpoint definition to the receive endpoint configurator
@@ -38,5 +45,7 @@
         /// <returns></returns>
         IActiveMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
             IActiveMqEndpointConfiguration endpointConfiguration, Action<IActiveMqReceiveEndpointConfigurator> configure = null);
+
+        IActiveMqHostTopology GetHostTopology();
     }
 }

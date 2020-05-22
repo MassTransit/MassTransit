@@ -1,9 +1,9 @@
 ﻿namespace MassTransit.Configuration
 {
     using System;
+    using Context;
     using EndpointConfigurators;
     using GreenPipes;
-    using Transports;
 
 
     public interface IHostConfiguration :
@@ -19,6 +19,10 @@
         /// </summary>
         bool DeployTopologyOnly { get; set; }
 
-        IBusHostControl Build();
+        ILogContext LogContext { get; set; }
+        ILogContext SendLogContext { get; }
+        ILogContext ReceiveLogContext { get; }
+
+        IHost Build();
     }
 }

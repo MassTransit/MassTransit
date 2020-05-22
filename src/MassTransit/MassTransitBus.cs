@@ -20,13 +20,13 @@ namespace MassTransit
     {
         readonly IBusObserver _busObservable;
         readonly IConsumePipe _consumePipe;
-        readonly IBusHostControl _host;
+        readonly IHost _host;
         readonly ILogContext _logContext;
         readonly IPublishEndpoint _publishEndpoint;
         readonly IReceiveEndpoint _receiveEndpoint;
         Handle _busHandle;
 
-        public MassTransitBus(IBusHostControl host, IBusObserver busObservable, IReceiveEndpointConfiguration endpointConfiguration)
+        public MassTransitBus(IHost host, IBusObserver busObservable, IReceiveEndpointConfiguration endpointConfiguration)
         {
             Address = endpointConfiguration.InputAddress;
             _consumePipe = endpointConfiguration.ConsumePipe;
@@ -281,8 +281,8 @@ namespace MassTransit
         {
             readonly IBus _bus;
             readonly IBusObserver _busObserver;
-            readonly ILogContext _logContext;
             readonly HostHandle _hostHandle;
+            readonly ILogContext _logContext;
             bool _stopped;
 
             public Handle(HostHandle hostHandle, IBus bus, IBusObserver busObserver, ILogContext logContext)

@@ -3,20 +3,19 @@
     using Configuration;
     using Context;
     using Topology.Builders;
-    using Transport;
 
 
     public class ActiveMqConsumerReceiveEndpointContext :
         BaseReceiveEndpointContext,
         ActiveMqReceiveEndpointContext
     {
-        readonly IActiveMqHostControl _host;
+        readonly IActiveMqHostConfiguration _hostConfiguration;
 
-        public ActiveMqConsumerReceiveEndpointContext(IActiveMqHostControl host, IActiveMqReceiveEndpointConfiguration configuration, BrokerTopology
-            brokerTopology)
+        public ActiveMqConsumerReceiveEndpointContext(IActiveMqHostConfiguration hostConfiguration, IActiveMqReceiveEndpointConfiguration configuration,
+            BrokerTopology brokerTopology)
             : base(configuration)
         {
-            _host = host;
+            _hostConfiguration = hostConfiguration;
             BrokerTopology = brokerTopology;
         }
 
@@ -24,12 +23,12 @@
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new ActiveMqSendTransportProvider(_host);
+            return _hostConfiguration.ConnectionContextSupervisor;
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new ActiveMqPublishTransportProvider(_host);
+            return _hostConfiguration.ConnectionContextSupervisor;
         }
     }
 }

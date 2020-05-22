@@ -2,35 +2,37 @@
 {
     using Configuration;
     using Context;
+    using GreenPipes;
     using Topology;
-    using Transport;
 
 
     public class ServiceBusEntityReceiveEndpointContext :
         BaseReceiveEndpointContext,
         ServiceBusReceiveEndpointContext
     {
-        readonly IServiceBusHostControl _host;
+        readonly IServiceBusHostConfiguration _hostConfiguration;
 
-        public ServiceBusEntityReceiveEndpointContext(IServiceBusHostControl host, IServiceBusEntityEndpointConfiguration configuration,
+        public ServiceBusEntityReceiveEndpointContext(IServiceBusHostConfiguration hostConfiguration, IServiceBusEntityEndpointConfiguration configuration,
             BrokerTopology brokerTopology)
             : base(configuration)
         {
-            _host = host;
+            _hostConfiguration = hostConfiguration;
 
             BrokerTopology = brokerTopology;
         }
 
         public BrokerTopology BrokerTopology { get; }
 
+        public IRetryPolicy RetryPolicy => _hostConfiguration.RetryPolicy;
+
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new ServiceBusSendTransportProvider(_host);
+            return _hostConfiguration.ConnectionContextSupervisor;
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new ServiceBusPublishTransportProvider(_host);
+            return _hostConfiguration.ConnectionContextSupervisor;
         }
     }
 }

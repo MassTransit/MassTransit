@@ -4,9 +4,10 @@ namespace MassTransit.Configurators
     using System.Collections.Generic;
     using System.Linq;
     using Configuration;
+    using Context;
     using EndpointConfigurators;
     using GreenPipes;
-    using Transports;
+    using Logging;
 
 
     public abstract class BaseHostConfiguration<TReceiveEndpointConfiguration> :
@@ -15,6 +16,7 @@ namespace MassTransit.Configurators
     {
         readonly EndpointConfigurationObservable _endpointObservable;
         readonly IList<TReceiveEndpointConfiguration> _endpoints;
+        ILogContext _logContext;
 
         protected BaseHostConfiguration(IBusConfiguration busConfiguration)
         {
@@ -33,6 +35,21 @@ namespace MassTransit.Configurators
 
         public bool DeployTopologyOnly { get; set; }
 
+        public ILogContext LogContext
+        {
+            get => _logContext;
+            set
+            {
+                _logContext = value;
+
+                SendLogContext = value.CreateLogContext(LogCategoryName.Transport.Send);
+                ReceiveLogContext = value.CreateLogContext(LogCategoryName.Transport.Receive);
+            }
+        }
+
+        public ILogContext SendLogContext { get; private set; }
+        public ILogContext ReceiveLogContext { get; private set; }
+
         public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
             return _endpointObservable.Connect(observer);
@@ -43,7 +60,7 @@ namespace MassTransit.Configurators
             return _endpoints.SelectMany(x => x.Validate());
         }
 
-        public abstract IBusHostControl Build();
+        public abstract IHost Build();
 
         protected void Add(TReceiveEndpointConfiguration configuration)
         {

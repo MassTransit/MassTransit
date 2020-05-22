@@ -3,19 +3,19 @@
     using Configuration;
     using Context;
     using Topology.Builders;
-    using Transport;
 
 
     public class SqsQueueReceiveEndpointContext :
         BaseReceiveEndpointContext,
         SqsReceiveEndpointContext
     {
-        readonly IAmazonSqsHostControl _host;
+        readonly IAmazonSqsHostConfiguration _hostConfiguration;
 
-        public SqsQueueReceiveEndpointContext(IAmazonSqsHostControl host, IAmazonSqsReceiveEndpointConfiguration configuration, BrokerTopology brokerTopology)
+        public SqsQueueReceiveEndpointContext(IAmazonSqsHostConfiguration hostConfiguration, IAmazonSqsReceiveEndpointConfiguration configuration,
+            BrokerTopology brokerTopology)
             : base(configuration)
         {
-            _host = host;
+            _hostConfiguration = hostConfiguration;
             BrokerTopology = brokerTopology;
         }
 
@@ -23,12 +23,12 @@
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new AmazonSqsSendTransportProvider(_host);
+            return _hostConfiguration.ConnectionContextSupervisor;
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new AmazonSqsPublishTransportProvider(_host);
+            return _hostConfiguration.ConnectionContextSupervisor;
         }
     }
 }

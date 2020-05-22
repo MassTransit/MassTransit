@@ -1,8 +1,6 @@
 namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
-    using GreenPipes;
-    using Pipeline;
     using Topology;
 
 
@@ -13,19 +11,6 @@ namespace MassTransit.Azure.ServiceBus.Core
         IHost,
         IReceiveConnector<IServiceBusReceiveEndpointConfigurator>
     {
-        /// <summary>
-        /// The default messaging factory cache, could be AMQP or NET-TCP, depending upon configuration
-        /// </summary>
-        IConnectionContextSupervisor ConnectionContextSupervisor { get; }
-
-        /// <summary>
-        /// The retry policy shared by transports communicating with the host. Should be
-        /// used for all operations against Azure.
-        /// </summary>
-        IRetryPolicy RetryPolicy { get; }
-
-        ServiceBusHostSettings Settings { get; }
-
         new IServiceBusHostTopology Topology { get; }
 
         /// <summary>

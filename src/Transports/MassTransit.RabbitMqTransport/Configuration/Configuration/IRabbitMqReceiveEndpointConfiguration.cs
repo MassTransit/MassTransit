@@ -2,7 +2,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
 {
     using MassTransit.Configuration;
     using Topology;
-    using Transport;
 
 
     public interface IRabbitMqReceiveEndpointConfiguration :
@@ -11,6 +10,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
     {
         ReceiveSettings Settings { get; }
 
-        void Build(IRabbitMqHostControl host);
+        void Build(IHost host);
     }
 }

@@ -55,22 +55,15 @@ namespace MassTransit.RabbitMqTransport.Configuration
             }
         }
 
-        public bool BindMessageExchanges
-        {
-            set => ConfigureConsumeTopology = value;
-        }
-
         public ReceiveSettings Settings => _settings;
 
         public override Uri HostAddress => _hostConfiguration.HostAddress;
-
         public override Uri InputAddress => _inputAddress.Value;
-
         IRabbitMqTopologyConfiguration IRabbitMqEndpointConfiguration.Topology => _endpointConfiguration.Topology;
 
-        public void Build(IRabbitMqHostControl host)
+        public void Build(IHost host)
         {
-            var builder = new RabbitMqReceiveEndpointBuilder(host, this);
+            var builder = new RabbitMqReceiveEndpointBuilder(_hostConfiguration, this);
 
             ApplySpecifications(builder);
 
@@ -102,7 +95,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             IPipe<ModelContext> modelPipe = _modelConfigurator.Build();
 
-            var transport = new RabbitMqReceiveTransport(host, _settings, modelPipe, receiveEndpointContext);
+            var transport = new RabbitMqReceiveTransport(_hostConfiguration, _settings, modelPipe, receiveEndpointContext);
 
             transport.Add(consumerAgent);
 
@@ -208,11 +201,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public void SetExchangeArgument(string key, TimeSpan value)
         {
             _settings.SetExchangeArgument(key, value);
-        }
-
-        public RabbitMqEndpointAddress GetEndpointAddress(Uri hostAddress)
-        {
-            return _settings.GetEndpointAddress(hostAddress);
         }
 
         public void EnablePriority(byte maxPriority)

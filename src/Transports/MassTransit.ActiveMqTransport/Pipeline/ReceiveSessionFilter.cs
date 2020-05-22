@@ -12,13 +12,11 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     public class ReceiveSessionFilter :
         IFilter<ConnectionContext>
     {
-        readonly IActiveMqHost _host;
         readonly IPipe<SessionContext> _pipe;
 
-        public ReceiveSessionFilter(IPipe<SessionContext> pipe, IActiveMqHost host)
+        public ReceiveSessionFilter(IPipe<SessionContext> pipe)
         {
             _pipe = pipe;
-            _host = host;
         }
 
         void IProbeSite.Probe(ProbeContext context)

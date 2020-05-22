@@ -3,12 +3,13 @@
     using System;
     using Configurators;
     using Definition;
+    using Exceptions;
     using GreenPipes;
     using MassTransit.Configurators;
+    using Topology;
     using Topology.Settings;
     using Topology.Topologies;
     using Transport;
-    using Transports;
 
 
     public class AmazonSqsHostConfiguration :
@@ -26,6 +27,8 @@
             _busConfiguration = busConfiguration;
             _topologyConfiguration = topologyConfiguration;
             _hostSettings = new ConfigurationHostSettings();
+
+            ConnectionContextSupervisor = new ConnectionContextSupervisor(this, topologyConfiguration);
         }
 
         public override Uri HostAddress => _hostSettings.HostAddress;
@@ -35,6 +38,21 @@
             get => _hostSettings;
             set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
+
+        public IRetryPolicy ConnectionRetryPolicy
+        {
+            get
+            {
+                return Retry.CreatePolicy(x =>
+                {
+                    x.Handle<AmazonSqsTransportException>();
+
+                    x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+                });
+            }
+        }
+
+        public IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
         public void ApplyEndpointDefinition(IAmazonSqsReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
@@ -99,6 +117,13 @@
             return configuration;
         }
 
+        public IAmazonSqsHostTopology GetHostTopology()
+        {
+            var messageNameFormatter = new AmazonSqsMessageNameFormatter();
+
+            return new AmazonSqsHostTopology(messageNameFormatter, HostAddress, _topologyConfiguration);
+        }
+
         void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             ReceiveEndpoint(queueName, configureEndpoint);
@@ -127,13 +152,9 @@
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
         }
 
-        public override IBusHostControl Build()
+        public override IHost Build()
         {
-            var messageNameFormatter = new AmazonSqsMessageNameFormatter();
-
-            var hostTopology = new AmazonSqsHostTopology(messageNameFormatter, HostAddress, _topologyConfiguration);
-
-            var host = new AmazonSqsHost(this, hostTopology);
+            var host = new AmazonSqsHost(this, GetHostTopology());
 
             foreach (var endpointConfiguration in Endpoints)
                 endpointConfiguration.Build(host);

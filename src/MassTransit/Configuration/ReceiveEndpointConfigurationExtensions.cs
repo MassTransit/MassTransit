@@ -46,22 +46,5 @@ namespace MassTransit
                 configure?.Invoke(specification);
             });
         }
-
-        /// <summary>
-        /// Creates a management endpoint which can be used by controllable filters on a bus instance
-        /// </summary>
-        /// <param name="host"></param>
-        /// <param name="configure"></param>
-        /// <returns></returns>
-        public static void ManagementEndpoint(this IHost host, Action<IReceiveEndpointConfigurator> configure = null)
-        {
-            IReceiveEndpointConfigurator specification = null;
-            host.ConnectReceiveEndpoint(new ManagementEndpointDefinition(), DefaultEndpointNameFormatter.Instance, x =>
-            {
-                specification = x;
-
-                configure?.Invoke(specification);
-            });
-        }
     }
 }

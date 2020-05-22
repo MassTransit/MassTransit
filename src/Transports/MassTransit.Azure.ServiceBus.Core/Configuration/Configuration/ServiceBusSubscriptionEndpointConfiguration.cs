@@ -59,32 +59,32 @@
                 .Concat(base.Validate());
         }
 
-        public void Build(IServiceBusHostControl host)
+        public void Build(IHost host)
         {
-            var builder = new ServiceBusSubscriptionEndpointBuilder(host, this);
+            var builder = new ServiceBusSubscriptionEndpointBuilder(_hostConfiguration, this);
 
             ApplySpecifications(builder);
 
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
             ClientPipeConfigurator.UseFilter(new ConfigureTopologyFilter<SubscriptionSettings>(_settings, receiveEndpointContext.BrokerTopology,
-                _settings.RemoveSubscriptions, host.Stopping));
+                _settings.RemoveSubscriptions, _hostConfiguration.ConnectionContextSupervisor.Stopping));
 
             CreateReceiveEndpoint(host, receiveEndpointContext);
         }
 
-        protected override IErrorTransport CreateErrorTransport(IServiceBusHostControl host)
+        protected override IErrorTransport CreateErrorTransport()
         {
             var settings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings.SubscriptionConfigurator, _hostConfiguration.HostAddress);
 
-            return new BrokeredMessageErrorTransport(CreateSendEndpointContextSupervisor(host, settings));
+            return new BrokeredMessageErrorTransport(_hostConfiguration.CreateSendEndpointContextSupervisor(settings));
         }
 
-        protected override IDeadLetterTransport CreateDeadLetterTransport(IServiceBusHostControl host)
+        protected override IDeadLetterTransport CreateDeadLetterTransport()
         {
             var settings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings.SubscriptionConfigurator, _hostConfiguration.HostAddress);
 
-            return new BrokeredMessageDeadLetterTransport(CreateSendEndpointContextSupervisor(host, settings));
+            return new BrokeredMessageDeadLetterTransport(_hostConfiguration.CreateSendEndpointContextSupervisor(settings));
         }
 
         protected override IClientContextSupervisor CreateClientContextSupervisor(IConnectionContextSupervisor supervisor)

@@ -30,7 +30,7 @@
             var hostTopology = new InMemoryHostTopology(topologyConfiguration);
             var host = new InMemoryHost(busConfiguration.HostConfiguration, hostTopology);
 
-            var builder = new InMemoryReceiveEndpointBuilder(host, receiveEndpointConfiguration);
+            var builder = new InMemoryReceiveEndpointBuilder(busConfiguration.HostConfiguration, receiveEndpointConfiguration);
 
             if (LogContext.Current == null)
             {

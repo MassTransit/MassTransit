@@ -10,6 +10,6 @@
     {
         ReceiveSettings Settings { get; }
 
-        void Build(IAmazonSqsHostControl host);
+        void Build(IHost host);
     }
 }

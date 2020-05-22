@@ -15,12 +15,12 @@ namespace MassTransit.Transports
         readonly ISendPipe _sendPipe;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
-        readonly ISendTransportProvider _transportProvider;
+        readonly ISendTransportProvider _provider;
 
-        public SendEndpointProvider(ISendTransportProvider transportProvider, SendObservable observers, IMessageSerializer serializer, Uri sourceAddress,
+        public SendEndpointProvider(ISendTransportProvider provider, SendObservable observers, IMessageSerializer serializer, Uri sourceAddress,
             ISendPipe sendPipe)
         {
-            _transportProvider = transportProvider;
+            _provider = provider;
             _serializer = serializer;
             _sourceAddress = sourceAddress;
             _sendPipe = sendPipe;
@@ -31,7 +31,7 @@ namespace MassTransit.Transports
 
         public Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            address = _transportProvider.NormalizeAddress(address);
+            address = _provider.NormalizeAddress(address);
 
             return _cache.GetSendEndpoint(address, CreateSendEndpoint);
         }
@@ -43,7 +43,7 @@ namespace MassTransit.Transports
 
         async Task<ISendEndpoint> CreateSendEndpoint(Uri address)
         {
-            var sendTransport = await _transportProvider.GetSendTransport(address).ConfigureAwait(false);
+            var sendTransport = await _provider.GetSendTransport(address).ConfigureAwait(false);
 
             var handle = sendTransport.ConnectSendObserver(_observers);
 

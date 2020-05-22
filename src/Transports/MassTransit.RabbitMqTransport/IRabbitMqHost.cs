@@ -1,7 +1,5 @@
 ﻿namespace MassTransit.RabbitMqTransport
 {
-    using GreenPipes;
-    using Integration;
     using Topology;
 
 
@@ -9,12 +7,6 @@
         IHost,
         IReceiveConnector<IRabbitMqReceiveEndpointConfigurator>
     {
-        IConnectionContextSupervisor ConnectionContextSupervisor { get; }
-
-        IRetryPolicy ConnectionRetryPolicy { get; }
-
-        RabbitMqHostSettings Settings { get; }
-
         new IRabbitMqHostTopology Topology { get; }
     }
 }

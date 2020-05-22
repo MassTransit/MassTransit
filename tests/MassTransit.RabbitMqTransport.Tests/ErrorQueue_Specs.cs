@@ -119,7 +119,7 @@
 
 
     [TestFixture]
-    public class A_serialization_exception_from_a_bad_messagee :
+    public class A_serialization_exception_from_a_bad_message :
         RabbitMqTestFixture
     {
         [Test]

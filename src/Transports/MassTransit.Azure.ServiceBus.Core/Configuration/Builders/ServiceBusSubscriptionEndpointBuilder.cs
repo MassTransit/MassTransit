@@ -11,13 +11,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Builders
     public class ServiceBusSubscriptionEndpointBuilder :
         ReceiveEndpointBuilder
     {
-        readonly IServiceBusHostControl _host;
+        readonly IServiceBusHostConfiguration _hostConfiguration;
         readonly IServiceBusSubscriptionEndpointConfiguration _configuration;
 
-        public ServiceBusSubscriptionEndpointBuilder(IServiceBusHostControl host, IServiceBusSubscriptionEndpointConfiguration configuration)
+        public ServiceBusSubscriptionEndpointBuilder(IServiceBusHostConfiguration hostConfiguration, IServiceBusSubscriptionEndpointConfiguration configuration)
             : base(configuration)
         {
-            _host = host;
+            _hostConfiguration = hostConfiguration;
             _configuration = configuration;
         }
 
@@ -25,7 +25,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Builders
         {
             var topologyLayout = BuildTopology(_configuration.Settings);
 
-            return new ServiceBusEntityReceiveEndpointContext(_host, _configuration, topologyLayout);
+            return new ServiceBusEntityReceiveEndpointContext(_hostConfiguration, _configuration, topologyLayout);
         }
 
         static BrokerTopology BuildTopology(SubscriptionSettings settings)

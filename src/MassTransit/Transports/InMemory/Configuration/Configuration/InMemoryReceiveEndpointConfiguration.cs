@@ -11,12 +11,15 @@
         IInMemoryReceiveEndpointConfigurator
     {
         readonly IInMemoryEndpointConfiguration _endpointConfiguration;
+        readonly IInMemoryHostConfiguration _hostConfiguration;
         readonly string _queueName;
 
         public InMemoryReceiveEndpointConfiguration(IInMemoryHostConfiguration hostConfiguration, string queueName,
             IInMemoryEndpointConfiguration endpointConfiguration)
             : base(hostConfiguration, endpointConfiguration)
         {
+            _hostConfiguration = hostConfiguration;
+
             _queueName = queueName ?? throw new ArgumentNullException(nameof(queueName));
             _endpointConfiguration = endpointConfiguration ?? throw new ArgumentNullException(nameof(endpointConfiguration));
 
@@ -35,15 +38,15 @@
 
         public override Uri InputAddress { get; }
 
-        public void Build(IInMemoryHostControl host)
+        public void Build(IHost host)
         {
-            var builder = new InMemoryReceiveEndpointBuilder(host, this);
+            var builder = new InMemoryReceiveEndpointBuilder(_hostConfiguration, this);
 
             ApplySpecifications(builder);
 
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
-            var transport = host.GetReceiveTransport(_queueName, receiveEndpointContext);
+            var transport = _hostConfiguration.TransportProvider.GetReceiveTransport(_queueName, receiveEndpointContext);
 
             var receiveEndpoint = new ReceiveEndpoint(transport, receiveEndpointContext);
 

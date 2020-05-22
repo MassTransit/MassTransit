@@ -10,21 +10,18 @@
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
     using Policies;
-    using Topology;
     using Transports;
 
 
     public class ConnectionContextFactory :
         IPipeContextFactory<ConnectionContext>
     {
-        readonly IAmazonSqsHostConfiguration _configuration;
-        readonly IAmazonSqsHostTopology _hostTopology;
         readonly IRetryPolicy _connectionRetryPolicy;
+        readonly IAmazonSqsHostConfiguration _hostConfiguration;
 
-        public ConnectionContextFactory(IAmazonSqsHostConfiguration configuration, IAmazonSqsHostTopology hostTopology)
+        public ConnectionContextFactory(IAmazonSqsHostConfiguration hostConfiguration)
         {
-            _configuration = configuration;
-            _hostTopology = hostTopology;
+            _hostConfiguration = hostConfiguration;
 
             _connectionRetryPolicy = Retry.CreatePolicy(x =>
             {
@@ -36,7 +33,7 @@
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
-            var context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopping);
+            Task<ConnectionContext> context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopping);
 
             IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
 
@@ -61,16 +58,16 @@
             return await _connectionRetryPolicy.Retry(async () =>
             {
                 if (supervisor.Stopping.IsCancellationRequested)
-                    throw new OperationCanceledException($"The connection is stopping and cannot be used: {_configuration.HostAddress}");
+                    throw new OperationCanceledException($"The connection is stopping and cannot be used: {_hostConfiguration.HostAddress}");
 
                 IConnection connection = null;
                 try
                 {
-                    TransportLogMessages.ConnectHost(_configuration.Settings.ToString());
+                    TransportLogMessages.ConnectHost(_hostConfiguration.Settings.ToString());
 
-                    connection = _configuration.Settings.CreateConnection();
+                    connection = _hostConfiguration.Settings.CreateConnection();
 
-                    return new AmazonSqsConnectionContext(connection, _configuration, _hostTopology, supervisor.Stopped);
+                    return new AmazonSqsConnectionContext(connection, _hostConfiguration, supervisor.Stopped);
                 }
                 catch (OperationCanceledException)
                 {
@@ -78,7 +75,7 @@
                 }
                 catch (Exception ex)
                 {
-                    throw new AmazonSqsConnectException("Connect failed: " + _configuration.Settings, ex);
+                    throw new AmazonSqsConnectException("Connect failed: " + _hostConfiguration.Settings, ex);
                 }
             }, supervisor.Stopping).ConfigureAwait(false);
         }

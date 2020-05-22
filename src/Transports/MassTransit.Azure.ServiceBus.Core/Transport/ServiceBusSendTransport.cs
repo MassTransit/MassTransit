@@ -6,7 +6,6 @@
     using Context;
     using Contexts;
     using GreenPipes;
-    using GreenPipes.Agents;
     using Logging;
     using MassTransit.Scheduling;
     using Microsoft.Azure.ServiceBus;
@@ -19,7 +18,6 @@
     /// May be sensible to create a IBatchSendTransport that allows multiple messages to be sent as a single batch (perhaps using Tx support?)
     /// </summary>
     public class ServiceBusSendTransport :
-        Supervisor,
         ISendTransport
     {
         readonly ServiceBusSendTransportContext _context;
@@ -27,8 +25,6 @@
         public ServiceBusSendTransport(ServiceBusSendTransportContext context)
         {
             _context = context;
-
-            Add(context.Supervisor);
         }
 
         Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -43,21 +39,14 @@
             return _context.ConnectSendObserver(observer);
         }
 
-        protected override Task StopSupervisor(StopSupervisorContext context)
-        {
-            LogContext.Debug?.Log("Stopping send transport: {Address}", _context.Address);
-
-            return base.StopSupervisor(context);
-        }
-
 
         class SendPipe<T> :
             IPipe<SendEndpointContext>
             where T : class
         {
+            readonly CancellationToken _cancellationToken;
             readonly ServiceBusSendTransportContext _context;
             readonly T _message;
-            readonly CancellationToken _cancellationToken;
             readonly IPipe<SendContext<T>> _pipe;
 
             public SendPipe(ServiceBusSendTransportContext context, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -78,7 +67,7 @@
 
                 CopyIncomingIdentifiersIfPresent(context);
 
-                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context,
+                StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context,
                     (nameof(context.PartitionKey), context.PartitionKey),
                     (nameof(context.SessionId), context.SessionId));
                 try

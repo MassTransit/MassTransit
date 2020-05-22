@@ -20,16 +20,15 @@ namespace MassTransit.ActiveMqTransport.Contexts
         readonly IConnection _connection;
         readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
-        public ActiveMqConnectionContext(IConnection connection, IActiveMqHostConfiguration configuration, IActiveMqHostTopology hostTopology,
-            CancellationToken cancellationToken)
+        public ActiveMqConnectionContext(IConnection connection, IActiveMqHostConfiguration hostConfiguration, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
             _connection = connection;
 
-            Description = configuration.Description;
-            HostAddress = configuration.HostAddress;
+            Description = hostConfiguration.Description;
+            HostAddress = hostConfiguration.HostAddress;
 
-            Topology = hostTopology;
+            Topology = hostConfiguration.GetHostTopology();
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
         }
@@ -44,7 +43,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
 
             var session = await Task.Factory.StartNew(() => _connection.CreateSession(AcknowledgementMode.ClientAcknowledge),
-                    tokenSource.Token, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
+                tokenSource.Token, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
 
             return session;
         }
@@ -56,6 +55,8 @@ namespace MassTransit.ActiveMqTransport.Contexts
             try
             {
                 _connection.Close();
+
+                TransportLogMessages.DisconnectedHost(Description);
 
                 _connection.Dispose();
             }

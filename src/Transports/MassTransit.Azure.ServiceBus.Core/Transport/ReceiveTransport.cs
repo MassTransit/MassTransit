@@ -19,14 +19,12 @@
     {
         readonly IClientContextSupervisor _clientContextSupervisor;
         readonly IPipe<ClientContext> _clientPipe;
-        readonly IServiceBusHost _host;
         readonly ClientSettings _settings;
         readonly ServiceBusReceiveEndpointContext _context;
 
-        public ReceiveTransport(IServiceBusHost host, ClientSettings settings, IClientContextSupervisor clientContextSupervisor,
-            IPipe<ClientContext> clientPipe, ServiceBusReceiveEndpointContext context)
+        public ReceiveTransport(ClientSettings settings, IClientContextSupervisor clientContextSupervisor, IPipe<ClientContext> clientPipe,
+            ServiceBusReceiveEndpointContext context)
         {
-            _host = host;
             _settings = settings;
             _clientContextSupervisor = clientContextSupervisor;
             _clientPipe = clientPipe;
@@ -78,7 +76,7 @@
             {
                 try
                 {
-                    await _host.RetryPolicy.Retry(async () =>
+                    await _context.RetryPolicy.Retry(async () =>
                     {
                         try
                         {

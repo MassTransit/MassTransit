@@ -10,6 +10,6 @@
     {
         ReceiveSettings Settings { get; }
 
-        void Build(IActiveMqHostControl host);
+        void Build(IHost host);
     }
 }

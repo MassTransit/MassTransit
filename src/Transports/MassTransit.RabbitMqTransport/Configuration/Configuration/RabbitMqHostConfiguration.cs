@@ -5,12 +5,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using Configurators;
     using Definition;
     using GreenPipes;
+    using Integration;
     using MassTransit.Configurators;
     using Topology;
     using Topology.Settings;
     using Topology.Topologies;
     using Transport;
-    using Transports;
 
 
     public class RabbitMqHostConfiguration :
@@ -34,15 +34,38 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 Username = "guest",
                 Password = "guest"
             };
+
+            ConnectionContextSupervisor = new ConnectionContextSupervisor(this, topologyConfiguration);
         }
 
-        public string Description => _hostSettings.ToDescription();
+        public IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
         public override Uri HostAddress => _hostSettings.HostAddress;
 
         public bool PublisherConfirmation => _hostSettings.PublisherConfirmation;
 
         public BatchSettings BatchSettings => _hostSettings.BatchSettings;
+
+        public IRetryPolicy ConnectionRetryPolicy
+        {
+            get
+            {
+                return Retry.CreatePolicy(x =>
+                {
+                    x.Handle<RabbitMqConnectionException>();
+
+                    x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+                });
+            }
+        }
+
+        public IRabbitMqHostTopology GetHostTopology()
+        {
+            var exchangeTypeSelector = new FanoutExchangeTypeSelector();
+            var messageNameFormatter = new RabbitMqMessageNameFormatter();
+
+            return new RabbitMqHostTopology(exchangeTypeSelector, messageNameFormatter, _hostSettings.HostAddress, _topologyConfiguration);
+        }
 
         public RabbitMqHostSettings Settings
         {
@@ -59,9 +82,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             }
 
             if (definition.PrefetchCount.HasValue)
-            {
                 configurator.PrefetchCount = (ushort)definition.PrefetchCount.Value;
-            }
 
             if (definition.ConcurrentMessageLimit.HasValue)
             {
@@ -113,6 +134,21 @@ namespace MassTransit.RabbitMqTransport.Configuration
             return configuration;
         }
 
+        public ISendTransportProvider CreateSendTransportProvider(IModelContextSupervisor modelContextSupervisor)
+        {
+            return new RabbitMqSendTransportProvider(ConnectionContextSupervisor, modelContextSupervisor);
+        }
+
+        public IPublishTransportProvider CreatePublishTransportProvider(IModelContextSupervisor modelContextSupervisor)
+        {
+            return new RabbitMqPublishTransportProvider(ConnectionContextSupervisor, modelContextSupervisor);
+        }
+
+        public IModelContextSupervisor CreateModelContextSupervisor()
+        {
+            return new ModelContextSupervisor(ConnectionContextSupervisor);
+        }
+
         void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             ReceiveEndpoint(queueName, configureEndpoint);
@@ -159,19 +195,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
             }
         }
 
-        public override IBusHostControl Build()
+        public override IHost Build()
         {
-            var exchangeTypeSelector = new FanoutExchangeTypeSelector();
-            var messageNameFormatter = new RabbitMqMessageNameFormatter();
-
-            var hostTopology = new RabbitMqHostTopology(exchangeTypeSelector, messageNameFormatter, _hostSettings.HostAddress, _topologyConfiguration);
-
-            var host = new RabbitMqHost(this, hostTopology);
+            var host = new RabbitMqHost(this, GetHostTopology());
 
             foreach (var endpointConfiguration in Endpoints)
-            {
                 endpointConfiguration.Build(host);
-            }
 
             return host;
         }

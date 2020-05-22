@@ -1,7 +1,10 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
+    using GreenPipes;
+    using Integration;
     using MassTransit.Configuration;
+    using Topology;
     using Topology.Settings;
 
 
@@ -9,7 +12,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IHostConfiguration,
         IReceiveConfigurator<IRabbitMqReceiveEndpointConfigurator>
     {
-        string Description { get; }
+        IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
         RabbitMqHostSettings Settings { get; set; }
 
@@ -19,6 +22,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
         bool PublisherConfirmation { get; }
 
         BatchSettings BatchSettings { get; }
+        IRetryPolicy ConnectionRetryPolicy { get; }
+
+        IRabbitMqHostTopology GetHostTopology();
 
         /// <summary>
         /// Apply the endpoint definition to the receive endpoint configurator
@@ -32,5 +38,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(RabbitMqReceiveSettings settings,
             IRabbitMqEndpointConfiguration endpointConfiguration, Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
+
+        ISendTransportProvider CreateSendTransportProvider(IModelContextSupervisor modelContextSupervisor);
+        IPublishTransportProvider CreatePublishTransportProvider(IModelContextSupervisor modelContextSupervisor);
+        IModelContextSupervisor CreateModelContextSupervisor();
     }
 }

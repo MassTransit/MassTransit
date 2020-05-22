@@ -7,6 +7,6 @@
         IReceiveEndpointConfiguration,
         IServiceBusEndpointConfiguration
     {
-        void Build(IServiceBusHostControl host);
+        void Build(IHost host);
     }
 }

@@ -1,8 +1,11 @@
 ﻿namespace MassTransit.AmazonSqsTransport.Configuration
 {
     using System;
+    using GreenPipes;
     using MassTransit.Configuration;
+    using Topology;
     using Topology.Settings;
+    using Transport;
 
 
     public interface IAmazonSqsHostConfiguration :
@@ -10,6 +13,10 @@
         IReceiveConfigurator<IAmazonSqsReceiveEndpointConfigurator>
     {
         AmazonSqsHostSettings Settings { get; set; }
+
+        IRetryPolicy ConnectionRetryPolicy { get; }
+
+        IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
         /// <summary>
         /// Apply the endpoint definition to the receive endpoint configurator
@@ -34,5 +41,7 @@
         /// <returns></returns>
         IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
             IAmazonSqsEndpointConfiguration endpointConfiguration, Action<IAmazonSqsReceiveEndpointConfigurator> configure = null);
+
+        IAmazonSqsHostTopology GetHostTopology();
     }
 }

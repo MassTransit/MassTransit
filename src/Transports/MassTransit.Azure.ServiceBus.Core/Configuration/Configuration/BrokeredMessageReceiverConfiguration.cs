@@ -27,7 +27,7 @@
 
             try
             {
-                var builder = new ServiceBusReceiveEndpointBuilder(_busConfiguration.HostConfiguration.Proxy, _endpointConfiguration);
+                var builder = new ServiceBusReceiveEndpointBuilder(_busConfiguration.HostConfiguration, _endpointConfiguration);
 
                 foreach (var specification in Specifications)
                     specification.Configure(builder);

@@ -5,7 +5,6 @@
     using Configuration;
     using Contexts;
     using GreenPipes;
-    using Integration;
     using MassTransit.Builders;
     using Pipeline;
     using Topology;
@@ -17,13 +16,13 @@
     public class RabbitMqReceiveEndpointBuilder :
         ReceiveEndpointBuilder
     {
-        readonly IRabbitMqHostControl _host;
+        readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly IRabbitMqReceiveEndpointConfiguration _configuration;
 
-        public RabbitMqReceiveEndpointBuilder(IRabbitMqHostControl host, IRabbitMqReceiveEndpointConfiguration configuration)
+        public RabbitMqReceiveEndpointBuilder(IRabbitMqHostConfiguration hostConfiguration, IRabbitMqReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
-            _host = host;
+            _hostConfiguration = hostConfiguration;
             _configuration = configuration;
         }
 
@@ -46,14 +45,12 @@
             IDeadLetterTransport deadLetterTransport = CreateDeadLetterTransport();
             IErrorTransport errorTransport = CreateErrorTransport();
 
-            IModelContextSupervisor supervisor = new ModelContextSupervisor(_host.ConnectionContextSupervisor);
+            var context = new RabbitMqQueueReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology);
 
-            var receiveEndpointContext = new RabbitMqQueueReceiveEndpointContext(_host, supervisor, _configuration, brokerTopology);
+            context.GetOrAddPayload(() => deadLetterTransport);
+            context.GetOrAddPayload(() => errorTransport);
 
-            receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
-            receiveEndpointContext.GetOrAddPayload(() => errorTransport);
-
-            return receiveEndpointContext;
+            return context;
         }
 
         IErrorTransport CreateErrorTransport()

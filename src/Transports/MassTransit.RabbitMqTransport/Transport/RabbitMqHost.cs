@@ -1,23 +1,19 @@
 namespace MassTransit.RabbitMqTransport.Transport
 {
     using System;
-    using System.Threading.Tasks;
     using Configuration;
     using Context;
-    using Contexts;
     using Definition;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Integration;
     using MassTransit.Configurators;
-    using Pipeline;
     using Topology;
     using Transports;
 
 
     public class RabbitMqHost :
         BaseHost,
-        IRabbitMqHostControl
+        IRabbitMqHost
     {
         readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly IRabbitMqHostTopology _hostTopology;
@@ -28,14 +24,7 @@ namespace MassTransit.RabbitMqTransport.Transport
             _hostConfiguration = hostConfiguration;
             _hostTopology = hostTopology;
 
-            ConnectionRetryPolicy = Retry.CreatePolicy(x =>
-            {
-                x.Handle<RabbitMqConnectionException>();
-
-                x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
-            });
-
-            ConnectionContextSupervisor = new RabbitMqConnectionContextSupervisor(hostConfiguration, hostTopology);
+            Add(hostConfiguration.ConnectionContextSupervisor);
         }
 
         protected override void Probe(ProbeContext context)
@@ -43,26 +32,23 @@ namespace MassTransit.RabbitMqTransport.Transport
             context.Set(new
             {
                 Type = "RabbitMQ",
-                Settings.Host,
-                Settings.Port,
-                Settings.VirtualHost,
-                Settings.Username,
-                Password = new string('*', Settings.Password.Length),
-                Settings.Heartbeat,
-                Settings.Ssl
+                _hostConfiguration.Settings.Host,
+                _hostConfiguration.Settings.Port,
+                _hostConfiguration.Settings.VirtualHost,
+                _hostConfiguration.Settings.Username,
+                Password = new string('*', _hostConfiguration.Settings.Password.Length),
+                _hostConfiguration.Settings.Heartbeat,
+                _hostConfiguration.Settings.Ssl
             });
 
-            if (Settings.Ssl)
+            if (_hostConfiguration.Settings.Ssl)
             {
-                context.Set(new {Settings.SslServerName});
+                context.Set(new {_hostConfiguration.Settings.SslServerName});
             }
 
-            ConnectionContextSupervisor.Probe(context);
+            _hostConfiguration.ConnectionContextSupervisor.Probe(context);
         }
 
-        public IConnectionContextSupervisor ConnectionContextSupervisor { get; }
-        public IRetryPolicy ConnectionRetryPolicy { get; }
-        public RabbitMqHostSettings Settings => _hostConfiguration.Settings;
         IRabbitMqHostTopology IRabbitMqHost.Topology => _hostTopology;
 
         public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
@@ -90,7 +76,7 @@ namespace MassTransit.RabbitMqTransport.Transport
 
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configure = null)
         {
-            LogContext.SetCurrentIfNull(DefaultLogContext);
+            LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
 
             var configuration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName, configure);
 
@@ -103,54 +89,9 @@ namespace MassTransit.RabbitMqTransport.Transport
             return ReceiveEndpoints.Start(queueName);
         }
 
-        public Task<ISendTransport> CreateSendTransport(RabbitMqEndpointAddress address, IModelContextSupervisor modelContextSupervisor)
-        {
-            TransportLogMessages.CreateSendTransport(address);
-
-            var settings = _hostTopology.SendTopology.GetSendSettings(address);
-
-            var brokerTopology = settings.GetBrokerTopology();
-
-            IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
-
-            var supervisor = new ModelContextSupervisor(modelContextSupervisor);
-
-            var transport = CreateSendTransport(supervisor, pipe, settings.ExchangeName);
-
-            return Task.FromResult(transport);
-        }
-
-        public Task<ISendTransport> CreatePublishTransport<T>(IModelContextSupervisor modelContextSupervisor)
-            where T : class
-        {
-            IRabbitMqMessagePublishTopology<T> publishTopology = _hostTopology.Publish<T>();
-
-            var sendSettings = publishTopology.GetSendSettings(_hostConfiguration.HostAddress);
-
-            var brokerTopology = publishTopology.GetBrokerTopology();
-
-            var supervisor = new ModelContextSupervisor(modelContextSupervisor);
-
-            IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(sendSettings, brokerTopology).ToPipe();
-
-            var transport = CreateSendTransport(supervisor, pipe, publishTopology.Exchange.ExchangeName);
-
-            return Task.FromResult(transport);
-        }
-
-        ISendTransport CreateSendTransport(IModelContextSupervisor modelContextSupervisor, IPipe<ModelContext> pipe, string exchangeName)
-        {
-            var sendTransportContext = new HostRabbitMqSendTransportContext(modelContextSupervisor, pipe, exchangeName, SendLogContext);
-
-            var transport = new RabbitMqSendTransport(sendTransportContext);
-            Add(transport);
-
-            return transport;
-        }
-
         protected override IAgent[] GetAgentHandles()
         {
-            return new IAgent[] {ConnectionContextSupervisor};
+            return new IAgent[] {_hostConfiguration.ConnectionContextSupervisor};
         }
     }
 }

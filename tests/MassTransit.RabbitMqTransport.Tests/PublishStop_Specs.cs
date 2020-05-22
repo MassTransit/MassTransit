@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
+    using TestFramework;
 
 
     [TestFixture]
@@ -18,6 +19,8 @@
 
             var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
             {
+                BusTestFixture.ConfigureBusDiagnostics(sbc);
+
                 sbc.Host(rabbitMqHostSettings);
                 sbc.ReceiveEndpoint(receiveSettings.QueueName, ep =>
                 {

@@ -3,9 +3,13 @@
     using System;
     using Configurators;
     using Definition;
+    using GreenPipes;
     using MassTransit.Configurators;
     using MassTransit.Topology.EntityNameFormatters;
+    using Microsoft.Azure.ServiceBus;
+    using Microsoft.Azure.ServiceBus.Management;
     using Microsoft.Azure.ServiceBus.Primitives;
+    using Pipeline;
     using Settings;
     using Topology.Configurators;
     using Topology.Topologies;
@@ -18,8 +22,8 @@
         IServiceBusHostConfiguration
     {
         readonly IServiceBusBusConfiguration _busConfiguration;
-        readonly ServiceBusHostProxy _proxy;
         readonly IServiceBusTopologyConfiguration _topologyConfiguration;
+        readonly ServiceBusConnectionContextSupervisor _connectionContextSupervisor;
         ServiceBusHostSettings _hostSettings;
         IMessageNameFormatter _messageNameFormatter;
 
@@ -30,14 +34,14 @@
             _hostSettings = new HostSettings();
             _topologyConfiguration = topologyConfiguration;
 
-            _proxy = new ServiceBusHostProxy(this);
+            _connectionContextSupervisor = new ServiceBusConnectionContextSupervisor(this, topologyConfiguration);
         }
 
         public override Uri HostAddress => _hostSettings.ServiceUri;
 
         string IServiceBusHostConfiguration.BasePath => _hostSettings.ServiceUri.AbsolutePath.Trim('/');
 
-        public IServiceBusHostControl Proxy => _proxy;
+        public IConnectionContextSupervisor ConnectionContextSupervisor => _connectionContextSupervisor;
 
         public ServiceBusHostSettings Settings
         {
@@ -47,9 +51,26 @@
                 _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
 
                 if (_hostSettings.TokenProvider is ManagedIdentityTokenProvider)
-                {
                     SetNamespaceSeparatorToTilde();
-                }
+            }
+        }
+
+        public IRetryPolicy RetryPolicy
+        {
+            get
+            {
+                return Retry.CreatePolicy(x =>
+                {
+                    x.Ignore<MessagingEntityNotFoundException>();
+                    x.Ignore<MessagingEntityAlreadyExistsException>();
+                    x.Ignore<MessageNotFoundException>();
+                    x.Ignore<MessageSizeExceededException>();
+
+                    x.Handle<ServerBusyException>(exception => exception.IsTransient);
+                    x.Handle<TimeoutException>();
+
+                    x.Interval(5, TimeSpan.FromSeconds(10));
+                });
             }
         }
 
@@ -93,6 +114,11 @@
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
         }
 
+        public ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(SendSettings settings)
+        {
+            return _connectionContextSupervisor.CreateSendEndpointContextSupervisor(settings);
+        }
+
         public void ApplyEndpointDefinition(IServiceBusReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
             configurator.ConfigureConsumeTopology = definition.ConfigureConsumeTopology;
@@ -104,9 +130,7 @@
             }
 
             if (definition.PrefetchCount.HasValue)
-            {
                 configurator.PrefetchCount = (ushort)definition.PrefetchCount.Value;
-            }
 
             if (definition.ConcurrentMessageLimit.HasValue)
             {
@@ -180,7 +204,19 @@
             return CreateSubscriptionEndpointConfiguration(settings, _busConfiguration.CreateEndpointConfiguration(), configure);
         }
 
-        public IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings,
+        public override IHost Build()
+        {
+            var hostTopology = new ServiceBusHostTopology(_topologyConfiguration, _hostSettings.ServiceUri, _messageNameFormatter);
+
+            var host = new ServiceBusHost(this, hostTopology);
+
+            foreach (var endpointConfiguration in Endpoints)
+                endpointConfiguration.Build(host);
+
+            return host;
+        }
+
+        IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings,
             IServiceBusEndpointConfiguration endpointConfiguration, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
             if (settings == null)
@@ -197,22 +233,6 @@
             Add(configuration);
 
             return configuration;
-        }
-
-        public override IBusHostControl Build()
-        {
-            var hostTopology = new ServiceBusHostTopology(_topologyConfiguration, _hostSettings.ServiceUri, _messageNameFormatter);
-
-            var host = new ServiceBusHost(this, hostTopology);
-
-            foreach (var endpointConfiguration in Endpoints)
-            {
-                endpointConfiguration.Build(host);
-            }
-
-            _proxy.SetComplete(host);
-
-            return host;
         }
     }
 }

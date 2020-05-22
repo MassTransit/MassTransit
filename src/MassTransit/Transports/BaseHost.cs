@@ -8,14 +8,13 @@ namespace MassTransit.Transports
     using EndpointConfigurators;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Logging;
     using Pipeline;
     using Topology;
 
 
     public abstract class BaseHost :
         Supervisor,
-        IBusHostControl
+        IHost
     {
         readonly IHostConfiguration _hostConfiguration;
         readonly IHostTopology _hostTopology;
@@ -31,10 +30,6 @@ namespace MassTransit.Transports
         }
 
         protected IReceiveEndpointCollection ReceiveEndpoints => _receiveEndpoints;
-
-        protected ILogContext DefaultLogContext { get; set; }
-        protected ILogContext ReceiveLogContext { get; set; }
-        public ILogContext SendLogContext { get; set; }
 
         Uri IHost.Address => _hostConfiguration.HostAddress;
         IHostTopology IHost.Topology => _hostTopology;
@@ -84,11 +79,12 @@ namespace MassTransit.Transports
             if (_handle != null)
                 throw new MassTransitException($"The host was already started: {_hostConfiguration.HostAddress}");
 
-            LogContext.Debug?.Log("Starting host: {HostAddress}", _hostConfiguration.HostAddress);
+            if (LogContext.Current == null)
+                throw new ConfigurationException("No valid LogContext was configured.");
 
-            DefaultLogContext = LogContext.Current;
-            SendLogContext = LogContext.Current.CreateLogContext(LogCategoryName.Transport.Send);
-            ReceiveLogContext = LogContext.Current.CreateLogContext(LogCategoryName.Transport.Receive);
+            _hostConfiguration.LogContext = LogContext.Current;
+
+            LogContext.Debug?.Log("Starting host: {HostAddress}", _hostConfiguration.HostAddress);
 
             HostReceiveEndpointHandle[] handles = _receiveEndpoints.StartEndpoints(cancellationToken);
 
@@ -97,7 +93,7 @@ namespace MassTransit.Transports
             return Task.FromResult(_handle);
         }
 
-        void IBusHostControl.AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
+        public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
         {
             _receiveEndpoints.Add(endpointName, receiveEndpoint);
         }
@@ -113,7 +109,7 @@ namespace MassTransit.Transports
 
         async Task IAgent.Stop(StopContext context)
         {
-            LogContext.Current = DefaultLogContext;
+            LogContext.Current = _hostConfiguration.LogContext;
 
             await _receiveEndpoints.Stop(context).ConfigureAwait(false);
 

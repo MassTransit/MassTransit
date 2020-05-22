@@ -4,25 +4,24 @@
     using Context;
     using Integration;
     using Topology.Builders;
-    using Transport;
 
 
     public class RabbitMqQueueReceiveEndpointContext :
         BaseReceiveEndpointContext,
         RabbitMqReceiveEndpointContext
     {
-        readonly IRabbitMqHostControl _host;
+        readonly IRabbitMqHostConfiguration _hostConfiguration;
 
-        public RabbitMqQueueReceiveEndpointContext(IRabbitMqHostControl host, IModelContextSupervisor supervisor,
-            IRabbitMqReceiveEndpointConfiguration configuration,
+        public RabbitMqQueueReceiveEndpointContext(IRabbitMqHostConfiguration hostConfiguration, IRabbitMqReceiveEndpointConfiguration configuration,
             BrokerTopology brokerTopology)
             : base(configuration)
         {
-            _host = host;
-            ModelContextSupervisor = supervisor;
+            _hostConfiguration = hostConfiguration;
 
             ExclusiveConsumer = configuration.Settings.ExclusiveConsumer;
             BrokerTopology = brokerTopology;
+
+            ModelContextSupervisor = hostConfiguration.CreateModelContextSupervisor();
         }
 
         public BrokerTopology BrokerTopology { get; }
@@ -33,12 +32,12 @@
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new RabbitMqSendTransportProvider(_host, ModelContextSupervisor);
+            return _hostConfiguration.CreateSendTransportProvider(ModelContextSupervisor);
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new RabbitMqPublishTransportProvider(_host, ModelContextSupervisor);
+            return _hostConfiguration.CreatePublishTransportProvider(ModelContextSupervisor);
         }
     }
 }

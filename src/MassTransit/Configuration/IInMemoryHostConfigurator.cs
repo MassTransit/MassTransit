@@ -9,10 +9,5 @@ namespace MassTransit
         /// messages to consumers.
         /// </summary>
         int TransportConcurrencyLimit { set; }
-
-        /// <summary>
-        /// Configure the SendTransport cache settings
-        /// </summary>
-        ICacheConfigurator SendTransportCache { get; }
     }
 }

@@ -12,21 +12,21 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         BasePipeContext,
         ConnectionContext
     {
-        readonly IAmazonSqsHostConfiguration _configuration;
+        readonly IAmazonSqsHostConfiguration _hostConfiguration;
 
-        public AmazonSqsConnectionContext(IConnection connection, IAmazonSqsHostConfiguration configuration, IAmazonSqsHostTopology hostTopology,
-            CancellationToken cancellationToken)
+        public AmazonSqsConnectionContext(IConnection connection, IAmazonSqsHostConfiguration hostConfiguration, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
-            _configuration = configuration;
-            Topology = hostTopology;
+            _hostConfiguration = hostConfiguration;
             Connection = connection;
+
+            Topology = hostConfiguration.GetHostTopology();
         }
 
         public IConnection Connection { get; }
         public IAmazonSqsHostTopology Topology { get; }
 
-        public Uri HostAddress => _configuration.HostAddress;
+        public Uri HostAddress => _hostConfiguration.HostAddress;
 
         public ClientContext CreateClientContext(CancellationToken cancellationToken)
         {

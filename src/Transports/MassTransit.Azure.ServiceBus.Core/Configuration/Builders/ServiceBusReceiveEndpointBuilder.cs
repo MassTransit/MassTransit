@@ -17,13 +17,13 @@
     public class ServiceBusReceiveEndpointBuilder :
         ReceiveEndpointBuilder
     {
-        readonly IServiceBusHostControl _host;
+        readonly IServiceBusHostConfiguration _hostConfiguration;
         readonly IServiceBusReceiveEndpointConfiguration _configuration;
 
-        public ServiceBusReceiveEndpointBuilder(IServiceBusHostControl host, IServiceBusReceiveEndpointConfiguration configuration)
+        public ServiceBusReceiveEndpointBuilder(IServiceBusHostConfiguration hostConfiguration, IServiceBusReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
-            _host = host;
+            _hostConfiguration = hostConfiguration;
             _configuration = configuration;
         }
 
@@ -45,7 +45,7 @@
         {
             var topologyLayout = BuildTopology(_configuration.Settings);
 
-            return new ServiceBusEntityReceiveEndpointContext(_host, _configuration, topologyLayout);
+            return new ServiceBusEntityReceiveEndpointContext(_hostConfiguration, _configuration, topologyLayout);
         }
 
         static readonly char[] Separator = {'/'};

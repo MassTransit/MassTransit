@@ -2,7 +2,6 @@
 {
     using System;
     using Definition;
-    using GreenPipes.Caching;
     using MassTransit.Configurators;
     using Topology.Topologies;
 
@@ -14,7 +13,6 @@
     {
         readonly IInMemoryBusConfiguration _busConfiguration;
         readonly IInMemoryTopologyConfiguration _topologyConfiguration;
-        readonly ICacheConfigurator _sendTransportCacheConfigurator;
         Uri _hostAddress;
 
         public InMemoryHostConfiguration(IInMemoryBusConfiguration busConfiguration, Uri baseAddress, IInMemoryTopologyConfiguration topologyConfiguration)
@@ -27,12 +25,12 @@
 
             TransportConcurrencyLimit = Environment.ProcessorCount;
 
-            _sendTransportCacheConfigurator = new CacheConfigurator();
+            TransportProvider = new InMemoryTransportProvider(this, topologyConfiguration);
         }
 
         public IInMemoryHostConfigurator Configurator => this;
 
-        public CacheSettings SendTransportCacheSettings => _sendTransportCacheConfigurator.Settings;
+        public IInMemoryTransportProvider TransportProvider { get; }
 
         public override Uri HostAddress => _hostAddress;
 
@@ -82,8 +80,6 @@
             return configuration;
         }
 
-        ICacheConfigurator IInMemoryHostConfigurator.SendTransportCache => _sendTransportCacheConfigurator;
-
         void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             ReceiveEndpoint(queueName, configureEndpoint);
@@ -112,15 +108,13 @@
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
         }
 
-        public override IBusHostControl Build()
+        public override IHost Build()
         {
             var hostTopology = new InMemoryHostTopology(_topologyConfiguration);
             var host = new InMemoryHost(this, hostTopology);
 
             foreach (var endpointConfiguration in Endpoints)
-            {
                 endpointConfiguration.Build(host);
-            }
 
             return host;
         }

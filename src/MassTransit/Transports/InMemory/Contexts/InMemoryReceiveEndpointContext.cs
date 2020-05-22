@@ -2,31 +2,27 @@
 {
     using Configuration;
     using Context;
-    using Topology.Configurators;
 
 
     public class InMemoryReceiveEndpointContext :
         BaseReceiveEndpointContext
     {
-        readonly IInMemoryPublishTopologyConfigurator _publish;
-        readonly ISendTransportProvider _sendTransportProvider;
+        readonly IInMemoryHostConfiguration _hostConfiguration;
 
-        public InMemoryReceiveEndpointContext(IInMemoryReceiveEndpointConfiguration configuration, ISendTransportProvider sendTransportProvider)
+        public InMemoryReceiveEndpointContext(IInMemoryHostConfiguration hostConfiguration, IInMemoryReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
-            _sendTransportProvider = sendTransportProvider;
-
-            _publish = configuration.Topology.Publish;
+            _hostConfiguration = hostConfiguration;
         }
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return _sendTransportProvider;
+            return _hostConfiguration.TransportProvider;
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new InMemoryPublishTransportProvider(_sendTransportProvider, _publish);
+            return _hostConfiguration.TransportProvider;
         }
     }
 }

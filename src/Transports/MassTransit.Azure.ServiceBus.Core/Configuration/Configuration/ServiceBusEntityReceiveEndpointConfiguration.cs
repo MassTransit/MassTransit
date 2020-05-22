@@ -128,7 +128,7 @@
                 yield return this.Failure("MaxConcurrentCalls", "must be > 0");
         }
 
-        protected void CreateReceiveEndpoint(IServiceBusHostControl host, ServiceBusReceiveEndpointContext receiveEndpointContext)
+        protected void CreateReceiveEndpoint(IHost host, ServiceBusReceiveEndpointContext receiveEndpointContext)
         {
             var transportObserver = receiveEndpointContext.TransportObservers;
 
@@ -144,8 +144,8 @@
             {
                 var messageReceiver = new BrokeredMessageReceiver(receiveEndpointContext);
 
-                var errorTransport = CreateErrorTransport(host);
-                var deadLetterTransport = CreateDeadLetterTransport(host);
+                var errorTransport = CreateErrorTransport();
+                var deadLetterTransport = CreateDeadLetterTransport();
 
                 receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
                 receiveEndpointContext.GetOrAddPayload(() => errorTransport);
@@ -161,9 +161,9 @@
 
             IPipe<ClientContext> clientPipe = ClientPipeConfigurator.Build();
 
-            var supervisor = CreateClientContextSupervisor(host.ConnectionContextSupervisor);
+            var supervisor = CreateClientContextSupervisor(_hostConfiguration.ConnectionContextSupervisor);
 
-            var transport = new ReceiveTransport(host, _settings, supervisor, clientPipe, receiveEndpointContext);
+            var transport = new ReceiveTransport(_settings, supervisor, clientPipe, receiveEndpointContext);
 
             transport.Add(consumerAgent);
 
@@ -176,25 +176,9 @@
             ReceiveEndpoint = receiveEndpoint;
         }
 
-        protected abstract IErrorTransport CreateErrorTransport(IServiceBusHostControl host);
-        protected abstract IDeadLetterTransport CreateDeadLetterTransport(IServiceBusHostControl host);
+        protected abstract IErrorTransport CreateErrorTransport();
+        protected abstract IDeadLetterTransport CreateDeadLetterTransport();
 
         protected abstract IClientContextSupervisor CreateClientContextSupervisor(IConnectionContextSupervisor supervisor);
-
-        protected ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(IServiceBusHostControl host, SendSettings settings)
-        {
-            var brokerTopology = settings.GetBrokerTopology();
-
-            var configureTopologyPipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology, false, host.Stopping)
-                .ToPipe<SendEndpointContext>();
-
-            var contextFactory = new SendEndpointContextFactory(host.ConnectionContextSupervisor, configureTopologyPipe, settings);
-            var supervisor = new SendEndpointContextSupervisor(contextFactory);
-
-            // TODO this should be owned by the transport
-            host.Add(supervisor);
-
-            return supervisor;
-        }
     }
 }

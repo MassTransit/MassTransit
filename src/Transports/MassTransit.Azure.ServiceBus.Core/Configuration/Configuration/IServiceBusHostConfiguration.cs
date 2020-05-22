@@ -1,8 +1,11 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Configuration
 {
     using System;
+    using GreenPipes;
     using MassTransit.Configuration;
+    using Pipeline;
     using Settings;
+    using Transport;
 
 
     public interface IServiceBusHostConfiguration :
@@ -13,7 +16,11 @@
 
         string BasePath { get; }
 
-        IServiceBusHostControl Proxy { get; }
+        IConnectionContextSupervisor ConnectionContextSupervisor { get; }
+
+        IRetryPolicy RetryPolicy { get; }
+
+        ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(SendSettings settings);
 
         /// <summary>
         /// Apply the endpoint definition to the receive endpoint configurator
