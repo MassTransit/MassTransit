@@ -5,6 +5,7 @@ namespace MassTransit.WindsorIntegration.Registration
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
     using MassTransit.Registration;
+    using MassTransit.Registration.Attachments;
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
@@ -26,14 +27,18 @@ namespace MassTransit.WindsorIntegration.Registration
             container.RegisterScopedContextProviderIfNotPresent();
 
             if (!container.Kernel.HasComponent(typeof(IConsumerScopeProvider)))
+            {
                 container.Register(Component.For<IConsumerScopeProvider>()
                     .ImplementedBy<WindsorConsumerScopeProvider>()
                     .LifestyleTransient());
+            }
 
             if (!container.Kernel.HasComponent(typeof(IConfigurationServiceProvider)))
+            {
                 container.Register(Component.For<IConfigurationServiceProvider>()
                     .ImplementedBy<WindsorConfigurationServiceProvider>()
                     .LifestyleSingleton());
+            }
 
             container.Register(
                 Component.For<MassTransit.IRegistration>()
@@ -65,7 +70,7 @@ namespace MassTransit.WindsorIntegration.Registration
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
 
-            ThrowIfAlreadyConfigured();
+            ThrowIfAlreadyConfigured(nameof(AddBus));
 
             Container.Register(
                 Component.For<IBusControl>()
@@ -76,6 +81,11 @@ namespace MassTransit.WindsorIntegration.Registration
 
         public void SetBusFactory<T>(T busFactory)
             where T : IRegistrationBusFactory<IKernel>
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<IKernel>> configure)
         {
             throw new NotImplementedException();
         }

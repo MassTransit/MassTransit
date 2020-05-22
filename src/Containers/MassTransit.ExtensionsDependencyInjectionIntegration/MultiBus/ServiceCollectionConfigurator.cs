@@ -1,8 +1,10 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
 {
     using System;
+    using System.Linq;
     using MassTransit.MultiBus;
     using MassTransit.Registration;
+    using MassTransit.Registration.Attachments;
     using Microsoft.Extensions.DependencyInjection;
     using Monitoring.Health;
     using Registration;
@@ -40,12 +42,26 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
 
-            ThrowIfAlreadyConfigured();
+            ThrowIfAlreadyConfigured(nameof(SetBusFactory));
 
-            Collection.AddSingleton(provider => Bind<TBus>.Create(CreateBus(busFactory, provider)));
+            Collection.AddSingleton(provider =>
+            {
+                IBusInstance<TBus> busInstance = CreateBus(busFactory, provider);
+
+                foreach (var configurator in provider.GetServices<Bind<TBus, IBusInstanceConfigurator>>().Select(x => x.Value))
+                    configurator.Configure(busInstance);
+
+                return Bind<TBus>.Create(busInstance);
+            });
+
             Collection.AddSingleton<IBusInstance>(provider => provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value);
+            Collection.AddSingleton(provider => provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value.BusInstance);
+        }
 
-            Collection.AddSingleton<TBus>(provider => provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value.BusInstance);
+        public override void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<IServiceProvider>> configure)
+        {
+            var configurator = new ServiceCollectionBusAttachmentConfigurator<TBus>(Collection);
+            configure?.Invoke(configurator);
         }
 
         IBusInstance<TBus> CreateBus<T>(T busFactory, IServiceProvider provider)

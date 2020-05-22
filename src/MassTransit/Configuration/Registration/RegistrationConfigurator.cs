@@ -11,25 +11,22 @@ namespace MassTransit.Registration
     using Internals.Extensions;
     using Metadata;
     using Microsoft.Extensions.Logging;
-    using Monitoring.Health;
     using Saga;
 
 
     /// <summary>
-    /// Used for registration of consumers and sagas
+    ///     Used for registration of consumers and sagas
     /// </summary>
     public class RegistrationConfigurator :
         IRegistrationConfigurator
     {
-        readonly IContainerRegistrar _containerRegistrar;
-        readonly ConcurrentDictionary<Type, IConsumerRegistration> _consumerRegistrations;
-        readonly ConcurrentDictionary<Type, IExecuteActivityRegistration> _executeActivityRegistrations;
         readonly ConcurrentDictionary<Type, IActivityRegistration> _activityRegistrations;
-        readonly ConcurrentDictionary<Type, ISagaRegistration> _sagaRegistrations;
+        readonly ConcurrentDictionary<Type, IConsumerRegistration> _consumerRegistrations;
+        readonly IContainerRegistrar _containerRegistrar;
         readonly ConcurrentDictionary<Type, IEndpointRegistration> _endpointRegistrations;
+        readonly ConcurrentDictionary<Type, IExecuteActivityRegistration> _executeActivityRegistrations;
+        readonly ConcurrentDictionary<Type, ISagaRegistration> _sagaRegistrations;
         bool _configured;
-
-        protected Func<IConfigurationServiceProvider, IBus, IClientFactory> ClientFactoryProvider { get; private set; } = BusClientFactoryProvider;
 
         public RegistrationConfigurator(IContainerRegistrar containerRegistrar = null)
         {
@@ -41,6 +38,8 @@ namespace MassTransit.Registration
             _activityRegistrations = new ConcurrentDictionary<Type, IActivityRegistration>();
             _endpointRegistrations = new ConcurrentDictionary<Type, IEndpointRegistration>();
         }
+
+        protected Func<IConfigurationServiceProvider, IBus, IClientFactory> ClientFactoryProvider { get; private set; } = BusClientFactoryProvider;
 
         public IConsumerRegistrationConfigurator<T> AddConsumer<T>(Action<IConsumerConfigurator<T>> configure)
             where T : class, IConsumer
@@ -74,8 +73,10 @@ namespace MassTransit.Registration
         public void AddConsumer(Type consumerType, Type consumerDefinitionType)
         {
             if (TypeMetadataCache.HasSagaInterfaces(consumerType))
+            {
                 throw new ArgumentException($"{TypeMetadataCache.GetShortName(consumerType)} is a saga, and cannot be registered as a consumer",
                     nameof(consumerType));
+            }
 
             IConsumerRegistration ValueFactory(Type type)
             {
@@ -289,10 +290,10 @@ namespace MassTransit.Registration
                 _activityRegistrations.ToDictionary(x => x.Key, x => x.Value), _endpointRegistrations.ToDictionary(x => x.Key, x => x.Value));
         }
 
-        protected void ThrowIfAlreadyConfigured()
+        protected void ThrowIfAlreadyConfigured(string methodName)
         {
             if (_configured)
-                throw new ConfigurationException("Either AddBus or AddMediator can be called, and only once.");
+                throw new ConfigurationException($"{methodName} can be called only once.");
 
             _configured = true;
         }

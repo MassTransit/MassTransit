@@ -1,6 +1,9 @@
 namespace MassTransit.Registration
 {
     using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Attachments;
     using Configuration;
 
 
@@ -20,7 +23,21 @@ namespace MassTransit.Registration
         public IBus Bus => BusInstance;
         public IBusControl BusControl => _instance.BusControl;
         public IHostConfiguration HostConfiguration => _instance.HostConfiguration;
-
         public TBus BusInstance { get; }
+
+        public void Connect(IBusAttachment attachment)
+        {
+            _instance.Connect(attachment);
+        }
+
+        public Task Start(CancellationToken cancellationToken)
+        {
+            return _instance.Start(cancellationToken);
+        }
+
+        public Task Stop(CancellationToken cancellationToken)
+        {
+            return _instance.Stop(cancellationToken);
+        }
     }
 }

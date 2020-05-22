@@ -37,24 +37,24 @@ namespace MassTransit.Containers.Tests.Common_Tests
             where T : class
         {
             configurator.AddConsumer<Consumer1>();
-            configurator.AddBus(context => MassTransit.Bus.Factory.CreateUsingInMemory(cfg =>
+            configurator.UsingInMemory((context, cfg) =>
             {
                 cfg.Host(new Uri("loopback://bus-one/"));
                 cfg.ConfigureEndpoints(context);
                 cfg.UseHealthCheck(context);
-            }));
+            });
         }
 
         protected static void ConfigureTwo<T>(IRegistrationConfigurator<IBusTwo, T> configurator)
             where T : class
         {
             configurator.AddConsumer<Consumer2>();
-            configurator.AddBus(context => MassTransit.Bus.Factory.CreateUsingInMemory(cfg =>
+            configurator.UsingInMemory((context, cfg) =>
             {
                 cfg.Host(new Uri("loopback://bus-two/"));
                 cfg.ConfigureEndpoints(context);
                 cfg.UseHealthCheck(context);
-            }));
+            });
         }
 
         protected Common_MultiBus()

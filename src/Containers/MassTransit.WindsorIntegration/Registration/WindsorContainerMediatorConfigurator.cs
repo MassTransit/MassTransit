@@ -24,14 +24,18 @@ namespace MassTransit.WindsorIntegration.Registration
             container.RegisterScopedContextProviderIfNotPresent();
 
             if (!container.Kernel.HasComponent(typeof(IConsumerScopeProvider)))
+            {
                 container.Register(Component.For<IConsumerScopeProvider>()
                     .ImplementedBy<WindsorConsumerScopeProvider>()
                     .LifestyleTransient());
+            }
 
             if (!container.Kernel.HasComponent(typeof(IConfigurationServiceProvider)))
+            {
                 container.Register(Component.For<IConfigurationServiceProvider>()
                     .ImplementedBy<WindsorConfigurationServiceProvider>()
                     .LifestyleSingleton());
+            }
 
             container.Register(
                 Component.For<IMediator>()
@@ -44,7 +48,10 @@ namespace MassTransit.WindsorIntegration.Registration
 
         public void ConfigureMediator(Action<IKernel, IReceiveEndpointConfigurator> configure)
         {
-            ThrowIfAlreadyConfigured();
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+
+            ThrowIfAlreadyConfigured(nameof(ConfigureMediator));
             _configure = configure;
         }
 

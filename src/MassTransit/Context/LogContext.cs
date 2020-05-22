@@ -9,13 +9,6 @@ namespace MassTransit.Context
 
     public static class LogContext
     {
-        public static EnabledLogger? Critical => Current?.Critical;
-        public static EnabledLogger? Debug => Current?.Debug;
-        public static EnabledLogger? Error => Current?.Error;
-        public static EnabledLogger? Info => Current?.Info;
-        public static EnabledLogger? Trace => Current?.Trace;
-        public static EnabledLogger? Warning => Current?.Warning;
-
         static readonly AsyncLocal<ILogContext> _current;
 
         static LogContext()
@@ -23,9 +16,16 @@ namespace MassTransit.Context
             _current = new AsyncLocal<ILogContext>();
         }
 
+        public static EnabledLogger? Critical => Current?.Critical;
+        public static EnabledLogger? Debug => Current?.Debug;
+        public static EnabledLogger? Error => Current?.Error;
+        public static EnabledLogger? Info => Current?.Info;
+        public static EnabledLogger? Trace => Current?.Trace;
+        public static EnabledLogger? Warning => Current?.Warning;
+
         /// <summary>
-        /// Gets or sets the current operation (Activity) for the current thread.  This flows
-        /// across async calls.
+        ///     Gets or sets the current operation (Activity) for the current thread.  This flows
+        ///     across async calls.
         /// </summary>
         public static ILogContext Current
         {
@@ -39,8 +39,8 @@ namespace MassTransit.Context
         }
 
         /// <summary>
-        /// Configure the current <see cref="LogContext"/> using the specified <paramref name="logger"/>, which will be
-        /// used for all log output.
+        ///     Configure the current <see cref="LogContext" /> using the specified <paramref name="logger" />, which will be
+        ///     used for all log output.
         /// </summary>
         /// <param name="logger">An existing logger</param>
         public static void ConfigureCurrentLogContext(ILogger logger)
@@ -62,13 +62,12 @@ namespace MassTransit.Context
 
         public static void SetCurrentIfNull(ILogContext context)
         {
-            if (Current == null)
-                Current = context;
+            Current ??= context;
         }
 
         public static LogMessage<T1> Define<T1>(LogLevel logLevel, string formatString)
         {
-            var logAction = LoggerMessage.Define<T1>(logLevel, default, formatString);
+            Action<ILogger, T1, Exception> logAction = LoggerMessage.Define<T1>(logLevel, default, formatString);
 
             void Log(T1 arg1, Exception exception)
             {
@@ -82,7 +81,7 @@ namespace MassTransit.Context
 
         public static LogMessage<T1, T2> Define<T1, T2>(LogLevel logLevel, string formatString)
         {
-            var logAction = LoggerMessage.Define<T1, T2>(logLevel, default, formatString);
+            Action<ILogger, T1, T2, Exception> logAction = LoggerMessage.Define<T1, T2>(logLevel, default, formatString);
 
             void Log(T1 arg1, T2 arg2, Exception exception)
             {
@@ -96,7 +95,7 @@ namespace MassTransit.Context
 
         public static LogMessage<T1, T2, T3> Define<T1, T2, T3>(LogLevel logLevel, string formatString)
         {
-            var logAction = LoggerMessage.Define<T1, T2, T3>(logLevel, default, formatString);
+            Action<ILogger, T1, T2, T3, Exception> logAction = LoggerMessage.Define<T1, T2, T3>(logLevel, default, formatString);
 
             void Log(T1 arg1, T2 arg2, T3 arg3, Exception exception)
             {
@@ -110,7 +109,7 @@ namespace MassTransit.Context
 
         public static LogMessage<T1, T2, T3, T4> Define<T1, T2, T3, T4>(LogLevel logLevel, string formatString)
         {
-            var logAction = LoggerMessage.Define<T1, T2, T3, T4>(logLevel, default, formatString);
+            Action<ILogger, T1, T2, T3, T4, Exception> logAction = LoggerMessage.Define<T1, T2, T3, T4>(logLevel, default, formatString);
 
             void Log(T1 arg1, T2 arg2, T3 arg3, T4 arg4, Exception exception)
             {
@@ -124,7 +123,7 @@ namespace MassTransit.Context
 
         public static LogMessage<T1, T2, T3, T4, T5> Define<T1, T2, T3, T4, T5>(LogLevel logLevel, string formatString)
         {
-            var logAction = LoggerMessage.Define<T1, T2, T3, T4, T5>(logLevel, default, formatString);
+            Action<ILogger, T1, T2, T3, T4, T5, Exception> logAction = LoggerMessage.Define<T1, T2, T3, T4, T5>(logLevel, default, formatString);
 
             void Log(T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, Exception exception)
             {

@@ -70,10 +70,10 @@
 
         protected virtual void ConfigureHost(IRabbitMqBusFactoryConfigurator configurator)
         {
-             configurator.Host(HostAddress, h =>
-             {
-                 ConfigureHostSettings(h);
-             });
+            configurator.Host(HostAddress, h =>
+            {
+                ConfigureHostSettings(h);
+            });
         }
 
         public RabbitMqHostSettings GetHostSettings()

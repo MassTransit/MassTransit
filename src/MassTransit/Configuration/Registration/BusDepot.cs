@@ -11,8 +11,8 @@ namespace MassTransit.Registration
     public class BusDepot :
         IBusDepot
     {
-        readonly ILogger<BusDepot> _logger;
         readonly IDictionary<Type, IBusInstance> _instances;
+        readonly ILogger<BusDepot> _logger;
 
         public BusDepot(IEnumerable<IBusInstance> instances, ILogger<BusDepot> logger)
         {
@@ -24,14 +24,14 @@ namespace MassTransit.Registration
         {
             _logger.LogDebug("Starting bus instances: {Instances}", string.Join(", ", _instances.Keys.Select(x => x.Name)));
 
-            await Task.WhenAll(_instances.Values.Select(x => x.BusControl.StartAsync(cancellationToken))).ConfigureAwait(false);
+            await Task.WhenAll(_instances.Values.Select(x => x.Start(cancellationToken))).ConfigureAwait(false);
         }
 
         public async Task Stop(CancellationToken cancellationToken)
         {
             _logger.LogDebug("Stopping bus instances: {Instances}", string.Join(", ", _instances.Keys.Select(x => x.Name)));
 
-            await Task.WhenAll(_instances.Values.Select(x => x.BusControl.StopAsync(cancellationToken))).ConfigureAwait(false);
+            await Task.WhenAll(_instances.Values.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
         }
     }
 }

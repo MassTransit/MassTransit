@@ -31,6 +31,15 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             ConfigureMediator((_, cfg) => configure(cfg));
         }
 
+        public void ConfigureMediator(Action<Container, IReceiveEndpointConfigurator> configure)
+        {
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+
+            ThrowIfAlreadyConfigured(nameof(ConfigureMediator));
+            _configure = configure;
+        }
+
         IMediator MediatorFactory()
         {
             var provider = Container.GetInstance<IConfigurationServiceProvider>();
@@ -43,12 +52,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
                 ConfigureMediator(cfg, provider);
             });
-        }
-
-        public void ConfigureMediator(Action<Container, IReceiveEndpointConfigurator> configure)
-        {
-            ThrowIfAlreadyConfigured();
-            _configure = configure;
         }
 
         static void AddMassTransitComponents(Container container)

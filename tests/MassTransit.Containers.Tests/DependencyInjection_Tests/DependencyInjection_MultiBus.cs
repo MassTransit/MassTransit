@@ -10,7 +10,6 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
     using Microsoft.Extensions.Logging;
     using MultiBus;
     using NUnit.Framework;
-    using TestFramework.Logging;
 
 
     [TestFixture]
@@ -27,7 +26,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
         {
             var services = new ServiceCollection();
 
-            services.TryAddSingleton<ILoggerFactory>(provider => new TestOutputLoggerFactory(true));
+            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
             services.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
 
             services.AddSingleton(Task1);

@@ -1,0 +1,63 @@
+namespace MassTransit.KafkaIntegration.Subscriptions
+{
+    using System;
+    using System.Collections.Generic;
+    using Configuration;
+    using Configurators;
+    using Confluent.Kafka;
+    using GreenPipes;
+    using Registration;
+    using Serializers;
+
+
+    public class KafkaTopic<TKey, TValue> :
+        IKafkaTopic
+        where TValue : class
+    {
+        readonly Action<IKafkaTopicConfigurator<TKey, TValue>> _configure;
+        readonly ConsumerConfig _consumerConfig;
+        readonly IHeadersDeserializer _headersDeserializer;
+
+        public KafkaTopic(ConsumerConfig consumerConfig, ITopicNameFormatter topicNameFormatter, IHeadersDeserializer headersDeserializer,
+            Action<IKafkaTopicConfigurator<TKey, TValue>> configure)
+        {
+            _consumerConfig = consumerConfig;
+            Name = topicNameFormatter.GetTopicName<TKey, TValue>();
+            _headersDeserializer = headersDeserializer;
+            _configure = configure;
+        }
+
+        public string Name { get; }
+
+        public IKafkaConsumer CreateConsumer(IBusInstance busInstance)
+        {
+            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration($"kafka-{Name}");
+            var configurator =
+                new KafkaTopicConfigurator<TKey, TValue>(_consumerConfig, Name, busInstance, endpointConfiguration, _headersDeserializer);
+            _configure?.Invoke(configurator);
+
+            var result = BusConfigurationResult.CompileResults(configurator.Validate());
+
+            try
+            {
+                return configurator.Build();
+            }
+            catch (Exception ex)
+            {
+                throw new ConfigurationException(result, "An exception occurred creating the EventDataReceiver", ex);
+            }
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (string.IsNullOrEmpty(Name))
+                yield return this.Failure("Topic", "should not be empty");
+
+            if (string.IsNullOrEmpty(_consumerConfig.GroupId))
+                yield return this.Failure("GroupId", "should not be empty");
+
+            if (string.IsNullOrEmpty(_consumerConfig.BootstrapServers))
+                yield return this.Failure("BootstrapServers", "should not be empty. Please use cfg.Host() to configure it");
+        }
+    }
+}

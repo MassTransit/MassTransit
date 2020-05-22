@@ -57,6 +57,8 @@
             TaskCompletionSource = GetTask<MyId>();
         }
 
+        protected abstract IRegistration Registration { get; }
+
         [Test]
         public async Task Should_use_scope()
         {
@@ -65,13 +67,13 @@
             var result = await TaskCompletionSource.Task;
             Assert.IsNotNull(result);
         }
+
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             ConfigureFilter(configurator);
         }
 
         protected abstract void ConfigureFilter(IConsumePipeConfigurator configurator);
-        protected abstract IRegistration Registration { get; }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -90,8 +92,8 @@
             IFilter<ConsumeContext<T>>
             where T : class
         {
-            readonly TaskCompletionSource<MyId> _taskCompletionSource;
             readonly MyId _myId;
+            readonly TaskCompletionSource<MyId> _taskCompletionSource;
 
             public ScopedFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId)
             {

@@ -126,6 +126,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interoperability", "Interop
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Interop.NServiceBus", "src\MassTransit.Interop.NServiceBus\MassTransit.Interop.NServiceBus.csproj", "{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.KafkaIntegration", "src\Transports\MassTransit.KafkaIntegration\MassTransit.KafkaIntegration.csproj", "{1FC221F1-E49D-473C-9869-4452B2C4EBEE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.KafkaIntegration.Tests", "tests\MassTransit.KafkaIntegration.Tests\MassTransit.KafkaIntegration.Tests.csproj", "{555EC658-5EF6-4C10-ABA0-B717896398BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -657,6 +661,30 @@ Global
 		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
 		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
 		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
+		{1FC221F1-E49D-473C-9869-4452B2C4EBEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FC221F1-E49D-473C-9869-4452B2C4EBEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FC221F1-E49D-473C-9869-4452B2C4EBEE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1FC221F1-E49D-473C-9869-4452B2C4EBEE}.Debug|x86.Build.0 = Debug|Any CPU
+		{1FC221F1-E49D-473C-9869-4452B2C4EBEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FC221F1-E49D-473C-9869-4452B2C4EBEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FC221F1-E49D-473C-9869-4452B2C4EBEE}.Release|x86.ActiveCfg = Release|Any CPU
+		{1FC221F1-E49D-473C-9869-4452B2C4EBEE}.Release|x86.Build.0 = Release|Any CPU
+		{1FC221F1-E49D-473C-9869-4452B2C4EBEE}.ReleaseUnsigned|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FC221F1-E49D-473C-9869-4452B2C4EBEE}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
+		{1FC221F1-E49D-473C-9869-4452B2C4EBEE}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
+		{1FC221F1-E49D-473C-9869-4452B2C4EBEE}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
+		{555EC658-5EF6-4C10-ABA0-B717896398BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{555EC658-5EF6-4C10-ABA0-B717896398BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{555EC658-5EF6-4C10-ABA0-B717896398BE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{555EC658-5EF6-4C10-ABA0-B717896398BE}.Debug|x86.Build.0 = Debug|Any CPU
+		{555EC658-5EF6-4C10-ABA0-B717896398BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{555EC658-5EF6-4C10-ABA0-B717896398BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{555EC658-5EF6-4C10-ABA0-B717896398BE}.Release|x86.ActiveCfg = Release|Any CPU
+		{555EC658-5EF6-4C10-ABA0-B717896398BE}.Release|x86.Build.0 = Release|Any CPU
+		{555EC658-5EF6-4C10-ABA0-B717896398BE}.ReleaseUnsigned|Any CPU.ActiveCfg = Debug|Any CPU
+		{555EC658-5EF6-4C10-ABA0-B717896398BE}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
+		{555EC658-5EF6-4C10-ABA0-B717896398BE}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
+		{555EC658-5EF6-4C10-ABA0-B717896398BE}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -707,6 +735,8 @@ Global
 		{1AF687AB-41DE-4B2A-97F5-E9BBF5E51C75} = {DE40BDEC-6277-4E14-8EB6-D0B6863571BC}
 		{A29B1D94-6F11-487E-B4A1-3460928EC2C0} = {DE40BDEC-6277-4E14-8EB6-D0B6863571BC}
 		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7} = {4F40E08B-7C24-4D2A-8476-B7F93D0A2910}
+		{1FC221F1-E49D-473C-9869-4452B2C4EBEE} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
+		{555EC658-5EF6-4C10-ABA0-B717896398BE} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43D3A7D5-0945-435E-8D03-1E631E5CDBA8}

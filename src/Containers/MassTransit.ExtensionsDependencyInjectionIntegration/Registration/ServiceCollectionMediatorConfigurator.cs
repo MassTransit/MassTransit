@@ -27,21 +27,21 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         public IServiceCollection Collection { get; }
 
+        public void ConfigureMediator(Action<IServiceProvider, IReceiveEndpointConfigurator> configure)
+        {
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+
+            ThrowIfAlreadyConfigured(nameof(ConfigureMediator));
+            _configure = configure;
+        }
+
         static void AddMassTransitComponents(IServiceCollection collection)
         {
             collection.TryAddScoped<ScopedConsumeContextProvider>();
             collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext());
             collection.TryAddSingleton<IConsumerScopeProvider>(provider => new DependencyInjectionConsumerScopeProvider(provider));
             collection.TryAddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
-        }
-
-        public void ConfigureMediator(Action<IServiceProvider, IReceiveEndpointConfigurator> configure)
-        {
-            if(configure == null)
-                throw new ArgumentNullException(nameof(configure));
-
-            ThrowIfAlreadyConfigured();
-            _configure = configure;
         }
 
         IMediator MediatorFactory(IServiceProvider serviceProvider)

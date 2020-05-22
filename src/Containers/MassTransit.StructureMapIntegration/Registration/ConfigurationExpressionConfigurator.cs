@@ -2,6 +2,7 @@ namespace MassTransit.StructureMapIntegration.Registration
 {
     using System;
     using MassTransit.Registration;
+    using MassTransit.Registration.Attachments;
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
@@ -68,7 +69,7 @@ namespace MassTransit.StructureMapIntegration.Registration
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
 
-            ThrowIfAlreadyConfigured();
+            ThrowIfAlreadyConfigured(nameof(AddBus));
 
             _expression.For<IBusControl>()
                 .Use(context => BusFactory(context, busFactory))
@@ -81,6 +82,11 @@ namespace MassTransit.StructureMapIntegration.Registration
 
         public void SetBusFactory<T>(T busFactory)
             where T : IRegistrationBusFactory<IContext>
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<IContext>> configure)
         {
             throw new NotImplementedException();
         }

@@ -3,92 +3,112 @@
     public static class MessageHeaders
     {
         /// <summary>
-        /// The reason for a message action being taken
+        ///     The reason for a message action being taken
         /// </summary>
         public const string Reason = "MT-Reason";
 
         /// <summary>
-        /// The type of exception from a Fault
+        ///     The type of exception from a Fault
         /// </summary>
         public const string FaultExceptionType = "MT-Fault-ExceptionType";
 
         /// <summary>
-        /// The exception message from a Fault
+        ///     The exception message from a Fault
         /// </summary>
         public const string FaultMessage = "MT-Fault-Message";
 
         /// <summary>
-        /// The message type from a Fault
+        ///     The message type from a Fault
         /// </summary>
         public const string FaultMessageType = "MT-Fault-MessageType";
 
         /// <summary>
-        /// The consumer type which faulted
+        ///     The consumer type which faulted
         /// </summary>
         public const string FaultConsumerType = "MT-Fault-ConsumerType";
 
         /// <summary>
-        /// The timestamp when the fault occurred
+        ///     The timestamp when the fault occurred
         /// </summary>
         public const string FaultTimestamp = "MT-Fault-Timestamp";
 
         /// <summary>
-        /// The stack trace from a Fault
+        ///     The stack trace from a Fault
         /// </summary>
         public const string FaultStackTrace = "MT-Fault-StackTrace";
 
         /// <summary>
-        /// The number of times the message was retried
+        ///     The number of times the message was retried
         /// </summary>
         public const string FaultRetryCount = "MT-Fault-RetryCount";
 
         /// <summary>
-        /// The endpoint that forwarded the message to the new destination
+        ///     The endpoint that forwarded the message to the new destination
         /// </summary>
         public const string ForwarderAddress = "MT-Forwarder-Address";
 
         /// <summary>
-        /// The address where the message was originally delivered before being rescheduled
+        ///     The address where the message was originally delivered before being rescheduled
         /// </summary>
         public const string DeliveredAddress = "MT-Scheduling-DeliveredAddress";
 
         /// <summary>
-        /// The tokenId for the message that was registered with the scheduler
+        ///     The tokenId for the message that was registered with the scheduler
         /// </summary>
         public const string SchedulingTokenId = "MT-Scheduling-TokenId";
 
         /// <summary>
-        /// The number of times the message has been redelivered (zero if never)
+        ///     The number of times the message has been redelivered (zero if never)
         /// </summary>
         public const string RedeliveryCount = "MT-Redelivery-Count";
 
         /// <summary>
-        /// The trigger key that was used when the scheduled message was trigger
+        ///     The trigger key that was used when the scheduled message was trigger
         /// </summary>
         public const string QuartzTriggerKey = "MT-Quartz-TriggerKey";
 
         /// <summary>
-        /// Identifies the client from which the request is being sent
+        ///     Identifies the client from which the request is being sent
         /// </summary>
         public const string ClientId = "MT-Request-ClientId";
 
         /// <summary>
-        /// Identifies the endpoint that handled the request
+        ///     Identifies the endpoint that handled the request
         /// </summary>
         public const string EndpointId = "MT-Request-EndpointId";
 
         /// <summary>
-        /// The messageId, which is typically only in a transport header
+        ///     The messageId, which is typically only in a transport header
         /// </summary>
         public const string MessageId = "MessageId";
 
         /// <summary>
-        /// The Transport message ID, which is a string, because we can't assume anything
+        ///     The correlationId
+        /// </summary>
+        public const string CorrelationId = "CorrelationId";
+
+        /// <summary>
+        ///     The conversationId
+        /// </summary>
+        public const string ConversationId = "ConversationId";
+
+        /// <summary>
+        ///     The initiatorId
+        /// </summary>
+        public const string InitiatorId = "InitiatorId";
+
+        /// <summary>
+        ///     The source address
+        /// </summary>
+        public const string SourceAddress = "Source-Address";
+
+        /// <summary>
+        ///     The Transport message ID, which is a string, because we can't assume anything
         /// </summary>
         public const string TransportMessageId = "TransportMessageId";
 
         /// <summary>
-        /// When a transport header is used, this is the name
+        ///     When a transport header is used, this is the name
         /// </summary>
         public const string ContentType = "Content-Type";
 
@@ -115,22 +135,22 @@
         public static class Quartz
         {
             /// <summary>
-            /// The time when the message was scheduled
+            ///     The time when the message was scheduled
             /// </summary>
             public const string Scheduled = "MT-Quartz-Scheduled";
 
             /// <summary>
-            /// When the event for this message was fired by Quartz
+            ///     When the event for this message was fired by Quartz
             /// </summary>
             public const string Sent = "MT-Quartz-Sent";
 
             /// <summary>
-            /// When the next message is scheduled to be sent
+            ///     When the next message is scheduled to be sent
             /// </summary>
             public const string NextScheduled = "MT-Quartz-NextScheduled";
 
             /// <summary>
-            /// When the previous message was sent
+            ///     When the previous message was sent
             /// </summary>
             public const string PreviousSent = "MT-Quartz-PreviousSent";
         }

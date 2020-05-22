@@ -58,6 +58,15 @@ namespace MassTransit.AutofacIntegration.Registration
             set => _registrar.ConfigureScope = value;
         }
 
+        public void ConfigureMediator(Action<IComponentContext, IReceiveEndpointConfigurator> configure)
+        {
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+
+            ThrowIfAlreadyConfigured(nameof(ConfigureMediator));
+            _configure = configure;
+        }
+
         IMediator MediatorFactory(IComponentContext context)
         {
             var provider = context.Resolve<IConfigurationServiceProvider>();
@@ -76,15 +85,6 @@ namespace MassTransit.AutofacIntegration.Registration
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());
             return new AutofacConsumerScopeProvider(lifetimeScopeProvider, ScopeName, ConfigureScope);
-        }
-
-        public void ConfigureMediator(Action<IComponentContext, IReceiveEndpointConfigurator> configure)
-        {
-            if (configure == null)
-                throw new ArgumentNullException(nameof(configure));
-
-            ThrowIfAlreadyConfigured();
-            _configure = configure;
         }
     }
 }

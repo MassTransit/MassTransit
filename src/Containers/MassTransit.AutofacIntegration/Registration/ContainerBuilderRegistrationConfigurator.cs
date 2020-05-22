@@ -3,6 +3,7 @@ namespace MassTransit.AutofacIntegration.Registration
     using System;
     using Autofac;
     using MassTransit.Registration;
+    using MassTransit.Registration.Attachments;
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
@@ -88,7 +89,7 @@ namespace MassTransit.AutofacIntegration.Registration
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
 
-            ThrowIfAlreadyConfigured();
+            ThrowIfAlreadyConfigured(nameof(AddBus));
 
             _builder.Register(context => BusFactory(context, busFactory))
                 .As<IBusControl>()
@@ -98,6 +99,11 @@ namespace MassTransit.AutofacIntegration.Registration
 
         public void SetBusFactory<T>(T busFactory)
             where T : IRegistrationBusFactory<IComponentContext>
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<IComponentContext>> configure)
         {
             throw new NotImplementedException();
         }

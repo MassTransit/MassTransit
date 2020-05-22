@@ -13,10 +13,7 @@ namespace MassTransit.Registration
 
         public RegistrationBusFactory(Func<IRegistrationContext<TContainerContext>, IBusControl> configure)
         {
-            if (configure == null)
-                throw new ArgumentNullException(nameof(configure));
-
-            _configure = configure;
+            _configure = configure ?? throw new ArgumentNullException(nameof(configure));
         }
 
         public IBusInstance CreateBus(IRegistrationContext<TContainerContext> context)

@@ -3,6 +3,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using System;
     using Context;
     using MassTransit.Registration;
+    using MassTransit.Registration.Attachments;
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
@@ -51,7 +52,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
 
-            ThrowIfAlreadyConfigured();
+            ThrowIfAlreadyConfigured(nameof(AddBus));
 
             IBusControl BusFactory()
             {
@@ -70,6 +71,11 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         public void SetBusFactory<T>(T busFactory)
             where T : IRegistrationBusFactory<Container>
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<Container>> configure)
         {
             throw new NotImplementedException();
         }

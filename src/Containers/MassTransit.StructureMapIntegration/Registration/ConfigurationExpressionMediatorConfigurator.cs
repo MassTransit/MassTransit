@@ -37,7 +37,10 @@ namespace MassTransit.StructureMapIntegration.Registration
 
         public void ConfigureMediator(Action<IContext, IReceiveEndpointConfigurator> configure)
         {
-            ThrowIfAlreadyConfigured();
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+
+            ThrowIfAlreadyConfigured(nameof(ConfigureMediator));
             _configure = configure;
         }
 

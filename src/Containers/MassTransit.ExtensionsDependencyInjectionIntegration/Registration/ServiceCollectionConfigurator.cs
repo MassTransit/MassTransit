@@ -1,8 +1,12 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Configurators;
     using Context;
     using MassTransit.Registration;
+    using MassTransit.Registration.Attachments;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Monitoring.Health;
@@ -48,13 +52,31 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
 
-            ThrowIfAlreadyConfigured();
+            ThrowIfAlreadyConfigured(nameof(SetBusFactory));
 
-            Collection.AddSingleton(provider => Bind<IBus>.Create(busFactory.CreateBus(GetRegistrationContext(provider))));
+            Collection.AddSingleton(provider =>
+            {
+                var busInstance = busFactory.CreateBus(GetRegistrationContext(provider));
+
+                IEnumerable<IBusInstanceConfigurator> configurators = provider.GetServices<Bind<IBus, IBusInstanceConfigurator>>().Select(x => x.Value);
+
+                BusConfigurationResult.CompileResults(configurators.SelectMany(x => x.Validate()));
+
+                foreach (var configurator in configurators)
+                    configurator.Configure(busInstance);
+
+                return Bind<IBus>.Create(busInstance);
+            });
+
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value);
-
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.BusControl);
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.Bus);
+        }
+
+        public virtual void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<IServiceProvider>> configure)
+        {
+            var configurator = new ServiceCollectionBusAttachmentConfigurator(Collection);
+            configure?.Invoke(configurator);
         }
 
         static void AddMassTransitComponents(IServiceCollection collection)
