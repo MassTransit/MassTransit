@@ -5,6 +5,7 @@ namespace MassTransit.KafkaIntegration
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Context;
+    using Transport;
     using Util;
 
 
@@ -22,14 +23,17 @@ namespace MassTransit.KafkaIntegration
         readonly IConsumer<TKey, TValue> _consumer;
         readonly bool _isAutoCommitEnabled;
         readonly ILogContext _logContext;
+        readonly IKafkaReceiver<TKey, TValue> _receiver;
         readonly string _topic;
         CancellationTokenSource _cancellationTokenSource;
         Task _consumerTask;
 
-        public KafkaSubscription(string topic, IConsumer<TKey, TValue> consumer, ILogContext logContext, bool isAutoCommitEnabled)
+        public KafkaSubscription(string topic, IConsumer<TKey, TValue> consumer, IKafkaReceiver<TKey, TValue> receiver, ILogContext logContext,
+            bool isAutoCommitEnabled)
         {
             _topic = topic;
             _consumer = consumer;
+            _receiver = receiver;
             _logContext = logContext;
             _isAutoCommitEnabled = isAutoCommitEnabled;
         }
@@ -46,6 +50,8 @@ namespace MassTransit.KafkaIntegration
                     try
                     {
                         ConsumeResult<TKey, TValue> message = _consumer.Consume(cancellationToken);
+
+                        await _receiver.Handle(message, cancellationToken).ConfigureAwait(false);
 
                         if (!_isAutoCommitEnabled)
                             _consumer.Commit(message);

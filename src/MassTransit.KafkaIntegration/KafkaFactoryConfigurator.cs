@@ -1,19 +1,25 @@
 namespace MassTransit.KafkaIntegration
 {
     using System;
+    using System.Collections.Generic;
     using Configuration;
     using Configuration.Configurators;
     using Confluent.Kafka;
+    using Context;
+    using Metadata;
+    using Registration;
 
 
-    public class KafkaAttachmentConfigurator :
-        IKafkaAttachmentConfigurator
+    public class KafkaFactoryConfigurator :
+        IKafkaFactoryConfigurator
     {
         readonly ClientConfig _clientConfig;
+        readonly List<IKafkaSubscriptionDefinition> _definitions;
 
-        public KafkaAttachmentConfigurator()
+        public KafkaFactoryConfigurator(ClientConfig clientConfig)
         {
-            _clientConfig = new ClientConfig();
+            _clientConfig = clientConfig;
+            _definitions = new List<IKafkaSubscriptionDefinition>();
         }
 
         public void Host(string servers, Action<IKafkaHostConfigurator> configure)
@@ -33,6 +39,17 @@ namespace MassTransit.KafkaIntegration
         {
             var configurator = new KafkaSocketConfigurator(_clientConfig);
             configure?.Invoke(configurator);
+        }
+
+        public void Subscribe<TKey, TValue>(ITopicNameFormatter topicNameFormatter, Action<IKafkaSubscriptionConfigurator<TKey, TValue>> configure)
+            where TValue : class
+        {
+            var configurator = new KafkaSubscriptionConfigurator<TKey, TValue>(_clientConfig, topicNameFormatter);
+            configure?.Invoke(configurator);
+
+            IKafkaSubscriptionDefinition definition =
+                configurator.Build(LogContext.CreateLogContext(TypeMetadataCache<KafkaSubscription<TKey, TValue>>.ShortName));
+            _definitions.Add(definition);
         }
 
         public Acks? Acks
@@ -158,6 +175,12 @@ namespace MassTransit.KafkaIntegration
         public string ClientRack
         {
             set => _clientConfig.ClientRack = value;
+        }
+
+        public IBusInstanceConfigurator Build()
+        {
+            var configurator = new KafkaBusInstanceConfigurator(_definitions);
+            return configurator;
         }
     }
 }

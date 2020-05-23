@@ -1,6 +1,8 @@
 namespace MassTransit.Registration
 {
     using System;
+    using System.Collections.Generic;
+    using Attachments;
     using Configuration;
 
 
@@ -8,6 +10,7 @@ namespace MassTransit.Registration
         IBusInstance<TBus>
         where TBus : IBus
     {
+        readonly IList<IBusAttachment> _attachments = new List<IBusAttachment>();
         readonly IBusInstance _instance;
 
         public MultiBusInstance(TBus bus, IBusInstance instance)
@@ -20,6 +23,11 @@ namespace MassTransit.Registration
         public IBus Bus => BusInstance;
         public IBusControl BusControl => _instance.BusControl;
         public IHostConfiguration HostConfiguration => _instance.HostConfiguration;
+
+        public void Connect(IBusAttachment attachment)
+        {
+            _attachments.Add(attachment);
+        }
 
         public TBus BusInstance { get; }
     }

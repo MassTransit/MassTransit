@@ -5,7 +5,7 @@ namespace MassTransit.KafkaIntegration
     using Confluent.Kafka;
 
 
-    public interface IKafkaAttachmentConfigurator
+    public interface IKafkaFactoryConfigurator
     {
         /// <summary>
         ///     This field indicates the number of acknowledgements the leader broker must receive from ISR brokers
@@ -203,5 +203,8 @@ namespace MassTransit.KafkaIntegration
         void ConfigureApi(Action<IKafkaApiConfigurator> configure);
 
         void ConfigureSocket(Action<IKafkaSocketConfigurator> configure);
+
+        void Subscribe<TKey, TValue>(ITopicNameFormatter topicNameFormatter, Action<IKafkaSubscriptionConfigurator<TKey, TValue>> configure)
+            where TValue : class;
     }
 }

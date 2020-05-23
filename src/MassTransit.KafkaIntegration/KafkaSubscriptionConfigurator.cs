@@ -14,6 +14,7 @@ namespace MassTransit.KafkaIntegration
         where TValue : class
     {
         readonly ConsumerConfig _consumerConfig;
+        readonly ITopicNameFormatter _topicNameFormatter;
         Action<IConsumer<TKey, TValue>, Error> _errorHandler;
         IDeserializer<TKey> _keyDeserializer;
         Action<IConsumer<TKey, TValue>, LogMessage> _logHandler;
@@ -23,8 +24,9 @@ namespace MassTransit.KafkaIntegration
         Action<IConsumer<TKey, TValue>, string> _statisticsHandler;
         IDeserializer<TValue> _valueDeserializer;
 
-        public KafkaSubscriptionConfigurator(ClientConfig clientConfig)
+        public KafkaSubscriptionConfigurator(ClientConfig clientConfig, ITopicNameFormatter topicNameFormatter)
         {
+            _topicNameFormatter = topicNameFormatter;
             _consumerConfig = new ConsumerConfig(clientConfig);
             EnableAutoCommit(TimeSpan.FromSeconds(5));
         }
@@ -199,9 +201,9 @@ namespace MassTransit.KafkaIntegration
             _offsetsCommittedHandler = offsetsCommittedHandler ?? throw new ArgumentNullException(nameof(offsetsCommittedHandler));
         }
 
-        public KafkaSubscription<TKey, TValue> Build(ITopicNameFormatter entityNameFormatter, ILogContext logContext)
+        public KafkaSubscriptionDefinition<TKey, TValue> Build(ILogContext logContext)
         {
-            var topic = entityNameFormatter.GetTopicName<TKey, TValue>();
+            var topic = _topicNameFormatter.GetTopicName<TKey, TValue>();
 
             ConsumerBuilder<TKey, TValue> consumerBuilder = new ConsumerBuilder<TKey, TValue>(_consumerConfig)
                 .SetLogHandler((consumer, message) =>
@@ -235,7 +237,7 @@ namespace MassTransit.KafkaIntegration
             if (_partitionAssignmentHandler != null)
                 consumerBuilder.SetPartitionsAssignedHandler(_partitionAssignmentHandler);
 
-            return new KafkaSubscription<TKey, TValue>(topic, consumerBuilder.Build(), logContext, _consumerConfig.EnableAutoCommit == true);
+            return new KafkaSubscriptionDefinition<TKey, TValue>(topic, consumerBuilder.Build(), logContext, _consumerConfig);
         }
     }
 }

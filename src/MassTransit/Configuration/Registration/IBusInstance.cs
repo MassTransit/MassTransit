@@ -1,6 +1,7 @@
 namespace MassTransit.Registration
 {
     using System;
+    using Attachments;
     using Configuration;
 
 
@@ -12,6 +13,8 @@ namespace MassTransit.Registration
         IBusControl BusControl { get; }
 
         IHostConfiguration HostConfiguration { get; }
+
+        void Connect(IBusAttachment attachment);
     }
 
 
