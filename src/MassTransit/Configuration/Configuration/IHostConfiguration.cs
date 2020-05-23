@@ -23,6 +23,14 @@
         ILogContext SendLogContext { get; }
         ILogContext ReceiveLogContext { get; }
 
+        /// <summary>
+        /// Create a receive endpoint configuration
+        /// </summary>
+        /// <param name="queueName"></param>
+        /// <param name="configure"></param>
+        /// <returns></returns>
+        IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName, Action<IReceiveEndpointConfigurator> configure = null);
+
         IHost Build();
     }
 }

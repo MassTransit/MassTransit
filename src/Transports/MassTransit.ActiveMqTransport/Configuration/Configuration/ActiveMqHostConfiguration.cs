@@ -4,6 +4,7 @@
     using Configurators;
     using Definition;
     using GreenPipes;
+    using MassTransit.Configuration;
     using MassTransit.Configurators;
     using Topology;
     using Topology.Settings;
@@ -143,6 +144,12 @@
         public void ReceiveEndpoint(string queueName, Action<IActiveMqReceiveEndpointConfigurator> configureEndpoint)
         {
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
+        }
+
+        public override IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            Action<IReceiveEndpointConfigurator> configure = null)
+        {
+            return CreateReceiveEndpointConfiguration(queueName, configure);
         }
 
         public override IHost Build()

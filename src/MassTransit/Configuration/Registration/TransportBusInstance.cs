@@ -4,18 +4,19 @@ namespace MassTransit.Registration
     using Configuration;
 
 
-    public class DefaultBusInstance :
+    public class TransportBusInstance :
         IBusInstance
     {
-        public DefaultBusInstance(IBusControl busControl)
+        public TransportBusInstance(IBusControl busControl, IHostConfiguration hostConfiguration)
         {
             BusControl = busControl;
+            HostConfiguration = hostConfiguration;
         }
 
         public Type InstanceType => typeof(IBus);
         public IBus Bus => BusControl;
         public IBusControl BusControl { get; }
 
-        public IHostConfiguration HostConfiguration => default;
+        public IHostConfiguration HostConfiguration { get; }
     }
 }

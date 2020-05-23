@@ -5,7 +5,7 @@
     using RabbitMqTransport.Configuration;
 
 
-    public static class BusFactoryConfiguratorExtensions
+    public static class RabbitMqBusFactoryConfiguratorExtensions
     {
         /// <summary>
         /// Select RabbitMQ as the transport for the service bus

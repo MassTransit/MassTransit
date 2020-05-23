@@ -4,6 +4,7 @@
     using Configurators;
     using Definition;
     using GreenPipes;
+    using MassTransit.Configuration;
     using MassTransit.Configurators;
     using MassTransit.Topology.EntityNameFormatters;
     using Microsoft.Azure.ServiceBus;
@@ -202,6 +203,12 @@
             Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
         {
             return CreateSubscriptionEndpointConfiguration(settings, _busConfiguration.CreateEndpointConfiguration(), configure);
+        }
+
+        public override IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            Action<IReceiveEndpointConfigurator> configure = null)
+        {
+            return CreateReceiveEndpointConfiguration(queueName, configure);
         }
 
         public override IHost Build()

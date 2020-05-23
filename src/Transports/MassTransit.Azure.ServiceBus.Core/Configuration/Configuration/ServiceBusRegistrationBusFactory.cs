@@ -6,31 +6,31 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
 
 
     public class ServiceBusRegistrationBusFactory<TContainerContext> :
-        IRegistrationBusFactory<TContainerContext>
+        TransportRegistrationBusFactory<TContainerContext>
         where TContainerContext : class
     {
         readonly ServiceBusBusConfiguration _busConfiguration;
         readonly Action<IRegistrationContext<TContainerContext>, IServiceBusBusFactoryConfigurator> _configure;
 
         public ServiceBusRegistrationBusFactory(Action<IRegistrationContext<TContainerContext>, IServiceBusBusFactoryConfigurator> configure)
+            : this(new ServiceBusBusConfiguration(new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology)), configure)
+        {
+        }
+
+        ServiceBusRegistrationBusFactory(ServiceBusBusConfiguration busConfiguration,
+            Action<IRegistrationContext<TContainerContext>, IServiceBusBusFactoryConfigurator> configure)
+            : base(busConfiguration.HostConfiguration)
         {
             _configure = configure;
 
-            var topologyConfiguration = new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology);
-            _busConfiguration = new ServiceBusBusConfiguration(topologyConfiguration);
+            _busConfiguration = busConfiguration;
         }
 
-        public IBusInstance CreateBus(IRegistrationContext<TContainerContext> context)
+        public override IBusInstance CreateBus(IRegistrationContext<TContainerContext> context)
         {
             var configurator = new ServiceBusBusFactoryConfigurator(_busConfiguration);
 
-            context.UseHealthCheck(configurator);
-
-            _configure?.Invoke(context, configurator);
-
-            var busControl = configurator.Build();
-
-            return new ServiceBusBusInstance(busControl, _busConfiguration.HostConfiguration);
+            return CreateBus(configurator, context, _configure);
         }
     }
 }

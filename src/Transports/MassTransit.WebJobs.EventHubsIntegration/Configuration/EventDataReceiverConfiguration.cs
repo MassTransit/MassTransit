@@ -11,14 +11,13 @@
     public class EventDataReceiverConfiguration :
         ReceiverConfiguration
     {
-        readonly IServiceBusBusConfiguration _busConfiguration;
         readonly IServiceBusReceiveEndpointConfiguration _endpointConfiguration;
+        readonly IServiceBusHostConfiguration _hostConfiguration;
 
-        public EventDataReceiverConfiguration(IServiceBusBusConfiguration busConfiguration,
-            IServiceBusReceiveEndpointConfiguration endpointConfiguration)
+        public EventDataReceiverConfiguration(IServiceBusHostConfiguration hostConfiguration, IServiceBusReceiveEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)
         {
-            _busConfiguration = busConfiguration;
+            _hostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;
         }
 
@@ -28,7 +27,7 @@
 
             try
             {
-                var builder = new ServiceBusReceiveEndpointBuilder(_busConfiguration.HostConfiguration, _endpointConfiguration);
+                var builder = new ServiceBusReceiveEndpointBuilder(_hostConfiguration, _endpointConfiguration);
 
                 foreach (var specification in Specifications)
                     specification.Configure(builder);

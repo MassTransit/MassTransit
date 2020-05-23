@@ -2,6 +2,7 @@
 {
     using System;
     using Definition;
+    using MassTransit.Configuration;
     using MassTransit.Configurators;
     using Topology.Topologies;
 
@@ -106,6 +107,12 @@
         public void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
         {
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
+        }
+
+        public override IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            Action<IReceiveEndpointConfigurator> configure = null)
+        {
+            return CreateReceiveEndpointConfiguration(queueName, configure);
         }
 
         public override IHost Build()

@@ -6,6 +6,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using Definition;
     using GreenPipes;
     using Integration;
+    using MassTransit.Configuration;
     using MassTransit.Configurators;
     using Topology;
     using Topology.Settings;
@@ -193,6 +194,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 if (_hostSettings.BatchSettings.SizeLimit < 1024 || _hostSettings.BatchSettings.MessageLimit > 256 * 1024)
                     yield return this.Failure("BatchSizeLimit", "must be >= 1K and <= 256K");
             }
+        }
+
+        public override IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            Action<IReceiveEndpointConfigurator> configure = null)
+        {
+            return CreateReceiveEndpointConfiguration(queueName, configure);
         }
 
         public override IHost Build()

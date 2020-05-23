@@ -1,6 +1,7 @@
 namespace MassTransit.Registration
 {
     using System;
+    using Configuration;
 
 
     public class MultiBusInstance<TBus> :
@@ -18,6 +19,7 @@ namespace MassTransit.Registration
         public Type InstanceType => typeof(TBus);
         public IBus Bus => BusInstance;
         public IBusControl BusControl => _instance.BusControl;
+        public IHostConfiguration HostConfiguration => _instance.HostConfiguration;
 
         public TBus BusInstance { get; }
     }

@@ -7,6 +7,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration
     using Azure.ServiceBus.Core.Configuration;
     using Configuration;
     using Microsoft.Azure.EventHubs;
+    using Registration;
     using Saga;
     using ServiceBusIntegration;
     using Transport;
@@ -15,16 +16,22 @@ namespace MassTransit.WebJobs.EventHubsIntegration
     public class EventReceiver :
         IEventReceiver
     {
-        readonly IServiceBusBusConfiguration _busConfiguration;
         readonly IAsyncBusHandle _busHandle;
-        readonly IRegistration _registration;
+        readonly IServiceBusHostConfiguration _hostConfiguration;
         readonly ConcurrentDictionary<string, IEventDataReceiver> _receivers;
+        readonly IRegistration _registration;
 
-        public EventReceiver(IRegistration registration, IAsyncBusHandle busHandle, IServiceBusBusConfiguration busConfiguration)
+        public EventReceiver(IRegistration registration, IAsyncBusHandle busHandle, IBusInstance busInstance)
         {
+            if (busInstance.HostConfiguration == null)
+                throw new ArgumentNullException(nameof(busInstance), "The bus instance was not created properly, the hostConfiguration was not present.");
+
+            _hostConfiguration = busInstance.HostConfiguration as IServiceBusHostConfiguration;
+            if (_hostConfiguration == null)
+                throw new ArgumentException("The hostConfiguration was not configured for Azure Service Bus", nameof(busInstance));
+
             _registration = registration;
             _busHandle = busHandle;
-            _busConfiguration = busConfiguration;
 
             _receivers = new ConcurrentDictionary<string, IEventDataReceiver>();
         }
@@ -73,6 +80,10 @@ namespace MassTransit.WebJobs.EventHubsIntegration
             return receiver.Handle(message, cancellationToken);
         }
 
+        public void Dispose()
+        {
+        }
+
         IEventDataReceiver CreateBrokeredMessageReceiver(string entityName, Action<IReceiveEndpointConfigurator> configure)
         {
             if (string.IsNullOrWhiteSpace(entityName))
@@ -82,18 +93,14 @@ namespace MassTransit.WebJobs.EventHubsIntegration
 
             return _receivers.GetOrAdd(entityName, name =>
             {
-                var endpointConfiguration = _busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration(entityName);
+                var endpointConfiguration = _hostConfiguration.CreateReceiveEndpointConfiguration(entityName);
 
-                var configurator = new EventDataReceiverConfiguration(_busConfiguration, endpointConfiguration);
+                var configurator = new EventDataReceiverConfiguration(_hostConfiguration, endpointConfiguration);
 
                 configure(configurator);
 
                 return configurator.Build();
             });
-        }
-
-        public void Dispose()
-        {
         }
     }
 }

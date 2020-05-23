@@ -2,10 +2,7 @@ namespace MassTransit
 {
     using System;
     using Azure.ServiceBus.Core;
-    using Azure.ServiceBus.Core.Configuration;
-    using Azure.ServiceBus.Core.Configurators;
     using ExtensionsDependencyInjectionIntegration;
-    using MassTransit;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.Azure.WebJobs.ServiceBus;
     using Microsoft.Extensions.DependencyInjection;
@@ -27,43 +24,29 @@ namespace MassTransit
         public static IServiceCollection AddMassTransitForAzureFunctions(this IServiceCollection services, Action<IServiceCollectionConfigurator> configure,
             Action<IServiceBusBusFactoryConfigurator> configureBus = default)
         {
-            var topologyConfiguration = new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology);
-            var busConfiguration = new ServiceBusBusConfiguration(topologyConfiguration);
-
             ConfigureApplicationInsights(services);
 
-            services.AddSingleton<IServiceBusBusConfiguration>(busConfiguration)
+            services
                 .AddSingleton<IMessageReceiver, MessageReceiver>()
                 .AddSingleton<IAsyncBusHandle, AsyncBusHandle>()
-                .AddMassTransit(cfg =>
+                .AddMassTransit(x =>
                 {
-                    configure?.Invoke(cfg);
+                    configure?.Invoke(x);
 
-                    cfg.AddBus(configureBus);
+                    x.UsingAzureServiceBus((context, cfg) =>
+                    {
+                        var options = context.Container.GetRequiredService<IOptions<ServiceBusOptions>>();
+
+                        options.Value.MessageHandlerOptions.AutoComplete = true;
+
+                        cfg.Host(options.Value.ConnectionString);
+                        cfg.UseServiceBusMessageScheduler();
+
+                        configureBus?.Invoke(cfg);
+                    });
                 });
 
             return services;
-        }
-
-        static void AddBus(this IRegistrationConfigurator<IServiceProvider> configurator, Action<IServiceBusBusFactoryConfigurator> configure = null)
-        {
-            configurator.AddBus(context =>
-            {
-                IOptions<ServiceBusOptions> options = context.Container.GetRequiredService<IOptions<ServiceBusOptions>>();
-
-                options.Value.MessageHandlerOptions.AutoComplete = true;
-
-                IServiceBusBusConfiguration busConfiguration = context.Container.GetRequiredService<IServiceBusBusConfiguration>();
-
-                var busFactoryConfigurator = new ServiceBusBusFactoryConfigurator(busConfiguration);
-
-                busFactoryConfigurator.Host(options.Value.ConnectionString);
-                busFactoryConfigurator.UseServiceBusMessageScheduler();
-
-                configure?.Invoke(busFactoryConfigurator);
-
-                return busFactoryConfigurator.Build();
-            });
         }
 
         static void ConfigureApplicationInsights(IServiceCollection services)

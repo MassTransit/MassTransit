@@ -1,6 +1,7 @@
 namespace MassTransit.Registration
 {
     using System;
+    using Configuration;
 
 
     public interface IBusInstance
@@ -9,6 +10,8 @@ namespace MassTransit.Registration
 
         IBus Bus { get; }
         IBusControl BusControl { get; }
+
+        IHostConfiguration HostConfiguration { get; }
     }
 
 

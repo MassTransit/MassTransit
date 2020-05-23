@@ -10,14 +10,14 @@
     public class BrokeredMessageReceiverConfiguration :
         ReceiverConfiguration
     {
-        readonly IServiceBusBusConfiguration _busConfiguration;
+        readonly IServiceBusHostConfiguration _hostConfiguration;
         readonly IServiceBusReceiveEndpointConfiguration _endpointConfiguration;
 
-        public BrokeredMessageReceiverConfiguration(IServiceBusBusConfiguration busConfiguration,
+        public BrokeredMessageReceiverConfiguration(IServiceBusHostConfiguration hostConfiguration,
             IServiceBusReceiveEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)
         {
-            _busConfiguration = busConfiguration;
+            _hostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;
         }
 
@@ -27,7 +27,7 @@
 
             try
             {
-                var builder = new ServiceBusReceiveEndpointBuilder(_busConfiguration.HostConfiguration, _endpointConfiguration);
+                var builder = new ServiceBusReceiveEndpointBuilder(_hostConfiguration, _endpointConfiguration);
 
                 foreach (var specification in Specifications)
                     specification.Configure(builder);

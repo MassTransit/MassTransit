@@ -60,6 +60,9 @@ namespace MassTransit.Configurators
             return _endpoints.SelectMany(x => x.Validate());
         }
 
+        public abstract IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
+            Action<IReceiveEndpointConfigurator> configure = null);
+
         public abstract IHost Build();
 
         protected void Add(TReceiveEndpointConfiguration configuration)

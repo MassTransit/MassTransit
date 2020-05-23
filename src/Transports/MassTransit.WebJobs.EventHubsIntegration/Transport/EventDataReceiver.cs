@@ -54,7 +54,6 @@
             if (cancellationToken.CanBeCanceled)
                 registration = cancellationToken.Register(context.Cancel);
 
-
             try
             {
                 await _dispatcher.Dispatch(context).ConfigureAwait(false);

@@ -2,41 +2,35 @@ namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
     using Configurators;
-    using Context;
-    using Microsoft.Extensions.Logging;
     using Registration;
 
 
     public class RabbitMqRegistrationBusFactory<TContainerContext> :
-        IRegistrationBusFactory<TContainerContext>
+        TransportRegistrationBusFactory<TContainerContext>
         where TContainerContext : class
     {
         readonly RabbitMqBusConfiguration _busConfiguration;
         readonly Action<IRegistrationContext<TContainerContext>, IRabbitMqBusFactoryConfigurator> _configure;
 
         public RabbitMqRegistrationBusFactory(Action<IRegistrationContext<TContainerContext>, IRabbitMqBusFactoryConfigurator> configure)
+            : this(new RabbitMqBusConfiguration(new RabbitMqTopologyConfiguration(RabbitMqBusFactory.MessageTopology)), configure)
+        {
+        }
+
+        RabbitMqRegistrationBusFactory(RabbitMqBusConfiguration busConfiguration,
+            Action<IRegistrationContext<TContainerContext>, IRabbitMqBusFactoryConfigurator> configure)
+            : base(busConfiguration.HostConfiguration)
         {
             _configure = configure;
 
-            var topologyConfiguration = new RabbitMqTopologyConfiguration(RabbitMqBusFactory.MessageTopology);
-            _busConfiguration = new RabbitMqBusConfiguration(topologyConfiguration);
+            _busConfiguration = busConfiguration;
         }
 
-        public IBusInstance CreateBus(IRegistrationContext<TContainerContext> context)
+        public override IBusInstance CreateBus(IRegistrationContext<TContainerContext> context)
         {
             var configurator = new RabbitMqBusFactoryConfigurator(_busConfiguration);
 
-            var loggerFactory = context.GetService<ILoggerFactory>();
-            if (loggerFactory != null)
-                LogContext.ConfigureCurrentLogContext(loggerFactory);
-
-            context.UseHealthCheck(configurator);
-
-            _configure?.Invoke(context, configurator);
-
-            var busControl = configurator.Build();
-
-            return new RabbitMqBusInstance(busControl, _busConfiguration.HostConfiguration);
+            return CreateBus(configurator, context, _configure);
         }
     }
 }
