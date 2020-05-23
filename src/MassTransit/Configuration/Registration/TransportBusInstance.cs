@@ -9,13 +9,15 @@ namespace MassTransit.Registration
     public class TransportBusInstance :
         IBusInstance
     {
-        readonly IList<IBusAttachment> _attachments = new List<IBusAttachment>();
+        readonly List<IBusAttachment> _attachments = new List<IBusAttachment>();
 
         public TransportBusInstance(IBusControl busControl, IHostConfiguration hostConfiguration)
         {
             BusControl = busControl;
             HostConfiguration = hostConfiguration;
         }
+
+        public IReadOnlyList<IBusAttachment> Attachments => _attachments;
 
         public Type InstanceType => typeof(IBus);
         public IBus Bus => BusControl;

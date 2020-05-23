@@ -10,7 +10,7 @@ namespace MassTransit.Registration
         IBusInstance<TBus>
         where TBus : IBus
     {
-        readonly IList<IBusAttachment> _attachments = new List<IBusAttachment>();
+        readonly List<IBusAttachment> _attachments = new List<IBusAttachment>();
         readonly IBusInstance _instance;
 
         public MultiBusInstance(TBus bus, IBusInstance instance)
@@ -18,6 +18,8 @@ namespace MassTransit.Registration
             _instance = instance;
             BusInstance = bus;
         }
+
+        public IReadOnlyList<IBusAttachment> Attachments => _attachments;
 
         public Type InstanceType => typeof(TBus);
         public IBus Bus => BusInstance;

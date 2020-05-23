@@ -9,16 +9,18 @@ namespace MassTransit.KafkaIntegration
         IBusInstanceConfigurator
     {
         readonly IEnumerable<IKafkaSubscriptionDefinition> _definitions;
+        readonly IRegistration _registration;
 
-        public KafkaBusInstanceConfigurator(IEnumerable<IKafkaSubscriptionDefinition> definitions)
+        public KafkaBusInstanceConfigurator(IEnumerable<IKafkaSubscriptionDefinition> definitions, IRegistration registration)
         {
             _definitions = definitions;
+            _registration = registration;
         }
 
         public void Configure(IBusInstance busInstance)
         {
             IKafkaSubscription[] subscriptions = _definitions
-                .Select(x => x.Build(busInstance))
+                .Select(x => x.Build(busInstance, _registration))
                 .ToArray();
             busInstance.ConnectKafka(subscriptions);
         }

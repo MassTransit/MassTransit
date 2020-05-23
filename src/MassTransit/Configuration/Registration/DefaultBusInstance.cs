@@ -9,12 +9,14 @@ namespace MassTransit.Registration
     public class DefaultBusInstance :
         IBusInstance
     {
-        readonly IList<IBusAttachment> _attachments = new List<IBusAttachment>();
+        readonly List<IBusAttachment> _attachments = new List<IBusAttachment>();
 
         public DefaultBusInstance(IBusControl busControl)
         {
             BusControl = busControl;
         }
+
+        public IReadOnlyList<IBusAttachment> Attachments => _attachments;
 
         public Type InstanceType => typeof(IBus);
         public IBus Bus => BusControl;

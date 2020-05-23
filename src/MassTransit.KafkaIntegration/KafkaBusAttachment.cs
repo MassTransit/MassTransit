@@ -23,14 +23,14 @@ namespace MassTransit.KafkaIntegration
 
         public async ValueTask Connect(CancellationToken cancellationToken)
         {
-            if (_subscriptions == null || _subscriptions.Any())
+            if (_subscriptions == null || !_subscriptions.Any())
                 return;
             await Task.WhenAll(_subscriptions.Select(subscription => subscription.Subscribe(cancellationToken)));
         }
 
         public async ValueTask Disconnect(CancellationToken cancellationToken)
         {
-            if (_subscriptions == null || _subscriptions.Any())
+            if (_subscriptions == null || !_subscriptions.Any())
                 return;
             await Task.WhenAll(_subscriptions.Select(subscription => subscription.Unsubscribe(cancellationToken)));
         }

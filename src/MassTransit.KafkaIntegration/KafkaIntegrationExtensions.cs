@@ -13,7 +13,7 @@ namespace MassTransit.KafkaIntegration
             configurator.Collection.AddSingleton(provider =>
             {
                 var registration = provider.GetRequiredService<IRegistration>();
-                var factoryConfigurator = new KafkaFactoryConfigurator(provider.GetService<ClientConfig>() ?? new ClientConfig());
+                var factoryConfigurator = new KafkaFactoryConfigurator(registration, provider.GetService<ClientConfig>() ?? new ClientConfig());
                 configure?.Invoke(registration, factoryConfigurator);
                 return factoryConfigurator.Build();
             });

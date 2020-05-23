@@ -14,12 +14,13 @@ namespace MassTransit.KafkaIntegration.Contexts
         ConsumeContext<TValue>
         where TValue : class
     {
-        readonly ConsumeResult<TKey, TValue> _consumeResult;
+        readonly MessageContext _adapter;
 
         public KafkaConsumeContext(ReceiveContext receiveContext, ConsumeResult<TKey, TValue> consumeResult)
             : base(receiveContext)
         {
-            _consumeResult = consumeResult;
+            Message = consumeResult.Message.Value;
+            _adapter = new KafkaHeaderAdapter<TKey, TValue>(consumeResult, receiveContext);
         }
 
         public override bool HasMessageType(Type messageType)
@@ -39,35 +40,23 @@ namespace MassTransit.KafkaIntegration.Contexts
             return false;
         }
 
-        public override Guid? MessageId { get; }
-
-        public override Guid? RequestId { get; }
-
-        public override Guid? CorrelationId { get; }
-
-        public override Guid? ConversationId { get; }
-
-        public override Guid? InitiatorId { get; }
-
-        public override DateTime? ExpirationTime { get; }
-
-        public override Uri SourceAddress { get; }
-
-        public override Uri DestinationAddress { get; }
-
-        public override Uri ResponseAddress { get; }
-
-        public override Uri FaultAddress { get; }
-
-        public override DateTime? SentTime { get; }
-
-        public override MassTransit.Headers Headers { get; }
-
-        public override HostInfo Host => HostMetadataCache.Host;
+        public override Guid? MessageId => _adapter.MessageId;
+        public override Guid? RequestId => _adapter.RequestId;
+        public override Guid? CorrelationId => _adapter.CorrelationId;
+        public override Guid? ConversationId => _adapter.ConversationId;
+        public override Guid? InitiatorId => _adapter.InitiatorId;
+        public override DateTime? ExpirationTime => _adapter.ExpirationTime;
+        public override Uri SourceAddress => _adapter.SourceAddress;
+        public override Uri DestinationAddress => _adapter.DestinationAddress;
+        public override Uri ResponseAddress => _adapter.ResponseAddress;
+        public override Uri FaultAddress => _adapter.FaultAddress;
+        public override DateTime? SentTime => _adapter.SentTime;
+        public override MassTransit.Headers Headers => _adapter.Headers;
+        public override HostInfo Host => _adapter.Host;
 
         public override IEnumerable<string> SupportedMessageTypes => TypeMetadataCache<TValue>.MessageTypeNames;
 
-        public TValue Message => _consumeResult.Message.Value;
+        public TValue Message { get; }
 
         public Task NotifyConsumed(TimeSpan duration, string consumerType)
         {

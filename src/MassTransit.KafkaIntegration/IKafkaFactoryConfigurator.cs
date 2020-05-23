@@ -198,7 +198,7 @@ namespace MassTransit.KafkaIntegration
         /// </summary>
         string ClientRack { set; }
 
-        void Host(string servers, Action<IKafkaHostConfigurator> configure);
+        void Host(string servers, Action<IKafkaHostConfigurator> configure = null);
 
         void ConfigureApi(Action<IKafkaApiConfigurator> configure);
 

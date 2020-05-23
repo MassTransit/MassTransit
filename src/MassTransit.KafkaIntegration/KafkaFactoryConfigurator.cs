@@ -15,9 +15,11 @@ namespace MassTransit.KafkaIntegration
     {
         readonly ClientConfig _clientConfig;
         readonly List<IKafkaSubscriptionDefinition> _definitions;
+        readonly IRegistration _registration;
 
-        public KafkaFactoryConfigurator(ClientConfig clientConfig)
+        public KafkaFactoryConfigurator(IRegistration registration, ClientConfig clientConfig)
         {
+            _registration = registration;
             _clientConfig = clientConfig;
             _definitions = new List<IKafkaSubscriptionDefinition>();
         }
@@ -179,7 +181,7 @@ namespace MassTransit.KafkaIntegration
 
         public IBusInstanceConfigurator Build()
         {
-            var configurator = new KafkaBusInstanceConfigurator(_definitions);
+            var configurator = new KafkaBusInstanceConfigurator(_definitions, _registration);
             return configurator;
         }
     }

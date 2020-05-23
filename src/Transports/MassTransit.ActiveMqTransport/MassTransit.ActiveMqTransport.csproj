@@ -19,4 +19,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Transport\IActiveMqTransportProviderContext.cs" />
+  </ItemGroup>
 </Project>

@@ -49,12 +49,15 @@ namespace MassTransit.KafkaIntegration
                 {
                     try
                     {
-                        ConsumeResult<TKey, TValue> message = _consumer.Consume(cancellationToken);
+                        ConsumeResult<TKey, TValue> message = _consumer.Consume(_cancellationTokenSource.Token);
 
                         await _receiver.Handle(message, cancellationToken).ConfigureAwait(false);
 
                         if (!_isAutoCommitEnabled)
                             _consumer.Commit(message);
+                    }
+                    catch (OperationCanceledException e) when (e.CancellationToken == _cancellationTokenSource.Token)
+                    {
                     }
                     catch (Exception e)
                     {
@@ -72,14 +75,21 @@ namespace MassTransit.KafkaIntegration
 
         public async Task Unsubscribe(CancellationToken cancellationToken)
         {
-            _logContext.Info?.Log("Kafka subscription: {topicName} stopping", _topic);
-            _consumer.Unsubscribe();
+            try
+            {
+                _logContext.Info?.Log("Kafka subscription: {topicName} stopping", _topic);
+                _consumer.Unsubscribe();
 
-            await _consumerTask.ConfigureAwait(false);
-            _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Cancel();
+                await _consumerTask.ConfigureAwait(false);
 
-            _consumer.Dispose();
-            _cancellationTokenSource.Dispose();
+                _consumer.Dispose();
+                _cancellationTokenSource.Dispose();
+            }
+            catch (Exception e)
+            {
+                _logContext.Error?.Log(e, "Error occured while stopping kafka consumer: {topicName}", _topic);
+            }
         }
     }
 }

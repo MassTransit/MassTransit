@@ -2,6 +2,8 @@
 {
     using System;
     using System.IO;
+    using System.Linq;
+    using System.Text;
     using Confluent.Kafka;
     using Context;
     using Transports;
@@ -12,7 +14,6 @@
         KafkaReadContext
         where TValue : class
     {
-        readonly KafkaConsumeContext<TKey, TValue> _consumeContext;
         readonly ConsumeResult<TKey, TValue> _consumeResult;
 
         public KafkaReadReceiveContext(ConsumeResult<TKey, TValue> consumeResult, ReceiveEndpointContext receiveEndpointContext)
@@ -20,12 +21,13 @@
         {
             _consumeResult = consumeResult;
 
-            _consumeContext = new KafkaConsumeContext<TKey, TValue>(this, _consumeResult);
+            var consumeContext = new KafkaConsumeContext<TKey, TValue>(this, _consumeResult);
 
-            AddOrUpdatePayload<ConsumeContext>(() => _consumeContext, existing => _consumeContext);
+            AddOrUpdatePayload<ConsumeContext>(() => consumeContext, existing => consumeContext);
         }
 
-        protected override IHeaderProvider HeaderProvider => new DictionaryHeaderProvider(_consumeResult.Properties);
+        protected override IHeaderProvider HeaderProvider =>
+            new DictionaryHeaderProvider(_consumeResult.Message.Headers.ToDictionary(x => x.Key, x => (object)Encoding.UTF8.GetString(x.GetValueBytes())));
 
         public string Topic => _consumeResult.Topic;
 

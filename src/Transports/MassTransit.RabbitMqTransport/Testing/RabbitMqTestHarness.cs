@@ -22,7 +22,7 @@
 
             NameFormatter = new RabbitMqMessageNameFormatter();
 
-            HostAddress = new Uri("rabbitmq://localhost/test/");
+            HostAddress = new Uri("rabbitmq://localhost/");
         }
 
         public Uri HostAddress
@@ -70,10 +70,10 @@
 
         protected virtual void ConfigureHost(IRabbitMqBusFactoryConfigurator configurator)
         {
-             configurator.Host(HostAddress, h =>
-             {
-                 ConfigureHostSettings(h);
-             });
+            configurator.Host(HostAddress, h =>
+            {
+                ConfigureHostSettings(h);
+            });
         }
 
         public RabbitMqHostSettings GetHostSettings()

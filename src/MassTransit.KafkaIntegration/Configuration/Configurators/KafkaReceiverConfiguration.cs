@@ -3,6 +3,7 @@ namespace MassTransit.KafkaIntegration.Configuration.Configurators
     using System;
     using MassTransit.Configuration;
     using MassTransit.Configurators;
+    using Registration;
     using Transport;
 
 
@@ -10,13 +11,13 @@ namespace MassTransit.KafkaIntegration.Configuration.Configurators
         ReceiverConfiguration
         where TValue : class
     {
+        readonly IBusInstance _busInstance;
         readonly IReceiveEndpointConfiguration _endpointConfiguration;
-        readonly IHostConfiguration _hostConfiguration;
 
-        public KafkaReceiverConfiguration(IHostConfiguration hostConfiguration, IReceiveEndpointConfiguration endpointConfiguration)
+        public KafkaReceiverConfiguration(IBusInstance busInstance, IReceiveEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)
         {
-            _hostConfiguration = hostConfiguration;
+            _busInstance = busInstance;
             _endpointConfiguration = endpointConfiguration;
         }
 
@@ -26,7 +27,7 @@ namespace MassTransit.KafkaIntegration.Configuration.Configurators
 
             try
             {
-                var builder = new ServiceBusReceiveEndpointBuilder(_hostConfiguration, _endpointConfiguration);
+                var builder = new BusAttachmentReceiveEndpointBuilder(_busInstance, _endpointConfiguration);
 
                 foreach (var specification in Specifications)
                     specification.Configure(builder);

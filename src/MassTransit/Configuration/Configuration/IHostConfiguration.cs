@@ -15,7 +15,7 @@
         Uri HostAddress { get; }
 
         /// <summary>
-        /// If true, only the broker topology will be deployed
+        ///     If true, only the broker topology will be deployed
         /// </summary>
         bool DeployTopologyOnly { get; set; }
 
@@ -24,7 +24,7 @@
         ILogContext ReceiveLogContext { get; }
 
         /// <summary>
-        /// Create a receive endpoint configuration
+        ///     Create a receive endpoint configuration
         /// </summary>
         /// <param name="queueName"></param>
         /// <param name="configure"></param>

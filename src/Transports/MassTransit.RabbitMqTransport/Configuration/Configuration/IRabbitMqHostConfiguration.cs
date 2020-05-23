@@ -17,7 +17,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         RabbitMqHostSettings Settings { get; set; }
 
         /// <summary>
-        /// True if the broker is confirming published messages
+        ///     True if the broker is confirming published messages
         /// </summary>
         bool PublisherConfirmation { get; }
 
@@ -27,7 +27,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IRabbitMqHostTopology GetHostTopology();
 
         /// <summary>
-        /// Apply the endpoint definition to the receive endpoint configurator
+        ///     Apply the endpoint definition to the receive endpoint configurator
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="definition"></param>

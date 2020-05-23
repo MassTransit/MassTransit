@@ -7,6 +7,7 @@ namespace MassTransit.KafkaIntegration
     using Configuration.Configurators;
     using Confluent.Kafka;
     using Context;
+    using Serializers;
 
 
     public class KafkaSubscriptionConfigurator<TKey, TValue> :
@@ -29,6 +30,7 @@ namespace MassTransit.KafkaIntegration
             _topicNameFormatter = topicNameFormatter;
             _consumerConfig = new ConsumerConfig(clientConfig);
             EnableAutoCommit(TimeSpan.FromSeconds(5));
+            SetValueDeserializer(new MassTransitSerializer<TValue>());
         }
 
         public AutoOffsetReset? AutoOffsetReset
@@ -126,15 +128,11 @@ namespace MassTransit.KafkaIntegration
 
         public void SetKeyDeserializer(IDeserializer<TKey> deserializer)
         {
-            if (_keyDeserializer != null)
-                throw new InvalidOperationException("Key deserializer may not be specified more than once.");
             _keyDeserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
         }
 
         public void SetValueDeserializer(IDeserializer<TValue> deserializer)
         {
-            if (_valueDeserializer != null)
-                throw new InvalidOperationException("Value deserializer may not be specified more than once.");
             _valueDeserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
         }
 
@@ -206,6 +204,7 @@ namespace MassTransit.KafkaIntegration
             var topic = _topicNameFormatter.GetTopicName<TKey, TValue>();
 
             ConsumerBuilder<TKey, TValue> consumerBuilder = new ConsumerBuilder<TKey, TValue>(_consumerConfig)
+                .SetValueDeserializer(_valueDeserializer)
                 .SetLogHandler((consumer, message) =>
                 {
                     logContext.Info?.Log(message.Message);
@@ -222,12 +221,8 @@ namespace MassTransit.KafkaIntegration
                     _errorHandler?.Invoke(consumer, error);
                 });
 
-
             if (_keyDeserializer != null)
                 consumerBuilder.SetKeyDeserializer(_keyDeserializer);
-
-            if (_valueDeserializer != null)
-                consumerBuilder.SetValueDeserializer(_valueDeserializer);
 
             if (_offsetsCommittedHandler != null)
                 consumerBuilder.SetOffsetsCommittedHandler(_offsetsCommittedHandler);

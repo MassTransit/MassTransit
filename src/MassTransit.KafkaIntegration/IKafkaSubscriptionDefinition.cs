@@ -13,7 +13,7 @@ namespace MassTransit.KafkaIntegration
         string Topic { get; }
         bool IsAutoCommitEnabled { get; }
         ILogContext LogContext { get; }
-        IKafkaSubscription Build(IBusInstance busInstance);
+        IKafkaSubscription Build(IBusInstance busInstance, IRegistration registration);
     }
 
 
@@ -36,10 +36,12 @@ namespace MassTransit.KafkaIntegration
         public bool IsAutoCommitEnabled => _consumerConfig.EnableAutoCommit == true;
         public ILogContext LogContext { get; }
 
-        public IKafkaSubscription Build(IBusInstance busInstance)
+        public IKafkaSubscription Build(IBusInstance busInstance, IRegistration registration)
         {
             IKafkaReceiver<TKey, TValue> receiver = CreateReceiver(busInstance, cfg =>
             {
+                cfg.ConfigureConsumers(registration);
+                cfg.ConfigureSagas(registration);
             });
             return new KafkaSubscription<TKey, TValue>(Topic, _consumer, receiver, LogContext, IsAutoCommitEnabled);
         }
@@ -47,7 +49,7 @@ namespace MassTransit.KafkaIntegration
         IKafkaReceiver<TKey, TValue> CreateReceiver(IBusInstance busInstance, Action<IReceiveEndpointConfigurator> configure)
         {
             var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(Topic);
-            var configuration = new KafkaReceiverConfiguration<TKey, TValue>(busInstance.HostConfiguration, endpointConfiguration);
+            var configuration = new KafkaReceiverConfiguration<TKey, TValue>(busInstance, endpointConfiguration);
 
             configure?.Invoke(configuration);
             return configuration.Build();

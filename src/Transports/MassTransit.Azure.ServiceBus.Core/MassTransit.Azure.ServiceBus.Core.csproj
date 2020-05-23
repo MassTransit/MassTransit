@@ -18,4 +18,8 @@
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Pipeline\IServiceBusTransportProviderContext.cs" />
+  </ItemGroup>
+
 </Project>

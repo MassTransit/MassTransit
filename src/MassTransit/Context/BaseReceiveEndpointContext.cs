@@ -30,6 +30,9 @@
         readonly Lazy<IMessageSerializer> _serializer;
         readonly ReceiveTransportObservable _transportObservers;
 
+        protected readonly PublishObservable PublishObservers;
+        protected readonly SendObservable SendObservers;
+
         protected BaseReceiveEndpointContext(IReceiveEndpointConfiguration configuration)
         {
             InputAddress = configuration.InputAddress;
@@ -61,8 +64,6 @@
             _publishTransportProvider = new Lazy<IPublishTransportProvider>(CreatePublishTransportProvider);
         }
 
-        protected readonly PublishObservable PublishObservers;
-        protected readonly SendObservable SendObservers;
         protected Uri HostAddress { get; }
 
         protected IPublishPipe PublishPipe => _publishPipe.Value;

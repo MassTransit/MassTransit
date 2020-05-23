@@ -28,4 +28,10 @@
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Transports\InMemory\IInMemoryTransportProviderContext.cs" />
+    <Compile Remove="Configuration\ITransportProviderContext.cs" />
+    <Compile Remove="Configuration\ITransportProvider.cs" />
+  </ItemGroup>
+
 </Project>

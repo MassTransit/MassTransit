@@ -23,8 +23,8 @@
         IServiceBusHostConfiguration
     {
         readonly IServiceBusBusConfiguration _busConfiguration;
-        readonly IServiceBusTopologyConfiguration _topologyConfiguration;
         readonly ServiceBusConnectionContextSupervisor _connectionContextSupervisor;
+        readonly IServiceBusTopologyConfiguration _topologyConfiguration;
         ServiceBusHostSettings _hostSettings;
         IMessageNameFormatter _messageNameFormatter;
 

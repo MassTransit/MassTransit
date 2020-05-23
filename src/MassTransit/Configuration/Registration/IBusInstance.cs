@@ -1,12 +1,14 @@
 namespace MassTransit.Registration
 {
     using System;
+    using System.Collections.Generic;
     using Attachments;
     using Configuration;
 
 
     public interface IBusInstance
     {
+        IReadOnlyList<IBusAttachment> Attachments { get; }
         Type InstanceType { get; }
 
         IBus Bus { get; }
