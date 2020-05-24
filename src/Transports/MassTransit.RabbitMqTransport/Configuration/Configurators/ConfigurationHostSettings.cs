@@ -28,7 +28,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
             _batchSettings = new ConfigurationBatchSettings();
 
-            RequestedConnectionTimeout = 10000;
+            RequestedConnectionTimeout = TimeSpan.FromSeconds(10);
 
             ClientProvidedName = HostMetadataCache.Host.ProcessName;
 
@@ -40,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public string VirtualHost { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
-        public ushort Heartbeat { get; set; }
+        public TimeSpan Heartbeat { get; set; }
         public bool Ssl { get; set; }
         public SslProtocols SslProtocol { get; set; }
         public string SslServerName { get; set; }
@@ -56,7 +56,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public bool PublisherConfirmation { get; set; }
         public Uri HostAddress => _hostAddress.Value;
         public ushort RequestedChannelMax { get; set; }
-        public int RequestedConnectionTimeout { get; set; }
+        public TimeSpan RequestedConnectionTimeout { get; set; }
 
         public BatchSettings BatchSettings => _batchSettings;
 

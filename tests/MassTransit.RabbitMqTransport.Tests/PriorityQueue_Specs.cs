@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
+    using RabbitMQ.Client;
     using TestFramework.Messages;
 
 
@@ -25,12 +26,20 @@
         {
             configurator.ReceiveEndpoint("priority_input_queue", x =>
             {
+                x.ConfigureConsumeTopology = false;
+
                 x.EnablePriority(4);
 
                 _endpointAddress = x.InputAddress;
 
                 x.Handler<PingMessage>(context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
             });
+        }
+
+        protected override void OnCleanupVirtualHost(IModel model)
+        {
+            model.ExchangeDelete("priority_input_queue");
+            model.QueueDelete("priority_input_queue");
         }
     }
 }

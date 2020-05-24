@@ -78,7 +78,12 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public void Heartbeat(ushort requestedHeartbeat)
         {
-            _settings.Heartbeat = requestedHeartbeat;
+            _settings.Heartbeat = TimeSpan.FromSeconds(requestedHeartbeat);
+        }
+
+        public void Heartbeat(TimeSpan timeSpan)
+        {
+            _settings.Heartbeat = timeSpan;
         }
 
         public void Username(string username)
@@ -106,7 +111,12 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         public void RequestedConnectionTimeout(int milliseconds)
         {
-            _settings.RequestedConnectionTimeout = milliseconds;
+            _settings.RequestedConnectionTimeout = TimeSpan.FromMilliseconds(milliseconds);
+        }
+
+        public void RequestedConnectionTimeout(TimeSpan timeSpan)
+        {
+            _settings.RequestedConnectionTimeout = timeSpan;
         }
 
         string GetVirtualHost(Uri address)

@@ -154,7 +154,7 @@ namespace MassTransit.RabbitMqTransport
                     hostSettings.Password = parts[1];
             }
 
-            hostSettings.Heartbeat = hostAddress.Heartbeat ?? (ushort)0;
+            hostSettings.Heartbeat = TimeSpan.FromSeconds(hostAddress.Heartbeat ?? (ushort)0);
 
             return hostSettings;
         }

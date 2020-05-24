@@ -76,6 +76,9 @@ namespace MassTransit.RabbitMqTransport.Integration
             catch (OperationCanceledException)
             {
             }
+            catch (ChannelClosedException)
+            {
+            }
             catch (Exception exception)
             {
                 LogContext.Error?.Log(exception, "WaitForBatch Faulted");

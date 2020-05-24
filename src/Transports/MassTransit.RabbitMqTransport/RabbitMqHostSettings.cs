@@ -40,7 +40,7 @@
         /// <summary>
         /// The heartbeat interval (in seconds) to keep the host connection alive
         /// </summary>
-        ushort Heartbeat { get; }
+        TimeSpan Heartbeat { get; }
 
         /// <summary>
         /// True if SSL is required
@@ -126,7 +126,7 @@
         /// <summary>
         /// The requested connection timeout, in milliseconds
         /// </summary>
-        int RequestedConnectionTimeout { get; }
+        TimeSpan RequestedConnectionTimeout { get; }
 
         /// <summary>
         /// Batch settings used for the batch publish

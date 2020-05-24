@@ -22,6 +22,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     /// </summary>
     public class RabbitMqBasicConsumer :
         Supervisor,
+        IAsyncBasicConsumer,
         IBasicConsumer,
         RabbitMqDeliveryMetrics
     {
@@ -33,6 +34,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly ReceiveSettings _receiveSettings;
 
         string _consumerTag;
+
+        EventHandler<ConsumerEventArgs> _onConsumerCancelled;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -52,13 +55,59 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
+
+            ConsumerCancelled += OnConsumerCancelled;
         }
 
         /// <summary>
         /// Called when the consumer is ready to be delivered messages by the broker
         /// </summary>
         /// <param name="consumerTag"></param>
-        void IBasicConsumer.HandleBasicConsumeOk(string consumerTag)
+        Task IAsyncBasicConsumer.HandleBasicConsumeOk(string consumerTag)
+        {
+            HandleBasicConsumeOk(consumerTag);
+
+            return TaskUtil.Completed;
+        }
+
+        Task IAsyncBasicConsumer.HandleBasicCancelOk(string consumerTag)
+        {
+            HandleBasicCancelOk(consumerTag);
+
+            return TaskUtil.Completed;
+        }
+
+        Task IAsyncBasicConsumer.HandleBasicCancel(string consumerTag)
+        {
+            HandleBasicCancel(consumerTag);
+
+            return TaskUtil.Completed;
+        }
+
+        Task IAsyncBasicConsumer.HandleModelShutdown(object model, ShutdownEventArgs reason)
+        {
+            HandleModelShutdown(_model, reason);
+
+            return TaskUtil.Completed;
+        }
+
+        Task IAsyncBasicConsumer.HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
+            IBasicProperties properties, ReadOnlyMemory<byte> body)
+        {
+            HandleBasicDeliver(consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body);
+
+            return TaskUtil.Completed;
+        }
+
+        public IModel Model => _model.Model;
+
+        public event AsyncEventHandler<ConsumerEventArgs> ConsumerCancelled;
+
+        /// <summary>
+        /// Called when the consumer is ready to be delivered messages by the broker
+        /// </summary>
+        /// <param name="consumerTag"></param>
+        public void HandleBasicConsumeOk(string consumerTag)
         {
             LogContext.Current = _context.LogContext;
 
@@ -74,7 +123,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// that the consumer is requesting to be shut down gracefully.
         /// </summary>
         /// <param name="consumerTag">The consumerTag that was shut down.</param>
-        void IBasicConsumer.HandleBasicCancelOk(string consumerTag)
+        public void HandleBasicCancelOk(string consumerTag)
         {
             LogContext.Current = _context.LogContext;
 
@@ -89,7 +138,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         /// queue removal, or other change, that would disconnect the consumer.
         /// </summary>
         /// <param name="consumerTag">The consumerTag that is being cancelled.</param>
-        void IBasicConsumer.HandleBasicCancel(string consumerTag)
+        public void HandleBasicCancel(string consumerTag)
         {
             LogContext.Current = _context.LogContext;
 
@@ -98,13 +147,13 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             foreach (var context in _pending.Values)
                 context.Cancel();
 
-            ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(consumerTag));
+            ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(new[] {consumerTag}));
 
             _deliveryComplete.TrySetResult(true);
             SetCompleted(TaskUtil.Completed);
         }
 
-        void IBasicConsumer.HandleModelShutdown(object model, ShutdownEventArgs reason)
+        public void HandleModelShutdown(object model, ShutdownEventArgs reason)
         {
             LogContext.Current = _context.LogContext;
 
@@ -116,9 +165,11 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             SetCompleted(TaskUtil.Completed);
         }
 
-        void IBasicConsumer.HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
-            IBasicProperties properties, byte[] body)
+        public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
+            IBasicProperties properties, ReadOnlyMemory<byte> body)
         {
+            var bodyBytes = body.ToArray();
+
             Task.Run(async () =>
             {
                 LogContext.Current = _context.LogContext;
@@ -129,9 +180,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     return;
                 }
 
-                var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, body, redelivered, properties, _context,
-                    _receiveSettings,
-                    _model, _model.ConnectionContext);
+                var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, bodyBytes, redelivered, properties,
+                    _context, _receiveSettings, _model, _model.ConnectionContext);
 
                 if (!_pending.TryAdd(deliveryTag, context))
                     LogContext.Warning?.Log("Duplicate BasicDeliver: {DeliveryTag}", deliveryTag);
@@ -154,15 +204,24 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             });
         }
 
-        IModel IBasicConsumer.Model => _model.Model;
-
-        public event EventHandler<ConsumerEventArgs> ConsumerCancelled;
-
         string RabbitMqDeliveryMetrics.ConsumerTag => _consumerTag;
 
         long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;
 
         int DeliveryMetrics.ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
+
+        event EventHandler<ConsumerEventArgs> IBasicConsumer.ConsumerCancelled
+        {
+            add => _onConsumerCancelled += value;
+            remove => _onConsumerCancelled -= value;
+        }
+
+        Task OnConsumerCancelled(object obj, ConsumerEventArgs args)
+        {
+            _onConsumerCancelled?.Invoke(obj, args);
+
+            return TaskUtil.Completed;
+        }
 
         Task HandleDeliveryComplete()
         {

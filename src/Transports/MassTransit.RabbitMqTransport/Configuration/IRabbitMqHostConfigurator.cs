@@ -26,6 +26,13 @@
         void Heartbeat(ushort requestedHeartbeat);
 
         /// <summary>
+        /// Specifies the heartbeat interval, used to maintain the connection to RabbitMQ.
+        /// Setting this value to TimeSpan.Zero will disable heartbeats, allowing the connection to timeout
+        /// after an inactivity period.
+        /// </summary>
+        void Heartbeat(TimeSpan timeSpan);
+
+        /// <summary>
         /// Sets the username for the connection to RabbitMQ
         /// </summary>
         /// <param name="username"></param>
@@ -54,6 +61,11 @@
         /// </summary>
         /// <param name="milliseconds"></param>
         void RequestedConnectionTimeout(int milliseconds);
+
+        /// <summary>
+        /// The requested connection timeout
+        /// </summary>
+        void RequestedConnectionTimeout(TimeSpan timeSpan);
 
         /// <summary>
         /// Configure the RabbitMQ Batch Publish transport settings

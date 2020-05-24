@@ -161,7 +161,7 @@
 
                 _basicGetResult = model.BasicGet("input_queue_error", true);
 
-                _body = Encoding.UTF8.GetString(_basicGetResult.Body);
+                _body = Encoding.UTF8.GetString(_basicGetResult.Body.ToArray());
 
                 model.Close(200, "Cleanup complete");
                 connection.Close(200, "Cleanup complete");
@@ -216,7 +216,7 @@
 
                 _basicGetResult = model.BasicGet("input_queue_error", true);
 
-                _body = Encoding.UTF8.GetString(_basicGetResult.Body);
+                _body = Encoding.UTF8.GetString(_basicGetResult.Body.ToArray());
 
                 model.Close(200, "Cleanup complete");
                 connection.Close(200, "Cleanup complete");
