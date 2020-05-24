@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
-    <ProjectReference Include="..\..\src\MassTransit.KafkaIntegration\MassTransit.KafkaIntegration.csproj" />
+    <ProjectReference Include="..\..\src\Transports\MassTransit.KafkaIntegration\MassTransit.KafkaIntegration.csproj" />
     <ProjectReference Include="..\..\src\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
   </ItemGroup>
 

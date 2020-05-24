@@ -1,10 +1,9 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit.Registration.Attachments
 {
     using System;
     using Builders;
+    using Configuration;
     using Context;
-    using MassTransit.Configuration;
-    using Registration;
 
 
     public class BusAttachmentReceiveEndpointBuilder :

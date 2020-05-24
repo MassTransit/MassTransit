@@ -4,8 +4,8 @@ namespace MassTransit.KafkaIntegration
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Registration;
     using Registration.Attachments;
+    using Subscriptions;
 
 
     public class KafkaBusAttachment :
@@ -21,27 +21,20 @@ namespace MassTransit.KafkaIntegration
 
         public string Name { get; }
 
-        public async ValueTask Connect(CancellationToken cancellationToken)
+        public async Task Connect(CancellationToken cancellationToken)
         {
             if (_subscriptions == null || !_subscriptions.Any())
                 return;
-            await Task.WhenAll(_subscriptions.Select(subscription => subscription.Subscribe(cancellationToken)));
+
+            await Task.WhenAll(_subscriptions.Select(subscription => subscription.Subscribe(cancellationToken))).ConfigureAwait(false);
         }
 
-        public async ValueTask Disconnect(CancellationToken cancellationToken)
+        public async Task Disconnect(CancellationToken cancellationToken)
         {
             if (_subscriptions == null || !_subscriptions.Any())
                 return;
-            await Task.WhenAll(_subscriptions.Select(subscription => subscription.Unsubscribe(cancellationToken)));
-        }
-    }
 
-
-    public static class KafkaBusAttachmentExtensions
-    {
-        public static void ConnectKafka(this IBusInstance busInstance, params IKafkaSubscription[] subscriptions)
-        {
-            busInstance.Connect(new KafkaBusAttachment(subscriptions));
+            await Task.WhenAll(_subscriptions.Select(subscription => subscription.Unsubscribe(cancellationToken))).ConfigureAwait(false);
         }
     }
 }

@@ -3,6 +3,7 @@ namespace MassTransit.KafkaIntegration
     using System;
     using Configuration;
     using Confluent.Kafka;
+    using Subscriptions;
 
 
     public interface IKafkaFactoryConfigurator

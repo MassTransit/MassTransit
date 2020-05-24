@@ -126,7 +126,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interoperability", "Interop
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Interop.NServiceBus", "src\MassTransit.Interop.NServiceBus\MassTransit.Interop.NServiceBus.csproj", "{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.KafkaIntegration", "src\MassTransit.KafkaIntegration\MassTransit.KafkaIntegration.csproj", "{1FC221F1-E49D-473C-9869-4452B2C4EBEE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.KafkaIntegration", "src\Transports\MassTransit.KafkaIntegration\MassTransit.KafkaIntegration.csproj", "{1FC221F1-E49D-473C-9869-4452B2C4EBEE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.KafkaIntegration.Tests", "tests\MassTransit.KafkaIntegration.Tests\MassTransit.KafkaIntegration.Tests.csproj", "{555EC658-5EF6-4C10-ABA0-B717896398BE}"
 EndProject

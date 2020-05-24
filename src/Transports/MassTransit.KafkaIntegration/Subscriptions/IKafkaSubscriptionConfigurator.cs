@@ -1,4 +1,4 @@
-﻿namespace MassTransit.KafkaIntegration
+﻿namespace MassTransit.KafkaIntegration.Subscriptions
 {
     using System;
     using System.Collections.Generic;

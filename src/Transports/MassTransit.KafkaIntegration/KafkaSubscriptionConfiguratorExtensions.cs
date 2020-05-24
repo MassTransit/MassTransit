@@ -2,6 +2,7 @@ namespace MassTransit.KafkaIntegration
 {
     using System;
     using Confluent.Kafka;
+    using Subscriptions;
 
 
     public static class KafkaSubscriptionConfiguratorExtensions

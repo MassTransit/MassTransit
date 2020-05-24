@@ -4,6 +4,7 @@ namespace MassTransit.KafkaIntegration.Configuration.Configurators
     using MassTransit.Configuration;
     using MassTransit.Configurators;
     using Registration;
+    using Registration.Attachments;
     using Transport;
 
 

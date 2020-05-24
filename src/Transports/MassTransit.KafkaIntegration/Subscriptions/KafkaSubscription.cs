@@ -1,4 +1,4 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit.KafkaIntegration.Subscriptions
 {
     using System;
     using System.Threading;
@@ -7,13 +7,6 @@ namespace MassTransit.KafkaIntegration
     using Context;
     using Transport;
     using Util;
-
-
-    public interface IKafkaSubscription
-    {
-        Task Subscribe(CancellationToken cancellationToken);
-        Task Unsubscribe(CancellationToken cancellationToken);
-    }
 
 
     public class KafkaSubscription<TKey, TValue> :
@@ -78,12 +71,13 @@ namespace MassTransit.KafkaIntegration
             try
             {
                 _logContext.Info?.Log("Kafka subscription: {topicName} stopping", _topic);
-                _consumer.Unsubscribe();
 
                 _cancellationTokenSource.Cancel();
                 await _consumerTask.ConfigureAwait(false);
 
+                _consumer.Close();
                 _consumer.Dispose();
+
                 _cancellationTokenSource.Dispose();
             }
             catch (Exception e)

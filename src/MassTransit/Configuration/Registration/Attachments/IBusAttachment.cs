@@ -7,7 +7,7 @@ namespace MassTransit.Registration.Attachments
     public interface IBusAttachment
     {
         string Name { get; }
-        ValueTask Connect(CancellationToken cancellationToken);
-        ValueTask Disconnect(CancellationToken cancellationToken);
+        Task Connect(CancellationToken cancellationToken);
+        Task Disconnect(CancellationToken cancellationToken);
     }
 }

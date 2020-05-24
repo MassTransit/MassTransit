@@ -8,6 +8,7 @@ namespace MassTransit.KafkaIntegration
     using Context;
     using Metadata;
     using Registration;
+    using Subscriptions;
 
 
     public class KafkaFactoryConfigurator :
@@ -46,11 +47,14 @@ namespace MassTransit.KafkaIntegration
         public void Subscribe<TKey, TValue>(ITopicNameFormatter topicNameFormatter, Action<IKafkaSubscriptionConfigurator<TKey, TValue>> configure)
             where TValue : class
         {
+            if (topicNameFormatter == null)
+                throw new ArgumentNullException(nameof(topicNameFormatter));
+
             var configurator = new KafkaSubscriptionConfigurator<TKey, TValue>(_clientConfig, topicNameFormatter);
             configure?.Invoke(configurator);
 
             IKafkaSubscriptionDefinition definition =
-                configurator.Build(LogContext.CreateLogContext(TypeMetadataCache<KafkaSubscription<TKey, TValue>>.ShortName));
+                configurator.Build(_registration, LogContext.CreateLogContext(TypeMetadataCache<KafkaSubscription<TKey, TValue>>.ShortName));
             _definitions.Add(definition);
         }
 
@@ -181,7 +185,7 @@ namespace MassTransit.KafkaIntegration
 
         public IBusInstanceConfigurator Build()
         {
-            var configurator = new KafkaBusInstanceConfigurator(_definitions, _registration);
+            var configurator = new KafkaBusInstanceConfigurator(_definitions);
             return configurator;
         }
     }

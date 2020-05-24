@@ -1,9 +1,7 @@
 namespace MassTransit.KafkaIntegration.Tests
 {
     using System;
-    using System.Collections.Generic;
     using System.Text;
-    using System.Threading;
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +11,7 @@ namespace MassTransit.KafkaIntegration.Tests
     using TestFramework;
 
 
-    public class MyCustomTest :
+    public class InitialTest :
         InMemoryTestFixture
     {
         const string Topic = "test";
@@ -21,7 +19,7 @@ namespace MassTransit.KafkaIntegration.Tests
         readonly IServiceProvider _provider;
         readonly Task<ConsumeContext<IMessage>> _task;
 
-        public MyCustomTest()
+        public InitialTest()
         {
             var services = new ServiceCollection();
             TaskCompletionSource<ConsumeContext<IMessage>> taskCompletionSource = GetTask<ConsumeContext<IMessage>>();
@@ -36,36 +34,27 @@ namespace MassTransit.KafkaIntegration.Tests
                 configurator.AttachKafka((registration, cfg) =>
                 {
                     cfg.Host("localhost:9092");
-                    cfg.Subscribe<Null, IMessage>(new DefaultTopicNameFormatter(Topic), c =>
+                    cfg.Subscribe<Null, IMessage>(Topic, c =>
                     {
                         c.DisableAutoCommit();
-                        c.GroupId = nameof(MyCustomTest);
+                        //c.GroupId = nameof(InitialTest);
                     });
                 });
             });
             _provider = services.BuildServiceProvider();
-            IEnumerable<IBusInstanceConfigurator> configurators = _provider.GetServices<IBusInstanceConfigurator>();
             _busInstance = _provider.GetService<IBusInstance>();
-            foreach (var busInstanceConfigurator in configurators)
-                busInstanceConfigurator.Configure(_busInstance);
         }
 
         [OneTimeSetUp]
         public async Task Start()
         {
-            await _busInstance.BusControl.StartAsync();
-
-            foreach (var attachment in _busInstance.Attachments)
-                await attachment.Connect(CancellationToken.None);
+            await _busInstance.Start(default);
         }
 
         [OneTimeTearDown]
         public async Task Stop()
         {
-            foreach (var attachment in _busInstance.Attachments)
-                await attachment.Disconnect(CancellationToken.None);
-
-            await _busInstance.BusControl.StopAsync();
+            await _busInstance.Stop(default);
         }
 
         [Test]
@@ -126,11 +115,11 @@ namespace MassTransit.KafkaIntegration.Tests
                 _taskCompletionSource.TrySetResult(context);
             }
         }
-    }
 
 
-    public interface IMessage
-    {
-        string Text { get; }
+        public interface IMessage
+        {
+            string Text { get; }
+        }
     }
 }

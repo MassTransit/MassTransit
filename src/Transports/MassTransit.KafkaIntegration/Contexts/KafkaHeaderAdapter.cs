@@ -13,6 +13,7 @@ namespace MassTransit.KafkaIntegration.Contexts
         Guid? _conversationId;
         Guid? _correlationId;
         HostInfo _host;
+        Guid? _initiatorId;
         Guid? _messageId;
         DateTime? _sentTime;
         Uri _sourceAddress;
@@ -27,7 +28,7 @@ namespace MassTransit.KafkaIntegration.Contexts
         public Guid? RequestId { get; } = default;
         public Guid? CorrelationId => _correlationId ??= Headers.Get<Guid>("MT-CorrelationId");
         public Guid? ConversationId => _conversationId ??= Headers.Get<Guid>("MT-ConversationId");
-        public Guid? InitiatorId { get; } = default;
+        public Guid? InitiatorId => _initiatorId ??= Headers.Get<Guid>("MT-InitiatorId");
         public DateTime? ExpirationTime { get; } = default;
         public Uri SourceAddress => _sourceAddress ??= GetEndpointAddress("MT-Source-Address");
         public Uri DestinationAddress => _receiveContext.InputAddress;

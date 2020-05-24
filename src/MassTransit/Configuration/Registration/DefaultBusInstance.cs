@@ -2,6 +2,9 @@ namespace MassTransit.Registration
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Attachments;
     using Configuration;
 
@@ -16,8 +19,6 @@ namespace MassTransit.Registration
             BusControl = busControl;
         }
 
-        public IReadOnlyList<IBusAttachment> Attachments => _attachments;
-
         public Type InstanceType => typeof(IBus);
         public IBus Bus => BusControl;
         public IBusControl BusControl { get; }
@@ -27,6 +28,22 @@ namespace MassTransit.Registration
         public void Connect(IBusAttachment attachment)
         {
             _attachments.Add(attachment);
+        }
+
+        public async Task Start(CancellationToken cancellationToken)
+        {
+            await BusControl.StartAsync(cancellationToken).ConfigureAwait(false);
+
+            if (_attachments.Any())
+                await Task.WhenAll(_attachments.Select(attachment => attachment.Connect(cancellationToken))).ConfigureAwait(false);
+        }
+
+        public async Task Stop(CancellationToken cancellationToken)
+        {
+            if (_attachments.Any())
+                await Task.WhenAll(_attachments.Select(attachment => attachment.Disconnect(cancellationToken))).ConfigureAwait(false);
+
+            await BusControl.StopAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

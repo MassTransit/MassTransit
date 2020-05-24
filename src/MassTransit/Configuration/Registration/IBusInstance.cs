@@ -1,22 +1,24 @@
 namespace MassTransit.Registration
 {
     using System;
-    using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Attachments;
     using Configuration;
 
 
     public interface IBusInstance
     {
-        IReadOnlyList<IBusAttachment> Attachments { get; }
         Type InstanceType { get; }
 
         IBus Bus { get; }
         IBusControl BusControl { get; }
 
         IHostConfiguration HostConfiguration { get; }
-
         void Connect(IBusAttachment attachment);
+
+        Task Start(CancellationToken cancellationToken);
+        Task Stop(CancellationToken cancellationToken);
     }
 
 

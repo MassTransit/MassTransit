@@ -1,4 +1,4 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit.KafkaIntegration.Subscriptions
 {
     using System;
     using System.Collections.Generic;
@@ -199,7 +199,7 @@ namespace MassTransit.KafkaIntegration
             _offsetsCommittedHandler = offsetsCommittedHandler ?? throw new ArgumentNullException(nameof(offsetsCommittedHandler));
         }
 
-        public KafkaSubscriptionDefinition<TKey, TValue> Build(ILogContext logContext)
+        public KafkaSubscriptionDefinition<TKey, TValue> Build(IRegistration registration, ILogContext logContext)
         {
             var topic = _topicNameFormatter.GetTopicName<TKey, TValue>();
 
@@ -232,7 +232,7 @@ namespace MassTransit.KafkaIntegration
             if (_partitionAssignmentHandler != null)
                 consumerBuilder.SetPartitionsAssignedHandler(_partitionAssignmentHandler);
 
-            return new KafkaSubscriptionDefinition<TKey, TValue>(topic, consumerBuilder.Build(), logContext, _consumerConfig);
+            return new KafkaSubscriptionDefinition<TKey, TValue>(registration, topic, consumerBuilder, logContext, _consumerConfig);
         }
     }
 }
