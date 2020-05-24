@@ -22,11 +22,13 @@ namespace MassTransit.Mediator
         IMediator
     {
         readonly IClientFactory _clientFactory;
+        readonly IReceivePipeDispatcher _dispatcher;
         readonly MediatorSendEndpoint _endpoint;
 
         public MassTransitMediator(ILogContext logContext, IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher,
             IReceiveEndpointConfiguration responseConfiguration, IReceivePipeDispatcher responseDispatcher)
         {
+            _dispatcher = dispatcher;
             var sendObservable = new SendObservable();
 
             _endpoint = new MediatorSendEndpoint(configuration, dispatcher, logContext, sendObservable, responseConfiguration, responseDispatcher);
@@ -170,28 +172,6 @@ namespace MassTransit.Mediator
             return PublishInternal<T>(cancellationToken, values, publishPipe);
         }
 
-        async Task PublishInternal<T>(CancellationToken cancellationToken, T message, IPipe<PublishContext<T>> pipe = default)
-            where T : class
-        {
-            var sendEndpoint = await _endpoint.GetPublishSendEndpoint<T>().ConfigureAwait(false);
-
-            if (pipe.IsNotEmpty())
-                await sendEndpoint.Send(message, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
-            else
-                await sendEndpoint.Send(message, cancellationToken).ConfigureAwait(false);
-        }
-
-        async Task PublishInternal<T>(CancellationToken cancellationToken, object values, IPipe<PublishContext<T>> pipe = default)
-            where T : class
-        {
-            var sendEndpoint = await _endpoint.GetPublishSendEndpoint<T>().ConfigureAwait(false);
-
-            if (pipe.IsNotEmpty())
-                await sendEndpoint.Send(values, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
-            else
-                await sendEndpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);
-        }
-
         public ValueTask DisposeAsync()
         {
             return _clientFactory.DisposeAsync();
@@ -239,5 +219,39 @@ namespace MassTransit.Mediator
         }
 
         ClientFactoryContext IClientFactory.Context => _clientFactory.Context;
+
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+            where T : class
+        {
+            return _dispatcher.ConnectConsumePipe(pipe);
+        }
+
+        public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+            where T : class
+        {
+            return _dispatcher.ConnectRequestPipe(requestId, pipe);
+        }
+
+        async Task PublishInternal<T>(CancellationToken cancellationToken, T message, IPipe<PublishContext<T>> pipe = default)
+            where T : class
+        {
+            var sendEndpoint = await _endpoint.GetPublishSendEndpoint<T>().ConfigureAwait(false);
+
+            if (pipe.IsNotEmpty())
+                await sendEndpoint.Send(message, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
+            else
+                await sendEndpoint.Send(message, cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task PublishInternal<T>(CancellationToken cancellationToken, object values, IPipe<PublishContext<T>> pipe = default)
+            where T : class
+        {
+            var sendEndpoint = await _endpoint.GetPublishSendEndpoint<T>().ConfigureAwait(false);
+
+            if (pipe.IsNotEmpty())
+                await sendEndpoint.Send(values, new PublishSendPipeAdapter<T>(pipe), cancellationToken).ConfigureAwait(false);
+            else
+                await sendEndpoint.Send<T>(values, cancellationToken).ConfigureAwait(false);
+        }
     }
 }

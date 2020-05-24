@@ -58,6 +58,31 @@ namespace MassTransit.Tests
         }
 
         [Test]
+        public async Task Should_be_able_to_add_consumer_post_creation()
+        {
+            var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
+            {
+            });
+
+            var received = GetTask<ConsumeContext<PingMessage>>();
+
+            var handle = mediator.ConnectHandler<PingMessage>(x =>
+            {
+                received.SetResult(x);
+
+                return TaskUtil.Completed;
+            });
+
+            await mediator.Publish(new PingMessage());
+
+            var context = await received.Task;
+
+            handle.Disconnect();
+
+            await mediator.Publish(new PingMessage());
+        }
+
+        [Test]
         public async Task Should_handle_request_response()
         {
             var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>

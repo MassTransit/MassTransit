@@ -93,6 +93,18 @@ namespace MassTransit.Transports
             _receivePipe.Probe(context);
         }
 
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+            where T : class
+        {
+            return _receivePipe.ConnectConsumePipe(pipe);
+        }
+
+        public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+            where T : class
+        {
+            return _receivePipe.ConnectRequestPipe(requestId, pipe);
+        }
+
         ActiveDispatch StartDispatch()
         {
             var current = Interlocked.Increment(ref _activeDispatchCount);

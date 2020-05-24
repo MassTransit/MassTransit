@@ -16,21 +16,19 @@
         BasePipeContext,
         ReceiveEndpointContext
     {
+        readonly ReceiveEndpointObservable _endpointObservers;
         readonly ILogContext _logContext;
-        readonly IPublishTopologyConfigurator _publishTopology;
         readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
         readonly Lazy<IPublishPipe> _publishPipe;
+        readonly IPublishTopologyConfigurator _publishTopology;
+        readonly Lazy<IPublishTransportProvider> _publishTransportProvider;
+        readonly ReceiveObservable _receiveObservers;
         readonly Lazy<IReceivePipe> _receivePipe;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
         readonly Lazy<ISendPipe> _sendPipe;
-        readonly Lazy<IMessageSerializer> _serializer;
         readonly Lazy<ISendTransportProvider> _sendTransportProvider;
-        readonly Lazy<IPublishTransportProvider> _publishTransportProvider;
-        protected readonly PublishObservable PublishObservers;
-        protected readonly SendObservable SendObservers;
-        readonly ReceiveObservable _receiveObservers;
+        readonly Lazy<IMessageSerializer> _serializer;
         readonly ReceiveTransportObservable _transportObservers;
-        readonly ReceiveEndpointObservable _endpointObservers;
 
         protected BaseReceiveEndpointContext(IReceiveEndpointConfiguration configuration)
         {
@@ -63,11 +61,13 @@
             _publishTransportProvider = new Lazy<IPublishTransportProvider>(CreatePublishTransportProvider);
         }
 
+        protected readonly PublishObservable PublishObservers;
+        protected readonly SendObservable SendObservers;
+        protected Uri HostAddress { get; }
+
         protected IPublishPipe PublishPipe => _publishPipe.Value;
         public ISendPipe SendPipe => _sendPipe.Value;
         public IMessageSerializer Serializer => _serializer.Value;
-
-        protected Uri HostAddress { get; }
 
         public IConsumePipeSpecification ConsumePipeSpecification { get; }
 
@@ -135,7 +135,5 @@
         protected abstract ISendTransportProvider CreateSendTransportProvider();
 
         protected abstract IPublishTransportProvider CreatePublishTransportProvider();
-
-        protected ISendTransportProvider SendTransportProvider => _sendTransportProvider.Value;
     }
 }

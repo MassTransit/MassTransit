@@ -10,6 +10,8 @@
     /// Dispatches a prepared <see cref="ReceiveContext"/> to a <see cref="IReceivePipe"/>.
     /// </summary>
     public interface IReceivePipeDispatcher :
+        IConsumePipeConnector,
+        IRequestPipeConnector,
         IDispatchMetrics,
         IReceiveObserverConnector,
         IProbeSite

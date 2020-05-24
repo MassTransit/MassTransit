@@ -43,7 +43,7 @@ namespace MassTransit.Configuration
             }
             catch (Exception ex)
             {
-                throw new ConfigurationException(result, "An exception occurred during handler creation", ex);
+                throw new ConfigurationException(result, "An exception occurred during mediator creation", ex);
             }
         }
     }
