@@ -9,7 +9,6 @@ namespace MassTransit.ConsumeConnectors
         static ConsumerConventionCache()
         {
             ConsumerConvention.Register<AsyncConsumerConvention>();
-            ConsumerConvention.Register<LegacyConsumerConvention>();
             ConsumerConvention.Register<BatchConsumerConvention>();
         }
 
