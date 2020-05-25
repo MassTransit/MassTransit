@@ -16,6 +16,9 @@ namespace MassTransit
         string Consumer<T>()
             where T : class, IConsumer;
 
+        string Message<T>()
+            where T : class;
+
         string Saga<T>()
             where T : class, ISaga;
 

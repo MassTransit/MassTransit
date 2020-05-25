@@ -18,7 +18,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
-        public static void ServiceInstance<TEndpointConfigurator>(this IReceiveConfigurator<TEndpointConfigurator> configurator,
+        public static void ServiceInstance<TEndpointConfigurator>(this IBusFactoryConfigurator<TEndpointConfigurator> configurator,
             Action<IServiceInstanceConfigurator<TEndpointConfigurator>> configure)
             where TEndpointConfigurator : IReceiveEndpointConfigurator
         {
@@ -31,7 +31,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="options"></param>
         /// <param name="configure"></param>
-        public static void ServiceInstance<TEndpointConfigurator>(this IReceiveConfigurator<TEndpointConfigurator> configurator,
+        public static void ServiceInstance<TEndpointConfigurator>(this IBusFactoryConfigurator<TEndpointConfigurator> configurator,
             ServiceInstanceOptions options, Action<IServiceInstanceConfigurator<TEndpointConfigurator>> configure)
             where TEndpointConfigurator : IReceiveEndpointConfigurator
         {

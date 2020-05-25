@@ -4,6 +4,7 @@ namespace MassTransit.Conductor.Consumers
     using Client;
     using Context;
     using Contracts;
+    using Contracts.Conductor;
     using Util;
 
 

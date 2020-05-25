@@ -33,7 +33,7 @@ namespace MassTransit
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="options">Optional service instance options to start</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
-        public static void ConfigureServiceEndpoints<T>(this IReceiveConfigurator<T> configurator,
+        public static void ConfigureServiceEndpoints<T>(this IBusFactoryConfigurator<T> configurator,
             IRegistration registration, ServiceInstanceOptions options = null)
             where T : IReceiveEndpointConfigurator
         {

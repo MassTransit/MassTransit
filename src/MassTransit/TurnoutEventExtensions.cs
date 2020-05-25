@@ -1,18 +1,7 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit
 {
     using System;
+    using Contracts.Turnout;
     using Turnout.Contracts;
     using Util;
 
@@ -20,17 +9,60 @@ namespace MassTransit
     public static class TurnoutEventExtensions
     {
         /// <summary>
-        /// Returns the arguments from the JobCompleted event
+        /// Deserializes the job from the message
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
+        /// <typeparam name="T">The job type</typeparam>
+        /// <param name="message">The message event</param>
         /// <returns></returns>
-        public static T GetArguments<T>(this JobStarted source)
+        public static T GetJob<T>(this JobAttemptFaulted message)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
 
-            return ObjectTypeDeserializer.Deserialize<T>(source.Arguments);
+            return ObjectTypeDeserializer.Deserialize<T>(message.Job);
+        }
+
+        /// <summary>
+        /// Deserializes the job from the message
+        /// </summary>
+        /// <typeparam name="T">The job type</typeparam>
+        /// <param name="message">The message event</param>
+        /// <returns></returns>
+        public static T GetJob<T>(this JobAttemptCanceled message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return ObjectTypeDeserializer.Deserialize<T>(message.Job);
+        }
+
+        /// <summary>
+        /// Deserializes the job from the message
+        /// </summary>
+        /// <typeparam name="T">The job type</typeparam>
+        /// <param name="message">The message event</param>
+        /// <returns></returns>
+        public static T GetJob<T>(this JobAttemptCompleted message)
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return ObjectTypeDeserializer.Deserialize<T>(message.Job);
+        }
+
+        /// <summary>
+        /// Returns the job from the message
+        /// </summary>
+        /// <typeparam name="TJob"></typeparam>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public static TJob GetJob<TJob>(this StartJob message)
+            where TJob : class
+        {
+            if (message == null)
+                throw new ArgumentNullException(nameof(message));
+
+            return ObjectTypeDeserializer.Deserialize<TJob>(message.Job);
         }
 
         /// <summary>
@@ -39,12 +71,12 @@ namespace MassTransit
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static T GetArguments<T>(this JobCompleted source)
+        public static T GetJob<T>(this JobCompleted source)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            return ObjectTypeDeserializer.Deserialize<T>(source.Arguments);
+            return ObjectTypeDeserializer.Deserialize<T>(source.Job);
         }
 
         /// <summary>
@@ -58,7 +90,7 @@ namespace MassTransit
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            return ObjectTypeDeserializer.Deserialize<T>(source.Results);
+            return ObjectTypeDeserializer.Deserialize<T>(source.Result);
         }
     }
 }

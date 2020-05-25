@@ -45,5 +45,16 @@
 
             throw new ConfigurationException(result, message);
         }
+
+        public static ConfigurationResult CompileResults(IEnumerable<ValidationResult> results, string messagePrefix)
+        {
+            var result = new BusConfigurationResult(results);
+            if (!result.ContainsFailure)
+                return result;
+
+            string message = messagePrefix + Environment.NewLine + string.Join(Environment.NewLine, result.Results.Select(x => x.ToString()).ToArray());
+
+            throw new ConfigurationException(result, message);
+        }
     }
 }

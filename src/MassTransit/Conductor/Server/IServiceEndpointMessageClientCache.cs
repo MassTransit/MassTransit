@@ -4,6 +4,8 @@ namespace MassTransit.Conductor.Server
     using System.Threading.Tasks;
     using Contexts;
     using Contracts;
+    using Contracts.Conductor;
+    using Contracts.Metadata;
 
 
     public interface IServiceEndpointMessageClientCache

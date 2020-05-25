@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace Automatonymous
+﻿namespace Automatonymous
 {
     using System;
     using Events;
@@ -72,5 +60,27 @@ namespace Automatonymous
         /// <param name="instance"></param>
         /// <returns></returns>
         Guid? GetRequestId(TInstance instance);
+    }
+
+
+    /// <summary>
+    /// A request is a state-machine based request configuration that includes
+    /// the events and states related to the execution of a request.
+    /// </summary>
+    /// <typeparam name="TRequest">The request type</typeparam>
+    /// <typeparam name="TResponse">The response type</typeparam>
+    /// <typeparam name="TInstance"></typeparam>
+    /// <typeparam name="TResponse2"></typeparam>
+    public interface Request<in TInstance, TRequest, TResponse, TResponse2> :
+        Request<TInstance, TRequest, TResponse>
+        where TInstance : class, SagaStateMachineInstance
+        where TRequest : class
+        where TResponse : class
+        where TResponse2 : class
+    {
+        /// <summary>
+        /// The event that is raised when the request completes and the response is received
+        /// </summary>
+        Event<TResponse2> Completed2 { get; set; }
     }
 }

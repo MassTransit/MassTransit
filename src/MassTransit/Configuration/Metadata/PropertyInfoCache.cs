@@ -5,29 +5,30 @@ namespace MassTransit.Metadata
     using System.Linq;
     using System.Reflection;
     using Contracts;
+    using Contracts.Metadata;
     using Internals.Extensions;
 
 
     public class PropertyInfoCache<T> :
         IPropertyInfoCache
     {
-        readonly Contracts.PropertyInfo[] _properties;
+        readonly Contracts.Metadata.PropertyInfo[] _properties;
 
         PropertyInfoCache()
         {
             _properties = TypeMetadataCache<T>.Properties.Select(GetPropertyInfo).ToArray();
         }
 
-        Contracts.PropertyInfo[] IPropertyInfoCache.Properties => _properties;
+        Contracts.Metadata.PropertyInfo[] IPropertyInfoCache.Properties => _properties;
 
-        public static Contracts.PropertyInfo[] Properties => Cached.Instance.Value.Properties;
+        public static Contracts.Metadata.PropertyInfo[] Properties => Cached.Instance.Value.Properties;
 
-        Contracts.PropertyInfo GetPropertyInfo(System.Reflection.PropertyInfo propertyInfo)
+        Contracts.Metadata.PropertyInfo GetPropertyInfo(System.Reflection.PropertyInfo propertyInfo)
         {
             return GetPropertyInfo(propertyInfo, propertyInfo.PropertyType.GetTypeInfo());
         }
 
-        Contracts.PropertyInfo GetPropertyInfo(System.Reflection.PropertyInfo propertyInfo, TypeInfo type)
+        Contracts.Metadata.PropertyInfo GetPropertyInfo(System.Reflection.PropertyInfo propertyInfo, TypeInfo type)
         {
             if (type == typeof(object))
                 return new CachedPropertyInfo(propertyInfo.Name, PropertyKind.Object, TypeMetadataCache<object>.ShortName);
@@ -58,12 +59,12 @@ namespace MassTransit.Metadata
             return GetObjectPropertyInfo(propertyInfo, type);
         }
 
-        Contracts.PropertyInfo GetValuePropertyInfo(System.Reflection.PropertyInfo propertyInfo, TypeInfo propertyType, PropertyKind kindFlags = default)
+        Contracts.Metadata.PropertyInfo GetValuePropertyInfo(System.Reflection.PropertyInfo propertyInfo, TypeInfo propertyType, PropertyKind kindFlags = default)
         {
             return new CachedPropertyInfo(propertyInfo.Name, PropertyKind.Value | kindFlags, TypeMetadataCache.GetShortName(propertyType));
         }
 
-        Contracts.PropertyInfo GetDictionaryPropertyInfo(System.Reflection.PropertyInfo propertyInfo, TypeInfo keyType, TypeInfo valueType,
+        Contracts.Metadata.PropertyInfo GetDictionaryPropertyInfo(System.Reflection.PropertyInfo propertyInfo, TypeInfo keyType, TypeInfo valueType,
             PropertyKind kindFlags = default)
         {
             var keyPropertyInfo = GetPropertyInfo(propertyInfo, keyType);
@@ -73,7 +74,7 @@ namespace MassTransit.Metadata
                 valuePropertyInfo.PropertyType, keyPropertyInfo.PropertyType);
         }
 
-        Contracts.PropertyInfo GetArrayPropertyInfo(System.Reflection.PropertyInfo propertyInfo, TypeInfo valueType, PropertyKind kindFlags = default)
+        Contracts.Metadata.PropertyInfo GetArrayPropertyInfo(System.Reflection.PropertyInfo propertyInfo, TypeInfo valueType, PropertyKind kindFlags = default)
         {
             var elementPropertyInfo = GetPropertyInfo(propertyInfo, valueType);
 
@@ -81,7 +82,7 @@ namespace MassTransit.Metadata
                 elementPropertyInfo.PropertyType);
         }
 
-        Contracts.PropertyInfo GetObjectPropertyInfo(System.Reflection.PropertyInfo propertyInfo, TypeInfo valueType, PropertyKind kindFlags = default)
+        Contracts.Metadata.PropertyInfo GetObjectPropertyInfo(System.Reflection.PropertyInfo propertyInfo, TypeInfo valueType, PropertyKind kindFlags = default)
         {
             var objectInfo = ObjectInfoCache.GetObjectInfo(valueType);
 
@@ -96,7 +97,7 @@ namespace MassTransit.Metadata
 
 
         class CachedPropertyInfo :
-            Contracts.PropertyInfo
+            Contracts.Metadata.PropertyInfo
         {
             public CachedPropertyInfo(string name, PropertyKind kind, string propertyType, string keyType = default)
             {

@@ -1,7 +1,10 @@
 namespace MassTransit.Metadata
 {
+    using Contracts.Metadata;
+
+
     public interface IPropertyInfoCache
     {
-        Contracts.PropertyInfo[] Properties { get; }
+        PropertyInfo[] Properties { get; }
     }
 }

@@ -1,6 +1,7 @@
 namespace MassTransit.Metadata
 {
     using Contracts;
+    using Contracts.Metadata;
 
 
     public interface IConsumerInfoCache<TConsumer> :

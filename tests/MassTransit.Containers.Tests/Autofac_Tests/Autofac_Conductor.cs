@@ -27,7 +27,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             await _container.DisposeAsync();
         }
 
-        protected override void ConfigureServiceEndpoints(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
+        protected override void ConfigureServiceEndpoints(IBusFactoryConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
             configurator.ConfigureServiceEndpoints(GetRegistrationContext(), Options);
         }

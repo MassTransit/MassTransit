@@ -2,58 +2,42 @@ namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
+    using Conductor.Configuration;
     using Turnout;
     using Turnout.Configuration;
-    using Turnout.Contracts;
 
 
     public static class TurnoutConfigurationExtensions
     {
-        public static void ConfigureTurnoutEndpoints<T>(this IReceiveEndpointConfigurator configurator, IBusFactoryConfigurator busFactoryConfigurator,
-            IReceiveEndpointConfigurator turnoutEndpointConfigurator, IReceiveEndpointConfigurator expiredEndpointConfigurator,
-            Action<ITurnoutServiceConfigurator<T>> configure)
-            where T : class
+        /// <summary>
+        /// Configures Turnout on the service instance, which supports executing long-running jobs without blocking the consumer pipeline.
+        /// Turnout uses multiple state machines to track jobs, each of which runs on its own dedicated receive endpoint. Multiple service
+        /// instances will use the competing consumer pattern, so a shared saga repository should be configured.
+        /// </summary>
+        /// <typeparam name="T">The transport receive endpoint configurator type</typeparam>
+        /// <param name="configurator">The Conductor service instance</param>
+        /// <param name="configure"></param>
+        public static IServiceInstanceConfigurator<T> Turnout<T>(this IServiceInstanceConfigurator<T> configurator, Action<ITurnoutConfigurator<T>> configure)
+            where T : IReceiveEndpointConfigurator
         {
-            configurator.AddDependency(turnoutEndpointConfigurator);
-            turnoutEndpointConfigurator.AddDependency(expiredEndpointConfigurator);
+            var turnoutConfigurator = new TurnoutConfigurator<T>(configurator);
 
-            var specification = new TurnoutServiceSpecification<T>(configurator);
+            configure?.Invoke(turnoutConfigurator);
 
-            configure(specification);
-
-            specification.ManagementAddress = turnoutEndpointConfigurator.InputAddress;
-
-            var partitioner = busFactoryConfigurator.CreatePartitioner(specification.PartitionCount);
-
-            expiredEndpointConfigurator.Consumer(() => new JobCustodian<T>(specification.JobRegistry), x =>
-            {
-                x.Message<SuperviseJob<T>>(m => m.UsePartitioner(partitioner, p => p.Message.JobId));
-            });
-
-            turnoutEndpointConfigurator.Consumer(() => new JobSupervisor<T>(specification.Service, specification.JobRegistry), x =>
-            {
-                x.Message<CancelJob>(m => m.UsePartitioner(partitioner, p => p.Message.JobId));
-                x.Message<SuperviseJob<T>>(m => m.UsePartitioner(partitioner, p => p.Message.JobId));
-            });
-
-            IJobFactory<T> jobFactory = specification.JobFactory;
-
-            configurator.Consumer(() => new JobProducer<T>(specification.Service, jobFactory));
-
-            busFactoryConfigurator.ConnectBusObserver(new JobServiceBusObserver(specification.Service));
+            return configurator;
         }
 
         /// <summary>
-        /// Sets the job factory to the specified delegate
+        /// The job factory is used to execute the job, returning an awaitable <see cref="Task"/>.
+        /// Configures the job factory using the specified delegate.
         /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
+        /// <typeparam name="T">The job type</typeparam>
         /// <param name="configurator">The turnout configurator</param>
-        /// <param name="jobFactory">A function that returns a Task for the job</param>
-        public static void SetJobFactory<T>(this ITurnoutServiceConfigurator<T> configurator, Func<JobContext<T>, Task> jobFactory)
+        /// <param name="method">A function that returns a Task for the job</param>
+        public static void SetJobFactory<T>(this ITurnoutJobConfigurator<T> configurator, Func<JobContext<T>, Task> method)
             where T : class
         {
-            configurator.JobFactory = new DelegateJobFactory<T>(jobFactory);
+            configurator.JobFactory = new AsyncMethodJobFactory<T>(method);
         }
     }
 }

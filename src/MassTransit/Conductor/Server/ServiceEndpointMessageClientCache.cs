@@ -5,6 +5,8 @@ namespace MassTransit.Conductor.Server
     using Context;
     using Contexts;
     using Contracts;
+    using Contracts.Conductor;
+    using Contracts.Metadata;
     using GreenPipes.Caching;
     using Metadata;
 

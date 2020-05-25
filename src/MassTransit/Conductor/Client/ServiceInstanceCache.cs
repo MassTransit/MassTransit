@@ -5,6 +5,7 @@ namespace MassTransit.Conductor.Client
     using System.Threading.Tasks;
     using Contexts;
     using Contracts;
+    using Contracts.Conductor;
     using GreenPipes;
     using GreenPipes.Caching;
 

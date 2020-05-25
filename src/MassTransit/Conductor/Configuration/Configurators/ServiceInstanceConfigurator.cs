@@ -1,9 +1,11 @@
 namespace MassTransit.Conductor.Configuration.Configurators
 {
     using System;
+    using System.Collections.Generic;
     using Definition;
     using EndpointConfigurators;
     using GreenPipes;
+    using GreenPipes.Util;
     using MassTransit.Definition;
     using Server;
 
@@ -12,13 +14,13 @@ namespace MassTransit.Conductor.Configuration.Configurators
         IServiceInstanceConfigurator<TEndpointConfigurator>
         where TEndpointConfigurator : IReceiveEndpointConfigurator
     {
-        readonly IReceiveConfigurator<TEndpointConfigurator> _configurator;
+        readonly IBusFactoryConfigurator<TEndpointConfigurator> _configurator;
         readonly IServiceInstance _instance;
-        readonly ServiceInstanceOptions _options;
         readonly TEndpointConfigurator _instanceEndpointConfigurator;
+        readonly ServiceInstanceOptions _options;
         readonly IServiceInstanceTransportConfigurator<TEndpointConfigurator> _transportConfigurator;
 
-        public ServiceInstanceConfigurator(IReceiveConfigurator<TEndpointConfigurator> configurator,
+        public ServiceInstanceConfigurator(IBusFactoryConfigurator<TEndpointConfigurator> configurator,
             IServiceInstanceTransportConfigurator<TEndpointConfigurator> transportConfigurator,
             IServiceInstance instance,
             ServiceInstanceOptions options,
@@ -29,6 +31,17 @@ namespace MassTransit.Conductor.Configuration.Configurators
             _instance = instance;
             _options = options;
             _instanceEndpointConfigurator = instanceEndpointConfigurator;
+        }
+
+        public Uri InstanceAddress =>
+            _options.InstanceEndpointEnabled
+                ? _instanceEndpointConfigurator.InputAddress
+                : throw new ConfigurationException("The instance address is not available, InstanceEndpoint is not enabled");
+
+        public void AddSpecification(ISpecification specification)
+        {
+            if (_instanceEndpointConfigurator != null)
+                _instanceEndpointConfigurator.AddEndpointSpecification(new ValidateSpecification(specification));
         }
 
         public IEndpointNameFormatter EndpointNameFormatter => _options.EndpointNameFormatter;
@@ -103,11 +116,23 @@ namespace MassTransit.Conductor.Configuration.Configurators
             ReceiveEndpoint(queueName, x => configureEndpoint(x));
         }
 
+        public ConnectHandle ConnectBusObserver(IBusObserver observer)
+        {
+            return _configurator.ConnectBusObserver(observer);
+        }
+
+        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            if (_instanceEndpointConfigurator != null)
+                return _instanceEndpointConfigurator.ConnectReceiveEndpointObserver(observer);
+
+            return new EmptyConnectHandle();
+        }
+
         void ConfigureServiceEndpoint(TEndpointConfigurator endpointConfigurator, TEndpointConfigurator controlEndpointConfigurator,
             Action<TEndpointConfigurator> configureEndpoint)
         {
-            var configurator = new ServiceEndpointConfigurator(_instance, _configurator, endpointConfigurator,
-                controlEndpointConfigurator);
+            var configurator = new ServiceEndpointConfigurator(_instance, _configurator, endpointConfigurator, controlEndpointConfigurator);
 
             configureEndpoint(endpointConfigurator);
         }
@@ -117,6 +142,27 @@ namespace MassTransit.Conductor.Configuration.Configurators
             var configurator = new ServiceEndpointConfigurator(_instance, _configurator, endpointConfigurator);
 
             configureEndpoint(endpointConfigurator);
+        }
+
+
+        class ValidateSpecification :
+            IReceiveEndpointSpecification
+        {
+            readonly ISpecification _specification;
+
+            public ValidateSpecification(ISpecification specification)
+            {
+                _specification = specification;
+            }
+
+            public IEnumerable<ValidationResult> Validate()
+            {
+                return _specification.Validate();
+            }
+
+            public void Configure(IReceiveEndpointBuilder builder)
+            {
+            }
         }
     }
 }

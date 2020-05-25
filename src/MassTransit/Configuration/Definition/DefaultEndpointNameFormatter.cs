@@ -58,6 +58,12 @@ namespace MassTransit.Definition
             return GetConsumerName(typeof(T));
         }
 
+        public string Message<T>()
+            where T : class
+        {
+            return GetMessageName(typeof(T));
+        }
+
         public string Saga<T>()
             where T : class, ISaga
         {
@@ -90,9 +96,7 @@ namespace MassTransit.Definition
         string GetConsumerName(Type type)
         {
             if (type.IsGenericType)
-            {
                 return SanitizeName(type.GetGenericArguments()[0].Name);
-            }
 
             const string consumer = "Consumer";
             var consumerName = type.Name;
@@ -101,6 +105,16 @@ namespace MassTransit.Definition
                 consumerName = consumerName.Substring(0, consumerName.Length - consumer.Length);
 
             return SanitizeName(consumerName);
+        }
+
+        string GetMessageName(Type type)
+        {
+            if (type.IsGenericType)
+                return SanitizeName(type.GetGenericArguments()[0].Name);
+
+            var messageName = type.Name;
+
+            return SanitizeName(messageName);
         }
 
         string GetSagaName(string typeName)

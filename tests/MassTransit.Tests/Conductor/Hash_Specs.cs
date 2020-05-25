@@ -4,6 +4,7 @@ namespace MassTransit.Tests.Conductor
     using System.Linq;
     using System.Text;
     using Contracts;
+    using Contracts.Conductor;
     using MassTransit.Conductor.Distribution;
     using NUnit.Framework;
 

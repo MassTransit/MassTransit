@@ -3,6 +3,7 @@ namespace MassTransit.Metadata
     using System;
     using System.Collections.Concurrent;
     using Contracts;
+    using Contracts.Metadata;
 
 
     public class ObjectInfoCache :

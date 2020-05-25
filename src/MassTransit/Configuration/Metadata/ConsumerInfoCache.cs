@@ -4,6 +4,7 @@ namespace MassTransit.Metadata
     using System.Linq;
     using ConsumeConnectors;
     using Contracts;
+    using Contracts.Metadata;
 
 
     public class ConsumerInfoCache<TConsumer> :

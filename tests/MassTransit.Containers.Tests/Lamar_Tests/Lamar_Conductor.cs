@@ -27,7 +27,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureServiceEndpoints(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
+        protected override void ConfigureServiceEndpoints(IBusFactoryConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
             configurator.ConfigureServiceEndpoints(GetRegistrationContext(), Options);
         }

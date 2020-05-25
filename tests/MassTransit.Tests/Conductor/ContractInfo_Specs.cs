@@ -2,6 +2,7 @@ namespace MassTransit.Tests.Conductor
 {
     using System;
     using Contracts;
+    using Contracts.Metadata;
     using Internals.Reflection;
     using Metadata;
     using NUnit.Framework;

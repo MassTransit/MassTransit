@@ -46,7 +46,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             ConfigureServiceEndpoints(configurator);
         }
 
-        protected abstract void ConfigureServiceEndpoints(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator);
+        protected abstract void ConfigureServiceEndpoints(IBusFactoryConfigurator<IInMemoryReceiveEndpointConfigurator> configurator);
 
         protected abstract IClientFactory GetClientFactory();
 

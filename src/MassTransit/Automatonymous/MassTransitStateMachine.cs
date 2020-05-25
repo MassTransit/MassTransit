@@ -191,11 +191,11 @@ namespace Automatonymous
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression,
-            Action<IRequestConfigurator<TInstance, TRequest, TResponse>> configureRequest)
+            Action<IRequestConfigurator> configureRequest)
             where TRequest : class
             where TResponse : class
         {
-            var configurator = new StateMachineRequestConfigurator<TInstance, TRequest, TResponse>();
+            var configurator = new StateMachineRequestConfigurator<TRequest>();
 
             configureRequest(configurator);
 
@@ -213,16 +213,13 @@ namespace Automatonymous
         /// <param name="requestIdExpression">The property where the requestId is stored</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
         protected void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
-            Expression<Func<TInstance, Guid?>> requestIdExpression,
-            RequestSettings settings)
+            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
             where TRequest : class
             where TResponse : class
         {
             var property = propertyExpression.GetPropertyInfo();
 
-            var requestName = property.Name;
-
-            var request = new StateMachineRequest<TInstance, TRequest, TResponse>(requestName, requestIdExpression, settings);
+            var request = new StateMachineRequest<TInstance, TRequest, TResponse>(property.Name, requestIdExpression, settings);
 
             property.SetValue(this, request);
 
@@ -234,6 +231,75 @@ namespace Automatonymous
 
             DuringAny(
                 When(request.Completed)
+                    .CancelRequestTimeout(request)
+                    .ClearRequest(request),
+                When(request.Faulted)
+                    .CancelRequestTimeout(request)
+                    .ClearRequest(request),
+                When(request.TimeoutExpired, request.EventFilter)
+                    .ClearRequest(request));
+        }
+
+        /// <summary>
+        /// Declares a request that is sent by the state machine to a service, and the associated response, fault, and
+        /// timeout handling. The property is initialized with the fully built Request. The request must be declared before
+        /// it is used in the state/event declaration statements.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <typeparam name="TResponse2">The alternate response type</typeparam>
+        /// <param name="propertyExpression">The request property on the state machine</param>
+        /// <param name="requestIdExpression">The property where the requestId is stored</param>
+        /// <param name="configureRequest">Allow the request settings to be specified inline</param>
+        protected void Request<TRequest, TResponse, TResponse2>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
+            Expression<Func<TInstance, Guid?>> requestIdExpression,
+            Action<IRequestConfigurator> configureRequest)
+            where TRequest : class
+            where TResponse : class
+            where TResponse2 : class
+        {
+            var configurator = new StateMachineRequestConfigurator<TRequest>();
+
+            configureRequest(configurator);
+
+            Request(propertyExpression, requestIdExpression, configurator.Settings);
+        }
+
+        /// <summary>
+        /// Declares a request that is sent by the state machine to a service, and the associated response, fault, and
+        /// timeout handling. The property is initialized with the fully built Request. The request must be declared before
+        /// it is used in the state/event declaration statements.
+        /// </summary>
+        /// <typeparam name="TRequest">The request type</typeparam>
+        /// <typeparam name="TResponse">The response type</typeparam>
+        /// <typeparam name="TResponse2">The alternate response type</typeparam>
+        /// <param name="propertyExpression">The request property on the state machine</param>
+        /// <param name="requestIdExpression">The property where the requestId is stored</param>
+        /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
+        protected void Request<TRequest, TResponse, TResponse2>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
+            Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
+            where TRequest : class
+            where TResponse : class
+            where TResponse2 : class
+        {
+            var property = propertyExpression.GetPropertyInfo();
+
+            var request = new StateMachineRequest<TInstance, TRequest, TResponse, TResponse2>(property.Name, requestIdExpression, settings);
+
+            property.SetValue(this, request);
+
+            Event(propertyExpression, x => x.Completed, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
+            Event(propertyExpression, x => x.Completed2, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
+            Event(propertyExpression, x => x.Faulted, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
+            Event(propertyExpression, x => x.TimeoutExpired, x => x.CorrelateBy(requestIdExpression, context => context.Message.RequestId));
+
+            State(propertyExpression, x => x.Pending);
+
+            DuringAny(
+                When(request.Completed)
+                    .CancelRequestTimeout(request)
+                    .ClearRequest(request),
+                When(request.Completed2)
                     .CancelRequestTimeout(request)
                     .ClearRequest(request),
                 When(request.Faulted)

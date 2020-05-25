@@ -8,6 +8,7 @@ namespace MassTransit.Conductor.Client
     using Context;
     using Contexts;
     using Contracts;
+    using Contracts.Conductor;
     using Distribution;
     using GreenPipes.Caching;
     using GreenPipes.Internals.Extensions;

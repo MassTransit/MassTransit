@@ -22,7 +22,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             _container.Dispose();
         }
 
-        protected override void ConfigureServiceEndpoints(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
+        protected override void ConfigureServiceEndpoints(IBusFactoryConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
             configurator.ConfigureServiceEndpoints(_container.GetInstance<IRegistration>(), Options);
         }

@@ -5,6 +5,7 @@ namespace MassTransit.Tests.Conductor
     using System.Threading;
     using System.Threading.Tasks;
     using Contracts;
+    using Contracts.Conductor;
     using Definition;
     using GreenPipes;
     using MassTransit.Conductor.Configuration;

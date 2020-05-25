@@ -20,7 +20,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
                 .BuildServiceProvider(true);
         }
 
-        protected override void ConfigureServiceEndpoints(IReceiveConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
+        protected override void ConfigureServiceEndpoints(IBusFactoryConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
             configurator.ConfigureServiceEndpoints(GetRegistrationContext(), Options);
         }

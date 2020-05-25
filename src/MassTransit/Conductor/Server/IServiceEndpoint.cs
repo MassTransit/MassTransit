@@ -2,6 +2,7 @@ namespace MassTransit.Conductor.Server
 {
     using System.Threading.Tasks;
     using Contracts;
+    using Contracts.Conductor;
 
 
     public interface IServiceEndpoint

@@ -3,6 +3,7 @@ namespace MassTransit.Conductor.Consumers
     using System.Threading.Tasks;
     using Context;
     using Contracts;
+    using Contracts.Conductor;
     using Server;
     using Util;
 
