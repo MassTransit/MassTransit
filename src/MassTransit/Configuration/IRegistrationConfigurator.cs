@@ -13,7 +13,7 @@ namespace MassTransit
     public interface IRegistrationConfigurator
     {
         /// <summary>
-        ///     Adds the consumer, allowing configuration when it is configured on an endpoint
+        /// Adds the consumer, allowing configuration when it is configured on an endpoint
         /// </summary>
         /// <param name="configure"></param>
         /// <typeparam name="T">The consumer type</typeparam>
@@ -21,7 +21,7 @@ namespace MassTransit
             where T : class, IConsumer;
 
         /// <summary>
-        ///     Adds the consumer, allowing configuration when it is configured on an endpoint
+        /// Adds the consumer, allowing configuration when it is configured on an endpoint
         /// </summary>
         /// <param name="consumerDefinitionType">The consumer definition type</param>
         /// <param name="configure"></param>
@@ -30,15 +30,15 @@ namespace MassTransit
             where T : class, IConsumer;
 
         /// <summary>
-        ///     Adds the consumer, along with an optional consumer definition
+        /// Adds the consumer, along with an optional consumer definition
         /// </summary>
         /// <param name="consumerType">The consumer type</param>
         /// <param name="consumerDefinitionType">The consumer definition type</param>
         void AddConsumer(Type consumerType, Type consumerDefinitionType = null);
 
         /// <summary>
-        ///     Adds the saga, allowing configuration when it is configured on the endpoint. This should not
-        ///     be used for state machine (Automatonymous) sagas.
+        /// Adds the saga, allowing configuration when it is configured on the endpoint. This should not
+        /// be used for state machine (Automatonymous) sagas.
         /// </summary>
         /// <param name="configure"></param>
         /// <typeparam name="T">The saga type</typeparam>
@@ -46,8 +46,8 @@ namespace MassTransit
             where T : class, ISaga;
 
         /// <summary>
-        ///     Adds the saga, allowing configuration when it is configured on the endpoint. This should not
-        ///     be used for state machine (Automatonymous) sagas.
+        /// Adds the saga, allowing configuration when it is configured on the endpoint. This should not
+        /// be used for state machine (Automatonymous) sagas.
         /// </summary>
         /// <param name="sagaDefinitionType">The saga definition type</param>
         /// <param name="configure"></param>
@@ -56,15 +56,15 @@ namespace MassTransit
             where T : class, ISaga;
 
         /// <summary>
-        ///     Adds the saga, along with an optional saga definition
+        /// Adds the saga, along with an optional saga definition
         /// </summary>
         /// <param name="sagaType">The saga type</param>
         /// <param name="sagaDefinitionType">The saga definition type</param>
         void AddSaga(Type sagaType, Type sagaDefinitionType = null);
 
         /// <summary>
-        ///     Adds a SagaStateMachine to the registry, using the factory method, and updates the registrar prior to registering so that the default
-        ///     saga registrar isn't notified.
+        /// Adds a SagaStateMachine to the registry, using the factory method, and updates the registrar prior to registering so that the default
+        /// saga registrar isn't notified.
         /// </summary>
         /// <param name="configure"></param>
         /// <typeparam name="TStateMachine"></typeparam>
@@ -74,8 +74,8 @@ namespace MassTransit
             where T : class, SagaStateMachineInstance;
 
         /// <summary>
-        ///     Adds a SagaStateMachine to the registry, using the factory method, and updates the registrar prior to registering so that the default
-        ///     saga registrar isn't notified.
+        /// Adds a SagaStateMachine to the registry, using the factory method, and updates the registrar prior to registering so that the default
+        /// saga registrar isn't notified.
         /// </summary>
         /// <param name="sagaDefinitionType"></param>
         /// <param name="configure"></param>
@@ -86,14 +86,14 @@ namespace MassTransit
             where T : class, SagaStateMachineInstance;
 
         /// <summary>
-        ///     Adds the state machine saga, along with an optional saga definition
+        /// Adds the state machine saga, along with an optional saga definition
         /// </summary>
         /// <param name="sagaType">The saga type</param>
         /// <param name="sagaDefinitionType">The saga definition type</param>
         void AddSagaStateMachine(Type sagaType, Type sagaDefinitionType = null);
 
         /// <summary>
-        ///     Adds an execute activity (Courier), allowing configuration when it is configured on the endpoint.
+        /// Adds an execute activity (Courier), allowing configuration when it is configured on the endpoint.
         /// </summary>
         /// <param name="configure"></param>
         /// <typeparam name="TActivity">The activity type</typeparam>
@@ -104,7 +104,7 @@ namespace MassTransit
             where TArguments : class;
 
         /// <summary>
-        ///     Adds an execute activity (Courier), allowing configuration when it is configured on the endpoint.
+        /// Adds an execute activity (Courier), allowing configuration when it is configured on the endpoint.
         /// </summary>
         /// <param name="executeActivityDefinitionType"></param>
         /// <param name="configure"></param>
@@ -116,14 +116,14 @@ namespace MassTransit
             where TArguments : class;
 
         /// <summary>
-        ///     Adds an execute activity (Courier), along with an optional activity definition
+        /// Adds an execute activity (Courier), along with an optional activity definition
         /// </summary>
         /// <param name="activityType"></param>
         /// <param name="activityDefinitionType"></param>
         void AddExecuteActivity(Type activityType, Type activityDefinitionType);
 
         /// <summary>
-        ///     Adds an activity (Courier), allowing configuration when it is configured on the endpoint.
+        /// Adds an activity (Courier), allowing configuration when it is configured on the endpoint.
         /// </summary>
         /// <param name="configureExecute">The execute configuration callback</param>
         /// <param name="configureCompensate">The compensate configuration callback</param>
@@ -138,7 +138,7 @@ namespace MassTransit
             where TArguments : class;
 
         /// <summary>
-        ///     Adds an activity (Courier), allowing configuration when it is configured on the endpoint.
+        /// Adds an activity (Courier), allowing configuration when it is configured on the endpoint.
         /// </summary>
         /// <param name="activityDefinitionType"></param>
         /// <param name="configureExecute">The execute configuration callback</param>
@@ -154,16 +154,16 @@ namespace MassTransit
             where TArguments : class;
 
         /// <summary>
-        ///     Adds an activity (Courier), along with an optional activity definition
+        /// Adds an activity (Courier), along with an optional activity definition
         /// </summary>
         /// <param name="activityType"></param>
         /// <param name="activityDefinitionType"></param>
         void AddActivity(Type activityType, Type activityDefinitionType = null);
 
         /// <summary>
-        ///     Adds an endpoint definition, which will to used for consumers, sagas, etc. that are on that same endpoint. If a consumer, etc.
-        ///     specifies an endpoint without a definition, the default endpoint definition is used if one cannot be resolved from the configuration
-        ///     service provider (via generic registration).
+        /// Adds an endpoint definition, which will to used for consumers, sagas, etc. that are on that same endpoint. If a consumer, etc.
+        /// specifies an endpoint without a definition, the default endpoint definition is used if one cannot be resolved from the configuration
+        /// service provider (via generic registration).
         /// </summary>
         /// <param name="endpointDefinition">The endpoint definition to add</param>
         void AddEndpoint(Type endpointDefinition);
@@ -173,9 +173,9 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        ///     Add a request client, for the request type, which uses the <see cref="ConsumeContext" /> if present, otherwise
-        ///     uses the <see cref="IBus" />. The request is published, unless an endpoint convention is specified for the
-        ///     request type.
+        /// Add a request client, for the request type, which uses the <see cref="ConsumeContext" /> if present, otherwise
+        /// uses the <see cref="IBus" />. The request is published, unless an endpoint convention is specified for the
+        /// request type.
         /// </summary>
         /// <param name="timeout">The request timeout</param>
         /// <typeparam name="T">The request message type</typeparam>
@@ -183,8 +183,8 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        ///     Add a request client, for the request type, which uses the <see cref="ConsumeContext" /> if present, otherwise
-        ///     uses the <see cref="IBus" />.
+        /// Add a request client, for the request type, which uses the <see cref="ConsumeContext" /> if present, otherwise
+        /// uses the <see cref="IBus" />.
         /// </summary>
         /// <param name="destinationAddress">The destination address for the request</param>
         /// <param name="timeout">The request timeout</param>
@@ -193,13 +193,13 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
-        ///     Adds the service client, which enables service discovery via Conductor
+        /// Adds the service client, which enables service discovery via Conductor
         /// </summary>
         /// <param name="configure">Configure the service client</param>
         void AddServiceClient(Action<IServiceClientConfigurator> configure = default);
 
         /// <summary>
-        ///     Set the default endpoint name formatter used for endpoint names
+        /// Set the default endpoint name formatter used for endpoint names
         /// </summary>
         /// <param name="endpointNameFormatter"></param>
         void SetEndpointNameFormatter(IEndpointNameFormatter endpointNameFormatter);
@@ -207,7 +207,7 @@ namespace MassTransit
 
 
     /// <summary>
-    ///     Configures the container registration, and supports creation of a bus or a mediator.
+    /// Configures the container registration, and supports creation of a bus or a mediator.
     /// </summary>
     /// <typeparam name="TContainerContext">The container context type (IServiceProvider, etc.)</typeparam>
     public interface IRegistrationConfigurator<out TContainerContext> :
@@ -215,14 +215,14 @@ namespace MassTransit
         where TContainerContext : class
     {
         /// <summary>
-        ///     This method is being deprecated. Use the transport-specific UsingRabbitMq, UsingActiveMq, etc. methods instead.
+        /// This method is being deprecated. Use the transport-specific UsingRabbitMq, UsingActiveMq, etc. methods instead.
         /// </summary>
         /// <param name="busFactory"></param>
         void AddBus(Func<IRegistrationContext<TContainerContext>, IBusControl> busFactory);
 
         /// <summary>
-        ///     Sets the bus factory. This is used by the transport extension methods (such as UsingRabbitMq, Using ActiveMq, etc.) to
-        ///     specify the bus factory. The extension method approach is preferred (since v7) over the AddBus method.
+        /// Sets the bus factory. This is used by the transport extension methods (such as UsingRabbitMq, Using ActiveMq, etc.) to
+        /// specify the bus factory. The extension method approach is preferred (since v7) over the AddBus method.
         /// </summary>
         /// <param name="busFactory"></param>
         /// <typeparam name="T"></typeparam>
@@ -230,7 +230,7 @@ namespace MassTransit
             where T : IRegistrationBusFactory<TContainerContext>;
 
         /// <summary>
-        ///     Add bus attachment
+        /// Add bus attachment
         /// </summary>
         /// <param name="configure"></param>
         void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<TContainerContext>> configure);
@@ -238,7 +238,7 @@ namespace MassTransit
 
 
     /// <summary>
-    ///     Configures the container registration for an additional bus instance, with is an advanced concept
+    /// Configures the container registration for an additional bus instance, with is an advanced concept
     /// </summary>
     /// <typeparam name="TBus"></typeparam>
     /// <typeparam name="TContainerContext"></typeparam>
@@ -248,14 +248,14 @@ namespace MassTransit
         where TContainerContext : class
     {
         /// <summary>
-        ///     Add the bus to the container, configured properly
+        /// Add the bus to the container, configured properly
         /// </summary>
         /// <param name="busFactory"></param>
         void AddBus(Func<IRegistrationContext<TContainerContext>, IBusControl> busFactory);
 
         /// <summary>
-        ///     Sets the bus factory. This is used by the transport extension methods (such as UsingRabbitMq, Using ActiveMq, etc.) to
-        ///     specify the bus factory. The extension method approach is preferred (since v7) over the AddBus method.
+        /// Sets the bus factory. This is used by the transport extension methods (such as UsingRabbitMq, Using ActiveMq, etc.) to
+        /// specify the bus factory. The extension method approach is preferred (since v7) over the AddBus method.
         /// </summary>
         /// <param name="busFactory"></param>
         /// <typeparam name="T"></typeparam>
