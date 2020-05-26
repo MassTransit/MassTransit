@@ -13,7 +13,7 @@ namespace MassTransit.Turnout.Configuration
 
 
     public class TurnoutConfigurator<TReceiveEndpointConfigurator> :
-        ITurnoutConfigurator<TReceiveEndpointConfigurator>,
+        ITurnoutConfigurator,
         IReceiveEndpointSpecification
         where TReceiveEndpointConfigurator : IReceiveEndpointConfigurator
     {

@@ -6,8 +6,7 @@ namespace MassTransit.Turnout.Configuration
     using Saga;
 
 
-    public interface ITurnoutConfigurator<TReceiveEndpointConfigurator>
-        where TReceiveEndpointConfigurator : IReceiveEndpointConfigurator
+    public interface ITurnoutConfigurator
     {
         /// <summary>
         /// Sets the job saga repository (default is in-memory, which is not recommended for production).

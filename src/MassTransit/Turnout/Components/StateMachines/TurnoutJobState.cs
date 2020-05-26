@@ -14,7 +14,7 @@ namespace MassTransit.Turnout.Components.StateMachines
 
         public DateTime? Submitted { get; set; }
         public Uri ServiceAddress { get; set; }
-        public TimeSpan JobTimeout { get; set; }
+        public TimeSpan? JobTimeout { get; set; }
         public string JobJson { get; set; }
         public Guid JobTypeId { get; set; }
 
@@ -28,8 +28,8 @@ namespace MassTransit.Turnout.Components.StateMachines
         public DateTime? Faulted { get; set; }
         public string Reason { get; set; }
 
-        public Guid? AttemptJobRequestId { get; set; }
-        public Guid? AllocateJobSlotRequestId { get; set; }
+        public Guid? StartJobRequestId { get; set; }
+        public Guid? JobSlotRequestId { get; set; }
         public Guid? JobSlotWaitToken { get; set; }
 
         public Guid CorrelationId { get; set; }

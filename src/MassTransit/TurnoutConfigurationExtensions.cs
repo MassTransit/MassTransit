@@ -17,7 +17,7 @@ namespace MassTransit
         /// <typeparam name="T">The transport receive endpoint configurator type</typeparam>
         /// <param name="configurator">The Conductor service instance</param>
         /// <param name="configure"></param>
-        public static IServiceInstanceConfigurator<T> Turnout<T>(this IServiceInstanceConfigurator<T> configurator, Action<ITurnoutConfigurator<T>> configure)
+        public static IServiceInstanceConfigurator<T> Turnout<T>(this IServiceInstanceConfigurator<T> configurator, Action<ITurnoutConfigurator> configure)
             where T : IReceiveEndpointConfigurator
         {
             var turnoutConfigurator = new TurnoutConfigurator<T>(configurator);

@@ -43,8 +43,6 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
             // just to capture all the test output in a single window
             var completed = await _completed;
-
-            await Task.Delay(5000);
         }
 
         [Test]
@@ -227,8 +225,6 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             }
 
             var completed = await Task.WhenAll(_completed.Select(x => x.Task));
-
-            TestContext.WriteLine(string.Join(Environment.NewLine, completed.Select(x => $"{x.Message.JobId} {x.Message.Timestamp} {x.Message.Duration}")));
         }
 
         [Test]

@@ -28,7 +28,6 @@ MassTransit Nuget Packages
 | **Containers** |
 | [MassTransit.Autofac][Autofac.nuget] | 2.0 |
 | [MassTransit.Extensions.DependencyInjection][CoreDI.nuget] | 2.0 |
-| [MassTransit.Lamar][Lamar.nuget] | 2.0 |
 | [MassTransit.SimpleInjector][SimpleInjector.nuget] | 2.0 |
 | [MassTransit.StructureMap][StructureMap.nuget] | 2.0 |
 | [MassTransit.CastleWindsor][Windsor.nuget] | 2.0 |

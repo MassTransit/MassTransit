@@ -29,13 +29,13 @@ namespace MassTransit.Turnout.Components.StateMachines
                 x.Received = r => r.CorrelateById(context => context.Message.JobId);
             });
 
-            Request(() => RequestStartJob, instance => instance.AttemptJobRequestId, x =>
+            Request(() => RequestStartJob, instance => instance.StartJobRequestId, x =>
             {
                 x.Timeout = TimeSpan.FromSeconds(120);
                 x.ServiceAddress = options.JobAttemptSagaEndpointAddress;
             });
 
-            Request(() => RequestJobSlot, instance => instance.AllocateJobSlotRequestId, x =>
+            Request(() => RequestJobSlot, instance => instance.JobSlotRequestId, x =>
             {
                 x.ServiceAddress = options.JobTypeSagaEndpointAddress;
                 x.Timeout = TimeSpan.FromSeconds(10);
