@@ -1,9 +1,10 @@
-version: 6.3.2.{build}
+version: 7.0.0.{build}
 
 branches:
   only:
     - develop
     - master
+    - vnext
 
 skip_tags: true
 
@@ -66,6 +67,13 @@ install:
       .\waitforport.ps1 -port 8081 -maxAttempts 4
 
 deploy:
+- provider: NuGet
+  name: PrePrerelease
+  symbol_server: https://www.nuget.org
+  api_key:
+    secure: IXB1AHgV9Bp8wic6oljIngn3e2gQuLZhpxa1yi8JpX1psFpKIDjYlyyDya01z56o
+  on:
+    branch: vnext
 - provider: NuGet
   name: Prerelease
   symbol_server: https://www.nuget.org

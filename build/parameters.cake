@@ -13,6 +13,7 @@ public class BuildParameters
     public bool IsMainMassTransitRepo { get; private set; }
     public bool IsMasterBranch { get; private set; }
     public bool IsDevelopBranch { get; private set; }
+    public bool IsVNext { get; private set; }
     public bool IsTagged { get; private set; }
     public BuildPaths Paths { get; private set; }
     public Tests Tests { get; private set; }
@@ -22,7 +23,7 @@ public class BuildParameters
     {
         get
         {
-            return !IsLocalBuild && IsRunningOnWindows && !IsPullRequest && IsMainMassTransitRepo && (IsMasterBranch || IsDevelopBranch);
+            return !IsLocalBuild && IsRunningOnWindows && !IsPullRequest && IsMainMassTransitRepo && (IsMasterBranch || IsDevelopBranch || IsVNext);
         }
     }
 
@@ -51,8 +52,8 @@ public class BuildParameters
             IsPullRequest = buildSystem.AppVeyor.Environment.PullRequest.IsPullRequest,
             IsMainMassTransitRepo = StringComparer.OrdinalIgnoreCase.Equals("masstransit/masstransit", buildSystem.AppVeyor.Environment.Repository.Name),
             IsMasterBranch = StringComparer.OrdinalIgnoreCase.Equals("master", buildSystem.AppVeyor.Environment.Repository.Branch),
-            IsDevelopBranch = StringComparer.OrdinalIgnoreCase.Equals("develop", buildSystem.AppVeyor.Environment.Repository.Branch)
-              || StringComparer.OrdinalIgnoreCase.Equals("v6", buildSystem.AppVeyor.Environment.Repository.Branch),
+            IsDevelopBranch = StringComparer.OrdinalIgnoreCase.Equals("develop", buildSystem.AppVeyor.Environment.Repository.Branch),
+            IsVNext = StringComparer.OrdinalIgnoreCase.Equals("vnext", buildSystem.AppVeyor.Environment.Repository.Branch),
             IsTagged = IsBuildTagged(buildSystem),
             Paths = BuildPaths.GetPaths(context)
         };

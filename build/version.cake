@@ -33,6 +33,7 @@ public class BuildVersion
             suffix =
                 buildParameters.IsMasterBranch ? null
                 : buildParameters.IsDevelopBranch ? "develop"
+                : buildParameters.IsVNext ? "develop"
                 : "beta";
 
             if(suffix != null)
