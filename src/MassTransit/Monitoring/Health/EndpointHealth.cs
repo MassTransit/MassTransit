@@ -31,19 +31,16 @@ namespace MassTransit.Monitoring.Health
         public HealthResult CheckHealth()
         {
             EndpointStatus[] faulted = _endpoints.Values.Where(x => !x.Ready).ToArray();
+            Dictionary<string, object> data = _endpoints.ToDictionary(x => x.Key.ToString(), x => x.Value.GetData());
 
             HealthResult healthCheckResult;
             if (faulted.Any())
             {
                 healthCheckResult = HealthResult.Unhealthy($"Unhealthy Endpoints: {string.Join(",", faulted.Select(x => x.InputAddress.GetLastPart()))}",
-                    faulted.Select(x => x.LastException).FirstOrDefault(e => e != null),
-                    new Dictionary<string, object> {["Endpoints"] = _endpoints.Values.Select(x => x.ToDictionary()).ToArray()});
+                    faulted.Select(x => x.LastException).FirstOrDefault(e => e != null), data);
             }
             else
-            {
-                healthCheckResult = HealthResult.Healthy("Endpoints are healthy",
-                    new Dictionary<string, object> {["Endpoints"] = _endpoints.Values.Select(x => x.ToDictionary()).ToArray()});
-            }
+                healthCheckResult = HealthResult.Healthy("Endpoints are healthy", data);
 
             return healthCheckResult;
         }
@@ -78,10 +75,7 @@ namespace MassTransit.Monitoring.Health
 
         EndpointStatus GetEndpoint(Uri inputAddress)
         {
-            if (!_endpoints.ContainsKey(inputAddress))
-                _endpoints.TryAdd(inputAddress, new EndpointStatus(inputAddress));
-
-            return _endpoints[inputAddress];
+            return _endpoints.GetOrAdd(inputAddress, address => new EndpointStatus(address));
         }
 
 
@@ -122,17 +116,15 @@ namespace MassTransit.Monitoring.Health
                 Message = $"faulted ({faulted.Exception.Message})";
             }
 
-            public IDictionary<string, string> ToDictionary()
+            public object GetData()
             {
-                var dictionary = new Dictionary<string, string>
+                if (LastException == null)
+                    return new {Message};
+                return new
                 {
-                    {"InputAddress", InputAddress.ToString()},
-                    {"Message", Message},
+                    Message,
+                    LastException
                 };
-                if (LastException != null)
-                    dictionary.Add("LastExceptionMessage", LastException?.Message);
-
-                return dictionary;
             }
         }
     }

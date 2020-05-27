@@ -5,7 +5,6 @@ namespace MassTransit.KafkaIntegration.Tests
     using System.Threading.Tasks;
     using NUnit.Framework;
     using Registration;
-    using Registration.Attachments;
     using TestFramework;
 
 

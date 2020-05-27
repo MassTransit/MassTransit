@@ -3,18 +3,22 @@ namespace MassTransit.KafkaIntegration
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Attachments;
     using Configuration;
     using Configuration.Configurators;
     using Confluent.Kafka;
+    using GreenPipes;
     using Registration;
     using Serializers;
     using Subscriptions;
+    using Util;
 
 
     public class KafkaFactoryConfigurator :
         IKafkaFactoryConfigurator
     {
         readonly ClientConfig _clientConfig;
+        readonly BusAttachmentObservable _observers;
         readonly List<IKafkaTopic> _topics;
         IHeadersDeserializer _headersDeserializer;
 
@@ -22,6 +26,7 @@ namespace MassTransit.KafkaIntegration
         {
             _clientConfig = clientConfig;
             _topics = new List<IKafkaTopic>();
+            _observers = new BusAttachmentObservable();
 
             SetHeadersDeserializer(DictionaryHeadersSerialize.Deserializer);
         }
@@ -207,9 +212,21 @@ namespace MassTransit.KafkaIntegration
             set => _clientConfig.ClientRack = value;
         }
 
+        public ConnectHandle ConnectBusAttachmentObserver(IBusAttachmentObserver observer)
+        {
+            return _observers.Connect(observer);
+        }
+
+        public string Name => KafkaBaseBusAttachment.InstanceName;
+
+        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return new MultipleConnectHandle(_topics.Select(x => x.ConnectReceiveEndpointObserver(observer)));
+        }
+
         public IBusInstanceConfigurator Build()
         {
-            var configurator = new KafkaBusInstanceConfigurator(_topics);
+            var configurator = new KafkaBusInstanceConfigurator(_topics, _observers);
             return configurator;
         }
     }

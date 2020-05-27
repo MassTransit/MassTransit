@@ -1,7 +1,7 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
 {
     using System;
-    using MassTransit.Registration.Attachments;
+    using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
 
 

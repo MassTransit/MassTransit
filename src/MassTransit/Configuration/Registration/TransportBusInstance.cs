@@ -42,7 +42,7 @@ namespace MassTransit.Registration
             if (!_attachments.Any())
                 return;
 
-            LogContext.Info?.Log("Connecting bus ({Type}) attachments: {Names}", InstanceType.Name, string.Join(", ", _attachments.Select(x => x.Name)));
+            LogContext.Info?.Log("Connecting {Type} attachments: {Names}", InstanceType.Name, string.Join(", ", _attachments.Select(x => x.Name)));
             await Task.WhenAll(_attachments.Select(attachment => attachment.Connect(cancellationToken))).ConfigureAwait(false);
         }
 
@@ -52,7 +52,7 @@ namespace MassTransit.Registration
 
             if (_attachments.Any())
             {
-                LogContext.Info?.Log("Disconnecting bus ({Type}) attachments: {Names}", InstanceType.Name, string.Join(", ", _attachments.Select(x => x.Name)));
+                LogContext.Info?.Log("Disconnecting {Type} attachments: {Names}", InstanceType.Name, string.Join(", ", _attachments.Select(x => x.Name)));
                 await Task.WhenAll(_attachments.Select(attachment => attachment.Disconnect(cancellationToken))).ConfigureAwait(false);
             }
 

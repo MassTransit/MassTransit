@@ -4,7 +4,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
     using System.Linq;
     using MassTransit.MultiBus;
     using MassTransit.Registration;
-    using MassTransit.Registration.Attachments;
     using Microsoft.Extensions.DependencyInjection;
     using Monitoring.Health;
     using Registration;

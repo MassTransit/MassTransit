@@ -1,9 +1,10 @@
-namespace MassTransit.Registration.Attachments
+namespace MassTransit.Attachments
 {
     using System;
     using Builders;
     using Configuration;
     using Context;
+    using MassTransit.Registration;
 
 
     public class BusAttachmentReceiveEndpointBuilder :

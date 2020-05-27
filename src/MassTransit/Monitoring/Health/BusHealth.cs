@@ -1,7 +1,11 @@
 namespace MassTransit.Monitoring.Health
 {
     using System;
+    using System.Collections.Concurrent;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
+    using Attachments;
     using EndpointConfigurators;
     using Util;
 
@@ -11,7 +15,9 @@ namespace MassTransit.Monitoring.Health
         IEndpointConfigurationObserver,
         IBusHealth
     {
+        readonly ConcurrentDictionary<string, BusAttachmentHealth> _attachmentsHealth;
         readonly EndpointHealth _endpointHealth;
+
         string _failureMessage = "not started";
         bool _healthy;
 
@@ -19,6 +25,7 @@ namespace MassTransit.Monitoring.Health
         {
             Name = name;
             _endpointHealth = new EndpointHealth();
+            _attachmentsHealth = new ConcurrentDictionary<string, BusAttachmentHealth>();
         }
 
         public string Name { get; }
@@ -26,10 +33,19 @@ namespace MassTransit.Monitoring.Health
         public HealthResult CheckHealth()
         {
             var endpointHealthResult = _endpointHealth.CheckHealth();
+            Dictionary<string, HealthResult> attachmentHealthResult = _attachmentsHealth
+                .ToDictionary(x => x.Key, x => x.Value.CheckHealth());
+
+            var data = new Dictionary<string, object>
+            {
+                ["Attachments"] = attachmentHealthResult.ToDictionary(x => x.Key, x => x.Value.Description),
+                ["Endpoints"] = endpointHealthResult.Data
+            };
 
             return _healthy && endpointHealthResult.Status == BusHealthStatus.Healthy
-                ? HealthResult.Healthy("Ready", endpointHealthResult.Data)
-                : HealthResult.Unhealthy($"Not ready: {_failureMessage}", data: endpointHealthResult.Data);
+                && attachmentHealthResult.Values.All(x => x.Status == BusHealthStatus.Healthy)
+                    ? HealthResult.Healthy("Ready", data)
+                    : HealthResult.Unhealthy($"Not ready: {_failureMessage}", data: data);
         }
 
         Task IBusObserver.CreateFaulted(Exception exception)
@@ -77,6 +93,13 @@ namespace MassTransit.Monitoring.Health
         void IEndpointConfigurationObserver.EndpointConfigured<T>(T configurator)
         {
             _endpointHealth.EndpointConfigured(configurator);
+        }
+
+        public void Configure(IBusAttachmentFactoryConfigurator configurator)
+        {
+            var health = _attachmentsHealth.GetOrAdd(configurator.Name, n => new BusAttachmentHealth());
+            configurator.ConnectBusAttachmentObserver(health);
+            configurator.ConnectReceiveEndpointObserver(_endpointHealth);
         }
 
         Task Failure(string message)

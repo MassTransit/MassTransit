@@ -6,7 +6,6 @@ namespace MassTransit
     using Courier;
     using Definition;
     using Registration;
-    using Registration.Attachments;
     using Saga;
 
 

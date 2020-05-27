@@ -3,6 +3,7 @@ namespace MassTransit.KafkaIntegration.Subscriptions
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Attachments;
     using Configuration;
     using Configuration.Configurators;
     using Confluent.Kafka;
@@ -10,7 +11,6 @@ namespace MassTransit.KafkaIntegration.Subscriptions
     using GreenPipes;
     using MassTransit.Configuration;
     using Registration;
-    using Registration.Attachments;
     using Serializers;
     using Transport;
 
@@ -196,16 +196,16 @@ namespace MassTransit.KafkaIntegration.Subscriptions
                 yield return result;
         }
 
-        public IKafkaConsumer Build()
+        public IKafkaReceiveEndpoint Build()
         {
-            IKafkaReceiver<TKey, TValue> CreateReceiver()
+            ReceiveEndpointContext CreateContext()
             {
                 var builder = new BusAttachmentReceiveEndpointBuilder(_busInstance, _endpointConfiguration);
 
                 foreach (var specification in Specifications)
                     specification.Configure(builder);
 
-                return new KafkaReceiver<TKey, TValue>(builder.CreateReceiveEndpointContext(), _headersDeserializer);
+                return builder.CreateReceiveEndpointContext();
             }
 
             IConsumer<TKey, TValue> CreateConsumer()
@@ -232,7 +232,10 @@ namespace MassTransit.KafkaIntegration.Subscriptions
 
             LogContext.SetCurrentIfNull(_busInstance.HostConfiguration.LogContext);
 
-            return new KafkaConsumer<TKey, TValue>(_topic, CreateConsumer(), CreateReceiver(), _busInstance.HostConfiguration.LogContext,
+            var context = CreateContext();
+            var receiver = new KafkaReceiver<TKey, TValue>(context, _headersDeserializer);
+
+            return new KafkaReceiveEndpoint<TKey, TValue>(_topic, CreateConsumer(), receiver, context, _busInstance.HostConfiguration.LogContext,
                 _consumerConfig.EnableAutoCommit == true);
         }
     }

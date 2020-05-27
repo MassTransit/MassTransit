@@ -7,9 +7,12 @@
     using Context;
     using Contexts;
     using GreenPipes;
+    using Metadata;
     using Pipeline;
+    using Pipeline.Observables;
     using Serializers;
     using Transports;
+    using Util;
 
 
     public class KafkaReceiver<TKey, TValue> :
@@ -19,19 +22,26 @@
         readonly ReceiveEndpointContext _context;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly IHeadersDeserializer _headersDeserializer;
+        readonly ReceiveTransportObservable _observers;
 
         public KafkaReceiver(ReceiveEndpointContext context, IHeadersDeserializer headersDeserializer)
         {
             _context = context;
             _headersDeserializer = headersDeserializer;
-
+            _observers = new ReceiveTransportObservable();
             _dispatcher = context.CreateReceivePipeDispatcher();
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("receiver");
-            scope.Add("type", "eventData");
+            scope.Add("key-type", TypeMetadataCache<TKey>.ShortName);
+            scope.Add("value-type", TypeMetadataCache<TValue>.ShortName);
+        }
+
+        public ReceiveTransportHandle Start()
+        {
+            return new ReceiverHandle();
         }
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
@@ -77,6 +87,39 @@
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
         {
             return _context.ReceivePipe.ConnectConsumeObserver(observer);
+        }
+
+        public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
+        {
+            return _observers.Connect(observer);
+        }
+
+        public async Task Ready(ReceiveTransportReady ready)
+        {
+            await _context.TransportObservers.Ready(ready).ConfigureAwait(false);
+            await _observers.Ready(ready).ConfigureAwait(false);
+        }
+
+        public async Task Completed(ReceiveTransportCompleted completed)
+        {
+            await _context.TransportObservers.Completed(completed).ConfigureAwait(false);
+            await _observers.Completed(completed).ConfigureAwait(false);
+        }
+
+        public async Task Faulted(ReceiveTransportFaulted faulted)
+        {
+            await _context.TransportObservers.Faulted(faulted).ConfigureAwait(false);
+            await _observers.Faulted(faulted).ConfigureAwait(false);
+        }
+
+
+        class ReceiverHandle :
+            ReceiveTransportHandle
+        {
+            public Task Stop(CancellationToken cancellationToken = default)
+            {
+                return TaskUtil.Completed;
+            }
         }
     }
 }
