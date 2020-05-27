@@ -9,7 +9,6 @@ namespace MassTransit.KafkaIntegration.Tests
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using Registration;
-    using Registration.Attachments;
     using Serializers;
 
 

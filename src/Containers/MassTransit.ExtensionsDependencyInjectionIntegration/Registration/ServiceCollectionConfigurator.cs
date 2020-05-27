@@ -6,7 +6,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
     using Configurators;
     using Context;
     using MassTransit.Registration;
-    using MassTransit.Registration.Attachments;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Monitoring.Health;

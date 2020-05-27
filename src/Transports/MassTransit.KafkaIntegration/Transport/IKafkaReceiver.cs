@@ -4,22 +4,19 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Confluent.Kafka;
-    using GreenPipes;
     using Pipeline;
     using Transports;
 
 
     public interface IKafkaReceiver<TKey, TValue> :
-        IReceiveObserverConnector,
-        IPublishObserverConnector,
-        ISendObserverConnector,
         IConsumeMessageObserverConnector,
         IConsumeObserverConnector,
-        IProbeSite
+        IReceiveTransport,
+        IReceiveTransportObserver
         where TValue : class
     {
         /// <summary>
-        ///     Handles the <paramref name="message" />
+        /// Handles the <paramref name="message" />
         /// </summary>
         /// <param name="message"></param>
         /// <param name="cancellationToken"></param>

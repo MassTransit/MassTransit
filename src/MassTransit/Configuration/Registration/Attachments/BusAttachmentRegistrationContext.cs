@@ -1,7 +1,9 @@
-namespace MassTransit.Registration.Attachments
+namespace MassTransit.Registration
 {
     using System;
+    using Attachments;
     using ConsumeConfigurators;
+    using Monitoring.Health;
     using Saga;
 
 
@@ -9,15 +11,22 @@ namespace MassTransit.Registration.Attachments
         IBusAttachmentRegistrationContext<TContainerContext>
         where TContainerContext : class
     {
+        readonly BusHealth _health;
         readonly IRegistration _registration;
 
-        public BusAttachmentRegistrationContext(IRegistration registration, TContainerContext container)
+        public BusAttachmentRegistrationContext(IRegistration registration, BusHealth health, TContainerContext container)
         {
             _registration = registration;
+            _health = health;
             Container = container;
         }
 
         public TContainerContext Container { get; }
+
+        public void UseHealthCheck(IBusAttachmentFactoryConfigurator configurator)
+        {
+            configurator.ConnectHealthCheck(_health);
+        }
 
         public object GetService(Type serviceType)
         {

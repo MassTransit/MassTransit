@@ -6,6 +6,7 @@ namespace MassTransit.KafkaIntegration.Subscriptions
     using Configurators;
     using Confluent.Kafka;
     using GreenPipes;
+    using Pipeline.Observables;
     using Registration;
     using Serializers;
 
@@ -16,6 +17,7 @@ namespace MassTransit.KafkaIntegration.Subscriptions
     {
         readonly Action<IKafkaTopicConfigurator<TKey, TValue>> _configure;
         readonly ConsumerConfig _consumerConfig;
+        readonly ReceiveEndpointObservable _endpointObservers;
         readonly IHeadersDeserializer _headersDeserializer;
 
         public KafkaTopic(ConsumerConfig consumerConfig, ITopicNameFormatter topicNameFormatter, IHeadersDeserializer headersDeserializer,
@@ -23,15 +25,17 @@ namespace MassTransit.KafkaIntegration.Subscriptions
         {
             _consumerConfig = consumerConfig;
             Name = topicNameFormatter.GetTopicName<TKey, TValue>();
+            _endpointObservers = new ReceiveEndpointObservable();
             _headersDeserializer = headersDeserializer;
             _configure = configure;
         }
 
         public string Name { get; }
 
-        public IKafkaConsumer CreateConsumer(IBusInstance busInstance)
+        public IKafkaReceiveEndpoint CreateEndpoint(IBusInstance busInstance)
         {
             var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration($"kafka-{Name}");
+            endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
             var configurator =
                 new KafkaTopicConfigurator<TKey, TValue>(_consumerConfig, Name, busInstance, endpointConfiguration, _headersDeserializer);
             _configure?.Invoke(configurator);
@@ -58,6 +62,11 @@ namespace MassTransit.KafkaIntegration.Subscriptions
 
             if (string.IsNullOrEmpty(_consumerConfig.BootstrapServers))
                 yield return this.Failure("BootstrapServers", "should not be empty. Please use cfg.Host() to configure it");
+        }
+
+        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _endpointObservers.Connect(observer);
         }
     }
 }

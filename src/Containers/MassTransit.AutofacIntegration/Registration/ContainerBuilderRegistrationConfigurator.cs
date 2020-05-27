@@ -3,7 +3,6 @@ namespace MassTransit.AutofacIntegration.Registration
     using System;
     using Autofac;
     using MassTransit.Registration;
-    using MassTransit.Registration.Attachments;
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;

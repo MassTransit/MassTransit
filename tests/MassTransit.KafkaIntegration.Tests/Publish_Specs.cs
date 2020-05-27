@@ -51,6 +51,8 @@ namespace MassTransit.KafkaIntegration.Tests
                             c.DisableAutoCommit();
                             c.ConfigureConsumer<KafkaMessageConsumer>(context);
                         });
+
+                        k.UseHealthCheck(context);
                     });
                 });
             });

@@ -5,7 +5,6 @@ namespace MassTransit.WindsorIntegration.Registration
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
     using MassTransit.Registration;
-    using MassTransit.Registration.Attachments;
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;

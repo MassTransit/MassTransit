@@ -2,8 +2,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
 {
     using System;
     using MassTransit.Registration;
-    using MassTransit.Registration.Attachments;
     using Microsoft.Extensions.DependencyInjection;
+    using Monitoring.Health;
     using Registration;
 
 
@@ -30,6 +30,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
         IBusAttachmentRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
         {
             return new BusAttachmentRegistrationContext<IServiceProvider>(CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),
+                provider.GetRequiredService<Bind<TBus, BusHealth>>().Value,
                 provider);
         }
     }

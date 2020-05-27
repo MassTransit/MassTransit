@@ -2,12 +2,14 @@ namespace MassTransit.KafkaIntegration.Subscriptions
 {
     using GreenPipes;
     using Registration;
+    using Transports;
 
 
     public interface IKafkaTopic :
+        IReceiveEndpointObserverConnector,
         ISpecification
     {
         string Name { get; }
-        IKafkaConsumer CreateConsumer(IBusInstance busInstance);
+        IKafkaReceiveEndpoint CreateEndpoint(IBusInstance busInstance);
     }
 }

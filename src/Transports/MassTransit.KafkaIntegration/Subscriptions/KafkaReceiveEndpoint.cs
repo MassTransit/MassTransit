@@ -5,33 +5,46 @@ namespace MassTransit.KafkaIntegration.Subscriptions
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Context;
+    using Events;
     using Transport;
+    using Transports;
+    using Transports.Metrics;
     using Util;
 
 
-    public class KafkaConsumer<TKey, TValue> :
-        IKafkaConsumer
+    public class KafkaReceiveEndpoint<TKey, TValue> :
+        ReceiveEndpoint,
+        IKafkaReceiveEndpoint,
+        DeliveryMetrics
         where TValue : class
     {
         readonly IConsumer<TKey, TValue> _consumer;
+        readonly Uri _inputAddress;
         readonly bool _isAutoCommitEnabled;
         readonly ILogContext _logContext;
         readonly IKafkaReceiver<TKey, TValue> _receiver;
         readonly string _topic;
         CancellationTokenSource _cancellationTokenSource;
         Task _consumerTask;
+        long _deliveredCount;
 
-        public KafkaConsumer(string topic, IConsumer<TKey, TValue> consumer, IKafkaReceiver<TKey, TValue> receiver, ILogContext logContext,
-            bool isAutoCommitEnabled)
+        public KafkaReceiveEndpoint(string topic, IConsumer<TKey, TValue> consumer, IKafkaReceiver<TKey, TValue> receiver, ReceiveEndpointContext context,
+            ILogContext logContext, bool isAutoCommitEnabled)
+            : base(receiver, context)
         {
             _topic = topic;
             _consumer = consumer;
             _receiver = receiver;
             _logContext = logContext;
             _isAutoCommitEnabled = isAutoCommitEnabled;
+            _inputAddress = context.InputAddress;
+            _deliveredCount = 0;
         }
 
-        public Task Subscribe(CancellationToken cancellationToken)
+        public long DeliveryCount => _deliveredCount;
+        public int ConcurrentDeliveryCount => 0;
+
+        public Task Connect(CancellationToken cancellationToken)
         {
             LogContext.SetCurrentIfNull(_logContext);
 
@@ -39,7 +52,8 @@ namespace MassTransit.KafkaIntegration.Subscriptions
 
             _consumerTask = Task.Run(async () =>
             {
-                await Task.Yield();
+                await _receiver.Ready(new ReceiveTransportReadyEvent(_inputAddress)).ConfigureAwait(false);
+
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
                     LogContext.SetCurrentIfNull(_logContext);
@@ -51,6 +65,8 @@ namespace MassTransit.KafkaIntegration.Subscriptions
 
                         if (!_isAutoCommitEnabled)
                             _consumer.Commit(message);
+
+                        Interlocked.Increment(ref _deliveredCount);
                     }
                     catch (OperationCanceledException e) when (e.CancellationToken == _cancellationTokenSource.Token)
                     {
@@ -58,6 +74,7 @@ namespace MassTransit.KafkaIntegration.Subscriptions
                     catch (Exception e)
                     {
                         LogContext.Error?.Log(e, "Kafka subscription: {topicName} exception", _topic);
+                        await _receiver.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, e)).ConfigureAwait(false);
                         throw;
                     }
                 }
@@ -69,7 +86,7 @@ namespace MassTransit.KafkaIntegration.Subscriptions
             return _consumerTask.IsCompleted ? _consumerTask : TaskUtil.Completed;
         }
 
-        public async Task Unsubscribe(CancellationToken cancellationToken)
+        public async Task Disconnect(CancellationToken cancellationToken)
         {
             LogContext.SetCurrentIfNull(_logContext);
             try
@@ -87,6 +104,10 @@ namespace MassTransit.KafkaIntegration.Subscriptions
             catch (Exception e)
             {
                 LogContext.Error?.Log(e, "Error occured while stopping kafka consumer: {topicName}", _topic);
+            }
+            finally
+            {
+                await _receiver.Completed(new ReceiveTransportCompletedEvent(_inputAddress, this)).ConfigureAwait(false);
             }
         }
     }

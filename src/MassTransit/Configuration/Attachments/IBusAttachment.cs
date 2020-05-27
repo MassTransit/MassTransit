@@ -1,4 +1,4 @@
-namespace MassTransit.Registration.Attachments
+namespace MassTransit.Attachments
 {
     using System.Threading;
     using System.Threading.Tasks;

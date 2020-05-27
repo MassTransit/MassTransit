@@ -3,7 +3,6 @@ namespace MassTransit.KafkaIntegration
     using System;
     using Confluent.Kafka;
     using Registration;
-    using Registration.Attachments;
 
 
     public class KafkaBusInstanceConfiguratorFactory<TContainerContext> :

@@ -2,7 +2,6 @@ namespace MassTransit.StructureMapIntegration.Registration
 {
     using System;
     using MassTransit.Registration;
-    using MassTransit.Registration.Attachments;
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;

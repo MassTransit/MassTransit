@@ -1,7 +1,7 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration
 {
     using System;
-    using MassTransit.Registration.Attachments;
+    using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
 
 

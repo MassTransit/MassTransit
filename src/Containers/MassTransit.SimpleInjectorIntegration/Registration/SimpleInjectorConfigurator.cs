@@ -3,7 +3,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using System;
     using Context;
     using MassTransit.Registration;
-    using MassTransit.Registration.Attachments;
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;

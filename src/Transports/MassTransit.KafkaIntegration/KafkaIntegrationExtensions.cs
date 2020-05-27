@@ -2,7 +2,7 @@ namespace MassTransit.KafkaIntegration
 {
     using System;
     using Confluent.Kafka;
-    using Registration.Attachments;
+    using Registration;
 
 
     public static class KafkaIntegrationExtensions

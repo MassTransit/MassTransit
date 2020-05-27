@@ -1,4 +1,4 @@
-namespace MassTransit.Registration.Attachments
+namespace MassTransit.Registration
 {
     public interface IBusAttachmentRegistrationFactory<in TContainerContext>
         where TContainerContext : class
