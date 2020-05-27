@@ -6,7 +6,6 @@ namespace MassTransit.KafkaIntegration
     using Configuration;
     using Configuration.Configurators;
     using Confluent.Kafka;
-    using Context;
     using Registration;
     using Serializers;
     using Subscriptions;
@@ -23,9 +22,6 @@ namespace MassTransit.KafkaIntegration
         {
             _clientConfig = clientConfig;
             _topics = new List<IKafkaTopic>();
-
-            if (LogContext.Current == null)
-                LogContext.ConfigureCurrentLogContext();
 
             SetHeadersDeserializer(DictionaryHeadersSerialize.Deserializer);
         }

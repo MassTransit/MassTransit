@@ -18,12 +18,12 @@ namespace MassTransit.KafkaIntegration.Tests
     {
         const string Topic = "test";
         readonly IServiceProvider _provider;
-        readonly Task<ConsumeContext<IMessage>> _task;
+        readonly Task<ConsumeContext<KafkaMessage>> _task;
 
         public Receive_Specs()
         {
             var services = new ServiceCollection();
-            TaskCompletionSource<ConsumeContext<IMessage>> taskCompletionSource = GetTask<ConsumeContext<IMessage>>();
+            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
             _task = taskCompletionSource.Task;
             services.AddSingleton(taskCompletionSource);
             services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
@@ -42,17 +42,19 @@ namespace MassTransit.KafkaIntegration.Tests
 
         protected override void ConfigureBusAttachment<T>(IBusAttachmentRegistrationConfigurator<T> configurator)
         {
-            configurator.AddConsumer<MyConsumer>();
+            configurator.AddConsumer<KafkaMessageConsumer>();
             base.ConfigureBusAttachment(configurator);
         }
 
         protected override void ConfigureKafka<T>(IBusAttachmentRegistrationContext<T> context, IKafkaFactoryConfigurator configurator)
         {
             base.ConfigureKafka(context, configurator);
-            configurator.Topic<Null, IMessage>(Topic, nameof(Receive_Specs), c =>
+            configurator.Topic<Null, KafkaMessage>(Topic, nameof(Receive_Specs), c =>
             {
+                c.AutoOffsetReset = AutoOffsetReset.Earliest;
+
                 c.DisableAutoCommit();
-                c.ConfigureConsumer<MyConsumer>(context);
+                c.ConfigureConsumer<KafkaMessageConsumer>(context);
             });
         }
 
@@ -61,27 +63,27 @@ namespace MassTransit.KafkaIntegration.Tests
         {
             var config = new ProducerConfig {BootstrapServers = "localhost:9092"};
 
-            using IProducer<Null, IMessage> p = new ProducerBuilder<Null, IMessage>(config)
-                .SetValueSerializer(new MassTransitSerializer<IMessage>())
+            using IProducer<Null, KafkaMessage> p = new ProducerBuilder<Null, KafkaMessage>(config)
+                .SetValueSerializer(new MassTransitSerializer<KafkaMessage>())
                 .Build();
             var messageId = NewId.NextGuid();
-            var message = new Message<Null, IMessage>
+            var message = new Message<Null, KafkaMessage>
             {
-                Value = new Message("test"),
+                Value = new KafkaMessageClass("test"),
                 Headers = DictionaryHeadersSerialize.Serializer.Serialize(new Dictionary<string, object> {[MessageHeaders.MessageId] = messageId})
             };
             await p.ProduceAsync(Topic, message);
 
-            ConsumeContext<IMessage> result = await _task;
+            ConsumeContext<KafkaMessage> result = await _task;
             Assert.AreEqual(message.Value.Text, result.Message.Text);
             Assert.AreEqual(messageId, result.MessageId);
         }
 
 
-        class Message :
-            IMessage
+        class KafkaMessageClass :
+            KafkaMessage
         {
-            public Message(string text)
+            public KafkaMessageClass(string text)
             {
                 Text = text;
             }
@@ -90,24 +92,24 @@ namespace MassTransit.KafkaIntegration.Tests
         }
 
 
-        class MyConsumer :
-            IConsumer<IMessage>
+        class KafkaMessageConsumer :
+            IConsumer<KafkaMessage>
         {
-            readonly TaskCompletionSource<ConsumeContext<IMessage>> _taskCompletionSource;
+            readonly TaskCompletionSource<ConsumeContext<KafkaMessage>> _taskCompletionSource;
 
-            public MyConsumer(TaskCompletionSource<ConsumeContext<IMessage>> taskCompletionSource)
+            public KafkaMessageConsumer(TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource)
             {
                 _taskCompletionSource = taskCompletionSource;
             }
 
-            public async Task Consume(ConsumeContext<IMessage> context)
+            public async Task Consume(ConsumeContext<KafkaMessage> context)
             {
                 _taskCompletionSource.TrySetResult(context);
             }
         }
 
 
-        public interface IMessage
+        public interface KafkaMessage
         {
             string Text { get; }
         }

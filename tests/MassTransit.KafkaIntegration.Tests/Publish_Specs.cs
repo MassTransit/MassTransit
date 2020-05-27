@@ -9,86 +9,96 @@ namespace MassTransit.KafkaIntegration.Tests
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using Registration;
-    using Registration.Attachments;
     using Serializers;
+    using TestFramework;
     using Util;
 
 
     public class Publish_Specs :
-        KafkaTestFixture
+        InMemoryTestFixture
     {
         const string Topic = "test2";
-        readonly Task<ConsumeContext<IPing>> _pingTask;
-        readonly IServiceProvider _provider;
-        readonly Task<ConsumeContext<IMessage>> _task;
 
-        public Publish_Specs()
+        [Test]
+        public async Task Should_receive()
         {
+            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
+            TaskCompletionSource<ConsumeContext<BusPing>> pingTaskCompletionSource = GetTask<ConsumeContext<BusPing>>();
+
             var services = new ServiceCollection();
-            TaskCompletionSource<ConsumeContext<IMessage>> taskCompletionSource = GetTask<ConsumeContext<IMessage>>();
-            TaskCompletionSource<ConsumeContext<IPing>> pingTaskCompletionSource = GetTask<ConsumeContext<IPing>>();
-            _task = taskCompletionSource.Task;
-            _pingTask = pingTaskCompletionSource.Task;
             services.AddSingleton(taskCompletionSource);
             services.AddSingleton(pingTaskCompletionSource);
 
             services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
             services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
-            services.AddMassTransit(configurator =>
+            services.AddMassTransit(x =>
             {
-                configurator.AddConsumer<PingConsumer>();
-                configurator.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
-                configurator.AddBusAttachment(ConfigureBusAttachment);
+                x.AddConsumer<BusPingConsumer>();
+                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+                x.AddBusAttachment(attachment =>
+                {
+                    attachment.AddConsumer<KafkaMessageConsumer>();
+
+                    attachment.UsingKafka((context, k) =>
+                    {
+                        k.Host("localhost:9092");
+
+                        k.Topic<Null, KafkaMessage>(Topic, nameof(Receive_Specs), c =>
+                        {
+                            c.AutoOffsetReset = AutoOffsetReset.Earliest;
+
+                            c.DisableAutoCommit();
+                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                        });
+                    });
+                });
             });
-            _provider = services.BuildServiceProvider();
-        }
 
-        protected override IBusInstance BusInstance => _provider.GetRequiredService<IBusInstance>();
+            var provider = services.BuildServiceProvider();
 
-        protected override void ConfigureBusAttachment<T>(IBusAttachmentRegistrationConfigurator<T> configurator)
-        {
-            configurator.AddConsumer<MyConsumer>();
-            base.ConfigureBusAttachment(configurator);
-        }
+            var busInstance = provider.GetRequiredService<IBusInstance>();
 
-        protected override void ConfigureKafka<T>(IBusAttachmentRegistrationContext<T> context, IKafkaFactoryConfigurator configurator)
-        {
-            base.ConfigureKafka(context, configurator);
-            configurator.Topic<Null, IMessage>(Topic, nameof(Receive_Specs), c =>
+            await busInstance.Start(TestCancellationToken);
+
+            try
             {
-                c.DisableAutoCommit();
-                c.ConfigureConsumer<MyConsumer>(context);
-            });
-        }
+                var config = new ProducerConfig {BootstrapServers = "localhost:9092"};
 
-        [Test]
-        public async Task Should_receive()
-        {
-            var config = new ProducerConfig {BootstrapServers = "localhost:9092"};
+                using IProducer<Null, KafkaMessage> p = new ProducerBuilder<Null, KafkaMessage>(config)
+                    .SetValueSerializer(new MassTransitSerializer<KafkaMessage>())
+                    .Build();
 
-            using IProducer<Null, IMessage> p = new ProducerBuilder<Null, IMessage>(config)
-                .SetValueSerializer(new MassTransitSerializer<IMessage>())
-                .Build();
-            var messageId = NewId.NextGuid();
-            var message = new Message<Null, IMessage>
+                var messageId = NewId.NextGuid();
+                var message = new Message<Null, KafkaMessage>
+                {
+                    Value = new KafkaMessageClass("test"),
+                    Headers = DictionaryHeadersSerialize.Serializer.Serialize(new Dictionary<string, object> {[MessageHeaders.MessageId] = messageId})
+                };
+
+                await p.ProduceAsync(Topic, message);
+                p.Flush();
+
+                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
+                ConsumeContext<BusPing> ping = await pingTaskCompletionSource.Task;
+
+                Assert.AreEqual(result.CorrelationId, ping.InitiatorId);
+
+                Assert.That(ping.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/kafka-test2")));
+            }
+            finally
             {
-                Value = new Message("test"),
-                Headers = DictionaryHeadersSerialize.Serializer.Serialize(new Dictionary<string, object> {[MessageHeaders.MessageId] = messageId})
-            };
-            await p.ProduceAsync(Topic, message);
+                await busInstance.Stop(TestCancellationToken);
 
-            ConsumeContext<IMessage> result = await _task;
-            ConsumeContext<IPing> ping = await _pingTask;
-
-            Assert.AreEqual(result.CorrelationId, ping.InitiatorId);
+                await provider.DisposeAsync();
+            }
         }
 
 
-        class Message :
-            IMessage
+        class KafkaMessageClass :
+            KafkaMessage
         {
-            public Message(string text)
+            public KafkaMessageClass(string text)
             {
                 Text = text;
             }
@@ -97,37 +107,37 @@ namespace MassTransit.KafkaIntegration.Tests
         }
 
 
-        class MyConsumer :
-            IConsumer<IMessage>
+        class KafkaMessageConsumer :
+            IConsumer<KafkaMessage>
         {
             readonly IPublishEndpoint _publishEndpoint;
-            readonly TaskCompletionSource<ConsumeContext<IMessage>> _taskCompletionSource;
+            readonly TaskCompletionSource<ConsumeContext<KafkaMessage>> _taskCompletionSource;
 
-            public MyConsumer(IPublishEndpoint publishEndpoint, TaskCompletionSource<ConsumeContext<IMessage>> taskCompletionSource)
+            public KafkaMessageConsumer(IPublishEndpoint publishEndpoint, TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource)
             {
                 _publishEndpoint = publishEndpoint;
                 _taskCompletionSource = taskCompletionSource;
             }
 
-            public async Task Consume(ConsumeContext<IMessage> context)
+            public async Task Consume(ConsumeContext<KafkaMessage> context)
             {
                 _taskCompletionSource.TrySetResult(context);
-                await _publishEndpoint.Publish<IPing>(new { });
+                await _publishEndpoint.Publish<BusPing>(new { });
             }
         }
 
 
-        class PingConsumer :
-            IConsumer<IPing>
+        class BusPingConsumer :
+            IConsumer<BusPing>
         {
-            readonly TaskCompletionSource<ConsumeContext<IPing>> _taskCompletionSource;
+            readonly TaskCompletionSource<ConsumeContext<BusPing>> _taskCompletionSource;
 
-            public PingConsumer(TaskCompletionSource<ConsumeContext<IPing>> taskCompletionSource)
+            public BusPingConsumer(TaskCompletionSource<ConsumeContext<BusPing>> taskCompletionSource)
             {
                 _taskCompletionSource = taskCompletionSource;
             }
 
-            public Task Consume(ConsumeContext<IPing> context)
+            public Task Consume(ConsumeContext<BusPing> context)
             {
                 _taskCompletionSource.TrySetResult(context);
                 return TaskUtil.Completed;
@@ -135,13 +145,13 @@ namespace MassTransit.KafkaIntegration.Tests
         }
 
 
-        public interface IMessage
+        public interface KafkaMessage
         {
             string Text { get; }
         }
 
 
-        public interface IPing
+        public interface BusPing
         {
         }
     }
