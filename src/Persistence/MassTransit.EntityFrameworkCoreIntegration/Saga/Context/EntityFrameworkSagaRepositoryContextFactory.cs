@@ -49,11 +49,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             try
             {
                 Task Send() =>
-                    WithinTransaction(dbContext, context.CancellationToken, () =>
+                    WithinTransaction(dbContext, context.CancellationToken, async () =>
                     {
-                        var repositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _consumeContextFactory, _lockStrategy);
+                        using var repositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _consumeContextFactory, _lockStrategy);
 
-                        return next.Send(repositoryContext);
+                        await next.Send(repositoryContext).ConfigureAwait(false);
                     });
 
                 var executionStrategy = dbContext.Database.CreateExecutionStrategy();
@@ -80,9 +80,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             {
                 async Task Send()
                 {
-                    SagaLockContext<TSaga> lockContext = await _lockStrategy.CreateLockContext(dbContext, query, context.CancellationToken).ConfigureAwait(false);
+                    SagaLockContext<TSaga> lockContext =
+                        await _lockStrategy.CreateLockContext(dbContext, query, context.CancellationToken).ConfigureAwait(false);
 
-                    var repositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _consumeContextFactory, _lockStrategy);
+                    using var repositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _consumeContextFactory, _lockStrategy);
 
                     await WithinTransaction(dbContext, context.CancellationToken, async () =>
                     {
@@ -144,7 +145,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
         {
             async Task<bool> Create()
             {
-                await callback();
+                await callback().ConfigureAwait(false);
                 return true;
             }
 
@@ -159,7 +160,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             {
                 try
                 {
-                    await transaction.RollbackAsync();
+                    await transaction.RollbackAsync().ConfigureAwait(false);
                 }
                 catch (Exception innerException)
                 {

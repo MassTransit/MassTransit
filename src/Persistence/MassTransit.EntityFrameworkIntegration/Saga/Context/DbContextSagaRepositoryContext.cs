@@ -14,7 +14,8 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
 
     public class DbContextSagaRepositoryContext<TSaga, TMessage> :
         ConsumeContextScope<TMessage>,
-        SagaRepositoryContext<TSaga, TMessage>
+        SagaRepositoryContext<TSaga, TMessage>,
+        IDisposable
         where TSaga : class, ISaga
         where TMessage : class
     {
@@ -22,6 +23,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
         readonly ConsumeContext<TMessage> _consumeContext;
         readonly ISagaConsumeContextFactory<DbContext, TSaga> _factory;
         readonly ISagaRepositoryLockStrategy<TSaga> _lockStrategy;
+        readonly SemaphoreSlim _inUse = new SemaphoreSlim(1);
 
         public DbContextSagaRepositoryContext(DbContext dbContext, ConsumeContext<TMessage> consumeContext,
             ISagaConsumeContextFactory<DbContext, TSaga> factory, ISagaRepositoryLockStrategy<TSaga> lockStrategy)
@@ -73,21 +75,45 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
 
         public async Task Save(SagaConsumeContext<TSaga> context)
         {
-            _dbContext.Set<TSaga>().Add(context.Saga);
+            await _inUse.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+            try
+            {
+                _dbContext.Set<TSaga>().Add(context.Saga);
 
-            await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
+                await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                _inUse.Release();
+            }
         }
 
-        public Task Update(SagaConsumeContext<TSaga> context)
+        public async Task Update(SagaConsumeContext<TSaga> context)
         {
-            return _dbContext.SaveChangesAsync(CancellationToken);
+            await _inUse.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+            try
+            {
+                await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                _inUse.Release();
+            }
         }
 
-        public Task Delete(SagaConsumeContext<TSaga> context)
+        public async Task Delete(SagaConsumeContext<TSaga> context)
         {
-            _dbContext.Set<TSaga>().Remove(context.Saga);
+            await _inUse.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+            try
+            {
+                _dbContext.Set<TSaga>().Remove(context.Saga);
 
-            return _dbContext.SaveChangesAsync(CancellationToken);
+                await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                _inUse.Release();
+            }
         }
 
         public Task Discard(SagaConsumeContext<TSaga> context)
@@ -99,6 +125,11 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
             where T : class
         {
             return _factory.CreateSagaConsumeContext(_dbContext, consumeContext, instance, mode);
+        }
+
+        public void Dispose()
+        {
+            _inUse.Dispose();
         }
     }
 

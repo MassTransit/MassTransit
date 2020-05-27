@@ -52,11 +52,11 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
             var dbContext = _dbContextFactory.CreateScoped(context);
             try
             {
-                await WithinTransaction(dbContext, () =>
+                await WithinTransaction(dbContext, async () =>
                 {
-                    var repositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _consumeContextFactory, _lockStrategy);
+                    using var repositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _consumeContextFactory, _lockStrategy);
 
-                    return next.Send(repositoryContext);
+                    await next.Send(repositoryContext).ConfigureAwait(false);
                 }).ConfigureAwait(false);
             }
             finally
@@ -73,7 +73,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
             {
                 var lockContext = await _lockStrategy.CreateLockContext(dbContext, query, context.CancellationToken).ConfigureAwait(false);
 
-                var repositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _consumeContextFactory, _lockStrategy);
+                using var repositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _consumeContextFactory, _lockStrategy);
 
                 await WithinTransaction(dbContext, async () =>
                 {
