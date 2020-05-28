@@ -9,26 +9,24 @@
     using GreenPipes;
     using Metadata;
     using Pipeline;
-    using Pipeline.Observables;
     using Serializers;
     using Transports;
+    using Transports.Metrics;
     using Util;
 
 
-    public class KafkaReceiver<TKey, TValue> :
-        IKafkaReceiver<TKey, TValue>
+    public class KafkaReceiveTransport<TKey, TValue> :
+        IKafkaReceiveTransport<TKey, TValue>
         where TValue : class
     {
         readonly ReceiveEndpointContext _context;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly IHeadersDeserializer _headersDeserializer;
-        readonly ReceiveTransportObservable _observers;
 
-        public KafkaReceiver(ReceiveEndpointContext context, IHeadersDeserializer headersDeserializer)
+        public KafkaReceiveTransport(ReceiveEndpointContext context, IHeadersDeserializer headersDeserializer)
         {
             _context = context;
             _headersDeserializer = headersDeserializer;
-            _observers = new ReceiveTransportObservable();
             _dispatcher = context.CreateReceivePipeDispatcher();
         }
 
@@ -68,9 +66,13 @@
             if (cancellationToken.CanBeCanceled)
                 registration = cancellationToken.Register(context.Cancel);
 
+            ConsumeResultLockContext<TKey, TValue> receiveLock = context.TryGetPayload(out IConsumerLockContext<TKey, TValue> lockContext)
+                ? new ConsumeResultLockContext<TKey, TValue>(lockContext, message)
+                : default;
+
             try
             {
-                await _dispatcher.Dispatch(context).ConfigureAwait(false);
+                await _dispatcher.Dispatch(context, receiveLock).ConfigureAwait(false);
             }
             finally
             {
@@ -91,25 +93,22 @@
 
         public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
-            return _observers.Connect(observer);
+            return _context.ConnectReceiveTransportObserver(observer);
         }
 
-        public async Task Ready(ReceiveTransportReady ready)
+        public int ActiveDispatchCount => _dispatcher.ActiveDispatchCount;
+        public long DispatchCount => _dispatcher.DispatchCount;
+        public int MaxConcurrentDispatchCount => _dispatcher.MaxConcurrentDispatchCount;
+
+        public event ZeroActiveDispatchHandler ZeroActivity
         {
-            await _context.TransportObservers.Ready(ready).ConfigureAwait(false);
-            await _observers.Ready(ready).ConfigureAwait(false);
+            add => _dispatcher.ZeroActivity += value;
+            remove => _dispatcher.ZeroActivity -= value;
         }
 
-        public async Task Completed(ReceiveTransportCompleted completed)
+        public DeliveryMetrics GetMetrics()
         {
-            await _context.TransportObservers.Completed(completed).ConfigureAwait(false);
-            await _observers.Completed(completed).ConfigureAwait(false);
-        }
-
-        public async Task Faulted(ReceiveTransportFaulted faulted)
-        {
-            await _context.TransportObservers.Faulted(faulted).ConfigureAwait(false);
-            await _observers.Faulted(faulted).ConfigureAwait(false);
+            return _dispatcher.GetMetrics();
         }
 
 

@@ -1,6 +1,7 @@
 namespace MassTransit.AmazonSqsTransport.Configuration
 {
     using System;
+    using System.Collections.Generic;
     using Configurators;
     using Registration;
 
@@ -26,11 +27,11 @@ namespace MassTransit.AmazonSqsTransport.Configuration
             _busConfiguration = busConfiguration;
         }
 
-        public override IBusInstance CreateBus(IRegistrationContext<TContainerContext> context)
+        public override IBusInstance CreateBus(IRegistrationContext<TContainerContext> context, IEnumerable<IBusInstanceSpecification> specifications)
         {
             var configurator = new AmazonSqsBusFactoryConfigurator(_busConfiguration);
 
-            return CreateBus(configurator, context, _configure);
+            return CreateBus(configurator, context, _configure, specifications);
         }
     }
 }

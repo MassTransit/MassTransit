@@ -2,15 +2,15 @@ namespace MassTransit.KafkaIntegration
 {
     using System;
     using System.Collections.Generic;
-    using Attachments;
     using Configuration;
     using Confluent.Kafka;
+    using Riders;
     using Serializers;
     using Subscriptions;
 
 
     public interface IKafkaFactoryConfigurator :
-        IBusAttachmentFactoryConfigurator
+        IRiderFactoryConfigurator
     {
         /// <summary>
         /// This field indicates the number of acknowledgements the leader broker must receive from ISR brokers

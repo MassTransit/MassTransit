@@ -1,6 +1,7 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using MassTransit.MultiBus;
     using MassTransit.Registration;
@@ -43,30 +44,24 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
 
             ThrowIfAlreadyConfigured(nameof(SetBusFactory));
 
-            Collection.AddSingleton(provider =>
-            {
-                IBusInstance<TBus> busInstance = CreateBus(busFactory, provider);
-
-                foreach (var configurator in provider.GetServices<Bind<TBus, IBusInstanceConfigurator>>().Select(x => x.Value))
-                    configurator.Configure(busInstance);
-
-                return Bind<TBus>.Create(busInstance);
-            });
+            Collection.AddSingleton(provider => Bind<TBus>.Create(CreateBus(busFactory, provider)));
 
             Collection.AddSingleton<IBusInstance>(provider => provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value);
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value.BusInstance);
         }
 
-        public override void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<IServiceProvider>> configure)
+        public override void AddRider(Action<IRiderRegistrationConfigurator<IServiceProvider>> configure)
         {
-            var configurator = new ServiceCollectionBusAttachmentConfigurator<TBus>(Collection);
+            var configurator = new ServiceCollectionRiderConfigurator<TBus>(Collection);
             configure?.Invoke(configurator);
         }
 
         IBusInstance<TBus> CreateBus<T>(T busFactory, IServiceProvider provider)
             where T : IRegistrationBusFactory<IServiceProvider>
         {
-            var instance = busFactory.CreateBus(GetRegistrationContext(provider));
+            IEnumerable<IBusInstanceSpecification> specifications = provider.GetServices<Bind<TBus, IBusInstanceSpecification>>().Select(x => x.Value);
+
+            var instance = busFactory.CreateBus(GetRegistrationContext(provider), specifications);
 
             var busInstance = ActivatorUtilities.CreateInstance<TBusInstance>(provider, instance.BusControl);
 

@@ -3,8 +3,8 @@ namespace MassTransit.Registration
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Attachments;
     using Configuration;
+    using Riders;
 
 
     public class DefaultBusInstance :
@@ -21,7 +21,7 @@ namespace MassTransit.Registration
 
         public IHostConfiguration HostConfiguration => default;
 
-        public void Connect(IBusAttachment attachment)
+        public void Add(IRider rider)
         {
             throw new ConfigurationException("TODO: add a link to a documentation");
         }

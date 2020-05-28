@@ -1,6 +1,8 @@
 namespace MassTransit.Registration
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using Configuration;
     using Context;
     using Microsoft.Extensions.Logging;
@@ -17,10 +19,10 @@ namespace MassTransit.Registration
             _hostConfiguration = hostConfiguration;
         }
 
-        public abstract IBusInstance CreateBus(IRegistrationContext<TContainerContext> context);
+        public abstract IBusInstance CreateBus(IRegistrationContext<TContainerContext> context, IEnumerable<IBusInstanceSpecification> specifications);
 
         protected IBusInstance CreateBus<T, TConfigurator>(T configurator, IRegistrationContext<TContainerContext> context,
-            Action<IRegistrationContext<TContainerContext>, TConfigurator> configure)
+            Action<IRegistrationContext<TContainerContext>, TConfigurator> configure, IEnumerable<IBusInstanceSpecification> specifications)
             where T : TConfigurator, IBusFactory
             where TConfigurator : IBusFactoryConfigurator
         {
@@ -32,9 +34,16 @@ namespace MassTransit.Registration
 
             configure?.Invoke(context, configurator);
 
-            var busControl = configurator.Build();
+            specifications ??= Enumerable.Empty<IBusInstanceSpecification>();
 
-            return new TransportBusInstance(busControl, _hostConfiguration);
+            var busControl = configurator.Build(specifications);
+
+            var instance = new TransportBusInstance(busControl, _hostConfiguration);
+
+            foreach (var specification in specifications)
+                specification.Configure(instance);
+
+            return instance;
         }
     }
 }

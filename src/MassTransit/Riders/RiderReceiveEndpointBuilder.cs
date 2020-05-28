@@ -1,19 +1,19 @@
-namespace MassTransit.Attachments
+namespace MassTransit.Riders
 {
     using System;
     using Builders;
     using Configuration;
     using Context;
-    using MassTransit.Registration;
+    using Registration;
 
 
-    public class BusAttachmentReceiveEndpointBuilder :
+    public class RiderReceiveEndpointBuilder :
         ReceiveEndpointBuilder
     {
         readonly IBusInstance _busInstance;
         readonly IReceiveEndpointConfiguration _configuration;
 
-        public BusAttachmentReceiveEndpointBuilder(IBusInstance busInstance, IReceiveEndpointConfiguration configuration)
+        public RiderReceiveEndpointBuilder(IBusInstance busInstance, IReceiveEndpointConfiguration configuration)
             : base(configuration)
         {
             _busInstance = busInstance;
@@ -22,7 +22,7 @@ namespace MassTransit.Attachments
 
         public ReceiveEndpointContext CreateReceiveEndpointContext()
         {
-            var context = new BusAttachmentReceiveEndpointContext(_busInstance, _configuration);
+            var context = new RiderReceiveEndpointContext(_busInstance, _configuration);
 
             context.GetOrAddPayload(() => _busInstance.HostConfiguration.HostTopology);
 
@@ -30,12 +30,12 @@ namespace MassTransit.Attachments
         }
 
 
-        class BusAttachmentReceiveEndpointContext :
+        class RiderReceiveEndpointContext :
             BaseReceiveEndpointContext
         {
             readonly IBusInstance _busInstance;
 
-            public BusAttachmentReceiveEndpointContext(IBusInstance busInstance, IReceiveEndpointConfiguration configuration)
+            public RiderReceiveEndpointContext(IBusInstance busInstance, IReceiveEndpointConfiguration configuration)
                 : base(configuration)
             {
                 _busInstance = busInstance;

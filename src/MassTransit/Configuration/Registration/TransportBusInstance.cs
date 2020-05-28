@@ -5,15 +5,15 @@ namespace MassTransit.Registration
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Attachments;
     using Configuration;
     using Context;
+    using Riders;
 
 
     public class TransportBusInstance :
         IBusInstance
     {
-        readonly List<IBusAttachment> _attachments = new List<IBusAttachment>();
+        readonly List<IRider> _riders = new List<IRider>();
 
         public TransportBusInstance(IBusControl busControl, IHostConfiguration hostConfiguration)
         {
@@ -27,9 +27,9 @@ namespace MassTransit.Registration
 
         public IHostConfiguration HostConfiguration { get; }
 
-        public void Connect(IBusAttachment attachment)
+        public void Add(IRider rider)
         {
-            _attachments.Add(attachment);
+            _riders.Add(rider);
         }
 
         public async Task Start(CancellationToken cancellationToken)
@@ -39,21 +39,21 @@ namespace MassTransit.Registration
             LogContext.Info?.Log("Starting bus: {Type} instance", InstanceType.Name);
             await BusControl.StartAsync(cancellationToken).ConfigureAwait(false);
 
-            if (!_attachments.Any())
+            if (!_riders.Any())
                 return;
 
-            LogContext.Info?.Log("Connecting {Type} attachments: {Names}", InstanceType.Name, string.Join(", ", _attachments.Select(x => x.Name)));
-            await Task.WhenAll(_attachments.Select(attachment => attachment.Connect(cancellationToken))).ConfigureAwait(false);
+            LogContext.Info?.Log("Starting {Type} riders: {Names}", InstanceType.Name, string.Join(", ", _riders.Select(x => x.Name)));
+            await Task.WhenAll(_riders.Select(rider => rider.Start(cancellationToken))).ConfigureAwait(false);
         }
 
         public async Task Stop(CancellationToken cancellationToken)
         {
             LogContext.SetCurrentIfNull(HostConfiguration.LogContext);
 
-            if (_attachments.Any())
+            if (_riders.Any())
             {
-                LogContext.Info?.Log("Disconnecting {Type} attachments: {Names}", InstanceType.Name, string.Join(", ", _attachments.Select(x => x.Name)));
-                await Task.WhenAll(_attachments.Select(attachment => attachment.Disconnect(cancellationToken))).ConfigureAwait(false);
+                LogContext.Info?.Log("Stopping {Type} riders: {Names}", InstanceType.Name, string.Join(", ", _riders.Select(x => x.Name)));
+                await Task.WhenAll(_riders.Select(rider => rider.Stop(cancellationToken))).ConfigureAwait(false);
             }
 
             LogContext.Info?.Log("Stopping bus: {Type} instance", InstanceType.Name);

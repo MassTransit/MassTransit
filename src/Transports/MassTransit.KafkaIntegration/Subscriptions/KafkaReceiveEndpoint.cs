@@ -6,81 +6,134 @@ namespace MassTransit.KafkaIntegration.Subscriptions
     using Confluent.Kafka;
     using Context;
     using Events;
+    using GreenPipes;
+    using Pipeline;
     using Transport;
     using Transports;
-    using Transports.Metrics;
     using Util;
 
 
     public class KafkaReceiveEndpoint<TKey, TValue> :
-        ReceiveEndpoint,
-        IKafkaReceiveEndpoint,
-        DeliveryMetrics
+        IKafkaReceiveEndpoint
         where TValue : class
     {
         readonly IConsumer<TKey, TValue> _consumer;
-        readonly Uri _inputAddress;
-        readonly bool _isAutoCommitEnabled;
-        readonly ILogContext _logContext;
-        readonly IKafkaReceiver<TKey, TValue> _receiver;
+        readonly ReceiveEndpointContext _context;
+        readonly TaskCompletionSource<ReceiveEndpointReady> _started;
         readonly string _topic;
+        readonly IKafkaReceiveTransport<TKey, TValue> _transport;
         CancellationTokenSource _cancellationTokenSource;
         Task _consumerTask;
-        long _deliveredCount;
 
-        public KafkaReceiveEndpoint(string topic, IConsumer<TKey, TValue> consumer, IKafkaReceiver<TKey, TValue> receiver, ReceiveEndpointContext context,
-            ILogContext logContext, bool isAutoCommitEnabled)
-            : base(receiver, context)
+        public KafkaReceiveEndpoint(string topic, IConsumer<TKey, TValue> consumer, IKafkaReceiveTransport<TKey, TValue> transport,
+            ReceiveEndpointContext context)
         {
             _topic = topic;
             _consumer = consumer;
-            _receiver = receiver;
-            _logContext = logContext;
-            _isAutoCommitEnabled = isAutoCommitEnabled;
-            _inputAddress = context.InputAddress;
-            _deliveredCount = 0;
+            _transport = transport;
+            _context = context;
+
+            _started = TaskUtil.GetTask<ReceiveEndpointReady>();
         }
 
-        public long DeliveryCount => _deliveredCount;
-        public int ConcurrentDeliveryCount => 0;
+        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
+        {
+            return _context.ConnectReceiveObserver(observer);
+        }
+
+        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _context.ConnectReceiveEndpointObserver(observer);
+        }
+
+        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
+        {
+            return _context.ReceivePipe.ConnectConsumeObserver(observer);
+        }
+
+        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+        {
+            return _context.ReceivePipe.ConnectConsumeMessageObserver(observer);
+        }
+
+        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+        {
+            return _context.ReceivePipe.ConnectConsumePipe(pipe);
+        }
+
+        ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+        {
+            return _context.ReceivePipe.ConnectRequestPipe(requestId, pipe);
+        }
+
+        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _context.ConnectPublishObserver(observer);
+        }
+
+        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        {
+            return _context.ConnectSendObserver(observer);
+        }
+
+        public Task<ISendEndpoint> GetSendEndpoint(Uri address)
+        {
+            return _context.SendEndpointProvider.GetSendEndpoint(address);
+        }
+
+        public Task<ISendEndpoint> GetPublishSendEndpoint<T>()
+            where T : class
+        {
+            return _context.PublishEndpointProvider.GetPublishSendEndpoint<T>();
+        }
 
         public Task Connect(CancellationToken cancellationToken)
         {
-            LogContext.SetCurrentIfNull(_logContext);
+            var logContext = _context.LogContext;
+            LogContext.SetCurrentIfNull(logContext);
 
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
+            // TODO this feels like it needs to be more resilient, right now one error and it exits
+
             _consumerTask = Task.Run(async () =>
             {
-                await _receiver.Ready(new ReceiveTransportReadyEvent(_inputAddress)).ConfigureAwait(false);
+                var inputAddress = _context.InputAddress;
+                await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
+
+                var endpointReadyEvent = new ReceiveEndpointReadyEvent(_context.InputAddress, this, true);
+                _started.TrySetResult(endpointReadyEvent);
+
+                await _context.EndpointObservers.Ready(endpointReadyEvent).ConfigureAwait(false);
+
+                LogContext.Debug?.Log("Kafka consumer started: {InputAddress}", _context.InputAddress);
 
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
-                    LogContext.SetCurrentIfNull(_logContext);
+                    LogContext.SetCurrentIfNull(logContext);
                     try
                     {
                         ConsumeResult<TKey, TValue> message = _consumer.Consume(_cancellationTokenSource.Token);
 
-                        await _receiver.Handle(message, cancellationToken).ConfigureAwait(false);
-
-                        if (!_isAutoCommitEnabled)
-                            _consumer.Commit(message);
-
-                        Interlocked.Increment(ref _deliveredCount);
+                        await _transport.Handle(message, cancellationToken).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException e) when (e.CancellationToken == _cancellationTokenSource.Token)
                     {
                     }
-                    catch (Exception e)
+                    catch (Exception exception)
                     {
-                        LogContext.Error?.Log(e, "Kafka subscription: {topicName} exception", _topic);
-                        await _receiver.Faulted(new ReceiveTransportFaultedEvent(_inputAddress, e)).ConfigureAwait(false);
+                        var faultedEvent = new ReceiveTransportFaultedEvent(inputAddress, exception);
+
+                        await _context.TransportObservers.Faulted(faultedEvent).ConfigureAwait(false);
+                        await _context.EndpointObservers.Faulted(new ReceiveEndpointFaultedEvent(faultedEvent, this)).ConfigureAwait(false);
+
                         throw;
                     }
                 }
             }, cancellationToken);
 
-            LogContext.Info?.Log("Kafka subscription: {topicName} starting", _topic);
+            LogContext.Debug?.Log("Kafka consumer starting: {Topic}", _topic);
+
             _consumer.Subscribe(_topic);
 
             return _consumerTask.IsCompleted ? _consumerTask : TaskUtil.Completed;
@@ -88,12 +141,11 @@ namespace MassTransit.KafkaIntegration.Subscriptions
 
         public async Task Disconnect(CancellationToken cancellationToken)
         {
-            LogContext.SetCurrentIfNull(_logContext);
+            LogContext.SetCurrentIfNull(_context.LogContext);
             try
             {
-                LogContext.Info?.Log("Kafka subscription: {topicName} stopping", _topic);
-
                 _cancellationTokenSource.Cancel();
+
                 await _consumerTask.ConfigureAwait(false);
 
                 _consumer.Close();
@@ -103,12 +155,27 @@ namespace MassTransit.KafkaIntegration.Subscriptions
             }
             catch (Exception e)
             {
-                LogContext.Error?.Log(e, "Error occured while stopping kafka consumer: {topicName}", _topic);
+                LogContext.Error?.Log(e, "Error occured while stopping kafka topic: '{topicName}' listener", _topic);
             }
             finally
             {
-                await _receiver.Completed(new ReceiveTransportCompletedEvent(_inputAddress, this)).ConfigureAwait(false);
+                var metrics = _transport.GetMetrics();
+                var completedEvent = new ReceiveTransportCompletedEvent(_context.InputAddress, metrics);
+
+                await _context.TransportObservers.Completed(completedEvent).ConfigureAwait(false);
+                await _context.EndpointObservers.Completed(new ReceiveEndpointCompletedEvent(completedEvent, this)).ConfigureAwait(false);
+
+                LogContext.Debug?.Log("Kafka consumer completed {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent",
+                    _context.InputAddress, metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
             }
         }
+
+        public void Probe(ProbeContext context)
+        {
+            _transport.Probe(context);
+            _context.ReceivePipe.Probe(context);
+        }
+
+        public Task<ReceiveEndpointReady> Started => _started.Task;
     }
 }

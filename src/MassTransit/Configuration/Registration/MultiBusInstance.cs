@@ -3,8 +3,8 @@ namespace MassTransit.Registration
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Attachments;
     using Configuration;
+    using Riders;
 
 
     public class MultiBusInstance<TBus> :
@@ -25,9 +25,9 @@ namespace MassTransit.Registration
         public IHostConfiguration HostConfiguration => _instance.HostConfiguration;
         public TBus BusInstance { get; }
 
-        public void Connect(IBusAttachment attachment)
+        public void Add(IRider rider)
         {
-            _instance.Connect(attachment);
+            _instance.Add(rider);
         }
 
         public Task Start(CancellationToken cancellationToken)

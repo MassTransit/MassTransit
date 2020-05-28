@@ -5,8 +5,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
     using Microsoft.Extensions.DependencyInjection;
 
 
-    public interface IServiceCollectionBusAttachmentConfigurator<in TBus> :
-        IBusAttachmentRegistrationConfigurator<IServiceProvider>
+    public interface IServiceCollectionRiderConfigurator<in TBus> :
+        IRiderRegistrationConfigurator<IServiceProvider>
         where TBus : class, IBus
     {
         IServiceCollection Collection { get; }

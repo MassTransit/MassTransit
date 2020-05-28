@@ -3,14 +3,15 @@ namespace MassTransit.KafkaIntegration.Subscriptions
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Attachments;
     using Configuration;
     using Configuration.Configurators;
     using Confluent.Kafka;
     using Context;
+    using Contexts;
     using GreenPipes;
     using MassTransit.Configuration;
     using Registration;
+    using Riders;
     using Serializers;
     using Transport;
 
@@ -200,7 +201,7 @@ namespace MassTransit.KafkaIntegration.Subscriptions
         {
             ReceiveEndpointContext CreateContext()
             {
-                var builder = new BusAttachmentReceiveEndpointBuilder(_busInstance, _endpointConfiguration);
+                var builder = new RiderReceiveEndpointBuilder(_busInstance, _endpointConfiguration);
 
                 foreach (var specification in Specifications)
                     specification.Configure(builder);
@@ -208,35 +209,42 @@ namespace MassTransit.KafkaIntegration.Subscriptions
                 return builder.CreateReceiveEndpointContext();
             }
 
-            IConsumer<TKey, TValue> CreateConsumer()
-            {
-                ConsumerBuilder<TKey, TValue> consumerBuilder = new ConsumerBuilder<TKey, TValue>(_consumerConfig)
-                    .SetValueDeserializer(_valueDeserializer)
-                    .SetLogHandler((c, message) => LogContext.Info?.Log(message.Message))
-                    .SetStatisticsHandler((c, value) => LogContext.Debug?.Log(value))
-                    .SetErrorHandler((c, error) => LogContext.Error?.Log("Consumer error ({code}): {reason} on {topic}", error.Code, error.Reason, _topic));
-
-                if (_keyDeserializer != null)
-                    consumerBuilder.SetKeyDeserializer(_keyDeserializer);
-
-                if (_offsetsCommittedHandler != null)
-                    consumerBuilder.SetOffsetsCommittedHandler(_offsetsCommittedHandler);
-
-                if (_partitionsRevokedHandler != null)
-                    consumerBuilder.SetPartitionsRevokedHandler(_partitionsRevokedHandler);
-                if (_partitionAssignmentHandler != null)
-                    consumerBuilder.SetPartitionsAssignedHandler(_partitionAssignmentHandler);
-
-                return consumerBuilder.Build();
-            }
-
-            LogContext.SetCurrentIfNull(_busInstance.HostConfiguration.LogContext);
-
             var context = CreateContext();
-            var receiver = new KafkaReceiver<TKey, TValue>(context, _headersDeserializer);
 
-            return new KafkaReceiveEndpoint<TKey, TValue>(_topic, CreateConsumer(), receiver, context, _busInstance.HostConfiguration.LogContext,
-                _consumerConfig.EnableAutoCommit == true);
+            IConsumer<TKey, TValue> consumer = CreateConsumer(context);
+            var receiver = new KafkaReceiveTransport<TKey, TValue>(context, _headersDeserializer);
+
+            AddPayload(context, consumer, _consumerConfig);
+
+            return new KafkaReceiveEndpoint<TKey, TValue>(_topic, consumer, receiver, context);
+        }
+
+        static void AddPayload(PipeContext context, IConsumer<TKey, TValue> consumer, ConsumerConfig consumerConfig)
+        {
+            IConsumerLockContext<TKey, TValue> lockContext = new ConsumerLockContext<TKey, TValue>(consumer, consumerConfig);
+            context.AddOrUpdatePayload(() => lockContext, _ => lockContext);
+        }
+
+        IConsumer<TKey, TValue> CreateConsumer(ReceiveEndpointContext context)
+        {
+            ConsumerBuilder<TKey, TValue> consumerBuilder = new ConsumerBuilder<TKey, TValue>(_consumerConfig)
+                .SetValueDeserializer(_valueDeserializer)
+                .SetLogHandler((c, message) => context.LogContext.Info?.Log(message.Message))
+                .SetStatisticsHandler((c, value) => context.LogContext.Debug?.Log(value))
+                .SetErrorHandler((c, error) => context.LogContext.Error?.Log("Consumer error ({code}): {reason} on {topic}", error.Code, error.Reason, _topic));
+
+            if (_keyDeserializer != null)
+                consumerBuilder.SetKeyDeserializer(_keyDeserializer);
+
+            if (_offsetsCommittedHandler != null)
+                consumerBuilder.SetOffsetsCommittedHandler(_offsetsCommittedHandler);
+
+            if (_partitionsRevokedHandler != null)
+                consumerBuilder.SetPartitionsRevokedHandler(_partitionsRevokedHandler);
+            if (_partitionAssignmentHandler != null)
+                consumerBuilder.SetPartitionsAssignedHandler(_partitionAssignmentHandler);
+
+            return consumerBuilder.Build();
         }
     }
 }

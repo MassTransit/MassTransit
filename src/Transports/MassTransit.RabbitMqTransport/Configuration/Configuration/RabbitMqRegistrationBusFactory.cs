@@ -1,6 +1,7 @@
 namespace MassTransit.RabbitMqTransport.Configuration
 {
     using System;
+    using System.Collections.Generic;
     using Configurators;
     using Registration;
 
@@ -26,11 +27,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _busConfiguration = busConfiguration;
         }
 
-        public override IBusInstance CreateBus(IRegistrationContext<TContainerContext> context)
+        public override IBusInstance CreateBus(IRegistrationContext<TContainerContext> context, IEnumerable<IBusInstanceSpecification> specifications)
         {
             var configurator = new RabbitMqBusFactoryConfigurator(_busConfiguration);
 
-            return CreateBus(configurator, context, _configure);
+            return CreateBus(configurator, context, _configure, specifications);
         }
     }
 }

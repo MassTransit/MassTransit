@@ -1,6 +1,7 @@
 namespace MassTransit.Registration
 {
     using System;
+    using System.Collections.Generic;
     using Context;
     using Microsoft.Extensions.Logging;
 
@@ -16,7 +17,7 @@ namespace MassTransit.Registration
             _configure = configure ?? throw new ArgumentNullException(nameof(configure));
         }
 
-        public IBusInstance CreateBus(IRegistrationContext<TContainerContext> context)
+        public IBusInstance CreateBus(IRegistrationContext<TContainerContext> context, IEnumerable<IBusInstanceSpecification> specifications)
         {
             var loggerFactory = context.GetService<ILoggerFactory>();
             if (loggerFactory != null)

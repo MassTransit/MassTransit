@@ -85,7 +85,7 @@ namespace MassTransit.StructureMapIntegration.Registration
             throw new NotImplementedException();
         }
 
-        public void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<IContext>> configure)
+        public void AddRider(Action<IRiderRegistrationConfigurator<IContext>> configure)
         {
             throw new NotImplementedException();
         }
