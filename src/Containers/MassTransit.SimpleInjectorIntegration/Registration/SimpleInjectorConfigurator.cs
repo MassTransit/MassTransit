@@ -74,7 +74,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             throw new NotImplementedException();
         }
 
-        public void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<Container>> configure)
+        public void AddRider(Action<IRiderRegistrationConfigurator<Container>> configure)
         {
             throw new NotImplementedException();
         }

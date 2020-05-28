@@ -102,7 +102,7 @@ namespace MassTransit.AutofacIntegration.Registration
             throw new NotImplementedException();
         }
 
-        public void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<IComponentContext>> configure)
+        public void AddRider(Action<IRiderRegistrationConfigurator<IComponentContext>> configure)
         {
             throw new NotImplementedException();
         }

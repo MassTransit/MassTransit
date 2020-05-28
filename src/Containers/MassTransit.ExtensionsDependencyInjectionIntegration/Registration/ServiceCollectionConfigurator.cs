@@ -3,7 +3,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Configurators;
     using Context;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
@@ -53,29 +52,27 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
             ThrowIfAlreadyConfigured(nameof(SetBusFactory));
 
-            Collection.AddSingleton(provider =>
-            {
-                var busInstance = busFactory.CreateBus(GetRegistrationContext(provider));
-
-                IEnumerable<IBusInstanceConfigurator> configurators = provider.GetServices<Bind<IBus, IBusInstanceConfigurator>>().Select(x => x.Value);
-
-                BusConfigurationResult.CompileResults(configurators.SelectMany(x => x.Validate()));
-
-                foreach (var configurator in configurators)
-                    configurator.Configure(busInstance);
-
-                return Bind<IBus>.Create(busInstance);
-            });
+            Collection.AddSingleton(provider => Bind<IBus>.Create(CreateBus(busFactory, provider)));
 
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value);
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.BusControl);
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.Bus);
         }
 
-        public virtual void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<IServiceProvider>> configure)
+        public virtual void AddRider(Action<IRiderRegistrationConfigurator<IServiceProvider>> configure)
         {
-            var configurator = new ServiceCollectionBusAttachmentConfigurator(Collection);
+            var configurator = new ServiceCollectionRiderConfigurator(Collection);
             configure?.Invoke(configurator);
+        }
+
+        IBusInstance CreateBus<T>(T busFactory, IServiceProvider provider)
+            where T : IRegistrationBusFactory<IServiceProvider>
+        {
+            IEnumerable<IBusInstanceSpecification> specifications = provider.GetServices<Bind<IBus, IBusInstanceSpecification>>().Select(x => x.Value);
+
+            var busInstance = busFactory.CreateBus(GetRegistrationContext(provider), specifications);
+
+            return busInstance;
         }
 
         static void AddMassTransitComponents(IServiceCollection collection)

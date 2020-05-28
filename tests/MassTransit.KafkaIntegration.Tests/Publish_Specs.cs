@@ -36,11 +36,11 @@ namespace MassTransit.KafkaIntegration.Tests
             {
                 x.AddConsumer<BusPingConsumer>();
                 x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
-                x.AddBusAttachment(attachment =>
+                x.AddRider(rider =>
                 {
-                    attachment.AddConsumer<KafkaMessageConsumer>();
+                    rider.AddConsumer<KafkaMessageConsumer>();
 
-                    attachment.UsingKafka((context, k) =>
+                    rider.UsingKafka((context, k) =>
                     {
                         k.Host("localhost:9092");
 
@@ -51,8 +51,6 @@ namespace MassTransit.KafkaIntegration.Tests
                             c.DisableAutoCommit();
                             c.ConfigureConsumer<KafkaMessageConsumer>(context);
                         });
-
-                        k.UseHealthCheck(context);
                     });
                 });
             });
@@ -86,7 +84,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
                 Assert.AreEqual(result.CorrelationId, ping.InitiatorId);
 
-                Assert.That(ping.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/kafka-test2")));
+                Assert.That(ping.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/kafka/test2")));
             }
             finally
             {

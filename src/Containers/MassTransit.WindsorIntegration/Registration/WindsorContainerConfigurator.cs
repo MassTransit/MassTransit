@@ -84,7 +84,7 @@ namespace MassTransit.WindsorIntegration.Registration
             throw new NotImplementedException();
         }
 
-        public void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<IKernel>> configure)
+        public void AddRider(Action<IRiderRegistrationConfigurator<IKernel>> configure)
         {
             throw new NotImplementedException();
         }

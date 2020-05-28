@@ -229,36 +229,9 @@ namespace MassTransit
             where T : IRegistrationBusFactory<TContainerContext>;
 
         /// <summary>
-        /// Add bus attachment
+        /// Add bus rider
         /// </summary>
         /// <param name="configure"></param>
-        void AddBusAttachment(Action<IBusAttachmentRegistrationConfigurator<TContainerContext>> configure);
-    }
-
-
-    /// <summary>
-    /// Configures the container registration for an additional bus instance, with is an advanced concept
-    /// </summary>
-    /// <typeparam name="TBus"></typeparam>
-    /// <typeparam name="TContainerContext"></typeparam>
-    public interface IRegistrationConfigurator<in TBus, out TContainerContext> :
-        IRegistrationConfigurator
-        where TBus : class, IBus
-        where TContainerContext : class
-    {
-        /// <summary>
-        /// Add the bus to the container, configured properly
-        /// </summary>
-        /// <param name="busFactory"></param>
-        void AddBus(Func<IRegistrationContext<TContainerContext>, IBusControl> busFactory);
-
-        /// <summary>
-        /// Sets the bus factory. This is used by the transport extension methods (such as UsingRabbitMq, Using ActiveMq, etc.) to
-        /// specify the bus factory. The extension method approach is preferred (since v7) over the AddBus method.
-        /// </summary>
-        /// <param name="busFactory"></param>
-        /// <typeparam name="T"></typeparam>
-        void SetBusFactory<T>(T busFactory)
-            where T : IRegistrationBusFactory<TContainerContext>;
+        void AddRider(Action<IRiderRegistrationConfigurator<TContainerContext>> configure);
     }
 }

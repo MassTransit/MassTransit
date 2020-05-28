@@ -3,7 +3,7 @@ namespace MassTransit.Registration
     using GreenPipes;
 
 
-    public interface IBusInstanceConfigurator :
+    public interface IBusInstanceSpecification :
         ISpecification
     {
         void Configure(IBusInstance busInstance);

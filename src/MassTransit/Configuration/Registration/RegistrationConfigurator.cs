@@ -15,7 +15,7 @@ namespace MassTransit.Registration
 
 
     /// <summary>
-    ///     Used for registration of consumers and sagas
+    /// Used for registration of consumers and sagas
     /// </summary>
     public class RegistrationConfigurator :
         IRegistrationConfigurator
@@ -293,7 +293,7 @@ namespace MassTransit.Registration
         protected void ThrowIfAlreadyConfigured(string methodName)
         {
             if (_configured)
-                throw new ConfigurationException($"{methodName} can be called only once.");
+                throw new ConfigurationException($"'{methodName}' can be called only once.");
 
             _configured = true;
         }

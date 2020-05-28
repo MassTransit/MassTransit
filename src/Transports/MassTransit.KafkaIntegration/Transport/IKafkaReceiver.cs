@@ -6,13 +6,15 @@
     using Confluent.Kafka;
     using Pipeline;
     using Transports;
+    using Transports.Metrics;
 
 
     public interface IKafkaReceiver<TKey, TValue> :
         IConsumeMessageObserverConnector,
         IConsumeObserverConnector,
         IReceiveTransport,
-        IReceiveTransportObserver
+        IReceiveTransportObserver,
+        IDispatchMetrics
         where TValue : class
     {
         /// <summary>

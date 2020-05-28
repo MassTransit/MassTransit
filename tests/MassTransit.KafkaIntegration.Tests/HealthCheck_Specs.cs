@@ -29,9 +29,9 @@ namespace MassTransit.KafkaIntegration.Tests
             services.AddMassTransit(x =>
             {
                 x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
-                x.AddBusAttachment(attachment =>
+                x.AddRider(rider =>
                 {
-                    attachment.UsingKafka((context, k) =>
+                    rider.UsingKafka((context, k) =>
                     {
                         k.Host("localhost:9092");
                         k.Topic<Null, Ignore>("test", nameof(HealthCheck_Specs), c =>

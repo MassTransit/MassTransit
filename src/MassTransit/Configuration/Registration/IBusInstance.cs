@@ -3,8 +3,8 @@ namespace MassTransit.Registration
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Attachments;
     using Configuration;
+    using Riders;
 
 
     public interface IBusInstance
@@ -15,7 +15,7 @@ namespace MassTransit.Registration
         IBusControl BusControl { get; }
 
         IHostConfiguration HostConfiguration { get; }
-        void Connect(IBusAttachment attachment);
+        void Add(IRider rider);
 
         Task Start(CancellationToken cancellationToken);
         Task Stop(CancellationToken cancellationToken);

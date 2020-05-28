@@ -1,7 +1,7 @@
 namespace MassTransit
 {
-    using Attachments;
     using Registration;
+    using Riders;
 
 
     public static class HealthCheckConfigurationExtensions
@@ -13,8 +13,8 @@ namespace MassTransit
             context.UseHealthCheck(configurator);
         }
 
-        public static void UseHealthCheck<TContainerContext>(this IBusAttachmentFactoryConfigurator configurator,
-            IBusAttachmentRegistrationContext<TContainerContext> context)
+        public static void UseHealthCheck<TContainerContext>(this IRiderFactoryConfigurator configurator,
+            IRiderRegistrationContext<TContainerContext> context)
             where TContainerContext : class
         {
             context.UseHealthCheck(configurator);

@@ -10,72 +10,82 @@ namespace MassTransit.KafkaIntegration.Tests
     using NUnit.Framework;
     using Registration;
     using Serializers;
+    using TestFramework;
 
 
     public class Receive_Specs :
-        KafkaTestFixture
+        InMemoryTestFixture
     {
         const string Topic = "test";
-        readonly IServiceProvider _provider;
-        readonly Task<ConsumeContext<KafkaMessage>> _task;
-
-        public Receive_Specs()
-        {
-            var services = new ServiceCollection();
-            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
-            _task = taskCompletionSource.Task;
-            services.AddSingleton(taskCompletionSource);
-            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
-            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
-            services.AddMassTransit(configurator =>
-            {
-                configurator.UsingInMemory((context, cfg) =>
-                {
-                });
-                configurator.AddBusAttachment(ConfigureBusAttachment);
-            });
-            _provider = services.BuildServiceProvider();
-        }
-
-        protected override IBusInstance BusInstance => _provider.GetRequiredService<IBusInstance>();
-
-        protected override void ConfigureBusAttachment<T>(IBusAttachmentRegistrationConfigurator<T> configurator)
-        {
-            configurator.AddConsumer<KafkaMessageConsumer>();
-            base.ConfigureBusAttachment(configurator);
-        }
-
-        protected override void ConfigureKafka<T>(IBusAttachmentRegistrationContext<T> context, IKafkaFactoryConfigurator configurator)
-        {
-            base.ConfigureKafka(context, configurator);
-            configurator.Topic<Null, KafkaMessage>(Topic, nameof(Receive_Specs), c =>
-            {
-                c.AutoOffsetReset = AutoOffsetReset.Earliest;
-
-                c.DisableAutoCommit();
-                c.ConfigureConsumer<KafkaMessageConsumer>(context);
-            });
-        }
 
         [Test]
         public async Task Should_receive()
         {
-            var config = new ProducerConfig {BootstrapServers = "localhost:9092"};
+            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
+            var services = new ServiceCollection();
+            services.AddSingleton(taskCompletionSource);
 
-            using IProducer<Null, KafkaMessage> p = new ProducerBuilder<Null, KafkaMessage>(config)
-                .SetValueSerializer(new MassTransitSerializer<KafkaMessage>())
-                .Build();
-            var messageId = NewId.NextGuid();
-            var message = new Message<Null, KafkaMessage>
+            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            services.AddMassTransit(x =>
             {
-                Value = new KafkaMessageClass("test"),
-                Headers = DictionaryHeadersSerialize.Serializer.Serialize(new Dictionary<string, object> {[MessageHeaders.MessageId] = messageId})
-            };
-            await p.ProduceAsync(Topic, message);
+                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+                x.AddRider(rider =>
+                {
+                    rider.AddConsumer<KafkaMessageConsumer>();
 
-            ConsumeContext<KafkaMessage> result = await _task;
-            Assert.AreEqual(message.Value.Text, result.Message.Text);
-            Assert.AreEqual(messageId, result.MessageId);
+                    rider.UsingKafka((context, k) =>
+                    {
+                        k.Host("localhost:9092");
+
+                        k.Topic<Null, KafkaMessage>(Topic, nameof(Receive_Specs), c =>
+                        {
+                            c.AutoOffsetReset = AutoOffsetReset.Earliest;
+
+                            c.DisableAutoCommit();
+                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                        });
+                    });
+                });
+            });
+
+            var provider = services.BuildServiceProvider();
+
+            var busInstance = provider.GetRequiredService<IBusInstance>();
+
+            await busInstance.Start(TestCancellationToken);
+
+            try
+            {
+                var config = new ProducerConfig {BootstrapServers = "localhost:9092"};
+
+                using IProducer<Null, KafkaMessage> p = new ProducerBuilder<Null, KafkaMessage>(config)
+                    .SetValueSerializer(new MassTransitSerializer<KafkaMessage>())
+                    .Build();
+
+                var messageId = NewId.NextGuid();
+                var message = new Message<Null, KafkaMessage>
+                {
+                    Value = new KafkaMessageClass("test"),
+                    Headers = DictionaryHeadersSerialize.Serializer.Serialize(new Dictionary<string, object> {[MessageHeaders.MessageId] = messageId})
+                };
+
+                await p.ProduceAsync(Topic, message);
+                p.Flush();
+
+                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
+
+                Assert.AreEqual(message.Value.Text, result.Message.Text);
+                Assert.AreEqual(messageId, result.MessageId);
+                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri("loopback://localhost/kafka/test")));
+            }
+            finally
+            {
+                await busInstance.Stop(TestCancellationToken);
+
+                await provider.DisposeAsync();
+            }
         }
 
 

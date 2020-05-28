@@ -1,20 +1,20 @@
 namespace MassTransit.Registration
 {
     using System;
-    using Attachments;
     using ConsumeConfigurators;
     using Monitoring.Health;
+    using Riders;
     using Saga;
 
 
-    public class BusAttachmentRegistrationContext<TContainerContext> :
-        IBusAttachmentRegistrationContext<TContainerContext>
+    public class RiderRegistrationContext<TContainerContext> :
+        IRiderRegistrationContext<TContainerContext>
         where TContainerContext : class
     {
         readonly BusHealth _health;
         readonly IRegistration _registration;
 
-        public BusAttachmentRegistrationContext(IRegistration registration, BusHealth health, TContainerContext container)
+        public RiderRegistrationContext(IRegistration registration, BusHealth health, TContainerContext container)
         {
             _registration = registration;
             _health = health;
@@ -23,9 +23,9 @@ namespace MassTransit.Registration
 
         public TContainerContext Container { get; }
 
-        public void UseHealthCheck(IBusAttachmentFactoryConfigurator configurator)
+        public void UseHealthCheck(IRiderFactoryConfigurator configurator)
         {
-            configurator.ConnectHealthCheck(_health);
+            configurator.ConnectReceiveEndpointObserver(_health);
         }
 
         public object GetService(Type serviceType)

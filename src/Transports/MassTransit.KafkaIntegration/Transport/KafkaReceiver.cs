@@ -12,6 +12,7 @@
     using Pipeline.Observables;
     using Serializers;
     using Transports;
+    using Transports.Metrics;
     using Util;
 
 
@@ -68,9 +69,13 @@
             if (cancellationToken.CanBeCanceled)
                 registration = cancellationToken.Register(context.Cancel);
 
+            ConsumeResultLockContext<TKey, TValue> receiveLock = context.TryGetPayload(out IConsumerLockContext<TKey, TValue> lockContext)
+                ? new ConsumeResultLockContext<TKey, TValue>(lockContext, message)
+                : default;
+
             try
             {
-                await _dispatcher.Dispatch(context).ConfigureAwait(false);
+                await _dispatcher.Dispatch(context, receiveLock).ConfigureAwait(false);
             }
             finally
             {
@@ -110,6 +115,21 @@
         {
             await _context.TransportObservers.Faulted(faulted).ConfigureAwait(false);
             await _observers.Faulted(faulted).ConfigureAwait(false);
+        }
+
+        public int ActiveDispatchCount => _dispatcher.ActiveDispatchCount;
+        public long DispatchCount => _dispatcher.DispatchCount;
+        public int MaxConcurrentDispatchCount => _dispatcher.MaxConcurrentDispatchCount;
+
+        public event ZeroActiveDispatchHandler ZeroActivity
+        {
+            add => _dispatcher.ZeroActivity += value;
+            remove => _dispatcher.ZeroActivity -= value;
+        }
+
+        public DeliveryMetrics GetMetrics()
+        {
+            return _dispatcher.GetMetrics();
         }
 
 

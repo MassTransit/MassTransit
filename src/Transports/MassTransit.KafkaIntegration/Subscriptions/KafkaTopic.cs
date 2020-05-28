@@ -34,7 +34,8 @@ namespace MassTransit.KafkaIntegration.Subscriptions
 
         public IKafkaReceiveEndpoint CreateEndpoint(IBusInstance busInstance)
         {
-            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration($"kafka-{Name}");
+            var endpointConfiguration =
+                busInstance.HostConfiguration.CreateReceiveEndpointConfiguration($"kafka/{Name}");
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
             var configurator =
                 new KafkaTopicConfigurator<TKey, TValue>(_consumerConfig, Name, busInstance, endpointConfiguration, _headersDeserializer);
