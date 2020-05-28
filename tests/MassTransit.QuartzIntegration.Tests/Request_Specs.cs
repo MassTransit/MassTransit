@@ -223,7 +223,6 @@
                 Request(() => ValidateAddress, x => x.ValidateAddressRequestId, settings);
                 Request(() => ValidateName, x => x.ValidateNameRequestId, cfg =>
                 {
-                    cfg.SchedulingServiceAddress = settings.SchedulingServiceAddress;
                     cfg.Timeout = settings.Timeout;
                 });
 

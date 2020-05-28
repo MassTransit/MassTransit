@@ -60,7 +60,7 @@ namespace MassTransit.Transports.InMemory
             if (Name == "*")
                 Name = NewId.Next().ToString("NS");
 
-            foreach ((string key, string value) in address.SplitQueryString())
+            foreach (var (key, value) in address.SplitQueryString())
             {
                 switch (key)
                 {

@@ -32,14 +32,14 @@ namespace MassTransit.Azure.ServiceBus.Core
         public readonly TimeSpan? AutoDelete;
         public readonly AddressType Type;
 
-        public ServiceBusEndpointAddress(Uri hostAddress, Uri address)
+        public ServiceBusEndpointAddress(Uri hostAddress, Uri address, AddressType type = AddressType.Queue)
         {
             Scheme = default;
             Host = default;
             Scope = default;
 
             AutoDelete = default;
-            Type = AddressType.Queue;
+            Type = type;
 
             var scheme = address.Scheme.ToLowerInvariant();
             switch (scheme)
@@ -68,7 +68,7 @@ namespace MassTransit.Azure.ServiceBus.Core
                     throw new ArgumentException($"The address scheme is not supported: {address.Scheme}", nameof(address));
             }
 
-            foreach ((string key, string value) in address.SplitQueryString())
+            foreach (var (key, value) in address.SplitQueryString())
             {
                 switch (key)
                 {
@@ -76,7 +76,7 @@ namespace MassTransit.Azure.ServiceBus.Core
                         AutoDelete = TimeSpan.FromSeconds(result);
                         break;
 
-                    case TypeKey when _parseConverter.TryConvert(value, out AddressType result):
+                    case TypeKey when _parseConverter.TryConvert(value, out var result):
                         Type = result;
                         break;
                 }
@@ -117,6 +117,21 @@ namespace MassTransit.Azure.ServiceBus.Core
             builder.Query += string.Join("&", address.GetQueryStringOptions());
 
             return builder.Uri;
+        }
+
+        public Uri TopicAddress
+        {
+            get
+            {
+                if (Type != AddressType.Topic)
+                    throw new ArgumentException("Address was not a topic");
+
+                var builder = new UriBuilder($"topic:{Scope}/{Name}");
+
+                builder.Query += string.Join("&", GetQueryStringOptions());
+
+                return builder.Uri;
+            }
         }
 
         Uri DebuggerDisplay => this;

@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using NUnit.Framework;
     using Quartz;
+    using Scheduling;
     using TestFramework;
 
 
@@ -13,16 +14,21 @@
         ISendEndpoint _quartzEndpoint;
         TimeSpan _testOffset;
         IScheduler _scheduler;
+        readonly Lazy<IMessageScheduler> _messageScheduler;
 
         public QuartzInMemoryTestFixture()
         {
             QuartzAddress = new Uri("loopback://localhost/quartz");
             _testOffset = TimeSpan.Zero;
+
+            _messageScheduler = new Lazy<IMessageScheduler>(() =>
+                new MessageScheduler(new EndpointScheduleMessageProvider(() => GetSendEndpoint(QuartzAddress)), Bus.Topology));
         }
 
         protected Uri QuartzAddress { get; }
 
         protected ISendEndpoint QuartzEndpoint => _quartzEndpoint;
+        protected IMessageScheduler Scheduler => _messageScheduler.Value;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {

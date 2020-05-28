@@ -20,7 +20,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             _hostConfiguration = hostConfiguration;
             Connection = connection;
 
-            Topology = hostConfiguration.GetHostTopology();
+            Topology = hostConfiguration.HostTopology;
         }
 
         public IConnection Connection { get; }

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace Automatonymous.Activities
+﻿namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
@@ -50,13 +38,7 @@ namespace Automatonymous.Activities
 
                 RequestTimeoutExpired<TRequest> message = new TimeoutExpired<TRequest>(now, expirationTime, context.Instance.CorrelationId, pipe.RequestId);
 
-                if (_request.Settings.SchedulingServiceAddress != null)
-                {
-                    var scheduleEndpoint = await consumeContext.GetSendEndpoint(_request.Settings.SchedulingServiceAddress).ConfigureAwait(false);
-
-                    await scheduleEndpoint.ScheduleSend(consumeContext.ReceiveContext.InputAddress, expirationTime, message).ConfigureAwait(false);
-                }
-                else if (consumeContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
+                if (consumeContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
                     await schedulerContext.ScheduleSend(expirationTime, message).ConfigureAwait(false);
                 else
                     throw new ConfigurationException("A request timeout was specified but no message scheduler was specified or available");
@@ -78,8 +60,8 @@ namespace Automatonymous.Activities
         class SendRequestPipe :
             IPipe<SendContext<TRequest>>
         {
-            readonly Uri _responseAddress;
             readonly Guid _requestId;
+            readonly Uri _responseAddress;
 
             public SendRequestPipe(Uri responseAddress)
             {
@@ -104,7 +86,8 @@ namespace Automatonymous.Activities
 
 
         class TimeoutExpired<T> :
-            RequestTimeoutExpired<T> where T : class
+            RequestTimeoutExpired<T>
+            where T : class
         {
             public TimeoutExpired(DateTime timestamp, DateTime expirationTime, Guid correlationId, Guid requestId)
             {

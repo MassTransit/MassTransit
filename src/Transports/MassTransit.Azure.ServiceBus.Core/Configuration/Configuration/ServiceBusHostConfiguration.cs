@@ -6,12 +6,14 @@
     using GreenPipes;
     using MassTransit.Configuration;
     using MassTransit.Configurators;
+    using MassTransit.Topology;
     using MassTransit.Topology.EntityNameFormatters;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Management;
     using Microsoft.Azure.ServiceBus.Primitives;
     using Pipeline;
     using Settings;
+    using Topology;
     using Topology.Configurators;
     using Topology.Topologies;
     using Transport;
@@ -24,6 +26,7 @@
     {
         readonly IServiceBusBusConfiguration _busConfiguration;
         readonly ServiceBusConnectionContextSupervisor _connectionContextSupervisor;
+        readonly IServiceBusHostTopology _hostTopology;
         readonly IServiceBusTopologyConfiguration _topologyConfiguration;
         ServiceBusHostSettings _hostSettings;
         IMessageNameFormatter _messageNameFormatter;
@@ -32,8 +35,10 @@
             : base(busConfiguration)
         {
             _busConfiguration = busConfiguration;
-            _hostSettings = new HostSettings();
             _topologyConfiguration = topologyConfiguration;
+
+            _hostSettings = new HostSettings();
+            _hostTopology = new ServiceBusHostTopology(this, _topologyConfiguration, _messageNameFormatter);
 
             _connectionContextSupervisor = new ServiceBusConnectionContextSupervisor(this, topologyConfiguration);
         }
@@ -74,6 +79,8 @@
                 });
             }
         }
+
+        IServiceBusHostTopology IServiceBusHostConfiguration.HostTopology => _hostTopology;
 
         public void SetNamespaceSeparatorToTilde()
         {
@@ -205,6 +212,8 @@
             return CreateSubscriptionEndpointConfiguration(settings, _busConfiguration.CreateEndpointConfiguration(), configure);
         }
 
+        public override IHostTopology HostTopology => _hostTopology;
+
         public override IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IReceiveEndpointConfigurator> configure = null)
         {
@@ -213,9 +222,7 @@
 
         public override IHost Build()
         {
-            var hostTopology = new ServiceBusHostTopology(_topologyConfiguration, _hostSettings.ServiceUri, _messageNameFormatter);
-
-            var host = new ServiceBusHost(this, hostTopology);
+            var host = new ServiceBusHost(this, _hostTopology);
 
             foreach (var endpointConfiguration in Endpoints)
                 endpointConfiguration.Build(host);

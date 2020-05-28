@@ -4,6 +4,7 @@
     using Definition;
     using MassTransit.Configuration;
     using MassTransit.Configurators;
+    using MassTransit.Topology;
     using Topology.Topologies;
 
 
@@ -13,19 +14,18 @@
         IInMemoryHostConfigurator
     {
         readonly IInMemoryBusConfiguration _busConfiguration;
-        readonly IInMemoryTopologyConfiguration _topologyConfiguration;
+        readonly InMemoryHostTopology _hostTopology;
         Uri _hostAddress;
 
         public InMemoryHostConfiguration(IInMemoryBusConfiguration busConfiguration, Uri baseAddress, IInMemoryTopologyConfiguration topologyConfiguration)
             : base(busConfiguration)
         {
             _busConfiguration = busConfiguration;
-            _topologyConfiguration = topologyConfiguration;
 
             _hostAddress = baseAddress ?? new Uri("loopback://localhost/");
+            _hostTopology = new InMemoryHostTopology(this, topologyConfiguration);
 
             TransportConcurrencyLimit = Environment.ProcessorCount;
-
             TransportProvider = new InMemoryTransportProvider(this, topologyConfiguration);
         }
 
@@ -115,10 +115,13 @@
             return CreateReceiveEndpointConfiguration(queueName, configure);
         }
 
+        IInMemoryHostTopology IInMemoryHostConfiguration.HostTopology => _hostTopology;
+
+        public override IHostTopology HostTopology => _hostTopology;
+
         public override IHost Build()
         {
-            var hostTopology = new InMemoryHostTopology(_topologyConfiguration);
-            var host = new InMemoryHost(this, hostTopology);
+            var host = new InMemoryHost(this, _hostTopology);
 
             foreach (var endpointConfiguration in Endpoints)
                 endpointConfiguration.Build(host);

@@ -2,6 +2,7 @@
 {
     using System;
     using MassTransit.Configuration;
+    using Topology.Topologies;
 
 
     public interface IInMemoryHostConfiguration :
@@ -23,6 +24,8 @@
         IInMemoryHostConfigurator Configurator { get; }
 
         IInMemoryTransportProvider TransportProvider { get; }
+
+        IInMemoryHostTopology HostTopology { get; }
 
         void ApplyEndpointDefinition(IInMemoryReceiveEndpointConfigurator configurator, IEndpointDefinition definition);
 

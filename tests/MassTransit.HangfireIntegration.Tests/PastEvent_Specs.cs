@@ -1,44 +1,28 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.HangfireIntegration.Tests
+﻿namespace MassTransit.HangfireIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
     using NUnit.Framework;
+    using Scheduling;
 
 
     [TestFixture]
     public class Specifying_an_event_in_the_past :
         HangfireInMemoryTestFixture
     {
-        class A
-        {
-            public string Name { get; set; }
-        }
-
-
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Should_be_able_to_cancel_a_future_event()
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            var scheduledMessage = await HangfireEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(120), new A {Name = "Joe"});
+            ScheduledMessage<A> scheduledMessage = await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(120), new A {Name = "Joe"});
 
             await Task.Delay(2000);
 
-            await HangfireEndpoint.CancelScheduledSend(scheduledMessage);
+            await Scheduler.CancelScheduledSend(scheduledMessage);
 
             await Task.Delay(2000);
         }
@@ -48,7 +32,7 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            await HangfireEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow, new A {Name = "Joe"});
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow, new A {Name = "Joe"});
 
             await handler;
         }
@@ -58,7 +42,7 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            await HangfireEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(2), new A {Name = "Joe"});
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(2), new A {Name = "Joe"});
 
             await handler;
         }
@@ -68,11 +52,11 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            Guid requestId = Guid.NewGuid();
-            Guid correlationId = Guid.NewGuid();
-            Guid conversationId = Guid.NewGuid();
-            Guid initiatorId = Guid.NewGuid();
-            await HangfireEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow, new A {Name = "Joe"}, Pipe.Execute<SendContext>(x =>
+            var requestId = Guid.NewGuid();
+            var correlationId = Guid.NewGuid();
+            var conversationId = Guid.NewGuid();
+            var initiatorId = Guid.NewGuid();
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow, new A {Name = "Joe"}, Pipe.Execute<SendContext>(x =>
             {
                 x.FaultAddress = Bus.Address;
                 x.ResponseAddress = InputQueueAddress;
@@ -107,9 +91,15 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            await HangfireEndpoint.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromHours(-1), new A {Name = "Joe"});
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromHours(-1), new A {Name = "Joe"});
 
             await handler;
+        }
+
+
+        class A
+        {
+            public string Name { get; set; }
         }
     }
 
@@ -118,6 +108,30 @@ namespace MassTransit.HangfireIntegration.Tests
     public class Specifying_an_event_reschedule_if_exists :
         HangfireInMemoryTestFixture
     {
+        [Test]
+        public async Task Should_reschedule()
+        {
+            Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
+            var id = NewId.NextGuid();
+            var expected = "Joe 2";
+            await Scheduler.ScheduleSend(Bus.Address, TimeSpan.FromSeconds(120), new A
+            {
+                Id = id,
+                Name = "Joe"
+            });
+
+            await Task.Delay(2000);
+
+            await Scheduler.ScheduleSend(Bus.Address, TimeSpan.FromSeconds(5), new A
+            {
+                Id = id,
+                Name = expected
+            });
+
+            ConsumeContext<A> result = await handler;
+            Assert.AreEqual(expected, result.Message.Name);
+        }
+
         public Specifying_an_event_reschedule_if_exists()
         {
             ScheduleTokenId.UseTokenId<A>(x => x.Id);
@@ -128,31 +142,6 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             public Guid Id { get; set; }
             public string Name { get; set; }
-        }
-
-
-        [Test]
-        public async Task Should_reschedule()
-        {
-            var handler = SubscribeHandler<A>();
-            var id = NewId.NextGuid();
-            var expected = "Joe 2";
-            await HangfireEndpoint.ScheduleSend(Bus.Address, TimeSpan.FromSeconds(120), new A
-            {
-                Id = id,
-                Name = "Joe"
-            });
-
-            await Task.Delay(2000);
-
-            await HangfireEndpoint.ScheduleSend(Bus.Address, TimeSpan.FromSeconds(5), new A
-            {
-                Id = id,
-                Name = expected
-            });
-
-            ConsumeContext<A> result = await handler;
-            Assert.AreEqual(expected, result.Message.Name);
         }
     }
 }

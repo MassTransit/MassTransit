@@ -45,7 +45,11 @@
         {
             var topologyLayout = BuildTopology(_configuration.Settings);
 
-            return new ServiceBusEntityReceiveEndpointContext(_hostConfiguration, _configuration, topologyLayout);
+            var context = new ServiceBusEntityReceiveEndpointContext(_hostConfiguration, _configuration, topologyLayout);
+
+            context.GetOrAddPayload(() => _hostConfiguration.HostTopology);
+
+            return context;
         }
 
         static readonly char[] Separator = {'/'};

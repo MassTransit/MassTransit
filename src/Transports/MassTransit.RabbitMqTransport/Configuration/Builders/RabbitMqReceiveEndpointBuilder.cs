@@ -49,6 +49,7 @@
 
             context.GetOrAddPayload(() => deadLetterTransport);
             context.GetOrAddPayload(() => errorTransport);
+            context.GetOrAddPayload(() => _hostConfiguration.HostTopology);
 
             return context;
         }

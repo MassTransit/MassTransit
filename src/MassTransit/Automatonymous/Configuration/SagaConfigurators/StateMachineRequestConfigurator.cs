@@ -30,6 +30,5 @@ namespace Automatonymous.SagaConfigurators
 
         public Uri ServiceAddress { get; set; }
         public TimeSpan Timeout { get; set; }
-        public Uri SchedulingServiceAddress { get; set; }
     }
 }

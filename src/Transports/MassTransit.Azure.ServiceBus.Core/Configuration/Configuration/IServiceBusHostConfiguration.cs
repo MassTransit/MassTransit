@@ -5,6 +5,7 @@
     using MassTransit.Configuration;
     using Pipeline;
     using Settings;
+    using Topology;
     using Transport;
 
 
@@ -19,6 +20,8 @@
         IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
         IRetryPolicy RetryPolicy { get; }
+
+        new IServiceBusHostTopology HostTopology { get; }
 
         ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(SendSettings settings);
 

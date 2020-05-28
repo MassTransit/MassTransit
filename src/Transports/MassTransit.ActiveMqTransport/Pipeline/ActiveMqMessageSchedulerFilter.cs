@@ -5,6 +5,7 @@
     using Context;
     using GreenPipes;
     using MassTransit.Scheduling;
+    using MassTransit.Topology;
     using Scheduling;
 
 
@@ -20,7 +21,10 @@
         {
             MessageSchedulerContext PayloadFactory()
             {
-                IMessageScheduler Factory() => new MessageScheduler(new ActiveMqScheduleMessageProvider(context));
+                IMessageScheduler Factory()
+                {
+                    return new MessageScheduler(new ActiveMqScheduleMessageProvider(context), context.GetPayload<IBusTopology>());
+                }
 
                 return new ConsumeMessageSchedulerContext(Factory, context.ReceiveContext.InputAddress);
             }

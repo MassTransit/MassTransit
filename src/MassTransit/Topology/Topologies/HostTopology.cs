@@ -1,20 +1,7 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Topology.Topologies
+﻿namespace MassTransit.Topology.Topologies
 {
-    using System.Text;
+    using System;
     using Configuration;
-    using Metadata;
     using Util;
 
 
@@ -23,53 +10,45 @@ namespace MassTransit.Topology.Topologies
     {
         protected static readonly INewIdFormatter Formatter = FormatUtil.Formatter;
 
-        readonly ITopologyConfiguration _configuration;
+        readonly IHostConfiguration _hostConfiguration;
+        readonly ITopologyConfiguration _topologyConfiguration;
 
-        protected HostTopology(ITopologyConfiguration configuration)
+        protected HostTopology(IHostConfiguration hostConfiguration, ITopologyConfiguration topologyConfiguration)
         {
-            _configuration = configuration;
+            _hostConfiguration = hostConfiguration;
+            _topologyConfiguration = topologyConfiguration;
         }
 
-        public virtual string CreateTemporaryQueueName(string prefix)
-        {
-            var host = HostMetadataCache.Host;
-
-            var sb = new StringBuilder(host.MachineName.Length + host.ProcessName.Length + prefix.Length + 36);
-
-            foreach (var c in host.MachineName)
-                if (char.IsLetterOrDigit(c) || c == '_')
-                    sb.Append(c);
-
-            sb.Append('_');
-            foreach (var c in host.ProcessName)
-                if (char.IsLetterOrDigit(c) || c == '_')
-                    sb.Append(c);
-
-            sb.AppendFormat("_{0}_", prefix);
-            sb.Append(NewId.Next().ToString(Formatter));
-
-            return sb.ToString();
-        }
-
-        public IPublishTopology PublishTopology => _configuration.Publish;
-        public ISendTopology SendTopology => _configuration.Send;
+        public IPublishTopology PublishTopology => _topologyConfiguration.Publish;
+        public ISendTopology SendTopology => _topologyConfiguration.Send;
 
         public IMessagePublishTopology<T> Publish<T>()
             where T : class
         {
-            return _configuration.Publish.GetMessageTopology<T>();
+            return _topologyConfiguration.Publish.GetMessageTopology<T>();
         }
 
         public IMessageSendTopology<T> Send<T>()
             where T : class
         {
-            return _configuration.Send.GetMessageTopology<T>();
+            return _topologyConfiguration.Send.GetMessageTopology<T>();
         }
 
         public IMessageTopology<T> Message<T>()
             where T : class
         {
-            return _configuration.Message.GetMessageTopology<T>();
+            return _topologyConfiguration.Message.GetMessageTopology<T>();
+        }
+
+        public virtual bool TryGetPublishAddress(Type messageType, out Uri publishAddress)
+        {
+            return _topologyConfiguration.Publish.TryGetPublishAddress(messageType, _hostConfiguration.HostAddress, out publishAddress);
+        }
+
+        public virtual bool TryGetPublishAddress<T>(out Uri publishAddress)
+            where T : class
+        {
+            return _topologyConfiguration.Publish.GetMessageTopology<T>().TryGetPublishAddress(_hostConfiguration.HostAddress, out publishAddress);
         }
     }
 }

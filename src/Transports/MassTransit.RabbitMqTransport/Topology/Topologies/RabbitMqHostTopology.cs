@@ -1,7 +1,6 @@
 namespace MassTransit.RabbitMqTransport.Topology.Topologies
 {
     using System;
-    using System.Text;
     using Configuration;
     using MassTransit.Topology.Topologies;
     using Metadata;
@@ -13,14 +12,14 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         HostTopology,
         IRabbitMqHostTopology
     {
+        readonly IRabbitMqTopologyConfiguration _configuration;
         readonly IExchangeTypeSelector _exchangeTypeSelector;
         readonly Uri _hostAddress;
         readonly IMessageNameFormatter _messageNameFormatter;
-        readonly IRabbitMqTopologyConfiguration _configuration;
 
-        public RabbitMqHostTopology(IExchangeTypeSelector exchangeTypeSelector, IMessageNameFormatter messageNameFormatter,
-            Uri hostAddress, IRabbitMqTopologyConfiguration configuration)
-            : base(configuration)
+        public RabbitMqHostTopology(IRabbitMqHostConfiguration hostConfiguration, IExchangeTypeSelector exchangeTypeSelector,
+            IMessageNameFormatter messageNameFormatter, Uri hostAddress, IRabbitMqTopologyConfiguration configuration)
+            : base(hostConfiguration, configuration)
         {
             _exchangeTypeSelector = exchangeTypeSelector;
             _messageNameFormatter = messageNameFormatter;
@@ -76,29 +75,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             settings.BindToExchange(endpointAddress.Name);
 
             return settings.GetSendAddress(_hostAddress);
-        }
-
-        public override string CreateTemporaryQueueName(string prefix)
-        {
-            var sb = new StringBuilder(prefix);
-
-            var host = HostMetadataCache.Host;
-
-            foreach (var c in host.MachineName)
-                if (char.IsLetterOrDigit(c))
-                    sb.Append(c);
-                else if (c == '.' || c == '_' || c == '-' || c == ':')
-                    sb.Append(c);
-            sb.Append('-');
-            foreach (var c in host.ProcessName)
-                if (char.IsLetterOrDigit(c))
-                    sb.Append(c);
-                else if (c == '.' || c == '_' || c == '-' || c == ':')
-                    sb.Append(c);
-            sb.Append('-');
-            sb.Append(NewId.Next().ToString(Formatter));
-
-            return sb.ToString();
         }
     }
 }

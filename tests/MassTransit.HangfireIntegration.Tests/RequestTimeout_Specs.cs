@@ -66,7 +66,7 @@ namespace MassTransit.HangfireIntegration.Tests
 
             _repository = new InMemorySagaRepository<TestState>();
 
-            var settings = new RequestSettingsImpl(ServiceQueueAddress, HangfireAddress, TimeSpan.FromSeconds(1));
+            var settings = new RequestSettingsImpl(ServiceQueueAddress, TimeSpan.FromSeconds(1));
 
             _machine = new TestStateMachine(settings);
 

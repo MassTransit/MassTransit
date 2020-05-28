@@ -21,7 +21,7 @@ namespace MassTransit
         {
             Task<ISendEndpoint> GetSchedulerEndpoint() => bus.GetSendEndpoint(schedulerEndpointAddress);
 
-            return new MessageScheduler(new EndpointScheduleMessageProvider(GetSchedulerEndpoint));
+            return new MessageScheduler(new EndpointScheduleMessageProvider(GetSchedulerEndpoint), bus.Topology);
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace MassTransit
         /// <returns></returns>
         public static IMessageScheduler CreateMessageScheduler(this IBus bus)
         {
-            return new MessageScheduler(new PublishScheduleMessageProvider(bus));
+            return new MessageScheduler(new PublishScheduleMessageProvider(bus), bus.Topology);
         }
     }
 }

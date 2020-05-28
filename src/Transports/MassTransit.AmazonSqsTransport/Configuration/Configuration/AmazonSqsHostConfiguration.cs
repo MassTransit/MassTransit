@@ -7,6 +7,7 @@
     using GreenPipes;
     using MassTransit.Configuration;
     using MassTransit.Configurators;
+    using MassTransit.Topology;
     using Topology;
     using Topology.Settings;
     using Topology.Topologies;
@@ -18,7 +19,7 @@
         IAmazonSqsHostConfiguration
     {
         readonly IAmazonSqsBusConfiguration _busConfiguration;
-        readonly IAmazonSqsTopologyConfiguration _topologyConfiguration;
+        readonly IAmazonSqsHostTopology _hostTopology;
         AmazonSqsHostSettings _hostSettings;
 
         public AmazonSqsHostConfiguration(IAmazonSqsBusConfiguration busConfiguration, IAmazonSqsTopologyConfiguration
@@ -26,8 +27,12 @@
             : base(busConfiguration)
         {
             _busConfiguration = busConfiguration;
-            _topologyConfiguration = topologyConfiguration;
+
             _hostSettings = new ConfigurationHostSettings();
+
+            var messageNameFormatter = new AmazonSqsMessageNameFormatter();
+
+            _hostTopology = new AmazonSqsHostTopology(this, messageNameFormatter, topologyConfiguration);
 
             ConnectionContextSupervisor = new ConnectionContextSupervisor(this, topologyConfiguration);
         }
@@ -118,12 +123,7 @@
             return configuration;
         }
 
-        public IAmazonSqsHostTopology GetHostTopology()
-        {
-            var messageNameFormatter = new AmazonSqsMessageNameFormatter();
-
-            return new AmazonSqsHostTopology(messageNameFormatter, HostAddress, _topologyConfiguration);
-        }
+        IAmazonSqsHostTopology IAmazonSqsHostConfiguration.HostTopology => _hostTopology;
 
         void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
@@ -153,6 +153,8 @@
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
         }
 
+        public override IHostTopology HostTopology => _hostTopology;
+
         public override IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IReceiveEndpointConfigurator> configure = null)
         {
@@ -161,7 +163,7 @@
 
         public override IHost Build()
         {
-            var host = new AmazonSqsHost(this, GetHostTopology());
+            var host = new AmazonSqsHost(this, _hostTopology);
 
             foreach (var endpointConfiguration in Endpoints)
                 endpointConfiguration.Build(host);

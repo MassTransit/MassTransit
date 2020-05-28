@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Topology.Topologies
+﻿namespace MassTransit.Topology.Topologies
 {
     using System;
     using System.Collections.Concurrent;
@@ -21,7 +9,6 @@ namespace MassTransit.Topology.Topologies
     using GreenPipes.Internals.Extensions;
     using Metadata;
     using Observers;
-    using Util;
 
 
     public class MessageTopology :
@@ -93,8 +80,8 @@ namespace MassTransit.Topology.Topologies
         IMessageTopologyConfigurator<TMessage>
         where TMessage : class
     {
-        readonly MessageTopologyConfigurationObservable _observers;
         readonly Lazy<string> _entityName;
+        readonly MessageTopologyConfigurationObservable _observers;
         readonly ConcurrentDictionary<string, IMessagePropertyTopologyConfigurator<TMessage>> _properties;
 
         public MessageTopology(IMessageEntityNameFormatter<TMessage> entityNameFormatter, MessageTopologyConfigurationObservable observers)
@@ -114,8 +101,10 @@ namespace MassTransit.Topology.Topologies
         public void SetEntityNameFormatter(IMessageEntityNameFormatter<TMessage> entityNameFormatter)
         {
             if (_entityName.IsValueCreated)
+            {
                 throw new ConfigurationException(
                     $"The message type {TypeMetadataCache<TMessage>.ShortName} entity name was already evaluated: {_entityName.Value}");
+            }
 
             EntityNameFormatter = entityNameFormatter ?? throw new ArgumentNullException(nameof(entityNameFormatter));
         }
@@ -127,7 +116,7 @@ namespace MassTransit.Topology.Topologies
 
         public void CorrelateBy(Expression<Func<TMessage, Guid>> propertyExpression)
         {
-            var propertyTopology = GetPropertyTopology<Guid>(propertyExpression.GetPropertyInfo());
+            IMessagePropertyTopologyConfigurator<TMessage, Guid> propertyTopology = GetPropertyTopology<Guid>(propertyExpression.GetPropertyInfo());
 
             propertyTopology.IsCorrelationId = true;
         }
@@ -144,7 +133,8 @@ namespace MassTransit.Topology.Topologies
 
         IMessagePropertyTopologyConfigurator<TMessage, T> GetPropertyTopology<T>(PropertyInfo propertyInfo)
         {
-            var specification = _properties.GetOrAdd(propertyInfo.Name, _ => CreatePropertyTopology<T>(propertyInfo));
+            IMessagePropertyTopologyConfigurator<TMessage> specification =
+                _properties.GetOrAdd(propertyInfo.Name, _ => CreatePropertyTopology<T>(propertyInfo));
 
             return specification as IMessagePropertyTopologyConfigurator<TMessage, T>;
         }

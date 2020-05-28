@@ -44,7 +44,7 @@ namespace MassTransit.HangfireIntegration.Tests
 
             Bus.ConnectConsumer(() => new SomeMessageConsumer());
 
-            await Bus.ScheduleSend(Bus.Address, DateTime.Now, new SomeMessage
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.Now, new SomeMessage
             {
                 SendDate = DateTime.Now,
                 Source = "Schedule"

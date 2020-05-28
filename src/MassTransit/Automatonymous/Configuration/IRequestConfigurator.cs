@@ -11,11 +11,6 @@ namespace Automatonymous
         Uri ServiceAddress { set; }
 
         /// <summary>
-        /// Sets the address of the message scheduling service
-        /// </summary>
-        Uri SchedulingServiceAddress { set; }
-
-        /// <summary>
         /// Sets the request timeout
         /// </summary>
         TimeSpan Timeout { set; }

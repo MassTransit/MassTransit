@@ -4,6 +4,7 @@
     using Context;
     using EndpointConfigurators;
     using GreenPipes;
+    using Topology;
 
 
     public interface IHostConfiguration :
@@ -15,7 +16,7 @@
         Uri HostAddress { get; }
 
         /// <summary>
-        ///     If true, only the broker topology will be deployed
+        /// If true, only the broker topology will be deployed
         /// </summary>
         bool DeployTopologyOnly { get; set; }
 
@@ -23,8 +24,10 @@
         ILogContext SendLogContext { get; }
         ILogContext ReceiveLogContext { get; }
 
+        IHostTopology HostTopology { get; }
+
         /// <summary>
-        ///     Create a receive endpoint configuration
+        /// Create a receive endpoint configuration
         /// </summary>
         /// <param name="queueName"></param>
         /// <param name="configure"></param>

@@ -10,7 +10,7 @@
 
     [TestFixture]
     public class ScheduleMessage_Specs :
-        AzureServiceBusTestFixture
+        TwoScopeAzureServiceBusTestFixture
     {
         [Test]
         public async Task Should_get_both_messages()
@@ -210,7 +210,52 @@
         [Test]
         public async Task Should_get_both_messages()
         {
-            await InputQueueSendEndpoint.Send(new FirstMessage());
+            await Bus.Publish(new FirstMessage());
+
+            await _first;
+
+            await _second;
+        }
+
+        Task<ConsumeContext<SecondMessage>> _second;
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+            _first = Handler<FirstMessage>(configurator, async context =>
+            {
+                await context.SchedulePublish(TimeSpan.FromSeconds(1), new SecondMessage());
+            });
+
+            _second = Handled<SecondMessage>(configurator);
+        }
+
+
+        public class FirstMessage
+        {
+        }
+
+
+        public class SecondMessage
+        {
+        }
+    }
+
+
+    public class Scheduling_a_published_message_with_no_scope :
+        TwoScopeAzureServiceBusTestFixture
+    {
+        public Scheduling_a_published_message_with_no_scope()
+            : base("")
+        {
+        }
+
+        [Test]
+        public async Task Should_get_both_messages()
+        {
+            var scheduler = SecondBus.CreateServiceBusMessageScheduler();
+
+            await scheduler.SchedulePublish(DateTime.Now, new FirstMessage());
 
             await _first;
 

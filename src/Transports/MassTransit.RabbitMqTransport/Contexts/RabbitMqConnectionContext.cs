@@ -29,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
             PublisherConfirmation = hostConfiguration.PublisherConfirmation;
             BatchSettings = hostConfiguration.BatchSettings;
-            Topology = hostConfiguration.GetHostTopology();
+            Topology = hostConfiguration.HostTopology;
 
             StopTimeout = TimeSpan.FromSeconds(30);
 

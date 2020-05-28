@@ -1,9 +1,8 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
 {
     using System;
-    using System.Text;
-    using Configurators;
     using Configuration;
+    using Configurators;
     using MassTransit.Topology.Topologies;
     using Metadata;
     using Transports;
@@ -14,14 +13,15 @@
         IServiceBusHostTopology
     {
         readonly IServiceBusTopologyConfiguration _configuration;
-        readonly Uri _hostAddress;
+        readonly IServiceBusHostConfiguration _hostConfiguration;
         readonly IMessageNameFormatter _messageNameFormatter;
 
-        public ServiceBusHostTopology(IServiceBusTopologyConfiguration configuration, Uri hostAddress, IMessageNameFormatter messageNameFormatter = null)
-            : base(configuration)
+        public ServiceBusHostTopology(IServiceBusHostConfiguration hostConfiguration, IServiceBusTopologyConfiguration configuration,
+            IMessageNameFormatter messageNameFormatter)
+            : base(hostConfiguration, configuration)
         {
+            _hostConfiguration = hostConfiguration;
             _configuration = configuration;
-            _hostAddress = hostAddress;
 
             _messageNameFormatter = messageNameFormatter ?? new ServiceBusMessageNameFormatter(false);
         }
@@ -35,7 +35,7 @@
 
             configure?.Invoke(configurator);
 
-            return configurator.GetQueueAddress(_hostAddress);
+            return configurator.GetQueueAddress(_hostConfiguration.HostAddress);
         }
 
         public Uri GetDestinationAddress(Type messageType, Action<IQueueConfigurator> configure = null)
@@ -45,36 +45,11 @@
             var configurator = new QueueConfigurator(queueName);
 
             if (TypeMetadataCache.IsTemporaryMessageType(messageType))
-            {
                 configurator.AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle;
-            }
 
             configure?.Invoke(configurator);
 
-            return configurator.GetQueueAddress(_hostAddress);
-        }
-
-        public override string CreateTemporaryQueueName(string prefix)
-        {
-            var sb = new StringBuilder();
-
-            var host = HostMetadataCache.Host;
-
-            foreach (var c in host.MachineName)
-                if (char.IsLetterOrDigit(c))
-                    sb.Append(c);
-                else if (c == '_')
-                    sb.Append(c);
-            sb.Append('_');
-            foreach (var c in host.ProcessName)
-                if (char.IsLetterOrDigit(c))
-                    sb.Append(c);
-                else if (c == '_')
-                    sb.Append(c);
-            sb.AppendFormat("_{0}_", prefix);
-            sb.Append(NewId.Next().ToString(Formatter));
-
-            return sb.ToString();
+            return configurator.GetQueueAddress(_hostConfiguration.HostAddress);
         }
 
         IServiceBusMessagePublishTopology<T> IServiceBusHostTopology.Publish<T>()
@@ -85,6 +60,30 @@
         IServiceBusMessageSendTopology<T> IServiceBusHostTopology.Send<T>()
         {
             return _configuration.Send.GetMessageTopology<T>();
+        }
+
+        public override bool TryGetPublishAddress<T>(out Uri publishAddress)
+        {
+            if (base.TryGetPublishAddress<T>(out publishAddress))
+            {
+                publishAddress = new ServiceBusEndpointAddress(_hostConfiguration.HostAddress, publishAddress,
+                    ServiceBusEndpointAddress.AddressType.Topic).TopicAddress;
+                return true;
+            }
+
+            return false;
+        }
+
+        public override bool TryGetPublishAddress(Type messageType, out Uri publishAddress)
+        {
+            if (base.TryGetPublishAddress(messageType, out publishAddress))
+            {
+                publishAddress = new ServiceBusEndpointAddress(_hostConfiguration.HostAddress, publishAddress,
+                    ServiceBusEndpointAddress.AddressType.Topic).TopicAddress;
+                return true;
+            }
+
+            return false;
         }
     }
 }

@@ -5,6 +5,7 @@
     using Hangfire;
     using Hangfire.MemoryStorage;
     using NUnit.Framework;
+    using Scheduling;
     using TestFramework;
 
 
@@ -12,6 +13,7 @@
         InMemoryTestFixture
     {
         readonly string _queueName;
+        readonly Lazy<IMessageScheduler> _scheduler;
 
         static HangfireInMemoryTestFixture()
         {
@@ -19,17 +21,22 @@
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UseMemoryStorage();
-
         }
+
         public HangfireInMemoryTestFixture()
         {
             _queueName = "hangfire";
             HangfireAddress = new Uri($"loopback://localhost/{_queueName}");
+
+            _scheduler = new Lazy<IMessageScheduler>(() =>
+                new MessageScheduler(new EndpointScheduleMessageProvider(() => GetSendEndpoint(HangfireAddress)), Bus.Topology));
         }
 
         protected Uri HangfireAddress { get; }
 
         protected ISendEndpoint HangfireEndpoint { get; private set; }
+
+        protected IMessageScheduler Scheduler => _scheduler.Value;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {

@@ -42,6 +42,6 @@
         IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
             IAmazonSqsEndpointConfiguration endpointConfiguration, Action<IAmazonSqsReceiveEndpointConfigurator> configure = null);
 
-        IAmazonSqsHostTopology GetHostTopology();
+        IAmazonSqsHostTopology HostTopology { get; }
     }
 }

@@ -36,7 +36,7 @@ namespace MassTransit.AmazonSqsTransport
         public readonly bool Durable;
         public readonly AddressType Type;
 
-        public AmazonSqsEndpointAddress(Uri hostAddress, Uri address)
+        public AmazonSqsEndpointAddress(Uri hostAddress, Uri address, AddressType type = AddressType.Queue)
         {
             Scheme = default;
             Host = default;
@@ -44,7 +44,7 @@ namespace MassTransit.AmazonSqsTransport
 
             Durable = true;
             AutoDelete = false;
-            Type = AddressType.Queue;
+            Type = type;
 
             var scheme = address.Scheme.ToLowerInvariant();
             switch (scheme)
@@ -132,6 +132,25 @@ namespace MassTransit.AmazonSqsTransport
             builder.Query += string.Join("&", address.GetQueryStringOptions());
 
             return builder.Uri;
+        }
+
+        public Uri TopicAddress
+        {
+            get
+            {
+                if (Type != AddressType.Topic)
+                    throw new ArgumentException("Address was not a topic");
+
+                var path = Scope == "/"
+                    ? $"{Name}"
+                    : $"{Scope}/{Name}";
+
+                var builder = new UriBuilder($"topic:{path}");
+
+                builder.Query += string.Join("&", GetQueryStringOptions());
+
+                return builder.Uri;
+            }
         }
 
         Uri DebuggerDisplay => this;

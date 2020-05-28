@@ -1,7 +1,6 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Configurators
 {
     using System.Collections.Generic;
-    using Configuration;
     using Entities;
 
 

@@ -11,8 +11,8 @@ namespace MassTransit.Context
         OutboxContext
     {
         readonly TaskCompletionSource<InMemoryOutboxConsumeContext> _clearToSend;
-        readonly List<Func<Task>> _pendingActions;
         readonly InMemoryOutboxMessageSchedulerContext _outboxSchedulerContext;
+        readonly List<Func<Task>> _pendingActions;
 
         public InMemoryOutboxConsumeContext(ConsumeContext context)
             : base(context)
@@ -48,11 +48,23 @@ namespace MassTransit.Context
             lock (_pendingActions)
                 pendingActions = _pendingActions.ToArray();
 
-            foreach (var action in pendingActions)
+            foreach (Func<Task> action in pendingActions)
             {
                 var task = action();
                 if (task != null)
                     await task.ConfigureAwait(false);
+            }
+
+            if (_outboxSchedulerContext != null)
+            {
+                try
+                {
+                    await _outboxSchedulerContext.ExecutePendingActions().ConfigureAwait(false);
+                }
+                catch (Exception e)
+                {
+                    LogContext.Warning?.Log(e, "One or more messages could not be unscheduled.", e);
+                }
             }
         }
 

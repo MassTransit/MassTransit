@@ -27,7 +27,7 @@ namespace MassTransit.HangfireIntegration.Tests
         public async Task Should_handle_now_properly()
         {
             var scheduleId = NewId.NextGuid().ToString("N");
-            await HangfireEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(20), new Done {Name = "Joe"});
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(20), new Done {Name = "Joe"});
             await HangfireEndpoint.ScheduleRecurringSend(InputQueueAddress, new MySchedule(scheduleId), new Interval {Name = "Joe"});
 
             await _done;
@@ -40,7 +40,7 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             var scheduleId = Guid.NewGuid().ToString();
 
-            await HangfireEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new Done {Name = "Joe"});
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new Done {Name = "Joe"});
             var scheduledRecurringMessage =
                 await HangfireEndpoint.ScheduleRecurringSend(InputQueueAddress, new MyCancelableSchedule(scheduleId), new Interval {Name = "Joe"});
 
@@ -51,7 +51,7 @@ namespace MassTransit.HangfireIntegration.Tests
 
             await Bus.CancelScheduledRecurringSend(scheduledRecurringMessage);
 
-            await HangfireEndpoint.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new DoneAgain {Name = "Joe"});
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(11), new DoneAgain {Name = "Joe"});
 
             await _doneAgain;
 

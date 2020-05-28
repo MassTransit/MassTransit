@@ -35,7 +35,7 @@
             if (_connectionContext.PublisherConfirmation)
             {
                 _model.ConfirmSelect();
-                _confirmations = new PendingConfirmationCollection(_connectionContext);
+                _confirmations = new PendingConfirmationCollection();
             }
 
             _executor = new ChannelExecutor(1);

@@ -42,7 +42,11 @@ namespace MassTransit.Transports.InMemory.Builders
 
             _configuration.Topology.Consume.Apply(builder);
 
-            return new InMemoryReceiveEndpointContext(_hostConfiguration, _configuration);
+            var context = new InMemoryReceiveEndpointContext(_hostConfiguration, _configuration);
+
+            context.GetOrAddPayload(() => _hostConfiguration.HostTopology);
+
+            return context;
         }
     }
 }

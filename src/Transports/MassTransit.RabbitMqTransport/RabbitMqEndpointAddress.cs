@@ -96,7 +96,7 @@ namespace MassTransit.RabbitMqTransport
 
             HashSet<string> bindExchanges = new HashSet<string>();
 
-            foreach ((string key, string value) in address.SplitQueryString())
+            foreach (var (key, value) in address.SplitQueryString())
             {
                 switch (key)
                 {

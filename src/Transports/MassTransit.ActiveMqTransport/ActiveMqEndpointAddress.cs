@@ -86,7 +86,7 @@ namespace MassTransit.ActiveMqTransport
 
             ActiveMqEntityNameValidator.Validator.ThrowIfInvalidEntityName(Name);
 
-            foreach ((string key, string value) in address.SplitQueryString())
+            foreach (var (key, value) in address.SplitQueryString())
             {
                 switch (key)
                 {
@@ -174,6 +174,18 @@ namespace MassTransit.ActiveMqTransport
         }
 
         Uri DebuggerDisplay => this;
+
+        public Uri TopicAddress
+        {
+            get
+            {
+                var builder = new UriBuilder($"topic:{Name}");
+
+                builder.Query += string.Join("&", GetQueryStringOptions());
+
+                return builder.Uri;
+            }
+        }
 
         IEnumerable<string> GetQueryStringOptions()
         {

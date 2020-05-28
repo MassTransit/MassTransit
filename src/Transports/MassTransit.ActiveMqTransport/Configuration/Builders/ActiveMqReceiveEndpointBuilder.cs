@@ -43,12 +43,13 @@
             IDeadLetterTransport deadLetterTransport = CreateDeadLetterTransport();
             IErrorTransport errorTransport = CreateErrorTransport();
 
-            var receiveEndpointContext = new ActiveMqConsumerReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology);
+            var context = new ActiveMqConsumerReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology);
 
-            receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
-            receiveEndpointContext.GetOrAddPayload(() => errorTransport);
+            context.GetOrAddPayload(() => deadLetterTransport);
+            context.GetOrAddPayload(() => errorTransport);
+            context.GetOrAddPayload(() => _hostConfiguration.HostTopology);
 
-            return receiveEndpointContext;
+            return context;
         }
 
         IErrorTransport CreateErrorTransport()

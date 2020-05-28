@@ -11,23 +11,21 @@ namespace MassTransit.RabbitMqTransport.Integration
     public class PendingConfirmation :
         IPendingConfirmation
     {
-        readonly ConnectionContext _connectionContext;
         readonly string _exchange;
         readonly TaskCompletionSource<ulong> _source;
 
-        public PendingConfirmation(ConnectionContext connectionContext, string exchange, ulong publishTag)
+        public PendingConfirmation(string exchange, ulong publishTag)
         {
-            _connectionContext = connectionContext;
             _exchange = exchange;
             PublishTag = publishTag;
             _source = TaskUtil.GetTask<ulong>();
         }
 
+        Uri DestinationAddress => new Uri($"exchange:{_exchange}");
+
         public Task Confirmed => _source.Task;
 
         public ulong PublishTag { get; }
-
-        Uri DestinationAddress => _connectionContext.Topology.GetDestinationAddress(_exchange);
 
         public void Acknowledged()
         {

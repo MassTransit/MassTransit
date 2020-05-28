@@ -21,16 +21,20 @@ namespace MassTransit.Registration.Attachments
 
         public ReceiveEndpointContext CreateReceiveEndpointContext()
         {
-            return new BusAttachmentEndpointReceiveContext(_busInstance, _configuration);
+            var context = new BusAttachmentReceiveEndpointContext(_busInstance, _configuration);
+
+            context.GetOrAddPayload(() => _busInstance.HostConfiguration.HostTopology);
+
+            return context;
         }
 
 
-        class BusAttachmentEndpointReceiveContext :
+        class BusAttachmentReceiveEndpointContext :
             BaseReceiveEndpointContext
         {
             readonly IBusInstance _busInstance;
 
-            public BusAttachmentEndpointReceiveContext(IBusInstance busInstance, IReceiveEndpointConfiguration configuration)
+            public BusAttachmentReceiveEndpointContext(IBusInstance busInstance, IReceiveEndpointConfiguration configuration)
                 : base(configuration)
             {
                 _busInstance = busInstance;

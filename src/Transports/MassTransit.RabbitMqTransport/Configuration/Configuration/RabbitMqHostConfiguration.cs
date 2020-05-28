@@ -8,6 +8,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using Integration;
     using MassTransit.Configuration;
     using MassTransit.Configurators;
+    using MassTransit.Topology;
     using Topology;
     using Topology.Settings;
     using Topology.Topologies;
@@ -19,14 +20,13 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IRabbitMqHostConfiguration
     {
         readonly IRabbitMqBusConfiguration _busConfiguration;
-        readonly IRabbitMqTopologyConfiguration _topologyConfiguration;
+        readonly IRabbitMqHostTopology _hostTopology;
         RabbitMqHostSettings _hostSettings;
 
         public RabbitMqHostConfiguration(IRabbitMqBusConfiguration busConfiguration, IRabbitMqTopologyConfiguration topologyConfiguration)
             : base(busConfiguration)
         {
             _busConfiguration = busConfiguration;
-            _topologyConfiguration = topologyConfiguration;
             _hostSettings = new ConfigurationHostSettings
             {
                 Host = "localhost",
@@ -35,6 +35,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 Username = "guest",
                 Password = "guest"
             };
+
+            var exchangeTypeSelector = topologyConfiguration.Publish.ExchangeTypeSelector;
+            var messageNameFormatter = new RabbitMqMessageNameFormatter();
+
+            _hostTopology = new RabbitMqHostTopology(this, exchangeTypeSelector, messageNameFormatter, _hostSettings.HostAddress, topologyConfiguration);
 
             ConnectionContextSupervisor = new ConnectionContextSupervisor(this, topologyConfiguration);
         }
@@ -60,13 +65,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
             }
         }
 
-        public IRabbitMqHostTopology GetHostTopology()
-        {
-            var exchangeTypeSelector = new FanoutExchangeTypeSelector();
-            var messageNameFormatter = new RabbitMqMessageNameFormatter();
+        IRabbitMqHostTopology IRabbitMqHostConfiguration.HostTopology => _hostTopology;
 
-            return new RabbitMqHostTopology(exchangeTypeSelector, messageNameFormatter, _hostSettings.HostAddress, _topologyConfiguration);
-        }
+        public override IHostTopology HostTopology => _hostTopology;
 
         public RabbitMqHostSettings Settings
         {
@@ -204,7 +205,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public override IHost Build()
         {
-            var host = new RabbitMqHost(this, GetHostTopology());
+            var host = new RabbitMqHost(this, _hostTopology);
 
             foreach (var endpointConfiguration in Endpoints)
                 endpointConfiguration.Build(host);

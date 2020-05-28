@@ -6,6 +6,7 @@
     using GreenPipes;
     using MassTransit.Configuration;
     using MassTransit.Configurators;
+    using MassTransit.Topology;
     using Topology;
     using Topology.Settings;
     using Topology.Topologies;
@@ -17,16 +18,16 @@
         IActiveMqHostConfiguration
     {
         readonly IActiveMqBusConfiguration _busConfiguration;
-        readonly IActiveMqTopologyConfiguration _topologyConfiguration;
+        readonly IActiveMqHostTopology _hostTopology;
         ActiveMqHostSettings _hostSettings;
 
-        public ActiveMqHostConfiguration(IActiveMqBusConfiguration busConfiguration,
-            IActiveMqTopologyConfiguration topologyConfiguration)
+        public ActiveMqHostConfiguration(IActiveMqBusConfiguration busConfiguration, IActiveMqTopologyConfiguration topologyConfiguration)
             : base(busConfiguration)
         {
             _busConfiguration = busConfiguration;
-            _topologyConfiguration = topologyConfiguration;
+
             _hostSettings = new ConfigurationHostSettings(new Uri("activemq://localhost"));
+            _hostTopology = new ActiveMqHostTopology(this, topologyConfiguration);
 
             ConnectionContextSupervisor = new ConnectionContextSupervisor(this, topologyConfiguration);
         }
@@ -113,11 +114,9 @@
             return configuration;
         }
 
-        public IActiveMqHostTopology GetHostTopology()
-        {
-            var messageNameFormatter = new ActiveMqMessageNameFormatter();
-            return new ActiveMqHostTopology(messageNameFormatter, _hostSettings.HostAddress, _topologyConfiguration);
-        }
+        IActiveMqHostTopology IActiveMqHostConfiguration.HostTopology => _hostTopology;
+
+        public override IHostTopology HostTopology => _hostTopology;
 
         void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
@@ -154,7 +153,7 @@
 
         public override IHost Build()
         {
-            var host = new ActiveMqHost(this, GetHostTopology());
+            var host = new ActiveMqHost(this, _hostTopology);
 
             foreach (var endpointConfiguration in Endpoints)
                 endpointConfiguration.Build(host);

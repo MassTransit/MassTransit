@@ -16,7 +16,7 @@ namespace MassTransit.ActiveMqTransport
         /// <returns></returns>
         public static IMessageScheduler CreateActiveMqMessageScheduler(this IBus bus)
         {
-            return new MessageScheduler(new ActiveMqScheduleMessageProvider(bus));
+            return new MessageScheduler(new ActiveMqScheduleMessageProvider(bus), bus.Topology);
         }
     }
 }

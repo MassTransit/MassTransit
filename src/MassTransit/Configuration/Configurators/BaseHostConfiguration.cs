@@ -8,6 +8,7 @@ namespace MassTransit.Configurators
     using EndpointConfigurators;
     using GreenPipes;
     using Logging;
+    using Topology;
 
 
     public abstract class BaseHostConfiguration<TReceiveEndpointConfiguration> :
@@ -59,6 +60,8 @@ namespace MassTransit.Configurators
         {
             return _endpoints.SelectMany(x => x.Validate());
         }
+
+        public abstract IHostTopology HostTopology { get; }
 
         public abstract IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IReceiveEndpointConfigurator> configure = null);

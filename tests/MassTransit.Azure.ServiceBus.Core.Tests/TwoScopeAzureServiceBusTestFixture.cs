@@ -23,9 +23,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     public class TwoScopeAzureServiceBusTestFixture :
         AzureServiceBusTestFixture
     {
-        public TwoScopeAzureServiceBusTestFixture()
+        public TwoScopeAzureServiceBusTestFixture(string scope = default)
         {
-            _secondServiceUri = AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace, "MassTransit.Tests.SecondService");
+            _secondServiceUri = AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace, scope ?? "MassTransit.Tests.SecondService");
         }
 
         Uri _secondInputQueueAddress;

@@ -2,6 +2,10 @@
 {
     using System;
     using System.Threading.Tasks;
+    using GreenPipes;
+    using MassTransit.Scheduling;
+    using MassTransit.Topology;
+    using Scheduling;
 
 
     /// <summary>
@@ -14,24 +18,34 @@
         where TMessage : class
     {
         readonly ConsumeContext<TMessage> _context;
-        readonly IMessageScheduler _scheduler;
 
-        public ActiveMqMessageRedeliveryContext(ConsumeContext<TMessage> context, IMessageScheduler scheduler)
+        public ActiveMqMessageRedeliveryContext(ConsumeContext<TMessage> context)
         {
             _context = context;
-            _scheduler = scheduler;
         }
 
         Task MessageRedeliveryContext.ScheduleRedelivery(TimeSpan delay, Action<ConsumeContext, SendContext> callback)
         {
-            var combinedCallback = UpdateDeliveryContext + callback;
+            Action<ConsumeContext, SendContext> combinedCallback = UpdateDeliveryContext + callback;
 
-            return _scheduler.ScheduleSend(_context.ReceiveContext.InputAddress, delay, _context.Message, _context.CreateCopyContextPipe(combinedCallback));
+            var scheduler = CreateMessageScheduler();
+
+            return scheduler.ScheduleSend(_context.ReceiveContext.InputAddress, delay, _context.Message, _context.CreateCopyContextPipe(combinedCallback));
         }
 
         static void UpdateDeliveryContext(ConsumeContext context, SendContext sendContext)
         {
             sendContext.Headers.Set(MessageHeaders.RedeliveryCount, context.GetRedeliveryCount() + 1);
+        }
+
+        IMessageScheduler CreateMessageScheduler()
+        {
+            if (_context.TryGetPayload<IMessageScheduler>(out var scheduler))
+                return scheduler;
+
+            var provider = new ActiveMqScheduleMessageProvider(_context);
+
+            return new MessageScheduler(provider, _context.GetPayload<IBusTopology>());
         }
     }
 }

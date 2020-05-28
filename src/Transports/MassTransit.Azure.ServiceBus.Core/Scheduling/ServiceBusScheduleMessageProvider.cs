@@ -48,12 +48,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Scheduling
             var endpoint = await _sendEndpointProvider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
             await endpoint.Send<CancelScheduledMessage>(new
-                {
-                    InVar.CorrelationId,
-                    InVar.Timestamp,
-                    TokenId = tokenId,
-                })
-                .ConfigureAwait(false);
+            {
+                InVar.CorrelationId,
+                InVar.Timestamp,
+                TokenId = tokenId,
+            }).ConfigureAwait(false);
         }
     }
 }

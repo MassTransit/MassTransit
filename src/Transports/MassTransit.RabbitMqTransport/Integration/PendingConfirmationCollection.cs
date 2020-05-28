@@ -7,18 +7,16 @@ namespace MassTransit.RabbitMqTransport.Integration
 
     public class PendingConfirmationCollection
     {
-        readonly ConnectionContext _connectionContext;
         readonly ConcurrentDictionary<ulong, IPendingConfirmation> _published;
 
-        public PendingConfirmationCollection(ConnectionContext connectionContext)
+        public PendingConfirmationCollection()
         {
-            _connectionContext = connectionContext;
             _published = new ConcurrentDictionary<ulong, IPendingConfirmation>();
         }
 
         public IPendingConfirmation Add(string exchange, ulong publishTag, IBasicProperties basicProperties)
         {
-            var pendingConfirmation = new PendingConfirmation(_connectionContext, exchange, publishTag);
+            var pendingConfirmation = new PendingConfirmation(exchange, publishTag);
             _published.AddOrUpdate(publishTag, key => pendingConfirmation, (key, existing) =>
             {
                 existing.NotConfirmed($"Duplicate key: {key}");

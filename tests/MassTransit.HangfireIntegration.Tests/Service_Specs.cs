@@ -29,7 +29,7 @@ namespace MassTransit.HangfireIntegration.Tests
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
             Task<ConsumeContext<IA>> handlerIA = SubscribeHandler<IA>();
 
-            await Bus.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(1), new A {Name = "Joe"});
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(1), new A {Name = "Joe"});
 
             await handlerA;
             await handlerIA;
@@ -59,7 +59,7 @@ namespace MassTransit.HangfireIntegration.Tests
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
             Task<ConsumeContext<IA>> handlerIA = SubscribeHandler<IA>();
 
-            await Bus.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(1), new A {Name = "Joe"});
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(1), new A {Name = "Joe"});
 
             await handlerA;
 
@@ -99,11 +99,11 @@ namespace MassTransit.HangfireIntegration.Tests
             Task<ConsumeContext<A>> handlerA = SubscribeHandler<A>();
 
             ScheduledMessage<A> scheduledMessage =
-                await Bus.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(3), new A {Name = "Joe"});
+                await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(3), new A {Name = "Joe"});
 
             await Task.Delay(1000);
 
-            await Bus.CancelScheduledSend(scheduledMessage);
+            await Scheduler.CancelScheduledSend(scheduledMessage);
 
             Assert.That(async () => await handlerA.OrTimeout(5000), Throws.TypeOf<TimeoutException>());
         }

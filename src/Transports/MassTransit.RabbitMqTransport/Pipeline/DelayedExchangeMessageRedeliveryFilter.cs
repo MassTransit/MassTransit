@@ -4,8 +4,6 @@
     using System.Threading.Tasks;
     using Contexts;
     using GreenPipes;
-    using MassTransit.Scheduling;
-    using Scheduling;
 
 
     /// <summary>
@@ -23,14 +21,7 @@
         [DebuggerNonUserCode]
         Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
-            context.GetOrAddPayload<MessageRedeliveryContext>(() =>
-            {
-                var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
-
-                var provider = new DelayedExchangeScheduleMessageProvider(context, modelContext.ConnectionContext.Topology);
-
-                return new DelayedExchangeMessageRedeliveryContext<TMessage>(context, new MessageScheduler(provider));
-            });
+            context.GetOrAddPayload<MessageRedeliveryContext>(() => new DelayedExchangeMessageRedeliveryContext<TMessage>(context));
 
             return next.Send(context);
         }

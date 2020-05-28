@@ -3,8 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Contexts;
-    using MassTransit.Scheduling;
-    using Scheduling;
 
 
     public static class ActiveMqDeferMessageExtensions
@@ -20,14 +18,7 @@
         public static Task Defer<T>(this ConsumeContext<T> context, TimeSpan delay, Action<ConsumeContext, SendContext> callback = null)
             where T : class
         {
-            if (!context.TryGetPayload(out IMessageScheduler scheduler))
-            {
-                var provider = new ActiveMqScheduleMessageProvider(context);
-
-                scheduler = new MessageScheduler(provider);
-            }
-
-            MessageRedeliveryContext redeliveryContext = new ActiveMqMessageRedeliveryContext<T>(context, scheduler);
+            MessageRedeliveryContext redeliveryContext = new ActiveMqMessageRedeliveryContext<T>(context);
 
             return redeliveryContext.ScheduleRedelivery(delay, callback);
         }

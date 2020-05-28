@@ -48,9 +48,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
 
             Apply(builder);
 
-            var sendSettings = new TopicSendSettings(description, builder.BuildBrokerTopology());
-
-            return sendSettings;
+            return new TopicSendSettings(description, builder.BuildBrokerTopology());
         }
 
         string IMessageEntityConfigurator.Path => _topicConfigurator.Path;

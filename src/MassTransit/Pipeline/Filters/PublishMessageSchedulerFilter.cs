@@ -5,6 +5,7 @@ namespace MassTransit.Pipeline.Filters
     using Context;
     using GreenPipes;
     using Scheduling;
+    using Topology;
 
 
     /// <summary>
@@ -24,7 +25,10 @@ namespace MassTransit.Pipeline.Filters
         {
             MessageSchedulerContext PayloadFactory()
             {
-                IMessageScheduler Factory() => new MessageScheduler(new PublishScheduleMessageProvider(context));
+                IMessageScheduler Factory()
+                {
+                    return new MessageScheduler(new PublishScheduleMessageProvider(context), context.GetPayload<IBusTopology>());
+                }
 
                 return new ConsumeMessageSchedulerContext(Factory, context.ReceiveContext.InputAddress);
             }

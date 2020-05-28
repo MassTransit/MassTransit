@@ -24,7 +24,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         BatchSettings BatchSettings { get; }
         IRetryPolicy ConnectionRetryPolicy { get; }
 
-        IRabbitMqHostTopology GetHostTopology();
+        IRabbitMqHostTopology HostTopology { get; }
 
         /// <summary>
         ///     Apply the endpoint definition to the receive endpoint configurator

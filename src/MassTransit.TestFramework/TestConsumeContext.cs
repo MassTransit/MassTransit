@@ -27,7 +27,7 @@
 
             var receiveEndpointConfiguration = busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration("input-queue");
 
-            var hostTopology = new InMemoryHostTopology(topologyConfiguration);
+            var hostTopology = new InMemoryHostTopology(busConfiguration.HostConfiguration, topologyConfiguration);
             var host = new InMemoryHost(busConfiguration.HostConfiguration, hostTopology);
 
             var builder = new InMemoryReceiveEndpointBuilder(busConfiguration.HostConfiguration, receiveEndpointConfiguration);

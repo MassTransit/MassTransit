@@ -28,7 +28,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
             Description = hostConfiguration.Description;
             HostAddress = hostConfiguration.HostAddress;
 
-            Topology = hostConfiguration.GetHostTopology();
+            Topology = hostConfiguration.HostTopology;
 
             _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
         }

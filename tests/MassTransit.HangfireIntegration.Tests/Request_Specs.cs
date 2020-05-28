@@ -14,12 +14,6 @@
         public class Sending_a_request_from_a_state_machine :
             HangfireInMemoryTestFixture
         {
-            static Sending_a_request_from_a_state_machine()
-            {
-                _serviceAddress = new Uri("loopback://localhost/service_queue");
-                EndpointConvention.Map<ValidateName>(_serviceAddress);
-            }
-
             [Test]
             public async Task Should_handle_the_response()
             {
@@ -45,6 +39,12 @@
                 Assert.IsFalse(sagaInstance.ValidateAddressRequestId.HasValue);
             }
 
+            static Sending_a_request_from_a_state_machine()
+            {
+                _serviceAddress = new Uri("loopback://localhost/service_queue");
+                EndpointConvention.Map<ValidateName>(_serviceAddress);
+            }
+
             InMemorySagaRepository<TestState> _repository;
             TestStateMachine _machine;
 
@@ -63,7 +63,7 @@
 
             Uri ServiceQueueAddress
             {
-                get { return _serviceQueueAddress; }
+                get => _serviceQueueAddress;
                 set
                 {
                     if (Bus != null)
@@ -86,7 +86,7 @@
 
                 _repository = new InMemorySagaRepository<TestState>();
 
-                var settings = new RequestSettingsImpl(ServiceQueueAddress, HangfireAddress, TestTimeout);
+                var settings = new RequestSettingsImpl(ServiceQueueAddress, TestTimeout);
 
                 _machine = new TestStateMachine(settings);
 
@@ -118,31 +118,14 @@
         class RequestSettingsImpl :
             RequestSettings
         {
-            readonly Uri _schedulingServiceAddress;
-            readonly Uri _serviceAddress;
-            readonly TimeSpan _timeout;
-
-            public RequestSettingsImpl(Uri serviceAddress, Uri schedulingServiceAddress, TimeSpan timeout)
+            public RequestSettingsImpl(Uri serviceAddress, TimeSpan timeout)
             {
-                _serviceAddress = serviceAddress;
-                _schedulingServiceAddress = schedulingServiceAddress;
-                _timeout = timeout;
+                ServiceAddress = serviceAddress;
+                Timeout = timeout;
             }
 
-            public Uri ServiceAddress
-            {
-                get { return _serviceAddress; }
-            }
-
-            public Uri SchedulingServiceAddress
-            {
-                get { return _schedulingServiceAddress; }
-            }
-
-            public TimeSpan Timeout
-            {
-                get { return _timeout; }
-            }
+            public Uri ServiceAddress { get; }
+            public TimeSpan Timeout { get; }
         }
 
 
@@ -223,7 +206,6 @@
                 Request(() => ValidateAddress, x => x.ValidateAddressRequestId, settings);
                 Request(() => ValidateName, x => x.ValidateNameRequestId, cfg =>
                 {
-                    cfg.SchedulingServiceAddress = settings.SchedulingServiceAddress;
                     cfg.Timeout = settings.Timeout;
                 });
 

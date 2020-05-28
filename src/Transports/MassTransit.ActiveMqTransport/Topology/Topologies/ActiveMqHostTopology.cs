@@ -1,98 +1,97 @@
 namespace MassTransit.ActiveMqTransport.Topology.Topologies
 {
     using System;
-    using System.Text;
     using Configuration;
     using MassTransit.Topology.Topologies;
     using Metadata;
     using Settings;
-    using Transports;
 
 
     public class ActiveMqHostTopology :
         HostTopology,
         IActiveMqHostTopology
     {
-        readonly Uri _hostAddress;
-        readonly IMessageNameFormatter _messageNameFormatter;
-        readonly IActiveMqTopologyConfiguration _configuration;
+        readonly IActiveMqHostConfiguration _hostConfiguration;
+        readonly IActiveMqTopologyConfiguration _topologyConfiguration;
 
-        public ActiveMqHostTopology(IMessageNameFormatter messageNameFormatter, Uri hostAddress, IActiveMqTopologyConfiguration configuration)
-            : base(configuration)
+        public ActiveMqHostTopology(IActiveMqHostConfiguration hostConfiguration, IActiveMqTopologyConfiguration topologyConfiguration)
+            : base(hostConfiguration, topologyConfiguration)
         {
-            _messageNameFormatter = messageNameFormatter;
-            _hostAddress = hostAddress;
-            _configuration = configuration;
+            _hostConfiguration = hostConfiguration;
+            _topologyConfiguration = topologyConfiguration;
         }
 
-        IActiveMqPublishTopology IActiveMqHostTopology.PublishTopology => _configuration.Publish;
-        IActiveMqSendTopology IActiveMqHostTopology.SendTopology => _configuration.Send;
+        IActiveMqPublishTopology IActiveMqHostTopology.PublishTopology => _topologyConfiguration.Publish;
+        IActiveMqSendTopology IActiveMqHostTopology.SendTopology => _topologyConfiguration.Send;
 
         IActiveMqMessagePublishTopology<T> IActiveMqHostTopology.Publish<T>()
         {
-            return _configuration.Publish.GetMessageTopology<T>();
+            return _topologyConfiguration.Publish.GetMessageTopology<T>();
         }
 
         IActiveMqMessageSendTopology<T> IActiveMqHostTopology.Send<T>()
         {
-            return _configuration.Send.GetMessageTopology<T>();
+            return _topologyConfiguration.Send.GetMessageTopology<T>();
         }
 
         public SendSettings GetSendSettings(Uri address)
         {
-            var endpointAddress = new ActiveMqEndpointAddress(_hostAddress, address);
+            var endpointAddress = new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, address);
 
-            return _configuration.Send.GetSendSettings(endpointAddress);
+            return _topologyConfiguration.Send.GetSendSettings(endpointAddress);
         }
 
         public Uri GetDestinationAddress(string topicName, Action<ITopicConfigurator> configure = null)
         {
-            var address = new ActiveMqEndpointAddress(_hostAddress, new Uri($"topic:{topicName}"));
+            var address = new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, new Uri($"topic:{topicName}"));
 
             var sendSettings = new TopicSendSettings(address);
 
             configure?.Invoke(sendSettings);
 
-            return sendSettings.GetSendAddress(_hostAddress);
+            return sendSettings.GetSendAddress(_hostConfiguration.HostAddress);
         }
 
         public Uri GetDestinationAddress(Type messageType, Action<ITopicConfigurator> configure = null)
         {
-            var queueName = _messageNameFormatter.GetMessageName(messageType).ToString();
             var isTemporary = TypeMetadataCache.IsTemporaryMessageType(messageType);
 
-            var address = new ActiveMqEndpointAddress(_hostAddress, new Uri($"topic:{queueName}?temporary={isTemporary}"));
+            _topologyConfiguration.Publish.TryGetPublishAddress(messageType, _hostConfiguration.HostAddress, out var address);
 
-            var settings = new TopicSendSettings(address);
+            //            var address = new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, new Uri($"topic:{queueName}?temporary={isTemporary}"));
+
+            var settings = new TopicSendSettings(new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, address));
+            if (isTemporary)
+            {
+                settings.AutoDelete = true;
+                settings.Durable = false;
+            }
 
             configure?.Invoke(settings);
 
-            return settings.GetSendAddress(_hostAddress);
+            return settings.GetSendAddress(_hostConfiguration.HostAddress);
         }
 
-        public override string CreateTemporaryQueueName(string prefix)
+        public override bool TryGetPublishAddress<T>(out Uri publishAddress)
         {
-            var sb = new StringBuilder(prefix);
+            if (base.TryGetPublishAddress<T>(out publishAddress))
+            {
+                publishAddress = new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, publishAddress).TopicAddress;
+                return true;
+            }
 
-            var host = HostMetadataCache.Host;
+            return false;
+        }
 
-            foreach (var c in host.MachineName)
-                if (char.IsLetterOrDigit(c))
-                    sb.Append(c);
-                else if (c == '.' || c == '_' || c == '-' || c == ':')
-                    sb.Append(c);
+        public override bool TryGetPublishAddress(Type messageType, out Uri publishAddress)
+        {
+            if (base.TryGetPublishAddress(messageType, out publishAddress))
+            {
+                publishAddress = new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, publishAddress).TopicAddress;
+                return true;
+            }
 
-            sb.Append('-');
-            foreach (var c in host.ProcessName)
-                if (char.IsLetterOrDigit(c))
-                    sb.Append(c);
-                else if (c == '.' || c == '_' || c == '-' || c == ':')
-                    sb.Append(c);
-
-            sb.Append('-');
-            sb.Append(NewId.Next().ToString(Formatter));
-
-            return sb.ToString();
+            return false;
         }
     }
 }

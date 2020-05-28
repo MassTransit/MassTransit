@@ -103,7 +103,7 @@
             return _endpointObservers.Connect(observer);
         }
 
-        public Uri InputAddress { get; protected set; }
+        public Uri InputAddress { get; }
 
         public Task Dependencies { get; }
 

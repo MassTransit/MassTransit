@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit;
+    using MassTransit.Util;
 
 
     public class CancelRequestTimeoutActivity<TInstance, TData, TRequest, TResponse> :
@@ -42,24 +43,20 @@
             context.CreateScope("cancelRequest");
         }
 
-        async Task Execute(BehaviorContext<TInstance> context)
+        Task Execute(BehaviorContext<TInstance> context)
         {
             ConsumeContext consumeContext = context.CreateConsumeContext();
 
             Guid? requestId = _request.GetRequestId(context.Instance);
             if (requestId.HasValue && _request.Settings.Timeout > TimeSpan.Zero)
             {
-                if (_request.Settings.SchedulingServiceAddress != null)
-                {
-                    var scheduleEndpoint = await consumeContext.GetSendEndpoint(_request.Settings.SchedulingServiceAddress).ConfigureAwait(false);
+                if (consumeContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
+                    return schedulerContext.CancelScheduledSend(consumeContext.ReceiveContext.InputAddress, requestId.Value);
 
-                    await scheduleEndpoint.CancelScheduledSend(consumeContext.ReceiveContext.InputAddress,requestId.Value).ConfigureAwait(false);
-                }
-                else if (consumeContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
-                    await schedulerContext.CancelScheduledSend(consumeContext.ReceiveContext.InputAddress, requestId.Value).ConfigureAwait(false);
-                else
-                    throw new ConfigurationException("A scheduler was not available to cancel the scheduled request timeout");
+                throw new ConfigurationException("A scheduler was not available to cancel the scheduled request timeout");
             }
+
+            return TaskUtil.Completed;
         }
     }
 }

@@ -10,7 +10,6 @@ namespace MassTransit.RabbitMqTransport
     {
         /// <summary>
         /// Create a message scheduler that uses the RabbitMQ Delayed Exchange plug-in to schedule messages.
-        ///
         /// NOTE that this should only be used to schedule messages outside of a message consumer. Consumers should
         /// use the ScheduleSend extensions on ConsumeContext.
         /// </summary>
@@ -19,7 +18,7 @@ namespace MassTransit.RabbitMqTransport
         public static IMessageScheduler CreateRabbitMqMessageScheduler(this IBus bus)
         {
             if (bus.Topology is IRabbitMqHostTopology topology)
-                return new MessageScheduler(new DelayedExchangeScheduleMessageProvider(bus, topology));
+                return new MessageScheduler(new DelayedExchangeScheduleMessageProvider(bus, topology), topology);
 
             throw new ArgumentException("A RabbitMQ bus is required to use the RabbitMQ message scheduler");
         }

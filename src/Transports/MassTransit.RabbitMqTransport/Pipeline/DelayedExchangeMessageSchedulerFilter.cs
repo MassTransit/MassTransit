@@ -6,6 +6,7 @@
     using GreenPipes;
     using MassTransit.Scheduling;
     using Scheduling;
+    using Topology;
 
 
     public class DelayedExchangeMessageSchedulerFilter :
@@ -24,9 +25,11 @@
             {
                 IMessageScheduler Factory()
                 {
-                    var modelContext = context.ReceiveContext.GetPayload<ModelContext>();
+                    var hostTopology = context.GetPayload<IRabbitMqHostTopology>();
 
-                    return new MessageScheduler(new DelayedExchangeScheduleMessageProvider(context, modelContext.ConnectionContext.Topology));
+                    var provider = new DelayedExchangeScheduleMessageProvider(context, hostTopology);
+
+                    return new MessageScheduler(provider, hostTopology);
                 }
 
                 return new ConsumeMessageSchedulerContext(Factory, context.ReceiveContext.InputAddress);

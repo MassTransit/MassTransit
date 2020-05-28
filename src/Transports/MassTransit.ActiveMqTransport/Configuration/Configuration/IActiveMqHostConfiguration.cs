@@ -20,6 +20,8 @@
 
         IRetryPolicy ConnectionRetryPolicy { get; }
 
+        new IActiveMqHostTopology HostTopology { get; }
+
         /// <summary>
         /// Apply the endpoint definition to the receive endpoint configurator
         /// </summary>
@@ -45,7 +47,5 @@
         /// <returns></returns>
         IActiveMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
             IActiveMqEndpointConfiguration endpointConfiguration, Action<IActiveMqReceiveEndpointConfigurator> configure = null);
-
-        IActiveMqHostTopology GetHostTopology();
     }
 }

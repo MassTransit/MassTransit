@@ -17,7 +17,7 @@ namespace MassTransit.Azure.ServiceBus.Core
         /// <returns></returns>
         public static IMessageScheduler CreateServiceBusMessageScheduler(this IBus bus)
         {
-            return new MessageScheduler(new ServiceBusScheduleMessageProvider(bus));
+            return new MessageScheduler(new ServiceBusScheduleMessageProvider(bus), bus.Topology);
         }
     }
 }

@@ -44,7 +44,7 @@
         [Test]
         public async Task Should_get_both_messages()
         {
-            await Bus.ScheduleSend(InputQueueAddress, DateTime.Now, new FirstMessage());
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.Now, new FirstMessage());
 
             await _first;
 
@@ -87,7 +87,7 @@
         [Test]
         public async Task Should_include_it_with_the_final_message()
         {
-            await Bus.ScheduleSend(InputQueueAddress, DateTime.Now, new FirstMessage());
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.Now, new FirstMessage());
 
             await _first;
 

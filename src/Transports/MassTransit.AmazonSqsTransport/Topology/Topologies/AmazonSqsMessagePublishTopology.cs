@@ -2,7 +2,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 {
     using System;
     using System.Collections.Generic;
-    using AmazonSqsTransport.Configuration;
     using Builders;
     using Configurators;
     using Entities;
@@ -17,9 +16,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
         IAmazonSqsMessagePublishTopologyConfigurator<TMessage>
         where TMessage : class
     {
-        readonly TopicConfigurator _topic;
         readonly IList<IAmazonSqsMessagePublishTopology> _implementedMessageTypes;
         readonly IMessageTopology<TMessage> _messageTopology;
+        readonly TopicConfigurator _topic;
 
         public AmazonSqsMessagePublishTopology(IMessageTopology<TMessage> messageTopology)
         {
@@ -66,12 +65,12 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
         {
-            var topicHandle = builder.CreateTopic(_topic.EntityName, _topic.Durable, _topic.AutoDelete, _topic.TopicAttributes, _topic
-                .TopicSubscriptionAttributes, _topic.Tags);
+            var topicHandle = builder.CreateTopic(_topic.EntityName, _topic.Durable, _topic.AutoDelete, _topic.TopicAttributes,
+                _topic.TopicSubscriptionAttributes, _topic.Tags);
 
             builder.Topic ??= topicHandle;
 
-            foreach (IAmazonSqsMessagePublishTopology configurator in _implementedMessageTypes)
+            foreach (var configurator in _implementedMessageTypes)
                 configurator.Apply(builder);
         }
 
