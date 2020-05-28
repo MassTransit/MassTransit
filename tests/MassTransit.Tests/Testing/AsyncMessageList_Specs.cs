@@ -1,6 +1,7 @@
 namespace MassTransit.Tests.Testing
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using AsyncMessageListTestTypes;
     using Context;
@@ -104,6 +105,16 @@ namespace MassTransit.Tests.Testing
             });
 
             Assert.That(await messageList.Any<A>(), Is.True);
+        }
+
+        [Test]
+        public async Task Should_complete_when_cancelled()
+        {
+            using var token = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+
+            var messageList = new SentMessageList(TimeSpan.FromSeconds(10), token.Token);
+
+            Assert.That(await messageList.SelectAsync<A>().Count(), Is.EqualTo(0));
         }
 
         [Test]

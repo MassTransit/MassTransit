@@ -115,7 +115,7 @@
 
         public TestConsumeObserver GetConsumeObserver()
         {
-            return new TestConsumeObserver(TestTimeout);
+            return new TestConsumeObserver(TestTimeout, InactivityToken);
         }
     }
 }

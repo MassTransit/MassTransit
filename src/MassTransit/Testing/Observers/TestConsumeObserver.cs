@@ -1,6 +1,7 @@
 namespace MassTransit.Testing.Observers
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using MessageObservers;
     using Util;
@@ -11,9 +12,9 @@ namespace MassTransit.Testing.Observers
     {
         readonly ReceivedMessageList _messages;
 
-        public TestConsumeObserver(TimeSpan timeout)
+        public TestConsumeObserver(TimeSpan timeout, CancellationToken inactivityToken)
         {
-            _messages = new ReceivedMessageList(timeout);
+            _messages = new ReceivedMessageList(timeout, inactivityToken);
         }
 
         public IReceivedMessageList Messages => _messages;

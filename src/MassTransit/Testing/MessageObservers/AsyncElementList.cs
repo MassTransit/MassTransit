@@ -58,9 +58,9 @@ namespace MassTransit.Testing.MessageObservers
             if (cancellationToken.CanBeCanceled)
                 cancellationTokenRegistration = cancellationToken.Register(timeoutTokenSource.Cancel);
 
-            CancellationTokenRegistration timeoutTokenRegistration = default;
+            CancellationTokenRegistration testCompletedTokenRegistration = default;
             if (_testCompleted.CanBeCanceled)
-                timeoutTokenRegistration = _testCompleted.Register(timeoutTokenSource.Cancel);
+                testCompletedTokenRegistration = _testCompleted.Register(timeoutTokenSource.Cancel);
 
             try
             {
@@ -86,7 +86,7 @@ namespace MassTransit.Testing.MessageObservers
             finally
             {
                 cancellationTokenRegistration.Dispose();
-                timeoutTokenRegistration.Dispose();
+                testCompletedTokenRegistration.Dispose();
 
                 timeoutTokenSource.Dispose();
             }

@@ -24,9 +24,9 @@ namespace MassTransit.Testing
 
             TestTimeout = testHarness.TestTimeout;
 
-            _consumed = new ReceivedMessageList(testHarness.TestTimeout);
-            _created = new SagaList<TSaga>(testHarness.TestTimeout);
-            _sagas = new SagaList<TSaga>(testHarness.TestTimeout);
+            _consumed = new ReceivedMessageList(testHarness.TestTimeout, testHarness.InactivityToken);
+            _created = new SagaList<TSaga>(testHarness.TestTimeout, testHarness.InactivityToken);
+            _sagas = new SagaList<TSaga>(testHarness.TestTimeout, testHarness.InactivityToken);
 
             TestRepository = new TestSagaRepositoryDecorator<TSaga>(repository, _consumed, _created, _sagas);
 

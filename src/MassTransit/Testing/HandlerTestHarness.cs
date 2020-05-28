@@ -15,7 +15,7 @@ namespace MassTransit.Testing
         {
             _handler = handler;
 
-            _consumed = new ReceivedMessageList<TMessage>(testHarness.TestTimeout);
+            _consumed = new ReceivedMessageList<TMessage>(testHarness.TestTimeout, testHarness.InactivityToken);
 
             testHarness.OnConfigureReceiveEndpoint += ConfigureReceiveEndpoint;
         }

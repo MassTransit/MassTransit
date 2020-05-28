@@ -28,6 +28,8 @@ namespace MassTransit.Testing.Observers
 
         public Task NoActivity()
         {
+            Console.WriteLine("No Activity at {0}", DateTime.Now);
+
             _inactivityTaskSource.TrySetResult(true);
             _inactivityTokenSource.Cancel();
 
