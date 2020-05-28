@@ -46,5 +46,20 @@ namespace MassTransit.ActiveMqTransport.Configurators
             foreach (KeyValuePair<string, string> option in options)
                 _settings.TransportOptions[option.Key] = option.Value;
         }
+
+        public void EnableOptimizeAcknowledge()
+        {
+            _settings.TransportOptions["jms.optimizeAcknowledge"] = "true";
+        }
+
+        public void SetPrefetchPolicy(int limit)
+        {
+            _settings.TransportOptions["jms.prefetchPolicy.all"] = limit.ToString();
+        }
+
+        public void SetQueuePrefetchPolicy(int limit)
+        {
+            _settings.TransportOptions["jms.prefetchPolicy.queuePrefetch"] = limit.ToString();
+        }
     }
 }

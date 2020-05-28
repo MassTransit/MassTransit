@@ -11,6 +11,7 @@ namespace MassTransit.Util
     {
         readonly Channel<IFuture> _channel;
         readonly Task[] _runTasks;
+        readonly object _syncLock;
 
         public ChannelExecutor(int prefetchCount, int concurrencyLimit)
         {
@@ -25,6 +26,7 @@ namespace MassTransit.Util
             _channel = Channel.CreateBounded<IFuture>(channelOptions);
 
             _runTasks = new Task[concurrencyLimit];
+            _syncLock = new object();
 
             for (var i = 0; i < concurrencyLimit; i++)
                 _runTasks[i] = Task.Run(() => RunFromChannel());
@@ -42,6 +44,7 @@ namespace MassTransit.Util
             _channel = Channel.CreateUnbounded<IFuture>(channelOptions);
 
             _runTasks = new Task[concurrencyLimit];
+            _syncLock = new object();
 
             for (var i = 0; i < concurrencyLimit; i++)
                 _runTasks[i] = Task.Run(() => RunFromChannel());
@@ -52,6 +55,30 @@ namespace MassTransit.Util
             _channel.Writer.Complete();
 
             await Task.WhenAll(_runTasks).ConfigureAwait(false);
+        }
+
+        public void PushWithWait(Func<Task> method, CancellationToken cancellationToken = default)
+        {
+            async Task<bool> RunMethod()
+            {
+                await method().ConfigureAwait(false);
+
+                return true;
+            }
+
+            var future = new Future<bool>(() => RunMethod(), cancellationToken);
+
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                if (_channel.Writer.TryWrite(future))
+                    return;
+
+                lock (_syncLock)
+                    Monitor.Wait(_syncLock, 1000);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
         public async Task Push(Func<Task> method, CancellationToken cancellationToken = default)
@@ -117,10 +144,11 @@ namespace MassTransit.Util
                 if (_channel.Reader.TryRead(out var future))
                 {
                     var task = future.Run();
-                    if (task.IsCompleted)
-                        continue;
 
                     await task.ConfigureAwait(false);
+
+                    lock (_syncLock)
+                        Monitor.PulseAll(_syncLock);
                 }
             }
         }

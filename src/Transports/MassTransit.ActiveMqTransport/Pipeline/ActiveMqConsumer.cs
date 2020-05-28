@@ -18,7 +18,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     /// <summary>
     /// Receives messages from ActiveMQ, pushing them to the InboundPipe of the service endpoint.
     /// </summary>
-    public sealed class ActiveMqBasicConsumer :
+    public sealed class ActiveMqConsumer :
         Supervisor,
         DeliveryMetrics
     {
@@ -27,6 +27,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         readonly IMessageConsumer _messageConsumer;
         readonly ReceiveSettings _receiveSettings;
         readonly ActiveMqReceiveEndpointContext _context;
+        readonly ChannelExecutor _executor;
         readonly IReceivePipeDispatcher _dispatcher;
 
         /// <summary>
@@ -35,11 +36,13 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         /// <param name="session">The model context for the consumer</param>
         /// <param name="messageConsumer"></param>
         /// <param name="context">The topology</param>
-        public ActiveMqBasicConsumer(SessionContext session, IMessageConsumer messageConsumer, ActiveMqReceiveEndpointContext context)
+        /// <param name="executor"></param>
+        public ActiveMqConsumer(SessionContext session, IMessageConsumer messageConsumer, ActiveMqReceiveEndpointContext context, ChannelExecutor executor)
         {
             _session = session;
             _messageConsumer = messageConsumer;
             _context = context;
+            _executor = executor;
 
             _receiveSettings = session.GetPayload<ReceiveSettings>();
 
@@ -55,7 +58,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
         void HandleMessage(IMessage message)
         {
-            Task.Run(async () =>
+            _executor.PushWithWait(async () =>
             {
                 LogContext.Current = _context.LogContext;
 
@@ -79,7 +82,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 {
                     context.Dispose();
                 }
-            });
+            }, Stopping);
         }
 
         long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;

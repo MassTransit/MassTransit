@@ -111,11 +111,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         const string TestUsername = "masstransit-build";
         const string TestPassword = "build-Br0k3r";
 
-        readonly string[] FailoverHosts = new string[]
-        {
-
-        };
-
+        readonly string[] FailoverHosts = new string[] { };
 
         [Test, Category("SlowAF")]
         public async Task Should_succeed_and_connect_when_properly_configured()
@@ -266,9 +262,29 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             Assert.That(handler2.Consumed.Select().Any(), Is.True);
 
-            await harness.Stop().OrTimeout(s:5);
+            await harness.Stop().OrTimeout(s: 5);
 
             await harness.Stop();
+        }
+
+        [Test]
+        public async Task Should_connect_locally_with_test_harness_and_a_publisher_happy()
+        {
+            var harness = new ActiveMqTestHarness();
+            var handler = harness.Handler<PingMessage>();
+
+            await harness.Start();
+
+            for (int i = 0; i < 100; i++)
+            {
+                await harness.Bus.Publish(new PingMessage());
+            }
+
+            var count = await handler.Consumed.SelectAsync().Count();
+
+            Assert.That(count, Is.EqualTo(100));
+
+            await harness.Stop().OrTimeout(s: 5);
         }
 
         [Test]
@@ -304,14 +320,11 @@ namespace MassTransit.ActiveMqTransport.Tests
             var settings = new ConfigurationHostSettings(new Uri("activemq://fake-host"))
             {
                 Port = 61616,
-                FailoverHosts = new []
-                {
-                    "failover1",
-                    "failover2"
-                }
+                FailoverHosts = new[] {"failover1", "failover2"}
             };
 
-            Assert.That(settings.BrokerAddress, Is.EqualTo(new Uri("activemq:failover:(tcp://failover1:61616/,tcp://failover2:61616/)")));
+            Assert.That(settings.BrokerAddress, Is.EqualTo(new Uri(
+                "activemq:failover:(tcp://failover1:61616/,tcp://failover2:61616/)?wireFormat.tightEncodingEnabled=true&nms.AsyncSend=true")));
         }
 
         [Test, Category("SlowAF")]
@@ -330,10 +343,7 @@ namespace MassTransit.ActiveMqTransport.Tests
                     h.Username(TestUsername);
                     h.Password(TestPassword);
                     h.FailoverHosts(FailoverHosts);
-                    h.TransportOptions(new Dictionary<string, string>()
-                    {
-                        { "transport.randomize", "true" }
-                    });
+                    h.TransportOptions(new Dictionary<string, string>() {{"transport.randomize", "true"}});
 
                     h.UseSsl();
                 });
