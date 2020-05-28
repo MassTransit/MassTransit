@@ -25,7 +25,7 @@
 
         IInMemoryTransportProvider TransportProvider { get; }
 
-        IInMemoryHostTopology HostTopology { get; }
+        new IInMemoryHostTopology HostTopology { get; }
 
         void ApplyEndpointDefinition(IInMemoryReceiveEndpointConfigurator configurator, IEndpointDefinition definition);
 

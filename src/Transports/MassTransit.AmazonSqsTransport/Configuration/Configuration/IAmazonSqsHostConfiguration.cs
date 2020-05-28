@@ -18,6 +18,8 @@
 
         IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
+        new IAmazonSqsHostTopology HostTopology { get; }
+
         /// <summary>
         /// Apply the endpoint definition to the receive endpoint configurator
         /// </summary>
@@ -41,7 +43,5 @@
         /// <returns></returns>
         IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
             IAmazonSqsEndpointConfiguration endpointConfiguration, Action<IAmazonSqsReceiveEndpointConfigurator> configure = null);
-
-        IAmazonSqsHostTopology HostTopology { get; }
     }
 }

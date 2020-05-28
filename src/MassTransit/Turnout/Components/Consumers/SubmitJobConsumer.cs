@@ -11,7 +11,7 @@ namespace MassTransit.Turnout.Components.Consumers
 
 
     /// <summary>
-    /// Handles the <see cref="SubmitJob{TJob}"/> command, as well as a regular <typeparamref name="{T}"/>.
+    /// Handles the <see cref="SubmitJob{TJob}"/> command
     /// </summary>
     /// <typeparam name="TJob">The job type</typeparam>
     public class SubmitJobConsumer<TJob> :

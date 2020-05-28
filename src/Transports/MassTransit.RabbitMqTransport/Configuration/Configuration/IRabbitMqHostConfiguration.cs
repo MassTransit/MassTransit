@@ -17,17 +17,17 @@ namespace MassTransit.RabbitMqTransport.Configuration
         RabbitMqHostSettings Settings { get; set; }
 
         /// <summary>
-        ///     True if the broker is confirming published messages
+        /// True if the broker is confirming published messages
         /// </summary>
         bool PublisherConfirmation { get; }
 
         BatchSettings BatchSettings { get; }
         IRetryPolicy ConnectionRetryPolicy { get; }
 
-        IRabbitMqHostTopology HostTopology { get; }
+        new IRabbitMqHostTopology HostTopology { get; }
 
         /// <summary>
-        ///     Apply the endpoint definition to the receive endpoint configurator
+        /// Apply the endpoint definition to the receive endpoint configurator
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="definition"></param>
