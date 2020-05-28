@@ -17,14 +17,10 @@ namespace MassTransit.ActiveMqTransport.Configurators
             var hostAddress = new ActiveMqHostAddress(address);
 
             Host = hostAddress.Host;
+            Port = hostAddress.Port ?? 61616;
+
             Username = "";
             Password = "";
-            TransportOptions = new Dictionary<string, string>
-            {
-                {"wireFormat.tightEncodingEnabled", "true"},
-                {"nms.AsyncSend", "true"}
-            };
-            Port = hostAddress.Port ?? 61616;
 
             if (!string.IsNullOrEmpty(address.UserInfo))
             {
@@ -35,14 +31,20 @@ namespace MassTransit.ActiveMqTransport.Configurators
                     Password = parts[1];
             }
 
+            TransportOptions = new Dictionary<string, string>
+            {
+                {"wireFormat.tightEncodingEnabled", "true"},
+                {"nms.AsyncSend", "true"}
+            };
+
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
             _brokerAddress = new Lazy<Uri>(FormatBrokerAddress);
         }
 
         public string[] FailoverHosts { get; set; }
-        public Dictionary<string, string> TransportOptions { get; set; }
+        public Dictionary<string, string> TransportOptions { get; }
 
-        public string Host { get; set; }
+        public string Host { get; }
         public int Port { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
@@ -79,10 +81,8 @@ namespace MassTransit.ActiveMqTransport.Configurators
                         }.Uri.ToString()
                     ));
 
-
                 return new Uri($"activemq:failover:({failoverPart}){queryPart}");
             }
-
 
             var uri = new Uri($"activemq:{scheme}://{Host}:{Port}{queryPart}");
             return uri;
@@ -90,16 +90,12 @@ namespace MassTransit.ActiveMqTransport.Configurators
 
         string GetQueryString()
         {
-            var queryPart = string.Empty;
-            if (TransportOptions?.Count > 0)
-            {
-                var queryString = string.Join("&", TransportOptions
-                    .Select(pair => $"{pair.Key}={pair.Value}"));
+            if (TransportOptions.Count == 0)
+                return "";
 
-                queryString = $"?{queryString}";
-            }
+            var queryString = string.Join("&", TransportOptions.Select(pair => $"{pair.Key}={pair.Value}"));
 
-            return queryPart;
+            return $"?{queryString}";
         }
 
         public override string ToString()
