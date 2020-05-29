@@ -20,7 +20,22 @@ namespace MassTransit.Tests.MessageData
             Task<ConsumeContext<ReceiveFault>> receiveFault = ConnectPublishHandler<ReceiveFault>();
             Task<ConsumeContext<Fault<Documents>>> fault = ConnectPublishHandler<Fault<Documents>>();
 
-            await InputQueueSendEndpoint.Send<Documents>(new {Bodies = new[] {new {Body = firstBody}, new {Body = secondBody}}});
+            await InputQueueSendEndpoint.Send<Documents>(new
+            {
+                Bodies = new[]
+                {
+                    new
+                    {
+                        FileName = "first.txt",
+                        Body = firstBody
+                    },
+                    new
+                    {
+                        FileName = "second.txt",
+                        Body = secondBody
+                    }
+                }
+            });
 
             await Task.WhenAny(receiveFault, fault, _handled.Task);
 
@@ -63,6 +78,8 @@ namespace MassTransit.Tests.MessageData
                 Assert.That(bodyValue, Is.Not.Null);
                 Assert.That(bodyValue.Length, Is.EqualTo(10000));
 
+                Assert.That(context.Message.Bodies[0].FileName, Is.Not.Null);
+                Assert.That(context.Message.Bodies[0].FileName, Is.EqualTo("first.txt"));
 
                 _handled.SetResult(context);
             });
@@ -77,6 +94,7 @@ namespace MassTransit.Tests.MessageData
 
         public interface Document
         {
+            string FileName { get; }
             MessageData<byte[]> Body { get; }
         }
     }
