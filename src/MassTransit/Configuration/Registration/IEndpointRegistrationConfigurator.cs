@@ -16,8 +16,8 @@ namespace MassTransit.Registration
         bool Temporary { set; }
 
         /// <summary>
-        /// Only specify when required, use <see cref="ConcurrentMessageLimit"/> first and
-        /// only specific a <see cref="PrefetchCount"/> when the default is not appropriate
+        /// Only specify when required, use <see cref="ConcurrentMessageLimit" /> first and
+        /// only specific a <see cref="PrefetchCount" /> when the default is not appropriate
         /// </summary>
         int? PrefetchCount { set; }
 
@@ -30,7 +30,7 @@ namespace MassTransit.Registration
         /// <summary>
         /// Defaults to true, which connects topics/exchanges/etc. to the endpoint queue at the broker.
         /// If set to false, no broker topology is configured (automatically set to false for courier
-        /// activities since <see cref="RoutingSlip"/> should never be published).
+        /// activities since <see cref="RoutingSlip" /> should never be published).
         /// </summary>
         bool ConfigureConsumeTopology { set; }
     }

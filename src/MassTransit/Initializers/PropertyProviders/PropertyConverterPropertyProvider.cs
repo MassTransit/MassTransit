@@ -31,7 +31,7 @@ namespace MassTransit.Initializers.PropertyProviders
             if (!context.HasInput)
                 return TaskUtil.Default<TProperty>();
 
-            var inputTask = _inputProvider.GetProperty(context);
+            Task<TInputProperty> inputTask = _inputProvider.GetProperty(context);
             if (inputTask.IsCompleted)
                 return _converter.Convert(context, inputTask.Result);
 

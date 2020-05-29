@@ -25,7 +25,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             var consumeContext = await ConsumeContext;
 
-            Assert.That(consumeContext.TryGetPayload<MessageConsumeContext<PingMessage>>(out MessageConsumeContext<PingMessage> messageConsumeContext),
+            Assert.That(consumeContext.TryGetPayload(out MessageConsumeContext<PingMessage> messageConsumeContext),
                 "Is MessageConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
@@ -74,7 +74,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             var consumeContext = await ConsumeContext;
 
             Assert.That(
-                consumeContext.TryGetPayload<InMemoryOutboxConsumeContext<PingMessage>>(out InMemoryOutboxConsumeContext<PingMessage> outboxConsumeContext),
+                consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<PingMessage> outboxConsumeContext),
                 "Is ConsumerConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
@@ -129,7 +129,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             var consumeContext = await ConsumeContext;
 
             Assert.That(
-                consumeContext.TryGetPayload<InMemoryOutboxConsumeContext<PingMessage>>(out InMemoryOutboxConsumeContext<PingMessage> outboxConsumeContext),
+                consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<PingMessage> outboxConsumeContext),
                 "Is ConsumerConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;

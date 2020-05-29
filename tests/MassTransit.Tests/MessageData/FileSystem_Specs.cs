@@ -11,32 +11,32 @@
     [TestFixture]
     public class Storing_message_data_on_the_file_system
     {
-        IMessageDataRepository _repository;
-
         [Test]
         public async Task Should_generate_the_folder_and_file()
         {
-            var property = await _repository.PutString(new string('8', 10000));
+            MessageData<string> property = await _repository.PutString(new string('8', 10000));
 
             Console.WriteLine(property.Address);
 
-            Console.WriteLine("Path: {0}", Path.Combine(property.Address.Segments.SelectMany(x => x.Split(new []{':'})).ToArray()));
+            Console.WriteLine("Path: {0}", Path.Combine(property.Address.Segments.SelectMany(x => x.Split(new[] {':'})).ToArray()));
         }
 
         [Test]
         public async Task Should_generate_time_based_folder()
         {
-            var property = await _repository.PutString(new string('8', 10000), TimeSpan.FromDays(30));
+            MessageData<string> property = await _repository.PutString(new string('8', 10000), TimeSpan.FromDays(30));
 
-            var loaded = await _repository.GetString(property.Address);
+            MessageData<string> loaded = await _repository.GetString(property.Address);
 
             Console.WriteLine(await loaded.Value);
         }
 
+        IMessageDataRepository _repository;
+
         [OneTimeSetUp]
         public void Setup()
         {
-            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
             var messageDataPath = Path.Combine(baseDirectory, "MessageData");
 
             var dataDirectory = new DirectoryInfo(messageDataPath);

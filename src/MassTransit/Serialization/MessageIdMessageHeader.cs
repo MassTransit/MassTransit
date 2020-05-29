@@ -47,9 +47,11 @@ namespace MassTransit.Serialization
             where T : struct
         {
             if (key.Equals(nameof(MessageContext.MessageId)))
+            {
                 return _messageId is T result
                     ? result
                     : default;
+            }
 
             return defaultValue;
         }

@@ -50,13 +50,17 @@ namespace MassTransit.Topology.Topologies
             var sb = new StringBuilder(host.MachineName.Length + host.ProcessName.Length + tag.Length + 35);
 
             foreach (var c in host.MachineName)
+            {
                 if (char.IsLetterOrDigit(c) || c == '_')
                     sb.Append(c);
+            }
 
             sb.Append('_');
             foreach (var c in host.ProcessName)
+            {
                 if (char.IsLetterOrDigit(c) || c == '_')
                     sb.Append(c);
+            }
 
             sb.Append('_');
             sb.Append(tag);
@@ -86,9 +90,7 @@ namespace MassTransit.Topology.Topologies
                 _conventions.Add(convention);
 
                 foreach (var messageConsumeTopologyConfigurator in _messageTypes.Values)
-                {
                     messageConsumeTopologyConfigurator.TryAddConvention(convention);
-                }
 
                 return true;
             }
@@ -121,9 +123,7 @@ namespace MassTransit.Topology.Topologies
         {
             IMessageConsumeTopologyConfigurator[] configurators;
             lock (_lock)
-            {
                 configurators = _messageTypes.Values.ToArray();
-            }
 
             if (configurators.Length == 0)
                 return true;
@@ -139,9 +139,7 @@ namespace MassTransit.Topology.Topologies
         {
             IMessageConsumeTopologyConfigurator[] configurators;
             lock (_lock)
-            {
                 configurators = _messageTypes.Values.ToArray();
-            }
 
             if (configurators.Length == 0)
                 return Enumerable.Empty<TResult>();
@@ -157,9 +155,7 @@ namespace MassTransit.Topology.Topologies
         {
             IMessageConsumeTopologyConfigurator[] configurators;
             lock (_lock)
-            {
                 configurators = _messageTypes.Values.ToArray();
-            }
 
             switch (configurators.Length)
             {
@@ -196,13 +192,13 @@ namespace MassTransit.Topology.Topologies
         {
             IMessageConsumeTopologyConvention[] conventions;
             lock (_lock)
-            {
                 conventions = _conventions.ToArray();
-            }
 
             foreach (var convention in conventions)
+            {
                 if (convention.TryGetMessageConsumeTopologyConvention(out IMessageConsumeTopologyConvention<T> messageConsumeTopologyConvention))
                     messageTopology.TryAddConvention(messageConsumeTopologyConvention);
+            }
         }
     }
 }

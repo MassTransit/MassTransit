@@ -9,11 +9,13 @@ namespace MassTransit.KafkaIntegration
     public static class KafkaConfiguratorExtensions
     {
         /// <summary>
-        ///     Subscribe to kafka topic
+        /// Subscribe to kafka topic
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="topic">Topic name</param>
-        /// <param name="groupId">Client group id string. All clients sharing the same group.id belong to the same group.</param>
+        /// <param name="groupId">
+        /// Client group id string. All clients sharing the same group.id belong to the same group.
+        /// </param>
         /// <param name="configure"></param>
         /// <typeparam name="TKey">Message key type</typeparam>
         /// <typeparam name="TValue">Value key type</typeparam>
@@ -27,7 +29,7 @@ namespace MassTransit.KafkaIntegration
         }
 
         /// <summary>
-        ///     Subscribe to kafka topic
+        /// Subscribe to kafka topic
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="topic">Topic name</param>
@@ -45,7 +47,7 @@ namespace MassTransit.KafkaIntegration
         }
 
         /// <summary>
-        ///     Configure Kafka host
+        /// Configure Kafka host
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="server"></param>

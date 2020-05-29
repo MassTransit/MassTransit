@@ -16,8 +16,8 @@
         readonly IConsumerFactory<TConsumer> _consumerFactory;
         readonly IPipe<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> _consumerPipe;
         readonly int _messageLimit;
-        readonly TimeSpan _timeLimit;
         readonly TaskScheduler _scheduler;
+        readonly TimeSpan _timeLimit;
         BatchConsumer<TConsumer, TMessage> _currentConsumer;
 
         public BatchConsumerFactory(IConsumerFactory<TConsumer> consumerFactory, int messageLimit, TimeSpan timeLimit,
@@ -37,10 +37,22 @@
             if (messageContext == null)
                 throw new MessageException(typeof(T), $"Expected batch message type: {TypeMetadataCache<TMessage>.ShortName}");
 
-            var consumer = await Task.Factory.StartNew(() => Add(messageContext), context.CancellationToken, TaskCreationOptions.None, _scheduler)
+            BatchConsumer<TConsumer, TMessage> consumer = await Task.Factory
+                .StartNew(() => Add(messageContext), context.CancellationToken, TaskCreationOptions.None, _scheduler)
                 .ConfigureAwait(false);
 
             await next.Send(new ConsumerConsumeContextScope<BatchConsumer<TConsumer, TMessage>, T>(context, consumer)).ConfigureAwait(false);
+        }
+
+        void IProbeSite.Probe(ProbeContext context)
+        {
+            var scope = context.CreateConsumerFactoryScope<IConsumer<TMessage>>("batch");
+
+            scope.Add("timeLimit", _timeLimit);
+            scope.Add("messageLimit", _messageLimit);
+
+            _consumerFactory.Probe(scope);
+            _consumerPipe.Probe(scope);
         }
 
         BatchConsumer<TConsumer, TMessage> Add(ConsumeContext<TMessage> context)
@@ -59,17 +71,6 @@
             BatchConsumer<TConsumer, TMessage> consumer = _currentConsumer;
 
             return consumer;
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-            var scope = context.CreateConsumerFactoryScope<IConsumer<TMessage>>("batch");
-
-            scope.Add("timeLimit", _timeLimit);
-            scope.Add("messageLimit", _messageLimit);
-
-            _consumerFactory.Probe(scope);
-            _consumerPipe.Probe(scope);
         }
     }
 }

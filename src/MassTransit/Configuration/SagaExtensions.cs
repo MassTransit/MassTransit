@@ -58,9 +58,7 @@
 
             ISagaSpecification<T> specification = SagaConnectorCache<T>.Connector.CreateSagaSpecification<T>();
             foreach (IPipeSpecification<SagaConsumeContext<T>> pipeSpecification in pipeSpecifications)
-            {
                 specification.AddPipeSpecification(pipeSpecification);
-            }
 
             return SagaConnectorCache<T>.Connector.ConnectSaga(connector, sagaRepository, specification);
         }

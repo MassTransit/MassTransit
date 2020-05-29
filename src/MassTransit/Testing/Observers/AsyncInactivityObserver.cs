@@ -10,8 +10,8 @@ namespace MassTransit.Testing.Observers
     public class AsyncInactivityObserver :
         IInactivityObserver
     {
-        readonly TaskCompletionSource<bool> _inactivityTaskSource;
         readonly Lazy<Task> _inactivityTask;
+        readonly TaskCompletionSource<bool> _inactivityTaskSource;
         readonly CancellationTokenSource _inactivityTokenSource;
 
         public AsyncInactivityObserver(TimeSpan timeout, CancellationToken cancellationToken)

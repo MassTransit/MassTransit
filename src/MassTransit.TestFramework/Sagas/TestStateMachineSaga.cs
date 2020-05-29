@@ -18,7 +18,11 @@ namespace MassTransit.TestFramework.Sagas
 
             During(Active,
                 When(Updated)
-                    .Publish(context => new TestUpdated {CorrelationId = context.Instance.CorrelationId, TestKey = context.Instance.Key})
+                    .Publish(context => new TestUpdated
+                    {
+                        CorrelationId = context.Instance.CorrelationId,
+                        TestKey = context.Instance.Key
+                    })
                     .TransitionTo(Done)
                     .Finalize());
 

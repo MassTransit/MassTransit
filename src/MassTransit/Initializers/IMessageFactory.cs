@@ -10,6 +10,7 @@
         InitializeContext<TMessage> Create(InitializeContext context);
     }
 
+
     /// <summary>
     /// Creates the message type
     /// </summary>

@@ -11,9 +11,9 @@ namespace MassTransit.Initializers.PropertyProviders
         where TInput : class
         where TProperty : class
     {
+        readonly ConcurrentDictionary<Type, Converter> _converters;
         readonly IPropertyProviderFactory<TInput> _factory;
         readonly IPropertyProvider<TInput, object> _provider;
-        readonly ConcurrentDictionary<Type, Converter> _converters;
 
         public ObjectPropertyProvider(IPropertyProviderFactory<TInput> factory, IPropertyProvider<TInput, object> provider)
         {
@@ -26,7 +26,7 @@ namespace MassTransit.Initializers.PropertyProviders
         public Task<TProperty> GetProperty<T>(InitializeContext<T, TInput> context)
             where T : class
         {
-            var propertyTask = _provider.GetProperty(context);
+            Task<object> propertyTask = _provider.GetProperty(context);
             if (propertyTask.IsCompleted)
             {
                 var propertyValue = propertyTask.Result;

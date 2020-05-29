@@ -70,7 +70,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             var topicInfo = await _topicCache.Get(topic, _cancellationToken).ConfigureAwait(false);
             var queueInfo = await _queueCache.Get(queue, _cancellationToken).ConfigureAwait(false);
 
-            var subscriptionAttributes = topic.TopicSubscriptionAttributes.Select(x => (x.Key, x.Value.ToString()))
+            Dictionary<string, string> subscriptionAttributes = topic.TopicSubscriptionAttributes.Select(x => (x.Key, x.Value.ToString()))
                 .Concat(queue.QueueSubscriptionAttributes.Select(x => (x.Key, x.Value.ToString())))
                 .ToDictionary(x => x.Item1, x => x.Item2);
 
@@ -179,18 +179,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             response.EnsureSuccessfulResponse();
         }
 
-        static bool QueueHasTopicPermission(Policy policy, string topicArnPattern, string sqsQueueArn)
-        {
-            IEnumerable<Condition> conditions = policy.Statements
-                .Where(s => s.Resources.Any(r => r.Id.Equals(sqsQueueArn)))
-                .SelectMany(s => s.Conditions);
-
-            return conditions.Any(c =>
-                string.Equals(c.Type, ConditionFactory.ArnComparisonType.ArnLike.ToString(), StringComparison.OrdinalIgnoreCase) &&
-                string.Equals(c.ConditionKey, ConditionFactory.SOURCE_ARN_CONDITION_KEY, StringComparison.OrdinalIgnoreCase) &&
-                c.Values.Contains(topicArnPattern));
-        }
-
         public async Task<IList<Message>> ReceiveMessages(string queueName, int messageLimit, int waitTime, CancellationToken cancellationToken)
         {
             var queueInfo = await _queueCache.GetByName(queueName).ConfigureAwait(false);
@@ -208,6 +196,18 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             response.EnsureSuccessfulResponse();
 
             return response.Messages;
+        }
+
+        static bool QueueHasTopicPermission(Policy policy, string topicArnPattern, string sqsQueueArn)
+        {
+            IEnumerable<Condition> conditions = policy.Statements
+                .Where(s => s.Resources.Any(r => r.Id.Equals(sqsQueueArn)))
+                .SelectMany(s => s.Conditions);
+
+            return conditions.Any(c =>
+                string.Equals(c.Type, ConditionFactory.ArnComparisonType.ArnLike.ToString(), StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(c.ConditionKey, ConditionFactory.SOURCE_ARN_CONDITION_KEY, StringComparison.OrdinalIgnoreCase) &&
+                c.Values.Contains(topicArnPattern));
         }
     }
 }

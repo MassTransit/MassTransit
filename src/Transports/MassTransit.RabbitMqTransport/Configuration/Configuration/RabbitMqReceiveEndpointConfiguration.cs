@@ -12,6 +12,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using MassTransit.Pipeline.Filters;
     using MassTransit.Pipeline.Pipes;
     using Pipeline;
+    using RabbitMQ.Client;
     using Topology;
     using Topology.Settings;
     using Transport;
@@ -26,10 +27,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
     {
         readonly IBuildPipeConfigurator<ConnectionContext> _connectionConfigurator;
         readonly IRabbitMqEndpointConfiguration _endpointConfiguration;
+        readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly Lazy<Uri> _inputAddress;
         readonly IManagementPipe _managementPipe;
         readonly IBuildPipeConfigurator<ModelContext> _modelConfigurator;
-        readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly RabbitMqReceiveSettings _settings;
 
         public RabbitMqReceiveEndpointConfiguration(IRabbitMqHostConfiguration hostConfiguration, RabbitMqReceiveSettings settings,
@@ -108,6 +109,20 @@ namespace MassTransit.RabbitMqTransport.Configuration
             ReceiveEndpoint = receiveEndpoint;
         }
 
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            var queueName = $"{_settings.QueueName}";
+
+            if (!RabbitMqEntityNameValidator.Validator.IsValidEntityName(_settings.QueueName))
+                yield return this.Failure(queueName, "must be a valid queue name");
+
+            if (_settings.PurgeOnStartup)
+                yield return this.Warning(queueName, "Existing messages in the queue will be purged on service start");
+
+            foreach (var result in base.Validate())
+                yield return result.WithParentKey(queueName);
+        }
+
         public bool Durable
         {
             set
@@ -180,7 +195,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public string DeadLetterExchange
         {
-            set => SetQueueArgument(RabbitMQ.Client.Headers.XDeadLetterExchange, value);
+            set => SetQueueArgument(Headers.XDeadLetterExchange, value);
         }
 
         public void SetQueueArgument(string key, object value)
@@ -253,20 +268,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
         protected override bool IsAlreadyConfigured()
         {
             return _inputAddress.IsValueCreated || base.IsAlreadyConfigured();
-        }
-
-        public override IEnumerable<ValidationResult> Validate()
-        {
-            var queueName = $"{_settings.QueueName}";
-
-            if (!RabbitMqEntityNameValidator.Validator.IsValidEntityName(_settings.QueueName))
-                yield return this.Failure(queueName, "must be a valid queue name");
-
-            if (_settings.PurgeOnStartup)
-                yield return this.Warning(queueName, "Existing messages in the queue will be purged on service start");
-
-            foreach (var result in base.Validate())
-                yield return result.WithParentKey(queueName);
         }
     }
 }

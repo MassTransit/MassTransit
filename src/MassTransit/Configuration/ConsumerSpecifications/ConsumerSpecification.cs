@@ -14,8 +14,8 @@ namespace MassTransit.ConsumerSpecifications
     {
         readonly ConnectHandle[] _handles;
         readonly IReadOnlyDictionary<Type, IConsumerMessageSpecification<TConsumer>> _messageTypes;
-        readonly OptionsSet _optionsSet;
         readonly ConsumerConfigurationObservable _observers;
+        readonly OptionsSet _optionsSet;
 
         public ConsumerSpecification(IEnumerable<IConsumerMessageSpecification<TConsumer>> messageSpecifications)
         {
@@ -74,9 +74,7 @@ namespace MassTransit.ConsumerSpecifications
         public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer>> specification)
         {
             foreach (IConsumerMessageSpecification<TConsumer> messageSpecification in _messageTypes.Values)
-            {
                 messageSpecification.AddPipeSpecification(specification);
-            }
         }
 
         public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)

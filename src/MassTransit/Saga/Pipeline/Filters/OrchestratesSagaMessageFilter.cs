@@ -26,7 +26,7 @@
 
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
-            var activity = LogContext.IfEnabled(OperationName.Saga.Orchestrate)?.StartSagaActivity(context);
+            StartedActivity? activity = LogContext.IfEnabled(OperationName.Saga.Orchestrate)?.StartSagaActivity(context);
             try
             {
                 await context.Saga.Consume(context).ConfigureAwait(false);

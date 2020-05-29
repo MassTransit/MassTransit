@@ -32,7 +32,7 @@ namespace MassTransit.Internals.Reflection
             if (!TypeMetadataCache.IsValidMessageType(contractType))
                 throw new ArgumentException(nameof(contractType));
 
-            Type[] parameterTypes = new Type[0];
+            var parameterTypes = new Type[0];
             if (contractType.GetConstructor(parameterTypes) == null)
                 throw new ArgumentException("No default constructor available for message type", nameof(contractType));
 
@@ -61,56 +61,31 @@ namespace MassTransit.Internals.Reflection
                 _contracts = GetContracts();
         }
 
-        Contract[] IContractCache<TMessage>.Contracts =>
-            _contracts ?? throw new ArgumentException(TypeMetadataCache<TMessage>.InvalidMessageTypeReason, nameof(TMessage));
-
         public static Contract[] Contracts => Cached.Instance.Value.Contracts;
 
         public static IMessageFactory<TMessage> Factory => Cached.MessageFactory.Value;
+
+        Contract[] IContractCache<TMessage>.Contracts =>
+            _contracts ?? throw new ArgumentException(TypeMetadataCache<TMessage>.InvalidMessageTypeReason, nameof(TMessage));
 
         public static TMessage CreateMessage()
         {
             return Cached.MessageFactory.Value.Create(new BaseInitializeContext(CancellationToken.None)).Message;
         }
 
-
-        static class Cached
-        {
-            internal static readonly Lazy<IMessageFactory<TMessage>> MessageFactory = new Lazy<IMessageFactory<TMessage>>(CreateMessageFactory);
-
-            static IMessageFactory<TMessage> CreateMessageFactory()
-            {
-                if (!TypeMetadataCache<TMessage>.IsValidMessageType)
-                    throw new ArgumentException(TypeMetadataCache<TMessage>.InvalidMessageTypeReason, nameof(TMessage));
-
-                var messageType = typeof(TMessage);
-
-                Type[] parameterTypes = new Type[0];
-                if (messageType.GetConstructor(parameterTypes) == null)
-                    throw new ArgumentException("No default constructor available for message type", nameof(TMessage));
-
-                return (IMessageFactory<TMessage>)Activator.CreateInstance(typeof(DynamicMessageFactory<>).MakeGenericType(messageType));
-            }
-
-            internal static readonly Lazy<IContractCache<TMessage>> Instance = new Lazy<IContractCache<TMessage>>(() => new ContractCache<TMessage>());
-        }
-
-
         Contract[] GetContracts()
         {
             var contractName = _contractType.ToString();
 
-            DependencyGraph<string> graph = new DependencyGraph<string>(1);
+            var graph = new DependencyGraph<string>(1);
             graph.Add(contractName);
 
-            List<Property> propertyList = new List<Property>();
+            var propertyList = new List<Property>();
 
             foreach (var property in TypeMetadataCache<TMessage>.Properties)
             {
                 if (property.PropertyType.IsValueTypeOrObject())
-                {
                     propertyList.Add(new Property(property.Name, property.PropertyType));
-                }
                 else if (TypeMetadataCache.IsValidMessageType(property.PropertyType))
                 {
                 }
@@ -119,6 +94,28 @@ namespace MassTransit.Internals.Reflection
             var contract = new Contract(contractName, propertyList.ToArray());
 
             return new[] {contract};
+        }
+
+
+        static class Cached
+        {
+            internal static readonly Lazy<IMessageFactory<TMessage>> MessageFactory = new Lazy<IMessageFactory<TMessage>>(CreateMessageFactory);
+
+            internal static readonly Lazy<IContractCache<TMessage>> Instance = new Lazy<IContractCache<TMessage>>(() => new ContractCache<TMessage>());
+
+            static IMessageFactory<TMessage> CreateMessageFactory()
+            {
+                if (!TypeMetadataCache<TMessage>.IsValidMessageType)
+                    throw new ArgumentException(TypeMetadataCache<TMessage>.InvalidMessageTypeReason, nameof(TMessage));
+
+                var messageType = typeof(TMessage);
+
+                var parameterTypes = new Type[0];
+                if (messageType.GetConstructor(parameterTypes) == null)
+                    throw new ArgumentException("No default constructor available for message type", nameof(TMessage));
+
+                return (IMessageFactory<TMessage>)Activator.CreateInstance(typeof(DynamicMessageFactory<>).MakeGenericType(messageType));
+            }
         }
     }
 }

@@ -4,7 +4,6 @@ namespace MassTransit.Tests.Conductor
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using Contracts;
     using Contracts.Conductor;
     using Definition;
     using GreenPipes;
@@ -24,7 +23,7 @@ namespace MassTransit.Tests.Conductor
         [Test]
         public async Task Should_publish_up_when_started()
         {
-            var result = await _upHandled;
+            ConsumeContext<Up<DeployPayload>> result = await _upHandled;
 
             Assert.That(result.Message.Service.ServiceAddress.AbsolutePath.Trim('/'), Is.EqualTo(_serviceEndpointName));
 
@@ -34,9 +33,9 @@ namespace MassTransit.Tests.Conductor
         [Test]
         public async Task Should_find_the_service()
         {
-            var upHandler = SubscribeHandler<Up<DeployPayload>>();
+            Task<ConsumeContext<Up<DeployPayload>>> upHandler = SubscribeHandler<Up<DeployPayload>>();
 
-            Guid clientId = NewId.NextGuid();
+            var clientId = NewId.NextGuid();
 
             await Bus.Publish<Link<DeployPayload>>(new
             {
@@ -44,7 +43,7 @@ namespace MassTransit.Tests.Conductor
                 ClientId = clientId
             });
 
-            var response = await upHandler;
+            ConsumeContext<Up<DeployPayload>> response = await upHandler;
 
             Assert.That(response.Message.Service.ServiceAddress.AbsolutePath.Trim('/'), Is.EqualTo(_serviceEndpointName));
         }
@@ -52,9 +51,9 @@ namespace MassTransit.Tests.Conductor
         [Test]
         public async Task Should_find_and_invoke_the_service()
         {
-            var upHandler = SubscribeHandler<Up<DeployPayload>>();
+            Task<ConsumeContext<Up<DeployPayload>>> upHandler = SubscribeHandler<Up<DeployPayload>>();
 
-            Guid clientId = NewId.NextGuid();
+            var clientId = NewId.NextGuid();
 
             await Bus.Publish<Link<DeployPayload>>(new
             {
@@ -63,28 +62,26 @@ namespace MassTransit.Tests.Conductor
                 ClientId = clientId
             });
 
-            var upContext = await upHandler;
+            ConsumeContext<Up<DeployPayload>> upContext = await upHandler;
 
-            var client = Bus.CreateRequestClient<DeployPayload>(upContext.Message.Service.ServiceAddress);
+            IRequestClient<DeployPayload> client = Bus.CreateRequestClient<DeployPayload>(upContext.Message.Service.ServiceAddress);
 
-            var request = client.Create(new
-            {
-                Target = "Bogey",
-            });
+            RequestHandle<DeployPayload> request = client.Create(new {Target = "Bogey"});
 
             request.UseExecute(x => x.Headers.Set(MessageHeaders.ClientId, clientId));
 
-            var response = await request.GetResponse<PayloadDeployed>();
+            Response<PayloadDeployed> response = await request.GetResponse<PayloadDeployed>();
 
             Assert.That(response.Message.Target, Is.EqualTo("Bogey"));
         }
 
-        [Test, Explicit("NotYetImplemented")]
+        [Test]
+        [Explicit("NotYetImplemented")]
         public async Task Should_fault_if_clientId_is_not_specified()
         {
-            var upHandler = SubscribeHandler<Up<DeployPayload>>();
+            Task<ConsumeContext<Up<DeployPayload>>> upHandler = SubscribeHandler<Up<DeployPayload>>();
 
-            Guid clientId = NewId.NextGuid();
+            var clientId = NewId.NextGuid();
 
             await Bus.Publish<Link<DeployPayload>>(new
             {
@@ -93,9 +90,9 @@ namespace MassTransit.Tests.Conductor
                 ClientId = clientId
             });
 
-            var upContext = await upHandler;
+            ConsumeContext<Up<DeployPayload>> upContext = await upHandler;
 
-            var client = Bus.CreateRequestClient<DeployPayload>(upContext.Message.Service.ServiceAddress);
+            IRequestClient<DeployPayload> client = Bus.CreateRequestClient<DeployPayload>(upContext.Message.Service.ServiceAddress);
 
             Assert.That(async () => await client.GetResponse<PayloadDeployed>(new {Target = "Bogey"}), Throws.TypeOf<RequestFaultException>());
         }
@@ -105,9 +102,9 @@ namespace MassTransit.Tests.Conductor
         {
             var serviceClient = Bus.CreateServiceClient();
 
-            var requestClient = serviceClient.CreateRequestClient<DeployPayload>();
+            IRequestClient<DeployPayload> requestClient = serviceClient.CreateRequestClient<DeployPayload>();
 
-            var response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
+            Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
 
             Assert.That(response.Message.Target, Is.EqualTo("Bogey"));
         }
@@ -117,9 +114,9 @@ namespace MassTransit.Tests.Conductor
         {
             var serviceClient = Bus.CreateServiceClient();
 
-            var requestClient = serviceClient.CreateRequestClient<DeployHappiness>(RequestTimeout.After(s: 2));
+            IRequestClient<DeployHappiness> requestClient = serviceClient.CreateRequestClient<DeployHappiness>(RequestTimeout.After(s: 2));
 
-            Stopwatch timer = Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
 
             Assert.That(async () => await requestClient.GetResponse<PayloadDeployed>(new {Target = "Sunshine and Rainbows"}),
                 Throws.TypeOf<RequestTimeoutException>());
@@ -132,9 +129,9 @@ namespace MassTransit.Tests.Conductor
         {
             var serviceClient = Bus.CreateServiceClient(RequestTimeout.After(s: 2));
 
-            var requestClient = serviceClient.CreateRequestClient<DeployHappiness>();
+            IRequestClient<DeployHappiness> requestClient = serviceClient.CreateRequestClient<DeployHappiness>();
 
-            Stopwatch timer = Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
 
             Assert.That(async () => await requestClient.GetResponse<PayloadDeployed>(new {Target = "Sunshine and Rainbows"}),
                 Throws.TypeOf<RequestTimeoutException>());
@@ -147,9 +144,9 @@ namespace MassTransit.Tests.Conductor
         {
             var serviceClient = Bus.CreateServiceClient();
 
-            var requestClient = serviceClient.CreateRequestClient<DeployHappiness>();
+            IRequestClient<DeployHappiness> requestClient = serviceClient.CreateRequestClient<DeployHappiness>();
 
-            Stopwatch timer = Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
 
             using (var token = new CancellationTokenSource(TimeSpan.FromSeconds(2)))
             {
@@ -191,9 +188,9 @@ namespace MassTransit.Tests.Conductor
         {
             var serviceClient = Bus.CreateServiceClient();
 
-            var requestClient = serviceClient.CreateRequestClient<DeployPayload>();
+            IRequestClient<DeployPayload> requestClient = serviceClient.CreateRequestClient<DeployPayload>();
 
-            var response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
+            Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
 
             Assert.That(response.Message.Target, Is.EqualTo("Bogey"));
         }
@@ -219,11 +216,13 @@ namespace MassTransit.Tests.Conductor
     namespace TestService
     {
         using Context;
-        using Contracts;
 
 
         namespace Contracts
         {
+            using System;
+
+
             public interface DeployHappiness
             {
                 string Target { get; }

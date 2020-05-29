@@ -49,6 +49,12 @@ namespace Automatonymous.Requests
             SetCompletedWhenFinalized();
         }
 
+        public State Pending { get; private set; }
+
+        public Event<RequestStarted> Started { get; private set; }
+        public Event<RequestCompleted> Completed { get; private set; }
+        public Event<RequestFaulted> Faulted { get; private set; }
+
         static void InitializeInstance(BehaviorContext<RequestState, RequestStarted> context)
         {
             var consumeContext = context.GetPayload<ConsumeContext>();
@@ -61,11 +67,5 @@ namespace Automatonymous.Requests
             context.Instance.SagaCorrelationId = context.Data.CorrelationId;
             context.Instance.SagaAddress = consumeContext.SourceAddress;
         }
-
-        public State Pending { get; private set; }
-
-        public Event<RequestStarted> Started { get; private set; }
-        public Event<RequestCompleted> Completed { get; private set; }
-        public Event<RequestFaulted> Faulted { get; private set; }
     }
 }

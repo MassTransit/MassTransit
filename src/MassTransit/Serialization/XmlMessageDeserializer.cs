@@ -24,7 +24,7 @@ namespace MassTransit.Serialization
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("xml");
+            var scope = context.CreateScope("xml");
             scope.Add("contentType", XmlMessageSerializer.XmlContentType.MediaType);
         }
 
@@ -35,9 +35,11 @@ namespace MassTransit.Serialization
             try
             {
                 XDocument document;
-                using (Stream body = receiveContext.GetBodyStream())
-                using (var xmlReader = XmlReader.Create(body, new XmlReaderSettings { CheckCharacters = false }))
+                using (var body = receiveContext.GetBodyStream())
+                using (var xmlReader = XmlReader.Create(body, new XmlReaderSettings {CheckCharacters = false}))
+                {
                     document = XDocument.Load(xmlReader);
+                }
 
                 var json = new StringBuilder(1024);
 

@@ -8,7 +8,7 @@
 
 
     [DbContext(typeof(SlowConcurrentSagaDbContext))]
-    partial class SlowConcurrentSagaDbContextModelSnapshot : ModelSnapshot
+    class SlowConcurrentSagaDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -17,21 +17,21 @@
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga.SlowConcurrentSaga", b =>
-                {
-                    b.Property<Guid>("CorrelationId");
+            {
+                b.Property<Guid>("CorrelationId");
 
-                    b.Property<string>("CurrentState")
-                        .HasMaxLength(40);
+                b.Property<string>("CurrentState")
+                    .HasMaxLength(40);
 
-                    b.Property<string>("Name")
-                        .HasMaxLength(40);
+                b.Property<string>("Name")
+                    .HasMaxLength(40);
 
-                    b.Property<int>("Counter");
+                b.Property<int>("Counter");
 
-                    b.HasKey("CorrelationId");
+                b.HasKey("CorrelationId");
 
-                    b.ToTable("EfCoreSlowConcurrentSagas");
-                });
+                b.ToTable("EfCoreSlowConcurrentSagas");
+            });
         }
     }
 }

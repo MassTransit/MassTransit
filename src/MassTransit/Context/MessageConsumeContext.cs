@@ -247,7 +247,7 @@ namespace MassTransit.Context
 
         /// <summary>
         /// Initializes the response with the request message, and then uses the initializer to initialize the
-        /// remaining properties using the <paramref name="values"/> parameter.
+        /// remaining properties using the <paramref name="values" /> parameter.
         /// </summary>
         async Task ResponseAsyncWithMessage<T>(object values, IPipe<SendContext<T>> responsePipe = default)
             where T : class
@@ -255,7 +255,7 @@ namespace MassTransit.Context
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var context = await MessageInitializerCache<T>.Initialize(Message, _context.CancellationToken).ConfigureAwait(false);
+            InitializeContext<T> context = await MessageInitializerCache<T>.Initialize(Message, _context.CancellationToken).ConfigureAwait(false);
 
             IMessageInitializer<T> initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
 

@@ -40,11 +40,10 @@ namespace MassTransit.Interop.NServiceBus.Serialization
                 {
                     DeserializeRootElementName = "message",
                     WriteArrayAttribute = false,
-                    OmitRootObject = true,
+                    OmitRootObject = true
                 }
             })
         };
-
 
         public static JsonSerializerSettings SerializerSettings;
         static readonly Lazy<JsonSerializer> _serializer;
@@ -102,7 +101,7 @@ namespace MassTransit.Interop.NServiceBus.Serialization
                 using (var stringReader = new StringReader(json.ToString()))
                 using (var jsonReader = new JsonTextReader(stringReader))
                 {
-                    var document = (XDocument) XmlSerializer.Value.Deserialize(jsonReader, typeof(XDocument));
+                    var document = (XDocument)XmlSerializer.Value.Deserialize(jsonReader, typeof(XDocument));
 
                     if (document.Root != null)
                         document.Root.Name = typeof(T).Name;
@@ -123,7 +122,6 @@ namespace MassTransit.Interop.NServiceBus.Serialization
                 throw new SerializationException("Failed to serialize message", ex);
             }
         }
-
 
         public ContentType ContentType => XmlContentType;
     }

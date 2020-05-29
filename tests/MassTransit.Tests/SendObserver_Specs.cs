@@ -1,19 +1,16 @@
 ﻿namespace MassTransit.Tests
 {
-    using System;
-    using System.Runtime.Serialization;
-    using System.Threading.Tasks;
-    using NUnit.Framework;
-    using Shouldly;
-    using TestFramework;
-    using TestFramework.Messages;
-
-
     namespace ObserverTests
     {
+        using System;
+        using System.Runtime.Serialization;
         using System.Threading;
+        using System.Threading.Tasks;
         using GreenPipes;
-        using Util;
+        using NUnit.Framework;
+        using Shouldly;
+        using TestFramework;
+        using TestFramework.Messages;
 
 
         [TestFixture]
@@ -131,17 +128,6 @@
         public class Connecting_a_send_observer_to_the_bus_A :
             InMemoryTestFixture
         {
-            SendObserver _observer;
-
-            protected override void ConnectObservers(IBus bus)
-            {
-                base.ConnectObservers(bus);
-
-                _observer = new SendObserver(this);
-
-                bus.ConnectSendObserver(_observer);
-            }
-
             [Test]
             public async Task Should_not_invoke_post_sent_on_exception()
             {
@@ -156,13 +142,7 @@
                 Assert.That(_observer.PostSentCount, Is.EqualTo(0));
                 Assert.That(_observer.SendFaultCount, Is.EqualTo(1));
             }
-        }
 
-
-        [TestFixture]
-        public class Connecting_a_send_observer_to_the_bus_B :
-            InMemoryTestFixture
-        {
             SendObserver _observer;
 
             protected override void ConnectObservers(IBus bus)
@@ -173,13 +153,30 @@
 
                 bus.ConnectSendObserver(_observer);
             }
+        }
 
+
+        [TestFixture]
+        public class Connecting_a_send_observer_to_the_bus_B :
+            InMemoryTestFixture
+        {
             [Test]
             public async Task Should_invoke_the_observer_prior_to_send()
             {
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
                 await _observer.PreSent;
+            }
+
+            SendObserver _observer;
+
+            protected override void ConnectObservers(IBus bus)
+            {
+                base.ConnectObservers(bus);
+
+                _observer = new SendObserver(this);
+
+                bus.ConnectSendObserver(_observer);
             }
         }
 
@@ -188,6 +185,14 @@
         public class Connecting_a_send_observer_to_the_bus_C :
             InMemoryTestFixture
         {
+            [Test]
+            public async Task Should_invoke_the_observer_after_send()
+            {
+                await InputQueueSendEndpoint.Send(new PingMessage());
+
+                await _observer.PostSent;
+            }
+
             SendObserver _observer;
 
             protected override void ConnectObservers(IBus bus)
@@ -197,14 +202,6 @@
                 _observer = new SendObserver(this);
 
                 bus.ConnectSendObserver(_observer);
-            }
-
-            [Test]
-            public async Task Should_invoke_the_observer_after_send()
-            {
-                await InputQueueSendEndpoint.Send(new PingMessage());
-
-                await _observer.PostSent;
             }
         }
 
@@ -213,6 +210,15 @@
         public class Connecting_a_send_observer_to_the_bus_D :
             InMemoryTestFixture
         {
+            [Test]
+            public async Task Should_invoke_the_exception_after_send_failure()
+            {
+                Assert.That(async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
+                    Throws.TypeOf<SerializationException>());
+
+                await _observer.SendFaulted;
+            }
+
             SendObserver _observer;
 
             protected override void ConnectObservers(IBus bus)
@@ -222,15 +228,6 @@
                 _observer = new SendObserver(this);
 
                 bus.ConnectSendObserver(_observer);
-            }
-
-            [Test]
-            public async Task Should_invoke_the_exception_after_send_failure()
-            {
-                Assert.That(async () => await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
-                    Throws.TypeOf<SerializationException>());
-
-                await _observer.SendFaulted;
             }
         }
 
@@ -241,9 +238,9 @@
             readonly TaskCompletionSource<SendContext> _postSend;
             readonly TaskCompletionSource<SendContext> _preSend;
             readonly TaskCompletionSource<SendContext> _sendFaulted;
+            int _postSentCount;
 
             int _preSentCount;
-            int _postSentCount;
             int _sendFaultCount;
 
             public SendObserver(AsyncTestFixture fixture)

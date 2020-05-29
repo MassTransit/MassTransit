@@ -28,6 +28,7 @@ namespace MassTransit.Initializers.PropertyConverters
     public class ArrayPropertyConverter<TElement, TInputElement> :
         IPropertyConverter<TElement[], IEnumerable<TInputElement>>
     {
+        static readonly TElement[] _emptyArray = new TElement[0];
         readonly IPropertyConverter<TElement, TInputElement> _converter;
 
         public ArrayPropertyConverter(IPropertyConverter<TElement, TInputElement> converter)
@@ -38,7 +39,7 @@ namespace MassTransit.Initializers.PropertyConverters
         public Task<TElement[]> Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<TInputElement> input)
             where TMessage : class
         {
-            var resultTask = ConvertSync(context, input);
+            Task<TElement[]> resultTask = ConvertSync(context, input);
             if (resultTask.IsCompleted)
                 return Task.FromResult(resultTask.Result);
 
@@ -56,7 +57,7 @@ namespace MassTransit.Initializers.PropertyConverters
             if (input == null)
                 return TaskUtil.Default<TElement[]>();
 
-            int capacity = 0;
+            var capacity = 0;
             if (input is ICollection<TElement> collection)
             {
                 capacity = collection.Count;
@@ -64,9 +65,9 @@ namespace MassTransit.Initializers.PropertyConverters
                     return Task.FromResult(_emptyArray);
             }
 
-            List<TElement> results = new List<TElement>(capacity);
+            var results = new List<TElement>(capacity);
             IEnumerator<TInputElement> enumerator = input.GetEnumerator();
-            bool disposeEnumerator = true;
+            var disposeEnumerator = true;
             try
             {
                 async Task<TElement[]> ConvertAsync(IEnumerator<TInputElement> asyncEnumerator, Task<TElement> elementTask)
@@ -104,7 +105,7 @@ namespace MassTransit.Initializers.PropertyConverters
                 {
                     var current = enumerator.Current;
 
-                    var elementTask = _converter.Convert(context, current);
+                    Task<TElement> elementTask = _converter.Convert(context, current);
                     if (elementTask.IsCompleted)
                         results.Add(elementTask.Result);
                     else
@@ -122,7 +123,5 @@ namespace MassTransit.Initializers.PropertyConverters
 
             return Task.FromResult(results.ToArray());
         }
-
-        static readonly TElement[] _emptyArray = new TElement[0];
     }
 }

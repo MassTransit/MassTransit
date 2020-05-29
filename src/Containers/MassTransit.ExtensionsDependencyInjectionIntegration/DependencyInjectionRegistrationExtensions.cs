@@ -15,7 +15,7 @@ namespace MassTransit
     public static class DependencyInjectionRegistrationExtensions
     {
         /// <summary>
-        /// Adds MassTransit and its dependencies to the <paramref name="collection"/>, and allows consumers, sagas, and activities to be configured
+        /// Adds MassTransit and its dependencies to the <paramref name="collection" />, and allows consumers, sagas, and activities to be configured
         /// </summary>
         /// <param name="collection"></param>
         /// <param name="configure"></param>
@@ -35,7 +35,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Adds the MassTransit Mediator to the <paramref name="collection"/>, and allows consumers, sagas, and activities (which are not supported
+        /// Adds the MassTransit Mediator to the <paramref name="collection" />, and allows consumers, sagas, and activities (which are not supported
         /// by the Mediator) to be configured.
         /// </summary>
         /// <param name="collection"></param>
@@ -43,9 +43,7 @@ namespace MassTransit
         public static IServiceCollection AddMediator(this IServiceCollection collection, Action<IServiceCollectionMediatorConfigurator> configure = null)
         {
             if (collection.Any(d => d.ServiceType == typeof(IMediator)))
-            {
                 throw new ConfigurationException("AddMediator() was already called and may only be called once per container.");
-            }
 
             var configurator = new ServiceCollectionMediatorConfigurator(collection);
 

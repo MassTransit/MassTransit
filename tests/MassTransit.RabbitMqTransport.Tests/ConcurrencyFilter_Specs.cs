@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using NUnit.Framework;
@@ -16,7 +15,7 @@
         {
             _complete = GetTask<bool>();
 
-            List<Task> tasks = new List<Task>(_messageCount * 2);
+            var tasks = new List<Task>(_messageCount * 2);
 
             for (var i = 0; i < _messageCount; i++)
             {
@@ -32,7 +31,7 @@
         }
 
         Consumer _consumer;
-        static int _messageCount = 100;
+        static readonly int _messageCount = 100;
         static TaskCompletionSource<bool> _complete;
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)

@@ -25,7 +25,7 @@
             using (var client1 = new TestClient())
             using (var client2 = new TestClient())
             {
-                var manager = BackplaneHarness.HubLifetimeManager;
+                MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
 
                 var connection1 = HubConnectionContextUtils.Create(client1.Connection);
                 var connection2 = HubConnectionContextUtils.Create(client2.Connection);
@@ -33,7 +33,7 @@
                 await manager.OnConnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
                 await manager.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
 
-                await manager.SendAllAsync("Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
+                await manager.SendAllAsync("Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
 
                 Assert.IsTrue(BackplaneHarness.All.Consumed.Select<All<MyHub>>().Any());
 
@@ -57,7 +57,7 @@
             using (var client1 = new TestClient())
             using (var client2 = new TestClient())
             {
-                var manager = BackplaneHarness.HubLifetimeManager;
+                MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
 
                 var connection1 = HubConnectionContextUtils.Create(client1.Connection);
                 var connection2 = HubConnectionContextUtils.Create(client2.Connection);
@@ -67,7 +67,7 @@
 
                 await manager.OnDisconnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
 
-                await manager.SendAllAsync("Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
+                await manager.SendAllAsync("Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
 
                 Assert.IsTrue(BackplaneHarness.All.Consumed.Select<All<MyHub>>().Any());
 
@@ -87,7 +87,7 @@
             using (var client1 = new TestClient())
             using (var client2 = new TestClient())
             {
-                var manager = BackplaneHarness.HubLifetimeManager;
+                MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
 
                 var connection1 = HubConnectionContextUtils.Create(client1.Connection);
                 var connection2 = HubConnectionContextUtils.Create(client2.Connection);
@@ -100,7 +100,7 @@
                 // Because connection is local, should not have any GroupManagement
                 //Assert.IsFalse(backplaneConsumers.GroupManagementConsumer.Consumed.Select<GroupManagement<MyHub>>().Any());
 
-                await manager.SendGroupAsync("group", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
+                await manager.SendGroupAsync("group", "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
 
                 Assert.IsTrue(BackplaneHarness.Group.Consumed.Select<Group<MyHub>>().Any());
 
@@ -114,13 +114,14 @@
             }
         }
 
-        #region From Scaleout
+    #region From Scaleout
+
         [Test]
         public async Task DisconnectConnectionRemovesConnectionFromGroup()
         {
             using (var client = new TestClient())
             {
-                var manager = BackplaneHarness.HubLifetimeManager;
+                MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
 
                 var connection = HubConnectionContextUtils.Create(client.Connection);
 
@@ -134,7 +135,7 @@
 
                 await Task.Delay(2000);
 
-                await manager.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
+                await manager.SendGroupAsync("name", "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
 
                 await Task.Delay(2000);
 
@@ -147,7 +148,7 @@
         {
             using (var client = new TestClient())
             {
-                var manager = BackplaneHarness.HubLifetimeManager;
+                MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
 
                 var connection = HubConnectionContextUtils.Create(client.Connection);
 
@@ -155,7 +156,8 @@
 
                 await manager.RemoveFromGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
 
-                Assert.IsFalse(BackplaneHarness.GroupManagement.Consumed.Select<GroupManagement<MyHub>>().Any()); // Should not have published, because connection was local
+                Assert.IsFalse(BackplaneHarness.GroupManagement.Consumed.Select<GroupManagement<MyHub>>()
+                    .Any()); // Should not have published, because connection was local
             }
         }
 
@@ -164,7 +166,7 @@
         {
             using (var client = new TestClient())
             {
-                var manager = BackplaneHarness.HubLifetimeManager;
+                MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
 
                 var connection = HubConnectionContextUtils.Create(client.Connection);
 
@@ -173,7 +175,7 @@
                 await manager.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
                 await manager.AddToGroupAsync(connection.ConnectionId, "name").OrTimeout(Harness.TestTimeout);
 
-                await manager.SendGroupAsync("name", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
+                await manager.SendGroupAsync("name", "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
 
                 await AssertMessageAsync(client);
                 Assert.Null(client.TryRead());
@@ -186,7 +188,7 @@
             using (var client1 = new TestClient())
             using (var client2 = new TestClient())
             {
-                var manager = BackplaneHarness.HubLifetimeManager;
+                MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
 
                 // Force an exception when writing to connection
                 var connectionMock = HubConnectionContextUtils.CreateMock(client1.Connection);
@@ -199,13 +201,13 @@
                 await manager.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
                 await manager.AddToGroupAsync(connection2.ConnectionId, "group").OrTimeout(Harness.TestTimeout);
 
-                await manager.SendGroupAsync("group", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
+                await manager.SendGroupAsync("group", "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
                 // connection1 will throw when receiving a group message, we are making sure other connections
                 // are not affected by another connection throwing
                 await AssertMessageAsync(client2);
 
                 // Repeat to check that group can still be sent to
-                await manager.SendGroupAsync("group", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
+                await manager.SendGroupAsync("group", "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
                 await AssertMessageAsync(client2);
             }
         }
@@ -217,7 +219,7 @@
             using (var client2 = new TestClient())
             using (var client3 = new TestClient())
             {
-                var manager = BackplaneHarness.HubLifetimeManager;
+                MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
 
                 var connection1 = HubConnectionContextUtils.Create(client1.Connection, userIdentifier: "userA");
                 var connection2 = HubConnectionContextUtils.Create(client2.Connection, userIdentifier: "userA");
@@ -227,7 +229,7 @@
                 await manager.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
                 await manager.OnConnectedAsync(connection3).OrTimeout(Harness.TestTimeout);
 
-                await manager.SendUserAsync("userA", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
+                await manager.SendUserAsync("userA", "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
                 await AssertMessageAsync(client1);
                 await AssertMessageAsync(client2);
             }
@@ -240,7 +242,7 @@
             using (var client2 = new TestClient())
             using (var client3 = new TestClient())
             {
-                var manager = BackplaneHarness.HubLifetimeManager;
+                MassTransitHubLifetimeManager<MyHub> manager = BackplaneHarness.HubLifetimeManager;
 
                 var connection1 = HubConnectionContextUtils.Create(client1.Connection, userIdentifier: "userA");
                 var connection2 = HubConnectionContextUtils.Create(client2.Connection, userIdentifier: "userA");
@@ -250,17 +252,18 @@
                 await manager.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
                 await manager.OnConnectedAsync(connection3).OrTimeout(Harness.TestTimeout);
 
-                await manager.SendUserAsync("userA", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
+                await manager.SendUserAsync("userA", "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
                 await AssertMessageAsync(client1);
                 await AssertMessageAsync(client2);
 
                 // Disconnect one connection for the user
                 await manager.OnDisconnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
-                await manager.SendUserAsync("userA", "Hello", new object[] { "World" }).OrTimeout(Harness.TestTimeout);
+                await manager.SendUserAsync("userA", "Hello", new object[] {"World"}).OrTimeout(Harness.TestTimeout);
                 await AssertMessageAsync(client2);
             }
         }
-        #endregion From Scaleout
+
+    #endregion From Scaleout
 
         //[Test]
         //public async Task SendGroupExceptAsyncDoesNotWriteToExcludedConnections()
@@ -317,6 +320,7 @@
         //    }
         //}
     }
+
 
     //public class TestConsumer : IConsumer<All<MyHub>>
     //{

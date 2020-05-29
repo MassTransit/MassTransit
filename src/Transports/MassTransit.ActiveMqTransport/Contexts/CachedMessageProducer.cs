@@ -19,8 +19,6 @@
 
         public IDestination Destination { get; }
 
-        public event Action Used;
-
         public void Dispose()
         {
             _producer.Dispose();
@@ -105,44 +103,46 @@
 
         public ProducerTransformerDelegate ProducerTransformer
         {
-            get { return _producer.ProducerTransformer; }
-            set { _producer.ProducerTransformer = value; }
+            get => _producer.ProducerTransformer;
+            set => _producer.ProducerTransformer = value;
         }
 
         public MsgDeliveryMode DeliveryMode
         {
-            get { return _producer.DeliveryMode; }
-            set { _producer.DeliveryMode = value; }
+            get => _producer.DeliveryMode;
+            set => _producer.DeliveryMode = value;
         }
 
         public TimeSpan TimeToLive
         {
-            get { return _producer.TimeToLive; }
-            set { _producer.TimeToLive = value; }
+            get => _producer.TimeToLive;
+            set => _producer.TimeToLive = value;
         }
 
         public TimeSpan RequestTimeout
         {
-            get { return _producer.RequestTimeout; }
-            set { _producer.RequestTimeout = value; }
+            get => _producer.RequestTimeout;
+            set => _producer.RequestTimeout = value;
         }
 
         public MsgPriority Priority
         {
-            get { return _producer.Priority; }
-            set { _producer.Priority = value; }
+            get => _producer.Priority;
+            set => _producer.Priority = value;
         }
 
         public bool DisableMessageID
         {
-            get { return _producer.DisableMessageID; }
-            set { _producer.DisableMessageID = value; }
+            get => _producer.DisableMessageID;
+            set => _producer.DisableMessageID = value;
         }
 
         public bool DisableMessageTimestamp
         {
-            get { return _producer.DisableMessageTimestamp; }
-            set { _producer.DisableMessageTimestamp = value; }
+            get => _producer.DisableMessageTimestamp;
+            set => _producer.DisableMessageTimestamp = value;
         }
+
+        public event Action Used;
     }
 }

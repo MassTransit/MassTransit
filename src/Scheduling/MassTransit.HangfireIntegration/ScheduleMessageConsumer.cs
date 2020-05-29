@@ -12,9 +12,9 @@ namespace MassTransit.HangfireIntegration
         IConsumer<ScheduleMessage>,
         IConsumer<CancelScheduledMessage>
     {
+        const string JobIdKey = "MT-JobId";
         readonly IBackgroundJobClient _backgroundJobClient;
         readonly JobStorage _jobStorage;
-        const string JobIdKey = "MT-JobId";
 
         public ScheduleMessageConsumer(IHangfireComponentResolver hangfireComponentResolver)
             : this(hangfireComponentResolver.BackgroundJobClient, hangfireComponentResolver.JobStorage)
@@ -27,14 +27,14 @@ namespace MassTransit.HangfireIntegration
             _jobStorage = jobStorage;
         }
 
-        bool TryRemoveJob(IStorageConnection connection, string id, out string jobId)
+        public async Task Consume(ConsumeContext<CancelScheduledMessage> context)
         {
-            Dictionary<string, string> items = connection.GetAllEntriesFromHash(id);
-            if (items != null)
-                return items.TryGetValue(JobIdKey, out jobId) && _backgroundJobClient.Delete(jobId);
-            jobId = null;
-            return false;
-
+            using var connection = _jobStorage.GetConnection();
+            var correlationId = context.Message.TokenId.ToString("N");
+            if (TryRemoveJob(connection, correlationId, out var jobId))
+                LogContext.Debug?.Log("Cancelled Scheduled Message: {Id} at {Timestamp}", jobId, context.Message.Timestamp);
+            else
+                LogContext.Debug?.Log("CancelScheduledMessage: no message found for {Id}", jobId);
         }
 
         public async Task Consume(ConsumeContext<ScheduleMessage> context)
@@ -53,14 +53,13 @@ namespace MassTransit.HangfireIntegration
             LogContext.Debug?.Log("Scheduled: {Id}", jobId);
         }
 
-        public async Task Consume(ConsumeContext<CancelScheduledMessage> context)
+        bool TryRemoveJob(IStorageConnection connection, string id, out string jobId)
         {
-            using var connection = _jobStorage.GetConnection();
-            var correlationId = context.Message.TokenId.ToString("N");
-            if (TryRemoveJob(connection, correlationId, out var jobId))
-                LogContext.Debug?.Log("Cancelled Scheduled Message: {Id} at {Timestamp}", jobId, context.Message.Timestamp);
-            else
-                LogContext.Debug?.Log("CancelScheduledMessage: no message found for {Id}", jobId);
+            Dictionary<string, string> items = connection.GetAllEntriesFromHash(id);
+            if (items != null)
+                return items.TryGetValue(JobIdKey, out jobId) && _backgroundJobClient.Delete(jobId);
+            jobId = null;
+            return false;
         }
     }
 }

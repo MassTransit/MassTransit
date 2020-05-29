@@ -4,7 +4,7 @@ namespace MassTransit.Scoping
 
 
     /// <summary>
-    /// Captures the <see cref="ConsumeContext"/> for the current message as a scoped provider, so that it can be resolved
+    /// Captures the <see cref="ConsumeContext" /> for the current message as a scoped provider, so that it can be resolved
     /// by components at runtime (since MS DI doesn't support runtime configuration of scopes)
     /// </summary>
     public class ScopedConsumeContextProvider
@@ -30,9 +30,7 @@ namespace MassTransit.Scoping
                 {
                 }
                 else if (!context.TryGetPayload<ScopedConsumeContext>(out _))
-                {
                     throw new InvalidOperationException("The ConsumeContext was already set.");
-                }
             }
         }
 

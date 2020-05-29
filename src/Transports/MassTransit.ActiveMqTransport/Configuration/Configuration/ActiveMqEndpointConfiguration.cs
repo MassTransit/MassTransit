@@ -7,25 +7,23 @@
         EndpointConfiguration,
         IActiveMqEndpointConfiguration
     {
-        readonly IActiveMqTopologyConfiguration _topologyConfiguration;
-
         protected ActiveMqEndpointConfiguration(IActiveMqTopologyConfiguration topologyConfiguration)
             : base(topologyConfiguration)
         {
-            _topologyConfiguration = topologyConfiguration;
+            Topology = topologyConfiguration;
         }
 
         ActiveMqEndpointConfiguration(IEndpointConfiguration parentConfiguration, IActiveMqTopologyConfiguration topologyConfiguration)
             : base(parentConfiguration, topologyConfiguration)
         {
-            _topologyConfiguration = topologyConfiguration;
+            Topology = topologyConfiguration;
         }
 
-        public new IActiveMqTopologyConfiguration Topology => _topologyConfiguration;
+        public new IActiveMqTopologyConfiguration Topology { get; }
 
         public IActiveMqEndpointConfiguration CreateEndpointConfiguration()
         {
-            var topologyConfiguration = new ActiveMqTopologyConfiguration(_topologyConfiguration);
+            var topologyConfiguration = new ActiveMqTopologyConfiguration(Topology);
 
             return new ActiveMqEndpointConfiguration(this, topologyConfiguration);
         }

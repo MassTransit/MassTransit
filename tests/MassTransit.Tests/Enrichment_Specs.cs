@@ -39,7 +39,7 @@
             {
                 SqlText = "DROP TABLE [Users]",
                 Username = "sa",
-                Password = "god",
+                Password = "god"
             }).Wait(TestCancellationToken);
         }
 
@@ -47,8 +47,7 @@
         {
             _commandHandler = Handler<SecureCommand>(configurator, async context =>
             {
-                ConsumeContext<UserCredentials> credentials;
-                if (context.TryGetMessage(out credentials))
+                if (context.TryGetMessage(out ConsumeContext<UserCredentials> credentials))
                     _credentials.SetResult(credentials.Message);
             });
 

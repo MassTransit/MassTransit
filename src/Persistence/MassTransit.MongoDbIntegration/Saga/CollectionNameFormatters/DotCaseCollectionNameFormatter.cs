@@ -6,9 +6,7 @@ namespace MassTransit.MongoDbIntegration.Saga.CollectionNameFormatters
 
     /// <summary>
     /// Formats the saga collection names using dot naming with Pluralize
-    ///
     /// SimpleSaga -> simple.sagas
-    ///
     /// </summary>
     public class DotCaseCollectionNameFormatter : ICollectionNameFormatter
     {
@@ -22,8 +20,10 @@ namespace MassTransit.MongoDbIntegration.Saga.CollectionNameFormatters
         }
 
         public string Saga<TSaga>()
-            where TSaga : ISaga =>
-            Pluralize(Pattern.Replace(typeof(TSaga).Name, m => $".{m.Value}")).ToLowerInvariant();
+            where TSaga : ISaga
+        {
+            return Pluralize(Pattern.Replace(typeof(TSaga).Name, m => $".{m.Value}")).ToLowerInvariant();
+        }
 
         static string Pluralize(string str)
         {

@@ -20,6 +20,35 @@ namespace MassTransit.Transformation.Conventions
             _initializers = new Dictionary<string, IPropertyInitializer<TMessage, TMessage>>(StringComparer.OrdinalIgnoreCase);
         }
 
+        public int Count => _initializers.Count;
+
+        bool IInitializerConvention.TryGetPropertyInitializer<T, TInput, TProperty>(PropertyInfo propertyInfo, out IPropertyInitializer<T, TInput> initializer)
+        {
+            if (this is IInitializerConvention<T, TInput> convention)
+                return convention.TryGetPropertyInitializer<TProperty>(propertyInfo, out initializer);
+
+            initializer = default;
+            return false;
+        }
+
+        bool IInitializerConvention.TryGetHeaderInitializer<T, TInput, TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<T, TInput> initializer)
+        {
+            if (this is IInitializerConvention<T, TInput> convention)
+                return convention.TryGetHeaderInitializer<TProperty>(propertyInfo, out initializer);
+
+            initializer = default;
+            return false;
+        }
+
+        bool IInitializerConvention.TryGetHeadersInitializer<T, TInput, TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<T, TInput> initializer)
+        {
+            if (this is IInitializerConvention<T, TInput> convention)
+                return convention.TryGetHeaderInitializer<TProperty>(propertyInfo, out initializer);
+
+            initializer = default;
+            return false;
+        }
+
         public bool TryGetPropertyInitializer<TProperty>(PropertyInfo propertyInfo, out IPropertyInitializer<TMessage, TMessage> initializer)
         {
             if (_initializers.TryGetValue(propertyInfo.Name, out initializer))
@@ -71,38 +100,9 @@ namespace MassTransit.Transformation.Conventions
             return false;
         }
 
-        bool IInitializerConvention.TryGetPropertyInitializer<T, TInput, TProperty>(PropertyInfo propertyInfo, out IPropertyInitializer<T, TInput> initializer)
-        {
-            if (this is IInitializerConvention<T, TInput> convention)
-                return convention.TryGetPropertyInitializer<TProperty>(propertyInfo, out initializer);
-
-            initializer = default;
-            return false;
-        }
-
-        bool IInitializerConvention.TryGetHeaderInitializer<T, TInput, TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<T, TInput> initializer)
-        {
-            if (this is IInitializerConvention<T, TInput> convention)
-                return convention.TryGetHeaderInitializer<TProperty>(propertyInfo, out initializer);
-
-            initializer = default;
-            return false;
-        }
-
-        bool IInitializerConvention.TryGetHeadersInitializer<T, TInput, TProperty>(PropertyInfo propertyInfo, out IHeaderInitializer<T, TInput> initializer)
-        {
-            if (this is IInitializerConvention<T, TInput> convention)
-                return convention.TryGetHeaderInitializer<TProperty>(propertyInfo, out initializer);
-
-            initializer = default;
-            return false;
-        }
-
         public void Add(string propertyName, IPropertyInitializer<TMessage, TMessage> initializer)
         {
             _initializers.Add(propertyName, initializer);
         }
-
-        public int Count => _initializers.Count;
     }
 }

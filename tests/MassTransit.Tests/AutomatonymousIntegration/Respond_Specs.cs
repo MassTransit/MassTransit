@@ -14,6 +14,14 @@
         InMemoryTestFixture
     {
         [Test]
+        public void Should_fault_on_a_missing_instance()
+        {
+            Assert.That(
+                async () => await _statusClient.GetResponse<StatusReport>(new StatusRequested(NewId.NextGuid()), TestCancellationToken),
+                Throws.TypeOf<RequestFaultException>());
+        }
+
+        [Test]
         public async Task Should_receive_the_response_message()
         {
             Response<StartupComplete> complete = await _client.GetResponse<StartupComplete>(new Start(), TestCancellationToken);
@@ -26,17 +34,9 @@
 
             Response<StartupComplete> complete = await _client.GetResponse<StartupComplete>(start, TestCancellationToken);
 
-            var response = await _statusClient.GetResponse<StatusReport>(new StatusRequested(start.CorrelationId), TestCancellationToken);
+            Response<StatusReport> response = await _statusClient.GetResponse<StatusReport>(new StatusRequested(start.CorrelationId), TestCancellationToken);
 
             response.Message.Status.ShouldBe(_machine.Running.Name);
-        }
-
-        [Test]
-        public void Should_fault_on_a_missing_instance()
-        {
-            Assert.That(
-                async () => await _statusClient.GetResponse<StatusReport>(new StatusRequested(NewId.NextGuid()), TestCancellationToken),
-                Throws.TypeOf<RequestFaultException>());
         }
 
         [OneTimeSetUp]
@@ -132,8 +132,9 @@
                 Status = status;
             }
 
-            public Guid CorrelationId { get; private set; }
             public string Status { get; private set; }
+
+            public Guid CorrelationId { get; private set; }
         }
 
 

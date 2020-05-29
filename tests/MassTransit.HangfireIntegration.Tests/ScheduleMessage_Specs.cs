@@ -11,6 +11,19 @@
     public class ScheduleMessage_Specs :
         HangfireInMemoryTestFixture
     {
+        [Test]
+        public async Task Should_get_both_messages()
+        {
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.Now, new FirstMessage());
+
+            await _first;
+
+            await _second;
+
+            if (_secondActivityId != null && _firstActivityId != null)
+                Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
+        }
+
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
         string _firstActivityId;
@@ -39,26 +52,26 @@
         public class SecondMessage
         {
         }
-
-
-        [Test]
-        public async Task Should_get_both_messages()
-        {
-            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.Now, new FirstMessage());
-
-            await _first;
-
-            await _second;
-
-            if (_secondActivityId != null && _firstActivityId != null)
-                Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
-        }
     }
+
 
     [TestFixture]
     public class Specifying_an_expiration_time :
         HangfireInMemoryTestFixture
     {
+        [Test]
+        public async Task Should_include_it_with_the_final_message()
+        {
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.Now, new FirstMessage());
+
+            await _first;
+
+            ConsumeContext<SecondMessage> second = await _second;
+
+            Assert.That(second.ExpirationTime.HasValue, Is.True);
+            Assert.That(second.ExpirationTime.Value, Is.GreaterThan(DateTime.UtcNow + TimeSpan.FromSeconds(24)));
+        }
+
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
 
@@ -81,20 +94,6 @@
 
         public class SecondMessage
         {
-        }
-
-
-        [Test]
-        public async Task Should_include_it_with_the_final_message()
-        {
-            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.Now, new FirstMessage());
-
-            await _first;
-
-            var second = await _second;
-
-            Assert.That(second.ExpirationTime.HasValue, Is.True);
-            Assert.That(second.ExpirationTime.Value, Is.GreaterThan(DateTime.UtcNow + TimeSpan.FromSeconds(24)));
         }
     }
 }

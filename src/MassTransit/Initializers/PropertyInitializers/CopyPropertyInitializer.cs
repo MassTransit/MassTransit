@@ -34,9 +34,7 @@
         public Task Apply(InitializeContext<TMessage, TInput> context)
         {
             if (context.HasInput)
-            {
                 _messageProperty.Set(context.Message, _inputProperty.Get(context.Input));
-            }
 
             return TaskUtil.Completed;
         }

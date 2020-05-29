@@ -20,10 +20,7 @@ namespace MassTransit.Tests.Pipeline
             _completed = completed;
         }
 
-        public Task<MessageA> Task
-        {
-            get { return _completed.Task; }
-        }
+        public Task<MessageA> Task => _completed.Task;
 
         public async Task Consume(ConsumeContext<MessageA> context)
         {

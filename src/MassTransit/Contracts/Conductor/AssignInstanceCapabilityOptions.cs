@@ -9,6 +9,6 @@ namespace MassTransit.Contracts.Conductor
         /// <summary>
         /// Assignment is required
         /// </summary>
-        Required = 1,
+        Required = 1
     }
 }

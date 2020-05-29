@@ -10,8 +10,8 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
         ILoadQueryProvider<TSaga>
         where TSaga : class, ISaga
     {
-        readonly ILoadQueryProvider<TSaga> _source;
         readonly Func<IQueryable<TSaga>, IQueryable<TSaga>> _customize;
+        readonly ILoadQueryProvider<TSaga> _source;
 
         public CustomSagaLoadQueryProvider(ILoadQueryProvider<TSaga> source, Func<IQueryable<TSaga>, IQueryable<TSaga>> customize)
         {

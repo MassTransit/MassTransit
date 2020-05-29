@@ -31,9 +31,7 @@
                 yield return this.Failure("The instance cannot be null. This should have come in the ctor.");
 
             if (_instance != null && !_instance.GetType().HasInterface<IConsumer>())
-            {
                 yield return this.Warning($"The instance of {TypeMetadataCache.GetShortName(_instance.GetType())} does not implement any consumer interfaces");
-            }
         }
     }
 
@@ -86,6 +84,11 @@
             _specification.AddPipeSpecification(specification);
         }
 
+        public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
+        {
+            return _specification.ConnectConsumerConfigurationObserver(observer);
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             return _specification.Validate();
@@ -94,11 +97,6 @@
         public void Configure(IReceiveEndpointBuilder builder)
         {
             InstanceConnectorCache<TInstance>.Connector.ConnectInstance(builder, _instance, _specification);
-        }
-
-        public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
-        {
-            return _specification.ConnectConsumerConfigurationObserver(observer);
         }
     }
 }

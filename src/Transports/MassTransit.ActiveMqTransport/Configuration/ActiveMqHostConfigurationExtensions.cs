@@ -8,7 +8,7 @@ namespace MassTransit.ActiveMqTransport
     public static class ActiveMqHostConfigurationExtensions
     {
         /// <summary>
-        ///     Configure a ActiveMQ host using the configuration API
+        /// Configure a ActiveMQ host using the configuration API
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="hostAddress">The URI host address of the ActiveMQ host (activemq://host:port/vhost)</param>

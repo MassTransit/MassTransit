@@ -35,7 +35,7 @@ namespace MassTransit.Saga.Pipeline.Filters
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateFilterScope("saga");
+            var scope = context.CreateFilterScope("saga");
             scope.Set(new {Correlation = "Query"});
 
             _queryFactory.Probe(scope);
@@ -46,9 +46,9 @@ namespace MassTransit.Saga.Pipeline.Filters
 
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
-            var activity = LogContext.IfEnabled(OperationName.Saga.SendQuery)?.StartSagaActivity<TSaga, TMessage>(context);
+            StartedActivity? activity = LogContext.IfEnabled(OperationName.Saga.SendQuery)?.StartSagaActivity<TSaga, TMessage>(context);
 
-            Stopwatch timer = Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
             try
             {
                 await Task.Yield();

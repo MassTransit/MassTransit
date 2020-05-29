@@ -3,10 +3,9 @@
     using System;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using MassTransit;
     using MassTransit.Saga;
-    using MongoDbIntegration.Saga;
     using MongoDB.Bson.Serialization.Attributes;
+    using MongoDbIntegration.Saga;
 
 
     public class SimpleSaga :
@@ -22,7 +21,7 @@
         public bool Observed { get; private set; }
 
         public string Name { get; private set; }
-        
+
         public Task Consume(ConsumeContext<InitiateSimpleSaga> context)
         {
             Initiated = true;
@@ -33,6 +32,8 @@
 
         [BsonId]
         public Guid CorrelationId { get; set; }
+
+        public int Version { get; set; }
 
         public Task Consume(ConsumeContext<ObservableSagaMessage> message)
         {
@@ -52,7 +53,5 @@
 
             return Task.FromResult(0);
         }
-
-        public int Version { get; set; }
     }
 }

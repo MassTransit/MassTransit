@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
             {
                 Host = host,
                 Port = port,
-                VirtualHost = virtualHost,
+                VirtualHost = virtualHost
             };
 
             if (!string.IsNullOrEmpty(connectionName))

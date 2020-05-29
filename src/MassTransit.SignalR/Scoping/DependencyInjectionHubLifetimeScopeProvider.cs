@@ -28,7 +28,6 @@ namespace MassTransit.SignalR.Scoping
             where THub : Hub
         {
             readonly IServiceScope _serviceScope;
-            IServiceProvider ServiceProvider => _serviceScope.ServiceProvider;
 
             public HubLifetimeScope(IServiceScope serviceScope)
             {
@@ -36,6 +35,8 @@ namespace MassTransit.SignalR.Scoping
                 PublishEndpoint = ServiceProvider.GetRequiredService<IPublishEndpoint>();
                 RequestClient = ServiceProvider.GetRequiredService<IRequestClient<GroupManagement<THub>>>();
             }
+
+            IServiceProvider ServiceProvider => _serviceScope.ServiceProvider;
 
             public IPublishEndpoint PublishEndpoint { get; }
             public IRequestClient<GroupManagement<THub>> RequestClient { get; }

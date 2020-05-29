@@ -46,9 +46,7 @@ namespace Automatonymous.Pipeline
             List<State<TInstance>> states = _machine.States.Cast<State<TInstance>>()
                 .Where(x => x.Events.Contains(_event)).ToList();
             if (states.Any())
-            {
                 scope.Add("states", states.Select(x => x.Name).ToArray());
-            }
 
             _machine.Probe(context);
         }
@@ -57,7 +55,7 @@ namespace Automatonymous.Pipeline
         {
             var eventContext = new StateMachineEventContextProxy<TInstance, TData>(context, _machine, context.Saga, _event, context.Message);
 
-            var activity = LogContext.IfEnabled(OperationName.Saga.RaiseEvent)
+            StartedActivity? activity = LogContext.IfEnabled(OperationName.Saga.RaiseEvent)
                 ?.StartSagaActivity(context, (await _machine.Accessor.Get(eventContext).ConfigureAwait(false)).Name);
             try
             {
@@ -68,7 +66,7 @@ namespace Automatonymous.Pipeline
             }
             catch (UnhandledEventException ex)
             {
-                var currentState = await _machine.Accessor.Get(eventContext).ConfigureAwait(false);
+                State<TInstance> currentState = await _machine.Accessor.Get(eventContext).ConfigureAwait(false);
 
                 throw new NotAcceptedStateMachineException(typeof(TInstance), typeof(TData), context.CorrelationId ?? Guid.Empty, currentState.Name, ex);
             }

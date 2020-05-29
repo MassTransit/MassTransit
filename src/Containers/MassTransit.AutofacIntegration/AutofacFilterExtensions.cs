@@ -10,7 +10,7 @@ namespace MassTransit
     public static class AutofacFilterExtensions
     {
         /// <summary>
-        /// Use scoped filter for <see cref="ConsumeContext{T}"/>
+        /// Use scoped filter for <see cref="ConsumeContext{T}" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
@@ -27,7 +27,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Use scoped filter for <see cref="ConsumeContext{T}"/>
+        /// Use scoped filter for <see cref="ConsumeContext{T}" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
@@ -45,7 +45,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Use scoped filter for <see cref="SendContext{T}"/>
+        /// Use scoped filter for <see cref="SendContext{T}" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
@@ -62,7 +62,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Use scoped filter for <see cref="SendContext{T}"/>
+        /// Use scoped filter for <see cref="SendContext{T}" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
@@ -80,7 +80,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Use scoped filter for <see cref="PublishContext{T}"/>
+        /// Use scoped filter for <see cref="PublishContext{T}" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
@@ -97,7 +97,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Use scoped filter for <see cref="PublishContext{T}"/>
+        /// Use scoped filter for <see cref="PublishContext{T}" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
@@ -115,7 +115,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Use scoped filter for <see cref="ExecuteContext{TArguments}"/>
+        /// Use scoped filter for <see cref="ExecuteContext{TArguments}" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
@@ -133,7 +133,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Use scoped filter for <see cref="ExecuteContext{T}"/>
+        /// Use scoped filter for <see cref="ExecuteContext{T}" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
@@ -151,7 +151,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Use scoped filter for <see cref="CompensateContext{T}"/>
+        /// Use scoped filter for <see cref="CompensateContext{T}" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
@@ -169,7 +169,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Use scoped filter for <see cref="CompensateContext{T}"/>
+        /// Use scoped filter for <see cref="CompensateContext{T}" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>

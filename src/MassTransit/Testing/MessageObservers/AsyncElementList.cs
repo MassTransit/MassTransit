@@ -13,9 +13,9 @@ namespace MassTransit.Testing.MessageObservers
         IAsyncElementList<TElement>
         where TElement : class, IAsyncListElement
     {
-        readonly TimeSpan _timeout;
         readonly IList<Channel<TElement>> _listeners;
         readonly IList<TElement> _messages;
+        readonly TimeSpan _timeout;
         CancellationToken _testCompleted;
 
         protected AsyncElementList(TimeSpan timeout, CancellationToken testCompleted = default)
@@ -97,9 +97,7 @@ namespace MassTransit.Testing.MessageObservers
             try
             {
                 await foreach (var _ in SelectAsync(filter, cancellationToken).ConfigureAwait(false))
-                {
                     return true;
-                }
             }
             catch (OperationCanceledException)
             {
@@ -131,9 +129,7 @@ namespace MassTransit.Testing.MessageObservers
                     endTime = DateTime.Now;
 
                     lock (_messages)
-                    {
                         Monitor.PulseAll(_messages);
-                    }
                 }
 
                 CancellationTokenRegistration cancellationTokenRegistration = default;
@@ -184,7 +180,7 @@ namespace MassTransit.Testing.MessageObservers
 
                 lock (_listeners)
                 {
-                    foreach (var channel in _listeners)
+                    foreach (Channel<TElement> channel in _listeners)
                         channel.Writer.TryWrite(context);
                 }
             }

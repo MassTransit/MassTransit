@@ -9,7 +9,6 @@ namespace MassTransit.Azure.ServiceBus.Core
         /// <summary>
         /// Create a message scheduler that uses the Azure Service Bus ScheduleEnqueueTimeUtc property to
         /// schedule messages.
-        ///
         /// NOTE that this should only be used to schedule messages outside of a message consumer. Consumers should
         /// use the ScheduleSend extensions on ConsumeContext.
         /// </summary>

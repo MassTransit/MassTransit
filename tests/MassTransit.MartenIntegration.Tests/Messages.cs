@@ -33,14 +33,10 @@
         public string Name { get; set; }
     }
 
+
     [Serializable]
     public class ObservableSagaMessage
     {
-        public ObservableSagaMessage()
-        {
-
-        }
-
         public string Name { get; set; }
     }
 

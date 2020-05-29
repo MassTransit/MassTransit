@@ -60,7 +60,10 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
                     _lifetimeScope = lifetimeScope;
                 }
 
-                public object ResolveComponent(ResolveRequest request) => _lifetimeScope.ResolveComponent(request);
+                public object ResolveComponent(ResolveRequest request)
+                {
+                    return _lifetimeScope.ResolveComponent(request);
+                }
 
                 public IComponentRegistry ComponentRegistry => _lifetimeScope.ComponentRegistry;
 
@@ -68,17 +71,30 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
                 {
                 }
 
-                public ValueTask DisposeAsync() => default;
+                public ValueTask DisposeAsync()
+                {
+                    return default;
+                }
 
-                public ILifetimeScope BeginLifetimeScope() => _lifetimeScope.BeginLifetimeScope();
+                public ILifetimeScope BeginLifetimeScope()
+                {
+                    return _lifetimeScope.BeginLifetimeScope();
+                }
 
-                public ILifetimeScope BeginLifetimeScope(object tag) => _lifetimeScope.BeginLifetimeScope(tag);
+                public ILifetimeScope BeginLifetimeScope(object tag)
+                {
+                    return _lifetimeScope.BeginLifetimeScope(tag);
+                }
 
-                public ILifetimeScope BeginLifetimeScope(Action<ContainerBuilder> configurationAction) =>
-                    _lifetimeScope.BeginLifetimeScope(configurationAction);
+                public ILifetimeScope BeginLifetimeScope(Action<ContainerBuilder> configurationAction)
+                {
+                    return _lifetimeScope.BeginLifetimeScope(configurationAction);
+                }
 
-                public ILifetimeScope BeginLifetimeScope(object tag, Action<ContainerBuilder> configurationAction) =>
-                    _lifetimeScope.BeginLifetimeScope(tag, configurationAction);
+                public ILifetimeScope BeginLifetimeScope(object tag, Action<ContainerBuilder> configurationAction)
+                {
+                    return _lifetimeScope.BeginLifetimeScope(tag, configurationAction);
+                }
 
                 public IDisposer Disposer => _lifetimeScope.Disposer;
 

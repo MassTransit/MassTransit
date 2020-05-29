@@ -36,7 +36,7 @@ namespace Automatonymous.Activities
                 if (!context.TryGetPayload(out ConsumeContext<RequestCompleted> consumeContext))
                     throw new ArgumentException("The ConsumeContext was not present", nameof(context));
 
-                string body = GetResponseBody(consumeContext, context.Instance);
+                var body = GetResponseBody(consumeContext, context.Instance);
 
                 IPipe<SendContext> pipe = new CompletedMessagePipe(context.GetPayload<ConsumeContext<RequestCompleted>>(), context.Instance, body);
 
@@ -59,7 +59,7 @@ namespace Automatonymous.Activities
 
         static string GetResponseBody(ConsumeContext<RequestCompleted> context, RequestState requestState)
         {
-            string body = Encoding.UTF8.GetString(context.ReceiveContext.GetBody());
+            var body = Encoding.UTF8.GetString(context.ReceiveContext.GetBody());
 
             var mediaType = context.ReceiveContext.ContentType?.MediaType;
 
@@ -74,14 +74,14 @@ namespace Automatonymous.Activities
 
         static string TranslateJsonBody(string body, RequestState requestState)
         {
-            JObject envelope = JObject.Parse(body);
+            var envelope = JObject.Parse(body);
 
             envelope["destinationAddress"] = requestState.ResponseAddress.ToString();
 
-            JToken message = envelope["message"];
+            var message = envelope["message"];
 
-            JToken payload = message["payload"];
-            JToken payloadType = message["payloadType"];
+            var payload = message["payload"];
+            var payloadType = message["payloadType"];
 
             envelope["message"] = payload;
             envelope["messageType"] = payloadType;
@@ -102,30 +102,30 @@ namespace Automatonymous.Activities
         {
             using (var reader = new StringReader(body))
             {
-                XDocument document = XDocument.Load(reader);
+                var document = XDocument.Load(reader);
 
-                XElement envelope = (from e in document.Descendants("envelope") select e).Single();
+                var envelope = (from e in document.Descendants("envelope") select e).Single();
 
-                XElement destinationAddress = (from a in envelope.Descendants("destinationAddress") select a).Single();
+                var destinationAddress = (from a in envelope.Descendants("destinationAddress") select a).Single();
 
-                XElement message = (from m in envelope.Descendants("message") select m).Single();
-                IEnumerable<XElement> messageType = (from mt in envelope.Descendants("messageType") select mt);
+                var message = (from m in envelope.Descendants("message") select m).Single();
+                IEnumerable<XElement> messageType = from mt in envelope.Descendants("messageType") select mt;
 
-                XElement payload = (from p in message.Descendants("payload") select p).Single();
-                IEnumerable<XElement> payloadType = (from pt in message.Descendants("payloadType") select pt);
+                var payload = (from p in message.Descendants("payload") select p).Single();
+                IEnumerable<XElement> payloadType = from pt in message.Descendants("payloadType") select pt;
 
                 message.Remove();
                 messageType.Remove();
 
                 if (requestState.ConversationId.HasValue)
                 {
-                    XElement conversationId = (from a in envelope.Descendants("conversationId") select a).Single();
+                    var conversationId = (from a in envelope.Descendants("conversationId") select a).Single();
                     conversationId.Value = requestState.ConversationId.Value.ToString("D");
                 }
 
                 destinationAddress.Value = requestState.ResponseAddress.ToString();
 
-                XElement sourceAddress = (from a in envelope.Descendants("sourceAddress") select a).Single();
+                var sourceAddress = (from a in envelope.Descendants("sourceAddress") select a).Single();
                 sourceAddress.Value = requestState.SagaAddress.ToString();
 
                 message = new XElement("message");
@@ -151,9 +151,9 @@ namespace Automatonymous.Activities
         class CompletedMessagePipe :
             IPipe<SendContext>
         {
+            readonly string _body;
             readonly ConsumeContext<RequestCompleted> _context;
             readonly RequestState _instance;
-            readonly string _body;
 
             public CompletedMessagePipe(ConsumeContext<RequestCompleted> context, RequestState instance, string body)
             {

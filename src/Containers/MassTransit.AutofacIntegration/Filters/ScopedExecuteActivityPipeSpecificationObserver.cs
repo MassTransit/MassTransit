@@ -24,7 +24,7 @@ namespace MassTransit.AutofacIntegration.Filters
             where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
-           ExecuteActivityConfigured(configurator);
+            ExecuteActivityConfigured(configurator);
         }
 
         public void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)

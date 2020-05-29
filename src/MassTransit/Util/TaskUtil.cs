@@ -15,21 +15,24 @@
         public static Task<bool> True => Cached.TrueTask;
 
         /// <summary>
-        /// Returns a completed task with the default value for <typeparamref name="T"/>
+        /// Returns a completed task with the default value for <typeparamref name="T" />
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static Task<T> Default<T>() => Cached<T>.DefaultValueTask;
+        public static Task<T> Default<T>()
+        {
+            return Cached<T>.DefaultValueTask;
+        }
 
         /// <summary>
-        /// Returns a faulted task with the specified exception (creating using a <see cref="TaskCompletionSource{T}"/>)
+        /// Returns a faulted task with the specified exception (creating using a <see cref="TaskCompletionSource{T}" />)
         /// </summary>
         /// <param name="exception"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static Task<T> Faulted<T>(Exception exception)
         {
-            var source = GetTask<T>();
+            TaskCompletionSource<T> source = GetTask<T>();
             source.TrySetException(exception);
 
             return source.Task;
@@ -46,7 +49,7 @@
         }
 
         /// <summary>
-        /// Creates a new <see cref="TaskCompletionSource{T}"/>, and ensures the TaskCreationOptions.RunContinuationsAsynchronously
+        /// Creates a new <see cref="TaskCompletionSource{T}" />, and ensures the TaskCreationOptions.RunContinuationsAsynchronously
         /// flag is specified (if available).
         /// </summary>
         /// <param name="options"></param>
@@ -69,7 +72,7 @@
         }
 
         /// <summary>
-        /// Register a callback on the <paramref name="cancellationToken"/> which completes the resulting task.
+        /// Register a callback on the <paramref name="cancellationToken" /> which completes the resulting task.
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <param name="cancelTask"></param>
@@ -80,7 +83,7 @@
             if (!cancellationToken.CanBeCanceled)
                 throw new ArgumentException("The cancellationToken must support cancellation", nameof(cancellationToken));
 
-            var source = GetTask();
+            TaskCompletionSource<bool> source = GetTask();
 
             cancelTask = source.Task;
 
@@ -233,7 +236,7 @@
 
             static Task<T> GetCanceledTask()
             {
-                var source = GetTask<T>();
+                TaskCompletionSource<T> source = GetTask<T>();
                 source.SetCanceled();
                 return source.Task;
             }
@@ -278,8 +281,7 @@
 
             public void RunOnCurrentThread(CancellationToken cancellationToken)
             {
-                Tuple<SendOrPostCallback, object> callback;
-                while (_queue.TryTake(out callback, 50, cancellationToken))
+                while (_queue.TryTake(out Tuple<SendOrPostCallback, object> callback, 50, cancellationToken))
                     callback.Item1(callback.Item2);
             }
 

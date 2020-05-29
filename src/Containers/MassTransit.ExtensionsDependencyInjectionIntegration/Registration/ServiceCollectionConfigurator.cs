@@ -59,7 +59,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.Bus);
         }
 
-        public virtual void AddRider(Action<IRiderRegistrationConfigurator<IServiceProvider>> configure)
+        public virtual void AddRider(Action<IRiderConfigurator<IServiceProvider>> configure)
         {
             var configurator = new ServiceCollectionRiderConfigurator(Collection);
             configure?.Invoke(configurator);

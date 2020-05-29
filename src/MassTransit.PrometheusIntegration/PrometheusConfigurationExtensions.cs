@@ -13,7 +13,9 @@ namespace MassTransit.PrometheusIntegration
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configureOptions"></param>
-        /// <param name="serviceName">The service name for metrics reporting, defaults to the current process main module filename</param>
+        /// <param name="serviceName">
+        /// The service name for metrics reporting, defaults to the current process main module filename
+        /// </param>
         public static void UsePrometheusMetrics(this IBusFactoryConfigurator configurator,
             Action<PrometheusMetricsOptions> configureOptions = null,
             string serviceName = default)

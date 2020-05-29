@@ -11,11 +11,11 @@ namespace MassTransit
     {
         /// <summary>
         /// Configure the endpoints for all defined consumer, saga, and activity types using an optional
-        /// endpoint name formatter. If no endpoint name formatter is specified and an <see cref="IEndpointNameFormatter"/>
-        /// is registered in the container, it is resolved from the container. Otherwise, the <see cref="DefaultEndpointNameFormatter"/>
+        /// endpoint name formatter. If no endpoint name formatter is specified and an <see cref="IEndpointNameFormatter" />
+        /// is registered in the container, it is resolved from the container. Otherwise, the <see cref="DefaultEndpointNameFormatter" />
         /// is used.
         /// </summary>
-        /// <param name="configurator">The <see cref="IBusFactoryConfigurator"/> for the bus being configured</param>
+        /// <param name="configurator">The <see cref="IBusFactoryConfigurator" /> for the bus being configured</param>
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
@@ -29,7 +29,7 @@ namespace MassTransit
         /// <summary>
         /// Configure the Conductor service endpoints for all defined consumer, saga, and activity types.
         /// </summary>
-        /// <param name="configurator">The <see cref="IBusFactoryConfigurator"/> for the bus being configured</param>
+        /// <param name="configurator">The <see cref="IBusFactoryConfigurator" /> for the bus being configured</param>
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="options">Optional service instance options to start</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>

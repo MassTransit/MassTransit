@@ -81,6 +81,7 @@ namespace Automatonymous.Activities
         }
     }
 
+
     public class FaultedRespondActivity<TInstance, TData, TException, TMessage> :
         Activity<TInstance, TData>
         where TInstance : SagaStateMachineInstance

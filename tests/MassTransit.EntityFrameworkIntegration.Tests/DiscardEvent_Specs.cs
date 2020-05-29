@@ -7,7 +7,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Automatonymous;
-    using EntityFrameworkIntegration;
     using Mappings;
     using MassTransit.Saga;
     using NUnit.Framework;
@@ -19,8 +18,6 @@
     public class StateMachineTest :
         InMemoryTestFixture
     {
-        ISagaDbContextFactory<SimpleState> _sagaDbContextFactory;
-
         [Test]
         public async Task Test_Discarded_Missing_Saga_Instance_Is_Not_Persisted()
         {
@@ -47,7 +44,8 @@
             }
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Test_Event_Persists_Saga_By_Default()
         {
             // arrange
@@ -69,6 +67,8 @@
                 Assert.IsNotNull(result);
             }
         }
+
+        ISagaDbContextFactory<SimpleState> _sagaDbContextFactory;
 
         SimpleStateMachine _simpleStateMachine;
         Lazy<ISagaRepository<SimpleState>> _simpleStateRepository;
@@ -122,6 +122,17 @@
 
     public class SimpleStateSagaDbContext : SagaDbContext
     {
+        public SimpleStateSagaDbContext(string getLocalDbConnectionString)
+            : base(getLocalDbConnectionString)
+        {
+        }
+
+        protected override IEnumerable<ISagaClassMap> Configurations
+        {
+            get { yield return new SimpleStateMap(); }
+        }
+
+
         class SimpleStateMap :
             SagaClassMap<SimpleState>
         {
@@ -134,16 +145,6 @@
                 entity.Property(x => x.TestName);
                 entity.Property(x => x.PublishDate);
             }
-        }
-
-        public SimpleStateSagaDbContext(string getLocalDbConnectionString)
-            : base(getLocalDbConnectionString)
-        {
-        }
-
-        protected override IEnumerable<ISagaClassMap> Configurations
-        {
-            get { yield return new SimpleStateMap(); }
         }
     }
 

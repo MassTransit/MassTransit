@@ -1,6 +1,7 @@
 namespace MassTransit.Saga.InMemoryRepository
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -15,8 +16,8 @@ namespace MassTransit.Saga.InMemoryRepository
         ISagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISaga
     {
-        readonly IndexedSagaDictionary<TSaga> _sagas;
         readonly ISagaConsumeContextFactory<IndexedSagaDictionary<TSaga>, TSaga> _factory;
+        readonly IndexedSagaDictionary<TSaga> _sagas;
 
         public InMemorySagaRepositoryContextFactory(IndexedSagaDictionary<TSaga> sagas, ISagaConsumeContextFactory<IndexedSagaDictionary<TSaga>, TSaga> factory)
         {
@@ -47,7 +48,7 @@ namespace MassTransit.Saga.InMemoryRepository
 
             using var repositoryContext = new InMemorySagaRepositoryContext<TSaga, T>(_sagas, _factory, context);
 
-            var matchingInstances = _sagas.Where(query).Select(x => x.Instance.CorrelationId).ToList();
+            List<Guid> matchingInstances = _sagas.Where(query).Select(x => x.Instance.CorrelationId).ToList();
 
             var queryContext = new DefaultSagaRepositoryQueryContext<TSaga, T>(repositoryContext, matchingInstances);
 

@@ -35,6 +35,11 @@
             _stopwatch = Stopwatch.StartNew();
         }
 
+        public void Dispose()
+        {
+            _source.Dispose();
+        }
+
         public override CancellationToken CancellationToken => _source.Token;
 
         public Guid JobId { get; }
@@ -114,11 +119,6 @@
         public void Cancel()
         {
             _source.Cancel();
-        }
-
-        public void Dispose()
-        {
-            _source.Dispose();
         }
     }
 }

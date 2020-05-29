@@ -20,7 +20,7 @@
         {
             var contract = base.CreateContract(objectType);
 
-            for (int i = 0; i < _converters.Length; i++)
+            for (var i = 0; i < _converters.Length; i++)
             {
                 if (_converters[i].CanConvert(objectType))
                 {
@@ -34,7 +34,7 @@
 
         protected override JsonDictionaryContract CreateDictionaryContract(Type objectType)
         {
-            JsonDictionaryContract contract = base.CreateDictionaryContract(objectType);
+            var contract = base.CreateDictionaryContract(objectType);
 
             contract.DictionaryKeyResolver = ContractDictionaryKeyResolver;
 
@@ -48,7 +48,7 @@
 
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {
-            JsonProperty property = base.CreateProperty(member, memberSerialization);
+            var property = base.CreateProperty(member, memberSerialization);
             if (!property.Writable)
             {
                 var propertyInfo = member as PropertyInfo;

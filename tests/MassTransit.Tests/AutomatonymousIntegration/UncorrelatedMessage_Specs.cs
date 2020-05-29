@@ -1,22 +1,9 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.AutomatonymousIntegration
 {
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
     using GreenPipes;
-    using GreenPipes.Introspection;
     using MassTransit.Saga;
     using NUnit.Framework;
     using TestFramework;
@@ -26,10 +13,11 @@ namespace MassTransit.Tests.AutomatonymousIntegration
     public class When_a_message_is_not_correlated :
         InMemoryTestFixture
     {
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Should_retry_the_status_message()
         {
-            var statusTask = Bus.Request<CheckStatus, Status>(InputQueueAddress, new CheckStatus("A"), TestCancellationToken);
+            Task<Response<Status>> statusTask = Bus.Request<CheckStatus, Status>(InputQueueAddress, new CheckStatus("A"), TestCancellationToken);
 
             await InputQueueSendEndpoint.Send(new Start("A", Guid.NewGuid()));
 
@@ -38,10 +26,11 @@ namespace MassTransit.Tests.AutomatonymousIntegration
             Assert.AreEqual("A", status.Message.ServiceName);
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
-            ProbeResult result = Bus.GetProbeResult();
+            var result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }
@@ -49,9 +38,10 @@ namespace MassTransit.Tests.AutomatonymousIntegration
         [Test]
         public async Task Should_start_and_handle_the_status_request()
         {
-            var startupComplete = await Bus.Request<Start, StartupComplete>(InputQueueAddress, new Start("A", Guid.NewGuid()), TestCancellationToken);
+            Response<StartupComplete> startupComplete =
+                await Bus.Request<Start, StartupComplete>(InputQueueAddress, new Start("A", Guid.NewGuid()), TestCancellationToken);
 
-            var status = await Bus.Request<CheckStatus, Status>(InputQueueAddress, new CheckStatus("A"), TestCancellationToken);
+            Response<Status> status = await Bus.Request<CheckStatus, Status>(InputQueueAddress, new CheckStatus("A"), TestCancellationToken);
 
             Assert.AreEqual("A", status.Message.ServiceName);
         }
@@ -59,9 +49,10 @@ namespace MassTransit.Tests.AutomatonymousIntegration
         [Test]
         public async Task Should_start_and_handle_the_status_request_awaited()
         {
-            var startupComplete = await Bus.Request<Start, StartupComplete>(InputQueueAddress, new Start("B", Guid.NewGuid()), TestCancellationToken);
+            Response<StartupComplete> startupComplete =
+                await Bus.Request<Start, StartupComplete>(InputQueueAddress, new Start("B", Guid.NewGuid()), TestCancellationToken);
 
-            var status = await Bus.Request<CheckStatus, Status>(InputQueueAddress, new CheckStatus("B"), TestCancellationToken);
+            Response<Status> status = await Bus.Request<CheckStatus, Status>(InputQueueAddress, new CheckStatus("B"), TestCancellationToken);
 
             Assert.AreEqual("B", status.Message.ServiceName);
         }

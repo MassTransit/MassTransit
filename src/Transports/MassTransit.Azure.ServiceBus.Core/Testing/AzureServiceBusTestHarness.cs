@@ -8,8 +8,6 @@
     public class AzureServiceBusTestHarness :
         BusTestHarness
     {
-        readonly Uri _serviceUri;
-
         Uri _inputQueueAddress;
 
         public AzureServiceBusTestHarness(Uri serviceUri, string sharedAccessKeyName, string sharedAccessKeyValue, string inputQueueName = null)
@@ -17,7 +15,7 @@
             if (serviceUri == null)
                 throw new ArgumentNullException(nameof(serviceUri));
 
-            _serviceUri = serviceUri;
+            HostAddress = serviceUri;
             SharedAccessKeyName = sharedAccessKeyName;
             SharedAccessKeyValue = sharedAccessKeyValue;
 
@@ -37,7 +35,7 @@
         public bool ConfigureMessageScheduler { get; set; }
 
         public override Uri InputQueueAddress => _inputQueueAddress;
-        public Uri HostAddress => _serviceUri;
+        public Uri HostAddress { get; }
 
         public event Action<IServiceBusBusFactoryConfigurator> OnConfigureServiceBusBus;
         public event Action<IServiceBusReceiveEndpointConfigurator> OnConfigureServiceBusReceiveEndpoint;
@@ -56,7 +54,7 @@
         {
             return MassTransit.Bus.Factory.CreateUsingAzureServiceBus(x =>
             {
-                x.Host(_serviceUri, h =>
+                x.Host(HostAddress, h =>
                 {
                     h.SharedAccessSignature(s =>
                     {

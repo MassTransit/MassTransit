@@ -28,10 +28,7 @@
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("split");
-            scope.Set(new
-            {
-                MessageType = TypeMetadataCache<TMessage>.ShortName
-            });
+            scope.Set(new {MessageType = TypeMetadataCache<TMessage>.ShortName});
 
             _next.Probe(scope);
         }

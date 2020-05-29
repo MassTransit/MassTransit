@@ -37,14 +37,16 @@
         {
             lock (_properties)
             {
-                if (_properties.TryGetValue(name, out var property))
+                if (_properties.TryGetValue(name, out IReadProperty<T> property))
                     return property as IReadProperty<T, TProperty>;
 
                 if (_propertyIndex.TryGetValue(name, out var propertyInfo))
                 {
                     if (propertyInfo.PropertyType != typeof(TProperty))
+                    {
                         throw new ArgumentException(
                             $"Property type mismatch, {TypeMetadataCache<TProperty>.ShortName} != {TypeMetadataCache.GetShortName(propertyInfo.PropertyType)}");
+                    }
 
                     var readProperty = new ReadProperty<T, TProperty>(propertyInfo);
 

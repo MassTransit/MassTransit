@@ -12,7 +12,7 @@
     {
         public static IEnumerable<PropertyInfo> GetAllProperties(this Type type)
         {
-            TypeInfo typeInfo = type.GetTypeInfo();
+            var typeInfo = type.GetTypeInfo();
 
             return GetAllProperties(typeInfo);
         }
@@ -21,7 +21,7 @@
         {
             if (typeInfo.BaseType != null)
             {
-                foreach (PropertyInfo prop in GetAllProperties(typeInfo.BaseType))
+                foreach (var prop in GetAllProperties(typeInfo.BaseType))
                     yield return prop;
             }
 
@@ -35,19 +35,19 @@
                 IEnumerable<PropertyInfo> sourceProperties = properties
                     .Concat(typeInfo.ImplementedInterfaces.SelectMany(x => x.GetTypeInfo().DeclaredProperties));
 
-                foreach (PropertyInfo prop in sourceProperties)
+                foreach (var prop in sourceProperties)
                     yield return prop;
 
                 yield break;
             }
 
-            foreach (PropertyInfo info in properties)
+            foreach (var info in properties)
                 yield return info;
         }
 
         public static IEnumerable<Type> GetAllInterfaces(this Type type)
         {
-            TypeInfo typeInfo = type.GetTypeInfo();
+            var typeInfo = type.GetTypeInfo();
 
             return GetAllInterfaces(typeInfo);
         }
@@ -63,11 +63,11 @@
 
         public static IEnumerable<PropertyInfo> GetAllStaticProperties(this Type type)
         {
-            TypeInfo info = type.GetTypeInfo();
+            var info = type.GetTypeInfo();
 
             if (info.BaseType != null)
             {
-                foreach (PropertyInfo prop in GetAllStaticProperties(info.BaseType))
+                foreach (var prop in GetAllStaticProperties(info.BaseType))
                     yield return prop;
             }
 
@@ -75,13 +75,13 @@
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && x.IsStatic)
                 .Select(x => info.GetDeclaredProperty(x.Name.Substring("get_".Length)));
 
-            foreach (PropertyInfo propertyInfo in props)
+            foreach (var propertyInfo in props)
                 yield return propertyInfo;
         }
 
         public static IEnumerable<PropertyInfo> GetStaticProperties(this Type type)
         {
-            TypeInfo info = type.GetTypeInfo();
+            var info = type.GetTypeInfo();
 
             return info.DeclaredMethods
                 .Where(x => x.IsSpecialName && x.Name.StartsWith("get_") && x.IsStatic)
@@ -95,13 +95,13 @@
         /// <returns>True if the type can be constructed, otherwise false.</returns>
         public static bool IsConcrete(this Type type)
         {
-            TypeInfo typeInfo = type.GetTypeInfo();
+            var typeInfo = type.GetTypeInfo();
             return !typeInfo.IsAbstract && !typeInfo.IsInterface;
         }
 
         public static bool IsInterfaceOrConcreteClass(this Type type)
         {
-            TypeInfo typeInfo = type.GetTypeInfo();
+            var typeInfo = type.GetTypeInfo();
             if (typeInfo.IsInterface)
                 return true;
 
@@ -114,7 +114,9 @@
         /// </summary>
         /// <param name="type">The type to evaluate</param>
         /// <param name="assignableType">The type to which the subject type should be checked against</param>
-        /// <returns>True if the type is concrete and can be assigned to the assignableType, otherwise false.</returns>
+        /// <returns>
+        /// True if the type is concrete and can be assigned to the assignableType, otherwise false.
+        /// </returns>
         public static bool IsConcreteAndAssignableTo(this Type type, Type assignableType)
         {
             return IsConcrete(type) && assignableType.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo());
@@ -126,7 +128,9 @@
         /// </summary>
         /// <param name="type">The type to evaluate</param>
         /// <typeparam name="T">The type to which the subject type should be checked against</typeparam>
-        /// <returns>True if the type is concrete and can be assigned to the assignableType, otherwise false.</returns>
+        /// <returns>
+        /// True if the type is concrete and can be assigned to the assignableType, otherwise false.
+        /// </returns>
         public static bool IsConcreteAndAssignableTo<T>(this Type type)
         {
             return IsConcrete(type) && typeof(T).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo());
@@ -139,7 +143,7 @@
         /// <returns>True if the type can be null</returns>
         public static bool IsNullable(this Type type)
         {
-            TypeInfo typeInfo = type.GetTypeInfo();
+            var typeInfo = type.GetTypeInfo();
             return typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>);
         }
 
@@ -151,8 +155,8 @@
         /// <returns>True if the type can be null</returns>
         public static bool IsNullable(this Type type, out Type underlyingType)
         {
-            TypeInfo typeInfo = type.GetTypeInfo();
-            bool isNullable = typeInfo.IsGenericType
+            var typeInfo = type.GetTypeInfo();
+            var isNullable = typeInfo.IsGenericType
                 && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>);
 
             underlyingType = isNullable ? Nullable.GetUnderlyingType(type) : null;
@@ -164,14 +168,20 @@
         /// </summary>
         /// <param name="type">The type</param>
         /// <returns>True if the type is an open generic</returns>
-        public static bool IsOpenGeneric(this Type type) => type.GetTypeInfo().IsOpenGeneric();
+        public static bool IsOpenGeneric(this Type type)
+        {
+            return type.GetTypeInfo().IsOpenGeneric();
+        }
 
         /// <summary>
         /// Determines if the TypeInfo is an open generic with at least one unspecified generic argument
         /// </summary>
         /// <param name="typeInfo">The TypeInfo</param>
         /// <returns>True if the TypeInfo is an open generic</returns>
-        public static bool IsOpenGeneric(this TypeInfo typeInfo) => typeInfo.IsGenericTypeDefinition || typeInfo.ContainsGenericParameters;
+        public static bool IsOpenGeneric(this TypeInfo typeInfo)
+        {
+            return typeInfo.IsGenericTypeDefinition || typeInfo.ContainsGenericParameters;
+        }
 
         /// <summary>
         /// Determines if a type can be null
@@ -180,7 +190,7 @@
         /// <returns>True if the type can be null</returns>
         public static bool CanBeNull(this Type type)
         {
-            TypeInfo typeInfo = type.GetTypeInfo();
+            var typeInfo = type.GetTypeInfo();
             return !typeInfo.IsValueType || type.IsNullable() || type == typeof(string);
         }
 
@@ -214,15 +224,20 @@
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static bool IsAnonymousType(this Type type) => type.GetTypeInfo().IsAnonymousType();
+        public static bool IsAnonymousType(this Type type)
+        {
+            return type.GetTypeInfo().IsAnonymousType();
+        }
 
         /// <summary>
         /// Returns true if the TypeInfo is an anonymous type
         /// </summary>
         /// <param name="typeInfo"></param>
         /// <returns></returns>
-        public static bool IsAnonymousType(this TypeInfo typeInfo) =>
-            typeInfo.HasAttribute<CompilerGeneratedAttribute>() && typeInfo.FullName.Contains("AnonymousType");
+        public static bool IsAnonymousType(this TypeInfo typeInfo)
+        {
+            return typeInfo.HasAttribute<CompilerGeneratedAttribute>() && typeInfo.FullName.Contains("AnonymousType");
+        }
 
         /// <summary>
         /// Returns true if the type is an FSharp type (maybe?)
@@ -231,7 +246,7 @@
         /// <returns></returns>
         public static bool IsFSharpType(this TypeInfo typeInfo)
         {
-            var attributes = typeInfo.GetCustomAttributes();
+            IEnumerable<Attribute> attributes = typeInfo.GetCustomAttributes();
 
             return attributes.Any(attribute => attribute.GetType().FullName == "Microsoft.FSharp.Core.CompilationMappingAttribute");
         }

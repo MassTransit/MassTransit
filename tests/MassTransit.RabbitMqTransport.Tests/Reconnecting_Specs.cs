@@ -13,6 +13,42 @@
     public class Reconnecting_Specs :
         RabbitMqTestFixture
     {
+        [Test]
+        [Explicit]
+        [Category("SlowAF")]
+        public async Task Should_fault_nicely()
+        {
+            await Bus.Publish(new ReconnectMessage {Value = "Before"});
+
+            var beforeFound = await Task.Run(() => _consumer.Received.Select<ReconnectMessage>(x => x.Context.Message.Value == "Before").Any());
+            Assert.IsTrue(beforeFound);
+
+            Console.WriteLine("Okay, restart RabbitMQ");
+
+            for (var i = 0; i < 20; i++)
+            {
+                await Task.Delay(1000);
+
+                Console.Write($"{i}. ");
+
+                var clientFactory = Bus.CreateClientFactory(TestTimeout);
+
+                RequestHandle<PingMessage> request = clientFactory.CreateRequest(new PingMessage());
+
+                Response<PongMessage> response = await request.GetResponse<PongMessage>();
+
+                await clientFactory.DisposeAsync();
+            }
+
+            Console.WriteLine("");
+            Console.WriteLine("Resuming");
+
+            await Bus.Publish(new ReconnectMessage {Value = "After"});
+
+            var afterFound = await Task.Run(() => _consumer.Received.Select<ReconnectMessage>(x => x.Context.Message.Value == "After").Any());
+            Assert.IsTrue(afterFound);
+        }
+
         public Reconnecting_Specs()
         {
             SendEndpointCacheDefaults.MinAge = TimeSpan.FromSeconds(2);
@@ -47,41 +83,6 @@
         public class ReconnectMessage
         {
             public string Value { get; set; }
-        }
-
-
-        [Test, Explicit, Category("SlowAF")]
-        public async Task Should_fault_nicely()
-        {
-            await Bus.Publish(new ReconnectMessage {Value = "Before"});
-
-            bool beforeFound = await Task.Run(() => _consumer.Received.Select<ReconnectMessage>(x => x.Context.Message.Value == "Before").Any());
-            Assert.IsTrue(beforeFound);
-
-            Console.WriteLine("Okay, restart RabbitMQ");
-
-            for (int i = 0; i < 20; i++)
-            {
-                await Task.Delay(1000);
-
-                Console.Write($"{i}. ");
-
-                IClientFactory clientFactory = Bus.CreateClientFactory(TestTimeout);
-
-                RequestHandle<PingMessage> request = clientFactory.CreateRequest(new PingMessage());
-
-                Response<PongMessage> response = await request.GetResponse<PongMessage>();
-
-                await clientFactory.DisposeAsync();
-            }
-
-            Console.WriteLine("");
-            Console.WriteLine("Resuming");
-
-            await Bus.Publish(new ReconnectMessage {Value = "After"});
-
-            bool afterFound = await Task.Run(() => _consumer.Received.Select<ReconnectMessage>(x => x.Context.Message.Value == "After").Any());
-            Assert.IsTrue(afterFound);
         }
     }
 }

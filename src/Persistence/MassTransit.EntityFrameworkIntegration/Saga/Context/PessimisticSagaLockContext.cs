@@ -16,10 +16,10 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
         SagaLockContext<TSaga>
         where TSaga : class, ISaga
     {
-        readonly DbContext _context;
         readonly CancellationToken _cancellationToken;
-        readonly IList<Guid> _instances;
+        readonly DbContext _context;
         readonly ILoadQueryExecutor<TSaga> _executor;
+        readonly IList<Guid> _instances;
 
         public PessimisticSagaLockContext(DbContext context, CancellationToken cancellationToken, IList<Guid> instances, ILoadQueryExecutor<TSaga> executor)
         {
@@ -31,7 +31,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
 
         public async Task<IList<TSaga>> Load()
         {
-            List<TSaga> loaded = new List<TSaga>();
+            var loaded = new List<TSaga>();
 
             foreach (var correlationId in _instances)
             {

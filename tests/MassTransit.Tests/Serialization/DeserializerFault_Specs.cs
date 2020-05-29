@@ -13,19 +13,19 @@ namespace MassTransit.Tests.Serialization
     public class When_the_serialized_message_is_invalid :
         InMemoryTestFixture
     {
-        public When_the_serialized_message_is_invalid()
-        {
-            TestTimeout = TimeSpan.FromSeconds(8);
-        }
-
         [Test]
         public async Task Should_fault()
         {
-            var receiveFault = ConnectPublishHandler<ReceiveFault>();
+            Task<ConsumeContext<ReceiveFault>> receiveFault = ConnectPublishHandler<ReceiveFault>();
 
             await InputQueueSendEndpoint.Send<SubmitOrder>(new { }, context => ApplyStaticMessageToContext(context, Fail));
 
             await receiveFault;
+        }
+
+        public When_the_serialized_message_is_invalid()
+        {
+            TestTimeout = TimeSpan.FromSeconds(8);
         }
 
         void ApplyStaticMessageToContext(SendContext<SubmitOrder> context, string body)
@@ -93,6 +93,7 @@ namespace MassTransit.Tests.Serialization
     {
         using System;
         using System.Collections.Generic;
+        using Newtonsoft.Json;
 
 
         public interface MetaData
@@ -119,8 +120,8 @@ namespace MassTransit.Tests.Serialization
             DateTime Timestamp { get; }
 
             // this works
-            [Newtonsoft.Json.JsonProperty("CustomerNumber", Required = Newtonsoft.Json.Required.DisallowNull,
-                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+            [JsonProperty("CustomerNumber", Required = Required.DisallowNull,
+                NullValueHandling = NullValueHandling.Ignore)]
             int CustomerNumber { get; }
 
             string PaymentCardNumber { get; }

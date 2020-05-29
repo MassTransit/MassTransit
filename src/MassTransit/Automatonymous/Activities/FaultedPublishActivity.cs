@@ -5,6 +5,7 @@ namespace Automatonymous.Activities
     using GreenPipes;
     using MassTransit;
 
+
     public class FaultedPublishActivity<TInstance, TException, TMessage> :
         Activity<TInstance>
         where TInstance : SagaStateMachineInstance
@@ -80,6 +81,7 @@ namespace Automatonymous.Activities
             _publishPipe.Probe(scope);
         }
     }
+
 
     public class FaultedPublishActivity<TInstance, TData, TException, TMessage> :
         Activity<TInstance, TData>

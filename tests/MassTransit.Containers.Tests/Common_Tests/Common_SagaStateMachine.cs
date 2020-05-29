@@ -46,7 +46,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
     }
 
-     public abstract class Common_StateMachine_Filter :
+
+    public abstract class Common_StateMachine_Filter :
         InMemoryTestFixture
     {
         protected readonly TaskCompletionSource<MyId> TaskCompletionSource;
@@ -55,6 +56,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             TaskCompletionSource = GetTask<MyId>();
         }
+
+        protected abstract IRegistration Registration { get; }
 
         [Test]
         public async Task Should_use_scope()
@@ -75,12 +78,12 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
         protected abstract void ConfigureFilter(IConsumePipeConfigurator configurator);
-        protected abstract IRegistration Registration { get; }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.ConfigureSaga<TestInstance>(Registration);
         }
+
         protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
             where T : class
         {
@@ -89,12 +92,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
             configurator.AddBus(provider => BusControl);
         }
 
+
         protected class ScopedFilter<T> :
             IFilter<ConsumeContext<T>>
             where T : class
         {
-            readonly TaskCompletionSource<MyId> _taskCompletionSource;
             readonly MyId _myId;
+            readonly TaskCompletionSource<MyId> _taskCompletionSource;
 
             public ScopedFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId)
             {

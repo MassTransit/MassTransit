@@ -1,15 +1,3 @@
-// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Util.Scanning
 {
     using System;
@@ -94,9 +82,7 @@ namespace MassTransit.Util.Scanning
             IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(OnAssemblyLoadFailure, false, _assemblyFilter.Matches);
 
             foreach (var assembly in assemblies)
-            {
                 Assembly(assembly);
-            }
         }
 
         public void AssembliesAndExecutablesFromPath(string path)
@@ -104,9 +90,7 @@ namespace MassTransit.Util.Scanning
             IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(path, OnAssemblyLoadFailure, true, _assemblyFilter.Matches);
 
             foreach (var assembly in assemblies)
-            {
                 Assembly(assembly);
-            }
         }
 
         public void AssembliesFromPath(string path)
@@ -114,9 +98,7 @@ namespace MassTransit.Util.Scanning
             IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(path, OnAssemblyLoadFailure, false, _assemblyFilter.Matches);
 
             foreach (var assembly in assemblies)
-            {
                 Assembly(assembly);
-            }
         }
 
         public void AssembliesAndExecutablesFromPath(string path, Func<Assembly, bool> assemblyFilter)
@@ -125,9 +107,7 @@ namespace MassTransit.Util.Scanning
                 .Where(assemblyFilter);
 
             foreach (var assembly in assemblies)
-            {
                 Assembly(assembly);
-            }
         }
 
         public void AssembliesFromPath(string path, Func<Assembly, bool> assemblyFilter)
@@ -136,9 +116,7 @@ namespace MassTransit.Util.Scanning
                 .Where(assemblyFilter);
 
             foreach (var assembly in assemblies)
-            {
                 Assembly(assembly);
-            }
         }
 
         public void ExcludeFileNameStartsWith(params string[] startsWith)
@@ -166,19 +144,27 @@ namespace MassTransit.Util.Scanning
             IEnumerable<Assembly> assemblies = AssemblyFinder.FindAssemblies(OnAssemblyLoadFailure, true, _assemblyFilter.Matches);
 
             foreach (var assembly in assemblies)
-            {
                 Assembly(assembly);
-            }
-        }
-
-        static void OnAssemblyLoadFailure(string assemblyName, Exception exception)
-        {
-            Console.WriteLine("MassTransit could not load assembly from " + assemblyName);
         }
 
         public Task<TypeSet> ScanForTypes()
         {
             return AssemblyTypeCache.FindTypes(_assemblies, _filter.Matches);
+        }
+
+        public void TheCallingAssembly()
+        {
+            var callingAssembly = FindTheCallingAssembly();
+
+            if (callingAssembly != null)
+                Assembly(callingAssembly);
+            else
+                throw new ConfigurationException("Could not determine the calling assembly, you may need to explicitly call IAssemblyScanner.Assembly()");
+        }
+
+        static void OnAssemblyLoadFailure(string assemblyName, Exception exception)
+        {
+            Console.WriteLine("MassTransit could not load assembly from " + assemblyName);
         }
 
         public bool Contains(string assemblyName)
@@ -191,20 +177,6 @@ namespace MassTransit.Util.Scanning
         public bool HasAssemblies()
         {
             return _assemblies.Any();
-        }
-
-        public void TheCallingAssembly()
-        {
-            var callingAssembly = FindTheCallingAssembly();
-
-            if (callingAssembly != null)
-            {
-                Assembly(callingAssembly);
-            }
-            else
-            {
-                throw new ConfigurationException("Could not determine the calling assembly, you may need to explicitly call IAssemblyScanner.Assembly()");
-            }
         }
 
         static Assembly FindTheCallingAssembly()
@@ -228,6 +200,7 @@ namespace MassTransit.Util.Scanning
                     }
                 }
             }
+
             return callingAssembly;
         }
     }

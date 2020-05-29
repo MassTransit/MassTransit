@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
-    using NUnit.Framework;
     using System;
+    using NUnit.Framework;
 
 
     static class Configuration

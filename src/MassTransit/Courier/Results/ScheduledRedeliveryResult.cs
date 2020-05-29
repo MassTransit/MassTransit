@@ -9,18 +9,18 @@ namespace MassTransit.Courier.Results
         ExecutionResult,
         CompensationResult
     {
+        public bool IsFailed(out Exception exception)
+        {
+            exception = default;
+            return false;
+        }
+
         public Task Evaluate()
         {
             return TaskUtil.Completed;
         }
 
         public bool IsFaulted(out Exception exception)
-        {
-            exception = default;
-            return false;
-        }
-
-        public bool IsFailed(out Exception exception)
         {
             exception = default;
             return false;

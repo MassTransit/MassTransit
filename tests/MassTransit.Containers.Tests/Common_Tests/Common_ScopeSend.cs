@@ -78,6 +78,12 @@ namespace MassTransit.Containers.Tests.Common_Tests
             TaskCompletionSource = GetTask<MyId>();
         }
 
+        protected abstract IRegistration Registration { get; }
+
+        protected abstract MyId MyId { get; }
+
+        protected abstract ISendEndpointProvider SendEndpointProvider { get; }
+
         [Test]
         public async Task Should_use_scope()
         {
@@ -94,11 +100,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
         protected abstract void ConfigureFilter(ISendPipelineConfigurator sendPipelineConfigurator);
-        protected abstract IRegistration Registration { get; }
-
-        protected abstract MyId MyId { get; }
-
-        protected abstract ISendEndpointProvider SendEndpointProvider { get; }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -117,8 +118,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
             IFilter<SendContext<T>>
             where T : class
         {
-            readonly TaskCompletionSource<MyId> _taskCompletionSource;
             readonly MyId _myId;
+            readonly TaskCompletionSource<MyId> _taskCompletionSource;
 
             public ScopedFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId)
             {

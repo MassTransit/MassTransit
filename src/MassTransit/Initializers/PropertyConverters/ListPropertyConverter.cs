@@ -12,17 +12,15 @@ namespace MassTransit.Initializers.PropertyConverters
         IPropertyConverter<IReadOnlyList<TElement>, IEnumerable<TElement>>,
         IPropertyConverter<IEnumerable<TElement>, IEnumerable<TElement>>
     {
-        public Task<List<TElement>> Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<TElement> input)
-            where TMessage : class
+        Task<IEnumerable<TElement>> IPropertyConverter<IEnumerable<TElement>, IEnumerable<TElement>>.Convert<T>(InitializeContext<T> context,
+            IEnumerable<TElement> input)
         {
             switch (input)
             {
                 case null:
-                    return TaskUtil.Default<List<TElement>>();
-                case List<TElement> list:
-                    return Task.FromResult(list);
+                    return TaskUtil.Default<IEnumerable<TElement>>();
                 default:
-                    return Task.FromResult(input.ToList());
+                    return Task.FromResult(input);
             }
         }
 
@@ -53,15 +51,17 @@ namespace MassTransit.Initializers.PropertyConverters
             }
         }
 
-        Task<IEnumerable<TElement>> IPropertyConverter<IEnumerable<TElement>, IEnumerable<TElement>>.Convert<T>(InitializeContext<T> context,
-            IEnumerable<TElement> input)
+        public Task<List<TElement>> Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<TElement> input)
+            where TMessage : class
         {
             switch (input)
             {
                 case null:
-                    return TaskUtil.Default<IEnumerable<TElement>>();
+                    return TaskUtil.Default<List<TElement>>();
+                case List<TElement> list:
+                    return Task.FromResult(list);
                 default:
-                    return Task.FromResult(input);
+                    return Task.FromResult(input.ToList());
             }
         }
     }
@@ -80,16 +80,25 @@ namespace MassTransit.Initializers.PropertyConverters
             _converter = converter;
         }
 
-        Task<List<TElement>> IPropertyConverter<List<TElement>, IEnumerable<TInputElement>>.Convert<T>(InitializeContext<T> context,
+        Task<IEnumerable<TElement>> IPropertyConverter<IEnumerable<TElement>, IEnumerable<TInputElement>>.Convert<T>(InitializeContext<T> context,
             IEnumerable<TInputElement> elements)
         {
-            return ConvertSync(context, elements);
+            Task<List<TElement>> resultTask = ConvertSync(context, elements);
+            if (resultTask.IsCompleted)
+                return Task.FromResult<IEnumerable<TElement>>(resultTask.Result);
+
+            async Task<IEnumerable<TElement>> ConvertAsync()
+            {
+                return await resultTask.ConfigureAwait(false);
+            }
+
+            return ConvertAsync();
         }
 
         Task<IList<TElement>> IPropertyConverter<IList<TElement>, IEnumerable<TInputElement>>.Convert<T>(InitializeContext<T> context,
             IEnumerable<TInputElement> elements)
         {
-            var resultTask = ConvertSync(context, elements);
+            Task<List<TElement>> resultTask = ConvertSync(context, elements);
             if (resultTask.IsCompleted)
                 return Task.FromResult<IList<TElement>>(resultTask.Result);
 
@@ -104,7 +113,7 @@ namespace MassTransit.Initializers.PropertyConverters
         Task<IReadOnlyList<TElement>> IPropertyConverter<IReadOnlyList<TElement>, IEnumerable<TInputElement>>.Convert<T>(InitializeContext<T> context,
             IEnumerable<TInputElement> elements)
         {
-            var resultTask = ConvertSync(context, elements);
+            Task<List<TElement>> resultTask = ConvertSync(context, elements);
             if (resultTask.IsCompleted)
                 return Task.FromResult<IReadOnlyList<TElement>>(resultTask.Result);
 
@@ -116,19 +125,10 @@ namespace MassTransit.Initializers.PropertyConverters
             return ConvertAsync();
         }
 
-        Task<IEnumerable<TElement>> IPropertyConverter<IEnumerable<TElement>, IEnumerable<TInputElement>>.Convert<T>(InitializeContext<T> context,
+        Task<List<TElement>> IPropertyConverter<List<TElement>, IEnumerable<TInputElement>>.Convert<T>(InitializeContext<T> context,
             IEnumerable<TInputElement> elements)
         {
-            var resultTask = ConvertSync(context, elements);
-            if (resultTask.IsCompleted)
-                return Task.FromResult<IEnumerable<TElement>>(resultTask.Result);
-
-            async Task<IEnumerable<TElement>> ConvertAsync()
-            {
-                return await resultTask.ConfigureAwait(false);
-            }
-
-            return ConvertAsync();
+            return ConvertSync(context, elements);
         }
 
         Task<List<TElement>> ConvertSync<TMessage>(InitializeContext<TMessage> context, IEnumerable<TInputElement> input)
@@ -137,7 +137,7 @@ namespace MassTransit.Initializers.PropertyConverters
             if (input == null)
                 return TaskUtil.Default<List<TElement>>();
 
-            int capacity = 0;
+            var capacity = 0;
             if (input is ICollection<TElement> collection)
             {
                 capacity = collection.Count;
@@ -145,9 +145,9 @@ namespace MassTransit.Initializers.PropertyConverters
                     return Task.FromResult(new List<TElement>());
             }
 
-            List<TElement> results = new List<TElement>(capacity);
+            var results = new List<TElement>(capacity);
             IEnumerator<TInputElement> enumerator = input.GetEnumerator();
-            bool disposeEnumerator = true;
+            var disposeEnumerator = true;
             try
             {
                 async Task<List<TElement>> ConvertAsync(IEnumerator<TInputElement> asyncEnumerator, Task<TElement> elementTask)
@@ -185,7 +185,7 @@ namespace MassTransit.Initializers.PropertyConverters
                 {
                     var current = enumerator.Current;
 
-                    var elementTask = _converter.Convert(context, current);
+                    Task<TElement> elementTask = _converter.Convert(context, current);
                     if (elementTask.IsCompleted)
                         results.Add(elementTask.Result);
                     else

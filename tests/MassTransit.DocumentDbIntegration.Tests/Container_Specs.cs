@@ -15,6 +15,15 @@ namespace MassTransit.DocumentDbIntegration.Tests
         public class Using_the_container_integration :
             InMemoryTestFixture
         {
+            readonly IServiceProvider _provider;
+
+            public Using_the_container_integration()
+            {
+                _provider = new ServiceCollection()
+                    .AddMassTransit(ConfigureRegistration)
+                    .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
+            }
+
             [Test]
             public async Task Should_work_as_expected()
             {
@@ -38,15 +47,6 @@ namespace MassTransit.DocumentDbIntegration.Tests
                 });
 
                 await updated;
-            }
-
-            readonly IServiceProvider _provider;
-
-            public Using_the_container_integration()
-            {
-                _provider = new ServiceCollection()
-                    .AddMassTransit(ConfigureRegistration)
-                    .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
@@ -76,12 +76,11 @@ namespace MassTransit.DocumentDbIntegration.Tests
             SagaStateMachineInstance,
             IVersionedSaga
         {
-            public Guid CorrelationId { get; set; }
-
             public string CurrentState { get; set; }
             public string Key { get; set; }
 
             public string ETag { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

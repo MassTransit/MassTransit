@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests
+﻿namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
     using NUnit.Framework;
@@ -23,9 +11,6 @@ namespace MassTransit.Tests
     public class Serializing_an_object_in_a_header :
         InMemoryTestFixture
     {
-        Task<ConsumeContext<PingMessage>> _handled;
-        TaskCompletionSource<ClaimsIdentity> _header;
-
         [Test]
         public async Task Should_properly_serialize_and_deserialize()
         {
@@ -35,17 +20,20 @@ namespace MassTransit.Tests
                 {
                     IdentityType = "AAD:Claims",
                     IdentityId = 27,
-                    Claims = new[] {"One", "two", "Three"},
+                    Claims = new[] {"One", "two", "Three"}
                 });
             });
 
-            var consumeContext = await _handled;
+            ConsumeContext<PingMessage> consumeContext = await _handled;
 
             var identity = await _header.Task;
 
             Assert.AreEqual(27, identity.IdentityId);
             Assert.AreEqual("AAD:Claims", identity.IdentityType);
         }
+
+        Task<ConsumeContext<PingMessage>> _handled;
+        TaskCompletionSource<ClaimsIdentity> _header;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -60,7 +48,7 @@ namespace MassTransit.Tests
         }
 
 
-        public interface ClaimsIdentity 
+        public interface ClaimsIdentity
         {
             string IdentityType { get; }
             int IdentityId { get; }
@@ -75,6 +63,5 @@ namespace MassTransit.Tests
             public int IdentityId { get; set; }
             public string[] Claims { get; set; }
         }
-
     }
 }

@@ -32,7 +32,6 @@
         void TransportOptions(IEnumerable<KeyValuePair<string, string>> options);
 
         /// <summary>
-        ///
         /// </summary>
         void EnableOptimizeAcknowledge();
 

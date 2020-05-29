@@ -13,8 +13,7 @@
         /// <typeparam name="TLog"></typeparam>
         /// <param name="activityFactory"></param>
         /// <returns></returns>
-        public static IActivityFactory<TActivity, TArguments, TLog> CreateActivityFactory<TActivity, TArguments, TLog>(
-            this IActivityFactory activityFactory)
+        public static IActivityFactory<TActivity, TArguments, TLog> CreateActivityFactory<TActivity, TArguments, TLog>(this IActivityFactory activityFactory)
             where TActivity : class, IExecuteActivity<TArguments>, ICompensateActivity<TLog>
             where TArguments : class
             where TLog : class

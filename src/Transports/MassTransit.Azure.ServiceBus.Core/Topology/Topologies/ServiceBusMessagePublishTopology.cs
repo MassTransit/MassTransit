@@ -117,7 +117,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
 
             builder.Topic = topicHandle;
 
-            foreach (IServiceBusMessagePublishTopology configurator in _implementedMessageTypes)
+            foreach (var configurator in _implementedMessageTypes)
                 configurator.Apply(builder);
         }
 

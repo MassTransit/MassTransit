@@ -1,9 +1,6 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 {
-    using System.Reflection;
-
-    using MassTransit.EntityFrameworkCoreIntegration.Audit;
-    using MassTransit.Tests.AutomatonymousIntegration;
+    using Audit;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Design;
     using Shared;

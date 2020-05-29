@@ -6,11 +6,6 @@ namespace Automatonymous.Requests
     public class RequestState :
         SagaStateMachineInstance
     {
-        /// <summary>
-        /// Same as RequestId from the original request
-        /// </summary>
-        public Guid CorrelationId { get; set; }
-
         public int CurrentState { get; set; }
 
         public Guid? ConversationId { get; set; }
@@ -27,5 +22,10 @@ namespace Automatonymous.Requests
         /// The saga address where the request should be redelivered
         /// </summary>
         public Uri SagaAddress { get; set; }
+
+        /// <summary>
+        /// Same as RequestId from the original request
+        /// </summary>
+        public Guid CorrelationId { get; set; }
     }
 }

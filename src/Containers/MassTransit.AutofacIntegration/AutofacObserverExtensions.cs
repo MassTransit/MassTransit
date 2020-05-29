@@ -9,7 +9,7 @@
     public static class AutofacObserverExtensions
     {
         /// <summary>
-        /// Registers an <see cref="IConsumeObserver"/> which resolves the actual observer from the container lifetime scope
+        /// Registers an <see cref="IConsumeObserver" /> which resolves the actual observer from the container lifetime scope
         /// </summary>
         /// <param name="connector"></param>
         /// <returns></returns>
@@ -21,7 +21,7 @@
         }
 
         /// <summary>
-        /// Registers an <see cref="IConsumeObserver"/> which resolves the actual observer from the container lifetime scope
+        /// Registers an <see cref="IConsumeObserver" /> which resolves the actual observer from the container lifetime scope
         /// </summary>
         /// <param name="connector"></param>
         /// <param name="lifetimeScope">The default lifetime scope</param>
@@ -34,7 +34,7 @@
         }
 
         /// <summary>
-        /// Registers an <see cref="IConsumeMessageObserver{T}"/> which resolves the actual observer from the container lifetime scope
+        /// Registers an <see cref="IConsumeMessageObserver{T}" /> which resolves the actual observer from the container lifetime scope
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="connector"></param>
@@ -48,7 +48,7 @@
         }
 
         /// <summary>
-        /// Registers an <see cref="IConsumeMessageObserver{T}"/> which resolves the actual observer from the container lifetime scope
+        /// Registers an <see cref="IConsumeMessageObserver{T}" /> which resolves the actual observer from the container lifetime scope
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="connector"></param>

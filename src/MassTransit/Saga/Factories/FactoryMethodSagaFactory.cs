@@ -35,7 +35,7 @@ namespace MassTransit.Saga.Factories
             if (!context.CorrelationId.HasValue)
                 throw new SagaException("The correlationId was not present and the saga could not be created", typeof(TSaga), typeof(TMessage));
 
-            TSaga instance = _factoryMethod(context);
+            var instance = _factoryMethod(context);
 
             var proxy = new NewSagaConsumeContext<TSaga, TMessage>(context, instance);
 

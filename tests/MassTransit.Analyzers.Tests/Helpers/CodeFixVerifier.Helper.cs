@@ -37,7 +37,9 @@ namespace MassTransit.Analyzers.Tests
         /// </summary>
         /// <param name="diagnostics">The Diagnostics that existed in the code before the CodeFix was applied</param>
         /// <param name="newDiagnostics">The Diagnostics that exist in the code after the CodeFix was applied</param>
-        /// <returns>A list of Diagnostics that only surfaced in the code after the CodeFix was applied</returns>
+        /// <returns>
+        /// A list of Diagnostics that only surfaced in the code after the CodeFix was applied
+        /// </returns>
         static IEnumerable<Diagnostic> GetNewDiagnostics(IEnumerable<Diagnostic> diagnostics, IEnumerable<Diagnostic> newDiagnostics)
         {
             Diagnostic[] oldArray = diagnostics.OrderBy(d => d.Location.SourceSpan.Start).ToArray();

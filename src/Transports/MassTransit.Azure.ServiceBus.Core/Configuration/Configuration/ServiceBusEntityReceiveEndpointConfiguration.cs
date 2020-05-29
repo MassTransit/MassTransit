@@ -97,11 +97,6 @@
             set => _configurator.UserMetadata = value;
         }
 
-        public virtual void SelectBasicTier()
-        {
-            _settings.SelectBasicTier();
-        }
-
         public TimeSpan MessageWaitTimeout
         {
             set => _settings.MessageWaitTimeout = value;
@@ -110,6 +105,11 @@
         public TimeSpan MaxAutoRenewDuration
         {
             set => _settings.MaxAutoRenewDuration = value;
+        }
+
+        public virtual void SelectBasicTier()
+        {
+            _settings.SelectBasicTier();
         }
 
         public override IEnumerable<ValidationResult> Validate()

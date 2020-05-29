@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit
+﻿namespace MassTransit
 {
     using System;
     using System.Threading;
@@ -30,7 +18,7 @@ namespace MassTransit
         /// <param name="cancellationToken">To cancel the send from happening</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task Publish<T>(this IPublishEndpoint endpoint, T message, Action<PublishContext<T>> callback,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             where T : class
         {
             return endpoint.Publish(message, Pipe.Execute(callback), cancellationToken);
@@ -46,7 +34,7 @@ namespace MassTransit
         /// <param name="cancellationToken">To cancel the send from happening</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task Publish<T>(this IPublishEndpoint endpoint, T message, Func<PublishContext<T>, Task> callback,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             where T : class
         {
             return endpoint.Publish(message, Pipe.ExecuteAsync(callback), cancellationToken);
@@ -61,7 +49,7 @@ namespace MassTransit
         /// <param name="cancellationToken">To cancel the send from happening</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task Publish(this IPublishEndpoint endpoint, object message, Action<PublishContext> callback,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return endpoint.Publish(message, Pipe.Execute(callback), cancellationToken);
         }
@@ -75,7 +63,7 @@ namespace MassTransit
         /// <param name="cancellationToken">To cancel the send from happening</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task Publish(this IPublishEndpoint endpoint, object message, Func<PublishContext, Task> callback,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return endpoint.Publish(message, Pipe.ExecuteAsync(callback), cancellationToken);
         }
@@ -90,7 +78,7 @@ namespace MassTransit
         /// <param name="cancellationToken">To cancel the send from happening</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task Publish(this IPublishEndpoint endpoint, object message, Type messageType, Action<PublishContext> callback,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return endpoint.Publish(message, messageType, Pipe.Execute(callback), cancellationToken);
         }
@@ -105,7 +93,7 @@ namespace MassTransit
         /// <param name="cancellationToken">To cancel the send from happening</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task Publish(this IPublishEndpoint endpoint, object message, Type messageType, Func<PublishContext, Task> callback,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
         {
             return endpoint.Publish(message, messageType, Pipe.ExecuteAsync(callback), cancellationToken);
         }
@@ -120,7 +108,7 @@ namespace MassTransit
         /// <param name="cancellationToken">To cancel the send from happening</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task Publish<T>(this IPublishEndpoint endpoint, object values, Action<PublishContext<T>> callback,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             where T : class
         {
             return endpoint.Publish(values, Pipe.Execute(callback), cancellationToken);
@@ -136,7 +124,7 @@ namespace MassTransit
         /// <param name="cancellationToken">To cancel the send from happening</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task Publish<T>(this IPublishEndpoint endpoint, object values, Func<PublishContext<T>, Task> callback,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             where T : class
         {
             return endpoint.Publish(values, Pipe.ExecuteAsync(callback), cancellationToken);

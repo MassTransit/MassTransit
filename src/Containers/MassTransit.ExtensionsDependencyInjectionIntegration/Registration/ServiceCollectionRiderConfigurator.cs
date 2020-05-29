@@ -19,7 +19,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         public IServiceCollection Collection { get; }
 
         public virtual void SetRiderFactory<T>(T riderFactory)
-            where T : IRiderRegistrationFactory<IServiceProvider>
+            where T : IRegistrationRiderFactory<IServiceProvider>
         {
             if (riderFactory == null)
                 throw new ArgumentNullException(nameof(riderFactory));

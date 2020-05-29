@@ -17,8 +17,8 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
         where TSaga : class, IVersionedSaga
         where TMessage : class
     {
-        readonly DatabaseContext<TSaga> _context;
         readonly ConsumeContext<TMessage> _consumeContext;
+        readonly DatabaseContext<TSaga> _context;
         readonly ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> _factory;
 
         public DocumentDbSagaRepositoryContext(DatabaseContext<TSaga> context, ConsumeContext<TMessage> consumeContext,

@@ -24,7 +24,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
-            var context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopped);
+            Task<ConnectionContext> context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopped);
 
             IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
 
@@ -57,7 +57,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
             var connection = new ServiceBusConnection(endpoint, settings.TransportType, retryPolicy)
             {
                 TokenProvider = settings.TokenProvider,
-                OperationTimeout = settings.OperationTimeout,
+                OperationTimeout = settings.OperationTimeout
             };
 
             var managementClient = new ManagementClient(endpoint, settings.TokenProvider);

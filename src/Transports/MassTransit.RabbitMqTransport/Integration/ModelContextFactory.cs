@@ -24,7 +24,7 @@
         {
             IAsyncPipeContextAgent<ModelContext> asyncContext = supervisor.AddAsyncContext<ModelContext>();
 
-            var context = CreateModel(asyncContext, supervisor.Stopped);
+            Task<ModelContext> context = CreateModel(asyncContext, supervisor.Stopped);
 
             void HandleShutdown(object sender, ShutdownEventArgs args)
             {

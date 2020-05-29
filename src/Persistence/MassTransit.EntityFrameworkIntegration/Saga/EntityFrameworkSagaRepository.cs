@@ -50,7 +50,7 @@
 
         static ISagaRepository<TSaga> CreateRepository(ISagaDbContextFactory<TSaga> dbContextFactory, ISagaRepositoryLockStrategy<TSaga> lockStrategy)
         {
-            var consumeContextFactory = new SagaConsumeContextFactory<DbContext,TSaga>();
+            var consumeContextFactory = new SagaConsumeContextFactory<DbContext, TSaga>();
 
             var repositoryFactory =
                 new EntityFrameworkSagaRepositoryContextFactory<TSaga>(dbContextFactory, consumeContextFactory, lockStrategy);

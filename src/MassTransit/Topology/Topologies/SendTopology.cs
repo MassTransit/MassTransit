@@ -92,9 +92,7 @@
         {
             IMessageSendTopologyConvention[] conventions;
             lock (_lock)
-            {
                 conventions = _conventions.ToArray();
-            }
 
             foreach (var convention in conventions)
             {

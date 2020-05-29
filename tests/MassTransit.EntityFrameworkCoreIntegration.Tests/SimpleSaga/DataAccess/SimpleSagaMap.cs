@@ -1,13 +1,14 @@
 ﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SimpleSaga.DataAccess
 {
     using Mappings;
+    using MassTransit.Tests.Saga;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 
-    class SimpleSagaMap : SagaClassMap<MassTransit.Tests.Saga.SimpleSaga>
+    class SimpleSagaMap : SagaClassMap<SimpleSaga>
     {
-        protected override void Configure(EntityTypeBuilder<MassTransit.Tests.Saga.SimpleSaga> entity, ModelBuilder model)
+        protected override void Configure(EntityTypeBuilder<SimpleSaga> entity, ModelBuilder model)
         {
             entity.Property(x => x.Name).HasMaxLength(40);
             entity.Property(x => x.Initiated);

@@ -23,7 +23,7 @@
             await Harness.Start();
 
             // Need the bus to be started before we can set the manager for our Consumer Factory (so it can be injected into the consumers on creation);
-            var hubLifetimeManager = CreateLifetimeManager();
+            MassTransitHubLifetimeManager<THub> hubLifetimeManager = CreateLifetimeManager();
             BackplaneHarness.SetHubLifetimeManager(hubLifetimeManager);
         }
 

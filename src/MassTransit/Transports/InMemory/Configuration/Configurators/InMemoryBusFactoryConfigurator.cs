@@ -24,11 +24,6 @@ namespace MassTransit.Transports.InMemory.Configurators
             busConfiguration.BusEndpointConfiguration.Consume.Configurator.AutoStart = true;
         }
 
-        public override bool AutoStart
-        {
-            set { }
-        }
-
         public IBusControl CreateBus()
         {
             var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
@@ -38,6 +33,11 @@ namespace MassTransit.Transports.InMemory.Configurators
             var builder = new ConfigurationBusBuilder(_busConfiguration, busReceiveEndpointConfiguration);
 
             return builder.Build();
+        }
+
+        public override bool AutoStart
+        {
+            set { }
         }
 
         public void Publish<T>(Action<IInMemoryMessagePublishTopologyConfigurator<T>> configureTopology)

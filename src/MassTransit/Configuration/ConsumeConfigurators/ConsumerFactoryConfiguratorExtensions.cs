@@ -27,9 +27,9 @@ namespace MassTransit.ConsumeConfigurators
                 .Where(x => !(HasProtectedDefaultConstructor(x.MessageType) || HasSinglePublicConstructor(x.MessageType)))
                 .Select(x =>
                     $"The {TypeMetadataCache.GetShortName(x.MessageType)} message should have a public or protected default constructor."
-                        + " Without an available constructor, MassTransit will initialize new message instances"
-                        + " without calling a constructor, which can lead to unpredictable behavior if the message"
-                        + " depends upon logic in the constructor to be executed.")
+                    + " Without an available constructor, MassTransit will initialize new message instances"
+                    + " without calling a constructor, which can lead to unpredictable behavior if the message"
+                    + " depends upon logic in the constructor to be executed.")
                 .Select(message => configurator.Warning("Message", message));
 
             foreach (var message in warningForMessages)
@@ -55,7 +55,7 @@ namespace MassTransit.ConsumeConfigurators
         static bool HasSinglePublicConstructor(Type type)
         {
             return type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
-                .All(constructorInfo => !constructorInfo.GetParameters().Any())
+                    .All(constructorInfo => !constructorInfo.GetParameters().Any())
                 && type.GetConstructors().Length == 1;
         }
     }

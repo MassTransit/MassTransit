@@ -7,8 +7,8 @@ namespace MassTransit.Initializers
         where TInput : class
     {
         /// <summary>
-        /// Return the factory to create a property provider for the specified type <typeparamref name="TResult"/> using the
-        /// <paramref name="propertyInfo"/> as the source.
+        /// Return the factory to create a property provider for the specified type <typeparamref name="TResult" /> using the
+        /// <paramref name="propertyInfo" /> as the source.
         /// </summary>
         /// <param name="propertyInfo">The input property</param>
         /// <param name="provider"></param>

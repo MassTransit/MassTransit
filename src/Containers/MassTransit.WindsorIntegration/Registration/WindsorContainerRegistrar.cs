@@ -188,8 +188,10 @@ namespace MassTransit.WindsorIntegration.Registration
             where T : class
         {
             if (!_container.Kernel.HasComponent(typeof(T)))
+            {
                 _container.Register(Component.For<T>().UsingFactoryMethod(kernel => factoryMethod(kernel.Resolve<IConfigurationServiceProvider>()))
                     .LifestyleSingleton());
+            }
         }
 
         public void RegisterSingleInstance<T>(T instance)
@@ -211,6 +213,8 @@ namespace MassTransit.WindsorIntegration.Registration
             return kernel.Resolve<IClientFactory>();
         }
     }
+
+
     public class WindsorContainerMediatorRegistrar :
         WindsorContainerRegistrar
     {

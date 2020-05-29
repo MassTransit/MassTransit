@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace Automatonymous.Activities
+﻿namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
@@ -23,9 +11,9 @@ namespace Automatonymous.Activities
         where TRequest : class
         where TResponse : class
     {
-        readonly ServiceAddressProvider<TInstance> _serviceAddressProvider;
-        readonly EventMessageFactory<TInstance, TRequest> _messageFactory;
         readonly AsyncEventMessageFactory<TInstance, TRequest> _asyncMessageFactory;
+        readonly EventMessageFactory<TInstance, TRequest> _messageFactory;
+        readonly ServiceAddressProvider<TInstance> _serviceAddressProvider;
 
         public RequestActivity(Request<TInstance, TRequest, TResponse> request, EventMessageFactory<TInstance, TRequest> messageFactory)
             : base(request)
@@ -105,9 +93,9 @@ namespace Automatonymous.Activities
         where TRequest : class
         where TResponse : class
     {
-        readonly ServiceAddressProvider<TInstance, TData> _serviceAddressProvider;
-        readonly EventMessageFactory<TInstance, TData, TRequest> _messageFactory;
         readonly AsyncEventMessageFactory<TInstance, TData, TRequest> _asyncMessageFactory;
+        readonly EventMessageFactory<TInstance, TData, TRequest> _messageFactory;
+        readonly ServiceAddressProvider<TInstance, TData> _serviceAddressProvider;
 
         public RequestActivity(Request<TInstance, TRequest, TResponse> request, EventMessageFactory<TInstance, TData, TRequest> messageFactory)
             : base(request)

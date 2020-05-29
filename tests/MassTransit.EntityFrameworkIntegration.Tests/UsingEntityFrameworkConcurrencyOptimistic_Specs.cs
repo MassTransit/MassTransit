@@ -5,7 +5,6 @@
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
     using System.Threading.Tasks;
-    using EntityFrameworkIntegration;
     using GreenPipes;
     using MassTransit.Saga;
     using NUnit.Framework;
@@ -19,61 +18,28 @@
     public class When_using_EntityFrameworkConcurrencyOptimistic :
         InMemoryTestFixture
     {
-        ChoirStateMachine _machine;
-        readonly ISagaDbContextFactory<ChoirStateOptimistic> _sagaDbContextFactory;
-        readonly Lazy<ISagaRepository<ChoirStateOptimistic>> _repository;
-
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            _machine = new ChoirStateMachine();
-
-            configurator.UseRetry(x =>
-            {
-                x.Handle<DbUpdateConcurrencyException>();
-                x.Immediate(5);
-            });
-            configurator.StateMachineSaga(_machine, _repository.Value);
-        }
-
-        public When_using_EntityFrameworkConcurrencyOptimistic()
-        {
-            _sagaDbContextFactory = new DelegateSagaDbContextFactory<ChoirStateOptimistic>(() =>
-                new ChoirStateOptimisticSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
-
-            _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() =>
-                EntityFrameworkSagaRepository<ChoirStateOptimistic>.CreateOptimistic(_sagaDbContextFactory));
-        }
-
-        async Task<ChoirStateOptimistic> GetSaga(Guid id)
-        {
-            using (var dbContext = _sagaDbContextFactory.Create())
-            {
-                return await dbContext.Set<ChoirStateOptimistic>().SingleOrDefaultAsync(x => x.CorrelationId == id);
-            }
-        }
-
         [Test]
         public async Task Should_capture_all_events_many_sagas()
         {
             var tasks = new List<Task>();
 
-            Guid[] sagaIds = new Guid[20];
-            for (int i = 0; i < 20; i++)
+            var sagaIds = new Guid[20];
+            for (var i = 0; i < 20; i++)
             {
-                Guid correlationId = NewId.NextGuid();
+                var correlationId = NewId.NextGuid();
 
                 await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
 
                 sagaIds[i] = correlationId;
             }
 
-            for (int i = 0; i < 20; i++)
+            for (var i = 0; i < 20; i++)
             {
                 Guid? sagaId = await _repository.Value.ShouldContainSaga(sagaIds[i], TestTimeout);
                 Assert.IsTrue(sagaId.HasValue);
             }
 
-            for (int i = 0; i < 20; i++)
+            for (var i = 0; i < 20; i++)
             {
                 tasks.Add(InputQueueSendEndpoint.Send(new Bass
                 {
@@ -102,7 +68,7 @@
 
             foreach (var sid in sagaIds)
             {
-                var sagaId = await _repository.Value.ShouldContainSaga(x => x.CorrelationId == sid
+                Guid? sagaId = await _repository.Value.ShouldContainSaga(x => x.CorrelationId == sid
                     && x.CurrentState == _machine.Harmony.Name, TestTimeout);
 
                 Assert.IsTrue(sagaId.HasValue);
@@ -112,7 +78,7 @@
         [Test]
         public async Task Should_capture_all_events_single_saga()
         {
-            Guid correlationId = Guid.NewGuid();
+            var correlationId = Guid.NewGuid();
 
             await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
 
@@ -148,9 +114,42 @@
 
             Assert.IsTrue(sagaId.HasValue);
 
-            ChoirStateOptimistic instance = await GetSaga(correlationId);
+            var instance = await GetSaga(correlationId);
 
             Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
+        }
+
+        ChoirStateMachine _machine;
+        readonly ISagaDbContextFactory<ChoirStateOptimistic> _sagaDbContextFactory;
+        readonly Lazy<ISagaRepository<ChoirStateOptimistic>> _repository;
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _machine = new ChoirStateMachine();
+
+            configurator.UseRetry(x =>
+            {
+                x.Handle<DbUpdateConcurrencyException>();
+                x.Immediate(5);
+            });
+            configurator.StateMachineSaga(_machine, _repository.Value);
+        }
+
+        public When_using_EntityFrameworkConcurrencyOptimistic()
+        {
+            _sagaDbContextFactory = new DelegateSagaDbContextFactory<ChoirStateOptimistic>(() =>
+                new ChoirStateOptimisticSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+
+            _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() =>
+                EntityFrameworkSagaRepository<ChoirStateOptimistic>.CreateOptimistic(_sagaDbContextFactory));
+        }
+
+        async Task<ChoirStateOptimistic> GetSaga(Guid id)
+        {
+            using (var dbContext = _sagaDbContextFactory.Create())
+            {
+                return await dbContext.Set<ChoirStateOptimistic>().SingleOrDefaultAsync(x => x.CorrelationId == id);
+            }
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

@@ -3,7 +3,6 @@
     using System;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using MassTransit;
     using MassTransit.Saga;
     using Messages;
     using Newtonsoft.Json;
@@ -23,6 +22,8 @@
 
         public string Name { get; private set; }
 
+        public string Username { get; set; }
+
         public Task Consume(ConsumeContext<InitiateSimpleSaga> context)
         {
             Initiated = true;
@@ -34,8 +35,6 @@
         public Guid CorrelationId { get; set; }
 
         public string ETag { get; set; }
-
-        public string Username { get; set; }
 
         public Task Consume(ConsumeContext<ObservableSagaMessage> message)
         {

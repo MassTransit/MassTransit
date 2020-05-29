@@ -1,19 +1,17 @@
 ﻿namespace MassTransit.RabbitMqTransport.Tests
 {
-    using System;
-    using System.Runtime.Serialization;
-    using System.Threading.Tasks;
-    using GreenPipes;
-    using NUnit.Framework;
-    using Shouldly;
-    using TestFramework.Messages;
-
-
     namespace ObserverTests
     {
+        using System;
+        using System.Runtime.Serialization;
         using System.Threading;
+        using System.Threading.Tasks;
+        using GreenPipes;
         using GreenPipes.Internals.Extensions;
+        using NUnit.Framework;
+        using Shouldly;
         using TestFramework;
+        using TestFramework.Messages;
 
 
         [TestFixture]
@@ -59,6 +57,22 @@
             }
 
             [Test]
+            public async Task Should_not_invoke_post_sent_on_exception()
+            {
+                var observer = new PublishObserver(this);
+                using (Bus.ConnectPublishObserver(observer))
+                {
+                    Assert.That(
+                        async () => await Bus.Publish(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
+                        Throws.TypeOf<SerializationException>());
+
+                    await observer.SendFaulted;
+
+                    observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
+                }
+            }
+
+            [Test]
             public async Task Should_not_invoke_the_send_observer_prior_to_send()
             {
                 var observer = new PublishObserver(this);
@@ -73,22 +87,6 @@
 
                         Assert.That(async () => await sendObserver.PreSent.OrTimeout(s: 5), Throws.TypeOf<TimeoutException>());
                     }
-                }
-            }
-
-            [Test]
-            public async Task Should_not_invoke_post_sent_on_exception()
-            {
-                var observer = new PublishObserver(this);
-                using (Bus.ConnectPublishObserver(observer))
-                {
-                    Assert.That(
-                        async () => await Bus.Publish(new PingMessage(), Pipe.Execute<SendContext>(x => x.Serializer = null)),
-                        Throws.TypeOf<SerializationException>());
-
-                    await observer.SendFaulted;
-
-                    observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
                 }
             }
         }
@@ -138,9 +136,9 @@
             readonly TaskCompletionSource<SendContext> _postSend;
             readonly TaskCompletionSource<SendContext> _preSend;
             readonly TaskCompletionSource<SendContext> _sendFaulted;
+            int _postSentCount;
 
             int _preSentCount;
-            int _postSentCount;
             int _sendFaultCount;
 
             public SendObserver(AsyncTestFixture fixture)

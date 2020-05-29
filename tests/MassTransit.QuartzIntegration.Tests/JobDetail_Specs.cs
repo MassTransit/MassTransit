@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.QuartzIntegration.Tests
+﻿namespace MassTransit.QuartzIntegration.Tests
 {
     using System;
     using System.Threading;
@@ -28,14 +16,14 @@ namespace MassTransit.QuartzIntegration.Tests
         public async Task Should_return_the_properties()
         {
             var factory = new StdSchedulerFactory();
-            IScheduler scheduler = await factory.GetScheduler().ConfigureAwait(false);
+            var scheduler = await factory.GetScheduler().ConfigureAwait(false);
             await scheduler.Start().ConfigureAwait(false);
 
-            IJobDetail jobDetail = JobBuilder.Create<MyJob>()
+            var jobDetail = JobBuilder.Create<MyJob>()
                 .UsingJobData("Body", "By Jake")
                 .Build();
 
-            ITrigger trigger = TriggerBuilder.Create()
+            var trigger = TriggerBuilder.Create()
                 .ForJob(jobDetail)
                 .StartAt(DateTime.UtcNow + TimeSpan.FromSeconds(1))
                 .Build();
@@ -51,15 +39,16 @@ namespace MassTransit.QuartzIntegration.Tests
         public async Task Should_return_the_properties_with_custom_factory()
         {
             var factory = new StdSchedulerFactory();
-            IScheduler scheduler = await factory.GetScheduler().ConfigureAwait(false);
+            var scheduler = await factory.GetScheduler().ConfigureAwait(false);
             scheduler.JobFactory = new MassTransitJobFactory(null);
-            await scheduler.Start().ConfigureAwait(false);;
+            await scheduler.Start().ConfigureAwait(false);
+            ;
 
-            IJobDetail jobDetail = JobBuilder.Create<MyJob>()
+            var jobDetail = JobBuilder.Create<MyJob>()
                 .UsingJobData("Body", "By Jake")
                 .Build();
 
-            ITrigger trigger = TriggerBuilder.Create()
+            var trigger = TriggerBuilder.Create()
                 .ForJob(jobDetail)
                 .StartAt(DateTime.UtcNow + TimeSpan.FromSeconds(1))
                 .Build();

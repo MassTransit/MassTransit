@@ -15,9 +15,9 @@
         IReceiveEndpointConfiguration
     {
         readonly Lazy<IConsumePipe> _consumePipe;
+        readonly IList<IReceiveEndpointDependency> _dependencies;
         readonly IList<string> _lateConfigurationKeys;
         readonly IList<IReceiveEndpointSpecification> _specifications;
-        readonly IList<IReceiveEndpointDependency> _dependencies;
         IReceiveEndpoint _receiveEndpoint;
 
         protected ReceiveEndpointConfiguration(IHostConfiguration hostConfiguration, IEndpointConfiguration endpointConfiguration)
@@ -51,13 +51,6 @@
             return EndpointObservers.Connect(observer);
         }
 
-        public void AddDependency(IReceiveEndpointObserverConnector connector)
-        {
-            var dependency = new ReceiveEndpointDependency(connector);
-
-            _dependencies.Add(dependency);
-        }
-
         public override IEnumerable<ValidationResult> Validate()
         {
             foreach (var result in _specifications.SelectMany(x => x.Validate()))
@@ -88,6 +81,20 @@
             protected set => _receiveEndpoint = value;
         }
 
+        public virtual IReceivePipe CreateReceivePipe()
+        {
+            return Receive.CreatePipe(CreateConsumePipe(), Serialization.Deserializer);
+        }
+
+        public Task Dependencies => Task.WhenAll(_dependencies.Select(x => x.Ready));
+
+        public void AddDependency(IReceiveEndpointObserverConnector connector)
+        {
+            var dependency = new ReceiveEndpointDependency(connector);
+
+            _dependencies.Add(dependency);
+        }
+
         protected void ApplySpecifications(IReceiveEndpointBuilder builder)
         {
             for (var i = 0; i < _specifications.Count; i++)
@@ -99,17 +106,10 @@
             _specifications.Add(specification);
         }
 
-        public virtual IReceivePipe CreateReceivePipe()
-        {
-            return Receive.CreatePipe(CreateConsumePipe(), Serialization.Deserializer);
-        }
-
         protected virtual IConsumePipe CreateConsumePipe()
         {
             return _consumePipe.Value;
         }
-
-        public Task Dependencies => Task.WhenAll(_dependencies.Select(x => x.Ready));
 
         protected void Changed(string key)
         {

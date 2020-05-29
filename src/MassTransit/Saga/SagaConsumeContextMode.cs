@@ -15,6 +15,6 @@ namespace MassTransit.Saga
         /// <summary>
         /// New saga inserted prior to event
         /// </summary>
-        Insert = 2,
+        Insert = 2
     }
 }

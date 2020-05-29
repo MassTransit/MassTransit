@@ -7,7 +7,6 @@ namespace MassTransit.Saga
 
 
     /// <summary>
-    ///
     /// </summary>
     /// <typeparam name="TSaga"></typeparam>
     public interface ISagaRepositoryContextFactory<TSaga> :
@@ -15,7 +14,7 @@ namespace MassTransit.Saga
         where TSaga : class, ISaga
     {
         /// <summary>
-        /// Create a <see cref="SagaRepositoryContext{TSaga,T}"/> and send it to the next pipe.
+        /// Create a <see cref="SagaRepositoryContext{TSaga,T}" /> and send it to the next pipe.
         /// </summary>
         /// <param name="context"></param>
         /// <param name="next"></param>
@@ -25,7 +24,7 @@ namespace MassTransit.Saga
             where T : class;
 
         /// <summary>
-        /// Create a <see cref="SagaRepositoryQueryContext{TSaga,T}"/> and send it to the next pipe.
+        /// Create a <see cref="SagaRepositoryQueryContext{TSaga,T}" /> and send it to the next pipe.
         /// </summary>
         /// <param name="context"></param>
         /// <param name="query"></param>
@@ -36,7 +35,7 @@ namespace MassTransit.Saga
             where T : class;
 
         /// <summary>
-        /// Create a <see cref="SagaRepositoryContext{TSaga}"/> and send it to the next pipe.
+        /// Create a <see cref="SagaRepositoryContext{TSaga}" /> and send it to the next pipe.
         /// </summary>
         /// <param name="asyncMethod"></param>
         /// <param name="cancellationToken"></param>

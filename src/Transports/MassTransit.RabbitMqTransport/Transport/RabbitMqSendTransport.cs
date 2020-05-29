@@ -21,6 +21,8 @@
         ISendTransport,
         IAsyncDisposable
     {
+        static readonly DateTimeOffsetTypeConverter _dateTimeOffsetConverter = new DateTimeOffsetTypeConverter();
+        static readonly DateTimeTypeConverter _dateTimeConverter = new DateTimeTypeConverter();
         readonly RabbitMqSendTransportContext _context;
 
         public RabbitMqSendTransport(RabbitMqSendTransportContext context)
@@ -62,10 +64,10 @@
             IPipe<ModelContext>
             where T : class
         {
+            readonly CancellationToken _cancellationToken;
             readonly RabbitMqSendTransportContext _context;
             readonly T _message;
             readonly IPipe<SendContext<T>> _pipe;
-            readonly CancellationToken _cancellationToken;
 
             public SendPipe(RabbitMqSendTransportContext context, T message, IPipe<SendContext<T>> pipe, CancellationToken
                 cancellationToken)
@@ -97,7 +99,7 @@
                     exchange = "";
                 }
 
-                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
+                StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
                 try
                 {
                     if (_context.SendObservers.Count > 0)
@@ -125,8 +127,10 @@
                         properties.CorrelationId = context.CorrelationId.ToString();
 
                     if (context.TimeToLive.HasValue)
+                    {
                         properties.Expiration = (context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1)).TotalMilliseconds
                             .ToString("F0", CultureInfo.InvariantCulture);
+                    }
 
                     if (context.RequestId.HasValue && (context.ResponseAddress?.AbsolutePath?.EndsWith(RabbitMqExchangeNames.ReplyTo) ?? false))
                         context.BasicProperties.ReplyTo = RabbitMqExchangeNames.ReplyTo;
@@ -162,7 +166,7 @@
 
             static void SetHeaders(IDictionary<string, object> dictionary, SendHeaders headers)
             {
-                foreach (var header in headers.GetAll())
+                foreach (KeyValuePair<string, object> header in headers.GetAll())
                 {
                     if (header.Value == null)
                     {
@@ -208,9 +212,5 @@
                 }
             }
         }
-
-
-        static readonly DateTimeOffsetTypeConverter _dateTimeOffsetConverter = new DateTimeOffsetTypeConverter();
-        static readonly DateTimeTypeConverter _dateTimeConverter = new DateTimeTypeConverter();
     }
 }

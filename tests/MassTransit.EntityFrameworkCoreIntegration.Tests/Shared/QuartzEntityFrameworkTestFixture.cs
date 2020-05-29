@@ -12,7 +12,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Shared
         where TTestDbParameters : ITestDbParameters, new()
         where TDbContext : DbContext
     {
-        ISendEndpoint _quartzEndpoint;
         IScheduler _scheduler;
         TimeSpan _testOffset;
 
@@ -24,7 +23,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Shared
 
         protected Uri QuartzAddress { get; }
 
-        protected ISendEndpoint QuartzEndpoint => _quartzEndpoint;
+        protected ISendEndpoint QuartzEndpoint { get; set; }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -45,7 +44,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Shared
         [OneTimeSetUp]
         public async Task Setup_quartz_service()
         {
-            _quartzEndpoint = await GetSendEndpoint(QuartzAddress);
+            QuartzEndpoint = await GetSendEndpoint(QuartzAddress);
 
             SystemTime.UtcNow = GetUtcNow;
             SystemTime.Now = GetNow;

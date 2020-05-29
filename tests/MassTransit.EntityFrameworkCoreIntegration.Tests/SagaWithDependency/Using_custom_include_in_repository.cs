@@ -24,7 +24,7 @@
         [Test]
         public async Task A_correlated_message_should_update_inner_saga_dependency()
         {
-            Guid sagaId = NewId.NextGuid();
+            var sagaId = NewId.NextGuid();
             var message = new InitiateSimpleSaga(sagaId);
 
             await InputQueueSendEndpoint.Send(message);
@@ -47,7 +47,7 @@
         [Test]
         public async Task An_initiating_message_should_start_the_saga()
         {
-            Guid sagaId = NewId.NextGuid();
+            var sagaId = NewId.NextGuid();
             Console.WriteLine(sagaId);
             var message = new InitiateSimpleSaga(sagaId);
 

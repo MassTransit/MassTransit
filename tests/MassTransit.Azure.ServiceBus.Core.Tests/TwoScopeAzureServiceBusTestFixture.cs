@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Azure.ServiceBus.Core.Tests
+﻿namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
     using System.Threading;
@@ -32,24 +20,22 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         readonly Uri _secondServiceUri;
         IBusControl _secondBus;
         BusHandle _secondBusHandle;
-        ISendEndpoint _secondBusSendEndpoint;
-        ISendEndpoint _secondInputQueueSendEndpoint;
 
         /// <summary>
         /// The sending endpoint for the InputQueue
         /// </summary>
-        protected ISendEndpoint SecondInputQueueSendEndpoint => _secondInputQueueSendEndpoint;
+        protected ISendEndpoint SecondInputQueueSendEndpoint { get; set; }
 
         /// <summary>
         /// The sending endpoint for the Bus
         /// </summary>
-        protected ISendEndpoint SecondBusSendEndpoint => _secondBusSendEndpoint;
+        protected ISendEndpoint SecondBusSendEndpoint { get; set; }
 
         protected Uri SecondBusAddress => _secondBus.Address;
 
         protected Uri SecondInputQueueAddress
         {
-            get { return _secondInputQueueAddress; }
+            get => _secondInputQueueAddress;
             set
             {
                 if (SecondBus != null)
@@ -69,9 +55,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             _secondBusHandle = await _secondBus.StartAsync();
             try
             {
-                _secondBusSendEndpoint = await _secondBus.GetSendEndpoint(_secondBus.Address);
+                SecondBusSendEndpoint = await _secondBus.GetSendEndpoint(_secondBus.Address);
 
-                _secondInputQueueSendEndpoint = await _secondBus.GetSendEndpoint(_secondInputQueueAddress);
+                SecondInputQueueSendEndpoint = await _secondBus.GetSendEndpoint(_secondInputQueueAddress);
             }
             catch (Exception)
             {

@@ -21,7 +21,7 @@ namespace MassTransit.MessageData.Values
         }
 
         public Uri Address => null;
-        public bool HasValue { get;}
+        public bool HasValue { get; }
         public Task<T> Value { get; }
     }
 }

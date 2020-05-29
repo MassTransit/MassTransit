@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Courier
+﻿namespace MassTransit.Tests.Courier
 {
     using System;
     using System.Threading.Tasks;
@@ -35,10 +23,7 @@ namespace MassTransit.Tests.Courier
             var reviseActivity = GetActivityContext<ReviseItineraryActivity>();
 
             var builder = new RoutingSlipBuilder(_trackingNumber);
-            builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new
-            {
-                Value = "Time to add a new item!"
-            });
+            builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new {Value = "Time to add a new item!"});
 
             await Bus.Execute(builder.Build());
 
@@ -68,14 +53,13 @@ namespace MassTransit.Tests.Courier
                 var testActivity = GetActivityContext<TestActivity>();
                 var reviseActivity = GetActivityContext<ReviseItineraryActivity>();
 
-                _completed = Handled<RoutingSlipCompleted>(x, context => (context.Message.TrackingNumber == _trackingNumber));
+                _completed = Handled<RoutingSlipCompleted>(x, context => context.Message.TrackingNumber == _trackingNumber);
 
                 _testActivityCompleted = Handled<RoutingSlipActivityCompleted>(x,
                     context => context.Message.TrackingNumber == _trackingNumber && context.Message.ActivityName.Equals(testActivity.Name));
 
                 _reviseActivityCompleted = Handled<RoutingSlipActivityCompleted>(x,
                     context => context.Message.TrackingNumber == _trackingNumber && context.Message.ActivityName.Equals(reviseActivity.Name));
-
             });
         }
 
@@ -96,10 +80,7 @@ namespace MassTransit.Tests.Courier
 
             AddActivityContext<ReviseItineraryActivity, TestArguments, TestLog>(() => new ReviseItineraryActivity(x =>
             {
-                x.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
-                {
-                    Value = "Added"
-                });
+                x.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Added"});
                 x.AddSubscription(InputQueueAddress, RoutingSlipEvents.ActivityCompleted | RoutingSlipEvents.Supplemental, RoutingSlipEventContents.All,
                     testActivity.Name);
             }));

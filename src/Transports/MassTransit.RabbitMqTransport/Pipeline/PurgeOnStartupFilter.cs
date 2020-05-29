@@ -46,9 +46,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 _queueAlreadyPurged = true;
             }
             else
-            {
                 LogContext.Debug?.Log("Queue {QueueName} was purged at startup, skipping", queueName);
-            }
         }
     }
 }

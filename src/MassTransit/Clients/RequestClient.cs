@@ -73,15 +73,6 @@
             return GetResponseInternal<T>(Request, cancellationToken, timeout);
         }
 
-        async Task<Response<T>> GetResponseInternal<T>(ClientRequestHandle<TRequest>.SendRequestCallback request, CancellationToken cancellationToken,
-            RequestTimeout timeout)
-            where T : class
-        {
-            using RequestHandle<TRequest> handle = new ClientRequestHandle<TRequest>(_context, request, cancellationToken, timeout.Or(_timeout));
-
-            return await handle.GetResponse<T>().ConfigureAwait(false);
-        }
-
         public Task<(Task<Response<T1>>, Task<Response<T2>>)> GetResponse<T1, T2>(TRequest message, CancellationToken cancellationToken,
             RequestTimeout timeout)
             where T1 : class
@@ -111,6 +102,15 @@
             }
 
             return GetResponseInternal<T1, T2>(Request, cancellationToken, timeout);
+        }
+
+        async Task<Response<T>> GetResponseInternal<T>(ClientRequestHandle<TRequest>.SendRequestCallback request, CancellationToken cancellationToken,
+            RequestTimeout timeout)
+            where T : class
+        {
+            using RequestHandle<TRequest> handle = new ClientRequestHandle<TRequest>(_context, request, cancellationToken, timeout.Or(_timeout));
+
+            return await handle.GetResponse<T>().ConfigureAwait(false);
         }
 
         async Task<(Task<Response<T1>>, Task<Response<T2>>)> GetResponseInternal<T1, T2>(ClientRequestHandle<TRequest>.SendRequestCallback request,

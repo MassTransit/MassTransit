@@ -19,11 +19,11 @@ namespace MassTransit.Conductor.Client
         IServiceClient
     {
         readonly ICache<IServiceClientMessageCache> _cache;
-        readonly IIndex<Type, IServiceClientMessageCache> _index;
         readonly IClientFactory _clientFactory;
+        readonly Guid _clientId;
         readonly CancellationTokenSource _disposed;
         readonly HashSet<ConnectHandle> _handles;
-        readonly Guid _clientId;
+        readonly IIndex<Type, IServiceClientMessageCache> _index;
         readonly IServiceInstanceCache _instanceCache;
         readonly IPublishEndpointProvider _publishEndpointProvider;
 
@@ -68,7 +68,7 @@ namespace MassTransit.Conductor.Client
         {
             _disposed.Cancel();
 
-            var clients = _cache.GetAll();
+            IEnumerable<Task<IServiceClientMessageCache>> clients = _cache.GetAll();
 
             async Task DisposeClient(Task<IServiceClientMessageCache> client)
             {

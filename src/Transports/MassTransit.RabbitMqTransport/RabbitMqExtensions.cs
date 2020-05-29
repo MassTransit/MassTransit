@@ -60,7 +60,7 @@
 
             sb.Append(settings.Host);
 
-            var actualHost = settings.EndpointResolver?.LastHost;
+            ClusterNode? actualHost = settings.EndpointResolver?.LastHost;
             if (actualHost != null)
                 sb.Append('(').Append(actualHost).Append(')');
             if (settings.Port != -1)

@@ -13,8 +13,8 @@ namespace MassTransit.Mediator.Endpoints
         IRequestSendEndpoint<TRequest>
         where TRequest : class
     {
-        readonly ISendEndpoint _endpoint;
         readonly ConsumeContext _consumeContext;
+        readonly ISendEndpoint _endpoint;
 
         public MediatorRequestSendEndpoint(ISendEndpoint endpoint, ConsumeContext consumeContext)
         {
@@ -24,11 +24,11 @@ namespace MassTransit.Mediator.Endpoints
 
         public Task<TRequest> Send(Guid requestId, object values, IPipe<SendContext<TRequest>> pipe, CancellationToken cancellationToken)
         {
-            var initializer = MessageInitializerCache<TRequest>.GetInitializer(values.GetType());
+            IMessageInitializer<TRequest> initializer = MessageInitializerCache<TRequest>.GetInitializer(values.GetType());
 
             if (_consumeContext != null)
             {
-                var initializeContext = initializer.Create(_consumeContext);
+                InitializeContext<TRequest> initializeContext = initializer.Create(_consumeContext);
 
                 return initializer.Send(_endpoint, initializeContext, values, new ConsumeSendPipeAdapter<TRequest>(_consumeContext, pipe, requestId));
             }

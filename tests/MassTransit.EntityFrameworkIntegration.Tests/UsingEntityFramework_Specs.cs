@@ -7,7 +7,6 @@
     using System.Data.Entity.ModelConfiguration;
     using System.Linq;
     using System.Threading.Tasks;
-    using EntityFrameworkIntegration;
     using GreenPipes;
     using Mappings;
     using MassTransit.Saga;
@@ -22,6 +21,70 @@
     public class When_using_EntityFramework :
         InMemoryTestFixture
     {
+        [Test]
+        [Explicit]
+        public async Task Should_handle_the_big_load()
+        {
+            var tasks = new List<Task>();
+
+            var sagaIds = new Guid[200];
+            for (var i = 0; i < 200; i++)
+            {
+                var correlationId = Guid.NewGuid();
+
+                tasks.Add(InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId}));
+
+                sagaIds[i] = correlationId;
+            }
+
+            await Task.WhenAll(tasks);
+
+            for (var i = 0; i < 200; i++)
+            {
+                Guid? sagaId = await _repository.Value.ShouldContainSaga(sagaIds[i], TestTimeout);
+                Assert.IsTrue(sagaId.HasValue);
+            }
+        }
+
+        [Test]
+        public async Task Should_have_removed_the_state_machine()
+        {
+            var correlationId = Guid.NewGuid();
+
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
+
+            Guid? sagaId = await _repository.Value.ShouldContainSaga(correlationId, TestTimeout);
+            Assert.IsTrue(sagaId.HasValue);
+
+            await InputQueueSendEndpoint.Send(new SodOff {CorrelationId = correlationId});
+
+            sagaId = await _repository.Value.ShouldNotContainSaga(correlationId, TestTimeout);
+            Assert.IsFalse(sagaId.HasValue);
+        }
+
+        [Test]
+        public async Task Should_have_the_state_machine()
+        {
+            var correlationId = Guid.NewGuid();
+
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
+
+            Guid? sagaId = await _repository.Value.ShouldContainSaga(correlationId, TestTimeout);
+
+            Assert.IsTrue(sagaId.HasValue);
+
+            await InputQueueSendEndpoint.Send(new GotHitByACar {CorrelationId = correlationId});
+
+            sagaId = await _repository.Value.ShouldContainSaga(x => x.CorrelationId == correlationId
+                && x.CurrentState == _machine.Dead.Name, TestTimeout);
+
+            Assert.IsTrue(sagaId.HasValue);
+
+            var instance = await GetSaga(correlationId);
+
+            Assert.IsTrue(instance.Screwed);
+        }
+
         SuperShopper _machine;
         readonly ISagaDbContextFactory<ShoppingChore> _sagaDbContextFactory;
         readonly Lazy<ISagaRepository<ShoppingChore>> _repository;
@@ -61,69 +124,6 @@
             }
         }
 
-        [Test]
-        public async Task Should_have_removed_the_state_machine()
-        {
-            Guid correlationId = Guid.NewGuid();
-
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
-
-            Guid? sagaId = await _repository.Value.ShouldContainSaga(correlationId, TestTimeout);
-            Assert.IsTrue(sagaId.HasValue);
-
-            await InputQueueSendEndpoint.Send(new SodOff {CorrelationId = correlationId});
-
-            sagaId = await _repository.Value.ShouldNotContainSaga(correlationId, TestTimeout);
-            Assert.IsFalse(sagaId.HasValue);
-        }
-
-        [Test, Explicit]
-        public async Task Should_handle_the_big_load()
-        {
-            var tasks = new List<Task>();
-
-            Guid[] sagaIds = new Guid[200];
-            for (int i = 0; i < 200; i++)
-            {
-                Guid correlationId = Guid.NewGuid();
-
-                tasks.Add(InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId}));
-
-                sagaIds[i] = correlationId;
-            }
-
-            await Task.WhenAll(tasks);
-
-            for (int i = 0; i < 200; i++)
-            {
-                Guid? sagaId = await _repository.Value.ShouldContainSaga(sagaIds[i], TestTimeout);
-                Assert.IsTrue(sagaId.HasValue);
-            }
-        }
-
-        [Test]
-        public async Task Should_have_the_state_machine()
-        {
-            Guid correlationId = Guid.NewGuid();
-
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
-
-            Guid? sagaId = await _repository.Value.ShouldContainSaga(correlationId, TestTimeout);
-
-            Assert.IsTrue(sagaId.HasValue);
-
-            await InputQueueSendEndpoint.Send(new GotHitByACar {CorrelationId = correlationId});
-
-            sagaId = await _repository.Value.ShouldContainSaga(x => x.CorrelationId == correlationId
-                && x.CurrentState == _machine.Dead.Name, TestTimeout);
-
-            Assert.IsTrue(sagaId.HasValue);
-
-            ShoppingChore instance = await GetSaga(correlationId);
-
-            Assert.IsTrue(instance.Screwed);
-        }
-
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             base.ConfigureInMemoryBus(configurator);
@@ -135,6 +135,17 @@
 
     class ShoppingChoreSagaDbContext : SagaDbContext
     {
+        public ShoppingChoreSagaDbContext(string nameOrConnectionString)
+            : base(nameOrConnectionString)
+        {
+        }
+
+        protected override IEnumerable<ISagaClassMap> Configurations
+        {
+            get { yield return new EntityFrameworkShoppingChoreMap(); }
+        }
+
+
         class EntityFrameworkShoppingChoreMap :
             SagaClassMap<ShoppingChore>
         {
@@ -145,16 +156,6 @@
 
                 entity.Property(x => x.Screwed);
             }
-        }
-
-        public ShoppingChoreSagaDbContext(string nameOrConnectionString)
-            : base(nameOrConnectionString)
-        {
-        }
-
-        protected override IEnumerable<ISagaClassMap> Configurations
-        {
-            get { yield return new EntityFrameworkShoppingChoreMap(); }
         }
     }
 }

@@ -16,6 +16,24 @@ namespace MassTransit.Tests.Courier
     public class Using_message_data_arguments :
         InMemoryActivityTestFixture
     {
+        [Test]
+        public async Task Should_override_variables_in_the_routing_slip()
+        {
+            ConsumeContext<RoutingSlipCompleted> context = await _completed;
+
+            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+
+            Assert.AreEqual("Frank", context.Message.GetVariable<string>("Name"));
+        }
+
+        [Test]
+        public async Task Should_receive_the_routing_slip_activity_completed_event()
+        {
+            ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
+
+            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
+        }
+
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _activityCompleted;
         Task<ConsumeContext<RoutingSlipFaulted>> _faulted;
@@ -33,11 +51,11 @@ namespace MassTransit.Tests.Courier
             var builder = new RoutingSlipBuilder(_trackingNumber);
             builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
 
-            ActivityTestContext testActivity = GetActivityContext<SetLargeVariableActivity>();
+            var testActivity = GetActivityContext<SetLargeVariableActivity>();
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
             {
                 Key = "Name",
-                Value = await _repository.PutString("Frank"),
+                Value = await _repository.PutString("Frank")
             });
 
             await Bus.Execute(builder.Build());
@@ -58,24 +76,6 @@ namespace MassTransit.Tests.Courier
         protected override void SetupActivities(BusTestHarness testHarness)
         {
             var context = AddActivityContext<SetLargeVariableActivity, SetLargeVariableArguments>(() => new SetLargeVariableActivity());
-        }
-
-        [Test]
-        public async Task Should_override_variables_in_the_routing_slip()
-        {
-            ConsumeContext<RoutingSlipCompleted> context = await _completed;
-
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
-
-            Assert.AreEqual("Frank", context.Message.GetVariable<string>("Name"));
-        }
-
-        [Test]
-        public async Task Should_receive_the_routing_slip_activity_completed_event()
-        {
-            ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
-
-            Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
         }
     }
 }

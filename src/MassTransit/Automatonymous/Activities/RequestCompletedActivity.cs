@@ -5,14 +5,12 @@ namespace Automatonymous.Activities
     using Contracts;
     using GreenPipes;
     using MassTransit;
-    using MassTransit.Contracts;
     using MassTransit.Initializers;
     using MassTransit.Metadata;
-    using MassTransit.Util;
 
 
     /// <summary>
-    /// Publishes the <see cref="Automatonymous.Contracts.RequestCompleted{TResponse}"/> event, used by the request state machine to track
+    /// Publishes the <see cref="Automatonymous.Contracts.RequestCompleted{TResponse}" /> event, used by the request state machine to track
     /// pending requests for a saga instance.
     /// </summary>
     /// <typeparam name="TInstance"></typeparam>
@@ -36,7 +34,7 @@ namespace Automatonymous.Activities
         {
             ConsumeEventContext<TInstance, TData> consumeContext = context.CreateConsumeContext();
 
-            var initializeContext = await MessageInitializerCache<RequestCompleted<TData>>.Initialize(new
+            InitializeContext<RequestCompleted<TData>> initializeContext = await MessageInitializerCache<RequestCompleted<TData>>.Initialize(new
             {
                 context.Instance.CorrelationId,
                 InVar.Timestamp,
@@ -60,7 +58,7 @@ namespace Automatonymous.Activities
 
 
     /// <summary>
-    /// Publishes the <see cref="Automatonymous.Contracts.RequestCompleted{TResponse}"/> event, used by the request state machine to track
+    /// Publishes the <see cref="Automatonymous.Contracts.RequestCompleted{TResponse}" /> event, used by the request state machine to track
     /// pending requests for a saga instance.
     /// </summary>
     /// <typeparam name="TInstance"></typeparam>
@@ -93,7 +91,7 @@ namespace Automatonymous.Activities
         {
             ConsumeEventContext<TInstance, TData> consumeContext = context.CreateConsumeContext();
 
-            var initializeContext = await MessageInitializerCache<RequestCompleted<TData>>.Initialize(new
+            InitializeContext<RequestCompleted<TData>> initializeContext = await MessageInitializerCache<RequestCompleted<TData>>.Initialize(new
             {
                 context.Instance.CorrelationId,
                 InVar.Timestamp,

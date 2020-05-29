@@ -15,8 +15,8 @@ namespace MassTransit.MultiBus
     public static class DependencyInjectionMultiBusRegistrationExtensions
     {
         /// <summary>
-        /// Configure a MassTransit bus instance, using the specified <typeparamref name="TBus"/> bus type, which must inherit directly from <see cref="IBus"/>.
-        /// A type that implements <typeparamref name="TBus"/> is required, specified by the <typeparamref name="TBusInstance"/> parameter.
+        /// Configure a MassTransit bus instance, using the specified <typeparamref name="TBus" /> bus type, which must inherit directly from <see cref="IBus" />.
+        /// A type that implements <typeparamref name="TBus" /> is required, specified by the <typeparamref name="TBusInstance" /> parameter.
         /// </summary>
         /// <param name="collection">The service collection</param>
         /// <param name="configure">Bus instance configuration method</param>
@@ -42,8 +42,8 @@ namespace MassTransit.MultiBus
         }
 
         /// <summary>
-        /// Configure a MassTransit bus instance, using the specified <typeparamref name="TBus"/> bus type, which must inherit directly from <see cref="IBus"/>.
-        /// A dynamic type will be created to support the bus instance, which will be initialized when the <typeparamref name="TBus"/> type is retrieved
+        /// Configure a MassTransit bus instance, using the specified <typeparamref name="TBus" /> bus type, which must inherit directly from <see cref="IBus" />.
+        /// A dynamic type will be created to support the bus instance, which will be initialized when the <typeparamref name="TBus" /> type is retrieved
         /// from the container.
         /// </summary>
         /// <param name="collection">The service collection</param>
@@ -64,8 +64,8 @@ namespace MassTransit.MultiBus
             IBusInstanceBuilderCallback<TBus, IServiceCollection>
             where TBus : class, IBus
         {
-            readonly IServiceCollection _services;
             readonly Action<IServiceCollectionConfigurator<TBus>> _configure;
+            readonly IServiceCollection _services;
 
             public Callback(IServiceCollection services, Action<IServiceCollectionConfigurator<TBus>> configure)
             {

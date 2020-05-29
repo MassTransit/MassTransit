@@ -10,8 +10,8 @@
         where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {
-        readonly TScope _scope;
         readonly Action<TActivity> _disposeCallback;
+        readonly TScope _scope;
 
         public CreatedCompensateActivityScopeContext(TScope scope, CompensateActivityContext<TActivity, TLog> context, Action<TActivity> disposeCallback = null)
         {

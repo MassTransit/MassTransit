@@ -19,7 +19,6 @@
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UseMemoryStorage();
-
         }
 
         protected HangfireInMemoryActivityTestFixture()

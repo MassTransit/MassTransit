@@ -26,7 +26,7 @@ namespace MassTransit.Tests.Conventional
                 .Select(x => new CustomConsumerInterfaceType(x.GetTypeInfo().GetGenericArguments()[0], typeof(T)))
                 .Where(x => TypeMetadataCache.IsValidMessageType(x.MessageType));
 
-            foreach (CustomConsumerInterfaceType type in types)
+            foreach (var type in types)
                 yield return type;
         }
     }

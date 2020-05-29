@@ -15,10 +15,10 @@
         IMessageSendPipeSpecification
         where TMessage : class
     {
+        readonly IList<IPipeSpecification<SendContext>> _baseSpecifications;
         readonly IList<ISpecificationPipeSpecification<SendContext<TMessage>>> _implementedMessageTypeSpecifications;
         readonly IList<ISpecificationPipeSpecification<SendContext<TMessage>>> _parentMessageSpecifications;
         readonly IList<IPipeSpecification<SendContext<TMessage>>> _specifications;
-        readonly IList<IPipeSpecification<SendContext>> _baseSpecifications;
 
         public MessageSendPipeSpecification()
         {
@@ -55,7 +55,7 @@
         {
             if (!builder.IsDelegated && _implementedMessageTypeSpecifications.Count > 0)
             {
-                var implementedBuilder = builder.CreateImplementedBuilder();
+                ISpecificationPipeBuilder<SendContext<TMessage>> implementedBuilder = builder.CreateImplementedBuilder();
 
                 for (var index = _implementedMessageTypeSpecifications.Count - 1; index >= 0; index--)
                     _implementedMessageTypeSpecifications[index].Apply(implementedBuilder);
@@ -64,7 +64,7 @@
             var parentCount = _parentMessageSpecifications.Count;
             if (parentCount > 0)
             {
-                var delegatedBuilder = builder.CreateDelegatedBuilder();
+                ISpecificationPipeBuilder<SendContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
 
                 for (var index = 0; index < parentCount; index++)
                     _parentMessageSpecifications[index].Apply(delegatedBuilder);

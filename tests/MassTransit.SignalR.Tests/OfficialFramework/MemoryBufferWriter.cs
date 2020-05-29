@@ -5,25 +5,25 @@
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.IO;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
 
-    internal sealed class MemoryBufferWriter : Stream, IBufferWriter<byte>
+
+    sealed class MemoryBufferWriter : Stream,
+        IBufferWriter<byte>
     {
-        [ThreadStatic]
-        private static MemoryBufferWriter _cachedInstance;
+        [ThreadStatic] static MemoryBufferWriter _cachedInstance;
 
-#if DEBUG
-        private bool _inUse;
-#endif
+        readonly int _minimumSegmentSize;
+        int _bytesWritten;
 
-        private readonly int _minimumSegmentSize;
-        private int _bytesWritten;
+        List<CompletedBuffer> _completedSegments;
+        byte[] _currentSegment;
 
-        private List<CompletedBuffer> _completedSegments;
-        private byte[] _currentSegment;
-        private int _position;
+    #if DEBUG
+        bool _inUse;
+    #endif
+        int _position;
 
         public MemoryBufferWriter(int minimumSegmentSize = 4096)
         {
@@ -34,65 +34,11 @@
         public override bool CanRead => false;
         public override bool CanSeek => false;
         public override bool CanWrite => true;
+
         public override long Position
         {
             get => throw new NotSupportedException();
             set => throw new NotSupportedException();
-        }
-
-        public static MemoryBufferWriter Get()
-        {
-            var writer = _cachedInstance;
-            if (writer == null)
-            {
-                writer = new MemoryBufferWriter();
-            }
-            else
-            {
-                // Taken off the thread static
-                _cachedInstance = null;
-            }
-#if DEBUG
-            if (writer._inUse)
-            {
-                throw new InvalidOperationException("The reader wasn't returned!");
-            }
-
-            writer._inUse = true;
-#endif
-
-            return writer;
-        }
-
-        public static void Return(MemoryBufferWriter writer)
-        {
-            _cachedInstance = writer;
-#if DEBUG
-            writer._inUse = false;
-#endif
-            writer.Reset();
-        }
-
-        public void Reset()
-        {
-            if (_completedSegments != null)
-            {
-                for (var i = 0; i < _completedSegments.Count; i++)
-                {
-                    _completedSegments[i].Return();
-                }
-
-                _completedSegments.Clear();
-            }
-
-            if (_currentSegment != null)
-            {
-                ArrayPool<byte>.Shared.Return(_currentSegment);
-                _currentSegment = null;
-            }
-
-            _bytesWritten = 0;
-            _position = 0;
         }
 
         public void Advance(int count)
@@ -115,6 +61,55 @@
             return _currentSegment.AsSpan(_position, _currentSegment.Length - _position);
         }
 
+        public static MemoryBufferWriter Get()
+        {
+            var writer = _cachedInstance;
+            if (writer == null)
+                writer = new MemoryBufferWriter();
+            else
+            {
+                // Taken off the thread static
+                _cachedInstance = null;
+            }
+        #if DEBUG
+            if (writer._inUse)
+                throw new InvalidOperationException("The reader wasn't returned!");
+
+            writer._inUse = true;
+        #endif
+
+            return writer;
+        }
+
+        public static void Return(MemoryBufferWriter writer)
+        {
+            _cachedInstance = writer;
+        #if DEBUG
+            writer._inUse = false;
+        #endif
+            writer.Reset();
+        }
+
+        public void Reset()
+        {
+            if (_completedSegments != null)
+            {
+                for (var i = 0; i < _completedSegments.Count; i++)
+                    _completedSegments[i].Return();
+
+                _completedSegments.Clear();
+            }
+
+            if (_currentSegment != null)
+            {
+                ArrayPool<byte>.Shared.Return(_currentSegment);
+                _currentSegment = null;
+            }
+
+            _bytesWritten = 0;
+            _position = 0;
+        }
+
         public void CopyTo(IBufferWriter<byte> destination)
         {
             if (_completedSegments != null)
@@ -122,9 +117,7 @@
                 // Copy completed segments
                 var count = _completedSegments.Count;
                 for (var i = 0; i < count; i++)
-                {
                     destination.Write(_completedSegments[i].Span);
-                }
             }
 
             destination.Write(_currentSegment.AsSpan(0, _position));
@@ -141,7 +134,7 @@
             return CopyToSlowAsync(destination);
         }
 
-        private void EnsureCapacity(int sizeHint)
+        void EnsureCapacity(int sizeHint)
         {
             // This does the Right Thing. It only subtracts _position from the current segment length if it's non-null.
             // If _currentSegment is null, it returns 0.
@@ -149,7 +142,7 @@
 
             // If the sizeHint is 0, any capacity will do
             // Otherwise, the buffer must have enough space for the entire size hint, or we need to add a segment.
-            if ((sizeHint == 0 && remainingSize > 0) || (sizeHint > 0 && remainingSize >= sizeHint))
+            if (sizeHint == 0 && remainingSize > 0 || sizeHint > 0 && remainingSize >= sizeHint)
             {
                 // We have capacity in the current segment
                 return;
@@ -158,15 +151,13 @@
             AddSegment(sizeHint);
         }
 
-        private void AddSegment(int sizeHint = 0)
+        void AddSegment(int sizeHint = 0)
         {
             if (_currentSegment != null)
             {
                 // We're adding a segment to the list
                 if (_completedSegments == null)
-                {
                     _completedSegments = new List<CompletedBuffer>();
-                }
 
                 // Position might be less than the segment length if there wasn't enough space to satisfy the sizeHint when
                 // GetMemory was called. In that case we'll take the current segment and call it "completed", but need to
@@ -179,7 +170,7 @@
             _position = 0;
         }
 
-        private async Task CopyToSlowAsync(Stream destination)
+        async Task CopyToSlowAsync(Stream destination)
         {
             if (_completedSegments != null)
             {
@@ -198,9 +189,7 @@
         public byte[] ToArray()
         {
             if (_currentSegment == null)
-            {
                 return Array.Empty<byte>();
-            }
 
             var result = new byte[_bytesWritten];
 
@@ -229,9 +218,7 @@
             Debug.Assert(span.Length >= _bytesWritten);
 
             if (_currentSegment == null)
-            {
                 return;
-            }
 
             var totalWritten = 0;
 
@@ -253,18 +240,34 @@
             Debug.Assert(_bytesWritten == totalWritten + _position);
         }
 
-        public override void Flush() { }
-        public override Task FlushAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-        public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
-        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
-        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Flush()
+        {
+        }
+
+        public override Task FlushAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override void SetLength(long value)
+        {
+            throw new NotSupportedException();
+        }
 
         public override void WriteByte(byte value)
         {
             if (_currentSegment != null && (uint)_position < (uint)_currentSegment.Length)
-            {
                 _currentSegment[_position] = value;
-            }
             else
             {
                 AddSegment();
@@ -286,9 +289,7 @@
                 _bytesWritten += count;
             }
             else
-            {
                 BuffersExtensions.Write(this, buffer.AsSpan(offset, count));
-            }
         }
 
         public override void Write(ReadOnlySpan<byte> span)
@@ -299,23 +300,20 @@
                 _bytesWritten += span.Length;
             }
             else
-            {
                 BuffersExtensions.Write(this, span);
-            }
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
-            {
                 Reset();
-            }
         }
+
 
         /// <summary>
         /// Holds a byte[] from the pool and a size value. Basically a Memory but guaranteed to be backed by an ArrayPool byte[], so that we know we can return it.
         /// </summary>
-        private readonly struct CompletedBuffer
+        readonly struct CompletedBuffer
         {
             public byte[] Buffer { get; }
             public int Length { get; }

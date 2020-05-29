@@ -20,8 +20,8 @@
     {
         readonly ServiceBusConnection _connection;
         readonly ManagementClient _managementClient;
-        readonly RetryPolicy _retryPolicy;
         readonly TimeSpan _operationTimeout;
+        readonly RetryPolicy _retryPolicy;
 
         public ServiceBusConnectionContext(ServiceBusConnection connection, ManagementClient managementClient, RetryPolicy retryPolicy,
             TimeSpan operationTimeout, CancellationToken cancellationToken)
@@ -34,19 +34,6 @@
         }
 
         public Uri Endpoint => _connection.Endpoint;
-
-        public async ValueTask DisposeAsync()
-        {
-            var address = _connection.Endpoint.ToString();
-
-            TransportLogMessages.DisconnectHost(address);
-
-            await _managementClient.CloseAsync().ConfigureAwait(false);
-
-            await _connection.CloseAsync().ConfigureAwait(false);
-
-            TransportLogMessages.DisconnectedHost(address);
-        }
 
         public IQueueClient CreateQueueClient(string entityPath)
         {
@@ -67,9 +54,7 @@
         {
             var queueExists = await QueueExistsAsync(queueDescription.Path).ConfigureAwait(false);
             if (queueExists)
-            {
                 queueDescription = await GetQueueAsync(queueDescription.Path).ConfigureAwait(false);
-            }
             else
             {
                 try
@@ -103,9 +88,7 @@
         {
             var topicExists = await TopicExistsAsync(topicDescription.Path).ConfigureAwait(false);
             if (topicExists)
-            {
                 topicDescription = await GetTopicAsync(topicDescription.Path).ConfigureAwait(false);
-            }
             else
             {
                 try
@@ -126,7 +109,7 @@
                     {
                         topicDescription.RequiresDuplicateDetection ? "dupe detect" : "",
                         topicDescription.EnablePartitioning ? "partitioned" : "",
-                        topicDescription.SupportOrdering ? "ordered" : "",
+                        topicDescription.SupportOrdering ? "ordered" : ""
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
 
             return topicDescription;
@@ -161,7 +144,7 @@
 
                 if (rule != null)
                 {
-                    RuleDescription ruleDescription = await GetRuleAsync(description.TopicPath, description.SubscriptionName, rule.Name)
+                    var ruleDescription = await GetRuleAsync(description.TopicPath, description.SubscriptionName, rule.Name)
                         .ConfigureAwait(false);
                     if (rule.Name == ruleDescription.Name && (rule.Filter != ruleDescription.Filter || rule.Action != ruleDescription.Action))
                     {
@@ -199,8 +182,10 @@
                 }
 
                 if (!created)
+                {
                     subscriptionDescription = await GetSubscriptionAsync(description.TopicPath, description.SubscriptionName)
                         .ConfigureAwait(false);
+                }
             }
 
             LogContext.Debug?.Log("Subscription {Subscription} ({Topic} -> {ForwardTo})", subscriptionDescription.SubscriptionName,
@@ -221,6 +206,19 @@
 
             LogContext.Debug?.Log("Subscription Deleted: {Subscription} ({Topic} -> {ForwardTo})", description.SubscriptionName, description.TopicPath,
                 description.ForwardTo);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            var address = _connection.Endpoint.ToString();
+
+            TransportLogMessages.DisconnectHost(address);
+
+            await _managementClient.CloseAsync().ConfigureAwait(false);
+
+            await _connection.CloseAsync().ConfigureAwait(false);
+
+            TransportLogMessages.DisconnectedHost(address);
         }
 
         Task<QueueDescription> GetQueueAsync(string path)

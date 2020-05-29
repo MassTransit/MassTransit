@@ -3,6 +3,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
     using System;
     using System.Collections.Generic;
     using Configurators;
+    using RabbitMQ.Client;
 
 
     public class RabbitMqReceiveSettings :
@@ -17,17 +18,17 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
             ConsumeArguments = new Dictionary<string, object>();
         }
 
+        public int ConsumerPriority
+        {
+            set => ConsumeArguments[Headers.XPriority] = value;
+        }
+
         public ushort PrefetchCount { get; set; }
         public bool PurgeOnStartup { get; set; }
         public bool ExclusiveConsumer { get; set; }
         public bool NoAck { get; set; }
 
         public bool BindQueue { get; set; } = true;
-
-        public int ConsumerPriority
-        {
-            set => ConsumeArguments[RabbitMQ.Client.Headers.XPriority] = value;
-        }
 
         public IDictionary<string, object> ConsumeArguments { get; }
 

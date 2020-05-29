@@ -24,8 +24,8 @@ namespace MassTransit.Context
         public static EnabledLogger? Warning => Current?.Warning;
 
         /// <summary>
-        ///     Gets or sets the current operation (Activity) for the current thread.  This flows
-        ///     across async calls.
+        /// Gets or sets the current operation (Activity) for the current thread.  This flows
+        /// across async calls.
         /// </summary>
         public static ILogContext Current
         {
@@ -39,8 +39,8 @@ namespace MassTransit.Context
         }
 
         /// <summary>
-        ///     Configure the current <see cref="LogContext" /> using the specified <paramref name="logger" />, which will be
-        ///     used for all log output.
+        /// Configure the current <see cref="LogContext" /> using the specified <paramref name="logger" />, which will be
+        /// used for all log output.
         /// </summary>
         /// <param name="logger">An existing logger</param>
         public static void ConfigureCurrentLogContext(ILogger logger)

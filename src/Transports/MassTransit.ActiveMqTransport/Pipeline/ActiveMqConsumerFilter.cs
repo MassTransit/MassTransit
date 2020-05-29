@@ -40,7 +40,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var executor = new ChannelExecutor(1, receiveSettings.PrefetchCount);
 
-            List<Task<ActiveMqConsumer>> consumers = new List<Task<ActiveMqConsumer>>
+            var consumers = new List<Task<ActiveMqConsumer>>
             {
                 CreateConsumer(context, receiveSettings.EntityName, receiveSettings.Selector, receiveSettings.PrefetchCount, executor)
             };
@@ -48,7 +48,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             consumers.AddRange(_context.BrokerTopology.Consumers.Select(x =>
                 CreateConsumer(context, x.Destination.EntityName, x.Selector, receiveSettings.PrefetchCount, executor)));
 
-            var actualConsumers = await Task.WhenAll(consumers).ConfigureAwait(false);
+            ActiveMqConsumer[] actualConsumers = await Task.WhenAll(consumers).ConfigureAwait(false);
 
             var supervisor = CreateConsumerSupervisor(context, actualConsumers);
 
@@ -60,7 +60,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             }
             finally
             {
-                var consumerMetrics = actualConsumers.Cast<DeliveryMetrics>().ToArray();
+                DeliveryMetrics[] consumerMetrics = actualConsumers.Cast<DeliveryMetrics>().ToArray();
 
                 DeliveryMetrics metrics = new CombinedDeliveryMetrics(consumerMetrics.Sum(x => x.DeliveryCount),
                     consumerMetrics.Max(x => x.ConcurrentDeliveryCount));
@@ -76,12 +76,10 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
         Supervisor CreateConsumerSupervisor(SessionContext context, ActiveMqConsumer[] actualConsumers)
         {
-            Supervisor supervisor = new Supervisor();
+            var supervisor = new Supervisor();
 
             foreach (var consumer in actualConsumers)
-            {
                 supervisor.Add(consumer);
-            }
 
             Add(supervisor);
 
@@ -101,7 +99,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
         async Task<ActiveMqConsumer> CreateConsumer(SessionContext context, string entityName, string selector, ushort prefetchCount, ChannelExecutor executor)
         {
-            string queueName = $"{entityName}?consumer.prefetchSize={prefetchCount}";
+            var queueName = $"{entityName}?consumer.prefetchSize={prefetchCount}";
 
             var queue = await context.GetQueue(queueName).ConfigureAwait(false);
 

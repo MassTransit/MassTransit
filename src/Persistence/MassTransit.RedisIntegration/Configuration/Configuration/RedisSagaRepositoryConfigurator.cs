@@ -14,9 +14,9 @@ namespace MassTransit.RedisIntegration.Configuration
         ISpecification
         where TSaga : class, IVersionedSaga
     {
+        ConfigurationOptions _configurationOptions;
         Func<IConfigurationServiceProvider, ConnectionMultiplexer> _connectionFactory;
         SelectDatabase _databaseSelector;
-        ConfigurationOptions _configurationOptions;
 
         public RedisSagaRepositoryConfigurator()
         {

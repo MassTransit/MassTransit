@@ -14,7 +14,10 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
         {
         }
 
-        public Uri GetSendAddress(Uri hostAddress) => GetEndpointAddress(hostAddress);
+        public Uri GetSendAddress(Uri hostAddress)
+        {
+            return GetEndpointAddress(hostAddress);
+        }
 
         IEnumerable<string> GetSettingStrings()
         {
@@ -25,6 +28,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
                 yield return "auto-delete";
         }
 
-        public override string ToString() => string.Join(", ", GetSettingStrings());
+        public override string ToString()
+        {
+            return string.Join(", ", GetSettingStrings());
+        }
     }
 }

@@ -30,7 +30,7 @@ namespace MassTransit.Turnout.Components.StateMachines
                                 context.Instance.ActiveJobs.Add(new ActiveJob
                                 {
                                     JobId = context.Data.JobId,
-                                    Deadline = DateTime.Now + context.Data.JobTimeout,
+                                    Deadline = DateTime.Now + context.Data.JobTimeout
                                 });
 
                                 LogContext.Debug?.Log("Allocated Job Slot: {JobId} ({JobCount})", context.Data.JobId, context.Instance.ActiveJobCount);

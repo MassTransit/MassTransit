@@ -2,8 +2,8 @@
 {
     class Node<T>
     {
-        public readonly T Value;
         readonly int _index;
+        public readonly T Value;
 
         protected Node(int index, T value)
         {

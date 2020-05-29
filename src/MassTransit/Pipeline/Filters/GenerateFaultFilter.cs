@@ -9,7 +9,7 @@ namespace MassTransit.Pipeline.Filters
 
 
     /// <summary>
-    /// Generates and publishes a <see cref="Fault"/> event for the exception
+    /// Generates and publishes a <see cref="Fault" /> event for the exception
     /// </summary>
     public class GenerateFaultFilter :
         IFilter<ExceptionReceiveContext>

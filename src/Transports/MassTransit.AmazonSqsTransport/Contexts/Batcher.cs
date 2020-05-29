@@ -13,10 +13,10 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     public abstract class Batcher<TEntry> :
         IBatcher<TEntry>
     {
-        readonly BatchSettings _settings;
+        readonly Task _batchTask;
         readonly Channel<BatchEntry<TEntry>> _channel;
         readonly ChannelExecutor _executor;
-        readonly Task _batchTask;
+        readonly BatchSettings _settings;
 
         protected Batcher()
         {
@@ -44,14 +44,21 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             await batchEntry.Completed.ConfigureAwait(false);
         }
 
+        public async ValueTask DisposeAsync()
+        {
+            _channel.Writer.Complete();
+
+            await _batchTask.ConfigureAwait(false);
+
+            await _executor.DisposeAsync().ConfigureAwait(false);
+        }
+
         async Task WaitForBatch()
         {
             try
             {
                 while (await _channel.Reader.WaitToReadAsync().ConfigureAwait(false))
-                {
                     await ReadBatch().ConfigureAwait(false);
-                }
             }
             catch (ChannelClosedException)
             {
@@ -75,7 +82,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                         entryId < _settings.MessageLimit && batchLength < _settings.SizeLimit;
                         entryId++)
                     {
-                        var entry = await _channel.Reader.ReadAsync(batchToken.Token).ConfigureAwait(false);
+                        BatchEntry<TEntry> entry = await _channel.Reader.ReadAsync(batchToken.Token).ConfigureAwait(false);
 
                         batchLength += AddingEntry(entry.Entry, entryId.ToString());
                         batch.Add(entry);
@@ -95,22 +102,13 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             }
             catch (Exception exception)
             {
-                foreach (var entry in batch)
+                foreach (BatchEntry<TEntry> entry in batch)
                     entry.SetFaulted(exception);
             }
             finally
             {
                 batchToken.Dispose();
             }
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            _channel.Writer.Complete();
-
-            await _batchTask.ConfigureAwait(false);
-
-            await _executor.DisposeAsync().ConfigureAwait(false);
         }
 
         protected abstract int AddingEntry(TEntry entry, string entryId);
@@ -140,7 +138,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             }
             catch (Exception exception)
             {
-                foreach (var entry in batch)
+                foreach (BatchEntry<TEntry> entry in batch)
                     entry.SetFaulted(exception);
             }
         }

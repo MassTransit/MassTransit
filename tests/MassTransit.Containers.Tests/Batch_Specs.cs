@@ -172,7 +172,7 @@ namespace MassTransit.Containers.Tests
             context.Respond(new BatchResult
             {
                 Count = context.Message.Length,
-                Mode = context.Message.Mode,
+                Mode = context.Message.Mode
             });
 
             return TaskUtil.Completed;

@@ -1,20 +1,18 @@
 ﻿namespace MassTransit.DocumentDbIntegration.Tests.Saga
 {
-    using DocumentDbIntegration.Saga;
-    using MassTransit.Saga;
-    using NUnit.Framework;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Data;
+    using DocumentDbIntegration.Saga;
+    using MassTransit.Saga;
+    using NUnit.Framework;
 
 
     [TestFixture]
     public class DocumentDbQuerySagaRepositoryTests
     {
-        readonly List<Guid> _ids = new List<Guid>();
-
         [Test]
         public async Task Query_Fails_With_Json_Resolver_Rename()
         {
@@ -23,12 +21,12 @@
 
             await SagaRepository.Instance.InsertSaga(new SimpleSaga {CorrelationId = correlationId}, true);
 
-            var repository = DocumentDbSagaRepository<SimpleSaga>.Create(SagaRepository.Instance.Client, SagaRepository.DatabaseName,
+            ISagaRepository<SimpleSaga> repository = DocumentDbSagaRepository<SimpleSaga>.Create(SagaRepository.Instance.Client, SagaRepository.DatabaseName,
                 JsonSerializerSettingsExtensions.GetSagaRenameSettings<SimpleSaga>());
 
             var querySagaRepository = repository as IQuerySagaRepository<SimpleSaga>;
 
-            var result = await querySagaRepository.Find(new SagaQuery<SimpleSaga>(x => x.CorrelationId == correlationId));
+            IEnumerable<Guid> result = await querySagaRepository.Find(new SagaQuery<SimpleSaga>(x => x.CorrelationId == correlationId));
 
             Assert.That(result.Any(), Is.False);
         }
@@ -46,12 +44,12 @@
                 Username = username
             }, true);
 
-            var repository = DocumentDbSagaRepository<SimpleSaga>.Create(SagaRepository.Instance.Client, SagaRepository.DatabaseName,
+            ISagaRepository<SimpleSaga> repository = DocumentDbSagaRepository<SimpleSaga>.Create(SagaRepository.Instance.Client, SagaRepository.DatabaseName,
                 JsonSerializerSettingsExtensions.GetSagaRenameSettings<SimpleSaga>());
 
             var querySagaRepository = repository as IQuerySagaRepository<SimpleSaga>;
 
-            var result = await querySagaRepository.Find(new SagaQuery<SimpleSaga>(x => x.Username == username));
+            IEnumerable<Guid> result = await querySagaRepository.Find(new SagaQuery<SimpleSaga>(x => x.Username == username));
 
             // Assert
             Assert.That(result.Single(), Is.EqualTo(correlationId)); // So it does find it
@@ -65,22 +63,23 @@
 
             await SagaRepository.Instance.InsertSaga(new SimpleSagaResource {CorrelationId = correlationId}, false);
 
-            var repository = DocumentDbSagaRepository<SimpleSagaResource>.Create(SagaRepository.Instance.Client, SagaRepository.DatabaseName);
+            ISagaRepository<SimpleSagaResource> repository =
+                DocumentDbSagaRepository<SimpleSagaResource>.Create(SagaRepository.Instance.Client, SagaRepository.DatabaseName);
 
             var querySagaRepository = repository as IQuerySagaRepository<SimpleSagaResource>;
 
-            var result = await querySagaRepository.Find(new SagaQuery<SimpleSagaResource>(x => x.CorrelationId == correlationId));
+            IEnumerable<Guid> result = await querySagaRepository.Find(new SagaQuery<SimpleSagaResource>(x => x.CorrelationId == correlationId));
 
             Assert.That(result.Single(), Is.EqualTo(correlationId));
         }
+
+        readonly List<Guid> _ids = new List<Guid>();
 
         [OneTimeTearDown]
         public async Task Kill()
         {
             foreach (var id in _ids)
-            {
                 await SagaRepository.Instance.DeleteSaga(id);
-            }
         }
     }
 }

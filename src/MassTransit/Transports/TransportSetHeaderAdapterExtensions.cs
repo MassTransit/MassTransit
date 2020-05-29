@@ -74,18 +74,14 @@ namespace MassTransit.Transports
         public static void Set<TValueType>(this ITransportSetHeaderAdapter<TValueType> adapter, IDictionary<string, TValueType> dictionary,
             IEnumerable<HeaderValue> headerValues)
         {
-            foreach (HeaderValue header in headerValues)
-            {
+            foreach (var header in headerValues)
                 adapter.Set(dictionary, header);
-            }
         }
 
         public static void Set(this IDictionary<string, object> dictionary, IEnumerable<HeaderValue> headerValues)
         {
-            foreach (HeaderValue header in headerValues)
-            {
+            foreach (var header in headerValues)
                 _adapter.Set(dictionary, header);
-            }
         }
 
         public static bool TryGetInt(this IDictionary<string, string> dictionary, string key, out int value)
@@ -99,10 +95,8 @@ namespace MassTransit.Transports
 
         public static void Set(this IDictionary<string, object> dictionary, params HeaderValue[] headerValues)
         {
-            foreach (HeaderValue header in headerValues)
-            {
+            foreach (var header in headerValues)
                 _adapter.Set(dictionary, header);
-            }
         }
 
         public static void SetExceptionHeaders(this IDictionary<string, object> dictionary, ExceptionReceiveContext exceptionContext)

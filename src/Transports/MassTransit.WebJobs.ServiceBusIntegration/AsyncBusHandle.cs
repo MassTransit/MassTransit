@@ -6,12 +6,12 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     using Microsoft.Extensions.Logging;
 
 
-    public class AsyncBusHandle : 
+    public class AsyncBusHandle :
         IAsyncBusHandle
     {
-        readonly ILogger<MassTransitBus> _logger;
         readonly CancellationTokenSource _cancellationToken;
         readonly Task<BusHandle> _handleTask;
+        readonly ILogger<MassTransitBus> _logger;
 
         public AsyncBusHandle(IBusControl busControl, ILogger<MassTransitBus> logger)
         {

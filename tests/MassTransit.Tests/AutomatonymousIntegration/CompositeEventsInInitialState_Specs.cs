@@ -9,6 +9,7 @@
     using NUnit.Framework;
     using TestFramework;
 
+
     [TestFixture]
     public class When_combining_events_into_a_single_event_in_the_initial_state :
         InMemoryTestFixture
@@ -72,6 +73,7 @@
             public Guid CorrelationId { get; set; }
         }
 
+
         sealed class TestStateMachine :
             MassTransitStateMachine<Instance>
         {
@@ -93,7 +95,6 @@
                         {
                             ctx.Instance.ReceivedSecond = true;
                         }),
-
                     When(Third)
                         .Publish(ctx => new CompleteMessage(ctx.Instance.CorrelationId))
                 );
@@ -109,6 +110,7 @@
             public Event<SecondMessage> Second { get; private set; }
             public Event Third { get; private set; }
         }
+
 
         class FirstMessage :
             CorrelatedBy<Guid>
@@ -131,6 +133,7 @@
 
             public Guid CorrelationId { get; set; }
         }
+
 
         class CompleteMessage :
             CorrelatedBy<Guid>

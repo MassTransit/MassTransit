@@ -4,14 +4,12 @@ namespace Automatonymous.Activities
     using System.Threading.Tasks;
     using Contracts;
     using GreenPipes;
-    using MassTransit.Contracts;
     using MassTransit.Initializers;
     using MassTransit.Metadata;
-    using MassTransit.Util;
 
 
     /// <summary>
-    /// Publishes the <see cref="Automatonymous.Contracts.RequestStarted"/> event, used by the request state machine to track
+    /// Publishes the <see cref="Automatonymous.Contracts.RequestStarted" /> event, used by the request state machine to track
     /// pending requests for a saga instance.
     /// </summary>
     /// <typeparam name="TInstance"></typeparam>
@@ -35,7 +33,7 @@ namespace Automatonymous.Activities
         {
             ConsumeEventContext<TInstance, TData> consumeContext = context.CreateConsumeContext();
 
-            var initializeContext = await MessageInitializerCache<RequestStarted<TData>>.Initialize(new
+            InitializeContext<RequestStarted<TData>> initializeContext = await MessageInitializerCache<RequestStarted<TData>>.Initialize(new
             {
                 context.Instance.CorrelationId,
                 consumeContext.RequestId,

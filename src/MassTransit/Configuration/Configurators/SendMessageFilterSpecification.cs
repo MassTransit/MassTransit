@@ -8,32 +8,42 @@ namespace MassTransit.Configurators
     public class SendMessageFilterSpecification :
         IMessageFilterConfigurator
     {
-        readonly CompositeFilter<SendContext> _filter;
-
         public SendMessageFilterSpecification()
         {
-            _filter = new CompositeFilter<SendContext>();
+            Filter = new CompositeFilter<SendContext>();
         }
 
-        public CompositeFilter<SendContext> Filter => _filter;
+        public CompositeFilter<SendContext> Filter { get; }
 
-        void IMessageFilterConfigurator.Include(params Type[] messageTypes) =>
-            _filter.Includes += message => Match(message, messageTypes);
+        void IMessageFilterConfigurator.Include(params Type[] messageTypes)
+        {
+            Filter.Includes += message => Match(message, messageTypes);
+        }
 
-        void IMessageFilterConfigurator.Include<T>() =>
-            _filter.Includes += message => Match(message, typeof(T));
+        void IMessageFilterConfigurator.Include<T>()
+        {
+            Filter.Includes += message => Match(message, typeof(T));
+        }
 
-        void IMessageFilterConfigurator.Include<T>(Func<T, bool> filter) =>
-            _filter.Includes += message => Match(message, filter);
+        void IMessageFilterConfigurator.Include<T>(Func<T, bool> filter)
+        {
+            Filter.Includes += message => Match(message, filter);
+        }
 
-        void IMessageFilterConfigurator.Exclude(params Type[] messageTypes) =>
-            _filter.Excludes += message => Match(message, messageTypes);
+        void IMessageFilterConfigurator.Exclude(params Type[] messageTypes)
+        {
+            Filter.Excludes += message => Match(message, messageTypes);
+        }
 
-        void IMessageFilterConfigurator.Exclude<T>() =>
-            _filter.Excludes += message => Match(message, typeof(T));
+        void IMessageFilterConfigurator.Exclude<T>()
+        {
+            Filter.Excludes += message => Match(message, typeof(T));
+        }
 
-        void IMessageFilterConfigurator.Exclude<T>(Func<T, bool> filter) =>
-            _filter.Excludes += message => Match(message, filter);
+        void IMessageFilterConfigurator.Exclude<T>(Func<T, bool> filter)
+        {
+            Filter.Excludes += message => Match(message, filter);
+        }
 
         static bool Match(SendContext context, params Type[] messageTypes)
         {

@@ -70,37 +70,33 @@ namespace MassTransit.Tests.Configuration
         class SagaConfigurationObserver :
             ISagaConfigurationObserver
         {
-            readonly HashSet<Tuple<Type, Type>> _messageTypes;
-            readonly HashSet<Type> _sagaTypes;
-            readonly HashSet<Type> _stateMachineTypes;
-
             public SagaConfigurationObserver()
             {
-                _sagaTypes = new HashSet<Type>();
-                _stateMachineTypes = new HashSet<Type>();
-                _messageTypes = new HashSet<Tuple<Type, Type>>();
+                SagaTypes = new HashSet<Type>();
+                StateMachineTypes = new HashSet<Type>();
+                MessageTypes = new HashSet<Tuple<Type, Type>>();
             }
 
-            public HashSet<Type> SagaTypes => _sagaTypes;
+            public HashSet<Type> SagaTypes { get; }
 
-            public HashSet<Type> StateMachineTypes => _stateMachineTypes;
+            public HashSet<Type> StateMachineTypes { get; }
 
-            public HashSet<Tuple<Type, Type>> MessageTypes => _messageTypes;
+            public HashSet<Tuple<Type, Type>> MessageTypes { get; }
 
             void ISagaConfigurationObserver.SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator)
             {
-                _sagaTypes.Add(typeof(TSaga));
+                SagaTypes.Add(typeof(TSaga));
             }
 
             public void StateMachineSagaConfigured<TInstance>(ISagaConfigurator<TInstance> configurator, SagaStateMachine<TInstance> stateMachine)
                 where TInstance : class, ISaga, SagaStateMachineInstance
             {
-                _stateMachineTypes.Add(stateMachine.GetType());
+                StateMachineTypes.Add(stateMachine.GetType());
             }
 
             void ISagaConfigurationObserver.SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
             {
-                _messageTypes.Add(Tuple.Create(typeof(TSaga), typeof(TMessage)));
+                MessageTypes.Add(Tuple.Create(typeof(TSaga), typeof(TMessage)));
             }
         }
     }

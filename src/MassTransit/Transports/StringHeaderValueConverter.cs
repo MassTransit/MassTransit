@@ -5,7 +5,7 @@ namespace MassTransit.Transports
     {
         public bool TryConvert(HeaderValue headerValue, out HeaderValue result)
         {
-            if (headerValue.IsStringValue(out var stringValue))
+            if (headerValue.IsStringValue(out HeaderValue<string> stringValue))
             {
                 result = stringValue;
                 return true;
@@ -17,7 +17,7 @@ namespace MassTransit.Transports
 
         public bool TryConvert<T>(HeaderValue<T> headerValue, out HeaderValue result)
         {
-            if (headerValue.IsStringValue(out var stringValue))
+            if (headerValue.IsStringValue(out HeaderValue<string> stringValue))
             {
                 result = stringValue;
                 return true;

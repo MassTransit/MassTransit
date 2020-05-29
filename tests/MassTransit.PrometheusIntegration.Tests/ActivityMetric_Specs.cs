@@ -18,6 +18,24 @@ namespace MassTransit.PrometheusIntegration.Tests
     public class ActivityMetric_Specs :
         InMemoryActivityTestFixture
     {
+        [Test]
+        public async Task Should_complete_with_metrics_available()
+        {
+            var completed = (await _completed).Message;
+
+            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
+
+            using var stream = new MemoryStream();
+            await Metrics.DefaultRegistry.CollectAndExportAsTextAsync(stream);
+
+            var text = Encoding.UTF8.GetString(stream.ToArray());
+
+            Console.WriteLine(text);
+
+            Assert.That(text.Contains("mt_activity_execute_total{service_name=\"unit_test\",activity_name=\"SecondTest\",argument_type=\"Test\"} 1"));
+            Assert.That(text.Contains("mt_activity_execute_total{service_name=\"unit_test\",activity_name=\"Test\",argument_type=\"Test\"} 1"));
+        }
+
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _firstActivityCompleted;
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _secondActivityCompleted;
@@ -53,24 +71,6 @@ namespace MassTransit.PrometheusIntegration.Tests
         protected override void ConnectObservers(IBus bus)
         {
             _activityMonitor = bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(500));
-        }
-
-        [Test]
-        public async Task Should_complete_with_metrics_available()
-        {
-            RoutingSlipCompleted completed = (await _completed).Message;
-
-            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
-
-            using var stream = new MemoryStream();
-            await Metrics.DefaultRegistry.CollectAndExportAsTextAsync(stream);
-
-            var text = Encoding.UTF8.GetString(stream.ToArray());
-
-            Console.WriteLine(text);
-
-            Assert.That(text.Contains("mt_activity_execute_total{service_name=\"unit_test\",activity_name=\"SecondTest\",argument_type=\"Test\"} 1"));
-            Assert.That(text.Contains("mt_activity_execute_total{service_name=\"unit_test\",activity_name=\"Test\",argument_type=\"Test\"} 1"));
         }
 
         [OneTimeSetUp]

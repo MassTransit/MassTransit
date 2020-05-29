@@ -17,14 +17,14 @@ namespace MassTransit.Tests.Serialization
     public abstract class SerializationTest :
         InMemoryTestFixture
     {
-        readonly Type _serializerType;
-        protected IMessageDeserializer Deserializer;
-        protected IMessageSerializer Serializer;
-        readonly Uri _sourceAddress = new Uri("loopback://localhost/source");
         readonly Uri _destinationAddress = new Uri("loopback://localhost/destination");
-        readonly Uri _responseAddress = new Uri("loopback://localhost/response");
         readonly Uri _faultAddress = new Uri("loopback://localhost/fault");
         protected readonly Guid _requestId = Guid.NewGuid();
+        readonly Uri _responseAddress = new Uri("loopback://localhost/response");
+        readonly Type _serializerType;
+        readonly Uri _sourceAddress = new Uri("loopback://localhost/source");
+        protected IMessageDeserializer Deserializer;
+        protected IMessageSerializer Serializer;
 
         public SerializationTest(Type serializerType)
         {
@@ -107,7 +107,7 @@ namespace MassTransit.Tests.Serialization
         protected T SerializeAndReturn<T>(T obj)
             where T : class
         {
-            var serializedMessageData = Serialize(obj);
+            byte[] serializedMessageData = Serialize(obj);
 
             return Return<T>(serializedMessageData);
         }
@@ -141,10 +141,9 @@ namespace MassTransit.Tests.Serialization
             var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, Serializer.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
             var receiveContext = new InMemoryReceiveContext(message, TestConsumeContext.GetContext());
 
-            ConsumeContext consumeContext = Deserializer.Deserialize(receiveContext);
+            var consumeContext = Deserializer.Deserialize(receiveContext);
 
-            ConsumeContext<T> messageContext;
-            consumeContext.TryGetMessage(out messageContext);
+            consumeContext.TryGetMessage(out ConsumeContext<T> messageContext);
 
             messageContext.ShouldNotBe(null);
 
@@ -161,7 +160,7 @@ namespace MassTransit.Tests.Serialization
         protected virtual void TestSerialization<T>(T message)
             where T : class
         {
-            T result = SerializeAndReturn(message);
+            var result = SerializeAndReturn(message);
 
             message.Equals(result).ShouldBe(true);
         }

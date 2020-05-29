@@ -16,6 +16,17 @@ namespace MassTransit.NHibernateIntegration.Tests
         public class Using_optimistic_concurrency :
             InMemoryTestFixture
         {
+            readonly IServiceProvider _provider;
+
+            public Using_optimistic_concurrency()
+            {
+                _provider = new ServiceCollection()
+                    .AddMassTransit(ConfigureRegistration)
+                    .AddScoped<PublishTestStartedActivity>()
+                    .AddSingleton(provider => new SQLiteSessionFactoryProvider(typeof(TestInstanceMap)).GetSessionFactory())
+                    .BuildServiceProvider();
+            }
+
             [Test]
             public async Task Should_work_as_expected()
             {
@@ -39,17 +50,6 @@ namespace MassTransit.NHibernateIntegration.Tests
                 });
 
                 await updated;
-            }
-
-            readonly IServiceProvider _provider;
-
-            public Using_optimistic_concurrency()
-            {
-                _provider = new ServiceCollection()
-                    .AddMassTransit(ConfigureRegistration)
-                    .AddScoped<PublishTestStartedActivity>()
-                    .AddSingleton(provider => new SQLiteSessionFactoryProvider(typeof(TestInstanceMap)).GetSessionFactory())
-                    .BuildServiceProvider();
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
@@ -72,6 +72,21 @@ namespace MassTransit.NHibernateIntegration.Tests
         public class Using_pessimistic_concurrency :
             InMemoryTestFixture
         {
+            readonly IServiceProvider _provider;
+
+            public Using_pessimistic_concurrency()
+            {
+                var path = Path.Combine(AppContext.BaseDirectory, "sagas.db");
+
+                var connectionString = $"Data Source={path};Version=3;";
+
+                _provider = new ServiceCollection()
+                    .AddMassTransit(ConfigureRegistration)
+                    .AddScoped<PublishTestStartedActivity>()
+                    .AddSingleton(provider => new SQLiteSessionFactoryProvider(connectionString, typeof(TestInstanceMap)).GetSessionFactory())
+                    .BuildServiceProvider();
+            }
+
             [Test]
             public async Task Should_work_as_expected()
             {
@@ -97,21 +112,6 @@ namespace MassTransit.NHibernateIntegration.Tests
                 await updated;
             }
 
-            readonly IServiceProvider _provider;
-
-            public Using_pessimistic_concurrency()
-            {
-                var path = Path.Combine(AppContext.BaseDirectory, "sagas.db");
-
-                var connectionString = $"Data Source={path};Version=3;";
-
-                _provider = new ServiceCollection()
-                    .AddMassTransit(ConfigureRegistration)
-                    .AddScoped<PublishTestStartedActivity>()
-                    .AddSingleton(provider => new SQLiteSessionFactoryProvider(connectionString, typeof(TestInstanceMap)).GetSessionFactory())
-                    .BuildServiceProvider();
-            }
-
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
                 where T : class
             {
@@ -131,10 +131,9 @@ namespace MassTransit.NHibernateIntegration.Tests
         public class TestInstance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
-
             public string CurrentState { get; set; }
             public string Key { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

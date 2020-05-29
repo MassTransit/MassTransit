@@ -15,6 +15,15 @@ namespace MassTransit.RedisIntegration.Tests
         public class Using_optimistic_concurrency :
             InMemoryTestFixture
         {
+            readonly IServiceProvider _provider;
+
+            public Using_optimistic_concurrency()
+            {
+                _provider = new ServiceCollection()
+                    .AddMassTransit(ConfigureRegistration)
+                    .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
+            }
+
             [Test]
             public async Task Should_work_as_expected()
             {
@@ -38,15 +47,6 @@ namespace MassTransit.RedisIntegration.Tests
                 });
 
                 await updated;
-            }
-
-            readonly IServiceProvider _provider;
-
-            public Using_optimistic_concurrency()
-            {
-                _provider = new ServiceCollection()
-                    .AddMassTransit(ConfigureRegistration)
-                    .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
@@ -69,6 +69,15 @@ namespace MassTransit.RedisIntegration.Tests
         public class Using_pessimistic_concurrency :
             InMemoryTestFixture
         {
+            readonly IServiceProvider _provider;
+
+            public Using_pessimistic_concurrency()
+            {
+                _provider = new ServiceCollection()
+                    .AddMassTransit(ConfigureRegistration)
+                    .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
+            }
+
             [Test]
             public async Task Should_work_as_expected()
             {
@@ -94,15 +103,6 @@ namespace MassTransit.RedisIntegration.Tests
                 await updated;
             }
 
-            readonly IServiceProvider _provider;
-
-            public Using_pessimistic_concurrency()
-            {
-                _provider = new ServiceCollection()
-                    .AddMassTransit(ConfigureRegistration)
-                    .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
-            }
-
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
                 where T : class
             {
@@ -123,11 +123,10 @@ namespace MassTransit.RedisIntegration.Tests
             SagaStateMachineInstance,
             IVersionedSaga
         {
-            public Guid CorrelationId { get; set; }
-            public int Version { get; set; }
-
             public string CurrentState { get; set; }
             public string Key { get; set; }
+            public int Version { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

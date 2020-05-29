@@ -18,9 +18,9 @@
     {
         readonly BrokerTopology _brokerTopology;
         readonly bool _removeSubscriptions;
-        CancellationToken _cancellationToken;
 
         readonly TSettings _settings;
+        CancellationToken _cancellationToken;
 
         public ConfigureTopologyFilter(TSettings settings, BrokerTopology brokerTopology, bool removeSubscriptions, CancellationToken cancellationToken)
         {
@@ -35,6 +35,13 @@
             await ConfigureTopology(context).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateFilterScope("configureTopology");
+
+            _brokerTopology.Probe(scope);
         }
 
         public async Task Send(SendEndpointContext context, IPipe<SendEndpointContext> next)
@@ -53,6 +60,7 @@
                 context.GetOrAddPayload(() => _settings);
 
                 if (_removeSubscriptions)
+                {
                     _cancellationToken.Register(async () =>
                     {
                         try
@@ -64,14 +72,8 @@
                             LogContext.Warning?.Log(ex, "Failed to remove one or more subscriptions from the endpoint.");
                         }
                     });
+                }
             }, () => new Context()).ConfigureAwait(false);
-        }
-
-        public void Probe(ProbeContext context)
-        {
-            var scope = context.CreateFilterScope("configureTopology");
-
-            _brokerTopology.Probe(scope);
         }
 
         async Task ConfigureTopology(ConnectionContext context)

@@ -5,7 +5,6 @@
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
-    using MassTransit;
 
 
     public class ReadProperty<T, TProperty> :
@@ -23,7 +22,10 @@
             if (getMethod == null)
                 throw new ArgumentException("The property does not have an accessible get method");
 
-            TProperty GetUsingReflection(T entity) => (TProperty)getMethod.Invoke(entity, null);
+            TProperty GetUsingReflection(T entity)
+            {
+                return (TProperty)getMethod.Invoke(entity, null);
+            }
 
             TProperty Initialize(T entity)
             {
@@ -46,7 +48,7 @@
         {
             try
             {
-                var method = CompileGetMethod(getMethod);
+                Func<T, TProperty> method = CompileGetMethod(getMethod);
 
                 Interlocked.Exchange(ref _getMethod, method);
             }
@@ -62,7 +64,7 @@
                 var instance = Expression.Parameter(typeof(T), "instance");
                 var call = Expression.Call(instance, getMethod);
 
-                var lambdaExpression = Expression.Lambda<Func<T, TProperty>>(call, instance);
+                Expression<Func<T, TProperty>> lambdaExpression = Expression.Lambda<Func<T, TProperty>>(call, instance);
 
                 return lambdaExpression.CompileFast<Func<T, TProperty>>();
             }

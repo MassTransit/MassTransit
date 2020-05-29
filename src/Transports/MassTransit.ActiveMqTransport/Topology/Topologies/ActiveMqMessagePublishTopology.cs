@@ -16,9 +16,9 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         IActiveMqMessagePublishTopologyConfigurator<TMessage>
         where TMessage : class
     {
-        readonly TopicConfigurator _topic;
         readonly IList<IActiveMqMessagePublishTopology> _implementedMessageTypes;
         readonly IMessageTopology<TMessage> _messageTopology;
+        readonly TopicConfigurator _topic;
 
         public ActiveMqMessagePublishTopology(IMessageTopology<TMessage> messageTopology)
         {

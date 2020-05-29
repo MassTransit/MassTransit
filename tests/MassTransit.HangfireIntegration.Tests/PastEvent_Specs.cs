@@ -81,8 +81,7 @@
             Assert.IsTrue(context.InitiatorId.HasValue);
             Assert.AreEqual(initiatorId, context.InitiatorId.Value);
 
-            object value;
-            Assert.IsTrue(context.Headers.TryGetHeader("Hello", out value));
+            Assert.IsTrue(context.Headers.TryGetHeader("Hello", out var value));
             Assert.AreEqual("World", value);
         }
 

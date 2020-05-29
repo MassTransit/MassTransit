@@ -1,6 +1,6 @@
 namespace MassTransit.Registration
 {
-    public interface IRiderRegistrationConfigurator<out TContainerContext> :
+    public interface IRiderConfigurator<out TContainerContext> :
         IRegistrationConfigurator
         where TContainerContext : class
     {
@@ -9,6 +9,6 @@ namespace MassTransit.Registration
         /// </summary>
         /// <param name="riderFactory"></param>
         void SetRiderFactory<T>(T riderFactory)
-            where T : IRiderRegistrationFactory<TContainerContext>;
+            where T : IRegistrationRiderFactory<TContainerContext>;
     }
 }

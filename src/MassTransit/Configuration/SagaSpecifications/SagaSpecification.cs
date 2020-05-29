@@ -51,9 +51,7 @@
             where T : class
         {
             if (!_messageTypes.TryGetValue(typeof(T), out ISagaMessageSpecification<TSaga> specification))
-            {
                 throw new ArgumentException($"MessageType {TypeMetadataCache<T>.ShortName} is not consumed by {TypeMetadataCache<TSaga>.ShortName}");
-            }
 
             return specification.GetMessageSpecification<T>();
         }
@@ -72,9 +70,7 @@
         public void AddPipeSpecification(IPipeSpecification<SagaConsumeContext<TSaga>> specification)
         {
             foreach (ISagaMessageSpecification<TSaga> messageSpecification in _messageTypes.Values)
-            {
                 messageSpecification.AddPipeSpecification(specification);
-            }
         }
 
         public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)

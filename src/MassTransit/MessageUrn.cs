@@ -13,8 +13,25 @@ namespace MassTransit
     {
         static readonly ConcurrentDictionary<Type, Cached> _cache = new ConcurrentDictionary<Type, Cached>();
 
-        public static MessageUrn ForType<T>() => MessageUrnCache<T>.Urn;
-        public static string ForTypeString<T>() => MessageUrnCache<T>.UrnString;
+        MessageUrn(string uriString)
+            : base(uriString)
+        {
+        }
+
+        protected MessageUrn(SerializationInfo serializationInfo, StreamingContext streamingContext)
+            : base(serializationInfo, streamingContext)
+        {
+        }
+
+        public static MessageUrn ForType<T>()
+        {
+            return MessageUrnCache<T>.Urn;
+        }
+
+        public static string ForTypeString<T>()
+        {
+            return MessageUrnCache<T>.UrnString;
+        }
 
         public static MessageUrn ForType(Type type)
         {
@@ -29,45 +46,6 @@ namespace MassTransit
             return _cache.GetOrAdd(type, _ => (Cached)Activator.CreateInstance(typeof(Cached<>).MakeGenericType(type))).UrnString;
         }
 
-
-        static class MessageUrnCache<T>
-        {
-            internal static readonly MessageUrn Urn;
-            internal static readonly string UrnString;
-
-            static MessageUrnCache()
-            {
-                Urn = new MessageUrn(GetUrnForType(typeof(T)));
-                UrnString = Urn.ToString();
-            }
-        }
-
-
-        interface Cached
-        {
-            MessageUrn Urn { get; }
-            string UrnString { get; }
-        }
-
-
-        class Cached<T> :
-            Cached
-        {
-            public MessageUrn Urn => MessageUrnCache<T>.Urn;
-            public string UrnString => MessageUrnCache<T>.UrnString;
-        }
-
-
-        MessageUrn(string uriString)
-            : base(uriString)
-        {
-        }
-
-        protected MessageUrn(SerializationInfo serializationInfo, StreamingContext streamingContext)
-            : base(serializationInfo, streamingContext)
-        {
-        }
-
         public void Deconstruct(out string name, out string ns, out string assemblyName)
         {
             name = null;
@@ -80,9 +58,7 @@ namespace MassTransit
                 if (string.Compare(names[0], "message", StringComparison.OrdinalIgnoreCase) == 0)
                 {
                     if (names.Length == 2)
-                    {
                         name = names[1];
-                    }
                     else if (names.Length == 3)
                     {
                         name = names[2];
@@ -113,7 +89,7 @@ namespace MassTransit
 
             if (includeScope && typeInfo.Namespace != null)
             {
-                string ns = typeInfo.Namespace;
+                var ns = typeInfo.Namespace;
                 sb.Append(ns);
 
                 sb.Append(':');
@@ -130,7 +106,7 @@ namespace MassTransit
                 var name = typeInfo.GetGenericTypeDefinition().Name;
 
                 //remove `1
-                int index = name.IndexOf('`');
+                var index = name.IndexOf('`');
                 if (index > 0)
                     name = name.Remove(index);
                 //
@@ -139,7 +115,7 @@ namespace MassTransit
                 sb.Append('[');
 
                 Type[] arguments = typeInfo.GetGenericArguments();
-                for (int i = 0; i < arguments.Length; i++)
+                for (var i = 0; i < arguments.Length; i++)
                 {
                     if (i > 0)
                         sb.Append(',');
@@ -155,6 +131,34 @@ namespace MassTransit
                 sb.Append(typeInfo.Name);
 
             return sb.ToString();
+        }
+
+
+        static class MessageUrnCache<T>
+        {
+            internal static readonly MessageUrn Urn;
+            internal static readonly string UrnString;
+
+            static MessageUrnCache()
+            {
+                Urn = new MessageUrn(GetUrnForType(typeof(T)));
+                UrnString = Urn.ToString();
+            }
+        }
+
+
+        interface Cached
+        {
+            MessageUrn Urn { get; }
+            string UrnString { get; }
+        }
+
+
+        class Cached<T> :
+            Cached
+        {
+            public MessageUrn Urn => MessageUrnCache<T>.Urn;
+            public string UrnString => MessageUrnCache<T>.UrnString;
         }
     }
 }

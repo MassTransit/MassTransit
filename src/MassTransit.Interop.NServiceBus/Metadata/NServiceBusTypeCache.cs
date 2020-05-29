@@ -17,12 +17,12 @@ namespace MassTransit.Interop.NServiceBus.Metadata
             _messageTypeNames = new Lazy<string[]>(() => GetMessageTypeNames().ToArray());
         }
 
+        public static string[] MessageTypeNames => Cached.Metadata.Value.MessageTypeNames;
+
         /// <summary>
         /// The names of all the message types supported by the message type
         /// </summary>
         string[] INServiceBusTypeMetadataCache<T>.MessageTypeNames => _messageTypeNames.Value;
-
-        public static string[] MessageTypeNames => Cached.Metadata.Value.MessageTypeNames;
 
         static IEnumerable<string> GetMessageTypeNames()
         {
@@ -43,6 +43,7 @@ namespace MassTransit.Interop.NServiceBus.Metadata
                 }
             }
         }
+
 
         static class Cached
         {

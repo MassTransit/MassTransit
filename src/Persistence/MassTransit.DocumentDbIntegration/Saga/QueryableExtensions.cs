@@ -4,6 +4,7 @@ namespace MassTransit.DocumentDbIntegration.Saga
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Documents.Client;
     using Microsoft.Azure.Documents.Linq;
 
 
@@ -12,12 +13,12 @@ namespace MassTransit.DocumentDbIntegration.Saga
         // Loads all to memory. If the number of saga instances is quite large (shouldn't be), then this could run up memory usage fast
         public static async Task<IEnumerable<T>> QueryAsync<T>(this IQueryable<T> query, CancellationToken cancellationToken)
         {
-            var documentQuery = query.AsDocumentQuery();
+            IDocumentQuery<T> documentQuery = query.AsDocumentQuery();
             var batches = new List<IEnumerable<T>>();
 
             do
             {
-                var batch = await documentQuery.ExecuteNextAsync<T>(cancellationToken).ConfigureAwait(false);
+                FeedResponse<T> batch = await documentQuery.ExecuteNextAsync<T>(cancellationToken).ConfigureAwait(false);
                 batches.Add(batch);
             }
             while (documentQuery.HasMoreResults);

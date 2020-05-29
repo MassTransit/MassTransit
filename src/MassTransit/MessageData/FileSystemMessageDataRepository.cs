@@ -21,9 +21,9 @@ namespace MassTransit.MessageData
 
         async Task<Stream> IMessageDataRepository.Get(Uri address, CancellationToken cancellationToken)
         {
-            string filePath = ParseFilePath(address);
+            var filePath = ParseFilePath(address);
 
-            string fullPath = Path.Combine(_dataDirectory.FullName, filePath);
+            var fullPath = Path.Combine(_dataDirectory.FullName, filePath);
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException("The file was not found", fullPath);
 
@@ -40,9 +40,9 @@ namespace MassTransit.MessageData
 
         async Task<Uri> IMessageDataRepository.Put(Stream stream, TimeSpan? timeToLive, CancellationToken cancellationToken)
         {
-            string filePath = GenerateFilePath(timeToLive);
+            var filePath = GenerateFilePath(timeToLive);
 
-            string fullPath = Path.Combine(_dataDirectory.FullName, filePath);
+            var fullPath = Path.Combine(_dataDirectory.FullName, filePath);
 
             VerifyDirectory(fullPath);
 
@@ -55,7 +55,7 @@ namespace MassTransit.MessageData
 
         static void VerifyDirectory(string fullPath)
         {
-            string directoryName = Path.GetDirectoryName(fullPath);
+            var directoryName = Path.GetDirectoryName(fullPath);
             if (string.IsNullOrEmpty(directoryName))
                 throw new DirectoryNotFoundException("No directory was found for the file path: " + fullPath);
 
@@ -64,9 +64,9 @@ namespace MassTransit.MessageData
 
         static string GenerateFilePath(TimeSpan? timeToLive)
         {
-            string fileId = FormatUtil.Formatter.Format(NewId.Next().ToSequentialGuid().ToByteArray());
+            var fileId = FormatUtil.Formatter.Format(NewId.Next().ToSequentialGuid().ToByteArray());
 
-            string expiration = timeToLive.HasValue && timeToLive.Value < TimeSpan.MaxValue && timeToLive >= TimeSpan.Zero
+            var expiration = timeToLive.HasValue && timeToLive.Value < TimeSpan.MaxValue && timeToLive >= TimeSpan.Zero
                 ? (DateTime.UtcNow + timeToLive.Value).ToString("yyyy-MM-dd-HH").Replace('-', Path.DirectorySeparatorChar)
                 : "none";
 
@@ -82,7 +82,7 @@ namespace MassTransit.MessageData
             if (parts[0] != "file")
                 throw new ArgumentException("The address must be a urn:file");
 
-            int length = parts.Length - 1;
+            var length = parts.Length - 1;
             var elements = new string[length];
             Array.Copy(parts, 1, elements, 0, length);
 

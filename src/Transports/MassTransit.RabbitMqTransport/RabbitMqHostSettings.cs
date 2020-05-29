@@ -12,33 +12,33 @@
     public interface RabbitMqHostSettings
     {
         /// <summary>
-        ///     The RabbitMQ host to connect to (should be a valid hostname)
+        /// The RabbitMQ host to connect to (should be a valid hostname)
         /// </summary>
         string Host { get; }
 
         /// <summary>
-        ///     The RabbitMQ port to connect
+        /// The RabbitMQ port to connect
         /// </summary>
         int Port { get; }
 
         /// <summary>
-        ///     The virtual host for the connection
+        /// The virtual host for the connection
         /// </summary>
         string VirtualHost { get; }
 
         /// <summary>
-        ///     The Username for connecting to the host
+        /// The Username for connecting to the host
         /// </summary>
         string Username { get; }
 
         /// <summary>
-        ///     The password for connection to the host
-        ///     MAYBE this should be a SecureString instead of a regular string
+        /// The password for connection to the host
+        /// MAYBE this should be a SecureString instead of a regular string
         /// </summary>
         string Password { get; }
 
         /// <summary>
-        ///     The heartbeat interval (in seconds) to keep the host connection alive
+        /// The heartbeat interval (in seconds) to keep the host connection alive
         /// </summary>
         ushort Heartbeat { get; }
 
@@ -68,12 +68,12 @@
         string ClientCertificatePath { get; }
 
         /// <summary>
-        /// The passphrase for the client certificate found using the <see cref="ClientCertificatePath"/>, not required if <see cref="ClientCertificate"/> is populated
+        /// The passphrase for the client certificate found using the <see cref="ClientCertificatePath" />, not required if <see cref="ClientCertificate" /> is populated
         /// </summary>
         string ClientCertificatePassphrase { get; }
 
         /// <summary>
-        /// A certificate to use for client certificate authentication, if not set then the <see cref="ClientCertificatePath"/> and <see cref="ClientCertificatePassphrase"/> will be used
+        /// A certificate to use for client certificate authentication, if not set then the <see cref="ClientCertificatePath" /> and <see cref="ClientCertificatePassphrase" /> will be used
         /// </summary>
         X509Certificate ClientCertificate { get; }
 

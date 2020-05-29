@@ -8,7 +8,9 @@
     /// When a message data property is deserialized, this is used as a placeholder for the actual message
     /// data accessor which replaces this property value once the message is transformed on the pipeline.
     /// </summary>
-    /// <typeparam name="T">The type used to access the message data, valid types include stream, string, and byte[].</typeparam>
+    /// <typeparam name="T">
+    /// The type used to access the message data, valid types include stream, string, and byte[].
+    /// </typeparam>
     public class DeserializedMessageData<T> :
         MessageData<T>
     {

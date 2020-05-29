@@ -1,16 +1,17 @@
-using System;
-
 namespace MassTransit.Tests
 {
-	[Serializable]
-	public class ClientMessage
-	{
-		private string _name;
+    using System;
 
-		public string Name
-		{
-			get { return _name; }
-			set { _name = value; }
-		}
-	}
+
+    [Serializable]
+    public class ClientMessage
+    {
+        string _name;
+
+        public string Name
+        {
+            get => _name;
+            set => _name = value;
+        }
+    }
 }

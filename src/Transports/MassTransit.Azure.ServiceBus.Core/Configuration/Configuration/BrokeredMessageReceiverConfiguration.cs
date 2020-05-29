@@ -10,8 +10,8 @@
     public class BrokeredMessageReceiverConfiguration :
         ReceiverConfiguration
     {
-        readonly IServiceBusHostConfiguration _hostConfiguration;
         readonly IServiceBusReceiveEndpointConfiguration _endpointConfiguration;
+        readonly IServiceBusHostConfiguration _hostConfiguration;
 
         public BrokeredMessageReceiverConfiguration(IServiceBusHostConfiguration hostConfiguration,
             IServiceBusReceiveEndpointConfiguration endpointConfiguration)

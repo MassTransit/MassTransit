@@ -63,10 +63,10 @@ namespace MassTransit.AmazonSqsTransport
 
             if (typeInfo.IsGenericType)
             {
-                string name = typeInfo.GetGenericTypeDefinition().Name;
+                var name = typeInfo.GetGenericTypeDefinition().Name;
 
                 //remove `1
-                int index = name.IndexOf('`');
+                var index = name.IndexOf('`');
                 if (index > 0)
                     name = name.Remove(index);
 
@@ -74,7 +74,7 @@ namespace MassTransit.AmazonSqsTransport
                 sb.Append(_genericTypeSeparator);
 
                 Type[] arguments = typeInfo.GetGenericArguments();
-                for (int i = 0; i < arguments.Length; i++)
+                for (var i = 0; i < arguments.Length; i++)
                 {
                     if (i > 0)
                         sb.Append(_genericArgumentSeparator);

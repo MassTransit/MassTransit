@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Tests
+﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Collections.Concurrent;
@@ -20,12 +8,10 @@ namespace MassTransit.RabbitMqTransport.Tests
     using Courier;
     using Courier.Contracts;
     using GreenPipes;
-    using GreenPipes.Introspection;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;
-    using Util;
 
 
     [TestFixture]
@@ -35,7 +21,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_include_the_activity_log_data()
         {
-            RoutingSlipActivityCompleted activityCompleted = (await _firstActivityCompleted).Message;
+            var activityCompleted = (await _firstActivityCompleted).Message;
 
             Assert.AreEqual("Hello", activityCompleted.GetResult<string>("OriginalValue"));
         }
@@ -43,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_include_the_variable_set_by_the_activity()
         {
-            RoutingSlipCompleted completed = (await _completed).Message;
+            var completed = (await _completed).Message;
 
             Assert.AreEqual("Hello, World!", completed.GetVariable<string>("Value"));
         }
@@ -51,7 +37,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_include_the_variables_of_the_completed_routing_slip()
         {
-            RoutingSlipCompleted completed = (await _completed).Message;
+            var completed = (await _completed).Message;
 
             Assert.AreEqual("Knife", completed.Variables["Variable"]);
         }
@@ -59,7 +45,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_include_the_variables_with_the_activity_log()
         {
-            RoutingSlipActivityCompleted activityCompleted = (await _firstActivityCompleted).Message;
+            var activityCompleted = (await _firstActivityCompleted).Message;
 
             Assert.AreEqual("Knife", activityCompleted.Variables["Variable"]);
         }
@@ -67,7 +53,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_receive_the_first_routing_slip_activity_completed_event()
         {
-            RoutingSlipActivityCompleted activityCompleted = (await _firstActivityCompleted).Message;
+            var activityCompleted = (await _firstActivityCompleted).Message;
 
             Assert.AreEqual(_routingSlip.TrackingNumber, activityCompleted.TrackingNumber);
         }
@@ -75,7 +61,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_receive_the_routing_slip_completed_event()
         {
-            RoutingSlipCompleted completed = (await _completed).Message;
+            var completed = (await _completed).Message;
 
             Assert.AreEqual(_routingSlip.TrackingNumber, completed.TrackingNumber);
         }
@@ -83,15 +69,16 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_receive_the_second_routing_slip_activity_completed_event()
         {
-            RoutingSlipActivityCompleted activityCompleted = (await _secondActivityCompleted).Message;
+            var activityCompleted = (await _secondActivityCompleted).Message;
 
             Assert.AreEqual(_routingSlip.TrackingNumber, activityCompleted.TrackingNumber);
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
-            ProbeResult result = Bus.GetProbeResult();
+            var result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }
@@ -111,8 +98,8 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _completed = Handled<RoutingSlipCompleted>(configurator, x => x.Message.TrackingNumber == _routingSlip.TrackingNumber);
 
-            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
-            ActivityTestContext secondActivity = GetActivityContext<SecondTestActivity>();
+            var testActivity = GetActivityContext<TestActivity>();
+            var secondActivity = GetActivityContext<SecondTestActivity>();
 
             _firstActivityCompleted = Handled<RoutingSlipActivityCompleted>(configurator, context => context.Message.ActivityName.Equals(testActivity.Name)
                 && context.Message.TrackingNumber == _routingSlip.TrackingNumber);
@@ -125,12 +112,12 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
 
-            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
-            ActivityTestContext secondActivity = GetActivityContext<SecondTestActivity>();
+            var testActivity = GetActivityContext<TestActivity>();
+            var secondActivity = GetActivityContext<SecondTestActivity>();
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
             {
                 Value = "Hello",
-                NullValue = (string)null,
+                NullValue = (string)null
             });
 
             builder.AddActivity(secondActivity.Name, secondActivity.ExecuteUri);
@@ -152,7 +139,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_receive_the_routing_slip_completed_event()
         {
-            RoutingSlipCompleted completed = (await _completed).Message;
+            var completed = (await _completed).Message;
 
             Assert.AreEqual(_routingSlip.TrackingNumber, completed.TrackingNumber);
         }
@@ -181,12 +168,12 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
 
-            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
-            ActivityTestContext secondActivity = GetActivityContext<SecondTestActivity>();
+            var testActivity = GetActivityContext<TestActivity>();
+            var secondActivity = GetActivityContext<SecondTestActivity>();
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new
             {
                 Value = "Hello",
-                NullValue = (string)null,
+                NullValue = (string)null
             });
 
             builder.AddActivity(secondActivity.Name, secondActivity.ExecuteUri);
@@ -210,7 +197,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_receive_the_routing_slip_completed_event()
         {
-            int completed = await _allDone.Task;
+            var completed = await _allDone.Task;
         }
 
         public Executing_many_activities_in_a_row()
@@ -241,7 +228,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _completed = Handler<RoutingSlipCompleted>(configurator, async context =>
             {
                 _completedRoutingSlips.Add(context.Message.TrackingNumber);
-                int count = Interlocked.Increment(ref _count);
+                var count = Interlocked.Increment(ref _count);
                 if (count == _limit)
                     _allDone.TrySetResult(count);
             });
@@ -252,17 +239,17 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _limit = 100;
 
-            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
-            ActivityTestContext secondActivity = GetActivityContext<SecondTestActivity>();
+            var testActivity = GetActivityContext<TestActivity>();
+            var secondActivity = GetActivityContext<SecondTestActivity>();
 
-            for (int i = 0; i < _limit; i++)
+            for (var i = 0; i < _limit; i++)
             {
                 var builder = new RoutingSlipBuilder(Guid.NewGuid());
                 builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
                 builder.AddActivity(secondActivity.Name, secondActivity.ExecuteUri);
                 builder.AddVariable("Value", "Hello");
 
-                RoutingSlip routingSlip = builder.Build();
+                var routingSlip = builder.Build();
 
                 await Bus.Execute(routingSlip);
 
@@ -279,7 +266,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_receive_the_routing_slip_completed_event()
         {
-            int completed = await _allDone.Task;
+            var completed = await _allDone.Task;
         }
 
         public Executing_many_activities_in_a_row_with_a_fault_one()
@@ -309,7 +296,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             Handler<RoutingSlipFaulted>(configurator, async context =>
             {
                 _completedRoutingSlips.Add(context.Message.TrackingNumber);
-                int count = Interlocked.Increment(ref _count);
+                var count = Interlocked.Increment(ref _count);
                 if (count == _limit)
                     _allDone.TrySetResult(count);
             });
@@ -320,16 +307,16 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _limit = 1;
 
-            ActivityTestContext testActivity = GetActivityContext<TestActivity>();
-            ActivityTestContext secondActivity = GetActivityContext<SecondTestActivity>();
+            var testActivity = GetActivityContext<TestActivity>();
+            var secondActivity = GetActivityContext<SecondTestActivity>();
 
-            for (int i = 0; i < _limit; i++)
+            for (var i = 0; i < _limit; i++)
             {
                 var builder = new RoutingSlipBuilder(Guid.NewGuid());
                 builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
                 builder.AddActivity(secondActivity.Name, secondActivity.ExecuteUri);
 
-                RoutingSlip routingSlip = builder.Build();
+                var routingSlip = builder.Build();
 
                 await Bus.Execute(routingSlip);
 

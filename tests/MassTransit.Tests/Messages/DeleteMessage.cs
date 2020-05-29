@@ -1,9 +1,10 @@
-using System;
-
 namespace MassTransit.Tests
 {
-	[Serializable]
-	public class DeleteMessage
-	{
-	}
+    using System;
+
+
+    [Serializable]
+    public class DeleteMessage
+    {
+    }
 }

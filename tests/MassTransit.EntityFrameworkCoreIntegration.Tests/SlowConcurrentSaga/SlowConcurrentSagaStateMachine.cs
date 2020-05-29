@@ -27,8 +27,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
                         await Task.Delay(5000);
                         context.Instance.Counter++;
                     })
-                    .TransitionTo(this.DidIncrement));
+                    .TransitionTo(DidIncrement));
         }
+
         public Event<Begin> Begin { get; set; }
 
         public Event<IncrementCounterSlowly> IncrementCounterSlowly { get; set; }

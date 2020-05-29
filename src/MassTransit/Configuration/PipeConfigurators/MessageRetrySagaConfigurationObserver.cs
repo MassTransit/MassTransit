@@ -19,8 +19,8 @@ namespace MassTransit.PipeConfigurators
         ISagaConfigurationObserver
         where TSaga : class, ISaga
     {
-        readonly ISagaConfigurator<TSaga> _configurator;
         readonly CancellationToken _cancellationToken;
+        readonly ISagaConfigurator<TSaga> _configurator;
         readonly Action<IRetryConfigurator> _configure;
 
         public MessageRetrySagaConfigurationObserver(ISagaConfigurator<TSaga> configurator, CancellationToken cancellationToken,

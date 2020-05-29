@@ -1,15 +1,3 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.SendPipeSpecifications
 {
     using System;
@@ -43,9 +31,7 @@ namespace MassTransit.SendPipeSpecifications
                 _specifications.Add(specification);
 
                 foreach (var messageSpecification in _messageSpecifications.Values)
-                {
                     messageSpecification.AddPipeSpecification(specification);
-                }
             }
         }
 
@@ -54,6 +40,11 @@ namespace MassTransit.SendPipeSpecifications
             IMessageSendPipeSpecification<T> messageSpecification = GetMessageSpecification<T>();
 
             messageSpecification.AddPipeSpecification(specification);
+        }
+
+        public ConnectHandle ConnectSendPipeSpecificationObserver(ISendPipeSpecificationObserver observer)
+        {
+            return _observers.Connect(observer);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -70,19 +61,16 @@ namespace MassTransit.SendPipeSpecifications
             return specification.GetMessageSpecification<T>();
         }
 
-        public ConnectHandle ConnectSendPipeSpecificationObserver(ISendPipeSpecificationObserver observer)
-        {
-            return _observers.Connect(observer);
-        }
-
         IMessageSendPipeSpecification CreateMessageSpecification<T>(Type type)
             where T : class
         {
             var specification = new MessageSendPipeSpecification<T>();
 
             lock (_lock)
-                foreach (var pipeSpecification in _specifications)
+            {
+                foreach (IPipeSpecification<SendContext> pipeSpecification in _specifications)
                     specification.AddPipeSpecification(pipeSpecification);
+            }
 
             _observers.MessageSpecificationCreated(specification);
 

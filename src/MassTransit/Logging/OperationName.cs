@@ -26,6 +26,7 @@ namespace MassTransit.Logging
             public const string RaiseEvent = "MassTransit.Saga.RaiseEvent";
         }
 
+
         public static class Courier
         {
             public const string Execute = "MassTransit.Activity.Execute";

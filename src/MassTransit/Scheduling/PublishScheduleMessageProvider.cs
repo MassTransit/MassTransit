@@ -28,7 +28,7 @@ namespace MassTransit.Scheduling
             {
                 InVar.CorrelationId,
                 InVar.Timestamp,
-                TokenId = tokenId,
+                TokenId = tokenId
             });
         }
     }

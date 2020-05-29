@@ -3,6 +3,7 @@
     using System;
     using System.Linq;
 
+
     [Serializable]
     public class ReceiveFaultEvent :
         ReceiveFault
@@ -18,7 +19,7 @@
             FaultMessageTypes = faultMessageTypes;
 
             var aggregateException = exception as AggregateException;
-            Exceptions = aggregateException?.InnerExceptions.Select(x => ((ExceptionInfo)new FaultExceptionInfo(x))).ToArray()
+            Exceptions = aggregateException?.InnerExceptions.Select(x => (ExceptionInfo)new FaultExceptionInfo(x)).ToArray()
                 ?? new ExceptionInfo[] {new FaultExceptionInfo(exception)};
         }
 

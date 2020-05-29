@@ -89,7 +89,6 @@
             return host.Settings;
         }
 
-
         protected override IBusControl CreateBus()
         {
             var busControl = MassTransit.Bus.Factory.CreateUsingActiveMq(x =>

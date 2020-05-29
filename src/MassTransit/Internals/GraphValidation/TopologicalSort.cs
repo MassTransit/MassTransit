@@ -25,20 +25,17 @@
             _list = list;
             _results = new List<TNode>();
 
-            TNode sourceNode = list.GetNode(source);
+            var sourceNode = list.GetNode(source);
             _sourceNodes = Enumerable.Repeat(sourceNode, 1);
 
             Sort();
         }
 
-        public IEnumerable<TNode> Result
-        {
-            get { return _results; }
-        }
+        public IEnumerable<TNode> Result => _results;
 
         void Sort()
         {
-            foreach (TNode node in _sourceNodes)
+            foreach (var node in _sourceNodes)
             {
                 if (!node.Visited)
                     Sort(node);
@@ -48,7 +45,7 @@
         void Sort(TNode node)
         {
             node.Visited = true;
-            foreach (var edge in _list.GetEdges(node))
+            foreach (Edge<T, TNode> edge in _list.GetEdges(node))
             {
                 if (!edge.Target.Visited)
                     Sort(edge.Target);

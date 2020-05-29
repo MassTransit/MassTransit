@@ -1,17 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-
-namespace MassTransit.Courier.Serialization
+﻿namespace MassTransit.Courier.Serialization
 {
     using System;
     using System.Collections.Generic;
@@ -25,9 +12,9 @@ namespace MassTransit.Courier.Serialization
         IPipe<SendContext>
     {
         readonly string _contentType;
-        readonly object _subscriptionMessage;
         readonly MessageEnvelope _envelope;
         readonly IPipe<SendContext> _pipe;
+        readonly object _subscriptionMessage;
 
         public MessageEnvelopeContextAdapter(IPipe<SendContext> pipe, MessageEnvelope envelope, string contentType, object subscriptionMessage)
         {
@@ -68,10 +55,9 @@ namespace MassTransit.Courier.Serialization
         static Guid? ConvertIdToGuid(string id)
         {
             if (string.IsNullOrWhiteSpace(id))
-                return default(Guid?);
+                return default;
 
-            Guid messageId;
-            if (Guid.TryParse(id, out messageId))
+            if (Guid.TryParse(id, out var messageId))
                 return messageId;
 
             throw new FormatException("The Id was not a Guid: " + id);

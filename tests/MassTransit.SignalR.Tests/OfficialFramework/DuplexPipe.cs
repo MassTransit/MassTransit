@@ -2,7 +2,8 @@
 {
     using System.IO.Pipelines;
 
-    internal class DuplexPipe : IDuplexPipe
+
+    class DuplexPipe : IDuplexPipe
     {
         public DuplexPipe(PipeReader reader, PipeWriter writer)
         {
@@ -24,6 +25,7 @@
 
             return new DuplexPipePair(applicationToTransport, transportToApplication);
         }
+
 
         // This class exists to work around issues with value tuple on .NET Framework
         public readonly struct DuplexPipePair

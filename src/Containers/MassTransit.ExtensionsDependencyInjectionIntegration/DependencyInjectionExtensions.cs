@@ -39,7 +39,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Create a request client, using the specified service address, using the <see cref="IClientFactory"/> from the container.
+        /// Create a request client, using the specified service address, using the <see cref="IClientFactory" /> from the container.
         /// </summary>
         /// <param name="provider"></param>
         /// <param name="timeout">The default timeout for requests</param>
@@ -52,7 +52,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Create a request client, using the specified service address, using the <see cref="IClientFactory"/> from the container.
+        /// Create a request client, using the specified service address, using the <see cref="IClientFactory" /> from the container.
         /// </summary>
         /// <param name="provider"></param>
         /// <param name="destinationAddress">The destination service address</param>

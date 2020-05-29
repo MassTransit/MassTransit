@@ -33,7 +33,7 @@
 
                 await InputQueueSendEndpoint.Send(new StopCommand(correlationId));
 
-                var saga = await _repository.ShouldNotContainSaga(correlationId, TestTimeout);
+                Guid? saga = await _repository.ShouldNotContainSaga(correlationId, TestTimeout);
 
                 Assert.IsNull(saga);
             }

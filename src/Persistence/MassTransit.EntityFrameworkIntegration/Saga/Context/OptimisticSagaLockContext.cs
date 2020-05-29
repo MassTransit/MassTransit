@@ -16,10 +16,10 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
         SagaLockContext<TSaga>
         where TSaga : class, ISaga
     {
-        readonly DbContext _context;
-        readonly ISagaQuery<TSaga> _query;
         readonly CancellationToken _cancellationToken;
+        readonly DbContext _context;
         readonly ILoadQueryProvider<TSaga> _provider;
+        readonly ISagaQuery<TSaga> _query;
 
         public OptimisticSagaLockContext(DbContext context, ISagaQuery<TSaga> query, CancellationToken cancellationToken, ILoadQueryProvider<TSaga> provider)
         {
@@ -31,7 +31,7 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
 
         public async Task<IList<TSaga>> Load()
         {
-            var instances = await _provider.GetQueryable(_context)
+            List<TSaga> instances = await _provider.GetQueryable(_context)
                 .Where(_query.FilterExpression)
                 .ToListAsync(_cancellationToken)
                 .ConfigureAwait(false);

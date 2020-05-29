@@ -1,15 +1,3 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Topology.Entities
 {
     using System.Collections.Generic;
@@ -20,7 +8,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         Queue,
         QueueHandle
     {
-        public QueueEntity(long id, string name, bool durable, bool autoDelete, IDictionary<string, object> queueAttributes = null, IDictionary<string, object> queueSubscriptionAttributes = null, IDictionary<string, string> queueTags = null)
+        public QueueEntity(long id, string name, bool durable, bool autoDelete, IDictionary<string, object> queueAttributes = null,
+            IDictionary<string, object> queueSubscriptionAttributes = null, IDictionary<string, string> queueTags = null)
         {
             Id = id;
             EntityName = name;
@@ -38,23 +27,26 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         public string EntityName { get; }
         public bool Durable { get; }
         public bool AutoDelete { get; }
-        public long Id { get; }
         public IDictionary<string, object> QueueAttributes { get; }
         public IDictionary<string, object> QueueSubscriptionAttributes { get; }
         public IDictionary<string, string> QueueTags { get; }
+        public long Id { get; }
         public Queue Queue => this;
 
         public override string ToString()
         {
-            return string.Join(", ", new[]
-            {
-                $"name: {EntityName}",
-                Durable ? "durable" : "",
-                AutoDelete ? "auto-delete" : "",
-                QueueTags.Any() ? $"tags: {string.Join(";", QueueTags.Select(a => $"{a.Key}={a.Value}"))}" : "",
-                QueueAttributes.Any() ? $"attributes: {string.Join(";", QueueAttributes.Select(a => $"{a.Key}={a.Value}"))}" : "",
-                QueueSubscriptionAttributes.Any() ? $"subscription-attributes: {string.Join(";", QueueSubscriptionAttributes.Select(a => $"{a.Key}={a.Value}"))}" : ""
-            }.Where(x => !string.IsNullOrWhiteSpace(x)));
+            return string.Join(", ",
+                new[]
+                {
+                    $"name: {EntityName}",
+                    Durable ? "durable" : "",
+                    AutoDelete ? "auto-delete" : "",
+                    QueueTags.Any() ? $"tags: {string.Join(";", QueueTags.Select(a => $"{a.Key}={a.Value}"))}" : "",
+                    QueueAttributes.Any() ? $"attributes: {string.Join(";", QueueAttributes.Select(a => $"{a.Key}={a.Value}"))}" : "",
+                    QueueSubscriptionAttributes.Any()
+                        ? $"subscription-attributes: {string.Join(";", QueueSubscriptionAttributes.Select(a => $"{a.Key}={a.Value}"))}"
+                        : ""
+                }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 
 

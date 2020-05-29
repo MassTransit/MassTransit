@@ -21,8 +21,8 @@
 
 
         readonly CancellationToken _cancellationToken;
+        readonly CancellationTokenSource _cancellationTokenSource;
         readonly ClientFactoryContext _context;
-        readonly SendRequestCallback _sendRequestCallback;
         readonly TaskCompletionSource<TRequest> _message;
         readonly IBuildPipeConfigurator<SendContext<TRequest>> _pipeConfigurator;
         readonly TaskCompletionSource<bool> _readyToSend;
@@ -30,11 +30,11 @@
         readonly Dictionary<Type, HandlerConnectHandle> _responseHandlers;
         readonly Task _send;
         readonly TaskCompletionSource<SendContext<TRequest>> _sendContext;
-        readonly CancellationTokenSource _cancellationTokenSource;
+        readonly SendRequestCallback _sendRequestCallback;
         readonly TaskScheduler _taskScheduler;
+        int _faultedOrCanceled;
         CancellationTokenRegistration _registration;
         Timer _timeoutTimer;
-        int _faultedOrCanceled;
         RequestTimeout _timeToLive;
 
         public ClientRequestHandle(ClientFactoryContext context, SendRequestCallback sendRequestCallback, CancellationToken cancellationToken = default,
@@ -223,7 +223,7 @@
 
                 _readyToSend.TrySetException(exception);
 
-                bool cancel = _sendContext.TrySetException(exception);
+                var cancel = _sendContext.TrySetException(exception);
                 if (cancel)
                     _cancellationTokenSource.Cancel();
 
@@ -247,7 +247,7 @@
 
             _readyToSend.TrySetCanceled();
 
-            bool cancel = _sendContext.TrySetCanceled();
+            var cancel = _sendContext.TrySetCanceled();
             if (cancel)
                 _cancellationTokenSource.Cancel();
 

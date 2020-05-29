@@ -28,7 +28,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// The job factory is used to execute the job, returning an awaitable <see cref="Task"/>.
+        /// The job factory is used to execute the job, returning an awaitable <see cref="Task" />.
         /// Configures the job factory using the specified delegate.
         /// </summary>
         /// <typeparam name="T">The job type</typeparam>

@@ -11,9 +11,17 @@
     public class Initializer_Specs
     {
         [Test]
+        public async Task Should_convert_value_types_to_strings()
+        {
+            InitializeContext<TestStringMessage> context = await MessageInitializerCache<TestStringMessage>.Initialize(new {Text = _intValue});
+
+            Assert.That(context.Message.Text, Is.EqualTo(_intValue.ToString()));
+        }
+
+        [Test]
         public async Task Should_copy_the_property_values()
         {
-            var context = await MessageInitializerCache<TestInitializerMessage>.Initialize(new
+            InitializeContext<TestInitializerMessage> context = await MessageInitializerCache<TestInitializerMessage>.Initialize(new
             {
                 StringValue = _stringValue,
                 BoolValue = _boolValue,
@@ -27,44 +35,7 @@
                 DateTimeOffsetValue = _dateTimeOffsetValue,
                 TimeSpanValue = _timeSpanValue,
                 DayValue = _dayValue,
-                ObjectValue = _objectValue,
-            });
-
-            var message = context.Message;
-
-            Assert.That(message.StringValue, Is.EqualTo(_stringValue));
-            Assert.That(message.BoolValue, Is.EqualTo(_boolValue));
-            Assert.That(message.ByteValue, Is.EqualTo(_byteValue));
-            Assert.That(message.ShortValue, Is.EqualTo(_shortValue));
-            Assert.That(message.IntValue, Is.EqualTo(_intValue));
-            Assert.That(message.LongValue, Is.EqualTo(_longValue));
-            Assert.That(message.DoubleValue, Is.EqualTo(_doubleValue));
-            Assert.That(message.DecimalValue, Is.EqualTo(_decimalValue));
-            Assert.That(message.DateTimeValue, Is.EqualTo(_dateTimeValue));
-            Assert.That(message.DateTimeOffsetValue, Is.EqualTo(_dateTimeOffsetValue));
-            Assert.That(message.TimeSpanValue, Is.EqualTo(_timeSpanValue));
-            Assert.That(message.DayValue, Is.EqualTo(_dayValue));
-            Assert.That(message.ObjectValue, Is.EqualTo(_objectValue));
-        }
-
-        [Test]
-        public async Task Should_copy_the_property_values_from_strings()
-        {
-            var context = await MessageInitializerCache<TestInitializerMessage>.Initialize(new
-            {
-                StringValue = _stringValue,
-                BoolValue = _boolValue.ToString(),
-                ByteValue = _byteValue.ToString(),
-                ShortValue = _shortValue.ToString(),
-                IntValue = _intValue.ToString(),
-                LongValue = _longValue.ToString(),
-                DoubleValue = _doubleValue.ToString(CultureInfo.InvariantCulture),
-                DecimalValue = _decimalValue.ToString(CultureInfo.InvariantCulture),
-                DateTimeValue = _dateTimeValue.ToString("O"),
-                DateTimeOffsetValue = _dateTimeOffsetValue.ToString("O"),
-                TimeSpanValue = _timeSpanValue.ToString("c"),
-                DayValue = _dayValue.ToString(),
-                ObjectValue = _objectValue,
+                ObjectValue = _objectValue
             });
 
             var message = context.Message;
@@ -87,7 +58,7 @@
         [Test]
         public async Task Should_copy_the_property_values_from_nullable_types()
         {
-            var context = await MessageInitializerCache<TestInitializerMessage>.Initialize(new
+            InitializeContext<TestInitializerMessage> context = await MessageInitializerCache<TestInitializerMessage>.Initialize(new
             {
                 StringValue = _stringValue,
                 BoolValue = (bool?)_boolValue,
@@ -100,7 +71,7 @@
                 DateTimeValue = (DateTime?)_dateTimeValue,
                 DateTimeOffsetValue = (DateTimeOffset?)_dateTimeOffsetValue,
                 TimeSpanValue = (TimeSpan?)_timeSpanValue,
-                DayValue = (Day?)_dayValue,
+                DayValue = (Day?)_dayValue
             });
 
             var message = context.Message;
@@ -120,9 +91,46 @@
         }
 
         [Test]
+        public async Task Should_copy_the_property_values_from_strings()
+        {
+            InitializeContext<TestInitializerMessage> context = await MessageInitializerCache<TestInitializerMessage>.Initialize(new
+            {
+                StringValue = _stringValue,
+                BoolValue = _boolValue.ToString(),
+                ByteValue = _byteValue.ToString(),
+                ShortValue = _shortValue.ToString(),
+                IntValue = _intValue.ToString(),
+                LongValue = _longValue.ToString(),
+                DoubleValue = _doubleValue.ToString(CultureInfo.InvariantCulture),
+                DecimalValue = _decimalValue.ToString(CultureInfo.InvariantCulture),
+                DateTimeValue = _dateTimeValue.ToString("O"),
+                DateTimeOffsetValue = _dateTimeOffsetValue.ToString("O"),
+                TimeSpanValue = _timeSpanValue.ToString("c"),
+                DayValue = _dayValue.ToString(),
+                ObjectValue = _objectValue
+            });
+
+            var message = context.Message;
+
+            Assert.That(message.StringValue, Is.EqualTo(_stringValue));
+            Assert.That(message.BoolValue, Is.EqualTo(_boolValue));
+            Assert.That(message.ByteValue, Is.EqualTo(_byteValue));
+            Assert.That(message.ShortValue, Is.EqualTo(_shortValue));
+            Assert.That(message.IntValue, Is.EqualTo(_intValue));
+            Assert.That(message.LongValue, Is.EqualTo(_longValue));
+            Assert.That(message.DoubleValue, Is.EqualTo(_doubleValue));
+            Assert.That(message.DecimalValue, Is.EqualTo(_decimalValue));
+            Assert.That(message.DateTimeValue, Is.EqualTo(_dateTimeValue));
+            Assert.That(message.DateTimeOffsetValue, Is.EqualTo(_dateTimeOffsetValue));
+            Assert.That(message.TimeSpanValue, Is.EqualTo(_timeSpanValue));
+            Assert.That(message.DayValue, Is.EqualTo(_dayValue));
+            Assert.That(message.ObjectValue, Is.EqualTo(_objectValue));
+        }
+
+        [Test]
         public async Task Should_copy_the_property_values_to_nullable_types()
         {
-            var context = await MessageInitializerCache<TestNullableMessage>.Initialize(new
+            InitializeContext<TestNullableMessage> context = await MessageInitializerCache<TestNullableMessage>.Initialize(new
             {
                 StringValue = _stringValue,
                 BoolValue = _boolValue,
@@ -135,7 +143,7 @@
                 DateTimeValue = _dateTimeValue,
                 DateTimeOffsetValue = _dateTimeOffsetValue,
                 TimeSpanValue = _timeSpanValue,
-                DayValue = _dayValue,
+                DayValue = _dayValue
             });
 
             var message = context.Message;
@@ -152,14 +160,6 @@
             Assert.That(message.DateTimeOffsetValue, Is.EqualTo(_dateTimeOffsetValue));
             Assert.That(message.TimeSpanValue, Is.EqualTo(_timeSpanValue));
             Assert.That(message.DayValue, Is.EqualTo(_dayValue));
-        }
-
-        [Test]
-        public async Task Should_convert_value_types_to_strings()
-        {
-            var context = await MessageInitializerCache<TestStringMessage>.Initialize(new {Text = _intValue,});
-
-            Assert.That(context.Message.Text, Is.EqualTo(_intValue.ToString()));
         }
 
         readonly bool _boolValue = true;
@@ -181,7 +181,7 @@
         {
             Sunday = 0,
             Monday = 1,
-            Tuesday = 2,
+            Tuesday = 2
         }
 
 

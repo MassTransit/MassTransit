@@ -57,7 +57,7 @@
                 return false;
             }
 
-            bool found = _basicProperties.Headers.TryGetValue(key, out value);
+            var found = _basicProperties.Headers.TryGetValue(key, out value);
             if (found)
             {
                 if (value is byte[])
@@ -77,8 +77,7 @@
 
         T MassTransit.Headers.Get<T>(string key, T defaultValue)
         {
-            object value;
-            if (TryGetHeader(key, out value))
+            if (TryGetHeader(key, out var value))
                 return ObjectTypeDeserializer.Deserialize(value, defaultValue);
 
             return defaultValue;
@@ -87,8 +86,7 @@
         public T? Get<T>(string key, T? defaultValue)
             where T : struct
         {
-            object value;
-            if (TryGetHeader(key, out value))
+            if (TryGetHeader(key, out var value))
                 return ObjectTypeDeserializer.Deserialize(value, defaultValue);
 
             return defaultValue;

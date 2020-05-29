@@ -10,12 +10,11 @@ namespace MassTransit.Containers.Tests.Scenarios
     {
         static readonly TaskCompletionSource<SimpleConsumer> _consumerCreated = TaskUtil.GetTask<SimpleConsumer>();
 
-        readonly ISimpleConsumerDependency _dependency;
         readonly TaskCompletionSource<SimpleMessageInterface> _received;
 
         public SimpleConsumer(ISimpleConsumerDependency dependency)
         {
-            _dependency = dependency;
+            Dependency = dependency;
             Console.WriteLine("SimpleConsumer()");
 
             _received = TaskUtil.GetTask<SimpleMessageInterface>();
@@ -25,13 +24,13 @@ namespace MassTransit.Containers.Tests.Scenarios
 
         public Task<SimpleMessageInterface> Last => _received.Task;
 
-        public ISimpleConsumerDependency Dependency => _dependency;
+        public ISimpleConsumerDependency Dependency { get; }
 
         public static Task<SimpleConsumer> LastConsumer => _consumerCreated.Task;
 
         public async Task Consume(ConsumeContext<SimpleMessageInterface> message)
         {
-            _dependency.DoSomething();
+            Dependency.DoSomething();
 
             _received.TrySetResult(message.Message);
         }

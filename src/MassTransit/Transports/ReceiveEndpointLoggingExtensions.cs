@@ -36,7 +36,7 @@ namespace MassTransit.Transports
         static readonly LogMessage<Uri, string> _logFault = LogContext.Define<Uri, string>(LogLevel.Error,
             "T-FAULT {InputAddress} {MessageId}");
 
-        static readonly LogMessage<Uri, Guid?, string, DateTime, Guid?> _logScheduled = LogContext.Define<Uri, Guid?, String, DateTime, Guid?>(LogLevel.Debug,
+        static readonly LogMessage<Uri, Guid?, string, DateTime, Guid?> _logScheduled = LogContext.Define<Uri, Guid?, string, DateTime, Guid?>(LogLevel.Debug,
             "SCHED {DestinationAddress} {MessageId} {MessageType} {DeliveryTime:G} {Token}");
 
         /// <summary>

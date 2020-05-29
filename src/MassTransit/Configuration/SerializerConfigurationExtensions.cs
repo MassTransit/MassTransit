@@ -47,7 +47,7 @@ namespace MassTransit
             JsonMessageSerializer.DeserializerSettings = configure(JsonMessageSerializer.DeserializerSettings);
         }
 
-        ///<summary>
+        /// <summary>
         /// Configure the serialization settings used to create the BSON message serializer
         /// </summary>
         /// <param name="configurator"></param>
@@ -131,7 +131,9 @@ namespace MassTransit
         /// Serialize messages using the BSON message serializer with AES Encryption
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="symmetricKey">Cryptographic key for both encryption of plaintext message and decryption of ciphertext message</param>
+        /// <param name="symmetricKey">
+        /// Cryptographic key for both encryption of plaintext message and decryption of ciphertext message
+        /// </param>
         public static void UseEncryption(this IBusFactoryConfigurator configurator, byte[] symmetricKey)
         {
             var keyProvider = new ConstantSecureKeyProvider(symmetricKey);
@@ -144,7 +146,9 @@ namespace MassTransit
         /// Serialize messages using the BSON message serializer with AES Encryption
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="symmetricKey">Cryptographic key for both encryption of plaintext message and decryption of ciphertext message</param>
+        /// <param name="symmetricKey">
+        /// Cryptographic key for both encryption of plaintext message and decryption of ciphertext message
+        /// </param>
         public static void UseEncryption(this IReceiveEndpointConfigurator configurator, byte[] symmetricKey)
         {
             var keyProvider = new ConstantSecureKeyProvider(symmetricKey);
@@ -157,7 +161,9 @@ namespace MassTransit
         /// Serialize messages using the BSON message serializer with AES Encryption
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="keyProvider">The custom key provider to provide the symmetric key for encryption of plaintext message and decryption of ciphertext message</param>
+        /// <param name="keyProvider">
+        /// The custom key provider to provide the symmetric key for encryption of plaintext message and decryption of ciphertext message
+        /// </param>
         public static void UseEncryption(this IBusFactoryConfigurator configurator, ISecureKeyProvider keyProvider)
         {
             var streamProvider = new AesCryptoStreamProviderV2(keyProvider);
@@ -169,7 +175,9 @@ namespace MassTransit
         /// Serialize messages using the BSON message serializer with AES Encryption
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="keyProvider">The custom key provider to provide the symmetric key for encryption of plaintext message and decryption of ciphertext message</param>
+        /// <param name="keyProvider">
+        /// The custom key provider to provide the symmetric key for encryption of plaintext message and decryption of ciphertext message
+        /// </param>
         public static void UseEncryption(this IReceiveEndpointConfigurator configurator, ISecureKeyProvider keyProvider)
         {
             var streamProvider = new AesCryptoStreamProviderV2(keyProvider);

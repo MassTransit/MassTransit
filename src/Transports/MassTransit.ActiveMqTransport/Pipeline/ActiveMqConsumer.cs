@@ -22,13 +22,13 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         Supervisor,
         DeliveryMetrics
     {
+        readonly ActiveMqReceiveEndpointContext _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
-        readonly SessionContext _session;
+        readonly IReceivePipeDispatcher _dispatcher;
+        readonly ChannelExecutor _executor;
         readonly IMessageConsumer _messageConsumer;
         readonly ReceiveSettings _receiveSettings;
-        readonly ActiveMqReceiveEndpointContext _context;
-        readonly ChannelExecutor _executor;
-        readonly IReceivePipeDispatcher _dispatcher;
+        readonly SessionContext _session;
 
         /// <summary>
         /// The basic consumer receives messages pushed from the broker.
@@ -55,6 +55,9 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             SetReady();
         }
+
+        long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;
+        int DeliveryMetrics.ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
 
         void HandleMessage(IMessage message)
         {
@@ -84,9 +87,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                 }
             }, Stopping);
         }
-
-        long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;
-        int DeliveryMetrics.ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
 
         Task HandleDeliveryComplete()
         {

@@ -1,15 +1,3 @@
-// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.AmazonSqsTransport.Topology.Entities
 {
     using System.Collections.Generic;
@@ -20,7 +8,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         Topic,
         TopicHandle
     {
-        public TopicEntity(long id, string name, bool durable, bool autoDelete, IDictionary<string, object> topicAttributes = null, IDictionary<string, object> topicSubscriptionAttributes = null, IDictionary<string, string> topicTags = null)
+        public TopicEntity(long id, string name, bool durable, bool autoDelete, IDictionary<string, object> topicAttributes = null,
+            IDictionary<string, object> topicSubscriptionAttributes = null, IDictionary<string, string> topicTags = null)
         {
             Id = id;
             EntityName = name;
@@ -40,26 +29,29 @@ namespace MassTransit.AmazonSqsTransport.Topology.Entities
         public string EntityName { get; }
         public bool Durable { get; }
         public bool AutoDelete { get; }
-        public long Id { get; }
         public IDictionary<string, object> TopicAttributes { get; }
         public IDictionary<string, object> TopicSubscriptionAttributes { get; }
         public IDictionary<string, string> TopicTags { get; }
+        public long Id { get; }
         public Topic Topic => this;
 
         public override string ToString()
         {
-            return string.Join(", ", new[]
-            {
-                $"name: {EntityName}",
-                Durable ? "durable" : "",
-                AutoDelete ? "auto-delete" : "",
-                TopicTags.Any() ? $"tags: {string.Join(";", TopicTags.Select(a => $"{a.Key}={a.Value}"))}" : "",
-                TopicAttributes.Any() ? $"attributes: {string.Join(";", TopicAttributes.Select(a => $"{a.Key}={a.Value}"))}" : "",
-                TopicSubscriptionAttributes.Any() ? $"subscription-attributes: {string.Join(";", TopicSubscriptionAttributes.Select(a => $"{a.Key}={a.Value}"))}" : ""
-            }.Where(x => !string.IsNullOrWhiteSpace(x)));
+            return string.Join(", ",
+                new[]
+                {
+                    $"name: {EntityName}",
+                    Durable ? "durable" : "",
+                    AutoDelete ? "auto-delete" : "",
+                    TopicTags.Any() ? $"tags: {string.Join(";", TopicTags.Select(a => $"{a.Key}={a.Value}"))}" : "",
+                    TopicAttributes.Any() ? $"attributes: {string.Join(";", TopicAttributes.Select(a => $"{a.Key}={a.Value}"))}" : "",
+                    TopicSubscriptionAttributes.Any()
+                        ? $"subscription-attributes: {string.Join(";", TopicSubscriptionAttributes.Select(a => $"{a.Key}={a.Value}"))}"
+                        : ""
+                }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 
-        private void EnsureRawDeliveryIsSet()
+        void EnsureRawDeliveryIsSet()
         {
             TopicSubscriptionAttributes["RawMessageDelivery"] = "true";
         }

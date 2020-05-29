@@ -26,22 +26,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
             EntityFrameworkTestFixture<T, TestInstanceDbContext>
             where T : ITestDbParameters, new()
         {
-            [OneTimeSetUp]
-            public async Task SetUp()
-            {
-                await using var context = new TestInstanceContextFactory().CreateDbContext(DbContextOptionsBuilder);
-
-                await context.Database.MigrateAsync();
-            }
-
-            [OneTimeTearDown]
-            public async Task TearDown()
-            {
-                await using var context = new TestInstanceContextFactory().CreateDbContext(DbContextOptionsBuilder);
-
-                await context.Database.EnsureDeletedAsync();
-            }
-
             [Test]
             public async Task Should_work_as_expected()
             {
@@ -66,6 +50,22 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 });
 
                 await updated;
+            }
+
+            [OneTimeSetUp]
+            public async Task SetUp()
+            {
+                await using var context = new TestInstanceContextFactory().CreateDbContext(DbContextOptionsBuilder);
+
+                await context.Database.MigrateAsync();
+            }
+
+            [OneTimeTearDown]
+            public async Task TearDown()
+            {
+                await using var context = new TestInstanceContextFactory().CreateDbContext(DbContextOptionsBuilder);
+
+                await context.Database.EnsureDeletedAsync();
             }
 
             readonly IServiceProvider _provider;
@@ -111,22 +111,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
             EntityFrameworkTestFixture<TParameters, TestInstanceDbContext>
             where TParameters : ITestDbParameters, new()
         {
-            [OneTimeSetUp]
-            public async Task SetUp()
-            {
-                await using var context = new TestInstanceContextFactory().CreateDbContext(DbContextOptionsBuilder);
-
-                await context.Database.MigrateAsync();
-            }
-
-            [OneTimeTearDown]
-            public async Task TearDown()
-            {
-                await using var context = new TestInstanceContextFactory().CreateDbContext(DbContextOptionsBuilder);
-
-                await context.Database.EnsureDeletedAsync();
-            }
-
             [Test]
             public async Task Should_work_as_expected()
             {
@@ -151,6 +135,22 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 });
 
                 await updated;
+            }
+
+            [OneTimeSetUp]
+            public async Task SetUp()
+            {
+                await using var context = new TestInstanceContextFactory().CreateDbContext(DbContextOptionsBuilder);
+
+                await context.Database.MigrateAsync();
+            }
+
+            [OneTimeTearDown]
+            public async Task TearDown()
+            {
+                await using var context = new TestInstanceContextFactory().CreateDbContext(DbContextOptionsBuilder);
+
+                await context.Database.EnsureDeletedAsync();
             }
 
             readonly IServiceProvider _provider;
@@ -197,10 +197,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
         public class TestInstance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
-
             public string CurrentState { get; set; }
             public string Key { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

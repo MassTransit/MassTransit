@@ -8,7 +8,6 @@ namespace MassTransit.ActiveMqTransport
     {
         /// <summary>
         /// Create a message scheduler that uses the built-in ActiveMQ scheduler to schedule messages.
-        ///
         /// NOTE that this should only be used to schedule messages outside of a message consumer. Consumers should
         /// use the ScheduleSend extensions on ConsumeContext.
         /// </summary>

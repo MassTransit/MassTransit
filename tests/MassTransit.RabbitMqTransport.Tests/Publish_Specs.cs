@@ -1,21 +1,10 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Tests
+﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
     using Shouldly;
+
 
     namespace Send_Specs
     {
@@ -73,7 +62,6 @@ namespace MassTransit.RabbitMqTransport.Tests
                 ConsumeContext<A> received = await receivedA;
 
                 Assert.AreEqual(message.Id, received.Message.Id);
-
             }
         }
 
@@ -142,7 +130,10 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
-        [TestFixture, Category("SlowAF"), Explicit]
+
+        [TestFixture]
+        [Category("SlowAF")]
+        [Explicit]
         public class WhenAMessageIsPublishedToTheEndpointSuccessfully :
             RabbitMqTestFixture
         {
@@ -175,7 +166,10 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
-        [TestFixture, Category("SlowAF"), Explicit]
+
+        [TestFixture]
+        [Category("SlowAF")]
+        [Explicit]
         public class WhenAMessageIsPublishedToTheEndpointFaulting :
             RabbitMqTestFixture
         {
@@ -185,7 +179,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 var message = new A {Id = Guid.NewGuid()};
                 await Bus.Publish(message);
 
-                var received = await _faultA;
+                ConsumeContext<Fault<A>> received = await _faultA;
 
                 Assert.AreEqual(message.Id, received.Message.Message.Id);
             }
@@ -193,7 +187,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             [Test]
             public async Task Should_take_time_to_watch_channel_use()
             {
-                var received = await _faultA;
+                ConsumeContext<Fault<A>> received = await _faultA;
 
                 await Task.Delay(15000);
             }
@@ -281,7 +275,8 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 consumeContext.SourceAddress.ShouldBe(new Uri("rabbitmq://localhost/test/input_queue"));
 
-                Assert.That(consumeContext.ReceiveContext.TransportHeaders.Get(MessageHeaders.MessageId, "N/A"), Is.EqualTo(consumeContext.MessageId.ToString()));
+                Assert.That(consumeContext.ReceiveContext.TransportHeaders.Get(MessageHeaders.MessageId, "N/A"),
+                    Is.EqualTo(consumeContext.MessageId.ToString()));
             }
 
             Task<ConsumeContext<A>> _receivedA;
@@ -484,7 +479,12 @@ namespace MassTransit.RabbitMqTransport.Tests
         [OneTimeSetUp]
         public async Task Setup()
         {
-            await InputQueueSendEndpoint.Send<IProxyMe>(new {IntValue, StringValue, CorrelationId = _correlationId});
+            await InputQueueSendEndpoint.Send<IProxyMe>(new
+            {
+                IntValue,
+                StringValue,
+                CorrelationId = _correlationId
+            });
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)

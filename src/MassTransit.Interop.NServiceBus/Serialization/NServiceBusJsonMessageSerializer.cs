@@ -46,7 +46,6 @@ namespace MassTransit.Interop.NServiceBus.Serialization
             }
         }
 
-
         public ContentType ContentType => JsonContentType;
     }
 }

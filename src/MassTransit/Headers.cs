@@ -12,7 +12,7 @@
         /// <summary>
         /// Returns all available headers
         /// </summary>
-        IEnumerable<KeyValuePair<string,object>> GetAll();
+        IEnumerable<KeyValuePair<string, object>> GetAll();
 
         /// <summary>
         /// If the specified header name is found, returns the value of the header as an object

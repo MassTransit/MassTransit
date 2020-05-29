@@ -9,6 +9,11 @@
         CourierContext
     {
         /// <summary>
+        /// Set the execution result, which completes the activity
+        /// </summary>
+        ExecutionResult Result { get; set; }
+
+        /// <summary>
         /// Completes the execution, without passing a compensating log entry
         /// </summary>
         /// <returns></returns>
@@ -141,11 +146,6 @@
         /// <param name="variables">An dictionary of values to add/set as variables on the routing slip</param>
         /// <returns></returns>
         ExecutionResult FaultedWithVariables(Exception exception, IEnumerable<KeyValuePair<string, object>> variables);
-
-        /// <summary>
-        /// Set the execution result, which completes the activity
-        /// </summary>
-        ExecutionResult Result { get; set; }
     }
 
 

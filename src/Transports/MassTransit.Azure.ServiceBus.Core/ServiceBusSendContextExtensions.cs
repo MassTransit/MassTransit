@@ -29,33 +29,25 @@
         public static void SetScheduledEnqueueTime(this SendContext context, TimeSpan delay)
         {
             if (context.TryGetPayload(out ServiceBusSendContext sendContext))
-            {
                 sendContext.ScheduledEnqueueTimeUtc = DateTime.UtcNow + delay;
-            }
         }
 
         public static void SetSessionId(this SendContext context, string sessionId)
         {
             if (context.TryGetPayload(out ServiceBusSendContext sendContext))
-            {
                 sendContext.SessionId = sessionId;
-            }
         }
 
         public static void SetReplyToSessionId(this SendContext context, string sessionId)
         {
             if (context.TryGetPayload(out ServiceBusSendContext sendContext))
-            {
                 sendContext.ReplyToSessionId = sessionId;
-            }
         }
 
         public static void SetPartitionKey(this SendContext context, string partitionKey)
         {
             if (context.TryGetPayload(out ServiceBusSendContext sendContext))
-            {
                 sendContext.PartitionKey = partitionKey;
-            }
         }
     }
 }

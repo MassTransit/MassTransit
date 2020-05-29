@@ -147,34 +147,31 @@
         class ConsumerConfigurationObserver :
             IConsumerConfigurationObserver
         {
-            readonly HashSet<Type> _consumerTypes;
             readonly ILifetimeScope _lifetimeScope;
-            readonly HashSet<Tuple<Type, Type>> _messageTypes;
 
             public ConsumerConfigurationObserver(ILifetimeScope lifetimeScope)
             {
                 _lifetimeScope = lifetimeScope;
-                _consumerTypes = new HashSet<Type>();
-                _messageTypes = new HashSet<Tuple<Type, Type>>();
+                ConsumerTypes = new HashSet<Type>();
+                MessageTypes = new HashSet<Tuple<Type, Type>>();
             }
 
-            public HashSet<Type> ConsumerTypes => _consumerTypes;
+            public HashSet<Type> ConsumerTypes { get; }
 
-            public HashSet<Tuple<Type, Type>> MessageTypes => _messageTypes;
+            public HashSet<Tuple<Type, Type>> MessageTypes { get; }
 
             void IConsumerConfigurationObserver.ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
             {
-                _consumerTypes.Add(typeof(TConsumer));
+                ConsumerTypes.Add(typeof(TConsumer));
             }
 
             void IConsumerConfigurationObserver.ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
             {
-                _messageTypes.Add(Tuple.Create(typeof(TConsumer), typeof(TMessage)));
+                MessageTypes.Add(Tuple.Create(typeof(TConsumer), typeof(TMessage)));
 
                 if (_lifetimeScope.IsRegistered<IValidator<TMessage>>())
                 {
-                    ValidatorFilter<TMessage> filter;
-                    if (_lifetimeScope.TryResolve(out filter))
+                    if (_lifetimeScope.TryResolve(out ValidatorFilter<TMessage> filter))
                         configurator.Message(m => m.UseFilter(filter));
                 }
             }

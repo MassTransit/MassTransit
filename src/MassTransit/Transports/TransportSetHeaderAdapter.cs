@@ -6,9 +6,8 @@ namespace MassTransit.Transports
     public class TransportSetHeaderAdapter<TValueType> :
         ITransportSetHeaderAdapter<TValueType>
     {
-        readonly TransportHeaderOptions _options;
-
         readonly IHeaderValueConverter<TValueType> _converter;
+        readonly TransportHeaderOptions _options;
 
         public TransportSetHeaderAdapter(IHeaderValueConverter<TValueType> converter, TransportHeaderOptions options = TransportHeaderOptions.Default)
         {
@@ -26,7 +25,7 @@ namespace MassTransit.Transports
                     break;
 
                 default:
-                    if (IsHeaderIncluded(headerValue.Key) && _converter.TryConvert(headerValue, out var result))
+                    if (IsHeaderIncluded(headerValue.Key) && _converter.TryConvert(headerValue, out HeaderValue<TValueType> result))
                         dictionary[result.Key] = result.Value;
                     break;
             }
@@ -43,7 +42,7 @@ namespace MassTransit.Transports
                     break;
 
                 default:
-                    if (IsHeaderIncluded(headerValue.Key) && _converter.TryConvert(headerValue, out var result))
+                    if (IsHeaderIncluded(headerValue.Key) && _converter.TryConvert(headerValue, out HeaderValue<TValueType> result))
                         dictionary[result.Key] = result.Value;
                     break;
             }

@@ -6,7 +6,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration
 
 
     public interface IServiceCollectionRiderConfigurator :
-        IRiderRegistrationConfigurator<IServiceProvider>
+        IRiderConfigurator<IServiceProvider>
     {
         IServiceCollection Collection { get; }
     }

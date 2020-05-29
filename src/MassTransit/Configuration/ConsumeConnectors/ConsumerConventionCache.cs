@@ -21,7 +21,7 @@ namespace MassTransit.ConsumeConnectors
         public static bool Remove<T>()
             where T : IConsumerConvention
         {
-            for (int i = 0; i < Cached.Registered.Count; i++)
+            for (var i = 0; i < Cached.Registered.Count; i++)
             {
                 if (Cached.Registered[i] is T)
                 {

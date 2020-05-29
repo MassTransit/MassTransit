@@ -20,7 +20,7 @@
 
             Assert.That(async () =>
                 {
-                    var response = await Bus.Request<PingMessage, PongMessage>(InputQueueAddress, new PingMessage(), TestCancellationToken,
+                    Response<PongMessage> response = await Bus.Request<PingMessage, PongMessage>(InputQueueAddress, new PingMessage(), TestCancellationToken,
                         RequestTimeout.After(s: 3));
                 },
                 Throws.TypeOf<RequestFaultException>());

@@ -17,6 +17,9 @@ namespace MassTransit.PrometheusIntegration
             builder.AddFilter(new PrometheusCompensateActivityFilter<TActivity, TLog>());
         }
 
-        public IEnumerable<ValidationResult> Validate() => Enumerable.Empty<ValidationResult>();
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return Enumerable.Empty<ValidationResult>();
+        }
     }
 }

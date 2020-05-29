@@ -9,7 +9,6 @@
     public class LocalBusName_Specs :
         RabbitMqTestFixture
     {
-
         [Test]
         public async Task Should_get_the_response_to_the_bus()
         {

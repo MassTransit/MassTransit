@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Tests
+﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     namespace ConsumerBind_Specs
     {
@@ -138,6 +126,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
+
         [TestFixture]
         public class Configuring_a_consumer_without_binding :
             ConsumerBindingTestFixture
@@ -184,7 +173,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
                 Assert.IsTrue(sagaId.HasValue);
 
-                TestSaga saga = _repository[sagaId.Value].Instance;
+                var saga = _repository[sagaId.Value].Instance;
 
                 await saga.A.Task;
             }
@@ -195,9 +184,9 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Guid? sagaId = await _repository.ShouldContainSaga(_sagaId, TestTimeout);
                 Assert.IsTrue(sagaId.HasValue);
 
-                TestSaga saga = _repository[sagaId.Value].Instance;
+                var saga = _repository[sagaId.Value].Instance;
 
-                await InputQueueSendEndpoint.Send(new B { CorrelationId = _sagaId });
+                await InputQueueSendEndpoint.Send(new B {CorrelationId = _sagaId});
 
                 await saga.B.Task;
             }
@@ -226,33 +215,24 @@ namespace MassTransit.RabbitMqTransport.Tests
             IConsumer<A>,
             IConsumer<B>
         {
-            readonly TaskCompletionSource<A> _a;
-            readonly TaskCompletionSource<B> _b;
-
             public TestConsumer(TaskCompletionSource<A> a, TaskCompletionSource<B> b)
             {
-                _a = a;
-                _b = b;
+                A = a;
+                B = b;
             }
 
-            public TaskCompletionSource<A> A
-            {
-                get { return _a; }
-            }
+            public TaskCompletionSource<A> A { get; }
 
-            public TaskCompletionSource<B> B
-            {
-                get { return _b; }
-            }
+            public TaskCompletionSource<B> B { get; }
 
             public async Task Consume(ConsumeContext<A> context)
             {
-                _a.TrySetResult(context.Message);
+                A.TrySetResult(context.Message);
             }
 
             public async Task Consume(ConsumeContext<B> context)
             {
-                _b.TrySetResult(context.Message);
+                B.TrySetResult(context.Message);
             }
         }
 
@@ -262,9 +242,6 @@ namespace MassTransit.RabbitMqTransport.Tests
             InitiatedBy<A>,
             Orchestrates<B>
         {
-            readonly TaskCompletionSource<A> _a = TaskUtil.GetTask<A>();
-            readonly TaskCompletionSource<B> _b = TaskUtil.GetTask<B>();
-
             public TestSaga()
             {
             }
@@ -274,26 +251,20 @@ namespace MassTransit.RabbitMqTransport.Tests
                 CorrelationId = correlationId;
             }
 
-            public TaskCompletionSource<A> A
-            {
-                get { return _a; }
-            }
+            public TaskCompletionSource<A> A { get; } = TaskUtil.GetTask<A>();
 
-            public TaskCompletionSource<B> B
-            {
-                get { return _b; }
-            }
+            public TaskCompletionSource<B> B { get; } = TaskUtil.GetTask<B>();
 
             public async Task Consume(ConsumeContext<A> context)
             {
-                _a.TrySetResult(context.Message);
+                A.TrySetResult(context.Message);
             }
 
             public Guid CorrelationId { get; set; }
 
             public async Task Consume(ConsumeContext<B> context)
             {
-                _b.TrySetResult(context.Message);
+                B.TrySetResult(context.Message);
             }
         }
 

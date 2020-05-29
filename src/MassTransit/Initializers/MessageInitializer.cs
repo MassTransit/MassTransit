@@ -19,7 +19,7 @@
             _conventions = new List<IInitializerConvention>
             {
                 new DefaultInitializerConvention(),
-                new DictionaryInitializerConvention(),
+                new DictionaryInitializerConvention()
             };
         }
 
@@ -83,7 +83,7 @@
 
         public async Task<TMessage> Send(ISendEndpoint endpoint, object input, CancellationToken cancellationToken)
         {
-            var messageContext = await PrepareMessage((TInput)input, cancellationToken).ConfigureAwait(false);
+            InitializeContext<TMessage, TInput> messageContext = await PrepareMessage((TInput)input, cancellationToken).ConfigureAwait(false);
 
             if (_headerInitializers.Length > 0)
             {
@@ -91,9 +91,7 @@
                     .ConfigureAwait(false);
             }
             else
-            {
                 await endpoint.Send(messageContext.Message, cancellationToken).ConfigureAwait(false);
-            }
 
             return messageContext.Message;
         }
@@ -103,8 +101,10 @@
             InitializeContext<TMessage, TInput> messageContext = await PrepareMessage(context, (TInput)input).ConfigureAwait(false);
 
             if (_headerInitializers.Length > 0)
+            {
                 await endpoint.Send(messageContext.Message, new InitializerSendContextPipe(_headerInitializers, messageContext),
                     messageContext.CancellationToken).ConfigureAwait(false);
+            }
             else
                 await endpoint.Send(messageContext.Message, messageContext.CancellationToken).ConfigureAwait(false);
 
@@ -113,7 +113,7 @@
 
         public async Task<TMessage> Send(ISendEndpoint endpoint, object input, IPipe<SendContext<TMessage>> pipe, CancellationToken cancellationToken)
         {
-            var messageContext = await PrepareMessage((TInput)input, cancellationToken).ConfigureAwait(false);
+            InitializeContext<TMessage, TInput> messageContext = await PrepareMessage((TInput)input, cancellationToken).ConfigureAwait(false);
 
             await endpoint.Send(messageContext.Message,
                     _headerInitializers.Length > 0
@@ -129,8 +129,10 @@
             InitializeContext<TMessage, TInput> messageContext = await PrepareMessage((TInput)input, cancellationToken).ConfigureAwait(false);
 
             if (_headerInitializers.Length > 0)
+            {
                 await endpoint.Send(messageContext.Message, new InitializerSendContextPipe(_headerInitializers, messageContext, pipe), cancellationToken)
                     .ConfigureAwait(false);
+            }
             else
                 await endpoint.Send(messageContext.Message, pipe, cancellationToken).ConfigureAwait(false);
 
@@ -142,8 +144,10 @@
             InitializeContext<TMessage, TInput> messageContext = await PrepareMessage(context, (TInput)input).ConfigureAwait(false);
 
             if (_headerInitializers.Length > 0)
+            {
                 await endpoint.Send(messageContext.Message, new InitializerSendContextPipe(_headerInitializers, messageContext, pipe),
                     messageContext.CancellationToken).ConfigureAwait(false);
+            }
             else
                 await endpoint.Send(messageContext.Message, pipe, messageContext.CancellationToken).ConfigureAwait(false);
 
@@ -154,7 +158,7 @@
         {
             InitializeContext<TMessage, TInput> messageContext = await PrepareMessage(context, (TInput)input).ConfigureAwait(false);
 
-            var sendPipe = _headerInitializers.Length > 0
+            IPipe<SendContext<TMessage>> sendPipe = _headerInitializers.Length > 0
                 ? new InitializerSendContextPipe(_headerInitializers, messageContext, pipe)
                 : pipe;
 

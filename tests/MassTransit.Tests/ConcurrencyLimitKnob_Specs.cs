@@ -12,19 +12,19 @@
     public class Using_a_concurrency_limit_on_a_receive_endpoint :
         InMemoryTestFixture
     {
-        IInMemoryBusFactoryConfigurator _configurator;
-
         [Test]
         public async Task Should_allow_reconfiguration()
         {
-            var client = Bus.CreateRequestClient<SetConcurrencyLimit>();
+            IRequestClient<SetConcurrencyLimit> client = Bus.CreateRequestClient<SetConcurrencyLimit>();
 
-            var response = await client.GetResponse<ConcurrencyLimitUpdated>(new
+            Response<ConcurrencyLimitUpdated> response = await client.GetResponse<ConcurrencyLimitUpdated>(new
             {
                 ConcurrencyLimit = 16,
                 Timestamp = DateTime.UtcNow
             });
         }
+
+        IInMemoryBusFactoryConfigurator _configurator;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {

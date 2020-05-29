@@ -19,8 +19,10 @@ namespace MassTransit.Definition
             else if (_definitions.All(x => x.ConfigureConsumeTopology == false))
                 ConfigureConsumeTopology = false;
             else
+            {
                 throw new ConfigurationException(
                     $"Endpoints are not aligned on ConfigureConsumeTopology: {string.Join(", ", _definitions.Select(x => TypeMetadataCache.GetShortName(x.GetType())))}");
+            }
         }
 
         public bool IsTemporary => _definitions.All(x => x.IsTemporary);
@@ -66,9 +68,7 @@ namespace MassTransit.Definition
             where T : IReceiveEndpointConfigurator
         {
             foreach (var definition in _definitions)
-            {
                 definition.Configure(configurator);
-            }
         }
     }
 }

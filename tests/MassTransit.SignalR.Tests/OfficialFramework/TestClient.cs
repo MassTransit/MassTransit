@@ -1,37 +1,29 @@
 ﻿namespace MassTransit.SignalR.Tests.OfficialFramework
 {
-    using Microsoft.AspNetCore.Connections;
-    using Microsoft.AspNetCore.Connections.Features;
-    using Microsoft.AspNetCore.SignalR;
-    using Microsoft.AspNetCore.SignalR.Protocol;
     using System;
+    using System.Buffers;
     using System.Collections.Generic;
     using System.IO.Pipelines;
     using System.Security.Claims;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Connections;
+    using Microsoft.AspNetCore.Connections.Features;
+    using Microsoft.AspNetCore.SignalR;
+    using Microsoft.AspNetCore.SignalR.Protocol;
     using Util;
 
 
-    internal class TestClient : ITransferFormatFeature,
+    class TestClient : ITransferFormatFeature,
         IConnectionHeartbeatFeature,
         IDisposable
     {
-        private readonly object _heartbeatLock = new object();
-        private List<(Action<object> handler, object state)> _heartbeatHandlers;
-
-        private static int _id;
-        private readonly IHubProtocol _protocol;
-        private readonly IInvocationBinder _invocationBinder;
-        private readonly CancellationTokenSource _cts;
-
-        public DefaultConnectionContext Connection { get; }
-        public Task Connected => ((TaskCompletionSource<bool>)Connection.Items["ConnectedTask"]).Task;
-        public HandshakeResponseMessage HandshakeResponseMessage { get; private set; }
-
-        public TransferFormat SupportedFormats { get; set; } = TransferFormat.Text | TransferFormat.Binary;
-
-        public TransferFormat ActiveFormat { get; set; }
+        static int _id;
+        readonly CancellationTokenSource _cts;
+        readonly object _heartbeatLock = new object();
+        readonly IInvocationBinder _invocationBinder;
+        readonly IHubProtocol _protocol;
+        List<(Action<object> handler, object state)> _heartbeatHandlers;
 
         public TestClient(IHubProtocol protocol = null, IInvocationBinder invocationBinder = null, string userIdentifier = null)
         {
@@ -46,9 +38,7 @@
             var claimValue = Interlocked.Increment(ref _id).ToString();
             var claims = new List<Claim> {new Claim(ClaimTypes.Name, claimValue)};
             if (userIdentifier != null)
-            {
                 claims.Add(new Claim(ClaimTypes.NameIdentifier, userIdentifier));
-            }
 
             Connection.User = new ClaimsPrincipal(new ClaimsIdentity(claims));
             Connection.Items["ConnectedTask"] = TaskUtil.GetTask<bool>();
@@ -59,7 +49,33 @@
             _cts = new CancellationTokenSource();
         }
 
-        public async Task<Task> ConnectAsync(Microsoft.AspNetCore.Connections.ConnectionHandler handler,
+        public DefaultConnectionContext Connection { get; }
+        public Task Connected => ((TaskCompletionSource<bool>)Connection.Items["ConnectedTask"]).Task;
+        public HandshakeResponseMessage HandshakeResponseMessage { get; private set; }
+
+        public void OnHeartbeat(Action<object> action, object state)
+        {
+            lock (_heartbeatLock)
+            {
+                if (_heartbeatHandlers == null)
+                    _heartbeatHandlers = new List<(Action<object> handler, object state)>();
+
+                _heartbeatHandlers.Add((action, state));
+            }
+        }
+
+        public void Dispose()
+        {
+            _cts.Cancel();
+
+            Connection.Application.Output.Complete();
+        }
+
+        public TransferFormat SupportedFormats { get; set; } = TransferFormat.Text | TransferFormat.Binary;
+
+        public TransferFormat ActiveFormat { get; set; }
+
+        public async Task<Task> ConnectAsync(ConnectionHandler handler,
             bool sendHandshakeRequestMessage = true,
             bool expectedHandshakeResponseMessage = true)
         {
@@ -100,14 +116,10 @@
                 var message = await ReadAsync();
 
                 if (message == null)
-                {
                     throw new InvalidOperationException("Connection aborted!");
-                }
 
                 if (message is HubInvocationMessage hubInvocationMessage && !string.Equals(hubInvocationMessage.InvocationId, invocationId))
-                {
                     throw new NotSupportedException("TestClient does not support multiple outgoing invocations!");
-                }
 
                 switch (message)
                 {
@@ -125,21 +137,17 @@
 
         public async Task<CompletionMessage> InvokeAsync(string methodName, params object[] args)
         {
-            var invocationId = await SendInvocationAsync(methodName, nonBlocking: false, args: args);
+            var invocationId = await SendInvocationAsync(methodName, false, args);
 
             while (true)
             {
                 var message = await ReadAsync();
 
                 if (message == null)
-                {
                     throw new InvalidOperationException("Connection aborted!");
-                }
 
                 if (message is HubInvocationMessage hubInvocationMessage && !string.Equals(hubInvocationMessage.InvocationId, invocationId))
-                {
                     throw new NotSupportedException("TestClient does not support multiple outgoing invocations!");
-                }
 
                 switch (message)
                 {
@@ -158,7 +166,7 @@
 
         public Task<string> SendInvocationAsync(string methodName, params object[] args)
         {
-            return SendInvocationAsync(methodName, nonBlocking: false, args: args);
+            return SendInvocationAsync(methodName, false, args);
         }
 
         public Task<string> SendInvocationAsync(string methodName, bool nonBlocking, params object[] args)
@@ -175,7 +183,7 @@
 
         public async Task<string> SendHubMessageAsync(HubMessage message)
         {
-            var payload = _protocol.GetMessageBytes(message);
+            ReadOnlyMemory<byte> payload = _protocol.GetMessageBytes(message);
 
             await Connection.Application.Output.WriteAsync(payload);
             return message is HubInvocationMessage hubMessage ? hubMessage.InvocationId : null;
@@ -190,19 +198,15 @@
                 if (message == null)
                 {
                     var result = await Connection.Application.Input.ReadAsync();
-                    var buffer = result.Buffer;
+                    ReadOnlySequence<byte> buffer = result.Buffer;
 
                     try
                     {
                         if (!buffer.IsEmpty)
-                        {
                             continue;
-                        }
 
                         if (result.IsCompleted)
-                        {
                             return null;
-                        }
                     }
                     finally
                     {
@@ -210,37 +214,29 @@
                     }
                 }
                 else
-                {
                     return message;
-                }
             }
         }
 
         public HubMessage TryRead(bool isHandshake = false)
         {
             if (!Connection.Application.Input.TryRead(out var result))
-            {
                 return null;
-            }
 
-            var buffer = result.Buffer;
+            ReadOnlySequence<byte> buffer = result.Buffer;
 
             try
             {
                 if (!isHandshake)
                 {
                     if (_protocol.TryParseMessage(ref buffer, _invocationBinder, out var message))
-                    {
                         return message;
-                    }
                 }
                 else
                 {
                     // read first message out of the incoming data
                     if (HandshakeProtocol.TryParseResponseMessage(ref buffer, out var responseMessage))
-                    {
                         return responseMessage;
-                    }
                 }
             }
             finally
@@ -251,29 +247,9 @@
             return null;
         }
 
-        public void Dispose()
-        {
-            _cts.Cancel();
-
-            Connection.Application.Output.Complete();
-        }
-
-        private static string GetInvocationId()
+        static string GetInvocationId()
         {
             return Guid.NewGuid().ToString("N");
-        }
-
-        public void OnHeartbeat(Action<object> action, object state)
-        {
-            lock (_heartbeatLock)
-            {
-                if (_heartbeatHandlers == null)
-                {
-                    _heartbeatHandlers = new List<(Action<object> handler, object state)>();
-                }
-
-                _heartbeatHandlers.Add((action, state));
-            }
         }
 
         public void TickHeartbeat()
@@ -281,19 +257,15 @@
             lock (_heartbeatLock)
             {
                 if (_heartbeatHandlers == null)
-                {
                     return;
-                }
 
-                foreach (var (handler, state) in _heartbeatHandlers)
-                {
+                foreach ((Action<object> handler, var state) in _heartbeatHandlers)
                     handler(state);
-                }
             }
         }
 
 
-        private class DefaultInvocationBinder : IInvocationBinder
+        class DefaultInvocationBinder : IInvocationBinder
         {
             public IReadOnlyList<Type> GetParameterTypes(string methodName)
             {

@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.DocumentDbIntegration.Tests
 {
     using System;
+    using System.Net;
     using System.Threading.Tasks;
     using DocumentDbIntegration.Saga;
     using GreenPipes;
@@ -17,6 +18,45 @@
     public class When_using_DocumentDB :
         InMemoryTestFixture
     {
+        [Test]
+        public async Task Should_have_removed_the_state_machine()
+        {
+            var correlationId = Guid.NewGuid();
+
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
+
+            var saga = await GetSagaRetry(correlationId, TestTimeout);
+            Assert.IsNotNull(saga);
+
+            await InputQueueSendEndpoint.Send(new SodOff {CorrelationId = correlationId});
+
+            saga = await GetNoSagaRetry(correlationId, TestTimeout);
+            Assert.IsNull(saga);
+        }
+
+        [Test]
+        public async Task Should_have_the_state_machine()
+        {
+            var correlationId = Guid.NewGuid();
+
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
+
+            var saga = await GetSagaRetry(correlationId, TestTimeout);
+
+            Assert.IsNotNull(saga);
+
+            await InputQueueSendEndpoint.Send(new GotHitByACar {CorrelationId = correlationId});
+
+            saga = await GetSagaRetry(correlationId, TestTimeout, x => x.CurrentState == _machine.Dead.Name);
+
+            Assert.IsNotNull(saga);
+            Assert.IsTrue(saga.CurrentState == _machine.Dead.Name);
+
+            var instance = await GetSaga(correlationId);
+
+            Assert.IsTrue(instance.Screwed);
+        }
+
         SuperShopper _machine;
         readonly DocumentClient _documentClient;
         readonly string _databaseName;
@@ -65,10 +105,11 @@
         {
             try
             {
-                var document = await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
+                ResourceResponse<Document> document =
+                    await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
                 return JsonConvert.DeserializeObject<ShoppingChore>(document.Resource.ToString());
             }
-            catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (DocumentClientException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
             }
@@ -76,19 +117,20 @@
 
         async Task<ShoppingChore> GetNoSagaRetry(Guid id, TimeSpan timeout)
         {
-            DateTime giveUpAt = DateTime.Now + timeout;
+            var giveUpAt = DateTime.Now + timeout;
             ShoppingChore saga = null;
 
             while (DateTime.Now < giveUpAt)
             {
                 try
                 {
-                    var document = await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
+                    ResourceResponse<Document> document =
+                        await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
                     saga = JsonConvert.DeserializeObject<ShoppingChore>(document.Resource.ToString());
 
                     await Task.Delay(10).ConfigureAwait(false);
                 }
-                catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+                catch (DocumentClientException e) when (e.StatusCode == HttpStatusCode.NotFound)
                 {
                     saga = null;
                     break;
@@ -100,65 +142,27 @@
 
         async Task<ShoppingChore> GetSagaRetry(Guid id, TimeSpan timeout, Func<ShoppingChore, bool> filterExpression = null)
         {
-            DateTime giveUpAt = DateTime.Now + timeout;
+            var giveUpAt = DateTime.Now + timeout;
 
             while (DateTime.Now < giveUpAt)
             {
                 try
                 {
-                    var document = await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
+                    ResourceResponse<Document> document =
+                        await _documentClient.ReadDocumentAsync(UriFactory.CreateDocumentUri(_databaseName, _collectionName, id.ToString()));
                     var saga = JsonConvert.DeserializeObject<ShoppingChore>(document.Resource.ToString());
 
                     if (filterExpression?.Invoke(saga) == false)
                         continue;
                     return saga;
                 }
-                catch (DocumentClientException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+                catch (DocumentClientException e) when (e.StatusCode == HttpStatusCode.NotFound)
                 {
                     await Task.Delay(10).ConfigureAwait(false);
                 }
             }
 
             return null;
-        }
-
-        [Test]
-        public async Task Should_have_removed_the_state_machine()
-        {
-            Guid correlationId = Guid.NewGuid();
-
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
-
-            var saga = await GetSagaRetry(correlationId, TestTimeout);
-            Assert.IsNotNull(saga);
-
-            await InputQueueSendEndpoint.Send(new SodOff {CorrelationId = correlationId});
-
-            saga = await GetNoSagaRetry(correlationId, TestTimeout);
-            Assert.IsNull(saga);
-        }
-
-        [Test]
-        public async Task Should_have_the_state_machine()
-        {
-            Guid correlationId = Guid.NewGuid();
-
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
-
-            var saga = await GetSagaRetry(correlationId, TestTimeout);
-
-            Assert.IsNotNull(saga);
-
-            await InputQueueSendEndpoint.Send(new GotHitByACar {CorrelationId = correlationId});
-
-            saga = await GetSagaRetry(correlationId, TestTimeout, x => x.CurrentState == _machine.Dead.Name);
-
-            Assert.IsNotNull(saga);
-            Assert.IsTrue(saga.CurrentState == _machine.Dead.Name);
-
-            ShoppingChore instance = await GetSaga(correlationId);
-
-            Assert.IsTrue(instance.Screwed);
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

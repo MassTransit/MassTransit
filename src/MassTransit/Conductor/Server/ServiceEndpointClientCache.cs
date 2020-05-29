@@ -5,7 +5,6 @@ namespace MassTransit.Conductor.Server
     using System.Linq;
     using System.Threading.Tasks;
     using Contexts;
-    using Contracts;
     using Contracts.Conductor;
     using GreenPipes;
     using GreenPipes.Caching;
@@ -16,9 +15,9 @@ namespace MassTransit.Conductor.Server
         ICacheValueObserver<ServiceClientContext>
     {
         readonly ICache<ServiceClientContext> _cache;
+        readonly IIndex<Guid, ServiceClientContext> _index;
         readonly IServiceInstanceClientCache _instanceClientCache;
         readonly ConcurrentDictionary<Type, IServiceEndpointMessageClientCache> _messageTypes;
-        readonly IIndex<Guid, ServiceClientContext> _index;
 
         public ServiceEndpointClientCache(IServiceInstanceClientCache instanceClientCache)
         {
@@ -30,6 +29,20 @@ namespace MassTransit.Conductor.Server
             _messageTypes = new ConcurrentDictionary<Type, IServiceEndpointMessageClientCache>();
 
             instanceClientCache.Connect(this);
+        }
+
+        public void ValueAdded(INode<ServiceClientContext> node, ServiceClientContext value)
+        {
+        }
+
+        public void ValueRemoved(INode<ServiceClientContext> node, ServiceClientContext value)
+        {
+            _index.Remove(value.ClientId);
+        }
+
+        public void CacheCleared()
+        {
+            _cache.Clear();
         }
 
         public IServiceEndpointMessageClientCache GetMessageCache<T>()
@@ -67,20 +80,6 @@ namespace MassTransit.Conductor.Server
             where T : class
         {
             return new ServiceEndpointMessageClientCache<T>(this);
-        }
-
-        public void ValueAdded(INode<ServiceClientContext> node, ServiceClientContext value)
-        {
-        }
-
-        public void ValueRemoved(INode<ServiceClientContext> node, ServiceClientContext value)
-        {
-            _index.Remove(value.ClientId);
-        }
-
-        public void CacheCleared()
-        {
-            _cache.Clear();
         }
     }
 }

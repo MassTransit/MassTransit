@@ -29,9 +29,10 @@
         [NotMapped]
         public Dictionary<string, string> Custom
         {
-            get => string.IsNullOrEmpty(_custom)
-                       ? new Dictionary<string, string>()
-                       : JsonConvert.DeserializeObject<Dictionary<string, string>>(_custom);
+            get =>
+                string.IsNullOrEmpty(_custom)
+                    ? new Dictionary<string, string>()
+                    : JsonConvert.DeserializeObject<Dictionary<string, string>>(_custom);
             set => _custom = JsonConvert.SerializeObject(value);
         }
 
@@ -40,9 +41,10 @@
         [NotMapped]
         public Dictionary<string, string> Headers
         {
-            get => string.IsNullOrEmpty(_headers)
-                       ? new Dictionary<string, string>()
-                       : JsonConvert.DeserializeObject<Dictionary<string, string>>(_headers);
+            get =>
+                string.IsNullOrEmpty(_headers)
+                    ? new Dictionary<string, string>()
+                    : JsonConvert.DeserializeObject<Dictionary<string, string>>(_headers);
             set => _headers = JsonConvert.SerializeObject(value);
         }
 
@@ -51,9 +53,10 @@
         [NotMapped]
         public object Message
         {
-            get => string.IsNullOrEmpty(_message)
-                       ? null
-                       : JsonConvert.DeserializeObject(_message);
+            get =>
+                string.IsNullOrEmpty(_message)
+                    ? null
+                    : JsonConvert.DeserializeObject(_message);
             set => _message = JsonConvert.SerializeObject(value);
         }
 

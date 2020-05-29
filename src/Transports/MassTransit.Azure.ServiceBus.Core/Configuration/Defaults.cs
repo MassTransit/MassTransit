@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Azure.ServiceBus.Core
+﻿namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
     using System.ComponentModel;
@@ -20,6 +8,17 @@ namespace MassTransit.Azure.ServiceBus.Core
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class Defaults
     {
+        public static TimeSpan LockDuration = TimeSpan.FromMinutes(5);
+        public static TimeSpan DefaultMessageTimeToLive = TimeSpan.FromDays(365 + 1);
+        public static TimeSpan BasicMessageTimeToLive = TimeSpan.FromDays(14);
+
+        public static TimeSpan AutoDeleteOnIdle => TimeSpan.FromDays(427);
+        public static TimeSpan TemporaryAutoDeleteOnIdle => TimeSpan.FromMinutes(5);
+        public static TimeSpan MaxAutoRenewDuration => TimeSpan.FromMinutes(5);
+        public static TimeSpan MessageWaitTimeout => TimeSpan.FromSeconds(10);
+        public static int MaxConcurrentCalls => Math.Max(Environment.ProcessorCount, 8);
+        public static int PrefetchCount => Math.Max(MaxConcurrentCalls, 32);
+
         public static QueueDescription CreateQueueDescription(string queueName)
         {
             return new QueueDescription(queueName)
@@ -73,15 +72,5 @@ namespace MassTransit.Azure.ServiceBus.Core
                 UserMetadata = queue.UserMetadata
             };
         }
-
-        public static TimeSpan AutoDeleteOnIdle => TimeSpan.FromDays(427);
-        public static TimeSpan TemporaryAutoDeleteOnIdle => TimeSpan.FromMinutes(5);
-        public static TimeSpan MaxAutoRenewDuration => TimeSpan.FromMinutes(5);
-        public static TimeSpan MessageWaitTimeout => TimeSpan.FromSeconds(10);
-        public static TimeSpan LockDuration = TimeSpan.FromMinutes(5);
-        public static TimeSpan DefaultMessageTimeToLive = TimeSpan.FromDays(365 + 1);
-        public static TimeSpan BasicMessageTimeToLive = TimeSpan.FromDays(14);
-        public static int MaxConcurrentCalls => Math.Max(Environment.ProcessorCount, 8);
-        public static int PrefetchCount => Math.Max(MaxConcurrentCalls, 32);
     }
 }

@@ -7,7 +7,6 @@ namespace MassTransit.Conductor.Client
     using Clients;
     using Context;
     using Contexts;
-    using Contracts;
     using Contracts.Conductor;
     using Distribution;
     using GreenPipes.Caching;
@@ -23,8 +22,8 @@ namespace MassTransit.Conductor.Client
         where TMessage : class
     {
         readonly IClientFactory _clientFactory;
-        readonly IServiceInstanceCache _instanceCache;
         readonly IDistributionStrategy<ServiceInstanceContext> _distribution;
+        readonly IServiceInstanceCache _instanceCache;
         readonly TaskCompletionSource<Uri> _serviceAddress;
 
         public ServiceClientMessageCache(IClientFactory clientFactory, Guid clientId, IServiceInstanceCache instanceCache)
@@ -40,6 +39,19 @@ namespace MassTransit.Conductor.Client
             _distribution.Init(Enumerable.Empty<ServiceInstanceContext>());
 
             instanceCache.Connect(this);
+        }
+
+        public void ValueAdded(INode<ServiceInstanceContext> node, ServiceInstanceContext value)
+        {
+        }
+
+        public void ValueRemoved(INode<ServiceInstanceContext> node, ServiceInstanceContext value)
+        {
+            _distribution.Remove(value);
+        }
+
+        public void CacheCleared()
+        {
         }
 
         public async Task Consume(ConsumeContext<Up<TMessage>> context)
@@ -107,9 +119,9 @@ namespace MassTransit.Conductor.Client
         {
             LogContext.Debug?.Log("Linking: {ClientId} {MessageType}", ClientId, TypeMetadataCache<TMessage>.ShortName);
 
-            var client = _clientFactory.CreateRequestClient<Link<TMessage>>();
+            IRequestClient<Link<TMessage>> client = _clientFactory.CreateRequestClient<Link<TMessage>>();
 
-            var response = await client.GetResponse<Up<TMessage>>(new {ClientId}, cancellationToken).ConfigureAwait(false);
+            Response<Up<TMessage>> response = await client.GetResponse<Up<TMessage>>(new {ClientId}, cancellationToken).ConfigureAwait(false);
 
             var serviceAddress = response.Message.Service.ServiceAddress;
 
@@ -135,20 +147,6 @@ namespace MassTransit.Conductor.Client
 
             public NewId LastCorrelationId { get; }
             public InstanceInfo NodeInfo { get; }
-        }
-
-
-        public void ValueAdded(INode<ServiceInstanceContext> node, ServiceInstanceContext value)
-        {
-        }
-
-        public void ValueRemoved(INode<ServiceInstanceContext> node, ServiceInstanceContext value)
-        {
-            _distribution.Remove(value);
-        }
-
-        public void CacheCleared()
-        {
         }
     }
 }

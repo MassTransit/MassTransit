@@ -13,8 +13,8 @@
         ISendEndpoint,
         IAsyncDisposable
     {
-        readonly ISendPipe _sendPipe;
         readonly ConnectHandle _observerHandle;
+        readonly ISendPipe _sendPipe;
         readonly ISendTransport _transport;
 
         public SendEndpoint(ISendTransport transport, IMessageSerializer serializer, Uri destinationAddress, Uri sourceAddress, ISendPipe sendPipe,

@@ -1,23 +1,11 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.ActiveMqTransport.Contexts
+﻿namespace MassTransit.ActiveMqTransport.Contexts
 {
     using System.Threading.Tasks;
     using Apache.NMS;
     using GreenPipes.Agents;
     using GreenPipes.Caching;
-    using Util;
     using Transports;
+    using Util;
 
 
     public class MessageProducerCache :
@@ -26,8 +14,9 @@ namespace MassTransit.ActiveMqTransport.Contexts
         public delegate Task<IMessageProducer> MessageProducerFactory(IDestination destination);
 
 
-        readonly IIndex<IDestination, CachedMessageProducer> _index;
         readonly GreenCache<CachedMessageProducer> _cache;
+
+        readonly IIndex<IDestination, CachedMessageProducer> _index;
 
         public MessageProducerCache()
         {
@@ -54,10 +43,8 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
         protected override Task StopAgent(StopContext context)
         {
-            foreach (var producer in _cache.GetAll())
-            {
+            foreach (Task<CachedMessageProducer> producer in _cache.GetAll())
                 producer.Dispose();
-            }
 
             _cache.Clear();
 

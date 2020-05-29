@@ -16,8 +16,6 @@
     {
         readonly Func<MassTransitHubLifetimeManager<THub>, TConsumer> _factoryMethod;
 
-        public MassTransitHubLifetimeManager<THub> HubLifetimeManager { get; set; }
-
         public HubLifetimeManagerConsumerFactory(Func<MassTransitHubLifetimeManager<THub>, TConsumer> factoryMethod)
         {
             _factoryMethod = factoryMethod;
@@ -35,9 +33,7 @@
                 consumer = _factoryMethod(HubLifetimeManager);
 
                 if (consumer == null)
-                {
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
-                }
 
                 await next.Send(new ConsumerConsumeContextScope<TConsumer, TMessage>(context, consumer)).ConfigureAwait(false);
             }
@@ -52,5 +48,7 @@
         {
             context.CreateConsumerFactoryScope<TConsumer>("hubLifetimeManagerFactory");
         }
+
+        public MassTransitHubLifetimeManager<THub> HubLifetimeManager { get; set; }
     }
 }

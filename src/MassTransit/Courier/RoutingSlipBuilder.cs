@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Courier
+﻿namespace MassTransit.Courier
 {
     using System;
     using System.Collections.Generic;
@@ -39,12 +27,11 @@ namespace MassTransit.Courier
         readonly IList<Activity> _itinerary;
         readonly List<Activity> _sourceItinerary;
         readonly IList<Subscription> _subscriptions;
-        readonly Guid _trackingNumber;
         readonly IDictionary<string, object> _variables;
 
         public RoutingSlipBuilder(Guid trackingNumber)
         {
-            _trackingNumber = trackingNumber;
+            TrackingNumber = trackingNumber;
             _createTimestamp = DateTime.UtcNow;
 
             _itinerary = new List<Activity>();
@@ -58,7 +45,7 @@ namespace MassTransit.Courier
 
         public RoutingSlipBuilder(RoutingSlip routingSlip, Func<IEnumerable<Activity>, IEnumerable<Activity>> activitySelector)
         {
-            _trackingNumber = routingSlip.TrackingNumber;
+            TrackingNumber = routingSlip.TrackingNumber;
             _createTimestamp = routingSlip.CreateTimestamp;
             _itinerary = new List<Activity>(activitySelector(routingSlip.Itinerary));
             _activityLogs = new List<ActivityLog>(routingSlip.ActivityLogs);
@@ -72,7 +59,7 @@ namespace MassTransit.Courier
 
         public RoutingSlipBuilder(RoutingSlip routingSlip, IEnumerable<Activity> itinerary, IEnumerable<Activity> sourceItinerary)
         {
-            _trackingNumber = routingSlip.TrackingNumber;
+            TrackingNumber = routingSlip.TrackingNumber;
             _createTimestamp = routingSlip.CreateTimestamp;
             _itinerary = new List<Activity>(itinerary);
             _activityLogs = new List<ActivityLog>(routingSlip.ActivityLogs);
@@ -86,7 +73,7 @@ namespace MassTransit.Courier
 
         public RoutingSlipBuilder(RoutingSlip routingSlip, IEnumerable<CompensateLog> compensateLogs)
         {
-            _trackingNumber = routingSlip.TrackingNumber;
+            TrackingNumber = routingSlip.TrackingNumber;
             _createTimestamp = routingSlip.CreateTimestamp;
             _itinerary = new List<Activity>(routingSlip.Itinerary);
             _activityLogs = new List<ActivityLog>(routingSlip.ActivityLogs);
@@ -117,7 +104,7 @@ namespace MassTransit.Courier
         /// <summary>
         /// The tracking number of the routing slip
         /// </summary>
-        public Guid TrackingNumber => _trackingNumber;
+        public Guid TrackingNumber { get; }
 
         /// <summary>
         /// Adds an activity to the routing slip without specifying any arguments
@@ -201,7 +188,7 @@ namespace MassTransit.Courier
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            if (value == null || (value is string s && string.IsNullOrEmpty(s)))
+            if (value == null || value is string s && string.IsNullOrEmpty(s))
                 _variables.Remove(key);
             else
                 _variables[key] = value;
@@ -210,7 +197,6 @@ namespace MassTransit.Courier
         /// <summary>
         /// Sets the value of any existing variables to the value in the anonymous object,
         /// as well as adding any additional variables that did not exist previously.
-        /// 
         /// For example, SetVariables(new { IntValue = 27, StringValue = "Hello, World." });
         /// </summary>
         /// <param name="values"></param>
@@ -322,7 +308,7 @@ namespace MassTransit.Courier
         /// <returns>The RoutingSlip</returns>
         public RoutingSlip Build()
         {
-            return new RoutingSlipImpl(_trackingNumber, _createTimestamp, _itinerary, _activityLogs, _compensateLogs, _activityExceptions,
+            return new RoutingSlipImpl(TrackingNumber, _createTimestamp, _itinerary, _activityLogs, _compensateLogs, _activityExceptions,
                 _variables, _subscriptions);
         }
 
@@ -400,7 +386,7 @@ namespace MassTransit.Courier
         {
             foreach (KeyValuePair<string, object> value in values)
             {
-                if (value.Value == null || (value.Value is string s && string.IsNullOrEmpty(s)))
+                if (value.Value == null || value.Value is string s && string.IsNullOrEmpty(s))
                     _variables.Remove(value.Key);
                 else
                     _variables[value.Key] = value.Value;

@@ -14,15 +14,14 @@ namespace MassTransit.PipeConfigurators
         where TConsumer : class
     {
         readonly IConsumerConfigurator<TConsumer> _configurator;
-        readonly IConcurrencyLimiter _limiter;
 
         public ConcurrencyLimitConsumerConfigurationObserver(IConsumerConfigurator<TConsumer> configurator, int concurrentMessageLimit, string id = null)
         {
             _configurator = configurator;
-            _limiter = new ConcurrencyLimiter(concurrentMessageLimit, id);
+            Limiter = new ConcurrencyLimiter(concurrentMessageLimit, id);
         }
 
-        public IConcurrencyLimiter Limiter => _limiter;
+        public IConcurrencyLimiter Limiter { get; }
 
         void IConsumerConfigurationObserver.ConsumerConfigured<T>(IConsumerConfigurator<T> configurator)
         {
@@ -30,7 +29,7 @@ namespace MassTransit.PipeConfigurators
 
         void IConsumerConfigurationObserver.ConsumerMessageConfigured<T, TMessage>(IConsumerMessageConfigurator<T, TMessage> configurator)
         {
-            var specification = new ConcurrencyLimitConsumePipeSpecification<TMessage>(_limiter);
+            var specification = new ConcurrencyLimitConsumePipeSpecification<TMessage>(Limiter);
 
             _configurator.Message<TMessage>(x => x.AddPipeSpecification(specification));
         }

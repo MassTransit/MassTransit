@@ -21,10 +21,9 @@
         readonly IPipe<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> _consumerPipe;
         readonly DateTime _firstMessage;
         readonly int _messageLimit;
-        readonly TaskScheduler _taskScheduler;
         readonly SortedDictionary<Guid, ConsumeContext<TMessage>> _messages;
+        readonly TaskScheduler _taskScheduler;
         readonly Timer _timer;
-        bool _isCompleted;
         DateTime _lastMessage;
 
         public BatchConsumer(int messageLimit, TimeSpan timeLimit, TaskScheduler taskScheduler, IConsumerFactory<TConsumer> consumerFactory,
@@ -41,7 +40,7 @@
             _timer = new Timer(TimeLimitExpired, null, timeLimit, TimeSpan.Zero);
         }
 
-        public bool IsCompleted => _isCompleted;
+        public bool IsCompleted { get; set; }
 
         async Task IConsumer<TMessage>.Consume(ConsumeContext<TMessage> context)
         {
@@ -67,7 +66,7 @@
         {
             Task.Factory.StartNew(() =>
             {
-                _isCompleted = true;
+                IsCompleted = true;
 
                 if (_messages.Count > 0)
                 {
@@ -75,7 +74,6 @@
 
                     Deliver(messages[0], messages, BatchCompletionMode.Time);
                 }
-
             }, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
         }
 
@@ -88,7 +86,7 @@
 
             if (IsReadyToDeliver(context))
             {
-                _isCompleted = true;
+                IsCompleted = true;
 
                 Deliver(context, _messages.Values.ToList(), BatchCompletionMode.Size);
             }
@@ -104,7 +102,7 @@
 
         public void ForceComplete()
         {
-            _isCompleted = true;
+            IsCompleted = true;
 
             List<ConsumeContext<TMessage>> consumeContexts = _messages.Values.ToList();
             if (consumeContexts.Count == 0)

@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
@@ -21,12 +9,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     [TestFixture]
     public class GivenAVHostAddress
     {
-        [Test]
-        public void ShouldNotHaveATtl()
-        {
-            _hostSettings.Host.ShouldBe("some_server");
-        }
-
         [Test]
         public void Should_have_no_password()
         {
@@ -43,6 +25,12 @@ namespace MassTransit.RabbitMqTransport.Tests
         public void Should_have_the_queue_name()
         {
             _receiveSettings.QueueName.ShouldBe("queue");
+        }
+
+        [Test]
+        public void ShouldNotHaveATtl()
+        {
+            _hostSettings.Host.ShouldBe("some_server");
         }
 
         [Test]
@@ -128,50 +116,11 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class Given_a_valid_endpoint_address
     {
         [Test]
-        public void Should_return_a_valid_address_for_a_queue()
-        {
-            var hostAddress = new Uri("rabbitmq://localhost/test");
-
-            var address = new RabbitMqEndpointAddress(hostAddress, new Uri("queue:input-queue"));
-
-            Uri uri = address;
-
-            Assert.That(uri, Is.EqualTo(new Uri("rabbitmq://localhost/test/input-queue?bind=true")));
-        }
-
-        [Test]
-        public void Should_return_a_valid_address_for_an_exchange()
-        {
-            var hostAddress = new Uri("rabbitmq://localhost/test");
-
-            var address = new RabbitMqEndpointAddress(hostAddress, new Uri("exchange:input-queue"));
-
-            Uri uri = address;
-
-            Assert.That(uri, Is.EqualTo(new Uri("rabbitmq://localhost/test/input-queue")));
-        }
-
-        [Test]
         public void Should_return_a_valid_address_for_a_full_address()
         {
             var hostAddress = new Uri("rabbitmq://localhost/test");
 
             var address = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://remote-host/production/client/input-queue"));
-
-            Assert.That(address.VirtualHost, Is.EqualTo("production/client"));
-            Assert.That(address.Name, Is.EqualTo("input-queue"));
-
-            Uri uri = address;
-
-            Assert.That(uri, Is.EqualTo(new Uri("rabbitmq://remote-host/production%2Fclient/input-queue")));
-        }
-
-        [Test]
-        public void Should_return_a_valid_address_for_a_full_address_with_encoded_slash()
-        {
-            var hostAddress = new Uri("rabbitmq://localhost/test");
-
-            var address = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://remote-host/production%2Fclient/input-queue"));
 
             Assert.That(address.VirtualHost, Is.EqualTo("production/client"));
             Assert.That(address.Name, Is.EqualTo("input-queue"));
@@ -198,17 +147,42 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public void Should_return_a_valid_address_with_a_default_port()
+        public void Should_return_a_valid_address_for_a_full_address_with_encoded_slash()
         {
             var hostAddress = new Uri("rabbitmq://localhost/test");
 
-            var address = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://remote-host:5672/input-queue"));
+            var address = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://remote-host/production%2Fclient/input-queue"));
 
-            Assert.That(address.Port, Is.EqualTo(5672));
+            Assert.That(address.VirtualHost, Is.EqualTo("production/client"));
+            Assert.That(address.Name, Is.EqualTo("input-queue"));
 
             Uri uri = address;
 
-            Assert.That(uri, Is.EqualTo(new Uri("rabbitmq://remote-host/input-queue")));
+            Assert.That(uri, Is.EqualTo(new Uri("rabbitmq://remote-host/production%2Fclient/input-queue")));
+        }
+
+        [Test]
+        public void Should_return_a_valid_address_for_a_queue()
+        {
+            var hostAddress = new Uri("rabbitmq://localhost/test");
+
+            var address = new RabbitMqEndpointAddress(hostAddress, new Uri("queue:input-queue"));
+
+            Uri uri = address;
+
+            Assert.That(uri, Is.EqualTo(new Uri("rabbitmq://localhost/test/input-queue?bind=true")));
+        }
+
+        [Test]
+        public void Should_return_a_valid_address_for_an_exchange()
+        {
+            var hostAddress = new Uri("rabbitmq://localhost/test");
+
+            var address = new RabbitMqEndpointAddress(hostAddress, new Uri("exchange:input-queue"));
+
+            Uri uri = address;
+
+            Assert.That(uri, Is.EqualTo(new Uri("rabbitmq://localhost/test/input-queue")));
         }
 
         [Test]
@@ -226,6 +200,20 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
+        public void Should_return_a_valid_address_with_a_default_port()
+        {
+            var hostAddress = new Uri("rabbitmq://localhost/test");
+
+            var address = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://remote-host:5672/input-queue"));
+
+            Assert.That(address.Port, Is.EqualTo(5672));
+
+            Uri uri = address;
+
+            Assert.That(uri, Is.EqualTo(new Uri("rabbitmq://remote-host/input-queue")));
+        }
+
+        [Test]
         public void Should_return_a_valid_address_with_a_secure_port()
         {
             var hostAddress = new Uri("rabbitmq://localhost/test");
@@ -239,7 +227,6 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.That(uri, Is.EqualTo(new Uri("rabbitmqs://remote-host/input-queue")));
         }
     }
-
 
 
     [TestFixture]

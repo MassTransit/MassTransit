@@ -3,6 +3,7 @@
     using System;
     using System.Linq.Expressions;
     using System.Reflection;
+    using Initializers;
     using Transformation;
 
 
@@ -43,7 +44,7 @@
         /// <typeparam name="TProperty"></typeparam>
         /// <param name="property"></param>
         /// <param name="propertyProvider"></param>
-        void Set<TProperty>(PropertyInfo property, Initializers.IPropertyProvider<TInput, TProperty> propertyProvider);
+        void Set<TProperty>(PropertyInfo property, IPropertyProvider<TInput, TProperty> propertyProvider);
 
         /// <summary>
         /// Transform the property, but leave it unchanged on the input
@@ -51,6 +52,6 @@
         /// <typeparam name="TProperty"></typeparam>
         /// <param name="property"></param>
         /// <param name="propertyProvider"></param>
-        void Transform<TProperty>(PropertyInfo property, Initializers.IPropertyProvider<TInput, TProperty> propertyProvider);
+        void Transform<TProperty>(PropertyInfo property, IPropertyProvider<TInput, TProperty> propertyProvider);
     }
 }

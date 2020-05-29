@@ -15,6 +15,9 @@ namespace MassTransit.PrometheusIntegration
             builder.AddFilter(new PrometheusHandlerFilter<TMessage>());
         }
 
-        public IEnumerable<ValidationResult> Validate() => Enumerable.Empty<ValidationResult>();
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return Enumerable.Empty<ValidationResult>();
+        }
     }
 }

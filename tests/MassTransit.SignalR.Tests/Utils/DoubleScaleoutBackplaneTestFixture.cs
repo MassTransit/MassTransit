@@ -1,9 +1,10 @@
 ﻿namespace MassTransit.SignalR.Tests
 {
-    using MassTransit.Testing;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.SignalR;
     using NUnit.Framework;
-    using System.Threading.Tasks;
+    using Testing;
+
 
     public class DoubleScaleoutBackplaneTestFixture<THub> : MassTransitHubLifetimeTestFixture<THub>
         where THub : Hub

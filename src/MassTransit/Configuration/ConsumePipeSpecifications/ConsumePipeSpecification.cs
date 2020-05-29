@@ -22,6 +22,7 @@ namespace MassTransit.ConsumePipeSpecifications
         IConsumePipeConfigurator,
         IConsumePipeSpecification
     {
+        readonly ActivityConfigurationObservable _activityObservers;
         readonly IBuildPipeConfigurator<ConsumeContext> _consumePipeConfigurator;
         readonly ConsumerConfigurationObservable _consumerObservers;
         readonly HandlerConfigurationObservable _handlerObservers;
@@ -30,7 +31,6 @@ namespace MassTransit.ConsumePipeSpecifications
         readonly ConsumePipeSpecificationObservable _observers;
         readonly SagaConfigurationObservable _sagaObservers;
         readonly IList<IPipeSpecification<ConsumeContext>> _specifications;
-        readonly ActivityConfigurationObservable _activityObservers;
 
         public ConsumePipeSpecification()
         {

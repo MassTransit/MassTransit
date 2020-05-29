@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.AutomatonymousIntegration
+﻿namespace MassTransit.Tests.AutomatonymousIntegration
 {
     using System;
     using System.Threading.Tasks;
@@ -26,6 +14,23 @@ namespace MassTransit.Tests.AutomatonymousIntegration
     public class Correlation_a_state_machine_by_guid :
         InMemoryTestFixture
     {
+        [Test]
+        public async Task Should_properly_map_to_the_instance()
+        {
+            var id = NewId.NextGuid();
+
+            await Bus.Publish<BeginTransaction>(new {TransactionId = id});
+
+            Guid? saga = await _repository.ShouldContainSaga(state => state.TransactionId == id && state.CurrentState == _machine.Active, TestTimeout);
+
+            Assert.IsTrue(saga.HasValue);
+
+            await Bus.Publish<CommitTransaction>(new {TransactionId = id});
+
+            saga = await _repository.ShouldContainSaga(state => state.TransactionId == id && state.CurrentState == _machine.Final, TestTimeout);
+            Assert.IsTrue(saga.HasValue);
+        }
+
         InMemorySagaRepository<TransactionState> _repository;
         TransactionStateMachine _machine;
 
@@ -102,30 +107,6 @@ namespace MassTransit.Tests.AutomatonymousIntegration
         public interface CommitTransaction
         {
             Guid TransactionId { get; }
-        }
-
-
-        [Test]
-        public async Task Should_properly_map_to_the_instance()
-        {
-            Guid id = NewId.NextGuid();
-
-            await Bus.Publish<BeginTransaction>(new
-            {
-                TransactionId = id
-            });
-
-            Guid? saga = await _repository.ShouldContainSaga(state => state.TransactionId == id && state.CurrentState == _machine.Active, TestTimeout);
-
-            Assert.IsTrue(saga.HasValue);
-
-            await Bus.Publish<CommitTransaction>(new
-            {
-                TransactionId = id
-            });
-
-            saga = await _repository.ShouldContainSaga(state => state.TransactionId == id && state.CurrentState == _machine.Final, TestTimeout);
-            Assert.IsTrue(saga.HasValue);
         }
     }
 }

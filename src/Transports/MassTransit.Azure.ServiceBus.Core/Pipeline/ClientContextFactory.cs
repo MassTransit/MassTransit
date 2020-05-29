@@ -14,16 +14,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     public abstract class ClientContextFactory :
         IPipeContextFactory<ClientContext>
     {
-        readonly IConnectionContextSupervisor _supervisor;
         readonly ClientSettings _settings;
+        readonly IConnectionContextSupervisor _supervisor;
 
         protected ClientContextFactory(IConnectionContextSupervisor supervisor, ClientSettings settings)
         {
             _supervisor = supervisor;
             _settings = settings;
         }
-
-        protected abstract ClientContext CreateClientContext(ConnectionContext connectionContext, Uri inputAddress);
 
         public IPipeContextAgent<ClientContext> CreateContext(ISupervisor supervisor)
         {
@@ -39,6 +37,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
         {
             return supervisor.AddActiveContext(context, CreateSharedContext(context.Context, cancellationToken));
         }
+
+        protected abstract ClientContext CreateClientContext(ConnectionContext connectionContext, Uri inputAddress);
 
         void CreateClientContext(IAsyncPipeContextAgent<ClientContext> asyncContext, CancellationToken cancellationToken)
         {

@@ -13,8 +13,8 @@ namespace MassTransit.MongoDbIntegration.Saga.Context
         ISagaRepositoryContextFactory<TSaga>
         where TSaga : class, IVersionedSaga
     {
-        readonly IMongoCollection<TSaga> _mongoCollection;
         readonly ISagaConsumeContextFactory<IMongoCollection<TSaga>, TSaga> _factory;
+        readonly IMongoCollection<TSaga> _mongoCollection;
 
         public MongoDbSagaRepositoryContextFactory(IMongoCollection<TSaga> mongoCollection, ISagaConsumeContextFactory<IMongoCollection<TSaga>, TSaga> factory)
         {

@@ -59,10 +59,10 @@
             IPipe<SessionContext>
             where T : class
         {
+            readonly CancellationToken _cancellationToken;
             readonly ActiveMqSendTransportContext _context;
             readonly T _message;
             readonly IPipe<SendContext<T>> _pipe;
-            readonly CancellationToken _cancellationToken;
 
             public SendPipe(ActiveMqSendTransportContext context, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             {
@@ -85,7 +85,7 @@
 
                 await _pipe.Send(context).ConfigureAwait(false);
 
-                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
+                StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
                 try
                 {
                     if (_context.SendObservers.Count > 0)

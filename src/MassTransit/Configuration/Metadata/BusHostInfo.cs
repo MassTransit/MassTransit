@@ -46,9 +46,7 @@ namespace MassTransit.Metadata
         {
             var attribute = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
             if (attribute != null)
-            {
                 return attribute.Version;
-            }
 
             var assemblyLocation = assembly.Location;
             if (assemblyLocation != null)
@@ -61,16 +59,14 @@ namespace MassTransit.Metadata
         {
             var attribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
             if (attribute != null)
-            {
                 return attribute.InformationalVersion;
-            }
 
             return GetAssemblyFileVersion(assembly);
         }
 
         static string GetUsefulProcessName(string defaultProcessName)
         {
-            string entryAssemblyLocation = System.Reflection.Assembly.GetEntryAssembly()?.Location;
+            var entryAssemblyLocation = System.Reflection.Assembly.GetEntryAssembly()?.Location;
 
             return string.IsNullOrWhiteSpace(entryAssemblyLocation)
                 ? defaultProcessName

@@ -23,7 +23,10 @@
         {
             MessageSchedulerContext PayloadFactory()
             {
-                IMessageScheduler Factory() => new MessageScheduler(new DelayedMessageScheduleMessageProvider(context), context.GetPayload<IBusTopology>());
+                IMessageScheduler Factory()
+                {
+                    return new MessageScheduler(new DelayedMessageScheduleMessageProvider(context), context.GetPayload<IBusTopology>());
+                }
 
                 return new ConsumeMessageSchedulerContext(Factory, context.ReceiveContext.InputAddress);
             }

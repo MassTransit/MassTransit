@@ -23,14 +23,14 @@
 
             _deserializers = new Dictionary<string, IMessageDeserializer>(StringComparer.OrdinalIgnoreCase);
 
-            foreach (IMessageDeserializer deserializer in deserializers)
+            foreach (var deserializer in deserializers)
                 AddSerializer(deserializer);
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("deserializers");
-            foreach (IMessageDeserializer deserializer in _deserializers.Values)
+            var scope = context.CreateScope("deserializers");
+            foreach (var deserializer in _deserializers.Values)
                 deserializer.Probe(scope);
         }
 
@@ -49,7 +49,7 @@
 
         bool TryGetSerializer(ContentType contentType, out IMessageDeserializer deserializer)
         {
-            string mediaType = contentType?.MediaType ?? _defaultContentType;
+            var mediaType = contentType?.MediaType ?? _defaultContentType;
 
             if (string.IsNullOrWhiteSpace(mediaType))
                 throw new ArgumentException("The media type must be specified", nameof(contentType));
@@ -62,7 +62,7 @@
             if (deserializer == null)
                 throw new ArgumentNullException(nameof(deserializer));
 
-            string mediaType = deserializer.ContentType.MediaType;
+            var mediaType = deserializer.ContentType.MediaType;
 
             _deserializers[mediaType] = deserializer;
         }

@@ -17,8 +17,6 @@ namespace MassTransit.Definition
     {
         ISagaDefinition<TSaga> _sagaDefinition;
 
-        int? _concurrentMessageLimit;
-
         public SagaMessageDefinition(ISagaDefinition<TSaga> sagaDefinition)
         {
             _sagaDefinition = sagaDefinition;
@@ -28,11 +26,7 @@ namespace MassTransit.Definition
         /// Set the concurrent message limit for the saga, which limits how many saga instances are able to concurrently
         /// consume messages.
         /// </summary>
-        public int? ConcurrentMessageLimit
-        {
-            get => _concurrentMessageLimit;
-            protected set => _concurrentMessageLimit = value;
-        }
+        public int? ConcurrentMessageLimit { get; protected set; }
 
         public Type SagaType => typeof(TSaga);
 

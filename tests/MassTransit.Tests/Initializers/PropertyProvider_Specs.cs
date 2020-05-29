@@ -19,14 +19,47 @@ namespace MassTransit.Tests.Initializers
     public class The_property_providers
     {
         [Test]
-        public async Task Should_support_matching_property_types()
+        public async Task Should_support_async_arrays()
         {
-            var input = new
-            {
-                IntValue = 27,
-            };
+            var input = new {IntArray = new[] {Task.FromResult(1), Task.FromResult(2), Task.FromResult(3)}};
 
-            var provider = GetPropertyProvider(input, x => x.IntValue);
+            var provider = GetPropertyProvider(input, x => x.IntArray, (long[])default);
+
+            long[] arrayValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(arrayValue, Is.EqualTo(new long[] {1, 2, 3}));
+        }
+
+        [Test]
+        public async Task Should_support_async_arrays_with_nulls()
+        {
+            var input = new {IntArray = new[] {Task.FromResult(1), Task.FromResult(2), null, Task.FromResult(3)}};
+
+            var provider = GetPropertyProvider(input, x => x.IntArray, (long[])default);
+
+            long[] arrayValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(arrayValue, Is.EqualTo(new long[] {1, 2, 0, 3}));
+        }
+
+        [Test]
+        public async Task Should_support_async_convertible_arrays()
+        {
+            var input = new {IntArray = Task.FromResult(new[] {1, 2, 3})};
+
+            var provider = GetPropertyProvider(input, x => x.IntArray, (long[])default);
+
+            long[] arrayValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(arrayValue, Is.EqualTo(new long[] {1, 2, 3}));
+        }
+
+        [Test]
+        public async Task Should_support_async_input_types()
+        {
+            var input = new {IntValue = Task.FromResult(27)};
+
+            var provider = GetPropertyProvider(input, x => x.IntValue, 69);
 
             var intValue = await provider.GetProperty(CreateInitializeContext(input));
 
@@ -34,181 +67,159 @@ namespace MassTransit.Tests.Initializers
         }
 
         [Test]
-        public async Task Should_support_convertible_property_types()
+        public async Task Should_support_async_matching_arrays()
         {
-            var input = new
-            {
-                IntValue = 27,
-            };
+            var input = new {IntArray = Task.FromResult(new[] {1, 2, 3})};
 
-            var longProvider = GetPropertyProvider(input, x => x.IntValue, 69L);
+            var provider = GetPropertyProvider(input, x => x.IntArray, (int[])default);
 
-            var longValue = await longProvider.GetProperty(CreateInitializeContext(input));
+            int[] arrayValue = await provider.GetProperty(CreateInitializeContext(input));
 
-            Assert.That(longValue, Is.EqualTo(27));
+            Assert.That(arrayValue, Is.EqualTo(new[] {1, 2, 3}));
         }
 
         [Test]
-        public async Task Should_support_value_to_string_types()
+        public async Task Should_support_async_matching_enumerable()
         {
-            var input = new
+            var input = new {IntArray = Task.FromResult(new[] {1, 2, 3})};
+
+            var provider = GetPropertyProvider(input, x => x.IntArray, (IEnumerable<int>)default);
+
+            IEnumerable<int> listValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(listValue, Is.EqualTo(new List<int>
             {
-                IntValue = 27,
-            };
-
-            var stringProvider = GetPropertyProvider(input, x => x.IntValue, (string)default);
-
-            var stringValue = await stringProvider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(stringValue, Is.EqualTo("27"));
+                1,
+                2,
+                3
+            }));
         }
 
         [Test]
-        public async Task Should_support_uri_to_string()
+        public async Task Should_support_async_matching_lists()
         {
-            var input = new
+            var input = new {IntArray = Task.FromResult(new[] {1, 2, 3})};
+
+            var provider = GetPropertyProvider(input, x => x.IntArray, (List<int>)default);
+
+            List<int> listValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(listValue, Is.EqualTo(new List<int>
             {
-                Address = new Uri("http://localhost/"),
-            };
-
-            var stringProvider = GetPropertyProvider(input, x => x.Address, (string)default);
-
-            var stringValue = await stringProvider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(stringValue, Is.EqualTo("http://localhost/"));
+                1,
+                2,
+                3
+            }));
         }
 
         [Test]
-        public async Task Should_support_uri()
+        public async Task Should_support_async_matching_readonly_lists()
         {
-            var input = new
+            var input = new {IntArray = Task.FromResult(new[] {1, 2, 3})};
+
+            var provider = GetPropertyProvider(input, x => x.IntArray, (IReadOnlyList<int>)default);
+
+            IReadOnlyList<int> listValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(listValue, Is.EqualTo(new List<int>
             {
-                Address = new Uri("http://localhost/"),
-            };
-
-            var uriProvider = GetPropertyProvider(input, x => x.Address, (Uri)default);
-
-            var uriValue = await uriProvider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(uriValue, Is.EqualTo(input.Address));
+                1,
+                2,
+                3
+            }));
         }
 
         [Test]
-        public async Task Should_support_string_to_uri()
+        public async Task Should_support_async_result_convertible_arrays()
         {
-            var input = new
-            {
-                Address = "http://localhost/",
-            };
+            var input = new {IntArray = new[] {1, 2, 3}};
 
-            var uriProvider = GetPropertyProvider(input, x => x.Address, (Uri)default);
+            var provider = GetPropertyProvider(input, x => x.IntArray, (Task<long[]>)default);
 
-            var uriValue = await uriProvider.GetProperty(CreateInitializeContext(input));
+            Task<long[]> arrayTask = await provider.GetProperty(CreateInitializeContext(input));
 
-            Assert.That(uriValue, Is.EqualTo(new Uri(input.Address)));
-        }
+            long[] arrayValue = await arrayTask;
 
-        [Test]
-        public async Task Should_support_object()
-        {
-            var input = new
-            {
-                IntValue = 27,
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntValue, (object)default);
-
-            var value = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(value, Is.EqualTo(27));
-        }
-
-        [Test]
-        public async Task Should_support_multiple_result_types_for_single_property()
-        {
-            var input = new
-            {
-                IntValue = 27,
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntValue);
-
-            var intValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(intValue, Is.EqualTo(27));
-
-            var longProvider = GetPropertyProvider(input, x => x.IntValue, 69L);
-
-            var longValue = await longProvider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(longValue, Is.EqualTo(27));
+            Assert.That(arrayValue, Is.EqualTo(new long[] {1, 2, 3}));
         }
 
         [Test]
         public async Task Should_support_async_result_types()
         {
-            var input = new
-            {
-                IntValue = 27,
-            };
+            var input = new {IntValue = 27};
 
             var provider = GetPropertyProvider(input, x => x.IntValue, Task.FromResult(69));
 
-            var valueTask = await provider.GetProperty(CreateInitializeContext(input));
+            Task<int> valueTask = await provider.GetProperty(CreateInitializeContext(input));
             var intValue = await valueTask;
 
             Assert.That(intValue, Is.EqualTo(27));
         }
 
         [Test]
-        public async Task Should_support_async_input_types()
+        public async Task Should_support_convertible_arrays()
         {
-            var input = new
-            {
-                IntValue = Task.FromResult(27),
-            };
+            var input = new {IntArray = new[] {1, 2, 3}};
 
-            var provider = GetPropertyProvider(input, x => x.IntValue, 69);
+            var provider = GetPropertyProvider(input, x => x.IntArray, (long[])default);
 
-            var intValue = await provider.GetProperty(CreateInitializeContext(input));
+            long[] arrayValue = await provider.GetProperty(CreateInitializeContext(input));
 
-            Assert.That(intValue, Is.EqualTo(27));
+            Assert.That(arrayValue, Is.EqualTo(new long[] {1, 2, 3}));
         }
 
         [Test]
-        public async Task Should_support_nullable_result_types()
+        public async Task Should_support_convertible_arrays_from_strings()
         {
-            var input = new
-            {
-                IntValue = 27,
-            };
+            var input = new {StringArray = new[] {"1", "2", "", "3"}};
 
-            var provider = GetPropertyProvider(input, x => x.IntValue, (int?)69);
+            var provider = GetPropertyProvider(input, x => x.StringArray, (int?[])default);
 
-            var intValue = await provider.GetProperty(CreateInitializeContext(input));
+            int?[] arrayValue = await provider.GetProperty(CreateInitializeContext(input));
 
-            Assert.That(intValue, Is.EqualTo(27));
-
-            var longProvider = GetPropertyProvider(input, x => x.IntValue, (long?)69L);
-
-            var longValue = await longProvider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(longValue, Is.EqualTo(27));
+            Assert.That(arrayValue, Is.EqualTo(new int?[] {1, 2, default, 3}));
         }
 
         [Test]
-        public async Task Should_support_nullable_input_types()
+        public async Task Should_support_convertible_arrays_to_nullable_types()
         {
-            var input = new
-            {
-                IntValue = (int?)27,
-            };
+            var input = new {IntArray = new[] {1, 2, 3}};
 
-            var provider = GetPropertyProvider(input, x => x.IntValue, 69);
+            var provider = GetPropertyProvider(input, x => x.IntArray, (long?[])default);
 
-            var intValue = await provider.GetProperty(CreateInitializeContext(input));
+            long?[] arrayValue = await provider.GetProperty(CreateInitializeContext(input));
 
-            Assert.That(intValue, Is.EqualTo(27));
+            Assert.That(arrayValue, Is.EqualTo(new long?[] {1, 2, 3}));
+        }
+
+        [Test]
+        public async Task Should_support_convertible_arrays_to_strings()
+        {
+            var input = new {IntArray = new[] {1, 2, 3}};
+
+            var provider = GetPropertyProvider(input, x => x.IntArray, (string[])default);
+
+            string[] arrayValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(arrayValue, Is.EqualTo(new[] {"1", "2", "3"}));
+        }
+
+        [Test]
+        public async Task Should_support_convertible_arrays_with_nullable_types()
+        {
+            var input = new {IntArray = new int?[] {1, 2, 3}};
+
+            var provider = GetPropertyProvider(input, x => x.IntArray, (long[])default);
+
+            long[] arrayValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(arrayValue, Is.EqualTo(new long[] {1, 2, 3}));
+        }
+
+        [Test]
+        public async Task Should_support_convertible_property_types()
+        {
+            var input = new {IntValue = 27};
 
             var longProvider = GetPropertyProvider(input, x => x.IntValue, 69L);
 
@@ -218,49 +229,97 @@ namespace MassTransit.Tests.Initializers
         }
 
         [Test]
-        public async Task Should_support_initializer_variables()
+        public async Task Should_support_dictionary()
         {
-            var id = NewId.NextGuid();
+            var input = new
+            {
+                Strings = new Dictionary<string, string>
+                {
+                    {"Hello", "World"},
+                    {"Thank You", "Next"}
+                }
+            };
 
-            var input = new {IdValue = new IdVariable(id)};
+            var provider = GetPropertyProvider(input, x => x.Strings, (IDictionary<string, string>)default);
 
-            var provider = GetPropertyProvider(input, x => x.IdValue, Guid.Empty);
+            IDictionary<string, string> dictionary = await provider.GetProperty(CreateInitializeContext(input));
 
-            var idValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(idValue, Is.EqualTo(id));
+            Assert.That(dictionary, Is.Not.Null);
+            Assert.That(dictionary.Count, Is.EqualTo(2));
+            Assert.That(dictionary["Hello"], Is.EqualTo("World"));
+            Assert.That(dictionary["Thank You"], Is.EqualTo("Next"));
         }
 
         [Test]
-        public async Task Should_support_initializer_variables_to_strings()
+        public async Task Should_support_dictionary_key_conversion()
         {
-            var id = NewId.NextGuid();
+            var input = new
+            {
+                Strings = new Dictionary<string, string>
+                {
+                    {"1", "One"},
+                    {"2", "Two"}
+                }
+            };
 
-            var input = new {IdValue = new IdVariable(id)};
+            var provider = GetPropertyProvider(input, x => x.Strings, (IDictionary<int, string>)default);
 
-            var provider = GetPropertyProvider(input, x => x.IdValue, (string)default);
+            IDictionary<int, string> dictionary = await provider.GetProperty(CreateInitializeContext(input));
 
-            var idValue = await provider.GetProperty(CreateInitializeContext(input));
+            Assert.That(dictionary, Is.Not.Null);
+            Assert.That(dictionary.Count, Is.EqualTo(2));
+            Assert.That(dictionary[1], Is.EqualTo("One"));
+            Assert.That(dictionary[2], Is.EqualTo("Two"));
+        }
 
-            Assert.That(idValue, Is.EqualTo(id.ToString()));
+        [Test]
+        public async Task Should_support_dictionary_type_conversion()
+        {
+            var input = new
+            {
+                Strings = new Dictionary<string, string>
+                {
+                    {"Hello", "World"},
+                    {"Thank You", "Next"}
+                }
+            };
+
+            var provider = GetPropertyProvider(input, x => x.Strings, (IDictionary<string, object>)default);
+
+            IDictionary<string, object> dictionary = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(dictionary, Is.Not.Null);
+            Assert.That(dictionary.Count, Is.EqualTo(2));
+            Assert.That(dictionary["Hello"], Is.EqualTo("World"));
+            Assert.That(dictionary["Thank You"], Is.EqualTo("Next"));
+        }
+
+        [Test]
+        public async Task Should_support_enumerable_key_value_pair()
+        {
+            var input = new
+            {
+                Strings = (IEnumerable<KeyValuePair<string, string>>)new Dictionary<string, string>
+                {
+                    {"Hello", "World"},
+                    {"Thank You", "Next"}
+                }
+            };
+
+            var provider = GetPropertyProvider(input, x => x.Strings, (IDictionary<string, string>)default);
+
+            IDictionary<string, string> dictionary = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(dictionary, Is.Not.Null);
+            Assert.That(dictionary.Count, Is.EqualTo(2));
+            Assert.That(dictionary["Hello"], Is.EqualTo("World"));
+            Assert.That(dictionary["Thank You"], Is.EqualTo("Next"));
         }
 
         [Test]
         public async Task Should_support_enums()
         {
             var input = new {Status = TaskStatus.RanToCompletion};
-
-            var provider = GetPropertyProvider(input, x => x.Status, TaskStatus.Canceled);
-
-            var idValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(idValue, Is.EqualTo(TaskStatus.RanToCompletion));
-        }
-
-        [Test]
-        public async Task Should_support_enums_from_strings()
-        {
-            var input = new {Status = TaskStatus.RanToCompletion.ToString()};
 
             var provider = GetPropertyProvider(input, x => x.Status, TaskStatus.Canceled);
 
@@ -294,6 +353,18 @@ namespace MassTransit.Tests.Initializers
         }
 
         [Test]
+        public async Task Should_support_enums_from_strings()
+        {
+            var input = new {Status = TaskStatus.RanToCompletion.ToString()};
+
+            var provider = GetPropertyProvider(input, x => x.Status, TaskStatus.Canceled);
+
+            var idValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(idValue, Is.EqualTo(TaskStatus.RanToCompletion));
+        }
+
+        [Test]
         public async Task Should_support_exceptions()
         {
             var input = new {Exception = new IntentionalTestException("It Happens")};
@@ -307,342 +378,37 @@ namespace MassTransit.Tests.Initializers
         }
 
         [Test]
-        public async Task Should_support_matching_arrays()
+        public async Task Should_support_initializer_variables()
         {
-            var input = new
-            {
-                IntArray = new[] {1, 2, 3},
-            };
+            var id = NewId.NextGuid();
 
-            var provider = GetPropertyProvider(input, x => x.IntArray, (int[])default);
+            var input = new {IdValue = new IdVariable(id)};
 
-            var arrayValue = await provider.GetProperty(CreateInitializeContext(input));
+            var provider = GetPropertyProvider(input, x => x.IdValue, Guid.Empty);
 
-            Assert.That(arrayValue, Is.EqualTo(new[] {1, 2, 3}));
+            var idValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(idValue, Is.EqualTo(id));
         }
 
         [Test]
-        public async Task Should_support_matching_enumerable()
+        public async Task Should_support_initializer_variables_to_strings()
         {
-            var input = new
-            {
-                Decimals = Enumerable.Repeat(98.7m, 2),
-            };
+            var id = NewId.NextGuid();
 
-            var provider = GetPropertyProvider(input, x => x.Decimals, (decimal[])default);
+            var input = new {IdValue = new IdVariable(id)};
 
-            var arrayValue = await provider.GetProperty(CreateInitializeContext(input));
+            var provider = GetPropertyProvider(input, x => x.IdValue, (string)default);
 
-            Assert.That(arrayValue, Is.EqualTo(new[] {98.7m, 98.7m}));
-        }
+            var idValue = await provider.GetProperty(CreateInitializeContext(input));
 
-        [Test]
-        public async Task Should_support_async_matching_arrays()
-        {
-            var input = new
-            {
-                IntArray = Task.FromResult(new[] {1, 2, 3}),
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntArray, (int[])default);
-
-            var arrayValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(arrayValue, Is.EqualTo(new[] {1, 2, 3}));
-        }
-
-        [Test]
-        public async Task Should_support_async_matching_lists()
-        {
-            var input = new
-            {
-                IntArray = Task.FromResult(new[] {1, 2, 3}),
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntArray, (List<int>)default);
-
-            var listValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(listValue, Is.EqualTo(new List<int>
-            {
-                1,
-                2,
-                3
-            }));
-        }
-
-        [Test]
-        public async Task Should_support_async_matching_readonly_lists()
-        {
-            var input = new
-            {
-                IntArray = Task.FromResult(new[] {1, 2, 3}),
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntArray, (IReadOnlyList<int>)default);
-
-            var listValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(listValue, Is.EqualTo(new List<int>
-            {
-                1,
-                2,
-                3
-            }));
-        }
-
-        [Test]
-        public async Task Should_support_async_matching_enumerable()
-        {
-            var input = new
-            {
-                IntArray = Task.FromResult(new[] {1, 2, 3}),
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntArray, (IEnumerable<int>)default);
-
-            var listValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(listValue, Is.EqualTo(new List<int>
-            {
-                1,
-                2,
-                3
-            }));
-        }
-
-        [Test]
-        public async Task Should_support_convertible_arrays()
-        {
-            var input = new
-            {
-                IntArray = new[] {1, 2, 3},
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntArray, (long[])default);
-
-            var arrayValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(arrayValue, Is.EqualTo(new long[] {1, 2, 3}));
-        }
-
-        [Test]
-        public async Task Should_support_convertible_arrays_with_nullable_types()
-        {
-            var input = new
-            {
-                IntArray = new int?[] {1, 2, 3},
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntArray, (long[])default);
-
-            var arrayValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(arrayValue, Is.EqualTo(new long[] {1, 2, 3}));
-        }
-
-        [Test]
-        public async Task Should_support_async_arrays()
-        {
-            var input = new
-            {
-                IntArray = new[] {Task.FromResult(1), Task.FromResult(2), Task.FromResult(3)},
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntArray, (long[])default);
-
-            var arrayValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(arrayValue, Is.EqualTo(new long[] {1, 2, 3}));
-        }
-
-        [Test]
-        public async Task Should_support_async_arrays_with_nulls()
-        {
-            var input = new
-            {
-                IntArray = new[] {Task.FromResult(1), Task.FromResult(2), null, Task.FromResult(3)},
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntArray, (long[])default);
-
-            var arrayValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(arrayValue, Is.EqualTo(new long[] {1, 2, 0, 3}));
-        }
-
-        [Test]
-        public async Task Should_support_convertible_arrays_to_nullable_types()
-        {
-            var input = new
-            {
-                IntArray = new[] {1, 2, 3},
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntArray, (long?[])default);
-
-            var arrayValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(arrayValue, Is.EqualTo(new long?[] {1, 2, 3}));
-        }
-
-        [Test]
-        public async Task Should_support_convertible_arrays_to_strings()
-        {
-            var input = new
-            {
-                IntArray = new[] {1, 2, 3},
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntArray, (string[])default);
-
-            var arrayValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(arrayValue, Is.EqualTo(new[] {"1", "2", "3"}));
-        }
-
-        [Test]
-        public async Task Should_support_convertible_arrays_from_strings()
-        {
-            var input = new
-            {
-                StringArray = new[] {"1", "2", "", "3"},
-            };
-
-            var provider = GetPropertyProvider(input, x => x.StringArray, (int?[])default);
-
-            var arrayValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(arrayValue, Is.EqualTo(new int?[] {1, 2, default, 3}));
-        }
-
-        [Test]
-        public async Task Should_support_async_convertible_arrays()
-        {
-            var input = new
-            {
-                IntArray = Task.FromResult(new[] {1, 2, 3}),
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntArray, (long[])default);
-
-            var arrayValue = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(arrayValue, Is.EqualTo(new long[] {1, 2, 3}));
-        }
-
-        [Test]
-        public async Task Should_support_async_result_convertible_arrays()
-        {
-            var input = new
-            {
-                IntArray = new[] {1, 2, 3},
-            };
-
-            var provider = GetPropertyProvider(input, x => x.IntArray, (Task<long[]>)default);
-
-            var arrayTask = await provider.GetProperty(CreateInitializeContext(input));
-
-            var arrayValue = await arrayTask;
-
-            Assert.That(arrayValue, Is.EqualTo(new long[] {1, 2, 3}));
-        }
-
-        [Test]
-        public async Task Should_support_dictionary()
-        {
-            var input = new
-            {
-                Strings = new Dictionary<string, string>
-                {
-                    {"Hello", "World"},
-                    {"Thank You", "Next"}
-                },
-            };
-
-            var provider = GetPropertyProvider(input, x => x.Strings, (IDictionary<string, string>)default);
-
-            var dictionary = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(dictionary, Is.Not.Null);
-            Assert.That(dictionary.Count, Is.EqualTo(2));
-            Assert.That(dictionary["Hello"], Is.EqualTo("World"));
-            Assert.That(dictionary["Thank You"], Is.EqualTo("Next"));
-        }
-
-        [Test]
-        public async Task Should_support_enumerable_key_value_pair()
-        {
-            var input = new
-            {
-                Strings = (IEnumerable<KeyValuePair<string, string>>)new Dictionary<string, string>
-                {
-                    {"Hello", "World"},
-                    {"Thank You", "Next"}
-                },
-            };
-
-            var provider = GetPropertyProvider(input, x => x.Strings, (IDictionary<string, string>)default);
-
-            var dictionary = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(dictionary, Is.Not.Null);
-            Assert.That(dictionary.Count, Is.EqualTo(2));
-            Assert.That(dictionary["Hello"], Is.EqualTo("World"));
-            Assert.That(dictionary["Thank You"], Is.EqualTo("Next"));
-        }
-
-        [Test]
-        public async Task Should_support_dictionary_type_conversion()
-        {
-            var input = new
-            {
-                Strings = new Dictionary<string, string>
-                {
-                    {"Hello", "World"},
-                    {"Thank You", "Next"}
-                },
-            };
-
-            var provider = GetPropertyProvider(input, x => x.Strings, (IDictionary<string, object>)default);
-
-            var dictionary = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(dictionary, Is.Not.Null);
-            Assert.That(dictionary.Count, Is.EqualTo(2));
-            Assert.That(dictionary["Hello"], Is.EqualTo("World"));
-            Assert.That(dictionary["Thank You"], Is.EqualTo("Next"));
-        }
-
-        [Test]
-        public async Task Should_support_dictionary_key_conversion()
-        {
-            var input = new
-            {
-                Strings = new Dictionary<string, string>
-                {
-                    {"1", "One"},
-                    {"2", "Two"}
-                },
-            };
-
-            var provider = GetPropertyProvider(input, x => x.Strings, (IDictionary<int, string>)default);
-
-            var dictionary = await provider.GetProperty(CreateInitializeContext(input));
-
-            Assert.That(dictionary, Is.Not.Null);
-            Assert.That(dictionary.Count, Is.EqualTo(2));
-            Assert.That(dictionary[1], Is.EqualTo("One"));
-            Assert.That(dictionary[2], Is.EqualTo("Two"));
+            Assert.That(idValue, Is.EqualTo(id.ToString()));
         }
 
         [Test]
         public async Task Should_support_interface_initializer()
         {
-            var input = new
-            {
-                Message = new {Text = "Hello"},
-            };
+            var input = new {Message = new {Text = "Hello"}};
 
             var provider = GetPropertyProvider(input, x => x.Message, (MessageContract)default);
 
@@ -659,12 +425,21 @@ namespace MassTransit.Tests.Initializers
             {
                 Message = new
                 {
-                    Text = "Hello", Headers = new object[]
+                    Text = "Hello",
+                    Headers = new object[]
                     {
-                        new {Key = "Format", Value = "CSV"},
-                        new {Key = "Length", Value = 2457}
+                        new
+                        {
+                            Key = "Format",
+                            Value = "CSV"
+                        },
+                        new
+                        {
+                            Key = "Length",
+                            Value = 2457
+                        }
                     }
-                },
+                }
             };
 
             var provider = GetPropertyProvider(input, x => x.Message, (MessageContract)default);
@@ -684,18 +459,11 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public async Task Should_support_interface_initializer_with_array()
         {
-            var input = new
-            {
-                Messages = new[]
-                {
-                    new {Text = "Hello"},
-                    new {Text = "World"}
-                }
-            };
+            var input = new {Messages = new[] {new {Text = "Hello"}, new {Text = "World"}}};
 
             var provider = GetPropertyProvider(input, x => x.Messages, (MessageContract[])default);
 
-            var message = await provider.GetProperty(CreateInitializeContext(input));
+            MessageContract[] message = await provider.GetProperty(CreateInitializeContext(input));
 
             Assert.That(message, Is.Not.Null);
             Assert.That(message.Length, Is.EqualTo(2));
@@ -711,18 +479,168 @@ namespace MassTransit.Tests.Initializers
                 Messages = new Dictionary<string, object>
                 {
                     {"Hello", new {Text = "Hello"}},
-                    {"World", new {Text = "World"}},
+                    {"World", new {Text = "World"}}
                 }
             };
 
             var provider = GetPropertyProvider(input, x => x.Messages, (IDictionary<string, MessageContract>)default);
 
-            var message = await provider.GetProperty(CreateInitializeContext(input));
+            IDictionary<string, MessageContract> message = await provider.GetProperty(CreateInitializeContext(input));
 
             Assert.That(message, Is.Not.Null);
             Assert.That(message.Count, Is.EqualTo(2));
             Assert.That(message["Hello"].Text, Is.EqualTo("Hello"));
             Assert.That(message["World"].Text, Is.EqualTo("World"));
+        }
+
+        [Test]
+        public async Task Should_support_matching_arrays()
+        {
+            var input = new {IntArray = new[] {1, 2, 3}};
+
+            var provider = GetPropertyProvider(input, x => x.IntArray, (int[])default);
+
+            int[] arrayValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(arrayValue, Is.EqualTo(new[] {1, 2, 3}));
+        }
+
+        [Test]
+        public async Task Should_support_matching_enumerable()
+        {
+            var input = new {Decimals = Enumerable.Repeat(98.7m, 2)};
+
+            var provider = GetPropertyProvider(input, x => x.Decimals, (decimal[])default);
+
+            decimal[] arrayValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(arrayValue, Is.EqualTo(new[] {98.7m, 98.7m}));
+        }
+
+        [Test]
+        public async Task Should_support_matching_property_types()
+        {
+            var input = new {IntValue = 27};
+
+            var provider = GetPropertyProvider(input, x => x.IntValue);
+
+            var intValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(intValue, Is.EqualTo(27));
+        }
+
+        [Test]
+        public async Task Should_support_multiple_result_types_for_single_property()
+        {
+            var input = new {IntValue = 27};
+
+            var provider = GetPropertyProvider(input, x => x.IntValue);
+
+            var intValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(intValue, Is.EqualTo(27));
+
+            var longProvider = GetPropertyProvider(input, x => x.IntValue, 69L);
+
+            var longValue = await longProvider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(longValue, Is.EqualTo(27));
+        }
+
+        [Test]
+        public async Task Should_support_nullable_input_types()
+        {
+            var input = new {IntValue = (int?)27};
+
+            var provider = GetPropertyProvider(input, x => x.IntValue, 69);
+
+            var intValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(intValue, Is.EqualTo(27));
+
+            var longProvider = GetPropertyProvider(input, x => x.IntValue, 69L);
+
+            var longValue = await longProvider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(longValue, Is.EqualTo(27));
+        }
+
+        [Test]
+        public async Task Should_support_nullable_result_types()
+        {
+            var input = new {IntValue = 27};
+
+            var provider = GetPropertyProvider(input, x => x.IntValue, (int?)69);
+
+            int? intValue = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(intValue, Is.EqualTo(27));
+
+            var longProvider = GetPropertyProvider(input, x => x.IntValue, (long?)69L);
+
+            long? longValue = await longProvider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(longValue, Is.EqualTo(27));
+        }
+
+        [Test]
+        public async Task Should_support_object()
+        {
+            var input = new {IntValue = 27};
+
+            var provider = GetPropertyProvider(input, x => x.IntValue, (object)default);
+
+            var value = await provider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(value, Is.EqualTo(27));
+        }
+
+        [Test]
+        public async Task Should_support_string_to_uri()
+        {
+            var input = new {Address = "http://localhost/"};
+
+            var uriProvider = GetPropertyProvider(input, x => x.Address, (Uri)default);
+
+            var uriValue = await uriProvider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(uriValue, Is.EqualTo(new Uri(input.Address)));
+        }
+
+        [Test]
+        public async Task Should_support_uri()
+        {
+            var input = new {Address = new Uri("http://localhost/")};
+
+            var uriProvider = GetPropertyProvider(input, x => x.Address, (Uri)default);
+
+            var uriValue = await uriProvider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(uriValue, Is.EqualTo(input.Address));
+        }
+
+        [Test]
+        public async Task Should_support_uri_to_string()
+        {
+            var input = new {Address = new Uri("http://localhost/")};
+
+            var stringProvider = GetPropertyProvider(input, x => x.Address, (string)default);
+
+            var stringValue = await stringProvider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(stringValue, Is.EqualTo("http://localhost/"));
+        }
+
+        [Test]
+        public async Task Should_support_value_to_string_types()
+        {
+            var input = new {IntValue = 27};
+
+            var stringProvider = GetPropertyProvider(input, x => x.IntValue, (string)default);
+
+            var stringValue = await stringProvider.GetProperty(CreateInitializeContext(input));
+
+            Assert.That(stringValue, Is.EqualTo("27"));
         }
 
 
@@ -750,7 +668,7 @@ namespace MassTransit.Tests.Initializers
             where TInput : class
         {
             var baseContext = new BaseInitializeContext(CancellationToken.None);
-            var messageContext = baseContext.CreateMessageContext(new Subject());
+            InitializeContext<Subject> messageContext = baseContext.CreateMessageContext(new Subject());
 
             return messageContext.CreateInputContext(input);
         }
@@ -761,10 +679,8 @@ namespace MassTransit.Tests.Initializers
             var propertyInfo = propertyExpression.GetPropertyInfo();
 
             var propertyProviderFactory = new PropertyProviderFactory<TInput>();
-            if (propertyProviderFactory.TryGetPropertyProvider<TProperty>(propertyInfo, out var provider))
-            {
+            if (propertyProviderFactory.TryGetPropertyProvider<TProperty>(propertyInfo, out IPropertyProvider<TInput, TProperty> provider))
                 return provider;
-            }
 
             throw new InvalidOperationException("Unable to create provider");
         }
@@ -776,10 +692,8 @@ namespace MassTransit.Tests.Initializers
             var propertyInfo = propertyExpression.GetPropertyInfo();
 
             var propertyProviderFactory = new PropertyProviderFactory<TInput>();
-            if (propertyProviderFactory.TryGetPropertyProvider<TResult>(propertyInfo, out var provider))
-            {
+            if (propertyProviderFactory.TryGetPropertyProvider<TResult>(propertyInfo, out IPropertyProvider<TInput, TResult> provider))
                 return provider;
-            }
 
             throw new InvalidOperationException("Unable to create provider");
         }

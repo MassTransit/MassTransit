@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using Contracts.Turnout;
-    using Turnout.Contracts;
     using Util;
 
 

@@ -70,7 +70,7 @@
         public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            return _transactionOutbox.Outbox(() => _sendEndpoint.Send<T>(values, pipe, cancellationToken));
+            return _transactionOutbox.Outbox(() => _sendEndpoint.Send(values, pipe, cancellationToken));
         }
 
         public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)

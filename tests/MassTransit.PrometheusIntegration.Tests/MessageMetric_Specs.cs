@@ -16,8 +16,6 @@ namespace MassTransit.PrometheusIntegration.Tests
     public class MessageMetric_Specs :
         InMemoryTestFixture
     {
-        IBusActivityMonitor _activityMonitor;
-
         [Test]
         public async Task Should_capture_the_bus_instance_metric()
         {
@@ -47,6 +45,8 @@ namespace MassTransit.PrometheusIntegration.Tests
             Assert.That(text.Contains("mt_receive_total{service_name=\"unit_test\",endpoint_address=\"input_queue\"} 9"), "receive");
             Assert.That(text.Contains("mt_consume_total{service_name=\"unit_test\",message_type=\"PingMessage\",consumer_type=\"TestConsumer\"} 8"), "consume");
         }
+
+        IBusActivityMonitor _activityMonitor;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {

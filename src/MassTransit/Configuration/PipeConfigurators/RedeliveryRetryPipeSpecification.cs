@@ -33,11 +33,6 @@
             builder.AddFilter(new RedeliveryRetryFilter<ConsumeContext<TMessage>, TMessage>(policy, _observers));
         }
 
-        static RetryConsumeContext<TMessage> Factory(ConsumeContext<TMessage> context, IRetryPolicy retryPolicy, RetryContext retryContext)
-        {
-            return context as RetryConsumeContext<TMessage> ?? new RedeliveryRetryConsumeContext<TMessage>(context, retryPolicy, retryContext);
-        }
-
         public IEnumerable<ValidationResult> Validate()
         {
             if (_policyFactory == null)
@@ -52,6 +47,11 @@
         ConnectHandle IRetryObserverConnector.ConnectRetryObserver(IRetryObserver observer)
         {
             return _observers.Connect(observer);
+        }
+
+        static RetryConsumeContext<TMessage> Factory(ConsumeContext<TMessage> context, IRetryPolicy retryPolicy, RetryContext retryContext)
+        {
+            return context as RetryConsumeContext<TMessage> ?? new RedeliveryRetryConsumeContext<TMessage>(context, retryPolicy, retryContext);
         }
     }
 }

@@ -61,14 +61,9 @@
             var metadata = new BsonDocument();
 
             if (timeToLive.HasValue)
-            {
                 metadata["expiration"] = DateTime.UtcNow.Add(timeToLive.Value);
-            }
 
-            return new GridFSUploadOptions
-            {
-                Metadata = metadata
-            };
+            return new GridFSUploadOptions {Metadata = metadata};
         }
     }
 }

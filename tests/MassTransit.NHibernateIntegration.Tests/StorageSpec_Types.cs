@@ -6,7 +6,7 @@
 
 
     /// <summary>
-    ///     Why to exit the door to go shopping
+    /// Why to exit the door to go shopping
     /// </summary>
     public class GirlfriendYelling
     {
@@ -42,11 +42,11 @@
         public int Everything { get; set; }
         public bool Screwed { get; set; }
 
-        [JsonProperty("id")]
-        public Guid CorrelationId { get; set; }
-
         [JsonProperty("_etag")]
         public string ETag { get; set; }
+
+        [JsonProperty("id")]
+        public Guid CorrelationId { get; set; }
     }
 
 

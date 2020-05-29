@@ -232,6 +232,6 @@ namespace MassTransit
         /// Add bus rider
         /// </summary>
         /// <param name="configure"></param>
-        void AddRider(Action<IRiderRegistrationConfigurator<TContainerContext>> configure);
+        void AddRider(Action<IRiderConfigurator<TContainerContext>> configure);
     }
 }

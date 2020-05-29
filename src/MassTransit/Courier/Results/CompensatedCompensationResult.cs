@@ -29,25 +29,25 @@ namespace MassTransit.Courier.Results
 
         public async Task Evaluate()
         {
-            RoutingSlipBuilder builder = CreateRoutingSlipBuilder(_routingSlip);
+            var builder = CreateRoutingSlipBuilder(_routingSlip);
 
             Build(builder);
 
-            RoutingSlip routingSlip = builder.Build();
+            var routingSlip = builder.Build();
 
-             await _publisher.PublishRoutingSlipActivityCompensated(_compensateContext.ActivityName, _compensateContext.ExecutionId,
-                 _compensateContext.Timestamp, _duration, _routingSlip.Variables, _compensateLog.Data).ConfigureAwait(false);
+            await _publisher.PublishRoutingSlipActivityCompensated(_compensateContext.ActivityName, _compensateContext.ExecutionId,
+                _compensateContext.Timestamp, _duration, _routingSlip.Variables, _compensateLog.Data).ConfigureAwait(false);
 
             if (HasMoreCompensations(routingSlip))
             {
-                ISendEndpoint endpoint = await _compensateContext.GetSendEndpoint(routingSlip.GetNextCompensateAddress()).ConfigureAwait(false);
+                var endpoint = await _compensateContext.GetSendEndpoint(routingSlip.GetNextCompensateAddress()).ConfigureAwait(false);
 
-                 await _compensateContext.Forward(endpoint, routingSlip).ConfigureAwait(false);
+                await _compensateContext.Forward(endpoint, routingSlip).ConfigureAwait(false);
             }
             else
             {
-                DateTime faultedTimestamp = _compensateContext.Timestamp + _duration;
-                TimeSpan faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
+                var faultedTimestamp = _compensateContext.Timestamp + _duration;
+                var faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
 
                 await _publisher.PublishRoutingSlipFaulted(faultedTimestamp, faultedDuration, _routingSlip.Variables,
                     _routingSlip.ActivityExceptions.ToArray()).ConfigureAwait(false);

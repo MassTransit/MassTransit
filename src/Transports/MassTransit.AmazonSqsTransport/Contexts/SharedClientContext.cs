@@ -7,7 +7,6 @@
     using Amazon.SQS.Model;
     using GreenPipes;
     using Topology.Entities;
-    using Util;
 
 
     public class SharedClientContext :

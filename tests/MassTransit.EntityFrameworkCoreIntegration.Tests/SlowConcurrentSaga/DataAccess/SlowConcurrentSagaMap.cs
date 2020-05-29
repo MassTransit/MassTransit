@@ -4,6 +4,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga.Da
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+
     class SlowConcurrentSagaMap : SagaClassMap<SlowConcurrentSaga>
     {
         protected override void Configure(EntityTypeBuilder<SlowConcurrentSaga> entity, ModelBuilder model)

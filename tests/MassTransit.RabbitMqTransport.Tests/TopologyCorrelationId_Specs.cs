@@ -1,22 +1,9 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
     using Context;
     using NUnit.Framework;
-    using RabbitMqTransport;
 
 
     [TestFixture]
@@ -28,10 +15,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var transactionId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send<INewUserEvent>(new
-            {
-                TransactionId = transactionId
-            });
+            await InputQueueSendEndpoint.Send<INewUserEvent>(new {TransactionId = transactionId});
 
             ConsumeContext<INewUserEvent> context = await _handled;
 
@@ -44,10 +28,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var transactionId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send<LegacyMessage>(new
-            {
-                TransactionId = transactionId
-            });
+            await InputQueueSendEndpoint.Send<LegacyMessage>(new {TransactionId = transactionId});
 
             ConsumeContext<LegacyMessage> legacyContext = await _legacyHandled;
 
@@ -60,10 +41,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var transactionId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send<OtherMessage>(new
-            {
-                CorrelationId = transactionId
-            });
+            await InputQueueSendEndpoint.Send<OtherMessage>(new {CorrelationId = transactionId});
 
             ConsumeContext<OtherMessage> otherContext = await _otherHandled;
 

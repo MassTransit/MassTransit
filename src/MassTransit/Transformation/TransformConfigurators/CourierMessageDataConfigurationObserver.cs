@@ -12,8 +12,8 @@ namespace MassTransit.Transformation.TransformConfigurators
         ConfigurationObserver,
         IMessageConfigurationObserver
     {
-        readonly IMessageDataRepository _repository;
         readonly bool _includeMessages;
+        readonly IMessageDataRepository _repository;
 
         public CourierMessageDataConfigurationObserver(IConsumePipeConfigurator configurator, IMessageDataRepository repository, bool includeMessages)
             : base(configurator)
@@ -27,6 +27,17 @@ namespace MassTransit.Transformation.TransformConfigurators
             _includeMessages = includeMessages;
 
             Connect(this);
+        }
+
+        public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
+            where TMessage : class
+        {
+            if (!_includeMessages)
+                return;
+
+            IPipeSpecification<ConsumeContext<TMessage>> specification = new GetMessageDataTransformSpecification<TMessage>(_repository);
+
+            configurator.AddPipeSpecification(specification);
         }
 
         public override void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
@@ -48,17 +59,6 @@ namespace MassTransit.Transformation.TransformConfigurators
             IPipeSpecification<CompensateContext<TLog>> specification = new GetMessageDataTransformSpecification<TLog>(_repository);
 
             configurator.Log(x => x.AddPipeSpecification(specification));
-        }
-
-        public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
-            where TMessage : class
-        {
-            if (!_includeMessages)
-                return;
-
-            IPipeSpecification<ConsumeContext<TMessage>> specification = new GetMessageDataTransformSpecification<TMessage>(_repository);
-
-            configurator.AddPipeSpecification(specification);
         }
     }
 }

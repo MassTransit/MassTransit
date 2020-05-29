@@ -13,6 +13,26 @@ namespace MassTransit.MongoDbIntegration.Audit
     {
         readonly IMongoCollection<AuditDocument> _collection;
 
+        static MongoDbAuditStore()
+        {
+            if (BsonClassMap.IsClassMapRegistered(typeof(AuditDocument)))
+                return;
+
+            // easiest way to metadata since keys wont become element names, therefore subject to validation
+            // will allow keys like $correlationId to be kept
+            var headersSerializer = new DictionaryInterfaceImplementerSerializer<AuditHeaders, string, string>(
+                DictionaryRepresentation.ArrayOfDocuments
+            );
+
+            BsonClassMap.RegisterClassMap<AuditDocument>(x =>
+            {
+                x.AutoMap();
+                x.MapIdMember(doc => doc.AuditId);
+                x.MapMember(doc => doc.Headers).SetSerializer(headersSerializer);
+                x.MapMember(doc => doc.Custom).SetSerializer(headersSerializer);
+            });
+        }
+
         public MongoDbAuditStore(MongoUrl mongoUrl, string collectionName)
             : this(mongoUrl.Url, mongoUrl.DatabaseName, collectionName)
         {
@@ -34,26 +54,6 @@ namespace MassTransit.MongoDbIntegration.Audit
             var auditDocument = AuditDocument.Create(message, TypeMetadataCache<T>.ShortName, metadata);
 
             return _collection.InsertOneAsync(auditDocument);
-        }
-
-        static MongoDbAuditStore()
-        {
-            if (BsonClassMap.IsClassMapRegistered(typeof(AuditDocument)))
-                return;
-
-            // easiest way to metadata since keys wont become element names, therefore subject to validation
-            // will allow keys like $correlationId to be kept
-            var headersSerializer = new DictionaryInterfaceImplementerSerializer<AuditHeaders, string, string>(
-                DictionaryRepresentation.ArrayOfDocuments
-            );
-
-            BsonClassMap.RegisterClassMap<AuditDocument>(x =>
-            {
-                x.AutoMap();
-                x.MapIdMember(doc => doc.AuditId);
-                x.MapMember(doc => doc.Headers).SetSerializer(headersSerializer);
-                x.MapMember(doc => doc.Custom).SetSerializer(headersSerializer);
-            });
         }
     }
 }

@@ -8,18 +8,18 @@ namespace MassTransit.Tests
     [TestFixture]
     public class MessageUrnSpecs
     {
-
         [Test]
-        public void SimpleMessage()
+        public void ClosedGenericMessage()
         {
-            var urn = MessageUrn.ForType(typeof (PingMessage));
-            Assert.AreEqual(urn.AbsolutePath, "message:MassTransit.TestFramework.Messages:PingMessage");
+            var urn = MessageUrn.ForType(typeof(G<PingMessage>));
+            var expected = new Uri("urn:message:MassTransit.Tests:G[[MassTransit.TestFramework.Messages:PingMessage]]");
+            Assert.AreEqual(expected.AbsolutePath, urn.AbsolutePath);
         }
 
         [Test]
         public void NestedMessage()
         {
-            var urn = MessageUrn.ForType(typeof (X));
+            var urn = MessageUrn.ForType(typeof(X));
             Assert.AreEqual(urn.AbsolutePath, "message:MassTransit.Tests:MessageUrnSpecs+X");
         }
 
@@ -30,14 +30,20 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public void ClosedGenericMessage()
+        public void SimpleMessage()
         {
-            var urn = MessageUrn.ForType(typeof(G<PingMessage>));
-            var expected = new Uri("urn:message:MassTransit.Tests:G[[MassTransit.TestFramework.Messages:PingMessage]]");
-            Assert.AreEqual(expected.AbsolutePath,urn.AbsolutePath) ;
+            var urn = MessageUrn.ForType(typeof(PingMessage));
+            Assert.AreEqual(urn.AbsolutePath, "message:MassTransit.TestFramework.Messages:PingMessage");
         }
 
-        class X{}
+
+        class X
+        {
+        }
     }
-    public class G<T>{}
+
+
+    public class G<T>
+    {
+    }
 }

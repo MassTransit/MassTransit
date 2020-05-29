@@ -10,16 +10,26 @@ namespace MassTransit.MartenIntegration.Tests
         using DapperIntegration;
         using DapperIntegration.Tests;
         using GreenPipes;
+        using Microsoft.Data.SqlClient;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
         using TestFramework;
         using TestFramework.Sagas;
-        using Microsoft.Data.SqlClient;
 
 
         public class Using_the_container_integration :
             InMemoryTestFixture
         {
+            readonly IServiceProvider _provider;
+            string _connectionString;
+
+            public Using_the_container_integration()
+            {
+                _provider = new ServiceCollection()
+                    .AddMassTransit(ConfigureRegistration)
+                    .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
+            }
+
             [Test]
             public async Task Should_work_as_expected()
             {
@@ -50,7 +60,7 @@ namespace MassTransit.MartenIntegration.Tests
             {
                 using (var connection = new SqlConnection(_connectionString))
                 {
-                    string sql = @"
+                    var sql = @"
                 if not exists (select * from sysobjects where name='TestInstances' and xtype='U')
                 CREATE TABLE TestInstances (
                     CorrelationId uniqueidentifier NOT NULL,
@@ -61,16 +71,6 @@ namespace MassTransit.MartenIntegration.Tests
             ";
                     connection.Execute(sql);
                 }
-            }
-
-            readonly IServiceProvider _provider;
-            string _connectionString;
-
-            public Using_the_container_integration()
-            {
-                _provider = new ServiceCollection()
-                    .AddMassTransit(ConfigureRegistration)
-                    .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
@@ -95,11 +95,11 @@ namespace MassTransit.MartenIntegration.Tests
         public class TestInstance :
             SagaStateMachineInstance
         {
-            [ExplicitKey]
-            public Guid CorrelationId { get; set; }
-
             public string CurrentState { get; set; }
             public string Key { get; set; }
+
+            [ExplicitKey]
+            public Guid CorrelationId { get; set; }
         }
 
 

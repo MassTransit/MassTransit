@@ -3,7 +3,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     using System;
 
 
-    public interface IAsyncBusHandle : 
+    public interface IAsyncBusHandle :
         IDisposable
     {
     }

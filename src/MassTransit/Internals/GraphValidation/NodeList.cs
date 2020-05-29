@@ -15,8 +15,8 @@
         where TNode : Node<T>
     {
         readonly Func<int, T, TNode> _nodeFactory;
-        readonly NodeTable<T> _nodeTable;
         readonly IList<TNode> _nodes;
+        readonly NodeTable<T> _nodeTable;
 
         public NodeList(Func<int, T, TNode> nodeFactory, int capacity)
         {
@@ -32,24 +32,6 @@
         /// <returns>The unique node that relates to the specified key</returns>
         public TNode this[T key] => _nodes[Index(key) - 1];
 
-        /// <summary>
-        /// Retrieve the index for a given key
-        /// </summary>
-        /// <param name="key">The key</param>
-        /// <returns>The index</returns>
-        public int Index(T key)
-        {
-            int index = _nodeTable[key];
-
-            if (index <= _nodes.Count)
-                return index;
-
-            TNode node = _nodeFactory(index, key);
-            _nodes.Add(node);
-
-            return index;
-        }
-
         public IEnumerator<TNode> GetEnumerator()
         {
             return _nodes.GetEnumerator();
@@ -58,6 +40,24 @@
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
+        }
+
+        /// <summary>
+        /// Retrieve the index for a given key
+        /// </summary>
+        /// <param name="key">The key</param>
+        /// <returns>The index</returns>
+        public int Index(T key)
+        {
+            var index = _nodeTable[key];
+
+            if (index <= _nodes.Count)
+                return index;
+
+            var node = _nodeFactory(index, key);
+            _nodes.Add(node);
+
+            return index;
         }
     }
 }

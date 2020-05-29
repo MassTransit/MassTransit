@@ -11,8 +11,8 @@ namespace MassTransit.Courier.Contexts
         ConsumeRetryContext
         where TArguments : class
     {
-        readonly IRetryPolicy _retryPolicy;
         readonly ExecuteContext<TArguments> _context;
+        readonly IRetryPolicy _retryPolicy;
 
         public RetryExecuteContext(ExecuteContext<TArguments> context, IRetryPolicy retryPolicy, RetryContext retryContext)
             : base(context)

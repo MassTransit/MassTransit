@@ -14,11 +14,11 @@ namespace MassTransit.QuartzIntegration.Tests
         [Test]
         public async Task Should_deliver_both_messages()
         {
-            Guid accountId = NewId.NextGuid();
+            var accountId = NewId.NextGuid();
 
-            var opened = ConnectPublishHandler<AccountOpened>(x => x.Message.AccountId == accountId);
-            var defaulted = ConnectPublishHandler<AccountDefaulted>(x => x.Message.AccountId == accountId);
-            var closed = ConnectPublishHandler<AccountClosed>(x => x.Message.AccountId == accountId);
+            Task<ConsumeContext<AccountOpened>> opened = ConnectPublishHandler<AccountOpened>(x => x.Message.AccountId == accountId);
+            Task<ConsumeContext<AccountDefaulted>> defaulted = ConnectPublishHandler<AccountDefaulted>(x => x.Message.AccountId == accountId);
+            Task<ConsumeContext<AccountClosed>> closed = ConnectPublishHandler<AccountClosed>(x => x.Message.AccountId == accountId);
 
             await InputQueueSendEndpoint.Send<OpenAccount>(new {AccountId = accountId});
 
@@ -86,11 +86,11 @@ namespace MassTransit.QuartzIntegration.Tests
         class Account :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
 
             public Guid? PaymentTimeFrameToken { get; set; }
             public Guid? GracePeriodToken { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

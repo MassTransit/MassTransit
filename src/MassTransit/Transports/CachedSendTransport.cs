@@ -12,7 +12,6 @@ namespace MassTransit.Transports
         INotifyValueUsed
     {
         readonly ISendTransport _sendTransport;
-        public Uri Address { get; }
 
         public CachedSendTransport(Uri address, ISendTransport sendTransport)
         {
@@ -20,6 +19,10 @@ namespace MassTransit.Transports
 
             _sendTransport = sendTransport;
         }
+
+        public Uri Address { get; }
+
+        public event Action Used;
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
@@ -32,7 +35,5 @@ namespace MassTransit.Transports
             Used?.Invoke();
             return _sendTransport.Send(message, pipe, cancellationToken);
         }
-
-        public event Action Used;
     }
 }

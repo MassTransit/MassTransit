@@ -17,6 +17,8 @@ namespace MassTransit.Context
             _consumeTasks = new PendingTaskCollection(4);
         }
 
+        public override Task ConsumeCompleted => _consumeTasks.Completed(CancellationToken);
+
         /// <summary>
         /// Returns true if the payload type is included with or supported by the context type
         /// </summary>
@@ -72,8 +74,6 @@ namespace MassTransit.Context
 
             return ReceiveContext.AddOrUpdatePayload(addFactory, updateFactory);
         }
-
-        public override Task ConsumeCompleted => _consumeTasks.Completed(CancellationToken);
 
         public override void AddConsumeTask(Task task)
         {

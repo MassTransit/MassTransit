@@ -31,8 +31,8 @@ namespace MassTransit.TestFramework
         /// </summary>
         protected TimeSpan TestTimeout
         {
-            get { return AsyncTestHarness.TestTimeout; }
-            set { AsyncTestHarness.TestTimeout = value; }
+            get => AsyncTestHarness.TestTimeout;
+            set => AsyncTestHarness.TestTimeout = value;
         }
 
         /// <summary>

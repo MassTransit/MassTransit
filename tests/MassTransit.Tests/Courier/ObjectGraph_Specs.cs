@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Courier
+﻿namespace MassTransit.Tests.Courier
 {
     using System;
     using System.Collections.Generic;
@@ -29,25 +17,6 @@ namespace MassTransit.Tests.Courier
     public class Storing_an_object_graph_as_a_variable_or_argument :
         InMemoryActivityTestFixture
     {
-        int _intValue;
-        string _stringValue;
-        decimal _decimalValue;
-
-        readonly IDictionary<string, string> _argumentsDictionary = new Dictionary<string, string>
-        {
-            {"good_jpath_key", "val1"},
-            {"bad jpath key", "val2"}
-        };
-
-
-        protected override void SetupActivities(BusTestHarness testHarness)
-        {
-            AddActivityContext<ObjectGraphTestActivity, ObjectGraphActivityArguments, TestLog>(
-                () => new ObjectGraphTestActivity(_intValue, _stringValue, _decimalValue, new[] { "Albert", "Chris" }, _argumentsDictionary));
-            AddActivityContext<TestActivity, TestArguments, TestLog>(
-                () => new TestActivity());
-        }
-
         [Test]
         public async Task Should_work_for_activity_arguments()
         {
@@ -58,8 +27,8 @@ namespace MassTransit.Tests.Courier
             Task<ConsumeContext<RoutingSlipCompleted>> completed = ConnectPublishHandler<RoutingSlipCompleted>();
             Task<ConsumeContext<RoutingSlipFaulted>> faulted = ConnectPublishHandler<RoutingSlipFaulted>();
 
-            ActivityTestContext testActivity = GetActivityContext<ObjectGraphTestActivity>();
-            ActivityTestContext testActivity2 = GetActivityContext<TestActivity>();
+            var testActivity = GetActivityContext<ObjectGraphTestActivity>();
+            var testActivity2 = GetActivityContext<TestActivity>();
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
 
@@ -70,10 +39,7 @@ namespace MassTransit.Tests.Courier
                 {"ArgumentsDictionary", _argumentsDictionary}
             };
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, dictionary);
-            builder.AddActivity(testActivity2.Name, testActivity2.ExecuteUri, new
-            {
-                Value = "Howdy!"
-            });
+            builder.AddActivity(testActivity2.Name, testActivity2.ExecuteUri, new {Value = "Howdy!"});
 
             builder.AddVariable("ArgumentsDictionary", new Dictionary<string, string>
             {
@@ -94,6 +60,24 @@ namespace MassTransit.Tests.Courier
             }
 
             completed.Status.ShouldBe(TaskStatus.RanToCompletion);
+        }
+
+        int _intValue;
+        string _stringValue;
+        decimal _decimalValue;
+
+        readonly IDictionary<string, string> _argumentsDictionary = new Dictionary<string, string>
+        {
+            {"good_jpath_key", "val1"},
+            {"bad jpath key", "val2"}
+        };
+
+        protected override void SetupActivities(BusTestHarness testHarness)
+        {
+            AddActivityContext<ObjectGraphTestActivity, ObjectGraphActivityArguments, TestLog>(
+                () => new ObjectGraphTestActivity(_intValue, _stringValue, _decimalValue, new[] {"Albert", "Chris"}, _argumentsDictionary));
+            AddActivityContext<TestActivity, TestArguments, TestLog>(
+                () => new TestActivity());
         }
     }
 }

@@ -41,12 +41,14 @@ namespace MassTransit.MongoDbIntegration
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<TSaga> MongoDbRepository<TSaga>(this ISagaRegistrationConfigurator<TSaga> configurator,
             string connectionString, Action<IMongoDbSagaRepositoryConfigurator<TSaga>> configure)
-            where TSaga : class, IVersionedSaga =>
-            configurator.MongoDbRepository(cfg =>
+            where TSaga : class, IVersionedSaga
+        {
+            return configurator.MongoDbRepository(cfg =>
             {
                 cfg.Connection = connectionString;
                 configure?.Invoke(cfg);
             });
+        }
 
         /// <summary>
         /// Adds a MongoDB saga repository to the registration
@@ -58,11 +60,13 @@ namespace MassTransit.MongoDbIntegration
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<TSaga> MongoDbRepository<TSaga>(this ISagaRegistrationConfigurator<TSaga> configurator,
             IMongoDatabase database, Action<IMongoDbSagaRepositoryConfigurator<TSaga>> configure)
-            where TSaga : class, IVersionedSaga =>
-            configurator.MongoDbRepository(cfg =>
+            where TSaga : class, IVersionedSaga
+        {
+            return configurator.MongoDbRepository(cfg =>
             {
                 cfg.Database(database);
                 configure?.Invoke(cfg);
             });
+        }
     }
 }

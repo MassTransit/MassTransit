@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit
+﻿namespace MassTransit
 {
     using System;
     using System.Threading;
@@ -33,7 +21,7 @@ namespace MassTransit
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledRecurringMessage<T>> ScheduleRecurringSend<T>(this ISendEndpoint endpoint, Uri destinationAddress,
             RecurringSchedule schedule, T message,
-            CancellationToken cancellationToken = default(CancellationToken))
+            CancellationToken cancellationToken = default)
             where T : class
         {
             IRecurringMessageScheduler scheduler = new EndpointRecurringMessageScheduler(endpoint);
@@ -54,7 +42,7 @@ namespace MassTransit
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledRecurringMessage<T>> ScheduleRecurringSend<T>(this ISendEndpoint endpoint, Uri destinationAddress,
             RecurringSchedule schedule, T message,
-            IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
             IRecurringMessageScheduler scheduler = new EndpointRecurringMessageScheduler(endpoint);
@@ -75,7 +63,7 @@ namespace MassTransit
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledRecurringMessage<T>> ScheduleRecurringSend<T>(this ISendEndpoint endpoint, Uri destinationAddress,
             RecurringSchedule schedule, T message,
-            IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
             IRecurringMessageScheduler scheduler = new EndpointRecurringMessageScheduler(endpoint);
@@ -93,7 +81,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledRecurringMessage> ScheduleRecurringSend(this ISendEndpoint endpoint, Uri destinationAddress, RecurringSchedule schedule,
-            object message, CancellationToken cancellationToken = default(CancellationToken))
+            object message, CancellationToken cancellationToken = default)
         {
             IRecurringMessageScheduler scheduler = new EndpointRecurringMessageScheduler(endpoint);
 
@@ -111,7 +99,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledRecurringMessage> ScheduleRecurringSend(this ISendEndpoint endpoint, Uri destinationAddress, RecurringSchedule schedule,
-            object message, Type messageType, CancellationToken cancellationToken = default(CancellationToken))
+            object message, Type messageType, CancellationToken cancellationToken = default)
         {
             IRecurringMessageScheduler scheduler = new EndpointRecurringMessageScheduler(endpoint);
 
@@ -129,7 +117,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledRecurringMessage> ScheduleRecurringSend(this ISendEndpoint endpoint, Uri destinationAddress, RecurringSchedule schedule,
-            object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
         {
             IRecurringMessageScheduler scheduler = new EndpointRecurringMessageScheduler(endpoint);
 
@@ -148,7 +136,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledRecurringMessage> ScheduleRecurringSend(this ISendEndpoint endpoint, Uri destinationAddress, RecurringSchedule schedule,
-            object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
         {
             IRecurringMessageScheduler scheduler = new EndpointRecurringMessageScheduler(endpoint);
 
@@ -166,7 +154,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledRecurringMessage<T>> ScheduleRecurringSend<T>(this ISendEndpoint endpoint, Uri destinationAddress,
-            RecurringSchedule schedule, object values, CancellationToken cancellationToken = default(CancellationToken))
+            RecurringSchedule schedule, object values, CancellationToken cancellationToken = default)
             where T : class
         {
             IRecurringMessageScheduler scheduler = new EndpointRecurringMessageScheduler(endpoint);
@@ -186,7 +174,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledRecurringMessage<T>> ScheduleRecurringSend<T>(this ISendEndpoint endpoint, Uri destinationAddress,
-            RecurringSchedule schedule, object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            RecurringSchedule schedule, object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
             IRecurringMessageScheduler scheduler = new EndpointRecurringMessageScheduler(endpoint);
@@ -206,7 +194,7 @@ namespace MassTransit
         /// <param name="cancellationToken"></param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
         public static Task<ScheduledRecurringMessage<T>> ScheduleRecurringSend<T>(this ISendEndpoint endpoint, Uri destinationAddress,
-            RecurringSchedule schedule, object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = default(CancellationToken))
+            RecurringSchedule schedule, object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
             IRecurringMessageScheduler scheduler = new EndpointRecurringMessageScheduler(endpoint);

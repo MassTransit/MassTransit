@@ -85,7 +85,7 @@ namespace MassTransit.StructureMapIntegration.Registration
             throw new NotImplementedException();
         }
 
-        public void AddRider(Action<IRiderRegistrationConfigurator<IContext>> configure)
+        public void AddRider(Action<IRiderConfigurator<IContext>> configure)
         {
             throw new NotImplementedException();
         }

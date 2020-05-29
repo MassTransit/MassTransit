@@ -15,6 +15,6 @@
         /// <summary>
         /// The activity that was created/used for this compensation
         /// </summary>
-         TActivity Activity { get; }
+        TActivity Activity { get; }
     }
 }

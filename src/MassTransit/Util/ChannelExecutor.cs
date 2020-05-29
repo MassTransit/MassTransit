@@ -163,9 +163,9 @@ namespace MassTransit.Util
         class Future<T> :
             IFuture
         {
-            readonly Func<Task<T>> _method;
             readonly CancellationToken _cancellationToken;
             readonly TaskCompletionSource<T> _completion;
+            readonly Func<Task<T>> _method;
 
             public Future(Func<Task<T>> method, CancellationToken cancellationToken)
             {
@@ -208,9 +208,9 @@ namespace MassTransit.Util
         class SynchronousFuture<T> :
             IFuture
         {
-            readonly Func<T> _method;
             readonly CancellationToken _cancellationToken;
             readonly TaskCompletionSource<T> _completion;
+            readonly Func<T> _method;
 
             public SynchronousFuture(Func<T> method, CancellationToken cancellationToken)
             {

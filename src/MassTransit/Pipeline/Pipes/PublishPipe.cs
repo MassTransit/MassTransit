@@ -25,9 +25,7 @@ namespace MassTransit.Pipeline.Pipes
             var scope = context.CreateScope("publishPipe");
 
             foreach (var outputPipe in _outputPipes.Values)
-            {
                 outputPipe.Probe(scope);
-            }
         }
 
         [DebuggerNonUserCode]

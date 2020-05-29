@@ -52,7 +52,7 @@
             var handles = new List<ConnectHandle>();
             try
             {
-                foreach (var connector in _connectors.Cast<ISagaMessageConnector<T>>())
+                foreach (ISagaMessageConnector<T> connector in _connectors.Cast<ISagaMessageConnector<T>>())
                 {
                     var handle = connector.ConnectSaga(consumePipe, sagaRepository, specification);
 

@@ -14,10 +14,10 @@
         IBusObserver
     {
         public const string DefaultQueueName = "mt-message-queue";
+        readonly Action<BackgroundJobServerOptions> _configureServer;
 
         readonly IHangfireComponentResolver _hangfireComponentResolver;
         readonly Uri _schedulerEndpointAddress;
-        readonly Action<BackgroundJobServerOptions> _configureServer;
         BackgroundJobServer _server;
 
         public SchedulerBusObserver(IHangfireComponentResolver hangfireComponentResolver, Uri schedulerEndpointAddress,
@@ -51,7 +51,7 @@
                 FilterProvider = _hangfireComponentResolver.JobFilterProvider,
                 ServerName = $"MT-Server-{NewId.NextGuid():N}"
             };
-            
+
             _configureServer?.Invoke(backgroundJobServerOptions);
 
             backgroundJobServerOptions.Activator = new MassTransitJobActivator(bus);

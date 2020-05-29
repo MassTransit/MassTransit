@@ -22,7 +22,7 @@
         }
 
         Task<ConsumeContext<A>> _handled;
-        string _boundExchange = "bound-exchange";
+        readonly string _boundExchange = "bound-exchange";
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
@@ -47,7 +47,7 @@
         [Test]
         public async Task Should_deliver_the_message()
         {
-            Uri sendAddress = Bus.GetRabbitMqHostTopology().GetDestinationAddress(BoundExchange, x =>
+            var sendAddress = Bus.GetRabbitMqHostTopology().GetDestinationAddress(BoundExchange, x =>
             {
                 x.Durable = false;
                 x.AutoDelete = true;

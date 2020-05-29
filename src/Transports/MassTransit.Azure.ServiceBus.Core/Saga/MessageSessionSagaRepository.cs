@@ -31,13 +31,15 @@
         async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
         {
             if (!context.TryGetPayload(out MessageSessionContext sessionContext))
+            {
                 throw new SagaException($"The session-based saga repository requires an active message session: {TypeMetadataCache<TSaga>.ShortName}",
                     typeof(TSaga), typeof(T));
+            }
 
             if (Guid.TryParse(sessionContext.SessionId, out var sessionId))
                 context = new CorrelationIdConsumeContextProxy<T>(context, sessionId);
 
-            var activity = LogContext.IfEnabled(OperationName.Saga.Send)?.StartSagaActivity<TSaga, T>(context);
+            StartedActivity? activity = LogContext.IfEnabled(OperationName.Saga.Send)?.StartSagaActivity<TSaga, T>(context);
             try
             {
                 var saga = await ReadSagaState(sessionContext).ConfigureAwait(false);
@@ -101,7 +103,7 @@
 
         async Task<TSaga> ReadSagaState(MessageSessionContext context)
         {
-            var state = await context.GetStateAsync().ConfigureAwait(false);
+            byte[] state = await context.GetStateAsync().ConfigureAwait(false);
             if (state == null)
                 return default;
 

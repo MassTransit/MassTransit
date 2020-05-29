@@ -57,7 +57,7 @@ namespace MassTransit.AmazonSqsTransport
                 Scheme = address.Scheme,
                 Host = address.Host,
                 Path = address.Scope == "/"
-                    ? $"/"
+                    ? "/"
                     : $"/{Uri.EscapeDataString(address.Scope)}"
             };
 

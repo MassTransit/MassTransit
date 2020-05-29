@@ -11,8 +11,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     public class ReceiverClientMessageLockContext :
         MessageLockContext
     {
-        readonly IReceiverClient _receiverClient;
         readonly Message _message;
+        readonly IReceiverClient _receiverClient;
         bool _deadLettered;
 
         public ReceiverClientMessageLockContext(IReceiverClient receiverClient, Message message)
@@ -37,10 +37,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public async Task DeadLetter()
         {
-            var headers = new Dictionary<string, object>
-            {
-                {MessageHeaders.Reason, "dead-letter"},
-            };
+            var headers = new Dictionary<string, object> {{MessageHeaders.Reason, "dead-letter"}};
 
             await _receiverClient.DeadLetterAsync(_message.SystemProperties.LockToken, headers).ConfigureAwait(false);
 
@@ -49,7 +46,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public async Task DeadLetter(Exception exception)
         {
-            var propertiesToModify = ExceptionUtil.GetExceptionHeaderDictionary(exception);
+            IDictionary<string, object> propertiesToModify = ExceptionUtil.GetExceptionHeaderDictionary(exception);
 
             await _receiverClient.DeadLetterAsync(_message.SystemProperties.LockToken, propertiesToModify).ConfigureAwait(false);
 

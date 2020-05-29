@@ -19,9 +19,9 @@
     public class ConnectionContextFactory :
         IPipeContextFactory<ConnectionContext>
     {
-        readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly Lazy<ConnectionFactory> _connectionFactory;
         readonly IRetryPolicy _connectionRetryPolicy;
+        readonly IRabbitMqHostConfiguration _hostConfiguration;
 
         public ConnectionContextFactory(IRabbitMqHostConfiguration hostConfiguration)
         {
@@ -40,7 +40,7 @@
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
         {
-            var context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopped);
+            Task<ConnectionContext> context = Task.Run(() => CreateConnection(supervisor), supervisor.Stopped);
 
             IPipeContextAgent<ConnectionContext> contextHandle = supervisor.AddContext(context);
 

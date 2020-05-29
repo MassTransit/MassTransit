@@ -30,7 +30,7 @@ namespace MassTransit.ConsumerSpecifications
 
         /// <summary>
         /// Configure the message pipe as it is built. Any previously configured filters will precede
-        /// the configuration applied by the <paramref name="configure"/> callback.
+        /// the configuration applied by the <paramref name="configure" /> callback.
         /// </summary>
         /// <param name="configure">Configure the message pipe</param>
         /// <returns></returns>

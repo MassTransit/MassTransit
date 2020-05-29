@@ -1,15 +1,3 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Testing
 {
     using System.Linq;
@@ -21,8 +9,8 @@ namespace MassTransit.Tests.Testing
 
     public class When_a_consumer_with_multiple_message_consumers_is_tested
     {
-        InMemoryTestHarness _harness;
         ConsumerTestHarness<TwoMessageConsumer> _consumer;
+        InMemoryTestHarness _harness;
 
         [OneTimeSetUp]
         public async Task A_consumer_is_being_tested()
@@ -34,7 +22,6 @@ namespace MassTransit.Tests.Testing
 
             await _harness.InputQueueSendEndpoint.Send(new A(), context => context.ResponseAddress = _harness.BusAddress);
             await _harness.InputQueueSendEndpoint.Send(new B(), context => context.ResponseAddress = _harness.BusAddress);
-
         }
 
         [OneTimeTearDown]

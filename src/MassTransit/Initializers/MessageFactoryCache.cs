@@ -9,7 +9,6 @@ namespace MassTransit.Initializers
 
     public static class MessageFactoryCache
     {
-
     }
 
 
@@ -37,7 +36,7 @@ namespace MassTransit.Initializers
                 if (typeof(TMessage).IsInterface)
                     implementationType = TypeMetadataCache<TMessage>.ImplementationType;
 
-                Type[] parameterTypes = new Type[0];
+                var parameterTypes = new Type[0];
                 if (implementationType.GetConstructor(parameterTypes) == null)
                     throw new ArgumentException("No default constructor available for message type", nameof(TMessage));
 

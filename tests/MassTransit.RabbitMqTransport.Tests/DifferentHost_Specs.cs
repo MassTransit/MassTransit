@@ -12,7 +12,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_be_able_to_respond()
         {
-            IBusControl bus = Bus.Factory.CreateUsingRabbitMq(x =>
+            var bus = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 x.Host("localhost", "test", h =>
                 {
@@ -29,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 });
             });
 
-            IBusControl clientBus = Bus.Factory.CreateUsingRabbitMq(x =>
+            var clientBus = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 x.Host("127.0.0.1", "test", h =>
                 {
@@ -45,9 +45,9 @@ namespace MassTransit.RabbitMqTransport.Tests
 
                 try
                 {
-                    var requestClient = clientBus.CreateRequestClient<PingMessage>(new Uri("rabbitmq://127.0.0.1/test/input_queue"));
+                    IRequestClient<PingMessage> requestClient = clientBus.CreateRequestClient<PingMessage>(new Uri("rabbitmq://127.0.0.1/test/input_queue"));
 
-                    var response = await requestClient.GetResponse<PongMessage>(new PingMessage());
+                    Response<PongMessage> response = await requestClient.GetResponse<PongMessage>(new PingMessage());
                 }
                 finally
                 {

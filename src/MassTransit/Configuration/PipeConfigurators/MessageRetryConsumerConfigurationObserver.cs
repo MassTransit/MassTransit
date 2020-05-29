@@ -17,8 +17,8 @@ namespace MassTransit.PipeConfigurators
         IConsumerConfigurationObserver
         where TConsumer : class
     {
-        readonly IConsumerConfigurator<TConsumer> _configurator;
         readonly CancellationToken _cancellationToken;
+        readonly IConsumerConfigurator<TConsumer> _configurator;
         readonly Action<IRetryConfigurator> _configure;
 
         public MessageRetryConsumerConfigurationObserver(IConsumerConfigurator<TConsumer> configurator, CancellationToken cancellationToken,

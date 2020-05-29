@@ -7,7 +7,7 @@
 
 
     /// <summary>
-    /// Dispatches a prepared <see cref="ReceiveContext"/> to a <see cref="IReceivePipe"/>.
+    /// Dispatches a prepared <see cref="ReceiveContext" /> to a <see cref="IReceivePipe" />.
     /// </summary>
     public interface IReceivePipeDispatcher :
         IConsumePipeConnector,

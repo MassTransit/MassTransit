@@ -2,8 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
-    using RabbitMqTransport;
     using RabbitMQ.Client;
+    using RabbitMqTransport;
 
 
     public static class RabbitMqSendContextExtensions
@@ -22,13 +22,9 @@
                 basicProperties.Headers = new Dictionary<string, object>();
 
             if (value is DateTime dateTime)
-            {
                 value = dateTime.ToString("O");
-            }
             else if (value is DateTimeOffset dateTimeOffset)
-            {
                 value = dateTimeOffset.ToString("O");
-            }
 
             basicProperties.Headers[key] = value;
         }

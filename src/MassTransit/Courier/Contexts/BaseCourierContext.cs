@@ -10,8 +10,8 @@ namespace MassTransit.Courier.Contexts
         ConsumeContextScope<RoutingSlip>,
         CourierContext
     {
-        readonly Stopwatch _timer;
         readonly Guid _executionId;
+        readonly Stopwatch _timer;
         readonly DateTime _timestamp;
 
         protected BaseCourierContext(ConsumeContext<RoutingSlip> consumeContext)

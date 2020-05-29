@@ -9,10 +9,6 @@ namespace MassTransit
     public class SagaException :
         MassTransitException
     {
-        readonly Guid _correlationId;
-        readonly Type _messageType;
-        readonly Type _sagaType;
-
         protected SagaException()
         {
         }
@@ -20,60 +16,60 @@ namespace MassTransit
         public SagaException(string message, Type sagaType, Guid correlationId)
             : base(FormatMessage(sagaType, correlationId, message))
         {
-            _sagaType = sagaType;
-            _correlationId = correlationId;
+            SagaType = sagaType;
+            CorrelationId = correlationId;
         }
 
         public SagaException(string message, Type sagaType, Guid correlationId, Exception innerException)
             : base(FormatMessage(sagaType, correlationId, message), innerException)
         {
-            _sagaType = sagaType;
-            _correlationId = correlationId;
+            SagaType = sagaType;
+            CorrelationId = correlationId;
         }
 
         public SagaException(string message, Type sagaType, Type messageType, Guid correlationId)
             : base(FormatMessage(sagaType, correlationId, messageType, message))
         {
-            _sagaType = sagaType;
-            _messageType = messageType;
-            _correlationId = correlationId;
+            SagaType = sagaType;
+            MessageType = messageType;
+            CorrelationId = correlationId;
         }
 
         public SagaException(string message, Type sagaType, Type messageType, Expression findExpression)
             : base($"{sagaType.FullName} {message}({messageType.FullName}) - {findExpression}")
         {
-            _sagaType = sagaType;
-            _messageType = messageType;
+            SagaType = sagaType;
+            MessageType = messageType;
         }
 
         public SagaException(string message, Type sagaType, Type messageType, Expression findExpression, Exception innerException)
             : base($"{sagaType.FullName} {message}({messageType.FullName}) - {findExpression}", innerException)
         {
-            _sagaType = sagaType;
-            _messageType = messageType;
+            SagaType = sagaType;
+            MessageType = messageType;
         }
 
         public SagaException(string message, Type sagaType, Type messageType, Guid correlationId, Exception innerException)
             : base(FormatMessage(sagaType, correlationId, messageType, message), innerException)
         {
-            _sagaType = sagaType;
-            _messageType = messageType;
-            _correlationId = correlationId;
+            SagaType = sagaType;
+            MessageType = messageType;
+            CorrelationId = correlationId;
         }
 
         public SagaException(string message, Type sagaType, Type messageType)
             : base(FormatMessage(sagaType, messageType, message))
         {
-            _sagaType = sagaType;
-            _messageType = messageType;
-            _correlationId = Guid.Empty;
+            SagaType = sagaType;
+            MessageType = messageType;
+            CorrelationId = Guid.Empty;
         }
 
-        public Type SagaType => _sagaType;
+        public Type SagaType { get; }
 
-        public Type MessageType => _messageType;
+        public Type MessageType { get; }
 
-        public Guid CorrelationId => _correlationId;
+        public Guid CorrelationId { get; }
 
         static string FormatMessage(Type sagaType, Type messageType, string message)
         {

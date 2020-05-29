@@ -113,23 +113,15 @@ namespace MassTransit.Transformation.TransformConfigurators
                 {
                 }
                 else if (propertyType.ClosesType(typeof(IDictionary<,>), out types) || propertyType.ClosesType(typeof(IReadOnlyDictionary<,>), out types))
-                {
                     ConfigureDictionary(types[0], types[1]);
-                }
                 else if (propertyType.IsArray)
-                {
                     ConfigureArray(propertyType.GetElementType());
-                }
                 else if (propertyType.ClosesType(typeof(IEnumerable<>), out Type[] enumerableTypes))
                 {
                     if (enumerableTypes[0].ClosesType(typeof(KeyValuePair<,>), out types))
-                    {
                         ConfigureDictionary(types[0], types[1]);
-                    }
                     else
-                    {
                         ConfigureArray(enumerableTypes[0]);
-                    }
                 }
                 else if (IsUnknownObjectType(knownTypes, propertyType))
                 {

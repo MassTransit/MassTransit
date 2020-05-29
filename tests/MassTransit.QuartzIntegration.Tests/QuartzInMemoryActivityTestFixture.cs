@@ -10,7 +10,6 @@ namespace MassTransit.QuartzIntegration.Tests
     public abstract class QuartzInMemoryActivityTestFixture :
         InMemoryActivityTestFixture
     {
-        ISendEndpoint _quartzEndpoint;
         TimeSpan _testOffset;
 
         protected QuartzInMemoryActivityTestFixture()
@@ -21,7 +20,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
         protected Uri QuartzAddress { get; }
 
-        protected ISendEndpoint QuartzEndpoint => _quartzEndpoint;
+        protected ISendEndpoint QuartzEndpoint { get; set; }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -32,13 +31,13 @@ namespace MassTransit.QuartzIntegration.Tests
 
         protected void AdvanceTime(TimeSpan duration)
         {
-            _testOffset = _testOffset + duration;
+            _testOffset += duration;
         }
 
         [OneTimeSetUp]
         public async Task Setup_quartz_service()
         {
-            _quartzEndpoint = await GetSendEndpoint(QuartzAddress);
+            QuartzEndpoint = await GetSendEndpoint(QuartzAddress);
 
             SystemTime.UtcNow = GetUtcNow;
             SystemTime.Now = GetNow;

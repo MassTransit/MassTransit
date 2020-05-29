@@ -28,7 +28,10 @@
             if (keyProvider == null)
                 throw new ArgumentNullException(nameof(keyProvider));
 
-            byte[] PartitionKeyProvider(CompensateActivityContext<TActivity, TLog> context) => keyProvider(context).ToByteArray();
+            byte[] PartitionKeyProvider(CompensateActivityContext<TActivity, TLog> context)
+            {
+                return keyProvider(context).ToByteArray();
+            }
 
             var specification = new PartitionerPipeSpecification<CompensateActivityContext<TActivity, TLog>>(PartitionKeyProvider, partitionCount);
 
@@ -56,7 +59,10 @@
             if (keyProvider == null)
                 throw new ArgumentNullException(nameof(keyProvider));
 
-            byte[] PartitionKeyProvider(CompensateActivityContext<TActivity, TLog> context) => keyProvider(context).ToByteArray();
+            byte[] PartitionKeyProvider(CompensateActivityContext<TActivity, TLog> context)
+            {
+                return keyProvider(context).ToByteArray();
+            }
 
             var specification = new PartitionerPipeSpecification<CompensateActivityContext<TActivity, TLog>>(PartitionKeyProvider, partitioner);
 

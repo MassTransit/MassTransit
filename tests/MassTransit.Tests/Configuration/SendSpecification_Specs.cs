@@ -28,9 +28,7 @@
             IEnumerable<Type> messageTypes = GetMessageTypes<SubClass>();
 
             foreach (var type in messageTypes)
-            {
                 Console.WriteLine(TypeMetadataCache.GetShortName(type));
-            }
         }
 
         [Test]
@@ -180,9 +178,7 @@
                 yield return typeof(TMessage);
 
             foreach (var baseInterface in GetImplementedInterfaces(typeof(TMessage)))
-            {
                 yield return baseInterface;
-            }
 
             var baseType = typeof(TMessage).GetTypeInfo().BaseType;
             while (baseType != null && TypeMetadataCache.IsValidMessageType(baseType))
@@ -190,9 +186,7 @@
                 yield return baseType;
 
                 foreach (var baseInterface in GetImplementedInterfaces(baseType))
-                {
                     yield return baseInterface;
-                }
 
                 baseType = baseType.GetTypeInfo().BaseType;
             }
@@ -206,10 +200,12 @@
                 .ToArray();
 
             if (baseType.GetTypeInfo().BaseType != null && baseType.GetTypeInfo().BaseType != typeof(object))
+            {
                 baseInterfaces = baseInterfaces
                     .Except(baseType.GetTypeInfo().BaseType.GetInterfaces())
                     .Except(baseInterfaces.SelectMany(x => x.GetInterfaces()))
                     .ToArray();
+            }
 
             return baseInterfaces;
         }

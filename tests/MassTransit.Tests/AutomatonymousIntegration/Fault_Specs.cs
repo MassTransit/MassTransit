@@ -1,22 +1,9 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.AutomatonymousIntegration
+﻿namespace MassTransit.Tests.AutomatonymousIntegration
 {
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
     using GreenPipes;
-    using GreenPipes.Introspection;
     using MassTransit.Saga;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -51,26 +38,11 @@ namespace MassTransit.Tests.AutomatonymousIntegration
             var message = new Start();
 
             Task<ConsumeContext<Fault<Start>>> faultReceived =
-                ConnectPublishHandler<Fault<Start>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
+                ConnectPublishHandler<Fault<Start>>(x => message.CorrelationId == x.Message.Message.CorrelationId);
 
             await InputQueueSendEndpoint.Send(message);
 
             ConsumeContext<Fault<Start>> fault = await faultReceived;
-
-            Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
-        }
-
-        [Test]
-        public async Task Should_receive_a_fault_when_an_instance_does_not_exist()
-        {
-            var message = new Stop();
-
-            Task<ConsumeContext<Fault<Stop>>> faultReceived =
-                ConnectPublishHandler<Fault<Stop>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
-
-            await InputQueueSendEndpoint.Send(message);
-
-            ConsumeContext<Fault<Stop>> fault = await faultReceived;
 
             Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
         }
@@ -81,7 +53,7 @@ namespace MassTransit.Tests.AutomatonymousIntegration
             var message = new Initialize();
 
             Task<ConsumeContext<Fault<Start>>> faultReceived =
-                ConnectPublishHandler<Fault<Start>>(x => (message.CorrelationId == x.Message.Message.CorrelationId));
+                ConnectPublishHandler<Fault<Start>>(x => message.CorrelationId == x.Message.Message.CorrelationId);
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -101,10 +73,26 @@ namespace MassTransit.Tests.AutomatonymousIntegration
             Assert.IsTrue(saga.HasValue);
         }
 
-        [Test, Explicit]
+        [Test]
+        public async Task Should_receive_a_fault_when_an_instance_does_not_exist()
+        {
+            var message = new Stop();
+
+            Task<ConsumeContext<Fault<Stop>>> faultReceived =
+                ConnectPublishHandler<Fault<Stop>>(x => message.CorrelationId == x.Message.Message.CorrelationId);
+
+            await InputQueueSendEndpoint.Send(message);
+
+            ConsumeContext<Fault<Stop>> fault = await faultReceived;
+
+            Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
+        }
+
+        [Test]
+        [Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
-            ProbeResult result = Bus.GetProbeResult();
+            var result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }
@@ -212,6 +200,8 @@ namespace MassTransit.Tests.AutomatonymousIntegration
 
             public Guid CorrelationId { get; set; }
         }
+
+
         public class Stop :
             CorrelatedBy<Guid>
         {

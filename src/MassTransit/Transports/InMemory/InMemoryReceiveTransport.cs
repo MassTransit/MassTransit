@@ -20,10 +20,10 @@ namespace MassTransit.Transports.InMemory
         IReceiveTransport,
         IInMemoryQueueConsumer
     {
-        readonly Uri _inputAddress;
-        readonly IInMemoryQueue _queue;
         readonly ReceiveEndpointContext _context;
         readonly IReceivePipeDispatcher _dispatcher;
+        readonly Uri _inputAddress;
+        readonly IInMemoryQueue _queue;
 
         public InMemoryReceiveTransport(Uri inputAddress, IInMemoryQueue queue, ReceiveEndpointContext context)
         {
@@ -112,8 +112,8 @@ namespace MassTransit.Transports.InMemory
         class Handle :
             ReceiveTransportHandle
         {
-            readonly InMemoryReceiveTransport _transport;
             readonly ConnectHandle _consumerHandle;
+            readonly InMemoryReceiveTransport _transport;
 
             public Handle(InMemoryReceiveTransport transport, ConnectHandle consumerHandle)
             {

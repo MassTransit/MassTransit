@@ -49,8 +49,8 @@ namespace MassTransit.Internals.Extensions
             where T : class, PipeContext
             where TAgent : class, PipeContext
         {
-            readonly IAsyncPipeContextAgent<TAgent> _asyncContext;
             readonly Func<T, CancellationToken, Task<TAgent>> _agentFactory;
+            readonly IAsyncPipeContextAgent<TAgent> _asyncContext;
             readonly CancellationToken _cancellationToken;
 
             public CreateAgentPipe(IAsyncPipeContextAgent<TAgent> asyncContext, Func<T, CancellationToken, Task<TAgent>> agentFactory,

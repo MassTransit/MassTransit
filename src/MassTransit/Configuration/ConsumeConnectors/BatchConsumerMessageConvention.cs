@@ -48,7 +48,7 @@ namespace MassTransit.ConsumeConnectors
                 .Select(x => new BatchConsumerInterfaceType(x.BatchMessageType, x.MessageType, typeof(T)))
                 .Where(x => TypeMetadataCache.IsValidMessageType(x.MessageType));
 
-            foreach (IMessageInterfaceType type in types)
+            foreach (var type in types)
                 yield return type;
         }
     }

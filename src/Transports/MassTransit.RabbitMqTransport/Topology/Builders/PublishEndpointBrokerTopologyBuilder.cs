@@ -23,9 +23,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
         public IPublishEndpointBrokerTopologyBuilder CreateImplementedBuilder()
         {
             if (_options.HasFlag(PublishBrokerTopologyOptions.MaintainHierarchy))
-            {
                 return new ImplementedBuilder(this, _options);
-            }
 
             return this;
         }
@@ -46,23 +44,19 @@ namespace MassTransit.RabbitMqTransport.Topology.Builders
 
             public ExchangeHandle Exchange
             {
-                get { return _exchange; }
+                get => _exchange;
                 set
                 {
                     _exchange = value;
                     if (_builder.Exchange != null)
-                    {
                         _builder.ExchangeBind(_builder.Exchange, _exchange, "", new Dictionary<string, object>());
-                    }
                 }
             }
 
             public IPublishEndpointBrokerTopologyBuilder CreateImplementedBuilder()
             {
                 if (_options.HasFlag(PublishBrokerTopologyOptions.MaintainHierarchy))
-                {
                     return new ImplementedBuilder(this, _options);
-                }
 
                 return this;
             }

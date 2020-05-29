@@ -175,6 +175,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         }
     }
 
+
     public class DependencyInjectionMediatorContainerRegistrar :
         DependencyInjectionContainerRegistrar
     {

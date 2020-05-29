@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.HangfireIntegration.Tests
+﻿namespace MassTransit.HangfireIntegration.Tests
 {
     using System;
     using System.Diagnostics;
@@ -194,7 +182,6 @@ namespace MassTransit.HangfireIntegration.Tests
             int _count;
             TimeSpan _receivedTimeSpan;
             Stopwatch _timer;
-            int _redeliveryCount;
 
             public MyConsumer(TaskCompletionSource<ConsumeContext<PingMessage>> taskCompletionSource)
             {
@@ -205,7 +192,7 @@ namespace MassTransit.HangfireIntegration.Tests
 
             public IComparable ReceivedTimeSpan => _receivedTimeSpan;
 
-            public int RedeliveryCount => _redeliveryCount;
+            public int RedeliveryCount { get; set; }
 
             public Task Consume(ConsumeContext<PingMessage> context)
             {
@@ -224,7 +211,7 @@ namespace MassTransit.HangfireIntegration.Tests
 
                 // okay, ready.
                 _receivedTimeSpan = _timer.Elapsed;
-                _redeliveryCount = context.GetRedeliveryCount();
+                RedeliveryCount = context.GetRedeliveryCount();
                 _received.TrySetResult(context);
 
                 return TaskUtil.Completed;
@@ -309,7 +296,7 @@ namespace MassTransit.HangfireIntegration.Tests
         TimeSpan _receivedTimeSpan;
         Stopwatch _timer;
         int _count;
-        string customHeader = "Custom-Header";
+        readonly string customHeader = "Custom-Header";
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {

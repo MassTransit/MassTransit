@@ -3,7 +3,6 @@
     using System;
     using System.Threading;
     using Clients;
-    using GreenPipes;
 
 
     /// <summary>
@@ -13,6 +12,8 @@
     public interface IClientFactory :
         IAsyncDisposable
     {
+        ClientFactoryContext Context { get; }
+
         /// <summary>
         /// Create a request, using the message specified. If a destinationAddress for the message cannot be found, the message will be published.
         /// </summary>
@@ -102,7 +103,5 @@
         /// <returns></returns>
         IRequestClient<T> CreateRequestClient<T>(ConsumeContext consumeContext, Uri destinationAddress, RequestTimeout timeout = default)
             where T : class;
-
-        ClientFactoryContext Context { get; }
     }
 }

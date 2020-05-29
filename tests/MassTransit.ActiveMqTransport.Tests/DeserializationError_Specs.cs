@@ -1,10 +1,9 @@
 namespace MassTransit.ActiveMqTransport.Tests
 {
-    using System;
     using System.Text;
     using System.Threading.Tasks;
-    using Serialization;
     using NUnit.Framework;
+    using Serialization;
     using TestMessages;
 
 
@@ -12,15 +11,10 @@ namespace MassTransit.ActiveMqTransport.Tests
     public class When_the_serialized_message_is_invalid :
         ActiveMqTestFixture
     {
-        public When_the_serialized_message_is_invalid()
-        {
-//            TestTimeout = TimeSpan.FromSeconds(8);
-        }
-
         [Test]
         public async Task Should_fault()
         {
-            var receiveFault = ConnectPublishHandler<ReceiveFault>();
+            Task<ConsumeContext<ReceiveFault>> receiveFault = ConnectPublishHandler<ReceiveFault>();
 
             await InputQueueSendEndpoint.Send<SubmitOrder>(new { }, context => ApplyStaticMessageToContext(context, Fail));
 
@@ -92,6 +86,7 @@ namespace MassTransit.ActiveMqTransport.Tests
     {
         using System;
         using System.Collections.Generic;
+        using Newtonsoft.Json;
 
 
         public interface MetaData
@@ -118,8 +113,8 @@ namespace MassTransit.ActiveMqTransport.Tests
             DateTime Timestamp { get; }
 
             // this works
-            [Newtonsoft.Json.JsonProperty("CustomerNumber", Required = Newtonsoft.Json.Required.DisallowNull,
-                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+            [JsonProperty("CustomerNumber", Required = Required.DisallowNull,
+                NullValueHandling = NullValueHandling.Ignore)]
             int CustomerNumber { get; }
 
             string PaymentCardNumber { get; }

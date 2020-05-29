@@ -38,24 +38,6 @@
 
         public Dictionary<string, MessageAttributeValue> Attributes => TransportMessage.MessageAttributes;
 
-        public override byte[] GetBody()
-        {
-            if (_body != null)
-                return _body;
-
-            if (TransportMessage != null)
-            {
-                return _body = Encoding.UTF8.GetBytes(TransportMessage.Body);
-            }
-
-            throw new AmazonSqsTransportException($"The message type is not supported: {TypeMetadataCache.GetShortName(typeof(Message))}");
-        }
-
-        public override Stream GetBodyStream()
-        {
-            return new MemoryStream(GetBody());
-        }
-
         public Task Complete()
         {
             return _clientContext.DeleteMessage(_receiveSettings.EntityName, TransportMessage.ReceiptHandle);
@@ -69,6 +51,22 @@
         public Task ValidateLockStatus()
         {
             return TaskUtil.Completed;
+        }
+
+        public override byte[] GetBody()
+        {
+            if (_body != null)
+                return _body;
+
+            if (TransportMessage != null)
+                return _body = Encoding.UTF8.GetBytes(TransportMessage.Body);
+
+            throw new AmazonSqsTransportException($"The message type is not supported: {TypeMetadataCache.GetShortName(typeof(Message))}");
+        }
+
+        public override Stream GetBodyStream()
+        {
+            return new MemoryStream(GetBody());
         }
     }
 }

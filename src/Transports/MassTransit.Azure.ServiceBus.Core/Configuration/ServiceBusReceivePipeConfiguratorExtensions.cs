@@ -17,7 +17,7 @@ namespace MassTransit.Azure.ServiceBus.Core
         }
 
         /// <summary>
-        /// Generate a <see cref="ReceiveFault"/> event and move the message to the Azure dead-letter queue for the queue/subscription
+        /// Generate a <see cref="ReceiveFault" /> event and move the message to the Azure dead-letter queue for the queue/subscription
         /// </summary>
         /// <param name="configurator"></param>
         public static void ConfigureDeadLetterQueueErrorTransport(this IReceivePipelineConfigurator configurator)

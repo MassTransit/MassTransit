@@ -17,10 +17,10 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         IActiveMqMessageConsumeTopologyConfigurator
         where TMessage : class
     {
+        readonly string _consumerName;
         readonly IMessageTopology<TMessage> _messageTopology;
         readonly IActiveMqMessagePublishTopology<TMessage> _publishTopology;
         readonly IList<IActiveMqConsumeTopologySpecification> _specifications;
-        readonly string _consumerName;
 
         public ActiveMqMessageConsumeTopology(IMessageTopology<TMessage> messageTopology, IActiveMqMessagePublishTopology<TMessage> publishTopology)
         {

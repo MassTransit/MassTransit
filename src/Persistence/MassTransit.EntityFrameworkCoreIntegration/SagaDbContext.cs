@@ -8,12 +8,12 @@
     public abstract class SagaDbContext :
         DbContext
     {
-        protected abstract IEnumerable<ISagaClassMap> Configurations { get; }
-
         protected SagaDbContext(DbContextOptions options)
             : base(options)
         {
         }
+
+        protected abstract IEnumerable<ISagaClassMap> Configurations { get; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

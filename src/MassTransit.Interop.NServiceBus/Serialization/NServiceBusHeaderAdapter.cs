@@ -11,20 +11,22 @@ namespace MassTransit.Interop.NServiceBus.Serialization
         MessageContext
     {
         readonly Headers _headers;
-        Guid? _messageId;
-        Guid? _correlationId;
         Guid? _conversationId;
-        Uri _sourceAddress;
-        DateTime? _sentTime;
-        HostInfo _host;
-        Uri _responseAddress;
+        Guid? _correlationId;
         Headers _headerFilter;
+        HostInfo _host;
+        Guid? _messageId;
         string[] _messageTypes;
+        Uri _responseAddress;
+        DateTime? _sentTime;
+        Uri _sourceAddress;
 
         public NServiceBusHeaderAdapter(Headers headers)
         {
             _headers = headers;
         }
+
+        public string[] SupportedMessageTypes => _messageTypes ??= GetMessageTypes().ToArray();
 
         public Guid? MessageId => _messageId ??= _headers.Get<Guid>(NServiceBusMessageHeaders.MessageId);
 
@@ -50,9 +52,6 @@ namespace MassTransit.Interop.NServiceBus.Serialization
         public Headers Headers => _headerFilter ??= new TransportHeaderFilter(_headers);
 
         public HostInfo Host => _host ??= GetHostInfo();
-
-        public string[] SupportedMessageTypes => _messageTypes ??= GetMessageTypes().ToArray();
-
 
         Uri GetEndpointAddress(string key)
         {
@@ -82,7 +81,7 @@ namespace MassTransit.Interop.NServiceBus.Serialization
             if (string.IsNullOrWhiteSpace(enclosedMessageTypes))
                 yield break;
 
-            var typeNames = enclosedMessageTypes.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
+            string[] typeNames = enclosedMessageTypes.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
             foreach (var typeName in typeNames)
             {
                 var messageType = Type.GetType(typeName);
@@ -100,6 +99,7 @@ namespace MassTransit.Interop.NServiceBus.Serialization
 
             return new NServiceBusHostInfo(machineName, version);
         }
+
 
         class NServiceBusHostInfo :
             HostInfo
@@ -120,6 +120,7 @@ namespace MassTransit.Interop.NServiceBus.Serialization
             public string OperatingSystemVersion => default;
         }
 
+
         class TransportHeaderFilter :
             Headers
         {
@@ -137,12 +138,12 @@ namespace MassTransit.Interop.NServiceBus.Serialization
 
             IEnumerator IEnumerable.GetEnumerator()
             {
-                return ((IEnumerable) _headers).GetEnumerator();
+                return ((IEnumerable)_headers).GetEnumerator();
             }
 
             public IEnumerable<KeyValuePair<string, object>> GetAll()
             {
-                foreach (var header in _headers.GetAll())
+                foreach (KeyValuePair<string, object> header in _headers.GetAll())
                 {
                     if (header.Key.StartsWith("NServiceBus."))
                         continue;

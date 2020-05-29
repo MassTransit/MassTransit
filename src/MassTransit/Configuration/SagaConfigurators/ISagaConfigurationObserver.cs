@@ -18,7 +18,7 @@ namespace MassTransit.SagaConfigurators
 
         /// <summary>
         /// Called immediately after the state machine saga configuration is completed, but before the saga pipeline is built. Note that
-        /// <see cref="SagaConfigured{TInstance}"/> method will also be called, for backwards compatibility
+        /// <see cref="SagaConfigured{TInstance}" /> method will also be called, for backwards compatibility
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="stateMachine"></param>

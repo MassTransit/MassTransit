@@ -2,7 +2,6 @@ namespace MassTransit.Conductor.Consumers
 {
     using System.Threading.Tasks;
     using Context;
-    using Contracts;
     using Contracts.Conductor;
     using Server;
 
@@ -12,8 +11,8 @@ namespace MassTransit.Conductor.Consumers
         where TMessage : class
     {
         readonly IServiceEndpointMessageClientCache _clientCache;
-        readonly ServiceInfo _serviceInfo;
         readonly InstanceInfo _instanceInfo;
+        readonly ServiceInfo _serviceInfo;
 
         public LinkConsumer(IServiceEndpointMessageClientCache clientCache, ServiceInfo serviceInfo, InstanceInfo instanceInfo)
         {

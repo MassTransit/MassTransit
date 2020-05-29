@@ -16,7 +16,7 @@
             return context.CompletedWithVariables<TestLog>(new {OriginalValue = context.Arguments.Value}, new
             {
                 Value = "Hello, World!",
-                NullValue = (string)null,
+                NullValue = (string)null
             });
         }
 

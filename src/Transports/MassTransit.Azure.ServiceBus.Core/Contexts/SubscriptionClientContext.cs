@@ -15,8 +15,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         ClientContext,
         IAsyncDisposable
     {
-        readonly ISubscriptionClient _subscriptionClient;
         readonly SubscriptionSettings _settings;
+        readonly ISubscriptionClient _subscriptionClient;
 
         public SubscriptionClientContext(ConnectionContext connectionContext, ISubscriptionClient subscriptionClient, Uri inputAddress,
             SubscriptionSettings settings)

@@ -16,9 +16,9 @@ namespace MassTransit.Azure.Storage.MessageData
         IMessageDataRepository,
         IBusObserver
     {
+        readonly Uri _containerUri;
         readonly StorageCredentials _credentials;
         readonly IBlobNameGenerator _nameGenerator;
-        readonly Uri _containerUri;
 
         public AzureStorageMessageDataRepository(Uri storageEndpoint, string containerName, StorageCredentials credentials, IBlobNameGenerator nameGenerator)
         {
@@ -28,48 +28,6 @@ namespace MassTransit.Azure.Storage.MessageData
             var containerUriBase = $"{storageEndpoint}".TrimEnd('/');
 
             _containerUri = new Uri($"{containerUriBase}/{containerName}");
-        }
-
-        public async Task<Stream> Get(Uri address, CancellationToken cancellationToken = default)
-        {
-            var blob = new CloudBlockBlob(address, _credentials);
-            try
-            {
-                return await blob.OpenReadAsync(cancellationToken).ConfigureAwait(false);
-            }
-            catch (StorageException exception)
-            {
-                throw new MessageDataException($"MessageData content not found: {blob.Container.Name}/{blob.Name}", exception);
-            }
-        }
-
-        public async Task<Uri> Put(Stream stream, TimeSpan? timeToLive = default, CancellationToken cancellationToken = default)
-        {
-            var blobName = _nameGenerator.GenerateBlobName();
-            var blobAddress = new Uri($"{_containerUri}/{blobName}");
-            var blob = new CloudBlockBlob(blobAddress, _credentials);
-
-            SetBlobExpiration(blob, timeToLive);
-
-            await blob.UploadFromStreamAsync(stream, cancellationToken).ConfigureAwait(false);
-
-            LogContext.Debug?.Log("MessageData:Put {Blob} {Address}", blob.Name, blob.Uri);
-
-            return blob.Uri;
-        }
-
-        static void SetBlobExpiration(CloudBlockBlob blob, TimeSpan? timeToLive)
-        {
-            if (timeToLive.HasValue)
-            {
-                var utcNow = DateTime.UtcNow;
-
-                var expirationDate = utcNow + timeToLive.Value;
-                if (expirationDate <= utcNow)
-                    expirationDate = utcNow + TimeSpan.FromMinutes(1);
-
-                blob.Metadata["ValidUntilUtc"] = expirationDate.ToString("O");
-            }
         }
 
         public Task PostCreate(IBus bus)
@@ -123,6 +81,48 @@ namespace MassTransit.Azure.Storage.MessageData
         public Task StopFaulted(IBus bus, Exception exception)
         {
             return TaskUtil.Completed;
+        }
+
+        public async Task<Stream> Get(Uri address, CancellationToken cancellationToken = default)
+        {
+            var blob = new CloudBlockBlob(address, _credentials);
+            try
+            {
+                return await blob.OpenReadAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (StorageException exception)
+            {
+                throw new MessageDataException($"MessageData content not found: {blob.Container.Name}/{blob.Name}", exception);
+            }
+        }
+
+        public async Task<Uri> Put(Stream stream, TimeSpan? timeToLive = default, CancellationToken cancellationToken = default)
+        {
+            var blobName = _nameGenerator.GenerateBlobName();
+            var blobAddress = new Uri($"{_containerUri}/{blobName}");
+            var blob = new CloudBlockBlob(blobAddress, _credentials);
+
+            SetBlobExpiration(blob, timeToLive);
+
+            await blob.UploadFromStreamAsync(stream, cancellationToken).ConfigureAwait(false);
+
+            LogContext.Debug?.Log("MessageData:Put {Blob} {Address}", blob.Name, blob.Uri);
+
+            return blob.Uri;
+        }
+
+        static void SetBlobExpiration(CloudBlockBlob blob, TimeSpan? timeToLive)
+        {
+            if (timeToLive.HasValue)
+            {
+                var utcNow = DateTime.UtcNow;
+
+                var expirationDate = utcNow + timeToLive.Value;
+                if (expirationDate <= utcNow)
+                    expirationDate = utcNow + TimeSpan.FromMinutes(1);
+
+                blob.Metadata["ValidUntilUtc"] = expirationDate.ToString("O");
+            }
         }
     }
 }

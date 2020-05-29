@@ -4,6 +4,6 @@ namespace MassTransit.Monitoring.Health
     {
         Unhealthy = 0,
         Degraded = 1,
-        Healthy = 2,
+        Healthy = 2
     }
 }

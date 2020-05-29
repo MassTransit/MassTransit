@@ -8,6 +8,9 @@
 
     public static class TransportHeaderExtensions
     {
+        static readonly DateTimeOffsetTypeConverter _dateTimeOffsetConverter = new DateTimeOffsetTypeConverter();
+        static readonly DateTimeTypeConverter _dateTimeConverter = new DateTimeTypeConverter();
+
         public static void SetHeaders(this IPrimitiveMap dictionary, SendHeaders headers)
         {
             foreach (KeyValuePair<string, object> header in headers.GetAll())
@@ -54,8 +57,5 @@
                 }
             }
         }
-
-        static readonly DateTimeOffsetTypeConverter _dateTimeOffsetConverter = new DateTimeOffsetTypeConverter();
-        static readonly DateTimeTypeConverter _dateTimeConverter = new DateTimeTypeConverter();
     }
 }

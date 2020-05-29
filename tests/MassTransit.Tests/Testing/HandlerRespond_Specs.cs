@@ -38,7 +38,7 @@ namespace MassTransit.Tests.Testing
         [Test]
         public async Task Should_have_sent_message_to_bus_address()
         {
-            var message = await _harness.Sent.SelectAsync<B>().First();
+            ISentMessage<B> message = await _harness.Sent.SelectAsync<B>().First();
             message.ShouldNotBeNull();
 
             message.Context.DestinationAddress.ShouldBe(_harness.BusAddress);

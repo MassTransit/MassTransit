@@ -8,7 +8,7 @@
     {
         public static bool TryGetValueFromQueryString(this Uri uri, string key, out string value)
         {
-            string queryString = uri.Query;
+            var queryString = uri.Query;
             if (string.IsNullOrEmpty(queryString) || queryString.Length <= 1)
             {
                 value = null;
@@ -21,11 +21,14 @@
                 {
                     string[] values = x.Split('=');
                     if (values.Length == 2)
+                    {
                         return new
                         {
                             Key = values[0],
                             Value = values[1]
                         };
+                    }
+
                     return new
                     {
                         Key = values[0],
@@ -43,13 +46,12 @@
         public static T GetValueFromQueryString<T>(this Uri uri, string key, T defaultValue)
             where T : struct
         {
-            if (String.IsNullOrEmpty(uri.Query))
+            if (string.IsNullOrEmpty(uri.Query))
                 return defaultValue;
 
             try
             {
-                string value;
-                if (!uri.TryGetValueFromQueryString(key, out value) || string.IsNullOrEmpty(value))
+                if (!uri.TryGetValueFromQueryString(key, out var value) || string.IsNullOrEmpty(value))
                     return defaultValue;
 
                 return (T)Convert.ChangeType(value, typeof(T));

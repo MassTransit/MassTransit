@@ -11,7 +11,9 @@ namespace MassTransit
         /// <summary>
         /// Adds a receive endpoint
         /// </summary>
-        /// <param name="definition">An endpoint definition, which abstracts specific endpoint behaviors from the transport</param>
+        /// <param name="definition">
+        /// An endpoint definition, which abstracts specific endpoint behaviors from the transport
+        /// </param>
         /// <param name="endpointNameFormatter"></param>
         /// <param name="configureEndpoint">The configuration callback</param>
         HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
@@ -32,7 +34,9 @@ namespace MassTransit
         /// <summary>
         /// Adds a receive endpoint
         /// </summary>
-        /// <param name="definition">An endpoint definition, which abstracts specific endpoint behaviors from the transport</param>
+        /// <param name="definition">
+        /// An endpoint definition, which abstracts specific endpoint behaviors from the transport
+        /// </param>
         /// <param name="endpointNameFormatter"></param>
         /// <param name="configureEndpoint">The configuration callback</param>
         HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,

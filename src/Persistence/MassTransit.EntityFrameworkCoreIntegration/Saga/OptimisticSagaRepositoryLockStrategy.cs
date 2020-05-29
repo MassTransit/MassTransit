@@ -13,8 +13,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga
         ISagaRepositoryLockStrategy<TSaga>
         where TSaga : class, ISaga
     {
-        readonly ILoadQueryProvider<TSaga> _provider;
         readonly ILoadQueryExecutor<TSaga> _executor;
+        readonly ILoadQueryProvider<TSaga> _provider;
 
         public OptimisticSagaRepositoryLockStrategy(ILoadQueryProvider<TSaga> provider, ILoadQueryExecutor<TSaga> executor, IsolationLevel isolationLevel)
         {

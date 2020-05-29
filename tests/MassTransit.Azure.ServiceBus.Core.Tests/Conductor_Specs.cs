@@ -1,13 +1,11 @@
 namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
-    using System.Threading.Tasks;
-    using Definition;
-    using NUnit.Framework;
-
-
     namespace ConductorTests
     {
+        using System.Threading.Tasks;
         using Contracts;
+        using Definition;
+        using NUnit.Framework;
 
 
         namespace Contracts
@@ -58,9 +56,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             {
                 var serviceClient = Bus.CreateServiceClient();
 
-                var requestClient = serviceClient.CreateRequestClient<DeployPayload>();
+                IRequestClient<DeployPayload> requestClient = serviceClient.CreateRequestClient<DeployPayload>();
 
-                var response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
+                Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
 
                 Assert.That(response.Message.Target, Is.EqualTo("Bogey"));
             }

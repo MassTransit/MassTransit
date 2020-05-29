@@ -6,8 +6,8 @@ namespace MassTransit.TestFramework
     public class ThreadSafeRandom
     {
         static readonly Random GlobalSeedGenerator = new Random();
-        [ThreadStatic]
-        static Random _localThreadStaticRandom;
+
+        [ThreadStatic] static Random _localThreadStaticRandom;
 
         public ThreadSafeRandom()
         {
@@ -15,12 +15,11 @@ namespace MassTransit.TestFramework
             {
                 int seed;
                 lock (GlobalSeedGenerator)
-                {
                     seed = GlobalSeedGenerator.Next();
-                }
                 _localThreadStaticRandom = new Random(seed);
             }
         }
+
         public int Next()
         {
             return _localThreadStaticRandom.Next();
@@ -30,6 +29,7 @@ namespace MassTransit.TestFramework
         {
             return _localThreadStaticRandom.Next(maxValue);
         }
+
         public int Next(int minValue, int maxValue)
         {
             return _localThreadStaticRandom.Next(minValue, maxValue);

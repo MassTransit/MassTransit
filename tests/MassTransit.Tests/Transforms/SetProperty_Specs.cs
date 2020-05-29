@@ -97,7 +97,7 @@
 
             ConsumeContext<IA> result = await _received;
             ConsumeContext<IA> original = await unmodified;
-            IA tweaked = await _tweaked.Task;
+            var tweaked = await _tweaked.Task;
 
             result.Message.First.ShouldBe("Hello");
             result.Message.Second.ShouldBe("World");
@@ -154,7 +154,7 @@
 
             ConsumeContext<IA> result = await _received;
             ConsumeContext<IA> original = await unmodified;
-            IA tweaked = await _tweaked.Task;
+            var tweaked = await _tweaked.Task;
 
             result.Message.First.ShouldBe("Hello");
             result.Message.Second.ShouldBe(null);

@@ -20,7 +20,7 @@
         [Test]
         public async Task Should_be_awesome()
         {
-            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
+            IRequestClient<GetValue> client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
 
             Response<Value> response = await client.GetResponse<Value>(new GetValue());
 
@@ -30,7 +30,7 @@
         [Test]
         public async Task Should_be_awesome_with_a_side_of_sourdough_toast()
         {
-            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
+            IRequestClient<GetValue> client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
 
             Response<Value> response;
             using (RequestHandle<GetValue> request = client.Create(new GetValue()))
@@ -41,14 +41,54 @@
             }
 
             Assert.That(response.RequestId.HasValue, Is.True);
-            Assert.That(response.Headers.TryGetHeader("Frank", out object value), Is.True);
+            Assert.That(response.Headers.TryGetHeader("Frank", out var value), Is.True);
             Assert.That(value, Is.EqualTo("Mary"));
+        }
+
+        [Test]
+        public async Task Should_throw_a_timeout_exception()
+        {
+            IRequestClient<GetValue> client = Bus.CreateRequestClient<GetValue>(InputQueueAddress, RequestTimeout.After(s: 1));
+
+            Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}), Throws.TypeOf<RequestTimeoutException>());
+        }
+
+        [Test]
+        public async Task Should_throw_a_timeout_exception_with_milliseconds()
+        {
+            IRequestClient<GetValue> client = Bus.CreateRequestClient<GetValue>(InputQueueAddress, 100);
+
+            Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}), Throws.TypeOf<RequestTimeoutException>());
+        }
+
+        [Test]
+        public async Task Should_throw_canceled_exception_when_already_canceled()
+        {
+            IRequestClient<GetValue> client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
+
+            using (var source = new CancellationTokenSource())
+            {
+                source.Cancel();
+
+                Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}, source.Token), Throws.TypeOf<TaskCanceledException>());
+            }
+        }
+
+        [Test]
+        public async Task Should_throw_canceled_exception_when_canceled()
+        {
+            IRequestClient<GetValue> client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
+
+            using (var source = new CancellationTokenSource(100))
+            {
+                Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}, source.Token), Throws.TypeOf<TaskCanceledException>());
+            }
         }
 
         [Test]
         public async Task Should_throw_the_request_exception()
         {
-            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
+            IRequestClient<GetValue> client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
 
             Assert.That(async () => await client.GetResponse<Value>(new GetValue {BlowUp = true}), Throws.TypeOf<RequestFaultException>());
         }
@@ -56,7 +96,7 @@
         [Test]
         public async Task Should_throw_the_request_exception_including_fault()
         {
-            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
+            IRequestClient<GetValue> client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
 
             try
             {
@@ -73,46 +113,6 @@
             catch
             {
                 Assert.Fail("Unknown exception type thrown");
-            }
-        }
-
-        [Test]
-        public async Task Should_throw_a_timeout_exception()
-        {
-            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress, RequestTimeout.After(s: 1));
-
-            Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}), Throws.TypeOf<RequestTimeoutException>());
-        }
-
-        [Test]
-        public async Task Should_throw_a_timeout_exception_with_milliseconds()
-        {
-            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress, 100);
-
-            Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}), Throws.TypeOf<RequestTimeoutException>());
-        }
-
-        [Test]
-        public async Task Should_throw_canceled_exception_when_canceled()
-        {
-            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
-
-            using (var source = new CancellationTokenSource(100))
-            {
-                Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}, source.Token), Throws.TypeOf<TaskCanceledException>());
-            }
-        }
-
-        [Test]
-        public async Task Should_throw_canceled_exception_when_already_canceled()
-        {
-            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
-
-            using (var source = new CancellationTokenSource())
-            {
-                source.Cancel();
-
-                Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}, source.Token), Throws.TypeOf<TaskCanceledException>());
             }
         }
 
@@ -143,9 +143,10 @@
         [Test]
         public async Task Should_match_the_first_result()
         {
-            var client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
+            IRequestClient<RegisterMember> client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
 
-            var (registered, existing) = await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember());
+            (Task<Response<MemberRegistered>> registered, Task<Response<ExistingMemberFound>> existing) =
+                await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember());
 
             await registered;
 
@@ -155,9 +156,10 @@
         [Test]
         public async Task Should_match_the_second_result()
         {
-            var client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
+            IRequestClient<RegisterMember> client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
 
-            var (registered, existing) = await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember() {MemberId = "Johnny5"});
+            (Task<Response<MemberRegistered>> registered, Task<Response<ExistingMemberFound>> existing) =
+                await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember {MemberId = "Johnny5"});
 
             await existing;
 
@@ -169,15 +171,11 @@
             Handler<RegisterMember>(configurator, context =>
             {
                 if (context.Message.MemberId == "Johnny5")
-                    return context.RespondAsync<ExistingMemberFound>(new
-                    {
-                        context.Message.MemberId,
-                    });
-
-                return context.RespondAsync<MemberRegistered>(new
                 {
-                    context.Message.MemberId,
-                });
+                    return context.RespondAsync<ExistingMemberFound>(new {context.Message.MemberId});
+                }
+
+                return context.RespondAsync<MemberRegistered>(new {context.Message.MemberId});
             });
         }
 
@@ -206,12 +204,12 @@
         InMemoryTestFixture
     {
         [Test]
-        public async Task Should_handle_cancellation()
+        public async Task Should_handle_an_earlier_timeout()
         {
             var timeout = TimeSpan.FromMilliseconds(100);
-            var ctsTimeout = TimeSpan.FromMilliseconds(100);
+            var ctsTimeout = TimeSpan.FromMilliseconds(140);
 
-            int numOfLoops = 5;
+            var numOfLoops = 5;
             for (var i = 0; i < numOfLoops; ++i)
             {
                 Console.WriteLine($"Sending request {i + 1} of {numOfLoops}");
@@ -220,7 +218,7 @@
                 {
                     using (var timeoutReq = new CancellationTokenSource(ctsTimeout))
                     {
-                        var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, timeout);
+                        IRequestClient<PingMessage> client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, timeout);
 
                         await client.GetResponse<PongMessage>(new PingMessage(), timeoutReq.Token)
                             .OrTimeout(TimeSpan.FromSeconds(5))
@@ -235,12 +233,12 @@
         }
 
         [Test]
-        public async Task Should_handle_an_earlier_timeout()
+        public async Task Should_handle_cancellation()
         {
             var timeout = TimeSpan.FromMilliseconds(100);
-            var ctsTimeout = TimeSpan.FromMilliseconds(140);
+            var ctsTimeout = TimeSpan.FromMilliseconds(100);
 
-            int numOfLoops = 5;
+            var numOfLoops = 5;
             for (var i = 0; i < numOfLoops; ++i)
             {
                 Console.WriteLine($"Sending request {i + 1} of {numOfLoops}");
@@ -249,7 +247,7 @@
                 {
                     using (var timeoutReq = new CancellationTokenSource(ctsTimeout))
                     {
-                        var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, timeout);
+                        IRequestClient<PingMessage> client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, timeout);
 
                         await client.GetResponse<PongMessage>(new PingMessage(), timeoutReq.Token)
                             .OrTimeout(TimeSpan.FromSeconds(5))
@@ -305,17 +303,10 @@
     public class Sending_a_request_with_a_timeout :
         InMemoryTestFixture
     {
-        Uri _auditEndpointAddress;
-        Task<ConsumeContext<AuditGetValue>> _audited;
-        Task<ConsumeContext<ReturnedValue>> _returned;
-        Response<Value> _response;
-
         [Test]
-        public async Task Should_not_copy_the_time_to_live_to_sent_messages()
+        public async Task Should_copy_the_time_to_live_to_the_response()
         {
-            ConsumeContext<ReturnedValue> consumeContext = await _returned;
-
-            Assert.That(consumeContext.ExpirationTime.HasValue, Is.False);
+            Assert.That(_response.ExpirationTime.HasValue, Is.True);
         }
 
         [Test]
@@ -327,15 +318,22 @@
         }
 
         [Test]
-        public async Task Should_copy_the_time_to_live_to_the_response()
+        public async Task Should_not_copy_the_time_to_live_to_sent_messages()
         {
-            Assert.That(_response.ExpirationTime.HasValue, Is.True);
+            ConsumeContext<ReturnedValue> consumeContext = await _returned;
+
+            Assert.That(consumeContext.ExpirationTime.HasValue, Is.False);
         }
+
+        Uri _auditEndpointAddress;
+        Task<ConsumeContext<AuditGetValue>> _audited;
+        Task<ConsumeContext<ReturnedValue>> _returned;
+        Response<Value> _response;
 
         [OneTimeSetUp]
         public async Task Setup()
         {
-            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
+            IRequestClient<GetValue> client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
 
             _response = await client.GetResponse<Value>(new GetValue());
         }
@@ -382,9 +380,9 @@
         [Test]
         public async Task Should_copy_the_expiration_time_to_the_sent_fault()
         {
-            var handler = SubscribeHandler<Fault<GetValue>>();
+            Task<ConsumeContext<Fault<GetValue>>> handler = SubscribeHandler<Fault<GetValue>>();
 
-            var client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
+            IRequestClient<GetValue> client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
 
             try
             {

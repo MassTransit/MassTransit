@@ -14,8 +14,8 @@ namespace MassTransit.MartenIntegration.Saga.Context
         ISagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISaga
     {
-        readonly ISagaConsumeContextFactory<IDocumentSession, TSaga> _factory;
         readonly IDocumentStore _documentStore;
+        readonly ISagaConsumeContextFactory<IDocumentSession, TSaga> _factory;
 
         public MartenSagaRepositoryContextFactory(IDocumentStore documentStore, ISagaConsumeContextFactory<IDocumentSession, TSaga> factory)
         {

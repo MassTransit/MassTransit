@@ -34,7 +34,7 @@ namespace MassTransit.Transports.InMemory
 
             await pipe.Send(context).ConfigureAwait(false);
 
-            var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
+            StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
             try
             {
                 if (_context.SendObservers.Count > 0)

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Serialization
+﻿namespace MassTransit.Serialization
 {
     using System.IO;
     using System.Security.Cryptography;
@@ -31,7 +19,7 @@ namespace MassTransit.Serialization
 
         public Stream GetDecryptStream(Stream stream, ReceiveContext context)
         {
-            var key = _secureKeyProvider.GetKey(context);
+            byte[] key = _secureKeyProvider.GetKey(context);
 
             var iv = new byte[16];
             stream.Read(iv, 0, iv.Length);
@@ -43,9 +31,9 @@ namespace MassTransit.Serialization
 
         public Stream GetEncryptStream(Stream stream, SendContext context)
         {
-            var key = _secureKeyProvider.GetKey(context);
+            byte[] key = _secureKeyProvider.GetKey(context);
 
-            var iv = GenerateIv();
+            byte[] iv = GenerateIv();
 
             stream.Write(iv, 0, iv.Length);
             var encryptor = CreateEncryptor(key, iv);
@@ -90,7 +78,7 @@ namespace MassTransit.Serialization
 
         Aes CreateAes()
         {
-            return new AesCryptoServiceProvider { Padding = _paddingMode };
+            return new AesCryptoServiceProvider {Padding = _paddingMode};
         }
     }
 }

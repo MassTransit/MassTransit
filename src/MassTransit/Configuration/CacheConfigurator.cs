@@ -7,28 +7,26 @@ namespace MassTransit
     public class CacheConfigurator :
         ICacheConfigurator
     {
-        readonly CacheSettings _settings;
-
         public CacheConfigurator()
         {
-            _settings = new CacheSettings();
+            Settings = new CacheSettings();
         }
 
         public int Capacity
         {
-            set => _settings.Capacity = value;
+            set => Settings.Capacity = value;
         }
 
         public TimeSpan MinAge
         {
-            set => _settings.MinAge = value;
+            set => Settings.MinAge = value;
         }
 
         public TimeSpan MaxAge
         {
-            set => _settings.MaxAge = value;
+            set => Settings.MaxAge = value;
         }
 
-        public CacheSettings Settings => _settings;
+        public CacheSettings Settings { get; }
     }
 }

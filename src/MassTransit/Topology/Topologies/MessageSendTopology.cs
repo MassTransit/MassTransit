@@ -36,21 +36,16 @@
             ITopologyPipeBuilder<SendContext<TMessage>> delegatedBuilder = builder.CreateDelegatedBuilder();
 
             foreach (IMessageSendTopology<TMessage> topology in _delegateTopologies)
-            {
                 topology.Apply(delegatedBuilder);
-            }
 
             foreach (IMessageSendTopologyConvention<TMessage> convention in _conventions)
             {
-                IMessageSendTopology<TMessage> topology;
-                if (convention.TryGetMessageSendTopology(out topology))
+                if (convention.TryGetMessageSendTopology(out IMessageSendTopology<TMessage> topology))
                     topology.Apply(builder);
             }
 
             foreach (IMessageSendTopology<TMessage> topology in _topologies)
-            {
                 topology.Apply(builder);
-            }
         }
 
         public bool TryAddConvention(IMessageSendTopologyConvention<TMessage> convention)

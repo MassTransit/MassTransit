@@ -12,9 +12,29 @@ namespace MassTransit.Tests.Initializers
     public class Initializing_a_regular_class
     {
         [Test]
+        public async Task Should_initialize_a_fault()
+        {
+            InitializeContext<Top> topContext = await MessageInitializerCache<Top>.Initialize(new {Text = "Hello"});
+
+            InitializeContext<Report> context = await MessageInitializerCache<Report>.Initialize(new
+            {
+                Fault = new FaultEvent<Top>(topContext.Message, NewId.NextGuid(), HostMetadataCache.Host, new IntentionalTestException(),
+                    TypeMetadataCache<Top>.MessageTypeNames)
+            });
+
+            Assert.That(context.Message, Is.Not.Null);
+
+            Assert.That(context.Message.Fault, Is.Not.Null);
+            Assert.That(context.Message.Fault.Host, Is.Not.Null);
+            Assert.That(context.Message.Fault.Host.MachineName, Is.EqualTo(HostMetadataCache.Host.MachineName));
+            Assert.That(context.Message.Fault.Message, Is.Not.Null);
+            Assert.That(context.Message.Fault.Message.Text, Is.EqualTo("Hello"));
+        }
+
+        [Test]
         public async Task Should_initialize_all_the_properties()
         {
-            var context = await MessageInitializerCache<Member>.Initialize(new
+            InitializeContext<Member> context = await MessageInitializerCache<Member>.Initialize(new
             {
                 Name = "Frank",
                 Address = new
@@ -30,26 +50,6 @@ namespace MassTransit.Tests.Initializers
             Assert.That(context.Message.Address, Is.Not.Null);
             Assert.That(context.Message.Address.Street, Is.EqualTo("123 American Way"));
             Assert.That(context.Message.Address.City, Is.EqualTo("Dallas"));
-        }
-
-        [Test]
-        public async Task Should_initialize_a_fault()
-        {
-            var topContext = await MessageInitializerCache<Top>.Initialize(new {Text = "Hello"});
-
-            var context = await MessageInitializerCache<Report>.Initialize(new
-            {
-                Fault = new FaultEvent<Top>(topContext.Message, NewId.NextGuid(), HostMetadataCache.Host, new IntentionalTestException(),
-                    TypeMetadataCache<Top>.MessageTypeNames)
-            });
-
-            Assert.That(context.Message, Is.Not.Null);
-
-            Assert.That(context.Message.Fault, Is.Not.Null);
-            Assert.That(context.Message.Fault.Host, Is.Not.Null);
-            Assert.That(context.Message.Fault.Host.MachineName, Is.EqualTo(HostMetadataCache.Host.MachineName));
-            Assert.That(context.Message.Fault.Message, Is.Not.Null);
-            Assert.That(context.Message.Fault.Message.Text, Is.EqualTo("Hello"));
         }
 
 

@@ -92,7 +92,7 @@ namespace MassTransit.AmazonSqsTransport
                         AutoDelete = result;
                         break;
 
-                    case TypeKey when _parseConverter.TryConvert(value, out AddressType result):
+                    case TypeKey when _parseConverter.TryConvert(value, out var result):
                         Type = result;
                         break;
                 }

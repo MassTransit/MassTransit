@@ -10,14 +10,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         AzureServiceBusTestFixture
     {
         [Test]
-        public void Should_get_the_queue_address()
-        {
-            var address = Bus.GetServiceBusHostTopology().GetDestinationAddress("input_queue");
-
-            Assert.That(address, Is.EqualTo(InputQueueAddress));
-        }
-
-        [Test]
         public void Should_get_the_bus_address()
         {
             var queueName = Bus.Address.AbsolutePath.Split('/').Last();
@@ -25,6 +17,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             var address = Bus.GetServiceBusHostTopology().GetDestinationAddress(queueName, x => x.AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle);
 
             Assert.That(address, Is.EqualTo(Bus.Address));
+        }
+
+        [Test]
+        public void Should_get_the_queue_address()
+        {
+            var address = Bus.GetServiceBusHostTopology().GetDestinationAddress("input_queue");
+
+            Assert.That(address, Is.EqualTo(InputQueueAddress));
         }
 
         [Test]

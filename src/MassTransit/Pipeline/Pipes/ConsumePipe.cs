@@ -5,19 +5,19 @@ namespace MassTransit.Pipeline.Pipes
     using System.Threading.Tasks;
     using ConsumePipeSpecifications;
     using GreenPipes;
-    using GreenPipes.Internals.Extensions;
     using GreenPipes.Filters;
+    using GreenPipes.Internals.Extensions;
     using Util;
 
 
     public class ConsumePipe :
         IConsumePipe
     {
-        readonly ConcurrentDictionary<Type, IMessagePipe> _outputPipes;
-        readonly IConsumePipeSpecification _specification;
-        readonly IDynamicFilter<ConsumeContext, Guid> _dynamicFilter;
-        readonly IPipe<ConsumeContext> _pipe;
         readonly TaskCompletionSource<bool> _connected;
+        readonly IDynamicFilter<ConsumeContext, Guid> _dynamicFilter;
+        readonly ConcurrentDictionary<Type, IMessagePipe> _outputPipes;
+        readonly IPipe<ConsumeContext> _pipe;
+        readonly IConsumePipeSpecification _specification;
 
         public ConsumePipe(IConsumePipeSpecification specification, IDynamicFilter<ConsumeContext, Guid> dynamicFilter, IPipe<ConsumeContext> pipe,
             bool autoStart)

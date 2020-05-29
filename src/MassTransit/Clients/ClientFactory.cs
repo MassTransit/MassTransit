@@ -3,7 +3,6 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Util;
 
 
     public class ClientFactory :
@@ -72,7 +71,7 @@
         public IRequestClient<T> CreateRequestClient<T>(Uri destinationAddress, RequestTimeout timeout)
             where T : class
         {
-            var requestSendEndpoint = _context.GetRequestEndpoint<T>(destinationAddress);
+            IRequestSendEndpoint<T> requestSendEndpoint = _context.GetRequestEndpoint<T>(destinationAddress);
 
             return new RequestClient<T>(_context, requestSendEndpoint, timeout.Or(_context.DefaultTimeout));
         }

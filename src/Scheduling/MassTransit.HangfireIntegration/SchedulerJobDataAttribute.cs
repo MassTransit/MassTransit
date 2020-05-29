@@ -18,7 +18,7 @@ namespace MassTransit.HangfireIntegration
             var timeHeaders = new Dictionary<string, DateTimeOffset?>
             {
                 [HangfireMessageHeaders.Sent] = DateTimeOffset.UtcNow,
-                [HangfireMessageHeaders.Scheduled] = filterContext.BackgroundJob.CreatedAt,
+                [HangfireMessageHeaders.Scheduled] = filterContext.BackgroundJob.CreatedAt
             };
             data.PayloadMessageHeadersAsJson = JsonConvert.SerializeObject(timeHeaders);
         }

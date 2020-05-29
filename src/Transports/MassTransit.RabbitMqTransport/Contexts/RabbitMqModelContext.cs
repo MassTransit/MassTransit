@@ -18,11 +18,11 @@
         ModelContext,
         IAsyncDisposable
     {
-        readonly ConnectionContext _connectionContext;
-        readonly IModel _model;
         readonly CancellationToken _cancellationToken;
-        readonly ChannelExecutor _executor;
         readonly PendingConfirmationCollection _confirmations;
+        readonly ConnectionContext _connectionContext;
+        readonly ChannelExecutor _executor;
+        readonly IModel _model;
         readonly IPublisher _publisher;
 
         public RabbitMqModelContext(ConnectionContext connectionContext, IModel model, CancellationToken cancellationToken)
@@ -60,8 +60,10 @@
                 {
                     _model.WaitForConfirms(_connectionContext.StopTimeout, out var timedOut);
                     if (timedOut)
+                    {
                         LogContext.Warning?.Log("Timeout waiting for pending confirms:  {ChannelNumber} {Host}", _model.ChannelNumber,
                             _connectionContext.Description);
+                    }
                 }
             }
             catch (Exception ex)

@@ -5,6 +5,5 @@ namespace MassTransit.Conductor.Capabilities
     /// </summary>
     public class ClientIdCapability
     {
-
     }
 }

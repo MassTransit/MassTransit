@@ -43,6 +43,7 @@ namespace MassTransit.NHibernateIntegration.Saga
             catch (Exception)
             {
                 if (transaction.IsActive)
+                {
                     try
                     {
                         await transaction.RollbackAsync(context.CancellationToken).ConfigureAwait(false);
@@ -51,6 +52,7 @@ namespace MassTransit.NHibernateIntegration.Saga
                     {
                         LogContext.Warning?.Log(rollbackException, "Failed to rollback transaction");
                     }
+                }
 
                 throw;
             }
@@ -88,6 +90,7 @@ namespace MassTransit.NHibernateIntegration.Saga
             catch (Exception)
             {
                 if (transaction.IsActive)
+                {
                     try
                     {
                         await transaction.RollbackAsync(context.CancellationToken).ConfigureAwait(false);
@@ -96,6 +99,7 @@ namespace MassTransit.NHibernateIntegration.Saga
                     {
                         LogContext.Warning?.Log(rollbackException, "Failed to rollback transaction");
                     }
+                }
 
                 throw;
             }

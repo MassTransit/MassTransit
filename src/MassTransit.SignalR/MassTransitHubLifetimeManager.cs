@@ -18,9 +18,8 @@
         where THub : Hub
     {
         readonly HubLifetimeManagerOptions<THub> _options;
-        readonly IHubLifetimeScopeProvider _scopeProvider;
         readonly IHubProtocolResolver _resolver;
-        IReadOnlyList<IHubProtocol> Protocols => _resolver.AllProtocols;
+        readonly IHubLifetimeScopeProvider _scopeProvider;
 
         public MassTransitHubLifetimeManager(HubLifetimeManagerOptions<THub> options, IHubLifetimeScopeProvider scopeProvider, IHubProtocolResolver resolver)
         {
@@ -28,6 +27,8 @@
             _scopeProvider = scopeProvider;
             _resolver = resolver;
         }
+
+        IReadOnlyList<IHubProtocol> Protocols => _resolver.AllProtocols;
 
         public string ServerName => _options.ServerName;
         public HubConnectionStore Connections => _options.ConnectionStore;
@@ -59,9 +60,7 @@
             {
                 // Removes connection from all groups locally
                 foreach (var groupName in groups.ToArray())
-                {
                     RemoveGroupAsyncCore(connection, groupName);
-                }
             }
 
             return Task.CompletedTask;

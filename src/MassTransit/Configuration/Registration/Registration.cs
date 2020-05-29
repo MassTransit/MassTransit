@@ -12,12 +12,12 @@ namespace MassTransit.Registration
     public class Registration :
         IRegistration
     {
+        readonly IDictionary<Type, IActivityRegistration> _activities;
         readonly IConfigurationServiceProvider _configurationServiceProvider;
         readonly IDictionary<Type, IConsumerRegistration> _consumers;
-        readonly IDictionary<Type, ISagaRegistration> _sagas;
-        readonly IDictionary<Type, IExecuteActivityRegistration> _executeActivities;
-        readonly IDictionary<Type, IActivityRegistration> _activities;
         readonly IDictionary<Type, IEndpointRegistration> _endpoints;
+        readonly IDictionary<Type, IExecuteActivityRegistration> _executeActivities;
+        readonly IDictionary<Type, ISagaRegistration> _sagas;
 
         public Registration(IConfigurationServiceProvider configurationServiceProvider, IDictionary<Type, IConsumerRegistration> consumers,
             IDictionary<Type, ISagaRegistration> sagas, IDictionary<Type, IExecuteActivityRegistration> executeActivities,
@@ -121,25 +121,25 @@ namespace MassTransit.Registration
             endpointNameFormatter ??= _configurationServiceProvider.GetService<IEndpointNameFormatter>()
                 ?? DefaultEndpointNameFormatter.Instance;
 
-            var consumersByEndpoint = _consumers.Values
+            IEnumerable<IGrouping<string, IConsumerDefinition>> consumersByEndpoint = _consumers.Values
                 .Select(x => x.GetDefinition(_configurationServiceProvider))
                 .GroupBy(x => x.GetEndpointName(endpointNameFormatter));
 
-            var sagasByEndpoint = _sagas.Values
+            IEnumerable<IGrouping<string, ISagaDefinition>> sagasByEndpoint = _sagas.Values
                 .Select(x => x.GetDefinition(_configurationServiceProvider))
                 .GroupBy(x => x.GetEndpointName(endpointNameFormatter));
 
-            var activities = _activities.Values
+            IActivityDefinition[] activities = _activities.Values
                 .Select(x => x.GetDefinition(_configurationServiceProvider))
                 .ToArray();
 
-            var activitiesByExecuteEndpoint = activities
+            IEnumerable<IGrouping<string, IActivityDefinition>> activitiesByExecuteEndpoint = activities
                 .GroupBy(x => x.GetExecuteEndpointName(endpointNameFormatter));
 
-            var activitiesByCompensateEndpoint = activities
+            IEnumerable<IGrouping<string, IActivityDefinition>> activitiesByCompensateEndpoint = activities
                 .GroupBy(x => x.GetCompensateEndpointName(endpointNameFormatter));
 
-            var executeActivitiesByEndpoint = _executeActivities.Values
+            IEnumerable<IGrouping<string, IExecuteActivityDefinition>> executeActivitiesByEndpoint = _executeActivities.Values
                 .Select(x => x.GetDefinition(_configurationServiceProvider))
                 .GroupBy(x => x.GetExecuteEndpointName(endpointNameFormatter));
 
@@ -156,7 +156,7 @@ namespace MassTransit.Registration
                     Definition = values.Select(x => x.Definition).Combine()
                 });
 
-            var endpointNames = consumersByEndpoint.Select(x => x.Key)
+            IEnumerable<string> endpointNames = consumersByEndpoint.Select(x => x.Key)
                 .Union(sagasByEndpoint.Select(x => x.Key))
                 .Union(activitiesByExecuteEndpoint.Select(x => x.Key))
                 .Union(executeActivitiesByEndpoint.Select(x => x.Key))
@@ -195,18 +195,19 @@ namespace MassTransit.Registration
                 configurator.ReceiveEndpoint(endpoint.Definition, endpointNameFormatter, cfg =>
                 {
                     if (endpoint.Consumers != null)
+                    {
                         foreach (var consumer in endpoint.Consumers)
-                        {
                             ConfigureConsumer(consumer.ConsumerType, cfg);
-                        }
+                    }
 
                     if (endpoint.Sagas != null)
+                    {
                         foreach (var saga in endpoint.Sagas)
-                        {
                             ConfigureSaga(saga.SagaType, cfg);
-                        }
+                    }
 
                     if (endpoint.Activities != null)
+                    {
                         foreach (var activity in endpoint.Activities)
                         {
                             var compensateEndpointName = activity.GetCompensateEndpointName(endpointNameFormatter);
@@ -227,12 +228,13 @@ namespace MassTransit.Registration
                                 });
                             }
                         }
+                    }
 
                     if (endpoint.ExecuteActivities != null)
+                    {
                         foreach (var activity in endpoint.ExecuteActivities)
-                        {
                             ConfigureExecuteActivity(activity.ActivityType, cfg);
-                        }
+                    }
                 });
             }
         }

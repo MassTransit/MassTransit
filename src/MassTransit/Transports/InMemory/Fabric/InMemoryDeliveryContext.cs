@@ -7,11 +7,11 @@
         DeliveryContext<InMemoryTransportMessage>
     {
         readonly HashSet<IMessageSink<InMemoryTransportMessage>> _delivered;
-        
+
         public InMemoryDeliveryContext(InMemoryTransportMessage message)
         {
             Package = message;
-            
+
             _delivered = new HashSet<IMessageSink<InMemoryTransportMessage>>();
         }
 

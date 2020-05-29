@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.RabbitMqTransport.Tests
+﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -64,7 +52,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             await Bus.Publish<ThirdInterface>(new { });
             await Bus.Publish<AnotherThirdInterface>(new { });
 
-            var received = await _receivedA;
+            ConsumeContext<FirstInterface> received = await _receivedA;
         }
 
         Task<ConsumeContext<FirstInterface>> _receivedA;
@@ -194,7 +182,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.That(topology.Exchanges.Any(x => x.ExchangeName == interfaceName), Is.True);
             Assert.That(topology.Exchanges.Length, Is.EqualTo(2));
             Assert.That(topology.ExchangeBindings.Length, Is.EqualTo(1));
-            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == interfaceName && x.Destination.ExchangeName == singleInterfaceName), Is.True);
+            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == interfaceName && x.Destination.ExchangeName == singleInterfaceName),
+                Is.True);
 
             Assert.That(topology.Exchanges.Any(x => x.ExchangeName == singleInterfaceName), Is.True);
         }
@@ -249,9 +238,26 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.That(topology.Exchanges.Any(x => x.ExchangeName == interfaceName), Is.True);
             Assert.That(topology.Exchanges.Length, Is.EqualTo(2));
             Assert.That(topology.ExchangeBindings.Length, Is.EqualTo(1));
-            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == interfaceName && x.Destination.ExchangeName == singleInterfaceName), Is.True);
+            Assert.That(topology.ExchangeBindings.Any(x => x.Source.ExchangeName == interfaceName && x.Destination.ExchangeName == singleInterfaceName),
+                Is.True);
 
             Assert.That(topology.Exchanges.Any(x => x.ExchangeName == singleInterfaceName), Is.True);
+        }
+
+        [Test]
+        public void Should_include_a_binding_for_the_single_interface()
+        {
+            _publishTopology.GetMessageTopology<SingleInterface>()
+                .Apply(_builder);
+
+            var topology = _builder.BuildBrokerTopology();
+            topology.LogResult();
+
+            var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();
+
+            Assert.That(topology.Exchanges.Any(x => x.ExchangeName == singleInterfaceName), Is.True);
+            Assert.That(topology.Exchanges.Length, Is.EqualTo(1));
+            Assert.That(topology.ExchangeBindings.Length, Is.EqualTo(0));
         }
 
         [Test]
@@ -277,22 +283,6 @@ namespace MassTransit.RabbitMqTransport.Tests
                 Is.True);
 
             Assert.That(topology.Exchanges.Any(x => x.ExchangeName == firstInterfaceName), Is.True);
-        }
-
-        [Test]
-        public void Should_include_a_binding_for_the_single_interface()
-        {
-            _publishTopology.GetMessageTopology<SingleInterface>()
-                .Apply(_builder);
-
-            var topology = _builder.BuildBrokerTopology();
-            topology.LogResult();
-
-            var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();
-
-            Assert.That(topology.Exchanges.Any(x => x.ExchangeName == singleInterfaceName), Is.True);
-            Assert.That(topology.Exchanges.Length, Is.EqualTo(1));
-            Assert.That(topology.ExchangeBindings.Length, Is.EqualTo(0));
         }
 
         [SetUp]

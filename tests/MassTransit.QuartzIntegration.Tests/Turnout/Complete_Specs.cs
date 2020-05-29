@@ -20,20 +20,15 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     public class Submitting_a_job_to_turnout :
         QuartzInMemoryTestFixture
     {
-        Guid _jobId;
-        Task<ConsumeContext<JobCompleted>> _completed;
-        Task<ConsumeContext<JobSubmitted>> _submitted;
-        Task<ConsumeContext<JobStarted>> _started;
-
         [Test]
         [Order(1)]
         public async Task Should_get_the_job_accepted()
         {
             var serviceClient = Bus.CreateServiceClient();
 
-            var requestClient = serviceClient.CreateRequestClient<SubmitJob<CrunchTheNumbers>>();
+            IRequestClient<SubmitJob<CrunchTheNumbers>> requestClient = serviceClient.CreateRequestClient<SubmitJob<CrunchTheNumbers>>();
 
-            var response = await requestClient.GetResponse<JobSubmissionAccepted>(new
+            Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
                 Job = new {Duration = TimeSpan.FromSeconds(1)}
@@ -42,29 +37,34 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));
 
             // just to capture all the test output in a single window
-            var completed = await _completed;
-        }
-
-        [Test]
-        [Order(2)]
-        public async Task Should_have_published_the_job_submitted_event()
-        {
-            var submitted = await _submitted;
-        }
-
-        [Test]
-        [Order(3)]
-        public async Task Should_have_published_the_job_started_event()
-        {
-            var started = await _started;
+            ConsumeContext<JobCompleted> completed = await _completed;
         }
 
         [Test]
         [Order(4)]
         public async Task Should_have_published_the_job_completed_event()
         {
-            var completed = await _completed;
+            ConsumeContext<JobCompleted> completed = await _completed;
         }
+
+        [Test]
+        [Order(3)]
+        public async Task Should_have_published_the_job_started_event()
+        {
+            ConsumeContext<JobStarted> started = await _started;
+        }
+
+        [Test]
+        [Order(2)]
+        public async Task Should_have_published_the_job_submitted_event()
+        {
+            ConsumeContext<JobSubmitted> submitted = await _submitted;
+        }
+
+        Guid _jobId;
+        Task<ConsumeContext<JobCompleted>> _completed;
+        Task<ConsumeContext<JobSubmitted>> _submitted;
+        Task<ConsumeContext<JobStarted>> _started;
 
         [OneTimeSetUp]
         public async Task Arrange()
@@ -112,18 +112,13 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     public class Submitting_a_job_to_turnout_using_request_client :
         QuartzInMemoryTestFixture
     {
-        Guid _jobId;
-        Task<ConsumeContext<JobCompleted>> _completed;
-        Task<ConsumeContext<JobSubmitted>> _submitted;
-        Task<ConsumeContext<JobStarted>> _started;
-
         [Test]
         [Order(1)]
         public async Task Should_get_the_job_accepted()
         {
-            var requestClient = Bus.CreateRequestClient<SubmitJob<CrunchTheNumbers>>();
+            IRequestClient<SubmitJob<CrunchTheNumbers>> requestClient = Bus.CreateRequestClient<SubmitJob<CrunchTheNumbers>>();
 
-            var response = await requestClient.GetResponse<JobSubmissionAccepted>(new
+            Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
                 Job = new {Duration = TimeSpan.FromSeconds(1)}
@@ -132,29 +127,34 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));
 
             // just to capture all the test output in a single window
-            var completed = await _completed;
-        }
-
-        [Test]
-        [Order(2)]
-        public async Task Should_have_published_the_job_submitted_event()
-        {
-            var submitted = await _submitted;
-        }
-
-        [Test]
-        [Order(3)]
-        public async Task Should_have_published_the_job_started_event()
-        {
-            var started = await _started;
+            ConsumeContext<JobCompleted> completed = await _completed;
         }
 
         [Test]
         [Order(4)]
         public async Task Should_have_published_the_job_completed_event()
         {
-            var completed = await _completed;
+            ConsumeContext<JobCompleted> completed = await _completed;
         }
+
+        [Test]
+        [Order(3)]
+        public async Task Should_have_published_the_job_started_event()
+        {
+            ConsumeContext<JobStarted> started = await _started;
+        }
+
+        [Test]
+        [Order(2)]
+        public async Task Should_have_published_the_job_submitted_event()
+        {
+            ConsumeContext<JobSubmitted> submitted = await _submitted;
+        }
+
+        Guid _jobId;
+        Task<ConsumeContext<JobCompleted>> _completed;
+        Task<ConsumeContext<JobSubmitted>> _submitted;
+        Task<ConsumeContext<JobStarted>> _started;
 
         [OneTimeSetUp]
         public async Task Arrange()
@@ -198,55 +198,56 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     }
 
 
-    [TestFixture, Category("SlowAF")]
+    [TestFixture]
+    [Category("SlowAF")]
     public class Submitting_a_bunch_of_jobs :
         QuartzInMemoryTestFixture
     {
-        Guid[] _jobIds;
-        TaskCompletionSource<ConsumeContext<JobCompleted>>[] _completed;
-        TaskCompletionSource<ConsumeContext<JobSubmitted>>[] _submitted;
-        TaskCompletionSource<ConsumeContext<JobStarted>>[] _started;
-
         [Test]
         [Order(1)]
         public async Task Should_get_the_job_accepted()
         {
             var serviceClient = Bus.CreateServiceClient();
 
-            var requestClient = serviceClient.CreateRequestClient<SubmitJob<CrunchTheNumbers>>();
+            IRequestClient<SubmitJob<CrunchTheNumbers>> requestClient = serviceClient.CreateRequestClient<SubmitJob<CrunchTheNumbers>>();
 
-            for (int i = 0; i < Count; i++)
+            for (var i = 0; i < Count; i++)
             {
-                var response = await requestClient.GetResponse<JobSubmissionAccepted>(new
+                Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
                 {
                     JobId = _jobIds[i],
                     Job = new {Duration = TimeSpan.FromSeconds(1)}
                 });
             }
 
-            var completed = await Task.WhenAll(_completed.Select(x => x.Task));
-        }
-
-        [Test]
-        [Order(2)]
-        public async Task Should_have_published_the_job_submitted_event()
-        {
-            var submitted = await Task.WhenAll(_submitted.Select(x => x.Task));
-        }
-
-        [Test]
-        [Order(3)]
-        public async Task Should_have_published_the_job_started_event()
-        {
-            var started = await Task.WhenAll(_started.Select(x => x.Task));
+            ConsumeContext<JobCompleted>[] completed = await Task.WhenAll(_completed.Select(x => x.Task));
         }
 
         [Test]
         [Order(4)]
         public async Task Should_have_published_the_job_completed_event()
         {
-            var completed = await Task.WhenAll(_completed.Select(x => x.Task));
+            ConsumeContext<JobCompleted>[] completed = await Task.WhenAll(_completed.Select(x => x.Task));
         }
+
+        [Test]
+        [Order(3)]
+        public async Task Should_have_published_the_job_started_event()
+        {
+            ConsumeContext<JobStarted>[] started = await Task.WhenAll(_started.Select(x => x.Task));
+        }
+
+        [Test]
+        [Order(2)]
+        public async Task Should_have_published_the_job_submitted_event()
+        {
+            ConsumeContext<JobSubmitted>[] submitted = await Task.WhenAll(_submitted.Select(x => x.Task));
+        }
+
+        Guid[] _jobIds;
+        TaskCompletionSource<ConsumeContext<JobCompleted>>[] _completed;
+        TaskCompletionSource<ConsumeContext<JobSubmitted>>[] _submitted;
+        TaskCompletionSource<ConsumeContext<JobStarted>>[] _started;
 
         const int Count = 10;
 
@@ -254,10 +255,8 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
         public async Task Arrange()
         {
             _jobIds = new Guid[Count];
-            for (int i = 0; i < _jobIds.Length; i++)
-            {
+            for (var i = 0; i < _jobIds.Length; i++)
                 _jobIds[i] = NewId.NextGuid();
-            }
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -294,7 +293,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             _started = new TaskCompletionSource<ConsumeContext<JobStarted>>[Count];
             _completed = new TaskCompletionSource<ConsumeContext<JobCompleted>>[Count];
 
-            for (int i = 0; i < Count; i++)
+            for (var i = 0; i < Count; i++)
             {
                 _submitted[i] = GetTask<ConsumeContext<JobSubmitted>>();
                 _started[i] = GetTask<ConsumeContext<JobStarted>>();
@@ -303,7 +302,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
             configurator.Handler<JobSubmitted>(context =>
             {
-                for (int i = 0; i < Count; i++)
+                for (var i = 0; i < Count; i++)
                 {
                     if (_jobIds[i] == context.Message.JobId)
                         _submitted[i].TrySetResult(context);
@@ -314,7 +313,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
             configurator.Handler<JobStarted>(context =>
             {
-                for (int i = 0; i < Count; i++)
+                for (var i = 0; i < Count; i++)
                 {
                     if (_jobIds[i] == context.Message.JobId)
                         _started[i].TrySetResult(context);
@@ -325,7 +324,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
             configurator.Handler<JobCompleted>(context =>
             {
-                for (int i = 0; i < Count; i++)
+                for (var i = 0; i < Count; i++)
                 {
                     if (_jobIds[i] == context.Message.JobId)
                         _completed[i].TrySetResult(context);

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests
+﻿namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
     using NUnit.Framework;
@@ -31,7 +19,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_receive_the_secure_command()
         {
-            var context = await _secureCommandHandler;
+            ConsumeContext<SecureCommand<ExecuteSql>> context = await _secureCommandHandler;
 
             context.Message.Credentials.ShouldNotBe(null);
 
@@ -44,10 +32,7 @@ namespace MassTransit.Tests
         [OneTimeSetUp]
         public void Setup()
         {
-            InputQueueSendEndpoint.Send(new ExecuteSqlCommand
-            {
-                SqlText = "DROP TABLE [Users]",
-            }).Wait(TestCancellationToken);
+            InputQueueSendEndpoint.Send(new ExecuteSqlCommand {SqlText = "DROP TABLE [Users]"}).Wait(TestCancellationToken);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -59,7 +44,11 @@ namespace MassTransit.Tests
                 var output = new SecureCommandMessage<ExecuteSql>
                 {
                     Command = context.Message,
-                    Credentials = new UserCredentialsImpl {Username = "sa", Password = "n0_p4ssw0rd"},
+                    Credentials = new UserCredentialsImpl
+                    {
+                        Username = "sa",
+                        Password = "n0_p4ssw0rd"
+                    }
                 };
 
                 // TODO create ForwardContext pipe that copies the good bits of send context from the original

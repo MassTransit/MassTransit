@@ -18,12 +18,12 @@
         where TArguments : class
     {
         readonly IExecuteActivityFactory<TActivity, TArguments> _activityFactory;
-        readonly Uri _compensateAddress;
         readonly IBuildPipeConfigurator<ExecuteActivityContext<TActivity, TArguments>> _activityPipeConfigurator;
-        readonly IBuildPipeConfigurator<ExecuteContext<TArguments>> _executePipeConfigurator;
-        readonly RoutingSlipConfigurator _routingSlipConfigurator;
+        readonly Uri _compensateAddress;
         readonly ActivityConfigurationObservable _configurationObservers;
+        readonly IBuildPipeConfigurator<ExecuteContext<TArguments>> _executePipeConfigurator;
         readonly ActivityObservable _observers;
+        readonly RoutingSlipConfigurator _routingSlipConfigurator;
 
         public ExecuteActivityHostSpecification(IExecuteActivityFactory<TActivity, TArguments> activityFactory, IActivityConfigurationObserver observer)
         {
@@ -69,6 +69,16 @@
             configure?.Invoke(_routingSlipConfigurator);
         }
 
+        public ConnectHandle ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
+        {
+            return _configurationObservers.Connect(observer);
+        }
+
+        public ConnectHandle ConnectActivityObserver(IActivityObserver observer)
+        {
+            return _observers.Connect(observer);
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             foreach (var result in _routingSlipConfigurator.Validate())
@@ -95,22 +105,12 @@
 
             _executePipeConfigurator.UseFilter(new ExecuteActivityFactoryFilter<TActivity, TArguments>(_activityFactory, executeActivityPipe));
 
-            var executePipe = _executePipeConfigurator.Build();
+            IPipe<ExecuteContext<TArguments>> executePipe = _executePipeConfigurator.Build();
 
             var host = new ExecuteActivityHost<TActivity, TArguments>(executePipe, _compensateAddress);
             _routingSlipConfigurator.UseFilter(host);
 
             builder.ConnectConsumePipe(_routingSlipConfigurator.Build());
-        }
-
-        public ConnectHandle ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
-        {
-            return _configurationObservers.Connect(observer);
-        }
-
-        public ConnectHandle ConnectActivityObserver(IActivityObserver observer)
-        {
-            return _observers.Connect(observer);
         }
     }
 }

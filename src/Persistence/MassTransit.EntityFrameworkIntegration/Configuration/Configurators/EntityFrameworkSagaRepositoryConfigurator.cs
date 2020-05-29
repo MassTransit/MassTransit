@@ -18,10 +18,10 @@ namespace MassTransit.EntityFrameworkIntegration.Configurators
         where TSaga : class, ISaga
     {
         ConcurrencyMode _concurrencyMode;
-        Func<IQueryable<TSaga>, IQueryable<TSaga>> _queryCustomization;
-        ILockStatementProvider _lockStatementProvider;
-        IsolationLevel _isolationLevel;
         Action<ISagaRepositoryRegistrationConfigurator<TSaga>> _configureDbContext;
+        IsolationLevel _isolationLevel;
+        ILockStatementProvider _lockStatementProvider;
+        Func<IQueryable<TSaga>, IQueryable<TSaga>> _queryCustomization;
 
         public EntityFrameworkSagaRepositoryConfigurator()
         {

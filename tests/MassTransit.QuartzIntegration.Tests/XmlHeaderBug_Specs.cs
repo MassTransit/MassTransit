@@ -10,8 +10,6 @@
     public class XmlHeaderBug_Specs :
         QuartzInMemoryTestFixture
     {
-        Consumer _consumer;
-
         [Test]
         public async Task Should_not_get_junk_headers()
         {
@@ -19,6 +17,8 @@
 
             await _consumer.Completed;
         }
+
+        Consumer _consumer;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -43,9 +43,8 @@
         class Consumer :
             IConsumer<IMyMessage>
         {
-            public Task Completed => _source.Task;
-
             readonly TaskCompletionSource<ConsumeContext<IMyMessage>> _source = TaskUtil.GetTask<ConsumeContext<IMyMessage>>();
+            public Task Completed => _source.Task;
 
             public async Task Consume(ConsumeContext<IMyMessage> context)
             {
@@ -62,9 +61,7 @@
                 }
 
                 if (value == null)
-                {
                     await context.Redeliver(TimeSpan.FromSeconds(1));
-                }
             }
         }
     }

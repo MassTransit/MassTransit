@@ -14,17 +14,17 @@ namespace MassTransit.Definition
     {
         string _compensateEndpointName;
 
-        public IEndpointDefinition<ICompensateActivity<TLog>> CompensateEndpointDefinition { private get; set; }
-
         /// <summary>
         /// Specify the endpoint name (which may be a queue, or a subscription, depending upon the transport) on which the saga
-        /// should be configured. Setting to null will use the supplied <see cref="IEndpointNameFormatter"/> to generate the
+        /// should be configured. Setting to null will use the supplied <see cref="IEndpointNameFormatter" /> to generate the
         /// endpoint name.
         /// </summary>
         protected string CompensateEndpointName
         {
             set => _compensateEndpointName = value;
         }
+
+        public IEndpointDefinition<ICompensateActivity<TLog>> CompensateEndpointDefinition { private get; set; }
 
         void IActivityDefinition<TActivity, TArguments, TLog>.Configure(IReceiveEndpointConfigurator endpointConfigurator,
             ICompensateActivityConfigurator<TActivity, TLog> compensateActivityConfigurator)

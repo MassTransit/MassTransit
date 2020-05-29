@@ -9,6 +9,11 @@
         CourierContext
     {
         /// <summary>
+        /// Set the compensation result, which completes the activity
+        /// </summary>
+        CompensationResult Result { get; set; }
+
+        /// <summary>
         /// The compensation was successful
         /// </summary>
         /// <returns></returns>
@@ -40,11 +45,6 @@
         /// <param name="exception"></param>
         /// <returns></returns>
         CompensationResult Failed(Exception exception);
-
-        /// <summary>
-        /// Set the compensation result, which completes the activity
-        /// </summary>
-        CompensationResult Result { get; set; }
     }
 
 

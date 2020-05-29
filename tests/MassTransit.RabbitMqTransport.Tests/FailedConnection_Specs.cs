@@ -25,7 +25,7 @@
 
             DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
 
-            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 x.Host(new Uri("rabbitmq://unknownhost:32787"), h =>
                 {
@@ -52,7 +52,7 @@
         [Test]
         public async Task Should_fault_when_credentials_are_bad()
         {
-            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 x.Host(new Uri("rabbitmq://localhost/"), h =>
                 {
@@ -63,7 +63,7 @@
 
             Assert.That(async () =>
             {
-                BusHandle handle = await busControl.StartAsync();
+                var handle = await busControl.StartAsync();
                 try
                 {
                     Console.WriteLine("Waiting for connection...");
@@ -81,14 +81,14 @@
         [Explicit]
         public async Task Should_recover_from_a_crashed_server()
         {
-            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 x.Host(new Uri("rabbitmq://localhost/"), h =>
                 {
                 });
             });
 
-            BusHandle handle = await busControl.StartAsync();
+            var handle = await busControl.StartAsync();
             try
             {
                 Console.WriteLine("Waiting for connection...");
@@ -119,6 +119,25 @@
 
         [Test]
         [Explicit]
+        public async Task Should_start_without_any_configuration()
+        {
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            {
+            });
+
+            var handle = await busControl.StartAsync(new CancellationTokenSource(5000).Token);
+            try
+            {
+                await handle.Ready;
+            }
+            finally
+            {
+                await handle.StopAsync();
+            }
+        }
+
+        [Test]
+        [Explicit]
         public async Task Should_startup_and_shut_down_cleanly()
         {
             var loggerFactory = new TestOutputLoggerFactory(true);
@@ -127,7 +146,7 @@
 
             DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
 
-            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq();
+            var busControl = Bus.Factory.CreateUsingRabbitMq();
 
             BusHandle handle;
             using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
@@ -147,28 +166,9 @@
 
         [Test]
         [Explicit]
-        public async Task Should_start_without_any_configuration()
-        {
-            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
-            {
-            });
-
-            BusHandle handle = await busControl.StartAsync(new CancellationTokenSource(5000).Token);
-            try
-            {
-                await handle.Ready;
-            }
-            finally
-            {
-                await handle.StopAsync();
-            }
-        }
-
-        [Test]
-        [Explicit]
         public async Task Should_startup_and_shut_down_cleanly_with_an_endpoint()
         {
-            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 x.Host(new Uri("rabbitmq://localhost/"), h =>
                 {
@@ -182,7 +182,7 @@
                 });
             });
 
-            BusHandle handle = await busControl.StartAsync(TestCancellationToken);
+            var handle = await busControl.StartAsync(TestCancellationToken);
             try
             {
                 Console.WriteLine("Waiting for connection...");
@@ -201,7 +201,7 @@
         [Explicit]
         public async Task Should_startup_and_shut_down_cleanly_with_publish()
         {
-            IBusControl busControl = Bus.Factory.CreateUsingRabbitMq(x =>
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
                 x.Host(new Uri("rabbitmq://localhost/"), h =>
                 {

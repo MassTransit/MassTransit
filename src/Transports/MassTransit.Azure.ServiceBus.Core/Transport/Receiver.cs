@@ -49,8 +49,10 @@
         protected Task ExceptionHandler(ExceptionReceivedEventArgs args)
         {
             if (!(args.Exception is OperationCanceledException))
+            {
                 LogContext.Error?.Log(args.Exception, "Exception on Receiver {InputAddress} during {Action}", _context.InputAddress,
                     args.ExceptionReceivedContext.Action);
+            }
 
             if (_messageReceiver.ActiveDispatchCount == 0)
             {
@@ -67,9 +69,7 @@
         async Task HandleDeliveryComplete()
         {
             if (IsStopping)
-            {
                 _deliveryComplete.TrySetResult(true);
-            }
         }
 
         protected override async Task StopSupervisor(StopSupervisorContext context)
@@ -88,6 +88,7 @@
             await Task.WhenAll(context.Agents.Select(x => Completed)).OrCanceled(context.CancellationToken).ConfigureAwait(false);
 
             if (_messageReceiver.ActiveDispatchCount > 0)
+            {
                 try
                 {
                     await _deliveryComplete.Task.OrCanceled(context.CancellationToken).ConfigureAwait(false);
@@ -96,6 +97,7 @@
                 {
                     LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
                 }
+            }
         }
 
         Task OnMessage(IReceiverClient messageReceiver, Message message, CancellationToken cancellationToken)

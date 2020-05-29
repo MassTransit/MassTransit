@@ -1,11 +1,12 @@
-﻿using System;
-using System.Threading.Tasks;
-using Marten.Schema;
-using MassTransit.Saga;
-using System.Linq.Expressions;
-
-namespace MassTransit.MartenIntegration.Tests
+﻿namespace MassTransit.MartenIntegration.Tests
 {
+    using System;
+    using System.Linq.Expressions;
+    using System.Threading.Tasks;
+    using Marten.Schema;
+    using MassTransit.Saga;
+
+
     public class SimpleSaga :
         InitiatedBy<InitiateSimpleSaga>,
         Observes<ObservableSagaMessage, SimpleSaga>,
@@ -40,6 +41,5 @@ namespace MassTransit.MartenIntegration.Tests
         {
             Completed = true;
         }
-
     }
 }

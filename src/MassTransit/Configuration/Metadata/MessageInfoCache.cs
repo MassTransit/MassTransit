@@ -4,7 +4,6 @@ namespace MassTransit.Metadata
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using Contracts;
     using Contracts.Metadata;
     using Internals.GraphValidation;
 

@@ -1,6 +1,7 @@
 namespace MassTransit.Transformation.TransformConfigurators
 {
     using GreenPipes;
+    using Initializers;
     using Pipeline.Filters;
 
 
@@ -11,7 +12,7 @@ namespace MassTransit.Transformation.TransformConfigurators
     {
         void IPipeSpecification<SendContext<TMessage>>.Apply(IPipeBuilder<SendContext<TMessage>> builder)
         {
-            var initializer = Build();
+            IMessageInitializer<TMessage> initializer = Build();
 
             builder.AddFilter(new TransformFilter<TMessage>(initializer));
         }

@@ -10,7 +10,6 @@
     using Metadata;
     using Pipeline;
     using Pipeline.ConsumerFactories;
-    using Util;
 
 
     public static class ConsumerExtensions
@@ -62,9 +61,7 @@
 
             IConsumerSpecification<TConsumer> specification = ConsumerConnectorCache<TConsumer>.Connector.CreateConsumerSpecification<TConsumer>();
             foreach (IPipeSpecification<ConsumerConsumeContext<TConsumer>> pipeSpecification in pipeSpecifications)
-            {
                 specification.AddPipeSpecification(pipeSpecification);
-            }
 
             return ConsumerConnectorCache<TConsumer>.Connector.ConnectConsumer(connector, consumerFactory, specification);
         }

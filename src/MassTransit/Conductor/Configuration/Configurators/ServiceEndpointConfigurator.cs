@@ -12,9 +12,9 @@ namespace MassTransit.Conductor.Configuration.Configurators
         IEndpointConfigurationObserver
     {
         readonly IList<ConnectHandle> _configurationHandles;
-        readonly IReceiveEndpointConfigurator _serviceEndpointConfigurator;
         readonly IReceiveEndpointConfigurator _controlEndpointConfigurator;
         readonly IServiceEndpoint _endpoint;
+        readonly IReceiveEndpointConfigurator _serviceEndpointConfigurator;
 
         public ServiceEndpointConfigurator(IServiceInstance instance, IEndpointConfigurationObserverConnector connector,
             IReceiveEndpointConfigurator serviceEndpointConfigurator, IReceiveEndpointConfigurator controlEndpointConfigurator = null)
@@ -31,6 +31,22 @@ namespace MassTransit.Conductor.Configuration.Configurators
             _configurationHandles.Add(connector.ConnectEndpointConfigurationObserver(this));
         }
 
+        public void EndpointConfigured<T>(T configurator)
+            where T : IReceiveEndpointConfigurator
+        {
+            if (ReferenceEquals(configurator, _serviceEndpointConfigurator))
+                DisconnectConfigurationObservers();
+        }
+
+        public void ConfigureMessage<T>(IConsumePipeConfigurator configurator)
+            where T : class
+        {
+            _endpoint.ConfigureServiceEndpoint<T>(configurator);
+
+            if (_controlEndpointConfigurator != null)
+                _endpoint.ConfigureControlEndpoint<T>(_controlEndpointConfigurator);
+        }
+
         void ConnectConfigurationObserver(IConsumePipeConfigurator configurator)
         {
             var configurationObserver = new ServiceEndpointConfigurationObserver(configurator, this);
@@ -44,27 +60,9 @@ namespace MassTransit.Conductor.Configuration.Configurators
         void DisconnectConfigurationObservers()
         {
             foreach (var handle in _configurationHandles)
-            {
                 handle.Disconnect();
-            }
 
             _configurationHandles.Clear();
-        }
-
-        public void ConfigureMessage<T>(IConsumePipeConfigurator configurator)
-            where T : class
-        {
-            _endpoint.ConfigureServiceEndpoint<T>(configurator);
-
-            if (_controlEndpointConfigurator != null)
-                _endpoint.ConfigureControlEndpoint<T>(_controlEndpointConfigurator);
-        }
-
-        public void EndpointConfigured<T>(T configurator)
-            where T : IReceiveEndpointConfigurator
-        {
-            if (ReferenceEquals(configurator, _serviceEndpointConfigurator))
-                DisconnectConfigurationObservers();
         }
     }
 }

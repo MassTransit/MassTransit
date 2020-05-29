@@ -8,7 +8,7 @@ namespace MassTransit.Definition
     {
         public static IEndpointDefinition Combine(this IEnumerable<IEndpointDefinition> definitions)
         {
-            var list = definitions.ToList();
+            List<IEndpointDefinition> list = definitions.ToList();
             if (list.Count == 0)
                 return default;
 

@@ -30,7 +30,7 @@
 
         async Task<Uri> IMessageDataRepository.Put(Stream stream, TimeSpan? timeToLive, CancellationToken cancellationToken)
         {
-            Uri address = new InMemoryMessageDataId().Uri;
+            var address = new InMemoryMessageDataId().Uri;
 
             using var ms = new MemoryStream();
 

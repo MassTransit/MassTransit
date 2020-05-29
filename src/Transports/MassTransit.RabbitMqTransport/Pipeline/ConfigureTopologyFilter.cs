@@ -15,8 +15,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IFilter<ModelContext>
         where TSettings : class
     {
-        readonly TSettings _settings;
         readonly BrokerTopology _brokerTopology;
+        readonly TSettings _settings;
 
         public ConfigureTopologyFilter(TSettings settings, BrokerTopology brokerTopology)
         {

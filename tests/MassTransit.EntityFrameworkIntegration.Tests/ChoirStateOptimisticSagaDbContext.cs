@@ -8,6 +8,17 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 
     class ChoirStateOptimisticSagaDbContext : SagaDbContext
     {
+        public ChoirStateOptimisticSagaDbContext(string nameOrConnectionString)
+            : base(nameOrConnectionString)
+        {
+        }
+
+        protected override IEnumerable<ISagaClassMap> Configurations
+        {
+            get { yield return new EntityFrameworkChoirStateMap(); }
+        }
+
+
         class EntityFrameworkChoirStateMap :
             SagaClassMap<ChoirStateOptimistic>
         {
@@ -24,16 +35,6 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 
                 entity.Property(x => x.Harmony);
             }
-        }
-
-        public ChoirStateOptimisticSagaDbContext(string nameOrConnectionString)
-            : base(nameOrConnectionString)
-        {
-        }
-
-        protected override IEnumerable<ISagaClassMap> Configurations
-        {
-            get { yield return new EntityFrameworkChoirStateMap(); }
         }
     }
 }

@@ -11,6 +11,12 @@
     public class Renewing_a_lock_on_an_existing_message :
         AzureServiceBusTestFixture
     {
+        [Test]
+        public async Task Should_complete_the_consumer()
+        {
+            var context = await PingConsumer.Completed.Task;
+        }
+
         public Renewing_a_lock_on_an_existing_message()
         {
             TestTimeout = TimeSpan.FromMinutes(30);
@@ -29,17 +35,11 @@
             await InputQueueSendEndpoint.Send(new PingMessage());
         }
 
-        [Test]
-        public async Task Should_complete_the_consumer()
-        {
-            var context = await PingConsumer.Completed.Task;
-        }
-
 
         class PingConsumer :
             IConsumer<PingMessage>
         {
-            public static TaskCompletionSource<PingMessage> Completed = TaskUtil.GetTask<PingMessage>();
+            public static readonly TaskCompletionSource<PingMessage> Completed = TaskUtil.GetTask<PingMessage>();
 
             public async Task Consume(ConsumeContext<PingMessage> context)
             {

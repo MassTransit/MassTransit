@@ -30,7 +30,7 @@ namespace MassTransit.ConsumeConnectors
                 .Select(x => new ConsumerInterfaceType(x.GetGenericArguments()[0], typeof(T)))
                 .Where(x => TypeMetadataCache.IsValidMessageType(x.MessageType));
 
-            foreach (IMessageInterfaceType type in types)
+            foreach (var type in types)
                 yield return type;
         }
     }

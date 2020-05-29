@@ -40,14 +40,19 @@
         public ISendTopologyConfigurator SendTopology => _busConfiguration.Topology.Send;
         public IPublishTopologyConfigurator PublishTopology => _busConfiguration.Topology.Publish;
 
-        public virtual bool AutoStart
-        {
-            set => _busConfiguration.BusEndpointConfiguration.Consume.Configurator.AutoStart = value;
-        }
-
         public bool DeployTopologyOnly
         {
             set => _busConfiguration.HostConfiguration.DeployTopologyOnly = value;
+        }
+
+        public ConnectHandle ConnectBusObserver(IBusObserver observer)
+        {
+            return _busConfiguration.ConnectBusObserver(observer);
+        }
+
+        public virtual bool AutoStart
+        {
+            set => _busConfiguration.BusEndpointConfiguration.Consume.Configurator.AutoStart = value;
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext> specification)
@@ -84,16 +89,6 @@
         public ConnectHandle ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
         {
             return _busConfiguration.ConnectActivityConfigurationObserver(observer);
-        }
-
-        public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
-        {
-            return _busConfiguration.ConnectEndpointConfigurationObserver(observer);
-        }
-
-        public ConnectHandle ConnectBusObserver(IBusObserver observer)
-        {
-            return _busConfiguration.ConnectBusObserver(observer);
         }
 
         public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
@@ -153,6 +148,11 @@
             where TLog : class
         {
             _busConfiguration.Consume.Configurator.CompensateActivityConfigured(configurator);
+        }
+
+        public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
+        {
+            return _busConfiguration.ConnectEndpointConfigurationObserver(observer);
         }
 
         public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)

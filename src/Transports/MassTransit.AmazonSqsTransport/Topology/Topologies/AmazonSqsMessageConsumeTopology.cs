@@ -3,7 +3,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using AmazonSqsTransport.Configuration;
     using Builders;
     using GreenPipes;
     using MassTransit.Topology;

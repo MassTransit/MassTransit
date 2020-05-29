@@ -20,6 +20,11 @@
             _hubLifetimeManager = hubLifetimeManager;
         }
 
+        public Task Consume(ConsumeContext<User<THub>> context)
+        {
+            return Handle(context.Message.UserId, context.Message.Messages);
+        }
+
         async Task Handle(string userId, IReadOnlyDictionary<string, byte[]> messages)
         {
             var message = new Lazy<SerializedHubMessage>(messages.ToSerializedHubMessage);
@@ -31,9 +36,7 @@
 
             var tasks = new List<Task>(userStore.Count);
             foreach (var connection in userStore)
-            {
                 tasks.Add(connection.WriteAsync(message.Value).AsTask());
-            }
 
             try
             {
@@ -43,11 +46,6 @@
             {
                 LogContext.Warning?.Log(e, "Failed to write message");
             }
-        }
-
-        public Task Consume(ConsumeContext<User<THub>> context)
-        {
-            return Handle(context.Message.UserId, context.Message.Messages);
         }
     }
 }

@@ -2,8 +2,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using NUnit.Framework;
     using Filtering;
+    using NUnit.Framework;
     using Util;
 
 
@@ -27,15 +27,6 @@ namespace MassTransit.AmazonSqsTransport.Tests
     public class Using_a_filter_on_an_endpoint :
         AmazonSqsTestFixture
     {
-        readonly TaskCompletionSource<Message> _foo;
-        readonly TaskCompletionSource<Message> _bar;
-
-        public Using_a_filter_on_an_endpoint()
-        {
-            _foo = GetTask<Message>();
-            _bar = GetTask<Message>();
-        }
-
         [Test]
         public async Task Should_support_a_queue_with_a_filter()
         {
@@ -47,6 +38,15 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             await _foo.Task;
             await _bar.Task;
+        }
+
+        readonly TaskCompletionSource<Message> _foo;
+        readonly TaskCompletionSource<Message> _bar;
+
+        public Using_a_filter_on_an_endpoint()
+        {
+            _foo = GetTask<Message>();
+            _bar = GetTask<Message>();
         }
 
         async Task<HostReceiveEndpointHandle> Subscribe(string key)
@@ -73,8 +73,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
         class Consumer :
             IConsumer<Message>
         {
-            readonly TaskCompletionSource<Message> _foo;
             readonly TaskCompletionSource<Message> _bar;
+            readonly TaskCompletionSource<Message> _foo;
 
             public Consumer(TaskCompletionSource<Message> foo, TaskCompletionSource<Message> bar)
             {

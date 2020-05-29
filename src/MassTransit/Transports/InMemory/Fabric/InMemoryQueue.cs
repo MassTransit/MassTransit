@@ -13,9 +13,9 @@
     {
         readonly CancellationTokenSource _cancellationToken;
         readonly TaskCompletionSource<IInMemoryQueueConsumer> _consumer;
+        readonly Connectable<IInMemoryQueueConsumer> _consumers;
         readonly string _name;
         readonly LimitedConcurrencyLevelTaskScheduler _scheduler;
-        readonly Connectable<IInMemoryQueueConsumer> _consumers;
         int _queueDepth;
 
         public InMemoryQueue(string name, int concurrencyLevel)

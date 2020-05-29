@@ -1,6 +1,7 @@
 namespace MassTransit.Transformation.PropertyInitializers
 {
     using System;
+    using System.Reflection;
     using System.Threading.Tasks;
     using Initializers;
 
@@ -18,7 +19,7 @@ namespace MassTransit.Transformation.PropertyInitializers
     {
         readonly IPropertyProvider<TInput, TProperty> _propertyProvider;
 
-        public TransformPropertyInitializer(IPropertyProvider<TInput, TProperty> propertyProvider, System.Reflection.PropertyInfo propertyInfo)
+        public TransformPropertyInitializer(IPropertyProvider<TInput, TProperty> propertyProvider, PropertyInfo propertyInfo)
         {
             if (propertyProvider == null)
                 throw new ArgumentNullException(nameof(propertyProvider));

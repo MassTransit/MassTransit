@@ -1,6 +1,7 @@
 namespace MassTransit.Saga.InMemoryRepository
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -16,9 +17,9 @@ namespace MassTransit.Saga.InMemoryRepository
         where TSaga : class, ISaga
         where TMessage : class
     {
-        readonly IndexedSagaDictionary<TSaga> _sagas;
-        readonly ISagaConsumeContextFactory<IndexedSagaDictionary<TSaga>, TSaga> _factory;
         readonly ConsumeContext<TMessage> _context;
+        readonly ISagaConsumeContextFactory<IndexedSagaDictionary<TSaga>, TSaga> _factory;
+        readonly IndexedSagaDictionary<TSaga> _sagas;
         bool _sagasLocked;
 
         public InMemorySagaRepositoryContext(IndexedSagaDictionary<TSaga> sagas, ISagaConsumeContextFactory<IndexedSagaDictionary<TSaga>, TSaga> factory,
@@ -31,11 +32,21 @@ namespace MassTransit.Saga.InMemoryRepository
             _sagasLocked = true;
         }
 
+        public void Dispose()
+        {
+            if (_sagasLocked)
+            {
+                _sagas.Release();
+                _sagasLocked = false;
+            }
+        }
+
         public async Task<SagaConsumeContext<TSaga, TMessage>> Add(TSaga instance)
         {
             if (_sagasLocked)
             {
-                var consumeContext = await _factory.CreateSagaConsumeContext(_sagas, _context, instance, SagaConsumeContextMode.Add).ConfigureAwait(false);
+                SagaConsumeContext<TSaga, TMessage> consumeContext =
+                    await _factory.CreateSagaConsumeContext(_sagas, _context, instance, SagaConsumeContextMode.Add).ConfigureAwait(false);
 
                 _sagas.Release();
                 _sagasLocked = false;
@@ -151,15 +162,6 @@ namespace MassTransit.Saga.InMemoryRepository
             return Delete(context);
         }
 
-        public void Dispose()
-        {
-            if (_sagasLocked)
-            {
-                _sagas.Release();
-                _sagasLocked = false;
-            }
-        }
-
         public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
             where T : class
         {
@@ -206,7 +208,7 @@ namespace MassTransit.Saga.InMemoryRepository
 
         public async Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)
         {
-            var matchingInstances = _sagas.Where(query).Select(x => x.Instance.CorrelationId).ToList();
+            List<Guid> matchingInstances = _sagas.Where(query).Select(x => x.Instance.CorrelationId).ToList();
 
             return new DefaultSagaRepositoryQueryContext<TSaga>(this, matchingInstances);
         }

@@ -19,7 +19,7 @@
 
             IRequestClient<CommonRequest> client = CreateRequestClient<CommonRequest>();
 
-            var response = await client.GetResponse<CommonResponse>(request);
+            Response<CommonResponse> response = await client.GetResponse<CommonResponse>(request);
 
             Assert.That(response.Message.Message, Is.EqualTo(message));
             Assert.That(response.Message.Name, Is.EqualTo("I am lost!"));
@@ -35,7 +35,7 @@
         {
             public Task Consume(ConsumeContext<CommonRequest> context)
             {
-                CommonRequest newMessage = context.Message;
+                var newMessage = context.Message;
 
                 var response = new CommonResponse(newMessage.Message, 5000, "I am lost!");
 
@@ -49,26 +49,26 @@
 
     public class CommonRequest
     {
-        public string Message { get; }
-
         public CommonRequest(string message)
         {
             Message = message; //Incorrect naming but it s ok
         }
+
+        public string Message { get; }
     }
 
 
     public class CommonResponse
     {
-        public string Message { get; }
-        public int Cost { get; }
-        public string Name { get; }
-
         public CommonResponse(string message, int cost, string name)
         {
             Message = message; //Correct
             Cost = cost; //Correct
             Name = name; //Incorrect! Namings not matching. This data will be lost during serialization
         }
+
+        public string Message { get; }
+        public int Cost { get; }
+        public string Name { get; }
     }
 }

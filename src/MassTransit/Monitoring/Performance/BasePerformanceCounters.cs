@@ -9,7 +9,8 @@ namespace MassTransit.Monitoring.Performance
     {
         readonly Lazy<CounterData[]> _counterCreationData;
 
-        protected BasePerformanceCounters(){
+        protected BasePerformanceCounters()
+        {
             _counterCreationData = new Lazy<CounterData[]>(() => GetCounterData().ToArray());
             Initialize();
         }

@@ -10,15 +10,15 @@ namespace MassTransit.Turnout
         IOptions,
         ISpecification
     {
+        string _jobAttemptSagaEndpointName;
+        string _jobStateSagaEndpointName;
+        string _jobTypeSagaEndpointName;
+
         public TurnoutOptions()
         {
             JobStatusCheckInterval = TimeSpan.FromMinutes(1);
             JobSlotWaitTime = TimeSpan.FromSeconds(30);
         }
-
-        string _jobAttemptSagaEndpointName;
-        string _jobStateSagaEndpointName;
-        string _jobTypeSagaEndpointName;
 
         public string JobTypeSagaEndpointName
         {

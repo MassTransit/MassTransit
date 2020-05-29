@@ -9,6 +9,10 @@
     public class ScheduleMessage_Specs :
         ActiveMqTestFixture
     {
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        Task<ConsumeContext<SecondMessage>> _second;
+
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -23,9 +27,6 @@
         {
             configurator.UseActiveMqMessageScheduler();
         }
-
-        Task<ConsumeContext<SecondMessage>> _second;
-        Task<ConsumeContext<FirstMessage>> _first;
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
@@ -50,9 +51,14 @@
         }
     }
 
+
     public class SchedulePublish_Specs :
         ActiveMqTestFixture
     {
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        Task<ConsumeContext<SecondMessage>> _second;
+
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -67,9 +73,6 @@
         {
             configurator.UseActiveMqMessageScheduler();
         }
-
-        Task<ConsumeContext<SecondMessage>> _second;
-        Task<ConsumeContext<FirstMessage>> _first;
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
@@ -98,6 +101,10 @@
     public class Should_schedule_in_the_future :
         ActiveMqTestFixture
     {
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        Task<ConsumeContext<SecondMessage>> _second;
+
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -118,9 +125,6 @@
         {
             configurator.UseActiveMqMessageScheduler();
         }
-
-        Task<ConsumeContext<SecondMessage>> _second;
-        Task<ConsumeContext<FirstMessage>> _first;
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {

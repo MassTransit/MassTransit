@@ -5,6 +5,7 @@
     using PipeConfigurators;
     using Specifications;
 
+
     public class ActiveMqRedeliveryConfigurationObserver :
         ScheduledRedeliveryConfigurationObserver
     {
@@ -19,6 +20,5 @@
 
             configurator.AddPipeSpecification(redeliverySpecification);
         }
-
     }
 }

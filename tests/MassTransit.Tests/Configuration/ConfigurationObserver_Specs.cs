@@ -150,7 +150,6 @@ namespace MassTransit.Tests.Configuration
 
                         compensateAddress = ce.InputAddress;
                     });
-
                 });
             });
 
@@ -178,19 +177,17 @@ namespace MassTransit.Tests.Configuration
         class HandlerConfigurationObserver :
             IHandlerConfigurationObserver
         {
-            readonly HashSet<Type> _messageTypes;
-
-            public HashSet<Type> MessageTypes => _messageTypes;
-
             public HandlerConfigurationObserver()
             {
-                _messageTypes = new HashSet<Type>();
+                MessageTypes = new HashSet<Type>();
             }
+
+            public HashSet<Type> MessageTypes { get; }
 
             public void HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
                 where TMessage : class
             {
-                _messageTypes.Add(typeof(TMessage));
+                MessageTypes.Add(typeof(TMessage));
             }
         }
 
@@ -198,40 +195,38 @@ namespace MassTransit.Tests.Configuration
         class ActivityConfigurationObserver :
             IActivityConfigurationObserver
         {
-            readonly HashSet<(Type activityType, Type argumentType)> _executeActivityTypes;
-            readonly HashSet<(Type activityType, Type argumentType, Uri compensateAddress)> _activityTypes;
-            readonly HashSet<(Type activityType, Type logType)> _compensateActivityTypes;
-
-            public HashSet<(Type activityType, Type argumentType)> ExecuteActivityTypes => _executeActivityTypes;
-            public HashSet<(Type activityType, Type argumentType, Uri compensateAddress)> ActivityTypes => _activityTypes;
-            public HashSet<(Type activityType, Type logType)> CompensateActivityTypes => _compensateActivityTypes;
-
             public ActivityConfigurationObserver()
             {
-                _executeActivityTypes = new HashSet<(Type activityType, Type argumentdType)>();
-                _activityTypes = new HashSet<(Type activityType, Type argumentType, Uri compensateAddress)>();
-                _compensateActivityTypes = new HashSet<(Type activityType, Type logType)>();
+                ExecuteActivityTypes = new HashSet<(Type activityType, Type argumentdType)>();
+                ActivityTypes = new HashSet<(Type activityType, Type argumentType, Uri compensateAddress)>();
+                CompensateActivityTypes = new HashSet<(Type activityType, Type logType)>();
             }
+
+            public HashSet<(Type activityType, Type argumentType)> ExecuteActivityTypes { get; }
+
+            public HashSet<(Type activityType, Type argumentType, Uri compensateAddress)> ActivityTypes { get; }
+
+            public HashSet<(Type activityType, Type logType)> CompensateActivityTypes { get; }
 
             public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
                 where TActivity : class, IExecuteActivity<TArguments>
                 where TArguments : class
             {
-                _activityTypes.Add((typeof(TActivity), typeof(TArguments), compensateAddress));
+                ActivityTypes.Add((typeof(TActivity), typeof(TArguments), compensateAddress));
             }
 
             public void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
                 where TActivity : class, IExecuteActivity<TArguments>
                 where TArguments : class
             {
-                _executeActivityTypes.Add((typeof(TActivity), typeof(TArguments)));
+                ExecuteActivityTypes.Add((typeof(TActivity), typeof(TArguments)));
             }
 
             public void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
                 where TActivity : class, ICompensateActivity<TLog>
                 where TLog : class
             {
-                _compensateActivityTypes.Add((typeof(TActivity), typeof(TLog)));
+                CompensateActivityTypes.Add((typeof(TActivity), typeof(TLog)));
             }
         }
 
@@ -239,27 +234,24 @@ namespace MassTransit.Tests.Configuration
         class ConsumerConfigurationObserver :
             IConsumerConfigurationObserver
         {
-            readonly HashSet<Type> _consumerTypes;
-            readonly HashSet<Tuple<Type, Type>> _messageTypes;
-
             public ConsumerConfigurationObserver()
             {
-                _consumerTypes = new HashSet<Type>();
-                _messageTypes = new HashSet<Tuple<Type, Type>>();
+                ConsumerTypes = new HashSet<Type>();
+                MessageTypes = new HashSet<Tuple<Type, Type>>();
             }
 
-            public HashSet<Type> ConsumerTypes => _consumerTypes;
+            public HashSet<Type> ConsumerTypes { get; }
 
-            public HashSet<Tuple<Type, Type>> MessageTypes => _messageTypes;
+            public HashSet<Tuple<Type, Type>> MessageTypes { get; }
 
             void IConsumerConfigurationObserver.ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
             {
-                _consumerTypes.Add(typeof(TConsumer));
+                ConsumerTypes.Add(typeof(TConsumer));
             }
 
             void IConsumerConfigurationObserver.ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
             {
-                _messageTypes.Add(Tuple.Create(typeof(TConsumer), typeof(TMessage)));
+                MessageTypes.Add(Tuple.Create(typeof(TConsumer), typeof(TMessage)));
             }
         }
     }

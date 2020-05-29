@@ -48,7 +48,7 @@ namespace MassTransit.Azure.ServiceBus.Core
                 Scheme = address.Scheme,
                 Host = address.Host,
                 Path = address.Scope == "/"
-                    ? $"/"
+                    ? "/"
                     : $"/{Uri.EscapeDataString(address.Scope)}"
             };
 

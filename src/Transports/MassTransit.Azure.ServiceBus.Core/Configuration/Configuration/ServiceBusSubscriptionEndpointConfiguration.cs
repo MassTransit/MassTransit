@@ -41,16 +41,6 @@
 
         public override Uri InputAddress { get; }
 
-        public Filter Filter
-        {
-            set => _settings.Filter = value;
-        }
-
-        public RuleDescription Rule
-        {
-            set => _settings.Rule = value;
-        }
-
         public SubscriptionSettings Settings => _settings;
 
         public override IEnumerable<ValidationResult> Validate()
@@ -71,6 +61,16 @@
                 _settings.RemoveSubscriptions, _hostConfiguration.ConnectionContextSupervisor.Stopping));
 
             CreateReceiveEndpoint(host, receiveEndpointContext);
+        }
+
+        public Filter Filter
+        {
+            set => _settings.Filter = value;
+        }
+
+        public RuleDescription Rule
+        {
+            set => _settings.Rule = value;
         }
 
         protected override IErrorTransport CreateErrorTransport()

@@ -15,9 +15,6 @@
     public class Using_the_circuit_breaker :
         InMemoryTestFixture
     {
-        int _faultCount;
-        IBusActivityMonitor _activityMonitor;
-
         [Test]
         public async Task Should_work()
         {
@@ -32,6 +29,9 @@
             // this is broken, because the faults aren't produced by an open circuit breaker
             Assert.That(_faultCount, Is.GreaterThanOrEqualTo(3));
         }
+
+        int _faultCount;
+        IBusActivityMonitor _activityMonitor;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {

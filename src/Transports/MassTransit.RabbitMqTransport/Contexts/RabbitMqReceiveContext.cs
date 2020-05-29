@@ -65,8 +65,8 @@
         class ReceiveSendEndpointProvider :
             ISendEndpointProvider
         {
-            readonly ISendEndpointProvider _sendEndpointProvider;
             readonly string _replyTo;
+            readonly ISendEndpointProvider _sendEndpointProvider;
 
             public ReceiveSendEndpointProvider(ISendEndpointProvider sendEndpointProvider, string replyTo)
             {

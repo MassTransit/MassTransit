@@ -22,7 +22,8 @@ namespace Automatonymous
     /// <typeparam name="TException"></typeparam>
     /// <param name="context"></param>
     /// <returns></returns>
-    public delegate Uri ServiceAddressExceptionProvider<in TInstance, in TData, in TException>(ConsumeExceptionEventContext<TInstance, TData, TException> context)
+    public delegate Uri ServiceAddressExceptionProvider<in TInstance, in TData, in TException>(
+        ConsumeExceptionEventContext<TInstance, TData, TException> context)
         where TData : class
         where TException : Exception;
 }

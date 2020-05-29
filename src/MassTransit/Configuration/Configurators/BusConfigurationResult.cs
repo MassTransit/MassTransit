@@ -7,7 +7,8 @@
     using GreenPipes;
 
 
-    [Serializable, DebuggerDisplay("{DebuggerString()}")]
+    [Serializable]
+    [DebuggerDisplay("{DebuggerString()}")]
     public class BusConfigurationResult :
         ConfigurationResult
     {
@@ -27,7 +28,7 @@
 
         protected string DebuggerString()
         {
-            string debuggerString = string.Join(", ", _results);
+            var debuggerString = string.Join(", ", _results);
 
             return string.IsNullOrWhiteSpace(debuggerString)
                 ? "No Obvious Problems says ConfigurationResult"
@@ -40,7 +41,7 @@
             if (!result.ContainsFailure)
                 return result;
 
-            string message = "The service bus was not properly configured:" + Environment.NewLine +
+            var message = "The service bus was not properly configured:" + Environment.NewLine +
                 string.Join(Environment.NewLine, result.Results.Select(x => x.ToString()).ToArray());
 
             throw new ConfigurationException(result, message);
@@ -52,7 +53,7 @@
             if (!result.ContainsFailure)
                 return result;
 
-            string message = messagePrefix + Environment.NewLine + string.Join(Environment.NewLine, result.Results.Select(x => x.ToString()).ToArray());
+            var message = messagePrefix + Environment.NewLine + string.Join(Environment.NewLine, result.Results.Select(x => x.ToString()).ToArray());
 
             throw new ConfigurationException(result, message);
         }

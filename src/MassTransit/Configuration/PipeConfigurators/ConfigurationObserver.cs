@@ -37,6 +37,28 @@
             configurator.ConnectActivityConfigurationObserver(this);
         }
 
+        public virtual void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator,
+            Uri compensateAddress)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            NotifyObserver<RoutingSlip>();
+        }
+
+        public virtual void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+        {
+            NotifyObserver<RoutingSlip>();
+        }
+
+        public virtual void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
+            where TActivity : class, ICompensateActivity<TLog>
+            where TLog : class
+        {
+            NotifyObserver<RoutingSlip>();
+        }
+
         void IConsumerConfigurationObserver.ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
         {
         }
@@ -63,28 +85,6 @@
         void ISagaConfigurationObserver.SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
         {
             NotifyObserver<TMessage>();
-        }
-
-        public virtual void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator,
-            Uri compensateAddress)
-            where TActivity : class, IExecuteActivity<TArguments>
-            where TArguments : class
-        {
-            NotifyObserver<RoutingSlip>();
-        }
-
-        public virtual void ExecuteActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator)
-            where TActivity : class, IExecuteActivity<TArguments>
-            where TArguments : class
-        {
-            NotifyObserver<RoutingSlip>();
-        }
-
-        public virtual void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)
-            where TActivity : class, ICompensateActivity<TLog>
-            where TLog : class
-        {
-            NotifyObserver<RoutingSlip>();
         }
 
         void NotifyObserver<TMessage>()

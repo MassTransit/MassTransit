@@ -44,7 +44,7 @@
         Task<IModel> CreateModel(CancellationToken cancellationToken);
 
         /// <summary>
-        /// Create a channel, and return the <see cref="ModelContext"/>.
+        /// Create a channel, and return the <see cref="ModelContext" />.
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>

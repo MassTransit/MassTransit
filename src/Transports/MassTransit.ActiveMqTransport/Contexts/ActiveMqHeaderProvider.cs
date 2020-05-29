@@ -9,8 +9,8 @@
     public class ActiveMqHeaderProvider :
         IHeaderProvider
     {
-        readonly IMessage _message;
         readonly ActiveMqHeaderAdapter _adapter;
+        readonly IMessage _message;
 
         public ActiveMqHeaderProvider(IMessage message)
         {
@@ -23,7 +23,7 @@
             yield return new KeyValuePair<string, object>(MessageHeaders.TransportMessageId, _message.NMSMessageId);
             yield return new KeyValuePair<string, object>(nameof(MessageContext.CorrelationId), _message.NMSCorrelationID);
 
-            foreach (var header in _adapter.GetAll())
+            foreach (KeyValuePair<string, object> header in _adapter.GetAll())
                 yield return header;
         }
 

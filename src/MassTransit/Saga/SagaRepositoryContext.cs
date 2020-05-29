@@ -13,7 +13,7 @@ namespace MassTransit.Saga
         where TMessage : class
     {
         /// <summary>
-        /// Add the saga instance, using the specified <see cref="SagaConsumeContext{TSaga,T}"/>
+        /// Add the saga instance, using the specified <see cref="SagaConsumeContext{TSaga,T}" />
         /// </summary>
         /// <param name="instance"></param>
         /// <returns></returns>
@@ -23,14 +23,18 @@ namespace MassTransit.Saga
         /// Insert the saga instance, if it does not already exist.
         /// </summary>
         /// <param name="instance"></param>
-        /// <returns>A valid <see cref="SagaConsumeContext{TSaga,T}"/> if the instance inserted successfully, otherwise default</returns>
+        /// <returns>
+        /// A valid <see cref="SagaConsumeContext{TSaga,T}" /> if the instance inserted successfully, otherwise default
+        /// </returns>
         Task<SagaConsumeContext<TSaga, TMessage>> Insert(TSaga instance);
 
         /// <summary>
         /// Load an existing saga instance
         /// </summary>
         /// <param name="correlationId"></param>
-        /// <returns>A valid <see cref="SagaConsumeContext{TSaga,T}"/> if the instance loaded successfully, otherwise default</returns>
+        /// <returns>
+        /// A valid <see cref="SagaConsumeContext{TSaga,T}" /> if the instance loaded successfully, otherwise default
+        /// </returns>
         Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId);
 
         /// <summary>

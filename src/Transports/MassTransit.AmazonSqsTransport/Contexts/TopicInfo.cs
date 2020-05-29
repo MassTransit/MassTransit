@@ -10,7 +10,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         public TopicInfo(string entityName, string arn, IDictionary<string, string> attributes)
         {
             _attributes = attributes;
-            
+
             EntityName = entityName;
             Arn = arn;
         }

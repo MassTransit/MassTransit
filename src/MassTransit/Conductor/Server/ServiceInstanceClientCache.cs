@@ -47,6 +47,8 @@ namespace MassTransit.Conductor.Server
                 Address = address;
             }
 
+            public event Action Used;
+
             public Guid ClientId { get; }
             public Uri Address { get; }
 
@@ -55,8 +57,6 @@ namespace MassTransit.Conductor.Server
             {
                 NotifyUsed();
             }
-
-            public event Action Used;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void NotifyUsed()

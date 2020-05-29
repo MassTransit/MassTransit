@@ -294,12 +294,14 @@
                     return TaskUtil.Completed;
                 }
 
-                static bool IsUnrecoverable(Exception exception) =>
-                    exception switch
+                static bool IsUnrecoverable(Exception exception)
+                {
+                    return exception switch
                     {
                         ConnectionException connectionException => !connectionException.IsTransient,
                         _ => false
                     };
+                }
             }
         }
     }

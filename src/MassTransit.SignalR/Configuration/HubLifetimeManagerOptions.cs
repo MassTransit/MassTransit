@@ -18,10 +18,11 @@ namespace MassTransit.SignalR
             UsersSubscriptionManager = new MassTransitSubscriptionManager();
         }
 
-        public string ServerName { get; set; }
-        public RequestTimeout RequestTimeout { get; set; }
         public HubConnectionStore ConnectionStore { get; }
         public MassTransitSubscriptionManager GroupsSubscriptionManager { get; }
         public MassTransitSubscriptionManager UsersSubscriptionManager { get; }
+
+        public string ServerName { get; set; }
+        public RequestTimeout RequestTimeout { get; set; }
     }
 }

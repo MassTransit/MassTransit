@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Monitoring.Performance
+﻿namespace MassTransit.Monitoring.Performance
 {
     using System;
 
@@ -23,9 +11,9 @@ namespace MassTransit.Monitoring.Performance
         IDisposable,
         IConsumerPerformanceCounter
     {
+        readonly IPerformanceCounter _consumeRate;
         readonly IPerformanceCounter _duration;
         readonly IPerformanceCounter _durationBase;
-        readonly IPerformanceCounter _consumeRate;
         readonly IPerformanceCounter _faultPercentage;
         readonly IPerformanceCounter _faultPercentageBase;
         readonly IPerformanceCounter _totalFaults;
@@ -42,7 +30,8 @@ namespace MassTransit.Monitoring.Performance
             _durationBase = factory.Create(BuiltInCounters.Consumers.Category, ConsumerPerformanceCounters.DurationBase.CounterName, consumerType);
             _totalFaults = factory.Create(BuiltInCounters.Consumers.Category, ConsumerPerformanceCounters.TotalFaults.CounterName, consumerType);
             _faultPercentage = factory.Create(BuiltInCounters.Consumers.Category, ConsumerPerformanceCounters.FaultPercentage.CounterName, consumerType);
-            _faultPercentageBase = factory.Create(BuiltInCounters.Consumers.Category, ConsumerPerformanceCounters.FaultPercentageBase.CounterName, consumerType);
+            _faultPercentageBase = factory.Create(BuiltInCounters.Consumers.Category, ConsumerPerformanceCounters.FaultPercentageBase.CounterName,
+                consumerType);
         }
 
         public void Consumed(TimeSpan duration)

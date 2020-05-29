@@ -13,6 +13,7 @@
         where TInstance : SagaStateMachineInstance
         where TData : class;
 
+
     /// <summary>
     /// Returns the address for the message provided
     /// </summary>

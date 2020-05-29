@@ -18,12 +18,19 @@
         ITypeConverter<TimeSpan, double>
 
     {
-        public bool TryConvert(string input, out TimeSpan result)
+        public bool TryConvert(TimeSpan input, out string result)
         {
-            return TimeSpan.TryParse(input, out result);
+            result = input.ToString("c");
+            return true;
         }
 
-        public bool TryConvert(short input, out TimeSpan result)
+        public bool TryConvert(byte input, out TimeSpan result)
+        {
+            result = TimeSpan.FromMilliseconds(input);
+            return true;
+        }
+
+        public bool TryConvert(double input, out TimeSpan result)
         {
             result = TimeSpan.FromMilliseconds(input);
             return true;
@@ -38,48 +45,6 @@
         public bool TryConvert(long input, out TimeSpan result)
         {
             result = TimeSpan.FromMilliseconds(input);
-            return true;
-        }
-
-        public bool TryConvert(double input, out TimeSpan result)
-        {
-            result = TimeSpan.FromMilliseconds(input);
-            return true;
-        }
-
-        public bool TryConvert(sbyte input, out TimeSpan result)
-        {
-            result = TimeSpan.FromMilliseconds(input);
-            return true;
-        }
-
-        public bool TryConvert(byte input, out TimeSpan result)
-        {
-            result = TimeSpan.FromMilliseconds(input);
-            return true;
-        }
-
-        public bool TryConvert(ushort input, out TimeSpan result)
-        {
-            result = TimeSpan.FromMilliseconds(input);
-            return true;
-        }
-
-        public bool TryConvert(uint input, out TimeSpan result)
-        {
-            result = TimeSpan.FromMilliseconds(input);
-            return true;
-        }
-
-        public bool TryConvert(ulong input, out TimeSpan result)
-        {
-            result = TimeSpan.FromMilliseconds(input);
-            return true;
-        }
-
-        public bool TryConvert(TimeSpan input, out string result)
-        {
-            result = input.ToString("c");
             return true;
         }
 
@@ -98,6 +63,41 @@
                     result = default;
                     return false;
             }
+        }
+
+        public bool TryConvert(sbyte input, out TimeSpan result)
+        {
+            result = TimeSpan.FromMilliseconds(input);
+            return true;
+        }
+
+        public bool TryConvert(short input, out TimeSpan result)
+        {
+            result = TimeSpan.FromMilliseconds(input);
+            return true;
+        }
+
+        public bool TryConvert(string input, out TimeSpan result)
+        {
+            return TimeSpan.TryParse(input, out result);
+        }
+
+        public bool TryConvert(uint input, out TimeSpan result)
+        {
+            result = TimeSpan.FromMilliseconds(input);
+            return true;
+        }
+
+        public bool TryConvert(ulong input, out TimeSpan result)
+        {
+            result = TimeSpan.FromMilliseconds(input);
+            return true;
+        }
+
+        public bool TryConvert(ushort input, out TimeSpan result)
+        {
+            result = TimeSpan.FromMilliseconds(input);
+            return true;
         }
     }
 }

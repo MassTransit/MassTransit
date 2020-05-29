@@ -24,10 +24,10 @@
     {
         readonly IBuildPipeConfigurator<ConnectionContext> _connectionConfigurator;
         readonly IActiveMqEndpointConfiguration _endpointConfiguration;
+        readonly IActiveMqHostConfiguration _hostConfiguration;
         readonly Lazy<Uri> _inputAddress;
         readonly IBuildPipeConfigurator<SessionContext> _sessionConfigurator;
         readonly QueueReceiveSettings _settings;
-        readonly IActiveMqHostConfiguration _hostConfiguration;
 
         public ActiveMqReceiveEndpointConfiguration(IActiveMqHostConfiguration hostConfiguration, QueueReceiveSettings settings,
             IActiveMqEndpointConfiguration endpointConfiguration)

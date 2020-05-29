@@ -24,10 +24,7 @@
             CorrelationId = context.Message.CorrelationId;
             Initiated = true;
             Name = context.Message.Name;
-            Dependency = new SagaDependency
-            {
-                SagaInnerDependency = new SagaInnerDependency()
-            };
+            Dependency = new SagaDependency {SagaInnerDependency = new SagaInnerDependency()};
 
             return Task.CompletedTask;
         }

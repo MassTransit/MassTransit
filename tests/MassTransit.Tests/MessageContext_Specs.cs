@@ -1,23 +1,9 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using GreenPipes.Introspection;
     using NUnit.Framework;
-    using NUnit.Framework.Constraints;
     using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
@@ -64,8 +50,7 @@ namespace MassTransit.Tests
         {
             ConsumeContext<PingMessage> ping = await _ping;
 
-            object header;
-            ping.Headers.TryGetHeader("One", out header);
+            ping.Headers.TryGetHeader("One", out var header);
             header.ShouldBe("1");
         }
 
@@ -183,7 +168,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_have_received_the_actual_response()
         {
-            var (_, notSupported) = await _request;
+            (_, Task<Response<PingNotSupported>> notSupported) = await _request;
 
             Response<PingNotSupported> message = await notSupported;
 
@@ -193,13 +178,13 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_not_complete_the_handler()
         {
-            var (_, notSupported) = await _request;
+            (_, Task<Response<PingNotSupported>> notSupported) = await _request;
 
             Response<PingNotSupported> message = await notSupported;
 
             await BusSendEndpoint.Send(new PongMessage((await _ping).Message.CorrelationId));
 
-            var (completed, _) = await _request;
+            (Task<Response<PingMessage>> completed, _) = await _request;
 
             Assert.That(async () => await completed, Throws.TypeOf<TaskCanceledException>());
         }

@@ -1,10 +1,10 @@
 ﻿namespace MassTransit.DapperIntegration.Tests
 {
     using System;
-    using Microsoft.Data.SqlClient;
     using System.Threading.Tasks;
     using Dapper;
     using MassTransit.Tests.Saga.Messages;
+    using Microsoft.Data.SqlClient;
     using NUnit.Framework;
     using Saga;
     using Shouldly;
@@ -12,27 +12,41 @@
     using Testing;
 
 
-    [TestFixture, Category("Integration")]
+    [TestFixture]
+    [Category("Integration")]
     public class DapperSagaRepositoryTests :
         InMemoryTestFixture
     {
         [Test]
         public async Task A_correlated_message_should_find_the_correct_saga()
         {
-            Guid sagaId = NewId.NextGuid();
+            var sagaId = NewId.NextGuid();
             var message = new InitiateSimpleSaga(sagaId);
 
-            await this.InputQueueSendEndpoint.Send(message);
+            await InputQueueSendEndpoint.Send(message);
 
-            Guid? foundId = await this._sagaRepository.Value.ShouldContainSaga(message.CorrelationId, this.TestTimeout);
+            Guid? foundId = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
             foundId.HasValue.ShouldBe(true);
 
             var nextMessage = new CompleteSimpleSaga {CorrelationId = sagaId};
 
-            await this.InputQueueSendEndpoint.Send(nextMessage);
+            await InputQueueSendEndpoint.Send(nextMessage);
 
-            foundId = await this._sagaRepository.Value.ShouldContainSaga(x => x.CorrelationId == sagaId && x.Completed, this.TestTimeout);
+            foundId = await _sagaRepository.Value.ShouldContainSaga(x => x.CorrelationId == sagaId && x.Completed, TestTimeout);
+
+            foundId.HasValue.ShouldBe(true);
+        }
+
+        [Test]
+        public async Task An_initiating_message_should_start_the_saga()
+        {
+            var sagaId = NewId.NextGuid();
+            var message = new InitiateSimpleSaga(sagaId);
+
+            await InputQueueSendEndpoint.Send(message);
+
+            Guid? foundId = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
             foundId.HasValue.ShouldBe(true);
         }
@@ -40,7 +54,7 @@
         [Test]
         public async Task An_observed_message_should_find_and_update_the_correct_saga()
         {
-            Guid sagaId = NewId.NextGuid();
+            var sagaId = NewId.NextGuid();
             var message = new InitiateSimpleSaga(sagaId) {Name = "MySimpleSaga"};
 
             await InputQueueSendEndpoint.Send(message);
@@ -57,25 +71,12 @@
             found.ShouldBe(sagaId);
         }
 
-        [Test]
-        public async Task An_initiating_message_should_start_the_saga()
-        {
-            Guid sagaId = NewId.NextGuid();
-            var message = new InitiateSimpleSaga(sagaId);
-
-            await this.InputQueueSendEndpoint.Send(message);
-
-            Guid? foundId = await this._sagaRepository.Value.ShouldContainSaga(message.CorrelationId, this.TestTimeout);
-
-            foundId.HasValue.ShouldBe(true);
-        }
-
         [OneTimeSetUp]
         public async Task Setup()
         {
             using (var connection = new SqlConnection(_connectionString))
             {
-                string sql = @"
+                var sql = @"
                 if not exists (select * from sysobjects where name='SimpleSagas' and xtype='U')
                 CREATE TABLE SimpleSagas (
                     CorrelationId uniqueidentifier NOT NULL,
@@ -102,7 +103,7 @@
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.Saga(this._sagaRepository.Value);
+            configurator.Saga(_sagaRepository.Value);
         }
     }
 }

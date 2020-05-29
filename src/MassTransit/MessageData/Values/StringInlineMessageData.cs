@@ -19,16 +19,16 @@ namespace MassTransit.MessageData.Values
             Value = Task.FromResult(value);
         }
 
-        public Uri Address { get; }
-
-        public bool HasValue => true;
-
-        public Task<string> Value { get; }
-
         public void Set(MessageDataReference reference)
         {
             reference.Text = _value;
             reference.Data = default;
         }
+
+        public Uri Address { get; }
+
+        public bool HasValue => true;
+
+        public Task<string> Value { get; }
     }
 }

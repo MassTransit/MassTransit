@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Saga.Locator
 {
     using System;
@@ -71,7 +59,11 @@ namespace MassTransit.Tests.Saga.Locator
         public void Setup()
         {
             _sagaId = NewId.NextGuid();
-            _initiateSaga = new InitiateSimpleSaga {CorrelationId = _sagaId, Name = "Chris"};
+            _initiateSaga = new InitiateSimpleSaga
+            {
+                CorrelationId = _sagaId,
+                Name = "Chris"
+            };
 
             InputQueueSendEndpoint.Send(_initiateSaga)
                 .Wait(TestCancellationToken);
@@ -80,7 +72,11 @@ namespace MassTransit.Tests.Saga.Locator
                 .Wait(TestCancellationToken);
 
             _otherSagaId = Guid.NewGuid();
-            _initiateOtherSaga = new InitiateSimpleSaga {CorrelationId = _otherSagaId, Name = "Dru"};
+            _initiateOtherSaga = new InitiateSimpleSaga
+            {
+                CorrelationId = _otherSagaId,
+                Name = "Dru"
+            };
 
             InputQueueSendEndpoint.Send(_initiateOtherSaga)
                 .Wait(TestCancellationToken);

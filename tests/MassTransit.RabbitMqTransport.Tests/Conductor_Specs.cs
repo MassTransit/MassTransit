@@ -1,14 +1,12 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
-    using System.Threading.Tasks;
-    using Definition;
-    using NUnit.Framework;
-
-
     namespace ConductorTests
     {
+        using System.Threading.Tasks;
         using Conductor.Configuration;
         using Contracts;
+        using Definition;
+        using NUnit.Framework;
 
 
         namespace Contracts
@@ -59,9 +57,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 var serviceClient = Bus.CreateServiceClient();
 
-                var requestClient = serviceClient.CreateRequestClient<DeployPayload>();
+                IRequestClient<DeployPayload> requestClient = serviceClient.CreateRequestClient<DeployPayload>();
 
-                var response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
+                Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
 
                 Assert.That(response.Message.Target, Is.EqualTo("Bogey"));
             }
@@ -92,9 +90,9 @@ namespace MassTransit.RabbitMqTransport.Tests
                 try
                 {
                     var serviceClient = Bus.CreateServiceClient();
-                    var requestClient = serviceClient.CreateRequestClient<DeployPayload>();
+                    IRequestClient<DeployPayload> requestClient = serviceClient.CreateRequestClient<DeployPayload>();
 
-                    var response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "A"});
+                    Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "A"});
 
                     Assert.That(response.Message.Target, Is.EqualTo("A"));
 

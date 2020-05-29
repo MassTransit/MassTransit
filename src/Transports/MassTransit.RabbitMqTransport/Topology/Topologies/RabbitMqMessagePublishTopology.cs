@@ -8,6 +8,7 @@
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Metadata;
+    using RabbitMQ.Client;
     using Settings;
     using Specifications;
 
@@ -19,8 +20,8 @@
     {
         readonly ExchangeConfigurator _exchange;
         readonly IList<IRabbitMqMessagePublishTopology> _implementedMessageTypes;
-        readonly IRabbitMqPublishTopology _publishTopology;
         readonly IMessageTopology<TMessage> _messageTopology;
+        readonly IRabbitMqPublishTopology _publishTopology;
         readonly IList<IRabbitMqPublishTopologySpecification> _specifications;
 
         public RabbitMqMessagePublishTopology(IRabbitMqPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology,
@@ -53,7 +54,7 @@
 
             if (builder.Exchange != null)
             {
-                string routingKey = builder.Exchange.Exchange.ExchangeType == RabbitMQ.Client.ExchangeType.Topic
+                var routingKey = builder.Exchange.Exchange.ExchangeType == ExchangeType.Topic
                     ? "#"
                     : "";
 
@@ -62,10 +63,10 @@
             else
                 builder.Exchange = exchangeHandle;
 
-            for (int i = 0; i < _specifications.Count; i++)
+            for (var i = 0; i < _specifications.Count; i++)
                 _specifications[i].Apply(builder);
 
-            foreach (IRabbitMqMessagePublishTopology configurator in _implementedMessageTypes)
+            foreach (var configurator in _implementedMessageTypes)
                 configurator.Apply(builder);
         }
 
@@ -116,14 +117,9 @@
             _exchange.SetExchangeArgument(key, value);
         }
 
-        public RabbitMqEndpointAddress GetEndpointAddress(Uri hostAddress)
-        {
-            return _exchange.GetEndpointAddress(hostAddress);
-        }
-
         public string AlternateExchange
         {
-            set => _exchange.SetExchangeArgument(RabbitMQ.Client.Headers.AlternateExchange, value);
+            set => _exchange.SetExchangeArgument(Headers.AlternateExchange, value);
         }
 
         public void BindQueue(string exchangeName, string queueName, Action<IQueueBindingConfigurator> configure = null)
@@ -145,6 +141,11 @@
             BindQueue(exchangeName, queueName, configure);
 
             AlternateExchange = exchangeName;
+        }
+
+        public RabbitMqEndpointAddress GetEndpointAddress(Uri hostAddress)
+        {
+            return _exchange.GetEndpointAddress(hostAddress);
         }
 
         public void AddImplementedMessageConfigurator<T>(IRabbitMqMessagePublishTopologyConfigurator<T> configurator, bool direct)

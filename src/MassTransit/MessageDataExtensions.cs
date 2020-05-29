@@ -26,7 +26,7 @@
 
             using var ms = new MemoryStream(bytes, false);
 
-            Uri address = await repository.Put(ms, default, cancellationToken).ConfigureAwait(false);
+            var address = await repository.Put(ms, default, cancellationToken).ConfigureAwait(false);
 
             if (value.Length < MessageDataDefaults.Threshold)
                 return new StringInlineMessageData(value, address);
@@ -47,7 +47,7 @@
 
             using var ms = new MemoryStream(bytes, false);
 
-            Uri address = await repository.Put(ms, default, cancellationToken).ConfigureAwait(false);
+            var address = await repository.Put(ms, default, cancellationToken).ConfigureAwait(false);
 
             if (bytes.Length < MessageDataDefaults.Threshold)
                 return new BytesInlineMessageData(bytes, address);
@@ -70,7 +70,7 @@
 
             using var ms = new MemoryStream(bytes, false);
 
-            Uri address = await repository.Put(ms, timeToLive, cancellationToken).ConfigureAwait(false);
+            var address = await repository.Put(ms, timeToLive, cancellationToken).ConfigureAwait(false);
 
             if (value.Length < MessageDataDefaults.Threshold)
                 return new StringInlineMessageData(value, address);
@@ -91,7 +91,7 @@
 
             using var ms = new MemoryStream(bytes, false);
 
-            Uri address = await repository.Put(ms, timeToLive, cancellationToken).ConfigureAwait(false);
+            var address = await repository.Put(ms, timeToLive, cancellationToken).ConfigureAwait(false);
 
             if (bytes.Length < MessageDataDefaults.Threshold)
                 return new BytesInlineMessageData(bytes, address);
@@ -107,7 +107,7 @@
 
             using var ms = new MemoryStream();
 
-            Stream stream = await repository.Get(address, cancellationToken).ConfigureAwait(false);
+            var stream = await repository.Get(address, cancellationToken).ConfigureAwait(false);
 
             await stream.CopyToAsync(ms).ConfigureAwait(false);
 
@@ -122,7 +122,7 @@
 
             using var ms = new MemoryStream();
 
-            Stream stream = await repository.Get(address, cancellationToken).ConfigureAwait(false);
+            var stream = await repository.Get(address, cancellationToken).ConfigureAwait(false);
 
             await stream.CopyToAsync(ms).ConfigureAwait(false);
 

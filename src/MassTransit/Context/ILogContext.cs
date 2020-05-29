@@ -14,6 +14,14 @@ namespace MassTransit.Context
         /// </summary>
         ILogContext Messages { get; }
 
+        ILogger Logger { get; }
+        EnabledLogger? Critical { get; }
+        EnabledLogger? Debug { get; }
+        EnabledLogger? Error { get; }
+        EnabledLogger? Info { get; }
+        EnabledLogger? Trace { get; }
+        EnabledLogger? Warning { get; }
+
         /// <summary>
         /// If enabled, returns a valid source which can be used
         /// </summary>
@@ -34,15 +42,7 @@ namespace MassTransit.Context
         /// <returns>The <see cref="T:Microsoft.Extensions.Logging.ILogger" />.</returns>
         ILogContext CreateLogContext(string categoryName);
 
-        ILogger Logger { get; }
-
         EnabledLogger? IfEnabled(LogLevel level);
-        EnabledLogger? Critical { get; }
-        EnabledLogger? Debug { get; }
-        EnabledLogger? Error { get; }
-        EnabledLogger? Info { get; }
-        EnabledLogger? Trace { get; }
-        EnabledLogger? Warning { get; }
 
         /// <summary>
         /// Begin a scope for the logger

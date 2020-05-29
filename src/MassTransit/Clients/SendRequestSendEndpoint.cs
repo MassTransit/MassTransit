@@ -12,9 +12,9 @@
         IRequestSendEndpoint<TRequest>
         where TRequest : class
     {
-        readonly ISendEndpointProvider _provider;
-        readonly Uri _destinationAddress;
         readonly ConsumeContext _consumeContext;
+        readonly Uri _destinationAddress;
+        readonly ISendEndpointProvider _provider;
 
         public SendRequestSendEndpoint(ISendEndpointProvider provider, Uri destinationAddress, ConsumeContext consumeContext)
         {
@@ -27,11 +27,11 @@
         {
             var endpoint = await _provider.GetSendEndpoint(_destinationAddress).ConfigureAwait(false);
 
-            var initializer = MessageInitializerCache<TRequest>.GetInitializer(values.GetType());
+            IMessageInitializer<TRequest> initializer = MessageInitializerCache<TRequest>.GetInitializer(values.GetType());
 
             if (_consumeContext != null)
             {
-                var initializeContext = initializer.Create(_consumeContext);
+                InitializeContext<TRequest> initializeContext = initializer.Create(_consumeContext);
 
                 return await initializer.Send(endpoint, initializeContext, values, new ConsumeSendPipeAdapter<TRequest>(_consumeContext, pipe, requestId))
                     .ConfigureAwait(false);

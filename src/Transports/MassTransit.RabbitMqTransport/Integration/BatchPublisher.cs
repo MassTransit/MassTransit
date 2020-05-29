@@ -13,13 +13,13 @@ namespace MassTransit.RabbitMqTransport.Integration
     public class BatchPublisher :
         IPublisher
     {
-        readonly ChannelExecutor _executor;
-        readonly IModel _model;
-        readonly BatchSettings _settings;
         readonly PendingConfirmationCollection _confirmations;
+        readonly ChannelExecutor _executor;
+        readonly IPublisher _immediatePublisher;
+        readonly IModel _model;
         readonly Channel<BatchPublish> _publishChannel;
         readonly Task _publishTask;
-        readonly IPublisher _immediatePublisher;
+        readonly BatchSettings _settings;
 
         public BatchPublisher(ChannelExecutor executor, IModel model, BatchSettings settings, PendingConfirmationCollection confirmations)
         {
@@ -59,14 +59,19 @@ namespace MassTransit.RabbitMqTransport.Integration
             return PublishAsync();
         }
 
+        public async ValueTask DisposeAsync()
+        {
+            _publishChannel.Writer.Complete();
+
+            await _publishTask.ConfigureAwait(false);
+        }
+
         async Task WaitForBatch()
         {
             try
             {
                 while (await _publishChannel.Reader.WaitToReadAsync().ConfigureAwait(false))
-                {
                     await ReadBatch().ConfigureAwait(false);
-                }
             }
             catch (OperationCanceledException)
             {
@@ -110,7 +115,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             }
             catch (Exception exception)
             {
-                for (int i = 0; i < batch.Count; i++)
+                for (var i = 0; i < batch.Count; i++)
                     batch[i].NotConfirmed(exception.Message);
             }
             finally
@@ -136,7 +141,7 @@ namespace MassTransit.RabbitMqTransport.Integration
                 {
                     var publishBatch = _model.CreateBasicPublishBatch();
 
-                    for (int i = 0; i < batch.Count; i++)
+                    for (var i = 0; i < batch.Count; i++)
                     {
                         var publish = batch[i];
 
@@ -147,13 +152,13 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                     publishBatch.Publish();
 
-                    for (int i = 0; i < batch.Count; i++)
+                    for (var i = 0; i < batch.Count; i++)
                         batch[i].Published();
                 }
             }
             catch (Exception exception)
             {
-                for (int i = 0; i < batch.Count; i++)
+                for (var i = 0; i < batch.Count; i++)
                 {
                     var publish = batch[i];
 
@@ -162,13 +167,6 @@ namespace MassTransit.RabbitMqTransport.Integration
                     publish.NotConfirmed(exception.Message);
                 }
             }
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            _publishChannel.Writer.Complete();
-
-            await _publishTask.ConfigureAwait(false);
         }
     }
 }

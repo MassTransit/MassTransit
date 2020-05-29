@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Pipeline
+﻿namespace MassTransit.Tests.Pipeline
 {
     using System;
     using System.Linq;
@@ -35,7 +23,7 @@ namespace MassTransit.Tests.Pipeline
                 x.UseExecute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
                 x.UseExecuteAsync(payload => Task.Run(() =>
                 {
-                    using (TransactionScope scope = payload.CreateTransactionScope())
+                    using (var scope = payload.CreateTransactionScope())
                     {
                         Console.WriteLine("ExecuteAsync: {0}", Thread.CurrentThread.ManagedThreadId);
 
@@ -63,7 +51,7 @@ namespace MassTransit.Tests.Pipeline
                 {
                     await Task.Yield();
 
-                    using (TransactionScope scope = payload.CreateTransactionScope())
+                    using (var scope = payload.CreateTransactionScope())
                     {
                         Console.WriteLine("ExecuteAsync: {0}", Thread.CurrentThread.ManagedThreadId);
 
@@ -94,7 +82,7 @@ namespace MassTransit.Tests.Pipeline
                 x.UseExecute(payload => Console.WriteLine("Execute: {0}", Thread.CurrentThread.ManagedThreadId));
                 x.UseExecuteAsync(payload => Task.Run(() =>
                 {
-                    using (TransactionScope scope = payload.CreateTransactionScope())
+                    using (var scope = payload.CreateTransactionScope())
                     {
                         Console.WriteLine("ExecuteAsync: {0}", Thread.CurrentThread.ManagedThreadId);
 
@@ -121,7 +109,7 @@ namespace MassTransit.Tests.Pipeline
                 {
                     await Task.Yield();
 
-                    using (TransactionScope scope = payload.CreateTransactionScope())
+                    using (var scope = payload.CreateTransactionScope())
                     {
                         Console.WriteLine("ExecuteAsync: {0}", Thread.CurrentThread.ManagedThreadId);
 
@@ -151,15 +139,15 @@ namespace MassTransit.Tests.Pipeline
     public class When_a_transaction_throws_an_exception_with_retry :
         InMemoryTestFixture
     {
-        Task<ConsumeContext<Fault<Message>>> _faultReceived;
-
         [Test]
         public async Task Should_not_reuse_transaction_context_between_retries()
         {
-            var fault = await _faultReceived;
+            ConsumeContext<Fault<Message>> fault = await _faultReceived;
 
             Assert.That(fault.Message.Exceptions.First().ExceptionType, Does.Contain(nameof(IntentionalTestException)));
         }
+
+        Task<ConsumeContext<Fault<Message>>> _faultReceived;
 
         [OneTimeSetUp]
         public async Task Setup()

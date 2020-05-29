@@ -18,9 +18,7 @@ namespace MassTransit.Turnout.Components.Consumers
         public async Task Consume(ConsumeContext<CancelJob> context)
         {
             if (_jobRegistry.TryGetJob(context.Message.JobId, out var handle))
-            {
                 await handle.Cancel();
-            }
         }
     }
 }

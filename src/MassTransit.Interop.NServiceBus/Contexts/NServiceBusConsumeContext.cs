@@ -15,9 +15,9 @@ namespace MassTransit.Interop.NServiceBus.Contexts
         DeserializerConsumeContext
     {
         readonly JsonSerializer _deserializer;
+        readonly NServiceBusHeaderAdapter _headerAdapter;
         readonly JToken _messageToken;
         readonly IDictionary<Type, ConsumeContext> _messageTypes;
-        readonly NServiceBusHeaderAdapter _headerAdapter;
 
         public NServiceBusConsumeContext(JsonSerializer deserializer, ReceiveContext receiveContext, JToken messageToken)
             : base(receiveContext)
@@ -73,21 +73,21 @@ namespace MassTransit.Interop.NServiceBus.Contexts
                     return true;
                 }
 
-                string typeUrn = MessageUrn.ForTypeString<T>();
+                var typeUrn = MessageUrn.ForTypeString<T>();
 
                 if (SupportedMessageTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase)))
                 {
                     object obj;
-                    Type deserializeType = typeof(T);
+                    var deserializeType = typeof(T);
                     if (deserializeType.GetTypeInfo().IsInterface && TypeMetadataCache<T>.IsValidMessageType)
                         deserializeType = TypeMetadataCache<T>.ImplementationType;
 
-                    using (JsonReader jsonReader = _messageToken.CreateReader())
+                    using (var jsonReader = _messageToken.CreateReader())
                     {
                         obj = _deserializer.Deserialize(jsonReader, deserializeType);
                     }
 
-                    _messageTypes[typeof(T)] = message = new MessageConsumeContext<T>(this, (T) obj);
+                    _messageTypes[typeof(T)] = message = new MessageConsumeContext<T>(this, (T)obj);
                     return true;
                 }
 

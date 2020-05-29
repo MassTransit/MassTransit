@@ -17,7 +17,7 @@
         [Test]
         public async Task Should_complete_the_request()
         {
-            var response = await _requestClient.GetResponse<Response>(new Request());
+            Response<Response> response = await _requestClient.GetResponse<Response>(new Request());
         }
 
         RequestProxy _requestProxy;
@@ -195,7 +195,7 @@
         [Test]
         public async Task Should_fault_the_request()
         {
-            var (_, faulted) = await _requestClient.GetResponse<Response, FaultResponse>(new Request());
+            (_, Task<Response<FaultResponse>> faulted) = await _requestClient.GetResponse<Response, FaultResponse>(new Request());
             await faulted;
         }
 
@@ -280,6 +280,7 @@
         public class Response
         {
         }
+
 
         public class FaultResponse
         {

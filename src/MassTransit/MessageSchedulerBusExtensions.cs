@@ -10,7 +10,6 @@ namespace MassTransit
         /// <summary>
         /// Create a message scheduler that uses an external message scheduler, such as Quartz.NET or Hangfire, to
         /// schedule messages. This should not be used with the broker-specific message schedulers.
-        ///
         /// NOTE that this should only be used to schedule messages outside of a message consumer. Consumers should
         /// use the ScheduleSend extensions on ConsumeContext.
         /// </summary>
@@ -19,7 +18,10 @@ namespace MassTransit
         /// <returns></returns>
         public static IMessageScheduler CreateMessageScheduler(this IBus bus, Uri schedulerEndpointAddress)
         {
-            Task<ISendEndpoint> GetSchedulerEndpoint() => bus.GetSendEndpoint(schedulerEndpointAddress);
+            Task<ISendEndpoint> GetSchedulerEndpoint()
+            {
+                return bus.GetSendEndpoint(schedulerEndpointAddress);
+            }
 
             return new MessageScheduler(new EndpointScheduleMessageProvider(GetSchedulerEndpoint), bus.Topology);
         }
@@ -28,7 +30,6 @@ namespace MassTransit
         /// Create a message scheduler that uses an external message scheduler, such as Quartz.NET or Hangfire, to
         /// schedule messages. This should not be used with the broker-specific message schedulers. Scheduled messages
         /// are published to the external message scheduler, rather than uses a preconfigured endpoint address.
-        ///
         /// NOTE that this should only be used to schedule messages outside of a message consumer. Consumers should
         /// use the ScheduleSend extensions on ConsumeContext.
         /// </summary>

@@ -4,6 +4,7 @@ namespace MassTransit.Logging
     {
         public const string MassTransit = "MassTransit";
 
+
         public static class Configuration
         {
             public static class ReceiveEndpoint

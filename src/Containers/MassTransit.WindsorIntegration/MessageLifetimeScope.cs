@@ -6,11 +6,11 @@ namespace MassTransit.WindsorIntegration
     public class MessageLifetimeScope :
         CallContextLifetimeScope
     {
-        public ConsumeContext ConsumeContext { get; }
-
         public MessageLifetimeScope(ConsumeContext consumeContext)
         {
             ConsumeContext = consumeContext;
         }
+
+        public ConsumeContext ConsumeContext { get; }
     }
 }

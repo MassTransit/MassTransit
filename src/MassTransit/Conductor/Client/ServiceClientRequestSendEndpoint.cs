@@ -12,9 +12,9 @@ namespace MassTransit.Conductor.Client
         IRequestSendEndpoint<TMessage>
         where TMessage : class
     {
-        readonly Task<IServiceClientMessageCache<TMessage>> _messageClient;
         readonly ClientFactoryContext _clientFactoryContext;
         readonly ConsumeContext _consumeContext;
+        readonly Task<IServiceClientMessageCache<TMessage>> _messageClient;
 
         public ServiceClientRequestSendEndpoint(Task<IServiceClientMessageCache<TMessage>> messageClient, ClientFactoryContext clientFactoryContext)
         {
@@ -31,11 +31,12 @@ namespace MassTransit.Conductor.Client
 
         public async Task<TMessage> Send(Guid requestId, object values, IPipe<SendContext<TMessage>> pipe, CancellationToken cancellationToken)
         {
-            var messageClient = _messageClient.IsCompletedSuccessfully()
+            IServiceClientMessageCache<TMessage> messageClient = _messageClient.IsCompletedSuccessfully()
                 ? _messageClient.Result
                 : await _messageClient.OrCanceled(cancellationToken).ConfigureAwait(false);
 
-            var sendEndpoint = await messageClient.GetServiceSendEndpoint(_clientFactoryContext, default, _consumeContext, cancellationToken)
+            IRequestSendEndpoint<TMessage> sendEndpoint = await messageClient
+                .GetServiceSendEndpoint(_clientFactoryContext, default, _consumeContext, cancellationToken)
                 .ConfigureAwait(false);
 
             // TODO need to add ServiceInstanceContext at some point...
@@ -46,11 +47,12 @@ namespace MassTransit.Conductor.Client
 
         public async Task Send(Guid requestId, TMessage message, IPipe<SendContext<TMessage>> pipe, CancellationToken cancellationToken)
         {
-            var messageClient = _messageClient.IsCompletedSuccessfully()
+            IServiceClientMessageCache<TMessage> messageClient = _messageClient.IsCompletedSuccessfully()
                 ? _messageClient.Result
                 : await _messageClient.OrCanceled(cancellationToken).ConfigureAwait(false);
 
-            var sendEndpoint = await messageClient.GetServiceSendEndpoint(_clientFactoryContext, message, _consumeContext, cancellationToken)
+            IRequestSendEndpoint<TMessage> sendEndpoint = await messageClient
+                .GetServiceSendEndpoint(_clientFactoryContext, message, _consumeContext, cancellationToken)
                 .ConfigureAwait(false);
 
             var clientIdPipe = new ClientIdPipe<TMessage>(messageClient.ClientId, pipe);

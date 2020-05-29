@@ -10,7 +10,7 @@
     public static class BatchConsumerExtensions
     {
         /// <summary>
-        /// Configure a Batch&lt;<typeparamref name="TMessage"/>&gt; consumer, which allows messages to be collected into an array and consumed
+        /// Configure a Batch&lt;<typeparamref name="TMessage" />&gt; consumer, which allows messages to be collected into an array and consumed
         /// at once. This feature is experimental, but often requested. Be sure to configure the transport with sufficient concurrent message
         /// capacity (prefetch, etc.) so that a batch can actually complete without always reaching the time limit.
         /// </summary>

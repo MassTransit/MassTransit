@@ -20,9 +20,9 @@ namespace MassTransit.PipeConfigurators
         readonly ICompensateActivityFactory<TActivity, TLog> _activityFactory;
         readonly IBuildPipeConfigurator<CompensateActivityContext<TActivity, TLog>> _activityPipeConfigurator;
         readonly IBuildPipeConfigurator<CompensateContext<TLog>> _compensatePipeConfigurator;
-        readonly RoutingSlipConfigurator _routingSlipConfigurator;
         readonly ActivityConfigurationObservable _configurationObservers;
         readonly ActivityObservable _observers;
+        readonly RoutingSlipConfigurator _routingSlipConfigurator;
 
         public CompensateActivityHostSpecification(ICompensateActivityFactory<TActivity, TLog> activityFactory, IActivityConfigurationObserver observer)
         {
@@ -61,6 +61,16 @@ namespace MassTransit.PipeConfigurators
             configure?.Invoke(_routingSlipConfigurator);
         }
 
+        public ConnectHandle ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
+        {
+            return _configurationObservers.Connect(observer);
+        }
+
+        public ConnectHandle ConnectActivityObserver(IActivityObserver observer)
+        {
+            return _observers.Connect(observer);
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             foreach (var result in _routingSlipConfigurator.Validate())
@@ -83,22 +93,12 @@ namespace MassTransit.PipeConfigurators
 
             _compensatePipeConfigurator.UseFilter(new CompensateActivityFactoryFilter<TActivity, TLog>(_activityFactory, compensateActivityPipe));
 
-            var compensatePipe = _compensatePipeConfigurator.Build();
+            IPipe<CompensateContext<TLog>> compensatePipe = _compensatePipeConfigurator.Build();
 
             var host = new CompensateActivityHost<TActivity, TLog>(compensatePipe);
             _routingSlipConfigurator.UseFilter(host);
 
             builder.ConnectConsumePipe(_routingSlipConfigurator.Build());
-        }
-
-        public ConnectHandle ConnectActivityConfigurationObserver(IActivityConfigurationObserver observer)
-        {
-            return _configurationObservers.Connect(observer);
-        }
-
-        public ConnectHandle ConnectActivityObserver(IActivityObserver observer)
-        {
-            return _observers.Connect(observer);
         }
     }
 }

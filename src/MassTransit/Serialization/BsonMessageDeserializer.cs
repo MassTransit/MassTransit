@@ -1,7 +1,6 @@
 namespace MassTransit.Serialization
 {
     using System;
-    using System.IO;
     using System.Net.Mime;
     using System.Runtime.Serialization;
     using GreenPipes;
@@ -21,7 +20,7 @@ namespace MassTransit.Serialization
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("bson");
+            var scope = context.CreateScope("bson");
             scope.Add("contentType", BsonMessageSerializer.BsonContentType.MediaType);
         }
 
@@ -32,7 +31,7 @@ namespace MassTransit.Serialization
             try
             {
                 MessageEnvelope envelope;
-                using (Stream body = receiveContext.GetBodyStream())
+                using (var body = receiveContext.GetBodyStream())
                 using (var jsonReader = new BsonDataReader(body))
                 {
                     envelope = _deserializer.Deserialize<MessageEnvelope>(jsonReader);

@@ -41,7 +41,7 @@ namespace MassTransit.Initializers.PropertyConverters
             {
                 var value = await inputTask.ConfigureAwait(false);
 
-                var convertTask = _propertyConverter.Convert(context, value);
+                Task<TResult> convertTask = _propertyConverter.Convert(context, value);
                 if (convertTask.IsCompleted)
                     return convertTask.Result;
 

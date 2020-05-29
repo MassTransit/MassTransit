@@ -10,7 +10,6 @@ namespace MassTransit.Tests.Initializers
     using Metadata;
     using NUnit.Framework;
     using TestFramework;
-    using Util;
 
 
     [TestFixture]
@@ -20,9 +19,9 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public async Task Should_initialize_the_properties()
         {
-            var client = CreateRequestClient<SimpleRequest>();
+            IRequestClient<SimpleRequest> client = CreateRequestClient<SimpleRequest>();
 
-            var response = await client.GetResponse<SimpleResponse>(new {Name = "Hello"});
+            Response<SimpleResponse> response = await client.GetResponse<SimpleResponse>(new {Name = "Hello"});
 
             Assert.That(response.Message.Name, Is.EqualTo("Hello"));
             Assert.That(response.Message.Value, Is.EqualTo("World"));
@@ -45,10 +44,10 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public async Task Should_initialize_the_properties()
         {
-            var context = await MessageInitializerCache<ExceptionInfo>.Initialize(new
+            InitializeContext<ExceptionInfo> context = await MessageInitializerCache<ExceptionInfo>.Initialize(new
             {
                 Message = "Hello",
-                ExceptionType = TypeMetadataCache<ArgumentException>.ShortName,
+                ExceptionType = TypeMetadataCache<ArgumentException>.ShortName
             });
 
             var message = context.Message;
@@ -66,9 +65,9 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public async Task Should_initialize_the_properties()
         {
-            var client = CreateRequestClient<SimpleRequest>();
+            IRequestClient<SimpleRequest> client = CreateRequestClient<SimpleRequest>();
 
-            var response = await client.GetResponse<SimpleResponse>(new {Name = "Hello"});
+            Response<SimpleResponse> response = await client.GetResponse<SimpleResponse>(new {Name = "Hello"});
 
             Assert.That(response.Message.Name, Is.EqualTo("Hello"));
             Assert.That(response.Message.Value, Is.Null);
@@ -91,9 +90,9 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public async Task Should_initialize_the_properties()
         {
-            var client = CreateRequestClient<ComplexRequest>();
+            IRequestClient<ComplexRequest> client = CreateRequestClient<ComplexRequest>();
 
-            var response = await client.GetResponse<ComplexResponse>(new
+            Response<ComplexResponse> response = await client.GetResponse<ComplexResponse>(new
             {
                 Name = "Hello",
                 IntValue = 27,
@@ -120,6 +119,178 @@ namespace MassTransit.Tests.Initializers
     public class Creating_a_super_complex_message :
         InMemoryTestFixture
     {
+        [Test]
+        public void Should_handle_basic_dictionary()
+        {
+            Assert.That(_response.Message.Strings, Is.Not.Null);
+            Assert.That(_response.Message.Strings.Count, Is.EqualTo(2));
+            Assert.That(_response.Message.Strings["Hello"], Is.EqualTo("World"));
+            Assert.That(_response.Message.Strings["Thank You"], Is.EqualTo("Next"));
+        }
+
+        [Test]
+        public void Should_handle_conversion_dictionary()
+        {
+            Assert.That(_response.Message.IntToStrings, Is.Not.Null);
+            Assert.That(_response.Message.IntToStrings.Count, Is.EqualTo(2));
+            Assert.That(_response.Message.IntToStrings[100], Is.EqualTo("1000"));
+            Assert.That(_response.Message.IntToStrings[200], Is.EqualTo("2000"));
+        }
+
+        [Test]
+        public void Should_handle_datetime_utc()
+        {
+            Assert.That(_response.Message.DateTimeValue, Is.EqualTo(_now));
+        }
+
+        [Test]
+        public void Should_handle_decimal()
+        {
+            Assert.That(_response.Message.Amount, Is.EqualTo(867.53m));
+        }
+
+        [Test]
+        public void Should_handle_duplicate_input_property_names()
+        {
+            Assert.That(_response.Message.NewProperty, Is.Not.Null);
+            Assert.That(_response.Message.NewProperty.NewProperty, Is.EqualTo("Hello"));
+        }
+
+        [Test]
+        public void Should_handle_enumerable_decimal()
+        {
+            Assert.That(_response.Message.Amounts, Is.Not.Null);
+            Assert.That(_response.Message.Amounts.Count, Is.EqualTo(2));
+            Assert.That(_response.Message.Amounts[0], Is.EqualTo(98.6m));
+            Assert.That(_response.Message.Amounts[1], Is.EqualTo(98.6m));
+        }
+
+        [Test]
+        public void Should_handle_enums()
+        {
+            Assert.That(_response.Message.EngineStatus, Is.EqualTo(Status.Started));
+            Assert.That(_response.Message.NumberStatus, Is.EqualTo(Status.Stopped));
+            Assert.That(_response.Message.StringStatus, Is.EqualTo(Status.Started));
+        }
+
+        [Test]
+        public void Should_handle_exception()
+        {
+            Assert.That(_response.Message.Exception, Is.Not.Null);
+            Assert.That(_response.Message.Exception.ExceptionType, Is.EqualTo(TypeMetadataCache<IntentionalTestException>.ShortName));
+        }
+
+        [Test]
+        public async Task Should_handle_id_variable()
+        {
+            Assert.That(_response.Message.CorrelationId, Is.EqualTo(_response.Message.Id));
+            Assert.That(_response.Message.StringId, Is.EqualTo(_response.Message.Id));
+        }
+
+        [Test]
+        public void Should_handle_int()
+        {
+            Assert.That(_response.Message.IntValue, Is.EqualTo(27));
+        }
+
+        [Test]
+        public void Should_handle_int_to_string_array()
+        {
+            Assert.That(_response.Message.Numbers, Is.Not.Null);
+            Assert.That(_response.Message.Numbers.Length, Is.EqualTo(3));
+            Assert.That(_response.Message.Numbers[0], Is.EqualTo("12"));
+            Assert.That(_response.Message.Numbers[1], Is.EqualTo("24"));
+            Assert.That(_response.Message.Numbers[2], Is.EqualTo("36"));
+        }
+
+        [Test]
+        public void Should_handle_interface_type()
+        {
+            Assert.That(_response.Message.SubValue, Is.Not.Null);
+            Assert.That(_response.Message.SubValue.Text, Is.EqualTo("Mary"));
+        }
+
+        [Test]
+        public void Should_handle_interface_type_array()
+        {
+            Assert.That(_response.Message.SubValues.Length, Is.EqualTo(2));
+            Assert.That(_response.Message.SubValues[0].Text, Is.EqualTo("Frank"));
+            Assert.That(_response.Message.SubValues[1].Text, Is.EqualTo("Lola"));
+        }
+
+        [Test]
+        public void Should_handle_lists()
+        {
+            Assert.That(_response.Message.StringList, Is.Not.Null);
+            Assert.That(_response.Message.StringList.Count, Is.EqualTo(2));
+            Assert.That(_response.Message.StringList[0], Is.EqualTo("Frank"));
+            Assert.That(_response.Message.StringList[1], Is.EqualTo("Estelle"));
+        }
+
+        [Test]
+        public void Should_handle_long_from_nullable()
+        {
+            Assert.That(_response.Message.NotNullableValue, Is.EqualTo(69));
+        }
+
+        [Test]
+        public void Should_handle_nullable_decimal()
+        {
+            Assert.That(_response.Message.NullableDecimalValue, Is.EqualTo(123.45m));
+        }
+
+        [Test]
+        public void Should_handle_nullable_long()
+        {
+            Assert.That(_response.Message.NullableValue, Is.EqualTo(42));
+        }
+
+        [Test]
+        public void Should_handle_object_dictionary()
+        {
+            Assert.That(_response.Message.StringSubValues, Is.Not.Null);
+            Assert.That(_response.Message.StringSubValues.Count, Is.EqualTo(2));
+            Assert.That(_response.Message.StringSubValues["A"].Text, Is.EqualTo("Eh"));
+            Assert.That(_response.Message.StringSubValues["B"].Text, Is.EqualTo("Bee"));
+        }
+
+        [Test]
+        public void Should_handle_string()
+        {
+            Assert.That(_response.Message.StringValue, Is.EqualTo("Hello"));
+        }
+
+        [Test]
+        public void Should_handle_string_array()
+        {
+            Assert.That(_response.Message.Names, Is.Not.Null);
+            Assert.That(_response.Message.Names.Length, Is.EqualTo(3));
+            Assert.That(_response.Message.Names[0], Is.EqualTo("Curly"));
+            Assert.That(_response.Message.Names[1], Is.EqualTo("Larry"));
+            Assert.That(_response.Message.Names[2], Is.EqualTo("Moe"));
+        }
+
+        [Test]
+        public void Should_handle_task_of_task_of_int()
+        {
+            Assert.That(_response.Message.AsyncValue, Is.EqualTo(37));
+        }
+
+        [Test]
+        public void Should_handle_timestamp_variable()
+        {
+            Assert.That(_response.Message.Timestamp.HasValue, Is.True);
+            Assert.That(_response.Message.Timestamp, Is.GreaterThanOrEqualTo(_now));
+        }
+
+        [Test]
+        public void Should_handle_uris()
+        {
+            Assert.That(_response.Message.ServiceAddress, Is.EqualTo(new Uri("http://masstransit-project.com")));
+            Assert.That(_response.Message.OtherAddress, Is.EqualTo(new Uri("http://github.com")));
+            Assert.That(_response.Message.StringAddress, Is.EqualTo("loopback://localhost/"));
+        }
+
         DateTime _now;
         Response<SuperComplexResponse> _response;
 
@@ -128,7 +299,7 @@ namespace MassTransit.Tests.Initializers
         {
             _now = DateTime.UtcNow;
 
-            var client = CreateRequestClient<SuperComplexRequest>();
+            IRequestClient<SuperComplexRequest> client = CreateRequestClient<SuperComplexRequest>();
 
             _response = await client.GetResponse<SuperComplexResponse>(new
             {
@@ -146,7 +317,7 @@ namespace MassTransit.Tests.Initializers
                 Names = new[] {"Curly", "Larry", "Moe"},
                 Exception = new IntentionalTestException("It Happens"),
                 SubValue = new {Text = "Mary"},
-                SubValues = new object[] {new {Text = "Frank"}, new {Text = "Lola"},},
+                SubValues = new object[] {new {Text = "Frank"}, new {Text = "Lola"}},
                 Amount = 867.53m,
                 Amounts = Enumerable.Repeat(98.6m, 2),
                 AsyncValue = GetIntResult().Select(x => x.Number),
@@ -171,181 +342,9 @@ namespace MassTransit.Tests.Initializers
                 IntToStrings = new Dictionary<int, long>
                 {
                     {100, 1000},
-                    {200, 2000},
+                    {200, 2000}
                 }
             });
-        }
-
-        [Test]
-        public void Should_handle_string()
-        {
-            Assert.That(_response.Message.StringValue, Is.EqualTo("Hello"));
-        }
-
-        [Test]
-        public void Should_handle_int()
-        {
-            Assert.That(_response.Message.IntValue, Is.EqualTo(27));
-        }
-
-        [Test]
-        public void Should_handle_datetime_utc()
-        {
-            Assert.That(_response.Message.DateTimeValue, Is.EqualTo(_now));
-        }
-
-        [Test]
-        public void Should_handle_nullable_long()
-        {
-            Assert.That(_response.Message.NullableValue, Is.EqualTo(42));
-        }
-
-        [Test]
-        public void Should_handle_long_from_nullable()
-        {
-            Assert.That(_response.Message.NotNullableValue, Is.EqualTo(69));
-        }
-
-        [Test]
-        public void Should_handle_nullable_decimal()
-        {
-            Assert.That(_response.Message.NullableDecimalValue, Is.EqualTo(123.45m));
-        }
-
-        [Test]
-        public void Should_handle_int_to_string_array()
-        {
-            Assert.That(_response.Message.Numbers, Is.Not.Null);
-            Assert.That(_response.Message.Numbers.Length, Is.EqualTo(3));
-            Assert.That(_response.Message.Numbers[0], Is.EqualTo("12"));
-            Assert.That(_response.Message.Numbers[1], Is.EqualTo("24"));
-            Assert.That(_response.Message.Numbers[2], Is.EqualTo("36"));
-        }
-
-        [Test]
-        public void Should_handle_enumerable_decimal()
-        {
-            Assert.That(_response.Message.Amounts, Is.Not.Null);
-            Assert.That(_response.Message.Amounts.Count, Is.EqualTo(2));
-            Assert.That(_response.Message.Amounts[0], Is.EqualTo(98.6m));
-            Assert.That(_response.Message.Amounts[1], Is.EqualTo(98.6m));
-        }
-
-        [Test]
-        public void Should_handle_string_array()
-        {
-            Assert.That(_response.Message.Names, Is.Not.Null);
-            Assert.That(_response.Message.Names.Length, Is.EqualTo(3));
-            Assert.That(_response.Message.Names[0], Is.EqualTo("Curly"));
-            Assert.That(_response.Message.Names[1], Is.EqualTo("Larry"));
-            Assert.That(_response.Message.Names[2], Is.EqualTo("Moe"));
-        }
-
-        [Test]
-        public void Should_handle_exception()
-        {
-            Assert.That(_response.Message.Exception, Is.Not.Null);
-            Assert.That(_response.Message.Exception.ExceptionType, Is.EqualTo(TypeMetadataCache<IntentionalTestException>.ShortName));
-        }
-
-        [Test]
-        public void Should_handle_interface_type()
-        {
-            Assert.That(_response.Message.SubValue, Is.Not.Null);
-            Assert.That(_response.Message.SubValue.Text, Is.EqualTo("Mary"));
-        }
-
-        [Test]
-        public void Should_handle_interface_type_array()
-        {
-            Assert.That(_response.Message.SubValues.Length, Is.EqualTo(2));
-            Assert.That(_response.Message.SubValues[0].Text, Is.EqualTo("Frank"));
-            Assert.That(_response.Message.SubValues[1].Text, Is.EqualTo("Lola"));
-        }
-
-        [Test]
-        public void Should_handle_timestamp_variable()
-        {
-            Assert.That(_response.Message.Timestamp.HasValue, Is.True);
-            Assert.That(_response.Message.Timestamp, Is.GreaterThanOrEqualTo(_now));
-        }
-
-        [Test]
-        public void Should_handle_decimal()
-        {
-            Assert.That(_response.Message.Amount, Is.EqualTo(867.53m));
-        }
-
-        [Test]
-        public void Should_handle_task_of_task_of_int()
-        {
-            Assert.That(_response.Message.AsyncValue, Is.EqualTo(37));
-        }
-
-        [Test]
-        public void Should_handle_duplicate_input_property_names()
-        {
-            Assert.That(_response.Message.NewProperty, Is.Not.Null);
-            Assert.That(_response.Message.NewProperty.NewProperty, Is.EqualTo("Hello"));
-        }
-
-        [Test]
-        public void Should_handle_enums()
-        {
-            Assert.That(_response.Message.EngineStatus, Is.EqualTo(Status.Started));
-            Assert.That(_response.Message.NumberStatus, Is.EqualTo(Status.Stopped));
-            Assert.That(_response.Message.StringStatus, Is.EqualTo(Status.Started));
-        }
-
-        [Test]
-        public async Task Should_handle_id_variable()
-        {
-            Assert.That(_response.Message.CorrelationId, Is.EqualTo(_response.Message.Id));
-            Assert.That(_response.Message.StringId, Is.EqualTo(_response.Message.Id));
-        }
-
-        [Test]
-        public void Should_handle_uris()
-        {
-            Assert.That(_response.Message.ServiceAddress, Is.EqualTo(new Uri("http://masstransit-project.com")));
-            Assert.That(_response.Message.OtherAddress, Is.EqualTo(new Uri("http://github.com")));
-            Assert.That(_response.Message.StringAddress, Is.EqualTo("loopback://localhost/"));
-        }
-
-        [Test]
-        public void Should_handle_lists()
-        {
-            Assert.That(_response.Message.StringList, Is.Not.Null);
-            Assert.That(_response.Message.StringList.Count, Is.EqualTo(2));
-            Assert.That(_response.Message.StringList[0], Is.EqualTo("Frank"));
-            Assert.That(_response.Message.StringList[1], Is.EqualTo("Estelle"));
-        }
-
-        [Test]
-        public void Should_handle_basic_dictionary()
-        {
-            Assert.That(_response.Message.Strings, Is.Not.Null);
-            Assert.That(_response.Message.Strings.Count, Is.EqualTo(2));
-            Assert.That(_response.Message.Strings["Hello"], Is.EqualTo("World"));
-            Assert.That(_response.Message.Strings["Thank You"], Is.EqualTo("Next"));
-        }
-
-        [Test]
-        public void Should_handle_object_dictionary()
-        {
-            Assert.That(_response.Message.StringSubValues, Is.Not.Null);
-            Assert.That(_response.Message.StringSubValues.Count, Is.EqualTo(2));
-            Assert.That(_response.Message.StringSubValues["A"].Text, Is.EqualTo("Eh"));
-            Assert.That(_response.Message.StringSubValues["B"].Text, Is.EqualTo("Bee"));
-        }
-
-        [Test]
-        public void Should_handle_conversion_dictionary()
-        {
-            Assert.That(_response.Message.IntToStrings, Is.Not.Null);
-            Assert.That(_response.Message.IntToStrings.Count, Is.EqualTo(2));
-            Assert.That(_response.Message.IntToStrings[100], Is.EqualTo("1000"));
-            Assert.That(_response.Message.IntToStrings[200], Is.EqualTo("2000"));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -367,7 +366,7 @@ namespace MassTransit.Tests.Initializers
 
     namespace InitializerTestMessages
     {
-        using System;
+        using System.Collections.Generic;
 
 
         public interface SimpleRequest
@@ -403,7 +402,7 @@ namespace MassTransit.Tests.Initializers
         {
             Unknown = 0,
             Started = 1,
-            Stopped = 12,
+            Stopped = 12
         }
 
 

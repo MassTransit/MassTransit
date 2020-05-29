@@ -4,9 +4,9 @@ namespace MassTransit.KafkaIntegration.Configuration.Definition
 
 
     /// <summary>
-    ///     Formats the topic names using kebab-case (dashed snake case)
-    ///     SubmitOrder-> submit-order
-    ///     OrderState -> order-state
+    /// Formats the topic names using kebab-case (dashed snake case)
+    /// SubmitOrder-> submit-order
+    /// OrderState -> order-state
     /// </summary>
     public class KebabCaseTopicNameFormatter :
         DefaultTopicNameFormatter

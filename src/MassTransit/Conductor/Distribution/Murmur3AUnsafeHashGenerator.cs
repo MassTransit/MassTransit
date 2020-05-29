@@ -1,15 +1,12 @@
 namespace MassTransit.Conductor.Distribution
 {
-    using System;
-
-
     public class Murmur3AUnsafeHashGenerator :
         IHashGenerator
     {
         const uint Seed = 0xc58f1a7b;
 
-        const UInt32 C1 = 0xcc9e2d51;
-        const UInt32 C2 = 0x1b873593;
+        const uint C1 = 0xcc9e2d51;
+        const uint C2 = 0x1b873593;
 
         public unsafe uint Hash(string s)
         {
@@ -38,15 +35,15 @@ namespace MassTransit.Conductor.Distribution
 
         static unsafe uint Hash(byte* data, uint len, uint seed)
         {
-            UInt32 nblocks = len / 4;
-            UInt32 h1 = seed;
+            var nblocks = len / 4;
+            var h1 = seed;
 
             //----------
             // body
 
-            UInt32 k1;
-            var block = (UInt32*)data;
-            for (UInt32 i = nblocks; i > 0; --i, ++block)
+            uint k1;
+            var block = (uint*)data;
+            for (var i = nblocks; i > 0; --i, ++block)
             {
                 k1 = *block;
 
@@ -64,7 +61,7 @@ namespace MassTransit.Conductor.Distribution
 
 
             k1 = 0;
-            uint rem = len & 3;
+            var rem = len & 3;
             var tail = (byte*)block;
             if (rem >= 3)
                 k1 ^= (uint)(tail[2] << 16);
@@ -95,7 +92,7 @@ namespace MassTransit.Conductor.Distribution
             return h1;
         }
 
-        static UInt32 Rotl32(UInt32 x, int r)
+        static uint Rotl32(uint x, int r)
         {
             return (x << r) | (x >> (32 - r));
         }

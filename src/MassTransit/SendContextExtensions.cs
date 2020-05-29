@@ -68,9 +68,7 @@
             }
 
             if (exceptionContext.TryGetPayload(out RetryContext retryContext) && retryContext.RetryCount > 0)
-            {
                 headers.Set(MessageHeaders.FaultRetryCount, retryContext.RetryCount);
-            }
         }
 
         /// <summary>
@@ -100,9 +98,7 @@
             }
 
             if (exceptionContext.TryGetPayload(out RetryContext retryContext) && retryContext.RetryCount > 0)
-            {
                 adapter.Set(headers, MessageHeaders.FaultRetryCount, retryContext.RetryCount);
-            }
         }
 
         /// <summary>

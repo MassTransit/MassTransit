@@ -1,9 +1,10 @@
 namespace MassTransit.Tests
 {
-	using System;
+    using System;
 
-	[Serializable]
-	public class UpdateAcceptedMessage
-	{
-	}
+
+    [Serializable]
+    public class UpdateAcceptedMessage
+    {
+    }
 }

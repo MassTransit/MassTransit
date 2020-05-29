@@ -16,11 +16,11 @@
         SessionContext,
         IAsyncDisposable
     {
-        readonly ConnectionContext _connectionContext;
-        readonly ISession _session;
         readonly CancellationToken _cancellationToken;
-        readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
+        readonly ConnectionContext _connectionContext;
         readonly MessageProducerCache _messageProducerCache;
+        readonly ISession _session;
+        readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
 
         public ActiveMqSessionContext(ConnectionContext connectionContext, ISession session, CancellationToken cancellationToken)
             : base(connectionContext)

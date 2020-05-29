@@ -15,10 +15,10 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
         where TSaga : class, ISaga
     {
         const string DefaultScopeName = "message";
+        readonly Action<ContainerBuilder, ConsumeContext> _configureScope;
         readonly string _name;
 
         readonly ILifetimeScopeProvider _scopeProvider;
-        readonly Action<ContainerBuilder, ConsumeContext> _configureScope;
 
         public AutofacSagaRepositoryContextFactory(ILifetimeScopeProvider scopeProvider, string name, Action<ContainerBuilder, ConsumeContext> configureScope)
         {

@@ -87,11 +87,11 @@ namespace MassTransit.Serialization
                 try
                 {
                     object obj;
-                    Type deserializeType = typeof(T);
+                    var deserializeType = typeof(T);
                     if (deserializeType.GetTypeInfo().IsInterface && TypeMetadataCache<T>.IsValidMessageType)
                         deserializeType = TypeMetadataCache<T>.ImplementationType;
 
-                    using (JsonReader jsonReader = _messageToken.CreateReader())
+                    using (var jsonReader = _messageToken.CreateReader())
                     {
                         obj = _deserializer.Deserialize(jsonReader, deserializeType);
                     }

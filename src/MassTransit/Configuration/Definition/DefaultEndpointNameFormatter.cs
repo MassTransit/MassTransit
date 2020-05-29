@@ -10,8 +10,8 @@ namespace MassTransit.Definition
 
     /// <summary>
     /// The default endpoint name formatter, which simply trims the words Consumer, Activity, and Saga
-    /// from the type name. If you need something more readable, consider the <see cref="SnakeCaseEndpointNameFormatter"/>
-    /// or the <see cref="KebabCaseEndpointNameFormatter"/>.
+    /// from the type name. If you need something more readable, consider the <see cref="SnakeCaseEndpointNameFormatter" />
+    /// or the <see cref="KebabCaseEndpointNameFormatter" />.
     /// </summary>
     public class DefaultEndpointNameFormatter :
         IEndpointNameFormatter

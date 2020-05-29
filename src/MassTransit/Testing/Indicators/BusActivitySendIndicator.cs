@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Testing.Indicators
 {
     using System;
@@ -36,24 +24,30 @@ namespace MassTransit.Testing.Indicators
 
         public BusActivitySendIndicator(ISignalResource signalResource)
             :
-                this(signalResource, TimeSpan.FromSeconds(5))
+            this(signalResource, TimeSpan.FromSeconds(5))
         {
         }
 
         public BusActivitySendIndicator(TimeSpan receiveIdleTimeout)
             :
-                this(null, receiveIdleTimeout)
+            this(null, receiveIdleTimeout)
         {
         }
 
         public BusActivitySendIndicator()
             :
-                this(null)
+            this(null)
         {
         }
 
-        public override bool IsMet => _receiveIdleTimer.Triggered ||
+        public override bool IsMet =>
+            _receiveIdleTimer.Triggered ||
             Interlocked.CompareExchange(ref _activityStarted, int.MinValue, int.MinValue) == 0;
+
+        public void Signal()
+        {
+            SignalInactivity(null);
+        }
 
         public Task PreSend<T>(SendContext<T> context)
             where T : class
@@ -75,11 +69,6 @@ namespace MassTransit.Testing.Indicators
         {
             _receiveIdleTimer.Restart();
             return TaskUtil.Completed;
-        }
-
-        public void Signal()
-        {
-            SignalInactivity(null);
         }
 
         void SignalInactivity(object state)

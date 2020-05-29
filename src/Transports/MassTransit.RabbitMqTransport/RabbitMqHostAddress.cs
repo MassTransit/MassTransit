@@ -48,7 +48,7 @@ namespace MassTransit.RabbitMqTransport
             Prefetch = default;
             TimeToLive = default;
 
-            foreach ((string key, string value) in address.SplitQueryString())
+            foreach ((var key, var value) in address.SplitQueryString())
             {
                 switch (key)
                 {
@@ -77,14 +77,10 @@ namespace MassTransit.RabbitMqTransport
             if (port.HasValue)
             {
                 if (port.Value == 0)
-                {
                     Port = 5672;
-                }
 
                 if (port.Value == 5671)
-                {
                     Scheme = RabbitMqSslSchema;
-                }
             }
 
             Heartbeat = default;

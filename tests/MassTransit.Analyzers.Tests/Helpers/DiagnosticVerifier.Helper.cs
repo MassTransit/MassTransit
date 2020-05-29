@@ -41,7 +41,9 @@ namespace MassTransit.Analyzers.Tests
         /// <param name="sources">Classes in the form of strings</param>
         /// <param name="language">The language the source classes are in</param>
         /// <param name="analyzer">The analyzer to be run on the sources</param>
-        /// <returns>An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location</returns>
+        /// <returns>
+        /// An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location
+        /// </returns>
         static Diagnostic[] GetSortedDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer)
         {
             return GetSortedDiagnosticsFromDocuments(analyzer, GetDocuments(sources, language));
@@ -53,7 +55,9 @@ namespace MassTransit.Analyzers.Tests
         /// </summary>
         /// <param name="analyzer">The analyzer to run on the documents</param>
         /// <param name="documents">The Documents that the analyzer will be run on</param>
-        /// <returns>An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location</returns>
+        /// <returns>
+        /// An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location
+        /// </returns>
         protected static Diagnostic[] GetSortedDiagnosticsFromDocuments(DiagnosticAnalyzer analyzer, Document[] documents)
         {
             var projects = new HashSet<Project>();
@@ -102,7 +106,9 @@ namespace MassTransit.Analyzers.Tests
         /// </summary>
         /// <param name="sources">Classes in the form of strings</param>
         /// <param name="language">The language the source code is in</param>
-        /// <returns>A Tuple containing the Documents produced from the sources and their TextSpans if relevant</returns>
+        /// <returns>
+        /// A Tuple containing the Documents produced from the sources and their TextSpans if relevant
+        /// </returns>
         static Document[] GetDocuments(string[] sources, string language)
         {
             if (language != LanguageNames.CSharp && language != LanguageNames.VisualBasic)

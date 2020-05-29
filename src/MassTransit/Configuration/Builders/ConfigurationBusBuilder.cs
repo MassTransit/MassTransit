@@ -7,8 +7,8 @@ namespace MassTransit.Builders
 
     public class ConfigurationBusBuilder
     {
-        readonly IReceiveEndpointConfiguration _busEndpointConfiguration;
         readonly IBusConfiguration _busConfiguration;
+        readonly IReceiveEndpointConfiguration _busEndpointConfiguration;
 
         public ConfigurationBusBuilder(IBusConfiguration busConfiguration, IReceiveEndpointConfiguration busReceiveEndpointConfiguration)
         {

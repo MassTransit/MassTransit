@@ -17,10 +17,10 @@ namespace MassTransit.Tests.MessageData
             await Bus.Publish<DocumentProcessed>(new
             {
                 InVar.CorrelationId,
-                StringData = "This is a huge string, and it is just too big to fit.",
+                StringData = "This is a huge string, and it is just too big to fit."
             });
 
-            var completed = await _completed.Task;
+            ConsumeContext<DocumentProcessed> completed = await _completed.Task;
         }
 
         readonly IMessageDataRepository _repository = new InMemoryMessageDataRepository();

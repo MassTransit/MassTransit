@@ -18,6 +18,73 @@
     public class Given_a_variety_of_challenging_messages :
         SerializationTest
     {
+        [Test]
+        public void Byte_array()
+        {
+            TestSerialization(new C {Contents = new byte[] {0x56, 0x34, 0xf3}});
+        }
+
+        [Test]
+        public void Byte_interface_array()
+        {
+            var msg = MessageInitializerCache<ByteArrayMessage>.Initialize(new {Contents = new byte[] {0x56, 0x34, 0xf3}}).GetAwaiter().GetResult().Message;
+
+            var result = SerializeAndReturn(msg);
+
+            result.Contents.SequenceEqual(msg.Contents).ShouldBeTrue();
+        }
+
+        [Test]
+        public void Crazy_date_time()
+        {
+            TestSerialization(new B
+            {
+                Local = new DateTime(2001, 9, 11, 8, 46, 30, DateTimeKind.Local),
+                Universal = new DateTime(2001, 9, 11, 9, 3, 2, DateTimeKind.Local).ToUniversalTime()
+            });
+        }
+
+        [Test]
+        public void No_default_constructor()
+        {
+            TestSerialization(new A("Dru", "Sellers"));
+        }
+
+        [Test]
+        public void Serialize_complex()
+        {
+            Message = new SerializationTestMessage
+            {
+                DecimalValue = 123.45m,
+                LongValue = 098123213,
+                BoolValue = true,
+                ByteValue = 127,
+                IntValue = 123,
+                DateTimeValue = new DateTime(2008, 9, 8, 7, 6, 5, 4),
+                TimeSpanValue = TimeSpan.FromSeconds(30),
+                GuidValue = Guid.NewGuid(),
+                StringValue = "Chris's Sample Code",
+                DoubleValue = 1823.172,
+                MaybeMoney = 567.89m
+            };
+
+            TestSerialization(Message);
+        }
+
+        [Test]
+        public void Serialize_simple()
+        {
+            TestSerialization(new PingMessage());
+        }
+
+        [Test]
+        public void Serialize_small_number()
+        {
+            const decimal smallNumber = 0.000001M;
+
+            TestSerialization(new SmallNumberMessage {SmallNumber = smallNumber});
+        }
+
         public SerializationTestMessage Message { get; private set; }
 
         public Given_a_variety_of_challenging_messages(Type serializerType)
@@ -63,7 +130,7 @@
 
             public override int GetHashCode()
             {
-                return (Contents != null ? Contents.GetHashCode() : 0);
+                return Contents != null ? Contents.GetHashCode() : 0;
             }
         }
 
@@ -154,74 +221,6 @@
         }
 
 
-        [Test]
-        public void Byte_array()
-        {
-            TestSerialization(new C
-            {
-                Contents = new byte[] {0x56, 0x34, 0xf3}
-            });
-        }
-
-        [Test]
-        public void Byte_interface_array()
-        {
-            var msg = MessageInitializerCache<ByteArrayMessage>.Initialize(new
-            {
-                Contents = new byte[] {0x56, 0x34, 0xf3}
-            }).GetAwaiter().GetResult().Message;
-
-            var result = SerializeAndReturn(msg);
-
-            result.Contents.SequenceEqual(msg.Contents).ShouldBeTrue();
-        }
-
-        [Test]
-        public void Crazy_date_time()
-        {
-            TestSerialization(new B
-            {
-                Local = new DateTime(2001, 9, 11, 8, 46, 30, DateTimeKind.Local),
-                Universal = new DateTime(2001, 9, 11, 9, 3, 2, DateTimeKind.Local).ToUniversalTime(),
-            });
-        }
-
-        [Test]
-        public void No_default_constructor()
-        {
-            TestSerialization(new A("Dru", "Sellers"));
-        }
-
-        [Test]
-        public void Serialize_complex()
-        {
-            Message = new SerializationTestMessage
-            {
-                DecimalValue = 123.45m,
-                LongValue = 098123213,
-                BoolValue = true,
-                ByteValue = 127,
-                IntValue = 123,
-                DateTimeValue = new DateTime(2008, 9, 8, 7, 6, 5, 4),
-                TimeSpanValue = TimeSpan.FromSeconds(30),
-                GuidValue = Guid.NewGuid(),
-                StringValue = "Chris's Sample Code",
-                DoubleValue = 1823.172,
-                MaybeMoney = 567.89m,
-            };
-
-            TestSerialization(Message);
-        }
-
-        [Test]
-        public void Serialize_small_number()
-        {
-            const decimal smallNumber = 0.000001M;
-
-            TestSerialization(new SmallNumberMessage() {SmallNumber = smallNumber});
-        }
-
-
         public class SmallNumberMessage : IEquatable<SmallNumberMessage>
         {
             public decimal SmallNumber { get; set; }
@@ -245,7 +244,7 @@
                 if (ReferenceEquals(this, obj))
                     return true;
 
-                if (obj.GetType() != this.GetType())
+                if (obj.GetType() != GetType())
                     return false;
 
                 return Equals((SmallNumberMessage)obj);
@@ -255,13 +254,6 @@
             {
                 return SmallNumber.GetHashCode();
             }
-        }
-
-
-        [Test]
-        public void Serialize_simple()
-        {
-            TestSerialization(new PingMessage());
         }
     }
 }

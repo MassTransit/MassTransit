@@ -20,9 +20,7 @@ namespace MassTransit.Testing
             where TElement : class, IAsyncListElement
         {
             await foreach (var element in elements.ConfigureAwait(false))
-            {
                 return element;
-            }
 
             throw new InvalidOperationException("Message List was empty, or timed out");
         }
@@ -30,11 +28,9 @@ namespace MassTransit.Testing
         public static async Task<int> Count<TElement>(this IAsyncEnumerable<TElement> elements)
             where TElement : class, IAsyncListElement
         {
-            int count = 0;
+            var count = 0;
             await foreach (var element in elements.ConfigureAwait(false))
-            {
                 count++;
-            }
 
             return count;
         }
@@ -43,9 +39,7 @@ namespace MassTransit.Testing
             where TElement : class, IAsyncListElement
         {
             await foreach (var element in elements.ConfigureAwait(false))
-            {
                 return element;
-            }
 
             return default;
         }
@@ -56,9 +50,7 @@ namespace MassTransit.Testing
             try
             {
                 await foreach (var _ in elements.ConfigureAwait(false))
-                {
                     return true;
-                }
             }
             catch (OperationCanceledException)
             {

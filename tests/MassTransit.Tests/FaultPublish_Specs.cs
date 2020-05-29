@@ -39,8 +39,8 @@
         class PingConsumer :
             MultiTestConsumer
         {
-            readonly ReceivedMessageList<PingMessage> _messages;
             readonly ReceivedMessageList<Fault<PingMessage>> _faults;
+            readonly ReceivedMessageList<PingMessage> _messages;
 
             public PingConsumer(TimeSpan timeout, CancellationToken testCompleted)
                 : base(timeout, testCompleted)

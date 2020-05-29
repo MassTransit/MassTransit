@@ -51,6 +51,17 @@ namespace MassTransit.Turnout.Configuration
         IJobRegistry JobRegistry { get; }
         IJobService JobService { get; }
 
+        public IEnumerable<ValidationResult> Validate()
+        {
+            ISpecification turnoutOptions = _optionsSet.Configure<TurnoutOptions>();
+
+            return turnoutOptions.Validate();
+        }
+
+        public void Configure(IReceiveEndpointBuilder builder)
+        {
+        }
+
         public ISagaRepository<TurnoutJobTypeState> Repository
         {
             set => _jobTypeRepository = value;
@@ -173,17 +184,6 @@ namespace MassTransit.Turnout.Configuration
             });
 
             _endpointsConfigured = true;
-        }
-
-        public IEnumerable<ValidationResult> Validate()
-        {
-            ISpecification turnoutOptions = _optionsSet.Configure<TurnoutOptions>();
-
-            return turnoutOptions.Validate();
-        }
-
-        public void Configure(IReceiveEndpointBuilder builder)
-        {
         }
     }
 }

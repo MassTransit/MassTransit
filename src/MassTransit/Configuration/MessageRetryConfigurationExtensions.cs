@@ -33,7 +33,9 @@ namespace MassTransit
         /// Retry is configured once for each message type, and is added prior to the consumer factory or saga repository in the pipeline.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="connector">The bus factory configurator, to connect the observer, to cancel retries if the bus is stopped</param>
+        /// <param name="connector">
+        /// The bus factory configurator, to connect the observer, to cancel retries if the bus is stopped
+        /// </param>
         /// <param name="configure"></param>
         public static void UseMessageRetry(this IConsumePipeConfigurator configurator, IBusFactoryConfigurator connector,
             Action<IRetryConfigurator> configure)
@@ -69,7 +71,9 @@ namespace MassTransit
         /// Configures the message retry for the consumer consumer, regardless of message type.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="busFactoryConfigurator">The bus factory configurator, to connect the observer, to cancel retries if the bus is stopped</param>
+        /// <param name="busFactoryConfigurator">
+        /// The bus factory configurator, to connect the observer, to cancel retries if the bus is stopped
+        /// </param>
         /// <param name="configure"></param>
         public static void UseMessageRetry<TConsumer>(this IConsumerConfigurator<TConsumer> configurator, IBusFactoryConfigurator busFactoryConfigurator,
             Action<IRetryConfigurator> configure)
@@ -104,7 +108,9 @@ namespace MassTransit
         /// Configures the message retry for the consumer consumer, regardless of message type.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="busFactoryConfigurator">The bus factory configurator, to connect the observer, to cancel retries if the bus is stopped</param>
+        /// <param name="busFactoryConfigurator">
+        /// The bus factory configurator, to connect the observer, to cancel retries if the bus is stopped
+        /// </param>
         /// <param name="configure"></param>
         public static void UseMessageRetry<TSaga>(this ISagaConfigurator<TSaga> configurator, IBusFactoryConfigurator busFactoryConfigurator,
             Action<IRetryConfigurator> configure)
@@ -139,7 +145,9 @@ namespace MassTransit
         /// Configures the message retry for the consumer consumer, regardless of message type.
         /// </summary>
         /// <param name="configurator"></param>
-        /// <param name="busFactoryConfigurator">The bus factory configurator, to connect the observer, to cancel retries if the bus is stopped</param>
+        /// <param name="busFactoryConfigurator">
+        /// The bus factory configurator, to connect the observer, to cancel retries if the bus is stopped
+        /// </param>
         /// <param name="configure"></param>
         public static void UseMessageRetry<TMessage>(this IHandlerConfigurator<TMessage> configurator, IBusFactoryConfigurator busFactoryConfigurator,
             Action<IRetryConfigurator> configure)

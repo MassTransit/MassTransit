@@ -11,7 +11,7 @@ namespace MassTransit.Transports
         IReceiveEndpointObserver
     {
         readonly TaskCompletionSource<ReceiveEndpointReady> _ready;
-        ConnectHandle _handle;
+        readonly ConnectHandle _handle;
 
         public ReceiveEndpointDependency(IReceiveEndpointObserverConnector connector)
         {

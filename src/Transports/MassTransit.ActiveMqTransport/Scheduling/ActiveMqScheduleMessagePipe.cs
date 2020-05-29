@@ -28,7 +28,7 @@
         {
             ScheduledMessageId = ScheduleTokenIdCache<T>.GetTokenId(context.Message, context.MessageId);
 
-            long delay = Math.Max(0, (long)(_scheduledTime.Kind == DateTimeKind.Local
+            var delay = Math.Max(0, (long)(_scheduledTime.Kind == DateTimeKind.Local
                 ? _scheduledTime - DateTime.Now
                 : _scheduledTime - DateTime.UtcNow).TotalMilliseconds);
 

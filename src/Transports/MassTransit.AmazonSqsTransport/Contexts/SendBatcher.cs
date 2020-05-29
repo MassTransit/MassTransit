@@ -11,9 +11,9 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     public class SendBatcher :
         Batcher<SendMessageBatchRequestEntry>
     {
+        readonly CancellationToken _cancellationToken;
         readonly IAmazonSQS _client;
         readonly string _queueUrl;
-        readonly CancellationToken _cancellationToken;
 
         public SendBatcher(IAmazonSQS client, string queueUrl, CancellationToken cancellationToken)
         {

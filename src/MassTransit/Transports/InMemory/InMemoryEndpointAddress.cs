@@ -64,7 +64,7 @@ namespace MassTransit.Transports.InMemory
             {
                 switch (key)
                 {
-                    case BindQueueKey when bool.TryParse(value, out bool result):
+                    case BindQueueKey when bool.TryParse(value, out var result):
                         BindToQueue = result;
                         break;
 

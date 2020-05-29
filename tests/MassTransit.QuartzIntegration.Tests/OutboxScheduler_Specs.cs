@@ -5,6 +5,7 @@
     using Context;
     using GreenPipes.Internals.Extensions;
     using NUnit.Framework;
+    using Scheduling;
     using TestFramework;
     using TestFramework.Messages;
 
@@ -12,10 +13,14 @@
     public class Cancel_scheduled_message_through_the_outbox :
         QuartzInMemoryTestFixture
     {
+        TaskCompletionSource<ConsumeContext<PingMessage>> _pingReceived;
+        TaskCompletionSource<ConsumeContext<PongMessage>> _pongReceived;
+        TaskCompletionSource<ScheduledMessage> _scheduledMessage;
+
         [Test]
         public async Task Should_cancel_the_message()
         {
-            var faulted = ConnectPublishHandler<Fault<PingMessage>>();
+            Task<ConsumeContext<Fault<PingMessage>>> faulted = ConnectPublishHandler<Fault<PingMessage>>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -35,22 +40,18 @@
             Assert.That(async () => await _pongReceived.Task.OrTimeout(s: 5), Throws.TypeOf<TimeoutException>());
         }
 
-        TaskCompletionSource<ConsumeContext<PingMessage>> _pingReceived;
-        TaskCompletionSource<ConsumeContext<PongMessage>> _pongReceived;
-        TaskCompletionSource<Scheduling.ScheduledMessage> _scheduledMessage;
-
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseInMemoryOutbox();
 
             _pingReceived = GetTask<ConsumeContext<PingMessage>>();
-            _scheduledMessage = GetTask<Scheduling.ScheduledMessage>();
+            _scheduledMessage = GetTask<ScheduledMessage>();
 
             configurator.Handler<PingMessage>(async context =>
             {
                 _pingReceived.TrySetResult(context);
 
-                var scheduledMessage = await context.ScheduleSend(TimeSpan.FromSeconds(20), new PongMessage());
+                ScheduledMessage<PongMessage> scheduledMessage = await context.ScheduleSend(TimeSpan.FromSeconds(20), new PongMessage());
 
                 _scheduledMessage.TrySetResult(scheduledMessage);
 
@@ -70,10 +71,14 @@
     public class Not_cancel_scheduled_message_with_no_outbox :
         QuartzInMemoryTestFixture
     {
+        TaskCompletionSource<ConsumeContext<PingMessage>> _pingReceived;
+        TaskCompletionSource<ConsumeContext<PongMessage>> _pongReceived;
+        TaskCompletionSource<ScheduledMessage> _scheduledMessage;
+
         [Test]
         public async Task Should_not_cancel_the_message()
         {
-            var faulted = ConnectPublishHandler<Fault<PingMessage>>();
+            Task<ConsumeContext<Fault<PingMessage>>> faulted = ConnectPublishHandler<Fault<PingMessage>>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -96,20 +101,16 @@
             LogContext.Debug?.Log("Pong was received");
         }
 
-        TaskCompletionSource<ConsumeContext<PingMessage>> _pingReceived;
-        TaskCompletionSource<ConsumeContext<PongMessage>> _pongReceived;
-        TaskCompletionSource<Scheduling.ScheduledMessage> _scheduledMessage;
-
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _pingReceived = GetTask<ConsumeContext<PingMessage>>();
-            _scheduledMessage = GetTask<Scheduling.ScheduledMessage>();
+            _scheduledMessage = GetTask<ScheduledMessage>();
 
             configurator.Handler<PingMessage>(async context =>
             {
                 _pingReceived.TrySetResult(context);
 
-                var scheduledMessage = await context.ScheduleSend(TimeSpan.FromSeconds(20), new PongMessage());
+                ScheduledMessage<PongMessage> scheduledMessage = await context.ScheduleSend(TimeSpan.FromSeconds(20), new PongMessage());
 
                 _scheduledMessage.TrySetResult(scheduledMessage);
 

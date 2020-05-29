@@ -7,25 +7,23 @@ namespace MassTransit.RabbitMqTransport.Configuration
         EndpointConfiguration,
         IRabbitMqEndpointConfiguration
     {
-        readonly IRabbitMqTopologyConfiguration _topologyConfiguration;
-
         public RabbitMqEndpointConfiguration(IRabbitMqTopologyConfiguration topologyConfiguration)
             : base(topologyConfiguration)
         {
-            _topologyConfiguration = topologyConfiguration;
+            Topology = topologyConfiguration;
         }
 
         RabbitMqEndpointConfiguration(IEndpointConfiguration parentConfiguration, IRabbitMqTopologyConfiguration topologyConfiguration)
             : base(parentConfiguration, topologyConfiguration)
         {
-            _topologyConfiguration = topologyConfiguration;
+            Topology = topologyConfiguration;
         }
 
-        public new IRabbitMqTopologyConfiguration Topology => _topologyConfiguration;
+        public new IRabbitMqTopologyConfiguration Topology { get; }
 
         public IRabbitMqEndpointConfiguration CreateEndpointConfiguration()
         {
-            var topologyConfiguration = new RabbitMqTopologyConfiguration(_topologyConfiguration);
+            var topologyConfiguration = new RabbitMqTopologyConfiguration(Topology);
 
             return new RabbitMqEndpointConfiguration(this, topologyConfiguration);
         }

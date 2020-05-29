@@ -72,8 +72,8 @@
                         throw;
                     }
 
-                    int previousDeliveryCount = context.GetRedeliveryCount();
-                    for (int retryIndex = 0; retryIndex < previousDeliveryCount; retryIndex++)
+                    var previousDeliveryCount = context.GetRedeliveryCount();
+                    for (var retryIndex = 0; retryIndex < previousDeliveryCount; retryIndex++)
                     {
                         if (!retryContext.CanRetry(exception, out retryContext))
                         {

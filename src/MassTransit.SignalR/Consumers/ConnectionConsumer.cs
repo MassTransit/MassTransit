@@ -20,6 +20,11 @@
             _hubLifetimeManager = hubLifetimeManager;
         }
 
+        public Task Consume(ConsumeContext<Connection<THub>> context)
+        {
+            return Handle(context.Message.ConnectionId, context.Message.Messages);
+        }
+
         async Task Handle(string connectionId, IReadOnlyDictionary<string, byte[]> messages)
         {
             var message = new Lazy<SerializedHubMessage>(messages.ToSerializedHubMessage);
@@ -36,11 +41,6 @@
             {
                 LogContext.Warning?.Log(e, "Failed to write message");
             }
-        }
-
-        public Task Consume(ConsumeContext<Connection<THub>> context)
-        {
-            return Handle(context.Message.ConnectionId, context.Message.Messages);
         }
     }
 }

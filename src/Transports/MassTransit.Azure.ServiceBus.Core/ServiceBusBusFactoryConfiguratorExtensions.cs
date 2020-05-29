@@ -12,7 +12,9 @@
         /// Adds a service bus host using the MassTransit style URI host name
         /// </summary>
         /// <param name="configurator">The bus factory configurator</param>
-        /// <param name="hostAddress">The host address, in MassTransit format (sb://namespace.servicebus.windows.net/scope)</param>
+        /// <param name="hostAddress">
+        /// The host address, in MassTransit format (sb://namespace.servicebus.windows.net/scope)
+        /// </param>
         /// <param name="configure">A callback to further configure the service bus</param>
         /// <returns>The service bus host</returns>
         public static void Host(this IServiceBusBusFactoryConfigurator configurator, Uri hostAddress,

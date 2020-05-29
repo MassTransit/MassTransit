@@ -97,12 +97,14 @@
         /// <summary>
         /// Connects a client factory to a host receive endpoint, using the bus as the send endpoint provider
         /// </summary>
-        /// <param name="receiveEndpointHandle">A handle to the receive endpoint, which is stopped when the client factory is disposed</param>
+        /// <param name="receiveEndpointHandle">
+        /// A handle to the receive endpoint, which is stopped when the client factory is disposed
+        /// </param>
         /// <param name="timeout"></param>
         /// <returns></returns>
         public static async Task<IClientFactory> CreateClientFactory(this HostReceiveEndpointHandle receiveEndpointHandle, RequestTimeout timeout = default)
         {
-            ReceiveEndpointReady ready = await receiveEndpointHandle.Ready.ConfigureAwait(false);
+            var ready = await receiveEndpointHandle.Ready.ConfigureAwait(false);
 
             var context = new HostReceiveEndpointClientFactoryContext(receiveEndpointHandle, ready, timeout);
 
@@ -110,7 +112,7 @@
         }
 
         /// <summary>
-        /// Connects a new receive endpoint to the host, and creates a <see cref="IClientFactory"/>.
+        /// Connects a new receive endpoint to the host, and creates a <see cref="IClientFactory" />.
         /// </summary>
         /// <param name="connector">The host to connect the new receive endpoint</param>
         /// <param name="timeout">The default request timeout</param>
@@ -123,7 +125,7 @@
         }
 
         /// <summary>
-        /// Connects a new receive endpoint to the host, and creates a <see cref="IClientFactory"/>.
+        /// Connects a new receive endpoint to the host, and creates a <see cref="IClientFactory" />.
         /// </summary>
         /// <param name="connector">The host to connect the new receive endpoint</param>
         /// <param name="timeout">The default request timeout</param>

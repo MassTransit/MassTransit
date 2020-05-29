@@ -17,7 +17,7 @@
             {
                 CorrelationId = Guid.NewGuid(),
                 Name = "Dru",
-                Timestamp = DateTime.UtcNow,
+                Timestamp = DateTime.UtcNow
             };
 
             InitializeContext<IMessageType> context = await MessageInitializerCache<IMessageType>.Initialize(values);

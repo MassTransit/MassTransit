@@ -5,14 +5,12 @@ namespace Automatonymous.Activities
     using Contracts;
     using GreenPipes;
     using MassTransit;
-    using MassTransit.Contracts;
     using MassTransit.Initializers;
     using MassTransit.Metadata;
-    using MassTransit.Util;
 
 
     /// <summary>
-    /// Publishes the <see cref="Automatonymous.Contracts.RequestCompleted{TResponse}"/> event, used by the request state machine to track
+    /// Publishes the <see cref="Automatonymous.Contracts.RequestCompleted{TResponse}" /> event, used by the request state machine to track
     /// pending requests for a saga instance.
     /// </summary>
     /// <typeparam name="TInstance"></typeparam>
@@ -40,7 +38,7 @@ namespace Automatonymous.Activities
 
             var payload = context.Data as Fault;
 
-            var initializeContext = await MessageInitializerCache<RequestFaulted<TRequest>>.Initialize(new
+            InitializeContext<RequestFaulted<TRequest>> initializeContext = await MessageInitializerCache<RequestFaulted<TRequest>>.Initialize(new
             {
                 context.Instance.CorrelationId,
                 PayloadType = TypeMetadataCache<Fault<TRequest>>.MessageTypeNames,

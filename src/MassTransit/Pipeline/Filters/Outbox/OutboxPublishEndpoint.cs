@@ -11,8 +11,8 @@ namespace MassTransit.Pipeline.Filters.Outbox
     public class OutboxPublishEndpoint :
         IPublishEndpoint
     {
-        readonly IPublishEndpoint _publishEndpoint;
         readonly OutboxContext _outboxContext;
+        readonly IPublishEndpoint _publishEndpoint;
 
         public OutboxPublishEndpoint(OutboxContext outboxContext, IPublishEndpoint publishEndpoint)
         {

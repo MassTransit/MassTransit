@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.Transformation
 {
     /// <summary>
-    /// A transform property context, which includes the <see cref="TransformContext"/>, as well as the current input property value, if present.
+    /// A transform property context, which includes the <see cref="TransformContext" />, as well as the current input property value, if present.
     /// </summary>
     /// <typeparam name="TProperty"></typeparam>
     /// <typeparam name="TMessage"></typeparam>

@@ -18,7 +18,12 @@ namespace MassTransit.HangfireIntegration.Tests
         {
             var memberNumber = Guid.NewGuid().ToString();
 
-            await InputQueueSendEndpoint.Send<RegisterMember>(new { MemberNumber = memberNumber, Name = "Frank", Address = "123 American Way"});
+            await InputQueueSendEndpoint.Send<RegisterMember>(new
+            {
+                MemberNumber = memberNumber,
+                Name = "Frank",
+                Address = "123 American Way"
+            });
 
             Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == memberNumber
                 && GetCurrentState(x) == _machine.AddressValidationTimeout, TestTimeout);

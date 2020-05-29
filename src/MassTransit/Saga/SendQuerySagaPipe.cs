@@ -11,8 +11,8 @@ namespace MassTransit.Saga
         where TSaga : class, ISaga
         where T : class
     {
-        readonly ISagaPolicy<TSaga, T> _policy;
         readonly IPipe<SagaConsumeContext<TSaga, T>> _next;
+        readonly ISagaPolicy<TSaga, T> _policy;
 
         public SendQuerySagaPipe(ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
         {

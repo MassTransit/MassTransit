@@ -38,7 +38,7 @@ namespace MassTransit.Definition
         void Configure(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<TSaga> sagaConfigurator);
 
         /// <summary>
-        /// Called by the <see cref="SagaMessageDefinition{TSaga, T}"/> to configure any saga-level definitions, such as message partitioning.
+        /// Called by the <see cref="SagaMessageDefinition{TSaga, T}" /> to configure any saga-level definitions, such as message partitioning.
         /// </summary>
         /// <param name="endpointConfigurator"></param>
         /// <param name="sagaMessageConfigurator"></param>

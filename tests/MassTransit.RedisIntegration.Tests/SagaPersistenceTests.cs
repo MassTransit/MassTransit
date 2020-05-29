@@ -2,8 +2,8 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Saga;
     using NUnit.Framework;
+    using Saga;
     using Shouldly;
     using StackExchange.Redis;
     using TestFramework;
@@ -23,7 +23,7 @@
 
             await InputQueueSendEndpoint.Send(message);
 
-            var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
+            Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
             found.ShouldNotBeNull();
 
@@ -48,7 +48,7 @@
 
             await InputQueueSendEndpoint.Send(message);
 
-            var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
+            Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
             found.ShouldNotBeNull();
         }
@@ -83,7 +83,7 @@
 
             await InputQueueSendEndpoint.Send(message);
 
-            var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
+            Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
             found.ShouldNotBeNull();
 
@@ -108,7 +108,7 @@
 
             await InputQueueSendEndpoint.Send(message);
 
-            var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
+            Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
             found.ShouldNotBeNull();
         }
@@ -120,7 +120,7 @@
             var redis = ConnectionMultiplexer.Connect("127.0.0.1");
             redis.PreserveAsyncOrder = false;
 
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => RedisSagaRepository<SimpleSaga>.Create(() => redis.GetDatabase(), optimistic: false));
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => RedisSagaRepository<SimpleSaga>.Create(() => redis.GetDatabase(), false));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -143,7 +143,7 @@
 
             await InputQueueSendEndpoint.Send(message);
 
-            var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
+            Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
             found.ShouldNotBeNull();
 
@@ -168,7 +168,7 @@
 
             await InputQueueSendEndpoint.Send(message);
 
-            var found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
+            Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
 
             found.ShouldNotBeNull();
         }

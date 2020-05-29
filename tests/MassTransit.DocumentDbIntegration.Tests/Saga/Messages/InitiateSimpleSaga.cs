@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.DocumentDbIntegration.Tests.Saga.Messages
 {
     using System;
-    using MassTransit;
 
 
     public class InitiateSimpleSaga : CorrelatedBy<Guid>
@@ -15,8 +14,8 @@
             CorrelationId = correlationId;
         }
 
-        public Guid CorrelationId { get; }
-
         public string Name { get; set; }
+
+        public Guid CorrelationId { get; }
     }
 }

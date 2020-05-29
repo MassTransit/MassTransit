@@ -95,7 +95,7 @@ namespace MassTransit.Internals.Reflection
             }
             catch (Exception ex)
             {
-                string message = $"Exception creating proxy ({typeName}) for {contract.Name}";
+                var message = $"Exception creating proxy ({typeName}) for {contract.Name}";
 
                 throw new InvalidOperationException(message, ex);
             }

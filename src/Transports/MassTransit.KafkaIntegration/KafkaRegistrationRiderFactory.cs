@@ -5,19 +5,19 @@ namespace MassTransit.KafkaIntegration
     using Registration;
 
 
-    public class KafkaBusInstanceConfiguratorFactory<TContainerContext> :
-        IRiderRegistrationFactory<TContainerContext>
+    public class KafkaRegistrationRiderFactory<TContainerContext> :
+        IRegistrationRiderFactory<TContainerContext>
         where TContainerContext : class
     {
         readonly ClientConfig _clientConfig;
         readonly Action<IRiderRegistrationContext<TContainerContext>, IKafkaFactoryConfigurator> _configure;
 
-        public KafkaBusInstanceConfiguratorFactory(Action<IRiderRegistrationContext<TContainerContext>, IKafkaFactoryConfigurator> configure)
+        public KafkaRegistrationRiderFactory(Action<IRiderRegistrationContext<TContainerContext>, IKafkaFactoryConfigurator> configure)
             : this(null, configure)
         {
         }
 
-        public KafkaBusInstanceConfiguratorFactory(ClientConfig clientConfig,
+        public KafkaRegistrationRiderFactory(ClientConfig clientConfig,
             Action<IRiderRegistrationContext<TContainerContext>, IKafkaFactoryConfigurator> configure)
         {
             _clientConfig = clientConfig;

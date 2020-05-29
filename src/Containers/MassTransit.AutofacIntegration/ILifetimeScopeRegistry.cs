@@ -4,7 +4,7 @@
 
 
     /// <summary>
-    /// A lifetime scope registry contains an indexed set of lifetime scopes that can be used on 
+    /// A lifetime scope registry contains an indexed set of lifetime scopes that can be used on
     /// a per-index basis as the root for additional lifetime scopes (per request, etc.)
     /// </summary>
     public interface ILifetimeScopeRegistry<TId> :

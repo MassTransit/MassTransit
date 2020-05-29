@@ -43,20 +43,21 @@
     /// <summary>
     /// this requires debugger tricks to make it work
     /// </summary>
-    [TestFixture, Explicit]
+    [TestFixture]
+    [Explicit]
     public class When_a_message_has_an_unrecognized_body_format :
         InMemoryTestFixture
     {
-        Task<ConsumeContext<PingMessage>> _handled;
-        Task<ConsumeContext<ReceiveFault>> _faulted;
-
         [Test]
         public async Task It_should_publish_a_fault()
         {
             await InputQueueSendEndpoint.Send(new PingMessage(), context => context.ContentType = new ContentType("text/json"));
 
-            var faultContext = await _faulted;
+            ConsumeContext<ReceiveFault> faultContext = await _faulted;
         }
+
+        Task<ConsumeContext<PingMessage>> _handled;
+        Task<ConsumeContext<ReceiveFault>> _faulted;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {

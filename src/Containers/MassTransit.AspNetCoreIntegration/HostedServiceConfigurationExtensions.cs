@@ -15,7 +15,7 @@ namespace MassTransit
     public static class HostedServiceConfigurationExtensions
     {
         /// <summary>
-        /// Adds the MassTransit <see cref="IHostedService"/>, which includes a bus and endpoint health check.
+        /// Adds the MassTransit <see cref="IHostedService" />, which includes a bus and endpoint health check.
         /// Use it together with UseHealthCheck to get more detailed diagnostics.
         /// </summary>
         /// <param name="services"></param>

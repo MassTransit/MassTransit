@@ -20,9 +20,15 @@
 
         public Type ReturnedType => typeof(Guid);
 
-        public new bool Equals(object x, object y) => x != null && x.Equals(y);
+        public new bool Equals(object x, object y)
+        {
+            return x != null && x.Equals(y);
+        }
 
-        public int GetHashCode(object x) => x.GetHashCode();
+        public int GetHashCode(object x)
+        {
+            return x.GetHashCode();
+        }
 
         public object NullSafeGet(DbDataReader rs, string[] names, ISessionImplementor session, object owner)
         {
@@ -32,7 +38,7 @@
 
             var reorderedBytes = new byte[16];
 
-            for (int i = 0; i < 16; i++)
+            for (var i = 0; i < 16; i++)
                 reorderedBytes[_byteOrder[i]] = bytes[i];
 
             return new Guid(reorderedBytes);
@@ -45,7 +51,7 @@
                 byte[] bytes = ((Guid)value).ToByteArray();
                 var reorderedBytes = new byte[16];
 
-                for (int i = 0; i < 16; i++)
+                for (var i = 0; i < 16; i++)
                     reorderedBytes[i] = bytes[_byteOrder[i]];
 
                 NHibernateUtil.Binary.NullSafeSet(cmd, reorderedBytes, index, session);
@@ -54,14 +60,26 @@
                 NHibernateUtil.Binary.NullSafeSet(cmd, null, index, session);
         }
 
-        public object DeepCopy(object value) => value;
+        public object DeepCopy(object value)
+        {
+            return value;
+        }
 
         public bool IsMutable => false;
 
-        public object Replace(object original, object target, object owner) => original;
+        public object Replace(object original, object target, object owner)
+        {
+            return original;
+        }
 
-        public object Assemble(object cached, object owner) => cached;
+        public object Assemble(object cached, object owner)
+        {
+            return cached;
+        }
 
-        public object Disassemble(object value) => value;
+        public object Disassemble(object value)
+        {
+            return value;
+        }
     }
 }

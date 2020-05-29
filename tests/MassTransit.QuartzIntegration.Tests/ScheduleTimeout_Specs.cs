@@ -1,38 +1,19 @@
 ﻿namespace MassTransit.QuartzIntegration.Tests
 {
-    using System;
-    using System.Threading.Tasks;
-    using Automatonymous;
-    using NUnit.Framework;
-    using Saga;
-    using Testing;
-
-
     namespace ScheduleTimeout_Specs
     {
+        using System;
+        using System.Threading.Tasks;
+        using Automatonymous;
+        using NUnit.Framework;
+        using Saga;
+        using Testing;
+
+
         [TestFixture]
         public class Scheduling_a_message_from_a_state_machine :
             QuartzInMemoryTestFixture
         {
-            InMemorySagaRepository<TestState> _repository;
-            TestStateMachine _machine;
-
-            State GetCurrentState(TestState state)
-            {
-                return _machine.GetState(state).Result;
-            }
-
-            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-            {
-                base.ConfigureInMemoryReceiveEndpoint(configurator);
-
-                _repository = new InMemorySagaRepository<TestState>();
-
-                _machine = new TestStateMachine();
-
-                configurator.StateMachineSaga(_machine, _repository);
-            }
-
             [Test]
             public async Task Should_cancel_when_the_order_is_submitted()
             {
@@ -84,6 +65,25 @@
 
                 ConsumeContext<CartRemoved> removed = await handler;
             }
+
+            InMemorySagaRepository<TestState> _repository;
+            TestStateMachine _machine;
+
+            State GetCurrentState(TestState state)
+            {
+                return _machine.GetState(state).Result;
+            }
+
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
+                base.ConfigureInMemoryReceiveEndpoint(configurator);
+
+                _repository = new InMemorySagaRepository<TestState>();
+
+                _machine = new TestStateMachine();
+
+                configurator.StateMachineSaga(_machine, _repository);
+            }
         }
 
 
@@ -96,9 +96,9 @@
 
             public Guid? CartTimeoutTokenId { get; set; }
 
-            public Guid CorrelationId { get; set; }
-
             public int ExpiresAfterSeconds { get; set; }
+
+            public Guid CorrelationId { get; set; }
         }
 
 

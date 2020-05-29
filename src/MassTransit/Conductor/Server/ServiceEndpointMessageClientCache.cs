@@ -4,7 +4,6 @@ namespace MassTransit.Conductor.Server
     using System.Threading.Tasks;
     using Context;
     using Contexts;
-    using Contracts;
     using Contracts.Conductor;
     using Contracts.Metadata;
     using GreenPipes.Caching;
@@ -29,6 +28,20 @@ namespace MassTransit.Conductor.Server
             MessageInfo = MessageInfoCache.GetMessageInfo<TMessage>();
 
             endpointClientCache.Connect(this);
+        }
+
+        public void ValueAdded(INode<ServiceClientContext> node, ServiceClientContext value)
+        {
+        }
+
+        public void ValueRemoved(INode<ServiceClientContext> node, ServiceClientContext value)
+        {
+            _index.Remove(value.ClientId);
+        }
+
+        public void CacheCleared()
+        {
+            _cache.Clear();
         }
 
         public MessageInfo MessageInfo { get; }
@@ -65,20 +78,6 @@ namespace MassTransit.Conductor.Server
         Task<ServiceClientContext> CreateClient(Guid clientId, Uri address)
         {
             return _endpointClientCache.GetOrAdd(clientId, address);
-        }
-
-        public void ValueAdded(INode<ServiceClientContext> node, ServiceClientContext value)
-        {
-        }
-
-        public void ValueRemoved(INode<ServiceClientContext> node, ServiceClientContext value)
-        {
-            _index.Remove(value.ClientId);
-        }
-
-        public void CacheCleared()
-        {
-            _cache.Clear();
         }
     }
 }

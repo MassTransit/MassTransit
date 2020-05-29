@@ -117,9 +117,7 @@ namespace MassTransit.Transports
             {
                 var endpointReadyEvent = new ReceiveEndpointReadyEvent(ready.InputAddress, _endpoint, ready.IsStarted);
                 if (ready.IsStarted)
-                {
                     _endpoint._started.TrySetResultOnThreadPool(endpointReadyEvent);
-                }
 
                 return _observer.Ready(endpointReadyEvent);
             }
@@ -139,9 +137,9 @@ namespace MassTransit.Transports
         class Handle :
             ReceiveEndpointHandle
         {
+            readonly ReceiveEndpointContext _context;
             readonly ReceiveEndpoint _endpoint;
             readonly ReceiveTransportHandle _transportHandle;
-            readonly ReceiveEndpointContext _context;
 
             public Handle(ReceiveEndpoint endpoint, ReceiveTransportHandle transportHandle, ReceiveEndpointContext context)
             {

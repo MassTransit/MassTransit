@@ -4,11 +4,10 @@ namespace MassTransit.Conductor.Client
     using System.Threading;
     using System.Threading.Tasks;
     using Clients;
-    using GreenPipes;
 
 
     /// <summary>
-    /// The service client factory will use the <see cref="ServiceClient"/> for requests which do not specify a destination address. If a destination address
+    /// The service client factory will use the <see cref="ServiceClient" /> for requests which do not specify a destination address. If a destination address
     /// is specified, the call will be delegated to the regular client factory.
     /// </summary>
     public class ServiceClientFactory :

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.AutomatonymousIntegration
+﻿namespace MassTransit.Tests.AutomatonymousIntegration
 {
     using System;
     using System.Collections.Generic;
@@ -32,19 +20,13 @@ namespace MassTransit.Tests.AutomatonymousIntegration
         {
             var sagaId = Guid.NewGuid();
 
-            await Bus.Publish(new Start
-            {
-                CorrelationId = sagaId
-            });
+            await Bus.Publish(new Start {CorrelationId = sagaId});
 
             Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == sagaId
                 && x.CurrentState == _machine.Running, TestTimeout);
             Assert.IsTrue(saga.HasValue);
 
-            await Bus.Publish(new Start
-            {
-                CorrelationId = sagaId
-            });
+            await Bus.Publish(new Start {CorrelationId = sagaId});
 
             var faultMessage = await GetFaultMessage(TimeSpan.FromSeconds(3));
             Assert.IsNull(faultMessage?.Exceptions.Select(ex => $"{ex.ExceptionType}: {ex.Message}").First());
@@ -57,9 +39,7 @@ namespace MassTransit.Tests.AutomatonymousIntegration
             while (DateTime.Now < giveUpAt)
             {
                 if (_faultMessageContexts.Any())
-                {
                     return _faultMessageContexts.First().Message;
-                }
 
                 await Task.Delay(10).ConfigureAwait(false);
             }

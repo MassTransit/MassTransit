@@ -14,8 +14,6 @@
     public class When_a_batch_limit_is_reached :
         InMemoryTestFixture
     {
-        TestBatchConsumer _consumer;
-
         [Test]
         public async Task Should_receive_the_message_batch()
         {
@@ -26,6 +24,8 @@
 
             Assert.That(batch.Length, Is.EqualTo(2));
         }
+
+        TestBatchConsumer _consumer;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -45,8 +45,6 @@
     public class When_I_like_big_batches_and_I_cannot_lie :
         InMemoryTestFixture
     {
-        TestBatchConsumer _consumer;
-
         [Test]
         public async Task Should_receive_the_message_batch()
         {
@@ -56,6 +54,8 @@
 
             Assert.That(batch.Length, Is.EqualTo(100));
         }
+
+        TestBatchConsumer _consumer;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -80,8 +80,6 @@
     public class Receiving_a_single_message_in_a_batch :
         InMemoryTestFixture
     {
-        TestBatchConsumer _consumer;
-
         [Test]
         public async Task Should_receive_the_message_batch()
         {
@@ -91,6 +89,8 @@
 
             Assert.That(batch.Length, Is.EqualTo(1));
         }
+
+        TestBatchConsumer _consumer;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -111,8 +111,6 @@
     public class Receiving_a_single_message_in_a_batch_by_convention :
         InMemoryTestFixture
     {
-        TestBatchConsumer _consumer;
-
         [Test]
         public async Task Should_receive_the_message_batch()
         {
@@ -123,11 +121,14 @@
             Assert.That(batch.Length, Is.EqualTo(1));
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Should_show_me_the_pipe()
         {
             Console.WriteLine(Bus.GetProbeResult().ToJsonString());
         }
+
+        TestBatchConsumer _consumer;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -144,8 +145,6 @@
     public class Receiving_a_bunch_of_messages_in_a_batch_by_convention :
         InMemoryTestFixture
     {
-        TestBatchConsumer _consumer;
-
         [Test]
         public async Task Should_receive_the_message_batch()
         {
@@ -158,6 +157,8 @@
 
             Assert.That(batch.Length, Is.EqualTo(4));
         }
+
+        TestBatchConsumer _consumer;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -194,17 +195,18 @@
     }
 
 
-    [TestFixture, Explicit]
+    [TestFixture]
+    [Explicit]
     public class Using_a_batch_consumer :
         InMemoryTestFixture
     {
-        TestBatchConsumer _consumer;
-
         [Test]
         public async Task Should_show_me_the_pipe()
         {
             Console.WriteLine(Bus.GetProbeResult().ToJsonString());
         }
+
+        TestBatchConsumer _consumer;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -231,13 +233,13 @@
             _messageTask = messageTask;
         }
 
+        public Task<Batch<PingMessage>> Completed => _messageTask.Task;
+
         public Task Consume(ConsumeContext<Batch<PingMessage>> context)
         {
             _messageTask.TrySetResult(context.Message);
 
             return TaskUtil.Completed;
         }
-
-        public Task<Batch<PingMessage>> Completed => _messageTask.Task;
     }
 }

@@ -1,15 +1,3 @@
-// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Transports
 {
     using System;
@@ -61,7 +49,7 @@ namespace MassTransit.Transports
 
             if (typeInfo.Namespace != null)
             {
-                string ns = typeInfo.Namespace;
+                var ns = typeInfo.Namespace;
                 if (!ns.Equals(scope))
                 {
                     sb.Append(ns);
@@ -77,10 +65,10 @@ namespace MassTransit.Transports
 
             if (typeInfo.IsGenericType)
             {
-                string name = typeInfo.GetGenericTypeDefinition().Name;
+                var name = typeInfo.GetGenericTypeDefinition().Name;
 
                 //remove `1
-                int index = name.IndexOf('`');
+                var index = name.IndexOf('`');
                 if (index > 0)
                     name = name.Remove(index);
 
@@ -88,7 +76,7 @@ namespace MassTransit.Transports
                 sb.Append(_genericTypeSeparator);
 
                 Type[] arguments = typeInfo.GetGenericArguments();
-                for (int i = 0; i < arguments.Length; i++)
+                for (var i = 0; i < arguments.Length; i++)
                 {
                     if (i > 0)
                         sb.Append(_genericArgumentSeparator);

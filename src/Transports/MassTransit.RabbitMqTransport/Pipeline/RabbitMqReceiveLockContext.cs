@@ -10,8 +10,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     public class RabbitMqReceiveLockContext :
         ReceiveLockContext
     {
-        readonly ModelContext _model;
         readonly ulong _deliveryTag;
+        readonly ModelContext _model;
 
         public RabbitMqReceiveLockContext(ModelContext model, ulong deliveryTag)
         {

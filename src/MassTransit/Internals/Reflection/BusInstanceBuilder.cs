@@ -7,9 +7,7 @@ namespace MassTransit.Internals.Reflection
     using System.Reflection;
     using System.Reflection.Emit;
     using Extensions;
-    using GreenPipes.Internals.Extensions;
     using MultiBus;
-    using Registration;
     using Util;
 
 
@@ -23,11 +21,11 @@ namespace MassTransit.Internals.Reflection
             | MethodAttributes.Virtual
             | MethodAttributes.VtableLayoutMask;
 
+        public static readonly IBusInstanceBuilder Instance = Cached.Builder;
+
         readonly ConcurrentDictionary<string, ModuleBuilder> _moduleBuilders;
         readonly string _proxyNamespaceSuffix = ".MassTransit.BusInstances" + NewId.Next().ToString(FormatUtil.Formatter);
         readonly ConcurrentDictionary<Type, Lazy<Type>> _proxyTypes;
-
-        public static readonly IBusInstanceBuilder Instance = Cached.Builder;
 
         BusInstanceBuilder()
         {
@@ -39,7 +37,7 @@ namespace MassTransit.Internals.Reflection
         public TResult GetBusInstanceType<TBus, TResult>(IBusInstanceBuilderCallback<TBus, TResult> callback)
             where TBus : class, IBus
         {
-            Type interfaceType = typeof(TBus);
+            var interfaceType = typeof(TBus);
 
             var busInstanceType = _proxyTypes.GetOrAdd(interfaceType, x => new Lazy<Type>(() => CreateImplementation(x))).Value;
 
@@ -61,7 +59,7 @@ namespace MassTransit.Internals.Reflection
             if (typeInfo.IsGenericType)
                 throw new ArgumentException("Bus instance types can not be generic: " + interfaceType.Name, nameof(interfaceType));
 
-            if (!Extensions.InterfaceExtensions.HasInterface<IBus>(typeInfo))
+            if (!InterfaceExtensions.HasInterface<IBus>(typeInfo))
                 throw new ArgumentException("Bus instance types must include the IBus interface: " + interfaceType.Name, nameof(interfaceType));
 
             return GetModuleBuilderForType(interfaceType, moduleBuilder => CreateTypeFromInterface(moduleBuilder, interfaceType));
@@ -71,7 +69,7 @@ namespace MassTransit.Internals.Reflection
         {
             var classTypeName = interfaceType.Name.StartsWith("I") ? interfaceType.Name.Substring(1) : interfaceType.Name + "Instance";
 
-            string ns = interfaceType.IsNested && interfaceType.DeclaringType != null
+            var ns = interfaceType.IsNested && interfaceType.DeclaringType != null
                 ? interfaceType.DeclaringType.Namespace
                 : interfaceType.Namespace;
             if (ns != null)
@@ -94,15 +92,15 @@ namespace MassTransit.Internals.Reflection
                 var ctorParent = parentType.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, null, parameterTypes, null);
                 var ctorBuilder = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, parameterTypes);
 
-                ILGenerator il = ctorBuilder.GetILGenerator();
+                var il = ctorBuilder.GetILGenerator();
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldarg_1);
                 il.Emit(OpCodes.Call, ctorParent);
                 il.Emit(OpCodes.Ret);
 
-                var extraInterfaces = interfaceType.GetTypeInfo().GetAllInterfaces().Except(typeof(IBus).GetTypeInfo().GetAllInterfaces()).ToArray();
+                Type[] extraInterfaces = interfaceType.GetTypeInfo().GetAllInterfaces().Except(typeof(IBus).GetTypeInfo().GetAllInterfaces()).ToArray();
 
-                IEnumerable<PropertyInfo> properties = Extensions.TypeExtensions.GetAllProperties(interfaceType);
+                IEnumerable<PropertyInfo> properties = TypeExtensions.GetAllProperties(interfaceType);
                 foreach (var property in properties)
                 {
                     if (extraInterfaces.Contains(property.DeclaringType))
@@ -125,7 +123,7 @@ namespace MassTransit.Internals.Reflection
             }
             catch (Exception ex)
             {
-                string message = $"Exception creating bus instance ({typeName}) for {TypeCache.GetShortName(interfaceType)}";
+                var message = $"Exception creating bus instance ({typeName}) for {GreenPipes.Internals.Extensions.TypeCache.GetShortName(interfaceType)}";
 
                 throw new InvalidOperationException(message, ex);
             }

@@ -1,27 +1,16 @@
-﻿// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.EntityFrameworkCoreIntegration.Tests
+﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
     using System.Transactions;
     using GreenPipes.Internals.Extensions;
     using MassTransit.Tests.Saga.Messages;
-    using MassTransit.Transactions;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.ChangeTracking;
     using Microsoft.Extensions.Logging.Abstractions;
     using NUnit.Framework;
     using TestFramework;
+    using Transactions;
 
 
     /// <summary>
@@ -32,6 +21,30 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
     public class TransactionOutbox_Specs :
         InMemoryTestFixture
     {
+        [Test]
+        public async Task Should_not_publish_properly()
+        {
+            var message = new InitiateSimpleSaga();
+            var product = new Product {Name = "Should_not_publish_properly"};
+            var transactionOutbox = new TransactionOutbox(Bus, Bus, new NullLoggerFactory());
+
+            using (var dbContext = GetDbContext())
+            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+            {
+                EntityEntry<Product> entity = dbContext.Products.Add(product);
+                await dbContext.SaveChangesAsync();
+
+                await transactionOutbox.Publish(message);
+            }
+
+            Assert.That(async () => await _received.OrTimeout(s: 3), Throws.TypeOf<TimeoutException>());
+
+            using (var dbContext = GetDbContext())
+            {
+                Assert.IsFalse(await dbContext.Products.AnyAsync(x => x.Id == product.Id));
+            }
+        }
+
         [Test]
         public async Task Should_publish_after_db_create()
         {
@@ -59,30 +72,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
             using (var dbContext = GetDbContext())
             {
                 Assert.IsTrue(await dbContext.Products.AnyAsync(x => x.Id == product.Id));
-            }
-        }
-
-        [Test]
-        public async Task Should_not_publish_properly()
-        {
-            var message = new InitiateSimpleSaga();
-            var product = new Product {Name = "Should_not_publish_properly"};
-            var transactionOutbox = new TransactionOutbox(Bus, Bus, new NullLoggerFactory());
-
-            using (var dbContext = GetDbContext())
-            using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-            {
-                var entity = dbContext.Products.Add(product);
-                await dbContext.SaveChangesAsync();
-
-                await transactionOutbox.Publish(message);
-            }
-
-            Assert.That(async () => await _received.OrTimeout(s: 3), Throws.TypeOf<TimeoutException>());
-
-            using (var dbContext = GetDbContext())
-            {
-                Assert.IsFalse(await dbContext.Products.AnyAsync(x => x.Id == product.Id));
             }
         }
 

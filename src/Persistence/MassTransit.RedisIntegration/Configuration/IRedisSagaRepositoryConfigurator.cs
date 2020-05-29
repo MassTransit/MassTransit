@@ -20,13 +20,13 @@ namespace MassTransit.RedisIntegration
         TimeSpan? Expiry { set; }
 
         /// <summary>
-        /// Set the database factory using configuration, which caches a <see cref="ConnectionMultiplexer"/> under the hood.
+        /// Set the database factory using configuration, which caches a <see cref="ConnectionMultiplexer" /> under the hood.
         /// </summary>
         /// <param name="configuration"></param>
         void DatabaseConfiguration(string configuration);
 
         /// <summary>
-        /// Set the database factory using configuration, which caches a <see cref="ConnectionMultiplexer"/> under the hood.
+        /// Set the database factory using configuration, which caches a <see cref="ConnectionMultiplexer" /> under the hood.
         /// </summary>
         /// <param name="configurationOptions"></param>
         void DatabaseConfiguration(ConfigurationOptions configurationOptions);

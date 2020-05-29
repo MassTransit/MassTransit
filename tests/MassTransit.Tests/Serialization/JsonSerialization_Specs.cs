@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Serialization
 {
     using System;
@@ -28,7 +16,6 @@ namespace MassTransit.Tests.Serialization
     using Newtonsoft.Json.Serialization;
     using NUnit.Framework;
     using Shouldly;
-    using Util;
 
 
     public class When_serializing_messages_with_json_dot_net
@@ -49,19 +36,28 @@ namespace MassTransit.Tests.Serialization
                 Name = "Joe",
                 Details = new List<TestMessageDetail>
                 {
-                    new TestMessageDetail {Item = "A", Value = 27.5d},
-                    new TestMessageDetail {Item = "B", Value = 13.5d},
+                    new TestMessageDetail
+                    {
+                        Item = "A",
+                        Value = 27.5d
+                    },
+                    new TestMessageDetail
+                    {
+                        Item = "B",
+                        Value = 13.5d
+                    }
                 },
                 EnumDetails = new List<TestMessageDetail>
                 {
-                    new TestMessageDetail{Item = "1", Value = 42.0d}
+                    new TestMessageDetail
+                    {
+                        Item = "1",
+                        Value = 42.0d
+                    }
                 }
             };
 
-            _envelope = new Envelope
-            {
-                Message = _message,
-            };
+            _envelope = new Envelope {Message = _message};
 
             _envelope.MessageType.Add(_message.GetType().ToMessageName());
             _envelope.MessageType.Add(typeof(MessageA).ToMessageName());
@@ -84,7 +80,8 @@ namespace MassTransit.Tests.Serialization
             _xml = JsonConvert.DeserializeXNode(_body, "envelope");
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public void Show_me_the_message()
         {
             Trace.WriteLine(_body);
@@ -155,20 +152,21 @@ namespace MassTransit.Tests.Serialization
         [Test]
         public void Should_be_able_to_ressurect_the_message_from_xml()
         {
-            XDocument document = XDocument.Parse(_xml.ToString());
+            var document = XDocument.Parse(_xml.ToString());
             Trace.WriteLine(_xml.ToString());
-            string body = JsonConvert.SerializeXNode(document, Formatting.None, true);
+            var body = JsonConvert.SerializeXNode(document, Formatting.None, true);
             Trace.WriteLine(body);
-            var result = JsonConvert.DeserializeObject<Envelope>(body, new JsonSerializerSettings
-            {
-                Converters = new List<JsonConverter>(new JsonConverter[] {new ListJsonConverter()}),
-                NullValueHandling = NullValueHandling.Ignore,
-                DefaultValueHandling = DefaultValueHandling.Ignore,
-                MissingMemberHandling = MissingMemberHandling.Ignore,
-                ObjectCreationHandling = ObjectCreationHandling.Auto,
-                ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            });
+            var result = JsonConvert.DeserializeObject<Envelope>(body,
+                new JsonSerializerSettings
+                {
+                    Converters = new List<JsonConverter>(new JsonConverter[] {new ListJsonConverter()}),
+                    NullValueHandling = NullValueHandling.Ignore,
+                    DefaultValueHandling = DefaultValueHandling.Ignore,
+                    MissingMemberHandling = MissingMemberHandling.Ignore,
+                    ObjectCreationHandling = ObjectCreationHandling.Auto,
+                    ConstructorHandling = ConstructorHandling.AllowNonPublicDefaultConstructor,
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                });
 
             result.MessageType.Count.ShouldBe(3);
             result.MessageType[0].ShouldBe(typeof(TestMessage).ToMessageName());
@@ -177,33 +175,35 @@ namespace MassTransit.Tests.Serialization
             result.Headers.Count.ShouldBe(0);
         }
 
-        [Test, Explicit, Category("SlowAF")]
+        [Test]
+        [Explicit]
+        [Category("SlowAF")]
         public void Serialization_speed()
         {
             //warm it up
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 DoSerialize();
                 DoDeserialize();
             }
 
-            Stopwatch timer = Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
 
             const int iterations = 50000;
 
-            for (int i = 0; i < iterations; i++)
+            for (var i = 0; i < iterations; i++)
                 DoSerialize();
 
             timer.Stop();
 
-            long perSecond = iterations * 1000 / timer.ElapsedMilliseconds;
+            var perSecond = iterations * 1000 / timer.ElapsedMilliseconds;
 
-            string msg = string.Format("Serialize: {0}ms, Rate: {1} m/s", timer.ElapsedMilliseconds, perSecond);
+            var msg = string.Format("Serialize: {0}ms, Rate: {1} m/s", timer.ElapsedMilliseconds, perSecond);
             Trace.WriteLine(msg);
 
             timer = Stopwatch.StartNew();
 
-            for (int i = 0; i < 50000; i++)
+            for (var i = 0; i < 50000; i++)
                 DoDeserialize();
 
             timer.Stop();
@@ -248,7 +248,7 @@ namespace MassTransit.Tests.Serialization
 
         public static object Convert(string s)
         {
-            object obj = JsonConvert.DeserializeObject(s);
+            var obj = JsonConvert.DeserializeObject(s);
             if (obj is string)
                 return obj as string;
 
@@ -274,7 +274,7 @@ namespace MassTransit.Tests.Serialization
             }
 
             if (token is JArray)
-                return (token).Select(ConvertJson).ToList();
+                return token.Select(ConvertJson).ToList();
 
             throw new ArgumentException(string.Format("VisitUnknownFilter token type '{0}'", token.GetType()), "token");
         }
@@ -313,8 +313,8 @@ namespace MassTransit.Tests.Serialization
             public string Address { get; set; }
             public IList<TestMessageDetail> Details { get; set; }
             public int Level { get; set; }
-            public string Name { get; set; }
             public IEnumerable<TestMessageDetail> EnumDetails { get; set; }
+            public string Name { get; set; }
         }
 
 
@@ -337,7 +337,7 @@ namespace MassTransit.Tests.Serialization
         {
             var obj = new MessageB {Value = "Joe"};
 
-            MessageB result = SerializeAndReturn(obj);
+            var result = SerializeAndReturn(obj);
 
             result.Value.ShouldBe("Monster");
         }
@@ -347,7 +347,7 @@ namespace MassTransit.Tests.Serialization
         {
             var obj = new MessageA {Value = "Joe"};
 
-            MessageA result = SerializeAndReturn(obj);
+            var result = SerializeAndReturn(obj);
 
             result.Value.ShouldBe("Monster");
         }
@@ -438,7 +438,7 @@ namespace MassTransit.Tests.Serialization
         {
             var obj = new SimpleMessage {ValueB = "Joe"};
 
-            SimpleMessage result = SerializeAndReturn(obj);
+            var result = SerializeAndReturn(obj);
 
             result.ValueB.ShouldBe("Monster");
         }
@@ -448,7 +448,7 @@ namespace MassTransit.Tests.Serialization
         {
             var obj = new SimpleMessage {ValueA = "Joe"};
 
-            SimpleMessage result = SerializeAndReturn(obj);
+            var result = SerializeAndReturn(obj);
 
             result.ValueA.ShouldBe("Monster");
         }
@@ -515,19 +515,17 @@ namespace MassTransit.Tests.Serialization
         public void Should_deserialize_correctly()
         {
             // arrange
-            var message = new MessageA
-            {
-                Decimal = decimal.MaxValue
-            };
+            var message = new MessageA {Decimal = decimal.MaxValue};
 
             // act, assert
-            var serializedMessage = JsonConvert.SerializeObject(message, MassTransit.Serialization.JsonMessageSerializer.SerializerSettings);
+            var serializedMessage = JsonConvert.SerializeObject(message, JsonMessageSerializer.SerializerSettings);
             serializedMessage.ShouldNotBeNull();
 
-            var deserializedMessage = JsonConvert.DeserializeObject<MessageA>(serializedMessage, MassTransit.Serialization.JsonMessageSerializer.DeserializerSettings);
+            var deserializedMessage = JsonConvert.DeserializeObject<MessageA>(serializedMessage, JsonMessageSerializer.DeserializerSettings);
             deserializedMessage.ShouldNotBeNull();
             deserializedMessage.Decimal.ShouldBe(message.Decimal);
         }
+
 
         class MessageA
         {

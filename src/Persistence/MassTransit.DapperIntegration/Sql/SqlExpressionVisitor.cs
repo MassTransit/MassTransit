@@ -50,9 +50,7 @@
 
             object value;
             if (node.Right is ConstantExpression right)
-            {
                 value = right.Value;
-            }
             else
             {
                 value = Expression.Lambda<Func<object>>(
@@ -68,17 +66,11 @@
             object value;
 
             if (node.Type == typeof(bool))
-            {
                 value = true; // No support for Not yet.
-            }
             else if (node.Type.IsValueType)
-            {
                 value = Activator.CreateInstance(node.Type);
-            }
             else
-            {
                 value = null;
-            }
 
             return new List<(string, object)> {(name, value)};
         }

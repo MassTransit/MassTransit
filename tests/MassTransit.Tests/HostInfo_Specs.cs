@@ -11,19 +11,12 @@
     public class Host_info_should_be_included_on_json_serialization :
         InMemoryTestFixture
     {
-        Task<ConsumeContext<PingMessage>> _handled;
-
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            _handled = Handled<PingMessage>(configurator);
-        }
-
         [Test]
         public async Task Should_match_the_sending_host_information()
         {
             await Bus.Publish(new PingMessage());
 
-            var context = await _handled;
+            ConsumeContext<PingMessage> context = await _handled;
 
             Assert.IsNotNull(context.Host);
 
@@ -35,6 +28,13 @@
             Assert.AreEqual(HostMetadataCache.Host.OperatingSystemVersion, context.Host.OperatingSystemVersion);
             Assert.AreEqual(HostMetadataCache.Host.ProcessName, context.Host.ProcessName);
             Assert.AreEqual(HostMetadataCache.Host.ProcessId, context.Host.ProcessId);
+        }
+
+        Task<ConsumeContext<PingMessage>> _handled;
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _handled = Handled<PingMessage>(configurator);
         }
     }
 }

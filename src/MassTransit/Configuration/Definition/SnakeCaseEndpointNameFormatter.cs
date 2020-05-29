@@ -5,11 +5,9 @@ namespace MassTransit.Definition
 
     /// <summary>
     /// Formats the endpoint name using snake case. For example,
-    ///
     /// SubmitOrderConsumer -> submit_order
     /// OrderState -> order_state
     /// UpdateCustomerActivity -> update_customer_execute, update_customer_compensate
-    ///
     /// </summary>
     public class SnakeCaseEndpointNameFormatter :
         DefaultEndpointNameFormatter

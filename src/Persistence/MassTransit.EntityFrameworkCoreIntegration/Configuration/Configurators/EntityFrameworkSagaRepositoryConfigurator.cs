@@ -21,10 +21,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Configurators
         where TSaga : class, ISaga
     {
         ConcurrencyMode _concurrencyMode;
-        Func<IQueryable<TSaga>, IQueryable<TSaga>> _queryCustomization;
-        ILockStatementProvider _lockStatementProvider;
-        IsolationLevel _isolationLevel;
         Action<ISagaRepositoryRegistrationConfigurator<TSaga>> _configureDbContext;
+        IsolationLevel _isolationLevel;
+        ILockStatementProvider _lockStatementProvider;
+        Func<IQueryable<TSaga>, IQueryable<TSaga>> _queryCustomization;
 
         public EntityFrameworkSagaRepositoryConfigurator()
         {
@@ -143,9 +143,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Configurators
         {
             List<ConstructorInfo> declaredConstructors = typeof(TContext).GetTypeInfo().DeclaredConstructors.ToList();
             if (declaredConstructors.Count == 1 && declaredConstructors[0].GetParameters().Length == 0)
-            {
                 throw new ArgumentException(CoreStrings.DbContextMissingConstructor(typeof(TContext).ShortDisplayName()));
-            }
         }
 
         ISagaRepositoryLockStrategy<TSaga> CreateOptimisticLockStrategy()

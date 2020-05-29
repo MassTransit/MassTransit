@@ -23,13 +23,12 @@ namespace MassTransit.HangfireIntegration
     class DefaultHangfireComponentResolver :
         IHangfireComponentResolver
     {
+        static readonly Lazy<IHangfireComponentResolver> Cached;
         readonly Lazy<IBackgroundJobClient> _backgroundJobClient;
+        readonly Lazy<IJobFilterProvider> _jobFilterProvider;
+        readonly Lazy<JobStorage> _jobStorage;
         readonly Lazy<IRecurringJobManager> _recurringJobManager;
         readonly Lazy<ITimeZoneResolver> _timeZoneResolver;
-        readonly Lazy<JobStorage> _jobStorage;
-        readonly Lazy<IJobFilterProvider> _jobFilterProvider;
-        static readonly Lazy<IHangfireComponentResolver> Cached;
-        public static IHangfireComponentResolver Instance => Cached.Value;
 
         static DefaultHangfireComponentResolver()
         {
@@ -47,6 +46,8 @@ namespace MassTransit.HangfireIntegration
                 () => new RecurringJobManager(JobStorage, JobFilterProvider, TimeZoneResolver), LazyThreadSafetyMode.PublicationOnly);
             BackgroundProcesses = Enumerable.Empty<IBackgroundProcess>();
         }
+
+        public static IHangfireComponentResolver Instance => Cached.Value;
 
         public IEnumerable<IBackgroundProcess> BackgroundProcesses { get; }
         public IBackgroundJobClient BackgroundJobClient => _backgroundJobClient.Value;

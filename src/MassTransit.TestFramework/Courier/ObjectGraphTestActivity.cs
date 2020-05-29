@@ -10,11 +10,11 @@
     public class ObjectGraphTestActivity :
         IActivity<ObjectGraphActivityArguments, TestLog>
     {
+        readonly IDictionary<string, string> _argumentsDictionary;
         readonly decimal _decimalValue;
         readonly int _intValue;
         readonly string[] _names;
         readonly string _stringValue;
-        readonly IDictionary<string, string> _argumentsDictionary;
 
         public ObjectGraphTestActivity(int intValue, string stringValue, decimal decimalValue, string[] names, IDictionary<string, string> argumentsDictionary)
         {
@@ -24,16 +24,17 @@
             _names = names;
             _argumentsDictionary = argumentsDictionary;
         }
+
         public async Task<ExecutionResult> Execute(ExecuteContext<ObjectGraphActivityArguments> context)
         {
-            int intValue = context.Arguments.Outer.IntValue;
-            string stringValue = context.Arguments.Outer.StringValue;
-            decimal decimalValue = context.Arguments.Outer.DecimalValue;
+            var intValue = context.Arguments.Outer.IntValue;
+            var stringValue = context.Arguments.Outer.StringValue;
+            var decimalValue = context.Arguments.Outer.DecimalValue;
             string[] names = context.Arguments.Names;
             IDictionary<string, string> argumentsDictionary = context.Arguments.ArgumentsDictionary;
 
             Console.WriteLine("TestActivity: Execute: {0}, {1}, {2}, [{3}],[{4}]", intValue, stringValue, decimalValue,
-                          string.Join(",", names), string.Join(",", argumentsDictionary.Select(x => $"{x.Key} => {x.Value}")));
+                string.Join(",", names), string.Join(",", argumentsDictionary.Select(x => $"{x.Key} => {x.Value}")));
 
             if (_intValue != intValue)
                 throw new ArgumentException("intValue");

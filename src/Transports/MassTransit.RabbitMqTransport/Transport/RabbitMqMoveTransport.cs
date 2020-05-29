@@ -27,7 +27,7 @@
             await _topologyFilter.Send(modelContext, Pipe.Empty<ModelContext>()).ConfigureAwait(false);
 
             IBasicProperties properties;
-            string routingKey = "";
+            var routingKey = "";
             byte[] body;
 
             if (context.TryGetPayload(out RabbitMqBasicConsumeContext basicConsumeContext))

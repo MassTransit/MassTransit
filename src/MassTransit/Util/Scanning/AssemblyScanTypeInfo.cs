@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Util.Scanning
+﻿namespace MassTransit.Util.Scanning
 {
     using System;
     using System.Collections.Generic;
@@ -21,8 +9,6 @@ namespace MassTransit.Util.Scanning
 
     public class AssemblyScanTypeInfo
     {
-        readonly AssemblyScanRecord _record = new AssemblyScanRecord();
-
         public readonly AssemblyTypeList ClosedTypes = new AssemblyTypeList();
         public readonly AssemblyTypeList OpenTypes = new AssemblyTypeList();
 
@@ -33,7 +19,7 @@ namespace MassTransit.Util.Scanning
 
         public AssemblyScanTypeInfo(string name, Func<IEnumerable<Type>> source)
         {
-            _record.Name = name;
+            Record.Name = name;
 
             try
             {
@@ -46,43 +32,31 @@ namespace MassTransit.Util.Scanning
             }
             catch (Exception ex)
             {
-                _record.LoadException = ex;
+                Record.LoadException = ex;
             }
         }
 
-        public AssemblyScanRecord Record => _record;
+        public AssemblyScanRecord Record { get; } = new AssemblyScanRecord();
 
         public IEnumerable<Type> FindTypes(TypeClassification classification)
         {
             if (classification == TypeClassification.All)
-            {
                 return ClosedTypes.AllTypes().Concat(OpenTypes.AllTypes());
-            }
 
             if (classification == TypeClassification.Interface)
-            {
                 return SelectTypes(ClosedTypes.Interface, OpenTypes.Interface);
-            }
 
             if (classification == TypeClassification.Abstract)
-            {
                 return SelectTypes(ClosedTypes.Abstract, OpenTypes.Abstract);
-            }
 
             if (classification == TypeClassification.Concrete)
-            {
                 return SelectTypes(ClosedTypes.Concrete, OpenTypes.Concrete);
-            }
 
             if (classification == TypeClassification.Open)
-            {
                 return OpenTypes.AllTypes();
-            }
 
             if (classification == TypeClassification.Closed)
-            {
                 return ClosedTypes.AllTypes();
-            }
 
             return SelectTypes(SelectGroups(classification).ToArray());
         }
@@ -102,19 +76,15 @@ namespace MassTransit.Util.Scanning
             var open = classification.HasFlag(TypeClassification.Open);
             var closed = classification.HasFlag(TypeClassification.Closed);
 
-            if ((open && closed) || (!open && !closed))
+            if (open && closed || !open && !closed)
             {
                 yield return OpenTypes;
                 yield return ClosedTypes;
             }
             else if (open)
-            {
                 yield return OpenTypes;
-            }
             else if (closed)
-            {
                 yield return ClosedTypes;
-            }
         }
     }
 }

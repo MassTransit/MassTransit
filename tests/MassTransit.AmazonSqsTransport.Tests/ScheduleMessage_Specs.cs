@@ -9,6 +9,10 @@
     public class ScheduleMessage_Specs :
         AmazonSqsTestFixture
     {
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        Task<ConsumeContext<SecondMessage>> _second;
+
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -23,9 +27,6 @@
         {
             configurator.UseAmazonSqsMessageScheduler();
         }
-
-        Task<ConsumeContext<SecondMessage>> _second;
-        Task<ConsumeContext<FirstMessage>> _first;
 
         protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {
@@ -50,9 +51,14 @@
         }
     }
 
+
     public class SchedulePublish_Specs :
         AmazonSqsTestFixture
     {
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        Task<ConsumeContext<SecondMessage>> _second;
+
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -67,9 +73,6 @@
         {
             configurator.UseAmazonSqsMessageScheduler();
         }
-
-        Task<ConsumeContext<SecondMessage>> _second;
-        Task<ConsumeContext<FirstMessage>> _first;
 
         protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {
@@ -93,10 +96,15 @@
         {
         }
     }
+
 
     public class SchedulePublishNoScope_Specs :
         AmazonSqsTestFixture
     {
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        Task<ConsumeContext<SecondMessage>> _second;
+
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -111,9 +119,6 @@
         {
             configurator.UseAmazonSqsMessageScheduler();
         }
-
-        Task<ConsumeContext<SecondMessage>> _second;
-        Task<ConsumeContext<FirstMessage>> _first;
 
         protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {
@@ -138,9 +143,14 @@
         }
     }
 
+
     public class Should_schedule_in_the_future :
         AmazonSqsTestFixture
     {
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        Task<ConsumeContext<SecondMessage>> _second;
+
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -161,9 +171,6 @@
         {
             configurator.UseAmazonSqsMessageScheduler();
         }
-
-        Task<ConsumeContext<SecondMessage>> _second;
-        Task<ConsumeContext<FirstMessage>> _first;
 
         protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {

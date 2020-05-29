@@ -7,25 +7,23 @@
         EndpointConfiguration,
         IAmazonSqsEndpointConfiguration
     {
-        readonly IAmazonSqsTopologyConfiguration _topologyConfiguration;
-
         public AmazonSqsEndpointConfiguration(IAmazonSqsTopologyConfiguration topologyConfiguration)
             : base(topologyConfiguration)
         {
-            _topologyConfiguration = topologyConfiguration;
+            Topology = topologyConfiguration;
         }
 
         AmazonSqsEndpointConfiguration(IEndpointConfiguration parentConfiguration, IAmazonSqsTopologyConfiguration topologyConfiguration)
             : base(parentConfiguration, topologyConfiguration)
         {
-            _topologyConfiguration = topologyConfiguration;
+            Topology = topologyConfiguration;
         }
 
-        public new IAmazonSqsTopologyConfiguration Topology => _topologyConfiguration;
+        public new IAmazonSqsTopologyConfiguration Topology { get; }
 
         public IAmazonSqsEndpointConfiguration CreateEndpointConfiguration()
         {
-            var topologyConfiguration = new AmazonSqsTopologyConfiguration(_topologyConfiguration);
+            var topologyConfiguration = new AmazonSqsTopologyConfiguration(Topology);
 
             return new AmazonSqsEndpointConfiguration(this, topologyConfiguration);
         }

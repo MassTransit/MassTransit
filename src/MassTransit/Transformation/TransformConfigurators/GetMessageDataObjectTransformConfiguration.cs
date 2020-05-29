@@ -3,6 +3,7 @@ namespace MassTransit.Transformation.TransformConfigurators
     using System;
     using System.Collections.Generic;
     using System.Reflection;
+    using Initializers;
     using Initializers.PropertyProviders;
     using MessageData;
 
@@ -24,7 +25,7 @@ namespace MassTransit.Transformation.TransformConfigurators
 
         public void Apply(ITransformConfigurator<TInput> configurator)
         {
-            if (_transformConfigurator.TryGetConverter(out var converter))
+            if (_transformConfigurator.TryGetConverter(out IPropertyConverter<TProperty, TProperty> converter))
             {
                 var inputPropertyProvider = new InputPropertyProvider<TInput, TProperty>(_property);
 

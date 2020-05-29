@@ -27,37 +27,11 @@
             _initializer = initializer;
         }
 
-        Task IFilter<ExecuteContext<T>>.Send(ExecuteContext<T> context, IPipe<ExecuteContext<T>> next)
-        {
-            var transformContext = new ConsumeTransformContext<T>(context, context.Arguments);
-
-            var initializeTask = _initializer.Initialize(_initializer.Create(transformContext), context.Arguments);
-            if (initializeTask.IsCompleted)
-            {
-                var arguments = initializeTask.Result.Message;
-
-                return next.Send(ReferenceEquals(arguments, context.Arguments)
-                    ? context
-                    : new ExecuteContextProxy<T>(context, arguments));
-            }
-
-            async Task SendAsync()
-            {
-                var initializeContext = await initializeTask.ConfigureAwait(false);
-
-                await next.Send(ReferenceEquals(initializeContext.Message, context.Arguments)
-                    ? context
-                    : new ExecuteContextProxy<T>(context, initializeContext.Message)).ConfigureAwait(false);
-            }
-
-            return SendAsync();
-        }
-
         Task IFilter<CompensateContext<T>>.Send(CompensateContext<T> context, IPipe<CompensateContext<T>> next)
         {
             var transformContext = new ConsumeTransformContext<T>(context, context.Log);
 
-            var initializeTask = _initializer.Initialize(_initializer.Create(transformContext), context.Log);
+            Task<InitializeContext<T>> initializeTask = _initializer.Initialize(_initializer.Create(transformContext), context.Log);
             if (initializeTask.IsCompleted)
             {
                 var log = initializeTask.Result.Message;
@@ -69,7 +43,7 @@
 
             async Task SendAsync()
             {
-                var initializeContext = await initializeTask.ConfigureAwait(false);
+                InitializeContext<T> initializeContext = await initializeTask.ConfigureAwait(false);
 
                 await next.Send(ReferenceEquals(initializeContext.Message, context.Log)
                     ? context
@@ -88,7 +62,7 @@
         {
             var transformContext = new ConsumeTransformContext<T>(context, context.Message);
 
-            var initializeTask = _initializer.Initialize(_initializer.Create(transformContext), context.Message);
+            Task<InitializeContext<T>> initializeTask = _initializer.Initialize(_initializer.Create(transformContext), context.Message);
             if (initializeTask.IsCompleted)
             {
                 var message = initializeTask.Result.Message;
@@ -100,7 +74,7 @@
 
             async Task SendAsync()
             {
-                var initializeContext = await initializeTask.ConfigureAwait(false);
+                InitializeContext<T> initializeContext = await initializeTask.ConfigureAwait(false);
 
                 await next.Send(ReferenceEquals(initializeContext.Message, context.Message)
                     ? context
@@ -110,11 +84,37 @@
             return SendAsync();
         }
 
+        Task IFilter<ExecuteContext<T>>.Send(ExecuteContext<T> context, IPipe<ExecuteContext<T>> next)
+        {
+            var transformContext = new ConsumeTransformContext<T>(context, context.Arguments);
+
+            Task<InitializeContext<T>> initializeTask = _initializer.Initialize(_initializer.Create(transformContext), context.Arguments);
+            if (initializeTask.IsCompleted)
+            {
+                var arguments = initializeTask.Result.Message;
+
+                return next.Send(ReferenceEquals(arguments, context.Arguments)
+                    ? context
+                    : new ExecuteContextProxy<T>(context, arguments));
+            }
+
+            async Task SendAsync()
+            {
+                InitializeContext<T> initializeContext = await initializeTask.ConfigureAwait(false);
+
+                await next.Send(ReferenceEquals(initializeContext.Message, context.Arguments)
+                    ? context
+                    : new ExecuteContextProxy<T>(context, initializeContext.Message)).ConfigureAwait(false);
+            }
+
+            return SendAsync();
+        }
+
         Task IFilter<SendContext<T>>.Send(SendContext<T> context, IPipe<SendContext<T>> next)
         {
             var transformContext = new SendTransformContext<T>(context);
 
-            var initializeTask = _initializer.Initialize(_initializer.Create(transformContext), context.Message);
+            Task<InitializeContext<T>> initializeTask = _initializer.Initialize(_initializer.Create(transformContext), context.Message);
             if (initializeTask.IsCompleted)
             {
                 var message = initializeTask.Result.Message;
@@ -126,7 +126,7 @@
 
             async Task SendAsync()
             {
-                var initializeContext = await initializeTask.ConfigureAwait(false);
+                InitializeContext<T> initializeContext = await initializeTask.ConfigureAwait(false);
 
                 await next.Send(ReferenceEquals(initializeContext.Message, context.Message)
                     ? context

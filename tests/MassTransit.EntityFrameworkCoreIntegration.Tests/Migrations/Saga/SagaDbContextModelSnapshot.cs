@@ -8,7 +8,7 @@
 
 
     [DbContext(typeof(SimpleSagaDbContext))]
-    partial class SagaDbContextModelSnapshot : ModelSnapshot
+    class SagaDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -17,22 +17,22 @@
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("MassTransit.Tests.Saga.SimpleSaga", b =>
-                {
-                    b.Property<Guid>("CorrelationId");
+            {
+                b.Property<Guid>("CorrelationId");
 
-                    b.Property<bool>("Completed");
+                b.Property<bool>("Completed");
 
-                    b.Property<bool>("Initiated");
+                b.Property<bool>("Initiated");
 
-                    b.Property<string>("Name")
-                        .HasMaxLength(40);
+                b.Property<string>("Name")
+                    .HasMaxLength(40);
 
-                    b.Property<bool>("Observed");
+                b.Property<bool>("Observed");
 
-                    b.HasKey("CorrelationId");
+                b.HasKey("CorrelationId");
 
-                    b.ToTable("EfCoreSimpleSagas");
-                });
+                b.ToTable("EfCoreSimpleSagas");
+            });
         }
     }
 }

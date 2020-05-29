@@ -19,16 +19,16 @@ namespace MassTransit.Mediator.Endpoints
         ISendEndpoint,
         IPublishObserverConnector
     {
-        readonly MediatorSendEndpoint _sendEndpoint;
+        readonly Uri _destinationAddress;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly ILogContext _logContext;
-        readonly SendObservable _sendObservers;
         readonly PublishObservable _observers;
         readonly IPublishPipe _publishPipe;
-        readonly Uri _sourceAddress;
-        readonly Uri _destinationAddress;
         readonly IPublishTopologyConfigurator _publishTopology;
         readonly ReceiveObservable _receiveObservers;
+        readonly MediatorSendEndpoint _sendEndpoint;
+        readonly SendObservable _sendObservers;
+        readonly Uri _sourceAddress;
 
         MediatorPublishEndpoint(IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher, ILogContext logContext,
             SendObservable sendObservers)

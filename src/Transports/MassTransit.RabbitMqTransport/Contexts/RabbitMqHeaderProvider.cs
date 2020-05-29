@@ -32,13 +32,13 @@
 
             if (_context.Properties.IsHeadersPresent())
             {
-                foreach (var header in _context.Properties.Headers)
+                foreach (KeyValuePair<string, object> header in _context.Properties.Headers)
                 {
                     var value = header.Value;
 
                     if (value is byte[] bytes)
                     {
-                        string text = Encoding.UTF8.GetString(bytes);
+                        var text = Encoding.UTF8.GetString(bytes);
 
                         if (!string.IsNullOrWhiteSpace(text))
                             yield return new KeyValuePair<string, object>(header.Key, text);
@@ -57,7 +57,7 @@
             {
                 if (value is byte[] bytes)
                 {
-                    string text = Encoding.UTF8.GetString(bytes);
+                    var text = Encoding.UTF8.GetString(bytes);
 
                     value = text;
                     return !string.IsNullOrWhiteSpace(text);

@@ -20,10 +20,10 @@
         IReceiveTransport
     {
         readonly IPipe<ConnectionContext> _connectionPipe;
+        readonly SqsReceiveEndpointContext _context;
         readonly IAmazonSqsHostConfiguration _hostConfiguration;
         readonly Uri _inputAddress;
         readonly ReceiveSettings _settings;
-        readonly SqsReceiveEndpointContext _context;
 
         public SqsReceiveTransport(IAmazonSqsHostConfiguration hostConfiguration, ReceiveSettings settings, IPipe<ConnectionContext> connectionPipe,
             SqsReceiveEndpointContext context)

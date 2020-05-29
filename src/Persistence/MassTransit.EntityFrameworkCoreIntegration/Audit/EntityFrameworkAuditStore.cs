@@ -9,9 +9,8 @@
     public class EntityFrameworkAuditStore :
         IMessageAuditStore
     {
-        readonly DbContextOptions _contextOptions;
-
         readonly string _auditTableName;
+        readonly DbContextOptions _contextOptions;
 
         public EntityFrameworkAuditStore(DbContextOptions contextOptions, string auditTableName)
         {

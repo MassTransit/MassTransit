@@ -52,14 +52,16 @@
         {
             lock (_properties)
             {
-                if (_properties.TryGetValue(name, out var property))
+                if (_properties.TryGetValue(name, out IWriteProperty<T> property))
                     return property as IWriteProperty<T, TProperty>;
 
                 if (_propertyIndex.TryGetValue(name, out var propertyInfo))
                 {
                     if (propertyInfo.PropertyType != typeof(TProperty))
+                    {
                         throw new ArgumentException(
                             $"Property type mismatch, {TypeMetadataCache<TProperty>.ShortName} != {TypeMetadataCache.GetShortName(propertyInfo.PropertyType)}");
+                    }
 
                     var writeProperty = new WriteProperty<T, TProperty>(_implementationType, propertyInfo);
 

@@ -3,7 +3,6 @@ namespace MassTransit.Metadata
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using Contracts;
     using Contracts.Metadata;
     using Internals.Reflection;
 
@@ -18,6 +17,17 @@ namespace MassTransit.Metadata
             _contractTypes = new ConcurrentDictionary<string, Contract>();
         }
 
+        Contract IObjectInfoContractCache.GetOrAddObjectInfo(ObjectInfo objectInfo)
+        {
+            return _contractTypes.GetOrAdd(objectInfo.ObjectType, x => CreateContract(objectInfo));
+        }
+
+        void IObjectInfoContractCache.AddContracts(params ObjectInfo[] objectInfos)
+        {
+            foreach (var objectInfo in objectInfos)
+                _contractTypes.AddOrUpdate(objectInfo.ObjectType, CreateContract(objectInfo), (_, existing) => existing);
+        }
+
         public static Contract GetOrAddContract(ObjectInfo objectInfo)
         {
             return Cached.Instance.Value.GetOrAddObjectInfo(objectInfo);
@@ -28,22 +38,9 @@ namespace MassTransit.Metadata
             Cached.Instance.Value.AddContracts(objectInfos);
         }
 
-        Contract IObjectInfoContractCache.GetOrAddObjectInfo(ObjectInfo objectInfo)
-        {
-            return _contractTypes.GetOrAdd(objectInfo.ObjectType, x => CreateContract(objectInfo));
-        }
-
-        void IObjectInfoContractCache.AddContracts(params ObjectInfo[] objectInfos)
-        {
-            foreach (var objectInfo in objectInfos)
-            {
-                _contractTypes.AddOrUpdate(objectInfo.ObjectType, CreateContract(objectInfo), (_, existing) => existing);
-            }
-        }
-
         Contract CreateContract(ObjectInfo objectInfo)
         {
-            List<Property> properties = new List<Property>();
+            var properties = new List<Property>();
 
             foreach (var propertyInfo in objectInfo.Properties)
             {

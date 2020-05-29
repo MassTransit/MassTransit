@@ -98,7 +98,7 @@ namespace MassTransit.Serialization.JsonConverters
                 else
                 {
                     var item = (T)serializer.Deserialize(reader, typeof(T));
-                    result = new List<T>() {item};
+                    result = new List<T> {item};
                 }
 
                 if (contract.CreatedType.IsArray && result is IEnumerable<T> enumerable)
@@ -106,6 +106,8 @@ namespace MassTransit.Serialization.JsonConverters
 
                 return result;
             }
+
+            public bool IsSupported => true;
 
             static JsonArrayContract ResolveContract(Type objectType, JsonSerializer serializer)
             {
@@ -115,8 +117,6 @@ namespace MassTransit.Serialization.JsonConverters
 
                 throw new JsonSerializationException("Object is not an array contract");
             }
-
-            public bool IsSupported => true;
         }
     }
 }

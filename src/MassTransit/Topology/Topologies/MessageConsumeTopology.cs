@@ -22,6 +22,8 @@ namespace MassTransit.Topology.Topologies
             _delegateTopologies = new List<IMessageConsumeTopology<TMessage>>();
         }
 
+        protected bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
+
         public void Add(IMessageConsumeTopology<TMessage> consumeTopology)
         {
             _topologies.Add(consumeTopology);
@@ -103,7 +105,5 @@ namespace MassTransit.Topology.Topologies
         {
             return Enumerable.Empty<ValidationResult>();
         }
-
-        protected bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
     }
 }

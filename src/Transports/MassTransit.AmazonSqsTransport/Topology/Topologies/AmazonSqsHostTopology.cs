@@ -92,6 +92,5 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
             return false;
         }
-
     }
 }

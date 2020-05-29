@@ -10,8 +10,8 @@ namespace MassTransit.Mediator.Contexts
     public class MediatorClientFactoryContext :
         ClientFactoryContext
     {
-        readonly ISendEndpoint _endpoint;
         readonly IConsumePipe _connector;
+        readonly ISendEndpoint _endpoint;
 
         public MediatorClientFactoryContext(ISendEndpoint endpoint, IConsumePipe connector, Uri responseAddress, RequestTimeout defaultTimeout = default)
         {

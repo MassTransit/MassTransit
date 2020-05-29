@@ -12,10 +12,10 @@
     public class InMemoryOutboxMessageSchedulerContext :
         MessageSchedulerContext
     {
+        readonly List<Func<Task>> _cancelMessages;
         readonly MessageSchedulerContext _context;
         readonly object _listLock = new object();
         readonly List<ScheduledMessage> _scheduledMessages;
-        readonly List<Func<Task>> _cancelMessages;
 
         public InMemoryOutboxMessageSchedulerContext(MessageSchedulerContext context)
         {
@@ -394,7 +394,7 @@
             }
 
             var tasks = new PendingTaskCollection(cancelMessages.Length);
-            foreach (var cancel in cancelMessages)
+            foreach (Func<Task> cancel in cancelMessages)
                 tasks.Add(cancel());
 
             return tasks.Completed();

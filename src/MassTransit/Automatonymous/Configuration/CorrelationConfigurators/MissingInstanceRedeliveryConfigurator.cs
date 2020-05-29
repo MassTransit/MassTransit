@@ -18,20 +18,14 @@ namespace Automatonymous.CorrelationConfigurators
         where TData : class
     {
         readonly IMissingInstanceConfigurator<TInstance, TData> _configurator;
-        RetryPolicyFactory _policyFactory;
         IPipe<ConsumeContext<TData>> _finalPipe;
+        RetryPolicyFactory _policyFactory;
 
         public MissingInstanceRedeliveryConfigurator(IMissingInstanceConfigurator<TInstance, TData> configurator)
         {
             _configurator = configurator;
 
             _finalPipe = configurator.Discard();
-        }
-
-        public IEnumerable<ValidationResult> Validate()
-        {
-            if (_policyFactory == null)
-                yield return this.Failure("RetryPolicy", "must not be null");
         }
 
         public void SetRetryPolicy(RetryPolicyFactory factory)
@@ -47,6 +41,12 @@ namespace Automatonymous.CorrelationConfigurators
         ConnectHandle IRetryObserverConnector.ConnectRetryObserver(IRetryObserver observer)
         {
             return new EmptyConnectHandle();
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (_policyFactory == null)
+                yield return this.Failure("RetryPolicy", "must not be null");
         }
 
         public IPipe<ConsumeContext<TData>> Build()

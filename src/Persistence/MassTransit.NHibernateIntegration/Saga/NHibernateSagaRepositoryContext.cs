@@ -18,9 +18,9 @@ namespace MassTransit.NHibernateIntegration.Saga
         where TSaga : class, ISaga
         where TMessage : class
     {
-        readonly ISession _session;
         readonly ConsumeContext<TMessage> _consumeContext;
         readonly ISagaConsumeContextFactory<ISession, TSaga> _factory;
+        readonly ISession _session;
 
         public NHibernateSagaRepositoryContext(ISession session, ConsumeContext<TMessage> consumeContext,
             ISagaConsumeContextFactory<ISession, TSaga> factory)

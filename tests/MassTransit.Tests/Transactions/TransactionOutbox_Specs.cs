@@ -1,15 +1,16 @@
-﻿using GreenPipes.Internals.Extensions;
-using MassTransit.TestFramework;
-using MassTransit.TestFramework.Messages;
-using MassTransit.Transactions;
-using Microsoft.Extensions.Logging.Abstractions;
-using NUnit.Framework;
-using System;
-using System.Threading.Tasks;
-using System.Transactions;
-
-namespace MassTransit.Tests.Transactions
+﻿namespace MassTransit.Tests.Transactions
 {
+    using System;
+    using System.Threading.Tasks;
+    using System.Transactions;
+    using GreenPipes.Internals.Extensions;
+    using MassTransit.Transactions;
+    using Microsoft.Extensions.Logging.Abstractions;
+    using NUnit.Framework;
+    using TestFramework;
+    using TestFramework.Messages;
+
+
     [TestFixture]
     public class When_using_transaction_scope_with_publish_and_complete :
         InMemoryTestFixture
@@ -29,6 +30,7 @@ namespace MassTransit.Tests.Transactions
 
                 transaction.Complete();
             }
+
             // Now has published
             await _received;
         }
@@ -40,6 +42,7 @@ namespace MassTransit.Tests.Transactions
             _received = Handled<PingMessage>(configurator);
         }
     }
+
 
     [TestFixture]
     public class When_using_transaction_scope_with_send_and_complete :
@@ -72,6 +75,7 @@ namespace MassTransit.Tests.Transactions
         }
     }
 
+
     [TestFixture]
     public class When_using_transaction_scope_with_publish_and_no_complete :
         InMemoryTestFixture
@@ -97,6 +101,7 @@ namespace MassTransit.Tests.Transactions
             _received = Handled<PingMessage>(configurator);
         }
     }
+
 
     [TestFixture]
     public class When_using_transaction_scope_with_send_and_no_complete :

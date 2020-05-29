@@ -30,6 +30,5 @@ namespace MassTransit
 
             return configurator;
         }
-
     }
 }

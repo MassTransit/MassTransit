@@ -33,7 +33,7 @@ namespace MassTransit.NHibernateIntegration
 
         public object NullSafeGet(DbDataReader rs, string[] names, ISessionImplementor session, object owner)
         {
-            string value = (string)NHibernateUtil.String.NullSafeGet(rs, names, session);
+            var value = (string)NHibernateUtil.String.NullSafeGet(rs, names, session);
 
             return new Uri(value);
         }
@@ -51,13 +51,25 @@ namespace MassTransit.NHibernateIntegration
             NHibernateUtil.String.NullSafeSet(cmd, value, index, session);
         }
 
-        public object DeepCopy(object value) => value ?? null;
+        public object DeepCopy(object value)
+        {
+            return value ?? null;
+        }
 
-        public object Replace(object original, object target, object owner) => original;
+        public object Replace(object original, object target, object owner)
+        {
+            return original;
+        }
 
-        public object Assemble(object cached, object owner) => cached;
+        public object Assemble(object cached, object owner)
+        {
+            return cached;
+        }
 
-        public object Disassemble(object value) => value;
+        public object Disassemble(object value)
+        {
+            return value;
+        }
 
         public SqlType[] SqlTypes => new[] {NHibernateUtil.String.SqlType};
 

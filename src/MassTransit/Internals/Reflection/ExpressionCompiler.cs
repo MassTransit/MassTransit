@@ -32,166 +32,36 @@ namespace MassTransit.Internals.Reflection
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Reflection.Emit;
 
-    /// <summary>Compiles expression to delegate ~20 times faster than Expression.Compile.
-    /// Partial to extend with your things when used as source file.</summary>
+
+    /// <summary>
+    /// Compiles expression to delegate ~20 times faster than Expression.Compile.
+    /// Partial to extend with your things when used as source file.
+    /// </summary>
     // ReSharper disable once PartialTypeWithSinglePart
     public static partial class ExpressionCompiler
     {
-        #region Expression.CompileFast overloads for Delegate, Funcs, and Actions
-
-        /// <summary>Compiles lambda expression to TDelegate type. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static TDelegate CompileFast<TDelegate>(this LambdaExpression lambdaExpr,
-            bool ifFastFailedReturnNull = false) where TDelegate : class
+        /// <summary>Tries to compile lambda expression to <typeparamref name="TDelegate" /></summary>
+        public static TDelegate TryCompile<TDelegate>(this LambdaExpression lambdaExpr)
+            where TDelegate : class
         {
-            var ignored = new ClosureInfo(false);
-            return (TDelegate)TryCompile(ref ignored, 
-                       typeof(TDelegate), Tools.GetParamTypes(lambdaExpr.Parameters), 
-                       lambdaExpr.ReturnType, lambdaExpr.Body, lambdaExpr.Parameters)
-                ?? (ifFastFailedReturnNull ? null : (TDelegate)(object)lambdaExpr.CompileSys());
-        }
-
-        /// <summary>Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Delegate CompileFast(this LambdaExpression lambdaExpr, bool ifFastFailedReturnNull = false)
-        {
-            var ignored = new ClosureInfo(false);
-            return (Delegate)TryCompile(ref ignored, 
-                lambdaExpr.Type, Tools.GetParamTypes(lambdaExpr.Parameters), 
-                       lambdaExpr.ReturnType, lambdaExpr.Body, lambdaExpr.Parameters)
-                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-        }
-
-        /// <summary>Unifies Compile for System.Linq.Expressions and FEC.LightExpression</summary>
-        public static TDelegate CompileSys<TDelegate>(this Expression<TDelegate> lambdaExpr) where TDelegate : class =>
-            lambdaExpr
-#if LIGHT_EXPRESSION
-            .ToLambdaExpression()
-#endif
-            .Compile();
-
-        /// <summary>Unifies Compile for System.Linq.Expressions and FEC.LightExpression</summary>
-        public static Delegate CompileSys(this LambdaExpression lambdaExpr) =>
-            lambdaExpr
-#if LIGHT_EXPRESSION
-                .ToLambdaExpression()
-#endif
-                .Compile();
-
-        /// <summary>Compiles lambda expression to TDelegate type. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static TDelegate CompileFast<TDelegate>(this Expression<TDelegate> lambdaExpr,
-            bool ifFastFailedReturnNull = false)
-            where TDelegate : class => ((LambdaExpression)lambdaExpr).CompileFast<TDelegate>(ifFastFailedReturnNull);
-
-        /// <summary>Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Func<R> CompileFast<R>(this Expression<Func<R>> lambdaExpr,
-            bool ifFastFailedReturnNull = false) =>
-            TryCompile<Func<R>>(lambdaExpr.Body, lambdaExpr.Parameters, Tools.Empty<Type>(), typeof(R))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        /// <summary>Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Func<T1, R> CompileFast<T1, R>(this Expression<Func<T1, R>> lambdaExpr,
-            bool ifFastFailedReturnNull = false) =>
-            TryCompile<Func<T1, R>>(lambdaExpr.Body, lambdaExpr.Parameters, new[] { typeof(T1) }, typeof(R))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        /// <summary>Compiles lambda expression to TDelegate type. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Func<T1, T2, R> CompileFast<T1, T2, R>(this Expression<Func<T1, T2, R>> lambdaExpr,
-            bool ifFastFailedReturnNull = false) =>
-            TryCompile<Func<T1, T2, R>>(lambdaExpr.Body, lambdaExpr.Parameters, new[] { typeof(T1), typeof(T2) },
-                typeof(R))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        /// <summary>Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Func<T1, T2, T3, R> CompileFast<T1, T2, T3, R>(
-            this Expression<Func<T1, T2, T3, R>> lambdaExpr, bool ifFastFailedReturnNull = false) =>
-            TryCompile<Func<T1, T2, T3, R>>(lambdaExpr.Body, lambdaExpr.Parameters,
-                new[] { typeof(T1), typeof(T2), typeof(T3) }, typeof(R))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        /// <summary>Compiles lambda expression to TDelegate type. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Func<T1, T2, T3, T4, R> CompileFast<T1, T2, T3, T4, R>(
-            this Expression<Func<T1, T2, T3, T4, R>> lambdaExpr, bool ifFastFailedReturnNull = false) =>
-            TryCompile<Func<T1, T2, T3, T4, R>>(lambdaExpr.Body, lambdaExpr.Parameters,
-                new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4) }, typeof(R))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        /// <summary>Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Func<T1, T2, T3, T4, T5, R> CompileFast<T1, T2, T3, T4, T5, R>(
-            this Expression<Func<T1, T2, T3, T4, T5, R>> lambdaExpr, bool ifFastFailedReturnNull = false) =>
-            TryCompile<Func<T1, T2, T3, T4, T5, R>>(lambdaExpr.Body, lambdaExpr.Parameters,
-                new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5) }, typeof(R))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        /// <summary>Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Func<T1, T2, T3, T4, T5, T6, R> CompileFast<T1, T2, T3, T4, T5, T6, R>(
-            this Expression<Func<T1, T2, T3, T4, T5, T6, R>> lambdaExpr, bool ifFastFailedReturnNull = false) =>
-            TryCompile<Func<T1, T2, T3, T4, T5, T6, R>>(lambdaExpr.Body, lambdaExpr.Parameters,
-                new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6) }, typeof(R))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        /// <summary>Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Action CompileFast(this Expression<Action> lambdaExpr, bool ifFastFailedReturnNull = false) =>
-            TryCompile<Action>(lambdaExpr.Body, lambdaExpr.Parameters, Tools.Empty<Type>(), typeof(void))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        /// <summary>Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Action<T1> CompileFast<T1>(this Expression<Action<T1>> lambdaExpr,
-            bool ifFastFailedReturnNull = false) =>
-            TryCompile<Action<T1>>(lambdaExpr.Body, lambdaExpr.Parameters, new[] { typeof(T1) }, typeof(void))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        /// <summary>Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Action<T1, T2> CompileFast<T1, T2>(this Expression<Action<T1, T2>> lambdaExpr,
-            bool ifFastFailedReturnNull = false) =>
-            TryCompile<Action<T1, T2>>(lambdaExpr.Body, lambdaExpr.Parameters, new[] { typeof(T1), typeof(T2) },
-                typeof(void))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        /// <summary>Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Action<T1, T2, T3> CompileFast<T1, T2, T3>(this Expression<Action<T1, T2, T3>> lambdaExpr,
-            bool ifFastFailedReturnNull = false) =>
-            TryCompile<Action<T1, T2, T3>>(lambdaExpr.Body, lambdaExpr.Parameters,
-                new[] { typeof(T1), typeof(T2), typeof(T3) }, typeof(void))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        /// <summary>Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Action<T1, T2, T3, T4> CompileFast<T1, T2, T3, T4>(
-            this Expression<Action<T1, T2, T3, T4>> lambdaExpr, bool ifFastFailedReturnNull = false) =>
-            TryCompile<Action<T1, T2, T3, T4>>(lambdaExpr.Body, lambdaExpr.Parameters,
-                new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4) }, typeof(void))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        /// <summary>Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Action<T1, T2, T3, T4, T5> CompileFast<T1, T2, T3, T4, T5>(
-            this Expression<Action<T1, T2, T3, T4, T5>> lambdaExpr, bool ifFastFailedReturnNull = false) =>
-            TryCompile<Action<T1, T2, T3, T4, T5>>(lambdaExpr.Body, lambdaExpr.Parameters,
-                new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5) }, typeof(void))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        /// <summary>Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.</summary>
-        public static Action<T1, T2, T3, T4, T5, T6> CompileFast<T1, T2, T3, T4, T5, T6>(
-            this Expression<Action<T1, T2, T3, T4, T5, T6>> lambdaExpr, bool ifFastFailedReturnNull = false) =>
-            TryCompile<Action<T1, T2, T3, T4, T5, T6>>(lambdaExpr.Body, lambdaExpr.Parameters,
-                new[] { typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6) }, typeof(void))
-            ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
-
-        #endregion
-
-        /// <summary>Tries to compile lambda expression to <typeparamref name="TDelegate"/></summary>
-        public static TDelegate TryCompile<TDelegate>(this LambdaExpression lambdaExpr) where TDelegate : class =>
-            TryCompile<TDelegate>(lambdaExpr.Body, lambdaExpr.Parameters, Tools.GetParamTypes(lambdaExpr.Parameters),
+            return TryCompile<TDelegate>(lambdaExpr.Body, lambdaExpr.Parameters, Tools.GetParamTypes(lambdaExpr.Parameters),
                 lambdaExpr.ReturnType);
+        }
 
-        /// <summary>Tries to compile lambda expression to <typeparamref name="TDelegate"/> 
+        /// <summary>
+        /// Tries to compile lambda expression to <typeparamref name="TDelegate" />
         /// with the provided closure object and constant expressions (or lack there of) -
         /// Constant expression should be the in order of Fields in closure object!
         /// Note 1: Use it on your own risk - FEC won't verify the expression is compile-able with passed closure, it is up to you!
         /// Note 2: The expression with NESTED LAMBDA IS NOT SUPPORTED!
-        /// Note 3: `Label` and `GoTo` are not supported in this case, because they need first round to collect out-of-order labels</summary>
+        /// Note 3: `Label` and `GoTo` are not supported in this case, because they need first round to collect out-of-order labels
+        /// </summary>
         public static TDelegate TryCompileWithPreCreatedClosure<TDelegate>(this LambdaExpression lambdaExpr,
             object closure, params ConstantExpression[] closureConstantsExprs)
             where TDelegate : class
@@ -201,52 +71,58 @@ namespace MassTransit.Internals.Reflection
                 lambdaExpr.ReturnType, lambdaExpr.Body, lambdaExpr.Parameters);
         }
 
-        /// <summary>Tries to compile expression to "static" delegate, skipping the step of collecting the closure object.</summary>
+        /// <summary>
+        /// Tries to compile expression to "static" delegate, skipping the step of collecting the closure object.
+        /// </summary>
         public static TDelegate TryCompileWithoutClosure<TDelegate>(this LambdaExpression lambdaExpr)
-            where TDelegate : class => lambdaExpr.TryCompileWithPreCreatedClosure<TDelegate>(null, null);
+            where TDelegate : class
+        {
+            return lambdaExpr.TryCompileWithPreCreatedClosure<TDelegate>(null, null);
+        }
 
-        /// <summary>Compiles expression to delegate by emitting the IL. 
+        /// <summary>
+        /// Compiles expression to delegate by emitting the IL.
         /// If sub-expressions are not supported by emitter, then the method returns null.
-        /// The usage should be calling the method, if result is null then calling the Expression.Compile.</summary>
-        public static TDelegate TryCompile<TDelegate>(
-            Expression bodyExpr, IReadOnlyList<ParameterExpression> paramExprs, Type[] paramTypes, Type returnType)
+        /// The usage should be calling the method, if result is null then calling the Expression.Compile.
+        /// </summary>
+        public static TDelegate TryCompile<TDelegate>(Expression bodyExpr, IReadOnlyList<ParameterExpression> paramExprs, Type[] paramTypes, Type returnType)
             where TDelegate : class
         {
             var ignored = new ClosureInfo(false);
             return (TDelegate)TryCompile(ref ignored, typeof(TDelegate), paramTypes, returnType, bodyExpr, paramExprs);
         }
 
-        private static object TryCompile(ref ClosureInfo closureInfo,
+        static object TryCompile(ref ClosureInfo closureInfo,
             Type delegateType, Type[] paramTypes, Type returnType, Expression expr,
             IReadOnlyList<ParameterExpression> paramExprs, bool isNestedLambda = false)
         {
             object closureObject;
             if (closureInfo.IsClosureConstructed)
-            {
                 closureObject = closureInfo.Closure;
-            }
             else if (TryCollectBoundConstants(ref closureInfo, expr, paramExprs))
             {
-                var nestedLambdaExprs = closureInfo.NestedLambdaExprs;
+                LambdaExpression[] nestedLambdaExprs = closureInfo.NestedLambdaExprs;
                 var nestedLambdaCount = nestedLambdaExprs.Length;
                 if (nestedLambdaCount != 0)
                 {
                     closureInfo.NestedLambdas = new NestedLambdaInfo[nestedLambdaCount];
                     for (var i = 0; i < nestedLambdaCount; ++i)
+                    {
                         if (!TryCompileNestedLambda(ref closureInfo, i, nestedLambdaExprs[i]))
                             return null;
+                    }
                 }
 
-                closureObject = closureInfo.ConstructClosureTypeAndObject(constructTypeOnly: isNestedLambda);
+                closureObject = closureInfo.ConstructClosureTypeAndObject(isNestedLambda);
             }
             else
                 return null;
 
             var closureType = closureInfo.ClosureType;
-            var methodParamTypes = closureType == null ? paramTypes : GetClosureAndParamTypes(paramTypes, closureType);
+            Type[] methodParamTypes = closureType == null ? paramTypes : GetClosureAndParamTypes(paramTypes, closureType);
 
             var method = new DynamicMethod(string.Empty, returnType, methodParamTypes,
-                typeof(ExpressionCompiler), skipVisibility: true);
+                typeof(ExpressionCompiler), true);
 
             var il = method.GetILGenerator();
             var parentFlags = returnType == typeof(void) ? ParentFlags.IgnoreResult : ParentFlags.Empty;
@@ -265,30 +141,34 @@ namespace MassTransit.Internals.Reflection
             return method.CreateDelegate(delegateType, closureObject);
         }
 
-        private static void CopyNestedClosureInfo(IReadOnlyList<ParameterExpression> lambdaParamExprs,
+        static void CopyNestedClosureInfo(IReadOnlyList<ParameterExpression> lambdaParamExprs,
             ref ClosureInfo info, ref ClosureInfo nestedInfo)
         {
             // if nested non passed parameter is no matched with any outer passed parameter, 
             // then ensure it goes to outer non passed parameter.
             // But check that having a non-passed parameter in root expression is invalid.
-            var nestedNonPassedParams = nestedInfo.NonPassedParameters;
+            ParameterExpression[] nestedNonPassedParams = nestedInfo.NonPassedParameters;
             if (nestedNonPassedParams.Length != 0)
+            {
                 for (var i = 0; i < nestedNonPassedParams.Length; i++)
                 {
                     var nestedNonPassedParam = nestedNonPassedParams[i];
                     if (lambdaParamExprs.GetFirstIndex(nestedNonPassedParam) == -1)
                         info.AddNonPassedParam(nestedNonPassedParam);
                 }
+            }
 
             // Promote found constants and nested lambdas into outer closure
-            var nestedConstants = nestedInfo.Constants;
+            ConstantExpression[] nestedConstants = nestedInfo.Constants;
             if (nestedConstants.Length != 0)
+            {
                 for (var i = 0; i < nestedConstants.Length; i++)
                     info.AddConstant(nestedConstants[i]);
+            }
 
             // Add nested constants to outer lambda closure.
             // At this moment we  know that NestedLambdaExprs are non-empty, cause we doing this from the nested lambda already.
-            var nestedNestedLambdaExprs = nestedInfo.NestedLambdaExprs;
+            LambdaExpression[] nestedNestedLambdaExprs = nestedInfo.NestedLambdaExprs;
             if (nestedNestedLambdaExprs.Length != 0)
             {
                 var fixedNestedLambdaCount = info.NestedLambdaExprs.Length;
@@ -298,8 +178,10 @@ namespace MassTransit.Internals.Reflection
 
                     var j = info.NestedLambdaExprs.Length - 1;
                     for (; j >= fixedNestedLambdaCount; --j)
+                    {
                         if (ReferenceEquals(info.NestedLambdaExprs[j], nestedNestedLambdaExpr))
                             break;
+                    }
 
                     if (j < fixedNestedLambdaCount)
                     {
@@ -310,14 +192,14 @@ namespace MassTransit.Internals.Reflection
             }
         }
 
-        private static Type[] GetClosureAndParamTypes(Type[] paramTypes, Type closureType)
+        static Type[] GetClosureAndParamTypes(Type[] paramTypes, Type closureType)
         {
             var paramCount = paramTypes.Length;
             if (paramCount == 0)
-                return new[] { closureType };
+                return new[] {closureType};
 
             if (paramCount == 1)
-                return new[] { closureType, paramTypes[0] };
+                return new[] {closureType, paramTypes[0]};
 
             var closureAndParamTypes = new Type[paramCount + 1];
             closureAndParamTypes[0] = closureType;
@@ -325,15 +207,22 @@ namespace MassTransit.Internals.Reflection
             return closureAndParamTypes;
         }
 
-        private sealed class BlockInfo
+        internal static bool IgnoresResult(this ParentFlags parent)
+        {
+            return (parent & ParentFlags.IgnoreResult) != 0;
+        }
+
+
+        sealed class BlockInfo
         {
             public static readonly BlockInfo Empty = new BlockInfo();
-            private BlockInfo() { }
-
-            public bool IsEmpty => Parent == null;
+            public readonly LocalBuilder[] LocalVars;
             public readonly BlockInfo Parent;
             public readonly IReadOnlyList<ParameterExpression> VarExprs;
-            public readonly LocalBuilder[] LocalVars;
+
+            BlockInfo()
+            {
+            }
 
             internal BlockInfo(BlockInfo parent, IReadOnlyList<ParameterExpression> varExprs, LocalBuilder[] localVars)
             {
@@ -341,10 +230,13 @@ namespace MassTransit.Internals.Reflection
                 VarExprs = varExprs;
                 LocalVars = localVars;
             }
+
+            public bool IsEmpty => Parent == null;
         }
 
+
         // Track the info required to build a closure object + some context information not directly related to closure.
-        private struct ClosureInfo
+        struct ClosureInfo
         {
             public bool IsClosureConstructed;
 
@@ -435,9 +327,9 @@ namespace MassTransit.Internals.Reflection
             {
                 IsClosureConstructed = true;
 
-                var constants = Constants;
-                var nonPassedParams = NonPassedParameters;
-                var nestedLambdas = NestedLambdas;
+                ConstantExpression[] constants = Constants;
+                ParameterExpression[] nonPassedParams = NonPassedParameters;
+                NestedLambdaInfo[] nestedLambdas = NestedLambdas;
                 if (constants.Length == 0 && nonPassedParams.Length == 0 && nestedLambdas.Length == 0)
                     return null;
 
@@ -446,7 +338,7 @@ namespace MassTransit.Internals.Reflection
 
                 // Construct the array based closure when number of values is bigger than
                 // number of fields in biggest supported Closure class.
-                var createMethods = ExpressionCompiler.Closure.CreateMethods;
+                MethodInfo[] createMethods = ExpressionCompiler.Closure.CreateMethods;
                 if (totalItemCount > createMethods.Length)
                 {
                     ClosureType = typeof(ArrayClosure);
@@ -455,14 +347,18 @@ namespace MassTransit.Internals.Reflection
 
                     var items = new object[totalItemCount];
                     if (constants.Length != 0)
+                    {
                         for (var i = 0; i < constants.Length; i++)
                             items[i] = constants[i].Value;
+                    }
 
                     // skip non passed parameters as it is only for nested lambdas
 
                     if (nestedLambdas.Length != 0)
+                    {
                         for (var i = 0; i < nestedLambdas.Length; i++)
                             items[constPlusParamCount + i] = nestedLambdas[i].Lambda;
+                    }
 
                     return new ArrayClosure(items);
                 }
@@ -473,23 +369,32 @@ namespace MassTransit.Internals.Reflection
                 if (constructTypeOnly)
                 {
                     if (constants.Length != 0)
+                    {
                         for (var i = 0; i < constants.Length; i++)
                             fieldTypes[i] = constants[i].Type;
+                    }
 
                     if (nonPassedParams.Length != 0)
+                    {
                         for (var i = 0; i < nonPassedParams.Length; i++)
                             fieldTypes[constants.Length + i] = nonPassedParams[i].Type;
+                    }
 
                     if (nestedLambdas.Length != 0)
+                    {
                         for (var i = 0; i < nestedLambdas.Length; i++)
+                        {
                             fieldTypes[constPlusParamCount + i] =
                                 nestedLambdas[i].Lambda.GetType(); // compiled lambda type
+                        }
+                    }
                 }
                 else
                 {
                     fieldValues = new object[totalItemCount];
 
                     if (constants.Length != 0)
+                    {
                         for (var i = 0; i < constants.Length; i++)
                         {
                             var constantExpr = constants[i];
@@ -499,18 +404,23 @@ namespace MassTransit.Internals.Reflection
                                 fieldValues[i] = constantExpr.Value;
                             }
                         }
+                    }
 
                     if (nonPassedParams.Length != 0)
+                    {
                         for (var i = 0; i < nonPassedParams.Length; i++)
                             fieldTypes[constants.Length + i] = nonPassedParams[i].Type;
+                    }
 
                     if (nestedLambdas.Length != 0)
+                    {
                         for (var i = 0; i < nestedLambdas.Length; i++)
                         {
                             var lambda = nestedLambdas[i].Lambda;
                             fieldValues[constPlusParamCount + i] = lambda;
                             fieldTypes[constPlusParamCount + i] = lambda.GetType();
                         }
+                    }
                 }
 
                 var createClosure = createMethods[totalItemCount - 1].MakeGenericMethod(fieldTypes);
@@ -520,12 +430,14 @@ namespace MassTransit.Internals.Reflection
                 return constructTypeOnly ? null : createClosure.Invoke(null, fieldValues);
             }
 
-            public void PushBlock(IReadOnlyList<ParameterExpression> blockVarExprs, LocalBuilder[] localVars) =>
+            public void PushBlock(IReadOnlyList<ParameterExpression> blockVarExprs, LocalBuilder[] localVars)
+            {
                 CurrentBlock = new BlockInfo(CurrentBlock, blockVarExprs, localVars);
+            }
 
             public void PushBlockAndConstructLocalVars(IReadOnlyList<ParameterExpression> blockVarExprs, ILGenerator il)
             {
-                var localVars = Tools.Empty<LocalBuilder>();
+                LocalBuilder[] localVars = Tools.Empty<LocalBuilder>();
                 if (blockVarExprs.Count != 0)
                 {
                     localVars = new LocalBuilder[blockVarExprs.Count];
@@ -536,8 +448,10 @@ namespace MassTransit.Internals.Reflection
                 CurrentBlock = new BlockInfo(CurrentBlock, blockVarExprs, localVars);
             }
 
-            public void PopBlock() =>
+            public void PopBlock()
+            {
                 CurrentBlock = CurrentBlock.Parent;
+            }
 
             public bool IsLocalVar(object varParamExpr)
             {
@@ -562,585 +476,6 @@ namespace MassTransit.Internals.Reflection
             }
         }
 
-        #region Closures
-
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
-
-        public static class Closure
-        {
-            private static readonly IEnumerable<MethodInfo> _methods = typeof(Closure).GetTypeInfo().DeclaredMethods;
-            internal static readonly MethodInfo[] CreateMethods = _methods.AsArray();
-
-            public static Closure<T1> Create<T1>(T1 v1) => new Closure<T1>(v1);
-
-            public static Closure<T1, T2> Create<T1, T2>(T1 v1, T2 v2) => new Closure<T1, T2>(v1, v2);
-
-            public static Closure<T1, T2, T3> Create<T1, T2, T3>(T1 v1, T2 v2, T3 v3) =>
-                new Closure<T1, T2, T3>(v1, v2, v3);
-
-            public static Closure<T1, T2, T3, T4> Create<T1, T2, T3, T4>(T1 v1, T2 v2, T3 v3, T4 v4) =>
-                new Closure<T1, T2, T3, T4>(v1, v2, v3, v4);
-
-            public static Closure<T1, T2, T3, T4, T5> Create<T1, T2, T3, T4, T5>(T1 v1, T2 v2, T3 v3, T4 v4,
-                T5 v5) => new Closure<T1, T2, T3, T4, T5>(v1, v2, v3, v4, v5);
-
-            public static Closure<T1, T2, T3, T4, T5, T6> Create<T1, T2, T3, T4, T5, T6>(T1 v1, T2 v2, T3 v3,
-                T4 v4, T5 v5, T6 v6) => new Closure<T1, T2, T3, T4, T5, T6>(v1, v2, v3, v4, v5, v6);
-
-            public static Closure<T1, T2, T3, T4, T5, T6, T7> Create<T1, T2, T3, T4, T5, T6, T7>(T1 v1, T2 v2,
-                T3 v3, T4 v4, T5 v5, T6 v6, T7 v7) =>
-                new Closure<T1, T2, T3, T4, T5, T6, T7>(v1, v2, v3, v4, v5, v6, v7);
-
-            public static Closure<T1, T2, T3, T4, T5, T6, T7, T8> Create<T1, T2, T3, T4, T5, T6, T7, T8>(
-                T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6, T7 v7, T8 v8) =>
-                new Closure<T1, T2, T3, T4, T5, T6, T7, T8>(v1, v2, v3, v4, v5, v6, v7, v8);
-
-            public static Closure<T1, T2, T3, T4, T5, T6, T7, T8, T9> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9>(
-                T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6, T7 v7, T8 v8, T9 v9) =>
-                new Closure<T1, T2, T3, T4, T5, T6, T7, T8, T9>(v1, v2, v3, v4, v5, v6, v7, v8, v9);
-
-            public static Closure<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9,
-                T10>(
-                T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6, T7 v7, T8 v8, T9 v9, T10 v10) =>
-                new Closure<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10);
-        }
-
-        public sealed class Closure<T1>
-        {
-            public T1 V1;
-
-            public Closure(T1 v1)
-            {
-                V1 = v1;
-            }
-        }
-
-        public sealed class Closure<T1, T2>
-        {
-            public T1 V1;
-            public T2 V2;
-
-            public Closure(T1 v1, T2 v2)
-            {
-                V1 = v1;
-                V2 = v2;
-            }
-        }
-
-        public sealed class Closure<T1, T2, T3>
-        {
-            public T1 V1;
-            public T2 V2;
-            public T3 V3;
-
-            public Closure(T1 v1, T2 v2, T3 v3)
-            {
-                V1 = v1;
-                V2 = v2;
-                V3 = v3;
-            }
-        }
-
-        public sealed class Closure<T1, T2, T3, T4>
-        {
-            public T1 V1;
-            public T2 V2;
-            public T3 V3;
-            public T4 V4;
-
-            public Closure(T1 v1, T2 v2, T3 v3, T4 v4)
-            {
-                V1 = v1;
-                V2 = v2;
-                V3 = v3;
-                V4 = v4;
-            }
-        }
-
-        public sealed class Closure<T1, T2, T3, T4, T5>
-        {
-            public T1 V1;
-            public T2 V2;
-            public T3 V3;
-            public T4 V4;
-            public T5 V5;
-
-            public Closure(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5)
-            {
-                V1 = v1;
-                V2 = v2;
-                V3 = v3;
-                V4 = v4;
-                V5 = v5;
-            }
-        }
-
-        public sealed class Closure<T1, T2, T3, T4, T5, T6>
-        {
-            public T1 V1;
-            public T2 V2;
-            public T3 V3;
-            public T4 V4;
-            public T5 V5;
-            public T6 V6;
-
-            public Closure(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6)
-            {
-                V1 = v1;
-                V2 = v2;
-                V3 = v3;
-                V4 = v4;
-                V5 = v5;
-                V6 = v6;
-            }
-        }
-
-        public sealed class Closure<T1, T2, T3, T4, T5, T6, T7>
-        {
-            public T1 V1;
-            public T2 V2;
-            public T3 V3;
-            public T4 V4;
-            public T5 V5;
-            public T6 V6;
-            public T7 V7;
-
-            public Closure(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6, T7 v7)
-            {
-                V1 = v1;
-                V2 = v2;
-                V3 = v3;
-                V4 = v4;
-                V5 = v5;
-                V6 = v6;
-                V7 = v7;
-            }
-        }
-
-        public sealed class Closure<T1, T2, T3, T4, T5, T6, T7, T8>
-        {
-            public T1 V1;
-            public T2 V2;
-            public T3 V3;
-            public T4 V4;
-            public T5 V5;
-            public T6 V6;
-            public T7 V7;
-            public T8 V8;
-
-            public Closure(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6, T7 v7, T8 v8)
-            {
-                V1 = v1;
-                V2 = v2;
-                V3 = v3;
-                V4 = v4;
-                V5 = v5;
-                V6 = v6;
-                V7 = v7;
-                V8 = v8;
-            }
-        }
-
-        public sealed class Closure<T1, T2, T3, T4, T5, T6, T7, T8, T9>
-        {
-            public T1 V1;
-            public T2 V2;
-            public T3 V3;
-            public T4 V4;
-            public T5 V5;
-            public T6 V6;
-            public T7 V7;
-            public T8 V8;
-            public T9 V9;
-
-            public Closure(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6, T7 v7, T8 v8, T9 v9)
-            {
-                V1 = v1;
-                V2 = v2;
-                V3 = v3;
-                V4 = v4;
-                V5 = v5;
-                V6 = v6;
-                V7 = v7;
-                V8 = v8;
-                V9 = v9;
-            }
-        }
-
-        public sealed class Closure<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
-        {
-            public T1 V1;
-            public T2 V2;
-            public T3 V3;
-            public T4 V4;
-            public T5 V5;
-            public T6 V6;
-            public T7 V7;
-            public T8 V8;
-            public T9 V9;
-            public T10 V10;
-
-            public Closure(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6, T7 v7, T8 v8, T9 v9, T10 v10)
-            {
-                V1 = v1;
-                V2 = v2;
-                V3 = v3;
-                V4 = v4;
-                V5 = v5;
-                V6 = v6;
-                V7 = v7;
-                V8 = v8;
-                V9 = v9;
-                V10 = v10;
-            }
-        }
-
-        public sealed class ArrayClosure
-        {
-            public readonly object[] Constants;
-
-            public static FieldInfo ArrayField = typeof(ArrayClosure).GetTypeInfo().GetDeclaredField(nameof(Constants));
-
-            public static ConstructorInfo Constructor =
-                typeof(ArrayClosure).GetTypeInfo().DeclaredConstructors.GetFirst();
-
-            public ArrayClosure(object[] constants)
-            {
-                Constants = constants;
-            }
-        }
-
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
-
-        #endregion
-
-        #region Nested Lambdas
-
-        private struct NestedLambdaInfo
-        {
-            public readonly ClosureInfo ClosureInfo;
-            public readonly object Lambda;
-            public readonly bool IsAction;
-
-            public NestedLambdaInfo(ClosureInfo closureInfo, object lambda, bool isAction)
-            {
-                ClosureInfo = closureInfo;
-                Lambda = lambda;
-                IsAction = isAction;
-            }
-        }
-
-        internal static class CurryClosureFuncs
-        {
-            private static readonly IEnumerable<MethodInfo> _methods =
-                typeof(CurryClosureFuncs).GetTypeInfo().DeclaredMethods;
-
-            public static readonly MethodInfo[] Methods = _methods.AsArray();
-
-            public static Func<R> Curry<C, R>(Func<C, R> f, C c) => () => f(c);
-            public static Func<T1, R> Curry<C, T1, R>(Func<C, T1, R> f, C c) => t1 => f(c, t1);
-            public static Func<T1, T2, R> Curry<C, T1, T2, R>(Func<C, T1, T2, R> f, C c) => (t1, t2) => f(c, t1, t2);
-
-            public static Func<T1, T2, T3, R> Curry<C, T1, T2, T3, R>(Func<C, T1, T2, T3, R> f, C c) =>
-                (t1, t2, t3) => f(c, t1, t2, t3);
-
-            public static Func<T1, T2, T3, T4, R> Curry<C, T1, T2, T3, T4, R>(Func<C, T1, T2, T3, T4, R> f, C c) =>
-                (t1, t2, t3, t4) => f(c, t1, t2, t3, t4);
-
-            public static Func<T1, T2, T3, T4, T5, R> Curry<C, T1, T2, T3, T4, T5, R>(Func<C, T1, T2, T3, T4, T5, R> f,
-                C c) => (t1, t2, t3, t4, t5) => f(c, t1, t2, t3, t4, t5);
-
-            public static Func<T1, T2, T3, T4, T5, T6, R>
-                Curry<C, T1, T2, T3, T4, T5, T6, R>(Func<C, T1, T2, T3, T4, T5, T6, R> f, C c) =>
-                (t1, t2, t3, t4, t5, t6) => f(c, t1, t2, t3, t4, t5, t6);
-        }
-
-        internal static class CurryClosureActions
-        {
-            private static readonly IEnumerable<MethodInfo> _methods =
-                typeof(CurryClosureActions).GetTypeInfo().DeclaredMethods;
-
-            public static readonly MethodInfo[] Methods = _methods.AsArray();
-
-            internal static Action Curry<C>(Action<C> a, C c) => () => a(c);
-            internal static Action<T1> Curry<C, T1>(Action<C, T1> f, C c) => t1 => f(c, t1);
-            internal static Action<T1, T2> Curry<C, T1, T2>(Action<C, T1, T2> f, C c) => (t1, t2) => f(c, t1, t2);
-
-            internal static Action<T1, T2, T3> Curry<C, T1, T2, T3>(Action<C, T1, T2, T3> f, C c) =>
-                (t1, t2, t3) => f(c, t1, t2, t3);
-
-            internal static Action<T1, T2, T3, T4> Curry<C, T1, T2, T3, T4>(Action<C, T1, T2, T3, T4> f, C c) =>
-                (t1, t2, t3, t4) => f(c, t1, t2, t3, t4);
-
-            internal static Action<T1, T2, T3, T4, T5> Curry<C, T1, T2, T3, T4, T5>(Action<C, T1, T2, T3, T4, T5> f,
-                C c) => (t1, t2, t3, t4, t5) => f(c, t1, t2, t3, t4, t5);
-
-            internal static Action<T1, T2, T3, T4, T5, T6>
-                Curry<C, T1, T2, T3, T4, T5, T6>(Action<C, T1, T2, T3, T4, T5, T6> f, C c) =>
-                (t1, t2, t3, t4, t5, t6) => f(c, t1, t2, t3, t4, t5, t6);
-        }
-
-        #endregion
-
-        #region Collect Bound Constants
-
-        private static bool IsClosureBoundConstant(object value, TypeInfo type) =>
-            value is Delegate ||
-            !type.IsPrimitive && !type.IsEnum && !(value is string) && !(value is Type) && !(value is decimal);
-
-        // @paramExprs is required for nested lambda compilation
-        private static bool TryCollectBoundConstants(ref ClosureInfo closure, Expression expr, IReadOnlyList<ParameterExpression> paramExprs)
-        {
-            while (true)
-            {
-                if (expr == null)
-                    return false;
-
-                switch (expr.NodeType)
-                {
-                    case ExpressionType.Constant:
-                        var constantExpr = (ConstantExpression)expr;
-                        var value = constantExpr.Value;
-                        if (value != null && IsClosureBoundConstant(value, value.GetType().GetTypeInfo()))
-                            closure.AddConstant(constantExpr);
-                        return true;
-
-                    case ExpressionType.Parameter:
-                        // if parameter is used BUT is not in passed parameters and not in local variables,
-                        // it means parameter is provided by outer lambda and should be put in closure for current lambda
-                        if (paramExprs.GetFirstIndex(expr) == -1 && !closure.IsLocalVar(expr))
-                            closure.AddNonPassedParam((ParameterExpression)expr);
-                        return true;
-
-                    case ExpressionType.Call:
-                        var methodCallExpr = (MethodCallExpression)expr;
-                        if (methodCallExpr.Arguments.Count != 0 &&
-                            !TryCollectBoundConstants(ref closure, methodCallExpr.Arguments, paramExprs))
-                            return false;
-                        if (methodCallExpr.Object == null)
-                            return true;
-                        expr = methodCallExpr.Object;
-                        continue;
-
-                    case ExpressionType.MemberAccess:
-                        var memberExpr = ((MemberExpression)expr).Expression;
-                        if (memberExpr == null)
-                            return true;
-                        expr = memberExpr;
-                        continue;
-
-                    case ExpressionType.New:
-                        return TryCollectBoundConstants(ref closure, ((NewExpression)expr).Arguments, paramExprs);
-
-                    case ExpressionType.NewArrayBounds:
-                    case ExpressionType.NewArrayInit:
-                        return TryCollectBoundConstants(ref closure, ((NewArrayExpression)expr).Expressions, paramExprs);
-
-                    case ExpressionType.MemberInit:
-                        return TryCollectMemberInitExprConstants(ref closure, (MemberInitExpression)expr, paramExprs);
-
-                    case ExpressionType.Lambda:
-                        closure.AddNestedLambda((LambdaExpression)expr);
-                        return true;
-
-                    case ExpressionType.Invoke:
-                        // optimization #138: we are inlining invoked lambda body (only for lambdas without arguments)
-                        // therefore we skipping collecting the lambda and invocation arguments and got directly to lambda body.
-                        // This approach is repeated in `TryEmitInvoke`
-                        var invokeExpr = (InvocationExpression)expr;
-                        if (invokeExpr.Expression is LambdaExpression lambdaExpr && lambdaExpr.Parameters.Count == 0)
-                        {
-                            expr = lambdaExpr.Body;
-                            continue;
-                        }
-
-                        if (invokeExpr.Arguments.Count != 0 &&
-                            !TryCollectBoundConstants(ref closure, invokeExpr.Arguments, paramExprs))
-                            return false;
-
-                        expr = invokeExpr.Expression;
-                        continue;
-
-                    case ExpressionType.Conditional:
-                        var condExpr = (ConditionalExpression)expr;
-                        if (!TryCollectBoundConstants(ref closure, condExpr.Test, paramExprs) ||
-                            !TryCollectBoundConstants(ref closure, condExpr.IfFalse, paramExprs))
-                            return false;
-                        expr = condExpr.IfTrue;
-                        continue;
-
-                    case ExpressionType.Block:
-                        var blockExpr = (BlockExpression)expr;
-                        closure.PushBlock(blockExpr.Variables, Tools.Empty<LocalBuilder>());
-                        if (!TryCollectBoundConstants(ref closure, blockExpr.Expressions, paramExprs))
-                            return false;
-                        closure.PopBlock();
-                        return true;
-
-                    case ExpressionType.Index:
-                        var indexExpr = (IndexExpression)expr;
-                        if (!TryCollectBoundConstants(ref closure, indexExpr.Arguments, paramExprs))
-                            return false;
-                        if (indexExpr.Object == null)
-                            return true;
-                        expr = indexExpr.Object;
-                        continue;
-
-                    case ExpressionType.Try:
-                        return TryCollectTryExprConstants(ref closure, (TryExpression)expr, paramExprs);
-
-                    case ExpressionType.Label:
-                        var labelExpr = (LabelExpression)expr;
-                        var defaultValueExpr = labelExpr.DefaultValue;
-                        closure.Labels = closure.Labels
-                            .WithLast(new KeyValuePair<LabelTarget, Label?>(labelExpr.Target, null));
-                        if (defaultValueExpr == null)
-                            return true;
-                        expr = defaultValueExpr;
-                        continue;
-
-                    case ExpressionType.Goto:
-                        var gotoValueExpr = ((GotoExpression)expr).Value;
-                        if (gotoValueExpr == null)
-                            return true;
-                        expr = gotoValueExpr;
-                        continue;
-
-                    case ExpressionType.Switch:
-                        var switchExpr = ((SwitchExpression)expr);
-                        if (!TryCollectBoundConstants(ref closure, switchExpr.SwitchValue, paramExprs) ||
-                            switchExpr.DefaultBody != null && !TryCollectBoundConstants(ref closure, switchExpr.DefaultBody, paramExprs))
-                            return false;
-                        for (var i = 0; i < switchExpr.Cases.Count; i++)
-                            if (!TryCollectBoundConstants(ref closure, switchExpr.Cases[i].Body, paramExprs))
-                                return false;
-                        return true;
-
-                    case ExpressionType.Extension:
-                        expr = expr.Reduce();
-                        continue;
-
-                    case ExpressionType.Default:
-                        return true;
-
-                    default:
-                        if (expr is UnaryExpression unaryExpr)
-                        {
-                            expr = unaryExpr.Operand;
-                            continue;
-                        }
-
-                        if (expr is BinaryExpression binaryExpr)
-                        {
-                            if (!TryCollectBoundConstants(ref closure, binaryExpr.Left, paramExprs))
-                                return false;
-                            expr = binaryExpr.Right;
-                            continue;
-                        }
-
-                        if (expr is TypeBinaryExpression typeBinaryExpr)
-                        {
-                            expr = typeBinaryExpr.Expression;
-                            continue;
-                        }
-
-                        return false;
-                }
-            }
-        }
-
-        private static bool TryCompileNestedLambda(ref ClosureInfo closure, int lambdaIndex,
-            LambdaExpression lambdaExpr)
-        {
-            // 1. Try to compile nested lambda in place
-            // 2. Check that parameters used in compiled lambda are passed or closed by outer lambda
-            // 3. Add the compiled lambda to closure of outer lambda for later invocation
-
-            var lambdaParamExprs = lambdaExpr.Parameters;
-
-            var nestedClosure = new ClosureInfo(false);
-            var compiledLambda = TryCompile(ref nestedClosure,
-                lambdaExpr.Type, Tools.GetParamTypes(lambdaParamExprs), lambdaExpr.ReturnType, lambdaExpr.Body,
-                lambdaParamExprs, isNestedLambda: true);
-
-            if (compiledLambda == null)
-                return false;
-
-            var isAction = lambdaExpr.ReturnType == typeof(void);
-            closure.NestedLambdas[lambdaIndex] = new NestedLambdaInfo(nestedClosure, compiledLambda, isAction);
-
-            if (nestedClosure.HasClosure)
-                CopyNestedClosureInfo(lambdaParamExprs, ref closure, ref nestedClosure);
-
-            return true;
-        }
-
-        private static bool TryCollectMemberInitExprConstants(ref ClosureInfo closure, MemberInitExpression expr,
-            IReadOnlyList<ParameterExpression> paramExprs)
-        {
-            var newExpr = expr.NewExpression
-#if LIGHT_EXPRESSION
-                          ?? expr.Expression
-#endif
-                ;
-            if (!TryCollectBoundConstants(ref closure, newExpr, paramExprs))
-                return false;
-
-            var memberBindings = expr.Bindings;
-            for (var i = 0; i < memberBindings.Count; ++i)
-            {
-                var memberBinding = memberBindings[i];
-                if (memberBinding.BindingType == MemberBindingType.Assignment &&
-                    !TryCollectBoundConstants(ref closure, ((MemberAssignment)memberBinding).Expression, paramExprs))
-                    return false;
-            }
-
-            return true;
-        }
-
-        private static bool TryCollectTryExprConstants(ref ClosureInfo closure, TryExpression tryExpr,
-            IReadOnlyList<ParameterExpression> paramExprs)
-        {
-            if (!TryCollectBoundConstants(ref closure, tryExpr.Body, paramExprs))
-                return false;
-
-            var catchBlocks = tryExpr.Handlers;
-            for (var i = 0; i < catchBlocks.Count; i++)
-            {
-                var catchBlock = catchBlocks[i];
-                var catchBody = catchBlock.Body;
-                var catchExVar = catchBlock.Variable;
-                if (catchExVar != null)
-                {
-                    closure.PushBlock(new[] { catchExVar }, Tools.Empty<LocalBuilder>());
-                    if (!TryCollectBoundConstants(ref closure, catchExVar, paramExprs))
-                        return false;
-                }
-
-                var filterExpr = catchBlock.Filter;
-                if (filterExpr != null &&
-                    !TryCollectBoundConstants(ref closure, filterExpr, paramExprs) ||
-                    !TryCollectBoundConstants(ref closure, catchBody, paramExprs))
-                    return false;
-
-                if (catchExVar != null)
-                    closure.PopBlock();
-            }
-
-            var finallyExpr = tryExpr.Finally;
-            return finallyExpr == null || TryCollectBoundConstants(ref closure, finallyExpr, paramExprs);
-        }
-
-        private static bool TryCollectBoundConstants(ref ClosureInfo closure, IReadOnlyList<Expression> exprs,
-            IReadOnlyList<ParameterExpression> paramExprs)
-        {
-            for (var i = 0; i < exprs.Count; i++)
-                if (!TryCollectBoundConstants(ref closure, exprs[i], paramExprs))
-                    return false;
-            return true;
-        }
-
-        #endregion
 
         // The minimal context-aware flags set by parent
         [Flags]
@@ -1156,25 +491,26 @@ namespace MassTransit.Internals.Reflection
             InstanceCall = Call | InstanceAccess
         }
 
-        internal static bool IgnoresResult(this ParentFlags parent) => (parent & ParentFlags.IgnoreResult) != 0;
 
-        /// <summary>Supports emitting of selected expressions, e.g. lambdaExpr are not supported yet.
-        /// When emitter find not supported expression it will return false from <see cref="TryEmit"/>, so I could fallback
-        /// to normal and slow Expression.Compile.</summary>
-        private static class EmittingVisitor
+        /// <summary>
+        /// Supports emitting of selected expressions, e.g. lambdaExpr are not supported yet.
+        /// When emitter find not supported expression it will return false from <see cref="TryEmit" />, so I could fallback
+        /// to normal and slow Expression.Compile.
+        /// </summary>
+        static class EmittingVisitor
         {
-#if !NETSTANDARD2_0 && !NET45
+        #if !NETSTANDARD2_0 && !NET45
             private static readonly MethodInfo _getTypeFromHandleMethod = typeof(Type).GetTypeInfo()
                 .DeclaredMethods.First(m => m.IsStatic && m.Name == "GetTypeFromHandle");
 
             private static readonly MethodInfo _objectEqualsMethod = typeof(object).GetTypeInfo()
                 .DeclaredMethods.First(m => m.IsStatic && m.Name == "Equals");
-#else
-            private static readonly MethodInfo _getTypeFromHandleMethod =
+        #else
+            static readonly MethodInfo _getTypeFromHandleMethod =
                 ((Func<RuntimeTypeHandle, Type>)Type.GetTypeFromHandle).Method;
 
-            private static readonly MethodInfo _objectEqualsMethod = ((Func<object, object, bool>)object.Equals).Method;
-#endif
+            static readonly MethodInfo _objectEqualsMethod = ((Func<object, object, bool>)Equals).Method;
+        #endif
 
             public static bool TryEmit(Expression expr, IReadOnlyList<ParameterExpression> paramExprs,
                 ILGenerator il, ref ClosureInfo closure, ParentFlags parent, int byRefIndex = -1)
@@ -1187,7 +523,7 @@ namespace MassTransit.Internals.Reflection
                     {
                         case ExpressionType.Parameter:
                             return parent.IgnoresResult() ||
-                                   TryEmitParameter((ParameterExpression)expr, paramExprs, il, ref closure, parent, byRefIndex);
+                                TryEmitParameter((ParameterExpression)expr, paramExprs, il, ref closure, parent, byRefIndex);
 
                         case ExpressionType.TypeAs:
                             return TryEmitTypeAs((UnaryExpression)expr, paramExprs, il, ref closure, parent);
@@ -1205,13 +541,13 @@ namespace MassTransit.Internals.Reflection
                         case ExpressionType.ArrayIndex:
                             var arrIndexExpr = (BinaryExpression)expr;
                             return TryEmit(arrIndexExpr.Left, paramExprs, il, ref closure, parent) &&
-                                   TryEmit(arrIndexExpr.Right, paramExprs, il, ref closure, parent) &&
-                                   TryEmitArrayIndex(expr.Type, il);
+                                TryEmit(arrIndexExpr.Right, paramExprs, il, ref closure, parent) &&
+                                TryEmitArrayIndex(expr.Type, il);
 
                         case ExpressionType.Constant:
                             var constantExpression = (ConstantExpression)expr;
                             return IgnoresResult(parent) ||
-                                   TryEmitConstant(constantExpression, constantExpression.Type, constantExpression.Value, il, ref closure);
+                                TryEmitConstant(constantExpression, constantExpression.Type, constantExpression.Value, il, ref closure);
 
                         case ExpressionType.Call:
                             return TryEmitMethodCall((MethodCallExpression)expr, paramExprs, il, ref closure, parent);
@@ -1221,11 +557,13 @@ namespace MassTransit.Internals.Reflection
 
                         case ExpressionType.New:
                             var newExpr = (NewExpression)expr;
-                            var argExprs = newExpr.Arguments;
+                            ReadOnlyCollection<Expression> argExprs = newExpr.Arguments;
                             for (var i = 0; i < argExprs.Count; i++)
+                            {
                                 if (!TryEmit(argExprs[i], paramExprs, il, ref closure, parent,
                                     argExprs[i].Type.IsByRef ? i : -1))
                                     return false;
+                            }
 
                             return TryEmitNew(newExpr.Constructor, newExpr.Type, il);
 
@@ -1297,10 +635,12 @@ namespace MassTransit.Internals.Reflection
                                 closure.PushBlockAndConstructLocalVars(blockExpr.Variables, il);
 
                             // ignore result for all not the last statements in block
-                            var exprs = blockExpr.Expressions;
+                            ReadOnlyCollection<Expression> exprs = blockExpr.Expressions;
                             for (var i = 0; i < exprs.Count - 1; i++)
+                            {
                                 if (!TryEmit(exprs[i], paramExprs, il, ref closure, parent | ParentFlags.IgnoreResult))
                                     return false;
+                            }
 
                             // last (result) statement in block will provide the result
                             expr = blockExpr.Result;
@@ -1317,17 +657,17 @@ namespace MassTransit.Internals.Reflection
                                 parent);
 
                         case ExpressionType.Throw:
-                            {
-                                var opExpr = ((UnaryExpression)expr).Operand;
-                                if (!TryEmit(opExpr, paramExprs, il, ref closure, parent))
-                                    return false;
-                                il.ThrowException(opExpr.Type);
-                                return true;
-                            }
+                        {
+                            var opExpr = ((UnaryExpression)expr).Operand;
+                            if (!TryEmit(opExpr, paramExprs, il, ref closure, parent))
+                                return false;
+                            il.ThrowException(opExpr.Type);
+                            return true;
+                        }
 
                         case ExpressionType.Default:
                             return expr.Type == typeof(void) || IgnoresResult(parent) ||
-                                   EmitDefault(expr.Type, il);
+                                EmitDefault(expr.Type, il);
 
                         case ExpressionType.Index:
                             var indexExpr = (IndexExpression)expr;
@@ -1335,11 +675,13 @@ namespace MassTransit.Internals.Reflection
                                 !TryEmit(indexExpr.Object, paramExprs, il, ref closure, parent))
                                 return false;
 
-                            var indexArgExprs = indexExpr.Arguments;
+                            ReadOnlyCollection<Expression> indexArgExprs = indexExpr.Arguments;
                             for (var i = 0; i < indexArgExprs.Count; i++)
+                            {
                                 if (!TryEmit(indexArgExprs[i], paramExprs, il, ref closure, parent,
                                     indexArgExprs[i].Type.IsByRef ? i : -1))
                                     return false;
+                            }
 
                             return TryEmitIndex((IndexExpression)expr, il);
 
@@ -1362,7 +704,7 @@ namespace MassTransit.Internals.Reflection
                 }
             }
 
-            private static bool TryEmitLabel(LabelExpression expr,
+            static bool TryEmitLabel(LabelExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 var index = closure.Labels.GetFirstIndex(x => x.Key == expr.Target);
@@ -1370,24 +712,24 @@ namespace MassTransit.Internals.Reflection
                     return false; // should be found in first collecting constants round
 
                 // define a new label or use the label provided by the preceding GoTo expression
-                var label = closure.Labels[index].Value;
+                Label? label = closure.Labels[index].Value;
                 if (!label.HasValue)
                     closure.Labels[index] = new KeyValuePair<LabelTarget, Label?>(expr.Target, label = il.DefineLabel());
-                    
+
                 il.MarkLabel(label.Value);
 
                 return expr.DefaultValue == null || TryEmit(expr.DefaultValue, paramExprs, il, ref closure, parent);
             }
 
             // todo: GotoExpression.Value 
-            private static bool TryEmitGoto(GotoExpression expr, ILGenerator il, ref ClosureInfo closure)
+            static bool TryEmitGoto(GotoExpression expr, ILGenerator il, ref ClosureInfo closure)
             {
                 var index = closure.Labels.GetFirstIndex(x => x.Key == expr.Target);
                 if (index == -1)
                     throw new InvalidOperationException("Cannot jump, no labels found");
 
                 // use label defined by Label expression or define its own to use by subsequent Label
-                var label = closure.Labels[index].Value;
+                Label? label = closure.Labels[index].Value;
                 if (!label.HasValue)
                     closure.Labels[index] = new KeyValuePair<LabelTarget, Label?>(expr.Target, label = il.DefineLabel());
 
@@ -1400,7 +742,7 @@ namespace MassTransit.Internals.Reflection
                 return false;
             }
 
-            private static bool TryEmitIndex(IndexExpression expr, ILGenerator il)
+            static bool TryEmitIndex(IndexExpression expr, ILGenerator il)
             {
                 var elemType = expr.Type;
                 if (expr.Indexer != null)
@@ -1419,7 +761,7 @@ namespace MassTransit.Internals.Reflection
                 return EmitMethodCall(il, expr.Object?.Type.FindMethod("Get"));
             }
 
-            private static bool TryEmitCoalesceOperator(BinaryExpression exprObj,
+            static bool TryEmitCoalesceOperator(BinaryExpression exprObj,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 var labelFalse = il.DefineLabel();
@@ -1486,12 +828,10 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool EmitDefault(Type type, ILGenerator il)
+            static bool EmitDefault(Type type, ILGenerator il)
             {
                 if (type == typeof(string))
-                {
                     il.Emit(OpCodes.Ldnull);
-                }
                 else if (
                     type == typeof(bool) ||
                     type == typeof(byte) ||
@@ -1501,9 +841,7 @@ namespace MassTransit.Internals.Reflection
                     type == typeof(uint) ||
                     type == typeof(short) ||
                     type == typeof(ushort))
-                {
                     il.Emit(OpCodes.Ldc_I4_0);
-                }
                 else if (
                     type == typeof(long) ||
                     type == typeof(ulong))
@@ -1523,8 +861,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-
-            private static bool TryEmitTryCatchFinallyBlock(TryExpression tryExpr,
+            static bool TryEmitTryCatchFinallyBlock(TryExpression tryExpr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 var exprType = tryExpr.Type;
@@ -1548,7 +885,7 @@ namespace MassTransit.Internals.Reflection
                     il.Emit(OpCodes.Leave_S, returnLabel);
                 }
 
-                var catchBlocks = tryExpr.Handlers;
+                ReadOnlyCollection<CatchBlock> catchBlocks = tryExpr.Handlers;
                 for (var i = 0; i < catchBlocks.Count; i++)
                 {
                     var catchBlock = catchBlocks[i];
@@ -1563,7 +900,7 @@ namespace MassTransit.Internals.Reflection
                     if (exVarExpr != null)
                     {
                         var exVar = il.DeclareLocal(exVarExpr.Type);
-                        closure.PushBlock(new[] { exVarExpr }, new[] { exVar });
+                        closure.PushBlock(new[] {exVarExpr}, new[] {exVar});
                         il.Emit(OpCodes.Stloc_S, exVar);
                     }
 
@@ -1604,7 +941,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool TryEmitParameter(ParameterExpression paramExpr,
+            static bool TryEmitParameter(ParameterExpression paramExpr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure,
                 ParentFlags parent, int byRefIndex = -1)
             {
@@ -1618,7 +955,7 @@ namespace MassTransit.Internals.Reflection
 
                     closure.LastEmitIsAddress = !paramExpr.IsByRef && paramType.IsValueType() &&
                         ((parent & ParentFlags.InstanceCall) == ParentFlags.InstanceCall ||
-                        (parent & ParentFlags.MemberAccess) != 0);
+                            (parent & ParentFlags.MemberAccess) != 0);
 
                     EmitLoadParamArg(il, paramIndex, closure.LastEmitIsAddress);
 
@@ -1666,29 +1003,29 @@ namespace MassTransit.Internals.Reflection
                 return LoadClosureFieldOrItem(ref closure, il, closureItemIndex, paramType);
             }
 
-            private static void EmitDereference(ILGenerator il, Type type)
+            static void EmitDereference(ILGenerator il, Type type)
             {
-                if (type == typeof(Int32))
+                if (type == typeof(int))
                     il.Emit(OpCodes.Ldind_I4);
-                else if (type == typeof(Int64))
+                else if (type == typeof(long))
                     il.Emit(OpCodes.Ldind_I8);
-                else if (type == typeof(Int16))
+                else if (type == typeof(short))
                     il.Emit(OpCodes.Ldind_I2);
-                else if (type == typeof(SByte))
+                else if (type == typeof(sbyte))
                     il.Emit(OpCodes.Ldind_I1);
-                else if (type == typeof(Single))
+                else if (type == typeof(float))
                     il.Emit(OpCodes.Ldind_R4);
-                else if (type == typeof(Double))
+                else if (type == typeof(double))
                     il.Emit(OpCodes.Ldind_R8);
                 else if (type == typeof(IntPtr))
                     il.Emit(OpCodes.Ldind_I);
                 else if (type == typeof(UIntPtr))
                     il.Emit(OpCodes.Ldind_I);
-                else if (type == typeof(Byte))
+                else if (type == typeof(byte))
                     il.Emit(OpCodes.Ldind_U1);
-                else if (type == typeof(UInt16))
+                else if (type == typeof(ushort))
                     il.Emit(OpCodes.Ldind_U2);
-                else if (type == typeof(UInt32))
+                else if (type == typeof(uint))
                     il.Emit(OpCodes.Ldind_U4);
                 else
                     il.Emit(OpCodes.Ldobj, type);
@@ -1696,7 +1033,7 @@ namespace MassTransit.Internals.Reflection
             }
 
             // loads argument at paramIndex onto evaluation stack
-            private static void EmitLoadParamArg(ILGenerator il, int paramIndex, bool asAddress)
+            static void EmitLoadParamArg(ILGenerator il, int paramIndex, bool asAddress)
             {
                 if (asAddress)
                 {
@@ -1730,7 +1067,7 @@ namespace MassTransit.Internals.Reflection
                 }
             }
 
-            private static bool TryEmitTypeAs(UnaryExpression expr,
+            static bool TryEmitTypeAs(UnaryExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure,
                 ParentFlags parent)
             {
@@ -1743,7 +1080,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool TryEmitTypeIs(TypeBinaryExpression expr,
+            static bool TryEmitTypeIs(TypeBinaryExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure,
                 ParentFlags parent)
             {
@@ -1762,7 +1099,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool TryEmitNot(UnaryExpression expr,
+            static bool TryEmitNot(UnaryExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure,
                 ParentFlags parent)
             {
@@ -1775,17 +1112,20 @@ namespace MassTransit.Internals.Reflection
                     il.Emit(OpCodes.Ldc_I4_0);
                     il.Emit(OpCodes.Ceq);
                 }
+
                 return true;
             }
 
-            private static bool TryEmitConvert(UnaryExpression expr,
+            static bool TryEmitConvert(UnaryExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 var opExpr = expr.Operand;
                 var method = expr.Method;
                 if (method != null && method.Name != "op_Implicit" && method.Name != "op_Explicit")
-                    return TryEmit(opExpr, paramExprs, il, ref closure, parent & ~ParentFlags.IgnoreResult | ParentFlags.InstanceCall, 0)
+                {
+                    return TryEmit(opExpr, paramExprs, il, ref closure, (parent & ~ParentFlags.IgnoreResult) | ParentFlags.InstanceCall, 0)
                         && EmitMethodCall(il, method, parent);
+                }
 
                 var targetType = expr.Type;
 
@@ -1794,7 +1134,7 @@ namespace MassTransit.Internals.Reflection
                 var underlyingNullableSourceType = Nullable.GetUnderlyingType(sourceType);
                 if (sourceTypeIsNullable && targetType == underlyingNullableSourceType)
                 {
-                    if (!TryEmit(opExpr, paramExprs, il, ref closure, parent & ~ParentFlags.IgnoreResult | ParentFlags.InstanceAccess))
+                    if (!TryEmit(opExpr, paramExprs, il, ref closure, (parent & ~ParentFlags.IgnoreResult) | ParentFlags.InstanceAccess))
                         return false;
 
                     if (!closure.LastEmitIsAddress)
@@ -1879,7 +1219,7 @@ namespace MassTransit.Internals.Reflection
                 {
                     if (!sourceTypeIsNullable)
                     {
-                        if (!TryEmitValueConvert(underlyingNullableTargetType, il, isChecked: false))
+                        if (!TryEmitValueConvert(underlyingNullableTargetType, il, false))
                             return false;
 
                         il.Emit(OpCodes.Newobj, targetType.GetTypeInfo().DeclaredConstructors.GetFirst());
@@ -1937,7 +1277,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool TryEmitValueConvert(Type targetType, ILGenerator il, bool isChecked)
+            static bool TryEmitValueConvert(Type targetType, ILGenerator il, bool isChecked)
             {
                 if (targetType == typeof(int))
                     il.Emit(isChecked ? OpCodes.Conv_Ovf_I4 : OpCodes.Conv_I4);
@@ -1964,7 +1304,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool TryEmitConstant(ConstantExpression expr, Type exprType, object constantValue, ILGenerator il, ref ClosureInfo closure)
+            static bool TryEmitConstant(ConstantExpression expr, Type exprType, object constantValue, ILGenerator il, ref ClosureInfo closure)
             {
                 if (constantValue == null)
                 {
@@ -1989,29 +1329,17 @@ namespace MassTransit.Internals.Reflection
                         constantType = Enum.GetUnderlyingType(constantType);
 
                     if (constantType == typeof(int))
-                    {
                         EmitLoadConstantInt(il, (int)constantValue);
-                    }
                     else if (constantType == typeof(char))
-                    {
                         EmitLoadConstantInt(il, (char)constantValue);
-                    }
                     else if (constantType == typeof(short))
-                    {
                         EmitLoadConstantInt(il, (short)constantValue);
-                    }
                     else if (constantType == typeof(byte))
-                    {
                         EmitLoadConstantInt(il, (byte)constantValue);
-                    }
                     else if (constantType == typeof(ushort))
-                    {
                         EmitLoadConstantInt(il, (ushort)constantValue);
-                    }
                     else if (constantType == typeof(sbyte))
-                    {
                         EmitLoadConstantInt(il, (sbyte)constantValue);
-                    }
                     else if (constantType == typeof(uint))
                     {
                         unchecked
@@ -2020,9 +1348,7 @@ namespace MassTransit.Internals.Reflection
                         }
                     }
                     else if (constantType == typeof(long))
-                    {
                         il.Emit(OpCodes.Ldc_I8, (long)constantValue);
-                    }
                     else if (constantType == typeof(ulong))
                     {
                         unchecked
@@ -2031,30 +1357,20 @@ namespace MassTransit.Internals.Reflection
                         }
                     }
                     else if (constantType == typeof(float))
-                    {
                         il.Emit(OpCodes.Ldc_R4, (float)constantValue);
-                    }
                     else if (constantType == typeof(double))
-                    {
                         il.Emit(OpCodes.Ldc_R8, (double)constantValue);
-                    }
                     else if (constantType == typeof(bool))
-                    {
                         il.Emit((bool)constantValue ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
-                    }
                     else if (constantValue is string)
-                    {
                         il.Emit(OpCodes.Ldstr, (string)constantValue);
-                    }
                     else if (constantValue is Type)
                     {
                         il.Emit(OpCodes.Ldtoken, (Type)constantValue);
                         il.Emit(OpCodes.Call, _getTypeFromHandleMethod);
                     }
                     else if (constantType == typeof(IntPtr))
-                    {
                         il.Emit(OpCodes.Ldc_I8, ((IntPtr)constantValue).ToInt64());
-                    }
                     else if (constantType == typeof(UIntPtr))
                     {
                         unchecked
@@ -2063,17 +1379,14 @@ namespace MassTransit.Internals.Reflection
                         }
                     }
                     else if (constantType == typeof(decimal))
-                    {
                         EmitDecimalConstant((decimal)constantValue, il);
-                    }
-                    else return false;
+                    else
+                        return false;
                 }
 
                 var underlyingNullableType = Nullable.GetUnderlyingType(exprType);
                 if (underlyingNullableType != null)
-                {
                     il.Emit(OpCodes.Newobj, exprType.GetTypeInfo().DeclaredConstructors.First());
-                }
 
                 // todo: consider how to remove boxing where it is not required
                 // boxing the value type, otherwise we can get a strange result when 0 is treated as Null.
@@ -2083,7 +1396,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static void EmitDecimalConstant(decimal value, ILGenerator il)
+            static void EmitDecimalConstant(decimal value, ILGenerator il)
             {
                 //check if decimal has decimal places, if not use shorter IL code (constructor from int or long)
                 if (value % 1 == 0)
@@ -2115,7 +1428,7 @@ namespace MassTransit.Internals.Reflection
                     return;
                 }
 
-                var parts = decimal.GetBits(value);
+                int[] parts = decimal.GetBits(value);
                 var sign = (parts[3] & 0x80000000) != 0;
                 var scale = (byte)((parts[3] >> 16) & 0x7F);
 
@@ -2132,7 +1445,7 @@ namespace MassTransit.Internals.Reflection
                         x => x.GetParameters().Length == 5));
             }
 
-            private static LocalBuilder DeclareAndLoadLocalVariable(ILGenerator il, Type type)
+            static LocalBuilder DeclareAndLoadLocalVariable(ILGenerator il, Type type)
             {
                 var loc = il.DeclareLocal(type);
                 il.Emit(OpCodes.Stloc, loc);
@@ -2140,7 +1453,7 @@ namespace MassTransit.Internals.Reflection
                 return loc;
             }
 
-            private static LocalBuilder InitValueTypeVariable(ILGenerator il, Type exprType,
+            static LocalBuilder InitValueTypeVariable(ILGenerator il, Type exprType,
                 LocalBuilder existingVar = null)
             {
                 var valVar = existingVar ?? il.DeclareLocal(exprType);
@@ -2149,12 +1462,12 @@ namespace MassTransit.Internals.Reflection
                 return valVar;
             }
 
-            private static bool LoadClosureFieldOrItem(ref ClosureInfo closure, ILGenerator il, int itemIndex,
+            static bool LoadClosureFieldOrItem(ref ClosureInfo closure, ILGenerator il, int itemIndex,
                 Type itemType, Expression itemExprObj = null)
             {
                 il.Emit(OpCodes.Ldarg_0); // closure is always a first argument
 
-                var closureFields = closure.ClosureFields;
+                FieldInfo[] closureFields = closure.ClosureFields;
                 if (closureFields != null)
                     il.Emit(OpCodes.Ldfld, closureFields[itemIndex]);
                 else
@@ -2167,7 +1480,7 @@ namespace MassTransit.Internals.Reflection
 
                     // load item from index
                     il.Emit(OpCodes.Ldelem_Ref);
-                    itemType = itemType ?? itemExprObj?.Type;
+                    itemType ??= itemExprObj?.Type;
                     if (itemType == null)
                         return false;
 
@@ -2178,7 +1491,7 @@ namespace MassTransit.Internals.Reflection
             }
 
             // todo: Replace resultValueVar with a closureInfo block
-            private static bool TryEmitNew(ConstructorInfo ctor, Type exprType, ILGenerator il, LocalBuilder resultValueVar = null)
+            static bool TryEmitNew(ConstructorInfo ctor, Type exprType, ILGenerator il, LocalBuilder resultValueVar = null)
             {
                 if (ctor != null)
                     il.Emit(OpCodes.Newobj, ctor);
@@ -2195,11 +1508,11 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool EmitNewArray(NewArrayExpression expr,
+            static bool EmitNewArray(NewArrayExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 var arrayType = expr.Type;
-                var elems = expr.Expressions;
+                ReadOnlyCollection<Expression> elems = expr.Expressions;
                 var elemType = arrayType.GetElementType();
                 if (elemType == null)
                     return false;
@@ -2208,14 +1521,14 @@ namespace MassTransit.Internals.Reflection
 
                 var rank = arrayType.GetArrayRank();
                 if (rank == 1) // one dimensional
-                {
                     EmitLoadConstantInt(il, elems.Count);
-                }
                 else // multi dimensional
                 {
                     for (var i = 0; i < elems.Count; i++)
+                    {
                         if (!TryEmit(elems[i], paramExprs, il, ref closure, parent, i))
                             return false;
+                    }
 
                     il.Emit(OpCodes.Newobj, arrayType.GetTypeInfo().DeclaredConstructors.GetFirst());
                     return true;
@@ -2226,7 +1539,10 @@ namespace MassTransit.Internals.Reflection
 
                 var isElemOfValueType = elemType.GetTypeInfo().IsValueType;
 
-                for (int i = 0, n = elems.Count; i < n; i++)
+                for (int i = 0,
+                    n = elems.Count;
+                    i < n;
+                    i++)
                 {
                     il.Emit(OpCodes.Ldloc, arrVar);
                     EmitLoadConstantInt(il, i);
@@ -2248,7 +1564,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool TryEmitArrayIndex(Type exprType, ILGenerator il)
+            static bool TryEmitArrayIndex(Type exprType, ILGenerator il)
             {
                 if (exprType.IsValueType())
                     il.Emit(OpCodes.Ldelem, exprType);
@@ -2257,7 +1573,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool EmitMemberInit(MemberInitExpression expr,
+            static bool EmitMemberInit(MemberInitExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 // todo: Use closureInfo Block to track the variable instead
@@ -2266,24 +1582,27 @@ namespace MassTransit.Internals.Reflection
                     valueVar = il.DeclareLocal(expr.Type);
 
                 var newExpr = expr.NewExpression;
-#if LIGHT_EXPRESSION
+            #if LIGHT_EXPRESSION
                 if (newExpr == null)
                 {
                     if (!TryEmit(expr.Expression, paramExprs, il, ref closure, parent/*, valueVar*/)) // todo: fix me
                         return false;
                 }
                 else
-#endif
+            #endif
                 {
-                    var argExprs = newExpr.Arguments;
+                    ReadOnlyCollection<Expression> argExprs = newExpr.Arguments;
                     for (var i = 0; i < argExprs.Count; i++)
+                    {
                         if (!TryEmit(argExprs[i], paramExprs, il, ref closure, parent, i))
                             return false;
+                    }
+
                     if (!TryEmitNew(newExpr.Constructor, newExpr.Type, il, valueVar))
                         return false;
                 }
 
-                var bindings = expr.Bindings;
+                ReadOnlyCollection<MemberBinding> bindings = expr.Bindings;
                 for (var i = 0; i < bindings.Count; i++)
                 {
                     var binding = bindings[i];
@@ -2305,7 +1624,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool EmitMemberAssign(ILGenerator il, MemberInfo member)
+            static bool EmitMemberAssign(ILGenerator il, MemberInfo member)
             {
                 var prop = member as PropertyInfo;
                 if (prop != null)
@@ -2319,7 +1638,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool TryEmitIncDecAssign(UnaryExpression expr, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
+            static bool TryEmitIncDecAssign(UnaryExpression expr, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 var varIdx = closure.CurrentBlock.VarExprs.GetFirstIndex((ParameterExpression)expr.Operand);
                 if (varIdx == -1)
@@ -2361,7 +1680,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool TryEmitAssign(BinaryExpression expr,
+            static bool TryEmitAssign(BinaryExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 var exprType = expr.Type;
@@ -2384,7 +1703,7 @@ namespace MassTransit.Internals.Reflection
                         {
                             // shift parameter indices by one, because the first one will be closure
                             if (closure.HasClosure)
-                                paramIndex += 1; 
+                                paramIndex += 1;
 
                             if (paramIndex >= byte.MaxValue)
                                 return false;
@@ -2544,10 +1863,12 @@ namespace MassTransit.Internals.Reflection
                         if (obj != null && !TryEmit(obj, paramExprs, il, ref closure, flags))
                             return false;
 
-                        var indexArgExprs = indexExpr.Arguments;
+                        ReadOnlyCollection<Expression> indexArgExprs = indexExpr.Arguments;
                         for (var i = 0; i < indexArgExprs.Count; i++)
+                        {
                             if (!TryEmit(indexArgExprs[i], paramExprs, il, ref closure, flags, i))
                                 return false;
+                        }
 
                         if (!TryEmit(right, paramExprs, il, ref closure, flags))
                             return false;
@@ -2570,7 +1891,7 @@ namespace MassTransit.Internals.Reflection
                 }
             }
 
-            private static void EmitByRefStore(ILGenerator il, Type type)
+            static void EmitByRefStore(ILGenerator il, Type type)
             {
                 if (type == typeof(int) || type == typeof(uint))
                     il.Emit(OpCodes.Stind_I4);
@@ -2592,7 +1913,7 @@ namespace MassTransit.Internals.Reflection
                     il.Emit(OpCodes.Stobj, type);
             }
 
-            private static bool TryEmitIndexAssign(IndexExpression indexExpr, Type instType, Type elementType, ILGenerator il)
+            static bool TryEmitIndexAssign(IndexExpression indexExpr, Type instType, Type elementType, ILGenerator il)
             {
                 if (indexExpr.Indexer != null)
                     return EmitMemberAssign(il, indexExpr.Indexer);
@@ -2610,10 +1931,10 @@ namespace MassTransit.Internals.Reflection
                 return EmitMethodCall(il, instType?.GetTypeInfo().GetDeclaredMethod("Set"));
             }
 
-            private static bool TryEmitMethodCall(MethodCallExpression expr,
+            static bool TryEmitMethodCall(MethodCallExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
-                var flags = parent & ~ParentFlags.IgnoreResult | ParentFlags.Call;
+                var flags = (parent & ~ParentFlags.IgnoreResult) | ParentFlags.Call;
 
                 var objExpr = expr.Object;
                 if (objExpr != null)
@@ -2629,7 +1950,7 @@ namespace MassTransit.Internals.Reflection
                 IReadOnlyList<Expression> argExprs = expr.Arguments;
                 if (argExprs.Count != 0)
                 {
-                    var args = expr.Method.GetParameters();
+                    ParameterInfo[] args = expr.Method.GetParameters();
                     for (var i = 0; i < argExprs.Count; i++)
                     {
                         var byRefIndex = args[i].ParameterType.IsByRef ? i : -1;
@@ -2645,7 +1966,7 @@ namespace MassTransit.Internals.Reflection
                 return EmitMethodCall(il, expr.Method, parent);
             }
 
-            private static bool TryEmitMemberAccess(MemberExpression expr,
+            static bool TryEmitMemberAccess(MemberExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 var prop = expr.Member as PropertyInfo;
@@ -2660,12 +1981,10 @@ namespace MassTransit.Internals.Reflection
                     // Value type special treatment to load address of value instance in order to access a field or call a method.
                     // Parameter should be excluded because it already loads an address via Ldarga, and you don't need to.
                     // And for field access no need to load address, cause the field stored on stack nearby
-                    if (!closure.LastEmitIsAddress && instanceExpr != null && 
-                        instanceExpr.NodeType != ExpressionType.Parameter && 
+                    if (!closure.LastEmitIsAddress && instanceExpr != null &&
+                        instanceExpr.NodeType != ExpressionType.Parameter &&
                         instanceExpr.Type.IsValueType())
-                    {
                         DeclareAndLoadLocalVariable(il, instanceExpr.Type);
-                    }
 
                     closure.LastEmitIsAddress = false;
                     return EmitMethodCall(il, prop.FindPropertyGetMethod());
@@ -2686,6 +2005,7 @@ namespace MassTransit.Internals.Reflection
                         closure.LastEmitIsAddress = field.FieldType.IsValueType() && (parent & ParentFlags.InstanceAccess) != 0;
                         il.Emit(closure.LastEmitIsAddress ? OpCodes.Ldflda : OpCodes.Ldfld, field);
                     }
+
                     return true;
                 }
 
@@ -2693,13 +2013,13 @@ namespace MassTransit.Internals.Reflection
             }
 
             // ReSharper disable once FunctionComplexityOverflow
-            private static bool TryEmitNestedLambda(LambdaExpression lambdaExpr,
+            static bool TryEmitNestedLambda(LambdaExpression lambdaExpr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure)
             {
                 // First, find in closed compiled lambdas the one corresponding to the current lambda expression.
                 // Situation with not found lambda is not possible/exceptional,
                 // it means that we somehow skipped the lambda expression while collecting closure info.
-                var outerNestedLambdaExprs = closure.NestedLambdaExprs;
+                LambdaExpression[] outerNestedLambdaExprs = closure.NestedLambdaExprs;
                 var outerNestedLambdaIndex = outerNestedLambdaExprs.GetFirstIndex(lambdaExpr);
                 if (outerNestedLambdaIndex == -1)
                     return false;
@@ -2707,8 +2027,8 @@ namespace MassTransit.Internals.Reflection
                 var nestedLambdaInfo = closure.NestedLambdas[outerNestedLambdaIndex];
                 var nestedLambda = nestedLambdaInfo.Lambda;
 
-                var outerConstants = closure.Constants;
-                var outerNonPassedParams = closure.NonPassedParameters;
+                ConstantExpression[] outerConstants = closure.Constants;
+                ParameterExpression[] outerNonPassedParams = closure.NonPassedParameters;
 
                 // Load compiled lambda on stack counting the offset
                 outerNestedLambdaIndex += outerConstants.Length + outerNonPassedParams.Length;
@@ -2730,7 +2050,7 @@ namespace MassTransit.Internals.Reflection
                 }
 
                 // Load constants on stack
-                var nestedConstants = nestedClosureInfo.Constants;
+                ConstantExpression[] nestedConstants = nestedClosureInfo.Constants;
                 if (nestedConstants.Length != 0)
                 {
                     for (var nestedConstIndex = 0; nestedConstIndex < nestedConstants.Length; nestedConstIndex++)
@@ -2762,7 +2082,7 @@ namespace MassTransit.Internals.Reflection
                 }
 
                 // Load used and closed parameter values on stack
-                var nestedNonPassedParams = nestedClosureInfo.NonPassedParameters;
+                ParameterExpression[] nestedNonPassedParams = nestedClosureInfo.NonPassedParameters;
                 for (var nestedParamIndex = 0; nestedParamIndex < nestedNonPassedParams.Length; nestedParamIndex++)
                 {
                     var nestedUsedParam = nestedNonPassedParams[nestedParamIndex];
@@ -2791,9 +2111,7 @@ namespace MassTransit.Internals.Reflection
 
                         var variable = closure.GetDefinedLocalVarOrDefault(nestedUsedParam);
                         if (variable != null) // it's a local variable
-                        {
                             il.Emit(OpCodes.Ldloc, variable);
-                        }
                         else // it's a parameter from outer closure
                         {
                             var outerParamIndex = outerNonPassedParams.GetFirstIndex(nestedUsedParam);
@@ -2814,9 +2132,9 @@ namespace MassTransit.Internals.Reflection
                 }
 
                 // Load nested lambdas on stack
-                var nestedLambdaExprs = closure.NestedLambdaExprs;
-                var nestedNestedLambdaExprs = nestedClosureInfo.NestedLambdaExprs;
-                var nestedNestedLambdas = nestedClosureInfo.NestedLambdas;
+                LambdaExpression[] nestedLambdaExprs = closure.NestedLambdaExprs;
+                LambdaExpression[] nestedNestedLambdaExprs = nestedClosureInfo.NestedLambdaExprs;
+                NestedLambdaInfo[] nestedNestedLambdas = nestedClosureInfo.NestedLambdas;
                 if (nestedNestedLambdas.Length != 0)
                 {
                     for (var nestedLambdaIndex = 0; nestedLambdaIndex < nestedNestedLambdas.Length; nestedLambdaIndex++)
@@ -2855,15 +2173,15 @@ namespace MassTransit.Internals.Reflection
                 return EmitMethodCall(il, GetCurryClosureMethod(nestedLambda, nestedLambdaInfo.IsAction));
             }
 
-            private static MethodInfo GetCurryClosureMethod(object lambda, bool isAction)
+            static MethodInfo GetCurryClosureMethod(object lambda, bool isAction)
             {
-                var lambdaTypeArgs = lambda.GetType().GetTypeInfo().GenericTypeArguments;
+                Type[] lambdaTypeArgs = lambda.GetType().GetTypeInfo().GenericTypeArguments;
                 return isAction
                     ? CurryClosureActions.Methods[lambdaTypeArgs.Length - 1].MakeGenericMethod(lambdaTypeArgs)
                     : CurryClosureFuncs.Methods[lambdaTypeArgs.Length - 2].MakeGenericMethod(lambdaTypeArgs);
             }
 
-            private static bool TryEmitInvoke(InvocationExpression expr,
+            static bool TryEmitInvoke(InvocationExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 // optimization #138: we are inlining invoked lambda body (only for lambdas without arguments) 
@@ -2874,7 +2192,7 @@ namespace MassTransit.Internals.Reflection
                 if (!TryEmit(lambda, paramExprs, il, ref closure, parent & ~ParentFlags.IgnoreResult))
                     return false;
 
-                var argExprs = expr.Arguments;
+                ReadOnlyCollection<Expression> argExprs = expr.Arguments;
                 for (var i = 0; i < argExprs.Count; i++)
                 {
                     var byRefIndex = argExprs[i].Type.IsByRef ? i : -1;
@@ -2885,7 +2203,7 @@ namespace MassTransit.Internals.Reflection
                 return EmitMethodCall(il, lambda.Type.FindDelegateInvokeMethod(), parent);
             }
 
-            private static bool TryEmitSwitch(SwitchExpression expr,
+            static bool TryEmitSwitch(SwitchExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 // todo:
@@ -2933,7 +2251,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool TryEmitComparison(Expression exprLeft, Expression exprRight, ExpressionType expressionType,
+            static bool TryEmitComparison(Expression exprLeft, Expression exprRight, ExpressionType expressionType,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 var leftOpType = exprLeft.Type;
@@ -2942,7 +2260,8 @@ namespace MassTransit.Internals.Reflection
                 if (exprRight is ConstantExpression c && c.Value == null && exprRight.Type == typeof(object))
                     rightOpType = leftOpType;
 
-                LocalBuilder lVar = null, rVar = null;
+                LocalBuilder lVar = null,
+                    rVar = null;
                 if (!TryEmit(exprLeft, paramExprs, il, ref closure, parent & ~ParentFlags.IgnoreResult & ~ParentFlags.InstanceAccess))
                     return false;
 
@@ -2959,7 +2278,7 @@ namespace MassTransit.Internals.Reflection
 
                 if (leftOpType != rightOpType)
                 {
-                    if (leftOpType.IsClass() && rightOpType.IsClass() && 
+                    if (leftOpType.IsClass() && rightOpType.IsClass() &&
                         (leftOpType == typeof(object) || rightOpType == typeof(object)))
                     {
                         if (expressionType == ExpressionType.Equal)
@@ -3058,7 +2377,7 @@ namespace MassTransit.Internals.Reflection
                     case ExpressionType.GreaterThanOrEqual:
                     case ExpressionType.LessThanOrEqual:
                         var ifTrueLabel = il.DefineLabel();
-                        if (rightOpType == typeof(uint) || rightOpType == typeof(ulong) || 
+                        if (rightOpType == typeof(uint) || rightOpType == typeof(ulong) ||
                             rightOpType == typeof(ushort) || rightOpType == typeof(byte))
                             il.Emit(expressionType == ExpressionType.GreaterThanOrEqual ? OpCodes.Bge_Un_S : OpCodes.Ble_Un_S, ifTrueLabel);
                         else
@@ -3124,11 +2443,11 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool TryEmitArithmetic(BinaryExpression expr, ExpressionType exprNodeType,
+            static bool TryEmitArithmetic(BinaryExpression expr, ExpressionType exprNodeType,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure,
                 ParentFlags parent)
             {
-                var flags = parent & ~ParentFlags.IgnoreResult & ~ParentFlags.InstanceCall | ParentFlags.Arithmetic;
+                var flags = (parent & ~ParentFlags.IgnoreResult & ~ParentFlags.InstanceCall) | ParentFlags.Arithmetic;
 
                 var leftNoValueLabel = default(Label);
                 var leftExpr = expr.Left;
@@ -3211,7 +2530,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool TryEmitArithmeticOperation(BinaryExpression expr,
+            static bool TryEmitArithmeticOperation(BinaryExpression expr,
                 ExpressionType exprNodeType, Type exprType, ILGenerator il)
             {
                 if (!exprType.IsPrimitive())
@@ -3247,6 +2566,7 @@ namespace MassTransit.Internals.Reflection
                             if (methodName != null)
                                 method = exprType.FindMethod(methodName);
                         }
+
                         return method != null && EmitMethodCall(il, method);
                     }
                 }
@@ -3325,7 +2645,7 @@ namespace MassTransit.Internals.Reflection
                 return false;
             }
 
-            private static bool TryEmitLogicalOperator(BinaryExpression expr,
+            static bool TryEmitLogicalOperator(BinaryExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 if (!TryEmit(expr.Left, paramExprs, il, ref closure, parent))
@@ -3347,7 +2667,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool TryEmitConditional(ConditionalExpression expr,
+            static bool TryEmitConditional(ConditionalExpression expr,
                 IReadOnlyList<ParameterExpression> paramExprs, ILGenerator il, ref ClosureInfo closure, ParentFlags parent)
             {
                 var testExpr = expr.Test;
@@ -3356,14 +2676,12 @@ namespace MassTransit.Internals.Reflection
                 // optimization: special handling of comparing with null
                 if (testExpr is BinaryExpression b &&
                     ((testExpr.NodeType == ExpressionType.Equal || testExpr.NodeType == ExpressionType.NotEqual) &&
-                     !(b.Left.Type.IsNullable() || b.Right.Type.IsNullable()) &&
-                      b.Right is ConstantExpression r && r.Value == null
-                    ? TryEmit(b.Left, paramExprs, il, ref closure, parent & ~ParentFlags.IgnoreResult)
-                    : b.Left is ConstantExpression l && l.Value == null &&
-                      TryEmit(b.Right, paramExprs, il, ref closure, parent & ~ParentFlags.IgnoreResult)))
-                {
+                        !(b.Left.Type.IsNullable() || b.Right.Type.IsNullable()) &&
+                        b.Right is ConstantExpression r && r.Value == null
+                            ? TryEmit(b.Left, paramExprs, il, ref closure, parent & ~ParentFlags.IgnoreResult)
+                            : b.Left is ConstantExpression l && l.Value == null &&
+                            TryEmit(b.Right, paramExprs, il, ref closure, parent & ~ParentFlags.IgnoreResult)))
                     usedInverted = true;
-                }
                 else if (!TryEmit(testExpr, paramExprs, il, ref closure, parent & ~ParentFlags.IgnoreResult))
                     return false;
 
@@ -3387,7 +2705,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static bool EmitMethodCall(ILGenerator il, MethodInfo method, ParentFlags parent = ParentFlags.Empty)
+            static bool EmitMethodCall(ILGenerator il, MethodInfo method, ParentFlags parent = ParentFlags.Empty)
             {
                 if (method == null)
                     return false;
@@ -3399,7 +2717,7 @@ namespace MassTransit.Internals.Reflection
                 return true;
             }
 
-            private static void EmitLoadConstantInt(ILGenerator il, int i)
+            static void EmitLoadConstantInt(ILGenerator il, int i)
             {
                 switch (i)
                 {
@@ -3433,7 +2751,7 @@ namespace MassTransit.Internals.Reflection
                     case 8:
                         il.Emit(OpCodes.Ldc_I4_8);
                         break;
-                    case int n when (n > -129 && n < 128):
+                    case int n when n > -129 && n < 128:
                         il.Emit(OpCodes.Ldc_I4_S, (sbyte)i);
                         break;
                     default:
@@ -3442,60 +2760,967 @@ namespace MassTransit.Internals.Reflection
                 }
             }
         }
+
+
+    #region Expression.CompileFast overloads for Delegate, Funcs, and Actions
+
+        /// <summary>
+        /// Compiles lambda expression to TDelegate type. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static TDelegate CompileFast<TDelegate>(this LambdaExpression lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+            where TDelegate : class
+        {
+            var ignored = new ClosureInfo(false);
+            return (TDelegate)TryCompile(ref ignored,
+                    typeof(TDelegate), Tools.GetParamTypes(lambdaExpr.Parameters),
+                    lambdaExpr.ReturnType, lambdaExpr.Body, lambdaExpr.Parameters)
+                ?? (ifFastFailedReturnNull ? null : (TDelegate)(object)lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Delegate CompileFast(this LambdaExpression lambdaExpr, bool ifFastFailedReturnNull = false)
+        {
+            var ignored = new ClosureInfo(false);
+            return (Delegate)TryCompile(ref ignored,
+                    lambdaExpr.Type, Tools.GetParamTypes(lambdaExpr.Parameters),
+                    lambdaExpr.ReturnType, lambdaExpr.Body, lambdaExpr.Parameters)
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>Unifies Compile for System.Linq.Expressions and FEC.LightExpression</summary>
+        public static TDelegate CompileSys<TDelegate>(this Expression<TDelegate> lambdaExpr)
+            where TDelegate : class =>
+            lambdaExpr
+            #if LIGHT_EXPRESSION
+            .ToLambdaExpression()
+            #endif
+                .Compile();
+
+        /// <summary>Unifies Compile for System.Linq.Expressions and FEC.LightExpression</summary>
+        public static Delegate CompileSys(this LambdaExpression lambdaExpr) =>
+            lambdaExpr
+            #if LIGHT_EXPRESSION
+                .ToLambdaExpression()
+            #endif
+                .Compile();
+
+        /// <summary>
+        /// Compiles lambda expression to TDelegate type. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static TDelegate CompileFast<TDelegate>(this Expression<TDelegate> lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+            where TDelegate : class
+        {
+            return ((LambdaExpression)lambdaExpr).CompileFast<TDelegate>(ifFastFailedReturnNull);
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Func<R> CompileFast<R>(this Expression<Func<R>> lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Func<R>>(lambdaExpr.Body, lambdaExpr.Parameters, Tools.Empty<Type>(), typeof(R))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Func<T1, R> CompileFast<T1, R>(this Expression<Func<T1, R>> lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Func<T1, R>>(lambdaExpr.Body, lambdaExpr.Parameters, new[] {typeof(T1)}, typeof(R))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to TDelegate type. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Func<T1, T2, R> CompileFast<T1, T2, R>(this Expression<Func<T1, T2, R>> lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Func<T1, T2, R>>(lambdaExpr.Body, lambdaExpr.Parameters, new[] {typeof(T1), typeof(T2)},
+                    typeof(R))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Func<T1, T2, T3, R> CompileFast<T1, T2, T3, R>(this Expression<Func<T1, T2, T3, R>> lambdaExpr, bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Func<T1, T2, T3, R>>(lambdaExpr.Body, lambdaExpr.Parameters,
+                    new[] {typeof(T1), typeof(T2), typeof(T3)}, typeof(R))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to TDelegate type. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Func<T1, T2, T3, T4, R> CompileFast<T1, T2, T3, T4, R>(this Expression<Func<T1, T2, T3, T4, R>> lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Func<T1, T2, T3, T4, R>>(lambdaExpr.Body, lambdaExpr.Parameters,
+                    new[] {typeof(T1), typeof(T2), typeof(T3), typeof(T4)}, typeof(R))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Func<T1, T2, T3, T4, T5, R> CompileFast<T1, T2, T3, T4, T5, R>(this Expression<Func<T1, T2, T3, T4, T5, R>> lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Func<T1, T2, T3, T4, T5, R>>(lambdaExpr.Body, lambdaExpr.Parameters,
+                    new[] {typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5)}, typeof(R))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Func<T1, T2, T3, T4, T5, T6, R> CompileFast<T1, T2, T3, T4, T5, T6, R>(this Expression<Func<T1, T2, T3, T4, T5, T6, R>> lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Func<T1, T2, T3, T4, T5, T6, R>>(lambdaExpr.Body, lambdaExpr.Parameters,
+                    new[] {typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6)}, typeof(R))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Action CompileFast(this Expression<Action> lambdaExpr, bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Action>(lambdaExpr.Body, lambdaExpr.Parameters, Tools.Empty<Type>(), typeof(void))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Action<T1> CompileFast<T1>(this Expression<Action<T1>> lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Action<T1>>(lambdaExpr.Body, lambdaExpr.Parameters, new[] {typeof(T1)}, typeof(void))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Action<T1, T2> CompileFast<T1, T2>(this Expression<Action<T1, T2>> lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Action<T1, T2>>(lambdaExpr.Body, lambdaExpr.Parameters, new[] {typeof(T1), typeof(T2)},
+                    typeof(void))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Action<T1, T2, T3> CompileFast<T1, T2, T3>(this Expression<Action<T1, T2, T3>> lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Action<T1, T2, T3>>(lambdaExpr.Body, lambdaExpr.Parameters,
+                    new[] {typeof(T1), typeof(T2), typeof(T3)}, typeof(void))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Action<T1, T2, T3, T4> CompileFast<T1, T2, T3, T4>(this Expression<Action<T1, T2, T3, T4>> lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Action<T1, T2, T3, T4>>(lambdaExpr.Body, lambdaExpr.Parameters,
+                    new[] {typeof(T1), typeof(T2), typeof(T3), typeof(T4)}, typeof(void))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Action<T1, T2, T3, T4, T5> CompileFast<T1, T2, T3, T4, T5>(this Expression<Action<T1, T2, T3, T4, T5>> lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Action<T1, T2, T3, T4, T5>>(lambdaExpr.Body, lambdaExpr.Parameters,
+                    new[] {typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5)}, typeof(void))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+        /// <summary>
+        /// Compiles lambda expression to delegate. Use ifFastFailedReturnNull parameter to Not fallback to Expression.Compile, useful for testing.
+        /// </summary>
+        public static Action<T1, T2, T3, T4, T5, T6> CompileFast<T1, T2, T3, T4, T5, T6>(this Expression<Action<T1, T2, T3, T4, T5, T6>> lambdaExpr,
+            bool ifFastFailedReturnNull = false)
+        {
+            return TryCompile<Action<T1, T2, T3, T4, T5, T6>>(lambdaExpr.Body, lambdaExpr.Parameters,
+                    new[] {typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6)}, typeof(void))
+                ?? (ifFastFailedReturnNull ? null : lambdaExpr.CompileSys());
+        }
+
+    #endregion
+
+    #region Closures
+
+    #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+
+
+        public static class Closure
+        {
+            static readonly IEnumerable<MethodInfo> _methods = typeof(Closure).GetTypeInfo().DeclaredMethods;
+            internal static readonly MethodInfo[] CreateMethods = _methods.AsArray();
+
+            public static Closure<T1> Create<T1>(T1 v1)
+            {
+                return new Closure<T1>(v1);
+            }
+
+            public static Closure<T1, T2> Create<T1, T2>(T1 v1, T2 v2)
+            {
+                return new Closure<T1, T2>(v1, v2);
+            }
+
+            public static Closure<T1, T2, T3> Create<T1, T2, T3>(T1 v1, T2 v2, T3 v3)
+            {
+                return new Closure<T1, T2, T3>(v1, v2, v3);
+            }
+
+            public static Closure<T1, T2, T3, T4> Create<T1, T2, T3, T4>(T1 v1, T2 v2, T3 v3, T4 v4)
+            {
+                return new Closure<T1, T2, T3, T4>(v1, v2, v3, v4);
+            }
+
+            public static Closure<T1, T2, T3, T4, T5> Create<T1, T2, T3, T4, T5>(T1 v1, T2 v2, T3 v3, T4 v4,
+                T5 v5)
+            {
+                return new Closure<T1, T2, T3, T4, T5>(v1, v2, v3, v4, v5);
+            }
+
+            public static Closure<T1, T2, T3, T4, T5, T6> Create<T1, T2, T3, T4, T5, T6>(T1 v1, T2 v2, T3 v3,
+                T4 v4, T5 v5, T6 v6)
+            {
+                return new Closure<T1, T2, T3, T4, T5, T6>(v1, v2, v3, v4, v5, v6);
+            }
+
+            public static Closure<T1, T2, T3, T4, T5, T6, T7> Create<T1, T2, T3, T4, T5, T6, T7>(T1 v1, T2 v2,
+                T3 v3, T4 v4, T5 v5, T6 v6, T7 v7)
+            {
+                return new Closure<T1, T2, T3, T4, T5, T6, T7>(v1, v2, v3, v4, v5, v6, v7);
+            }
+
+            public static Closure<T1, T2, T3, T4, T5, T6, T7, T8> Create<T1, T2, T3, T4, T5, T6, T7, T8>(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6, T7 v7, T8 v8)
+            {
+                return new Closure<T1, T2, T3, T4, T5, T6, T7, T8>(v1, v2, v3, v4, v5, v6, v7, v8);
+            }
+
+            public static Closure<T1, T2, T3, T4, T5, T6, T7, T8, T9> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9>(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6,
+                T7 v7, T8 v8, T9 v9)
+            {
+                return new Closure<T1, T2, T3, T4, T5, T6, T7, T8, T9>(v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            }
+
+            public static Closure<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9,
+                T10>(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6, T7 v7, T8 v8, T9 v9, T10 v10)
+            {
+                return new Closure<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10);
+            }
+        }
+
+
+        public sealed class Closure<T1>
+        {
+            public T1 V1;
+
+            public Closure(T1 v1)
+            {
+                V1 = v1;
+            }
+        }
+
+
+        public sealed class Closure<T1, T2>
+        {
+            public T1 V1;
+            public T2 V2;
+
+            public Closure(T1 v1, T2 v2)
+            {
+                V1 = v1;
+                V2 = v2;
+            }
+        }
+
+
+        public sealed class Closure<T1, T2, T3>
+        {
+            public T1 V1;
+            public T2 V2;
+            public T3 V3;
+
+            public Closure(T1 v1, T2 v2, T3 v3)
+            {
+                V1 = v1;
+                V2 = v2;
+                V3 = v3;
+            }
+        }
+
+
+        public sealed class Closure<T1, T2, T3, T4>
+        {
+            public T1 V1;
+            public T2 V2;
+            public T3 V3;
+            public T4 V4;
+
+            public Closure(T1 v1, T2 v2, T3 v3, T4 v4)
+            {
+                V1 = v1;
+                V2 = v2;
+                V3 = v3;
+                V4 = v4;
+            }
+        }
+
+
+        public sealed class Closure<T1, T2, T3, T4, T5>
+        {
+            public T1 V1;
+            public T2 V2;
+            public T3 V3;
+            public T4 V4;
+            public T5 V5;
+
+            public Closure(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5)
+            {
+                V1 = v1;
+                V2 = v2;
+                V3 = v3;
+                V4 = v4;
+                V5 = v5;
+            }
+        }
+
+
+        public sealed class Closure<T1, T2, T3, T4, T5, T6>
+        {
+            public T1 V1;
+            public T2 V2;
+            public T3 V3;
+            public T4 V4;
+            public T5 V5;
+            public T6 V6;
+
+            public Closure(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6)
+            {
+                V1 = v1;
+                V2 = v2;
+                V3 = v3;
+                V4 = v4;
+                V5 = v5;
+                V6 = v6;
+            }
+        }
+
+
+        public sealed class Closure<T1, T2, T3, T4, T5, T6, T7>
+        {
+            public T1 V1;
+            public T2 V2;
+            public T3 V3;
+            public T4 V4;
+            public T5 V5;
+            public T6 V6;
+            public T7 V7;
+
+            public Closure(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6, T7 v7)
+            {
+                V1 = v1;
+                V2 = v2;
+                V3 = v3;
+                V4 = v4;
+                V5 = v5;
+                V6 = v6;
+                V7 = v7;
+            }
+        }
+
+
+        public sealed class Closure<T1, T2, T3, T4, T5, T6, T7, T8>
+        {
+            public T1 V1;
+            public T2 V2;
+            public T3 V3;
+            public T4 V4;
+            public T5 V5;
+            public T6 V6;
+            public T7 V7;
+            public T8 V8;
+
+            public Closure(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6, T7 v7, T8 v8)
+            {
+                V1 = v1;
+                V2 = v2;
+                V3 = v3;
+                V4 = v4;
+                V5 = v5;
+                V6 = v6;
+                V7 = v7;
+                V8 = v8;
+            }
+        }
+
+
+        public sealed class Closure<T1, T2, T3, T4, T5, T6, T7, T8, T9>
+        {
+            public T1 V1;
+            public T2 V2;
+            public T3 V3;
+            public T4 V4;
+            public T5 V5;
+            public T6 V6;
+            public T7 V7;
+            public T8 V8;
+            public T9 V9;
+
+            public Closure(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6, T7 v7, T8 v8, T9 v9)
+            {
+                V1 = v1;
+                V2 = v2;
+                V3 = v3;
+                V4 = v4;
+                V5 = v5;
+                V6 = v6;
+                V7 = v7;
+                V8 = v8;
+                V9 = v9;
+            }
+        }
+
+
+        public sealed class Closure<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
+        {
+            public T1 V1;
+            public T10 V10;
+            public T2 V2;
+            public T3 V3;
+            public T4 V4;
+            public T5 V5;
+            public T6 V6;
+            public T7 V7;
+            public T8 V8;
+            public T9 V9;
+
+            public Closure(T1 v1, T2 v2, T3 v3, T4 v4, T5 v5, T6 v6, T7 v7, T8 v8, T9 v9, T10 v10)
+            {
+                V1 = v1;
+                V2 = v2;
+                V3 = v3;
+                V4 = v4;
+                V5 = v5;
+                V6 = v6;
+                V7 = v7;
+                V8 = v8;
+                V9 = v9;
+                V10 = v10;
+            }
+        }
+
+
+        public sealed class ArrayClosure
+        {
+            public static FieldInfo ArrayField = typeof(ArrayClosure).GetTypeInfo().GetDeclaredField(nameof(Constants));
+
+            public static ConstructorInfo Constructor =
+                typeof(ArrayClosure).GetTypeInfo().DeclaredConstructors.GetFirst();
+
+            public readonly object[] Constants;
+
+            public ArrayClosure(object[] constants)
+            {
+                Constants = constants;
+            }
+        }
+
+
+    #pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+
+    #endregion
+
+    #region Nested Lambdas
+
+        struct NestedLambdaInfo
+        {
+            public readonly ClosureInfo ClosureInfo;
+            public readonly object Lambda;
+            public readonly bool IsAction;
+
+            public NestedLambdaInfo(ClosureInfo closureInfo, object lambda, bool isAction)
+            {
+                ClosureInfo = closureInfo;
+                Lambda = lambda;
+                IsAction = isAction;
+            }
+        }
+
+
+        internal static class CurryClosureFuncs
+        {
+            static readonly IEnumerable<MethodInfo> _methods =
+                typeof(CurryClosureFuncs).GetTypeInfo().DeclaredMethods;
+
+            public static readonly MethodInfo[] Methods = _methods.AsArray();
+
+            public static Func<R> Curry<C, R>(Func<C, R> f, C c)
+            {
+                return () => f(c);
+            }
+
+            public static Func<T1, R> Curry<C, T1, R>(Func<C, T1, R> f, C c)
+            {
+                return t1 => f(c, t1);
+            }
+
+            public static Func<T1, T2, R> Curry<C, T1, T2, R>(Func<C, T1, T2, R> f, C c)
+            {
+                return (t1, t2) => f(c, t1, t2);
+            }
+
+            public static Func<T1, T2, T3, R> Curry<C, T1, T2, T3, R>(Func<C, T1, T2, T3, R> f, C c)
+            {
+                return (t1, t2, t3) => f(c, t1, t2, t3);
+            }
+
+            public static Func<T1, T2, T3, T4, R> Curry<C, T1, T2, T3, T4, R>(Func<C, T1, T2, T3, T4, R> f, C c)
+            {
+                return (t1, t2, t3, t4) => f(c, t1, t2, t3, t4);
+            }
+
+            public static Func<T1, T2, T3, T4, T5, R> Curry<C, T1, T2, T3, T4, T5, R>(Func<C, T1, T2, T3, T4, T5, R> f,
+                C c)
+            {
+                return (t1, t2, t3, t4, t5) => f(c, t1, t2, t3, t4, t5);
+            }
+
+            public static Func<T1, T2, T3, T4, T5, T6, R>
+                Curry<C, T1, T2, T3, T4, T5, T6, R>(Func<C, T1, T2, T3, T4, T5, T6, R> f, C c)
+            {
+                return (t1, t2, t3, t4, t5, t6) => f(c, t1, t2, t3, t4, t5, t6);
+            }
+        }
+
+
+        internal static class CurryClosureActions
+        {
+            static readonly IEnumerable<MethodInfo> _methods =
+                typeof(CurryClosureActions).GetTypeInfo().DeclaredMethods;
+
+            public static readonly MethodInfo[] Methods = _methods.AsArray();
+
+            internal static Action Curry<C>(Action<C> a, C c)
+            {
+                return () => a(c);
+            }
+
+            internal static Action<T1> Curry<C, T1>(Action<C, T1> f, C c)
+            {
+                return t1 => f(c, t1);
+            }
+
+            internal static Action<T1, T2> Curry<C, T1, T2>(Action<C, T1, T2> f, C c)
+            {
+                return (t1, t2) => f(c, t1, t2);
+            }
+
+            internal static Action<T1, T2, T3> Curry<C, T1, T2, T3>(Action<C, T1, T2, T3> f, C c)
+            {
+                return (t1, t2, t3) => f(c, t1, t2, t3);
+            }
+
+            internal static Action<T1, T2, T3, T4> Curry<C, T1, T2, T3, T4>(Action<C, T1, T2, T3, T4> f, C c)
+            {
+                return (t1, t2, t3, t4) => f(c, t1, t2, t3, t4);
+            }
+
+            internal static Action<T1, T2, T3, T4, T5> Curry<C, T1, T2, T3, T4, T5>(Action<C, T1, T2, T3, T4, T5> f,
+                C c)
+            {
+                return (t1, t2, t3, t4, t5) => f(c, t1, t2, t3, t4, t5);
+            }
+
+            internal static Action<T1, T2, T3, T4, T5, T6>
+                Curry<C, T1, T2, T3, T4, T5, T6>(Action<C, T1, T2, T3, T4, T5, T6> f, C c)
+            {
+                return (t1, t2, t3, t4, t5, t6) => f(c, t1, t2, t3, t4, t5, t6);
+            }
+        }
+
+    #endregion
+
+    #region Collect Bound Constants
+
+        static bool IsClosureBoundConstant(object value, TypeInfo type)
+        {
+            return value is Delegate ||
+                !type.IsPrimitive && !type.IsEnum && !(value is string) && !(value is Type) && !(value is decimal);
+        }
+
+        // @paramExprs is required for nested lambda compilation
+        static bool TryCollectBoundConstants(ref ClosureInfo closure, Expression expr, IReadOnlyList<ParameterExpression> paramExprs)
+        {
+            while (true)
+            {
+                if (expr == null)
+                    return false;
+
+                switch (expr.NodeType)
+                {
+                    case ExpressionType.Constant:
+                        var constantExpr = (ConstantExpression)expr;
+                        var value = constantExpr.Value;
+                        if (value != null && IsClosureBoundConstant(value, value.GetType().GetTypeInfo()))
+                            closure.AddConstant(constantExpr);
+                        return true;
+
+                    case ExpressionType.Parameter:
+                        // if parameter is used BUT is not in passed parameters and not in local variables,
+                        // it means parameter is provided by outer lambda and should be put in closure for current lambda
+                        if (paramExprs.GetFirstIndex(expr) == -1 && !closure.IsLocalVar(expr))
+                            closure.AddNonPassedParam((ParameterExpression)expr);
+                        return true;
+
+                    case ExpressionType.Call:
+                        var methodCallExpr = (MethodCallExpression)expr;
+                        if (methodCallExpr.Arguments.Count != 0 &&
+                            !TryCollectBoundConstants(ref closure, methodCallExpr.Arguments, paramExprs))
+                            return false;
+                        if (methodCallExpr.Object == null)
+                            return true;
+                        expr = methodCallExpr.Object;
+                        continue;
+
+                    case ExpressionType.MemberAccess:
+                        var memberExpr = ((MemberExpression)expr).Expression;
+                        if (memberExpr == null)
+                            return true;
+                        expr = memberExpr;
+                        continue;
+
+                    case ExpressionType.New:
+                        return TryCollectBoundConstants(ref closure, ((NewExpression)expr).Arguments, paramExprs);
+
+                    case ExpressionType.NewArrayBounds:
+                    case ExpressionType.NewArrayInit:
+                        return TryCollectBoundConstants(ref closure, ((NewArrayExpression)expr).Expressions, paramExprs);
+
+                    case ExpressionType.MemberInit:
+                        return TryCollectMemberInitExprConstants(ref closure, (MemberInitExpression)expr, paramExprs);
+
+                    case ExpressionType.Lambda:
+                        closure.AddNestedLambda((LambdaExpression)expr);
+                        return true;
+
+                    case ExpressionType.Invoke:
+                        // optimization #138: we are inlining invoked lambda body (only for lambdas without arguments)
+                        // therefore we skipping collecting the lambda and invocation arguments and got directly to lambda body.
+                        // This approach is repeated in `TryEmitInvoke`
+                        var invokeExpr = (InvocationExpression)expr;
+                        if (invokeExpr.Expression is LambdaExpression lambdaExpr && lambdaExpr.Parameters.Count == 0)
+                        {
+                            expr = lambdaExpr.Body;
+                            continue;
+                        }
+
+                        if (invokeExpr.Arguments.Count != 0 &&
+                            !TryCollectBoundConstants(ref closure, invokeExpr.Arguments, paramExprs))
+                            return false;
+
+                        expr = invokeExpr.Expression;
+                        continue;
+
+                    case ExpressionType.Conditional:
+                        var condExpr = (ConditionalExpression)expr;
+                        if (!TryCollectBoundConstants(ref closure, condExpr.Test, paramExprs) ||
+                            !TryCollectBoundConstants(ref closure, condExpr.IfFalse, paramExprs))
+                            return false;
+                        expr = condExpr.IfTrue;
+                        continue;
+
+                    case ExpressionType.Block:
+                        var blockExpr = (BlockExpression)expr;
+                        closure.PushBlock(blockExpr.Variables, Tools.Empty<LocalBuilder>());
+                        if (!TryCollectBoundConstants(ref closure, blockExpr.Expressions, paramExprs))
+                            return false;
+                        closure.PopBlock();
+                        return true;
+
+                    case ExpressionType.Index:
+                        var indexExpr = (IndexExpression)expr;
+                        if (!TryCollectBoundConstants(ref closure, indexExpr.Arguments, paramExprs))
+                            return false;
+                        if (indexExpr.Object == null)
+                            return true;
+                        expr = indexExpr.Object;
+                        continue;
+
+                    case ExpressionType.Try:
+                        return TryCollectTryExprConstants(ref closure, (TryExpression)expr, paramExprs);
+
+                    case ExpressionType.Label:
+                        var labelExpr = (LabelExpression)expr;
+                        var defaultValueExpr = labelExpr.DefaultValue;
+                        closure.Labels = closure.Labels
+                            .WithLast(new KeyValuePair<LabelTarget, Label?>(labelExpr.Target, null));
+                        if (defaultValueExpr == null)
+                            return true;
+                        expr = defaultValueExpr;
+                        continue;
+
+                    case ExpressionType.Goto:
+                        var gotoValueExpr = ((GotoExpression)expr).Value;
+                        if (gotoValueExpr == null)
+                            return true;
+                        expr = gotoValueExpr;
+                        continue;
+
+                    case ExpressionType.Switch:
+                        var switchExpr = (SwitchExpression)expr;
+                        if (!TryCollectBoundConstants(ref closure, switchExpr.SwitchValue, paramExprs) ||
+                            switchExpr.DefaultBody != null && !TryCollectBoundConstants(ref closure, switchExpr.DefaultBody, paramExprs))
+                            return false;
+                        for (var i = 0; i < switchExpr.Cases.Count; i++)
+                        {
+                            if (!TryCollectBoundConstants(ref closure, switchExpr.Cases[i].Body, paramExprs))
+                                return false;
+                        }
+
+                        return true;
+
+                    case ExpressionType.Extension:
+                        expr = expr.Reduce();
+                        continue;
+
+                    case ExpressionType.Default:
+                        return true;
+
+                    default:
+                        if (expr is UnaryExpression unaryExpr)
+                        {
+                            expr = unaryExpr.Operand;
+                            continue;
+                        }
+
+                        if (expr is BinaryExpression binaryExpr)
+                        {
+                            if (!TryCollectBoundConstants(ref closure, binaryExpr.Left, paramExprs))
+                                return false;
+                            expr = binaryExpr.Right;
+                            continue;
+                        }
+
+                        if (expr is TypeBinaryExpression typeBinaryExpr)
+                        {
+                            expr = typeBinaryExpr.Expression;
+                            continue;
+                        }
+
+                        return false;
+                }
+            }
+        }
+
+        static bool TryCompileNestedLambda(ref ClosureInfo closure, int lambdaIndex,
+            LambdaExpression lambdaExpr)
+        {
+            // 1. Try to compile nested lambda in place
+            // 2. Check that parameters used in compiled lambda are passed or closed by outer lambda
+            // 3. Add the compiled lambda to closure of outer lambda for later invocation
+
+            ReadOnlyCollection<ParameterExpression> lambdaParamExprs = lambdaExpr.Parameters;
+
+            var nestedClosure = new ClosureInfo(false);
+            var compiledLambda = TryCompile(ref nestedClosure,
+                lambdaExpr.Type, Tools.GetParamTypes(lambdaParamExprs), lambdaExpr.ReturnType, lambdaExpr.Body,
+                lambdaParamExprs, true);
+
+            if (compiledLambda == null)
+                return false;
+
+            var isAction = lambdaExpr.ReturnType == typeof(void);
+            closure.NestedLambdas[lambdaIndex] = new NestedLambdaInfo(nestedClosure, compiledLambda, isAction);
+
+            if (nestedClosure.HasClosure)
+                CopyNestedClosureInfo(lambdaParamExprs, ref closure, ref nestedClosure);
+
+            return true;
+        }
+
+        static bool TryCollectMemberInitExprConstants(ref ClosureInfo closure, MemberInitExpression expr,
+            IReadOnlyList<ParameterExpression> paramExprs)
+        {
+            var newExpr = expr.NewExpression
+            #if LIGHT_EXPRESSION
+                          ?? expr.Expression
+            #endif
+                ;
+            if (!TryCollectBoundConstants(ref closure, newExpr, paramExprs))
+                return false;
+
+            ReadOnlyCollection<MemberBinding> memberBindings = expr.Bindings;
+            for (var i = 0; i < memberBindings.Count; ++i)
+            {
+                var memberBinding = memberBindings[i];
+                if (memberBinding.BindingType == MemberBindingType.Assignment &&
+                    !TryCollectBoundConstants(ref closure, ((MemberAssignment)memberBinding).Expression, paramExprs))
+                    return false;
+            }
+
+            return true;
+        }
+
+        static bool TryCollectTryExprConstants(ref ClosureInfo closure, TryExpression tryExpr,
+            IReadOnlyList<ParameterExpression> paramExprs)
+        {
+            if (!TryCollectBoundConstants(ref closure, tryExpr.Body, paramExprs))
+                return false;
+
+            ReadOnlyCollection<CatchBlock> catchBlocks = tryExpr.Handlers;
+            for (var i = 0; i < catchBlocks.Count; i++)
+            {
+                var catchBlock = catchBlocks[i];
+                var catchBody = catchBlock.Body;
+                var catchExVar = catchBlock.Variable;
+                if (catchExVar != null)
+                {
+                    closure.PushBlock(new[] {catchExVar}, Tools.Empty<LocalBuilder>());
+                    if (!TryCollectBoundConstants(ref closure, catchExVar, paramExprs))
+                        return false;
+                }
+
+                var filterExpr = catchBlock.Filter;
+                if (filterExpr != null &&
+                    !TryCollectBoundConstants(ref closure, filterExpr, paramExprs) ||
+                    !TryCollectBoundConstants(ref closure, catchBody, paramExprs))
+                    return false;
+
+                if (catchExVar != null)
+                    closure.PopBlock();
+            }
+
+            var finallyExpr = tryExpr.Finally;
+            return finallyExpr == null || TryCollectBoundConstants(ref closure, finallyExpr, paramExprs);
+        }
+
+        static bool TryCollectBoundConstants(ref ClosureInfo closure, IReadOnlyList<Expression> exprs,
+            IReadOnlyList<ParameterExpression> paramExprs)
+        {
+            for (var i = 0; i < exprs.Count; i++)
+            {
+                if (!TryCollectBoundConstants(ref closure, exprs[i], paramExprs))
+                    return false;
+            }
+
+            return true;
+        }
+
+    #endregion
     }
+
 
     // Helpers targeting the performance. Extensions method names may be a bit funny (non standard), 
     // in order to prevent conflicts with YOUR helpers with standard names
-    internal static class Tools
+    static class Tools
     {
-        internal static bool IsValueType(this Type type) => type.GetTypeInfo().IsValueType;
-        internal static bool IsPrimitive(this Type type) => type.GetTypeInfo().IsPrimitive;
-        internal static bool IsClass(this Type type) => type.GetTypeInfo().IsClass;
+        internal static bool IsValueType(this Type type)
+        {
+            return type.GetTypeInfo().IsValueType;
+        }
 
-        internal static bool IsUnsigned(this Type type) =>
-            type == typeof(byte) || type == typeof(ushort) || type == typeof(uint) || type == typeof(ulong);
+        internal static bool IsPrimitive(this Type type)
+        {
+            return type.GetTypeInfo().IsPrimitive;
+        }
 
-        internal static bool IsNullable(this Type type) =>
-            type.GetTypeInfo().IsGenericType && type.GetTypeInfo().GetGenericTypeDefinition() == typeof(Nullable<>);
+        internal static bool IsClass(this Type type)
+        {
+            return type.GetTypeInfo().IsClass;
+        }
 
-        internal static PropertyInfo FindProperty(this Type type, string propertyName) =>
-            type.GetTypeInfo().GetDeclaredProperty(propertyName);
+        internal static bool IsUnsigned(this Type type)
+        {
+            return type == typeof(byte) || type == typeof(ushort) || type == typeof(uint) || type == typeof(ulong);
+        }
 
-        internal static FieldInfo FindField(this Type type, string fieldName) =>
-            type.GetTypeInfo().GetDeclaredField(fieldName);
+        internal static bool IsNullable(this Type type)
+        {
+            return type.GetTypeInfo().IsGenericType && type.GetTypeInfo().GetGenericTypeDefinition() == typeof(Nullable<>);
+        }
 
-        internal static MethodInfo FindMethod(this Type type, string methodName) =>
-            type.GetTypeInfo().GetDeclaredMethod(methodName);
+        internal static PropertyInfo FindProperty(this Type type, string propertyName)
+        {
+            return type.GetTypeInfo().GetDeclaredProperty(propertyName);
+        }
 
-        internal static MethodInfo FindDelegateInvokeMethod(this Type type) =>
-            type.GetTypeInfo().GetDeclaredMethod("Invoke");
+        internal static FieldInfo FindField(this Type type, string fieldName)
+        {
+            return type.GetTypeInfo().GetDeclaredField(fieldName);
+        }
 
-        internal static MethodInfo FindNullableGetValueOrDefaultMethod(this Type type) =>
-            type.GetTypeInfo().GetDeclaredMethods("GetValueOrDefault").GetFirst(x => x.GetParameters().Length == 0);
+        internal static MethodInfo FindMethod(this Type type, string methodName)
+        {
+            return type.GetTypeInfo().GetDeclaredMethod(methodName);
+        }
 
-        internal static MethodInfo FindValueGetterMethod(this Type type) =>
-            type.GetTypeInfo().GetDeclaredMethod("get_Value");
+        internal static MethodInfo FindDelegateInvokeMethod(this Type type)
+        {
+            return type.GetTypeInfo().GetDeclaredMethod("Invoke");
+        }
 
-        internal static MethodInfo FindNullableHasValueGetterMethod(this Type type) =>
-            type.GetTypeInfo().GetDeclaredMethod("get_HasValue");
+        internal static MethodInfo FindNullableGetValueOrDefaultMethod(this Type type)
+        {
+            return type.GetTypeInfo().GetDeclaredMethods("GetValueOrDefault").GetFirst(x => x.GetParameters().Length == 0);
+        }
 
-        internal static MethodInfo FindPropertyGetMethod(this PropertyInfo prop) =>
-            prop.DeclaringType.GetTypeInfo().GetDeclaredMethod("get_" + prop.Name);
+        internal static MethodInfo FindValueGetterMethod(this Type type)
+        {
+            return type.GetTypeInfo().GetDeclaredMethod("get_Value");
+        }
 
-        internal static MethodInfo FindPropertySetMethod(this PropertyInfo prop) =>
-            prop.DeclaringType.GetTypeInfo().GetDeclaredMethod("set_" + prop.Name);
+        internal static MethodInfo FindNullableHasValueGetterMethod(this Type type)
+        {
+            return type.GetTypeInfo().GetDeclaredMethod("get_HasValue");
+        }
 
-        internal static MethodInfo FindConvertOperator(this Type type, Type sourceType, Type targetType) =>
-            type.GetTypeInfo().DeclaredMethods.GetFirst(m =>
+        internal static MethodInfo FindPropertyGetMethod(this PropertyInfo prop)
+        {
+            return prop.DeclaringType.GetTypeInfo().GetDeclaredMethod("get_" + prop.Name);
+        }
+
+        internal static MethodInfo FindPropertySetMethod(this PropertyInfo prop)
+        {
+            return prop.DeclaringType.GetTypeInfo().GetDeclaredMethod("set_" + prop.Name);
+        }
+
+        internal static MethodInfo FindConvertOperator(this Type type, Type sourceType, Type targetType)
+        {
+            return type.GetTypeInfo().DeclaredMethods.GetFirst(m =>
                 m.IsStatic && m.ReturnType == targetType &&
                 (m.Name == "op_Implicit" || m.Name == "op_Explicit") &&
                 m.GetParameters()[0].ParameterType == sourceType);
+        }
 
         internal static ConstructorInfo FindSingleParamConstructor(this Type type, Type paramType)
         {
             foreach (var ctor in type.GetTypeInfo().DeclaredConstructors)
             {
-                var parameters = ctor.GetParameters();
+                ParameterInfo[] parameters = ctor.GetParameters();
                 if (parameters.Length == 1 && parameters[0].ParameterType == paramType)
                     return ctor;
             }
@@ -3508,44 +3733,62 @@ namespace MassTransit.Internals.Reflection
         {
             switch (arithmetic)
             {
-                case ExpressionType.AddAssign: return ExpressionType.Add;
-                case ExpressionType.AddAssignChecked: return ExpressionType.AddChecked;
-                case ExpressionType.SubtractAssign: return ExpressionType.Subtract;
-                case ExpressionType.SubtractAssignChecked: return ExpressionType.SubtractChecked;
-                case ExpressionType.MultiplyAssign: return ExpressionType.Multiply;
-                case ExpressionType.MultiplyAssignChecked: return ExpressionType.MultiplyChecked;
-                case ExpressionType.DivideAssign: return ExpressionType.Divide;
-                case ExpressionType.ModuloAssign: return ExpressionType.Modulo;
-                case ExpressionType.PowerAssign: return ExpressionType.Power;
-                case ExpressionType.AndAssign: return ExpressionType.And;
-                case ExpressionType.OrAssign: return ExpressionType.Or;
-                case ExpressionType.ExclusiveOrAssign: return ExpressionType.ExclusiveOr;
-                case ExpressionType.LeftShiftAssign: return ExpressionType.LeftShift;
-                case ExpressionType.RightShiftAssign: return ExpressionType.RightShift;
-                default: return arithmetic;
+                case ExpressionType.AddAssign:
+                    return ExpressionType.Add;
+                case ExpressionType.AddAssignChecked:
+                    return ExpressionType.AddChecked;
+                case ExpressionType.SubtractAssign:
+                    return ExpressionType.Subtract;
+                case ExpressionType.SubtractAssignChecked:
+                    return ExpressionType.SubtractChecked;
+                case ExpressionType.MultiplyAssign:
+                    return ExpressionType.Multiply;
+                case ExpressionType.MultiplyAssignChecked:
+                    return ExpressionType.MultiplyChecked;
+                case ExpressionType.DivideAssign:
+                    return ExpressionType.Divide;
+                case ExpressionType.ModuloAssign:
+                    return ExpressionType.Modulo;
+                case ExpressionType.PowerAssign:
+                    return ExpressionType.Power;
+                case ExpressionType.AndAssign:
+                    return ExpressionType.And;
+                case ExpressionType.OrAssign:
+                    return ExpressionType.Or;
+                case ExpressionType.ExclusiveOrAssign:
+                    return ExpressionType.ExclusiveOr;
+                case ExpressionType.LeftShiftAssign:
+                    return ExpressionType.LeftShift;
+                case ExpressionType.RightShiftAssign:
+                    return ExpressionType.RightShift;
+                default:
+                    return arithmetic;
             }
         }
 
-        public static T[] AsArray<T>(this IEnumerable<T> xs) => xs as T[] ?? xs.ToArray();
-
-        public static IReadOnlyList<T> AsReadOnlyList<T>(this IEnumerable<T> xs) =>
-            xs as IReadOnlyList<T> ?? xs.ToArray();
-
-        private static class EmptyArray<T>
+        public static T[] AsArray<T>(this IEnumerable<T> xs)
         {
-            public static readonly T[] Value = new T[0];
+            return xs as T[] ?? xs.ToArray();
         }
 
-        public static T[] Empty<T>() => EmptyArray<T>.Value;
+        public static IReadOnlyList<T> AsReadOnlyList<T>(this IEnumerable<T> xs)
+        {
+            return xs as IReadOnlyList<T> ?? xs.ToArray();
+        }
+
+        public static T[] Empty<T>()
+        {
+            return EmptyArray<T>.Value;
+        }
 
         public static T[] WithLast<T>(this T[] source, T value)
         {
             if (source == null || source.Length == 0)
-                return new[] { value };
+                return new[] {value};
             if (source.Length == 1)
-                return new[] { source[0], value };
+                return new[] {source[0], value};
             if (source.Length == 2)
-                return new[] { source[0], source[1], value };
+                return new[] {source[0], source[1], value};
             var sourceLength = source.Length;
             var result = new T[sourceLength + 1];
             Array.Copy(source, result, sourceLength);
@@ -3559,7 +3802,7 @@ namespace MassTransit.Internals.Reflection
                 return Empty<Type>();
 
             if (paramExprs.Count == 1)
-                return new[] { paramExprs[0].IsByRef ? paramExprs[0].Type.MakeByRefType() : paramExprs[0].Type };
+                return new[] {paramExprs[0].IsByRef ? paramExprs[0].Type.MakeByRefType() : paramExprs[0].Type};
 
             var paramTypes = new Type[paramExprs.Count];
             for (var i = 0; i < paramTypes.Length; i++)
@@ -3577,14 +3820,22 @@ namespace MassTransit.Internals.Reflection
             {
                 switch (paramTypes.Length)
                 {
-                    case 0: return typeof(Action);
-                    case 1: return typeof(Action<>).MakeGenericType(paramTypes);
-                    case 2: return typeof(Action<,>).MakeGenericType(paramTypes);
-                    case 3: return typeof(Action<,,>).MakeGenericType(paramTypes);
-                    case 4: return typeof(Action<,,,>).MakeGenericType(paramTypes);
-                    case 5: return typeof(Action<,,,,>).MakeGenericType(paramTypes);
-                    case 6: return typeof(Action<,,,,,>).MakeGenericType(paramTypes);
-                    case 7: return typeof(Action<,,,,,,>).MakeGenericType(paramTypes);
+                    case 0:
+                        return typeof(Action);
+                    case 1:
+                        return typeof(Action<>).MakeGenericType(paramTypes);
+                    case 2:
+                        return typeof(Action<,>).MakeGenericType(paramTypes);
+                    case 3:
+                        return typeof(Action<,,>).MakeGenericType(paramTypes);
+                    case 4:
+                        return typeof(Action<,,,>).MakeGenericType(paramTypes);
+                    case 5:
+                        return typeof(Action<,,,,>).MakeGenericType(paramTypes);
+                    case 6:
+                        return typeof(Action<,,,,,>).MakeGenericType(paramTypes);
+                    case 7:
+                        return typeof(Action<,,,,,,>).MakeGenericType(paramTypes);
                     default:
                         throw new NotSupportedException(
                             $"Action with so many ({paramTypes.Length}) parameters is not supported!");
@@ -3594,14 +3845,22 @@ namespace MassTransit.Internals.Reflection
             paramTypes = paramTypes.WithLast(returnType);
             switch (paramTypes.Length)
             {
-                case 1: return typeof(Func<>).MakeGenericType(paramTypes);
-                case 2: return typeof(Func<,>).MakeGenericType(paramTypes);
-                case 3: return typeof(Func<,,>).MakeGenericType(paramTypes);
-                case 4: return typeof(Func<,,,>).MakeGenericType(paramTypes);
-                case 5: return typeof(Func<,,,,>).MakeGenericType(paramTypes);
-                case 6: return typeof(Func<,,,,,>).MakeGenericType(paramTypes);
-                case 7: return typeof(Func<,,,,,,>).MakeGenericType(paramTypes);
-                case 8: return typeof(Func<,,,,,,,>).MakeGenericType(paramTypes);
+                case 1:
+                    return typeof(Func<>).MakeGenericType(paramTypes);
+                case 2:
+                    return typeof(Func<,>).MakeGenericType(paramTypes);
+                case 3:
+                    return typeof(Func<,,>).MakeGenericType(paramTypes);
+                case 4:
+                    return typeof(Func<,,,>).MakeGenericType(paramTypes);
+                case 5:
+                    return typeof(Func<,,,,>).MakeGenericType(paramTypes);
+                case 6:
+                    return typeof(Func<,,,,,>).MakeGenericType(paramTypes);
+                case 7:
+                    return typeof(Func<,,,,,,>).MakeGenericType(paramTypes);
+                case 8:
+                    return typeof(Func<,,,,,,,>).MakeGenericType(paramTypes);
                 default:
                     throw new NotSupportedException(
                         string.Format("Func with so many ({0}) parameters is not supported!", paramTypes.Length));
@@ -3616,8 +3875,11 @@ namespace MassTransit.Internals.Reflection
             if (count == 1)
                 return ReferenceEquals(source[0], item) ? 0 : -1;
             for (var i = 0; i < count; ++i)
+            {
                 if (ReferenceEquals(source[i], item))
                     return i;
+            }
+
             return -1;
         }
 
@@ -3628,15 +3890,18 @@ namespace MassTransit.Internals.Reflection
             if (source.Length == 1)
                 return predicate(source[0]) ? 0 : -1;
             for (var i = 0; i < source.Length; ++i)
+            {
                 if (predicate(source[i]))
                     return i;
+            }
+
             return -1;
         }
 
         public static T GetFirst<T>(this IEnumerable<T> source)
         {
             var list = source as IReadOnlyList<T>;
-            return list == null ? source.FirstOrDefault() : list.Count != 0 ? list[0] : default(T);
+            return list == null ? source.FirstOrDefault() : list.Count != 0 ? list[0] : default;
         }
 
         public static T GetFirst<T>(this IEnumerable<T> source, Func<T, bool> predicate)
@@ -3645,7 +3910,7 @@ namespace MassTransit.Internals.Reflection
             if (arr == null)
                 return source.FirstOrDefault(predicate);
             var index = arr.GetFirstIndex(predicate);
-            return index == -1 ? default(T) : arr[index];
+            return index == -1 ? default : arr[index];
         }
 
         public static R[] Map<T, R>(this IReadOnlyList<T> source, Func<T, R> project)
@@ -3654,12 +3919,18 @@ namespace MassTransit.Internals.Reflection
                 return Empty<R>();
 
             if (source.Count == 1)
-                return new[] { project(source[0]) };
+                return new[] {project(source[0])};
 
             var result = new R[source.Count];
             for (var i = 0; i < result.Length; ++i)
                 result[i] = project(source[i]);
             return result;
+        }
+
+
+        static class EmptyArray<T>
+        {
+            public static readonly T[] Value = new T[0];
         }
     }
 }

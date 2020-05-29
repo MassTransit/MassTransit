@@ -1,24 +1,20 @@
 ﻿namespace MassTransit.SignalR.Tests
 {
-    using MassTransit.SignalR.Contracts;
-    using MassTransit.SignalR.Tests.OfficialFramework;
-    using MassTransit.Testing;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Contracts;
     using Microsoft.AspNetCore.SignalR;
     using Microsoft.AspNetCore.SignalR.Protocol;
     using Newtonsoft.Json.Linq;
     using Newtonsoft.Json.Serialization;
     using NUnit.Framework;
-    using System.Linq;
-    using System.Threading.Tasks;
+    using OfficialFramework;
+    using Testing;
+
 
     public class MassTransitHubLifetimeManagerTests : MassTransitHubLifetimeTestFixture<MyHub>
     {
         protected override BusTestHarness Harness { get; set; }
-
-        public class TestObject
-        {
-            public string TestProperty { get; set; }
-        }
 
         [Test]
         public async Task CamelCasedJsonIsPreservedAcrossMassTransitBoundary()
@@ -29,8 +25,8 @@
 
             var jsonOptions = new JsonHubProtocolOptions();
             jsonOptions.PayloadSerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            var backplane1Harness = RegisterBusEndpoint("receiveEndpoint1");
-            var backplane2Harness = RegisterBusEndpoint("receiveEndpoint2");
+            SignalRBackplaneConsumersTestHarness<MyHub> backplane1Harness = RegisterBusEndpoint("receiveEndpoint1");
+            SignalRBackplaneConsumersTestHarness<MyHub> backplane2Harness = RegisterBusEndpoint("receiveEndpoint2");
 
             await Harness.Start();
 
@@ -41,8 +37,8 @@
                 using (var client1 = new TestClient())
                 using (var client2 = new TestClient())
                 {
-                    var manager1 = backplane1Harness.HubLifetimeManager;
-                    var manager2 = backplane2Harness.HubLifetimeManager;
+                    MassTransitHubLifetimeManager<MyHub> manager1 = backplane1Harness.HubLifetimeManager;
+                    MassTransitHubLifetimeManager<MyHub> manager2 = backplane2Harness.HubLifetimeManager;
 
                     var connection1 = HubConnectionContextUtils.Create(client1.Connection);
                     var connection2 = HubConnectionContextUtils.Create(client2.Connection);
@@ -50,7 +46,7 @@
                     await manager1.OnConnectedAsync(connection1).OrTimeout(Harness.TestTimeout);
                     await manager2.OnConnectedAsync(connection2).OrTimeout(Harness.TestTimeout);
 
-                    await manager1.SendAllAsync("Hello", new object[] { new TestObject { TestProperty = "Foo" } }).OrTimeout(Harness.TestTimeout);
+                    await manager1.SendAllAsync("Hello", new object[] {new TestObject {TestProperty = "Foo"}}).OrTimeout(Harness.TestTimeout);
 
                     Assert.IsTrue(backplane2Harness.All.Consumed.Select<All<MyHub>>().Any());
 
@@ -69,6 +65,12 @@
             {
                 await Harness.Stop();
             }
+        }
+
+
+        public class TestObject
+        {
+            public string TestProperty { get; set; }
         }
     }
 }

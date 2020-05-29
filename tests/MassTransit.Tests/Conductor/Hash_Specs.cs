@@ -3,7 +3,6 @@ namespace MassTransit.Tests.Conductor
     using System;
     using System.Linq;
     using System.Text;
-    using Contracts;
     using Contracts.Conductor;
     using MassTransit.Conductor.Distribution;
     using NUnit.Framework;
@@ -13,22 +12,11 @@ namespace MassTransit.Tests.Conductor
     public class An_empty_hash
     {
         [Test]
-        public void Should_not_return_a_node()
-        {
-            var distribution = new ConsistentHashDistributionStrategy<string>(new Murmur3AUnsafeHashGenerator(), GetHashKey);
-            distribution.Init(Enumerable.Empty<string>());
-
-            var result = distribution.GetNode(Encoding.UTF8.GetBytes("Frank"));
-
-            Assert.That(result, Is.Null);
-        }
-
-        [Test]
         public void Should_initialize_with_the_same_results()
         {
-            InstanceInfo nodeA = new Node() {InstanceId = NewId.NextGuid()};
-            InstanceInfo nodeB = new Node() {InstanceId = NewId.NextGuid()};
-            InstanceInfo nodeC = new Node() {InstanceId = NewId.NextGuid()};
+            InstanceInfo nodeA = new Node {InstanceId = NewId.NextGuid()};
+            InstanceInfo nodeB = new Node {InstanceId = NewId.NextGuid()};
+            InstanceInfo nodeC = new Node {InstanceId = NewId.NextGuid()};
 
             var serverA = new ConsistentHashDistributionStrategy<InstanceInfo>(new Murmur3AUnsafeHashGenerator(), x => x.InstanceId.ToByteArray());
             serverA.Init(Enumerable.Empty<InstanceInfo>());
@@ -70,15 +58,26 @@ namespace MassTransit.Tests.Conductor
             Assert.That(resultA.InstanceId, Is.EqualTo(resultC.InstanceId));
         }
 
+        [Test]
+        public void Should_not_return_a_node()
+        {
+            var distribution = new ConsistentHashDistributionStrategy<string>(new Murmur3AUnsafeHashGenerator(), GetHashKey);
+            distribution.Init(Enumerable.Empty<string>());
+
+            var result = distribution.GetNode(Encoding.UTF8.GetBytes("Frank"));
+
+            Assert.That(result, Is.Null);
+        }
+
 
         class Node :
             InstanceInfo
         {
-            public Guid InstanceId { get; set; }
-            public DateTime? Started { get; set; }
             public ServiceCapability[] Capabilities { get; set; }
             public Uri Address { get; set; }
             public Uri ServiceAddress { get; set; }
+            public Guid InstanceId { get; set; }
+            public DateTime? Started { get; set; }
         }
 
 

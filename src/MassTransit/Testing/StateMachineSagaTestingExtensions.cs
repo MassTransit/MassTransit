@@ -49,7 +49,7 @@ namespace MassTransit.Testing
         public static TSaga ContainsInState<TSaga>(this ISagaList<TSaga> sagas, Guid correlationId, SagaStateMachine<TSaga> machine, State state)
             where TSaga : class, SagaStateMachineInstance
         {
-            bool any = sagas.Select(x => x.CorrelationId == correlationId && machine.GetState(x).Result.Equals(state)).Any();
+            var any = sagas.Select(x => x.CorrelationId == correlationId && machine.GetState(x).Result.Equals(state)).Any();
             return any ? sagas.Contains(correlationId) : null;
         }
 
@@ -64,12 +64,12 @@ namespace MassTransit.Testing
 
             var state = stateSelector(machine);
 
-            DateTime giveUpAt = DateTime.Now + timeout;
+            var giveUpAt = DateTime.Now + timeout;
             var query = new SagaQuery<TInstance>(x => x.CorrelationId == correlationId && machine.GetState(x).Result.Equals(state));
 
             while (DateTime.Now < giveUpAt)
             {
-                Guid saga = (await querySagaRepository.Find(query).ConfigureAwait(false)).FirstOrDefault();
+                var saga = (await querySagaRepository.Find(query).ConfigureAwait(false)).FirstOrDefault();
                 if (saga != Guid.Empty)
                     return saga;
 

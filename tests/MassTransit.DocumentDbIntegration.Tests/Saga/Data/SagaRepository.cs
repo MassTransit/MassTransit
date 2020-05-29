@@ -12,16 +12,20 @@
     {
         static readonly SagaRepository _instance = new SagaRepository();
 
-        SagaRepository()
-        {
-        }
-
         public static readonly SagaRepository Instance = _instance;
 
         public static string DatabaseName = "sagaTest";
         public static string CollectionName = "sagas";
 
         public static JsonSerializerSettings JsonSerializerSettings;
+
+        readonly DocumentClient _documentClient = new DocumentClient(Configuration.EndpointUri, Configuration.Key);
+
+        SagaRepository()
+        {
+        }
+
+        public IDocumentClient Client => _documentClient;
 
         public async Task Initialize()
         {
@@ -32,9 +36,6 @@
                 .CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri(DatabaseName), new DocumentCollection {Id = CollectionName})
                 .ConfigureAwait(false);
         }
-
-        readonly DocumentClient _documentClient = new DocumentClient(Configuration.EndpointUri, Configuration.Key);
-        public IDocumentClient Client => _documentClient;
 
         public async Task<Document> InsertSaga<TSaga>(TSaga saga, bool useJsonSerializerSettings)
             where TSaga : class, IVersionedSaga

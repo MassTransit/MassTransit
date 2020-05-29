@@ -20,7 +20,9 @@ namespace MassTransit.RabbitMqTransport.Integration
         /// <param name="mandatory"></param>
         /// <param name="basicProperties"></param>
         /// <param name="body"></param>
-        /// <param name="awaitAck">Complete the Task only once the message has been confirmed, if confirmation is enabled</param>
+        /// <param name="awaitAck">
+        /// Complete the Task only once the message has been confirmed, if confirmation is enabled
+        /// </param>
         /// <returns></returns>
         Task Publish(string exchange, string routingKey, bool mandatory, IBasicProperties basicProperties, byte[] body, bool awaitAck);
     }

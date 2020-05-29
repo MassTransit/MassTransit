@@ -14,7 +14,6 @@
 
     /// <summary>
     /// Send messages to an azure transport using the message sender.
-    ///
     /// May be sensible to create a IBatchSendTransport that allows multiple messages to be sent as a single batch (perhaps using Tx support?)
     /// </summary>
     public class ServiceBusSendTransport :

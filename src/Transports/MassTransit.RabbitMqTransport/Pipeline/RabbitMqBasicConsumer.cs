@@ -25,12 +25,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         IBasicConsumer,
         RabbitMqDeliveryMetrics
     {
+        readonly RabbitMqReceiveEndpointContext _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
+        readonly IReceivePipeDispatcher _dispatcher;
         readonly ModelContext _model;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
         readonly ReceiveSettings _receiveSettings;
-        readonly RabbitMqReceiveEndpointContext _context;
-        readonly IReceivePipeDispatcher _dispatcher;
 
         string _consumerTag;
 
@@ -204,9 +204,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             catch (OperationCanceledException)
             {
                 foreach (var pendingContext in _pending.Values)
-                {
                     pendingContext.Cancel();
-                }
 
                 throw;
             }

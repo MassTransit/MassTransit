@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2014 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.NHibernateIntegration.Tests
+﻿namespace MassTransit.NHibernateIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
@@ -25,14 +13,15 @@ namespace MassTransit.NHibernateIntegration.Tests
     using Testing;
 
 
-    [TestFixture, Category("Integration")]
+    [TestFixture]
+    [Category("Integration")]
     public class Locating_an_existing_saga :
         InMemoryTestFixture
     {
         [Test]
         public async Task A_correlated_message_should_find_the_correct_saga()
         {
-            Guid sagaId = NewId.NextGuid();
+            var sagaId = NewId.NextGuid();
             var message = new InitiateSimpleSaga(sagaId);
 
             await InputQueueSendEndpoint.Send(message);
@@ -53,7 +42,7 @@ namespace MassTransit.NHibernateIntegration.Tests
         [Test]
         public async Task An_initiating_message_should_start_the_saga()
         {
-            Guid sagaId = NewId.NextGuid();
+            var sagaId = NewId.NextGuid();
             var message = new InitiateSimpleSaga(sagaId);
 
             await InputQueueSendEndpoint.Send(message);

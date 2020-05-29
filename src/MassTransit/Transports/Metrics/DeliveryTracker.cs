@@ -34,9 +34,7 @@ namespace MassTransit.Transports.Metrics
         {
             var pendingCount = Interlocked.Decrement(ref _activeDeliveryCount);
             if (pendingCount == 0)
-            {
                 _handler();
-            }
         }
 
 

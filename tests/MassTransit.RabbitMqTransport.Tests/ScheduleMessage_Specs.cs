@@ -9,6 +9,10 @@
     public class ScheduleMessage_Specs :
         RabbitMqTestFixture
     {
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        Task<ConsumeContext<SecondMessage>> _second;
+
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -23,9 +27,6 @@
         {
             configurator.UseDelayedExchangeMessageScheduler();
         }
-
-        Task<ConsumeContext<SecondMessage>> _second;
-        Task<ConsumeContext<FirstMessage>> _first;
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
@@ -52,6 +53,10 @@
     public class Should_schedule_in_the_future :
         RabbitMqTestFixture
     {
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        Task<ConsumeContext<SecondMessage>> _second;
+
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -72,9 +77,6 @@
         {
             configurator.UseDelayedExchangeMessageScheduler();
         }
-
-        Task<ConsumeContext<SecondMessage>> _second;
-        Task<ConsumeContext<FirstMessage>> _first;
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
@@ -101,6 +103,10 @@
     public class Scheduling_a_published_message :
         RabbitMqTestFixture
     {
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        Task<ConsumeContext<SecondMessage>> _second;
+
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -115,9 +121,6 @@
         {
             configurator.UseDelayedExchangeMessageScheduler();
         }
-
-        Task<ConsumeContext<SecondMessage>> _second;
-        Task<ConsumeContext<FirstMessage>> _first;
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {

@@ -237,7 +237,7 @@ namespace MassTransit.Analyzers
             else
                 node = CreateDefault(type);
 
-            ExpressionSyntax[] nodes = new[] {node};
+            ExpressionSyntax[] nodes = {node};
             var initializer = SyntaxFactory.InitializerExpression(SyntaxKind.ArrayInitializerExpression)
                 .WithExpressions(SyntaxFactory.SeparatedList(nodes));
             return SyntaxFactory.ImplicitArrayCreationExpression(initializer)

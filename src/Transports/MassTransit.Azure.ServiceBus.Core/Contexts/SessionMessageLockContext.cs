@@ -10,8 +10,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     public class SessionMessageLockContext :
         MessageLockContext
     {
-        readonly IMessageSession _session;
         readonly Message _message;
+        readonly IMessageSession _session;
         bool _deadLettered;
 
         public SessionMessageLockContext(IMessageSession session, Message message)
@@ -36,10 +36,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public async Task DeadLetter()
         {
-            var headers = new Dictionary<string, object>
-            {
-                {MessageHeaders.Reason, "dead-letter"},
-            };
+            var headers = new Dictionary<string, object> {{MessageHeaders.Reason, "dead-letter"}};
 
             await _session.DeadLetterAsync(_message.SystemProperties.LockToken, headers).ConfigureAwait(false);
 

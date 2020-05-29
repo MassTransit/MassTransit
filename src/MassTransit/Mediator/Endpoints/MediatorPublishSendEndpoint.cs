@@ -9,7 +9,6 @@ namespace MassTransit.Mediator.Endpoints
 
 
     /// <summary>
-    ///
     /// </summary>
     public class MediatorPublishSendEndpoint :
         SendEndpointProxy,

@@ -1,19 +1,6 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Pipeline
+﻿namespace MassTransit.Tests.Pipeline
 {
     using System.Threading.Tasks;
-    using MassTransit.Pipeline;
     using MassTransit.Testing.Observers;
     using NUnit.Framework;
     using TestFramework;
@@ -27,7 +14,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public void Should_invoke_faulted()
         {
-            IConsumePipe filter = CreateConsumePipe();
+            var filter = CreateConsumePipe();
 
             filter.ConnectHandler<MessageA>(async context =>
             {
@@ -37,7 +24,7 @@ namespace MassTransit.Tests.Pipeline
             TestConsumeMessageObserver<MessageA> interceptor = GetConsumeObserver<MessageA>();
             filter.ConnectConsumeMessageObserver(interceptor);
 
-            ConsumeContext consumeContext = GetConsumeContext(new MessageA());
+            var consumeContext = GetConsumeContext(new MessageA());
 
             Assert.That(async () => await filter.Send(consumeContext), Throws.TypeOf<IntentionalTestException>());
 
@@ -47,7 +34,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async Task Should_invoke_post()
         {
-            IConsumePipe filter = CreateConsumePipe();
+            var filter = CreateConsumePipe();
 
             TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 
@@ -56,7 +43,7 @@ namespace MassTransit.Tests.Pipeline
             TestConsumeMessageObserver<MessageA> interceptor = GetConsumeObserver<MessageA>();
             filter.ConnectConsumeMessageObserver(interceptor);
 
-            ConsumeContext consumeContext = GetConsumeContext(new MessageA());
+            var consumeContext = GetConsumeContext(new MessageA());
 
             await filter.Send(consumeContext);
 
@@ -68,7 +55,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async Task Should_invoke_post_consumer()
         {
-            IConsumePipe filter = CreateConsumePipe();
+            var filter = CreateConsumePipe();
 
             TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 
@@ -77,7 +64,7 @@ namespace MassTransit.Tests.Pipeline
             TestConsumeMessageObserver<MessageA> interceptor = GetConsumeObserver<MessageA>();
             filter.ConnectConsumeMessageObserver(interceptor);
 
-            ConsumeContext consumeContext = GetConsumeContext(new MessageA());
+            var consumeContext = GetConsumeContext(new MessageA());
 
             await filter.Send(consumeContext);
 
@@ -89,7 +76,7 @@ namespace MassTransit.Tests.Pipeline
         [Test]
         public async Task Should_invoke_pre()
         {
-            IConsumePipe filter = CreateConsumePipe();
+            var filter = CreateConsumePipe();
 
             TaskCompletionSource<MessageA> received = GetTask<MessageA>();
 
@@ -98,7 +85,7 @@ namespace MassTransit.Tests.Pipeline
             TestConsumeMessageObserver<MessageA> interceptor = GetConsumeObserver<MessageA>();
             filter.ConnectConsumeMessageObserver(interceptor);
 
-            ConsumeContext consumeContext = GetConsumeContext(new MessageA());
+            var consumeContext = GetConsumeContext(new MessageA());
 
             await filter.Send(consumeContext);
 

@@ -6,10 +6,9 @@
 
     public interface ITestDbParameters
     {
+        ILockStatementProvider RawSqlLockStatements { get; }
         DbContextOptionsBuilder GetDbContextOptions(Type dbContextType);
 
         void Apply(Type dbContextType, DbContextOptionsBuilder builder);
-
-        ILockStatementProvider RawSqlLockStatements { get; }
     }
 }

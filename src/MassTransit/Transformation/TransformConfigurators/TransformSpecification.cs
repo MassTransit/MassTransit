@@ -91,11 +91,9 @@ namespace MassTransit.Transformation.TransformConfigurators
         protected IMessageInitializer<TMessage> Build()
         {
             IMessageFactory<TMessage> messageFactory = null;
-            var conventions = Enumerable.Repeat<IInitializerConvention>(_convention, 1);
+            IEnumerable<IInitializerConvention> conventions = Enumerable.Repeat<IInitializerConvention>(_convention, 1);
             if (Replace)
-            {
                 messageFactory = new ReplaceMessageFactory<TMessage>();
-            }
             else
                 conventions = conventions.Concat(MessageInitializer.Conventions);
 

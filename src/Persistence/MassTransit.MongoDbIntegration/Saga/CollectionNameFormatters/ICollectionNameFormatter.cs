@@ -14,7 +14,9 @@ namespace MassTransit.MongoDbIntegration.Saga.CollectionNameFormatters
     public static class CollectionNameFormatterExtensions
     {
         public static IMongoCollection<TSaga> GetCollection<TSaga>(this IMongoDatabase database, ICollectionNameFormatter collectionNameFormatter)
-            where TSaga : class, ISaga =>
-            database.GetCollection<TSaga>(collectionNameFormatter.Saga<TSaga>());
+            where TSaga : class, ISaga
+        {
+            return database.GetCollection<TSaga>(collectionNameFormatter.Saga<TSaga>());
+        }
     }
 }

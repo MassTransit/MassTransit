@@ -119,16 +119,16 @@ namespace MassTransit.Context
             set => _context.Serializer = value;
         }
 
-        public SendContext<T> CreateProxy<T>(T message)
-            where T : class
-        {
-            return _context.CreateProxy(message);
-        }
-
         public bool Mandatory
         {
             get => _context.GetPayload<PublishContext>().Mandatory;
             set => _context.GetPayload<PublishContext>().Mandatory = value;
+        }
+
+        public SendContext<T> CreateProxy<T>(T message)
+            where T : class
+        {
+            return _context.CreateProxy(message);
         }
     }
 }

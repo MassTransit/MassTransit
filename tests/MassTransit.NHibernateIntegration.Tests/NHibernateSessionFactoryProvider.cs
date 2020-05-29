@@ -13,7 +13,6 @@ namespace MassTransit.NHibernateIntegration.Tests
     public class NHibernateSessionFactoryProvider
     {
         static readonly Mutex _factoryMutex = new Mutex();
-        readonly Configuration _configuration;
         readonly Action<IDbIntegrationConfigurationProperties> _databaseIntegration;
         readonly IEnumerable<Type> _mappedTypes;
         bool _computed;
@@ -23,7 +22,7 @@ namespace MassTransit.NHibernateIntegration.Tests
         {
             _mappedTypes = mappedTypes;
 
-            _configuration = CreateConfiguration();
+            Configuration = CreateConfiguration();
         }
 
         protected NHibernateSessionFactoryProvider(IEnumerable<Type> mappedTypes,
@@ -31,14 +30,14 @@ namespace MassTransit.NHibernateIntegration.Tests
         {
             _mappedTypes = mappedTypes;
             _databaseIntegration = databaseIntegration;
-            _configuration = CreateConfiguration();
+            Configuration = CreateConfiguration();
         }
 
-        public Configuration Configuration => _configuration;
+        public Configuration Configuration { get; }
 
         /// <summary>
-        ///     Builds the session factory and returns the ISessionFactory. If it was already
-        ///     built, the same instance is returned.
+        /// Builds the session factory and returns the ISessionFactory. If it was already
+        /// built, the same instance is returned.
         /// </summary>
         /// <returns></returns>
         public virtual ISessionFactory GetSessionFactory()
@@ -50,11 +49,11 @@ namespace MassTransit.NHibernateIntegration.Tests
         }
 
         /// <summary>
-        ///     Update the schema in the database
+        /// Update the schema in the database
         /// </summary>
         public void UpdateSchema()
         {
-            new SchemaUpdate(_configuration).Execute(false, true);
+            new SchemaUpdate(Configuration).Execute(false, true);
         }
 
         ModelMapper CreateModelMapper()
@@ -85,7 +84,7 @@ namespace MassTransit.NHibernateIntegration.Tests
                 if (!acquired)
                     throw new InvalidOperationException("Waiting for access to create session factory failed.");
 
-                var sessionFactory = _configuration.BuildSessionFactory();
+                var sessionFactory = Configuration.BuildSessionFactory();
 
                 _sessionFactory = sessionFactory;
                 _computed = true;

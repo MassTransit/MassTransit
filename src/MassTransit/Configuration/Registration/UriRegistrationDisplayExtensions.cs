@@ -7,7 +7,7 @@ namespace MassTransit.Registration
     public static class UriRegistrationDisplayExtensions
     {
         /// <summary>
-        /// Returns the last part of the <see cref="Uri.AbsolutePath"/> trimmed and neat for display
+        /// Returns the last part of the <see cref="Uri.AbsolutePath" /> trimmed and neat for display
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>

@@ -32,9 +32,7 @@ namespace MassTransit.PublishPipeSpecifications
                 _specifications.Add(specification);
 
                 foreach (var messageSpecification in _messageSpecifications.Values)
-                {
                     messageSpecification.AddPipeSpecification(specification);
-                }
             }
         }
 
@@ -60,6 +58,11 @@ namespace MassTransit.PublishPipeSpecifications
             AddPipeSpecification(splitSpecification);
         }
 
+        public ConnectHandle ConnectPublishPipeSpecificationObserver(IPublishPipeSpecificationObserver observer)
+        {
+            return _observers.Connect(observer);
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             return _specifications.SelectMany(x => x.Validate())
@@ -72,11 +75,6 @@ namespace MassTransit.PublishPipeSpecifications
             var specification = _messageSpecifications.GetOrAdd(typeof(T), CreateMessageSpecification<T>);
 
             return specification.GetMessageSpecification<T>();
-        }
-
-        public ConnectHandle ConnectPublishPipeSpecificationObserver(IPublishPipeSpecificationObserver observer)
-        {
-            return _observers.Connect(observer);
         }
 
         static SendContext<T> FilterContext<T>(PublishContext<T> context)
@@ -107,8 +105,10 @@ namespace MassTransit.PublishPipeSpecifications
             var specification = new MessagePublishPipeSpecification<T>();
 
             lock (_lock)
-                foreach (var pipeSpecification in _specifications)
+            {
+                foreach (IPipeSpecification<PublishContext> pipeSpecification in _specifications)
                     specification.AddPipeSpecification(pipeSpecification);
+            }
 
             _observers.MessageSpecificationCreated(specification);
 

@@ -51,8 +51,7 @@ namespace Automatonymous.Requests
 
         public bool EventFilter(EventContext<TInstance, RequestTimeoutExpired<TRequest>> context)
         {
-            ConsumeContext<RequestTimeoutExpired<TRequest>> consumeContext;
-            if (!context.TryGetPayload(out consumeContext))
+            if (!context.TryGetPayload(out ConsumeContext<RequestTimeoutExpired<TRequest>> consumeContext))
                 return false;
 
             if (!consumeContext.RequestId.HasValue)

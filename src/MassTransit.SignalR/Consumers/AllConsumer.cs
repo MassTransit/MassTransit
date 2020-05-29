@@ -21,6 +21,11 @@
             _hubLifetimeManager = hubLifetimeManager;
         }
 
+        public Task Consume(ConsumeContext<All<THub>> context)
+        {
+            return Handle(context.Message.ExcludedConnectionIds, context.Message.Messages);
+        }
+
         async Task Handle(string[] excludedConnectionIds, IReadOnlyDictionary<string, byte[]> messages)
         {
             var message = new Lazy<SerializedHubMessage>(messages.ToSerializedHubMessage);
@@ -30,9 +35,7 @@
             foreach (var connection in _hubLifetimeManager.Connections)
             {
                 if (excludedConnectionIds == null || !excludedConnectionIds.Contains(connection.ConnectionId, StringComparer.OrdinalIgnoreCase))
-                {
                     tasks.Add(connection.WriteAsync(message.Value).AsTask());
-                }
             }
 
             try
@@ -43,11 +46,6 @@
             {
                 LogContext.Warning?.Log(e, "Failed to write message");
             }
-        }
-
-        public Task Consume(ConsumeContext<All<THub>> context)
-        {
-            return Handle(context.Message.ExcludedConnectionIds, context.Message.Messages);
         }
     }
 }

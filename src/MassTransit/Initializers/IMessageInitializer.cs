@@ -13,7 +13,7 @@
         where TMessage : class
     {
         /// <summary>
-        /// Create a message context, using <paramref name="context"/> as a base for payloads, etc.
+        /// Create a message context, using <paramref name="context" /> as a base for payloads, etc.
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>

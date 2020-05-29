@@ -26,12 +26,22 @@ namespace MassTransit.Conductor.Distribution
             _keyCache = RebuildKeyCache();
         }
 
+        public T this[string key]
+        {
+            get
+            {
+                var hash = (int)_hashGenerator.Hash(key);
+
+                return GetNode(hash);
+            }
+        }
+
         public void Init(IEnumerable<T> nodes)
         {
             _lock.EnterWriteLock();
             try
             {
-                foreach (T node in nodes)
+                foreach (var node in nodes)
                     InternalAdd(node);
 
                 _keyCache = RebuildKeyCache();
@@ -63,7 +73,7 @@ namespace MassTransit.Conductor.Distribution
             try
             {
                 byte[] key = _keyProvider(node);
-                int offset = key.Length;
+                var offset = key.Length;
 
                 Array.Resize(ref key, offset + 1);
 
@@ -80,16 +90,6 @@ namespace MassTransit.Conductor.Distribution
             finally
             {
                 _lock.ExitWriteLock();
-            }
-        }
-
-        public T this[string key]
-        {
-            get
-            {
-                var hash = (int)_hashGenerator.Hash(key);
-
-                return GetNode(hash);
             }
         }
 
@@ -111,7 +111,7 @@ namespace MassTransit.Conductor.Distribution
                 if (_circle.Keys.Count == 0)
                     return default;
 
-                int first = FirstGreaterThanOrEqual(_keyCache.Value, hash);
+                var first = FirstGreaterThanOrEqual(_keyCache.Value, hash);
 
                 return _circle[_keyCache.Value[first]];
             }
@@ -124,7 +124,7 @@ namespace MassTransit.Conductor.Distribution
         void InternalAdd(T node)
         {
             byte[] key = _keyProvider(node);
-            int offset = key.Length;
+            var offset = key.Length;
 
             Array.Resize(ref key, offset + 1);
 
@@ -139,15 +139,15 @@ namespace MassTransit.Conductor.Distribution
 
         int FirstGreaterThanOrEqual(int[] keyCache, int value)
         {
-            int begin = 0;
-            int end = keyCache.Length - 1;
+            var begin = 0;
+            var end = keyCache.Length - 1;
 
             if (keyCache[end] < value || keyCache[0] > value)
                 return 0;
 
             while (end - begin > 1)
             {
-                int mid = (end + begin) / 2;
+                var mid = (end + begin) / 2;
                 if (keyCache[mid] >= value)
                     end = mid;
                 else

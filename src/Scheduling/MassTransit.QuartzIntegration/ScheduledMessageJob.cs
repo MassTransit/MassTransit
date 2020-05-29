@@ -20,6 +20,8 @@
         }
 
         public string Destination { get; set; }
+        public string MessageType { get; set; }
+        public string TokenId { get; set; }
 
         public async Task Execute(IJobExecutionContext context)
         {
@@ -51,13 +53,11 @@
         public string FaultAddress { get; set; }
         public string Body { get; set; }
         public string MessageId { get; set; }
-        public string MessageType { get; set; }
         public string ContentType { get; set; }
         public string RequestId { get; set; }
         public string CorrelationId { get; set; }
         public string ConversationId { get; set; }
         public string InitiatorId { get; set; }
-        public string TokenId { get; set; }
         public string HeadersAsJson { get; set; }
         public string PayloadMessageHeadersAsJson { get; set; }
 

@@ -1,6 +1,7 @@
 namespace MassTransit.DapperIntegration.Context
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -16,8 +17,8 @@ namespace MassTransit.DapperIntegration.Context
         where TSaga : class, ISaga
         where TMessage : class
     {
-        readonly DatabaseContext<TSaga> _context;
         readonly ConsumeContext<TMessage> _consumeContext;
+        readonly DatabaseContext<TSaga> _context;
         readonly ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> _factory;
 
         public DapperSagaRepositoryContext(DatabaseContext<TSaga> context, ConsumeContext<TMessage> consumeContext,
@@ -93,7 +94,7 @@ namespace MassTransit.DapperIntegration.Context
 
         public async Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken = default)
         {
-            var instances = await _context.QueryAsync(query.FilterExpression, cancellationToken).ConfigureAwait(false);
+            IEnumerable<TSaga> instances = await _context.QueryAsync(query.FilterExpression, cancellationToken).ConfigureAwait(false);
 
             return new LoadedSagaRepositoryQueryContext<TSaga>(this, instances.ToList());
         }

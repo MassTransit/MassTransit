@@ -4,8 +4,8 @@
     using System.Threading.Tasks;
     using MassTransit.Testing;
     using NUnit.Framework;
-    using RabbitMqTransport.Testing;
     using RabbitMQ.Client;
+    using RabbitMqTransport.Testing;
     using TestFramework;
     using Transports;
 
@@ -13,8 +13,6 @@
     public class RabbitMqTestFixture :
         BusTestFixture
     {
-        protected RabbitMqTestHarness RabbitMqTestHarness { get; }
-
         public RabbitMqTestFixture(Uri logicalHostAddress = null, string inputQueueName = null)
             : this(new RabbitMqTestHarness(inputQueueName), logicalHostAddress)
         {
@@ -37,6 +35,8 @@
             RabbitMqTestHarness.OnCleanupVirtualHost += OnCleanupVirtualHost;
         }
 
+        protected RabbitMqTestHarness RabbitMqTestHarness { get; }
+
         /// <summary>
         /// The sending endpoint for the InputQueue
         /// </summary>
@@ -55,7 +55,12 @@
 
         protected Uri BusAddress => RabbitMqTestHarness.BusAddress;
 
-        protected RabbitMqHostSettings GetHostSettings() => RabbitMqTestHarness.GetHostSettings();
+        protected IMessageNameFormatter NameFormatter => RabbitMqTestHarness.NameFormatter;
+
+        protected RabbitMqHostSettings GetHostSettings()
+        {
+            return RabbitMqTestHarness.GetHostSettings();
+        }
 
         [OneTimeSetUp]
         public Task SetupInMemoryTestFixture()
@@ -84,7 +89,5 @@
         protected virtual void OnCleanupVirtualHost(IModel model)
         {
         }
-
-        protected IMessageNameFormatter NameFormatter => RabbitMqTestHarness.NameFormatter;
     }
 }

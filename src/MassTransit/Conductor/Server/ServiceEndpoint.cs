@@ -2,10 +2,8 @@ namespace MassTransit.Conductor.Server
 {
     using System;
     using System.Threading.Tasks;
-    using Consumers;
     using Context;
     using Contexts;
-    using Contracts;
     using Contracts.Conductor;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;

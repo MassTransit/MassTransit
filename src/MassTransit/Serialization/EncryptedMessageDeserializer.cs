@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Serialization
 {
     using System;
-    using System.IO;
     using System.Net.Mime;
     using System.Runtime.Serialization;
     using GreenPipes;
@@ -23,7 +22,7 @@
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("encrypted");
+            var scope = context.CreateScope("encrypted");
             scope.Add("contentType", EncryptedMessageSerializer.EncryptedContentType.MediaType);
             _provider.Probe(scope);
         }
@@ -35,8 +34,8 @@
             try
             {
                 MessageEnvelope envelope;
-                using (Stream body = receiveContext.GetBodyStream())
-                using (Stream cryptoStream = _provider.GetDecryptStream(body, receiveContext))
+                using (var body = receiveContext.GetBodyStream())
+                using (var cryptoStream = _provider.GetDecryptStream(body, receiveContext))
                 using (var jsonReader = new BsonDataReader(cryptoStream))
                 {
                     envelope = _deserializer.Deserialize<MessageEnvelope>(jsonReader);

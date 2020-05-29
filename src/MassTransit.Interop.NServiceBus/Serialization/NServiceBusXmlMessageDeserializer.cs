@@ -18,6 +18,8 @@ namespace MassTransit.Interop.NServiceBus.Serialization
     public class NServiceBusXmlMessageDeserializer :
         IMessageDeserializer
     {
+        public const string ContentTypeHeaderValue = "text/xml";
+        public static readonly ContentType XmlContentType = new ContentType(ContentTypeHeaderValue);
         readonly JsonSerializer _deserializer;
 
         public NServiceBusXmlMessageDeserializer(JsonSerializer deserializer)
@@ -27,12 +29,9 @@ namespace MassTransit.Interop.NServiceBus.Serialization
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("deserializer");
+            var scope = context.CreateScope("deserializer");
             scope.Add("contentType", XmlContentType.MediaType);
         }
-
-        public const string ContentTypeHeaderValue = "text/xml";
-        public static readonly ContentType XmlContentType = new ContentType(ContentTypeHeaderValue);
 
         ContentType IMessageDeserializer.ContentType => XmlContentType;
 
@@ -52,7 +51,7 @@ namespace MassTransit.Interop.NServiceBus.Serialization
                     }
                 }
 
-                var json = new StringBuilder((int) position);
+                var json = new StringBuilder((int)position);
 
                 using (var stringWriter = new StringWriter(json, CultureInfo.InvariantCulture))
                 using (var jsonWriter = new JsonTextWriter(stringWriter))

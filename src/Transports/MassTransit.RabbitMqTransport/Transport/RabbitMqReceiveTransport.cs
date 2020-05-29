@@ -19,11 +19,11 @@
         Supervisor,
         IReceiveTransport
     {
-        readonly IPipe<ModelContext> _modelPipe;
+        readonly RabbitMqReceiveEndpointContext _context;
         readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly Uri _inputAddress;
+        readonly IPipe<ModelContext> _modelPipe;
         readonly ReceiveSettings _settings;
-        readonly RabbitMqReceiveEndpointContext _context;
 
         public RabbitMqReceiveTransport(IRabbitMqHostConfiguration hostConfiguration, ReceiveSettings settings, IPipe<ModelContext> modelPipe,
             RabbitMqReceiveEndpointContext context)

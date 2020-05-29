@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using GreenPipes.Introspection;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -72,7 +71,8 @@
         {
             var pingMessage = new PingMessage();
 
-            var fault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<PingMessage>>> fault =
+                SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
 
             await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
 
@@ -111,7 +111,8 @@
         {
             var pingMessage = new PingMessage();
 
-            var fault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<PingMessage>>> fault =
+                SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
 
             await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
 
@@ -150,8 +151,10 @@
         {
             var pingMessage = new PingMessage();
 
-            var pingFault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
-            var pongFault = SubscribeHandler<Fault<PongMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<PingMessage>>> pingFault =
+                SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<PongMessage>>> pongFault =
+                SubscribeHandler<Fault<PongMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
 
             await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
             await InputQueueSendEndpoint.Send(new PongMessage(pingMessage.CorrelationId), x => x.FaultAddress = Bus.Address);
@@ -212,7 +215,8 @@
         {
             var pingMessage = new PingMessage();
 
-            var pingFault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<PingMessage>>> pingFault =
+                SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
 
             await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
             await InputQueueSendEndpoint.Send(new PongMessage(pingMessage.CorrelationId), x => x.FaultAddress = Bus.Address);
@@ -222,10 +226,11 @@
             Assert.That(Consumer.PingCount, Is.EqualTo(6));
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Show_me_the_pipeline()
         {
-            ProbeResult result = Bus.GetProbeResult();
+            var result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }
@@ -275,7 +280,8 @@
         {
             var pingMessage = new PingMessage();
 
-            var fault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<PingMessage>>> fault =
+                SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
 
             await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
 

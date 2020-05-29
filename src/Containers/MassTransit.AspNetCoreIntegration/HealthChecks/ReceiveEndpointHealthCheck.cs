@@ -23,7 +23,7 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
 
         Task<HealthCheckResult> IHealthCheck.CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken)
         {
-            var faulted = _endpoints.Where(x => !x.Value.Ready).ToArray();
+            KeyValuePair<Uri, EndpointStatus>[] faulted = _endpoints.Where(x => !x.Value.Ready).ToArray();
 
             HealthCheckResult healthCheckResult;
             if (faulted.Any())
@@ -32,12 +32,12 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
                     context.Registration.FailureStatus,
                     $"Failed endpoints: {string.Join(",", faulted.Select(x => x.Key))}",
                     faulted.Select(x => x.Value.LastException).FirstOrDefault(e => e != null),
-                    new Dictionary<string, object> { ["Endpoints"] = faulted.Select(x => x.Key).ToArray() });
+                    new Dictionary<string, object> {["Endpoints"] = faulted.Select(x => x.Key).ToArray()});
             }
             else
             {
                 healthCheckResult = HealthCheckResult.Healthy("All endpoints ready",
-                    new Dictionary<string, object> { ["Endpoints"] = _endpoints.Keys.ToArray() });
+                    new Dictionary<string, object> {["Endpoints"] = _endpoints.Keys.ToArray()});
             }
 
             return Task.FromResult(healthCheckResult);

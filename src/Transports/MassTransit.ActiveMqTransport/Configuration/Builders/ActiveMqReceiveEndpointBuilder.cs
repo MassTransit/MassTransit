@@ -14,8 +14,8 @@
     public class ActiveMqReceiveEndpointBuilder :
         ReceiveEndpointBuilder
     {
-        readonly IActiveMqHostConfiguration _hostConfiguration;
         readonly IActiveMqReceiveEndpointConfiguration _configuration;
+        readonly IActiveMqHostConfiguration _hostConfiguration;
 
         public ActiveMqReceiveEndpointBuilder(IActiveMqHostConfiguration hostConfiguration, IActiveMqReceiveEndpointConfiguration configuration)
             : base(configuration)
@@ -40,8 +40,8 @@
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
-            IDeadLetterTransport deadLetterTransport = CreateDeadLetterTransport();
-            IErrorTransport errorTransport = CreateErrorTransport();
+            var deadLetterTransport = CreateDeadLetterTransport();
+            var errorTransport = CreateErrorTransport();
 
             var context = new ActiveMqConsumerReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology);
 

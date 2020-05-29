@@ -14,7 +14,9 @@
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
         /// <param name="context">The consume context of the message</param>
-        /// <param name="delay">The delay before the message is delivered. It may take longer to receive the message if the queue is not empty.</param>
+        /// <param name="delay">
+        /// The delay before the message is delivered. It may take longer to receive the message if the queue is not empty.
+        /// </param>
         /// <param name="callback">Operation which is executed before the message is delivered.</param>
         /// <returns></returns>
         public static Task Redeliver<T>(this ConsumeContext<T> context, TimeSpan delay, Action<ConsumeContext, SendContext> callback = null)

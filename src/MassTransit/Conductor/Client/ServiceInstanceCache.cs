@@ -4,7 +4,6 @@ namespace MassTransit.Conductor.Client
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using Contexts;
-    using Contracts;
     using Contracts.Conductor;
     using GreenPipes;
     using GreenPipes.Caching;
@@ -55,6 +54,8 @@ namespace MassTransit.Conductor.Client
                 InstanceId = instanceId;
             }
 
+            public event Action Used;
+
             public Guid InstanceId { get; }
 
             public DateTime? Started { get; set; }
@@ -64,8 +65,6 @@ namespace MassTransit.Conductor.Client
             {
                 NotifyUsed();
             }
-
-            public event Action Used;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void NotifyUsed()

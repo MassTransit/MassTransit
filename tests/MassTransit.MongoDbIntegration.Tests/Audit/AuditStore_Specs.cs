@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.MongoDbIntegration.Tests.Audit
+﻿namespace MassTransit.MongoDbIntegration.Tests.Audit
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -116,7 +104,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Audit
         [OneTimeSetUp]
         public async Task Send_message_to_test_consumer()
         {
-            _harness =  new InMemoryTestHarness();
+            _harness = new InMemoryTestHarness();
             _harness.OnConnectObservers += bus => bus.ConnectConsumeAuditObserver(AuditStore);
 
             ConsumerTestHarness<TestConsumer> consumer = _harness.Consumer<TestConsumer>();
@@ -142,20 +130,19 @@ namespace MassTransit.MongoDbIntegration.Tests.Audit
     public class Can_store_two_records_for_both_send_and_consume
     {
         [Test]
-        public void Should_have_the_sent_record()
-        {
-            var consumedRecord = _audit.FirstOrDefault(x => x.ContextType == "Consume");
-
-            Assert.NotNull(consumedRecord);
-
-        }
-
-        [Test]
         public void Should_have_the_consume_record()
         {
             var sentRecord = _audit.FirstOrDefault(x => x.ContextType == "Send");
 
             Assert.NotNull(sentRecord);
+        }
+
+        [Test]
+        public void Should_have_the_sent_record()
+        {
+            var consumedRecord = _audit.FirstOrDefault(x => x.ContextType == "Consume");
+
+            Assert.NotNull(consumedRecord);
         }
 
         [Test]
@@ -170,7 +157,7 @@ namespace MassTransit.MongoDbIntegration.Tests.Audit
         [OneTimeSetUp]
         public async Task Send_message_to_test_consumer()
         {
-            _harness =  new InMemoryTestHarness();
+            _harness = new InMemoryTestHarness();
             _harness.OnConnectObservers += bus =>
             {
                 bus.ConnectConsumeAuditObserver(AuditStore);

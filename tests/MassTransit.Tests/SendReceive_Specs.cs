@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
@@ -39,7 +27,7 @@ namespace MassTransit.Tests
         {
             Task<ConsumeContext<IMessageA>> handler = SubscribeHandler<IMessageA>();
 
-            await BusSendEndpoint.Send<IMessageA>(new {});
+            await BusSendEndpoint.Send<IMessageA>(new { });
 
             await handler;
         }
@@ -76,7 +64,7 @@ namespace MassTransit.Tests
             var message = new MessageA();
             await BusSendEndpoint.Send(message, c => c.RequestId = requestId);
 
-            var consumeContext = await handler;
+            ConsumeContext<MessageA> consumeContext = await handler;
 
             consumeContext.RequestId.ShouldBe(requestId);
         }
@@ -91,7 +79,7 @@ namespace MassTransit.Tests
             object message = new MessageA();
             await BusSendEndpoint.Send(message, typeof(MessageA), c => c.RequestId = requestId);
 
-            var consumeContext = await handler;
+            ConsumeContext<MessageA> consumeContext = await handler;
 
             consumeContext.RequestId.ShouldBe(requestId);
         }
@@ -104,9 +92,9 @@ namespace MassTransit.Tests
             var requestId = NewId.NextGuid();
 
             object message = new MessageA();
-            await BusSendEndpoint.Send(message, (SendContext context) => context.RequestId = requestId);
+            await BusSendEndpoint.Send(message, context => context.RequestId = requestId);
 
-            var consumeContext = await handler;
+            ConsumeContext<MessageA> consumeContext = await handler;
 
             consumeContext.RequestId.ShouldBe(requestId);
         }

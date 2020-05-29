@@ -11,8 +11,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Configuration
     class EntityFrameworkSagaRepository :
         IEntityFrameworkSagaRepository
     {
-        readonly DbContextOptions _dbContextOptions;
         readonly ConcurrentDictionary<Type, ISagaClassMap> _configurations;
+        readonly DbContextOptions _dbContextOptions;
 
         public EntityFrameworkSagaRepository(DbContextOptions dbContextOptions)
         {
@@ -28,9 +28,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Configuration
             _configurations.GetOrAdd(sagaClassMap.SagaType, sagaClassMap);
         }
 
-        public DbContext GetDbContext() => new RepositorySagaDbContext(_dbContextOptions, _configurations.Values);
+        public DbContext GetDbContext()
+        {
+            return new RepositorySagaDbContext(_dbContextOptions, _configurations.Values);
+        }
 
-        public static DbContextOptionsBuilder CreateOptionsBuilder() => new DbContextOptionsBuilder<RepositorySagaDbContext>();
+        public static DbContextOptionsBuilder CreateOptionsBuilder()
+        {
+            return new DbContextOptionsBuilder<RepositorySagaDbContext>();
+        }
 
 
         class RepositorySagaDbContext : SagaDbContext

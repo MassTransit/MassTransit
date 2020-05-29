@@ -34,9 +34,7 @@
         public static string GetStackTrace(Exception exception)
         {
             if (string.IsNullOrWhiteSpace(exception?.StackTrace))
-            {
                 return "";
-            }
 
             return _cleanup.Replace(exception.StackTrace, "");
         }

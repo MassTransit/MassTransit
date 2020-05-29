@@ -6,7 +6,6 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     using System.Data.Entity;
     using System.Data.Entity.Core.Mapping;
     using System.Data.Entity.Core.Metadata.Edm;
-    using System.Data.Entity.Core.Objects;
     using System.Data.Entity.Infrastructure;
     using MassTransit.Saga;
 
@@ -14,8 +13,8 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
     public class SqlLockStatementProvider :
         ILockStatementProvider
     {
-        readonly bool _enableSchemaCaching;
         protected static readonly ConcurrentDictionary<Type, SchemaTablePair> TableNames = new ConcurrentDictionary<Type, SchemaTablePair>();
+        readonly bool _enableSchemaCaching;
 
         public SqlLockStatementProvider(string defaultSchema, string rowLockStatement, bool enableSchemaCaching = true)
         {
@@ -46,12 +45,12 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
             if (TableNames.TryGetValue(type, out var result) && _enableSchemaCaching)
                 return result;
 
-            string entityName = type.Name;
+            var entityName = type.Name;
 
-            ObjectContext objectContext = ((IObjectContextAdapter)context).ObjectContext;
+            var objectContext = ((IObjectContextAdapter)context).ObjectContext;
             ReadOnlyCollection<EntityContainerMapping> storageMetadata = objectContext.MetadataWorkspace.GetItems<EntityContainerMapping>(DataSpace.CSSpace);
 
-            foreach (EntityContainerMapping mapping in storageMetadata)
+            foreach (var mapping in storageMetadata)
             {
                 if (mapping.StoreEntityContainer.TryGetEntitySetByName(entityName, true, out var entitySet))
                 {
@@ -69,14 +68,14 @@ namespace MassTransit.EntityFrameworkIntegration.Saga
 
         protected class SchemaTablePair
         {
+            public readonly string Schema;
+            public readonly string Table;
+
             public SchemaTablePair(string schema, string table)
             {
                 Schema = schema;
                 Table = table;
             }
-
-            public readonly string Schema;
-            public readonly string Table;
         }
     }
 }

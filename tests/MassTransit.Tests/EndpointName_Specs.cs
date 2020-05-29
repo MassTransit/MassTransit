@@ -1,15 +1,3 @@
-// Copyright 2007-2019 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
@@ -26,7 +14,7 @@ namespace MassTransit.Tests
         {
             var formatter = new SnakeCaseEndpointNameFormatter();
 
-            string name = formatter.Consumer<SomeReallyCoolConsumer>();
+            var name = formatter.Consumer<SomeReallyCoolConsumer>();
 
             Assert.That(name, Is.EqualTo("some_really_cool"));
         }
@@ -36,7 +24,7 @@ namespace MassTransit.Tests
         {
             var formatter = new SnakeCaseEndpointNameFormatter();
 
-            string name = formatter.Consumer<OneOr2MessageConsumer>();
+            var name = formatter.Consumer<OneOr2MessageConsumer>();
 
             Assert.That(name, Is.EqualTo("one_or2_message"));
         }
@@ -46,7 +34,7 @@ namespace MassTransit.Tests
         {
             var formatter = new SnakeCaseEndpointNameFormatter();
 
-            string name = formatter.Consumer<SomeSuperIDFormatConsumer>();
+            var name = formatter.Consumer<SomeSuperIDFormatConsumer>();
 
             Assert.That(name, Is.EqualTo("some_super_idformat"));
         }
@@ -60,6 +48,7 @@ namespace MassTransit.Tests
             }
         }
 
+
         class SomeSuperIDFormatConsumer :
             IConsumer<PingMessage>
         {
@@ -67,6 +56,7 @@ namespace MassTransit.Tests
             {
             }
         }
+
 
         class OneOr2MessageConsumer :
             IConsumer<PingMessage>

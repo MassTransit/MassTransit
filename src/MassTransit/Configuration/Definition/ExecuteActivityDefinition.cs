@@ -18,17 +18,17 @@ namespace MassTransit.Definition
         {
         }
 
-        public IEndpointDefinition<IExecuteActivity<TArguments>> ExecuteEndpointDefinition { private get; set; }
-
         /// <summary>
         /// Specify the endpoint name (which may be a queue, or a subscription, depending upon the transport) on which the saga
-        /// should be configured. Setting to null will use the supplied <see cref="IEndpointNameFormatter"/> to generate the
+        /// should be configured. Setting to null will use the supplied <see cref="IEndpointNameFormatter" /> to generate the
         /// endpoint name.
         /// </summary>
         protected string ExecuteEndpointName
         {
             set => _executeEndpointName = value;
         }
+
+        public IEndpointDefinition<IExecuteActivity<TArguments>> ExecuteEndpointDefinition { private get; set; }
 
         /// <summary>
         /// Specify a concurrency limit, which is applied to the entire consumer, saga, or activity, regardless of message type.

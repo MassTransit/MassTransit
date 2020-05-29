@@ -103,7 +103,7 @@
 
         static async Task<IJobDetail> CreateJobDetail(ConsumeContext context, Uri destination, JobKey jobKey, Guid? tokenId = default)
         {
-            string body = Encoding.UTF8.GetString(context.ReceiveContext.GetBody());
+            var body = Encoding.UTF8.GetString(context.ReceiveContext.GetBody());
 
             var mediaType = context.ReceiveContext.ContentType?.MediaType;
 
@@ -144,7 +144,7 @@
             if (tokenId.HasValue)
                 builder = builder.UsingJobData("TokenId", tokenId.Value.ToString("N"));
 
-            var headers = context.Headers.GetAll();
+            IEnumerable<KeyValuePair<string, object>> headers = context.Headers.GetAll();
             if (headers.Any())
                 builder = builder.UsingJobData("HeadersAsJson", JsonConvert.SerializeObject(headers));
 
@@ -187,10 +187,10 @@
                 var destinationAddress = (from a in envelope.Descendants("destinationAddress") select a).Single();
 
                 var message = (from m in envelope.Descendants("message") select m).Single();
-                IEnumerable<XElement> messageType = (from mt in envelope.Descendants("messageType") select mt);
+                IEnumerable<XElement> messageType = from mt in envelope.Descendants("messageType") select mt;
 
                 var payload = (from p in message.Descendants("payload") select p).Single();
-                IEnumerable<XElement> payloadType = (from pt in message.Descendants("payloadType") select pt);
+                IEnumerable<XElement> payloadType = from pt in message.Descendants("payloadType") select pt;
 
                 message.Remove();
                 messageType.Remove();

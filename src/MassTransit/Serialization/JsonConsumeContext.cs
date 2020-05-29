@@ -69,7 +69,7 @@ namespace MassTransit.Serialization
                     return existing != null;
             }
 
-            string typeUrn = MessageUrn.ForTypeString(messageType);
+            var typeUrn = MessageUrn.ForTypeString(messageType);
 
             return _supportedTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase));
         }
@@ -90,16 +90,16 @@ namespace MassTransit.Serialization
                     return true;
                 }
 
-                string typeUrn = MessageUrn.ForTypeString<T>();
+                var typeUrn = MessageUrn.ForTypeString<T>();
 
                 if (_supportedTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase)))
                 {
                     object obj;
-                    Type deserializeType = typeof(T);
+                    var deserializeType = typeof(T);
                     if (deserializeType.GetTypeInfo().IsInterface && TypeMetadataCache<T>.IsValidMessageType)
                         deserializeType = TypeMetadataCache<T>.ImplementationType;
 
-                    using (JsonReader jsonReader = _messageToken.CreateReader())
+                    using (var jsonReader = _messageToken.CreateReader())
                     {
                         obj = _deserializer.Deserialize(jsonReader, deserializeType);
                     }
@@ -123,8 +123,8 @@ namespace MassTransit.Serialization
         }
 
         /// <summary>
-        ///     Converts a string identifier to a Guid, if it is actually a Guid. Can throw a FormatException
-        ///     if things are not right
+        /// Converts a string identifier to a Guid, if it is actually a Guid. Can throw a FormatException
+        /// if things are not right
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -140,7 +140,7 @@ namespace MassTransit.Serialization
         }
 
         /// <summary>
-        ///     Convert the string to a Uri, or return null if it is empty
+        /// Convert the string to a Uri, or return null if it is empty
         /// </summary>
         /// <param name="uri"></param>
         /// <returns></returns>

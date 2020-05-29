@@ -28,14 +28,14 @@
         IEnumerable<string> SupportedMessageTypes { get; }
 
         /// <summary>
-        ///     Returns true if the specified message type is contained in the serialized message
+        /// Returns true if the specified message type is contained in the serialized message
         /// </summary>
         /// <param name="messageType"></param>
         /// <returns></returns>
         bool HasMessageType(Type messageType);
 
         /// <summary>
-        ///     Returns the specified message type if available, otherwise returns false
+        /// Returns the specified message type if available, otherwise returns false
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="consumeContext"></param>

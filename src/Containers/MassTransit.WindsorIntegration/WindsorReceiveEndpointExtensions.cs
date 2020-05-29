@@ -9,13 +9,9 @@ namespace MassTransit
     using ConsumeConfigurators;
     using Context;
     using Courier;
-    using GreenPipes;
-    using Pipeline;
-    using Registration;
     using Saga;
     using Scoping;
     using WindsorIntegration.Configuration;
-    using WindsorIntegration.Registration;
     using WindsorIntegration.ScopeProviders;
 
 
@@ -107,7 +103,7 @@ namespace MassTransit
         public static void Saga<T>(this IReceiveEndpointConfigurator configurator, IKernel kernel, Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            ISagaRepository<T> repository = kernel.Resolve<ISagaRepository<T>>();
+            var repository = kernel.Resolve<ISagaRepository<T>>();
 
             configurator.Saga(repository, configure);
         }
@@ -141,7 +137,7 @@ namespace MassTransit
             IKernel kernel, Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            ISagaRepository<TInstance> repository = kernel.Resolve<ISagaRepository<TInstance>>();
+            var repository = kernel.Resolve<ISagaRepository<TInstance>>();
 
             var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, repository, configurator);
 

@@ -11,7 +11,6 @@ namespace MassTransit.Topology.Topologies
     /// This represents the global topology configuration, which is delegated to by
     /// all topology instances, unless for some radical reason a bus is configured
     /// without any topology delegation.
-    ///
     /// YES, I hate globals, but they are serving a purpose in that these are really
     /// just defining the default behavior of message types, rather than actually
     /// behaving like the nasty evil global variables.
@@ -58,7 +57,8 @@ namespace MassTransit.Topology.Topologies
 
         static class Cached
         {
-            internal static readonly Lazy<IGlobalTopology> Metadata = new Lazy<IGlobalTopology>(() => new GlobalTopology(), LazyThreadSafetyMode.PublicationOnly);
+            internal static readonly Lazy<IGlobalTopology> Metadata =
+                new Lazy<IGlobalTopology>(() => new GlobalTopology(), LazyThreadSafetyMode.PublicationOnly);
         }
     }
 }

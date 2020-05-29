@@ -8,27 +8,6 @@
         ITypeConverter<Uri, string>,
         ITypeConverter<Uri, object>
     {
-        public bool TryConvert(string input, out Uri result)
-        {
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                result = null;
-                return true;
-            }
-
-            try
-            {
-                result = new Uri(input);
-
-                return true;
-            }
-            catch (FormatException)
-            {
-                result = default;
-                return false;
-            }
-        }
-
         public bool TryConvert(Uri input, out string result)
         {
             result = input?.ToString();
@@ -59,6 +38,27 @@
                 default:
                     result = default;
                     return false;
+            }
+        }
+
+        public bool TryConvert(string input, out Uri result)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                result = null;
+                return true;
+            }
+
+            try
+            {
+                result = new Uri(input);
+
+                return true;
+            }
+            catch (FormatException)
+            {
+                result = default;
+                return false;
             }
         }
     }

@@ -276,7 +276,7 @@
             where T : class;
 
         /// <summary>
-        /// Cancel a scheduled publish, using the tokenId. The message type <typeparamref name="T"/> is used to determine
+        /// Cancel a scheduled publish, using the tokenId. The message type <typeparamref name="T" /> is used to determine
         /// the destinationAddress.
         /// </summary>
         /// <param name="tokenId">The tokenId of the scheduled message</param>
@@ -284,7 +284,7 @@
             where T : class;
 
         /// <summary>
-        /// Cancel a scheduled publish, using the tokenId. The <paramref name="messageType"/> is used to determine
+        /// Cancel a scheduled publish, using the tokenId. The <paramref name="messageType" /> is used to determine
         /// the destinationAddress.
         /// </summary>
         /// <param name="messageType"></param>

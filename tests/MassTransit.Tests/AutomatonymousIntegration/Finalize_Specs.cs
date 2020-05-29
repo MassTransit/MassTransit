@@ -13,6 +13,11 @@
     public class Finalize_Specs
         : InMemoryTestFixture
     {
+        readonly TaskCompletionSource<bool> _taskCompletionSource = new TaskCompletionSource<bool>();
+        TestStateMachine _machine;
+
+        InMemorySagaRepository<Instance> _repository;
+
         [Test]
         public async Task Should_remove_saga_when_completed_in_whenenter()
         {
@@ -31,8 +36,6 @@
             Assert.IsFalse(saga.HasValue);
         }
 
-        InMemorySagaRepository<Instance> _repository;
-
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _machine = new TestStateMachine(_taskCompletionSource.Task);
@@ -40,9 +43,6 @@
 
             configurator.StateMachineSaga(_machine, _repository);
         }
-
-        readonly TaskCompletionSource<bool> _taskCompletionSource = new TaskCompletionSource<bool>();
-        TestStateMachine _machine;
 
         async Task<State> GetCurrentState(Instance state)
         {
@@ -70,6 +70,7 @@
 
             public Guid CorrelationId { get; set; }
         }
+
 
         sealed class TestStateMachine :
             MassTransitStateMachine<Instance>
@@ -105,6 +106,7 @@
             public Event<FirstMessage> First { get; private set; }
         }
 
+
         class FirstMessage :
             CorrelatedBy<Guid>
         {
@@ -115,6 +117,5 @@
 
             public Guid CorrelationId { get; set; }
         }
-
     }
 }

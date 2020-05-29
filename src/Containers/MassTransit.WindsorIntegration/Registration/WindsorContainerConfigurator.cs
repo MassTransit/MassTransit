@@ -84,7 +84,7 @@ namespace MassTransit.WindsorIntegration.Registration
             throw new NotImplementedException();
         }
 
-        public void AddRider(Action<IRiderRegistrationConfigurator<IKernel>> configure)
+        public void AddRider(Action<IRiderConfigurator<IKernel>> configure)
         {
             throw new NotImplementedException();
         }

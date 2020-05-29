@@ -43,9 +43,7 @@ namespace MassTransit
         public static IWindsorContainer AddMediator(this IWindsorContainer container, Action<IWindsorContainerMediatorConfigurator> configure = null)
         {
             if (container.Kernel.HasComponent(typeof(IMediator)))
-            {
                 throw new ConfigurationException("AddMediator() was already called and may only be called once per container.");
-            }
 
             var configurator = new WindsorContainerMediatorConfigurator(container);
 
@@ -59,7 +57,7 @@ namespace MassTransit
         /// </summary>
         public static void AddConsumersFromContainer(this IRegistrationConfigurator configurator, IWindsorContainer container)
         {
-            var consumerTypes = container.FindTypes(TypeMetadataCache.IsConsumerOrDefinition);
+            Type[] consumerTypes = container.FindTypes(TypeMetadataCache.IsConsumerOrDefinition);
             configurator.AddConsumers(consumerTypes);
         }
 
@@ -68,7 +66,7 @@ namespace MassTransit
         /// </summary>
         public static void AddSagasFromContainer(this IRegistrationConfigurator configurator, IWindsorContainer container)
         {
-            var sagaTypes = container.FindTypes(TypeMetadataCache.IsSagaOrDefinition);
+            Type[] sagaTypes = container.FindTypes(TypeMetadataCache.IsSagaOrDefinition);
             configurator.AddSagas(sagaTypes);
         }
 

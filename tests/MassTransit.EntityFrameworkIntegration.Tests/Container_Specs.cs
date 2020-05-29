@@ -19,7 +19,21 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         public class Using_pessimistic_concurrency :
             InMemoryTestFixture
         {
-            [Test, Explicit]
+            readonly IServiceProvider _provider;
+
+            public Using_pessimistic_concurrency()
+            {
+                // add new migration by calling
+                // dotnet ef migrations add --context "TestInstanceDbContext" Init  -v
+
+                _provider = new ServiceCollection()
+                    .AddMassTransit(ConfigureRegistration)
+                    .AddScoped<PublishTestStartedActivity>()
+                    .BuildServiceProvider();
+            }
+
+            [Test]
+            [Explicit]
             public async Task Should_work_as_expected()
             {
                 Task<ConsumeContext<TestStarted>> started = ConnectPublishHandler<TestStarted>();
@@ -43,19 +57,6 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
                 });
 
                 await updated;
-            }
-
-            readonly IServiceProvider _provider;
-
-            public Using_pessimistic_concurrency()
-            {
-                // add new migration by calling
-                // dotnet ef migrations add --context "TestInstanceDbContext" Init  -v
-
-                _provider = new ServiceCollection()
-                    .AddMassTransit(ConfigureRegistration)
-                    .AddScoped<PublishTestStartedActivity>()
-                    .BuildServiceProvider();
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
@@ -84,7 +85,21 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         public class Using_optimistic_concurrency :
             InMemoryTestFixture
         {
-            [Test, Explicit]
+            readonly IServiceProvider _provider;
+
+            public Using_optimistic_concurrency()
+            {
+                // add new migration by calling
+                // dotnet ef migrations add --context "TestInstanceDbContext" Init  -v
+
+                _provider = new ServiceCollection()
+                    .AddMassTransit(ConfigureRegistration)
+                    .AddScoped<PublishTestStartedActivity>()
+                    .BuildServiceProvider();
+            }
+
+            [Test]
+            [Explicit]
             public async Task Should_work_as_expected()
             {
                 Task<ConsumeContext<TestStarted>> started = ConnectPublishHandler<TestStarted>();
@@ -110,19 +125,6 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
                 });
 
                 await updated;
-            }
-
-            readonly IServiceProvider _provider;
-
-            public Using_optimistic_concurrency()
-            {
-                // add new migration by calling
-                // dotnet ef migrations add --context "TestInstanceDbContext" Init  -v
-
-                _provider = new ServiceCollection()
-                    .AddMassTransit(ConfigureRegistration)
-                    .AddScoped<PublishTestStartedActivity>()
-                    .BuildServiceProvider();
             }
 
             protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
@@ -151,10 +153,9 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         public class TestInstance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
-
             public string CurrentState { get; set; }
             public string Key { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

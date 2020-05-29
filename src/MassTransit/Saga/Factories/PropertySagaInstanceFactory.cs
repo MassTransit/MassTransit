@@ -6,7 +6,6 @@ namespace MassTransit.Saga.Factories
     using GreenPipes.Internals.Reflection;
     using Internals.Reflection;
     using Metadata;
-    using Util;
 
 
     /// <summary>
@@ -26,22 +25,22 @@ namespace MassTransit.Saga.Factories
             if (!TypeCache<TSaga>.ReadWritePropertyCache.TryGetValue("CorrelationId", out ReadWriteProperty<TSaga> property))
                 throw new ArgumentException($"The saga {TypeMetadataCache<TSaga>.ShortName} does not have a writable CorrelationId property");
 
-            ParameterExpression correlationId = Expression.Parameter(typeof(Guid), "correlationId");
+            var correlationId = Expression.Parameter(typeof(Guid), "correlationId");
 
-            NewExpression newSaga = Expression.New(constructorInfo);
+            var newSaga = Expression.New(constructorInfo);
 
             var saga = Expression.Variable(typeof(TSaga), "saga");
 
             var assign = Expression.Assign(saga, newSaga);
 
-            MethodCallExpression call = Expression.Call(saga, property.Property.SetMethod, correlationId);
+            var call = Expression.Call(saga, property.Property.SetMethod, correlationId);
 
-            LabelTarget returnTarget = Expression.Label(typeof(TSaga));
+            var returnTarget = Expression.Label(typeof(TSaga));
 
-            GotoExpression returnExpression = Expression.Return(returnTarget,
+            var returnExpression = Expression.Return(returnTarget,
                 saga, typeof(TSaga));
 
-            LabelExpression returnLabel = Expression.Label(returnTarget, Expression.Default(typeof(TSaga)));
+            var returnLabel = Expression.Label(returnTarget, Expression.Default(typeof(TSaga)));
 
             var block = Expression.Block(new[] {saga},
                 assign,

@@ -236,13 +236,13 @@ namespace MassTransit.PrometheusIntegration
             string[] endpointLabels = {options.ServiceNameLabel, options.EndpointLabel};
             string[] endpointFaultLabels = {options.ServiceNameLabel, options.EndpointLabel, options.ExceptionTypeLabel};
 
-            string[] messageLabels = {options.ServiceNameLabel, options.MessageTypeLabel,};
+            string[] messageLabels = {options.ServiceNameLabel, options.MessageTypeLabel};
             string[] messageFaultLabels = {options.ServiceNameLabel, options.MessageTypeLabel, options.ExceptionTypeLabel};
 
-            string[] executeLabels = {options.ServiceNameLabel, options.ActivityNameLabel, options.ArgumentTypeLabel,};
+            string[] executeLabels = {options.ServiceNameLabel, options.ActivityNameLabel, options.ArgumentTypeLabel};
             string[] executeFaultLabels = {options.ServiceNameLabel, options.ActivityNameLabel, options.ArgumentTypeLabel, options.ExceptionTypeLabel};
 
-            string[] compensateLabels = {options.ServiceNameLabel, options.ActivityNameLabel, options.LogTypeLabel,};
+            string[] compensateLabels = {options.ServiceNameLabel, options.ActivityNameLabel, options.LogTypeLabel};
             string[] compensateFailureLabels = {options.ServiceNameLabel, options.ActivityNameLabel, options.LogTypeLabel, options.ExceptionTypeLabel};
 
             string[] consumerLabels = {options.ServiceNameLabel, options.MessageTypeLabel, options.ConsumerTypeLabel};
@@ -412,9 +412,7 @@ namespace MassTransit.PrometheusIntegration
             return _labelCache.GetOrAdd(consumerType, type =>
             {
                 if (type.StartsWith("MassTransit.MessageHandler<"))
-                {
                     return "Handler";
-                }
 
                 return type.Split('.', '+').Last().Replace("<", "_").Replace(">", "_");
             });
@@ -454,17 +452,17 @@ namespace MassTransit.PrometheusIntegration
 
             if (type.GetTypeInfo().IsGenericType)
             {
-                string name = type.GetGenericTypeDefinition().Name;
+                var name = type.GetGenericTypeDefinition().Name;
 
                 //remove `1
-                int index = name.IndexOf('`');
+                var index = name.IndexOf('`');
                 if (index > 0)
                     name = name.Remove(index);
 
                 sb.Append(name);
                 sb.Append('_');
                 Type[] arguments = type.GetTypeInfo().GenericTypeArguments;
-                for (int i = 0; i < arguments.Length; i++)
+                for (var i = 0; i < arguments.Length; i++)
                 {
                     if (i > 0)
                         sb.Append('_');
@@ -473,9 +471,7 @@ namespace MassTransit.PrometheusIntegration
                 }
             }
             else
-            {
                 sb.Append(type.Name);
-            }
 
             return sb.ToString();
         }

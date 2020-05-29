@@ -10,8 +10,8 @@ namespace MassTransit.Registration
         IRegistrationContext<TContainerContext>
         where TContainerContext : class
     {
-        readonly IRegistration _registration;
         readonly BusHealth _busHealth;
+        readonly IRegistration _registration;
 
         public RegistrationContext(IRegistration registration, BusHealth busHealth, TContainerContext container)
         {

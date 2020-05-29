@@ -25,7 +25,7 @@ namespace MassTransit.Pipeline.Filters
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateFilterScope("deserialize");
+            var scope = context.CreateFilterScope("deserialize");
 
             _deserializer.Probe(scope);
             _output.Probe(scope);

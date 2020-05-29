@@ -26,11 +26,11 @@ namespace MassTransit.Testing
         static async Task<Guid?> ShouldContainSaga<TSaga>(this ILoadSagaRepository<TSaga> repository, Guid correlationId, TimeSpan timeout)
             where TSaga : class, ISaga
         {
-            DateTime giveUpAt = DateTime.Now + timeout;
+            var giveUpAt = DateTime.Now + timeout;
 
             while (DateTime.Now < giveUpAt)
             {
-                TSaga saga = await repository.Load(correlationId).ConfigureAwait(false);
+                var saga = await repository.Load(correlationId).ConfigureAwait(false);
                 if (saga != null)
                     return saga.CorrelationId;
 
@@ -43,13 +43,13 @@ namespace MassTransit.Testing
         static async Task<Guid?> ShouldContainSaga<TSaga>(this IQuerySagaRepository<TSaga> repository, Guid correlationId, TimeSpan timeout)
             where TSaga : class, ISaga
         {
-            DateTime giveUpAt = DateTime.Now + timeout;
+            var giveUpAt = DateTime.Now + timeout;
 
             var query = new SagaQuery<TSaga>(x => x.CorrelationId == correlationId);
 
             while (DateTime.Now < giveUpAt)
             {
-                Guid instanceId = (await repository.Find(query).ConfigureAwait(false)).SingleOrDefault();
+                var instanceId = (await repository.Find(query).ConfigureAwait(false)).SingleOrDefault();
                 if (instanceId != Guid.Empty)
                     return instanceId;
 
@@ -73,11 +73,11 @@ namespace MassTransit.Testing
             TimeSpan timeout)
             where TSaga : class, ISaga
         {
-            DateTime giveUpAt = DateTime.Now + timeout;
+            var giveUpAt = DateTime.Now + timeout;
 
             while (DateTime.Now < giveUpAt)
             {
-                TSaga saga = await repository.Load(correlationId).ConfigureAwait(false);
+                var saga = await repository.Load(correlationId).ConfigureAwait(false);
                 if (saga != null && condition(saga))
                     return saga.CorrelationId;
 
@@ -102,7 +102,7 @@ namespace MassTransit.Testing
         static async Task<Guid?> ShouldNotContainSaga<TSaga>(this ILoadSagaRepository<TSaga> repository, Guid correlationId, TimeSpan timeout)
             where TSaga : class, ISaga
         {
-            DateTime giveUpAt = DateTime.Now + timeout;
+            var giveUpAt = DateTime.Now + timeout;
 
             var query = new SagaQuery<TSaga>(x => x.CorrelationId == correlationId);
 
@@ -122,7 +122,7 @@ namespace MassTransit.Testing
         static async Task<Guid?> ShouldNotContainSaga<TSaga>(this IQuerySagaRepository<TSaga> repository, Guid correlationId, TimeSpan timeout)
             where TSaga : class, ISaga
         {
-            DateTime giveUpAt = DateTime.Now + timeout;
+            var giveUpAt = DateTime.Now + timeout;
 
             var query = new SagaQuery<TSaga>(x => x.CorrelationId == correlationId);
 
@@ -153,7 +153,7 @@ namespace MassTransit.Testing
             TimeSpan timeout)
             where TSaga : class, ISaga
         {
-            DateTime giveUpAt = DateTime.Now + timeout;
+            var giveUpAt = DateTime.Now + timeout;
 
             var query = new SagaQuery<TSaga>(filter);
 

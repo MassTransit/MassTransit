@@ -8,18 +8,22 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
 
     public abstract class BrokerTopologyBuilder
     {
-        long _nextId;
-        protected readonly NamedEntityCollection<QueueSubscriptionEntity, QueueSubscriptionHandle> QueueSubscriptions;
-        protected readonly NamedEntityCollection<TopicSubscriptionEntity, TopicSubscriptionHandle> TopicSubscriptions;
-        protected readonly NamedEntityCollection<TopicEntity, TopicHandle> Topics;
         protected readonly NamedEntityCollection<QueueEntity, QueueHandle> Queues;
+        protected readonly NamedEntityCollection<QueueSubscriptionEntity, QueueSubscriptionHandle> QueueSubscriptions;
+        protected readonly NamedEntityCollection<TopicEntity, TopicHandle> Topics;
+        protected readonly NamedEntityCollection<TopicSubscriptionEntity, TopicSubscriptionHandle> TopicSubscriptions;
+        long _nextId;
 
         protected BrokerTopologyBuilder()
         {
             Topics = new NamedEntityCollection<TopicEntity, TopicHandle>(TopicEntity.EntityComparer, TopicEntity.NameComparer);
             Queues = new NamedEntityCollection<QueueEntity, QueueHandle>(QueueEntity.QueueComparer, QueueEntity.NameComparer);
-            QueueSubscriptions = new NamedEntityCollection<QueueSubscriptionEntity, QueueSubscriptionHandle>(QueueSubscriptionEntity.EntityComparer, QueueSubscriptionEntity.NameComparer);
-            TopicSubscriptions = new NamedEntityCollection<TopicSubscriptionEntity, TopicSubscriptionHandle>(TopicSubscriptionEntity.EntityComparer, TopicSubscriptionEntity.NameComparer);
+            QueueSubscriptions =
+                new NamedEntityCollection<QueueSubscriptionEntity, QueueSubscriptionHandle>(QueueSubscriptionEntity.EntityComparer,
+                    QueueSubscriptionEntity.NameComparer);
+            TopicSubscriptions =
+                new NamedEntityCollection<TopicSubscriptionEntity, TopicSubscriptionHandle>(TopicSubscriptionEntity.EntityComparer,
+                    TopicSubscriptionEntity.NameComparer);
         }
 
         long GetNextId()
@@ -27,7 +31,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
             return Interlocked.Increment(ref _nextId);
         }
 
-        public TopicHandle CreateTopic(string name, bool durable, bool autoDelete, IDictionary<string, object> topicAttributes = null, IDictionary<string, object> topicSubscriptionAttributes = null, IDictionary<string, string> tags = null)
+        public TopicHandle CreateTopic(string name, bool durable, bool autoDelete, IDictionary<string, object> topicAttributes = null,
+            IDictionary<string, object> topicSubscriptionAttributes = null, IDictionary<string, string> tags = null)
         {
             var id = GetNextId();
 
@@ -36,7 +41,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Builders
             return Topics.GetOrAdd(topicEntity);
         }
 
-        public QueueHandle CreateQueue(string name, bool durable, bool autoDelete, IDictionary<string, object> queueAttributes = null, IDictionary<string, object> queueSubscriptionAttributes = null, IDictionary<string, string> tags = null)
+        public QueueHandle CreateQueue(string name, bool durable, bool autoDelete, IDictionary<string, object> queueAttributes = null,
+            IDictionary<string, object> queueSubscriptionAttributes = null, IDictionary<string, string> tags = null)
         {
             var id = GetNextId();
 

@@ -43,7 +43,7 @@ namespace MassTransit
         /// </summary>
         public static void AddConsumersFromContainer(this IRegistrationConfigurator configurator, IContainer container)
         {
-            var consumerTypes = container.FindTypes(TypeMetadataCache.IsConsumerOrDefinition);
+            Type[] consumerTypes = container.FindTypes(TypeMetadataCache.IsConsumerOrDefinition);
             configurator.AddConsumers(consumerTypes);
         }
 
@@ -52,7 +52,7 @@ namespace MassTransit
         /// </summary>
         public static void AddSagasFromContainer(this IRegistrationConfigurator configurator, IContainer container)
         {
-            var sagaTypes = container.FindTypes(TypeMetadataCache.IsSagaOrDefinition);
+            Type[] sagaTypes = container.FindTypes(TypeMetadataCache.IsSagaOrDefinition);
             configurator.AddSagas(sagaTypes);
         }
 

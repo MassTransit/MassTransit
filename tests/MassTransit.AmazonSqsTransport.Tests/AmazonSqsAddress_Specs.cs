@@ -8,12 +8,12 @@ namespace MassTransit.AmazonSqsTransport.Tests
     public class Given_a_valid_host_address
     {
         [Test]
-        public void Should_return_a_valid_address_for_a_full_address_with_scope()
+        public void Should_return_a_valid_address_for_a_full_address()
         {
-            var host = new Uri("amazonsqs://remote-host/production");
+            var host = new Uri("amazonsqs://remote-host");
             var address = new AmazonSqsHostAddress(host);
 
-            Assert.That(address.Scope, Is.EqualTo("production"));
+            Assert.That(address.Scope, Is.EqualTo("/"));
             Assert.That(address.Host, Is.EqualTo("remote-host"));
 
             Uri uri = address;
@@ -22,12 +22,12 @@ namespace MassTransit.AmazonSqsTransport.Tests
         }
 
         [Test]
-        public void Should_return_a_valid_address_for_a_full_address()
+        public void Should_return_a_valid_address_for_a_full_address_with_scope()
         {
-            var host = new Uri("amazonsqs://remote-host");
+            var host = new Uri("amazonsqs://remote-host/production");
             var address = new AmazonSqsHostAddress(host);
 
-            Assert.That(address.Scope, Is.EqualTo("/"));
+            Assert.That(address.Scope, Is.EqualTo("production"));
             Assert.That(address.Host, Is.EqualTo("remote-host"));
 
             Uri uri = address;
@@ -41,15 +41,18 @@ namespace MassTransit.AmazonSqsTransport.Tests
     public class Given_a_valid_endpoint_address
     {
         [Test]
-        public void Should_return_a_valid_address_for_a_queue()
+        public void Should_return_a_valid_address_for_a_full_address()
         {
             var hostAddress = new Uri("amazonsqs://localhost/test");
 
-            var address = new AmazonSqsEndpointAddress(hostAddress, new Uri("queue:input-queue"));
+            var address = new AmazonSqsEndpointAddress(hostAddress, new Uri("amazonsqs://remote-host/input-queue"));
+
+            Assert.That(address.Scope, Is.EqualTo("/"));
+            Assert.That(address.Name, Is.EqualTo("input-queue"));
 
             Uri uri = address;
 
-            Assert.That(uri, Is.EqualTo(new Uri("amazonsqs://localhost/test/input-queue")));
+            Assert.That(uri, Is.EqualTo(new Uri("amazonsqs://remote-host/input-queue")));
         }
 
         [Test]
@@ -67,22 +70,19 @@ namespace MassTransit.AmazonSqsTransport.Tests
             Assert.That(uri, Is.EqualTo(new Uri("amazonsqs://remote-host/production/input-queue")));
         }
 
-
         [Test]
-        public void Should_return_a_valid_address_for_a_full_address()
+        public void Should_return_a_valid_address_for_a_queue()
         {
             var hostAddress = new Uri("amazonsqs://localhost/test");
 
-            var address = new AmazonSqsEndpointAddress(hostAddress, new Uri("amazonsqs://remote-host/input-queue"));
-
-            Assert.That(address.Scope, Is.EqualTo("/"));
-            Assert.That(address.Name, Is.EqualTo("input-queue"));
+            var address = new AmazonSqsEndpointAddress(hostAddress, new Uri("queue:input-queue"));
 
             Uri uri = address;
 
-            Assert.That(uri, Is.EqualTo(new Uri("amazonsqs://remote-host/input-queue")));
+            Assert.That(uri, Is.EqualTo(new Uri("amazonsqs://localhost/test/input-queue")));
         }
     }
+
 
     [TestFixture]
     public class Given_a_valid_topic_address

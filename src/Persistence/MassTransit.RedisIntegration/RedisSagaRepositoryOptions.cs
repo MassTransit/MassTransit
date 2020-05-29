@@ -22,7 +22,7 @@ namespace MassTransit.RedisIntegration
             RetryPolicy = Retry.Exponential(10, TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(10), TimeSpan.FromMilliseconds(918));
 
             DatabaseSelector = databaseSelector;
-            
+
             Expiry = expiry;
         }
 

@@ -27,7 +27,7 @@ namespace MassTransit.Interop.NServiceBus.Serialization
                 context.Headers.Set(NServiceBusMessageHeaders.ReplyToAddress, context.ResponseAddress.GetQueueOrExchangeName());
 
             context.Headers.Set(NServiceBusMessageHeaders.ContentType, NServiceBusJsonMessageSerializer.ContentTypeHeaderValue);
-            context.Headers.Set(NServiceBusMessageHeaders.EnclosedMessageTypes, String.Join(";", NServiceBusTypeCache<T>.MessageTypeNames));
+            context.Headers.Set(NServiceBusMessageHeaders.EnclosedMessageTypes, string.Join(";", NServiceBusTypeCache<T>.MessageTypeNames));
             context.Headers.Set(NServiceBusMessageHeaders.OriginatingMachine, HostMetadataCache.Host.MachineName);
 
             context.Headers.Set(NServiceBusMessageHeaders.TimeSent, (context.SentTime ?? DateTime.UtcNow).ToString("yyyy-MM-dd hh:mm:ss:ffffff Z"));

@@ -12,18 +12,16 @@ namespace MassTransit.Saga.InMemoryRepository
         where TSaga : class, ISaga
     {
         readonly SemaphoreSlim _inUse;
-        readonly TSaga _instance;
-        bool _isRemoved;
 
         public SagaInstance(TSaga instance)
         {
-            _instance = instance;
+            Instance = instance;
             _inUse = new SemaphoreSlim(1);
         }
 
-        public TSaga Instance => _instance;
+        public TSaga Instance { get; }
 
-        public bool IsRemoved => _isRemoved;
+        public bool IsRemoved { get; set; }
 
         public bool Equals(SagaInstance<TSaga> other)
         {
@@ -33,7 +31,7 @@ namespace MassTransit.Saga.InMemoryRepository
             if (ReferenceEquals(this, other))
                 return true;
 
-            return EqualityComparer<TSaga>.Default.Equals(_instance, other._instance);
+            return EqualityComparer<TSaga>.Default.Equals(Instance, other.Instance);
         }
 
         public override bool Equals(object obj)
@@ -52,20 +50,20 @@ namespace MassTransit.Saga.InMemoryRepository
 
         public override int GetHashCode()
         {
-            return EqualityComparer<TSaga>.Default.GetHashCode(_instance);
+            return EqualityComparer<TSaga>.Default.GetHashCode(Instance);
         }
 
         public Task MarkInUse(CancellationToken cancellationToken)
         {
-            if (_isRemoved)
-                throw new InvalidOperationException($"The saga instance was removed: {TypeMetadataCache<TSaga>.ShortName}: {_instance.CorrelationId}");
+            if (IsRemoved)
+                throw new InvalidOperationException($"The saga instance was removed: {TypeMetadataCache<TSaga>.ShortName}: {Instance.CorrelationId}");
 
             return _inUse.WaitAsync(cancellationToken);
         }
 
         public void Release()
         {
-            if (_isRemoved)
+            if (IsRemoved)
                 return;
 
             _inUse.Release();
@@ -73,7 +71,7 @@ namespace MassTransit.Saga.InMemoryRepository
 
         public void Remove()
         {
-            _isRemoved = true;
+            IsRemoved = true;
             _inUse.Release();
         }
     }

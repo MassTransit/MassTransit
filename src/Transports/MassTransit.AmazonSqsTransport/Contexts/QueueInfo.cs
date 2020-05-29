@@ -11,8 +11,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     public class QueueInfo :
         IAsyncDisposable
     {
-        readonly IBatcher<SendMessageBatchRequestEntry> _batchSender;
         readonly IBatcher<DeleteMessageBatchRequestEntry> _batchDeleter;
+        readonly IBatcher<SendMessageBatchRequestEntry> _batchSender;
 
         public QueueInfo(string entityName, string url, IDictionary<string, string> attributes, IAmazonSQS client, CancellationToken cancellationToken)
         {
@@ -33,6 +33,12 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         public string Arn { get; }
         public IDictionary<string, string> Attributes { get; }
 
+        public async ValueTask DisposeAsync()
+        {
+            await _batchSender.DisposeAsync().ConfigureAwait(false);
+            await _batchDeleter.DisposeAsync().ConfigureAwait(false);
+        }
+
         public Task Send(SendMessageBatchRequestEntry entry, CancellationToken cancellationToken)
         {
             return _batchSender.Execute(entry, cancellationToken);
@@ -43,12 +49,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             var entry = new DeleteMessageBatchRequestEntry("", receiptHandle);
 
             return _batchDeleter.Execute(entry, cancellationToken);
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            await _batchSender.DisposeAsync().ConfigureAwait(false);
-            await _batchDeleter.DisposeAsync().ConfigureAwait(false);
         }
     }
 }

@@ -56,7 +56,7 @@
             var message = new BagOfCrap
             {
                 CommandId = NewId.NextGuid(),
-                ItemNumber = "27",
+                ItemNumber = "27"
             };
 
             await InputQueueSendEndpoint.Send(message);

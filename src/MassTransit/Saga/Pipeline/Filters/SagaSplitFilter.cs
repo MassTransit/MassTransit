@@ -27,10 +27,7 @@
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateFilterScope("split");
-            scope.Set(new
-            {
-                SagaType = TypeMetadataCache<TSaga>.ShortName
-            });
+            scope.Set(new {SagaType = TypeMetadataCache<TSaga>.ShortName});
 
             _next.Probe(scope);
         }

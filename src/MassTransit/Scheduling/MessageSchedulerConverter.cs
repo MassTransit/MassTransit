@@ -44,7 +44,6 @@ namespace MassTransit.Scheduling
                 return await scheduler.ScheduleSend(destinationAddress, scheduledTime, msg, pipe, cancellationToken).ConfigureAwait(false);
 
             throw new ArgumentException("Unexpected message type: " + TypeMetadataCache.GetShortName(message.GetType()));
-
         }
 
         public async Task<ScheduledRecurringMessage> ScheduleRecurringSend(IRecurringMessageScheduler scheduler, Uri destinationAddress,

@@ -7,8 +7,8 @@
     public class RabbitMqClusterConfigurator :
         IRabbitMqClusterConfigurator
     {
-        readonly RabbitMqHostSettings _settings;
         readonly List<ClusterNode> _nodes;
+        readonly RabbitMqHostSettings _settings;
 
         public RabbitMqClusterConfigurator(RabbitMqHostSettings settings)
         {

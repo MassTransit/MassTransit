@@ -16,10 +16,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
         SagaLockContext<TSaga>
         where TSaga : class, ISaga
     {
-        readonly DbContext _context;
         readonly CancellationToken _cancellationToken;
-        readonly IList<Guid> _instances;
+        readonly DbContext _context;
         readonly ILoadQueryExecutor<TSaga> _executor;
+        readonly IList<Guid> _instances;
 
         public PessimisticSagaLockContext(DbContext context, CancellationToken cancellationToken, IList<Guid> instances, ILoadQueryExecutor<TSaga> executor)
         {

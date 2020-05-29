@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace Automatonymous
+﻿namespace Automatonymous
 {
     using System;
     using System.Collections.Generic;
@@ -61,8 +49,7 @@ namespace Automatonymous
             {
                 foreach (var @event in Events)
                 {
-                    EventCorrelation correlation;
-                    if (_eventCorrelations.TryGetValue(@event, out correlation))
+                    if (_eventCorrelations.TryGetValue(@event, out var correlation))
                         yield return correlation;
                 }
             }
@@ -113,8 +100,7 @@ namespace Automatonymous
 
             var @event = (Event<T>)propertyInfo.GetValue(this);
 
-            EventCorrelation existingCorrelation;
-            _eventCorrelations.TryGetValue(@event, out existingCorrelation);
+            _eventCorrelations.TryGetValue(@event, out var existingCorrelation);
 
             var configurator = new MassTransitEventCorrelationConfigurator<TInstance, T>(this, @event, existingCorrelation);
 
@@ -145,8 +131,7 @@ namespace Automatonymous
             var eventPropertyInfo = eventPropertyExpression.GetPropertyInfo();
             var @event = (Event<T>)eventPropertyInfo.GetValue(property);
 
-            EventCorrelation existingCorrelation;
-            _eventCorrelations.TryGetValue(@event, out existingCorrelation);
+            _eventCorrelations.TryGetValue(@event, out var existingCorrelation);
 
             var configurator = new MassTransitEventCorrelationConfigurator<TInstance, T>(this, @event, existingCorrelation);
 
@@ -371,7 +356,7 @@ namespace Automatonymous
                             Guid? messageTokenId = consumeContext.GetSchedulingTokenId();
                             if (messageTokenId.HasValue)
                             {
-                                if (!tokenId.HasValue || (messageTokenId.Value != tokenId.Value))
+                                if (!tokenId.HasValue || messageTokenId.Value != tokenId.Value)
                                 {
                                     LogContext.Debug?.Log("SAGA: {CorrelationId} Scheduled message not current: {TokenId}", context.Instance.CorrelationId,
                                         messageTokenId.Value);
@@ -386,7 +371,7 @@ namespace Automatonymous
                         await ((StateMachine<TInstance>)this).RaiseEvent(eventContext).ConfigureAwait(false);
 
                         if (schedule.GetTokenId(context.Instance) == tokenId)
-                            schedule.SetTokenId(context.Instance, default(Guid?));
+                            schedule.SetTokenId(context.Instance, default);
                     }));
         }
 
@@ -460,7 +445,7 @@ namespace Automatonymous
 
             public void Declare(object stateMachine)
             {
-                var machine = ((TStateMachine)stateMachine);
+                var machine = (TStateMachine)stateMachine;
                 var @event = (Event<TData>)_propertyInfo.GetValue(machine);
                 if (@event != null)
                 {
@@ -487,7 +472,7 @@ namespace Automatonymous
 
             public void Declare(object stateMachine)
             {
-                var machine = ((TStateMachine)stateMachine);
+                var machine = (TStateMachine)stateMachine;
                 var @event = (Event<TData>)_propertyInfo.GetValue(machine);
                 if (@event != null)
                 {

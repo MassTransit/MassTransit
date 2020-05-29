@@ -34,9 +34,7 @@
         public bool TryGetHeader(string key, out object value)
         {
             if (_context.Properties != null && _context.Properties.TryGetValue(key, out value))
-            {
                 return true;
-            }
 
             if (nameof(_context.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))
             {

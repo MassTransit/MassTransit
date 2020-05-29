@@ -11,10 +11,10 @@
         where TMessage : class
         where TInput : class
     {
-        readonly IMessageFactory<TMessage> _messageFactory;
-        readonly IDictionary<string, IPropertyInitializer<TMessage, TInput>> _initializers;
         readonly IList<IHeaderInitializer<TMessage, TInput>> _headerInitializers;
+        readonly IDictionary<string, IPropertyInitializer<TMessage, TInput>> _initializers;
         readonly HashSet<string> _inputPropertyUsed;
+        readonly IMessageFactory<TMessage> _messageFactory;
 
         public MessageInitializerBuilder(IMessageFactory<TMessage> messageFactory)
         {
@@ -26,13 +26,6 @@
             _initializers = new Dictionary<string, IPropertyInitializer<TMessage, TInput>>(StringComparer.OrdinalIgnoreCase);
             _headerInitializers = new List<IHeaderInitializer<TMessage, TInput>>();
             _inputPropertyUsed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        }
-
-        public IMessageInitializer<TMessage> Build()
-        {
-            IMessageFactory<TMessage> messageFactory = _messageFactory ?? MessageFactoryCache<TMessage>.Factory;
-
-            return new MessageInitializer<TMessage, TInput>(messageFactory, _initializers.Values, _headerInitializers);
         }
 
         public void Add(string propertyName, IPropertyInitializer<TMessage> initializer)
@@ -63,6 +56,13 @@
         public void SetInputPropertyUsed(string propertyName)
         {
             _inputPropertyUsed.Add(propertyName);
+        }
+
+        public IMessageInitializer<TMessage> Build()
+        {
+            IMessageFactory<TMessage> messageFactory = _messageFactory ?? MessageFactoryCache<TMessage>.Factory;
+
+            return new MessageInitializer<TMessage, TInput>(messageFactory, _initializers.Values, _headerInitializers);
         }
 
 

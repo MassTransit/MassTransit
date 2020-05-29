@@ -12,7 +12,6 @@ namespace MassTransit.Context
         const string EnableActivityPropagationEnvironmentVariableSettingName = "MASSTRANSIT_ENABLEACTIVITYPROPAGATION";
         const string EnableActivityPropagationAppCtxSettingName = "MassTransit.EnableActivityPropagation";
         readonly bool _enabled;
-        readonly ILogger _logger;
         readonly ILoggerFactory _loggerFactory;
         readonly ILogContext _messageLogger;
         readonly DiagnosticListener _source;
@@ -21,7 +20,7 @@ namespace MassTransit.Context
         {
             _source = source;
             _loggerFactory = loggerFactory;
-            _logger = loggerFactory.CreateLogger(LogCategoryName.MassTransit);
+            Logger = loggerFactory.CreateLogger(LogCategoryName.MassTransit);
 
             _enabled = GetEnabled();
 
@@ -34,7 +33,7 @@ namespace MassTransit.Context
             _enabled = enabled;
             _loggerFactory = loggerFactory;
             _messageLogger = messageLogger;
-            _logger = logger;
+            Logger = logger;
         }
 
         BusLogContext(DiagnosticListener source, bool enabled, ILoggerFactory loggerFactory, ILogger logger)
@@ -42,7 +41,7 @@ namespace MassTransit.Context
             _source = source;
             _enabled = enabled;
             _loggerFactory = loggerFactory;
-            _logger = logger;
+            Logger = logger;
 
             _messageLogger = this;
         }
@@ -70,28 +69,28 @@ namespace MassTransit.Context
             return new BusLogContext(_source, _enabled, _loggerFactory, _messageLogger, logger);
         }
 
-        public ILogger Logger => _logger;
+        public ILogger Logger { get; }
 
         public EnabledLogger? IfEnabled(LogLevel level)
         {
-            return _logger.IsEnabled(level) ? new EnabledLogger(_logger, level) : default(EnabledLogger?);
+            return Logger.IsEnabled(level) ? new EnabledLogger(Logger, level) : default(EnabledLogger?);
         }
 
-        public EnabledLogger? Critical => _logger.IsEnabled(LogLevel.Critical) ? new EnabledLogger(_logger, LogLevel.Critical) : default(EnabledLogger?);
+        public EnabledLogger? Critical => Logger.IsEnabled(LogLevel.Critical) ? new EnabledLogger(Logger, LogLevel.Critical) : default(EnabledLogger?);
 
-        public EnabledLogger? Debug => _logger.IsEnabled(LogLevel.Debug) ? new EnabledLogger(_logger, LogLevel.Debug) : default(EnabledLogger?);
+        public EnabledLogger? Debug => Logger.IsEnabled(LogLevel.Debug) ? new EnabledLogger(Logger, LogLevel.Debug) : default(EnabledLogger?);
 
-        public EnabledLogger? Error => _logger.IsEnabled(LogLevel.Error) ? new EnabledLogger(_logger, LogLevel.Error) : default(EnabledLogger?);
+        public EnabledLogger? Error => Logger.IsEnabled(LogLevel.Error) ? new EnabledLogger(Logger, LogLevel.Error) : default(EnabledLogger?);
 
-        public EnabledLogger? Info => _logger.IsEnabled(LogLevel.Information) ? new EnabledLogger(_logger, LogLevel.Information) : default(EnabledLogger?);
+        public EnabledLogger? Info => Logger.IsEnabled(LogLevel.Information) ? new EnabledLogger(Logger, LogLevel.Information) : default(EnabledLogger?);
 
-        public EnabledLogger? Trace => _logger.IsEnabled(LogLevel.Trace) ? new EnabledLogger(_logger, LogLevel.Trace) : default(EnabledLogger?);
+        public EnabledLogger? Trace => Logger.IsEnabled(LogLevel.Trace) ? new EnabledLogger(Logger, LogLevel.Trace) : default(EnabledLogger?);
 
-        public EnabledLogger? Warning => _logger.IsEnabled(LogLevel.Warning) ? new EnabledLogger(_logger, LogLevel.Warning) : default(EnabledLogger?);
+        public EnabledLogger? Warning => Logger.IsEnabled(LogLevel.Warning) ? new EnabledLogger(Logger, LogLevel.Warning) : default(EnabledLogger?);
 
         public EnabledScope? BeginScope()
         {
-            return new EnabledScope(_logger);
+            return new EnabledScope(Logger);
         }
 
         bool GetEnabled()

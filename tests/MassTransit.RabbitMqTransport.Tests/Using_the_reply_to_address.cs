@@ -14,7 +14,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var clientFactory = await Bus.CreateReplyToClientFactory();
 
-            var client = clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
+            IRequestClient<PingMessage> client = clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
 
             Response<PongMessage> response = await client.GetResponse<PongMessage>(new PingMessage());
         }

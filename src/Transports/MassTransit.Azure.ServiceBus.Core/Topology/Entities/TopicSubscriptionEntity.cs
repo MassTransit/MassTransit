@@ -1,15 +1,3 @@
-// Copyright 2007-2017 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
 {
     using System.Collections.Generic;
@@ -26,7 +14,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
         readonly TopicEntity _source;
         readonly SubscriptionEntity _subscription;
 
-        public TopicSubscriptionEntity(long id, long subscriptionId, TopicEntity source, TopicEntity destination, SubscriptionDescription subscriptionDescription,
+        public TopicSubscriptionEntity(long id, long subscriptionId, TopicEntity source, TopicEntity destination,
+            SubscriptionDescription subscriptionDescription,
             RuleDescription rule = null, Filter filter = null)
         {
             Id = id;
@@ -47,12 +36,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
 
         public override string ToString()
         {
-            return string.Join(", ", new[]
-            {
-                $"source: {_source.TopicDescription.Path}",
-                $"destination: {_destination.TopicDescription.Path}",
-                $"subscription: {_subscription.SubscriptionDescription.SubscriptionName}"
-            }.Where(x => !string.IsNullOrWhiteSpace(x)));
+            return string.Join(", ",
+                new[]
+                {
+                    $"source: {_source.TopicDescription.Path}",
+                    $"destination: {_destination.TopicDescription.Path}",
+                    $"subscription: {_subscription.SubscriptionDescription.SubscriptionName}"
+                }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 
 

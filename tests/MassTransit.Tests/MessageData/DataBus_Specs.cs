@@ -20,23 +20,9 @@
             InMemoryTestFixture
         {
             [Test]
-            public async Task Should_load_the_data_from_the_repository()
-            {
-                string data = new string('*', 10000);
-
-                var message = new SendMessageWithBigData {Body = await _repository.PutString(data)};
-
-                await InputQueueSendEndpoint.Send(message);
-
-                await _received;
-
-                _receivedBody.ShouldBe(data);
-            }
-
-            [Test]
             public async Task Should_be_able_to_write_bytes_too()
             {
-                byte[] data = new byte[10000];
+                var data = new byte[10000];
 
                 var message = new MessageWithByteArrayImpl {Bytes = await _repository.PutBytes(data)};
 
@@ -47,6 +33,20 @@
                 _receivedBytesArray.ShouldBe(data);
             }
 
+            [Test]
+            public async Task Should_load_the_data_from_the_repository()
+            {
+                var data = new string('*', 10000);
+
+                var message = new SendMessageWithBigData {Body = await _repository.PutString(data)};
+
+                await InputQueueSendEndpoint.Send(message);
+
+                await _received;
+
+                _receivedBody.ShouldBe(data);
+            }
+
             IMessageDataRepository _repository;
             Task<ConsumeContext<MessageWithBigData>> _received;
             Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
@@ -55,9 +55,9 @@
 
             protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
-                string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-                string messageDataPath = Path.Combine(baseDirectory, "MessageData");
+                var messageDataPath = Path.Combine(baseDirectory, "MessageData");
 
                 var dataDirectory = new DirectoryInfo(messageDataPath);
 
@@ -86,23 +86,9 @@
             InMemoryTestFixture
         {
             [Test]
-            public async Task Should_load_the_data_from_the_repository()
-            {
-                string data = new string('*', 10000);
-
-                var message = new SendMessageWithBigData {Body = await _repository.PutString(data)};
-
-                await InputQueueSendEndpoint.Send(message);
-
-                await _received;
-
-                _receivedBody.ShouldBe(data);
-            }
-
-            [Test]
             public async Task Should_be_able_to_write_bytes_too()
             {
-                byte[] data = new byte[10000];
+                var data = new byte[10000];
 
                 var message = new MessageWithByteArrayImpl {Bytes = await _repository.PutBytes(data)};
 
@@ -113,6 +99,20 @@
                 _receivedBytesArray.ShouldBe(data);
             }
 
+            [Test]
+            public async Task Should_load_the_data_from_the_repository()
+            {
+                var data = new string('*', 10000);
+
+                var message = new SendMessageWithBigData {Body = await _repository.PutString(data)};
+
+                await InputQueueSendEndpoint.Send(message);
+
+                await _received;
+
+                _receivedBody.ShouldBe(data);
+            }
+
             IMessageDataRepository _repository;
             Task<ConsumeContext<MessageWithBigData>> _received;
             Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
@@ -121,9 +121,9 @@
 
             protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
-                string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                var baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
-                string messageDataPath = Path.Combine(baseDirectory, "MessageData");
+                var messageDataPath = Path.Combine(baseDirectory, "MessageData");
 
                 var dataDirectory = new DirectoryInfo(messageDataPath);
 
@@ -158,7 +158,7 @@
             [Test]
             public async Task Should_load_the_data_from_the_repository()
             {
-                string data = NewId.NextGuid().ToString();
+                var data = NewId.NextGuid().ToString();
                 Uri dataAddress;
                 using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(data), false))
                 {
@@ -202,7 +202,7 @@
             [Test]
             public async Task Should_load_the_data_from_the_repository()
             {
-                string data = NewId.NextGuid().ToString();
+                var data = NewId.NextGuid().ToString();
                 Uri dataAddress;
                 byte[] buffer = Encoding.UTF8.GetBytes(data);
                 using (var stream = new MemoryStream(buffer, false))
@@ -212,29 +212,29 @@
 
                 var message = new Message
                 {
-                    Document = new Document() {Body = new StoredMessageData<byte[]>(dataAddress, buffer)},
+                    Document = new Document {Body = new StoredMessageData<byte[]>(dataAddress, buffer)},
                     Documents = new IDocument[]
                     {
-                        new Document()
+                        new Document
                         {
                             Title = "Hello, World",
                             PageCount = 27,
                             Body = new StoredMessageData<byte[]>(dataAddress, buffer)
                         }
                     },
-                    DocumentList = new List<IDocument>()
+                    DocumentList = new List<IDocument>
                     {
-                        new Document()
+                        new Document
                         {
                             Title = "Hello, World",
                             PageCount = 44,
                             Body = new StoredMessageData<byte[]>(dataAddress, buffer)
                         }
                     },
-                    DocumentIndex = new Dictionary<string, IDocument>()
+                    DocumentIndex = new Dictionary<string, IDocument>
                     {
                         {"First", new Document {Body = new StoredMessageData<byte[]>(dataAddress, buffer)}},
-                        {"Second", new Document {Body = new StoredMessageData<byte[]>(dataAddress, buffer)}},
+                        {"Second", new Document {Body = new StoredMessageData<byte[]>(dataAddress, buffer)}}
                     }
                 };
 
@@ -245,7 +245,7 @@
                 Assert.That(_body, Is.Not.Null);
                 Assert.That(_body0, Is.Not.Null);
 
-                var result = await _body.Value;
+                byte[] result = await _body.Value;
                 Assert.That(result, Is.EqualTo(buffer));
 
                 result = await _body0.Value;
@@ -298,8 +298,8 @@
             [Test]
             public async Task Should_load_the_data_from_the_repository()
             {
-                Guid nextGuid = NewId.NextGuid();
-                string data = nextGuid.ToString();
+                var nextGuid = NewId.NextGuid();
+                var data = nextGuid.ToString();
                 Uri dataAddress;
                 using (var stream = new MemoryStream(nextGuid.ToByteArray(), false))
                 {

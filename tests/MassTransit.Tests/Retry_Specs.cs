@@ -4,7 +4,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using GreenPipes.Introspection;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -32,10 +31,11 @@
             _attempts.ShouldBe(1);
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
-            ProbeResult result = Bus.GetProbeResult();
+            var result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }
@@ -77,10 +77,11 @@
             _attempts.ShouldBe(1);
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
-            ProbeResult result = Bus.GetProbeResult();
+            var result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }
@@ -120,10 +121,11 @@
             Consumer.Attempts.ShouldBe(6);
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
-            ProbeResult result = Bus.GetProbeResult();
+            var result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }
@@ -172,10 +174,11 @@
             _attempts.ShouldBe(2);
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
-            ProbeResult result = Bus.GetProbeResult();
+            var result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }
@@ -220,10 +223,11 @@
             _attempts.ShouldBe(2);
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
-            ProbeResult result = Bus.GetProbeResult();
+            var result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }
@@ -282,10 +286,11 @@
             _lastAttempt.ShouldBe(3);
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
-            ProbeResult result = Bus.GetProbeResult();
+            var result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }
@@ -340,10 +345,11 @@
             Consumer.LastAttempt.ShouldBe(3);
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
         {
-            ProbeResult result = Bus.GetProbeResult();
+            var result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }
@@ -590,10 +596,10 @@
         class RetryPayload
         {
             public int PostCreateCount;
-            public int RetryFaultCount;
             public int PostFaultCount;
-            public int RetryCompletedCount;
             public int PreRetryCount;
+            public int RetryCompletedCount;
+            public int RetryFaultCount;
         }
 
 

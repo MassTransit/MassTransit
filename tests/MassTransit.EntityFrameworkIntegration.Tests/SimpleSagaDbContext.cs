@@ -9,6 +9,17 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 
     public class SimpleSagaDbContext : SagaDbContext
     {
+        public SimpleSagaDbContext(string nameOrConnectionString)
+            : base(nameOrConnectionString)
+        {
+        }
+
+        protected override IEnumerable<ISagaClassMap> Configurations
+        {
+            get { yield return new SimpleSagaMap(); }
+        }
+
+
         class SimpleSagaMap :
             SagaClassMap<SimpleSaga>
         {
@@ -20,16 +31,6 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
                 entity.Property(x => x.Observed);
                 entity.Property(x => x.Completed);
             }
-        }
-
-        protected override IEnumerable<ISagaClassMap> Configurations
-        {
-            get { yield return new SimpleSagaMap(); }
-        }
-
-        public SimpleSagaDbContext(string nameOrConnectionString)
-            : base(nameOrConnectionString)
-        {
         }
     }
 }

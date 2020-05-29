@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System.Threading.Tasks;
@@ -21,6 +9,20 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     public class Sending_a_message_to_an_endpoint :
         AzureServiceBusTestFixture
     {
+        [Test]
+        public async Task Should_have_a_redelivery_flag_of_false()
+        {
+            ConsumeContext<PingMessage> context = await _handler;
+
+            Assert.IsFalse(context.ReceiveContext.Redelivered);
+        }
+
+        [Test]
+        public async Task Should_succeed()
+        {
+            await _handler;
+        }
+
         Task<ConsumeContext<PingMessage>> _handler;
 
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
@@ -33,13 +35,18 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         {
             await InputQueueSendEndpoint.Send(new PingMessage());
         }
+    }
 
+
+    [TestFixture]
+    [Explicit]
+    public class A_fault_on_the_receive_endpoint :
+        AzureServiceBusTestFixture
+    {
         [Test]
-        public async Task Should_have_a_redelivery_flag_of_false()
+        public async Task Should_properly_reconnect_and_reconfigure_the_broker()
         {
-            var context = await _handler;
-
-            Assert.IsFalse(context.ReceiveContext.Redelivered);
+            ConsumeContext<PingMessage> context = await _handler;
         }
 
         [Test]
@@ -47,13 +54,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         {
             await _handler;
         }
-    }
 
-
-    [TestFixture, Explicit]
-    public class A_fault_on_the_receive_endpoint :
-        AzureServiceBusTestFixture
-    {
         Task<ConsumeContext<PingMessage>> _handler;
 
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
@@ -68,18 +69,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             await InputQueueSendEndpoint.Send(new PingMessage());
         }
-
-        [Test]
-        public async Task Should_properly_reconnect_and_reconfigure_the_broker()
-        {
-            var context = await _handler;
-        }
-
-        [Test]
-        public async Task Should_succeed()
-        {
-            await _handler;
-        }
     }
 
 
@@ -87,6 +76,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     public class Sending_a_request_using_the_request_client :
         AzureServiceBusTestFixture
     {
+        [Test]
+        public async Task Should_receive_the_response()
+        {
+            Response<PongMessage> message = await _response;
+
+            Assert.AreEqual(message.Message.CorrelationId, _ping.Result.Message.CorrelationId);
+        }
+
         Task<ConsumeContext<PingMessage>> _ping;
         Task<Response<PongMessage>> _response;
         IRequestClient<PingMessage> _requestClient;
@@ -102,14 +99,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
             _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
-        }
-
-        [Test]
-        public async Task Should_receive_the_response()
-        {
-            Response<PongMessage> message = await _response;
-
-            Assert.AreEqual(message.Message.CorrelationId, _ping.Result.Message.CorrelationId);
         }
     }
 }

@@ -1,18 +1,16 @@
 ﻿namespace MassTransit.Tests
 {
-    using System;
-    using System.Runtime.Serialization;
-    using System.Threading.Tasks;
-    using GreenPipes;
-    using NUnit.Framework;
-    using Shouldly;
-    using TestFramework;
-    using TestFramework.Messages;
-
-
     namespace ObserverTests
     {
+        using System;
+        using System.Runtime.Serialization;
+        using System.Threading.Tasks;
+        using GreenPipes;
         using GreenPipes.Internals.Extensions;
+        using NUnit.Framework;
+        using Shouldly;
+        using TestFramework;
+        using TestFramework.Messages;
         using Util;
 
 
@@ -59,24 +57,6 @@
             }
 
             [Test]
-            public async Task Should_not_invoke_the_send_observer_prior_to_send()
-            {
-                var observer = new Observer();
-                using (Bus.ConnectPublishObserver(observer))
-                {
-                    var sendObserver = new SendObserver(this);
-                    using (Bus.ConnectSendObserver(sendObserver))
-                    {
-                        await Bus.Publish(new PingMessage());
-
-                        await observer.PreSent;
-
-                        Assert.That(async () => await sendObserver.PreSent.OrTimeout(s:5), Throws.TypeOf<TimeoutException>());
-                    }
-                }
-            }
-
-            [Test]
             public async Task Should_not_invoke_post_sent_on_exception()
             {
                 var observer = new Observer();
@@ -89,6 +69,24 @@
                     await observer.SendFaulted;
 
                     observer.PostSent.Status.ShouldBe(TaskStatus.WaitingForActivation);
+                }
+            }
+
+            [Test]
+            public async Task Should_not_invoke_the_send_observer_prior_to_send()
+            {
+                var observer = new Observer();
+                using (Bus.ConnectPublishObserver(observer))
+                {
+                    var sendObserver = new SendObserver(this);
+                    using (Bus.ConnectSendObserver(sendObserver))
+                    {
+                        await Bus.Publish(new PingMessage());
+
+                        await observer.PreSent;
+
+                        Assert.That(async () => await sendObserver.PreSent.OrTimeout(s: 5), Throws.TypeOf<TimeoutException>());
+                    }
                 }
             }
 

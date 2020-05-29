@@ -23,9 +23,7 @@
                 serializer.Serialize(writer, reference);
             }
             else
-            {
                 writer.WriteNull();
-            }
         }
 
         protected override IConverter ValueFactory(Type objectType)

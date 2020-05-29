@@ -21,11 +21,11 @@ namespace MassTransit.Context
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly Lazy<ContentType> _contentType;
         readonly Lazy<Headers> _headers;
-        readonly PendingTaskCollection _receiveTasks;
         readonly Lazy<IPublishEndpointProvider> _publishEndpointProvider;
+        readonly ReceiveEndpointContext _receiveEndpointContext;
+        readonly PendingTaskCollection _receiveTasks;
         readonly Stopwatch _receiveTimer;
         readonly Lazy<ISendEndpointProvider> _sendEndpointProvider;
-        readonly ReceiveEndpointContext _receiveEndpointContext;
 
         protected BaseReceiveContext(bool redelivered, ReceiveEndpointContext receiveEndpointContext, params object[] payloads)
             : base(receiveEndpointContext, payloads)

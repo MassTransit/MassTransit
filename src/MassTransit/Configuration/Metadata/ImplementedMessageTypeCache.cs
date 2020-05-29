@@ -59,18 +59,14 @@ namespace MassTransit.Metadata
                 }
             }
 
-            var implementedInterfaces = GetImplementedInterfaces(typeof(TMessage)).ToArray();
+            Type[] implementedInterfaces = GetImplementedInterfaces(typeof(TMessage)).ToArray();
 
             foreach (var baseInterface in implementedInterfaces.Except(implementedInterfaces.SelectMany(x => x.GetInterfaces()))
                 .Where(TypeMetadataCache.IsValidMessageType))
-            {
                 yield return new ImplementedType(baseInterface, true);
-            }
 
             foreach (var baseInterface in implementedInterfaces.SelectMany(x => x.GetInterfaces()).Distinct().Where(TypeMetadataCache.IsValidMessageType))
-            {
                 yield return new ImplementedType(baseInterface, false);
-            }
 
             var baseType = typeof(TMessage).GetTypeInfo().BaseType;
             while (baseType != null && TypeMetadataCache.IsValidMessageType(baseType))
@@ -78,9 +74,7 @@ namespace MassTransit.Metadata
                 yield return new ImplementedType(baseType, typeof(TMessage).GetTypeInfo().BaseType == baseType);
 
                 foreach (var baseInterface in GetImplementedInterfaces(baseType).Where(TypeMetadataCache.IsValidMessageType))
-                {
                     yield return new ImplementedType(baseInterface, false);
-                }
 
                 baseType = baseType.GetTypeInfo().BaseType;
             }
@@ -96,10 +90,12 @@ namespace MassTransit.Metadata
                 .ToArray();
 
             if (baseTypeInfo.BaseType != null && baseTypeInfo.BaseType != typeof(object))
+            {
                 baseInterfaces = baseInterfaces
                     .Except(baseTypeInfo.BaseType.GetInterfaces())
                     .Except(baseInterfaces.SelectMany(x => x.GetInterfaces()))
                     .ToArray();
+            }
 
             return baseInterfaces;
         }

@@ -14,7 +14,7 @@
             where T : class;
 
         /// <summary>
-        /// Return the send settings for the specified <paramref name="address"/>
+        /// Return the send settings for the specified <paramref name="address" />
         /// </summary>
         /// <param name="address"></param>
         /// <returns></returns>

@@ -11,6 +11,21 @@
     public class ScheduleMessage_Specs :
         QuartzInMemoryTestFixture
     {
+        [Test]
+        public async Task Should_get_both_messages()
+        {
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.Now, new FirstMessage());
+
+            await _first;
+
+            AdvanceTime(TimeSpan.FromSeconds(10));
+
+            await _second;
+
+            if (_secondActivityId != null && _firstActivityId != null)
+                Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
+        }
+
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
         string _firstActivityId;
@@ -39,22 +54,6 @@
         public class SecondMessage
         {
         }
-
-
-        [Test]
-        public async Task Should_get_both_messages()
-        {
-            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.Now, new FirstMessage());
-
-            await _first;
-
-            AdvanceTime(TimeSpan.FromSeconds(10));
-
-            await _second;
-
-            if (_secondActivityId != null && _firstActivityId != null)
-                Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
-        }
     }
 
 
@@ -62,6 +61,21 @@
     public class Specifying_an_expiration_time :
         QuartzInMemoryTestFixture
     {
+        [Test]
+        public async Task Should_include_it_with_the_final_message()
+        {
+            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.Now, new FirstMessage());
+
+            await _first;
+
+            AdvanceTime(TimeSpan.FromSeconds(10));
+
+            ConsumeContext<SecondMessage> second = await _second;
+
+            Assert.That(second.ExpirationTime.HasValue, Is.True);
+            Assert.That(second.ExpirationTime.Value, Is.GreaterThan(DateTime.UtcNow + TimeSpan.FromSeconds(20)));
+        }
+
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
 
@@ -84,22 +98,6 @@
 
         public class SecondMessage
         {
-        }
-
-
-        [Test]
-        public async Task Should_include_it_with_the_final_message()
-        {
-            await Scheduler.ScheduleSend(InputQueueAddress, DateTime.Now, new FirstMessage());
-
-            await _first;
-
-            AdvanceTime(TimeSpan.FromSeconds(10));
-
-            var second = await _second;
-
-            Assert.That(second.ExpirationTime.HasValue, Is.True);
-            Assert.That(second.ExpirationTime.Value, Is.GreaterThan(DateTime.UtcNow + TimeSpan.FromSeconds(20)));
         }
     }
 }

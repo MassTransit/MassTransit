@@ -2,6 +2,7 @@ namespace Automatonymous
 {
     using System;
 
+
     /// <summary>
     /// Returns a message from an event exception
     /// </summary>
@@ -13,6 +14,7 @@ namespace Automatonymous
     public delegate TMessage EventExceptionMessageFactory<in TInstance, in TException, out TMessage>(
         ConsumeExceptionEventContext<TInstance, TException> context)
         where TException : Exception;
+
 
     /// <summary>
     /// Returns a message from an event exception

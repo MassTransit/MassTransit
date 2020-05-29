@@ -9,7 +9,7 @@ namespace MassTransit
     public static class AmazonSqsHostConfigurationExtensions
     {
         /// <summary>
-        ///     Configure a AmazonSQS host using the configuration API
+        /// Configure a AmazonSQS host using the configuration API
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="hostAddress">The URI host address of the AmazonSQS host (amazonsqs://region)</param>
@@ -34,7 +34,7 @@ namespace MassTransit
         /// <param name="configure">The configuration callback</param>
         public static void Host(this IAmazonSqsBusFactoryConfigurator configurator, string hostName, Action<IAmazonSqsHostConfigurator> configure)
         {
-             configurator.Host(new UriBuilder("amazonsqs", hostName).Uri, configure);
+            configurator.Host(new UriBuilder("amazonsqs", hostName).Uri, configure);
         }
 
         /// <summary>

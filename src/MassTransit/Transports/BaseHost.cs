@@ -18,7 +18,6 @@ namespace MassTransit.Transports
     {
         readonly IHostConfiguration _hostConfiguration;
         readonly IHostTopology _hostTopology;
-        readonly IReceiveEndpointCollection _receiveEndpoints;
         HostHandle _handle;
 
         protected BaseHost(IHostConfiguration hostConfiguration, IHostTopology hostTopology)
@@ -26,10 +25,10 @@ namespace MassTransit.Transports
             _hostConfiguration = hostConfiguration;
             _hostTopology = hostTopology;
 
-            _receiveEndpoints = new ReceiveEndpointCollection();
+            ReceiveEndpoints = new ReceiveEndpointCollection();
         }
 
-        protected IReceiveEndpointCollection ReceiveEndpoints => _receiveEndpoints;
+        protected IReceiveEndpointCollection ReceiveEndpoints { get; }
 
         Uri IHost.Address => _hostConfiguration.HostAddress;
         IHostTopology IHost.Topology => _hostTopology;
@@ -41,22 +40,22 @@ namespace MassTransit.Transports
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
-            return _receiveEndpoints.ConnectConsumeMessageObserver(observer);
+            return ReceiveEndpoints.ConnectConsumeMessageObserver(observer);
         }
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
         {
-            return _receiveEndpoints.ConnectConsumeObserver(observer);
+            return ReceiveEndpoints.ConnectConsumeObserver(observer);
         }
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return _receiveEndpoints.ConnectReceiveObserver(observer);
+            return ReceiveEndpoints.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
-            return _receiveEndpoints.ConnectReceiveEndpointObserver(observer);
+            return ReceiveEndpoints.ConnectReceiveEndpointObserver(observer);
         }
 
         public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
@@ -66,12 +65,12 @@ namespace MassTransit.Transports
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return _receiveEndpoints.ConnectPublishObserver(observer);
+            return ReceiveEndpoints.ConnectPublishObserver(observer);
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            return _receiveEndpoints.ConnectSendObserver(observer);
+            return ReceiveEndpoints.ConnectSendObserver(observer);
         }
 
         public virtual Task<HostHandle> Start(CancellationToken cancellationToken)
@@ -86,7 +85,7 @@ namespace MassTransit.Transports
 
             LogContext.Debug?.Log("Starting host: {HostAddress}", _hostConfiguration.HostAddress);
 
-            HostReceiveEndpointHandle[] handles = _receiveEndpoints.StartEndpoints(cancellationToken);
+            HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints(cancellationToken);
 
             _handle = new StartHostHandle(this, handles, GetAgentHandles());
 
@@ -95,7 +94,7 @@ namespace MassTransit.Transports
 
         public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
         {
-            _receiveEndpoints.Add(endpointName, receiveEndpoint);
+            ReceiveEndpoints.Add(endpointName, receiveEndpoint);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -104,14 +103,14 @@ namespace MassTransit.Transports
 
             Probe(scope);
 
-            _receiveEndpoints.Probe(scope);
+            ReceiveEndpoints.Probe(scope);
         }
 
         async Task IAgent.Stop(StopContext context)
         {
             LogContext.Current = _hostConfiguration.LogContext;
 
-            await _receiveEndpoints.Stop(context).ConfigureAwait(false);
+            await ReceiveEndpoints.Stop(context).ConfigureAwait(false);
 
             await base.Stop(context).ConfigureAwait(false);
         }
@@ -121,9 +120,7 @@ namespace MassTransit.Transports
             await base.StopSupervisor(context).ConfigureAwait(false);
 
             foreach (var agent in GetAgentHandles())
-            {
                 await agent.Stop(context).ConfigureAwait(false);
-            }
         }
 
         protected abstract void Probe(ProbeContext context);

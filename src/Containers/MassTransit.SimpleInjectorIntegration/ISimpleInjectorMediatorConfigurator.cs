@@ -8,6 +8,7 @@ namespace MassTransit.SimpleInjectorIntegration
         IMediatorConfigurator<Container>
     {
         Container Container { get; }
+
         /// <summary>
         /// Optionally configure the pipeline used by the mediator
         /// </summary>

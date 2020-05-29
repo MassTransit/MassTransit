@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Serialization
 {
     using System;
@@ -38,13 +26,12 @@ namespace MassTransit.Serialization
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
-            keyId = keyId ?? _defaultKeyId;
+            keyId ??= _defaultKeyId;
 
-            SymmetricKey key;
-            if (!_keyProvider.TryGetKey(keyId, out key))
+            if (!_keyProvider.TryGetKey(keyId, out var key))
                 throw new SerializationException("Encryption Key not found: " + keyId);
 
-            ICryptoTransform encryptor = CreateEncryptor(key.Key, key.IV);
+            var encryptor = CreateEncryptor(key.Key, key.IV);
 
             return new DisposingCryptoStream(stream, encryptor, streamMode);
         }
@@ -54,13 +41,12 @@ namespace MassTransit.Serialization
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
 
-            keyId = keyId ?? _defaultKeyId;
+            keyId ??= _defaultKeyId;
 
-            SymmetricKey key;
-            if (!_keyProvider.TryGetKey(keyId, out key))
+            if (!_keyProvider.TryGetKey(keyId, out var key))
                 throw new SerializationException("Encryption Key not found: " + keyId);
 
-            ICryptoTransform encryptor = CreateDecryptor(key.Key, key.IV);
+            var encryptor = CreateDecryptor(key.Key, key.IV);
 
             return new DisposingCryptoStream(stream, encryptor, streamMode);
         }
@@ -88,6 +74,8 @@ namespace MassTransit.Serialization
         }
 
         Aes CreateAes()
-            => new AesCryptoServiceProvider {Padding = _paddingMode};
+        {
+            return new AesCryptoServiceProvider {Padding = _paddingMode};
+        }
     }
 }

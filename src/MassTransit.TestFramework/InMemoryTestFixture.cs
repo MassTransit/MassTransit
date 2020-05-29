@@ -10,25 +10,7 @@ namespace MassTransit.TestFramework
     public class InMemoryTestFixture :
         BusTestFixture
     {
-        [SetUp]
-        public Task SetupInMemoryTest()
-        {
-            return _busCreationScope.TestSetup();
-        }
-
-        [TearDown]
-        public Task TearDownInMemoryTest()
-        {
-            return _busCreationScope.TestTeardown();
-        }
-
-        protected InMemoryTestHarness InMemoryTestHarness { get; }
-
         readonly IBusCreationScope _busCreationScope;
-
-        protected string InputQueueName => InMemoryTestHarness.InputQueueName;
-
-        protected Uri BaseAddress => InMemoryTestHarness.BaseAddress;
 
         public InMemoryTestFixture(bool busPerTest = false)
             : this(new InMemoryTestHarness(), busPerTest)
@@ -49,6 +31,12 @@ namespace MassTransit.TestFramework
             InMemoryTestHarness.OnConfigureInMemoryReceiveEndpoint += ConfigureInMemoryReceiveEndpoint;
         }
 
+        protected InMemoryTestHarness InMemoryTestHarness { get; }
+
+        protected string InputQueueName => InMemoryTestHarness.InputQueueName;
+
+        protected Uri BaseAddress => InMemoryTestHarness.BaseAddress;
+
         /// <summary>
         /// The sending endpoint for the InputQueue
         /// </summary>
@@ -62,6 +50,18 @@ namespace MassTransit.TestFramework
         protected Uri BusAddress => InMemoryTestHarness.BusAddress;
 
         protected Uri InputQueueAddress => InMemoryTestHarness.InputQueueAddress;
+
+        [SetUp]
+        public Task SetupInMemoryTest()
+        {
+            return _busCreationScope.TestSetup();
+        }
+
+        [TearDown]
+        public Task TearDownInMemoryTest()
+        {
+            return _busCreationScope.TestTeardown();
+        }
 
         protected IRequestClient<TRequest> CreateRequestClient<TRequest>()
             where TRequest : class
@@ -117,6 +117,7 @@ namespace MassTransit.TestFramework
         protected virtual void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
         }
+
 
         interface IBusCreationScope
         {

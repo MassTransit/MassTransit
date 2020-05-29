@@ -284,9 +284,15 @@
         }
 
         [Test]
+        public async Task Should_move_the_message_to_the_error_queue()
+        {
+            await _errorHandler;
+        }
+
+        [Test]
         public async Task Write_out_message_body()
         {
-            var context = await _errorHandler;
+            ConsumeContext<PingMessage> context = await _errorHandler;
 
             using (var body = context.ReceiveContext.GetBodyStream())
             using (var output = new MemoryStream())
@@ -299,19 +305,13 @@
             }
         }
 
-        [Test]
-        public async Task Should_move_the_message_to_the_error_queue()
-        {
-            await _errorHandler;
-        }
-
         Task<ConsumeContext<PingMessage>> _errorHandler;
         Task<Response<PongMessage>> _responseTask;
 
         [OneTimeSetUp]
         public async Task Setup()
         {
-            var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
+            IRequestClient<PingMessage> client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
 
             _responseTask = client.GetResponse<PongMessage>(new PingMessage());
         }
@@ -357,7 +357,7 @@
         [OneTimeSetUp]
         public async Task Setup()
         {
-            var client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
+            IRequestClient<PingMessage> client = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
 
             _responseTask = client.GetResponse<PongMessage>(new PingMessage());
         }

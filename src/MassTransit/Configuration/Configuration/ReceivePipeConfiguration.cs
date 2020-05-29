@@ -34,18 +34,6 @@
 
         public IBuildPipeConfigurator<ExceptionReceiveContext> ErrorConfigurator { get; }
 
-        public void AddPipeSpecification(IPipeSpecification<ReceiveContext> specification)
-        {
-            _configurator.AddPipeSpecification(specification);
-        }
-
-        public IEnumerable<ValidationResult> Validate()
-        {
-            return _configurator.Validate()
-                .Concat(DeadLetterConfigurator.Validate())
-                .Concat(ErrorConfigurator.Validate());
-        }
-
         public IReceivePipe CreatePipe(IConsumePipe consumePipe, IMessageDeserializer messageDeserializer)
         {
             if (_created)
@@ -64,9 +52,21 @@
             return new ReceivePipe(_configurator.Build(), consumePipe);
         }
 
+        public void AddPipeSpecification(IPipeSpecification<ReceiveContext> specification)
+        {
+            _configurator.AddPipeSpecification(specification);
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return _configurator.Validate()
+                .Concat(DeadLetterConfigurator.Validate())
+                .Concat(ErrorConfigurator.Validate());
+        }
+
         IPipe<ReceiveContext> CreateDeadLetterPipe()
         {
-            var deadLetterPipe = DeadLetterConfigurator.Build();
+            IPipe<ReceiveContext> deadLetterPipe = DeadLetterConfigurator.Build();
             if (deadLetterPipe.IsNotEmpty())
                 return deadLetterPipe;
 
@@ -77,7 +77,7 @@
 
         IPipe<ExceptionReceiveContext> CreateErrorPipe()
         {
-            var errorPipe = ErrorConfigurator.Build();
+            IPipe<ExceptionReceiveContext> errorPipe = ErrorConfigurator.Build();
             if (errorPipe.IsNotEmpty())
                 return errorPipe;
 

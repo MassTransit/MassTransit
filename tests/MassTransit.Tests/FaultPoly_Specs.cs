@@ -11,9 +11,9 @@ namespace MassTransit.Tests
     public class A_fault_message
     {
         [Test]
-        public void Should_have_the_fault_message_type()
+        public void Should_have_the_fault_base_message_class_type()
         {
-            Assert.That(TypeMetadataCache<Fault<UpdateMemberAddress>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<UpdateMemberAddress>))));
+            Assert.That(TypeMetadataCache<Fault<MemberAddressUpdated>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<MemberUpdateEvent>))));
         }
 
         [Test]
@@ -25,13 +25,14 @@ namespace MassTransit.Tests
         [Test]
         public void Should_have_the_fault_message_class_type()
         {
-            Assert.That(TypeMetadataCache<Fault<MemberAddressUpdated>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<MemberAddressUpdated>))));
+            Assert.That(TypeMetadataCache<Fault<MemberAddressUpdated>>.MessageTypeNames,
+                Contains.Item(MessageUrn.ForType(typeof(Fault<MemberAddressUpdated>))));
         }
 
         [Test]
-        public void Should_have_the_fault_base_message_class_type()
+        public void Should_have_the_fault_message_type()
         {
-            Assert.That(TypeMetadataCache<Fault<MemberAddressUpdated>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<MemberUpdateEvent>))));
+            Assert.That(TypeMetadataCache<Fault<UpdateMemberAddress>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<UpdateMemberAddress>))));
         }
     }
 
@@ -43,7 +44,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_support_the_base_fault_type()
         {
-            var handler = ConnectPublishHandler<Fault<MemberUpdateCommand>>();
+            Task<ConsumeContext<Fault<MemberUpdateCommand>>> handler = ConnectPublishHandler<Fault<MemberUpdateCommand>>();
 
             await InputQueueSendEndpoint.Send<UpdateMemberAddress>(new
             {

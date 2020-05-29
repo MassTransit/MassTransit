@@ -17,8 +17,9 @@
     public class ServiceBusReceiveEndpointBuilder :
         ReceiveEndpointBuilder
     {
-        readonly IServiceBusHostConfiguration _hostConfiguration;
+        static readonly char[] Separator = {'/'};
         readonly IServiceBusReceiveEndpointConfiguration _configuration;
+        readonly IServiceBusHostConfiguration _hostConfiguration;
 
         public ServiceBusReceiveEndpointBuilder(IServiceBusHostConfiguration hostConfiguration, IServiceBusReceiveEndpointConfiguration configuration)
             : base(configuration)
@@ -51,8 +52,6 @@
 
             return context;
         }
-
-        static readonly char[] Separator = {'/'};
 
         string GenerateSubscriptionName()
         {

@@ -18,8 +18,8 @@ namespace MassTransit.Initializers.PropertyInitializers
         where TMessage : class
         where TInput : class
     {
-        readonly IPropertyProvider<TInput, TProperty> _propertyProvider;
         readonly IWriteProperty<TMessage, TProperty> _messageProperty;
+        readonly IPropertyProvider<TInput, TProperty> _propertyProvider;
 
         public ProviderPropertyInitializer(IPropertyProvider<TInput, TProperty> propertyProvider, PropertyInfo propertyInfo)
         {
@@ -36,7 +36,7 @@ namespace MassTransit.Initializers.PropertyInitializers
 
         public Task Apply(InitializeContext<TMessage, TInput> context)
         {
-            var propertyTask = _propertyProvider.GetProperty(context);
+            Task<TProperty> propertyTask = _propertyProvider.GetProperty(context);
             if (propertyTask.IsCompleted)
             {
                 if (_messageProperty.TargetType == context.MessageType)

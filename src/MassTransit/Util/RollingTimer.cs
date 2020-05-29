@@ -13,8 +13,8 @@ namespace MassTransit.Util
     {
         readonly TimerCallback _callback;
         readonly TimeSpan _dueTime;
-        readonly object _state;
         readonly object _lock = new object();
+        readonly object _state;
         Timer _timer;
         int _triggered;
 

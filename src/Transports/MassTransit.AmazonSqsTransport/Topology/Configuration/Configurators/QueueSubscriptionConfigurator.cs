@@ -1,8 +1,5 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Configurators
 {
-    using Configuration;
-
-
     public class QueueSubscriptionConfigurator :
         QueueConfigurator,
         IQueueSubscriptionConfigurator

@@ -46,10 +46,10 @@
             IPipe<ClientContext>
             where T : class
         {
+            readonly CancellationToken _cancellationToken;
             readonly SqsSendTransportContext _context;
             readonly T _message;
             readonly IPipe<SendContext<T>> _pipe;
-            readonly CancellationToken _cancellationToken;
 
             public SendPipe(SqsSendTransportContext context, T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             {
@@ -69,7 +69,7 @@
 
                 await _pipe.Send(sendContext).ConfigureAwait(false);
 
-                var activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(sendContext);
+                StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(sendContext);
                 try
                 {
                     if (_context.SendObservers.Count > 0)

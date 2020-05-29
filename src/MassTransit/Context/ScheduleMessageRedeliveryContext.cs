@@ -37,7 +37,7 @@
 
         static IEnumerable<KeyValuePair<string, object>> GetScheduledMessageHeaders(ConsumeContext context)
         {
-            Uri inputAddress = context.ReceiveContext.InputAddress ?? context.DestinationAddress;
+            var inputAddress = context.ReceiveContext.InputAddress ?? context.DestinationAddress;
             if (inputAddress != null)
                 yield return new KeyValuePair<string, object>(MessageHeaders.DeliveredAddress, inputAddress.ToString());
 

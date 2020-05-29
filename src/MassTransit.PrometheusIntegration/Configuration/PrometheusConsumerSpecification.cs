@@ -16,7 +16,10 @@ namespace MassTransit.PrometheusIntegration
             builder.AddFilter(new PrometheusConsumerFilter<TConsumer, TMessage>());
         }
 
-        public IEnumerable<ValidationResult> Validate() => Enumerable.Empty<ValidationResult>();
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return Enumerable.Empty<ValidationResult>();
+        }
     }
 
 
@@ -28,6 +31,9 @@ namespace MassTransit.PrometheusIntegration
             builder.AddFilter(new PrometheusReceiveFilter());
         }
 
-        public IEnumerable<ValidationResult> Validate() => Enumerable.Empty<ValidationResult>();
+        public IEnumerable<ValidationResult> Validate()
+        {
+            return Enumerable.Empty<ValidationResult>();
+        }
     }
 }

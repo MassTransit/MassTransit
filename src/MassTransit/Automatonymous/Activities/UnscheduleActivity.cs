@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace Automatonymous.Activities
+﻿namespace Automatonymous.Activities
 {
     using System;
     using System.Threading.Tasks;
@@ -65,12 +53,10 @@ namespace Automatonymous.Activities
 
         async Task Execute(BehaviorContext<TInstance> context)
         {
-            ConsumeContext consumeContext;
-            if (!context.TryGetPayload(out consumeContext))
+            if (!context.TryGetPayload(out ConsumeContext consumeContext))
                 throw new ContextException("The consume context could not be retrieved.");
 
-            MessageSchedulerContext schedulerContext;
-            if (!consumeContext.TryGetPayload(out schedulerContext))
+            if (!consumeContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
                 throw new ContextException("The scheduler context could not be retrieved.");
 
             Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
@@ -78,7 +64,7 @@ namespace Automatonymous.Activities
             {
                 await schedulerContext.CancelScheduledSend(consumeContext.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
 
-                _schedule.SetTokenId(context.Instance, default(Guid?));
+                _schedule.SetTokenId(context.Instance, default);
             }
         }
     }

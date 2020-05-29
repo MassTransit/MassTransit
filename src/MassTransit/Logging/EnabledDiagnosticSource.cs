@@ -49,15 +49,17 @@ namespace MassTransit.Logging
                 activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress.ToString());
 
             if (tags != null)
-                for (int i = 0; i < tags.Length; i++)
+            {
+                for (var i = 0; i < tags.Length; i++)
                     activity.AddTag(tags[i].Key, tags[i].Value);
+            }
 
             var startActivity = _source.StartActivity(activity, context);
 
             context.Headers.Set(DiagnosticHeaders.ActivityId, startActivity.Id);
 
             IList<KeyValuePair<string, string>> baggage = null;
-            foreach (var pair in startActivity.Baggage)
+            foreach (KeyValuePair<string, string> pair in startActivity.Baggage)
             {
                 if (pair.Key.Equals(DiagnosticHeaders.ConversationId) || pair.Key.Equals(DiagnosticHeaders.CorrelationId))
                     continue;
@@ -88,8 +90,10 @@ namespace MassTransit.Logging
             activity.AddTag(DiagnosticHeaders.InputAddress, context.InputAddress.ToString());
 
             if (tags != null)
-                for (int i = 0; i < tags.Length; i++)
+            {
+                for (var i = 0; i < tags.Length; i++)
                     activity.AddTag(tags[i].Key, tags[i].Value);
+            }
 
             var startActivity = _source.StartActivity(activity, context);
 
@@ -218,9 +222,7 @@ namespace MassTransit.Logging
             string parentActivityId = null;
             if (headers.TryGetHeader(DiagnosticHeaders.ActivityId, out var headerValue)
                 && headerValue is string activityId && !string.IsNullOrWhiteSpace(activityId))
-            {
                 parentActivityId = activityId;
-            }
 
             return parentActivityId;
         }

@@ -11,13 +11,14 @@
     using Testing;
 
 
-    [TestFixture, Category("Integration")]
+    [TestFixture]
+    [Category("Integration")]
     public class LocatingAnExistingSaga : InMemoryTestFixture
     {
         [Test]
         public async Task A_correlated_message_should_find_the_correct_saga()
         {
-            Guid sagaId = NewId.NextGuid();
+            var sagaId = NewId.NextGuid();
             var message = new InitiateSimpleSaga(sagaId);
 
             await InputQueueSendEndpoint.Send(message);
@@ -35,9 +36,22 @@
         }
 
         [Test]
+        public async Task An_initiating_message_should_start_the_saga()
+        {
+            var sagaId = NewId.NextGuid();
+            var message = new InitiateSimpleSaga(sagaId);
+
+            await InputQueueSendEndpoint.Send(message);
+
+            Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
+
+            found.ShouldBe(sagaId);
+        }
+
+        [Test]
         public async Task An_observed_message_should_find_and_update_the_correct_saga()
         {
-            Guid sagaId = NewId.NextGuid();
+            var sagaId = NewId.NextGuid();
             var message = new InitiateSimpleSaga(sagaId) {Name = "MySimpleSaga"};
 
             await InputQueueSendEndpoint.Send(message);
@@ -51,19 +65,6 @@
             await InputQueueSendEndpoint.Send(nextMessage);
 
             found = await _sagaRepository.Value.ShouldContainSaga(x => x.CorrelationId == sagaId && x.Observed, TestTimeout);
-            found.ShouldBe(sagaId);
-        }
-
-        [Test]
-        public async Task An_initiating_message_should_start_the_saga()
-        {
-            Guid sagaId = NewId.NextGuid();
-            var message = new InitiateSimpleSaga(sagaId);
-
-            await InputQueueSendEndpoint.Send(message);
-
-            Guid? found = await _sagaRepository.Value.ShouldContainSaga(message.CorrelationId, TestTimeout);
-
             found.ShouldBe(sagaId);
         }
 

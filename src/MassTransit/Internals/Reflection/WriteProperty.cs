@@ -5,7 +5,6 @@
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
-    using MassTransit;
 
 
     public class WriteProperty<T, TProperty> :
@@ -24,7 +23,10 @@
 
             // look for <Address>k__BackingField and use a field setter if available
 
-            void SetUsingReflection(T entity, TProperty property) => setMethod.Invoke(entity, new object[] {property});
+            void SetUsingReflection(T entity, TProperty property)
+            {
+                setMethod.Invoke(entity, new object[] {property});
+            }
 
             void Initialize(T entity, TProperty property)
             {
@@ -49,7 +51,7 @@
         {
             try
             {
-                var fastSetMethod = CompileSetMethod(implementationType, setMethod);
+                Action<T, TProperty> fastSetMethod = CompileSetMethod(implementationType, setMethod);
 
                 Interlocked.Exchange(ref _setMethod, fastSetMethod);
             }
@@ -68,7 +70,7 @@
 
                 var call = Expression.Call(cast, setMethod, value);
 
-                var lambdaExpression = Expression.Lambda<Action<T, TProperty>>(call, instance, value);
+                Expression<Action<T, TProperty>> lambdaExpression = Expression.Lambda<Action<T, TProperty>>(call, instance, value);
 
                 return lambdaExpression.CompileFast<Action<T, TProperty>>();
             }

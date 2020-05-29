@@ -201,21 +201,6 @@
             callback(Receive.ErrorConfigurator);
         }
 
-        public void SetMessageSerializer(SerializerFactory serializerFactory)
-        {
-            Serialization.SetSerializer(serializerFactory);
-        }
-
-        public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
-        {
-            Serialization.AddDeserializer(contentType, deserializerFactory);
-        }
-
-        public void ClearMessageDeserializers()
-        {
-            Serialization.ClearDeserializers();
-        }
-
         public virtual IEnumerable<ValidationResult> Validate()
         {
             return Send.Specification.Validate()
@@ -232,5 +217,20 @@
         public IReceivePipeConfiguration Receive { get; }
         public ITopologyConfiguration Topology { get; }
         public ISerializationConfiguration Serialization { get; }
+
+        public void SetMessageSerializer(SerializerFactory serializerFactory)
+        {
+            Serialization.SetSerializer(serializerFactory);
+        }
+
+        public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
+        {
+            Serialization.AddDeserializer(contentType, deserializerFactory);
+        }
+
+        public void ClearMessageDeserializers()
+        {
+            Serialization.ClearDeserializers();
+        }
     }
 }

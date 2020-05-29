@@ -11,7 +11,7 @@ namespace MassTransit.MongoDbIntegration
     public static class MongoDbSagaRepositoryConfiguratorExtensions
     {
         /// <summary>
-        /// Sets the collection name formatter instance <see cref="ICollectionNameFormatter"/>
+        /// Sets the collection name formatter instance <see cref="ICollectionNameFormatter" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="collectionNameFormatter"></param>
@@ -26,7 +26,7 @@ namespace MassTransit.MongoDbIntegration
         }
 
         /// <summary>
-        /// Sets the database factory using the database instance <see cref="IMongoDatabase"/>
+        /// Sets the database factory using the database instance <see cref="IMongoDatabase" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="database"></param>
@@ -41,7 +41,7 @@ namespace MassTransit.MongoDbIntegration
         }
 
         /// <summary>
-        /// Configure saga class mapping using <see cref="BsonClassMap{TClass}"/>
+        /// Configure saga class mapping using <see cref="BsonClassMap{TClass}" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="classMapConfigurator"></param>
@@ -59,7 +59,7 @@ namespace MassTransit.MongoDbIntegration
         }
 
         /// <summary>
-        /// Configure saga class mapping using <see cref="BsonClassMap{TClass}"/>
+        /// Configure saga class mapping using <see cref="BsonClassMap{TClass}" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="classMapConfigurator"></param>
@@ -77,7 +77,7 @@ namespace MassTransit.MongoDbIntegration
         }
 
         /// <summary>
-        /// Configure saga class mapping using <see cref="BsonClassMap{TClass}"/>
+        /// Configure saga class mapping using <see cref="BsonClassMap{TClass}" />
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="classMap"></param>

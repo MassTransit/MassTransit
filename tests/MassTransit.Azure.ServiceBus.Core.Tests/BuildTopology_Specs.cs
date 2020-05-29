@@ -55,7 +55,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             await Bus.Publish<ThirdInterface>(new {Value = "A"});
             await Bus.Publish<AnotherThirdInterface>(new {Value = "B"});
 
-            var received = await _receivedA;
+            ConsumeContext<FirstInterface> received = await _receivedA;
 
             await Task.Delay(10000);
 
@@ -256,6 +256,22 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         }
 
         [Test]
+        public void Should_include_a_binding_for_the_single_interface()
+        {
+            _publishTopology.GetMessageTopology<SingleInterface>()
+                .Apply(_builder);
+
+            var topology = _builder.BuildBrokerTopology();
+            topology.LogResult();
+
+            var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();
+
+            Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == singleInterfaceName), Is.True);
+            Assert.That(topology.Topics.Length, Is.EqualTo(1));
+            Assert.That(topology.TopicSubscriptions.Length, Is.EqualTo(0));
+        }
+
+        [Test]
         public void Should_include_a_binding_for_the_third_interface_as_well()
         {
             _publishTopology.GetMessageTopology<ThirdInterface>()
@@ -282,22 +298,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
                 Is.True);
 
             Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == firstInterfaceName), Is.True);
-        }
-
-        [Test]
-        public void Should_include_a_binding_for_the_single_interface()
-        {
-            _publishTopology.GetMessageTopology<SingleInterface>()
-                .Apply(_builder);
-
-            var topology = _builder.BuildBrokerTopology();
-            topology.LogResult();
-
-            var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();
-
-            Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == singleInterfaceName), Is.True);
-            Assert.That(topology.Topics.Length, Is.EqualTo(1));
-            Assert.That(topology.TopicSubscriptions.Length, Is.EqualTo(0));
         }
 
         [SetUp]

@@ -12,15 +12,14 @@
     public class GetMessageData<T> :
         MessageData<T>
     {
-        readonly Uri _address;
+        readonly CancellationToken _cancellationToken;
         readonly IMessageDataConverter<T> _converter;
         readonly IMessageDataRepository _repository;
         readonly Lazy<Task<T>> _value;
-        readonly CancellationToken _cancellationToken;
 
         public GetMessageData(Uri address, IMessageDataRepository repository, IMessageDataConverter<T> converter, CancellationToken cancellationToken)
         {
-            _address = address;
+            Address = address;
             _repository = repository;
             _converter = converter;
 
@@ -29,7 +28,7 @@
             _value = new Lazy<Task<T>>(GetValue);
         }
 
-        public Uri Address => _address;
+        public Uri Address { get; }
 
         public bool HasValue => true;
 
@@ -37,7 +36,7 @@
 
         async Task<T> GetValue()
         {
-            using var valueStream = await _repository.Get(_address, _cancellationToken).ConfigureAwait(false);
+            using var valueStream = await _repository.Get(Address, _cancellationToken).ConfigureAwait(false);
 
             return await _converter.Convert(valueStream, _cancellationToken).ConfigureAwait(false);
         }

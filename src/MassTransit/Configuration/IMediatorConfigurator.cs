@@ -6,7 +6,6 @@ namespace MassTransit
     public interface IMediatorConfigurator<out TContainerContext> :
         IRegistrationConfigurator
         where TContainerContext : class
-
     {
         /// <summary>
         /// Optionally configure the pipeline used by the mediator

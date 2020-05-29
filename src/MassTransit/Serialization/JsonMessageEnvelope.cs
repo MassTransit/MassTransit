@@ -48,7 +48,7 @@ namespace MassTransit.Serialization
 
             Headers = new Dictionary<string, object>();
 
-            foreach (var header in context.Headers.GetAll())
+            foreach (KeyValuePair<string, object> header in context.Headers.GetAll())
                 Headers[header.Key] = header.Value;
 
             Host = HostMetadataCache.Host;

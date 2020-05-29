@@ -13,13 +13,13 @@ namespace MassTransit
 
         /// <summary>
         /// The number of messages to fetch in advance from the broker, if applicable. This should <b>only</b> be set when
-        /// necessary, use the <see cref="ConcurrentMessageLimit"/> initially.
+        /// necessary, use the <see cref="ConcurrentMessageLimit" /> initially.
         /// </summary>
         int? PrefetchCount { get; }
 
         /// <summary>
         /// The maximum number of concurrent messages which can be delivered at any one time. This should be set by an
-        /// endpoint before modifying the prefetch count. If this is specified, and <see cref="PrefetchCount"/> is left default,
+        /// endpoint before modifying the prefetch count. If this is specified, and <see cref="PrefetchCount" /> is left default,
         /// it will calculate an effective prefetch count automatically when supported.
         /// </summary>
         int? ConcurrentMessageLimit { get; }

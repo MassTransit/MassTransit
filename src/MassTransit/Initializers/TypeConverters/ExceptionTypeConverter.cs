@@ -10,18 +10,6 @@ namespace MassTransit.Initializers.TypeConverters
         ITypeConverter<ExceptionInfo, Exception>,
         ITypeConverter<ExceptionInfo, object>
     {
-        public bool TryConvert(Exception input, out string result)
-        {
-            if (input != null)
-            {
-                result = ExceptionUtil.GetMessage(input);
-                return true;
-            }
-
-            result = default;
-            return false;
-        }
-
         public bool TryConvert(Exception input, out ExceptionInfo result)
         {
             if (input != null)
@@ -50,6 +38,18 @@ namespace MassTransit.Initializers.TypeConverters
                     result = default;
                     return false;
             }
+        }
+
+        public bool TryConvert(Exception input, out string result)
+        {
+            if (input != null)
+            {
+                result = ExceptionUtil.GetMessage(input);
+                return true;
+            }
+
+            result = default;
+            return false;
         }
     }
 }

@@ -12,23 +12,27 @@ namespace MassTransit
         where TRequest : class
     {
         /// <summary>
-        /// Create a request, returning a <see cref="RequestHandle{TRequest}"/>, which is then used to get responses, and ultimately
+        /// Create a request, returning a <see cref="RequestHandle{TRequest}" />, which is then used to get responses, and ultimately
         /// send the request.
         /// </summary>
         /// <param name="message">The request message</param>
         /// <param name="cancellationToken">An optional cancellationToken to cancel the request</param>
-        /// <param name="timeout">An optional timeout, to automatically cancel the request after the specified timeout period</param>
-        /// <returns>A <see cref="RequestHandle{TRequest}"/> for the request</returns>
+        /// <param name="timeout">
+        /// An optional timeout, to automatically cancel the request after the specified timeout period
+        /// </param>
+        /// <returns>A <see cref="RequestHandle{TRequest}" /> for the request</returns>
         RequestHandle<TRequest> Create(TRequest message, CancellationToken cancellationToken = default, RequestTimeout timeout = default);
 
         /// <summary>
-        /// Create a request, returning a <see cref="RequestHandle{TRequest}"/>, which is then used to get responses, and ultimately
+        /// Create a request, returning a <see cref="RequestHandle{TRequest}" />, which is then used to get responses, and ultimately
         /// send the request.
         /// </summary>
         /// <param name="values">The values to initialize the message</param>
         /// <param name="cancellationToken">An optional cancellationToken to cancel the request</param>
-        /// <param name="timeout">An optional timeout, to automatically cancel the request after the specified timeout period</param>
-        /// <returns>A <see cref="RequestHandle{TRequest}"/> for the request</returns>
+        /// <param name="timeout">
+        /// An optional timeout, to automatically cancel the request after the specified timeout period
+        /// </param>
+        /// <returns>A <see cref="RequestHandle{TRequest}" /> for the request</returns>
         RequestHandle<TRequest> Create(object values, CancellationToken cancellationToken = default, RequestTimeout timeout = default);
 
         /// <summary>
@@ -36,7 +40,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="message">The request message</param>
         /// <param name="cancellationToken">An optional cancellationToken to cancel the request</param>
-        /// <param name="timeout">An optional timeout, to automatically cancel the request after the specified timeout period</param>
+        /// <param name="timeout">
+        /// An optional timeout, to automatically cancel the request after the specified timeout period
+        /// </param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         Task<Response<T>> GetResponse<T>(TRequest message, CancellationToken cancellationToken = default, RequestTimeout timeout = default)
@@ -47,7 +53,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="values">The values to initialize the message</param>
         /// <param name="cancellationToken">An optional cancellationToken to cancel the request</param>
-        /// <param name="timeout">An optional timeout, to automatically cancel the request after the specified timeout period</param>
+        /// <param name="timeout">
+        /// An optional timeout, to automatically cancel the request after the specified timeout period
+        /// </param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         Task<Response<T>> GetResponse<T>(object values, CancellationToken cancellationToken = default, RequestTimeout timeout = default)
@@ -58,7 +66,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="message">The request message</param>
         /// <param name="cancellationToken">An optional cancellationToken to cancel the request</param>
-        /// <param name="timeout">An optional timeout, to automatically cancel the request after the specified timeout period</param>
+        /// <param name="timeout">
+        /// An optional timeout, to automatically cancel the request after the specified timeout period
+        /// </param>
         /// <typeparam name="T1">The first response type</typeparam>
         /// <typeparam name="T2">The second response type</typeparam>
         /// <returns></returns>
@@ -72,7 +82,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="values">The values to initialize the message</param>
         /// <param name="cancellationToken">An optional cancellationToken to cancel the request</param>
-        /// <param name="timeout">An optional timeout, to automatically cancel the request after the specified timeout period</param>
+        /// <param name="timeout">
+        /// An optional timeout, to automatically cancel the request after the specified timeout period
+        /// </param>
         /// <typeparam name="T1">The first response type</typeparam>
         /// <typeparam name="T2">The second response type</typeparam>
         /// <returns></returns>

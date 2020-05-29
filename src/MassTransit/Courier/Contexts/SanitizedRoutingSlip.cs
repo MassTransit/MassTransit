@@ -29,7 +29,7 @@ namespace MassTransit.Courier.Contexts
 
             _messageToken = messageTokenContext.Message;
 
-            RoutingSlip routingSlip = context.Message;
+            var routingSlip = context.Message;
 
             TrackingNumber = routingSlip.TrackingNumber;
             CreateTimestamp = routingSlip.CreateTimestamp;
@@ -79,15 +79,15 @@ namespace MassTransit.Courier.Contexts
         {
             try
             {
-                JToken itineraryToken = _messageToken["itinerary"];
+                var itineraryToken = _messageToken["itinerary"];
                 if (itineraryToken == null)
                     throw new ArgumentException("Itinerary not found in the routing slip");
 
-                JToken activityToken = itineraryToken is JArray ? itineraryToken[0] : itineraryToken;
+                var activityToken = itineraryToken is JArray ? itineraryToken[0] : itineraryToken;
                 if (activityToken == null)
                     throw new ArgumentException("Activity not found in the routing slip");
 
-                JToken token = _variablesToken.Merge(activityToken["arguments"]);
+                var token = _variablesToken.Merge(activityToken["arguments"]);
 
                 return converter.Convert(token);
             }
@@ -101,18 +101,16 @@ namespace MassTransit.Courier.Contexts
         {
             try
             {
-                JToken activityLogsToken = _messageToken["compensateLogs"];
+                var activityLogsToken = _messageToken["compensateLogs"];
 
                 JToken activityLogToken;
                 if (activityLogsToken is JArray logsToken)
-                {
                     activityLogToken = logsToken[logsToken.Count - 1];
-                }
                 else
                     activityLogToken = activityLogsToken;
 
                 // give data priority over variables, duh
-                JToken token = _variablesToken.Merge(activityLogToken["data"]);
+                var token = _variablesToken.Merge(activityLogToken["data"]);
                 if (token.Type == JTokenType.Null)
                     token = new JObject();
 

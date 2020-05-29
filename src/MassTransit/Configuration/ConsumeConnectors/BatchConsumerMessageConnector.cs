@@ -25,22 +25,25 @@ namespace MassTransit.ConsumeConnectors
         {
             var options = specification.Options<BatchOptions>();
 
-            int messageLimit = options.MessageLimit;
-            TimeSpan timeLimit = options.TimeLimit;
+            var messageLimit = options.MessageLimit;
+            var timeLimit = options.TimeLimit;
 
-            var batchMessageSpecification = specification.GetMessageSpecification<Batch<TMessage>>();
+            IConsumerMessageSpecification<TConsumer, Batch<TMessage>> batchMessageSpecification = specification.GetMessageSpecification<Batch<TMessage>>();
 
             var consumeFilter = new MethodConsumerMessageFilter<TConsumer, Batch<TMessage>>();
 
-            var batchConsumerPipe = batchMessageSpecification.Build(consumeFilter);
+            IPipe<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> batchConsumerPipe = batchMessageSpecification.Build(consumeFilter);
 
             var batchConsumerFactory = new BatchConsumerFactory<TConsumer, TMessage>(consumerFactory, messageLimit, timeLimit, batchConsumerPipe);
 
-            var messageConsumerSpecification = ConsumerConnectorCache<IConsumer<TMessage>>.Connector.CreateConsumerSpecification<IConsumer<TMessage>>();
+            IConsumerSpecification<IConsumer<TMessage>> messageConsumerSpecification =
+                ConsumerConnectorCache<IConsumer<TMessage>>.Connector.CreateConsumerSpecification<IConsumer<TMessage>>();
 
-            var messageSpecification = messageConsumerSpecification.GetMessageSpecification<TMessage>();
+            IConsumerMessageSpecification<IConsumer<TMessage>, TMessage> messageSpecification =
+                messageConsumerSpecification.GetMessageSpecification<TMessage>();
 
-            var consumerPipe = messageSpecification.Build(new MethodConsumerMessageFilter<IConsumer<TMessage>, TMessage>());
+            IPipe<ConsumerConsumeContext<IConsumer<TMessage>, TMessage>> consumerPipe =
+                messageSpecification.Build(new MethodConsumerMessageFilter<IConsumer<TMessage>, TMessage>());
 
             IPipe<ConsumeContext<TMessage>> messagePipe = messageSpecification.BuildMessagePipe(x =>
             {

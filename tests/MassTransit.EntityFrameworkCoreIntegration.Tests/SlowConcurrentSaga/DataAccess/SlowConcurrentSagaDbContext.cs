@@ -3,7 +3,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga.Da
     using System.Collections.Generic;
     using Mappings;
     using Microsoft.EntityFrameworkCore;
-    using SimpleSaga.DataAccess;
 
 
     public class SlowConcurrentSagaDbContext : SagaDbContext

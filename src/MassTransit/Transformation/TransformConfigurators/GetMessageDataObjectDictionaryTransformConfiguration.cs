@@ -26,7 +26,7 @@ namespace MassTransit.Transformation.TransformConfigurators
 
         public void Apply(ITransformConfigurator<TInput> configurator)
         {
-            if (_transformConfigurator.TryGetConverter(out var converter))
+            if (_transformConfigurator.TryGetConverter(out IPropertyConverter<TValue, TValue> converter))
             {
                 var inputPropertyProvider = new InputPropertyProvider<TInput, TProperty>(_property);
 

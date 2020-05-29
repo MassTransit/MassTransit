@@ -38,14 +38,10 @@
                 yield return this.Failure("The consumer factory cannot be null.");
 
             if (!typeof(TConsumer).HasInterface<IConsumer>())
-            {
                 yield return this.Warning($"The consumer class {TypeMetadataCache<TConsumer>.ShortName} does not implement any IMessageConsumer interfaces");
-            }
 
             foreach (var result in _specification.Validate())
-            {
                 yield return result;
-            }
         }
 
         public void Configure(IReceiveEndpointBuilder builder)

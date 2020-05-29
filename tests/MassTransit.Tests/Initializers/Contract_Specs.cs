@@ -17,24 +17,9 @@ namespace MassTransit.Tests.Initializers
     }
 
 
-
     [TestFixture]
     public class Extracting_contract_from_type
     {
-        [Test]
-        public void Should_handle_simple_arguments()
-        {
-            var contracts = ContractCache<SimpleArgument>.Contracts;
-
-            Assert.That(contracts, Is.Not.Null);
-            Assert.That(contracts.Length, Is.EqualTo(1));
-
-            var contract = contracts[0];
-
-            Assert.That(contract.Properties, Is.Not.Null);
-            Assert.That(contract.Properties.Length, Is.EqualTo(2));
-        }
-
         [Test]
         public void Should_create_a_dynamic_type()
         {
@@ -54,6 +39,20 @@ namespace MassTransit.Tests.Initializers
 
             PropertyInfo[] properties = messageType.GetProperties();
             Assert.That(properties.Length, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void Should_handle_simple_arguments()
+        {
+            Contract[] contracts = ContractCache<SimpleArgument>.Contracts;
+
+            Assert.That(contracts, Is.Not.Null);
+            Assert.That(contracts.Length, Is.EqualTo(1));
+
+            var contract = contracts[0];
+
+            Assert.That(contract.Properties, Is.Not.Null);
+            Assert.That(contract.Properties.Length, Is.EqualTo(2));
         }
     }
 }

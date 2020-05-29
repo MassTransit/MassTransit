@@ -20,18 +20,15 @@
         {
             var connection = _hubLifetimeManager.Connections[context.Message.ConnectionId];
 
-            if (connection == null) return Task.CompletedTask; // Connection doesn't exist on this server, no need to send Ack back
+            if (connection == null)
+                return Task.CompletedTask; // Connection doesn't exist on this server, no need to send Ack back
 
             if (context.Message.Action == GroupAction.Remove)
-            {
                 _hubLifetimeManager.RemoveGroupAsyncCore(connection, context.Message.GroupName);
-            }
             else if (context.Message.Action == GroupAction.Add)
-            {
                 _hubLifetimeManager.AddGroupAsyncCore(connection, context.Message.GroupName);
-            }
 
-            return context.RespondAsync<Ack<THub>>(new { _hubLifetimeManager.ServerName });
+            return context.RespondAsync<Ack<THub>>(new {_hubLifetimeManager.ServerName});
         }
     }
 }

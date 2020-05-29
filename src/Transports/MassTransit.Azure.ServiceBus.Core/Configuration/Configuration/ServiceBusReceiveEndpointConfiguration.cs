@@ -19,8 +19,8 @@
     {
         readonly IServiceBusEndpointConfiguration _endpointConfiguration;
         readonly IServiceBusHostConfiguration _hostConfiguration;
-        readonly ReceiveEndpointSettings _settings;
         readonly Lazy<Uri> _inputAddress;
+        readonly ReceiveEndpointSettings _settings;
 
         public ServiceBusReceiveEndpointConfiguration(IServiceBusHostConfiguration hostConfiguration, ReceiveEndpointSettings settings,
             IServiceBusEndpointConfiguration endpointConfiguration)
@@ -42,6 +42,26 @@
         public override Uri InputAddress => _inputAddress.Value;
 
         IServiceBusTopologyConfiguration IServiceBusEndpointConfiguration.Topology => _endpointConfiguration.Topology;
+
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            return _settings.QueueConfigurator.Validate()
+                .Concat(base.Validate());
+        }
+
+        public void Build(IHost host)
+        {
+            var builder = new ServiceBusReceiveEndpointBuilder(_hostConfiguration, this);
+
+            ApplySpecifications(builder);
+
+            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
+
+            ClientPipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology,
+                _settings.RemoveSubscriptions, _hostConfiguration.ConnectionContextSupervisor.Stopping));
+
+            CreateReceiveEndpoint(host, receiveEndpointContext);
+        }
 
         public TimeSpan DuplicateDetectionHistoryTimeWindow
         {
@@ -100,26 +120,6 @@
         protected override bool IsAlreadyConfigured()
         {
             return _inputAddress.IsValueCreated || base.IsAlreadyConfigured();
-        }
-
-        public override IEnumerable<ValidationResult> Validate()
-        {
-            return _settings.QueueConfigurator.Validate()
-                .Concat(base.Validate());
-        }
-
-        public void Build(IHost host)
-        {
-            var builder = new ServiceBusReceiveEndpointBuilder(_hostConfiguration, this);
-
-            ApplySpecifications(builder);
-
-            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
-
-            ClientPipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology,
-                _settings.RemoveSubscriptions, _hostConfiguration.ConnectionContextSupervisor.Stopping));
-
-            CreateReceiveEndpoint(host, receiveEndpointContext);
         }
 
         protected override IErrorTransport CreateErrorTransport()

@@ -43,8 +43,9 @@ namespace MassTransit.PrometheusIntegration
         public string ConsumeDuration { get; set; }
         public string DeliveryDuration { get; set; }
 
-        public static PrometheusMetricsOptions CreateDefault() =>
-            new PrometheusMetricsOptions
+        public static PrometheusMetricsOptions CreateDefault()
+        {
+            return new PrometheusMetricsOptions
             {
                 EndpointLabel = "endpoint_address",
                 ConsumerTypeLabel = "consumer_type",
@@ -80,7 +81,8 @@ namespace MassTransit.PrometheusIntegration
                 HandlerInProgress = "mt_handler_in_progress",
                 SagaInProgress = "mt_saga_in_progress",
                 ExecuteInProgress = "mt_activity_execute_in_progress",
-                CompensateInProgress = "mt_activity_compensate_in_progress",
+                CompensateInProgress = "mt_activity_compensate_in_progress"
             };
+        }
     }
 }

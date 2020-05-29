@@ -1,8 +1,8 @@
 namespace MassTransit
 {
     using NHibernate;
-    using Saga;
     using NHibernateIntegration.Saga;
+    using Saga;
 
 
     public static class NHibernateSagaRepositoryRegistrationExtensions

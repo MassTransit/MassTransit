@@ -1,23 +1,20 @@
 ﻿namespace MassTransit.EntityFrameworkIntegration.Tests
 {
-    using System;
-    using System.Threading.Tasks;
-    using Automatonymous;
-    using EntityFrameworkIntegration;
-    using NUnit.Framework;
-    using Saga;
-    using TestFramework;
-    using Testing;
-
-
     namespace PreInsert
     {
+        using System;
         using System.Collections.Generic;
         using System.Data.Entity;
         using System.Data.Entity.ModelConfiguration;
+        using System.Threading.Tasks;
+        using Automatonymous;
         using GreenPipes;
         using Mappings;
         using MassTransit.Saga;
+        using NUnit.Framework;
+        using Saga;
+        using TestFramework;
+        using Testing;
 
 
         public class Instance :
@@ -87,17 +84,6 @@
 
         public class InstanceSagaDbContext : SagaDbContext
         {
-            class EntityFrameworkInstanceMap : SagaClassMap<Instance>
-            {
-                protected override void Configure(EntityTypeConfiguration<Instance> entity, DbModelBuilder modelBuilder)
-                {
-                    entity.Property(x => x.CurrentState);
-                    entity.Property(x => x.Name);
-                    entity.Property(x => x.CreateTimestamp);
-                }
-            }
-
-
             public InstanceSagaDbContext(string dbConnectionString)
                 : base(dbConnectionString)
             {
@@ -107,13 +93,50 @@
             {
                 get { yield return new EntityFrameworkInstanceMap(); }
             }
+
+
+            class EntityFrameworkInstanceMap : SagaClassMap<Instance>
+            {
+                protected override void Configure(EntityTypeConfiguration<Instance> entity, DbModelBuilder modelBuilder)
+                {
+                    entity.Property(x => x.CurrentState);
+                    entity.Property(x => x.Name);
+                    entity.Property(x => x.CreateTimestamp);
+                }
+            }
         }
 
 
-        [TestFixture, Explicit]
+        [TestFixture]
+        [Explicit]
         public class When_pre_inserting_the_state_machine_instance_using_ef :
             InMemoryTestFixture
         {
+            [Test]
+            public async Task Should_receive_the_published_message()
+            {
+                Task<ConsumeContext<StartupComplete>> messageReceived = ConnectPublishHandler<StartupComplete>();
+
+                var message = new Start("Joe");
+
+                await InputQueueSendEndpoint.Send(message);
+
+                ConsumeContext<StartupComplete> received = await messageReceived;
+
+                Assert.AreEqual(message.CorrelationId, received.Message.TransactionId);
+
+                Assert.IsTrue(received.InitiatorId.HasValue, "The initiator should be copied from the CorrelationId");
+
+                Assert.AreEqual(received.InitiatorId.Value, message.CorrelationId, "The initiator should be the saga CorrelationId");
+
+                Assert.AreEqual(received.SourceAddress, InputQueueAddress, "The published message should have the input queue source address");
+
+                Guid? saga =
+                    await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.Running.Name, TestTimeout);
+
+                Assert.IsTrue(saga.HasValue);
+            }
+
             public When_pre_inserting_the_state_machine_instance_using_ef()
             {
                 ISagaDbContextFactory<Instance> sagaDbContextFactory = new DelegateSagaDbContextFactory<Instance>(
@@ -161,20 +184,36 @@
                 public State Running { get; private set; }
                 public Event<Start> Started { get; private set; }
             }
+        }
 
 
+        [TestFixture]
+        public class When_pre_inserting_in_an_invalid_state_using_ef :
+            InMemoryTestFixture
+        {
             [Test]
+            [Explicit]
             public async Task Should_receive_the_published_message()
             {
                 Task<ConsumeContext<StartupComplete>> messageReceived = ConnectPublishHandler<StartupComplete>();
 
-                var message = new Start("Joe");
+                var sagaId = NewId.NextGuid();
+
+                var warmUpMessage = new WarmUp(sagaId, "Joe");
+
+                await InputQueueSendEndpoint.Send(warmUpMessage);
+
+                await _repository.ShouldContainSaga(sagaId, TestTimeout);
+
+                var message = new Start(sagaId, "Joe");
+
+                await Task.Delay(1000);
 
                 await InputQueueSendEndpoint.Send(message);
 
                 ConsumeContext<StartupComplete> received = await messageReceived;
 
-                Assert.AreEqual(message.CorrelationId, received.Message.TransactionId);
+                Assert.AreEqual(sagaId, received.Message.TransactionId);
 
                 Assert.IsTrue(received.InitiatorId.HasValue, "The initiator should be copied from the CorrelationId");
 
@@ -187,13 +226,7 @@
 
                 Assert.IsTrue(saga.HasValue);
             }
-        }
 
-
-        [TestFixture]
-        public class When_pre_inserting_in_an_invalid_state_using_ef :
-            InMemoryTestFixture
-        {
             public When_pre_inserting_in_an_invalid_state_using_ef()
             {
                 var sagaDbContextFactory =
@@ -246,42 +279,6 @@
                 public State Running { get; private set; }
                 public Event<Start> Started { get; private set; }
                 public Event<WarmUp> WarmedUp { get; private set; }
-            }
-
-
-            [Test, Explicit]
-            public async Task Should_receive_the_published_message()
-            {
-                Task<ConsumeContext<StartupComplete>> messageReceived = ConnectPublishHandler<StartupComplete>();
-
-                Guid sagaId = NewId.NextGuid();
-
-                var warmUpMessage = new WarmUp(sagaId, "Joe");
-
-                await InputQueueSendEndpoint.Send(warmUpMessage);
-
-                await _repository.ShouldContainSaga(sagaId, TestTimeout);
-
-                var message = new Start(sagaId, "Joe");
-
-                await Task.Delay(1000);
-
-                await InputQueueSendEndpoint.Send(message);
-
-                ConsumeContext<StartupComplete> received = await messageReceived;
-
-                Assert.AreEqual(sagaId, received.Message.TransactionId);
-
-                Assert.IsTrue(received.InitiatorId.HasValue, "The initiator should be copied from the CorrelationId");
-
-                Assert.AreEqual(received.InitiatorId.Value, message.CorrelationId, "The initiator should be the saga CorrelationId");
-
-                Assert.AreEqual(received.SourceAddress, InputQueueAddress, "The published message should have the input queue source address");
-
-                Guid? saga =
-                    await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.Running.Name, TestTimeout);
-
-                Assert.IsTrue(saga.HasValue);
             }
         }
 

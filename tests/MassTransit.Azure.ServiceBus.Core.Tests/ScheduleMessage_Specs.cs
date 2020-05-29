@@ -96,16 +96,6 @@
     public class Scheduling_a_message_using_quartz :
         AzureServiceBusTestFixture
     {
-        TimeSpan _testOffset;
-
-        public Scheduling_a_message_using_quartz()
-        {
-            _testOffset = TimeSpan.Zero;
-            AzureServiceBusTestHarness.ConfigureMessageScheduler = false;
-        }
-
-        Uri QuartzAddress { get; set; }
-
         [Test]
         public async Task Should_get_the_message()
         {
@@ -115,6 +105,16 @@
 
             await _second;
         }
+
+        TimeSpan _testOffset;
+
+        public Scheduling_a_message_using_quartz()
+        {
+            _testOffset = TimeSpan.Zero;
+            AzureServiceBusTestHarness.ConfigureMessageScheduler = false;
+        }
+
+        Uri QuartzAddress { get; set; }
 
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
@@ -150,16 +150,6 @@
     public class Scheduling_a_message_using_quartz_and_cancelling_it :
         AzureServiceBusTestFixture
     {
-        TimeSpan _testOffset;
-
-        public Scheduling_a_message_using_quartz_and_cancelling_it()
-        {
-            _testOffset = TimeSpan.Zero;
-            AzureServiceBusTestHarness.ConfigureMessageScheduler = false;
-        }
-
-        Uri QuartzAddress { get; set; }
-
         [Test]
         public async Task Should_not_get_the_message()
         {
@@ -169,6 +159,16 @@
 
             Assert.That(async () => await _second.OrTimeout(5000), Throws.TypeOf<TimeoutException>());
         }
+
+        TimeSpan _testOffset;
+
+        public Scheduling_a_message_using_quartz_and_cancelling_it()
+        {
+            _testOffset = TimeSpan.Zero;
+            AzureServiceBusTestHarness.ConfigureMessageScheduler = false;
+        }
+
+        Uri QuartzAddress { get; set; }
 
         Task<ConsumeContext<SecondMessage>> _second;
         Task<ConsumeContext<FirstMessage>> _first;
@@ -245,11 +245,6 @@
     public class Scheduling_a_published_message_with_no_scope :
         TwoScopeAzureServiceBusTestFixture
     {
-        public Scheduling_a_published_message_with_no_scope()
-            : base("")
-        {
-        }
-
         [Test]
         public async Task Should_get_both_messages()
         {
@@ -260,6 +255,11 @@
             await _first;
 
             await _second;
+        }
+
+        public Scheduling_a_published_message_with_no_scope()
+            : base("")
+        {
         }
 
         Task<ConsumeContext<SecondMessage>> _second;
@@ -290,7 +290,8 @@
     public class Cancelling_a_scheduled_message :
         AzureServiceBusTestFixture
     {
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Should_result_in_no_message_received()
         {
             await InputQueueSendEndpoint.Send(new FirstMessage());
@@ -310,7 +311,7 @@
 
             _first = Handler<FirstMessage>(configurator, async context =>
             {
-                var scheduledMessage = await context.ScheduleSend(TimeSpan.FromSeconds(15), new SecondMessage() {Id = _testId});
+                ScheduledMessage<SecondMessage> scheduledMessage = await context.ScheduleSend(TimeSpan.FromSeconds(15), new SecondMessage {Id = _testId});
 
                 await Task.Delay(1000);
 

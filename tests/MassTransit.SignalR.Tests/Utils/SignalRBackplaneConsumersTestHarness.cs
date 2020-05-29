@@ -10,15 +10,7 @@
     public class SignalRBackplaneConsumersTestHarness<THub>
         where THub : Hub
     {
-        public ConsumerTestHarness<AllConsumer<THub>> All { get; private set; }
-        public ConsumerTestHarness<ConnectionConsumer<THub>> Connection { get; private set; }
-        public ConsumerTestHarness<GroupConsumer<THub>> Group { get; private set; }
-        public ConsumerTestHarness<GroupManagementConsumer<THub>> GroupManagement { get; private set; }
-        public ConsumerTestHarness<UserConsumer<THub>> User { get; private set; }
-
         readonly IList<IHubManagerConsumerFactory<THub>> _hubManagerConsumerFactories;
-
-        public MassTransitHubLifetimeManager<THub> HubLifetimeManager { get; private set; }
 
         readonly string _queuePrefix;
         readonly BusTestHarness _testHarness;
@@ -29,6 +21,14 @@
             _testHarness = testHarness;
             _hubManagerConsumerFactories = new List<IHubManagerConsumerFactory<THub>>();
         }
+
+        public ConsumerTestHarness<AllConsumer<THub>> All { get; private set; }
+        public ConsumerTestHarness<ConnectionConsumer<THub>> Connection { get; private set; }
+        public ConsumerTestHarness<GroupConsumer<THub>> Group { get; private set; }
+        public ConsumerTestHarness<GroupManagementConsumer<THub>> GroupManagement { get; private set; }
+        public ConsumerTestHarness<UserConsumer<THub>> User { get; private set; }
+
+        public MassTransitHubLifetimeManager<THub> HubLifetimeManager { get; private set; }
 
         public void AddAllConsumer(HubLifetimeManagerConsumerFactory<AllConsumer<THub>, THub> hubConsumerFactory)
         {
@@ -67,10 +67,8 @@
 
         public void SetHubLifetimeManager(MassTransitHubLifetimeManager<THub> hubLifetimeManager)
         {
-            foreach (var factory in _hubManagerConsumerFactories)
-            {
+            foreach (IHubManagerConsumerFactory<THub> factory in _hubManagerConsumerFactories)
                 factory.HubLifetimeManager = hubLifetimeManager;
-            }
 
             HubLifetimeManager = hubLifetimeManager;
         }

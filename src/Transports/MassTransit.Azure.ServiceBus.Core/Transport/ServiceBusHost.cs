@@ -29,18 +29,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         public IServiceBusHostTopology Topology { get; }
 
-        protected override void Probe(ProbeContext context)
-        {
-            context.Set(new
-            {
-                Type = "Azure Service Bus",
-                _hostConfiguration.HostAddress,
-                _hostConfiguration.Settings.OperationTimeout
-            });
-
-            _hostConfiguration.ConnectionContextSupervisor.Probe(context);
-        }
-
         public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IReceiveEndpointConfigurator> configureEndpoint = null)
         {
@@ -94,6 +82,18 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             var settings = new SubscriptionEndpointSettings(topicName, subscriptionName);
 
             return ConnectSubscriptionEndpoint(settings, configure);
+        }
+
+        protected override void Probe(ProbeContext context)
+        {
+            context.Set(new
+            {
+                Type = "Azure Service Bus",
+                _hostConfiguration.HostAddress,
+                _hostConfiguration.Settings.OperationTimeout
+            });
+
+            _hostConfiguration.ConnectionContextSupervisor.Probe(context);
         }
 
         HostReceiveEndpointHandle ConnectSubscriptionEndpoint(SubscriptionEndpointSettings settings,

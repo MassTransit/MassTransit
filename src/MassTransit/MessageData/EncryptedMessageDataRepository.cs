@@ -52,11 +52,9 @@
                 var query = addressBuilder.Query;
 
                 if (query.Contains("?"))
-                {
                     query = query.Substring(query.IndexOf('?') + 1);
-                }
 
-                foreach (string parameter in query.Split('&'))
+                foreach (var parameter in query.Split('&'))
                 {
                     if (string.IsNullOrWhiteSpace(parameter))
                         continue;

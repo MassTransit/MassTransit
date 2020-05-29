@@ -20,10 +20,10 @@
         IReceiveTransport
     {
         readonly IPipe<ConnectionContext> _connectionPipe;
+        readonly ActiveMqReceiveEndpointContext _context;
         readonly IActiveMqHostConfiguration _hostConfiguration;
         readonly Uri _inputAddress;
         readonly ReceiveSettings _settings;
-        readonly ActiveMqReceiveEndpointContext _context;
 
         public ActiveMqReceiveTransport(IActiveMqHostConfiguration hostConfiguration, ReceiveSettings settings, IPipe<ConnectionContext> connectionPipe,
             ActiveMqReceiveEndpointContext context)
@@ -46,7 +46,7 @@
                 _settings.EntityName,
                 _settings.Durable,
                 _settings.AutoDelete,
-                _settings.PrefetchCount,
+                _settings.PrefetchCount
             });
             var topologyScope = scope.CreateScope("topology");
 

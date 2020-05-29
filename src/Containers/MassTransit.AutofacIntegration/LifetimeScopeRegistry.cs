@@ -185,6 +185,12 @@
 
             public ILifetimeScope Scope => _scope.Value;
 
+            public async ValueTask DisposeAsync()
+            {
+                if (_scope.IsValueCreated)
+                    await _scope.Value.DisposeAsync().ConfigureAwait(false);
+            }
+
             public void Dispose()
             {
                 if (_scope.IsValueCreated)
@@ -198,12 +204,6 @@
 
             static void DefaultConfigurator(TId id, ContainerBuilder containerBuilder)
             {
-            }
-
-            public async ValueTask DisposeAsync()
-            {
-                if (_scope.IsValueCreated)
-                    await _scope.Value.DisposeAsync().ConfigureAwait(false);
             }
         }
     }

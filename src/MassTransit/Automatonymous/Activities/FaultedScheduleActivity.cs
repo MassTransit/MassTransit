@@ -6,6 +6,7 @@
     using MassTransit;
     using MassTransit.Scheduling;
 
+
     public class FaultedScheduleActivity<TInstance, TException, TMessage> :
         Activity<TInstance>
         where TInstance : class, SagaStateMachineInstance
@@ -109,6 +110,7 @@
             await next.Faulted(context).ConfigureAwait(false);
         }
     }
+
 
     public class FaultedScheduleActivity<TInstance, TData, TException, TMessage> :
         Activity<TInstance, TData>

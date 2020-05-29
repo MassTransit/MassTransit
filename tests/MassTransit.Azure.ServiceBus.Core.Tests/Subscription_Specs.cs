@@ -38,6 +38,7 @@
             }
         }
 
+
         [TestFixture]
         public class Using_a_subscription_endpoint_that_faults :
             AzureServiceBusTestFixture
@@ -90,6 +91,7 @@
         {
             public string Value { get; set; }
         }
+
 
         public class MessageC
         {

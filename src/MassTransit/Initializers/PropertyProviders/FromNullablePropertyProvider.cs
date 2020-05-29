@@ -22,7 +22,7 @@ namespace MassTransit.Initializers.PropertyProviders
             if (!context.HasInput)
                 return TaskUtil.Default<TProperty>();
 
-            var propertyTask = _provider.GetProperty(context);
+            Task<TProperty?> propertyTask = _provider.GetProperty(context);
             if (propertyTask.IsCompleted)
                 return Task.FromResult(propertyTask.Result ?? default);
 

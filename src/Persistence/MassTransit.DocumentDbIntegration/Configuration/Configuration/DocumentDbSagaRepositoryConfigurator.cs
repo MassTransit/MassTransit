@@ -28,15 +28,6 @@ namespace MassTransit.DocumentDbIntegration.Configuration
             _serializerSettings = GetSerializerSettingsIfNeeded();
         }
 
-        public IEnumerable<ValidationResult> Validate()
-        {
-            if (string.IsNullOrWhiteSpace(DatabaseId))
-                yield return this.Failure("DatabaseId", "must be specified");
-
-            if (string.IsNullOrWhiteSpace(CollectionId))
-                yield return this.Warning("CollectionId", "not specified, using default");
-        }
-
         public void ConfigureEmulator()
         {
             EndpointUri = EmulatorConstants.EndpointUri;
@@ -47,6 +38,15 @@ namespace MassTransit.DocumentDbIntegration.Configuration
         public string CollectionId { get; set; }
         public Uri EndpointUri { get; set; }
         public string Key { get; set; }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (string.IsNullOrWhiteSpace(DatabaseId))
+                yield return this.Failure("DatabaseId", "must be specified");
+
+            if (string.IsNullOrWhiteSpace(CollectionId))
+                yield return this.Warning("CollectionId", "not specified, using default");
+        }
 
         public void Register(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
         {
@@ -70,8 +70,8 @@ namespace MassTransit.DocumentDbIntegration.Configuration
             var correlationId = TypeMetadataCache<TSaga>.Properties.Single(x => x.Name == nameof(IVersionedSaga.CorrelationId));
             var etag = TypeMetadataCache<TSaga>.Properties.Single(x => x.Name == nameof(IVersionedSaga.ETag));
 
-            bool hasId = correlationId.GetAttribute<JsonPropertyAttribute>().Any(x => x.PropertyName == "id");
-            bool hasETag = etag.GetAttribute<JsonPropertyAttribute>().Any(x => x.PropertyName == "_etag");
+            var hasId = correlationId.GetAttribute<JsonPropertyAttribute>().Any(x => x.PropertyName == "id");
+            var hasETag = etag.GetAttribute<JsonPropertyAttribute>().Any(x => x.PropertyName == "_etag");
 
             if (hasId && hasETag)
                 return default;

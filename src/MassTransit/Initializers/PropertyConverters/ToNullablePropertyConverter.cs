@@ -29,7 +29,7 @@ namespace MassTransit.Initializers.PropertyConverters
         public Task<TResult?> Convert<T>(InitializeContext<T> context, TInput input)
             where T : class
         {
-            var resultTask = _converter.Convert(context, input);
+            Task<TResult> resultTask = _converter.Convert(context, input);
             if (resultTask.IsCompleted)
                 return Task.FromResult<TResult?>(resultTask.Result);
 

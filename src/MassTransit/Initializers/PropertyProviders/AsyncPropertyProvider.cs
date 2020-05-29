@@ -5,7 +5,7 @@ namespace MassTransit.Initializers.PropertyProviders
 
 
     /// <summary>
-    /// Awaits a <see cref="Task{TProperty}"/> property, returning the property value.
+    /// Awaits a <see cref="Task{TProperty}" /> property, returning the property value.
     /// </summary>
     /// <typeparam name="TInput"></typeparam>
     /// <typeparam name="TProperty"></typeparam>
@@ -25,17 +25,17 @@ namespace MassTransit.Initializers.PropertyProviders
             if (!context.HasInput)
                 return TaskUtil.Default<TProperty>();
 
-            var propertyTask = _provider.GetProperty(context);
+            Task<Task<TProperty>> propertyTask = _provider.GetProperty(context);
             if (propertyTask.IsCompleted)
             {
-                var valueTask = propertyTask.Result;
+                Task<TProperty> valueTask = propertyTask.Result;
                 if (valueTask.IsCompleted)
                     return valueTask;
             }
 
             async Task<TProperty> GetPropertyAsync()
             {
-                var valueTask = await propertyTask.ConfigureAwait(false);
+                Task<TProperty> valueTask = await propertyTask.ConfigureAwait(false);
 
                 return await valueTask.ConfigureAwait(false);
             }
@@ -46,7 +46,7 @@ namespace MassTransit.Initializers.PropertyProviders
 
 
     /// <summary>
-    /// Awaits a <see cref="Task{TProperty}"/> property, returning the property value.
+    /// Awaits a <see cref="Task{TProperty}" /> property, returning the property value.
     /// </summary>
     /// <typeparam name="TInput"></typeparam>
     /// <typeparam name="TProperty"></typeparam>
@@ -55,8 +55,8 @@ namespace MassTransit.Initializers.PropertyProviders
         IPropertyProvider<TInput, TProperty>
         where TInput : class
     {
-        readonly IPropertyProvider<TInput, Task<TTask>> _provider;
         readonly IPropertyConverter<TProperty, TTask> _converter;
+        readonly IPropertyProvider<TInput, Task<TTask>> _provider;
 
         public AsyncPropertyProvider(IPropertyProvider<TInput, Task<TTask>> provider, IPropertyConverter<TProperty, TTask> converter)
         {
@@ -69,17 +69,17 @@ namespace MassTransit.Initializers.PropertyProviders
             if (!context.HasInput)
                 return TaskUtil.Default<TProperty>();
 
-            var propertyTask = _provider.GetProperty(context);
+            Task<Task<TTask>> propertyTask = _provider.GetProperty(context);
             if (propertyTask.IsCompleted)
             {
-                var valueTask = propertyTask.Result;
+                Task<TTask> valueTask = propertyTask.Result;
                 if (valueTask.IsCompleted)
                     return _converter.Convert(context, valueTask.Result);
             }
 
             async Task<TProperty> GetPropertyAsync()
             {
-                var valueTask = await propertyTask.ConfigureAwait(false);
+                Task<TTask> valueTask = await propertyTask.ConfigureAwait(false);
 
                 var value = await valueTask.ConfigureAwait(false);
 

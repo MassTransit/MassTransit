@@ -10,8 +10,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class Publishing_a_fault_message :
         RabbitMqTestFixture
     {
-        Task<ConsumeContext<Fault<MemberUpdateCommand>>> _handled;
-
         [Test]
         public async Task Should_support_the_base_fault_type()
         {
@@ -23,6 +21,8 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             await _handled;
         }
+
+        Task<ConsumeContext<Fault<MemberUpdateCommand>>> _handled;
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {

@@ -2,6 +2,7 @@
 {
     using System.Data.SqlClient;
 
+
     public class DbQuery
     {
         readonly string _connectionString;

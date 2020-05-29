@@ -19,11 +19,11 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
         where TSaga : class, ISaga
         where TMessage : class
     {
-        readonly DbContext _dbContext;
         readonly ConsumeContext<TMessage> _consumeContext;
+        readonly DbContext _dbContext;
         readonly ISagaConsumeContextFactory<DbContext, TSaga> _factory;
-        readonly ISagaRepositoryLockStrategy<TSaga> _lockStrategy;
         readonly SemaphoreSlim _inUse = new SemaphoreSlim(1);
+        readonly ISagaRepositoryLockStrategy<TSaga> _lockStrategy;
 
         public DbContextSagaRepositoryContext(DbContext dbContext, ConsumeContext<TMessage> consumeContext,
             ISagaConsumeContextFactory<DbContext, TSaga> factory, ISagaRepositoryLockStrategy<TSaga> lockStrategy)
@@ -33,6 +33,11 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
             _consumeContext = consumeContext;
             _factory = factory;
             _lockStrategy = lockStrategy;
+        }
+
+        public void Dispose()
+        {
+            _inUse.Dispose();
         }
 
         public Task<SagaConsumeContext<TSaga, TMessage>> Add(TSaga instance)
@@ -125,11 +130,6 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
             where T : class
         {
             return _factory.CreateSagaConsumeContext(_dbContext, consumeContext, instance, mode);
-        }
-
-        public void Dispose()
-        {
-            _inUse.Dispose();
         }
     }
 

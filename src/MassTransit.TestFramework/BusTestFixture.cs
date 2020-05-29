@@ -19,6 +19,11 @@ namespace MassTransit.TestFramework
         static readonly bool _enableDiagnostics = !bool.TryParse(Environment.GetEnvironmentVariable("CI"), out var isBuildServer) || !isBuildServer;
         protected static readonly TestOutputLoggerFactory LoggerFactory;
 
+        static BusTestFixture()
+        {
+            LoggerFactory = new TestOutputLoggerFactory(true);
+        }
+
         protected BusTestFixture(BusTestHarness harness)
             : base(harness)
         {
@@ -28,10 +33,10 @@ namespace MassTransit.TestFramework
             harness.OnConfigureBus += ConfigureBusDiagnostics;
         }
 
-        static BusTestFixture()
-        {
-            LoggerFactory = new TestOutputLoggerFactory(true);
-        }
+        protected BusTestHarness BusTestHarness { get; }
+
+        protected IBus Bus => BusTestHarness.Bus;
+        protected IBusControl BusControl => BusTestHarness.BusControl;
 
         public static void ConfigureBusDiagnostics(IBusFactoryConfigurator configurator)
         {
@@ -43,11 +48,6 @@ namespace MassTransit.TestFramework
                     DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
             }
         }
-
-        protected BusTestHarness BusTestHarness { get; }
-
-        protected IBus Bus => BusTestHarness.Bus;
-        protected IBusControl BusControl => BusTestHarness.BusControl;
 
         /// <summary>
         /// Subscribes a message handler to the bus, which is disconnected after the message
@@ -92,7 +92,7 @@ namespace MassTransit.TestFramework
             Task<ConsumeContext<T>> result = null;
             Bus.ConnectReceiveEndpoint(NewId.NextGuid().ToString(), context =>
             {
-                result = Handled<T>(context, filter);
+                result = Handled(context, filter);
             });
 
             return result;

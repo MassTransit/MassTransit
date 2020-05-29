@@ -90,20 +90,20 @@ namespace MassTransit.ActiveMqTransport
             {
                 switch (key)
                 {
-                    case TemporaryKey when bool.TryParse(value, out bool result):
+                    case TemporaryKey when bool.TryParse(value, out var result):
                         AutoDelete = result;
                         Durable = !result;
                         break;
 
-                    case DurableKey when bool.TryParse(value, out bool result):
+                    case DurableKey when bool.TryParse(value, out var result):
                         Durable = result;
                         break;
 
-                    case AutoDeleteKey when bool.TryParse(value, out bool result):
+                    case AutoDeleteKey when bool.TryParse(value, out var result):
                         AutoDelete = result;
                         break;
 
-                    case TypeKey when _parseConverter.TryConvert(value, out AddressType result):
+                    case TypeKey when _parseConverter.TryConvert(value, out var result):
                         Type = result;
                         break;
                 }
@@ -136,7 +136,7 @@ namespace MassTransit.ActiveMqTransport
 
         public ActiveMqEndpointAddress GetDelayAddress()
         {
-            string name = $"{Name}_delay";
+            var name = $"{Name}_delay";
 
             return new ActiveMqEndpointAddress(Scheme, Host, Port, VirtualHost, name, Durable, AutoDelete, Type);
         }

@@ -30,7 +30,7 @@ namespace MassTransit.Initializers.HeaderInitializers
 
         public Task Apply(InitializeContext<TMessage, TInput> context, SendContext sendContext)
         {
-            var propertyTask = _provider.GetProperty(context);
+            Task<THeader> propertyTask = _provider.GetProperty(context);
             if (propertyTask.IsCompleted)
             {
                 sendContext.Headers.Set(_headerName, propertyTask.Result);

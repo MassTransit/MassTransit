@@ -12,9 +12,9 @@
 
     public class MultiTestConsumer
     {
-        readonly CancellationToken _testCompleted;
         readonly IList<IConsumerConfigurator> _configures;
         readonly ReceivedMessageList _received;
+        readonly CancellationToken _testCompleted;
 
         public MultiTestConsumer(TimeSpan timeout, CancellationToken testCompleted = default)
         {
@@ -112,19 +112,18 @@
             where T : class
         {
             readonly MultiTestConsumer _multiConsumer;
-            readonly ReceivedMessageList<T> _received;
 
             public Of(MultiTestConsumer multiConsumer)
             {
                 _multiConsumer = multiConsumer;
-                _received = new ReceivedMessageList<T>(multiConsumer.Timeout, multiConsumer._testCompleted);
+                Received = new ReceivedMessageList<T>(multiConsumer.Timeout, multiConsumer._testCompleted);
             }
 
-            public ReceivedMessageList<T> Received => _received;
+            public ReceivedMessageList<T> Received { get; }
 
             public Task Consume(ConsumeContext<T> context)
             {
-                _received.Add(context);
+                Received.Add(context);
                 _multiConsumer._received.Add(context);
 
                 return TaskUtil.Completed;
@@ -137,19 +136,18 @@
             where T : class
         {
             readonly MultiTestConsumer _multiConsumer;
-            readonly ReceivedMessageList<T> _received;
 
             public FaultOf(MultiTestConsumer multiConsumer)
             {
                 _multiConsumer = multiConsumer;
-                _received = new ReceivedMessageList<T>(multiConsumer.Timeout, multiConsumer._testCompleted);
+                Received = new ReceivedMessageList<T>(multiConsumer.Timeout, multiConsumer._testCompleted);
             }
 
-            public ReceivedMessageList<T> Received => _received;
+            public ReceivedMessageList<T> Received { get; }
 
             public Task Consume(ConsumeContext<T> context)
             {
-                _received.Add(context);
+                Received.Add(context);
                 _multiConsumer._received.Add(context);
 
                 throw new InvalidOperationException("This is intentional from a test");

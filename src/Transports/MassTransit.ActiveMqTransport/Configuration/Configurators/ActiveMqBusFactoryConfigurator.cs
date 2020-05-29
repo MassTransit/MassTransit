@@ -29,30 +29,6 @@
             _settings = new QueueReceiveSettings(queueName, false, true);
         }
 
-        public IBusControl CreateBus()
-        {
-            void ConfigureBusEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
-            {
-                configurator.ConfigureConsumeTopology = false;
-            }
-
-            var busReceiveEndpointConfiguration = _busConfiguration.HostConfiguration
-                .CreateReceiveEndpointConfiguration(_settings, _busConfiguration.BusEndpointConfiguration, ConfigureBusEndpoint);
-
-            var builder = new ConfigurationBusBuilder(_busConfiguration, busReceiveEndpointConfiguration);
-
-            return builder.Build();
-        }
-
-        public override IEnumerable<ValidationResult> Validate()
-        {
-            foreach (var result in base.Validate())
-                yield return result;
-
-            if (string.IsNullOrWhiteSpace(_settings.EntityName))
-                yield return this.Failure("Bus", "The bus queue name must not be null or empty");
-        }
-
         public ushort PrefetchCount
         {
             set => _settings.PrefetchCount = value;
@@ -110,6 +86,30 @@
         public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
+        }
+
+        public IBusControl CreateBus()
+        {
+            void ConfigureBusEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
+            {
+                configurator.ConfigureConsumeTopology = false;
+            }
+
+            var busReceiveEndpointConfiguration = _busConfiguration.HostConfiguration
+                .CreateReceiveEndpointConfiguration(_settings, _busConfiguration.BusEndpointConfiguration, ConfigureBusEndpoint);
+
+            var builder = new ConfigurationBusBuilder(_busConfiguration, busReceiveEndpointConfiguration);
+
+            return builder.Build();
+        }
+
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            foreach (var result in base.Validate())
+                yield return result;
+
+            if (string.IsNullOrWhiteSpace(_settings.EntityName))
+                yield return this.Failure("Bus", "The bus queue name must not be null or empty");
         }
     }
 }

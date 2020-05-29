@@ -53,8 +53,8 @@ namespace MassTransit.Turnout.Configuration
 
         /// <summary>
         /// Configures a turnout job. Jobs are started by using the request or service client to send
-        /// <see cref="SubmitJob{TJob}"/> requests to the endpoint. The default endpoint name is the
-        /// message type formatted using the configured <see cref="IEndpointNameFormatter"/>.
+        /// <see cref="SubmitJob{TJob}" /> requests to the endpoint. The default endpoint name is the
+        /// message type formatted using the configured <see cref="IEndpointNameFormatter" />.
         /// </summary>
         /// <param name="configure">Job configuration method</param>
         /// <typeparam name="T">The job type, which is the message type that starts a new job.</typeparam>

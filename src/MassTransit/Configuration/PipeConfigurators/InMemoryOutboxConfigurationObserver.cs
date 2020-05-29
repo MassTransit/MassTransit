@@ -14,6 +14,14 @@
             Connect(this);
         }
 
+        public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
+            where TMessage : class
+        {
+            var specification = new InMemoryOutboxSpecification<TMessage>();
+
+            configurator.AddPipeSpecification(specification);
+        }
+
         public override void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
         {
             var specification = new InMemoryExecuteContextOutboxSpecification<TArguments>();
@@ -33,14 +41,6 @@
             var specification = new InMemoryCompensateContextOutboxSpecification<TLog>();
 
             configurator.Log(x => x.AddPipeSpecification(specification));
-        }
-
-        public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
-            where TMessage : class
-        {
-            var specification = new InMemoryOutboxSpecification<TMessage>();
-
-            configurator.AddPipeSpecification(specification);
         }
     }
 }

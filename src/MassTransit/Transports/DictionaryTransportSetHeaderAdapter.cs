@@ -6,9 +6,8 @@ namespace MassTransit.Transports
     public class DictionaryTransportSetHeaderAdapter :
         ITransportSetHeaderAdapter<object>
     {
-        readonly TransportHeaderOptions _options;
-
         readonly IHeaderValueConverter _converter;
+        readonly TransportHeaderOptions _options;
 
         public DictionaryTransportSetHeaderAdapter(IHeaderValueConverter converter, TransportHeaderOptions options = TransportHeaderOptions.Default)
         {

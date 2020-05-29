@@ -7,10 +7,10 @@ namespace MassTransit.ActiveMqTransport.Topology.Builders
 
     public abstract class BrokerTopologyBuilder
     {
-        long _nextId;
         protected readonly NamedEntityCollection<ConsumerEntity, ConsumerHandle> Consumers;
-        protected readonly NamedEntityCollection<TopicEntity, TopicHandle> Topics;
         protected readonly NamedEntityCollection<QueueEntity, QueueHandle> Queues;
+        protected readonly NamedEntityCollection<TopicEntity, TopicHandle> Topics;
+        long _nextId;
 
         protected BrokerTopologyBuilder()
         {

@@ -20,8 +20,8 @@
     {
         readonly TaskCompletionSource<ConsumeContext<TResponse>> _completed;
         readonly MessageHandler<TResponse> _handler;
-        readonly Task _requestTask;
         readonly IBuildPipeConfigurator<ConsumeContext<TResponse>> _pipeConfigurator;
+        readonly Task _requestTask;
         readonly TaskScheduler _taskScheduler;
 
         public ResponseHandlerConfigurator(TaskScheduler taskScheduler, MessageHandler<TResponse> handler, Task requestTask)

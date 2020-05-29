@@ -16,8 +16,8 @@
     public class RabbitMqReceiveEndpointBuilder :
         ReceiveEndpointBuilder
     {
-        readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly IRabbitMqReceiveEndpointConfiguration _configuration;
+        readonly IRabbitMqHostConfiguration _hostConfiguration;
 
         public RabbitMqReceiveEndpointBuilder(IRabbitMqHostConfiguration hostConfiguration, IRabbitMqReceiveEndpointConfiguration configuration)
             : base(configuration)
@@ -42,8 +42,8 @@
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
-            IDeadLetterTransport deadLetterTransport = CreateDeadLetterTransport();
-            IErrorTransport errorTransport = CreateErrorTransport();
+            var deadLetterTransport = CreateDeadLetterTransport();
+            var errorTransport = CreateErrorTransport();
 
             var context = new RabbitMqQueueReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology);
 
@@ -79,7 +79,7 @@
 
             var queueArguments = new Dictionary<string, object>(settings.QueueArguments);
 
-            bool queueAutoDelete = settings.AutoDelete;
+            var queueAutoDelete = settings.AutoDelete;
             if (settings.QueueExpiration.HasValue)
             {
                 queueArguments["x-expires"] = (long)settings.QueueExpiration.Value.TotalMilliseconds;

@@ -55,7 +55,7 @@ namespace MassTransit.MartenIntegration.Configurators
             where T : class, ISaga
         {
             configurator.RegisterSingleInstance<IDocumentStore>(provider => DocumentStore.For(_configureOptions));
-            configurator.RegisterSagaRepository<T, IDocumentSession, SagaConsumeContextFactory<IDocumentSession,T>, MartenSagaRepositoryContextFactory<T>>();
+            configurator.RegisterSagaRepository<T, IDocumentSession, SagaConsumeContextFactory<IDocumentSession, T>, MartenSagaRepositoryContextFactory<T>>();
         }
     }
 }

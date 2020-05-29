@@ -84,7 +84,5 @@ namespace MassTransit.Tests
                 });
             }
         }
-
-
     }
 }

@@ -116,13 +116,13 @@ namespace MassTransit.Topology.Topologies
         {
             IMessagePublishTopologyConvention[] conventions;
             lock (_lock)
-            {
                 conventions = _conventions.ToArray();
-            }
 
             foreach (var convention in conventions)
+            {
                 if (convention.TryGetMessagePublishTopologyConvention(out IMessagePublishTopologyConvention<T> messagePublishTopologyConvention))
                     messageTopology.TryAddConvention(messagePublishTopologyConvention);
+            }
         }
 
         IMessagePublishTopologyConfigurator CreateMessageType(Type messageType)

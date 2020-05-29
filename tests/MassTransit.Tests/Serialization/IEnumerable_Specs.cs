@@ -21,7 +21,7 @@
         {
             EnumerableMessageType message = new EnumerableMessageTypeImpl {Items = new[] {new MessageItem {Value = "Frank"}, new MessageItem {Value = "Mary"}}};
 
-            EnumerableMessageType result = SerializeAndReturn(message);
+            var result = SerializeAndReturn(message);
 
             result.Items.Count().ShouldBe(message.Items.Count());
         }

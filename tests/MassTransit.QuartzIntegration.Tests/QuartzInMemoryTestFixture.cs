@@ -11,10 +11,9 @@
     public class QuartzInMemoryTestFixture :
         InMemoryTestFixture
     {
-        ISendEndpoint _quartzEndpoint;
-        TimeSpan _testOffset;
-        IScheduler _scheduler;
         readonly Lazy<IMessageScheduler> _messageScheduler;
+        IScheduler _scheduler;
+        TimeSpan _testOffset;
 
         public QuartzInMemoryTestFixture()
         {
@@ -27,7 +26,8 @@
 
         protected Uri QuartzAddress { get; }
 
-        protected ISendEndpoint QuartzEndpoint => _quartzEndpoint;
+        protected ISendEndpoint QuartzEndpoint { get; set; }
+
         protected IMessageScheduler Scheduler => _messageScheduler.Value;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -49,7 +49,7 @@
         [OneTimeSetUp]
         public async Task Setup_quartz_service()
         {
-            _quartzEndpoint = await GetSendEndpoint(QuartzAddress);
+            QuartzEndpoint = await GetSendEndpoint(QuartzAddress);
 
             SystemTime.UtcNow = GetUtcNow;
             SystemTime.Now = GetNow;

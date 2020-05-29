@@ -7,7 +7,7 @@
         IMessageSink<InMemoryTransportMessage>,
         IMessageSource<InMemoryTransportMessage>
     {
-        Task Send(InMemoryTransportMessage message);
         string Name { get; }
+        Task Send(InMemoryTransportMessage message);
     }
 }

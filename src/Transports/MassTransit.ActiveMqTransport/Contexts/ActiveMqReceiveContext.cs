@@ -16,43 +16,23 @@
         ActiveMqMessageContext,
         ReceiveLockContext
     {
-        readonly IMessage _transportMessage;
         byte[] _body;
 
         public ActiveMqReceiveContext(IMessage transportMessage, ActiveMqReceiveEndpointContext context, params object[] payloads)
             : base(transportMessage.NMSRedelivered, context, payloads)
         {
-            _transportMessage = transportMessage;
+            TransportMessage = transportMessage;
         }
 
-        protected override IHeaderProvider HeaderProvider => new ActiveMqHeaderProvider(_transportMessage);
+        protected override IHeaderProvider HeaderProvider => new ActiveMqHeaderProvider(TransportMessage);
 
-        public IMessage TransportMessage => _transportMessage;
+        public IMessage TransportMessage { get; }
 
-        public IPrimitiveMap Properties => _transportMessage.Properties;
-
-        public override byte[] GetBody()
-        {
-            if (_body != null)
-                return _body;
-
-            if (_transportMessage is ITextMessage textMessage)
-                return _body = Encoding.UTF8.GetBytes(textMessage.Text);
-
-            if (_transportMessage is IBytesMessage bytesMessage)
-                return _body = bytesMessage.Content;
-
-            throw new ActiveMqTransportException($"The message type is not supported: {TypeMetadataCache.GetShortName(_transportMessage.GetType())}");
-        }
-
-        public override Stream GetBodyStream()
-        {
-            return new MemoryStream(GetBody());
-        }
+        public IPrimitiveMap Properties => TransportMessage.Properties;
 
         public Task Complete()
         {
-            _transportMessage.Acknowledge();
+            TransportMessage.Acknowledge();
 
             return TaskUtil.Completed;
         }
@@ -65,6 +45,25 @@
         public Task ValidateLockStatus()
         {
             return TaskUtil.Completed;
+        }
+
+        public override byte[] GetBody()
+        {
+            if (_body != null)
+                return _body;
+
+            if (TransportMessage is ITextMessage textMessage)
+                return _body = Encoding.UTF8.GetBytes(textMessage.Text);
+
+            if (TransportMessage is IBytesMessage bytesMessage)
+                return _body = bytesMessage.Content;
+
+            throw new ActiveMqTransportException($"The message type is not supported: {TypeMetadataCache.GetShortName(TransportMessage.GetType())}");
+        }
+
+        public override Stream GetBodyStream()
+        {
+            return new MemoryStream(GetBody());
         }
     }
 }

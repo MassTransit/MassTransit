@@ -8,7 +8,6 @@
         where TNode : Node<T>, ITarjanNodeProperties
     {
         readonly AdjacencyList<T, TNode> _list;
-        readonly IList<IList<TNode>> _result;
         readonly Stack<TNode> _stack;
         int _index;
 
@@ -16,10 +15,10 @@
         {
             _list = list;
             _index = 0;
-            _result = new List<IList<TNode>>();
+            Result = new List<IList<TNode>>();
             _stack = new Stack<TNode>();
 
-            foreach (TNode node in _list.SourceNodes)
+            foreach (var node in _list.SourceNodes)
             {
                 if (node.Index != -1)
                     continue;
@@ -28,7 +27,7 @@
             }
         }
 
-        public IList<IList<TNode>> Result => _result;
+        public IList<IList<TNode>> Result { get; }
 
         void Compute(TNode v)
         {
@@ -38,9 +37,9 @@
 
             _stack.Push(v);
 
-            foreach (var edge in _list.GetEdges(v))
+            foreach (Edge<T, TNode> edge in _list.GetEdges(v))
             {
-                TNode n = edge.Target;
+                var n = edge.Target;
                 if (n.Index == -1)
                 {
                     Compute(n);
@@ -62,7 +61,7 @@
                 while (!v.Equals(n));
 
                 if (component.Count != 1 || !v.Equals(component[0]))
-                    _result.Add(component);
+                    Result.Add(component);
             }
         }
     }

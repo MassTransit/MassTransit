@@ -19,8 +19,8 @@
     {
         readonly IClientContextSupervisor _clientContextSupervisor;
         readonly IPipe<ClientContext> _clientPipe;
-        readonly ClientSettings _settings;
         readonly ServiceBusReceiveEndpointContext _context;
+        readonly ClientSettings _settings;
 
         public ReceiveTransport(ClientSettings settings, IClientContextSupervisor clientContextSupervisor, IPipe<ClientContext> clientPipe,
             ServiceBusReceiveEndpointContext context)

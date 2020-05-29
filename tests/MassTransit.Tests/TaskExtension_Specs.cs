@@ -1,8 +1,8 @@
 namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
-    using NUnit.Framework;
     using MassTransit.Initializers;
+    using NUnit.Framework;
 
 
     public class TaskExtension_Specs
@@ -10,7 +10,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_return_the_string_property()
         {
-            var subject = Task.FromResult(new Subject {Name = "Frank"});
+            Task<Subject> subject = Task.FromResult(new Subject {Name = "Frank"});
 
             var result = await subject.Select(x => x.Name);
 
@@ -20,7 +20,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_return_the_default_string_property()
         {
-            var subject = Task.FromResult(new Subject());
+            Task<Subject> subject = Task.FromResult(new Subject());
 
             var result = await subject.Select(x => x.Name, "Frank");
 
@@ -30,7 +30,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_return_the_default_provider_string_property()
         {
-            var subject = Task.FromResult(new Subject());
+            Task<Subject> subject = Task.FromResult(new Subject());
 
             var result = await subject.Select(x => x.Name, () => "Frank");
 
@@ -40,7 +40,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_return_the_default_async_string_property()
         {
-            var subject = Task.FromResult(new Subject());
+            Task<Subject> subject = Task.FromResult(new Subject());
 
             var result = await subject.Select(x => x.Name, () => Task.FromResult("Frank"));
 
@@ -50,7 +50,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_return_the_value_type_property()
         {
-            var subject = Task.FromResult(new Subject {Id = 27});
+            Task<Subject> subject = Task.FromResult(new Subject {Id = 27});
 
             var result = await subject.Select(x => x.Id);
 
@@ -60,9 +60,9 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_return_the_nullable_value_type_property()
         {
-            var subject = Task.FromResult(new Subject {MemberId = 27});
+            Task<Subject> subject = Task.FromResult(new Subject {MemberId = 27});
 
-            var result = await subject.Select(x => x.MemberId);
+            int? result = await subject.Select(x => x.MemberId);
 
             Assert.That(result, Is.EqualTo(27));
         }
@@ -70,9 +70,9 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_return_the_null_nullable_value_type_property()
         {
-            var subject = Task.FromResult(new Subject {MemberId = default});
+            Task<Subject> subject = Task.FromResult(new Subject {MemberId = default});
 
-            var result = await subject.Select(x => x.MemberId);
+            int? result = await subject.Select(x => x.MemberId);
 
             Assert.That(result.HasValue, Is.False);
         }
@@ -80,7 +80,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_return_the_null_nullable_default_value_for_value_type_property()
         {
-            var subject = Task.FromResult(new Subject {MemberId = default});
+            Task<Subject> subject = Task.FromResult(new Subject {MemberId = default});
 
             var result = await subject.Select(x => x.MemberId, 27);
 
@@ -90,7 +90,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_return_the_null_nullable_default_value_provider_for_value_type_property()
         {
-            var subject = Task.FromResult(new Subject {MemberId = default});
+            Task<Subject> subject = Task.FromResult(new Subject {MemberId = default});
 
             var result = await subject.Select(x => x.MemberId, () => 27);
 
@@ -100,7 +100,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_return_the_null_nullable_default_value_async_provider_for_value_type_property()
         {
-            var subject = Task.FromResult(new Subject {MemberId = default});
+            Task<Subject> subject = Task.FromResult(new Subject {MemberId = default});
 
             var result = await subject.Select(x => x.MemberId, () => Task.FromResult(27));
 

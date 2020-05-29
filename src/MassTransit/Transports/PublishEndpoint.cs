@@ -19,7 +19,7 @@ namespace MassTransit.Transports
             PublishEndpointProvider = provider;
         }
 
-        protected IPublishEndpointProvider PublishEndpointProvider { get; set;}
+        protected IPublishEndpointProvider PublishEndpointProvider { get; set; }
 
         public Task Publish<T>(T message, CancellationToken cancellationToken)
             where T : class

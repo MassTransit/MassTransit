@@ -1,15 +1,3 @@
-// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.RabbitMqTransport.Configurators
 {
     using System.Net.Security;
@@ -20,8 +8,6 @@ namespace MassTransit.RabbitMqTransport.Configurators
     public class RabbitMqSslConfigurator :
         IRabbitMqSslConfigurator
     {
-        SslPolicyErrors _acceptablePolicyErrors;
-
         public RabbitMqSslConfigurator(RabbitMqHostSettings settings)
         {
             CertificatePath = settings.ClientCertificatePath;
@@ -30,21 +16,21 @@ namespace MassTransit.RabbitMqTransport.Configurators
             UseCertificateAsAuthenticationIdentity = settings.UseClientCertificateAsAuthenticationIdentity;
             ServerName = settings.SslServerName;
             Protocol = settings.SslProtocol;
-            _acceptablePolicyErrors = settings.AcceptablePolicyErrors;
+            AcceptablePolicyErrors = settings.AcceptablePolicyErrors;
             CertificateSelectionCallback = settings.CertificateSelectionCallback;
             CertificateValidationCallback = settings.CertificateValidationCallback;
         }
 
-        public SslPolicyErrors AcceptablePolicyErrors => _acceptablePolicyErrors;
+        public SslPolicyErrors AcceptablePolicyErrors { get; set; }
 
         public void AllowPolicyErrors(SslPolicyErrors policyErrors)
         {
-            _acceptablePolicyErrors |= policyErrors;
+            AcceptablePolicyErrors |= policyErrors;
         }
 
         public void EnforcePolicyErrors(SslPolicyErrors policyErrors)
         {
-            _acceptablePolicyErrors &= ~policyErrors;
+            AcceptablePolicyErrors &= ~policyErrors;
         }
 
         public string CertificatePath { get; set; }

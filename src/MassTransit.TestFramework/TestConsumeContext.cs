@@ -20,6 +20,8 @@
 
     public static class TestConsumeContext
     {
+        static ReceiveEndpointContext _receiveEndpointContext;
+
         static ReceiveEndpointContext Build()
         {
             var topologyConfiguration = new InMemoryTopologyConfiguration(InMemoryBus.MessageTopology);
@@ -42,8 +44,6 @@
             return builder.CreateReceiveEndpointContext();
         }
 
-        static ReceiveEndpointContext _receiveEndpointContext;
-
         public static ReceiveEndpointContext GetContext()
         {
             return _receiveEndpointContext ??= Build();
@@ -56,8 +56,6 @@
         ConsumeContext<TMessage>
         where TMessage : class
     {
-        readonly ReceiveContext _receiveContext;
-
         public TestConsumeContext(TMessage message)
         {
             Message = message;
@@ -66,7 +64,7 @@
             SourceAddress = new Uri("loopback://localhost/input_queue");
             DestinationAddress = new Uri("loopback://localhost/input_queue");
 
-            _receiveContext = new TestReceiveContext(TestConsumeContext.GetContext());
+            ReceiveContext = new TestReceiveContext(TestConsumeContext.GetContext());
         }
 
         public Guid? MessageId { get; }
@@ -146,20 +144,11 @@
             throw new NotImplementedException();
         }
 
-        public ReceiveContext ReceiveContext
-        {
-            get { return _receiveContext; }
-        }
+        public ReceiveContext ReceiveContext { get; }
 
-        public Task ConsumeCompleted
-        {
-            get { return Task.FromResult(true); }
-        }
+        public Task ConsumeCompleted => Task.FromResult(true);
 
-        public IEnumerable<string> SupportedMessageTypes
-        {
-            get { return Enumerable.Repeat(MessageUrn.ForTypeString<TMessage>(), 1); }
-        }
+        public IEnumerable<string> SupportedMessageTypes => Enumerable.Repeat(MessageUrn.ForTypeString<TMessage>(), 1);
 
         public bool HasMessageType(Type messageType)
         {

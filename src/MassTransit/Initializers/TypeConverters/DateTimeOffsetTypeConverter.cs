@@ -12,10 +12,25 @@
     {
         readonly DateTime _epoch = new DateTime(1970, 1, 1);
 
-        public bool TryConvert(DateTimeOffset input, out string result)
+        public bool TryConvert(object input, out DateTimeOffset result)
         {
-            result = input.ToString("O");
-            return true;
+            switch (input)
+            {
+                case DateTime dateTime:
+                    result = dateTime;
+                    return true;
+
+                case DateTimeOffset dateTimeOffset:
+                    result = dateTimeOffset;
+                    return true;
+
+                case string text when !string.IsNullOrWhiteSpace(text):
+                    return TryConvert(text, out result);
+
+                default:
+                    result = default;
+                    return false;
+            }
         }
 
         public bool TryConvert(string input, out DateTimeOffset result)
@@ -55,25 +70,10 @@
             return false;
         }
 
-        public bool TryConvert(object input, out DateTimeOffset result)
+        public bool TryConvert(DateTimeOffset input, out string result)
         {
-            switch (input)
-            {
-                case DateTime dateTime:
-                    result = dateTime;
-                    return true;
-
-                case DateTimeOffset dateTimeOffset:
-                    result = dateTimeOffset;
-                    return true;
-
-                case string text when !string.IsNullOrWhiteSpace(text):
-                    return TryConvert(text, out result);
-
-                default:
-                    result = default;
-                    return false;
-            }
+            result = input.ToString("O");
+            return true;
         }
     }
 }

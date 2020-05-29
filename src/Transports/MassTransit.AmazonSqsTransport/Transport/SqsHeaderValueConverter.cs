@@ -16,7 +16,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
         public bool TryConvert(HeaderValue headerValue, out HeaderValue<MessageAttributeValue> result)
         {
-            if (headerValue.IsStringValue(out var stringValue) && _allowTransportHeader(stringValue))
+            if (headerValue.IsStringValue(out HeaderValue<string> stringValue) && _allowTransportHeader(stringValue))
             {
                 result = CreateMessageAttributeValue(stringValue);
                 return true;
@@ -28,7 +28,7 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
         public bool TryConvert<T>(HeaderValue<T> headerValue, out HeaderValue<MessageAttributeValue> result)
         {
-            if (headerValue.IsStringValue(out var stringValue) && _allowTransportHeader(stringValue))
+            if (headerValue.IsStringValue(out HeaderValue<string> stringValue) && _allowTransportHeader(stringValue))
             {
                 result = CreateMessageAttributeValue(stringValue);
                 return true;

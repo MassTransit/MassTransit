@@ -7,8 +7,8 @@ namespace MassTransit.MongoDbIntegration.Saga.CollectionNameFormatters
     public class DefaultCollectionNameFormatter :
         ICollectionNameFormatter
     {
-        readonly string _collectionName;
         const string DefaultCollectionName = "sagas";
+        readonly string _collectionName;
 
         public DefaultCollectionNameFormatter(string collectionName = null)
         {

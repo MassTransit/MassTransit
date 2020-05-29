@@ -1,7 +1,6 @@
 namespace MassTransit.Tests.Conductor
 {
     using System;
-    using Contracts;
     using Contracts.Metadata;
     using Internals.Reflection;
     using Metadata;
@@ -68,7 +67,7 @@ namespace MassTransit.Tests.Conductor
 
             var message = factory.Create();
 
-            var properties = message.GetType().GetProperties();
+            System.Reflection.PropertyInfo[] properties = message.GetType().GetProperties();
 
             Assert.That(properties.Length, Is.EqualTo(2));
             Assert.That(properties[0].Name, Is.EqualTo("Name"));
@@ -92,7 +91,7 @@ namespace MassTransit.Tests.Conductor
 
             var message = factory.Create();
 
-            var properties = message.GetType().GetProperties();
+            System.Reflection.PropertyInfo[] properties = message.GetType().GetProperties();
 
             Assert.That(properties.Length, Is.EqualTo(2));
             Assert.That(properties[0].Name, Is.EqualTo("CommandId"));
@@ -114,59 +113,13 @@ namespace MassTransit.Tests.Conductor
     public class Generating_a_contract
     {
         [Test]
-        public void Should_work()
+        public void Should_get_info_for_an_activity()
         {
-            var messageInfo = MessageInfoCache.GetMessageInfo<SimpleArgument>();
+            var argumentInfo = MessageInfoCache.GetMessageInfo<TestArguments>();
+            var logInfo = MessageInfoCache.GetMessageInfo<TestLog>();
+            ObjectInfo[] objectInfos = MessageInfoCache.GetMessageObjectInfo(argumentInfo, logInfo);
 
-            Assert.That(messageInfo, Is.Not.Null);
-
-            Assert.That(messageInfo.MessageTypes[0], Is.EqualTo(MessageUrn.ForTypeString<SimpleArgument>()));
-        }
-
-        [Test]
-        public void Should_support_message_property_types()
-        {
-            var messageInfo = MessageInfoCache.GetMessageInfo<OverarchingArgument>();
-
-            Assert.That(messageInfo, Is.Not.Null);
-
-            Assert.That(messageInfo.MessageTypes[0], Is.EqualTo(MessageUrn.ForTypeString<OverarchingArgument>()));
-
-            Assert.That(messageInfo.Properties, Is.Not.Null);
-            Assert.That(messageInfo.Properties.Length, Is.EqualTo(2));
-            Assert.That(messageInfo.Properties[1].Kind, Is.EqualTo(PropertyKind.Object));
-            Assert.That(messageInfo.Properties[1].PropertyType, Is.EqualTo(MessageUrn.ForTypeString<SimpleArgument>()));
-        }
-
-        [Test]
-        public void Should_support_object_property_types_an_have_object_info()
-        {
-            var messageInfo = MessageInfoCache.GetMessageInfo<NestedArgument>();
-
-            Assert.That(messageInfo, Is.Not.Null);
-
-            ObjectInfo[] objectInfos = MessageInfoCache.GetMessageObjectInfo(messageInfo);
-
-            Assert.That(objectInfos, Is.Not.Null);
-            Assert.That(objectInfos.Length, Is.EqualTo(4));
-            Assert.That(objectInfos[0].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<SimpleArgument>()));
-            Assert.That(objectInfos[1].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<OverarchingArgument>()));
-            Assert.That(objectInfos[2].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<DictionaryArgument>()));
-            Assert.That(objectInfos[3].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<NestedArgument>()));
-        }
-
-        [Test]
-        public void Should_support_looped_property_types_an_have_object_info()
-        {
-            var messageInfo = MessageInfoCache.GetMessageInfo<ExceptionInfo>();
-
-            Assert.That(messageInfo, Is.Not.Null);
-
-            ObjectInfo[] objectInfos = MessageInfoCache.GetMessageObjectInfo(messageInfo);
-
-            Assert.That(objectInfos, Is.Not.Null);
-            Assert.That(objectInfos.Length, Is.EqualTo(1));
-            Assert.That(objectInfos[0].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<ExceptionInfo>()));
+            Assert.That(objectInfos.Length, Is.EqualTo(2));
         }
 
         [Test]
@@ -211,13 +164,59 @@ namespace MassTransit.Tests.Conductor
         }
 
         [Test]
-        public void Should_get_info_for_an_activity()
+        public void Should_support_looped_property_types_an_have_object_info()
         {
-            var argumentInfo = MessageInfoCache.GetMessageInfo<TestArguments>();
-            var logInfo = MessageInfoCache.GetMessageInfo<TestLog>();
-            var objectInfos = MessageInfoCache.GetMessageObjectInfo(argumentInfo, logInfo);
+            var messageInfo = MessageInfoCache.GetMessageInfo<ExceptionInfo>();
 
-            Assert.That(objectInfos.Length, Is.EqualTo(2));
+            Assert.That(messageInfo, Is.Not.Null);
+
+            ObjectInfo[] objectInfos = MessageInfoCache.GetMessageObjectInfo(messageInfo);
+
+            Assert.That(objectInfos, Is.Not.Null);
+            Assert.That(objectInfos.Length, Is.EqualTo(1));
+            Assert.That(objectInfos[0].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<ExceptionInfo>()));
+        }
+
+        [Test]
+        public void Should_support_message_property_types()
+        {
+            var messageInfo = MessageInfoCache.GetMessageInfo<OverarchingArgument>();
+
+            Assert.That(messageInfo, Is.Not.Null);
+
+            Assert.That(messageInfo.MessageTypes[0], Is.EqualTo(MessageUrn.ForTypeString<OverarchingArgument>()));
+
+            Assert.That(messageInfo.Properties, Is.Not.Null);
+            Assert.That(messageInfo.Properties.Length, Is.EqualTo(2));
+            Assert.That(messageInfo.Properties[1].Kind, Is.EqualTo(PropertyKind.Object));
+            Assert.That(messageInfo.Properties[1].PropertyType, Is.EqualTo(MessageUrn.ForTypeString<SimpleArgument>()));
+        }
+
+        [Test]
+        public void Should_support_object_property_types_an_have_object_info()
+        {
+            var messageInfo = MessageInfoCache.GetMessageInfo<NestedArgument>();
+
+            Assert.That(messageInfo, Is.Not.Null);
+
+            ObjectInfo[] objectInfos = MessageInfoCache.GetMessageObjectInfo(messageInfo);
+
+            Assert.That(objectInfos, Is.Not.Null);
+            Assert.That(objectInfos.Length, Is.EqualTo(4));
+            Assert.That(objectInfos[0].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<SimpleArgument>()));
+            Assert.That(objectInfos[1].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<OverarchingArgument>()));
+            Assert.That(objectInfos[2].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<DictionaryArgument>()));
+            Assert.That(objectInfos[3].ObjectType, Is.EqualTo(MessageUrn.ForTypeString<NestedArgument>()));
+        }
+
+        [Test]
+        public void Should_work()
+        {
+            var messageInfo = MessageInfoCache.GetMessageInfo<SimpleArgument>();
+
+            Assert.That(messageInfo, Is.Not.Null);
+
+            Assert.That(messageInfo.MessageTypes[0], Is.EqualTo(MessageUrn.ForTypeString<SimpleArgument>()));
         }
     }
 }

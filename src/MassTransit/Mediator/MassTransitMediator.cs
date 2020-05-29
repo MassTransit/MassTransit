@@ -16,7 +16,7 @@ namespace MassTransit.Mediator
 
 
     /// <summary>
-    /// Sends messages directly to the <see cref="IReceivePipe"/>, without serialization
+    /// Sends messages directly to the <see cref="IReceivePipe" />, without serialization
     /// </summary>
     public class MassTransitMediator :
         IMediator

@@ -38,6 +38,7 @@ namespace MassTransit.Initializers.PropertyConverters
         }
     }
 
+
     public class InitializePropertyConverter<TProperty> :
         IPropertyConverter<TProperty, object>
         where TProperty : class

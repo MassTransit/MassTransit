@@ -22,7 +22,7 @@
 
         static JsonSerializer CreateSerializer()
         {
-            JsonSerializerSettings source = JsonMessageSerializer.SerializerSettings;
+            var source = JsonMessageSerializer.SerializerSettings;
 
             _serializerSettings = new JsonSerializerSettings
             {
@@ -43,7 +43,7 @@
 
         static JsonSerializer CreateDeserializer()
         {
-            JsonSerializerSettings source = JsonMessageSerializer.DeserializerSettings;
+            var source = JsonMessageSerializer.DeserializerSettings;
 
             var settings = new JsonSerializerSettings
             {

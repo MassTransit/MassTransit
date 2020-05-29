@@ -15,11 +15,11 @@ namespace MassTransit.Courier.Results
         readonly Activity _activity;
         readonly ActivityException _activityException;
         readonly TimeSpan _elapsed;
+        readonly Exception _exception;
         readonly ExceptionInfo _exceptionInfo;
         readonly ExecuteContext<TArguments> _executeContext;
         readonly IRoutingSlipEventPublisher _publisher;
         readonly RoutingSlip _routingSlip;
-        readonly Exception _exception;
 
         public FaultedExecutionResult(ExecuteContext<TArguments> executeContext, IRoutingSlipEventPublisher publisher, Activity activity,
             RoutingSlip routingSlip, Exception exception)
@@ -48,9 +48,7 @@ namespace MassTransit.Courier.Results
                 _elapsed, _exceptionInfo, routingSlip.Variables, _activity.Arguments).ConfigureAwait(false);
 
             if (HasCompensationLogs(routingSlip))
-            {
                 await _executeContext.Forward(routingSlip.GetNextCompensateAddress(), routingSlip).ConfigureAwait(false);
-            }
             else
             {
                 var faultedTimestamp = _executeContext.Timestamp + _elapsed;

@@ -18,7 +18,7 @@
         IProbeSite
     {
         /// <summary>
-        /// Handles the <paramref name="message"/>
+        /// Handles the <paramref name="message" />
         /// </summary>
         /// <param name="message"></param>
         /// <param name="cancellationToken"></param>

@@ -5,7 +5,6 @@
     using Context;
     using MassTransit.Serialization;
     using Metadata;
-    using Util;
 
 
     public class RoutingSlipSendContext<T> :

@@ -15,7 +15,7 @@ namespace MassTransit.Registration
             if (!activityType.HasInterface(typeof(IActivity<,>)))
                 throw new ArgumentException($"The type is not an activity: {TypeMetadataCache.GetShortName(activityType)}", nameof(activityType));
 
-            var argumentLogTypes = activityType.GetClosingArguments(typeof(IActivity<,>)).ToArray();
+            Type[] argumentLogTypes = activityType.GetClosingArguments(typeof(IActivity<,>)).ToArray();
             var genericType = typeof(CachedRegistration<,,>).MakeGenericType(activityType, argumentLogTypes[0], argumentLogTypes[1]);
 
             return Cached.Instance.GetOrAdd(activityType, _ => (CachedRegistration)Activator.CreateInstance(genericType));

@@ -16,8 +16,10 @@ namespace MassTransit.Registration
                 throw new ArgumentException($"The type is not an execute activity: {TypeMetadataCache.GetShortName(activityType)}", nameof(activityType));
 
             if (activityType.HasInterface(typeof(ICompensateActivity<>)))
+            {
                 throw new ArgumentException($"The type is an activity, which supports compensation: {TypeMetadataCache.GetShortName(activityType)}",
                     nameof(activityType));
+            }
 
             var argumentType = activityType.GetClosingArguments(typeof(IExecuteActivity<>)).Single();
 

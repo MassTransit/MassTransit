@@ -13,9 +13,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     public class SendEndpointContextFactory :
         IPipeContextFactory<SendEndpointContext>
     {
-        readonly IConnectionContextSupervisor _supervisor;
         readonly IPipe<SendEndpointContext> _pipe;
         readonly SendSettings _settings;
+        readonly IConnectionContextSupervisor _supervisor;
 
         public SendEndpointContextFactory(IConnectionContextSupervisor supervisor, IPipe<SendEndpointContext> pipe, SendSettings settings)
         {

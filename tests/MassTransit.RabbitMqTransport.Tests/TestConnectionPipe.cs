@@ -3,7 +3,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using RabbitMqTransport;
     using Util;
 
 
@@ -18,11 +17,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             testCancellationToken.Register(() => _called.TrySetCanceled());
         }
 
-
-        public Task<ConnectionContext> Called
-        {
-            get { return _called.Task; }
-        }
+        public Task<ConnectionContext> Called => _called.Task;
 
         async void IProbeSite.Probe(ProbeContext context)
         {

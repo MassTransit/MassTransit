@@ -116,11 +116,11 @@ namespace MassTransit.Context
 
         public TMessage Message { get; }
 
+        public bool Mandatory { get; set; }
+
         public Stream GetBodyStream()
         {
             return new MemoryStream(Body, false);
         }
-
-        public bool Mandatory { get; set; }
     }
 }

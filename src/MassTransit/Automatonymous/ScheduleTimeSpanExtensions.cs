@@ -64,7 +64,8 @@ namespace Automatonymous
         }
 
         public static EventActivityBinder<TInstance> Schedule<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
-            Schedule<TInstance, TMessage> schedule, EventMessageFactory<TInstance, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback = null)
+            Schedule<TInstance, TMessage> schedule, EventMessageFactory<TInstance, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
@@ -77,7 +78,8 @@ namespace Automatonymous
         }
 
         public static EventActivityBinder<TInstance> Schedule<TInstance, TMessage>(this EventActivityBinder<TInstance> source,
-            Schedule<TInstance, TMessage> schedule, AsyncEventMessageFactory<TInstance, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback = null)
+            Schedule<TInstance, TMessage> schedule, AsyncEventMessageFactory<TInstance, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TMessage : class
         {
@@ -176,7 +178,8 @@ namespace Automatonymous
         }
 
         public static EventActivityBinder<TInstance, TData> Schedule<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
-            Schedule<TInstance, TMessage> schedule, EventMessageFactory<TInstance, TData, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback = null)
+            Schedule<TInstance, TMessage> schedule, EventMessageFactory<TInstance, TData, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback = null)
             where TInstance : class, SagaStateMachineInstance
             where TData : class
             where TMessage : class
@@ -190,7 +193,8 @@ namespace Automatonymous
         }
 
         public static EventActivityBinder<TInstance, TData> Schedule<TInstance, TData, TMessage>(this EventActivityBinder<TInstance, TData> source,
-            Schedule<TInstance, TMessage> schedule, AsyncEventMessageFactory<TInstance, TData, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback =
+            Schedule<TInstance, TMessage> schedule, AsyncEventMessageFactory<TInstance, TData, TMessage> messageFactory,
+            Action<SendContext<TMessage>> contextCallback =
                 null)
             where TInstance : class, SagaStateMachineInstance
             where TData : class

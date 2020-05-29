@@ -3,8 +3,8 @@ namespace MassTransit.Definition
     public class DelegateEndpointDefinition :
         DefaultEndpointDefinition
     {
-        readonly string _endpointName;
         readonly IDefinition _definition;
+        readonly string _endpointName;
 
         public DelegateEndpointDefinition(string endpointName, IDefinition definition)
         {
@@ -12,11 +12,11 @@ namespace MassTransit.Definition
             _definition = definition;
         }
 
+        public override int? ConcurrentMessageLimit => _definition.ConcurrentMessageLimit;
+
         public override string GetEndpointName(IEndpointNameFormatter formatter)
         {
             return _endpointName;
         }
-
-        public override int? ConcurrentMessageLimit => _definition.ConcurrentMessageLimit;
     }
 }

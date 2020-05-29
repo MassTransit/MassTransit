@@ -65,9 +65,7 @@
             const string fifoSuffix = ".fifo";
 
             if (!entityName.EndsWith(fifoSuffix, true, CultureInfo.InvariantCulture))
-            {
                 return entityName + suffix;
-            }
 
             return entityName.Substring(0, entityName.Length - fifoSuffix.Length) + suffix + fifoSuffix;
         }

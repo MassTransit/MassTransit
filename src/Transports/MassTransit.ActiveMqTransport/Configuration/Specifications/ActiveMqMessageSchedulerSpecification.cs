@@ -4,6 +4,7 @@
     using GreenPipes;
     using Pipeline;
 
+
     public class ActiveMqMessageSchedulerSpecification :
         IPipeSpecification<ConsumeContext>
     {

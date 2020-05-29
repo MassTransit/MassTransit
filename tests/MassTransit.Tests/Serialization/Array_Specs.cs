@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests.Serialization
+﻿namespace MassTransit.Tests.Serialization
 {
     namespace Array_Specs
     {
@@ -29,7 +17,7 @@ namespace MassTransit.Tests.Serialization
             [Test]
             public void Should_come_from_json_as_null()
             {
-                string source = @"{
+                var source = @"{
   ""messageId"": ""e655000040d800fff4f808d245dca3c8"",
   ""requestId"": """ + _requestId.ToString("N") + @""",
   ""sourceAddress"": ""loopback://localhost/source"",
@@ -51,7 +39,7 @@ namespace MassTransit.Tests.Serialization
             [Test]
             public void Should_get_one_element()
             {
-                string source = @"{
+                var source = @"{
   ""messageId"": ""e655000040d800fff4f808d245dca3c8"",
   ""requestId"": """ + _requestId.ToString("N") + @""",
   ""sourceAddress"": ""loopback://localhost/source"",
@@ -62,7 +50,7 @@ namespace MassTransit.Tests.Serialization
     ""urn:message:MassTransit.Tests.Serialization.Array_Specs:SomeArray""
   ],
   ""message"": {
-    ""elements"": 
+    ""elements"":
       {
         ""value"": 27
       }
@@ -82,7 +70,7 @@ namespace MassTransit.Tests.Serialization
             {
                 var someArray = new SomeArray();
 
-                SomeArray result = SerializeAndReturn(someArray);
+                var result = SerializeAndReturn(someArray);
 
                 someArray.Elements.ShouldBe(null);
                 result.Elements.ShouldBe(null);
@@ -96,7 +84,7 @@ namespace MassTransit.Tests.Serialization
                 someArray.Elements[0] = new ArrayElement();
                 someArray.Elements[0].Value = 27;
 
-                SomeArray result = SerializeAndReturn(someArray);
+                var result = SerializeAndReturn(someArray);
 
                 result.Elements.ShouldNotBe(null);
                 result.Elements.Length.ShouldBe(1);
@@ -106,12 +94,9 @@ namespace MassTransit.Tests.Serialization
             public void Should_serialize_a_single_element_collection()
             {
                 var someArray = new SomeCollection();
-                someArray.Elements = new ArrayElement[1]
-                {
-                    new ArrayElement {Value = 27}
-                };
+                someArray.Elements = new ArrayElement[1] {new ArrayElement {Value = 27}};
 
-                SomeCollection result = SerializeAndReturn(someArray);
+                var result = SerializeAndReturn(someArray);
 
                 result.Elements.ShouldNotBe(null);
                 result.Elements.Count.ShouldBe(1);

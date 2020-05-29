@@ -49,7 +49,7 @@
         public SendSettings GetErrorSettings(IQueueConfigurator configurator)
         {
             var description = configurator.GetQueueDescription();
-            description.Path = description.Path + ErrorQueueSuffix;
+            description.Path += ErrorQueueSuffix;
 
             var errorSettings = new QueueSendSettings(description);
 
@@ -78,7 +78,7 @@
         public SendSettings GetDeadLetterSettings(IQueueConfigurator configurator)
         {
             var description = configurator.GetQueueDescription();
-            description.Path = description.Path + DeadLetterQueueSuffix;
+            description.Path += DeadLetterQueueSuffix;
 
             var deadLetterSetting = new QueueSendSettings(description);
 

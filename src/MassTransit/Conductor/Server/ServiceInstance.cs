@@ -1,6 +1,7 @@
 namespace MassTransit.Conductor.Server
 {
     using System;
+    using Util;
 
 
     public class ServiceInstance :
@@ -13,7 +14,7 @@ namespace MassTransit.Conductor.Server
             var instanceId = NewId.Next();
 
             InstanceId = instanceId.ToGuid();
-            InstanceName = instanceId.ToString(Util.FormatUtil.Formatter);
+            InstanceName = instanceId.ToString(FormatUtil.Formatter);
 
             _clientCache = new ServiceInstanceClientCache();
         }

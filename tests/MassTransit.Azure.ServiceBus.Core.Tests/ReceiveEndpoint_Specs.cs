@@ -10,11 +10,6 @@
     public class Creating_a_receive_endpoint_from_an_existing_bus :
         AzureServiceBusTestFixture
     {
-        public Creating_a_receive_endpoint_from_an_existing_bus()
-        {
-            TestTimeout = TimeSpan.FromMinutes(1);
-        }
-
         [Test]
         public async Task Should_be_allowed()
         {
@@ -45,11 +40,38 @@
         }
 
         [Test]
+        public async Task Should_not_be_allowed_twice()
+        {
+            var handle = Bus.ConnectReceiveEndpoint("second_queue", x =>
+            {
+                Handled<PingMessage>(x);
+            });
+
+            await handle.Ready;
+
+            try
+            {
+                Assert.That(async () =>
+                {
+                    var unused = Bus.ConnectReceiveEndpoint("second_queue", x =>
+                    {
+                    });
+
+                    await unused.Ready;
+                }, Throws.TypeOf<ConfigurationException>());
+            }
+            finally
+            {
+                await handle.StopAsync();
+            }
+        }
+
+        [Test]
         public async Task Should_work_when_reconnected()
         {
             async Task ConnectAndConsume()
             {
-                Guid correlationId = NewId.NextGuid();
+                var correlationId = NewId.NextGuid();
 
                 Task<ConsumeContext<PingMessage>> pingHandled = null;
 
@@ -81,31 +103,9 @@
             await ConnectAndConsume();
         }
 
-        [Test]
-        public async Task Should_not_be_allowed_twice()
+        public Creating_a_receive_endpoint_from_an_existing_bus()
         {
-            var handle = Bus.ConnectReceiveEndpoint("second_queue", x =>
-            {
-                Handled<PingMessage>(x);
-            });
-
-            await handle.Ready;
-
-            try
-            {
-                Assert.That(async () =>
-                {
-                    var unused = Bus.ConnectReceiveEndpoint("second_queue", x =>
-                    {
-                    });
-
-                    await unused.Ready;
-                }, Throws.TypeOf<ConfigurationException>());
-            }
-            finally
-            {
-                await handle.StopAsync();
-            }
+            TestTimeout = TimeSpan.FromMinutes(1);
         }
     }
 }

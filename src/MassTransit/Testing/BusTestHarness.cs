@@ -15,27 +15,26 @@
     public abstract class BusTestHarness :
         AsyncTestHarness
     {
-        IBusControl _bus;
         ConnectHandle _busConsumeObserver;
         BusHandle _busHandle;
         ConnectHandle _busPublishObserver;
+        ConnectHandle _busReceiveObserver;
         ConnectHandle _busSendObserver;
         BusTestConsumeObserver _consumed;
         ConnectHandle _inputQueueSendObserver;
         BusTestPublishObserver _published;
-        ConnectHandle _receiveEndpointObserver;
-        BusTestSendObserver _sent;
         BusTestReceiveObserver _received;
+        ConnectHandle _receiveEndpointObserver;
         ConnectHandle _receiveInactivityHandle;
-        ConnectHandle _busReceiveObserver;
+        BusTestSendObserver _sent;
 
-        public IBus Bus => _bus;
-        public IBusControl BusControl => _bus;
+        public IBus Bus => BusControl;
+        public IBusControl BusControl { get; set; }
 
         /// <summary>
         /// The address of the default bus endpoint, used as the SourceAddress for requests and published messages
         /// </summary>
-        public Uri BusAddress => _bus.Address;
+        public Uri BusAddress => BusControl.Address;
 
         /// <summary>
         /// The name of the input queue (for the default receive endpoint)
@@ -108,22 +107,22 @@
 
             PreCreateBus?.Invoke(this);
 
-            _bus = CreateBus();
+            BusControl = CreateBus();
 
-            ConnectObservers(_bus);
+            ConnectObservers(BusControl);
 
-            _busHandle = await _bus.StartAsync(cancellationToken).ConfigureAwait(false);
+            _busHandle = await BusControl.StartAsync(cancellationToken).ConfigureAwait(false);
 
-            BusSendEndpoint = await GetSendEndpoint(_bus.Address).ConfigureAwait(false);
+            BusSendEndpoint = await GetSendEndpoint(BusControl.Address).ConfigureAwait(false);
 
             InputQueueSendEndpoint = await GetSendEndpoint(InputQueueAddress).ConfigureAwait(false);
 
             _inputQueueSendObserver = InputQueueSendEndpoint.ConnectSendObserver(_sent);
 
-            _busConsumeObserver = _bus.ConnectConsumeObserver(_consumed);
-            _busPublishObserver = _bus.ConnectPublishObserver(_published);
-            _busReceiveObserver = _bus.ConnectReceiveObserver(_received);
-            _busSendObserver = _bus.ConnectSendObserver(_sent);
+            _busConsumeObserver = BusControl.ConnectConsumeObserver(_consumed);
+            _busPublishObserver = BusControl.ConnectPublishObserver(_published);
+            _busReceiveObserver = BusControl.ConnectReceiveObserver(_received);
+            _busSendObserver = BusControl.ConnectSendObserver(_sent);
         }
 
         public virtual async Task Stop()
@@ -163,13 +162,13 @@
             finally
             {
                 _busHandle = null;
-                _bus = null;
+                BusControl = null;
             }
         }
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            return await _bus.GetSendEndpoint(address).ConfigureAwait(false);
+            return await BusControl.GetSendEndpoint(address).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -181,7 +180,7 @@
         public Task<ConsumeContext<T>> SubscribeHandler<T>()
             where T : class
         {
-            var source = TaskUtil.GetTask<ConsumeContext<T>>();
+            TaskCompletionSource<ConsumeContext<T>> source = TaskUtil.GetTask<ConsumeContext<T>>();
 
             ConnectHandle handler = null;
             handler = Bus.ConnectHandler<T>(async context =>
@@ -211,7 +210,7 @@
         public Task<ConsumeContext<T>> SubscribeHandler<T>(Func<ConsumeContext<T>, bool> filter)
             where T : class
         {
-            var source = TaskUtil.GetTask<ConsumeContext<T>>();
+            TaskCompletionSource<ConsumeContext<T>> source = TaskUtil.GetTask<ConsumeContext<T>>();
 
             ConnectHandle handler = null;
             handler = Bus.ConnectHandler<T>(async context =>
@@ -289,7 +288,7 @@
             var count = 0;
             configurator.Handler<T>(async context =>
             {
-                int value = Interlocked.Increment(ref count);
+                var value = Interlocked.Increment(ref count);
                 if (value == expectedCount)
                     source.TrySetResult(context);
             });

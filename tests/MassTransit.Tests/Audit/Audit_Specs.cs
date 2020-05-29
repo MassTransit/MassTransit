@@ -10,6 +10,22 @@
     [TestFixture]
     public class Audit_Specs
     {
+        [Test]
+        public async Task Should_audit_consumed_messages()
+        {
+            var expected = _harness.Consumed.Select<A>().Any();
+            var expectedB = _harness.Consumed.Select<B>().Any();
+            _store.Count(x => x.Result.Metadata.ContextType == "Consume").ShouldBe(2);
+        }
+
+        [Test]
+        public async Task Should_audit_sent_messages()
+        {
+            var expected = _harness.Sent.Select<A>().Any();
+            var expectedB = _harness.Sent.Select<B>().Any();
+            _store.Count(x => x.Result.Metadata.ContextType == "Send").ShouldBe(2);
+        }
+
         InMemoryTestHarness _harness;
         InMemoryAuditStore _store;
 
@@ -27,34 +43,20 @@
 
             await _harness.Start();
 
-            var response = _harness.SubscribeHandler<B>();
+            Task<ConsumeContext<B>> response = _harness.SubscribeHandler<B>();
 
             await _harness.InputQueueSendEndpoint.Send(new A(), x => x.ResponseAddress = _harness.BusAddress);
 
             await response;
         }
 
-        [Test]
-        public async Task Should_audit_sent_messages()
-        {
-            var expected = _harness.Sent.Select<A>().Any();
-            var expectedB = _harness.Sent.Select<B>().Any();
-            _store.Count(x => x.Result.Metadata.ContextType == "Send").ShouldBe(2);
-        }
-
-        [Test]
-        public async Task Should_audit_consumed_messages()
-        {
-            bool expected = _harness.Consumed.Select<A>().Any();
-            bool expectedB = _harness.Consumed.Select<B>().Any();
-            _store.Count(x => x.Result.Metadata.ContextType == "Consume").ShouldBe(2);
-        }
-
 
         class TestConsumer : IConsumer<A>
         {
-            public async Task Consume(ConsumeContext<A> context) =>
+            public async Task Consume(ConsumeContext<A> context)
+            {
                 await context.RespondAsync(new B());
+            }
         }
 
 

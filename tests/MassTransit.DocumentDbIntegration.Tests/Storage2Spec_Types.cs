@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.DocumentDbIntegration.Tests
+﻿namespace MassTransit.DocumentDbIntegration.Tests
 {
     using System;
     using Automatonymous;
@@ -21,11 +9,13 @@ namespace MassTransit.DocumentDbIntegration.Tests
         public Guid CorrelationId { get; set; }
     }
 
+
     public class Bass
     {
         public Guid CorrelationId { get; set; }
         public string Name { get; set; }
     }
+
 
     public class Baritone
     {
@@ -33,11 +23,13 @@ namespace MassTransit.DocumentDbIntegration.Tests
         public string Name { get; set; }
     }
 
+
     public class Tenor
     {
         public Guid CorrelationId { get; set; }
         public string Name { get; set; }
     }
+
 
     public class Countertenor
     {
@@ -45,8 +37,10 @@ namespace MassTransit.DocumentDbIntegration.Tests
         public string Name { get; set; }
     }
 
+
     public class ChoirStateOptimistic :
-        SagaStateMachineInstance, IVersionedSaga
+        SagaStateMachineInstance,
+        IVersionedSaga
     {
         protected ChoirStateOptimistic()
         {
@@ -59,13 +53,13 @@ namespace MassTransit.DocumentDbIntegration.Tests
 
         public string CurrentState { get; set; }
         public int Harmony { get; set; }
-        public Guid CorrelationId { get; set; }
-        public string ETag { get; set; }
         public byte[] RowVersion { get; set; }
         public string BassName { get; set; }
         public string BaritoneName { get; set; }
         public string TenorName { get; set; }
         public string CountertenorName { get; set; }
+        public string ETag { get; set; }
+        public Guid CorrelationId { get; set; }
     }
 
 
@@ -79,7 +73,7 @@ namespace MassTransit.DocumentDbIntegration.Tests
             Event(() => RehersalStarts, x =>
             {
                 x.CorrelateById(context => context.Message.CorrelationId);
-                });
+            });
             Event(() => BassStarts, x => x.CorrelateById(context => context.Message.CorrelationId));
             Event(() => BaritoneStarts, x => x.CorrelateById(context => context.Message.CorrelationId));
             Event(() => TenorStarts, x => x.CorrelateById(context => context.Message.CorrelationId));
@@ -119,6 +113,7 @@ namespace MassTransit.DocumentDbIntegration.Tests
         public State Harmony { get; private set; }
     }
 
+
     public class ChoirStatePessimistic :
         SagaStateMachineInstance
     {
@@ -133,11 +128,11 @@ namespace MassTransit.DocumentDbIntegration.Tests
 
         public string CurrentState { get; set; }
         public int Harmony { get; set; }
-        public Guid CorrelationId { get; set; }
         public string BassName { get; set; }
         public string BaritoneName { get; set; }
         public string TenorName { get; set; }
         public string CountertenorName { get; set; }
+        public Guid CorrelationId { get; set; }
     }
 
 

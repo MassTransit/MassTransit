@@ -11,7 +11,6 @@ namespace MassTransit.Initializers
     public interface IPropertyConverter<TResult, in TProperty>
     {
         /// <summary>
-        ///
         /// </summary>
         /// <param name="context"></param>
         /// <param name="input"></param>

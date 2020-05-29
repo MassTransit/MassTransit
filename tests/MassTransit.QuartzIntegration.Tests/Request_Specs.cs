@@ -1,25 +1,19 @@
 ﻿namespace MassTransit.QuartzIntegration.Tests
 {
-    using System;
-    using System.Threading.Tasks;
-    using Automatonymous;
-    using NUnit.Framework;
-    using Saga;
-    using Testing;
-
-
     namespace Request_Specs
     {
+        using System;
+        using System.Threading.Tasks;
+        using Automatonymous;
+        using NUnit.Framework;
+        using Saga;
+        using Testing;
+
+
         [TestFixture]
         public class Sending_a_request_from_a_state_machine :
             QuartzInMemoryTestFixture
         {
-            static Sending_a_request_from_a_state_machine()
-            {
-                _serviceAddress = new Uri("loopback://localhost/service_queue");
-                EndpointConvention.Map<ValidateName>(_serviceAddress);
-            }
-
             [Test]
             public async Task Should_handle_the_response()
             {
@@ -45,6 +39,12 @@
                 Assert.IsFalse(sagaInstance.ValidateAddressRequestId.HasValue);
             }
 
+            static Sending_a_request_from_a_state_machine()
+            {
+                _serviceAddress = new Uri("loopback://localhost/service_queue");
+                EndpointConvention.Map<ValidateName>(_serviceAddress);
+            }
+
             InMemorySagaRepository<TestState> _repository;
             TestStateMachine _machine;
 
@@ -63,7 +63,7 @@
 
             Uri ServiceQueueAddress
             {
-                get { return _serviceQueueAddress; }
+                get => _serviceQueueAddress;
                 set
                 {
                     if (Bus != null)
@@ -106,10 +106,7 @@
                 {
                     Console.WriteLine("Name validated: {0}", context.Message.CorrelationId);
 
-                    await context.RespondAsync<NameValidated>(new
-                    {
-                        RequestName = context.Message.Name,
-                    });
+                    await context.RespondAsync<NameValidated>(new {RequestName = context.Message.Name});
                 });
             }
         }
@@ -118,31 +115,18 @@
         class RequestSettingsImpl :
             RequestSettings
         {
-            readonly Uri _schedulingServiceAddress;
-            readonly Uri _serviceAddress;
-            readonly TimeSpan _timeout;
-
             public RequestSettingsImpl(Uri serviceAddress, Uri schedulingServiceAddress, TimeSpan timeout)
             {
-                _serviceAddress = serviceAddress;
-                _schedulingServiceAddress = schedulingServiceAddress;
-                _timeout = timeout;
+                ServiceAddress = serviceAddress;
+                SchedulingServiceAddress = schedulingServiceAddress;
+                Timeout = timeout;
             }
 
-            public Uri ServiceAddress
-            {
-                get { return _serviceAddress; }
-            }
+            public Uri SchedulingServiceAddress { get; }
 
-            public Uri SchedulingServiceAddress
-            {
-                get { return _schedulingServiceAddress; }
-            }
+            public Uri ServiceAddress { get; }
 
-            public TimeSpan Timeout
-            {
-                get { return _timeout; }
-            }
+            public TimeSpan Timeout { get; }
         }
 
 

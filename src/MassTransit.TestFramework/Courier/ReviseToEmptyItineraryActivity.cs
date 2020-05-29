@@ -12,7 +12,9 @@
         {
             Console.WriteLine("ReviseToEmptyItineraryActivity: Execute: {0}", context.Arguments.Value);
 
-            return context.ReviseItinerary(x => { });
+            return context.ReviseItinerary(x =>
+            {
+            });
         }
 
         public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)

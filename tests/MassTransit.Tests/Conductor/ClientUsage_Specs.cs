@@ -8,6 +8,5 @@ namespace MassTransit.Tests.Conductor
     public class Using_the_service_client :
         InMemoryTestFixture
     {
-
     }
 }

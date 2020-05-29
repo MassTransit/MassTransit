@@ -8,7 +8,6 @@
     using NUnit.Framework;
     using Shouldly;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]
@@ -21,6 +20,22 @@
             ConsumeContext<PingMessage> context = await _errorHandler;
 
             context.CorrelationId.ShouldBe(_correlationId);
+        }
+
+        [Test]
+        public async Task Should_have_the_exception()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            context.ReceiveContext.TransportHeaders.Get("MT-Fault-Message", (string)null).ShouldBe("This is fine, forcing death");
+        }
+
+        [Test]
+        public async Task Should_have_the_host_machine_name()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            context.ReceiveContext.TransportHeaders.Get("MT-Host-MachineName", (string)null).ShouldBe(HostMetadataCache.Host.MachineName);
         }
 
         [Test]
@@ -47,21 +62,12 @@
             context.ResponseAddress.ShouldBe(BusAddress);
         }
 
-
         [Test]
-        public async Task Should_have_the_exception()
+        public async Task Should_have_the_original_source_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            context.ReceiveContext.TransportHeaders.Get("MT-Fault-Message", (string)null).ShouldBe("This is fine, forcing death");
-        }
-
-        [Test]
-        public async Task Should_have_the_host_machine_name()
-        {
-            ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.ReceiveContext.TransportHeaders.Get("MT-Host-MachineName", (string)null).ShouldBe(HostMetadataCache.Host.MachineName);
+            context.SourceAddress.ShouldBe(BusAddress);
         }
 
         [Test]
@@ -70,14 +76,6 @@
             ConsumeContext<PingMessage> context = await _errorHandler;
 
             context.ReceiveContext.TransportHeaders.Get("MT-Reason", (string)null).ShouldBe("fault");
-        }
-
-        [Test]
-        public async Task Should_have_the_original_source_address()
-        {
-            ConsumeContext<PingMessage> context = await _errorHandler;
-
-            context.SourceAddress.ShouldBe(BusAddress);
         }
 
         [Test]

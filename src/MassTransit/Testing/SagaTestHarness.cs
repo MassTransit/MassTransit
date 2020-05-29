@@ -15,12 +15,11 @@ namespace MassTransit.Testing
     {
         readonly ReceivedMessageList _consumed;
         readonly SagaList<TSaga> _created;
-        readonly IQuerySagaRepository<TSaga> _querySagaRepository;
         readonly SagaList<TSaga> _sagas;
 
         public SagaTestHarness(BusTestHarness testHarness, ISagaRepository<TSaga> repository, string queueName)
         {
-            _querySagaRepository = repository as IQuerySagaRepository<TSaga>;
+            QuerySagaRepository = repository as IQuerySagaRepository<TSaga>;
 
             TestTimeout = testHarness.TestTimeout;
 
@@ -43,7 +42,7 @@ namespace MassTransit.Testing
         public ISagaList<TSaga> Sagas => _sagas;
         public ISagaList<TSaga> Created => _created;
 
-        protected IQuerySagaRepository<TSaga> QuerySagaRepository => _querySagaRepository;
+        protected IQuerySagaRepository<TSaga> QuerySagaRepository { get; }
 
         protected virtual void ConfigureReceiveEndpoint(IReceiveEndpointConfigurator configurator)
         {
@@ -66,7 +65,7 @@ namespace MassTransit.Testing
         /// <returns></returns>
         public async Task<Guid?> Exists(Guid correlationId, TimeSpan? timeout = default)
         {
-            if (_querySagaRepository == null)
+            if (QuerySagaRepository == null)
                 throw new InvalidOperationException("The repository does not support Query operations");
 
             var giveUpAt = DateTime.Now + (timeout ?? TestTimeout);
@@ -75,7 +74,7 @@ namespace MassTransit.Testing
 
             while (DateTime.Now < giveUpAt)
             {
-                var saga = (await _querySagaRepository.Find(query).ConfigureAwait(false)).FirstOrDefault();
+                var saga = (await QuerySagaRepository.Find(query).ConfigureAwait(false)).FirstOrDefault();
                 if (saga != Guid.Empty)
                     return saga;
 
@@ -93,7 +92,7 @@ namespace MassTransit.Testing
         /// <returns></returns>
         public async Task<IList<Guid>> Match(Expression<Func<TSaga, bool>> filter, TimeSpan? timeout = default)
         {
-            if (_querySagaRepository == null)
+            if (QuerySagaRepository == null)
                 throw new InvalidOperationException("The repository does not support Query operations");
 
             var giveUpAt = DateTime.Now + (timeout ?? TestTimeout);
@@ -102,7 +101,7 @@ namespace MassTransit.Testing
 
             while (DateTime.Now < giveUpAt)
             {
-                List<Guid> sagas = (await _querySagaRepository.Find(query).ConfigureAwait(false)).ToList();
+                List<Guid> sagas = (await QuerySagaRepository.Find(query).ConfigureAwait(false)).ToList();
                 if (sagas.Count > 0)
                     return sagas;
 
@@ -120,7 +119,7 @@ namespace MassTransit.Testing
         /// <returns></returns>
         public async Task<Guid?> NotExists(Guid correlationId, TimeSpan? timeout = default)
         {
-            if (_querySagaRepository == null)
+            if (QuerySagaRepository == null)
                 throw new InvalidOperationException("The repository does not support Query operations");
 
             var giveUpAt = DateTime.Now + (timeout ?? TestTimeout);
@@ -130,7 +129,7 @@ namespace MassTransit.Testing
             Guid? saga = default;
             while (DateTime.Now < giveUpAt)
             {
-                saga = (await _querySagaRepository.Find(query).ConfigureAwait(false)).FirstOrDefault();
+                saga = (await QuerySagaRepository.Find(query).ConfigureAwait(false)).FirstOrDefault();
                 if (saga == Guid.Empty)
                     return default;
 

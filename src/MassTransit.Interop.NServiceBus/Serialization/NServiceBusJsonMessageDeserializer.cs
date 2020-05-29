@@ -23,7 +23,7 @@ namespace MassTransit.Interop.NServiceBus.Serialization
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            ProbeContext scope = context.CreateScope("deserializer");
+            var scope = context.CreateScope("deserializer");
             scope.Add("contentType", NServiceBusJsonMessageSerializer.JsonContentType.MediaType);
         }
 

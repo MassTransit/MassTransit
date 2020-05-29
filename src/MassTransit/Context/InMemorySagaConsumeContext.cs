@@ -21,6 +21,11 @@
             _instance = instance;
         }
 
+        public void Dispose()
+        {
+            _instance.Release();
+        }
+
         public override Guid? CorrelationId => Saga.CorrelationId;
 
         public bool IsCompleted { get; private set; }
@@ -30,11 +35,6 @@
         public async Task SetCompleted()
         {
             IsCompleted = true;
-        }
-
-        public void Dispose()
-        {
-            _instance.Release();
         }
     }
 }

@@ -54,7 +54,7 @@ namespace MassTransit.PrometheusIntegration.Observers
             where TLog : class
         {
             PrometheusMetrics.MeasureCompensate(context, exception);
-            
+
             return Task.CompletedTask;
         }
     }

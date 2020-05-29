@@ -13,14 +13,13 @@
         ConsumeContextScope,
         ConsumeRetryContext
     {
-        readonly IRetryPolicy _retryPolicy;
         readonly ConsumeContext _context;
         readonly IList<PendingFault> _pendingFaults;
 
         public RetryConsumeContext(ConsumeContext context, IRetryPolicy retryPolicy, RetryContext retryContext)
             : base(context)
         {
-            _retryPolicy = retryPolicy;
+            RetryPolicy = retryPolicy;
             _context = context;
 
             if (retryContext != null)
@@ -32,27 +31,11 @@
             _pendingFaults = new List<PendingFault>();
         }
 
+        protected IRetryPolicy RetryPolicy { get; }
+
         public int RetryAttempt { get; }
 
         public int RetryCount { get; }
-
-        public override Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
-        {
-            if (_retryPolicy.IsHandled(exception))
-            {
-                _pendingFaults.Add(new PendingFault<T>(context, duration, consumerType, exception));
-                return TaskUtil.Completed;
-            }
-
-            return _context.NotifyFaulted(context, duration, consumerType, exception);
-        }
-
-        public RetryConsumeContext CreateNext(RetryContext retryContext)
-        {
-            return new RetryConsumeContext(_context, _retryPolicy, retryContext);
-        }
-
-        protected IRetryPolicy RetryPolicy => _retryPolicy;
 
         public virtual TContext CreateNext<TContext>(RetryContext retryContext)
             where TContext : class, ConsumeRetryContext
@@ -63,6 +46,22 @@
         public Task NotifyPendingFaults()
         {
             return Task.WhenAll(_pendingFaults.Select(x => x.Notify(_context)));
+        }
+
+        public override Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        {
+            if (RetryPolicy.IsHandled(exception))
+            {
+                _pendingFaults.Add(new PendingFault<T>(context, duration, consumerType, exception));
+                return TaskUtil.Completed;
+            }
+
+            return _context.NotifyFaulted(context, duration, consumerType, exception);
+        }
+
+        public RetryConsumeContext CreateNext(RetryContext retryContext)
+        {
+            return new RetryConsumeContext(_context, RetryPolicy, retryContext);
         }
 
 

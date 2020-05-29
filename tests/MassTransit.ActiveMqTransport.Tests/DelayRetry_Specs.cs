@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.ActiveMqTransport.Tests
+﻿namespace MassTransit.ActiveMqTransport.Tests
 {
     using System;
     using System.Diagnostics;
@@ -18,11 +6,11 @@ namespace MassTransit.ActiveMqTransport.Tests
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using GreenPipes.Introspection;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
     using Util;
+
 
     [TestFixture]
     public class Using_the_delayed_exchange :
@@ -83,7 +71,8 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var pingMessage = new PingMessage();
 
-            var fault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<PingMessage>>> fault =
+                SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
 
             await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
 
@@ -117,7 +106,8 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var pingMessage = new PingMessage();
 
-            var fault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<PingMessage>>> fault =
+                SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
 
             await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
 
@@ -151,8 +141,10 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var pingMessage = new PingMessage();
 
-            var pingFault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
-            var pongFault = SubscribeHandler<Fault<PongMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<PingMessage>>> pingFault =
+                SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<PongMessage>>> pongFault =
+                SubscribeHandler<Fault<PongMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
 
             await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
             await InputQueueSendEndpoint.Send(new PongMessage(pingMessage.CorrelationId), x => x.FaultAddress = Bus.Address);
@@ -208,7 +200,8 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var pingMessage = new PingMessage();
 
-            var pingFault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<PingMessage>>> pingFault =
+                SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
 
             await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
             await InputQueueSendEndpoint.Send(new PongMessage(pingMessage.CorrelationId), x => x.FaultAddress = Bus.Address);
@@ -218,10 +211,11 @@ namespace MassTransit.ActiveMqTransport.Tests
             Assert.That(Consumer.PingCount, Is.EqualTo(6));
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Show_me_the_pipeline()
         {
-            ProbeResult result = Bus.GetProbeResult();
+            var result = Bus.GetProbeResult();
 
             Console.WriteLine(result.ToJsonString());
         }
@@ -266,7 +260,8 @@ namespace MassTransit.ActiveMqTransport.Tests
         {
             var pingMessage = new PingMessage();
 
-            var fault = SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<PingMessage>>> fault =
+                SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
 
             await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
 

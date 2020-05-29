@@ -13,6 +13,24 @@ namespace MassTransit.Tests.MessageData
         InMemoryTestFixture
     {
         [Test]
+        public async Task A_missing_body_should_fault()
+        {
+            IRequestClient<ProcessDocument> client = CreateRequestClient<ProcessDocument>();
+
+            const string byteData = "This byte is a good byte to eat.";
+            const string stringValue = "This string is soo incredibly huge.";
+            const string byteValue = "Such a byte value, a really great byte value.";
+
+            Assert.That(async () => await client.GetResponse<DocumentProcessed>(new
+            {
+                InVar.CorrelationId,
+                ByteData = byteData,
+                StringValue = stringValue,
+                ByteValue = Encoding.UTF8.GetBytes(byteValue)
+            }), Throws.TypeOf<RequestFaultException>());
+        }
+
+        [Test]
         public async Task Should_load_the_data_from_the_repository()
         {
             IRequestClient<ProcessDocument> client = CreateRequestClient<ProcessDocument>();
@@ -40,7 +58,7 @@ namespace MassTransit.Tests.MessageData
             Assert.That(response.Message.StringByteData, Is.Not.Null);
             Assert.That(response.Message.StringByteData.HasValue, Is.True);
             Assert.That(response.Message.StringByteData.Address, Is.EqualTo(_stringDataAddress), "Should use the existing message data address");
-            var bytes = await response.Message.StringByteData.Value;
+            byte[] bytes = await response.Message.StringByteData.Value;
             Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo(stringData));
 
             Assert.That(response.Message.ByteData, Is.Not.Null);
@@ -63,24 +81,6 @@ namespace MassTransit.Tests.MessageData
             Assert.That(response.Message.ByteValue.HasValue, Is.True);
             bytes = await response.Message.ByteValue.Value;
             Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo(byteValue));
-        }
-
-        [Test]
-        public async Task A_missing_body_should_fault()
-        {
-            IRequestClient<ProcessDocument> client = CreateRequestClient<ProcessDocument>();
-
-            const string byteData = "This byte is a good byte to eat.";
-            const string stringValue = "This string is soo incredibly huge.";
-            const string byteValue = "Such a byte value, a really great byte value.";
-
-            Assert.That(async () => await client.GetResponse<DocumentProcessed>(new
-            {
-                InVar.CorrelationId,
-                ByteData = byteData,
-                StringValue = stringValue,
-                ByteValue = Encoding.UTF8.GetBytes(byteValue)
-            }), Throws.TypeOf<RequestFaultException>());
         }
 
         readonly IMessageDataRepository _repository = new InMemoryMessageDataRepository();
@@ -114,7 +114,7 @@ namespace MassTransit.Tests.MessageData
                     context.Message.ByteData,
                     context.Message.StringValue,
                     StringByteValue = context.Message.StringValue,
-                    context.Message.ByteValue,
+                    context.Message.ByteValue
                 });
             });
         }

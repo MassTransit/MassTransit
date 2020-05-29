@@ -48,7 +48,7 @@
                 new HubLifetimeManagerOptions<THub> {ServerName = $"{_prefix}_{Guid.NewGuid():N}"},
                 new BusHubLifetimeScopeProvider(Harness.Bus),
                 new DefaultHubProtocolResolver(
-                    new IHubProtocol[] {new JsonHubProtocol(Options.Create(jsonOptions)), new MessagePackHubProtocol(Options.Create(messagePackOptions)),},
+                    new IHubProtocol[] {new JsonHubProtocol(Options.Create(jsonOptions)), new MessagePackHubProtocol(Options.Create(messagePackOptions))},
                     NullLogger<DefaultHubProtocolResolver>.Instance)
             );
 

@@ -9,8 +9,6 @@
     public class AlternateExchange_Specs :
         RabbitMqTestFixture
     {
-        Task<ConsumeContext<TheWorldImploded>> _handled;
-
         [Test]
         public async Task Should_create_and_bind_the_exchange_and_properties()
         {
@@ -18,6 +16,8 @@
 
             await _handled;
         }
+
+        Task<ConsumeContext<TheWorldImploded>> _handled;
 
         const string AlternateExchangeName = "publish-not-delivered";
         const string AlternateQueueName = "world-examiner";

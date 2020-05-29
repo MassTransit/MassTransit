@@ -20,6 +20,21 @@
             Connect(this);
         }
 
+        public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
+            where TMessage : class
+        {
+            AddRedeliveryPipeSpecification<TMessage>(configurator);
+
+            if (typeof(TMessage) == typeof(RoutingSlip))
+                return;
+
+            var retrySpecification = new RedeliveryRetryPipeSpecification<TMessage>();
+
+            _configure?.Invoke(retrySpecification);
+
+            configurator.AddPipeSpecification(retrySpecification);
+        }
+
         public override void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
         {
             base.ActivityConfigured(configurator, compensateAddress);
@@ -51,21 +66,6 @@
             _configure?.Invoke(specification);
 
             configurator.Log(x => x.AddPipeSpecification(specification));
-        }
-
-        public void MessageConfigured<TMessage>(IConsumePipeConfigurator configurator)
-            where TMessage : class
-        {
-            AddRedeliveryPipeSpecification<TMessage>(configurator);
-
-            if (typeof(TMessage) == typeof(RoutingSlip))
-                return;
-
-            var retrySpecification = new RedeliveryRetryPipeSpecification<TMessage>();
-
-            _configure?.Invoke(retrySpecification);
-
-            configurator.AddPipeSpecification(retrySpecification);
         }
 
         protected virtual void AddRedeliveryPipeSpecification<TMessage>(IConsumePipeConfigurator configurator)

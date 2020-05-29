@@ -81,9 +81,9 @@
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var initializer = Cached.InitializerCache.GetInitializer(values.GetType());
+            IMessageInitializer<TMessage> initializer = Cached.InitializerCache.GetInitializer(values.GetType());
 
-            var initializeContext = await initializer.Initialize(initializer.Create(context), values).ConfigureAwait(false);
+            InitializeContext<TMessage> initializeContext = await initializer.Initialize(initializer.Create(context), values).ConfigureAwait(false);
 
             return initializeContext.Message;
         }
@@ -93,7 +93,8 @@
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            var context = await Cached.InitializerCache.GetInitializer(values.GetType()).Initialize(values, cancellationToken).ConfigureAwait(false);
+            InitializeContext<TMessage> context =
+                await Cached.InitializerCache.GetInitializer(values.GetType()).Initialize(values, cancellationToken).ConfigureAwait(false);
 
             return context.Message;
         }

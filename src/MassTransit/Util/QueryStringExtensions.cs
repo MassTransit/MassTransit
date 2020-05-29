@@ -22,7 +22,7 @@ namespace MassTransit.Util
             if (path.Length == 1 && path[0] == '/')
                 return path;
 
-            int split = path.LastIndexOf('/');
+            var split = path.LastIndexOf('/');
             if (split > 0)
                 return Uri.UnescapeDataString(path.Substring(1, split - 1));
 
@@ -39,7 +39,7 @@ namespace MassTransit.Util
         {
             var path = address.AbsolutePath;
 
-            int split = path.LastIndexOf('/');
+            var split = path.LastIndexOf('/');
             if (split > 0)
             {
                 hostPath = Uri.UnescapeDataString(path.Substring(1, split - 1));
@@ -59,11 +59,9 @@ namespace MassTransit.Util
         /// <returns></returns>
         public static IEnumerable<(string, string)> SplitQueryString(this Uri address)
         {
-            string query = address.Query?.TrimStart('?');
+            var query = address.Query?.TrimStart('?');
             if (!string.IsNullOrWhiteSpace(query))
-            {
                 return query.Split('&').Select(x => x.Split('=')).Select(x => (x.First().ToLowerInvariant(), x.Skip(1).FirstOrDefault()));
-            }
 
             return Enumerable.Empty<(string, string)>();
         }

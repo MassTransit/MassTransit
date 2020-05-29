@@ -32,13 +32,13 @@ namespace MassTransit.Transformation.PropertyProviders
         public Task<TProperty> GetProperty<T>(InitializeContext<T, TInput> context)
             where T : class
         {
-            if (!context.TryGetPayload<TransformContext<TInput>>(out var transformContext))
+            if (!context.TryGetPayload<TransformContext<TInput>>(out TransformContext<TInput> transformContext))
                 return TaskUtil.Default<TProperty>();
 
             if (!context.HasInput)
                 return TaskUtil.Default<TProperty>();
 
-            var inputTask = _inputProvider.GetProperty(context);
+            Task<TProperty> inputTask = _inputProvider.GetProperty(context);
             if (inputTask.IsCompleted)
             {
                 var propertyContext = new MessageTransformPropertyContext<TProperty, TInput>(transformContext, inputTask.Result);

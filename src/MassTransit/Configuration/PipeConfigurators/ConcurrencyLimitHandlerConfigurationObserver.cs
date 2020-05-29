@@ -11,19 +11,17 @@ namespace MassTransit.PipeConfigurators
     public class ConcurrencyLimitHandlerConfigurationObserver :
         IHandlerConfigurationObserver
     {
-        readonly IConcurrencyLimiter _limiter;
-
         public ConcurrencyLimitHandlerConfigurationObserver(int concurrentMessageLimit, string id = null)
         {
-            _limiter = new ConcurrencyLimiter(concurrentMessageLimit, id);
+            Limiter = new ConcurrencyLimiter(concurrentMessageLimit, id);
         }
 
-        public IConcurrencyLimiter Limiter => _limiter;
+        public IConcurrencyLimiter Limiter { get; }
 
         public void HandlerConfigured<T>(IHandlerConfigurator<T> configurator)
             where T : class
         {
-            var specification = new ConcurrencyLimitConsumePipeSpecification<T>(_limiter);
+            var specification = new ConcurrencyLimitConsumePipeSpecification<T>(Limiter);
 
             configurator.AddPipeSpecification(specification);
         }

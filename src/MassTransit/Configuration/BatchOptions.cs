@@ -5,7 +5,7 @@ namespace MassTransit
 
 
     /// <summary>
-    /// Batch options are applied to a <see cref="Batch{T}"/> consumer to configure
+    /// Batch options are applied to a <see cref="Batch{T}" /> consumer to configure
     /// the size and time limits for each batch.
     /// </summary>
     public class BatchOptions :
@@ -16,6 +16,9 @@ namespace MassTransit
             MessageLimit = 10;
             TimeLimit = TimeSpan.FromSeconds(1);
         }
+
+        public int MessageLimit { get; private set; }
+        public TimeSpan TimeLimit { get; private set; }
 
         public BatchOptions SetMessageLimit(int limit)
         {
@@ -38,8 +41,5 @@ namespace MassTransit
             TimeLimit = timeSpan;
             return this;
         }
-
-        public int MessageLimit { get; private set; }
-        public TimeSpan TimeLimit { get; private set; }
     }
 }

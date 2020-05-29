@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Internals.Extensions
+﻿namespace MassTransit.Internals.Extensions
 {
     using System;
     using System.Collections.Generic;
@@ -42,7 +30,7 @@ namespace MassTransit.Internals.Extensions
             if (interfaceType == null)
                 throw new ArgumentNullException(nameof(interfaceType));
 
-            TypeInfo interfaceTypeInfo = interfaceType.GetTypeInfo();
+            var interfaceTypeInfo = interfaceType.GetTypeInfo();
             if (!interfaceTypeInfo.IsInterface)
                 throw new ArgumentException("The interface type must be an interface: " + interfaceType.Name);
 
@@ -65,7 +53,7 @@ namespace MassTransit.Internals.Extensions
             if (interfaceType == null)
                 throw new ArgumentNullException(nameof(interfaceType));
 
-            TypeInfo interfaceTypeInfo = interfaceType.GetTypeInfo();
+            var interfaceTypeInfo = interfaceType.GetTypeInfo();
             if (!interfaceTypeInfo.IsInterface)
                 throw new ArgumentException("The interface type must be an interface: " + interfaceType.Name);
 
@@ -77,7 +65,7 @@ namespace MassTransit.Internals.Extensions
             if (ClosesType(type, typeof(Task<>), out Type closedType))
             {
                 Type[] arguments = closedType.GetGenericArguments();
-                for (int i = 0; i < arguments.Length; i++)
+                for (var i = 0; i < arguments.Length; i++)
                 {
                     if (arguments[i].IsGenericParameter)
                         continue;
@@ -124,14 +112,14 @@ namespace MassTransit.Internals.Extensions
                 if (!openType.IsOpenGeneric())
                     throw new ArgumentException("The interface type must be an open generic interface: " + openType.Name);
 
-                Type interfaceType = type.GetInterface(openType);
+                var interfaceType = type.GetInterface(openType);
                 if (interfaceType == null)
                 {
                     closedType = default;
                     return false;
                 }
 
-                TypeInfo typeInfo = interfaceType.GetTypeInfo();
+                var typeInfo = interfaceType.GetTypeInfo();
                 if (!typeInfo.IsGenericTypeDefinition && !typeInfo.ContainsGenericParameters)
                 {
                     closedType = typeInfo;
@@ -142,10 +130,10 @@ namespace MassTransit.Internals.Extensions
                 return false;
             }
 
-            Type baseType = type;
+            var baseType = type;
             while (baseType != null && baseType != typeof(object))
             {
-                TypeInfo baseTypeInfo = baseType.GetTypeInfo();
+                var baseTypeInfo = baseType.GetTypeInfo();
                 if (baseTypeInfo.IsGenericType && baseTypeInfo.GetGenericTypeDefinition() == openType)
                 {
                     if (!baseTypeInfo.IsGenericTypeDefinition && !baseTypeInfo.ContainsGenericParameters)
@@ -192,17 +180,17 @@ namespace MassTransit.Internals.Extensions
                 if (!openType.IsOpenGeneric())
                     throw new ArgumentException("The interface type must be an open generic interface: " + openType.Name);
 
-                Type interfaceType = type.GetInterface(openType);
+                var interfaceType = type.GetInterface(openType);
                 if (interfaceType == null)
                     throw new ArgumentException("The interface type is not implemented by: " + type.Name);
 
                 return interfaceType.GetTypeInfo().GetGenericArguments().Where(x => !x.IsGenericParameter);
             }
 
-            Type baseType = type;
+            var baseType = type;
             while (baseType != null && baseType != typeof(object))
             {
-                TypeInfo baseTypeInfo = baseType.GetTypeInfo();
+                var baseTypeInfo = baseType.GetTypeInfo();
                 if (baseTypeInfo.IsGenericType && baseType.GetGenericTypeDefinition() == openType)
                     return baseTypeInfo.GetGenericArguments().Where(x => !x.IsGenericParameter);
 

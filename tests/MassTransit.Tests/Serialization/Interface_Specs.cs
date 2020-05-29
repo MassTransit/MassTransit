@@ -192,7 +192,7 @@ namespace MassTransit.Tests.Serialization
         {
             unchecked
             {
-                var result = (AddedBy != null ? AddedBy.GetHashCode() : 0);
+                var result = AddedBy != null ? AddedBy.GetHashCode() : 0;
                 result = (result * 397) ^ AddedAt.GetHashCode();
                 result = (result * 397) ^ (Subject != null ? Subject.GetHashCode() : 0);
                 result = (result * 397) ^ (Body != null ? Body.GetHashCode() : 0);

@@ -34,7 +34,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             var consumer = new RabbitMqBasicConsumer(context, _context);
 
             await context.BasicConsume(receiveSettings.QueueName, receiveSettings.NoAck, _context.ExclusiveConsumer, receiveSettings
-            .ConsumeArguments, consumer)
+                    .ConsumeArguments, consumer)
                 .ConfigureAwait(false);
 
             await consumer.Ready.ConfigureAwait(false);

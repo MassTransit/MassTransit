@@ -27,11 +27,11 @@ namespace MassTransit.Mediator.Contexts
         ReceiveContext
         where TMessage : class
     {
+        readonly MediatorConsumeContext<TMessage> _consumeContext;
+        readonly MessageIdMessageHeader _headers;
         readonly IReceiveObserver _observers;
         readonly PendingTaskCollection _receiveTasks;
         readonly Stopwatch _receiveTimer;
-        readonly MessageIdMessageHeader _headers;
-        readonly MediatorConsumeContext<TMessage> _consumeContext;
 
         public MediatorReceiveContext(SendContext<TMessage> sendContext, ISendEndpointProvider sendEndpointProvider,
             IPublishEndpointProvider publishEndpointProvider, IPublishTopology publishTopology, IReceiveObserver observers, CancellationToken cancellationToken,

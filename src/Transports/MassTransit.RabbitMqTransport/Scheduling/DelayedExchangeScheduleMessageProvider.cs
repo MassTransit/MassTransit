@@ -12,8 +12,8 @@ namespace MassTransit.RabbitMqTransport.Scheduling
     public class DelayedExchangeScheduleMessageProvider :
         IScheduleMessageProvider
     {
-        readonly IRabbitMqHostTopology _topology;
         readonly ISendEndpointProvider _sendEndpointProvider;
+        readonly IRabbitMqHostTopology _topology;
 
         public DelayedExchangeScheduleMessageProvider(ISendEndpointProvider sendEndpointProvider, IRabbitMqHostTopology topology)
         {

@@ -12,8 +12,8 @@
         IRequestSendEndpoint<TRequest>
         where TRequest : class
     {
-        readonly IPublishEndpointProvider _provider;
         readonly ConsumeContext _consumeContext;
+        readonly IPublishEndpointProvider _provider;
 
         public PublishRequestSendEndpoint(IPublishEndpointProvider provider, ConsumeContext consumeContext)
         {
@@ -25,11 +25,11 @@
         {
             var endpoint = await _provider.GetPublishSendEndpoint<TRequest>().ConfigureAwait(false);
 
-            var initializer = MessageInitializerCache<TRequest>.GetInitializer(values.GetType());
+            IMessageInitializer<TRequest> initializer = MessageInitializerCache<TRequest>.GetInitializer(values.GetType());
 
             if (_consumeContext != null)
             {
-                var initializeContext = initializer.Create(_consumeContext);
+                InitializeContext<TRequest> initializeContext = initializer.Create(_consumeContext);
 
                 return await initializer.Send(endpoint, initializeContext, values, new ConsumeSendPipeAdapter<TRequest>(_consumeContext, pipe, requestId))
                     .ConfigureAwait(false);

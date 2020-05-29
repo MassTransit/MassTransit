@@ -30,9 +30,7 @@
         public void RemoveSubscription(string id, HubConnectionContext connection)
         {
             if (!_subscriptions.TryGetValue(id, out var subscription))
-            {
                 return;
-            }
 
             subscription.Remove(connection);
         }

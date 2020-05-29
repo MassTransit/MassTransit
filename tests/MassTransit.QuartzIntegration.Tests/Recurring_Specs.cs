@@ -18,7 +18,7 @@
             var scheduleId = Guid.NewGuid().ToString();
 
             await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(10), new Done {Name = "Joe"});
-            var scheduledRecurringMessage =
+            ScheduledRecurringMessage<Interval> scheduledRecurringMessage =
                 await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MyCancelableSchedule(scheduleId), new Interval {Name = "Joe"});
 
             await _done;
@@ -42,7 +42,8 @@
             var scheduleId = Guid.NewGuid().ToString();
 
             await Scheduler.ScheduleSend(InputQueueAddress, DateTime.UtcNow + TimeSpan.FromSeconds(10), new Done {Name = "Joe"});
-            var scheduledRecurringMessage = await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MySchedule(), new Interval {Name = "Joe"});
+            ScheduledRecurringMessage<Interval> scheduledRecurringMessage =
+                await QuartzEndpoint.ScheduleRecurringSend(InputQueueAddress, new MySchedule(), new Interval {Name = "Joe"});
 
             await _done;
 

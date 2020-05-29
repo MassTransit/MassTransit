@@ -35,7 +35,7 @@ namespace MassTransit
             ServiceInstanceOptions options, Action<IServiceInstanceConfigurator<TEndpointConfigurator>> configure)
             where TEndpointConfigurator : IReceiveEndpointConfigurator
         {
-            var transportConfigurator = Cached<TEndpointConfigurator>.Instance;
+            IServiceInstanceTransportConfigurator<TEndpointConfigurator> transportConfigurator = Cached<TEndpointConfigurator>.Instance;
 
             var instance = new ServiceInstance();
 
@@ -62,10 +62,10 @@ namespace MassTransit
         static class Cached<TEndpointConfigurator>
             where TEndpointConfigurator : IReceiveEndpointConfigurator
         {
-            internal static IServiceInstanceTransportConfigurator<TEndpointConfigurator> Instance => _configurator.Value;
-
             static readonly Lazy<IServiceInstanceTransportConfigurator<TEndpointConfigurator>> _configurator =
                 new Lazy<IServiceInstanceTransportConfigurator<TEndpointConfigurator>>(GetServiceInstanceTransportConfigurator);
+
+            internal static IServiceInstanceTransportConfigurator<TEndpointConfigurator> Instance => _configurator.Value;
 
             static IServiceInstanceTransportConfigurator<TEndpointConfigurator> GetServiceInstanceTransportConfigurator()
             {

@@ -28,11 +28,9 @@ namespace MassTransit.Initializers.PropertyProviders
             if (!context.HasInput)
                 return TaskUtil.Default<TValue>();
 
-            var propertyTask = _provider.GetProperty(context);
+            Task<TProperty> propertyTask = _provider.GetProperty(context);
             if (propertyTask.IsCompleted)
-            {
                 return propertyTask.Result.GetValue(context);
-            }
 
             async Task<TValue> GetPropertyAsync()
             {

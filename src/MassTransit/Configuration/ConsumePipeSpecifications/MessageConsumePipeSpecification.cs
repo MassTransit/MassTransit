@@ -15,9 +15,9 @@
         IMessageConsumePipeSpecification
         where TMessage : class
     {
+        readonly IList<IPipeSpecification<ConsumeContext>> _baseSpecifications;
         readonly IList<ISpecificationPipeSpecification<ConsumeContext<TMessage>>> _parentMessageSpecifications;
         readonly IList<IPipeSpecification<ConsumeContext<TMessage>>> _specifications;
-        readonly IList<IPipeSpecification<ConsumeContext>> _baseSpecifications;
 
         public MessageConsumePipeSpecification()
         {

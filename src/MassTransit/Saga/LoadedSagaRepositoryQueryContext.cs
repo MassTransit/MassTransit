@@ -21,9 +21,9 @@ namespace MassTransit.Saga
         where TSaga : class, ISaga
         where TMessage : class
     {
-        readonly SagaRepositoryContext<TSaga, TMessage> _repositoryContext;
-        readonly IList<TSaga> _instances;
         readonly IDictionary<Guid, TSaga> _index;
+        readonly IList<TSaga> _instances;
+        readonly SagaRepositoryContext<TSaga, TMessage> _repositoryContext;
 
         public LoadedSagaRepositoryQueryContext(SagaRepositoryContext<TSaga, TMessage> repositoryContext, IList<TSaga> instances)
             : base(repositoryContext)
@@ -49,9 +49,7 @@ namespace MassTransit.Saga
         public Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId)
         {
             if (_index.TryGetValue(correlationId, out var instance))
-            {
                 return _repositoryContext.CreateSagaConsumeContext(_repositoryContext, instance, SagaConsumeContextMode.Load);
-            }
 
             return _repositoryContext.Load(correlationId);
         }
@@ -103,9 +101,9 @@ namespace MassTransit.Saga
         SagaRepositoryQueryContext<TSaga>
         where TSaga : class, ISaga
     {
-        readonly SagaRepositoryContext<TSaga> _repositoryContext;
-        readonly IList<TSaga> _instances;
         readonly IDictionary<Guid, TSaga> _index;
+        readonly IList<TSaga> _instances;
+        readonly SagaRepositoryContext<TSaga> _repositoryContext;
 
         public LoadedSagaRepositoryQueryContext(SagaRepositoryContext<TSaga> repositoryContext, IList<TSaga> instances)
             : base(repositoryContext)
@@ -126,9 +124,7 @@ namespace MassTransit.Saga
         public Task<TSaga> Load(Guid correlationId)
         {
             if (_index.TryGetValue(correlationId, out var instance))
-            {
                 return Task.FromResult(instance);
-            }
 
             return _repositoryContext.Load(correlationId);
         }

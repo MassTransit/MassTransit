@@ -41,6 +41,19 @@ namespace MassTransit.Initializers.PropertyConverters
             }
         }
 
+        Task<IEnumerable<KeyValuePair<TKey, TElement>>>
+            IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TKey, TElement>>>.Convert<TMessage>(
+                InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TElement>> input)
+        {
+            switch (input)
+            {
+                case null:
+                    return TaskUtil.Default<IEnumerable<KeyValuePair<TKey, TElement>>>();
+                default:
+                    return Task.FromResult(input);
+            }
+        }
+
         Task<IReadOnlyDictionary<TKey, TElement>> IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TElement>>>
             .Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TElement>> input)
         {
@@ -52,19 +65,6 @@ namespace MassTransit.Initializers.PropertyConverters
                     return Task.FromResult(dictionary);
                 default:
                     return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(input.ToDictionary(x => x.Key, x => x.Value));
-            }
-        }
-
-        Task<IEnumerable<KeyValuePair<TKey, TElement>>>
-            IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TKey, TElement>>>.Convert<TMessage>(
-                InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TElement>> input)
-        {
-            switch (input)
-            {
-                case null:
-                    return TaskUtil.Default<IEnumerable<KeyValuePair<TKey, TElement>>>();
-                default:
-                    return Task.FromResult(input);
             }
         }
     }
@@ -93,7 +93,7 @@ namespace MassTransit.Initializers.PropertyConverters
         Task<IDictionary<TKey, TElement>> IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TInputElement>>>.
             Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
         {
-            var resultTask = ConvertSync(context, input);
+            Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
             if (resultTask.IsCompleted)
                 return Task.FromResult<IDictionary<TKey, TElement>>(resultTask.Result);
 
@@ -105,14 +105,15 @@ namespace MassTransit.Initializers.PropertyConverters
             return ConvertAsync();
         }
 
-        Task<IReadOnlyDictionary<TKey, TElement>> IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TInputElement>>>.
-            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
+        Task<IEnumerable<KeyValuePair<TKey, TElement>>>
+            IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TKey, TInputElement>>>.Convert<TMessage>(
+                InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
         {
-            var resultTask = ConvertSync(context, input);
+            Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
             if (resultTask.IsCompleted)
-                return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(resultTask.Result);
+                return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(resultTask.Result);
 
-            async Task<IReadOnlyDictionary<TKey, TElement>> ConvertAsync()
+            async Task<IEnumerable<KeyValuePair<TKey, TElement>>> ConvertAsync()
             {
                 return await resultTask.ConfigureAwait(false);
             }
@@ -120,15 +121,14 @@ namespace MassTransit.Initializers.PropertyConverters
             return ConvertAsync();
         }
 
-        Task<IEnumerable<KeyValuePair<TKey, TElement>>>
-            IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TKey, TInputElement>>>.Convert<TMessage>(
-                InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
+        Task<IReadOnlyDictionary<TKey, TElement>> IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TKey, TInputElement>>>.
+            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
         {
-            var resultTask = ConvertSync(context, input);
+            Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
             if (resultTask.IsCompleted)
-                return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(resultTask.Result);
+                return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(resultTask.Result);
 
-            async Task<IEnumerable<KeyValuePair<TKey, TElement>>> ConvertAsync()
+            async Task<IReadOnlyDictionary<TKey, TElement>> ConvertAsync()
             {
                 return await resultTask.ConfigureAwait(false);
             }
@@ -143,7 +143,7 @@ namespace MassTransit.Initializers.PropertyConverters
             if (input == null)
                 return TaskUtil.Default<Dictionary<TKey, TElement>>();
 
-            int capacity = 0;
+            var capacity = 0;
             if (input is ICollection<TElement> collection)
             {
                 capacity = collection.Count;
@@ -151,9 +151,9 @@ namespace MassTransit.Initializers.PropertyConverters
                     return Task.FromResult(new Dictionary<TKey, TElement>());
             }
 
-            Dictionary<TKey, TElement> results = new Dictionary<TKey, TElement>(capacity);
+            var results = new Dictionary<TKey, TElement>(capacity);
             IEnumerator<KeyValuePair<TKey, TInputElement>> enumerator = input.GetEnumerator();
-            bool disposeEnumerator = true;
+            var disposeEnumerator = true;
             try
             {
                 async Task<Dictionary<TKey, TElement>> ConvertAsync(IEnumerator<KeyValuePair<TKey, TInputElement>> asyncEnumerator, Task<TElement> elementTask)
@@ -166,7 +166,7 @@ namespace MassTransit.Initializers.PropertyConverters
 
                         while (asyncEnumerator.MoveNext())
                         {
-                            var current = asyncEnumerator.Current;
+                            KeyValuePair<TKey, TInputElement> current = asyncEnumerator.Current;
 
                             elementTask = _converter.Convert(context, current.Value);
                             if (elementTask.IsCompleted)
@@ -189,9 +189,9 @@ namespace MassTransit.Initializers.PropertyConverters
 
                 while (enumerator.MoveNext())
                 {
-                    var current = enumerator.Current;
+                    KeyValuePair<TKey, TInputElement> current = enumerator.Current;
 
-                    var elementTask = _converter.Convert(context, current.Value);
+                    Task<TElement> elementTask = _converter.Convert(context, current.Value);
                     if (elementTask.IsCompleted)
                         results.Add(current.Key, elementTask.Result);
                     else
@@ -235,7 +235,7 @@ namespace MassTransit.Initializers.PropertyConverters
         Task<IDictionary<TKey, TElement>> IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TElement>>>.
             Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
         {
-            var resultTask = ConvertSync(context, input);
+            Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
             if (resultTask.IsCompleted)
                 return Task.FromResult<IDictionary<TKey, TElement>>(resultTask.Result);
 
@@ -247,14 +247,15 @@ namespace MassTransit.Initializers.PropertyConverters
             return ConvertAsync();
         }
 
-        Task<IReadOnlyDictionary<TKey, TElement>> IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TElement>>>.
-            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
+        Task<IEnumerable<KeyValuePair<TKey, TElement>>>
+            IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TInputKey, TElement>>>.Convert<TMessage>(
+                InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
         {
-            var resultTask = ConvertSync(context, input);
+            Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
             if (resultTask.IsCompleted)
-                return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(resultTask.Result);
+                return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(resultTask.Result);
 
-            async Task<IReadOnlyDictionary<TKey, TElement>> ConvertAsync()
+            async Task<IEnumerable<KeyValuePair<TKey, TElement>>> ConvertAsync()
             {
                 return await resultTask.ConfigureAwait(false);
             }
@@ -262,15 +263,14 @@ namespace MassTransit.Initializers.PropertyConverters
             return ConvertAsync();
         }
 
-        Task<IEnumerable<KeyValuePair<TKey, TElement>>>
-            IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>, IEnumerable<KeyValuePair<TInputKey, TElement>>>.Convert<TMessage>(
-                InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
+        Task<IReadOnlyDictionary<TKey, TElement>> IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TElement>>>.
+            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
         {
-            var resultTask = ConvertSync(context, input);
+            Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
             if (resultTask.IsCompleted)
-                return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(resultTask.Result);
+                return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(resultTask.Result);
 
-            async Task<IEnumerable<KeyValuePair<TKey, TElement>>> ConvertAsync()
+            async Task<IReadOnlyDictionary<TKey, TElement>> ConvertAsync()
             {
                 return await resultTask.ConfigureAwait(false);
             }
@@ -285,7 +285,7 @@ namespace MassTransit.Initializers.PropertyConverters
             if (input == null)
                 return TaskUtil.Default<Dictionary<TKey, TElement>>();
 
-            int capacity = 0;
+            var capacity = 0;
             if (input is ICollection<TElement> collection)
             {
                 capacity = collection.Count;
@@ -293,9 +293,9 @@ namespace MassTransit.Initializers.PropertyConverters
                     return Task.FromResult(new Dictionary<TKey, TElement>());
             }
 
-            Dictionary<TKey, TElement> results = new Dictionary<TKey, TElement>(capacity);
+            var results = new Dictionary<TKey, TElement>(capacity);
             IEnumerator<KeyValuePair<TInputKey, TElement>> enumerator = input.GetEnumerator();
-            bool disposeEnumerator = true;
+            var disposeEnumerator = true;
             try
             {
                 async Task<Dictionary<TKey, TElement>> ConvertAsync(IEnumerator<KeyValuePair<TInputKey, TElement>> asyncEnumerator, Task<TKey> keyTask)
@@ -308,7 +308,7 @@ namespace MassTransit.Initializers.PropertyConverters
 
                         while (asyncEnumerator.MoveNext())
                         {
-                            var current = asyncEnumerator.Current;
+                            KeyValuePair<TInputKey, TElement> current = asyncEnumerator.Current;
 
                             keyTask = _converter.Convert(context, current.Key);
                             if (keyTask.IsCompleted)
@@ -331,9 +331,9 @@ namespace MassTransit.Initializers.PropertyConverters
 
                 while (enumerator.MoveNext())
                 {
-                    var current = enumerator.Current;
+                    KeyValuePair<TInputKey, TElement> current = enumerator.Current;
 
-                    var keyTask = _converter.Convert(context, current.Key);
+                    Task<TKey> keyTask = _converter.Convert(context, current.Key);
                     if (keyTask.IsCompleted)
                         results.Add(keyTask.Result, current.Value);
                     else
@@ -380,7 +380,7 @@ namespace MassTransit.Initializers.PropertyConverters
         Task<IDictionary<TKey, TElement>> IPropertyConverter<IDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TInputElement>>>
             .Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
         {
-            var resultTask = ConvertSync(context, input);
+            Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
             if (resultTask.IsCompleted)
                 return Task.FromResult<IDictionary<TKey, TElement>>(resultTask.Result);
 
@@ -392,15 +392,15 @@ namespace MassTransit.Initializers.PropertyConverters
             return ConvertAsync();
         }
 
-        Task<IReadOnlyDictionary<TKey, TElement>>
-            IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TInputElement>>>.
-            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
+        Task<IEnumerable<KeyValuePair<TKey, TElement>>> IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>,
+            IEnumerable<KeyValuePair<TInputKey, TInputElement>>>.Convert<TMessage>(InitializeContext<TMessage> context,
+            IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
         {
-            var resultTask = ConvertSync(context, input);
+            Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
             if (resultTask.IsCompleted)
-                return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(resultTask.Result);
+                return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(resultTask.Result);
 
-            async Task<IReadOnlyDictionary<TKey, TElement>> ConvertAsync()
+            async Task<IEnumerable<KeyValuePair<TKey, TElement>>> ConvertAsync()
             {
                 return await resultTask.ConfigureAwait(false);
             }
@@ -408,15 +408,15 @@ namespace MassTransit.Initializers.PropertyConverters
             return ConvertAsync();
         }
 
-        Task<IEnumerable<KeyValuePair<TKey, TElement>>> IPropertyConverter<IEnumerable<KeyValuePair<TKey, TElement>>,
-            IEnumerable<KeyValuePair<TInputKey, TInputElement>>>.Convert<TMessage>(InitializeContext<TMessage> context,
-            IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
+        Task<IReadOnlyDictionary<TKey, TElement>>
+            IPropertyConverter<IReadOnlyDictionary<TKey, TElement>, IEnumerable<KeyValuePair<TInputKey, TInputElement>>>.
+            Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
         {
-            var resultTask = ConvertSync(context, input);
+            Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
             if (resultTask.IsCompleted)
-                return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(resultTask.Result);
+                return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(resultTask.Result);
 
-            async Task<IEnumerable<KeyValuePair<TKey, TElement>>> ConvertAsync()
+            async Task<IReadOnlyDictionary<TKey, TElement>> ConvertAsync()
             {
                 return await resultTask.ConfigureAwait(false);
             }
@@ -431,7 +431,7 @@ namespace MassTransit.Initializers.PropertyConverters
             if (input == null)
                 return TaskUtil.Default<Dictionary<TKey, TElement>>();
 
-            int capacity = 0;
+            var capacity = 0;
             if (input is ICollection<TElement> collection)
             {
                 capacity = collection.Count;
@@ -439,9 +439,9 @@ namespace MassTransit.Initializers.PropertyConverters
                     return Task.FromResult(new Dictionary<TKey, TElement>());
             }
 
-            Dictionary<TKey, TElement> results = new Dictionary<TKey, TElement>(capacity);
+            var results = new Dictionary<TKey, TElement>(capacity);
             IEnumerator<KeyValuePair<TInputKey, TInputElement>> enumerator = input.GetEnumerator();
-            bool disposeEnumerator = true;
+            var disposeEnumerator = true;
             try
             {
                 async Task<Dictionary<TKey, TElement>> ConvertAsync(IEnumerator<KeyValuePair<TInputKey, TInputElement>> asyncEnumerator, Task<TKey> keyTask,
@@ -456,7 +456,7 @@ namespace MassTransit.Initializers.PropertyConverters
 
                         while (asyncEnumerator.MoveNext())
                         {
-                            var current = asyncEnumerator.Current;
+                            KeyValuePair<TInputKey, TInputElement> current = asyncEnumerator.Current;
 
                             keyTask = _keyConverter.Convert(context, current.Key);
                             elementTask = _elementConverter.Convert(context, current.Value);
@@ -477,10 +477,10 @@ namespace MassTransit.Initializers.PropertyConverters
 
                 while (enumerator.MoveNext())
                 {
-                    var current = enumerator.Current;
+                    KeyValuePair<TInputKey, TInputElement> current = enumerator.Current;
 
-                    var keyTask = _keyConverter.Convert(context, current.Key);
-                    var elementTask = _elementConverter.Convert(context, current.Value);
+                    Task<TKey> keyTask = _keyConverter.Convert(context, current.Key);
+                    Task<TElement> elementTask = _elementConverter.Convert(context, current.Value);
                     if (keyTask.IsCompleted && elementTask.IsCompleted)
                         results.Add(keyTask.Result, elementTask.Result);
                     else

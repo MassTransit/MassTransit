@@ -2,18 +2,32 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using TestFramework.Messages;
-    using NUnit.Framework;
     using GreenPipes;
     using MassTransit.Testing;
     using MassTransit.Testing.Indicators;
+    using NUnit.Framework;
     using TestFramework;
+    using TestFramework.Messages;
 
 
     [TestFixture]
     public class When_specifying_retry_limit :
         RabbitMqTestFixture
     {
+        [Test]
+        public async Task Should_stop_after_limit_exceeded()
+        {
+            await Bus.Publish(new PingMessage());
+
+            ConsumeContext<Fault<PingMessage>> handled = await _handled;
+
+            Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.GreaterThan(0));
+
+            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
+
+            Assert.LessOrEqual(_attempts, _limit + 1);
+        }
+
         readonly int _limit;
         int _attempts;
         IBusActivityMonitor _activityMonitor;
@@ -23,20 +37,6 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _limit = 2;
             _attempts = 0;
-        }
-
-        [Test]
-        public async Task Should_stop_after_limit_exceeded()
-        {
-            await Bus.Publish(new PingMessage());
-
-            var handled = await _handled;
-
-            Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.GreaterThan(0));
-
-            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
-
-            Assert.LessOrEqual(_attempts, _limit + 1);
         }
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
@@ -83,6 +83,20 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class When_specifying_redelivery_limit :
         RabbitMqTestFixture
     {
+        [Test]
+        public async Task Should_stop_after_limit_exceeded()
+        {
+            await Bus.Publish(new PingMessage());
+
+            ConsumeContext<Fault<PingMessage>> handled = await _handled;
+
+            Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.GreaterThan(0));
+
+            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
+
+            Assert.LessOrEqual(_attempts, _limit + 1);
+        }
+
         readonly int _limit;
         int _attempts;
         IBusActivityMonitor _activityMonitor;
@@ -92,20 +106,6 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _limit = 3;
             _attempts = 0;
-        }
-
-        [Test]
-        public async Task Should_stop_after_limit_exceeded()
-        {
-            await Bus.Publish(new PingMessage());
-
-            var handled = await _handled;
-
-            Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.GreaterThan(0));
-
-            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
-
-            Assert.LessOrEqual(_attempts, _limit + 1);
         }
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
@@ -149,10 +149,25 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
     }
 
+
     [TestFixture]
     public class When_specifying_redelivery_limit_with_message_ttl :
         RabbitMqTestFixture
     {
+        [Test]
+        public async Task Should_stop_after_limit_exceeded()
+        {
+            await Bus.Publish(new PingMessage(), x => x.TimeToLive = TimeSpan.FromSeconds(2));
+
+            ConsumeContext<Fault<PingMessage>> handled = await _handled;
+
+            Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.GreaterThan(0));
+
+            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
+
+            Assert.LessOrEqual(_attempts, _limit + 1);
+        }
+
         readonly int _limit;
         int _attempts;
         IBusActivityMonitor _activityMonitor;
@@ -162,20 +177,6 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _limit = 3;
             _attempts = 0;
-        }
-
-        [Test]
-        public async Task Should_stop_after_limit_exceeded()
-        {
-            await Bus.Publish(new PingMessage(), x => x.TimeToLive = TimeSpan.FromSeconds(2));
-
-            var handled = await _handled;
-
-            Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.GreaterThan(0));
-
-            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
-
-            Assert.LessOrEqual(_attempts, _limit + 1);
         }
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)

@@ -22,10 +22,12 @@
             if (CallContextLifetimeScope.ObtainCurrentScope() is MessageLifetimeScope)
                 await next.Send(context).ConfigureAwait(false);
             else
+            {
                 using (new MessageLifetimeScope(context))
                 {
                     await next.Send(context).ConfigureAwait(false);
                 }
+            }
         }
     }
 }

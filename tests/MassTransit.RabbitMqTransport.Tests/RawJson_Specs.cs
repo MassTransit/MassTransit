@@ -16,7 +16,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_deserialize()
         {
-            RawContract contract = await MessageInitializerCache<RawContract>.InitializeMessage(new
+            var contract = await MessageInitializerCache<RawContract>.InitializeMessage(new
             {
                 Name = "Frank",
                 Value = 27,
@@ -24,7 +24,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
 
             var jsonText = JsonConvert.SerializeObject(contract, JsonMessageSerializer.SerializerSettings);
-            var body = Encoding.UTF8.GetBytes(jsonText);
+            byte[] body = Encoding.UTF8.GetBytes(jsonText);
 
             SendRawMessage(body);
 

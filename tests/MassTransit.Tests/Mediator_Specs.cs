@@ -5,6 +5,7 @@ namespace MassTransit.Tests
     using System.Linq;
     using System.Threading.Tasks;
     using MassTransit.Testing;
+    using MassTransit.Testing.MessageObservers;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -16,10 +17,35 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
+        public async Task Should_be_able_to_add_consumer_post_creation()
+        {
+            var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
+            {
+            });
+
+            TaskCompletionSource<ConsumeContext<PingMessage>> received = GetTask<ConsumeContext<PingMessage>>();
+
+            var handle = mediator.ConnectHandler<PingMessage>(x =>
+            {
+                received.SetResult(x);
+
+                return TaskUtil.Completed;
+            });
+
+            await mediator.Publish(new PingMessage());
+
+            ConsumeContext<PingMessage> context = await received.Task;
+
+            handle.Disconnect();
+
+            await mediator.Publish(new PingMessage());
+        }
+
+        [Test]
         public async Task Should_deliver_the_message()
         {
             var multiConsumer = new MultiTestConsumer(TimeSpan.FromSeconds(8));
-            var received = multiConsumer.Consume<PingMessage>();
+            ReceivedMessageList<PingMessage> received = multiConsumer.Consume<PingMessage>();
 
             var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
             {
@@ -35,7 +61,7 @@ namespace MassTransit.Tests
         public async Task Should_deliver_the_publish()
         {
             var multiConsumer = new MultiTestConsumer(TimeSpan.FromSeconds(8));
-            var received = multiConsumer.Consume<PingMessage>();
+            ReceivedMessageList<PingMessage> received = multiConsumer.Consume<PingMessage>();
 
             var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
             {
@@ -48,38 +74,14 @@ namespace MassTransit.Tests
         }
 
         [Test]
-        public async Task Should_not_throw_when_publishing_without_consumer()
+        public async Task Should_fault_at_the_send()
         {
             var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
             {
+                cfg.Handler<PingMessage>(context => throw new IntentionalTestException("No thank you!"));
             });
 
-            await mediator.Publish(new PingMessage());
-        }
-
-        [Test]
-        public async Task Should_be_able_to_add_consumer_post_creation()
-        {
-            var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
-            {
-            });
-
-            var received = GetTask<ConsumeContext<PingMessage>>();
-
-            var handle = mediator.ConnectHandler<PingMessage>(x =>
-            {
-                received.SetResult(x);
-
-                return TaskUtil.Completed;
-            });
-
-            await mediator.Publish(new PingMessage());
-
-            var context = await received.Task;
-
-            handle.Disconnect();
-
-            await mediator.Publish(new PingMessage());
+            Assert.That(async () => await mediator.Send(new PingMessage()), Throws.TypeOf<IntentionalTestException>());
         }
 
         [Test]
@@ -90,31 +92,31 @@ namespace MassTransit.Tests
                 cfg.Handler<PingMessage>(context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
             });
 
-            var client = mediator.CreateRequestClient<PingMessage>();
+            IRequestClient<PingMessage> client = mediator.CreateRequestClient<PingMessage>();
 
             var pingMessage = new PingMessage();
 
-            var response = await client.GetResponse<PongMessage>(pingMessage);
+            Response<PongMessage> response = await client.GetResponse<PongMessage>(pingMessage);
 
             Assert.That(response.Message.CorrelationId, Is.EqualTo(pingMessage.CorrelationId));
         }
 
         [Test]
-        public async Task Should_fault_at_the_send()
+        public async Task Should_not_throw_when_publishing_without_consumer()
         {
             var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
             {
-                cfg.Handler<PingMessage>(context => throw new IntentionalTestException("No thank you!"));
             });
 
-            Assert.That(async () => await mediator.Send(new PingMessage()), Throws.TypeOf<IntentionalTestException>());
+            await mediator.Publish(new PingMessage());
         }
     }
 
 
     public class Mediator_performance
     {
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Send()
         {
             var mediator = Bus.Factory.CreateMediator(cfg =>
@@ -124,15 +126,13 @@ namespace MassTransit.Tests
 
             var message = new PingMessage();
 
-            Stopwatch timer = Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
 
             const int count = 200000;
             const int split = 20;
 
-            for (int i = 0; i < count / split; i++)
-            {
+            for (var i = 0; i < count / split; i++)
                 await Task.WhenAll(Enumerable.Range(0, split).Select(_ => mediator.Send(message)));
-            }
 
             timer.Stop();
 
@@ -140,7 +140,8 @@ namespace MassTransit.Tests
             Console.WriteLine("Messages per second: {0}", count * 1000 / timer.ElapsedMilliseconds);
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Request_client()
         {
             var mediator = Bus.Factory.CreateMediator(cfg =>
@@ -148,18 +149,21 @@ namespace MassTransit.Tests
                 cfg.Handler<PingMessage>(context => context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
             });
 
-            var client = mediator.CreateRequestClient<PingMessage>();
+            IRequestClient<PingMessage> client = mediator.CreateRequestClient<PingMessage>();
 
             var message = new PingMessage();
 
-            Stopwatch timer = Stopwatch.StartNew();
+            var timer = Stopwatch.StartNew();
 
             const int count = 200000;
             const int split = 10;
 
-            for (int i = 0; i < count / split; i++)
+            for (var i = 0; i < count / split; i++)
             {
-                async Task<Response<PongMessage>> MakeRequest(int _) => await client.GetResponse<PongMessage>(message);
+                async Task<Response<PongMessage>> MakeRequest(int _)
+                {
+                    return await client.GetResponse<PongMessage>(message);
+                }
 
                 await Task.WhenAll(Enumerable.Range(0, split).Select(MakeRequest));
             }

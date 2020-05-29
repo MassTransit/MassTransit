@@ -60,16 +60,15 @@
         class SendRequestPipe :
             IPipe<SendContext<TRequest>>
         {
-            readonly Guid _requestId;
             readonly Uri _responseAddress;
 
             public SendRequestPipe(Uri responseAddress)
             {
                 _responseAddress = responseAddress;
-                _requestId = NewId.NextGuid();
+                RequestId = NewId.NextGuid();
             }
 
-            public Guid RequestId => _requestId;
+            public Guid RequestId { get; }
 
             void IProbeSite.Probe(ProbeContext context)
             {
@@ -77,7 +76,7 @@
 
             Task IPipe<SendContext<TRequest>>.Send(SendContext<TRequest> context)
             {
-                context.RequestId = _requestId;
+                context.RequestId = RequestId;
                 context.ResponseAddress = _responseAddress;
 
                 return TaskUtil.Completed;

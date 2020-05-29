@@ -11,8 +11,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     public class SqlLockStatementProvider :
         ILockStatementProvider
     {
-        readonly bool _enableSchemaCaching;
         protected static readonly ConcurrentDictionary<Type, SchemaTablePair> TableNames = new ConcurrentDictionary<Type, SchemaTablePair>();
+        readonly bool _enableSchemaCaching;
 
         public SqlLockStatementProvider(string defaultSchema, string rowLockStatement, bool enableSchemaCaching = true)
         {

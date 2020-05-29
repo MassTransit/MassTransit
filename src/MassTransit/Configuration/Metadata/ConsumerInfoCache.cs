@@ -3,7 +3,6 @@ namespace MassTransit.Metadata
     using System;
     using System.Linq;
     using ConsumeConnectors;
-    using Contracts;
     using Contracts.Metadata;
 
 
@@ -19,6 +18,8 @@ namespace MassTransit.Metadata
         }
 
         public static ConsumerInfo ConsumerInfo => Cached.Instance.Value.ConsumerInfo;
+
+        ConsumerInfo IConsumerInfoCache.ConsumerInfo => _consumerInfo.Value;
 
         static ConsumerInfo CreateConsumerInfo()
         {
@@ -48,8 +49,5 @@ namespace MassTransit.Metadata
             public string ConsumerType { get; }
             public MessageInfo[] Messages { get; }
         }
-
-
-        ConsumerInfo IConsumerInfoCache.ConsumerInfo => _consumerInfo.Value;
     }
 }

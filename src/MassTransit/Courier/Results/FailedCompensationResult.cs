@@ -10,8 +10,8 @@ namespace MassTransit.Courier.Results
         CompensationResult
         where TLog : class
     {
-        readonly CompensateLog _compensateLog;
         readonly CompensateContext<TLog> _compensateContext;
+        readonly CompensateLog _compensateLog;
         readonly TimeSpan _duration;
         readonly Exception _exception;
         readonly IRoutingSlipEventPublisher _publisher;
@@ -30,8 +30,8 @@ namespace MassTransit.Courier.Results
 
         public Task Evaluate()
         {
-            DateTime faultedTimestamp = _compensateContext.Timestamp + _duration;
-            TimeSpan faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
+            var faultedTimestamp = _compensateContext.Timestamp + _duration;
+            var faultedDuration = faultedTimestamp - _routingSlip.CreateTimestamp;
 
             return _publisher.PublishRoutingSlipActivityCompensationFailed(_compensateContext.ActivityName, _compensateContext.ExecutionId,
                 _compensateContext.Timestamp, _duration, faultedTimestamp, faultedDuration, new FaultExceptionInfo(_exception), _routingSlip.Variables,

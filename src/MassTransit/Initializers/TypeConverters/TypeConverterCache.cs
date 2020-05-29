@@ -11,8 +11,8 @@ namespace MassTransit.Initializers.TypeConverters
     public class TypeConverterCache :
         ITypeConverterCache
     {
-        readonly ConcurrentDictionary<Type, object> _typeConverters;
         readonly IList<object> _converters;
+        readonly ConcurrentDictionary<Type, object> _typeConverters;
 
         TypeConverterCache()
         {
@@ -22,7 +22,7 @@ namespace MassTransit.Initializers.TypeConverters
             var assembly = typeof(BooleanTypeConverter).Assembly;
             var ns = typeof(BooleanTypeConverter).Namespace;
 
-            var converterTypes = AssemblyTypeCache.FindTypes(assembly, TypeClassification.Concrete | TypeClassification.Closed,
+            Type[] converterTypes = AssemblyTypeCache.FindTypes(assembly, TypeClassification.Concrete | TypeClassification.Closed,
                 x => x.Namespace.StartsWith(ns) && x.HasInterface(typeof(ITypeConverter<,>))).GetAwaiter().GetResult().ToArray();
 
             foreach (var converterType in converterTypes)
@@ -33,7 +33,7 @@ namespace MassTransit.Initializers.TypeConverters
         {
             var neededType = typeof(ITypeConverter<TProperty, TInput>);
 
-            if (_typeConverters.TryGetValue(neededType, out object converter))
+            if (_typeConverters.TryGetValue(neededType, out var converter))
             {
                 typeConverter = converter as ITypeConverter<TProperty, TInput>;
                 return typeConverter != null;
@@ -48,14 +48,12 @@ namespace MassTransit.Initializers.TypeConverters
                 return typeConverter != null;
             }
 
-            Type propertyType = typeof(TProperty);
+            var propertyType = typeof(TProperty);
             if (propertyType.IsEnum)
             {
                 var enumConverterType = typeof(EnumTypeConverter<>).MakeGenericType(propertyType);
                 if (enumConverterType.HasInterface(neededType))
-                {
                     AddSupportedTypes(enumConverterType);
-                }
             }
             else if (propertyType.IsNullable(out var underlyingType))
             {

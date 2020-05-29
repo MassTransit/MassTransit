@@ -11,8 +11,8 @@ namespace MassTransit.Turnout.Components.Consumers
         where TJob : class
     {
         readonly IJobFactory<TJob> _jobFactory;
-        readonly TurnoutJobOptions<TJob> _options;
         readonly IJobService _jobService;
+        readonly TurnoutJobOptions<TJob> _options;
 
         public StartJobConsumer(IJobService jobService, IJobFactory<TJob> jobFactory, TurnoutJobOptions<TJob> options)
         {

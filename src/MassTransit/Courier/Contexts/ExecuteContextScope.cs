@@ -9,8 +9,8 @@ namespace MassTransit.Courier.Contexts
         ExecuteContext<TArguments>
         where TArguments : class
     {
-        readonly ExecuteContext<TArguments> _context;
         readonly TArguments _arguments;
+        readonly ExecuteContext<TArguments> _context;
 
         protected ExecuteContextScope(ExecuteContext<TArguments> context)
             : base(context)

@@ -1,16 +1,4 @@
-﻿// Copyright 2007-2016 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Azure.ServiceBus.Core.Tests
+﻿namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     namespace ScheduleTimeout_Specs
     {
@@ -26,7 +14,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         public class Scheduling_a_message_from_a_state_machine :
             AzureServiceBusTestFixture
         {
-            [Test, Explicit]
+            [Test]
+            [Explicit]
             public async Task Should_cancel_when_the_order_is_submitted()
             {
                 var memberNumber = NewId.NextGuid().ToString();
@@ -45,7 +34,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
                 await Task.Delay(3000);
             }
 
-            [Test, Explicit]
+            [Test]
+            [Explicit]
             public async Task Should_receive_the_timeout()
             {
                 var memberNumber = NewId.NextGuid().ToString();
@@ -55,7 +45,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
                 ConsumeContext<CartRemoved> removed = await _cartRemoved;
             }
 
-            [Test, Explicit]
+            [Test]
+            [Explicit]
             public async Task Should_reschedule_the_timeout_when_items_are_added()
             {
                 var memberNumber = NewId.NextGuid().ToString();
@@ -137,10 +128,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
                 _state = state;
             }
 
-            public string MemberNumber
-            {
-                get { return _state.MemberNumber; }
-            }
+            public string MemberNumber => _state.MemberNumber;
         }
 
 

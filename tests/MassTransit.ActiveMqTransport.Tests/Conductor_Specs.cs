@@ -1,18 +1,18 @@
 namespace MassTransit.ActiveMqTransport.Tests
 {
-    using System;
-    using System.Threading.Tasks;
-    using Definition;
-    using NUnit.Framework;
-
-
     namespace ConductorTests
     {
+        using System.Threading.Tasks;
         using Contracts;
+        using Definition;
+        using NUnit.Framework;
 
 
         namespace Contracts
         {
+            using System;
+
+
             public interface DeployHappiness
             {
                 string Target { get; }
@@ -56,9 +56,9 @@ namespace MassTransit.ActiveMqTransport.Tests
             {
                 var serviceClient = Bus.CreateServiceClient();
 
-                var requestClient = serviceClient.CreateRequestClient<DeployPayload>();
+                IRequestClient<DeployPayload> requestClient = serviceClient.CreateRequestClient<DeployPayload>();
 
-                var response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
+                Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
 
                 Assert.That(response.Message.Target, Is.EqualTo("Bogey"));
             }

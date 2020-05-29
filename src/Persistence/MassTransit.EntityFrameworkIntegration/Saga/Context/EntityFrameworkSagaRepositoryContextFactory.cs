@@ -1,6 +1,7 @@
 namespace MassTransit.EntityFrameworkIntegration.Saga.Context
 {
     using System;
+    using System.Collections.Generic;
     using System.Data.Entity;
     using System.Data.Entity.Core.Metadata.Edm;
     using System.Data.Entity.Infrastructure;
@@ -16,8 +17,8 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
         ISagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISaga
     {
-        readonly ISagaDbContextFactory<TSaga> _dbContextFactory;
         readonly ISagaConsumeContextFactory<DbContext, TSaga> _consumeContextFactory;
+        readonly ISagaDbContextFactory<TSaga> _dbContextFactory;
         readonly ISagaRepositoryLockStrategy<TSaga> _lockStrategy;
 
         public EntityFrameworkSagaRepositoryContextFactory(ISagaDbContextFactory<TSaga> dbContextFactory,
@@ -71,13 +72,13 @@ namespace MassTransit.EntityFrameworkIntegration.Saga.Context
             var dbContext = _dbContextFactory.CreateScoped(context);
             try
             {
-                var lockContext = await _lockStrategy.CreateLockContext(dbContext, query, context.CancellationToken).ConfigureAwait(false);
+                SagaLockContext<TSaga> lockContext = await _lockStrategy.CreateLockContext(dbContext, query, context.CancellationToken).ConfigureAwait(false);
 
                 using var repositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _consumeContextFactory, _lockStrategy);
 
                 await WithinTransaction(dbContext, async () =>
                 {
-                    var instances = await lockContext.Load().ConfigureAwait(false);
+                    IList<TSaga> instances = await lockContext.Load().ConfigureAwait(false);
 
                     var queryContext = new LoadedSagaRepositoryQueryContext<TSaga, T>(repositoryContext, instances);
 

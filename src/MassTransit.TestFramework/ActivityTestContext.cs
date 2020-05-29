@@ -8,12 +8,11 @@ namespace MassTransit.TestFramework
 
     public interface ActivityTestContext
     {
-        event Action<IReceiveEndpointConfigurator> OnConfigureExecuteReceiveEndpoint;
-        event Action<IReceiveEndpointConfigurator> OnConfigureCompensateReceiveEndpoint;
-
         string Name { get; }
 
         Uri ExecuteUri { get; }
+        event Action<IReceiveEndpointConfigurator> OnConfigureExecuteReceiveEndpoint;
+        event Action<IReceiveEndpointConfigurator> OnConfigureCompensateReceiveEndpoint;
     }
 
 

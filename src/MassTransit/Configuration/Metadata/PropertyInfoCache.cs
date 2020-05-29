@@ -4,7 +4,6 @@ namespace MassTransit.Metadata
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Contracts;
     using Contracts.Metadata;
     using Internals.Extensions;
 
@@ -19,9 +18,9 @@ namespace MassTransit.Metadata
             _properties = TypeMetadataCache<T>.Properties.Select(GetPropertyInfo).ToArray();
         }
 
-        Contracts.Metadata.PropertyInfo[] IPropertyInfoCache.Properties => _properties;
-
         public static Contracts.Metadata.PropertyInfo[] Properties => Cached.Instance.Value.Properties;
+
+        Contracts.Metadata.PropertyInfo[] IPropertyInfoCache.Properties => _properties;
 
         Contracts.Metadata.PropertyInfo GetPropertyInfo(System.Reflection.PropertyInfo propertyInfo)
         {
@@ -59,7 +58,8 @@ namespace MassTransit.Metadata
             return GetObjectPropertyInfo(propertyInfo, type);
         }
 
-        Contracts.Metadata.PropertyInfo GetValuePropertyInfo(System.Reflection.PropertyInfo propertyInfo, TypeInfo propertyType, PropertyKind kindFlags = default)
+        Contracts.Metadata.PropertyInfo GetValuePropertyInfo(System.Reflection.PropertyInfo propertyInfo, TypeInfo propertyType,
+            PropertyKind kindFlags = default)
         {
             return new CachedPropertyInfo(propertyInfo.Name, PropertyKind.Value | kindFlags, TypeMetadataCache.GetShortName(propertyType));
         }

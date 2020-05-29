@@ -33,7 +33,10 @@ namespace MassTransit.Util
             task.ContinueWith(x => Remove(id), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
         }
 
-        public Task Completed(CancellationToken cancellationToken = default) => ReceiveTasksCompleted(cancellationToken);
+        public Task Completed(CancellationToken cancellationToken = default)
+        {
+            return ReceiveTasksCompleted(cancellationToken);
+        }
 
         async Task ReceiveTasksCompleted(CancellationToken cancellationToken)
         {

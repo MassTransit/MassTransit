@@ -32,15 +32,15 @@
         InitializeContext
         where TMessage : class
     {
-        InitializeContext<TMessage, T> CreateInputContext<T>(T input)
-            where T : class;
-
         Type MessageType { get; }
 
         /// <summary>
         /// The message being initialized
         /// </summary>
         TMessage Message { get; }
+
+        InitializeContext<TMessage, T> CreateInputContext<T>(T input)
+            where T : class;
     }
 
 

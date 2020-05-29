@@ -51,7 +51,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Scheduling
             {
                 InVar.CorrelationId,
                 InVar.Timestamp,
-                TokenId = tokenId,
+                TokenId = tokenId
             }).ConfigureAwait(false);
         }
     }

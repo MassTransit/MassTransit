@@ -4,6 +4,11 @@ namespace MassTransit.Transports.InMemory.Fabric
         where T : class
     {
         /// <summary>
+        /// The package being delivered
+        /// </summary>
+        T Package { get; }
+
+        /// <summary>
         /// Should this delivery occur, or has is already been delievered
         /// </summary>
         /// <param name="sink"></param>
@@ -15,10 +20,5 @@ namespace MassTransit.Transports.InMemory.Fabric
         /// </summary>
         /// <param name="sink"></param>
         void Delivered(IMessageSink<T> sink);
-
-        /// <summary>
-        /// The package being delivered
-        /// </summary>
-        T Package { get; }
     }
 }

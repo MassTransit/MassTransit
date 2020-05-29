@@ -10,15 +10,13 @@ namespace MassTransit.Tests.Initializers
     public class Specifying_a_message_header :
         InMemoryTestFixture
     {
-        Task<ConsumeContext<Ping>> _handled;
-
         [Test]
         public async Task Should_set_the_header_on_send()
         {
             const string responseAddress = "loopback://localhost/client_queue";
 
             var requestId = NewId.NextGuid();
-            DateTime now = DateTime.UtcNow;
+            var now = DateTime.UtcNow;
 
             await Bus.Publish<Ping>(new
             {
@@ -30,19 +28,21 @@ namespace MassTransit.Tests.Initializers
                 Text = "Hello"
             });
 
-            var context = await _handled;
+            ConsumeContext<Ping> context = await _handled;
 
             Assert.That(context.ResponseAddress, Is.EqualTo(new Uri(responseAddress)));
             Assert.That(context.RequestId, Is.EqualTo(requestId));
             Assert.That(context.ExpirationTime.HasValue, Is.True);
             Assert.That(context.ExpirationTime.Value, Is.GreaterThanOrEqualTo(now + TimeSpan.FromSeconds(5)));
 
-            Assert.That(context.Headers.TryGetHeader("Custom-Header-Value", out object value), Is.True);
+            Assert.That(context.Headers.TryGetHeader("Custom-Header-Value", out var value), Is.True);
             Assert.That(value, Is.EqualTo("Frankie Say Relax"));
 
             Assert.That(context.Headers.TryGetHeader("Custom-Header-Value2", out value), Is.True);
             Assert.That(value, Is.EqualTo(27));
         }
+
+        Task<ConsumeContext<Ping>> _handled;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {

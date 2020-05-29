@@ -18,20 +18,15 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
     public class Submitting_a_job_to_turnout :
         RabbitMqTestFixture
     {
-        Guid _jobId;
-        Task<ConsumeContext<JobCompleted>> _completed;
-        Task<ConsumeContext<JobSubmitted>> _submitted;
-        Task<ConsumeContext<JobStarted>> _started;
-
         [Test]
         [Order(1)]
         public async Task Should_get_the_job_accepted()
         {
             var serviceClient = Bus.CreateServiceClient();
 
-            var requestClient = serviceClient.CreateRequestClient<SubmitJob<CrunchTheNumbers>>();
+            IRequestClient<SubmitJob<CrunchTheNumbers>> requestClient = serviceClient.CreateRequestClient<SubmitJob<CrunchTheNumbers>>();
 
-            var response = await requestClient.GetResponse<JobSubmissionAccepted>(new
+            Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
                 Job = new {Duration = TimeSpan.FromSeconds(1)}
@@ -40,29 +35,34 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));
 
             // just to capture all the test output in a single window
-            var completed = await _completed;
-        }
-
-        [Test]
-        [Order(2)]
-        public async Task Should_have_published_the_job_submitted_event()
-        {
-            var submitted = await _submitted;
-        }
-
-        [Test]
-        [Order(3)]
-        public async Task Should_have_published_the_job_started_event()
-        {
-            var started = await _started;
+            ConsumeContext<JobCompleted> completed = await _completed;
         }
 
         [Test]
         [Order(4)]
         public async Task Should_have_published_the_job_completed_event()
         {
-            var completed = await _completed;
+            ConsumeContext<JobCompleted> completed = await _completed;
         }
+
+        [Test]
+        [Order(3)]
+        public async Task Should_have_published_the_job_started_event()
+        {
+            ConsumeContext<JobStarted> started = await _started;
+        }
+
+        [Test]
+        [Order(2)]
+        public async Task Should_have_published_the_job_submitted_event()
+        {
+            ConsumeContext<JobSubmitted> submitted = await _submitted;
+        }
+
+        Guid _jobId;
+        Task<ConsumeContext<JobCompleted>> _completed;
+        Task<ConsumeContext<JobSubmitted>> _submitted;
+        Task<ConsumeContext<JobStarted>> _started;
 
         [OneTimeSetUp]
         public async Task Arrange()

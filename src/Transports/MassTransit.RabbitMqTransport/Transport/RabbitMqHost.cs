@@ -27,28 +27,6 @@ namespace MassTransit.RabbitMqTransport.Transport
             Add(hostConfiguration.ConnectionContextSupervisor);
         }
 
-        protected override void Probe(ProbeContext context)
-        {
-            context.Set(new
-            {
-                Type = "RabbitMQ",
-                _hostConfiguration.Settings.Host,
-                _hostConfiguration.Settings.Port,
-                _hostConfiguration.Settings.VirtualHost,
-                _hostConfiguration.Settings.Username,
-                Password = new string('*', _hostConfiguration.Settings.Password.Length),
-                _hostConfiguration.Settings.Heartbeat,
-                _hostConfiguration.Settings.Ssl
-            });
-
-            if (_hostConfiguration.Settings.Ssl)
-            {
-                context.Set(new {_hostConfiguration.Settings.SslServerName});
-            }
-
-            _hostConfiguration.ConnectionContextSupervisor.Probe(context);
-        }
-
         IRabbitMqHostTopology IRabbitMqHost.Topology => _hostTopology;
 
         public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
@@ -87,6 +65,26 @@ namespace MassTransit.RabbitMqTransport.Transport
             configuration.Build(this);
 
             return ReceiveEndpoints.Start(queueName);
+        }
+
+        protected override void Probe(ProbeContext context)
+        {
+            context.Set(new
+            {
+                Type = "RabbitMQ",
+                _hostConfiguration.Settings.Host,
+                _hostConfiguration.Settings.Port,
+                _hostConfiguration.Settings.VirtualHost,
+                _hostConfiguration.Settings.Username,
+                Password = new string('*', _hostConfiguration.Settings.Password.Length),
+                _hostConfiguration.Settings.Heartbeat,
+                _hostConfiguration.Settings.Ssl
+            });
+
+            if (_hostConfiguration.Settings.Ssl)
+                context.Set(new {_hostConfiguration.Settings.SslServerName});
+
+            _hostConfiguration.ConnectionContextSupervisor.Probe(context);
         }
 
         protected override IAgent[] GetAgentHandles()

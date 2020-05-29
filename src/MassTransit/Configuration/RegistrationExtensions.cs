@@ -59,7 +59,10 @@ namespace MassTransit
             IEnumerable<Type> types;
             if (filter != null)
             {
-                bool IsAllowed(Type candidate) => TypeMetadataCache.IsConsumerOrDefinition(candidate) && filter(candidate);
+                bool IsAllowed(Type candidate)
+                {
+                    return TypeMetadataCache.IsConsumerOrDefinition(candidate) && filter(candidate);
+                }
 
                 types = FindTypesInNamespace(type, IsAllowed);
             }
@@ -72,7 +75,8 @@ namespace MassTransit
         /// <summary>
         /// Adds the specified consumer types
         /// </summary>
-        /// <param name="configurator"></param>ˆ
+        /// <param name="configurator"></param>
+        /// ˆ
         /// <param name="types">The state machine types to add</param>
         public static void AddConsumers(this IRegistrationConfigurator configurator, params Type[] types)
         {
@@ -136,7 +140,10 @@ namespace MassTransit
             IEnumerable<Type> types;
             if (filter != null)
             {
-                bool IsAllowed(Type candidate) => TypeMetadataCache.IsSagaOrDefinition(candidate) && filter(candidate);
+                bool IsAllowed(Type candidate)
+                {
+                    return TypeMetadataCache.IsSagaOrDefinition(candidate) && filter(candidate);
+                }
 
                 types = FindTypesInNamespace(type, IsAllowed);
             }
@@ -315,7 +322,10 @@ namespace MassTransit
             IEnumerable<Type> types;
             if (filter != null)
             {
-                bool IsAllowed(Type candidate) => TypeMetadataCache.IsActivityOrDefinition(candidate) && filter(candidate);
+                bool IsAllowed(Type candidate)
+                {
+                    return TypeMetadataCache.IsActivityOrDefinition(candidate) && filter(candidate);
+                }
 
                 types = FindTypesInNamespace(type, IsAllowed);
             }

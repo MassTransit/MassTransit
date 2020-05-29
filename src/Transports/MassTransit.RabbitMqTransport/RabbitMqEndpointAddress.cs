@@ -94,22 +94,22 @@ namespace MassTransit.RabbitMqTransport
 
             RabbitMqEntityNameValidator.Validator.ThrowIfInvalidEntityName(Name);
 
-            HashSet<string> bindExchanges = new HashSet<string>();
+            var bindExchanges = new HashSet<string>();
 
             foreach (var (key, value) in address.SplitQueryString())
             {
                 switch (key)
                 {
-                    case TemporaryKey when bool.TryParse(value, out bool result):
+                    case TemporaryKey when bool.TryParse(value, out var result):
                         AutoDelete = result;
                         Durable = !result;
                         break;
 
-                    case DurableKey when bool.TryParse(value, out bool result):
+                    case DurableKey when bool.TryParse(value, out var result):
                         Durable = result;
                         break;
 
-                    case AutoDeleteKey when bool.TryParse(value, out bool result):
+                    case AutoDeleteKey when bool.TryParse(value, out var result):
                         AutoDelete = result;
                         break;
 
@@ -117,7 +117,7 @@ namespace MassTransit.RabbitMqTransport
                         ExchangeType = value;
                         break;
 
-                    case BindQueueKey when bool.TryParse(value, out bool result):
+                    case BindQueueKey when bool.TryParse(value, out var result):
                         BindToQueue = result;
                         break;
 
@@ -182,7 +182,7 @@ namespace MassTransit.RabbitMqTransport
 
         public RabbitMqEndpointAddress GetDelayAddress()
         {
-            string name = $"{Name}_delay";
+            var name = $"{Name}_delay";
 
             return new RabbitMqEndpointAddress(Scheme, Host, Port, VirtualHost, name, DelayedMessageExchangeType, Durable, AutoDelete, BindToQueue,
                 QueueName, ExchangeType, BindExchanges, AlternateExchange);
@@ -248,8 +248,10 @@ namespace MassTransit.RabbitMqTransport
                 yield return $"{AlternateExchangeKey}={AlternateExchange}";
 
             if (BindExchanges != null)
+            {
                 foreach (var binding in BindExchanges)
                     yield return $"{BindExchangeKey}={binding}";
+            }
         }
     }
 }

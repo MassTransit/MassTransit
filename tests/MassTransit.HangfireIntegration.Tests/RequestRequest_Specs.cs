@@ -14,27 +14,27 @@ namespace MassTransit.HangfireIntegration.Tests
     public class A_long_running_state_machine_initiated_by_a_request :
         HangfireInMemoryTestFixture
     {
-        RequestStateMachine _machine;
-        CreateLinkStateMachine _createLinkStateMachine;
-
-        [Test]
-        public async Task Should_complete_the_request()
-        {
-            var client = Bus.CreateRequestClient<CreateShortLink>(RequestTimeout.After(s: 30));
-
-            var response = await client.GetResponse<ShortLinkCreated>(new {Link = new Uri("http://www.microsoft.com")});
-
-            Console.WriteLine("Link: {0}, Short Link: {1}", response.Message.Link, response.Message.ShortLink);
-        }
-
         [Test]
         public async Task Should_accept_that_faults_happen()
         {
-            var client = Bus.CreateRequestClient<CreateShortLink>(RequestTimeout.After(s: 30));
+            IRequestClient<CreateShortLink> client = Bus.CreateRequestClient<CreateShortLink>(RequestTimeout.After(s: 30));
 
             Assert.That(async () =>
                 await client.GetResponse<ShortLinkCreated>(new {Link = new Uri("http://www.google.com")}), Throws.TypeOf<RequestFaultException>());
         }
+
+        [Test]
+        public async Task Should_complete_the_request()
+        {
+            IRequestClient<CreateShortLink> client = Bus.CreateRequestClient<CreateShortLink>(RequestTimeout.After(s: 30));
+
+            Response<ShortLinkCreated> response = await client.GetResponse<ShortLinkCreated>(new {Link = new Uri("http://www.microsoft.com")});
+
+            Console.WriteLine("Link: {0}, Short Link: {1}", response.Message.Link, response.Message.ShortLink);
+        }
+
+        RequestStateMachine _machine;
+        CreateLinkStateMachine _createLinkStateMachine;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -101,14 +101,13 @@ namespace MassTransit.HangfireIntegration.Tests
         public class CreateLinkState :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
-
             public State CurrentState { get; set; }
 
             public Uri Link { get; set; }
             public Uri ShortLink { get; set; }
 
             public Guid? LinkRequestId { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -146,7 +145,7 @@ namespace MassTransit.HangfireIntegration.Tests
                         .RespondAsync(x => x.Init<ShortLinkCreated>(new
                         {
                             x.Instance.Link,
-                            x.Instance.ShortLink,
+                            x.Instance.ShortLink
                         })));
             }
 

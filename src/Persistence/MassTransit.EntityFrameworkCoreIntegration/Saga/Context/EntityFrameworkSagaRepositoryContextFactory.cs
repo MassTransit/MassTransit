@@ -16,8 +16,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
         ISagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISaga
     {
-        readonly ISagaDbContextFactory<TSaga> _dbContextFactory;
         readonly ISagaConsumeContextFactory<DbContext, TSaga> _consumeContextFactory;
+        readonly ISagaDbContextFactory<TSaga> _dbContextFactory;
         readonly ISagaRepositoryLockStrategy<TSaga> _lockStrategy;
 
         public EntityFrameworkSagaRepositoryContextFactory(ISagaDbContextFactory<TSaga> dbContextFactory,
@@ -48,23 +48,21 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             var dbContext = _dbContextFactory.CreateScoped(context);
             try
             {
-                Task Send() =>
-                    WithinTransaction(dbContext, context.CancellationToken, async () =>
+                Task Send()
+                {
+                    return WithinTransaction(dbContext, context.CancellationToken, async () =>
                     {
                         using var repositoryContext = new DbContextSagaRepositoryContext<TSaga, T>(dbContext, context, _consumeContextFactory, _lockStrategy);
 
                         await next.Send(repositoryContext).ConfigureAwait(false);
                     });
+                }
 
                 var executionStrategy = dbContext.Database.CreateExecutionStrategy();
                 if (executionStrategy is ExecutionStrategy)
-                {
                     await executionStrategy.ExecuteAsync(Send).ConfigureAwait(false);
-                }
                 else
-                {
                     await Send().ConfigureAwait(false);
-                }
             }
             finally
             {
@@ -97,13 +95,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
 
                 var executionStrategy = dbContext.Database.CreateExecutionStrategy();
                 if (executionStrategy is ExecutionStrategy)
-                {
                     await executionStrategy.ExecuteAsync(Send).ConfigureAwait(false);
-                }
                 else
-                {
                     await Send().ConfigureAwait(false);
-                }
             }
             finally
             {
@@ -117,23 +111,21 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             var dbContext = _dbContextFactory.Create();
             try
             {
-                Task<T> Send() =>
-                    WithinTransaction(dbContext, cancellationToken, () =>
+                Task<T> Send()
+                {
+                    return WithinTransaction(dbContext, cancellationToken, () =>
                     {
                         var sagaRepositoryContext = new DbContextSagaRepositoryContext<TSaga>(dbContext, cancellationToken);
 
                         return asyncMethod(sagaRepositoryContext);
                     });
+                }
 
                 var executionStrategy = dbContext.Database.CreateExecutionStrategy();
                 if (executionStrategy is ExecutionStrategy)
-                {
                     return await executionStrategy.ExecuteAsync(Send).ConfigureAwait(false);
-                }
                 else
-                {
                     return await Send().ConfigureAwait(false);
-                }
             }
             finally
             {

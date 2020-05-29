@@ -22,14 +22,10 @@
             var binPath = string.Empty;
 
             if (string.IsNullOrEmpty(binPath))
-            {
                 return FindAssemblies(assemblyPath, loadFailure, includeExeFiles, filter);
-            }
 
             if (Path.IsPathRooted(binPath))
-            {
                 return FindAssemblies(binPath, loadFailure, includeExeFiles, filter);
-            }
 
             string[] binPaths = binPath.Split(';');
             return binPaths.SelectMany(bin =>

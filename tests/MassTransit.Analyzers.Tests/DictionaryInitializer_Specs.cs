@@ -1,22 +1,14 @@
-using System;
-using System.Linq;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CodeFixes;
-using Microsoft.CodeAnalysis.Diagnostics;
-using NUnit.Framework;
-
 namespace MassTransit.Analyzers.Tests
 {
+    using Microsoft.CodeAnalysis;
+    using Microsoft.CodeAnalysis.CodeFixes;
+    using Microsoft.CodeAnalysis.Diagnostics;
+    using NUnit.Framework;
+
+
     public class DictionaryInitializer_Specs :
         CodeFixVerifier
     {
-        readonly string Usings = @"
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using MassTransit;
-";
-
         readonly string MessageContracts = @"
 namespace ConsoleApplication1
 {
@@ -50,6 +42,13 @@ namespace ConsoleApplication1
 }
 ";
 
+        readonly string Usings = @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using MassTransit;
+";
+
         [Test]
         public void WhenTypesAreStructurallyCompatibleAndMissingProperty_ShouldHaveDiagnostic()
         {
@@ -76,10 +75,7 @@ namespace ConsoleApplication1
                     "Anonymous type is missing properties that are in the message contract 'OrderSubmitted'. The following properties are missing: Id, CustomerId, OrderItems",
                 Severity = DiagnosticSeverity.Info,
                 Locations =
-                    new[]
-                    {
-                        new DiagnosticResultLocation("Test0.cs", 46, 47)
-                    }
+                    new[] {new DiagnosticResultLocation("Test0.cs", 46, 47)}
             };
 
             VerifyCSharpDiagnostic(test, expected);
@@ -127,10 +123,7 @@ namespace ConsoleApplication1
                     "Anonymous type does not map to message contract 'OrderSubmitted'. The following properties of the anonymous type are incompatible: OrderItems",
                 Severity = DiagnosticSeverity.Error,
                 Locations =
-                    new[]
-                    {
-                        new DiagnosticResultLocation("Test0.cs", 46, 47)
-                    }
+                    new[] {new DiagnosticResultLocation("Test0.cs", 46, 47)}
             };
 
             VerifyCSharpDiagnostic(test, expected);

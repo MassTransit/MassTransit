@@ -11,8 +11,8 @@ namespace MassTransit.Courier.Contexts
         ConsumeRetryContext
         where TLog : class
     {
-        readonly IRetryPolicy _retryPolicy;
         readonly CompensateContext<TLog> _context;
+        readonly IRetryPolicy _retryPolicy;
 
         public RetryCompensateContext(CompensateContext<TLog> context, IRetryPolicy retryPolicy, RetryContext retryContext)
             : base(context)

@@ -14,7 +14,6 @@
 
     public static class AutofacExtensions
     {
-
         /// <summary>
         /// Creates a lifetime scope which is shared by any downstream filters (rather than creating a new one).
         /// </summary>

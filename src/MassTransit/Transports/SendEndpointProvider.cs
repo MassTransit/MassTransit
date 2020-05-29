@@ -12,10 +12,10 @@ namespace MassTransit.Transports
     {
         readonly ISendEndpointCache<Uri> _cache;
         readonly SendObservable _observers;
+        readonly ISendTransportProvider _provider;
         readonly ISendPipe _sendPipe;
         readonly IMessageSerializer _serializer;
         readonly Uri _sourceAddress;
-        readonly ISendTransportProvider _provider;
 
         public SendEndpointProvider(ISendTransportProvider provider, SendObservable observers, IMessageSerializer serializer, Uri sourceAddress,
             ISendPipe sendPipe)

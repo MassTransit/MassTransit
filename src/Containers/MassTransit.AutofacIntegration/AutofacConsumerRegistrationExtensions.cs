@@ -10,12 +10,12 @@
 
 
     /// <summary>
-    /// Extends <see cref="ContainerBuilder"/> with methods to support MassTransit.
+    /// Extends <see cref="ContainerBuilder" /> with methods to support MassTransit.
     /// </summary>
     public static class AutofacConsumerRegistrationExtensions
     {
         /// <summary>
-        /// Register types that implement <see cref="IConsumer"/> in the provided assemblies.
+        /// Register types that implement <see cref="IConsumer" /> in the provided assemblies.
         /// </summary>
         /// <param name="builder">The container builder.</param>
         /// <param name="consumerAssemblies">Assemblies to scan for consumers.</param>
@@ -28,7 +28,7 @@
         }
 
         /// <summary>
-        /// Register types that implement <see cref="IConsumer"/> in the provided assemblies.
+        /// Register types that implement <see cref="IConsumer" /> in the provided assemblies.
         /// </summary>
         /// <param name="builder">The container builder.</param>
         /// <param name="sagaAssemblies">Assemblies to scan for consumers.</param>

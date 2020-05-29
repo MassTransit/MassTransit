@@ -42,9 +42,7 @@ namespace MassTransit.ActiveMqTransport
             VirtualHost = virtualHost;
 
             if (port.HasValue && port.Value == 0)
-            {
                 Port = 61616;
-            }
         }
 
         static void ParseLeft(Uri address, out string scheme, out string host, out int? port, out string virtualHost)

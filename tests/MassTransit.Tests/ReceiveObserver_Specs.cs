@@ -1,27 +1,13 @@
-﻿// Copyright 2007-2015 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.Tests
+﻿namespace MassTransit.Tests
 {
     namespace ReceivingObserver_Specs
     {
         using System;
         using System.Threading.Tasks;
-        using GreenPipes;
         using Metadata;
         using NUnit.Framework;
         using TestFramework;
         using TestFramework.Messages;
-        using Util;
 
 
         [TestFixture]
@@ -31,9 +17,9 @@ namespace MassTransit.Tests
             [Test]
             public async Task Should_call_the_post_consume_notification()
             {
-                ReceiveObserver observer = GetObserver();
+                var observer = GetObserver();
 
-                using (ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer))
+                using (var observerHandle = Bus.ConnectReceiveObserver(observer))
                 {
                     await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -46,9 +32,9 @@ namespace MassTransit.Tests
             [Test]
             public async Task Should_call_the_post_receive_notification()
             {
-                ReceiveObserver observer = GetObserver();
+                var observer = GetObserver();
 
-                ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer);
+                var observerHandle = Bus.ConnectReceiveObserver(observer);
 
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -58,9 +44,9 @@ namespace MassTransit.Tests
             [Test]
             public async Task Should_call_the_pre_receive_notification()
             {
-                ReceiveObserver observer = GetObserver();
+                var observer = GetObserver();
 
-                ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer);
+                var observerHandle = Bus.ConnectReceiveObserver(observer);
 
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -79,6 +65,7 @@ namespace MassTransit.Tests
             }
         }
 
+
         [TestFixture]
         public class Receiving_messages_at_the_endpoint_by_consumer :
             InMemoryTestFixture
@@ -86,9 +73,9 @@ namespace MassTransit.Tests
             [Test]
             public async Task Should_call_the_post_consume_notification()
             {
-                ReceiveObserver observer = GetObserver();
+                var observer = GetObserver();
 
-                using (ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer))
+                using (var observerHandle = Bus.ConnectReceiveObserver(observer))
                 {
                     await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -127,9 +114,9 @@ namespace MassTransit.Tests
             [Test]
             public async Task Should_call_the_pre_receive_notification()
             {
-                ReceiveObserver observer = GetObserver();
+                var observer = GetObserver();
 
-                ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer);
+                var observerHandle = Bus.ConnectReceiveObserver(observer);
 
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -139,9 +126,9 @@ namespace MassTransit.Tests
             [Test]
             public async Task Should_call_the_receive_fault_notification()
             {
-                ReceiveObserver observer = GetObserver();
+                var observer = GetObserver();
 
-                ConnectHandle observerHandle = Bus.ConnectReceiveObserver(observer);
+                var observerHandle = Bus.ConnectReceiveObserver(observer);
 
                 await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -184,30 +171,15 @@ namespace MassTransit.Tests
                 _consumeFault = consumeFault;
             }
 
-            public Task<ReceiveContext> PreReceived
-            {
-                get { return _preReceive.Task; }
-            }
+            public Task<ReceiveContext> PreReceived => _preReceive.Task;
 
-            public Task<ReceiveContext> PostReceived
-            {
-                get { return _postReceive.Task; }
-            }
+            public Task<ReceiveContext> PostReceived => _postReceive.Task;
 
-            public Task<Tuple<ConsumeContext, string>> PostConsumed
-            {
-                get { return _postConsume.Task; }
-            }
+            public Task<Tuple<ConsumeContext, string>> PostConsumed => _postConsume.Task;
 
-            public Task<ConsumeContext> ConsumeFaulted
-            {
-                get { return _consumeFault.Task; }
-            }
+            public Task<ConsumeContext> ConsumeFaulted => _consumeFault.Task;
 
-            public Task<Tuple<ReceiveContext, Exception>> ReceiveFaulted
-            {
-                get { return _receiveFault.Task; }
-            }
+            public Task<Tuple<ReceiveContext, Exception>> ReceiveFaulted => _receiveFault.Task;
 
             public async Task PreReceive(ReceiveContext context)
             {
@@ -225,7 +197,8 @@ namespace MassTransit.Tests
                 _postConsume.TrySetResult(Tuple.Create<ConsumeContext, string>(context, consumerType));
             }
 
-            public async Task ConsumeFault<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType, Exception exception) where T : class
+            public async Task ConsumeFault<T>(ConsumeContext<T> context, TimeSpan elapsed, string consumerType, Exception exception)
+                where T : class
             {
                 _consumeFault.TrySetResult(context);
             }

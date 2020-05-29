@@ -42,7 +42,7 @@
             where T : class;
 
         /// <summary>
-        ///     Sends an object as a message, using the type of the message instance.
+        /// Sends an object as a message, using the type of the message instance.
         /// </summary>
         /// <param name="message">The message object</param>
         /// <param name="cancellationToken"></param>
@@ -50,8 +50,8 @@
         Task Send(object message, CancellationToken cancellationToken = default);
 
         /// <summary>
-        ///     Sends an object as a message, using the message type specified. If the object cannot be cast
-        ///     to the specified message type, an exception will be thrown.
+        /// Sends an object as a message, using the message type specified. If the object cannot be cast
+        /// to the specified message type, an exception will be thrown.
         /// </summary>
         /// <param name="message">The message object</param>
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
@@ -60,8 +60,8 @@
         Task Send(object message, Type messageType, CancellationToken cancellationToken = default);
 
         /// <summary>
-        ///     Sends an object as a message, using the message type specified. If the object cannot be cast
-        ///     to the specified message type, an exception will be thrown.
+        /// Sends an object as a message, using the message type specified. If the object cannot be cast
+        /// to the specified message type, an exception will be thrown.
         /// </summary>
         /// <param name="message">The message object</param>
         /// <param name="pipe"></param>
@@ -70,8 +70,8 @@
         Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default);
 
         /// <summary>
-        ///     Sends an object as a message, using the message type specified. If the object cannot be cast
-        ///     to the specified message type, an exception will be thrown.
+        /// Sends an object as a message, using the message type specified. If the object cannot be cast
+        /// to the specified message type, an exception will be thrown.
         /// </summary>
         /// <param name="message">The message object</param>
         /// <param name="messageType">The type of the message (use message.GetType() if desired)</param>
@@ -82,8 +82,8 @@
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        ///     Sends an interface message, initializing the properties of the interface using the anonymous
-        ///     object specified
+        /// Sends an interface message, initializing the properties of the interface using the anonymous
+        /// object specified
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="values">The property values to initialize on the interface</param>
@@ -93,8 +93,8 @@
             where T : class;
 
         /// <summary>
-        ///     Sends an interface message, initializing the properties of the interface using the anonymous
-        ///     object specified
+        /// Sends an interface message, initializing the properties of the interface using the anonymous
+        /// object specified
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="values">The property values to initialize on the interface</param>
@@ -105,8 +105,8 @@
             where T : class;
 
         /// <summary>
-        ///     Sends an interface message, initializing the properties of the interface using the anonymous
-        ///     object specified
+        /// Sends an interface message, initializing the properties of the interface using the anonymous
+        /// object specified
         /// </summary>
         /// <typeparam name="T">The interface type to send</typeparam>
         /// <param name="values">The property values to initialize on the interface</param>

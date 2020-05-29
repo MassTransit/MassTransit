@@ -30,8 +30,10 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
                 SetExchangeArgument("x-delayed-type", address.DelayedType);
 
             if (address.BindExchanges != null)
+            {
                 foreach (var exchange in address.BindExchanges)
                     BindToExchange(exchange);
+            }
 
             if (!string.IsNullOrWhiteSpace(address.AlternateExchange))
                 SetExchangeArgument("alternate-exchange", address.AlternateExchange);
@@ -109,12 +111,16 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
                 yield return $"bind->{_queueName}";
 
             if (ExchangeArguments != null)
+            {
                 foreach (KeyValuePair<string, object> argument in ExchangeArguments)
                     yield return $"e:{argument.Key}={argument.Value}";
+            }
 
             if (QueueArguments != null)
+            {
                 foreach (KeyValuePair<string, object> argument in QueueArguments)
                     yield return $"q:{argument.Key}={argument.Value}";
+            }
         }
 
         public override string ToString()

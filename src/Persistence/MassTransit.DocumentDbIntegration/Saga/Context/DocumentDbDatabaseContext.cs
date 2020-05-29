@@ -13,8 +13,8 @@ namespace MassTransit.DocumentDbIntegration.Saga.Context
         DatabaseContext<TSaga>
         where TSaga : class, IVersionedSaga
     {
-        readonly string _databaseId;
         readonly string _collectionId;
+        readonly string _databaseId;
         readonly JsonSerializerSettings _serializerSettings;
 
         public DocumentDbDatabaseContext(IDocumentClient client, string databaseId, string collectionId, JsonSerializerSettings serializerSettings = null,

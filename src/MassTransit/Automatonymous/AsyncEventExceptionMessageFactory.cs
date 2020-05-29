@@ -3,6 +3,7 @@ namespace Automatonymous
     using System;
     using System.Threading.Tasks;
 
+
     /// <summary>
     /// Returns a message from an event exception
     /// </summary>

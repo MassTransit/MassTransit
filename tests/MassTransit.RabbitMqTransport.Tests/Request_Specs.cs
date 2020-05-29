@@ -19,7 +19,7 @@
 
             requestHandle.UseExecute(context => context.SetAwaitAck(false));
 
-            var response = await requestHandle.GetResponse<PongMessage>();
+            Response<PongMessage> response = await requestHandle.GetResponse<PongMessage>();
 
             response.Message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }
@@ -65,7 +65,7 @@
                 context.ResponseAddress = new UriBuilder(Bus.Address) {Host = "totally-bogus-host"}.Uri;
             });
 
-            var response = await requestHandle.GetResponse<PongMessage>();
+            Response<PongMessage> response = await requestHandle.GetResponse<PongMessage>();
 
             response.Message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }
@@ -103,7 +103,7 @@
         [Test]
         public async Task Should_receive_the_response()
         {
-            var message = await _response;
+            Response<PongMessage> message = await _response;
 
             message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }
@@ -144,7 +144,7 @@
         [Test]
         public async Task Should_receive_the_response()
         {
-            var message = await _response;
+            Response<PongMessage> message = await _response;
 
             message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }
@@ -173,20 +173,20 @@
         RabbitMqTestFixture
     {
         [Test]
-        public async Task Should_receive_the_response()
+        public async Task Should_have_the_conversation_id()
         {
-            var message = await _response;
+            ConsumeContext<PingMessage> ping = await _ping;
+            ConsumeContext<A> a = await _a;
 
-            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            ping.ConversationId.ShouldBe(a.ConversationId);
         }
 
         [Test]
-        public async Task Should_have_the_conversation_id()
+        public async Task Should_receive_the_response()
         {
-            var ping = await _ping;
-            var a = await _a;
+            Response<PongMessage> message = await _response;
 
-            ping.ConversationId.ShouldBe(a.ConversationId);
+            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
@@ -215,9 +215,9 @@
         {
             _ping = Handler<PingMessage>(configurator, async x =>
             {
-                var client = _clientFactory.CreateRequestClient<A>(x, InputQueueAddress);
+                IRequestClient<A> client = _clientFactory.CreateRequestClient<A>(x, InputQueueAddress);
 
-                var request = client.Create(new A(), x.CancellationToken);
+                RequestHandle<A> request = client.Create(new A(), x.CancellationToken);
 
                 await request.GetResponse<B>();
 
@@ -244,20 +244,20 @@
         RabbitMqTestFixture
     {
         [Test]
-        public async Task Should_receive_the_response()
+        public async Task Should_have_the_conversation_id()
         {
-            var message = await _response;
+            ConsumeContext<PingMessage> ping = await _ping;
+            ConsumeContext<A> a = await _a;
 
-            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+            ping.ConversationId.ShouldBe(a.ConversationId);
         }
 
         [Test]
-        public async Task Should_have_the_conversation_id()
+        public async Task Should_receive_the_response()
         {
-            var ping = await _ping;
-            var a = await _a;
+            Response<PongMessage> message = await _response;
 
-            ping.ConversationId.ShouldBe(a.ConversationId);
+            message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }
 
         Task<ConsumeContext<PingMessage>> _ping;
@@ -286,7 +286,7 @@
         {
             _ping = Handler<PingMessage>(configurator, async x =>
             {
-                var request = _clientFactory.CreateRequest(x, InputQueueAddress, new A(), x.CancellationToken);
+                RequestHandle<A> request = _clientFactory.CreateRequest(x, InputQueueAddress, new A(), x.CancellationToken);
 
                 await request.GetResponse<B>();
 
@@ -315,7 +315,7 @@
         [Test]
         public async Task Should_receive_the_response()
         {
-            var response = await _requestClient.GetResponse<PongMessage>(new PingMessage());
+            Response<PongMessage> response = await _requestClient.GetResponse<PongMessage>(new PingMessage());
 
             response.Message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
         }

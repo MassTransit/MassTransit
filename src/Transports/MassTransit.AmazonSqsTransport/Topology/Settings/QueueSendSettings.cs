@@ -11,11 +11,14 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
         SendSettings
     {
         public QueueSendSettings(AmazonSqsEndpointAddress address)
-            : base(address.Name, address.Durable,address.AutoDelete)
+            : base(address.Name, address.Durable, address.AutoDelete)
         {
         }
 
-        public Uri GetSendAddress(Uri hostAddress) => GetEndpointAddress(hostAddress);
+        public Uri GetSendAddress(Uri hostAddress)
+        {
+            return GetEndpointAddress(hostAddress);
+        }
 
         public BrokerTopology GetBrokerTopology()
         {

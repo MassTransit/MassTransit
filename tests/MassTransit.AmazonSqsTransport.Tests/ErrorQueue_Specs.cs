@@ -1,21 +1,8 @@
-﻿// Copyright 2007-2018 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-// this file except in compliance with the License. You may obtain a copy of the
-// License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software distributed
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the
-// specific language governing permissions and limitations under the License.
-namespace MassTransit.AmazonSqsTransport.Tests
+﻿namespace MassTransit.AmazonSqsTransport.Tests
 {
     using System;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
-    using Configuration;
     using GreenPipes;
     using NUnit.Framework;
     using TestFramework.Messages;
@@ -34,22 +21,6 @@ namespace MassTransit.AmazonSqsTransport.Tests
         }
 
         [Test]
-        public async Task Should_have_the_frank_header()
-        {
-            ConsumeContext<PingMessage> context = await _errorHandler;
-
-            Assert.That(context.ReceiveContext.TransportHeaders.Get("Frank", (string)null), Is.EqualTo("Happy"));
-        }
-
-        [Test]
-        public async Task Should_not_have_the_estelle_header()
-        {
-            ConsumeContext<PingMessage> context = await _errorHandler;
-
-            Assert.That(context.ReceiveContext.TransportHeaders.Get("Estelle", (string)null), Is.Null);
-        }
-
-        [Test]
         public async Task Should_have_the_exception()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
@@ -58,19 +29,11 @@ namespace MassTransit.AmazonSqsTransport.Tests
         }
 
         [Test]
-        public async Task Should_not_have_the_host_machine_name()
+        public async Task Should_have_the_frank_header()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
 
-            Assert.That(context.ReceiveContext.TransportHeaders.Get(MessageHeaders.Host.MachineName, (string)null), Is.Null);
-        }
-
-        [Test]
-        public async Task Should_not_have_the_fault_exception_type()
-        {
-            ConsumeContext<PingMessage> context = await _errorHandler;
-
-            Assert.That(context.ReceiveContext.TransportHeaders.Get(MessageHeaders.FaultExceptionType, (string)null), Is.Null);
+            Assert.That(context.ReceiveContext.TransportHeaders.Get("Frank", (string)null), Is.EqualTo("Happy"));
         }
 
         [Test]
@@ -117,6 +80,30 @@ namespace MassTransit.AmazonSqsTransport.Tests
         public async Task Should_move_the_message_to_the_error_queue()
         {
             await _errorHandler;
+        }
+
+        [Test]
+        public async Task Should_not_have_the_estelle_header()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get("Estelle", (string)null), Is.Null);
+        }
+
+        [Test]
+        public async Task Should_not_have_the_fault_exception_type()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get(MessageHeaders.FaultExceptionType, (string)null), Is.Null);
+        }
+
+        [Test]
+        public async Task Should_not_have_the_host_machine_name()
+        {
+            ConsumeContext<PingMessage> context = await _errorHandler;
+
+            Assert.That(context.ReceiveContext.TransportHeaders.Get(MessageHeaders.Host.MachineName, (string)null), Is.Null);
         }
 
         Task<ConsumeContext<PingMessage>> _errorHandler;

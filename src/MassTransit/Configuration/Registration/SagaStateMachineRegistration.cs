@@ -53,7 +53,10 @@ namespace MassTransit.Registration
             configurator.AddEndpointSpecification(stateMachineConfigurator);
         }
 
-        ISagaDefinition ISagaRegistration.GetDefinition(IConfigurationServiceProvider provider) => GetSagaDefinition(provider);
+        ISagaDefinition ISagaRegistration.GetDefinition(IConfigurationServiceProvider provider)
+        {
+            return GetSagaDefinition(provider);
+        }
 
         ISagaDefinition<TInstance> GetSagaDefinition(IConfigurationServiceProvider provider)
         {

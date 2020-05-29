@@ -13,24 +13,24 @@ namespace MassTransit.Tests.Saga
     public class Using_the_universal_saga_repository :
         InMemoryTestFixture
     {
-        TestStateMachine _machine;
-        ISagaRepository<Instance> _repository;
-
         [Test]
         public async Task Should_reach_the_saga()
         {
-            var createCompleted = ConnectPublishHandler<CreateCompleted>();
-            var destroyCompleted = ConnectPublishHandler<DestroyCompleted>();
+            Task<ConsumeContext<CreateCompleted>> createCompleted = ConnectPublishHandler<CreateCompleted>();
+            Task<ConsumeContext<DestroyCompleted>> destroyCompleted = ConnectPublishHandler<DestroyCompleted>();
 
             var values = new {InVar.CorrelationId};
             await InputQueueSendEndpoint.Send<Create>(values);
 
-            var createContext = await createCompleted;
+            ConsumeContext<CreateCompleted> createContext = await createCompleted;
 
             await InputQueueSendEndpoint.Send<Destroy>(values);
 
-            var destroyContext = await destroyCompleted;
+            ConsumeContext<DestroyCompleted> destroyContext = await destroyCompleted;
         }
+
+        TestStateMachine _machine;
+        ISagaRepository<Instance> _repository;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -80,8 +80,8 @@ namespace MassTransit.Tests.Saga
         public class Instance :
             SagaStateMachineInstance
         {
-            public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 

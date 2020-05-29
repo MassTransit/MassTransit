@@ -5,11 +5,9 @@ namespace MassTransit
     using Automatonymous.SagaConfigurators;
     using ConsumeConfigurators;
     using Courier;
-    using Registration;
     using Saga;
     using Scoping;
     using StructureMap;
-    using StructureMapIntegration.Registration;
     using StructureMapIntegration.ScopeProviders;
 
 
@@ -168,7 +166,7 @@ namespace MassTransit
             Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            SagaStateMachine<TInstance> stateMachine = container.GetInstance<SagaStateMachine<TInstance>>();
+            var stateMachine = container.GetInstance<SagaStateMachine<TInstance>>();
 
             StateMachineSaga(configurator, stateMachine, container, configure);
         }
@@ -202,7 +200,7 @@ namespace MassTransit
             IContainer container, Action<ISagaConfigurator<TInstance>> configure = null)
             where TInstance : class, SagaStateMachineInstance
         {
-            ISagaRepository<TInstance> repository = container.GetInstance<ISagaRepository<TInstance>>();
+            var repository = container.GetInstance<ISagaRepository<TInstance>>();
 
             var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, repository, configurator);
 

@@ -11,10 +11,10 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
     public class TopicCache
     {
-        readonly IAmazonSimpleNotificationService _client;
         readonly ICache<TopicInfo> _cache;
-        readonly IIndex<string, TopicInfo> _nameIndex;
+        readonly IAmazonSimpleNotificationService _client;
         readonly IDictionary<string, TopicInfo> _durableTopics;
+        readonly IIndex<string, TopicInfo> _nameIndex;
 
         public TopicCache(IAmazonSimpleNotificationService client)
         {
@@ -28,8 +28,10 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         public Task<TopicInfo> Get(Topology.Entities.Topic topic, CancellationToken cancellationToken)
         {
             lock (_durableTopics)
+            {
                 if (_durableTopics.TryGetValue(topic.EntityName, out var queueInfo))
                     return Task.FromResult(queueInfo);
+            }
 
             return _nameIndex.Get(topic.EntityName, key => CreateMissingTopic(topic, cancellationToken));
         }
@@ -37,15 +39,17 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         public Task<TopicInfo> GetByName(string entityName)
         {
             lock (_durableTopics)
+            {
                 if (_durableTopics.TryGetValue(entityName, out var queueInfo))
                     return Task.FromResult(queueInfo);
+            }
 
             return _nameIndex.Get(entityName);
         }
 
         public void RemoveByName(string entityName)
         {
-            lock(_durableTopics)
+            lock (_durableTopics)
                 _durableTopics.Remove(entityName);
 
             _nameIndex.Remove(entityName);
@@ -53,7 +57,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         async Task<TopicInfo> CreateMissingTopic(Topology.Entities.Topic topic, CancellationToken cancellationToken)
         {
-            var attributes = topic.TopicAttributes.ToDictionary(x => x.Key, x => x.Value.ToString());
+            Dictionary<string, string> attributes = topic.TopicAttributes.ToDictionary(x => x.Key, x => x.Value.ToString());
 
             var request = new CreateTopicRequest(topic.EntityName)
             {
@@ -78,8 +82,10 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             var missingTopic = new TopicInfo(topic.EntityName, topicArn, attributesResponse.Attributes);
 
             if (topic.Durable && topic.AutoDelete == false)
+            {
                 lock (_durableTopics)
                     _durableTopics[missingTopic.EntityName] = missingTopic;
+            }
 
             return missingTopic;
         }

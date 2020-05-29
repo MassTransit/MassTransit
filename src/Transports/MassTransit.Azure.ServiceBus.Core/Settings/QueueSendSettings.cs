@@ -18,17 +18,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
             _description = description;
         }
 
-        public string EntityPath => _description.Path;
-
-        public BrokerTopology GetBrokerTopology()
-        {
-            var builder = new SendEndpointBrokerTopologyBuilder();
-
-            builder.Queue = builder.CreateQueue(_description);
-
-            return builder.BuildBrokerTopology();
-        }
-
         public TimeSpan? AutoDeleteOnIdle
         {
             set
@@ -59,6 +48,17 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
         public string UserMetadata
         {
             set => _description.UserMetadata = value;
+        }
+
+        public string EntityPath => _description.Path;
+
+        public BrokerTopology GetBrokerTopology()
+        {
+            var builder = new SendEndpointBrokerTopologyBuilder();
+
+            builder.Queue = builder.CreateQueue(_description);
+
+            return builder.BuildBrokerTopology();
         }
     }
 }

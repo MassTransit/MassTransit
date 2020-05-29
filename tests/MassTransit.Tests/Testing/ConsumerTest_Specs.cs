@@ -1,27 +1,39 @@
-// Copyright 2007-2011 Chris Patterson, Dru Sellers, Travis Smith, et. al.
-//  
-// Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
-// this file except in compliance with the License. You may obtain a copy of the 
-// License at 
-// 
-//     http://www.apache.org/licenses/LICENSE-2.0 
-// 
-// Unless required by applicable law or agreed to in writing, software distributed 
-// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-// CONDITIONS OF ANY KIND, either express or implied. See the License for the 
-// specific language governing permissions and limitations under the License.
 namespace MassTransit.Tests.Testing
 {
     using System.Linq;
     using System.Threading.Tasks;
-    using NUnit.Framework;
     using MassTransit.Testing;
+    using NUnit.Framework;
     using Shouldly;
 
 
     [TestFixture]
     public class When_a_consumer_is_being_tested
     {
+        [Test]
+        public void Should_have_called_the_consumer_method()
+        {
+            _consumer.Consumed.Select<A>().Any().ShouldBe(true);
+        }
+
+        [Test]
+        public void Should_have_sent_the_response_from_the_consumer()
+        {
+            _harness.Published.Select<B>().Any().ShouldBe(true);
+        }
+
+        [Test]
+        public void Should_receive_the_message_type_a()
+        {
+            _harness.Consumed.Select<A>().Any().ShouldBe(true);
+        }
+
+        [Test]
+        public void Should_send_the_initial_message_to_the_consumer()
+        {
+            _harness.Sent.Select<A>().Any().ShouldBe(true);
+        }
+
         InMemoryTestHarness _harness;
         ConsumerTestHarness<Testsumer> _consumer;
 
@@ -40,30 +52,6 @@ namespace MassTransit.Tests.Testing
         public async Task Teardown()
         {
             await _harness.Stop();
-        }
-
-        [Test]
-        public void Should_send_the_initial_message_to_the_consumer()
-        {
-            _harness.Sent.Select<A>().Any().ShouldBe(true);
-        }
-
-        [Test]
-        public void Should_have_sent_the_response_from_the_consumer()
-        {
-            _harness.Published.Select<B>().Any().ShouldBe(true);
-        }
-
-        [Test]
-        public void Should_receive_the_message_type_a()
-        {
-            _harness.Consumed.Select<A>().Any().ShouldBe(true);
-        }
-
-        [Test]
-        public void Should_have_called_the_consumer_method()
-        {
-            _consumer.Consumed.Select<A>().Any().ShouldBe(true);
         }
 
 
@@ -91,6 +79,32 @@ namespace MassTransit.Tests.Testing
     [TestFixture]
     public class When_a_consumer_of_interfaces_is_being_tested
     {
+        [Test]
+        public void Should_have_called_the_consumer_method()
+        {
+            _consumer.Consumed.Select<IA>().Any().ShouldBe(true);
+        }
+
+        [Test]
+        public void Should_have_sent_the_response_from_the_consumer()
+        {
+            _harness.Published.Select<B>().Any().ShouldBe(true);
+            _harness.Published.Select<IB>().Any().ShouldBe(true);
+        }
+
+        [Test]
+        public void Should_receive_the_message_type_a()
+        {
+            _harness.Consumed.Select<IA>().Any().ShouldBe(true);
+        }
+
+        [Test]
+        public void Should_send_the_initial_message_to_the_consumer()
+        {
+            _harness.Sent.Select<A>().Any().ShouldBe(true);
+            _harness.Sent.Select<IA>().Any().ShouldBe(true);
+        }
+
         InMemoryTestHarness _harness;
         ConsumerTestHarness<TestInterfaceConsumer> _consumer;
 
@@ -109,32 +123,6 @@ namespace MassTransit.Tests.Testing
         public async Task Teardown()
         {
             await _harness.Stop();
-        }
-
-        [Test]
-        public void Should_send_the_initial_message_to_the_consumer()
-        {
-            _harness.Sent.Select<A>().Any().ShouldBe(true);
-            _harness.Sent.Select<IA>().Any().ShouldBe(true);
-        }
-
-        [Test]
-        public void Should_have_sent_the_response_from_the_consumer()
-        {
-            _harness.Published.Select<B>().Any().ShouldBe(true);
-            _harness.Published.Select<IB>().Any().ShouldBe(true);
-        }
-
-        [Test]
-        public void Should_receive_the_message_type_a()
-        {
-            _harness.Consumed.Select<IA>().Any().ShouldBe(true);
-        }
-
-        [Test]
-        public void Should_have_called_the_consumer_method()
-        {
-            _consumer.Consumed.Select<IA>().Any().ShouldBe(true);
         }
 
 
@@ -173,8 +161,8 @@ namespace MassTransit.Tests.Testing
 
     public class When_a_context_consumer_is_being_tested
     {
-        InMemoryTestHarness _harness;
         ConsumerTestHarness<Testsumer> _consumer;
+        InMemoryTestHarness _harness;
 
         [OneTimeSetUp]
         public async Task A_consumer_is_being_tested()

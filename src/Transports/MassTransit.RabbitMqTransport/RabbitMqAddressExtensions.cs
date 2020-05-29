@@ -74,7 +74,7 @@ namespace MassTransit.RabbitMqTransport
 
             factory.ClientProperties ??= new Dictionary<string, object>();
 
-            HostInfo hostInfo = HostMetadataCache.Host;
+            var hostInfo = HostMetadataCache.Host;
 
             factory.ClientProperties["client_api"] = "MassTransit";
             factory.ClientProperties["masstransit_version"] = hostInfo.MassTransitVersion;
@@ -139,7 +139,7 @@ namespace MassTransit.RabbitMqTransport
                 Host = hostAddress.Host,
                 VirtualHost = hostAddress.VirtualHost,
                 Username = "",
-                Password = "",
+                Password = ""
             };
 
             if (hostAddress.Port.HasValue)

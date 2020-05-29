@@ -8,27 +8,6 @@ namespace MassTransit.Initializers.TypeConverters
         ITypeConverter<Version, string>,
         ITypeConverter<Version, object>
     {
-        public bool TryConvert(string input, out Version result)
-        {
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                result = null;
-                return true;
-            }
-
-            try
-            {
-                result = new Version(input);
-
-                return true;
-            }
-            catch (Exception)
-            {
-                result = default;
-                return false;
-            }
-        }
-
         public bool TryConvert(Version input, out string result)
         {
             result = input?.ToString();
@@ -59,6 +38,27 @@ namespace MassTransit.Initializers.TypeConverters
                 default:
                     result = default;
                     return false;
+            }
+        }
+
+        public bool TryConvert(string input, out Version result)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                result = null;
+                return true;
+            }
+
+            try
+            {
+                result = new Version(input);
+
+                return true;
+            }
+            catch (Exception)
+            {
+                result = default;
+                return false;
             }
         }
     }

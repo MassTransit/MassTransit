@@ -1,15 +1,15 @@
 ﻿namespace MassTransit.QuartzIntegration.Tests
 {
-    using System;
-    using System.Threading.Tasks;
-    using Automatonymous;
-    using NUnit.Framework;
-    using Saga;
-    using Testing;
-
-
     namespace Reschedule_Specs
     {
+        using System;
+        using System.Threading.Tasks;
+        using Automatonymous;
+        using NUnit.Framework;
+        using Saga;
+        using Testing;
+
+
         [TestFixture]
         public class Rescheduling_a_message_from_a_state_machine :
             QuartzInMemoryTestFixture
@@ -33,7 +33,7 @@
 
                 await InputQueueSendEndpoint.Send(new StopCommand(correlationId));
 
-                var saga = await _repository.ShouldNotContainSaga(correlationId, TestTimeout);
+                Guid? saga = await _repository.ShouldNotContainSaga(correlationId, TestTimeout);
 
                 Assert.IsNull(saga);
             }

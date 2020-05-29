@@ -31,7 +31,7 @@ namespace MassTransit.DapperIntegration.Context
         public async Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
             where T : class
         {
-            using var databaseContext = await CreateDatabaseContext(context.CancellationToken).ConfigureAwait(false);
+            using DapperDatabaseContext<TSaga> databaseContext = await CreateDatabaseContext(context.CancellationToken).ConfigureAwait(false);
 
             var repositoryContext = new DapperSagaRepositoryContext<TSaga, T>(databaseContext, context, _factory);
 
@@ -43,7 +43,7 @@ namespace MassTransit.DapperIntegration.Context
         public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, IPipe<SagaRepositoryQueryContext<TSaga, T>> next)
             where T : class
         {
-            using var databaseContext = await CreateDatabaseContext(context.CancellationToken).ConfigureAwait(false);
+            using DapperDatabaseContext<TSaga> databaseContext = await CreateDatabaseContext(context.CancellationToken).ConfigureAwait(false);
 
             IEnumerable<TSaga> instances = await databaseContext.QueryAsync(query.FilterExpression, context.CancellationToken).ConfigureAwait(false);
 
@@ -59,7 +59,7 @@ namespace MassTransit.DapperIntegration.Context
         public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
             where T : class
         {
-            using var databaseContext = await CreateDatabaseContext(cancellationToken).ConfigureAwait(false);
+            using DapperDatabaseContext<TSaga> databaseContext = await CreateDatabaseContext(cancellationToken).ConfigureAwait(false);
 
             var sagaRepositoryContext = new DapperSagaRepositoryContext<TSaga>(databaseContext, cancellationToken);
 

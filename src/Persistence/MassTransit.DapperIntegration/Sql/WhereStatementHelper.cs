@@ -19,9 +19,7 @@
             var parameters = new DynamicParameters();
 
             if (!columnsAndValues.Any())
-            {
                 return (string.Empty, parameters);
-            }
 
             var sb = new StringBuilder();
             sb.Append("WHERE");
@@ -30,9 +28,7 @@
             foreach (var (name, value) in columnsAndValues)
             {
                 if (i > 0)
-                {
                     sb.Append(" AND");
-                }
 
                 var valueName = $"@value{i}";
                 sb.Append($" {name} = {valueName}");

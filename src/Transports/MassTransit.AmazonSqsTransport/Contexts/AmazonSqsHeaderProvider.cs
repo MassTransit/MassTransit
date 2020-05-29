@@ -9,8 +9,8 @@
     public class AmazonSqsHeaderProvider :
         IHeaderProvider
     {
-        readonly Message _message;
         readonly Headers _headers;
+        readonly Message _message;
 
         public AmazonSqsHeaderProvider(Message message)
         {
@@ -23,7 +23,7 @@
         {
             yield return new KeyValuePair<string, object>(MessageHeaders.MessageId, _message.MessageId);
 
-            foreach (var header in _headers.GetAll())
+            foreach (KeyValuePair<string, object> header in _headers.GetAll())
                 yield return header;
         }
 

@@ -50,7 +50,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value.BusInstance);
         }
 
-        public override void AddRider(Action<IRiderRegistrationConfigurator<IServiceProvider>> configure)
+        public override void AddRider(Action<IRiderConfigurator<IServiceProvider>> configure)
         {
             var configurator = new ServiceCollectionRiderConfigurator<TBus>(Collection);
             configure?.Invoke(configurator);

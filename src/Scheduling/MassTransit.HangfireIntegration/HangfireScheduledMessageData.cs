@@ -109,10 +109,10 @@ namespace MassTransit.HangfireIntegration
             var destinationAddress = (from a in envelope.Descendants("destinationAddress") select a).Single();
 
             var message = (from m in envelope.Descendants("message") select m).Single();
-            IEnumerable<XElement> messageType = (from mt in envelope.Descendants("messageType") select mt);
+            IEnumerable<XElement> messageType = from mt in envelope.Descendants("messageType") select mt;
 
             var payload = (from p in message.Descendants("payload") select p).Single();
-            IEnumerable<XElement> payloadType = (from pt in message.Descendants("payloadType") select pt);
+            IEnumerable<XElement> payloadType = from pt in message.Descendants("payloadType") select pt;
 
             message.Remove();
             messageType.Remove();

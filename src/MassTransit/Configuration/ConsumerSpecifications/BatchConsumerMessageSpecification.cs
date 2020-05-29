@@ -36,6 +36,15 @@ namespace MassTransit.ConsumerSpecifications
             _observers = new ConsumerConfigurationObservable();
         }
 
+        public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer, TMessage>> specification)
+        {
+        }
+
+        public void Message(Action<IConsumerMessageConfigurator<TMessage>> configure)
+        {
+            _consumerSpecification.Message(configure);
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             var specification = this as IConsumerMessageConfigurator<TConsumer, TMessage>;
@@ -116,16 +125,6 @@ namespace MassTransit.ConsumerSpecifications
             {
                 _batchConfigurator.AddPipeSpecification(new ConsumerPipeSpecificationProxy<TConsumer, Batch<TMessage>>(specification));
             }
-        }
-
-
-        public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer, TMessage>> specification)
-        {
-        }
-
-        public void Message(Action<IConsumerMessageConfigurator<TMessage>> configure)
-        {
-            _consumerSpecification.Message(configure);
         }
     }
 }

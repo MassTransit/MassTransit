@@ -9,7 +9,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using Amazon.SQS;
     using Amazon.SQS.Model;
     using Context;
-    using GreenPipes;
     using GreenPipes.Caching;
     using Topology.Entities;
 
@@ -17,11 +16,11 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     public class QueueCache :
         IAsyncDisposable
     {
-        readonly IAmazonSQS _client;
-        readonly CancellationToken _cancellationToken;
         readonly ICache<QueueInfo> _cache;
-        readonly IIndex<string, QueueInfo> _nameIndex;
+        readonly CancellationToken _cancellationToken;
+        readonly IAmazonSQS _client;
         readonly IDictionary<string, QueueInfo> _durableQueues;
+        readonly IIndex<string, QueueInfo> _nameIndex;
 
         public QueueCache(IAmazonSQS client, CancellationToken cancellationToken)
         {
@@ -33,11 +32,29 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             _durableQueues = new Dictionary<string, QueueInfo>();
         }
 
+        public async ValueTask DisposeAsync()
+        {
+            QueueInfo[] queueInfos;
+            lock (_durableQueues)
+            {
+                queueInfos = _durableQueues.Values.ToArray();
+
+                _durableQueues.Clear();
+            }
+
+            foreach (var queueInfo in queueInfos)
+                await queueInfo.DisposeAsync().ConfigureAwait(false);
+
+            _cache.Clear();
+        }
+
         public Task<QueueInfo> Get(Queue queue, CancellationToken cancellationToken)
         {
             lock (_durableQueues)
+            {
                 if (_durableQueues.TryGetValue(queue.EntityName, out var queueInfo))
                     return Task.FromResult(queueInfo);
+            }
 
             return _nameIndex.Get(queue.EntityName, key => CreateMissingQueue(queue, cancellationToken));
         }
@@ -45,8 +62,10 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         public Task<QueueInfo> GetByName(string entityName)
         {
             lock (_durableQueues)
+            {
                 if (_durableQueues.TryGetValue(entityName, out var queueInfo))
                     return Task.FromResult(queueInfo);
+            }
 
             return _nameIndex.Get(entityName);
         }
@@ -61,7 +80,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         async Task<QueueInfo> CreateMissingQueue(Queue queue, CancellationToken cancellationToken)
         {
-            var attributes = queue.QueueAttributes.ToDictionary(x => x.Key, x => x.Value.ToString());
+            Dictionary<string, string> attributes = queue.QueueAttributes.ToDictionary(x => x.Key, x => x.Value.ToString());
 
             if (queue.EntityName.EndsWith(".fifo", true, CultureInfo.InvariantCulture) && !attributes.ContainsKey(QueueAttributeName.FifoQueue))
             {
@@ -82,31 +101,17 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             var queueUrl = response.QueueUrl;
 
-            var queueAttributes = await _client.GetAttributesAsync(queueUrl).ConfigureAwait(false);
+            Dictionary<string, string> queueAttributes = await _client.GetAttributesAsync(queueUrl).ConfigureAwait(false);
 
             var missingQueue = new QueueInfo(queue.EntityName, queueUrl, queueAttributes, _client, _cancellationToken);
 
             if (queue.Durable && queue.AutoDelete == false)
+            {
                 lock (_durableQueues)
                     _durableQueues[missingQueue.EntityName] = missingQueue;
-
-            return missingQueue;
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            QueueInfo[] queueInfos;
-            lock (_durableQueues)
-            {
-                queueInfos = _durableQueues.Values.ToArray();
-
-                _durableQueues.Clear();
             }
 
-            foreach (var queueInfo in queueInfos)
-                await queueInfo.DisposeAsync().ConfigureAwait(false);
-
-            _cache.Clear();
+            return missingQueue;
         }
     }
 }

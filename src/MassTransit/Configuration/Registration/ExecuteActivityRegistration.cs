@@ -45,7 +45,7 @@ namespace MassTransit.Registration
             GetActivityDefinition(configurationServiceProvider)
                 .Configure(configurator, specification);
 
-            foreach (var action in _configureActions)
+            foreach (Action<IExecuteActivityConfigurator<TActivity, TArguments>> action in _configureActions)
                 action(specification);
 
             configurator.AddEndpointSpecification(specification);

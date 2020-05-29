@@ -16,15 +16,14 @@ namespace MassTransit.PipeConfigurators
         where TSaga : class, ISaga
     {
         readonly ISagaConfigurator<TSaga> _configurator;
-        readonly IConcurrencyLimiter _limiter;
 
         public ConcurrencyLimitSagaConfigurationObserver(ISagaConfigurator<TSaga> configurator, int concurrentMessageLimit, string id = null)
         {
             _configurator = configurator;
-            _limiter = new ConcurrencyLimiter(concurrentMessageLimit, id);
+            Limiter = new ConcurrencyLimiter(concurrentMessageLimit, id);
         }
 
-        public IConcurrencyLimiter Limiter => _limiter;
+        public IConcurrencyLimiter Limiter { get; }
 
         void ISagaConfigurationObserver.SagaConfigured<T>(ISagaConfigurator<T> configurator)
         {
@@ -37,7 +36,7 @@ namespace MassTransit.PipeConfigurators
 
         void ISagaConfigurationObserver.SagaMessageConfigured<T, TMessage>(ISagaMessageConfigurator<T, TMessage> configurator)
         {
-            var specification = new ConcurrencyLimitConsumePipeSpecification<TMessage>(_limiter);
+            var specification = new ConcurrencyLimitConsumePipeSpecification<TMessage>(Limiter);
 
             _configurator.Message<TMessage>(x => x.AddPipeSpecification(specification));
         }
