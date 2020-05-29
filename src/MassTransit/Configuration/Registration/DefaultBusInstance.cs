@@ -1,9 +1,8 @@
 namespace MassTransit.Registration
 {
     using System;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Configuration;
+    using GreenPipes;
     using Riders;
 
 
@@ -21,19 +20,9 @@ namespace MassTransit.Registration
 
         public IHostConfiguration HostConfiguration => default;
 
-        public void Add(IRider rider)
+        public ConnectHandle ConnectRider(IRider rider)
         {
             throw new ConfigurationException("TODO: add a link to a documentation");
-        }
-
-        public Task Start(CancellationToken cancellationToken)
-        {
-            return BusControl.StartAsync(cancellationToken);
-        }
-
-        public Task Stop(CancellationToken cancellationToken)
-        {
-            return BusControl.StopAsync(cancellationToken);
         }
     }
 }

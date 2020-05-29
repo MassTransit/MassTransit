@@ -8,7 +8,6 @@ namespace MassTransit.KafkaIntegration.Tests
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
-    using Registration;
     using Serializers;
     using TestFramework;
     using Util;
@@ -57,9 +56,9 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var provider = services.BuildServiceProvider();
 
-            var busInstance = provider.GetRequiredService<IBusInstance>();
+            var busControl = provider.GetRequiredService<IBusControl>();
 
-            await busInstance.Start(TestCancellationToken);
+            await busControl.StartAsync(TestCancellationToken);
 
             try
             {
@@ -88,7 +87,7 @@ namespace MassTransit.KafkaIntegration.Tests
             }
             finally
             {
-                await busInstance.Stop(TestCancellationToken);
+                await busControl.StopAsync(TestCancellationToken);
 
                 await provider.DisposeAsync();
             }

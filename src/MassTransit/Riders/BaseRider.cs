@@ -3,11 +3,13 @@ namespace MassTransit.Riders
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
 
 
     public abstract class BaseRider :
         IRider
     {
+        readonly string _name;
         readonly RiderObservable _observers;
 
         protected BaseRider(string name)
@@ -20,23 +22,23 @@ namespace MassTransit.Riders
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentException(name);
 
-            Name = name;
+            _name = name;
             _observers = observers ?? throw new ArgumentNullException(nameof(observers));
         }
 
-        public string Name { get; }
-
         public async Task Start(CancellationToken cancellationToken)
         {
+            LogContext.Current.Info?.Log("Starting rider: {Name}", _name);
             await _observers.PreStart(this).ConfigureAwait(false);
 
             try
             {
                 await BaseStart(cancellationToken).ConfigureAwait(false);
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                await _observers.StartFaulted(e);
+                LogContext.Current.Error?.Log(exception, "Rider start failed: {Name}", _name);
+                await _observers.StartFaulted(exception);
                 throw;
             }
 
@@ -45,15 +47,17 @@ namespace MassTransit.Riders
 
         public async Task Stop(CancellationToken cancellationToken)
         {
+            LogContext.Current.Info?.Log("Stopping rider: {Name}", _name);
             await _observers.PreStop(this).ConfigureAwait(false);
 
             try
             {
                 await BaseStop(cancellationToken).ConfigureAwait(false);
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                await _observers.StopFaulted(e);
+                LogContext.Current.Error?.Log(exception, "Rider stop failed: {Name}", _name);
+                await _observers.StopFaulted(exception);
                 throw;
             }
 

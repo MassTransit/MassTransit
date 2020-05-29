@@ -25,7 +25,7 @@ namespace MassTransit.KafkaIntegration
             IKafkaReceiveEndpoint[] endpoints = _topics
                 .Select(x => x.CreateEndpoint(busInstance))
                 .ToArray();
-            busInstance.AddKafka(_observers, endpoints);
+            busInstance.ConnectKafka(_observers, endpoints);
         }
 
         public IEnumerable<ValidationResult> Validate()

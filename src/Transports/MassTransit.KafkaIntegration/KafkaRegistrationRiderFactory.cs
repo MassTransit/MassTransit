@@ -27,7 +27,11 @@ namespace MassTransit.KafkaIntegration
         public IBusInstanceSpecification CreateRider(IRiderRegistrationContext<TContainerContext> context)
         {
             var factoryConfigurator = new KafkaFactoryConfigurator(_clientConfig ?? context.GetService<ClientConfig>() ?? new ClientConfig());
+
+            context.UseHealthCheck(factoryConfigurator);
+
             _configure?.Invoke(context, factoryConfigurator);
+
             return factoryConfigurator.Build();
         }
     }

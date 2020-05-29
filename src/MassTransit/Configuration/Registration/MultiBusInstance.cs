@@ -1,9 +1,8 @@
 namespace MassTransit.Registration
 {
     using System;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Configuration;
+    using GreenPipes;
     using Riders;
 
 
@@ -25,19 +24,9 @@ namespace MassTransit.Registration
         public IHostConfiguration HostConfiguration => _instance.HostConfiguration;
         public TBus BusInstance { get; }
 
-        public void Add(IRider rider)
+        public ConnectHandle ConnectRider(IRider rider)
         {
-            _instance.Add(rider);
-        }
-
-        public Task Start(CancellationToken cancellationToken)
-        {
-            return _instance.Start(cancellationToken);
-        }
-
-        public Task Stop(CancellationToken cancellationToken)
-        {
-            return _instance.Stop(cancellationToken);
+            return _instance.ConnectRider(rider);
         }
     }
 }

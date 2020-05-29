@@ -20,18 +20,18 @@ namespace MassTransit.Registration
             _instances = instances.ToDictionary(x => x.InstanceType);
         }
 
-        public async Task Start(CancellationToken cancellationToken)
+        public Task Start(CancellationToken cancellationToken)
         {
             _logger.LogDebug("Starting bus instances: {Instances}", string.Join(", ", _instances.Keys.Select(x => x.Name)));
 
-            await Task.WhenAll(_instances.Values.Select(x => x.Start(cancellationToken))).ConfigureAwait(false);
+            return Task.WhenAll(_instances.Values.Select(x => x.BusControl.StartAsync(cancellationToken)));
         }
 
-        public async Task Stop(CancellationToken cancellationToken)
+        public Task Stop(CancellationToken cancellationToken)
         {
             _logger.LogDebug("Stopping bus instances: {Instances}", string.Join(", ", _instances.Keys.Select(x => x.Name)));
 
-            await Task.WhenAll(_instances.Values.Select(x => x.Stop(cancellationToken))).ConfigureAwait(false);
+            return Task.WhenAll(_instances.Values.Select(x => x.BusControl.StopAsync(cancellationToken)));
         }
     }
 }

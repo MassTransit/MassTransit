@@ -7,17 +7,18 @@ namespace MassTransit.KafkaIntegration
     using Configuration.Configurators;
     using Confluent.Kafka;
     using GreenPipes;
+    using Pipeline.Observables;
     using Registration;
     using Riders;
     using Serializers;
     using Subscriptions;
-    using Util;
 
 
     public class KafkaFactoryConfigurator :
         IKafkaFactoryConfigurator
     {
         readonly ClientConfig _clientConfig;
+        readonly ReceiveEndpointObservable _endpointObservers;
         readonly RiderObservable _observers;
         readonly List<IKafkaTopic> _topics;
         IHeadersDeserializer _headersDeserializer;
@@ -27,6 +28,7 @@ namespace MassTransit.KafkaIntegration
             _clientConfig = clientConfig;
             _topics = new List<IKafkaTopic>();
             _observers = new RiderObservable();
+            _endpointObservers = new ReceiveEndpointObservable();
 
             SetHeadersDeserializer(DictionaryHeadersSerialize.Deserializer);
         }
@@ -79,6 +81,7 @@ namespace MassTransit.KafkaIntegration
                 throw new ArgumentNullException(nameof(consumerConfig));
 
             var topic = new KafkaTopic<TKey, TValue>(consumerConfig, topicNameFormatter, _headersDeserializer, configure);
+            topic.ConnectReceiveEndpointObserver(_endpointObservers);
             _topics.Add(topic);
         }
 
@@ -219,7 +222,7 @@ namespace MassTransit.KafkaIntegration
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
-            return new MultipleConnectHandle(_topics.Select(x => x.ConnectReceiveEndpointObserver(observer)));
+            return _endpointObservers.Connect(observer);
         }
 
         public IBusInstanceSpecification Build()
