@@ -4,6 +4,8 @@ namespace MassTransit.Transformation.PropertyInitializers
     using System.Reflection;
     using System.Threading.Tasks;
     using Initializers;
+    using Internals.Reflection;
+    using Util;
 
 
     /// <summary>
@@ -17,6 +19,7 @@ namespace MassTransit.Transformation.PropertyInitializers
         where TMessage : class
         where TInput : class
     {
+        readonly IWriteProperty<TMessage, TProperty> _messageProperty;
         readonly IPropertyProvider<TInput, TProperty> _propertyProvider;
 
         public TransformPropertyInitializer(IPropertyProvider<TInput, TProperty> propertyProvider, PropertyInfo propertyInfo)
@@ -28,11 +31,29 @@ namespace MassTransit.Transformation.PropertyInitializers
                 throw new ArgumentNullException(nameof(propertyInfo));
 
             _propertyProvider = propertyProvider;
+
+            _messageProperty = WritePropertyCache<TMessage>.GetProperty<TProperty>(propertyInfo);
         }
 
         public Task Apply(InitializeContext<TMessage, TInput> context)
         {
-            return _propertyProvider.GetProperty(context);
+            Task<TProperty> propertyTask = _propertyProvider.GetProperty(context);
+            if (propertyTask.IsCompleted)
+            {
+                if (_messageProperty.TargetType == context.MessageType)
+                    _messageProperty.Set(context.Message, propertyTask.Result);
+                return TaskUtil.Completed;
+            }
+
+            async Task ApplyAsync()
+            {
+                var propertyValue = await propertyTask.ConfigureAwait(false);
+
+                if (_messageProperty.TargetType == context.MessageType)
+                    _messageProperty.Set(context.Message, propertyValue);
+            }
+
+            return ApplyAsync();
         }
     }
 }

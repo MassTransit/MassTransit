@@ -182,7 +182,7 @@
 
             await Task.WhenAll(_initializers.Select(x => x.Apply(inputContext))).ConfigureAwait(false);
 
-            return inputContext;
+            return messageContext;
         }
 
         Task<InitializeContext<TMessage, TInput>> PrepareMessage(TInput input, CancellationToken cancellationToken)
