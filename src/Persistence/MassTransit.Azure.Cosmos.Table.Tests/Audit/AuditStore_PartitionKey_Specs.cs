@@ -10,85 +10,39 @@
 
 
     [TestFixture]
-    [Category("Integration")]
-    public class Saving_audit_records_to_the_audit_store :
+    public class Saving_audit_records_with_custom_partitionKey :
         AzureCosmosTableInMemoryTestFixture
     {
-        IEnumerable<AuditRecord> _records;
+        List<AuditRecord> _records;
+        string PartitionKey = "TestPartitionKey";
 
         [Test]
-        public async Task Should_Have_Audit_Records()
+        public async Task Should_Have_Custom_PartitionKey()
         {
-            _records = AzureTableHelpers.GetAuditRecords();
-            _records.ShouldNotBeEmpty();
+            _records = AzureTableHelpers.GetAuditRecords().ToList();
+            _records.Count.ShouldBe(1);
+            _records[0].PartitionKey.ShouldBe(PartitionKey);
         }
-
-        [Test]
-        public async Task Should_have_consume_audit_records()
-        {
-            var consumeRecords = _records.Where(x => x.ContextType == "Consume");
-            consumeRecords.Count().ShouldBe(2);
-        }
-
-        [Test]
-        public async Task Should_have_send_audit_record()
-        {
-            var consumeRecords = _records.Where(x => x.ContextType == "Send");
-            consumeRecords.Count().ShouldBe(2);
-        }
-
-        Task<ConsumeContext<A>> _handledA;
-        Task<ConsumeContext<B>> _handledB;
 
         [OneTimeSetUp]
         public async Task SetUp()
         {
             await InputQueueSendEndpoint.Send(new A());
-            await _handledA;
-            await InputQueueSendEndpoint.Send(new B());
-            await _handledB;
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseAzureCosmosTableAuditStore(ConnectionString, AuditTableName);
+            configurator.UseAzureCosmosTableAuditStore(ConnectionString, AuditTableName, (messageType, record) => PartitionKey);
             base.ConfigureInMemoryBus(configurator);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.Consumer<TestConsumer>();
-            _handledA = Handled<A>(configurator);
-            _handledB = Handled<B>(configurator);
             EndpointConvention.Map<A>(new Uri($"{configurator.InputAddress}"));
-            EndpointConvention.Map<B>(new Uri($"{configurator.InputAddress}"));
         }
-
-
-        class TestConsumer : IConsumer<A>,
-                             IConsumer<B>
-        {
-            public Task Consume(ConsumeContext<A> context)
-            {
-                return TaskUtil.Completed;
-            }
-
-            public Task Consume(ConsumeContext<B> context)
-            {
-                return TaskUtil.Completed;
-            }
-        }
-
 
         class A
         {
-            public string Data { get; set; }
-        }
-
-
-        class B
-        {
-            public string Data { get; set; }
         }
     }
 }
