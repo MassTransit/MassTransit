@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../signing.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MassTransit.Azure.Cosmos.Table</PackageId>
+    <Title>MassTransit.Azure.Cosmos.Table</Title>
+    <PackageTags>MassTransit;Azure;Cosmos;Table</PackageTags>
+    <Description>MassTransit Azure Cosmos persistence support; $(Description)</Description>
+  </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.7" />
+    </ItemGroup>
+
+</Project>
