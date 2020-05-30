@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../../signing.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MassTransit.EventHub</PackageId>
+    <Title>MassTransit.EventHub</Title>
+    <PackageTags>MassTransit;EventHub</PackageTags>
+    <Description>MassTransit EventHub Support; $(Description)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Messaging.EventHubs.Processor" Version="5.1.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Azure.Messaging.EventHubs.Processor" Version="5.1.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+  </ItemGroup>
+
+</Project>

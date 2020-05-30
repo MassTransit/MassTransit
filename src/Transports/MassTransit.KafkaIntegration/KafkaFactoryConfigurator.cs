@@ -227,8 +227,8 @@ namespace MassTransit.KafkaIntegration
 
         public IBusInstanceSpecification Build()
         {
-            var configurator = new KafkaBusInstanceSpecification(_topics, _observers);
-            return configurator;
+            var specification = new KafkaBusInstanceSpecification(_topics, _observers);
+            return specification;
         }
     }
 }
