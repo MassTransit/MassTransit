@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../netfx.props" />
+
+    <PropertyGroup>
+      <TargetFrameworks>net461;netcoreapp3.1</TargetFrameworks>
+    </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+    <PackageReference Include="Shouldly" Version="3.0.2" />
+    <ProjectReference Include="..\..\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
+    <ProjectReference Include="..\MassTransit.Azure.Cosmos.Table\MassTransit.Azure.Cosmos.Table.csproj" />
+  </ItemGroup>
+
+</Project>
