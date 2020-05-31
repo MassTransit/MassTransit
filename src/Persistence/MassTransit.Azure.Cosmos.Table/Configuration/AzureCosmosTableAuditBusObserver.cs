@@ -12,34 +12,26 @@ namespace MassTransit.Azure.Cosmos.Table
     {
         readonly string _auditTableName;
         readonly string _connectionString;
-        readonly Func<string, AuditRecord, string> _partitionKeyStrategy;
         readonly Action<IMessageFilterConfigurator> _filter;
+        readonly Func<string, AuditRecord, string> _partitionKeyStrategy;
 
-        public AzureCosmosTableAuditBusObserver(string connectionString, string auditTableName, Action<IMessageFilterConfigurator> filter, Func<string, AuditRecord, string> partitionKeyStrategy)
+        public AzureCosmosTableAuditBusObserver(string connectionString, string auditTableName, Action<IMessageFilterConfigurator> filter,
+                                                Func<string, AuditRecord, string> partitionKeyStrategy)
         {
-            _connectionString = connectionString;
-            _auditTableName   = auditTableName;
+            _connectionString     = connectionString;
+            _auditTableName       = auditTableName;
             _partitionKeyStrategy = partitionKeyStrategy;
-            _filter = filter;
+            _filter               = filter;
         }
 
         public async Task PostCreate(IBus bus)
         {
             LogContext.Debug?.Log($"Connecting Azure Cosmos Table Audit Store against table {_auditTableName}");
-            var table = await GetAuditCloudTable(_auditTableName);
+            var table      = await GetAuditCloudTable(_auditTableName);
             var auditStore = new AzureCosmosTableAuditStore(table, _partitionKeyStrategy);
             bus.ConnectSendAuditObservers(auditStore, _filter);
             bus.ConnectConsumeAuditObserver(auditStore, _filter);
             LogContext.Debug?.Log($"Azure Cosmos Table Audit store connected. {_auditTableName}");
-        }
-
-        async Task<CloudTable> GetAuditCloudTable(string auditTableName)
-        {
-            var storageAccount = CloudStorageAccount.Parse(_connectionString);
-            var tableClient    = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            var table          = tableClient.GetTableReference(auditTableName);
-            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
-            return table;
         }
 
         public Task CreateFaulted(Exception exception)
@@ -75,6 +67,15 @@ namespace MassTransit.Azure.Cosmos.Table
         public Task StopFaulted(IBus bus, Exception exception)
         {
             return TaskUtil.Completed;
+        }
+
+        async Task<CloudTable> GetAuditCloudTable(string auditTableName)
+        {
+            var storageAccount = CloudStorageAccount.Parse(_connectionString);
+            var tableClient    = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
+            var table          = tableClient.GetTableReference(auditTableName);
+            await table.CreateIfNotExistsAsync().ConfigureAwait(false);
+            return table;
         }
     }
 }

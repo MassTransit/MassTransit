@@ -14,7 +14,8 @@ namespace MassTransit.Azure.Cosmos.Table
         public static void UseAzureCosmosTableAuditStore(this IBusFactoryConfigurator configurator, string connectionString, string auditTableName,
                                                          Action<IMessageFilterConfigurator> configureFilter = null)
         {
-            configurator.ConnectBusObserver(new AzureCosmosTableAuditBusObserver(connectionString,auditTableName,
+            configurator.ConnectBusObserver(new AzureCosmosTableAuditBusObserver(connectionString,
+                                                                                 auditTableName,
                                                                                  configureFilter,
                                                                                  DefaultPartitionKeyStrategy));
         }

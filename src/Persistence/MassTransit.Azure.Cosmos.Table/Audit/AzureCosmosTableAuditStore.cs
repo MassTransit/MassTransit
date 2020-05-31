@@ -6,6 +6,7 @@
     using Metadata;
     using Microsoft.Azure.Cosmos.Table;
 
+
     public class AzureCosmosTableAuditStore : IMessageAuditStore
     {
         readonly Func<string, AuditRecord, string> _partitionKeyStrategy;

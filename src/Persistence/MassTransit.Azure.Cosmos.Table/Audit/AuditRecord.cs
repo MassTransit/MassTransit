@@ -57,13 +57,18 @@ namespace MassTransit.Azure.Cosmos.Table
         }
 
         /// <summary>
-        ///
         /// </summary>
         /// <param name="candidatePartitionKey"></param>
         /// <returns></returns>
         static string CleanDisallowedPartitionKeyCharacters(string candidatePartitionKey)
         {
-            var disallowedCharacters = new HashSet<char>(){'/', '\\', '#', '?'};
+            var disallowedCharacters = new HashSet<char>
+                                       {
+                                           '/',
+                                           '\\',
+                                           '#',
+                                           '?'
+                                       };
             var key = new StringBuilder();
             foreach (var character in candidatePartitionKey)
             {

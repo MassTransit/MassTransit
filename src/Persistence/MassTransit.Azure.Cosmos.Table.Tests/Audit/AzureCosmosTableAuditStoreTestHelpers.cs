@@ -7,6 +7,8 @@ namespace MassTransit.Azure.Cosmos.Table.Tests
 
     class AzureCosmosTableAuditStoreTestHelpers
     {
+        readonly CloudTable _table;
+
         public AzureCosmosTableAuditStoreTestHelpers(string connectionString, string auditTableName)
         {
             var storageAccount = CloudStorageAccount.Parse(connectionString);
@@ -14,8 +16,6 @@ namespace MassTransit.Azure.Cosmos.Table.Tests
             _table = tableClient.GetTableReference(auditTableName);
             _table.CreateIfNotExists();
         }
-
-        readonly CloudTable _table;
 
         public IEnumerable<AuditRecord> GetAuditRecords()
         {
