@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using GreenPipes.Util;
     using NUnit.Framework;
     using Shouldly;
 
@@ -13,9 +12,6 @@
     public class Saving_audit_records_with_custom_partitionKey :
         AzureCosmosTableInMemoryTestFixture
     {
-        List<AuditRecord> _records;
-        string PartitionKey = "TestPartitionKey";
-
         [Test]
         public async Task Should_Have_Custom_PartitionKey()
         {
@@ -23,6 +19,9 @@
             _records.Count.ShouldBe(1);
             _records[0].PartitionKey.ShouldBe(PartitionKey);
         }
+
+        List<AuditRecord> _records;
+        readonly string PartitionKey = "TestPartitionKey";
 
         [OneTimeSetUp]
         public async Task SetUp()
@@ -40,6 +39,7 @@
         {
             EndpointConvention.Map<A>(new Uri($"{configurator.InputAddress}"));
         }
+
 
         class A
         {

@@ -9,18 +9,15 @@
 
 
     [TestFixture]
-    public class Saving_audit_records_to_the_audit_store :
+    public class Saving_consume_audit_records_to_the_audit_store :
         AzureCosmosTableInMemoryTestFixture
     {
         [Test]
-        public async Task Should_Have_Audit_Records()
+        public async Task Should_have_consume_audit_records()
         {
-            _records = AzureTableHelpers.GetAuditRecords();
-            _records.ShouldNotBeEmpty();
-            _records.Count().ShouldBe(4);
+            IEnumerable<AuditRecord> consumeRecords = AzureTableHelpers.GetAuditRecords().Where(x => x.ContextType == "Consume");
+            consumeRecords.Count().ShouldBe(2);
         }
-
-        IEnumerable<AuditRecord> _records;
 
         Task<ConsumeContext<A>> _handledA;
         Task<ConsumeContext<B>> _handledB;
