@@ -1,10 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="../../netfx.props" />
-  <Import Project="../../signing.props" />
+  <Import Project="../../../signing.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>

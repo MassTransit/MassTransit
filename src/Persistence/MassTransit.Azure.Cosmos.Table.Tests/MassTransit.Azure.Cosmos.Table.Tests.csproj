@@ -2,7 +2,7 @@
   <Import Project="../../netfx.props" />
 
     <PropertyGroup>
-      <TargetFrameworks>net461;netcoreapp3.1</TargetFrameworks>
+      <TargetFramework>netcoreapp3.1</TargetFramework>
     </PropertyGroup>
 
   <ItemGroup>
