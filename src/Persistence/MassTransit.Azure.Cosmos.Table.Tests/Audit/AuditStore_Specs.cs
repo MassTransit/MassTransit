@@ -1,20 +1,16 @@
 ﻿namespace MassTransit.Azure.Cosmos.Table.Tests
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using GreenPipes.Util;
     using NUnit.Framework;
     using Shouldly;
-
-
+    
     [TestFixture]
     public class Saving_audit_records_to_the_audit_store :
         AzureCosmosTableInMemoryTestFixture
     {
-        IEnumerable<AuditRecord> _records;
-
         [Test]
         public async Task Should_Have_Audit_Records()
         {
@@ -25,16 +21,18 @@
         [Test]
         public async Task Should_have_consume_audit_records()
         {
-            var consumeRecords = _records.Where(x => x.ContextType == "Consume");
+            IEnumerable<AuditRecord> consumeRecords = _records.Where(x => x.ContextType == "Consume");
             consumeRecords.Count().ShouldBe(2);
         }
 
         [Test]
         public async Task Should_have_send_audit_record()
         {
-            var consumeRecords = _records.Where(x => x.ContextType == "Send");
+            IEnumerable<AuditRecord> consumeRecords = _records.Where(x => x.ContextType == "Send");
             consumeRecords.Count().ShouldBe(2);
         }
+
+        IEnumerable<AuditRecord> _records;
 
         Task<ConsumeContext<A>> _handledA;
         Task<ConsumeContext<B>> _handledB;
@@ -59,8 +57,6 @@
             configurator.Consumer<TestConsumer>();
             _handledA = Handled<A>(configurator);
             _handledB = Handled<B>(configurator);
-            EndpointConvention.Map<A>(new Uri($"{configurator.InputAddress}"));
-            EndpointConvention.Map<B>(new Uri($"{configurator.InputAddress}"));
         }
 
 
