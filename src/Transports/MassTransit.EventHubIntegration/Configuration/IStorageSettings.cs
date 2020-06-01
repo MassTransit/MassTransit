@@ -1,4 +1,4 @@
-namespace MassTransit.EventHubIntegration.Configuration
+namespace MassTransit.EventHubIntegration
 {
     using System;
     using Azure.Core;

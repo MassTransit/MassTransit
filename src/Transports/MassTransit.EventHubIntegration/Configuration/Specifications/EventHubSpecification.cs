@@ -1,16 +1,17 @@
-namespace MassTransit.EventHubIntegration.Processors
+namespace MassTransit.EventHubIntegration.Specifications
 {
     using System;
     using System.Collections.Generic;
-    using Configuration;
     using Configurators;
     using GreenPipes;
+    using MassTransit.Configurators;
+    using MassTransit.Registration;
     using Pipeline.Observables;
-    using Registration;
+    using Transport;
 
 
-    public class EventHubDefinition :
-        IEventHubDefinition
+    public class EventHubSpecification :
+        IEventHubSpecification
     {
         readonly Action<IEventHubConfigurator> _configure;
         readonly string _consumerGroup;
@@ -18,7 +19,7 @@ namespace MassTransit.EventHubIntegration.Processors
         readonly IHostSettings _hostSettings;
         readonly IStorageSettings _storageSettings;
 
-        public EventHubDefinition(string eventHubName, string consumerGroup, IHostSettings hostSettings, IStorageSettings storageSettings,
+        public EventHubSpecification(string eventHubName, string consumerGroup, IHostSettings hostSettings, IStorageSettings storageSettings,
             Action<IEventHubConfigurator> configure)
         {
             _consumerGroup = consumerGroup;
@@ -31,26 +32,6 @@ namespace MassTransit.EventHubIntegration.Processors
         }
 
         public string Name { get; }
-
-        public IEventHubReceiveEndpoint Create(IBusInstance busInstance)
-        {
-            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration($"event-hub/{Name}");
-            endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
-            var configurator =
-                new EventHubConfigurator(Name, _consumerGroup, _hostSettings, _storageSettings, busInstance, endpointConfiguration);
-            _configure?.Invoke(configurator);
-
-            var result = BusConfigurationResult.CompileResults(configurator.Validate());
-
-            try
-            {
-                return configurator.Build();
-            }
-            catch (Exception ex)
-            {
-                throw new ConfigurationException(result, "An exception occurred creating the EventDataReceiver", ex);
-            }
-        }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
@@ -72,6 +53,26 @@ namespace MassTransit.EventHubIntegration.Processors
 
             if (string.IsNullOrWhiteSpace(_storageSettings.ConnectionString) && _storageSettings.ContainerUri == null)
                 yield return this.Failure("StorageSettings", "is invalid");
+        }
+
+        public IEventHubReceiveEndpoint Create(IBusInstance busInstance)
+        {
+            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration($"event-hub/{Name}");
+            endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
+
+            var configurator = new EventHubConfigurator(Name, _consumerGroup, _hostSettings, _storageSettings, busInstance, endpointConfiguration);
+            _configure?.Invoke(configurator);
+
+            var result = BusConfigurationResult.CompileResults(configurator.Validate());
+
+            try
+            {
+                return configurator.Build();
+            }
+            catch (Exception ex)
+            {
+                throw new ConfigurationException(result, "An exception occurred creating the EventDataReceiver", ex);
+            }
         }
     }
 }

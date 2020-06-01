@@ -1,4 +1,4 @@
-namespace MassTransit.EventHubIntegration.Processors
+namespace MassTransit.EventHubIntegration.Transport
 {
     using System;
     using System.Runtime.Serialization;
@@ -12,7 +12,6 @@ namespace MassTransit.EventHubIntegration.Processors
     using Events;
     using GreenPipes;
     using GreenPipes.Util;
-    using Transport;
 
 
     public class EventHubReceiveEndpoint :

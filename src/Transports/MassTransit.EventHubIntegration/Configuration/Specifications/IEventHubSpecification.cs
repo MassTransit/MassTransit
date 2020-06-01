@@ -1,11 +1,12 @@
-namespace MassTransit.EventHubIntegration.Processors
+namespace MassTransit.EventHubIntegration.Specifications
 {
     using GreenPipes;
-    using Registration;
+    using MassTransit.Registration;
+    using Transport;
     using Transports;
 
 
-    public interface IEventHubDefinition :
+    public interface IEventHubSpecification :
         IReceiveEndpointObserverConnector,
         ISpecification
     {

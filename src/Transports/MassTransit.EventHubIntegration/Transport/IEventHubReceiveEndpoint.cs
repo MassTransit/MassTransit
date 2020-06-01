@@ -1,4 +1,4 @@
-namespace MassTransit.EventHubIntegration.Processors
+namespace MassTransit.EventHubIntegration.Transport
 {
     using System.Threading;
     using System.Threading.Tasks;

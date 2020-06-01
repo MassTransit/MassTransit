@@ -1,4 +1,4 @@
-namespace MassTransit.KafkaIntegration.Subscriptions
+namespace MassTransit.KafkaIntegration.Transport
 {
     using System.Threading;
     using System.Threading.Tasks;

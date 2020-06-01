@@ -1,4 +1,4 @@
-namespace MassTransit.KafkaIntegration.Subscriptions
+namespace MassTransit.KafkaIntegration.Configurators
 {
     using System;
     using System.Collections.Generic;
@@ -10,7 +10,7 @@ namespace MassTransit.KafkaIntegration.Subscriptions
     using Contexts;
     using GreenPipes;
     using MassTransit.Configuration;
-    using Registration;
+    using MassTransit.Registration;
     using Riders;
     using Serializers;
     using Transport;

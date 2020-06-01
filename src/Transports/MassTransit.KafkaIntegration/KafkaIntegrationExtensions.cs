@@ -1,7 +1,9 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit
 {
     using System;
     using Confluent.Kafka;
+    using KafkaIntegration;
+    using KafkaIntegration.Registration;
     using Registration;
 
 

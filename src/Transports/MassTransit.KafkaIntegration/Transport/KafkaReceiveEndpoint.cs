@@ -1,4 +1,4 @@
-namespace MassTransit.KafkaIntegration.Subscriptions
+namespace MassTransit.KafkaIntegration.Transport
 {
     using System;
     using System.Threading;
@@ -8,7 +8,6 @@ namespace MassTransit.KafkaIntegration.Subscriptions
     using Events;
     using GreenPipes;
     using Pipeline;
-    using Transport;
     using Transports;
     using Util;
 

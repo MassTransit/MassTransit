@@ -1,6 +1,8 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit
 {
     using System;
+    using EventHubIntegration;
+    using EventHubIntegration.Registration;
     using Registration;
 
 

@@ -5,13 +5,6 @@ namespace MassTransit.KafkaIntegration.Contexts
     using Util;
 
 
-    public interface IConsumerLockContext<TKey, TValue>
-        where TValue : class
-    {
-        Task Complete(ConsumeResult<TKey, TValue> result);
-    }
-
-
     public class ConsumerLockContext<TKey, TValue> :
         IConsumerLockContext<TKey, TValue>
         where TValue : class

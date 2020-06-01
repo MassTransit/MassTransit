@@ -1,8 +1,9 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit.KafkaIntegration.Registration
 {
     using System;
+    using Configurators;
     using Confluent.Kafka;
-    using Registration;
+    using MassTransit.Registration;
 
 
     public class KafkaRegistrationRiderFactory<TContainerContext> :

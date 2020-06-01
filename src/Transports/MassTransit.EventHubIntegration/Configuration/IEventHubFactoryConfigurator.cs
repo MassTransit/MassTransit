@@ -1,10 +1,9 @@
-﻿namespace MassTransit.EventHubIntegration
+namespace MassTransit.EventHubIntegration
 {
     using System;
     using Azure.Core;
     using Azure.Storage;
     using Azure.Storage.Blobs;
-    using Processors;
     using Riders;
 
 

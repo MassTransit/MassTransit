@@ -1,4 +1,4 @@
-namespace MassTransit.EventHubIntegration.Processors
+namespace MassTransit.EventHubIntegration.Configurators
 {
     using System;
     using System.Threading.Tasks;
@@ -9,8 +9,7 @@ namespace MassTransit.EventHubIntegration.Processors
     using Context;
     using Contexts;
     using GreenPipes;
-    using MassTransit.Configuration;
-    using Registration;
+    using MassTransit.Registration;
     using Riders;
     using Transport;
 

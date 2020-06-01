@@ -1,7 +1,8 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit.EventHubIntegration.Registration
 {
     using System;
-    using Registration;
+    using Configurators;
+    using MassTransit.Registration;
 
 
     public class EventHubRegistrationRiderFactory<TContainerContext> :

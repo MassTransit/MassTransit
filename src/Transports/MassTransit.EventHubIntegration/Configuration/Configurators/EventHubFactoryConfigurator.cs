@@ -1,22 +1,22 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit.EventHubIntegration.Configurators
 {
     using System;
     using System.Collections.Generic;
     using Azure.Core;
     using Azure.Storage;
     using Azure.Storage.Blobs;
-    using Configuration;
     using GreenPipes;
+    using MassTransit.Registration;
     using Pipeline.Observables;
-    using Processors;
     using Registration;
     using Riders;
+    using Specifications;
 
 
     public class EventHubFactoryConfigurator :
         IEventHubFactoryConfigurator
     {
-        readonly List<IEventHubDefinition> _definitions;
+        readonly List<IEventHubSpecification> _specifications;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly RiderObservable _observers;
         HostSettings _hostSettings;
@@ -26,7 +26,7 @@ namespace MassTransit.EventHubIntegration
         {
             _observers = new RiderObservable();
             _endpointObservers = new ReceiveEndpointObservable();
-            _definitions = new List<IEventHubDefinition>();
+            _specifications = new List<IEventHubSpecification>();
         }
 
         public ConnectHandle ConnectRiderObserver(IRiderObserver observer)
@@ -118,15 +118,15 @@ namespace MassTransit.EventHubIntegration
             if (string.IsNullOrWhiteSpace(consumerGroup))
                 throw new ArgumentException(nameof(consumerGroup));
 
-            var definition = new EventHubDefinition(eventHubName, consumerGroup, _hostSettings, _storageSettings, configure);
-            definition.ConnectReceiveEndpointObserver(_endpointObservers);
-            _definitions.Add(definition);
+            var specification = new EventHubSpecification(eventHubName, consumerGroup, _hostSettings, _storageSettings, configure);
+            specification.ConnectReceiveEndpointObserver(_endpointObservers);
+
+            _specifications.Add(specification);
         }
 
         public IBusInstanceSpecification Build()
         {
-            var specification = new EventHubBusInstanceSpecification(_definitions, _observers);
-            return specification;
+            return new EventHubBusInstanceSpecification(_specifications, _observers);
         }
     }
 }

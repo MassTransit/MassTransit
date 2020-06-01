@@ -1,7 +1,7 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit
 {
+    using EventHubIntegration.Transport;
     using GreenPipes;
-    using Processors;
     using Registration;
     using Riders;
 

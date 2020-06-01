@@ -1,4 +1,4 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit.KafkaIntegration.Configurators
 {
     using System;
     using System.Collections.Generic;
@@ -7,11 +7,11 @@ namespace MassTransit.KafkaIntegration
     using Configuration.Configurators;
     using Confluent.Kafka;
     using GreenPipes;
+    using MassTransit.Registration;
     using Pipeline.Observables;
-    using Registration;
     using Riders;
     using Serializers;
-    using Subscriptions;
+    using Specifications;
 
 
     public class KafkaFactoryConfigurator :
@@ -20,13 +20,13 @@ namespace MassTransit.KafkaIntegration
         readonly ClientConfig _clientConfig;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly RiderObservable _observers;
-        readonly List<IKafkaTopic> _topics;
+        readonly List<IKafkaTopicSpecification> _topics;
         IHeadersDeserializer _headersDeserializer;
 
         public KafkaFactoryConfigurator(ClientConfig clientConfig)
         {
             _clientConfig = clientConfig;
-            _topics = new List<IKafkaTopic>();
+            _topics = new List<IKafkaTopicSpecification>();
             _observers = new RiderObservable();
             _endpointObservers = new ReceiveEndpointObservable();
 
@@ -80,7 +80,7 @@ namespace MassTransit.KafkaIntegration
             if (consumerConfig == null)
                 throw new ArgumentNullException(nameof(consumerConfig));
 
-            var topic = new KafkaTopic<TKey, TValue>(consumerConfig, topicNameFormatter, _headersDeserializer, configure);
+            var topic = new KafkaTopicSpecification<TKey, TValue>(consumerConfig, topicNameFormatter, _headersDeserializer, configure);
             topic.ConnectReceiveEndpointObserver(_endpointObservers);
             _topics.Add(topic);
         }
@@ -227,8 +227,7 @@ namespace MassTransit.KafkaIntegration
 
         public IBusInstanceSpecification Build()
         {
-            var specification = new KafkaBusInstanceSpecification(_topics, _observers);
-            return specification;
+            return new KafkaBusInstanceSpecification(_topics, _observers);
         }
     }
 }

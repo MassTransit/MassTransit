@@ -6,7 +6,6 @@ namespace MassTransit.KafkaIntegration
     using Confluent.Kafka;
     using Riders;
     using Serializers;
-    using Subscriptions;
 
 
     public interface IKafkaFactoryConfigurator :

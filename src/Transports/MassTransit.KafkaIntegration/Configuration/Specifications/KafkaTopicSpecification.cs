@@ -1,4 +1,4 @@
-namespace MassTransit.KafkaIntegration.Subscriptions
+namespace MassTransit.KafkaIntegration.Specifications
 {
     using System;
     using System.Collections.Generic;
@@ -6,13 +6,15 @@ namespace MassTransit.KafkaIntegration.Subscriptions
     using Configurators;
     using Confluent.Kafka;
     using GreenPipes;
+    using MassTransit.Configurators;
+    using MassTransit.Registration;
     using Pipeline.Observables;
-    using Registration;
     using Serializers;
+    using Transport;
 
 
-    public class KafkaTopic<TKey, TValue> :
-        IKafkaTopic
+    public class KafkaTopicSpecification<TKey, TValue> :
+        IKafkaTopicSpecification
         where TValue : class
     {
         readonly Action<IKafkaTopicConfigurator<TKey, TValue>> _configure;
@@ -20,7 +22,7 @@ namespace MassTransit.KafkaIntegration.Subscriptions
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly IHeadersDeserializer _headersDeserializer;
 
-        public KafkaTopic(ConsumerConfig consumerConfig, ITopicNameFormatter topicNameFormatter, IHeadersDeserializer headersDeserializer,
+        public KafkaTopicSpecification(ConsumerConfig consumerConfig, ITopicNameFormatter topicNameFormatter, IHeadersDeserializer headersDeserializer,
             Action<IKafkaTopicConfigurator<TKey, TValue>> configure)
         {
             _consumerConfig = consumerConfig;
@@ -34,11 +36,10 @@ namespace MassTransit.KafkaIntegration.Subscriptions
 
         public IKafkaReceiveEndpoint CreateEndpoint(IBusInstance busInstance)
         {
-            var endpointConfiguration =
-                busInstance.HostConfiguration.CreateReceiveEndpointConfiguration($"kafka/{Name}");
+            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration($"kafka/{Name}");
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
-            var configurator =
-                new KafkaTopicConfigurator<TKey, TValue>(_consumerConfig, Name, busInstance, endpointConfiguration, _headersDeserializer);
+
+            var configurator = new KafkaTopicConfigurator<TKey, TValue>(_consumerConfig, Name, busInstance, endpointConfiguration, _headersDeserializer);
             _configure?.Invoke(configurator);
 
             var result = BusConfigurationResult.CompileResults(configurator.Validate());

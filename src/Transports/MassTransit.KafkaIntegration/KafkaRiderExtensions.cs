@@ -1,9 +1,9 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit
 {
     using GreenPipes;
+    using KafkaIntegration.Transport;
     using Registration;
     using Riders;
-    using Subscriptions;
 
 
     public static class KafkaRiderExtensions

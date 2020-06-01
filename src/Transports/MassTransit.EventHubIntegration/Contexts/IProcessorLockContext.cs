@@ -9,15 +9,4 @@ namespace MassTransit.EventHubIntegration.Contexts
     {
         Task Complete(ProcessEventArgs eventArgs, CancellationToken cancellationToken);
     }
-
-
-    public class ProcessorLockContext :
-        IProcessorLockContext
-    {
-        public Task Complete(ProcessEventArgs eventArgs, CancellationToken cancellationToken)
-        {
-            //TODO: use batching here, this operation is slow as hell
-            return eventArgs.UpdateCheckpointAsync(cancellationToken);
-        }
-    }
 }

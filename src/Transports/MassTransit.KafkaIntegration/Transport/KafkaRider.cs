@@ -1,21 +1,20 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit.KafkaIntegration.Transport
 {
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Processors;
     using Riders;
     using Util;
 
 
-    public class EventHubRider :
+    public class KafkaRider :
         BaseRider
     {
-        readonly IEnumerable<IEventHubReceiveEndpoint> _endpoints;
+        readonly IEnumerable<IKafkaReceiveEndpoint> _endpoints;
 
-        public EventHubRider(IEnumerable<IEventHubReceiveEndpoint> endpoints, RiderObservable observers)
-            : base("azure.event-hub", observers)
+        public KafkaRider(IEnumerable<IKafkaReceiveEndpoint> endpoints, RiderObservable observers)
+            : base("confluent.kafka", observers)
         {
             _endpoints = endpoints;
         }

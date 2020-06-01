@@ -1,31 +1,31 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit.EventHubIntegration.Specifications
 {
     using System.Collections.Generic;
     using System.Linq;
     using GreenPipes;
-    using Processors;
-    using Registration;
+    using MassTransit.Registration;
     using Riders;
+    using Transport;
 
 
     public class EventHubBusInstanceSpecification :
         IBusInstanceSpecification
     {
-        readonly IEnumerable<IEventHubDefinition> _definitions;
+        readonly IEnumerable<IEventHubSpecification> _specifications;
         readonly RiderObservable _observer;
 
-        public EventHubBusInstanceSpecification(IEnumerable<IEventHubDefinition> definitions, RiderObservable observer)
+        public EventHubBusInstanceSpecification(IEnumerable<IEventHubSpecification> specifications, RiderObservable observer)
         {
-            _definitions = definitions;
+            _specifications = specifications;
             _observer = observer;
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_definitions == null || !_definitions.Any())
+            if (_specifications == null || !_specifications.Any())
                 yield return this.Failure("Topics", "should not be empty");
 
-            foreach (KeyValuePair<string, IEventHubDefinition[]> kv in _definitions.GroupBy(x => x.Name).ToDictionary(x => x.Key, x => x.ToArray()))
+            foreach (KeyValuePair<string, IEventHubSpecification[]> kv in _specifications.GroupBy(x => x.Name).ToDictionary(x => x.Key, x => x.ToArray()))
             {
                 if (kv.Value.Length > 1)
                     yield return this.Failure($"EventHub: {kv.Key} was added more than once.");
@@ -37,7 +37,7 @@ namespace MassTransit.EventHubIntegration
 
         public void Configure(IBusInstance busInstance)
         {
-            IEventHubReceiveEndpoint[] endpoints = _definitions
+            IEventHubReceiveEndpoint[] endpoints = _specifications
                 .Select(x => x.Create(busInstance))
                 .ToArray();
             busInstance.ConnectEventHub(_observer, endpoints);

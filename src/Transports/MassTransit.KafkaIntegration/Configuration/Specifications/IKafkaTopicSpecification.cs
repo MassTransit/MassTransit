@@ -1,11 +1,12 @@
-namespace MassTransit.KafkaIntegration.Subscriptions
+namespace MassTransit.KafkaIntegration.Specifications
 {
     using GreenPipes;
-    using Registration;
+    using MassTransit.Registration;
+    using Transport;
     using Transports;
 
 
-    public interface IKafkaTopic :
+    public interface IKafkaTopicSpecification :
         IReceiveEndpointObserverConnector,
         ISpecification
     {
