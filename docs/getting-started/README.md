@@ -71,9 +71,19 @@ Save the file, and execute _dotnet run_, and you should see the message *Receive
 
 ### Install RabbitMQ
 
-::: tip
-If you are using a Mac, RabbitMQ can be installed using [Homebrew](https://brew.sh/) by typing `brew install rabbitmq`. This installs the management plug-in automatically.
-:::
+RabbitMQ can be installed several different ways, depending upon your operating system and installed software.
+
+#### Docker
+
+The easiest by far is using Docker, which can be started as shown below. This will download and run a preconfigured Docker image, maintained by MassTransit, including the delayed exchange plug-in, as well as the Management interface enabled.
+
+```bash
+$ docker run -p 15672:15672 -p 5672:5672 masstransit/rabbitmq
+```
+
+#### Homebrew (Mac OS X)
+
+If you are using a Mac, RabbitMQ can be installed using [Homebrew](https://brew.sh/) by typing `brew install rabbitmq`. This installs the management plug-in automatically. Once installed, type `brew services start rabbitmq` and accept the prompts to enable network ports.
 
 #### To install RabbitMQ manually:
 
@@ -84,7 +94,7 @@ If you are using a Mac, RabbitMQ can be installed using [Homebrew](https://brew.
 
 1. First, from an elevated command prompt, change directory to the sbin folder within the RabbitMQ Server installation directory e.g. `%PROGRAMFILES%\RabbitMQ Server\rabbitmq_server_3.5.3\sbin\`
 
-2. Next, run the following command to enable the rabbitmq management plugin: `rabbitmq-plugins.bat enable rabbitmq_management`
+2. Next, run the following command to enable the rabbitmq management plugin: `rabbitmq-plugins enable rabbitmq_management`
 
 ### What is this doing?
 
