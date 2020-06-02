@@ -15,6 +15,16 @@ namespace MassTransit.EventHubIntegration
         string ContainerName { set; }
 
         /// <summary>
+        /// Sets interval before checkpoint, low interval will decrease throughput (default: 1min)
+        /// </summary>
+        TimeSpan CheckpointInterval { set; }
+
+        /// <summary>
+        /// Set max message count for checkpoint, low message count will decrease throughput (default: 1000)
+        /// </summary>
+        ushort CheckpointMessageCount { set; }
+
+        /// <summary>
         /// Configure <see cref="EventProcessorClientOptions" />
         /// </summary>
         Action<EventProcessorClientOptions> ConfigureOptions { set; }

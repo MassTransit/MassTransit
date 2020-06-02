@@ -8,7 +8,6 @@ namespace MassTransit.EventHubIntegration.Configurators
     using Configuration;
     using Context;
     using Contexts;
-    using GreenPipes;
     using MassTransit.Registration;
     using Riders;
     using Transport;
@@ -24,6 +23,8 @@ namespace MassTransit.EventHubIntegration.Configurators
         readonly string _eventHubName;
         readonly IHostSettings _hostSettings;
         readonly IStorageSettings _storageSettings;
+        TimeSpan _checkpointInterval;
+        ushort _checkpointMessageCount;
         Action<EventProcessorClientOptions> _configureOptions;
         string _containerName;
         Func<PartitionClosingEventArgs, Task> _partitionClosingHandler;
@@ -40,11 +41,24 @@ namespace MassTransit.EventHubIntegration.Configurators
             _storageSettings = storageSettings;
             _busInstance = busInstance;
             _endpointConfiguration = endpointConfiguration;
+
+            CheckpointInterval = TimeSpan.FromMinutes(1);
+            CheckpointMessageCount = 1000;
         }
 
         public string ContainerName
         {
             set => _containerName = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
+        public TimeSpan CheckpointInterval
+        {
+            set => _checkpointInterval = value;
+        }
+
+        public ushort CheckpointMessageCount
+        {
+            set => _checkpointMessageCount = value;
         }
 
         public Action<EventProcessorClientOptions> ConfigureOptions
@@ -80,10 +94,13 @@ namespace MassTransit.EventHubIntegration.Configurators
 
             var context = CreateContext();
             var blobClient = CreateBlobClient();
-            var processor = CreateEventProcessorClient(blobClient);
+
+            IProcessorLockContext lockContext = new ProcessorLockContext(context.LogContext, _checkpointInterval, _checkpointMessageCount);
+
+            var processor = CreateEventProcessorClient(blobClient, lockContext, context);
             var transport = new EventHubReceiveTransport(context);
 
-            AddPayload(context);
+            context.AddOrUpdatePayload(() => lockContext, _ => lockContext);
 
             return new EventHubReceiveEndpoint(processor, blobClient, transport, context);
         }
@@ -93,17 +110,21 @@ namespace MassTransit.EventHubIntegration.Configurators
             var blobClientOptions = new BlobClientOptions();
             _storageSettings.Configure?.Invoke(blobClientOptions);
 
+            var containerName = _containerName ?? _eventHubName;
             if (!string.IsNullOrWhiteSpace(_storageSettings.ConnectionString))
-                return new BlobContainerClient(_storageSettings.ConnectionString, _containerName ?? _eventHubName, blobClientOptions);
+                return new BlobContainerClient(_storageSettings.ConnectionString, containerName, blobClientOptions);
+
+            var uri = new Uri(_storageSettings.ContainerUri, new Uri(containerName));
             if (_storageSettings.TokenCredential != null)
-                return new BlobContainerClient(_storageSettings.ContainerUri, _storageSettings.TokenCredential, blobClientOptions);
+                return new BlobContainerClient(uri, _storageSettings.TokenCredential, blobClientOptions);
 
             return _storageSettings.SharedKeyCredential != null
-                ? new BlobContainerClient(_storageSettings.ContainerUri, _storageSettings.SharedKeyCredential, blobClientOptions)
+                ? new BlobContainerClient(uri, _storageSettings.SharedKeyCredential, blobClientOptions)
                 : new BlobContainerClient(_storageSettings.ContainerUri, blobClientOptions);
         }
 
-        EventProcessorClient CreateEventProcessorClient(BlobContainerClient blobClient)
+        EventProcessorClient CreateEventProcessorClient(BlobContainerClient blobClient, IProcessorLockContext lockContext,
+            ReceiveEndpointContext receiveEndpointContext)
         {
             var options = new EventProcessorClientOptions();
             _configureOptions?.Invoke(options);
@@ -113,18 +134,31 @@ namespace MassTransit.EventHubIntegration.Configurators
                 : new EventProcessorClient(blobClient, _consumerGroup, _hostSettings.FullyQualifiedNamespace, _eventHubName, _hostSettings.TokenCredential,
                     options);
 
-            if (_partitionClosingHandler != null)
-                client.PartitionClosingAsync += _partitionClosingHandler;
-            if (_partitionInitializingHandler != null)
-                client.PartitionInitializingAsync += _partitionInitializingHandler;
+            var logContext = receiveEndpointContext.LogContext;
+
+            async Task OnPartitionClosing(PartitionClosingEventArgs args)
+            {
+                logContext.Info?.Log("Partition: {PartitionId} closing, reason: {Reason}", args.PartitionId, args.Reason);
+
+                await lockContext.OnPartitionClosing(args).ConfigureAwait(false);
+                if (_partitionClosingHandler != null)
+                    await _partitionClosingHandler(args).ConfigureAwait(false);
+            }
+
+            async Task OnPartitionInitializing(PartitionInitializingEventArgs args)
+            {
+                logContext.Info?.Log("Partition: {PartitionId} initializing, starting position: {DefaultStartingPosition}", args.PartitionId,
+                    args.DefaultStartingPosition);
+
+                await lockContext.OnPartitionInitializing(args).ConfigureAwait(false);
+                if (_partitionInitializingHandler != null)
+                    await _partitionInitializingHandler(args).ConfigureAwait(false);
+            }
+
+            client.PartitionClosingAsync += OnPartitionClosing;
+            client.PartitionInitializingAsync += OnPartitionInitializing;
 
             return client;
-        }
-
-        static void AddPayload(PipeContext context)
-        {
-            IProcessorLockContext lockContext = new ProcessorLockContext();
-            context.AddOrUpdatePayload(() => lockContext, _ => lockContext);
         }
     }
 }

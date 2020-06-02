@@ -38,6 +38,9 @@
 
         public async Task Handle(ProcessEventArgs @event, CancellationToken cancellationToken, Action<ReceiveContext> contextCallback = null)
         {
+            if (!@event.HasEvent)
+                return;
+
             var context = new EventDataReceiveContext(@event.Data, _context);
             contextCallback?.Invoke(context);
 
