@@ -28,7 +28,9 @@ namespace MassTransit.Definition
             set => _executeEndpointName = value;
         }
 
-        public IEndpointDefinition<IExecuteActivity<TArguments>> ExecuteEndpointDefinition { private get; set; }
+        public IEndpointDefinition<IExecuteActivity<TArguments>> ExecuteEndpointDefinition { get; set; }
+
+        IEndpointDefinition IExecuteActivityDefinition.ExecuteEndpointDefinition => ExecuteEndpointDefinition;
 
         /// <summary>
         /// Specify a concurrency limit, which is applied to the entire consumer, saga, or activity, regardless of message type.

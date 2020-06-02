@@ -30,7 +30,9 @@ namespace MassTransit.Definition
             set => _endpointName = value;
         }
 
-        public IEndpointDefinition<TSaga> EndpointDefinition { private get; set; }
+        public IEndpointDefinition<TSaga> EndpointDefinition { get; set; }
+
+        IEndpointDefinition ISagaDefinition.EndpointDefinition => EndpointDefinition;
 
         /// <summary>
         /// Set the concurrent message limit for the saga, which limits how many saga instances are able to concurrently

@@ -12,6 +12,8 @@ namespace MassTransit.Definition
         /// </summary>
         Type LogType { get; }
 
+        IEndpointDefinition CompensateEndpointDefinition { get; }
+
         /// <summary>
         /// Return the endpoint name for the compensate activity
         /// </summary>
@@ -31,7 +33,7 @@ namespace MassTransit.Definition
         /// <summary>
         /// Sets the endpoint definition, if available
         /// </summary>
-        IEndpointDefinition<ICompensateActivity<TLog>> CompensateEndpointDefinition { set; }
+        new IEndpointDefinition<ICompensateActivity<TLog>> CompensateEndpointDefinition { set; }
 
         /// <summary>
         /// Configure the compensate activity

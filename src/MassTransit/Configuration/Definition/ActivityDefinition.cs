@@ -24,7 +24,9 @@ namespace MassTransit.Definition
             set => _compensateEndpointName = value;
         }
 
-        public IEndpointDefinition<ICompensateActivity<TLog>> CompensateEndpointDefinition { private get; set; }
+        public IEndpointDefinition<ICompensateActivity<TLog>> CompensateEndpointDefinition { get; set; }
+
+        IEndpointDefinition IActivityDefinition.CompensateEndpointDefinition => CompensateEndpointDefinition;
 
         void IActivityDefinition<TActivity, TArguments, TLog>.Configure(IReceiveEndpointConfigurator endpointConfigurator,
             ICompensateActivityConfigurator<TActivity, TLog> compensateActivityConfigurator)

@@ -40,15 +40,15 @@ namespace MassTransit.Registration
             var repository = configurationServiceProvider.GetRequiredService<ISagaRepository<TInstance>>();
             var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, repository, configurator);
 
-            LogContext.Debug?.Log("Configuring endpoint {Endpoint}, Saga: {SagaType}, State Machine: {StateMachineType}",
-                configurator.InputAddress.GetLastPart(),
-                TypeMetadataCache<TInstance>.ShortName, TypeMetadataCache.GetShortName(stateMachine.GetType()));
-
             GetSagaDefinition(configurationServiceProvider)
                 .Configure(configurator, stateMachineConfigurator);
 
             foreach (Action<ISagaConfigurator<TInstance>> action in _configureActions)
                 action(stateMachineConfigurator);
+
+            LogContext.Debug?.Log("Configured endpoint {Endpoint}, Saga: {SagaType}, State Machine: {StateMachineType}",
+                configurator.InputAddress.GetLastPart(),
+                TypeMetadataCache<TInstance>.ShortName, TypeMetadataCache.GetShortName(stateMachine.GetType()));
 
             configurator.AddEndpointSpecification(stateMachineConfigurator);
         }

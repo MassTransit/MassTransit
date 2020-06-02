@@ -147,8 +147,8 @@ namespace MassTransit.Registration
                 .Select(x => x.GetDefinition(_configurationServiceProvider))
                 .Select(x => new
                 {
-                    Definition = x,
-                    Name = x.GetEndpointName(endpointNameFormatter)
+                    Name = x.GetEndpointName(endpointNameFormatter),
+                    Definition = x
                 })
                 .GroupBy(x => x.Name, (name, values) => new
                 {
@@ -175,10 +175,10 @@ namespace MassTransit.Registration
                 from ea in eas.DefaultIfEmpty()
                 join ep in endpointsWithName on e equals ep.Name into eps
                 from ep in eps.Select(x => x.Definition)
-                    .DefaultIfEmpty(c?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).Combine()
-                        ?? s?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).Combine()
-                        ?? a?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).Combine()
-                        ?? ea?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x)).Combine()
+                    .DefaultIfEmpty(c?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine()
+                        ?? s?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.EndpointDefinition)).Combine()
+                        ?? a?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.ExecuteEndpointDefinition)).Combine()
+                        ?? ea?.Select(x => (IEndpointDefinition)new DelegateEndpointDefinition(e, x, x.ExecuteEndpointDefinition)).Combine()
                         ?? new NamedEndpointDefinition(e))
                 select new
                 {
@@ -212,7 +212,9 @@ namespace MassTransit.Registration
                         {
                             var compensateEndpointName = activity.GetCompensateEndpointName(endpointNameFormatter);
 
-                            var compensateDefinition = endpointsWithName.SingleOrDefault(x => x.Name == compensateEndpointName)?.Definition;
+                            var compensateDefinition = activity.CompensateEndpointDefinition ??
+                                endpointsWithName.SingleOrDefault(x => x.Name == compensateEndpointName)?.Definition;
+
                             if (compensateDefinition != null)
                             {
                                 configurator.ReceiveEndpoint(compensateDefinition, endpointNameFormatter, compensateEndpointConfigurator =>

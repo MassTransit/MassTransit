@@ -31,7 +31,9 @@ namespace MassTransit.Definition
             set => _endpointName = value;
         }
 
-        public IEndpointDefinition<TConsumer> EndpointDefinition { private get; set; }
+        public IEndpointDefinition<TConsumer> EndpointDefinition { get; set; }
+
+        IEndpointDefinition IConsumerDefinition.EndpointDefinition => EndpointDefinition;
 
         /// Set the concurrent message limit for the consumer, which limits how many consumers are able to concurrently
         /// consume messages.
