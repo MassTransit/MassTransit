@@ -8,7 +8,5 @@ namespace MassTransit.EventHubIntegration.Contexts
     public interface IProcessorLockContext
     {
         Task Complete(ProcessEventArgs eventArgs, CancellationToken cancellationToken);
-        Task OnPartitionInitializing(PartitionInitializingEventArgs eventArgs);
-        Task OnPartitionClosing(PartitionClosingEventArgs eventArgs);
     }
 }

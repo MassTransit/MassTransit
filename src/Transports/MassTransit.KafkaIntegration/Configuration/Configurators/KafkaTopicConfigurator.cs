@@ -2,7 +2,6 @@ namespace MassTransit.KafkaIntegration.Configurators
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Configuration;
     using Configuration.Configurators;
     using Confluent.Kafka;
@@ -25,11 +24,12 @@ namespace MassTransit.KafkaIntegration.Configurators
         readonly ConsumerConfig _consumerConfig;
         readonly IReceiveEndpointConfiguration _endpointConfiguration;
         readonly string _topic;
+        TimeSpan _checkpointInterval;
+        ushort _checkpointMessageCount;
+        int _concurrencyLimit;
         IHeadersDeserializer _headersDeserializer;
         IDeserializer<TKey> _keyDeserializer;
         Action<IConsumer<TKey, TValue>, CommittedOffsets> _offsetsCommittedHandler;
-        Func<IConsumer<TKey, TValue>, List<TopicPartition>, IEnumerable<TopicPartitionOffset>> _partitionAssignmentHandler;
-        Func<IConsumer<TKey, TValue>, List<TopicPartitionOffset>, IEnumerable<TopicPartitionOffset>> _partitionsRevokedHandler;
         IDeserializer<TValue> _valueDeserializer;
 
         public KafkaTopicConfigurator(ConsumerConfig consumerConfig, string topic, IBusInstance busInstance,
@@ -42,6 +42,10 @@ namespace MassTransit.KafkaIntegration.Configurators
             _topic = topic;
             SetValueDeserializer(new MassTransitSerializer<TValue>());
             SetHeadersDeserializer(headersDeserializer);
+
+            CheckpointInterval = TimeSpan.FromMinutes(1);
+            CheckpointMessageCount = 5000;
+            ConcurrencyLimit = 1;
         }
 
         public AutoOffsetReset? AutoOffsetReset
@@ -52,6 +56,21 @@ namespace MassTransit.KafkaIntegration.Configurators
         public string GroupInstanceId
         {
             set => _consumerConfig.GroupInstanceId = value;
+        }
+
+        public TimeSpan CheckpointInterval
+        {
+            set => _checkpointInterval = value;
+        }
+
+        public int ConcurrencyLimit
+        {
+            set => _concurrencyLimit = value;
+        }
+
+        public ushort CheckpointMessageCount
+        {
+            set => _checkpointMessageCount = value;
         }
 
         public PartitionAssignmentStrategy? PartitionAssignmentStrategy
@@ -82,18 +101,6 @@ namespace MassTransit.KafkaIntegration.Configurators
         public TimeSpan? MaxPollInterval
         {
             set => _consumerConfig.MaxPollIntervalMs = value?.Milliseconds;
-        }
-
-        public void DisableAutoCommit()
-        {
-            _consumerConfig.EnableAutoCommit = false;
-            _consumerConfig.AutoCommitIntervalMs = null;
-        }
-
-        public void EnableAutoCommit(TimeSpan interval)
-        {
-            _consumerConfig.EnableAutoCommit = true;
-            _consumerConfig.AutoCommitIntervalMs = interval.Milliseconds;
         }
 
         public bool? EnableAutoOffsetStore
@@ -147,40 +154,6 @@ namespace MassTransit.KafkaIntegration.Configurators
             _headersDeserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
         }
 
-        public void SetPartitionsAssignedHandler(
-            Func<IConsumer<TKey, TValue>, List<TopicPartition>, IEnumerable<TopicPartitionOffset>> partitionsAssignedHandler)
-        {
-            if (_partitionAssignmentHandler != null)
-                throw new InvalidOperationException("Partitions assignment handler may not be specified more than once.");
-            _partitionAssignmentHandler = partitionsAssignedHandler ?? throw new ArgumentNullException(nameof(partitionsAssignedHandler));
-        }
-
-        public void SetPartitionsAssignedHandler(Action<IConsumer<TKey, TValue>, List<TopicPartition>> partitionAssignmentHandler)
-        {
-            SetPartitionsAssignedHandler((consumer, partitions) =>
-            {
-                partitionAssignmentHandler(consumer, partitions);
-                return partitions.Select(tp => new TopicPartitionOffset(tp, Offset.Unset)).ToList();
-            });
-        }
-
-        public void SetPartitionsRevokedHandler(
-            Func<IConsumer<TKey, TValue>, List<TopicPartitionOffset>, IEnumerable<TopicPartitionOffset>> partitionsRevokedHandler)
-        {
-            if (_partitionsRevokedHandler != null)
-                throw new InvalidOperationException("Partitions revoked handler may not be specified more than once.");
-            _partitionsRevokedHandler = partitionsRevokedHandler ?? throw new ArgumentNullException(nameof(partitionsRevokedHandler));
-        }
-
-        public void SetPartitionsRevokedHandler(Action<IConsumer<TKey, TValue>, List<TopicPartitionOffset>> partitionsRevokedHandler)
-        {
-            SetPartitionsRevokedHandler((consumer, partitions) =>
-            {
-                partitionsRevokedHandler(consumer, partitions);
-                return new List<TopicPartitionOffset>();
-            });
-        }
-
         public void SetOffsetsCommittedHandler(Action<IConsumer<TKey, TValue>, CommittedOffsets> offsetsCommittedHandler)
         {
             if (_offsetsCommittedHandler != null)
@@ -211,21 +184,19 @@ namespace MassTransit.KafkaIntegration.Configurators
 
             var context = CreateContext();
 
-            IConsumer<TKey, TValue> consumer = CreateConsumer(context);
+
+            ConsumerBuilder<TKey, TValue> consumerBuilder = CreateConsumerBuilder(context);
             var receiver = new KafkaReceiveTransport<TKey, TValue>(context, _headersDeserializer);
 
-            AddPayload(context, consumer, _consumerConfig);
-
-            return new KafkaReceiveEndpoint<TKey, TValue>(_topic, consumer, receiver, context);
-        }
-
-        static void AddPayload(PipeContext context, IConsumer<TKey, TValue> consumer, ConsumerConfig consumerConfig)
-        {
-            IConsumerLockContext<TKey, TValue> lockContext = new ConsumerLockContext<TKey, TValue>(consumer, consumerConfig);
+            IConsumerLockContext<TKey, TValue> lockContext =
+                new ConsumerLockContext<TKey, TValue>(consumerBuilder, context.LogContext, _checkpointInterval, _checkpointMessageCount);
             context.AddOrUpdatePayload(() => lockContext, _ => lockContext);
+
+            return new KafkaReceiveEndpoint<TKey, TValue>(_topic, Math.Max(1000, _checkpointMessageCount / 10), _concurrencyLimit, consumerBuilder.Build(),
+                receiver, context);
         }
 
-        IConsumer<TKey, TValue> CreateConsumer(ReceiveEndpointContext context)
+        ConsumerBuilder<TKey, TValue> CreateConsumerBuilder(ReceiveEndpointContext context)
         {
             ConsumerBuilder<TKey, TValue> consumerBuilder = new ConsumerBuilder<TKey, TValue>(_consumerConfig)
                 .SetValueDeserializer(_valueDeserializer)
@@ -235,16 +206,10 @@ namespace MassTransit.KafkaIntegration.Configurators
 
             if (_keyDeserializer != null)
                 consumerBuilder.SetKeyDeserializer(_keyDeserializer);
-
             if (_offsetsCommittedHandler != null)
                 consumerBuilder.SetOffsetsCommittedHandler(_offsetsCommittedHandler);
 
-            if (_partitionsRevokedHandler != null)
-                consumerBuilder.SetPartitionsRevokedHandler(_partitionsRevokedHandler);
-            if (_partitionAssignmentHandler != null)
-                consumerBuilder.SetPartitionsAssignedHandler(_partitionAssignmentHandler);
-
-            return consumerBuilder.Build();
+            return consumerBuilder;
         }
     }
 }

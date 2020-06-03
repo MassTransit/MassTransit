@@ -18,13 +18,15 @@ namespace MassTransit.KafkaIntegration.Transport
     {
         readonly IConsumer<TKey, TValue> _consumer;
         readonly ReceiveEndpointContext _context;
+        readonly ChannelExecutor _executor;
         readonly TaskCompletionSource<ReceiveEndpointReady> _started;
         readonly string _topic;
         readonly IKafkaReceiveTransport<TKey, TValue> _transport;
         CancellationTokenSource _cancellationTokenSource;
         Task _consumerTask;
 
-        public KafkaReceiveEndpoint(string topic, IConsumer<TKey, TValue> consumer, IKafkaReceiveTransport<TKey, TValue> transport,
+        public KafkaReceiveEndpoint(string topic, int prefetch, int concurrencyLimit, IConsumer<TKey, TValue> consumer,
+            IKafkaReceiveTransport<TKey, TValue> transport,
             ReceiveEndpointContext context)
         {
             _topic = topic;
@@ -33,6 +35,7 @@ namespace MassTransit.KafkaIntegration.Transport
             _context = context;
 
             _started = TaskUtil.GetTask<ReceiveEndpointReady>();
+            _executor = new ChannelExecutor(prefetch, concurrencyLimit);
         }
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
@@ -114,7 +117,7 @@ namespace MassTransit.KafkaIntegration.Transport
                     {
                         ConsumeResult<TKey, TValue> message = _consumer.Consume(_cancellationTokenSource.Token);
 
-                        await _transport.Handle(message, cancellationToken).ConfigureAwait(false);
+                        await _executor.Push(() => _transport.Handle(message, cancellationToken), _cancellationTokenSource.Token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException e) when (e.CancellationToken == _cancellationTokenSource.Token)
                     {
@@ -146,6 +149,7 @@ namespace MassTransit.KafkaIntegration.Transport
                 _cancellationTokenSource.Cancel();
 
                 await _consumerTask.ConfigureAwait(false);
+                await _executor.DisposeAsync().ConfigureAwait(false);
 
                 _consumer.Close();
                 _consumer.Dispose();

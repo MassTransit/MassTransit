@@ -20,9 +20,14 @@ namespace MassTransit.EventHubIntegration
         TimeSpan CheckpointInterval { set; }
 
         /// <summary>
-        /// Set max message count for checkpoint, low message count will decrease throughput (default: 1000)
+        /// Set max message count for checkpoint, low message count will decrease throughput (default: 5000)
         /// </summary>
         ushort CheckpointMessageCount { set; }
+
+        /// <summary>
+        /// The number of concurrent messages to process. Could increase throughput but will not preserve an order (default: 1)
+        /// </summary>
+        int ConcurrencyLimit { set; }
 
         /// <summary>
         /// Configure <see cref="EventProcessorClientOptions" />

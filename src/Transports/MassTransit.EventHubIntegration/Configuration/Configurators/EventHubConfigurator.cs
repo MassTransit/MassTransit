@@ -25,6 +25,7 @@ namespace MassTransit.EventHubIntegration.Configurators
         readonly IStorageSettings _storageSettings;
         TimeSpan _checkpointInterval;
         ushort _checkpointMessageCount;
+        int _concurrencyLimit;
         Action<EventProcessorClientOptions> _configureOptions;
         string _containerName;
         Func<PartitionClosingEventArgs, Task> _partitionClosingHandler;
@@ -43,7 +44,8 @@ namespace MassTransit.EventHubIntegration.Configurators
             _endpointConfiguration = endpointConfiguration;
 
             CheckpointInterval = TimeSpan.FromMinutes(1);
-            CheckpointMessageCount = 1000;
+            CheckpointMessageCount = 5000;
+            ConcurrencyLimit = 1;
         }
 
         public string ContainerName
@@ -59,6 +61,11 @@ namespace MassTransit.EventHubIntegration.Configurators
         public ushort CheckpointMessageCount
         {
             set => _checkpointMessageCount = value;
+        }
+
+        public int ConcurrencyLimit
+        {
+            set => _concurrencyLimit = value;
         }
 
         public Action<EventProcessorClientOptions> ConfigureOptions
@@ -94,15 +101,13 @@ namespace MassTransit.EventHubIntegration.Configurators
 
             var context = CreateContext();
             var blobClient = CreateBlobClient();
-
-            IProcessorLockContext lockContext = new ProcessorLockContext(context.LogContext, _checkpointInterval, _checkpointMessageCount);
-
-            var processor = CreateEventProcessorClient(blobClient, lockContext, context);
+            var processor = CreateEventProcessorClient(blobClient);
             var transport = new EventHubReceiveTransport(context);
 
+            IProcessorLockContext lockContext = new ProcessorLockContext(processor, context.LogContext, _checkpointInterval, _checkpointMessageCount);
             context.AddOrUpdatePayload(() => lockContext, _ => lockContext);
 
-            return new EventHubReceiveEndpoint(processor, blobClient, transport, context);
+            return new EventHubReceiveEndpoint(processor, Math.Max(1000, _checkpointMessageCount / 10), _concurrencyLimit, blobClient, transport, context);
         }
 
         BlobContainerClient CreateBlobClient()
@@ -123,8 +128,7 @@ namespace MassTransit.EventHubIntegration.Configurators
                 : new BlobContainerClient(_storageSettings.ContainerUri, blobClientOptions);
         }
 
-        EventProcessorClient CreateEventProcessorClient(BlobContainerClient blobClient, IProcessorLockContext lockContext,
-            ReceiveEndpointContext receiveEndpointContext)
+        EventProcessorClient CreateEventProcessorClient(BlobContainerClient blobClient)
         {
             var options = new EventProcessorClientOptions();
             _configureOptions?.Invoke(options);
@@ -134,29 +138,10 @@ namespace MassTransit.EventHubIntegration.Configurators
                 : new EventProcessorClient(blobClient, _consumerGroup, _hostSettings.FullyQualifiedNamespace, _eventHubName, _hostSettings.TokenCredential,
                     options);
 
-            var logContext = receiveEndpointContext.LogContext;
-
-            async Task OnPartitionClosing(PartitionClosingEventArgs args)
-            {
-                logContext.Info?.Log("Partition: {PartitionId} closing, reason: {Reason}", args.PartitionId, args.Reason);
-
-                await lockContext.OnPartitionClosing(args).ConfigureAwait(false);
-                if (_partitionClosingHandler != null)
-                    await _partitionClosingHandler(args).ConfigureAwait(false);
-            }
-
-            async Task OnPartitionInitializing(PartitionInitializingEventArgs args)
-            {
-                logContext.Info?.Log("Partition: {PartitionId} initializing, starting position: {DefaultStartingPosition}", args.PartitionId,
-                    args.DefaultStartingPosition);
-
-                await lockContext.OnPartitionInitializing(args).ConfigureAwait(false);
-                if (_partitionInitializingHandler != null)
-                    await _partitionInitializingHandler(args).ConfigureAwait(false);
-            }
-
-            client.PartitionClosingAsync += OnPartitionClosing;
-            client.PartitionInitializingAsync += OnPartitionInitializing;
+            if (_partitionClosingHandler != null)
+                client.PartitionClosingAsync += _partitionClosingHandler;
+            if (_partitionInitializingHandler != null)
+                client.PartitionInitializingAsync += _partitionInitializingHandler;
 
             return client;
         }

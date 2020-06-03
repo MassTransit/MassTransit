@@ -1,7 +1,6 @@
 namespace MassTransit.EventHubIntegration.Transport
 {
     using System;
-    using System.Runtime.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
     using Azure;
@@ -11,7 +10,7 @@ namespace MassTransit.EventHubIntegration.Transport
     using Context;
     using Events;
     using GreenPipes;
-    using GreenPipes.Util;
+    using Util;
 
 
     public class EventHubReceiveEndpoint :
@@ -19,12 +18,14 @@ namespace MassTransit.EventHubIntegration.Transport
     {
         readonly BlobContainerClient _blobContainerClient;
         readonly ReceiveEndpointContext _context;
+        readonly ChannelExecutor _executor;
         readonly EventProcessorClient _processor;
         readonly TaskCompletionSource<ReceiveEndpointReady> _started;
         readonly IEventHubReceiveTransport _transport;
+        CancellationTokenSource _cancellationTokenSource;
 
-        public EventHubReceiveEndpoint(EventProcessorClient processor, BlobContainerClient blobContainerClient, IEventHubReceiveTransport transport,
-            ReceiveEndpointContext context)
+        public EventHubReceiveEndpoint(EventProcessorClient processor, int prefetch, int concurrencyLimit, BlobContainerClient blobContainerClient,
+            IEventHubReceiveTransport transport, ReceiveEndpointContext context)
         {
             _processor = processor;
             _blobContainerClient = blobContainerClient;
@@ -32,6 +33,7 @@ namespace MassTransit.EventHubIntegration.Transport
             _context = context;
 
             _started = TaskUtil.GetTask<ReceiveEndpointReady>();
+            _executor = new ChannelExecutor(prefetch, concurrencyLimit);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -102,21 +104,18 @@ namespace MassTransit.EventHubIntegration.Transport
             var inputAddress = _context.InputAddress;
             LogContext.SetCurrentIfNull(logContext);
 
+            _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
             async Task ProcessEventAsync(ProcessEventArgs arg)
             {
                 LogContext.SetCurrentIfNull(logContext);
+
                 try
                 {
-                    await _transport.Handle(arg, cancellationToken).ConfigureAwait(false);
+                    await _executor.Push(() => _transport.Handle(arg, cancellationToken), _cancellationTokenSource.Token).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException e) when (e.CancellationToken == cancellationToken)
+                catch (OperationCanceledException e) when (e.CancellationToken == _cancellationTokenSource.Token)
                 {
-                }
-                catch (SerializationException exception)
-                {
-                    LogContext.Error?.Log(exception, "EventHub: {EventHubName} message deserialization error", _processor.EventHubName);
-                    //TODO: remove this, just for test purposes!!!!!!!!!!!!!!
-                    await arg.UpdateCheckpointAsync().ConfigureAwait(false);
                 }
             }
 
@@ -142,7 +141,7 @@ namespace MassTransit.EventHubIntegration.Transport
 
             LogContext.Debug?.Log("EventHub processor starting: {EventHubName}", _processor.EventHubName);
 
-            await _processor.StartProcessingAsync(cancellationToken);
+            await _processor.StartProcessingAsync(cancellationToken).ConfigureAwait(false);
 
             await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
 
@@ -154,12 +153,16 @@ namespace MassTransit.EventHubIntegration.Transport
 
         public async Task Disconnect(CancellationToken cancellationToken)
         {
-            //TODO ensure checkpoint committed
             LogContext.SetCurrentIfNull(_context.LogContext);
 
             try
             {
-                await _processor.StopProcessingAsync(cancellationToken);
+                _cancellationTokenSource.Cancel();
+
+                await _executor.DisposeAsync().ConfigureAwait(false);
+                await _processor.StopProcessingAsync(cancellationToken).ConfigureAwait(false);
+
+                _cancellationTokenSource.Dispose();
             }
             catch (Exception e)
             {
