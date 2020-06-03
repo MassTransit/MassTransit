@@ -46,8 +46,6 @@ namespace MassTransit.KafkaIntegration.Tests
                         k.Topic<Null, KafkaMessage>(Topic, nameof(Receive_Specs), c =>
                         {
                             c.AutoOffsetReset = AutoOffsetReset.Earliest;
-
-                            c.DisableAutoCommit();
                             c.ConfigureConsumer<KafkaMessageConsumer>(context);
                         });
                     });

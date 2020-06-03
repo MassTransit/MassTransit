@@ -80,6 +80,9 @@ namespace MassTransit.KafkaIntegration.Configurators
             if (consumerConfig == null)
                 throw new ArgumentNullException(nameof(consumerConfig));
 
+            consumerConfig.AutoCommitIntervalMs = null;
+            consumerConfig.EnableAutoCommit = false;
+
             var topic = new KafkaTopicSpecification<TKey, TValue>(consumerConfig, topicNameFormatter, _headersDeserializer, configure);
             topic.ConnectReceiveEndpointObserver(_endpointObservers);
             _topics.Add(topic);

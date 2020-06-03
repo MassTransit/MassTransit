@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.KafkaIntegration
 {
     using System;
-    using System.Collections.Generic;
     using Configuration;
     using Confluent.Kafka;
     using Serializers;
@@ -27,6 +26,21 @@
         /// importance: medium
         /// </summary>
         string GroupInstanceId { set; }
+
+        /// <summary>
+        /// Sets interval before checkpoint, low interval will decrease throughput (default: 1min)
+        /// </summary>
+        TimeSpan CheckpointInterval { set; }
+
+        /// <summary>
+        /// The number of concurrent messages to process. Could increase throughput but will not preserve an order (default: 1)
+        /// </summary>
+        int ConcurrencyLimit { set; }
+
+        /// <summary>
+        /// Set max message count for checkpoint, low message count will decrease throughput (default: 5000)
+        /// </summary>
+        ushort CheckpointMessageCount { set; }
 
         /// <summary>
         /// Name of partition assignment strategy to use when elected group leader assigns partitions to group members.
@@ -112,16 +126,6 @@
         /// </summary>
         bool? CheckCrcs { set; }
 
-        void DisableAutoCommit();
-
-        /// <summary>
-        /// Automatically and periodically commit offsets in the background. Note: setting this to false does not prevent the consumer from fetching previously committed start offsets. To
-        /// circumvent this behaviour set specific start offsets per partition in the call to assign().
-        /// default: true
-        /// importance: high
-        /// </summary>
-        void EnableAutoCommit(TimeSpan interval);
-
         void ConfigureFetch(Action<IKafkaFetchConfigurator> configure);
 
         /// <summary>
@@ -163,76 +167,6 @@
         /// </summary>
         /// <param name="deserializer"></param>
         void SetHeadersDeserializer(IHeadersDeserializer deserializer);
-
-        /// <summary>
-        /// This handler is called when a new consumer group partition assignment has been received
-        /// by this consumer.
-        /// Note: corresponding to every call to this handler there will be a corresponding call to
-        /// the partitions revoked handler (if one has been set using SetPartitionsRevokedHandler).
-        /// The actual partitions to consume from and start offsets are specified by the return value
-        /// of the handler. This set of partitions is not required to match the assignment provided
-        /// by the consumer group, but typically will. Partition offsets may be a specific offset, or
-        /// special value (Beginning, End or Unset). If Unset, consumption will resume from the
-        /// last committed offset for each partition, or if there is no committed offset, in accordance
-        /// with the `auto.offset.reset` configuration property.
-        /// </summary>
-        /// <remarks>
-        /// May execute as a side-effect of the Consumer.Consume call (on the same thread).
-        /// Assign/Unassign must not be called in the handler.
-        /// Exceptions: Any exception thrown by your partitions assigned handler
-        /// will be wrapped in a ConsumeException with ErrorCode
-        /// ErrorCode.Local_Application and thrown by the initiating call to Consume.
-        /// </remarks>
-        void SetPartitionsAssignedHandler(Func<IConsumer<TKey, TValue>, List<TopicPartition>, IEnumerable<TopicPartitionOffset>> partitionsAssignedHandler);
-
-        /// <summary>
-        /// This handler is called when a new consumer group partition assignment has been received
-        /// by this consumer.
-        /// Note: corresponding to every call to this handler there will be a corresponding call to
-        /// the partitions revoked handler (if one has been set using SetPartitionsRevokedHandler").
-        /// Consumption will resume from the last committed offset for each partition, or if there is
-        /// no committed offset, in accordance with the `auto.offset.reset` configuration property.
-        /// </summary>
-        /// <remarks>
-        /// May execute as a side-effect of the Consumer.Consume call (on the same thread).
-        /// Assign/Unassign must not be called in the handler.
-        /// Exceptions: Any exception thrown by your partitions assigned handler
-        /// will be wrapped in a ConsumeException with ErrorCode
-        /// ErrorCode.Local_Application and thrown by the initiating call to Consume.
-        /// </remarks>
-        void SetPartitionsAssignedHandler(Action<IConsumer<TKey, TValue>, List<TopicPartition>> partitionAssignmentHandler);
-
-        /// <summary>
-        /// This handler is called immediately prior to a group partition assignment being
-        /// revoked. The second parameter provides the set of partitions the consumer is
-        /// currently assigned to, and the current position of the consumer on each of these
-        /// partitions.
-        /// </summary>
-        /// <remarks>
-        /// May execute as a side-effect of the Consumer.Consume call (on the same thread).
-        /// Assign/Unassign must not be called in the handler.
-        /// Exceptions: Any exception thrown by your partitions revoked handler
-        /// will be wrapped in a ConsumeException with ErrorCode
-        /// ErrorCode.Local_Application and thrown by the initiating call to Consume/Close.
-        /// </remarks>
-        void SetPartitionsRevokedHandler(Func<IConsumer<TKey, TValue>, List<TopicPartitionOffset>, IEnumerable<TopicPartitionOffset>> partitionsRevokedHandler);
-
-        /// <summary>
-        /// This handler is called immediately prior to a group partition assignment being
-        /// revoked. The second parameter provides the set of partitions the consumer is
-        /// currently assigned to, and the current position of the consumer on each of these
-        /// partitions.
-        /// The return value of the handler specifies the partitions/offsets the consumer
-        /// should be assigned to following completion of this method (typically empty).
-        /// </summary>
-        /// <remarks>
-        /// May execute as a side-effect of the Consumer.Consume call (on the same thread).
-        /// Assign/Unassign must not be called in the handler.
-        /// Exceptions: Any exception thrown by your partitions revoked handler
-        /// will be wrapped in a ConsumeException with ErrorCode
-        /// ErrorCode.Local_Application and thrown by the initiating call to Consume.
-        /// </remarks>
-        void SetPartitionsRevokedHandler(Action<IConsumer<TKey, TValue>, List<TopicPartitionOffset>> partitionsRevokedHandler);
 
         /// <summary>
         /// A handler that is called to report the result of (automatic) offset
