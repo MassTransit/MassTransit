@@ -220,7 +220,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
             _publishTopology = new ServiceBusPublishTopology(AzureBusFactory.MessageTopology);
 
-            _builder = new PublishEndpointBrokerTopologyBuilder();
+            _builder = new PublishEndpointBrokerTopologyBuilder(_publishTopology);
         }
 
         ServiceBusMessageNameFormatter _nameFormatter;
@@ -307,7 +307,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(_nameFormatter);
             _publishTopology = new ServiceBusPublishTopology(AzureBusFactory.MessageTopology);
 
-            _builder = new PublishEndpointBrokerTopologyBuilder();
+            _builder = new PublishEndpointBrokerTopologyBuilder(_publishTopology);
         }
 
         ServiceBusMessageNameFormatter _nameFormatter;

@@ -58,8 +58,6 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
 
             _topologyConfiguration.Publish.TryGetPublishAddress(messageType, _hostConfiguration.HostAddress, out var address);
 
-            //            var address = new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, new Uri($"topic:{queueName}?temporary={isTemporary}"));
-
             var settings = new TopicSendSettings(new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, address));
             if (isTemporary)
             {

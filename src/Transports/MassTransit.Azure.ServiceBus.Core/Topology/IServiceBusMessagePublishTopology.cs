@@ -1,6 +1,7 @@
 namespace MassTransit.Azure.ServiceBus.Core.Topology
 {
     using Builders;
+    using Configurators;
     using MassTransit.Topology;
     using Microsoft.Azure.ServiceBus.Management;
     using Transport;
@@ -17,6 +18,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology
         TopicDescription TopicDescription { get; }
 
         SendSettings GetSendSettings();
+
+        SubscriptionConfigurator GetSubscriptionConfigurator(string subscriptionName);
     }
 
 

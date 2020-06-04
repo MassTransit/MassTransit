@@ -4,8 +4,6 @@
     using Configuration;
     using Configurators;
     using MassTransit.Topology.Topologies;
-    using Metadata;
-    using Transports;
 
 
     public class ServiceBusHostTopology :
@@ -14,16 +12,12 @@
     {
         readonly IServiceBusTopologyConfiguration _configuration;
         readonly IServiceBusHostConfiguration _hostConfiguration;
-        readonly IMessageNameFormatter _messageNameFormatter;
 
-        public ServiceBusHostTopology(IServiceBusHostConfiguration hostConfiguration, IServiceBusTopologyConfiguration configuration,
-            IMessageNameFormatter messageNameFormatter)
+        public ServiceBusHostTopology(IServiceBusHostConfiguration hostConfiguration, IServiceBusTopologyConfiguration configuration)
             : base(hostConfiguration, configuration)
         {
             _hostConfiguration = hostConfiguration;
             _configuration = configuration;
-
-            _messageNameFormatter = messageNameFormatter ?? new ServiceBusMessageNameFormatter(false);
         }
 
         IServiceBusPublishTopology IServiceBusHostTopology.PublishTopology => _configuration.Publish;
@@ -32,20 +26,6 @@
         public Uri GetDestinationAddress(string queueName, Action<IQueueConfigurator> configure = null)
         {
             var configurator = new QueueConfigurator(queueName);
-
-            configure?.Invoke(configurator);
-
-            return configurator.GetQueueAddress(_hostConfiguration.HostAddress);
-        }
-
-        public Uri GetDestinationAddress(Type messageType, Action<IQueueConfigurator> configure = null)
-        {
-            var queueName = _messageNameFormatter.GetMessageName(messageType).ToString();
-
-            var configurator = new QueueConfigurator(queueName);
-
-            if (TypeMetadataCache.IsTemporaryMessageType(messageType))
-                configurator.AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle;
 
             configure?.Invoke(configurator);
 

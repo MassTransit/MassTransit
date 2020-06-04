@@ -4,7 +4,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
-    using Configurators;
     using GreenPipes;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
@@ -49,7 +48,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
 
             var topicDescription = _publishTopology.TopicDescription;
 
-            var subscriptionConfigurator = new SubscriptionConfigurator(topicDescription.Path, subscriptionName);
+            var subscriptionConfigurator = _publishTopology.GetSubscriptionConfigurator(subscriptionName);
 
             configure?.Invoke(subscriptionConfigurator);
 

@@ -12,7 +12,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
         new IAmazonSqsSendTopology SendTopology { get; }
 
         /// <summary>
-        /// Returns the destination address for the specified exchange
+        /// Returns the destination address for the specified topic
         /// </summary>
         /// <param name="topicName"></param>
         /// <param name="configure">Callback to configure exchange settings</param>
@@ -20,7 +20,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
         Uri GetDestinationAddress(string topicName, Action<ITopicConfigurator> configure = null);
 
         /// <summary>
-        /// Returns the destination address for the specified message type
+        /// Returns the destination address for the topic identified by the message type
         /// </summary>
         /// <param name="messageType">The message type</param>
         /// <param name="configure">Callback to configure exchange settings</param>

@@ -38,10 +38,11 @@
                 return new QueueSendSettings(queueDescription);
             }
 
+
             var topicDescription = GetTopicDescription(address);
 
-            var builder = new PublishEndpointBrokerTopologyBuilder();
-            builder.Topic = builder.CreateTopic(topicDescription);
+            var builder = new BrokerTopologyBuilder();
+            builder.CreateTopic(topicDescription);
 
             return new TopicSendSettings(topicDescription, builder.BuildBrokerTopology());
         }

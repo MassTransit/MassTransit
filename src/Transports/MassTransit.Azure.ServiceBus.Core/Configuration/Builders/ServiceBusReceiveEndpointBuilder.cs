@@ -2,8 +2,6 @@
 {
     using System;
     using System.Linq;
-    using System.Security.Cryptography;
-    using System.Text;
     using Configuration;
     using Contexts;
     using GreenPipes;
@@ -11,7 +9,6 @@
     using Topology;
     using Topology.Builders;
     using Transport;
-    using Util;
 
 
     public class ServiceBusReceiveEndpointBuilder :
@@ -56,28 +53,9 @@
         string GenerateSubscriptionName()
         {
             var subscriptionName = _configuration.Settings.Name.Split(Separator, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+            var hostScope = _configuration.HostAddress.AbsolutePath.Split(Separator, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
 
-            var suffix = _configuration.HostAddress.AbsolutePath.Split(Separator, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
-            if (!string.IsNullOrWhiteSpace(suffix))
-                subscriptionName += $"-{suffix}";
-
-            string name;
-            if (subscriptionName.Length > 50)
-            {
-                string hashed;
-                using (var hasher = new SHA1Managed())
-                {
-                    byte[] buffer = Encoding.UTF8.GetBytes(subscriptionName);
-                    byte[] hash = hasher.ComputeHash(buffer);
-                    hashed = FormatUtil.Formatter.Format(hash).Substring(0, 6);
-                }
-
-                name = $"{subscriptionName.Substring(0, 43)}-{hashed}";
-            }
-            else
-                name = subscriptionName;
-
-            return name;
+            return _configuration.Topology.Publish.GenerateSubscriptionName(subscriptionName, hostScope);
         }
 
         BrokerTopology BuildTopology(ReceiveSettings settings)

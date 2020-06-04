@@ -2,14 +2,11 @@
 {
     using System;
     using Configuration;
-    using Util;
 
 
     public abstract class HostTopology :
         IHostTopology
     {
-        protected static readonly INewIdFormatter Formatter = FormatUtil.Formatter;
-
         readonly IHostConfiguration _hostConfiguration;
         readonly ITopologyConfiguration _topologyConfiguration;
 
@@ -21,6 +18,8 @@
 
         public IPublishTopology PublishTopology => _topologyConfiguration.Publish;
         public ISendTopology SendTopology => _topologyConfiguration.Send;
+
+        public Uri HostAddress => _hostConfiguration.HostAddress;
 
         public IMessagePublishTopology<T> Publish<T>()
             where T : class

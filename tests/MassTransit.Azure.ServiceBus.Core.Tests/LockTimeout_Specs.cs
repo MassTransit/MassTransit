@@ -11,7 +11,7 @@
     public class Renewing_a_lock_on_an_existing_message :
         AzureServiceBusTestFixture
     {
-        [Test]
+        [Test, Explicit]
         public async Task Should_complete_the_consumer()
         {
             var context = await PingConsumer.Completed.Task;

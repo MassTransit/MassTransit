@@ -38,7 +38,7 @@
             _topologyConfiguration = topologyConfiguration;
 
             _hostSettings = new HostSettings();
-            _hostTopology = new ServiceBusHostTopology(this, _topologyConfiguration, _messageNameFormatter);
+            _hostTopology = new ServiceBusHostTopology(this, _topologyConfiguration);
 
             _connectionContextSupervisor = new ServiceBusConnectionContextSupervisor(this, topologyConfiguration);
         }

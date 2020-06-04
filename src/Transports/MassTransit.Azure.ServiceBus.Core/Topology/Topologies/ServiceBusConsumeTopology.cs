@@ -52,6 +52,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
             if (string.IsNullOrWhiteSpace(subscriptionName))
                 throw new ArgumentException("Value cannot be null or whitespace.", nameof(subscriptionName));
 
+            subscriptionName = _publishTopology.FormatSubscriptionName(subscriptionName);
+
             var topicDescription = Defaults.CreateTopicDescription(topicName);
 
             var subscriptionConfigurator = new SubscriptionConfigurator(topicDescription.Path, subscriptionName);

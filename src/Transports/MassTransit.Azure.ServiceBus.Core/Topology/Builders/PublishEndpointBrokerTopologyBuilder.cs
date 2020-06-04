@@ -2,12 +2,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
 {
     using System;
     using System.Linq;
-    using System.Security.Cryptography;
-    using System.Text;
     using Entities;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Management;
-    using Util;
 
 
     public class PublishEndpointBrokerTopologyBuilder :
@@ -22,10 +19,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
         }
 
 
+        readonly IServiceBusPublishTopology _topology;
         readonly Options _options;
 
-        public PublishEndpointBrokerTopologyBuilder(Options options = Options.MaintainHierarchy)
+        public PublishEndpointBrokerTopologyBuilder(IServiceBusPublishTopology topology, Options options = Options.MaintainHierarchy)
         {
+            _topology = topology;
             _options = options;
         }
 
@@ -37,7 +36,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
         public IPublishEndpointBrokerTopologyBuilder CreateImplementedBuilder()
         {
             if (_options.HasFlag(Options.MaintainHierarchy))
-                return new ImplementedBuilder(this, _options);
+                return new ImplementedBuilder(this, _topology, _options);
 
             return this;
         }
@@ -47,12 +46,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
             IPublishEndpointBrokerTopologyBuilder
         {
             readonly IPublishEndpointBrokerTopologyBuilder _builder;
+            readonly IServiceBusPublishTopology _topology;
             readonly Options _options;
             TopicHandle _topic;
 
-            public ImplementedBuilder(IPublishEndpointBrokerTopologyBuilder builder, Options options)
+            public ImplementedBuilder(IPublishEndpointBrokerTopologyBuilder builder, IServiceBusPublishTopology topology, Options options)
             {
                 _builder = builder;
+                _topology = topology;
                 _options = options;
             }
 
@@ -66,7 +67,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
                     {
                         var subscriptionName = string.Join("-", value.Topic.TopicDescription.Path.Split('/').Reverse());
                         var subscriptionDescription = new SubscriptionDescription(_builder.Topic.Topic.TopicDescription.Path,
-                            GenerateSubscriptionName(subscriptionName)) {ForwardTo = value.Topic.TopicDescription.Path};
+                            _topology.FormatSubscriptionName(subscriptionName)) {ForwardTo = value.Topic.TopicDescription.Path};
 
                         _builder.CreateTopicSubscription(_builder.Topic, _topic, subscriptionDescription);
                     }
@@ -75,10 +76,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
 
             public IPublishEndpointBrokerTopologyBuilder CreateImplementedBuilder()
             {
-                if (_options.HasFlag(Options.MaintainHierarchy))
-                    return new ImplementedBuilder(this, _options);
-
-                return this;
+                return _options.HasFlag(Options.MaintainHierarchy) ? new ImplementedBuilder(this, _topology, _options) : this;
             }
 
             public TopicHandle CreateTopic(TopicDescription topicDescription)
@@ -107,27 +105,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
                 Filter filter)
             {
                 return _builder.CreateQueueSubscription(exchange, queue, subscriptionDescription, rule, filter);
-            }
-
-            string GenerateSubscriptionName(string subscriptionName)
-            {
-                string name;
-                if (subscriptionName.Length > 50)
-                {
-                    string hashed;
-                    using (var hasher = new SHA1Managed())
-                    {
-                        byte[] buffer = Encoding.UTF8.GetBytes(subscriptionName);
-                        byte[] hash = hasher.ComputeHash(buffer);
-                        hashed = FormatUtil.Formatter.Format(hash).Substring(0, 6);
-                    }
-
-                    name = $"{subscriptionName.Substring(0, 43)}-{hashed}";
-                }
-                else
-                    name = subscriptionName;
-
-                return name;
             }
         }
     }

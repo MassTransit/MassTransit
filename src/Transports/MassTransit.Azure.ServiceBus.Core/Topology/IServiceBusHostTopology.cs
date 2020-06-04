@@ -18,19 +18,11 @@
             where T : class;
 
         /// <summary>
-        /// Returns the destination address for the specified exchange
+        /// Returns the destination address for the specified queue
         /// </summary>
         /// <param name="queueName"></param>
         /// <param name="configure">Callback to configure queue settings</param>
         /// <returns></returns>
         Uri GetDestinationAddress(string queueName, Action<IQueueConfigurator> configure = null);
-
-        /// <summary>
-        /// Returns the destination address for the specified message type
-        /// </summary>
-        /// <param name="messageType">The message type</param>
-        /// <param name="configure">Callback to configure exchange settings</param>
-        /// <returns></returns>
-        Uri GetDestinationAddress(Type messageType, Action<IQueueConfigurator> configure = null);
     }
 }

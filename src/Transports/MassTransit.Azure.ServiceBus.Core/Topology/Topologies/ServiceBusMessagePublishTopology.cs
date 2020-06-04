@@ -19,12 +19,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
     {
         readonly IList<IServiceBusMessagePublishTopology> _implementedMessageTypes;
         readonly IMessageTopology<TMessage> _messageTopology;
+        readonly IServiceBusPublishTopology _publishTopology;
         readonly TopicConfigurator _topicConfigurator;
         readonly Lazy<TopicDescription> _topicDescription;
 
-        public ServiceBusMessagePublishTopology(IMessageTopology<TMessage> messageTopology)
+        public ServiceBusMessagePublishTopology(IMessageTopology<TMessage> messageTopology, IServiceBusPublishTopology publishTopology)
         {
             _messageTopology = messageTopology;
+            _publishTopology = publishTopology;
 
             _topicDescription = new Lazy<TopicDescription>(GetTopicDescription);
 
@@ -44,11 +46,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
         {
             var description = GetTopicDescription();
 
-            var builder = new PublishEndpointBrokerTopologyBuilder();
+            var builder = new PublishEndpointBrokerTopologyBuilder(_publishTopology);
 
             Apply(builder);
 
             return new TopicSendSettings(description, builder.BuildBrokerTopology());
+        }
+
+        public SubscriptionConfigurator GetSubscriptionConfigurator(string subscriptionName)
+        {
+            return new SubscriptionConfigurator(TopicDescription.Path, _publishTopology.FormatSubscriptionName(subscriptionName));
         }
 
         string IMessageEntityConfigurator.Path => _topicConfigurator.Path;
