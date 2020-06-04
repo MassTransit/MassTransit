@@ -6,7 +6,7 @@ Consumer sagas combined data and behavior in a single class. In the above exampl
 
 ```cs {16}
 public interface SubmitOrder :
-    ICorrelatedBy<Guid>
+    CorrelatedBy<Guid>
 {
     DateTime OrderDate { get; }
 }
@@ -31,7 +31,7 @@ To add the _OrderAccepted_ message to the saga, an additional interface and meth
 
 ```cs {19}
 public interface OrderAccepted :
-    ICorrelatedBy<Guid>
+    CorrelatedBy<Guid>
 {
     DateTime Timestamp { get; }
 }
