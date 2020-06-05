@@ -68,8 +68,7 @@
         {
             if (context.TryGetExceptionContext(out ConsumeExceptionEventContext<TInstance, TException> exceptionContext))
             {
-                if (!exceptionContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
-                    throw new ContextException("The scheduler context could not be retrieved.");
+                var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
                 var message = _messageFactory?.Invoke(exceptionContext) ?? await _asyncMessageFactory(exceptionContext).ConfigureAwait(false);
 
@@ -91,8 +90,7 @@
         {
             if (context.TryGetExceptionContext(out ConsumeExceptionEventContext<TInstance, TException> exceptionContext))
             {
-                if (!exceptionContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
-                    throw new ContextException("The scheduler context could not be retrieved.");
+                var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
                 var message = _messageFactory?.Invoke(exceptionContext) ?? await _asyncMessageFactory(exceptionContext).ConfigureAwait(false);
 
@@ -169,8 +167,7 @@
         {
             if (context.TryGetExceptionContext(out ConsumeExceptionEventContext<TInstance, TData, TException> exceptionContext))
             {
-                if (!exceptionContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
-                    throw new ContextException("The scheduler context could not be retrieved.");
+                var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
                 var message = _messageFactory?.Invoke(exceptionContext) ?? await _asyncMessageFactory(exceptionContext).ConfigureAwait(false);
 

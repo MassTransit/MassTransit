@@ -78,8 +78,7 @@
         {
             ConsumeEventContext<TInstance> consumeContext = context.CreateConsumeContext();
 
-            if (!consumeContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
-                throw new ContextException("The scheduler context could not be retrieved.");
+            var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
             var message = _messageFactory?.Invoke(consumeContext) ?? await _asyncMessageFactory(consumeContext).ConfigureAwait(false);
 
@@ -145,8 +144,7 @@
         {
             ConsumeEventContext<TInstance, TData> consumeContext = context.CreateConsumeContext();
 
-            if (!consumeContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
-                throw new ContextException("The scheduler context could not be retrieved.");
+            var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
             var message = _messageFactory?.Invoke(consumeContext) ?? await _asyncMessageFactory(consumeContext).ConfigureAwait(false);
 

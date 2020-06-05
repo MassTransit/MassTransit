@@ -53,11 +53,9 @@
 
         async Task Faulted(BehaviorContext<TInstance> context)
         {
-            if (!context.TryGetPayload(out ConsumeContext consumeContext))
-                throw new ContextException("The consume context could not be retrieved.");
+            var consumeContext = context.GetPayload<ConsumeContext>();
 
-            if (!consumeContext.TryGetPayload(out MessageSchedulerContext schedulerContext))
-                throw new ContextException("The scheduler context could not be retrieved.");
+            var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
             Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)

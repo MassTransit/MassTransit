@@ -96,8 +96,7 @@
 
                     try
                     {
-                        if (!context.TryGetPayload(out MessageRedeliveryContext redeliveryContext))
-                            throw new ContextException("The message redelivery context was not available to delay the message", exception);
+                        var redeliveryContext = context.GetPayload<MessageRedeliveryContext>();
 
                         var delay = retryContext.Delay ?? TimeSpan.Zero;
 
@@ -108,7 +107,8 @@
                     }
                     catch (Exception redeliveryException)
                     {
-                        throw new ContextException("The message delivery could not be rescheduled", new AggregateException(redeliveryException, exception));
+                        throw new TransportException(context.ReceiveContext.InputAddress, "The message delivery could not be rescheduled",
+                            new AggregateException(redeliveryException, exception));
                     }
                 }
             }

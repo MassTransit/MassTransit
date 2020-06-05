@@ -2,6 +2,7 @@
 {
     using System;
     using Contexts;
+    using GreenPipes;
     using MassTransit;
 
 
@@ -10,16 +11,14 @@
         public static ConsumeEventContext<TInstance, TData> CreateConsumeContext<TInstance, TData>(this BehaviorContext<TInstance, TData> context)
             where TData : class
         {
-            if (!context.TryGetPayload(out ConsumeContext<TData> consumeContext))
-                throw new ArgumentException("The ConsumeContext was not available");
+            var consumeContext = context.GetPayload<ConsumeContext<TData>>();
 
             return new AutomatonymousConsumeEventContext<TInstance, TData>(context, consumeContext);
         }
 
         public static ConsumeEventContext<TInstance> CreateConsumeContext<TInstance>(this BehaviorContext<TInstance> context)
         {
-            if (!context.TryGetPayload(out ConsumeContext consumeContext))
-                throw new ArgumentException("The ConsumeContext was not available");
+            var consumeContext = context.GetPayload<ConsumeContext>();
 
             return new AutomatonymousConsumeEventContext<TInstance>(context, consumeContext);
         }
@@ -30,8 +29,7 @@
         {
             if (context is BehaviorExceptionContext<TInstance, TException> behaviorExceptionContext)
             {
-                if (!context.TryGetPayload(out ConsumeContext consumeContext))
-                    throw new ContextException("The consume context could not be retrieved.");
+                var consumeContext = context.GetPayload<ConsumeContext>();
 
                 exceptionContext = new AutomatonymousConsumeExceptionEventContext<TInstance, TException>(behaviorExceptionContext, consumeContext);
                 return true;
@@ -48,8 +46,7 @@
         {
             if (context is BehaviorExceptionContext<TInstance, TData, TException> behaviorExceptionContext)
             {
-                if (!context.TryGetPayload(out ConsumeContext<TData> consumeContext))
-                    throw new ContextException("The consume context could not be retrieved.");
+                var consumeContext = context.GetPayload<ConsumeContext<TData>>();
 
                 exceptionContext = new AutomatonymousConsumeExceptionEventContext<TInstance, TData, TException>(behaviorExceptionContext, consumeContext);
                 return true;
