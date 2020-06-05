@@ -2,9 +2,13 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using Context;
     using Courier;
+    using Metadata;
+    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
+    using Serialization;
 
 
     /// <summary>
@@ -71,6 +75,11 @@
             var token = value as JToken ?? new JValue(value);
             if (token.Type == JTokenType.Null && allowNull)
                 return null;
+
+            if (token.Type == JTokenType.String && objectType.IsInterface && TypeMetadataCache.IsValidMessageType(objectType))
+            {
+                return JsonConvert.DeserializeObject((string)value, objectType, JsonMessageSerializer.DeserializerSettings);
+            }
 
             using var jsonReader = new JTokenReader(token);
 

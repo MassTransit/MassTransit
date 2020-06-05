@@ -2,6 +2,7 @@ namespace MassTransit
 {
     using EventHubIntegration.Transport;
     using GreenPipes;
+    using Pipeline.Observables;
     using Registration;
     using Riders;
 

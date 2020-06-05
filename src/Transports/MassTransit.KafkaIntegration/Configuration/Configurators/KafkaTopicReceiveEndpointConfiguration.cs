@@ -3,21 +3,19 @@ namespace MassTransit.KafkaIntegration.Configurators
     using System;
     using System.Collections.Generic;
     using Configuration;
-    using Configuration.Configurators;
     using Confluent.Kafka;
     using Context;
     using Contexts;
     using GreenPipes;
-    using MassTransit.Configuration;
     using MassTransit.Registration;
     using Riders;
     using Serializers;
     using Transport;
 
 
-    public class KafkaTopicConfigurator<TKey, TValue> :
+    public class KafkaTopicReceiveEndpointConfiguration<TKey, TValue> :
         ReceiverConfiguration,
-        IKafkaTopicConfigurator<TKey, TValue>
+        IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>
         where TValue : class
     {
         readonly IBusInstance _busInstance;
@@ -32,7 +30,7 @@ namespace MassTransit.KafkaIntegration.Configurators
         Action<IConsumer<TKey, TValue>, CommittedOffsets> _offsetsCommittedHandler;
         IDeserializer<TValue> _valueDeserializer;
 
-        public KafkaTopicConfigurator(ConsumerConfig consumerConfig, string topic, IBusInstance busInstance,
+        public KafkaTopicReceiveEndpointConfiguration(ConsumerConfig consumerConfig, string topic, IBusInstance busInstance,
             IReceiveEndpointConfiguration endpointConfiguration, IHeadersDeserializer headersDeserializer)
             : base(endpointConfiguration)
         {
@@ -158,6 +156,7 @@ namespace MassTransit.KafkaIntegration.Configurators
         {
             if (_offsetsCommittedHandler != null)
                 throw new InvalidOperationException("Offset committed handler may not be specified more than once.");
+
             _offsetsCommittedHandler = offsetsCommittedHandler ?? throw new ArgumentNullException(nameof(offsetsCommittedHandler));
         }
 
@@ -186,10 +185,10 @@ namespace MassTransit.KafkaIntegration.Configurators
 
 
             ConsumerBuilder<TKey, TValue> consumerBuilder = CreateConsumerBuilder(context);
-            var receiver = new KafkaReceiveTransport<TKey, TValue>(context, _headersDeserializer);
+            var lockContext = new ConsumerLockContext<TKey, TValue>(consumerBuilder, context.LogContext, _checkpointInterval, _checkpointMessageCount);
 
-            IConsumerLockContext<TKey, TValue> lockContext =
-                new ConsumerLockContext<TKey, TValue>(consumerBuilder, context.LogContext, _checkpointInterval, _checkpointMessageCount);
+            var receiver = new KafkaMessageReceiver<TKey, TValue>(context, lockContext, _headersDeserializer);
+
             context.AddOrUpdatePayload(() => lockContext, _ => lockContext);
 
             return new KafkaReceiveEndpoint<TKey, TValue>(_topic, Math.Max(1000, _checkpointMessageCount / 10), _concurrencyLimit, consumerBuilder.Build(),
@@ -202,7 +201,7 @@ namespace MassTransit.KafkaIntegration.Configurators
                 .SetValueDeserializer(_valueDeserializer)
                 .SetLogHandler((c, message) => context.LogContext.Info?.Log(message.Message))
                 .SetStatisticsHandler((c, value) => context.LogContext.Debug?.Log(value))
-                .SetErrorHandler((c, error) => context.LogContext.Error?.Log("Consumer error ({code}): {reason} on {topic}", error.Code, error.Reason, _topic));
+                .SetErrorHandler((c, error) => context.LogContext.Error?.Log("Consumer error ({Code}): {Reason} on {Topic}", error.Code, error.Reason, _topic));
 
             if (_keyDeserializer != null)
                 consumerBuilder.SetKeyDeserializer(_keyDeserializer);

@@ -1,50 +1,11 @@
 namespace MassTransit.KafkaIntegration
 {
     using System;
-    using Configuration;
     using Confluent.Kafka;
 
 
     public static class KafkaConfiguratorExtensions
     {
-        /// <summary>
-        /// Subscribe to kafka topic
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="topic">Topic name</param>
-        /// <param name="groupId">
-        /// Client group id string. All clients sharing the same group.id belong to the same group.
-        /// </param>
-        /// <param name="configure"></param>
-        /// <typeparam name="TKey">Message key type</typeparam>
-        /// <typeparam name="TValue">Value key type</typeparam>
-        public static void Topic<TKey, TValue>(this IKafkaFactoryConfigurator configurator, string topic, string groupId,
-            Action<IKafkaTopicConfigurator<TKey, TValue>> configure)
-            where TValue : class
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-            configurator.Topic(new ConstantTopicNameFormatter(topic), groupId, configure);
-        }
-
-        /// <summary>
-        /// Subscribe to kafka topic
-        /// </summary>
-        /// <param name="configurator"></param>
-        /// <param name="topic">Topic name</param>
-        /// <param name="consumerConfig">Consumer config</param>
-        /// <param name="configure"></param>
-        /// <typeparam name="TKey">Message key type</typeparam>
-        /// <typeparam name="TValue">Value key type</typeparam>
-        public static void Topic<TKey, TValue>(this IKafkaFactoryConfigurator configurator, string topic, ConsumerConfig consumerConfig,
-            Action<IKafkaTopicConfigurator<TKey, TValue>> configure)
-            where TValue : class
-        {
-            if (configurator == null)
-                throw new ArgumentNullException(nameof(configurator));
-            configurator.Topic(new ConstantTopicNameFormatter(topic), consumerConfig, configure);
-        }
-
         /// <summary>
         /// Configure Kafka host
         /// </summary>
@@ -58,22 +19,66 @@ namespace MassTransit.KafkaIntegration
             configurator.Host(new[] {server}, configure);
         }
 
-
-        class ConstantTopicNameFormatter :
-            ITopicNameFormatter
+        /// <summary>
+        /// Subscribe to kafka topic
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="topicName">The topic name</param>
+        /// <param name="groupId">
+        /// Client group id string. All clients sharing the same group.id belong to the same group.
+        /// </param>
+        /// <param name="configure"></param>
+        /// <typeparam name="T">Message value type</typeparam>
+        public static void TopicEndpoint<T>(this IKafkaFactoryConfigurator configurator, string topicName, string groupId,
+            Action<IKafkaTopicReceiveEndpointConfigurator<Ignore, T>> configure)
+            where T : class
         {
-            readonly string _topic;
+            configurator.TopicEndpoint(topicName, groupId, configure);
+        }
 
-            public ConstantTopicNameFormatter(string topic)
-            {
-                _topic = topic;
-            }
+        /// <summary>
+        /// Subscribe to kafka topic
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="topicName">The topic name</param>
+        /// <param name="consumerConfig">Consumer config</param>
+        /// <param name="configure"></param>
+        /// <typeparam name="T">Message value type</typeparam>
+        public static void TopicEndpoint<T>(this IKafkaFactoryConfigurator configurator, string topicName, ConsumerConfig consumerConfig,
+            Action<IKafkaTopicReceiveEndpointConfigurator<Ignore, T>> configure)
+            where T : class
+        {
+            configurator.TopicEndpoint(topicName, consumerConfig, configure);
+        }
 
-            public string GetTopicName<TKey, TValue>()
-                where TValue : class
-            {
-                return _topic;
-            }
+        /// <summary>
+        /// Configure kafka topic producer
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="topicName">The topic name</param>
+        /// <param name="configure"></param>
+        /// <typeparam name="T">Value key type</typeparam>
+        public static void TopicProducer<T>(this IKafkaFactoryConfigurator configurator, string topicName,
+            Action<IKafkaProducerConfigurator<Null, T>> configure)
+            where T : class
+        {
+            configurator.TopicProducer(topicName, configure);
+        }
+
+        /// <summary>
+        /// Configure kafka topic producer
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="topicName">The topic name</param>
+        /// <param name="producerConfig">Producer config</param>
+        /// <param name="configure"></param>
+        /// <typeparam name="TKey">Message key type</typeparam>
+        /// <typeparam name="TValue">Value key type</typeparam>
+        public static void TopicProducer<TKey, TValue>(this IKafkaFactoryConfigurator configurator, string topicName, ProducerConfig producerConfig,
+            Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
+            where TValue : class
+        {
+            configurator.TopicProducer(topicName, producerConfig, configure);
         }
     }
 }

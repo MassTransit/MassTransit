@@ -14,6 +14,9 @@ namespace MassTransit.Registration
         IBusControl BusControl { get; }
 
         IHostConfiguration HostConfiguration { get; }
+
+        TRider GetRider<TRider>()
+            where TRider : IRider;
     }
 
 

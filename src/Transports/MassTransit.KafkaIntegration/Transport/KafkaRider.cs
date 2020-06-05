@@ -1,38 +1,75 @@
 namespace MassTransit.KafkaIntegration.Transport
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Confluent.Kafka;
+    using Pipeline.Observables;
     using Riders;
     using Util;
 
 
     public class KafkaRider :
-        BaseRider
+        BaseRider,
+        IKafkaRider
     {
-        readonly IEnumerable<IKafkaReceiveEndpoint> _endpoints;
+        readonly IKafkaReceiveEndpoint[] _endpoints;
+        readonly Uri _hostAddress;
+        readonly Dictionary<string, IKafkaProducerFactory> _producerFactories;
 
-        public KafkaRider(IEnumerable<IKafkaReceiveEndpoint> endpoints, RiderObservable observers)
+        public KafkaRider(Uri hostAddress, IEnumerable<IKafkaReceiveEndpoint> endpoints, IEnumerable<IKafkaProducerFactory> producerFactories,
+            RiderObservable observers)
             : base("confluent.kafka", observers)
         {
-            _endpoints = endpoints;
+            _hostAddress = hostAddress;
+            _endpoints = endpoints?.ToArray() ?? Array.Empty<IKafkaReceiveEndpoint>();
+            _producerFactories = producerFactories.ToDictionary(x => x.TopicName);
         }
 
-        protected override Task BaseStart(CancellationToken cancellationToken)
+        public IKafkaProducer<TKey, TValue> GetProducer<TKey, TValue>(Uri address, ConsumeContext consumeContext)
+            where TValue : class
         {
-            if (_endpoints == null || !_endpoints.Any())
-                return TaskUtil.Completed;
+            if (address == null)
+                throw new ArgumentNullException(nameof(address));
 
-            return Task.WhenAll(_endpoints.Select(endpoint => endpoint.Connect(cancellationToken)));
+            var topicAddress = new KafkaTopicAddress(_hostAddress, address);
+
+            KafkaProducerFactory<TKey, TValue> factory = GetProducerFactory<TKey, TValue>(topicAddress.Topic);
+
+            return factory.CreateProducer(topicAddress, consumeContext);
         }
 
-        protected override Task BaseStop(CancellationToken cancellationToken)
+        KafkaProducerFactory<TKey, TValue> GetProducerFactory<TKey, TValue>(string topic)
+            where TValue : class
         {
-            if (_endpoints == null || !_endpoints.Any())
+            if (!_producerFactories.TryGetValue(topic, out var factory))
+                throw new ConfigurationException($"Producer for topic: {topic} is not configured.");
+
+            if (factory is KafkaProducerFactory<TKey, TValue> producerFactory)
+                return producerFactory;
+
+            throw new ConfigurationException($"Producer for topic: {topic} is not configured for ${typeof(Message<TKey, TValue>).Name} message");
+        }
+
+        protected override Task StartRider(CancellationToken cancellationToken)
+        {
+            if (!_endpoints.Any())
                 return TaskUtil.Completed;
 
-            return Task.WhenAll(_endpoints.Select(endpoint => endpoint.Disconnect(cancellationToken)));
+            return Task.WhenAll(_endpoints.Select(endpoint => endpoint.Start(cancellationToken)));
+        }
+
+        protected override async Task StopRider(CancellationToken cancellationToken)
+        {
+            if (_endpoints.Any())
+                await Task.WhenAll(_endpoints.Select(endpoint => endpoint.Stop())).ConfigureAwait(false);
+
+            foreach (var factory in _producerFactories.Values)
+            {
+                factory.Dispose();
+            }
         }
     }
 }

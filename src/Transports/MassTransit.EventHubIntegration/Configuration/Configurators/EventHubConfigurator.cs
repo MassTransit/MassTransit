@@ -102,7 +102,7 @@ namespace MassTransit.EventHubIntegration.Configurators
             var context = CreateContext();
             var blobClient = CreateBlobClient();
             var processor = CreateEventProcessorClient(blobClient);
-            var transport = new EventHubReceiveTransport(context);
+            var transport = new EventHubDataReceiver(context);
 
             IProcessorLockContext lockContext = new ProcessorLockContext(processor, context.LogContext, _checkpointInterval, _checkpointMessageCount);
             context.AddOrUpdatePayload(() => lockContext, _ => lockContext);

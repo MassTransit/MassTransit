@@ -21,11 +21,11 @@ namespace MassTransit.EventHubIntegration.Transport
         readonly ChannelExecutor _executor;
         readonly EventProcessorClient _processor;
         readonly TaskCompletionSource<ReceiveEndpointReady> _started;
-        readonly IEventHubReceiveTransport _transport;
+        readonly IEventHubDataReceiver _transport;
         CancellationTokenSource _cancellationTokenSource;
 
         public EventHubReceiveEndpoint(EventProcessorClient processor, int prefetch, int concurrencyLimit, BlobContainerClient blobContainerClient,
-            IEventHubReceiveTransport transport, ReceiveEndpointContext context)
+            IEventHubDataReceiver transport, ReceiveEndpointContext context)
         {
             _processor = processor;
             _blobContainerClient = blobContainerClient;

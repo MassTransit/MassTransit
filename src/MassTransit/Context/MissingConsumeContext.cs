@@ -10,6 +10,8 @@ namespace MassTransit.Context
     public class MissingConsumeContext :
         ConsumeContext
     {
+        public static ConsumeContext Instance { get; } = new MissingConsumeContext();
+
         bool PipeContext.HasPayloadType(Type payloadType)
         {
             throw new ConsumeContextNotAvailableException();

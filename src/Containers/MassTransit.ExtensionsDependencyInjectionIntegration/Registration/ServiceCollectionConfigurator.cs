@@ -61,7 +61,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         public virtual void AddRider(Action<IRiderConfigurator<IServiceProvider>> configure)
         {
-            var configurator = new ServiceCollectionRiderConfigurator(Collection);
+            var configurator = new ServiceCollectionRiderConfigurator(Collection, Registrar);
             configure?.Invoke(configurator);
         }
 
@@ -80,13 +80,13 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             collection.TryAddSingleton<IBusDepot, BusDepot>();
 
             collection.TryAddScoped<ScopedConsumeContextProvider>();
-            collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext());
+            collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext() ?? MissingConsumeContext.Instance);
 
             collection.TryAddScoped(GetCurrentSendEndpointProvider);
             collection.TryAddScoped(GetCurrentPublishEndpoint);
 
             collection.TryAddSingleton<IConsumerScopeProvider>(provider => new DependencyInjectionConsumerScopeProvider(provider));
-            collection.TryAddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
+            collection.TryAddTransient<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IServiceProvider provider)

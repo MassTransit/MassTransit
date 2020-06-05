@@ -4,15 +4,15 @@ namespace MassTransit.EventHubIntegration.Specifications
     using System.Linq;
     using GreenPipes;
     using MassTransit.Registration;
-    using Riders;
+    using Pipeline.Observables;
     using Transport;
 
 
     public class EventHubBusInstanceSpecification :
         IBusInstanceSpecification
     {
-        readonly IEnumerable<IEventHubSpecification> _specifications;
         readonly RiderObservable _observer;
+        readonly IEnumerable<IEventHubSpecification> _specifications;
 
         public EventHubBusInstanceSpecification(IEnumerable<IEventHubSpecification> specifications, RiderObservable observer)
         {

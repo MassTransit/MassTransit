@@ -1,12 +1,11 @@
 ﻿namespace MassTransit.KafkaIntegration
 {
     using System;
-    using Configuration;
     using Confluent.Kafka;
     using Serializers;
 
 
-    public interface IKafkaTopicConfigurator :
+    public interface IKafkaTopicReceiveEndpointConfigurator :
         IReceiveEndpointConfigurator
     {
         /// <summary>
@@ -138,8 +137,8 @@
     }
 
 
-    public interface IKafkaTopicConfigurator<TKey, TValue> :
-        IKafkaTopicConfigurator
+    public interface IKafkaTopicReceiveEndpointConfigurator<TKey, TValue> :
+        IKafkaTopicReceiveEndpointConfigurator
         where TValue : class
     {
         /// <summary>Set the deserializer to use to deserialize keys.</summary>

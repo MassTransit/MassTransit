@@ -34,7 +34,7 @@ namespace MassTransit.KafkaIntegration.Tests
                     rider.UsingKafka((context, k) =>
                     {
                         k.Host("localhost:9092");
-                        k.Topic<Null, Ignore>("test", nameof(HealthCheck_Specs), c =>
+                        k.TopicEndpoint<Null, Ignore>("test", nameof(HealthCheck_Specs), c =>
                         {
                         });
 

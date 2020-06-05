@@ -7,7 +7,6 @@ namespace MassTransit
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
     using ConsumeConfigurators;
-    using Context;
     using Courier;
     using Saga;
     using Scoping;
@@ -290,7 +289,7 @@ namespace MassTransit
             {
                 container.Register(Component.For<ScopedConsumeContextProvider>().LifestyleScoped(),
                     Component.For<ConsumeContext>()
-                        .UsingFactoryMethod(kernel => kernel.Resolve<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext())
+                        .UsingFactoryMethod(kernel => kernel.Resolve<ScopedConsumeContextProvider>().GetContext())
                         .LifestyleScoped());
             }
         }

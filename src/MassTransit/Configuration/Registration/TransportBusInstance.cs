@@ -29,6 +29,15 @@ namespace MassTransit.Registration
 
         public IHostConfiguration HostConfiguration { get; }
 
+        public TRider GetRider<TRider>()
+            where TRider : IRider
+        {
+            var rider = _riders.Get<TRider>();
+            if (rider == null)
+                throw new ConfigurationException($"Rider: {typeof(TRider).Name} is not registered.");
+            return rider;
+        }
+
         public ConnectHandle ConnectRider(IRider rider)
         {
             return _riders.Connect(rider);

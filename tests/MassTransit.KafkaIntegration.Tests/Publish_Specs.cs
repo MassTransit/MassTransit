@@ -4,6 +4,7 @@ namespace MassTransit.KafkaIntegration.Tests
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Confluent.Kafka;
+    using Context;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
@@ -43,7 +44,7 @@ namespace MassTransit.KafkaIntegration.Tests
                     {
                         k.Host("localhost:9092");
 
-                        k.Topic<Null, KafkaMessage>(Topic, nameof(Receive_Specs), c =>
+                        k.TopicEndpoint<Null, KafkaMessage>(Topic, nameof(Receive_Specs), c =>
                         {
                             c.AutoOffsetReset = AutoOffsetReset.Earliest;
                             c.ConfigureConsumer<KafkaMessageConsumer>(context);
@@ -66,15 +67,15 @@ namespace MassTransit.KafkaIntegration.Tests
                     .SetValueSerializer(new MassTransitSerializer<KafkaMessage>())
                     .Build();
 
-                var messageId = NewId.NextGuid();
+                var kafkaMessage = new KafkaMessageClass("test");
+                var sendContext = new MessageSendContext<KafkaMessage>(kafkaMessage);
                 var message = new Message<Null, KafkaMessage>
                 {
-                    Value = new KafkaMessageClass("test"),
-                    Headers = DictionaryHeadersSerialize.Serializer.Serialize(new Dictionary<string, object> {[MessageHeaders.MessageId] = messageId})
+                    Value = kafkaMessage,
+                    Headers = DictionaryHeadersSerialize.Serializer.Serialize(sendContext)
                 };
 
                 await p.ProduceAsync(Topic, message);
-                p.Flush();
 
                 ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
                 ConsumeContext<BusPing> ping = await pingTaskCompletionSource.Task;

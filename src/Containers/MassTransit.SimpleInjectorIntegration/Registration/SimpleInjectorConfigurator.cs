@@ -112,7 +112,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             container.Register(GetPublishEndpoint, _hybridLifestyle);
 
             container.RegisterSingleton<IConsumerScopeProvider>(() => new SimpleInjectorConsumerScopeProvider(container));
-            container.RegisterSingleton<IConfigurationServiceProvider>(() => new SimpleInjectorConfigurationServiceProvider(container));
+            container.Register<IConfigurationServiceProvider>(() => new SimpleInjectorConfigurationServiceProvider(container));
         }
     }
 }

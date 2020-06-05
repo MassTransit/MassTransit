@@ -52,7 +52,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
 
         public override void AddRider(Action<IRiderConfigurator<IServiceProvider>> configure)
         {
-            var configurator = new ServiceCollectionRiderConfigurator<TBus>(Collection);
+            var configurator = new ServiceCollectionRiderConfigurator<TBus>(Collection, Registrar);
             configure?.Invoke(configurator);
         }
 

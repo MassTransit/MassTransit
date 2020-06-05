@@ -22,6 +22,13 @@ namespace MassTransit.Registration
         public IBus Bus => BusInstance;
         public IBusControl BusControl => _instance.BusControl;
         public IHostConfiguration HostConfiguration => _instance.HostConfiguration;
+
+        public TRider GetRider<TRider>()
+            where TRider : IRider
+        {
+            return _instance.GetRider<TRider>();
+        }
+
         public TBus BusInstance { get; }
 
         public ConnectHandle ConnectRider(IRider rider)

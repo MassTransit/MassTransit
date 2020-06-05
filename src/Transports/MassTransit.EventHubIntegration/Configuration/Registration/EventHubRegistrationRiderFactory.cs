@@ -3,10 +3,11 @@ namespace MassTransit.EventHubIntegration.Registration
     using System;
     using Configurators;
     using MassTransit.Registration;
+    using Transport;
 
 
     public class EventHubRegistrationRiderFactory<TContainerContext> :
-        IRegistrationRiderFactory<TContainerContext>
+        RegistrationRiderFactory<TContainerContext, IEventHubRider>
         where TContainerContext : class
     {
         readonly Action<IRiderRegistrationContext<TContainerContext>, IEventHubFactoryConfigurator> _configure;
@@ -16,15 +17,15 @@ namespace MassTransit.EventHubIntegration.Registration
             _configure = configure;
         }
 
-        public IBusInstanceSpecification CreateRider(IRiderRegistrationContext<TContainerContext> context)
+        public override IBusInstanceSpecification CreateRider(IRiderRegistrationContext<TContainerContext> context)
         {
-            var factoryConfigurator = new EventHubFactoryConfigurator();
+            var configurator = new EventHubFactoryConfigurator();
 
-            context.UseHealthCheck(factoryConfigurator);
+            ConfigureRider(configurator, context);
 
-            _configure?.Invoke(context, factoryConfigurator);
+            _configure?.Invoke(context, configurator);
 
-            return factoryConfigurator.Build();
+            return configurator.Build();
         }
     }
 }

@@ -4,6 +4,7 @@ namespace MassTransit.Riders
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using Pipeline.Observables;
 
 
     public abstract class BaseRider :
@@ -29,16 +30,18 @@ namespace MassTransit.Riders
         public async Task Start(CancellationToken cancellationToken)
         {
             LogContext.Current.Info?.Log("Starting rider: {Name}", _name);
+
             await _observers.PreStart(this).ConfigureAwait(false);
 
             try
             {
-                await BaseStart(cancellationToken).ConfigureAwait(false);
+                await StartRider(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
                 LogContext.Current.Error?.Log(exception, "Rider start failed: {Name}", _name);
-                await _observers.StartFaulted(exception);
+
+                await _observers.StartFaulted(exception).ConfigureAwait(false);
                 throw;
             }
 
@@ -48,23 +51,25 @@ namespace MassTransit.Riders
         public async Task Stop(CancellationToken cancellationToken)
         {
             LogContext.Current.Info?.Log("Stopping rider: {Name}", _name);
+
             await _observers.PreStop(this).ConfigureAwait(false);
 
             try
             {
-                await BaseStop(cancellationToken).ConfigureAwait(false);
+                await StopRider(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
                 LogContext.Current.Error?.Log(exception, "Rider stop failed: {Name}", _name);
-                await _observers.StopFaulted(exception);
+
+                await _observers.StopFaulted(exception).ConfigureAwait(false);
                 throw;
             }
 
             await _observers.PostStop(this);
         }
 
-        protected abstract Task BaseStart(CancellationToken cancellationToken);
-        protected abstract Task BaseStop(CancellationToken cancellationToken);
+        protected abstract Task StartRider(CancellationToken cancellationToken);
+        protected abstract Task StopRider(CancellationToken cancellationToken);
     }
 }

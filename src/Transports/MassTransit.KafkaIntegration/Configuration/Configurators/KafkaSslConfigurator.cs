@@ -1,4 +1,4 @@
-namespace MassTransit.KafkaIntegration.Configuration.Configurators
+namespace MassTransit.KafkaIntegration.Configurators
 {
     using Confluent.Kafka;
 

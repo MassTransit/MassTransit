@@ -1,7 +1,6 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 {
     using System;
-    using Context;
     using MassTransit.Registration;
     using Mediator;
     using Microsoft.Extensions.DependencyInjection;
@@ -39,9 +38,9 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         static void AddMassTransitComponents(IServiceCollection collection)
         {
             collection.TryAddScoped<ScopedConsumeContextProvider>();
-            collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext());
+            collection.TryAddScoped(provider => provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext());
             collection.TryAddSingleton<IConsumerScopeProvider>(provider => new DependencyInjectionConsumerScopeProvider(provider));
-            collection.TryAddSingleton<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
+            collection.TryAddTransient<IConfigurationServiceProvider>(provider => new DependencyInjectionConfigurationServiceProvider(provider));
         }
 
         IMediator MediatorFactory(IServiceProvider serviceProvider)

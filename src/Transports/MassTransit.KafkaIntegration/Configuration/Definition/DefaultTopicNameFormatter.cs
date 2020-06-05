@@ -1,21 +1,21 @@
-namespace MassTransit.KafkaIntegration.Configuration.Definition
+namespace MassTransit.KafkaIntegration.Definition
 {
     using System;
+    using Topology;
 
 
     public class DefaultTopicNameFormatter :
-        ITopicNameFormatter
+        IEntityNameFormatter
     {
         protected DefaultTopicNameFormatter()
         {
         }
 
-        public static ITopicNameFormatter Instance { get; } = new DefaultTopicNameFormatter();
+        public static IEntityNameFormatter Instance { get; } = new DefaultTopicNameFormatter();
 
-        public string GetTopicName<TKey, TValue>()
-            where TValue : class
+        public string FormatEntityName<T>()
         {
-            return GetMessageName(typeof(TValue));
+            return GetMessageName(typeof(T));
         }
 
         protected virtual string SanitizeName(string name)

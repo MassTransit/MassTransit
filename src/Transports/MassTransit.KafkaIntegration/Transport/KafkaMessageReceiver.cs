@@ -1,66 +1,40 @@
-﻿namespace MassTransit.EventHubIntegration.Transport
+﻿namespace MassTransit.KafkaIntegration.Transport
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Azure.Messaging.EventHubs.Processor;
+    using Confluent.Kafka;
     using Context;
     using Contexts;
     using GreenPipes;
+    using Metadata;
     using Pipeline;
+    using Serializers;
     using Transports;
     using Transports.Metrics;
-    using Util;
 
 
-    public class EventHubReceiveTransport :
-        IEventHubReceiveTransport
+    public class KafkaMessageReceiver<TKey, TValue> :
+        IKafkaMessageReceiver<TKey, TValue>
+        where TValue : class
     {
         readonly ReceiveEndpointContext _context;
         readonly IReceivePipeDispatcher _dispatcher;
+        readonly IHeadersDeserializer _headersDeserializer;
+        readonly IConsumerLockContext<TKey, TValue> _lockContext;
 
-        public EventHubReceiveTransport(ReceiveEndpointContext context)
+        public KafkaMessageReceiver(ReceiveEndpointContext context, IConsumerLockContext<TKey, TValue> lockContext, IHeadersDeserializer headersDeserializer)
         {
             _context = context;
+            _lockContext = lockContext;
+            _headersDeserializer = headersDeserializer;
             _dispatcher = context.CreateReceivePipeDispatcher();
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("receiver");
-            scope.Add("type", "event-data");
-        }
-
-        public ReceiveTransportHandle Start()
-        {
-            return new ReceiverHandle();
-        }
-
-        public async Task Handle(ProcessEventArgs @event, CancellationToken cancellationToken, Action<ReceiveContext> contextCallback = null)
-        {
-            if (!@event.HasEvent)
-                return;
-
-            var context = new EventDataReceiveContext(@event.Data, _context);
-            contextCallback?.Invoke(context);
-
-            CancellationTokenRegistration registration;
-            if (cancellationToken.CanBeCanceled)
-                registration = cancellationToken.Register(context.Cancel);
-
-            var receiveLock = context.TryGetPayload(out IProcessorLockContext lockContext)
-                ? new ProcessEventLockContext(lockContext, @event, cancellationToken)
-                : default;
-
-            try
-            {
-                await _dispatcher.Dispatch(context, receiveLock).ConfigureAwait(false);
-            }
-            finally
-            {
-                registration.Dispose();
-                context.Dispose();
-            }
+            scope.Add("keyType", TypeMetadataCache<TKey>.ShortName);
+            scope.Add("valueType", TypeMetadataCache<TValue>.ShortName);
         }
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
@@ -76,6 +50,25 @@
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
             return _context.ConnectSendObserver(observer);
+        }
+
+        public async Task Handle(ConsumeResult<TKey, TValue> result, CancellationToken cancellationToken)
+        {
+            var context = new ConsumeResultReceiveContext<TKey, TValue>(result, _context, _lockContext, _headersDeserializer);
+
+            CancellationTokenRegistration registration;
+            if (cancellationToken.CanBeCanceled)
+                registration = cancellationToken.Register(context.Cancel);
+
+            try
+            {
+                await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
+            }
+            finally
+            {
+                registration.Dispose();
+                context.Dispose();
+            }
         }
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
@@ -106,16 +99,6 @@
         public DeliveryMetrics GetMetrics()
         {
             return _dispatcher.GetMetrics();
-        }
-
-
-        class ReceiverHandle :
-            ReceiveTransportHandle
-        {
-            public Task Stop(CancellationToken cancellationToken = default)
-            {
-                return TaskUtil.Completed;
-            }
         }
     }
 }

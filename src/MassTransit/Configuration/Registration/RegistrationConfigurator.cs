@@ -22,15 +22,14 @@ namespace MassTransit.Registration
     {
         readonly ConcurrentDictionary<Type, IActivityRegistration> _activityRegistrations;
         readonly ConcurrentDictionary<Type, IConsumerRegistration> _consumerRegistrations;
-        readonly IContainerRegistrar _containerRegistrar;
         readonly ConcurrentDictionary<Type, IEndpointRegistration> _endpointRegistrations;
         readonly ConcurrentDictionary<Type, IExecuteActivityRegistration> _executeActivityRegistrations;
         readonly ConcurrentDictionary<Type, ISagaRegistration> _sagaRegistrations;
         bool _configured;
 
-        public RegistrationConfigurator(IContainerRegistrar containerRegistrar = null)
+        public RegistrationConfigurator(IContainerRegistrar registrar = null)
         {
-            _containerRegistrar = containerRegistrar ?? new NullContainerRegistrar();
+            Registrar = registrar ?? new NullContainerRegistrar();
 
             _consumerRegistrations = new ConcurrentDictionary<Type, IConsumerRegistration>();
             _sagaRegistrations = new ConcurrentDictionary<Type, ISagaRegistration>();
@@ -38,6 +37,8 @@ namespace MassTransit.Registration
             _activityRegistrations = new ConcurrentDictionary<Type, IActivityRegistration>();
             _endpointRegistrations = new ConcurrentDictionary<Type, IEndpointRegistration>();
         }
+
+        public IContainerRegistrar Registrar { get; }
 
         protected Func<IConfigurationServiceProvider, IBus, IClientFactory> ClientFactoryProvider { get; private set; } = BusClientFactoryProvider;
 
@@ -55,10 +56,10 @@ namespace MassTransit.Registration
 
             IConsumerRegistration ValueFactory(Type type)
             {
-                ConsumerRegistrationCache.Register(type, _containerRegistrar);
+                ConsumerRegistrationCache.Register(type, Registrar);
 
                 if (consumerDefinitionType != null)
-                    ConsumerDefinitionRegistrationCache.Register(consumerDefinitionType, _containerRegistrar);
+                    ConsumerDefinitionRegistrationCache.Register(consumerDefinitionType, Registrar);
 
                 return new ConsumerRegistration<T>();
             }
@@ -80,10 +81,10 @@ namespace MassTransit.Registration
 
             IConsumerRegistration ValueFactory(Type type)
             {
-                ConsumerRegistrationCache.Register(type, _containerRegistrar);
+                ConsumerRegistrationCache.Register(type, Registrar);
 
                 if (consumerDefinitionType != null)
-                    ConsumerDefinitionRegistrationCache.Register(consumerDefinitionType, _containerRegistrar);
+                    ConsumerDefinitionRegistrationCache.Register(consumerDefinitionType, Registrar);
 
                 return (IConsumerRegistration)Activator.CreateInstance(typeof(ConsumerRegistration<>).MakeGenericType(type));
             }
@@ -105,10 +106,10 @@ namespace MassTransit.Registration
 
             ISagaRegistration ValueFactory(Type type)
             {
-                SagaRegistrationCache.Register(type, _containerRegistrar);
+                SagaRegistrationCache.Register(type, Registrar);
 
                 if (sagaDefinitionType != null)
-                    SagaDefinitionRegistrationCache.Register(sagaDefinitionType, _containerRegistrar);
+                    SagaDefinitionRegistrationCache.Register(sagaDefinitionType, Registrar);
 
                 return new SagaRegistration<T>();
             }
@@ -117,7 +118,7 @@ namespace MassTransit.Registration
 
             registration.AddConfigureAction(configure);
 
-            return new SagaRegistrationConfigurator<T>(this, _containerRegistrar);
+            return new SagaRegistrationConfigurator<T>(this, Registrar);
         }
 
         public void AddSaga(Type sagaType, Type sagaDefinitionType)
@@ -125,7 +126,7 @@ namespace MassTransit.Registration
             if (sagaType.HasInterface<SagaStateMachineInstance>())
                 throw new ArgumentException($"State machine sagas must be registered using AddSagaStateMachine: {TypeMetadataCache.GetShortName(sagaType)}");
 
-            _sagaRegistrations.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, sagaDefinitionType, _containerRegistrar));
+            _sagaRegistrations.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, sagaDefinitionType, Registrar));
         }
 
         public ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(Action<ISagaConfigurator<T>> configure = null)
@@ -141,10 +142,10 @@ namespace MassTransit.Registration
         {
             ISagaRegistration ValueFactory(Type type)
             {
-                SagaStateMachineRegistrationCache.Register(typeof(TStateMachine), _containerRegistrar);
+                SagaStateMachineRegistrationCache.Register(typeof(TStateMachine), Registrar);
 
                 if (sagaDefinitionType != null)
-                    SagaDefinitionRegistrationCache.Register(sagaDefinitionType, _containerRegistrar);
+                    SagaDefinitionRegistrationCache.Register(sagaDefinitionType, Registrar);
 
                 return new SagaStateMachineRegistration<T>();
             }
@@ -153,7 +154,7 @@ namespace MassTransit.Registration
 
             registration.AddConfigureAction(configure);
 
-            return new SagaRegistrationConfigurator<T>(this, _containerRegistrar);
+            return new SagaRegistrationConfigurator<T>(this, Registrar);
         }
 
         public void AddSagaStateMachine(Type sagaType, Type sagaDefinitionType)
@@ -176,10 +177,10 @@ namespace MassTransit.Registration
         {
             IExecuteActivityRegistration ValueFactory(Type type)
             {
-                ExecuteActivityRegistrationCache.Register(type, _containerRegistrar);
+                ExecuteActivityRegistrationCache.Register(type, Registrar);
 
                 if (executeActivityDefinitionType != null)
-                    ExecuteActivityDefinitionRegistrationCache.Register(executeActivityDefinitionType, _containerRegistrar);
+                    ExecuteActivityDefinitionRegistrationCache.Register(executeActivityDefinitionType, Registrar);
 
                 return new ExecuteActivityRegistration<TActivity, TArguments>();
             }
@@ -194,7 +195,7 @@ namespace MassTransit.Registration
         public void AddExecuteActivity(Type activityType, Type activityDefinitionType)
         {
             _executeActivityRegistrations.GetOrAdd(activityType,
-                type => ExecuteActivityRegistrationCache.CreateRegistration(type, activityDefinitionType, _containerRegistrar));
+                type => ExecuteActivityRegistrationCache.CreateRegistration(type, activityDefinitionType, Registrar));
         }
 
         public IActivityRegistrationConfigurator<TActivity, TArguments, TLog> AddActivity<TActivity, TArguments, TLog>(
@@ -216,10 +217,10 @@ namespace MassTransit.Registration
         {
             IActivityRegistration ValueFactory(Type type)
             {
-                ActivityRegistrationCache.Register(type, _containerRegistrar);
+                ActivityRegistrationCache.Register(type, Registrar);
 
                 if (activityDefinitionType != null)
-                    ActivityDefinitionRegistrationCache.Register(activityDefinitionType, _containerRegistrar);
+                    ActivityDefinitionRegistrationCache.Register(activityDefinitionType, Registrar);
 
                 return new ActivityRegistration<TActivity, TArguments, TLog>();
             }
@@ -235,12 +236,12 @@ namespace MassTransit.Registration
         public void AddActivity(Type activityType, Type activityDefinitionType)
         {
             _activityRegistrations.GetOrAdd(activityType,
-                type => ActivityRegistrationCache.CreateRegistration(type, activityDefinitionType, _containerRegistrar));
+                type => ActivityRegistrationCache.CreateRegistration(type, activityDefinitionType, Registrar));
         }
 
         public void AddEndpoint(Type definitionType)
         {
-            _endpointRegistrations.GetOrAdd(definitionType, type => EndpointRegistrationCache.CreateRegistration(definitionType, _containerRegistrar));
+            _endpointRegistrations.GetOrAdd(definitionType, type => EndpointRegistrationCache.CreateRegistration(definitionType, Registrar));
         }
 
         public void AddEndpoint<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings)
@@ -249,7 +250,7 @@ namespace MassTransit.Registration
         {
             IEndpointRegistration ValueFactory(Type type)
             {
-                _containerRegistrar.RegisterEndpointDefinition<TDefinition, T>(settings);
+                Registrar.RegisterEndpointDefinition<TDefinition, T>(settings);
 
                 return new EndpointRegistration<T>();
             }
@@ -260,27 +261,27 @@ namespace MassTransit.Registration
         public void AddRequestClient<T>(RequestTimeout timeout)
             where T : class
         {
-            _containerRegistrar.RegisterRequestClient<T>(timeout);
+            Registrar.RegisterRequestClient<T>(timeout);
         }
 
         public void AddRequestClient<T>(Uri destinationAddress, RequestTimeout timeout)
             where T : class
         {
-            _containerRegistrar.RegisterRequestClient<T>(destinationAddress, timeout);
+            Registrar.RegisterRequestClient<T>(destinationAddress, timeout);
         }
 
         public void AddServiceClient(Action<IServiceClientConfigurator> configure = default)
         {
             var options = new ServiceClientOptions();
 
-            _containerRegistrar.RegisterSingleInstance(options);
+            Registrar.RegisterSingleInstance(options);
 
             ClientFactoryProvider = ServiceClientClientFactoryProvider;
         }
 
         public void SetEndpointNameFormatter(IEndpointNameFormatter endpointNameFormatter)
         {
-            _containerRegistrar.RegisterSingleInstance(endpointNameFormatter);
+            Registrar.RegisterSingleInstance(endpointNameFormatter);
         }
 
         protected IRegistration CreateRegistration(IConfigurationServiceProvider provider)

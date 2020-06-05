@@ -29,8 +29,7 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Singleton();
 
             expression.For<IConfigurationServiceProvider>()
-                .Use(context => new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>()))
-                .Singleton();
+                .Use(context => new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>()));
         }
 
         ConfigurationExpression IConfigurationExpressionMediatorConfigurator.Builder => _expression;

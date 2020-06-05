@@ -53,8 +53,7 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Singleton();
 
             expression.For<IConfigurationServiceProvider>()
-                .Use(context => new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>()))
-                .Singleton();
+                .Use(context => new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>()));
 
             expression.For<IRegistration>()
                 .Use(provider => CreateRegistration(provider.GetInstance<IConfigurationServiceProvider>()))

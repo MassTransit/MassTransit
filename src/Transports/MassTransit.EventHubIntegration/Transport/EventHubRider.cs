@@ -4,12 +4,14 @@ namespace MassTransit.EventHubIntegration.Transport
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Pipeline.Observables;
     using Riders;
     using Util;
 
 
     public class EventHubRider :
-        BaseRider
+        BaseRider,
+        IEventHubRider
     {
         readonly IEnumerable<IEventHubReceiveEndpoint> _endpoints;
 
@@ -19,7 +21,7 @@ namespace MassTransit.EventHubIntegration.Transport
             _endpoints = endpoints;
         }
 
-        protected override Task BaseStart(CancellationToken cancellationToken)
+        protected override Task StartRider(CancellationToken cancellationToken)
         {
             if (_endpoints == null || !_endpoints.Any())
                 return TaskUtil.Completed;
@@ -27,7 +29,7 @@ namespace MassTransit.EventHubIntegration.Transport
             return Task.WhenAll(_endpoints.Select(endpoint => endpoint.Connect(cancellationToken)));
         }
 
-        protected override Task BaseStop(CancellationToken cancellationToken)
+        protected override Task StopRider(CancellationToken cancellationToken)
         {
             if (_endpoints == null || !_endpoints.Any())
                 return TaskUtil.Completed;

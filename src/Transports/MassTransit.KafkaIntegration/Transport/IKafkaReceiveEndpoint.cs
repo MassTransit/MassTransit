@@ -7,7 +7,8 @@ namespace MassTransit.KafkaIntegration.Transport
     public interface IKafkaReceiveEndpoint :
         IReceiveEndpoint
     {
-        Task Connect(CancellationToken cancellationToken);
-        Task Disconnect(CancellationToken cancellationToken);
+        Task Start(CancellationToken cancellationToken);
+
+        Task Stop();
     }
 }

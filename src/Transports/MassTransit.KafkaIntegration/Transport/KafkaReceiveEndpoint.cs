@@ -21,13 +21,12 @@ namespace MassTransit.KafkaIntegration.Transport
         readonly ChannelExecutor _executor;
         readonly TaskCompletionSource<ReceiveEndpointReady> _started;
         readonly string _topic;
-        readonly IKafkaReceiveTransport<TKey, TValue> _transport;
+        readonly IKafkaMessageReceiver<TKey, TValue> _transport;
         CancellationTokenSource _cancellationTokenSource;
         Task _consumerTask;
 
         public KafkaReceiveEndpoint(string topic, int prefetch, int concurrencyLimit, IConsumer<TKey, TValue> consumer,
-            IKafkaReceiveTransport<TKey, TValue> transport,
-            ReceiveEndpointContext context)
+            IKafkaMessageReceiver<TKey, TValue> transport, ReceiveEndpointContext context)
         {
             _topic = topic;
             _consumer = consumer;
@@ -89,7 +88,7 @@ namespace MassTransit.KafkaIntegration.Transport
             return _context.PublishEndpointProvider.GetPublishSendEndpoint<T>();
         }
 
-        public Task Connect(CancellationToken cancellationToken)
+        public Task Start(CancellationToken cancellationToken)
         {
             var logContext = _context.LogContext;
             LogContext.SetCurrentIfNull(logContext);
@@ -134,14 +133,12 @@ namespace MassTransit.KafkaIntegration.Transport
                 }
             }, cancellationToken);
 
-            LogContext.Debug?.Log("Kafka consumer starting: {Topic}", _topic);
-
             _consumer.Subscribe(_topic);
 
             return _consumerTask.IsCompleted ? _consumerTask : TaskUtil.Completed;
         }
 
-        public async Task Disconnect(CancellationToken cancellationToken)
+        public async Task Stop()
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
             try

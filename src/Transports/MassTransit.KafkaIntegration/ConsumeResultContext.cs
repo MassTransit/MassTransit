@@ -1,9 +1,9 @@
-namespace MassTransit.KafkaIntegration.Contexts
+namespace MassTransit.KafkaIntegration
 {
     using Confluent.Kafka;
 
 
-    public interface KafkaReadContext
+    public interface ConsumeResultContext
     {
         string Topic { get; }
         Partition Partition { get; }

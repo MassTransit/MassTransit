@@ -6,16 +6,23 @@ namespace MassTransit.KafkaIntegration.Serializers
     using System.Text;
     using Confluent.Kafka;
     using Context;
-    using Courier;
-    using Newtonsoft.Json.Linq;
     using Transports;
 
 
     public static class DictionaryHeadersSerialize
     {
-        static readonly Encoding _encoding = Encoding.UTF8;
-        static readonly Lazy<IHeadersDeserializer> _deserializer = new Lazy<IHeadersDeserializer>(() => new DictionaryHeadersDeserializer());
-        static readonly Lazy<IHeadersSerializer> _serializer = new Lazy<IHeadersSerializer>(() => new DictionaryHeadersSerializer());
+        static readonly Encoding _encoding;
+        static readonly Lazy<IHeadersDeserializer> _deserializer;
+        static readonly Lazy<IHeadersSerializer> _serializer;
+
+        static DictionaryHeadersSerialize()
+        {
+            _encoding = new UTF8Encoding(false);
+            _deserializer = new Lazy<IHeadersDeserializer>(() => new DictionaryHeadersDeserializer());
+            _serializer = new Lazy<IHeadersSerializer>(() => new DictionaryHeadersSerializer(
+                new TransportSetHeaderAdapter<Header>(new KafkaHeaderValueConverter(_encoding), TransportHeaderOptions.IncludeFaultMessage)));
+        }
+
         public static IHeadersDeserializer Deserializer => _deserializer.Value;
         public static IHeadersSerializer Serializer => _serializer.Value;
 
@@ -25,8 +32,7 @@ namespace MassTransit.KafkaIntegration.Serializers
         {
             public IHeaderProvider Deserialize(Headers headers)
             {
-                Dictionary<string, object> dictionary = headers.ToDictionary(x => x.Key, x => (object)_encoding.GetString(x.GetValueBytes()));
-                return new DictionaryHeaderProvider(dictionary);
+                return new DictionaryHeaderProvider(headers.ToDictionary(x => x.Key, x => (object)_encoding.GetString(x.GetValueBytes())));
             }
         }
 
@@ -34,21 +40,46 @@ namespace MassTransit.KafkaIntegration.Serializers
         class DictionaryHeadersSerializer :
             IHeadersSerializer
         {
-            public Headers Serialize(Dictionary<string, object> headers)
-            {
-                var result = new Headers();
-                foreach (KeyValuePair<string, object> kv in headers)
-                    result.Add(kv.Key, Serialize(kv.Value));
+            readonly ITransportSetHeaderAdapter<Header> _adapter;
 
-                return result;
+            public DictionaryHeadersSerializer(ITransportSetHeaderAdapter<Header> adapter)
+            {
+                _adapter = adapter;
             }
 
-            static byte[] Serialize(object value)
+            public Headers Serialize(SendContext context)
             {
-                using var jsonWriter = new JTokenWriter();
-                jsonWriter.WriteValue(value);
-                SerializerCache.Serializer.Serialize(jsonWriter, value, value.GetType());
-                return _encoding.GetBytes(jsonWriter.Token.ToString());
+                var dictionary = new Dictionary<string, Header>();
+
+                if (context.MessageId.HasValue)
+                    _adapter.Set(dictionary, nameof(MessageContext.MessageId), context.MessageId.Value);
+
+                if (context.CorrelationId.HasValue)
+                    _adapter.Set(dictionary, nameof(MessageContext.CorrelationId), context.CorrelationId.Value);
+
+                if (context.ConversationId.HasValue)
+                    _adapter.Set(dictionary, nameof(MessageContext.ConversationId), context.ConversationId.Value);
+
+                if (context.InitiatorId.HasValue)
+                    _adapter.Set(dictionary, nameof(MessageContext.InitiatorId), context.InitiatorId.Value);
+
+                if (context.DestinationAddress != null)
+                    _adapter.Set(dictionary, nameof(MessageContext.DestinationAddress), context.DestinationAddress.ToString());
+
+                if (context.SourceAddress != null)
+                    _adapter.Set(dictionary, nameof(MessageContext.SourceAddress), context.SourceAddress.ToString());
+
+                if (context.ContentType != null)
+                    _adapter.Set(dictionary, MessageHeaders.ContentType, context.ContentType.MediaType);
+
+                foreach (var headerValue in context.Headers)
+                    _adapter.Set(dictionary, headerValue);
+
+                var headers = new Headers();
+                foreach (var value in dictionary.Values)
+                    headers.Add(value);
+
+                return headers;
             }
         }
     }

@@ -16,11 +16,11 @@ namespace MassTransit.KafkaIntegration.Contexts
     {
         readonly MessageContext _adapter;
 
-        public KafkaConsumeContext(ReceiveContext receiveContext, ConsumeResult<TKey, TValue> consumeResult)
+        public KafkaConsumeContext(ReceiveContext receiveContext, ConsumeResult<TKey, TValue> result)
             : base(receiveContext)
         {
-            Message = consumeResult.Message.Value;
-            _adapter = new KafkaHeaderAdapter<TKey, TValue>(consumeResult, receiveContext);
+            Message = result.Message.Value;
+            _adapter = new KafkaHeaderAdapter<TKey, TValue>(result, receiveContext);
         }
 
         public override bool HasMessageType(Type messageType)

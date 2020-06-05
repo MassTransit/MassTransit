@@ -83,26 +83,6 @@
         public const string MessageId = "MessageId";
 
         /// <summary>
-        /// The correlationId
-        /// </summary>
-        public const string CorrelationId = "CorrelationId";
-
-        /// <summary>
-        /// The conversationId
-        /// </summary>
-        public const string ConversationId = "ConversationId";
-
-        /// <summary>
-        /// The initiatorId
-        /// </summary>
-        public const string InitiatorId = "InitiatorId";
-
-        /// <summary>
-        /// The source address
-        /// </summary>
-        public const string SourceAddress = "Source-Address";
-
-        /// <summary>
         /// The Transport message ID, which is a string, because we can't assume anything
         /// </summary>
         public const string TransportMessageId = "TransportMessageId";

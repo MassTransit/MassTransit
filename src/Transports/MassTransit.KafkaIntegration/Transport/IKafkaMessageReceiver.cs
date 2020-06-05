@@ -1,28 +1,31 @@
 ﻿namespace MassTransit.KafkaIntegration.Transport
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Confluent.Kafka;
+    using GreenPipes;
     using Pipeline;
     using Transports;
     using Transports.Metrics;
 
 
-    public interface IKafkaReceiveTransport<TKey, TValue> :
+    public interface IKafkaMessageReceiver<TKey, TValue> :
         IDispatchMetrics,
+        IReceiveObserverConnector,
+        IReceiveTransportObserverConnector,
+        IPublishObserverConnector,
+        ISendObserverConnector,
         IConsumeMessageObserverConnector,
         IConsumeObserverConnector,
-        IReceiveTransport
+        IProbeSite
         where TValue : class
     {
         /// <summary>
-        /// Handles the <paramref name="message" />
+        /// Handles the <paramref name="result" />
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="result"></param>
         /// <param name="cancellationToken"></param>
-        /// <param name="contextCallback">Callback to adjust the context</param>
         /// <returns></returns>
-        Task Handle(ConsumeResult<TKey, TValue> message, CancellationToken cancellationToken, Action<ReceiveContext> contextCallback = null);
+        Task Handle(ConsumeResult<TKey, TValue> result, CancellationToken cancellationToken);
     }
 }

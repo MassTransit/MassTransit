@@ -4,10 +4,11 @@ namespace MassTransit.KafkaIntegration.Registration
     using Configurators;
     using Confluent.Kafka;
     using MassTransit.Registration;
+    using Transport;
 
 
     public class KafkaRegistrationRiderFactory<TContainerContext> :
-        IRegistrationRiderFactory<TContainerContext>
+        RegistrationRiderFactory<TContainerContext, IKafkaRider>
         where TContainerContext : class
     {
         readonly ClientConfig _clientConfig;
@@ -25,15 +26,15 @@ namespace MassTransit.KafkaIntegration.Registration
             _configure = configure;
         }
 
-        public IBusInstanceSpecification CreateRider(IRiderRegistrationContext<TContainerContext> context)
+        public override IBusInstanceSpecification CreateRider(IRiderRegistrationContext<TContainerContext> context)
         {
-            var factoryConfigurator = new KafkaFactoryConfigurator(_clientConfig ?? context.GetService<ClientConfig>() ?? new ClientConfig());
+            var configurator = new KafkaFactoryConfigurator(_clientConfig ?? context.GetService<ClientConfig>() ?? new ClientConfig());
 
-            context.UseHealthCheck(factoryConfigurator);
+            ConfigureRider(configurator, context);
 
-            _configure?.Invoke(context, factoryConfigurator);
+            _configure?.Invoke(context, configurator);
 
-            return factoryConfigurator.Build();
+            return configurator.Build();
         }
     }
 }

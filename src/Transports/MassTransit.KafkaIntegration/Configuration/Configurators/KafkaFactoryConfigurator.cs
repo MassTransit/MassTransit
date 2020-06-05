@@ -3,8 +3,6 @@ namespace MassTransit.KafkaIntegration.Configurators
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Configuration;
-    using Configuration.Configurators;
     using Confluent.Kafka;
     using GreenPipes;
     using MassTransit.Registration;
@@ -20,17 +18,23 @@ namespace MassTransit.KafkaIntegration.Configurators
         readonly ClientConfig _clientConfig;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly RiderObservable _observers;
-        readonly List<IKafkaTopicSpecification> _topics;
+        readonly List<IKafkaProducerSpecification> _producers;
+        readonly SendObservable _sendObservers;
+        readonly List<IKafkaConsumerSpecification> _topics;
         IHeadersDeserializer _headersDeserializer;
+        IHeadersSerializer _headersSerializer;
 
         public KafkaFactoryConfigurator(ClientConfig clientConfig)
         {
             _clientConfig = clientConfig;
-            _topics = new List<IKafkaTopicSpecification>();
+            _topics = new List<IKafkaConsumerSpecification>();
+            _producers = new List<IKafkaProducerSpecification>();
             _observers = new RiderObservable();
             _endpointObservers = new ReceiveEndpointObservable();
+            _sendObservers = new SendObservable();
 
             SetHeadersDeserializer(DictionaryHeadersSerialize.Deserializer);
+            SetHeadersSerializer(DictionaryHeadersSerialize.Serializer);
         }
 
         public void Host(IEnumerable<string> servers, Action<IKafkaHostConfigurator> configure)
@@ -57,40 +61,57 @@ namespace MassTransit.KafkaIntegration.Configurators
             configure?.Invoke(configurator);
         }
 
-        public void Topic<TKey, TValue>(ITopicNameFormatter topicNameFormatter, string groupId,
-            Action<IKafkaTopicConfigurator<TKey, TValue>> configure)
+        public void TopicEndpoint<TKey, TValue>(string topicName, string groupId, Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
             where TValue : class
         {
-            if (topicNameFormatter == null)
-                throw new ArgumentNullException(nameof(topicNameFormatter));
-
             if (string.IsNullOrEmpty(groupId))
                 throw new ArgumentException(groupId);
 
-            Topic(topicNameFormatter, new ConsumerConfig(_clientConfig) {GroupId = groupId}, configure);
+            TopicEndpoint(topicName, new ConsumerConfig(_clientConfig) {GroupId = groupId}, configure);
         }
 
-        public void Topic<TKey, TValue>(ITopicNameFormatter topicNameFormatter, ConsumerConfig consumerConfig,
-            Action<IKafkaTopicConfigurator<TKey, TValue>> configure)
+        public void TopicEndpoint<TKey, TValue>(string topicName, ConsumerConfig consumerConfig,
+            Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
             where TValue : class
         {
-            if (topicNameFormatter == null)
-                throw new ArgumentNullException(nameof(topicNameFormatter));
-
             if (consumerConfig == null)
                 throw new ArgumentNullException(nameof(consumerConfig));
 
             consumerConfig.AutoCommitIntervalMs = null;
             consumerConfig.EnableAutoCommit = false;
 
-            var topic = new KafkaTopicSpecification<TKey, TValue>(consumerConfig, topicNameFormatter, _headersDeserializer, configure);
+            var topic = new KafkaConsumerSpecification<TKey, TValue>(consumerConfig, topicName, _headersDeserializer, configure);
             topic.ConnectReceiveEndpointObserver(_endpointObservers);
             _topics.Add(topic);
+        }
+
+        public void TopicProducer<TKey, TValue>(string topicName, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
+            where TValue : class
+        {
+            TopicProducer(topicName, new ProducerConfig(_clientConfig), configure);
+        }
+
+        public void TopicProducer<TKey, TValue>(string topicName, ProducerConfig producerConfig, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
+            where TValue : class
+        {
+            if (producerConfig == null)
+                throw new ArgumentNullException(nameof(producerConfig));
+
+            var configurator = new KafkaProducerSpecification<TKey, TValue>(producerConfig, topicName, _headersSerializer);
+            configure?.Invoke(configurator);
+
+            configurator.ConnectSendObserver(_sendObservers);
+            _producers.Add(configurator);
         }
 
         public void SetHeadersDeserializer(IHeadersDeserializer deserializer)
         {
             _headersDeserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
+        }
+
+        public void SetHeadersSerializer(IHeadersSerializer serializer)
+        {
+            _headersSerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }
 
         public Acks? Acks
@@ -228,9 +249,14 @@ namespace MassTransit.KafkaIntegration.Configurators
             return _endpointObservers.Connect(observer);
         }
 
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendObservers.Connect(observer);
+        }
+
         public IBusInstanceSpecification Build()
         {
-            return new KafkaBusInstanceSpecification(_topics, _observers);
+            return new KafkaBusInstanceSpecification(_topics, _producers, _observers);
         }
     }
 }

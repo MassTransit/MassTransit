@@ -61,7 +61,6 @@ namespace MassTransit.AutofacIntegration.Registration
 
             builder.Register(context => new AutofacConfigurationServiceProvider(context.Resolve<ILifetimeScope>()))
                 .As<IConfigurationServiceProvider>()
-                .SingleInstance()
                 .IfNotRegistered(typeof(IConfigurationServiceProvider));
 
             builder.Register(provider => CreateRegistration(provider.Resolve<IConfigurationServiceProvider>()))

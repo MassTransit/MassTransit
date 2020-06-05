@@ -36,7 +36,7 @@ namespace MassTransit.WindsorIntegration.Registration
             {
                 container.Register(Component.For<IConfigurationServiceProvider>()
                     .ImplementedBy<WindsorConfigurationServiceProvider>()
-                    .LifestyleSingleton());
+                    .LifestyleTransient());
             }
 
             container.Register(

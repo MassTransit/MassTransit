@@ -1,6 +1,7 @@
 namespace MassTransit.Scoping
 {
     using System;
+    using Context;
 
 
     /// <summary>
@@ -33,6 +34,8 @@ namespace MassTransit.Scoping
                     throw new InvalidOperationException("The ConsumeContext was already set.");
             }
         }
+
+        public bool HasContext => !(_context is MissingConsumeContext);
 
         public ConsumeContext GetContext()
         {

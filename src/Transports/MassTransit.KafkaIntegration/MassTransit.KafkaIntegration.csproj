@@ -18,7 +18,18 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <ProjectReference Include="..\..\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Transport\KafkaProduceTransport.cs" />
+    <Compile Remove="Transport\IKafkaProduceTransport.cs" />
+    <Compile Remove="Transport\IKafkaProduceEndpoint.cs" />
+    <Compile Remove="Contexts\ProduceEndpointContext.cs" />
+    <Compile Remove="Contexts\ProduceContext.cs" />
+    <Compile Remove="Contexts\KafkaProduceTransportContext.cs" />
+    <Compile Remove="Contexts\IProduceEndpointContextSupervisor.cs" />
   </ItemGroup>
 
 </Project>

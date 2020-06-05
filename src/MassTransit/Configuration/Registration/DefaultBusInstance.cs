@@ -20,6 +20,12 @@ namespace MassTransit.Registration
 
         public IHostConfiguration HostConfiguration => default;
 
+        public TRider GetRider<TRider>()
+            where TRider : IRider
+        {
+            throw new ConfigurationException("TODO: add a link to a documentation");
+        }
+
         public ConnectHandle ConnectRider(IRider rider)
         {
             throw new ConfigurationException("TODO: add a link to a documentation");

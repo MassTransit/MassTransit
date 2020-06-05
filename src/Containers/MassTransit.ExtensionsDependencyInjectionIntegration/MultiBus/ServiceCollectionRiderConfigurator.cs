@@ -12,12 +12,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
         IServiceCollectionRiderConfigurator<TBus>
         where TBus : class, IBus
     {
-        public ServiceCollectionRiderConfigurator(IServiceCollection collection)
-            : base(collection)
+        public ServiceCollectionRiderConfigurator(IServiceCollection collection, IContainerRegistrar registrar)
+            : base(collection, registrar)
         {
         }
 
-        public override void SetRiderFactory<T>(T riderFactory)
+        public override void SetRiderFactory<TRider>(IRegistrationRiderFactory<IServiceProvider, TRider> riderFactory)
         {
             if (riderFactory == null)
                 throw new ArgumentNullException(nameof(riderFactory));
@@ -25,6 +25,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             ThrowIfAlreadyConfigured(nameof(SetRiderFactory));
 
             Collection.AddSingleton(provider => Bind<TBus>.Create(riderFactory.CreateRider(GetRegistrationContext(provider))));
+            Collection.AddSingleton(provider => Bind<TBus>.Create(provider.GetRequiredService<IBusInstance<TBus>>().GetRider<TRider>()));
         }
 
         IRiderRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)

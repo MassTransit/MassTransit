@@ -4,7 +4,7 @@ namespace MassTransit.KafkaIntegration.Specifications
     using System.Linq;
     using GreenPipes;
     using MassTransit.Registration;
-    using Riders;
+    using Pipeline.Observables;
     using Transport;
 
 
@@ -12,28 +12,33 @@ namespace MassTransit.KafkaIntegration.Specifications
         IBusInstanceSpecification
     {
         readonly RiderObservable _observers;
-        readonly IEnumerable<IKafkaTopicSpecification> _topics;
+        readonly IEnumerable<IKafkaProducerSpecification> _producers;
+        readonly IEnumerable<IKafkaConsumerSpecification> _consumers;
 
-        public KafkaBusInstanceSpecification(IEnumerable<IKafkaTopicSpecification> topics, RiderObservable observers)
+        public KafkaBusInstanceSpecification(IEnumerable<IKafkaConsumerSpecification> consumers, IEnumerable<IKafkaProducerSpecification> producers,
+            RiderObservable observers)
         {
-            _topics = topics;
+            _consumers = consumers;
+            _producers = producers;
             _observers = observers;
         }
 
         public void Configure(IBusInstance busInstance)
         {
-            IKafkaReceiveEndpoint[] endpoints = _topics
-                .Select(x => x.CreateEndpoint(busInstance))
+            IKafkaReceiveEndpoint[] endpoints = _consumers
+                .Select(x => x.CreateReceiveEndpoint(busInstance))
                 .ToArray();
-            busInstance.ConnectKafka(_observers, endpoints);
+
+            IKafkaProducerFactory[] producers = _producers
+                .Select(x => x.CreateProducerFactory(busInstance))
+                .ToArray();
+
+            busInstance.ConnectKafka(_observers, endpoints, producers);
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (_topics == null || !_topics.Any())
-                yield return this.Failure("Topics", "should not be empty");
-
-            foreach (KeyValuePair<string, IKafkaTopicSpecification[]> kv in _topics.GroupBy(x => x.Name).ToDictionary(x => x.Key, x => x.ToArray()))
+            foreach (KeyValuePair<string, IKafkaConsumerSpecification[]> kv in _consumers.GroupBy(x => x.Name).ToDictionary(x => x.Key, x => x.ToArray()))
             {
                 if (kv.Value.Length > 1)
                     yield return this.Failure($"Topic: {kv.Key} was added more than once.");
@@ -41,6 +46,9 @@ namespace MassTransit.KafkaIntegration.Specifications
                 foreach (var result in kv.Value.SelectMany(x => x.Validate()))
                     yield return result;
             }
+
+            foreach (var result in _producers.SelectMany(x => x.Validate()))
+                yield return result;
         }
     }
 }

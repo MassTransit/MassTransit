@@ -1,8 +1,9 @@
-namespace MassTransit.Riders
+namespace MassTransit.Pipeline.Observables
 {
     using System;
     using System.Threading.Tasks;
     using GreenPipes.Util;
+    using Riders;
 
 
     public class RiderObservable :
