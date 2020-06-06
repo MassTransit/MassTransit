@@ -17,12 +17,15 @@
         Action<IMessageFilterConfigurator> _messageFilter;
         Func<string, AuditRecord, string> _partitionKeyStrategy;
         CloudTable _table;
-        object _tableClient;
+        CloudTableClient _tableClient;
         string _tableName;
 
         public ITableNameHolder WithAccessKey(string accountName, string accessKey, string endpoint)
         {
-            throw new NotImplementedException();
+            _accessKey = accessKey;
+            _accountName = accountName;
+            _endpoint = endpoint;
+            return this;
         }
 
         public IPartitionKeyHolder WithTable(CloudTable table)

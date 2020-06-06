@@ -1,8 +1,12 @@
-﻿namespace MassTransit.Azure.Cosmos.Table.Tests
+﻿namespace MassTransit.Azure.Cosmos.Table.Tests.Audit
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.Azure.Cosmos.Table;
     using NUnit.Framework;
+    using Shouldly;
 
 
     [TestFixture]
@@ -15,10 +19,19 @@
             await InputQueueSendEndpoint.Send(new A());
         }
 
+        [Test]
+        public async Task Should_have_send_audit_records()
+        {
+            IEnumerable<AuditRecord> consumeRecords = AzureTableHelpers.GetAuditRecords().Where(x => x.ContextType == "Send");
+            consumeRecords.Count().ShouldBe(1);
+        }
+
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseAzureCosmosTableAuditStore(configure => configure.WithConnectionString(ConnectionString)
-                                                                             .WithTableName(AuditTableName)
+            var storageAccount = CloudStorageAccount.Parse(ConnectionString);
+            var tableClient = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
+            var table = tableClient.GetTableReference(AuditTableName);
+            configurator.UseAzureCosmosTableAuditStore(configure => configure.WithTable(table)
                                                                              .WithContextTypePartitionKeyStrategy()
                                                                              .WithNoMessageFilter()
                                                                              .Build());
