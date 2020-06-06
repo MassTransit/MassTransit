@@ -8,7 +8,7 @@
 
 
     [TestFixture]
-    public class Saving_send_audit_records_to_the_audit_store :
+    public class Saving_send_records_with_filter :
         AzureCosmosTableInMemoryTestFixture
     {
         [Test]
@@ -21,8 +21,9 @@
         [Test]
         public async Task Should_have_send_audit_record()
         {
-            IEnumerable<AuditRecord> sendRecords = _records.Where(x => x.ContextType == "Send");
-            sendRecords.Count().ShouldBe(2);
+            List<AuditRecord> sendRecords = _records.Where(x => x.ContextType == "Send").ToList();
+            sendRecords.Count.ShouldBe(1);
+            sendRecords[0].MessageType.ShouldBe(typeof(A).FullName);
         }
 
         IEnumerable<AuditRecord> _records;
@@ -39,7 +40,7 @@
             configurator.UseAzureCosmosTableAuditStore(configure => configure.WithConnectionString(ConnectionString)
                 .WithTableName(AuditTableName)
                 .WithContextTypePartitionKeyStrategy()
-                .WithNoMessageFilter()
+                .WithMessageFilter(builder => builder.Exclude(typeof(B)))
                 .Build());
             base.ConfigureInMemoryBus(configurator);
         }

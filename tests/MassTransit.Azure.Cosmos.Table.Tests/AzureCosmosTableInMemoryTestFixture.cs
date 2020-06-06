@@ -1,5 +1,6 @@
 namespace MassTransit.Azure.Cosmos.Table.Tests
 {
+    using Audit;
     using NUnit.Framework;
     using TestFramework;
 

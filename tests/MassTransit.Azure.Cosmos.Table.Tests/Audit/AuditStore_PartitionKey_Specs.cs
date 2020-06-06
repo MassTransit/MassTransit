@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Azure.Cosmos.Table.Tests
+﻿namespace MassTransit.Azure.Cosmos.Table.Tests.Audit
 {
     using System;
     using System.Collections.Generic;

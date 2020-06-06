@@ -16,8 +16,8 @@
         [Test]
         public async Task Should_have_send_audit_records()
         {
-            IEnumerable<AuditRecord> consumeRecords = AzureTableHelpers.GetAuditRecords().Where(x => x.ContextType == "Send");
-            consumeRecords.Count().ShouldBe(1);
+            IEnumerable<AuditRecord> sendRecords = AzureTableHelpers.GetAuditRecords().Where(x => x.ContextType == "Send");
+            sendRecords.Count().ShouldBe(1);
         }
 
         [OneTimeSetUp]
