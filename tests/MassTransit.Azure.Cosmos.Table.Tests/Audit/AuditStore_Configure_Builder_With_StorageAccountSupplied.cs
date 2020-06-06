@@ -29,9 +29,8 @@
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             var storageAccount = CloudStorageAccount.Parse(ConnectionString);
-            var tableClient = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            var table = tableClient.GetTableReference(AuditTableName);
-            configurator.UseAzureCosmosTableAuditStore(configure => configure.WithTable(table)
+            configurator.UseAzureCosmosTableAuditStore(configure => configure.WithStorageAccount(storageAccount)
+                                                                             .WithTableName(AuditTableName)
                                                                              .WithContextTypePartitionKeyStrategy()
                                                                              .WithNoMessageFilter()
                                                                              .Build());

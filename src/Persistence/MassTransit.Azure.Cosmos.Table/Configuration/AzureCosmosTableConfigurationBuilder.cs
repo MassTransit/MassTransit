@@ -5,10 +5,10 @@
 
 
     class AzureCosmosTableConfigurationBuilder : IAzureCosmosTableConfigurator,
-                                                        IPartitionKeyHolder,
-                                                        ITableNameHolder,
-                                                        IFilterHolder,
-                                                        IBuilder
+                                                 IPartitionKeyHolder,
+                                                 ITableNameHolder,
+                                                 IFilterHolder,
+                                                 IBuilder
     {
         string _accessKey;
         string _accountName;
@@ -16,15 +16,17 @@
         string _endpoint;
         Action<IMessageFilterConfigurator> _messageFilter;
         Func<string, AuditRecord, string> _partitionKeyStrategy;
+        CloudStorageAccount _storageAccount;
         CloudTable _table;
         CloudTableClient _tableClient;
         string _tableName;
 
         public ITableNameHolder WithAccessKey(string accountName, string accessKey, string endpoint)
         {
-            _accessKey = accessKey;
+            _accessKey   = accessKey;
             _accountName = accountName;
-            _endpoint = endpoint;
+            _endpoint    = endpoint;
+            _tableClient = new CloudTableClient(new Uri(_endpoint), new StorageCredentials(_accountName, _accessKey));
             return this;
         }
 
@@ -34,10 +36,24 @@
             return this;
         }
 
+        public ITableNameHolder WithStorageAccount(CloudStorageAccount storageAccount)
+        {
+            _storageAccount = storageAccount;
+            _tableClient = _storageAccount.CreateCloudTableClient(new TableClientConfiguration());
+            return this;
+        }
+
         public ITableNameHolder WithConnectionString(string connectionString)
         {
             _connectionString = connectionString;
+            _storageAccount = CloudStorageAccount.Parse(_connectionString);
+            _tableClient = _storageAccount.CreateCloudTableClient(new TableClientConfiguration());
             return this;
+        }
+
+        public AzureCosmosTableAuditBusObserver Build()
+        {
+            return new AzureCosmosTableAuditBusObserver(_table, _messageFilter, _partitionKeyStrategy);
         }
 
         public IBuilder WithMessageFilter(Action<IMessageFilterConfigurator> configureFilter)
@@ -71,32 +87,11 @@
             return this;
         }
 
-        public ITableNameHolder WithAccessKey(string accessKey, string endpoint)
-        {
-            _accessKey = accessKey;
-            _endpoint  = endpoint;
-            return this;
-        }
-
         CloudTable GetAuditCloudTable()
         {
-            CloudTableClient tableClient;
-            if (!string.IsNullOrEmpty(_connectionString))
-            {
-                var storageAccount = CloudStorageAccount.Parse(_connectionString);
-                tableClient = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
-            }
-            else
-                tableClient = new CloudTableClient(new Uri(_endpoint), new StorageCredentials(_accountName, _accessKey));
-
-            _table = tableClient.GetTableReference(_tableName);
+            _table = _tableClient.GetTableReference(_tableName);
             _table.CreateIfNotExists();
             return _table;
-        }
-
-        public AzureCosmosTableAuditBusObserver Build()
-        {
-            return new AzureCosmosTableAuditBusObserver(_table, _messageFilter, _partitionKeyStrategy);
         }
     }
 
@@ -106,6 +101,7 @@
         ITableNameHolder WithConnectionString(string connectionString);
         ITableNameHolder WithAccessKey(string accountName, string accessKey, string endpoint);
         IPartitionKeyHolder WithTable(CloudTable table);
+        ITableNameHolder WithStorageAccount(CloudStorageAccount storageAccount);
     }
 
 
