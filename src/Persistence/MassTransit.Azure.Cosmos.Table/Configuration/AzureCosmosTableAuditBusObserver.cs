@@ -17,11 +17,11 @@ namespace MassTransit.Azure.Cosmos.Table
         readonly CloudTable _table;
 
         public AzureCosmosTableAuditBusObserver(CloudTable table, Action<IMessageFilterConfigurator> filter,
-                                                Func<string, AuditRecord, string> partitionKeyStrategy)
+            Func<string, AuditRecord, string> partitionKeyStrategy)
         {
-            _table                = table;
+            _table = table;
             _partitionKeyStrategy = partitionKeyStrategy;
-            _filter               = filter;
+            _filter = filter;
         }
 
         public async Task PostCreate(IBus bus)

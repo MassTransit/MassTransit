@@ -37,10 +37,10 @@
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseAzureCosmosTableAuditStore(configure => configure.WithConnectionString(ConnectionString)
-                                                                             .WithTableName(AuditTableName)
-                                                                             .WithContextTypePartitionKeyStrategy()
-                                                                             .WithNoMessageFilter()
-                                                                             .Build());
+                .WithTableName(AuditTableName)
+                .WithContextTypePartitionKeyStrategy()
+                .WithNoMessageFilter()
+                .Build());
             base.ConfigureInMemoryBus(configurator);
         }
 
@@ -53,7 +53,7 @@
 
 
         class TestConsumer : IConsumer<A>,
-                             IConsumer<B>
+            IConsumer<B>
         {
             public Task Consume(ConsumeContext<A> context)
             {

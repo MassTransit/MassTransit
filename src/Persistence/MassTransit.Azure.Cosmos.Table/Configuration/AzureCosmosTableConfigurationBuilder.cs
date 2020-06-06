@@ -5,10 +5,10 @@
 
 
     class AzureCosmosTableConfigurationBuilder : IAzureCosmosTableConfigurator,
-                                                 IPartitionKeyHolder,
-                                                 ITableNameHolder,
-                                                 IFilterHolder,
-                                                 IBuilder
+        IPartitionKeyHolder,
+        ITableNameHolder,
+        IFilterHolder,
+        IBuilder
     {
         string _accessKey;
         string _accountName;
@@ -23,9 +23,9 @@
 
         public ITableNameHolder WithAccessKey(string accountName, string accessKey, string endpoint)
         {
-            _accessKey   = accessKey;
+            _accessKey = accessKey;
             _accountName = accountName;
-            _endpoint    = endpoint;
+            _endpoint = endpoint;
             _tableClient = new CloudTableClient(new Uri(_endpoint), new StorageCredentials(_accountName, _accessKey));
             return this;
         }
@@ -83,7 +83,7 @@
         public IPartitionKeyHolder WithTableName(string tableName)
         {
             _tableName = tableName;
-            _table     = GetAuditCloudTable();
+            _table = GetAuditCloudTable();
             return this;
         }
 

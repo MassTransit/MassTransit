@@ -13,17 +13,17 @@
     public class Configure_audit_store_bring_your_own_table :
         AzureCosmosTableInMemoryTestFixture
     {
-        [OneTimeSetUp]
-        public async Task SetUp()
-        {
-            await InputQueueSendEndpoint.Send(new A());
-        }
-
         [Test]
         public async Task Should_have_send_audit_records()
         {
             IEnumerable<AuditRecord> consumeRecords = AzureTableHelpers.GetAuditRecords().Where(x => x.ContextType == "Send");
             consumeRecords.Count().ShouldBe(1);
+        }
+
+        [OneTimeSetUp]
+        public async Task SetUp()
+        {
+            await InputQueueSendEndpoint.Send(new A());
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -32,9 +32,9 @@
             var tableClient = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
             var table = tableClient.GetTableReference(AuditTableName);
             configurator.UseAzureCosmosTableAuditStore(configure => configure.WithTable(table)
-                                                                             .WithContextTypePartitionKeyStrategy()
-                                                                             .WithNoMessageFilter()
-                                                                             .Build());
+                .WithContextTypePartitionKeyStrategy()
+                .WithNoMessageFilter()
+                .Build());
             base.ConfigureInMemoryBus(configurator);
         }
 

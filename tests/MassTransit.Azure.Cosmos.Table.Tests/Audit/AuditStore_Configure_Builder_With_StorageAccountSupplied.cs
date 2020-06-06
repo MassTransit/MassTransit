@@ -13,12 +13,6 @@
     public class Configure_audit_store_bring_your_own_storage_account :
         AzureCosmosTableInMemoryTestFixture
     {
-        [OneTimeSetUp]
-        public async Task SetUp()
-        {
-            await InputQueueSendEndpoint.Send(new A());
-        }
-
         [Test]
         public async Task Should_have_send_audit_records()
         {
@@ -26,14 +20,20 @@
             consumeRecords.Count().ShouldBe(1);
         }
 
+        [OneTimeSetUp]
+        public async Task SetUp()
+        {
+            await InputQueueSendEndpoint.Send(new A());
+        }
+
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             var storageAccount = CloudStorageAccount.Parse(ConnectionString);
             configurator.UseAzureCosmosTableAuditStore(configure => configure.WithStorageAccount(storageAccount)
-                                                                             .WithTableName(AuditTableName)
-                                                                             .WithContextTypePartitionKeyStrategy()
-                                                                             .WithNoMessageFilter()
-                                                                             .Build());
+                .WithTableName(AuditTableName)
+                .WithContextTypePartitionKeyStrategy()
+                .WithNoMessageFilter()
+                .Build());
             base.ConfigureInMemoryBus(configurator);
         }
 

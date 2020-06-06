@@ -32,10 +32,10 @@
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseAzureCosmosTableAuditStore(configure => configure.WithConnectionString(ConnectionString)
-                                                                             .WithTableName(AuditTableName)
-                                                                             .WithCustomPartitionKey((messageType, record) => PartitionKey)
-                                                                             .WithNoMessageFilter()
-                                                                             .Build());
+                .WithTableName(AuditTableName)
+                .WithCustomPartitionKey((messageType, record) => PartitionKey)
+                .WithNoMessageFilter()
+                .Build());
             base.ConfigureInMemoryBus(configurator);
         }
 

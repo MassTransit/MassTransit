@@ -12,7 +12,7 @@ namespace MassTransit.Azure.Cosmos.Table.Tests
         public AzureCosmosTableAuditStoreTestHelpers(string connectionString, string auditTableName)
         {
             var storageAccount = CloudStorageAccount.Parse(connectionString);
-            var tableClient    = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
+            var tableClient = storageAccount.CreateCloudTableClient(new TableClientConfiguration());
             _table = tableClient.GetTableReference(auditTableName);
             _table.CreateIfNotExists();
         }

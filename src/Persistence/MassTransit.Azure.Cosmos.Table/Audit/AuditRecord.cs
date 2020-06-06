@@ -28,30 +28,30 @@ namespace MassTransit.Azure.Cosmos.Table
         public string Message { get; set; }
 
         internal static AuditRecord Create<T>(T message, string messageType, MessageAuditMetadata metadata,
-                                              Func<string, AuditRecord, string> partitionKeyStrategy)
+            Func<string, AuditRecord, string> partitionKeyStrategy)
             where T : class
         {
             var record = new AuditRecord
-                         {
-                             RowKey =
-                                 $"{DateTime.MaxValue.Subtract(metadata.SentTime ?? DateTime.UtcNow).TotalMilliseconds}",
-                             ContextType        = metadata.ContextType,
-                             MessageId          = metadata.MessageId,
-                             ConversationId     = metadata.ConversationId,
-                             CorrelationId      = metadata.CorrelationId,
-                             InitiatorId        = metadata.InitiatorId,
-                             RequestId          = metadata.RequestId,
-                             SentTime           = metadata.SentTime,
-                             SourceAddress      = metadata.SourceAddress,
-                             InputAddress       = metadata.InputAddress,
-                             DestinationAddress = metadata.DestinationAddress,
-                             ResponseAddress    = metadata.ResponseAddress,
-                             FaultAddress       = metadata.FaultAddress,
-                             Headers            = JsonConvert.SerializeObject(metadata.Headers),
-                             Custom             = JsonConvert.SerializeObject(metadata.Custom),
-                             Message            = JsonConvert.SerializeObject(message),
-                             MessageType        = messageType
-                         };
+            {
+                RowKey =
+                    $"{DateTime.MaxValue.Subtract(metadata.SentTime ?? DateTime.UtcNow).TotalMilliseconds}",
+                ContextType = metadata.ContextType,
+                MessageId = metadata.MessageId,
+                ConversationId = metadata.ConversationId,
+                CorrelationId = metadata.CorrelationId,
+                InitiatorId = metadata.InitiatorId,
+                RequestId = metadata.RequestId,
+                SentTime = metadata.SentTime,
+                SourceAddress = metadata.SourceAddress,
+                InputAddress = metadata.InputAddress,
+                DestinationAddress = metadata.DestinationAddress,
+                ResponseAddress = metadata.ResponseAddress,
+                FaultAddress = metadata.FaultAddress,
+                Headers = JsonConvert.SerializeObject(metadata.Headers),
+                Custom = JsonConvert.SerializeObject(metadata.Custom),
+                Message = JsonConvert.SerializeObject(message),
+                MessageType = messageType
+            };
             record.PartitionKey = CleanDisallowedPartitionKeyCharacters(partitionKeyStrategy.Invoke(messageType, record));
             return record;
         }
@@ -63,12 +63,12 @@ namespace MassTransit.Azure.Cosmos.Table
         static string CleanDisallowedPartitionKeyCharacters(string candidatePartitionKey)
         {
             var disallowedCharacters = new HashSet<char>
-                                       {
-                                           '/',
-                                           '\\',
-                                           '#',
-                                           '?'
-                                       };
+            {
+                '/',
+                '\\',
+                '#',
+                '?'
+            };
             var key = new StringBuilder();
             foreach (var character in candidatePartitionKey)
             {
