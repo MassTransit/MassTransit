@@ -284,6 +284,11 @@ namespace MassTransit.Registration
             Registrar.RegisterSingleInstance(endpointNameFormatter);
         }
 
+        public void AddMessageScheduler(IMessageSchedulerRegistration registration)
+        {
+            registration.Register(Registrar);
+        }
+
         protected IRegistration CreateRegistration(IConfigurationServiceProvider provider)
         {
             return new Registration(provider, _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value),

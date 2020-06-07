@@ -202,6 +202,12 @@ namespace MassTransit
         /// </summary>
         /// <param name="endpointNameFormatter"></param>
         void SetEndpointNameFormatter(IEndpointNameFormatter endpointNameFormatter);
+
+        /// <summary>
+        /// Add a message scheduler to the container, using the specified scheduler factory
+        /// </summary>
+        /// <param name="registration"></param>
+        void AddMessageScheduler(IMessageSchedulerRegistration registration);
     }
 
 

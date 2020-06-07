@@ -3,6 +3,8 @@
     using System;
     using GreenPipes;
     using PipeConfigurators;
+    using Registration;
+    using Scheduling;
 
 
     public static class MessageSchedulerExtensions
@@ -36,6 +38,57 @@
             var pipeBuilderConfigurator = new PublishMessageSchedulerPipeSpecification();
 
             configurator.AddPipeSpecification(pipeBuilderConfigurator);
+        }
+
+        /// <summary>
+        /// Add a <see cref="IMessageScheduler" /> to the container that sends <see cref="ScheduleMessage{T}" />
+        /// to an external message scheduler on the specified endpoint address, such as Quartz or Hangfire.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="schedulerEndpointAddress">The endpoint address where the scheduler is running</param>
+        public static void AddMessageScheduler(this IRegistrationConfigurator configurator, Uri schedulerEndpointAddress)
+        {
+            if (schedulerEndpointAddress == null)
+                throw new ArgumentNullException(nameof(schedulerEndpointAddress));
+
+            configurator.AddMessageScheduler(new EndpointMessageSchedulerRegistration(schedulerEndpointAddress));
+        }
+
+        /// <summary>
+        /// Add a <see cref="IMessageScheduler" /> to the container that publishes <see cref="ScheduleMessage{T}" />
+        /// to an external message scheduler, such as Quartz or Hangfire.
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void AddPublishMessageScheduler(this IRegistrationConfigurator configurator)
+        {
+            configurator.AddMessageScheduler(new PublishEndpointMessageSchedulerRegistration());
+        }
+
+
+        class EndpointMessageSchedulerRegistration :
+            IMessageSchedulerRegistration
+        {
+            readonly Uri _schedulerEndpointAddress;
+
+            public EndpointMessageSchedulerRegistration(Uri schedulerEndpointAddress)
+            {
+                _schedulerEndpointAddress = schedulerEndpointAddress;
+            }
+
+            public void Register(IContainerRegistrar registrar)
+            {
+                registrar.RegisterSingleInstance(provider => provider.GetRequiredService<IBus>().CreateMessageScheduler(_schedulerEndpointAddress));
+            }
+        }
+
+
+        class PublishEndpointMessageSchedulerRegistration :
+            IMessageSchedulerRegistration
+        {
+            public void Register(IContainerRegistrar registrar)
+            {
+                registrar.RegisterSingleInstance(provider => provider.GetRequiredService<IBus>().CreateMessageScheduler());
+            }
         }
     }
 }

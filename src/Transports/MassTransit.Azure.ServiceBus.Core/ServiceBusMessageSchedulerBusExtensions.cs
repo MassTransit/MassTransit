@@ -1,6 +1,7 @@
-namespace MassTransit.Azure.ServiceBus.Core
+namespace MassTransit
 {
-    using MassTransit.Scheduling;
+    using Azure.ServiceBus.Core.Scheduling;
+    using Registration;
     using Scheduling;
 
 
@@ -17,6 +18,25 @@ namespace MassTransit.Azure.ServiceBus.Core
         public static IMessageScheduler CreateServiceBusMessageScheduler(this IBus bus)
         {
             return new MessageScheduler(new ServiceBusScheduleMessageProvider(bus), bus.Topology);
+        }
+
+        /// <summary>
+        /// Add a <see cref="IMessageScheduler" /> to the container that uses the Azure message enqueue time to schedule messages.
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void AddServiceBusMessageScheduler(this IRegistrationConfigurator configurator)
+        {
+            configurator.AddMessageScheduler(new MessageSchedulerRegistration());
+        }
+
+
+        class MessageSchedulerRegistration :
+            IMessageSchedulerRegistration
+        {
+            public void Register(IContainerRegistrar registrar)
+            {
+                registrar.RegisterSingleInstance(provider => provider.GetRequiredService<IBus>().CreateServiceBusMessageScheduler());
+            }
         }
     }
 }
