@@ -8,6 +8,7 @@
     using MassTransit.Configuration;
     using MassTransit.Configurators;
     using MassTransit.Topology;
+    using MassTransit.Topology.EntityNameFormatters;
     using Topology;
     using Topology.Settings;
     using Topology.Topologies;
@@ -19,6 +20,7 @@
         IAmazonSqsHostConfiguration
     {
         readonly IAmazonSqsBusConfiguration _busConfiguration;
+        readonly IAmazonSqsTopologyConfiguration _topologyConfiguration;
         readonly IAmazonSqsHostTopology _hostTopology;
         AmazonSqsHostSettings _hostSettings;
 
@@ -27,6 +29,7 @@
             : base(busConfiguration)
         {
             _busConfiguration = busConfiguration;
+            _topologyConfiguration = topologyConfiguration;
 
             _hostSettings = new ConfigurationHostSettings();
 
@@ -42,7 +45,19 @@
         public AmazonSqsHostSettings Settings
         {
             get => _hostSettings;
-            set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
+            set
+            {
+                _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
+
+                var hostAddress = new AmazonSqsHostAddress(value.HostAddress);
+
+                if (value.ScopeTopics && hostAddress.Scope != "/")
+                {
+                    var formatter = new PrefixEntityNameFormatter(_topologyConfiguration.Message.EntityNameFormatter, hostAddress.Scope.Trim('/') + "_");
+
+                    _topologyConfiguration.Message.SetEntityNameFormatter(formatter);
+                }
+            }
         }
 
         public IRetryPolicy ConnectionRetryPolicy

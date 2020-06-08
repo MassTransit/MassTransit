@@ -96,7 +96,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             Uri uri = address;
 
-            Assert.That(uri, Is.EqualTo(new Uri("amazonsqs://localhost/test/input&type=topic")));
+            Assert.That(uri, Is.EqualTo(new Uri("amazonsqs://localhost/test_input?type=topic")));
         }
 
         [Theory]

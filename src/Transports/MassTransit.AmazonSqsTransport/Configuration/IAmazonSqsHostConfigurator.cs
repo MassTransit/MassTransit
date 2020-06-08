@@ -32,7 +32,13 @@
         /// Set scope for AmazonSQS. Will be used as a prefix for queue/topic name
         /// </summary>
         /// <param name="scope"></param>
-        void Scope(string scope);
+        /// <param name="scopeTopics">If true, topics will be scoped to the host scope</param>
+        void Scope(string scope, bool scopeTopics = false);
+
+        /// <summary>
+        /// Enable the scoping of topics to use the host scope (specified via the <see cref="Scope"/> method.
+        /// </summary>
+        void EnableScopedTopics();
 
         /// <summary>
         /// Sets the default config for the connection to AmazonSQS

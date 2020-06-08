@@ -43,6 +43,8 @@ namespace MassTransit.AmazonSqsTransport.Configurators
 
         public AllowTransportHeader AllowTransportHeader { get; set; }
 
+        public bool ScopeTopics { get; set; }
+
         public Uri HostAddress => _hostAddress.Value;
 
         public IConnection CreateConnection()

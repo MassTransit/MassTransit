@@ -51,9 +51,17 @@ namespace MassTransit.AmazonSqsTransport.Configurators
             SetBasicCredentials();
         }
 
-        public void Scope(string scope)
+        public void Scope(string scope, bool scopeTopics)
         {
             _settings.Scope = scope;
+
+            if (scopeTopics)
+                EnableScopedTopics();
+        }
+
+        public void EnableScopedTopics()
+        {
+            _settings.ScopeTopics = true;
         }
 
         public void SecretKey(string secretKey)

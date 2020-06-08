@@ -65,7 +65,7 @@ namespace MassTransit.AmazonSqsTransport
                 case "topic":
                     ParseLeft(hostAddress, out Scheme, out Host, out Scope);
 
-                    Name = address.AbsolutePath;
+                    Name = Scope == "/" ? address.AbsolutePath : $"{Scope}_{address.AbsolutePath}";
                     Type = AddressType.Topic;
                     break;
 

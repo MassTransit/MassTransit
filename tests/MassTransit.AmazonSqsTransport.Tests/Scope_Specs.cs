@@ -5,7 +5,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using NUnit.Framework;
 
 
-    public class Sending_with_virtual_host : AmazonSqsTestFixture
+    public class Sending_with_virtual_host :
+        AmazonSqsTestFixture
     {
         Task<ConsumeContext<Ping>> _handled;
 
@@ -17,7 +18,6 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
         protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureAmazonSqsReceiveEndpoint(configurator);
             _handled = Handled<Ping>(configurator);
         }
 
@@ -25,7 +25,10 @@ namespace MassTransit.AmazonSqsTransport.Tests
         public async Task Should_be_able_to_handle()
         {
             await InputQueueSendEndpoint.Send<Ping>(new { });
-            await _handled;
+
+            ConsumeContext<Ping> context = await _handled;
+
+            Assert.That(context.DestinationAddress, Is.EqualTo(new Uri($"amazonsqs://localhost/test/{AmazonSqsTestHarness.InputQueueName}")));
         }
 
 
@@ -35,19 +38,19 @@ namespace MassTransit.AmazonSqsTransport.Tests
     }
 
 
-    public class Publishing_with_virtual_host : AmazonSqsTestFixture
+    public class Publishing_with_virtual_host :
+        AmazonSqsTestFixture
     {
         Task<ConsumeContext<Ping>> _handled;
 
         protected override void ConfigureAmazonSqsHost(IAmazonSqsHostConfigurator configurator)
         {
             base.ConfigureAmazonSqsHost(configurator);
-            configurator.Scope("test");
+            configurator.Scope("test", true);
         }
 
         protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {
-            base.ConfigureAmazonSqsReceiveEndpoint(configurator);
             _handled = Handled<Ping>(configurator);
         }
 
@@ -60,7 +63,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             var entityName = new AmazonSqsMessageNameFormatter().GetMessageName(typeof(Ping));
 
-            Assert.That(context.DestinationAddress, Is.EqualTo(new Uri($"amazonsqs://localhost/test/{entityName}")));
+            Assert.That(context.DestinationAddress, Is.EqualTo(new Uri($"amazonsqs://localhost/test_{entityName}?type=topic")));
         }
 
 
