@@ -49,8 +49,7 @@ namespace MassTransit.MartenIntegration.Tests
                 await updated;
             }
 
-            protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-                where T : class
+            protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .MartenRepository("server=localhost;port=5432;database=MartenTest;user id=postgres;password=Password12!;", r =>

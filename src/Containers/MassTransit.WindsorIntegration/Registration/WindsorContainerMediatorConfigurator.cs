@@ -14,7 +14,7 @@ namespace MassTransit.WindsorIntegration.Registration
         RegistrationConfigurator,
         IWindsorContainerMediatorConfigurator
     {
-        Action<IKernel, IReceiveEndpointConfigurator> _configure;
+        Action<MassTransit.IRegistration, IReceiveEndpointConfigurator> _configure;
 
         public WindsorContainerMediatorConfigurator(IWindsorContainer container)
             : base(new WindsorContainerMediatorRegistrar(container))
@@ -34,7 +34,7 @@ namespace MassTransit.WindsorIntegration.Registration
             {
                 container.Register(Component.For<IConfigurationServiceProvider>()
                     .ImplementedBy<WindsorConfigurationServiceProvider>()
-                    .LifestyleTransient());
+                    .LifestyleSingleton());
             }
 
             container.Register(
@@ -46,7 +46,7 @@ namespace MassTransit.WindsorIntegration.Registration
 
         public IWindsorContainer Container { get; }
 
-        public void ConfigureMediator(Action<IKernel, IReceiveEndpointConfigurator> configure)
+        public void ConfigureMediator(Action<MassTransit.IRegistration, IReceiveEndpointConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
@@ -63,9 +63,7 @@ namespace MassTransit.WindsorIntegration.Registration
 
             return Bus.Factory.CreateMediator(cfg =>
             {
-                _configure?.Invoke(kernel, cfg);
-
-                ConfigureMediator(cfg, provider);
+                base.ConfigureMediator(cfg, provider, _configure);
             });
         }
     }

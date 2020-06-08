@@ -1,11 +1,10 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration
 {
-    using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
 
 
-    public interface IServiceCollectionRiderConfigurator :
-        IRiderRegistrationConfigurator
+    public interface IServiceCollectionBusConfigurator :
+        IBusRegistrationConfigurator
     {
         IServiceCollection Collection { get; }
     }

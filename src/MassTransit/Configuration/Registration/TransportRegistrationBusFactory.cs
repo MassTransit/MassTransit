@@ -9,9 +9,8 @@ namespace MassTransit.Registration
     using Riders;
 
 
-    public abstract class TransportRegistrationBusFactory<TContainerContext> :
-        IRegistrationBusFactory<TContainerContext>
-        where TContainerContext : class
+    public abstract class TransportRegistrationBusFactory :
+        IRegistrationBusFactory
     {
         readonly IHostConfiguration _hostConfiguration;
 
@@ -20,10 +19,10 @@ namespace MassTransit.Registration
             _hostConfiguration = hostConfiguration;
         }
 
-        public abstract IBusInstance CreateBus(IRegistrationContext<TContainerContext> context, IEnumerable<IBusInstanceSpecification> specifications);
+        public abstract IBusInstance CreateBus(IRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications);
 
-        protected IBusInstance CreateBus<T, TConfigurator>(T configurator, IRegistrationContext<TContainerContext> context,
-            Action<IRegistrationContext<TContainerContext>, TConfigurator> configure, IEnumerable<IBusInstanceSpecification> specifications)
+        protected IBusInstance CreateBus<T, TConfigurator>(T configurator, IRegistrationContext context,
+            Action<IRegistrationContext, TConfigurator> configure, IEnumerable<IBusInstanceSpecification> specifications)
             where T : TConfigurator, IBusFactory
             where TConfigurator : IBusFactoryConfigurator
         {

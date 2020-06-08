@@ -73,8 +73,7 @@ namespace MassTransit.MartenIntegration.Tests
                 }
             }
 
-            protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-                where T : class
+            protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
             {
                 _connectionString = LocalDbConnectionStringProvider.GetLocalDbConnectionString();
 

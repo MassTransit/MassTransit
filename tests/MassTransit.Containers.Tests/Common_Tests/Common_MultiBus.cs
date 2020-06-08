@@ -33,8 +33,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         protected abstract HealthCheckService HealthCheckService { get; }
         protected abstract IEnumerable<IHostedService> HostedServices { get; }
 
-        protected static void ConfigureOne<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected static void ConfigureOne(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<Consumer1>();
             configurator.UsingInMemory((context, cfg) =>
@@ -45,8 +44,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             });
         }
 
-        protected static void ConfigureTwo<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected static void ConfigureTwo(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<Consumer2>();
             configurator.UsingInMemory((context, cfg) =>

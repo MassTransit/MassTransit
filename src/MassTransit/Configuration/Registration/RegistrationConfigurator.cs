@@ -311,12 +311,14 @@ namespace MassTransit.Registration
                 LogContext.ConfigureCurrentLogContext(loggerFactory);
         }
 
-        protected void ConfigureMediator(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider provider)
+        protected void ConfigureMediator(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider provider,
+            Action<IRegistration, IReceiveEndpointConfigurator> configure)
         {
             var registration = new Registration(provider, _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value),
                 _sagaRegistrations.ToDictionary(x => x.Key, x => x.Value), _executeActivityRegistrations.ToDictionary(x => x.Key, x => x.Value),
                 _activityRegistrations.ToDictionary(x => x.Key, x => x.Value), _endpointRegistrations.ToDictionary(x => x.Key, x => x.Value));
 
+            configure?.Invoke(registration, configurator);
             registration.ConfigureConsumers(configurator);
             registration.ConfigureSagas(configurator);
         }

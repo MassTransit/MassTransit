@@ -52,8 +52,7 @@ namespace MassTransit.NHibernateIntegration.Tests
                 await updated;
             }
 
-            protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-                where T : class
+            protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .NHibernateRepository();
@@ -112,8 +111,7 @@ namespace MassTransit.NHibernateIntegration.Tests
                 await updated;
             }
 
-            protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-                where T : class
+            protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .NHibernateRepository();

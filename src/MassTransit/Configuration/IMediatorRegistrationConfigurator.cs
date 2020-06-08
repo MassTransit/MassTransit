@@ -3,14 +3,13 @@ namespace MassTransit
     using System;
 
 
-    public interface IMediatorConfigurator<out TContainerContext> :
+    public interface IMediatorRegistrationConfigurator :
         IRegistrationConfigurator
-        where TContainerContext : class
     {
         /// <summary>
         /// Optionally configure the pipeline used by the mediator
         /// </summary>
         /// <param name="configure"></param>
-        void ConfigureMediator(Action<TContainerContext, IReceiveEndpointConfigurator> configure);
+        void ConfigureMediator(Action<IRegistration, IReceiveEndpointConfigurator> configure);
     }
 }

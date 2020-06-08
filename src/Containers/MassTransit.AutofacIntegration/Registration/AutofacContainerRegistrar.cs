@@ -58,8 +58,7 @@ namespace MassTransit.AutofacIntegration.Registration
         public void RegisterSagaRepository<TSaga>(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory)
             where TSaga : class, ISaga
         {
-            _builder.Register(context => repositoryFactory(context.Resolve<IConfigurationServiceProvider>()))
-                .SingleInstance();
+            RegisterSingleInstance(provider => repositoryFactory(provider));
         }
 
         void IContainerRegistrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>()
@@ -167,13 +166,13 @@ namespace MassTransit.AutofacIntegration.Registration
         public void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
-            _builder.Register(context => factoryMethod(context.Resolve<IConfigurationServiceProvider>()));
+            _builder.Register(context => factoryMethod(new AutofacConfigurationServiceProvider(context.Resolve<ILifetimeScope>())));
         }
 
         public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
-            _builder.Register(context => factoryMethod(context.Resolve<IConfigurationServiceProvider>())).SingleInstance();
+            _builder.Register(context => factoryMethod(new AutofacConfigurationServiceProvider(context.Resolve<ILifetimeScope>()))).SingleInstance();
         }
 
         public void RegisterSingleInstance<T>(T instance)

@@ -6,22 +6,17 @@ namespace MassTransit.Registration
     using Saga;
 
 
-    public class RegistrationContext<TContainerContext> :
-        IRegistrationContext<TContainerContext>
-        where TContainerContext : class
+    public class RegistrationContext :
+        IRegistrationContext
     {
         readonly BusHealth _busHealth;
         readonly IRegistration _registration;
 
-        public RegistrationContext(IRegistration registration, BusHealth busHealth, TContainerContext container)
+        public RegistrationContext(IRegistration registration, BusHealth busHealth)
         {
-            Container = container;
-
             _registration = registration;
             _busHealth = busHealth;
         }
-
-        public TContainerContext Container { get; }
 
         public void UseHealthCheck(IBusFactoryConfigurator configurator)
         {

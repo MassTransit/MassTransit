@@ -5,7 +5,7 @@ namespace MassTransit.SimpleInjectorIntegration
 
 
     public interface ISimpleInjectorMediatorConfigurator :
-        IMediatorConfigurator<Container>
+        IMediatorRegistrationConfigurator
     {
         Container Container { get; }
 

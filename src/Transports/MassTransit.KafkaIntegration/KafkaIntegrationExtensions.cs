@@ -10,23 +10,21 @@ namespace MassTransit
 
     public static class KafkaIntegrationExtensions
     {
-        public static void UsingKafka<TContainerContext>(this IRiderConfigurator<TContainerContext> configurator,
-            Action<IRiderRegistrationContext<TContainerContext>, IKafkaFactoryConfigurator> configure)
-            where TContainerContext : class
+        public static void UsingKafka(this IRiderRegistrationConfigurator configurator,
+            Action<IRiderRegistrationContext, IKafkaFactoryConfigurator> configure)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
             RegisterComponents(configurator.Registrar);
 
-            var factory = new KafkaRegistrationRiderFactory<TContainerContext>(configure);
+            var factory = new KafkaRegistrationRiderFactory(configure);
             configurator.SetRiderFactory(factory);
         }
 
-        public static void UsingKafka<TContainerContext>(this IRiderConfigurator<TContainerContext> configurator,
+        public static void UsingKafka(this IRiderRegistrationConfigurator configurator,
             ClientConfig clientConfig,
-            Action<IRiderRegistrationContext<TContainerContext>, IKafkaFactoryConfigurator> configure)
-            where TContainerContext : class
+            Action<IRiderRegistrationContext, IKafkaFactoryConfigurator> configure)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
@@ -35,7 +33,7 @@ namespace MassTransit
 
             RegisterComponents(configurator.Registrar);
 
-            var factory = new KafkaRegistrationRiderFactory<TContainerContext>(clientConfig, configure);
+            var factory = new KafkaRegistrationRiderFactory(clientConfig, configure);
             configurator.SetRiderFactory(factory);
         }
 

@@ -31,8 +31,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             await updated;
         }
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                 .InMemoryRepository();
@@ -84,8 +83,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             configurator.ConfigureSaga<TestInstance>(Registration);
         }
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                 .InMemoryRepository();

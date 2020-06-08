@@ -6,18 +6,17 @@ namespace MassTransit.Registration
     using Microsoft.Extensions.Logging;
 
 
-    public class RegistrationBusFactory<TContainerContext> :
-        IRegistrationBusFactory<TContainerContext>
-        where TContainerContext : class
+    public class RegistrationBusFactory :
+        IRegistrationBusFactory
     {
-        readonly Func<IRegistrationContext<TContainerContext>, IBusControl> _configure;
+        readonly Func<IRegistrationContext, IBusControl> _configure;
 
-        public RegistrationBusFactory(Func<IRegistrationContext<TContainerContext>, IBusControl> configure)
+        public RegistrationBusFactory(Func<IRegistrationContext, IBusControl> configure)
         {
             _configure = configure ?? throw new ArgumentNullException(nameof(configure));
         }
 
-        public IBusInstance CreateBus(IRegistrationContext<TContainerContext> context, IEnumerable<IBusInstanceSpecification> specifications)
+        public IBusInstance CreateBus(IRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
         {
             var loggerFactory = context.GetService<ILoggerFactory>();
             if (loggerFactory != null)

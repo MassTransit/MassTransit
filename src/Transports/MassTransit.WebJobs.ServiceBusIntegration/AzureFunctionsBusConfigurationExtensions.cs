@@ -23,7 +23,7 @@ namespace MassTransit
         /// </param>
         /// <param name="configureBus">Optional, configure the service bus settings</param>
         /// <returns></returns>
-        public static IServiceCollection AddMassTransitForAzureFunctions(this IServiceCollection services, Action<IServiceCollectionConfigurator> configure,
+        public static IServiceCollection AddMassTransitForAzureFunctions(this IServiceCollection services, Action<IServiceCollectionBusConfigurator> configure,
             Action<IServiceBusBusFactoryConfigurator> configureBus = default)
         {
             ConfigureApplicationInsights(services);
@@ -37,7 +37,7 @@ namespace MassTransit
 
                     x.UsingAzureServiceBus((context, cfg) =>
                     {
-                        var options = context.Container.GetRequiredService<IOptions<ServiceBusOptions>>();
+                        var options = context.GetRequiredService<IOptions<ServiceBusOptions>>();
 
                         options.Value.MessageHandlerOptions.AutoComplete = true;
 

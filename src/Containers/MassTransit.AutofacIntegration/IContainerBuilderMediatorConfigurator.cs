@@ -5,7 +5,7 @@ namespace MassTransit.AutofacIntegration
 
 
     public interface IContainerBuilderMediatorConfigurator :
-        IMediatorConfigurator<IComponentContext>
+        IMediatorRegistrationConfigurator
     {
         ContainerBuilder Builder { get; }
 

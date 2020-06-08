@@ -73,8 +73,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             foundId.HasValue.ShouldBe(true);
         }
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.AddSaga<SimpleSaga>()
                 .InMemoryRepository();
@@ -129,8 +128,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             foundId.HasValue.ShouldBe(true);
         }
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.AddSaga<SimpleSaga>()
                 .Endpoint(e => e.Name = "custom-endpoint-name")

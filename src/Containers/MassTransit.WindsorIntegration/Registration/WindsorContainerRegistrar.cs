@@ -60,8 +60,7 @@ namespace MassTransit.WindsorIntegration.Registration
         public void RegisterSagaRepository<TSaga>(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory)
             where TSaga : class, ISaga
         {
-            _container.Register(Component.For<ISagaRepository<TSaga>>().UsingFactoryMethod(provider =>
-                repositoryFactory(provider.Resolve<IConfigurationServiceProvider>())).LifestyleSingleton());
+            RegisterSingleInstance(provider => repositoryFactory(provider));
         }
 
         void IContainerRegistrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>()
@@ -180,7 +179,7 @@ namespace MassTransit.WindsorIntegration.Registration
         public void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
-            _container.Register(Component.For<T>().UsingFactoryMethod(kernel => factoryMethod(kernel.Resolve<IConfigurationServiceProvider>()))
+            _container.Register(Component.For<T>().UsingFactoryMethod(kernel => factoryMethod(new WindsorConfigurationServiceProvider(kernel)))
                 .LifestyleScoped());
         }
 
@@ -189,7 +188,7 @@ namespace MassTransit.WindsorIntegration.Registration
         {
             if (!_container.Kernel.HasComponent(typeof(T)))
             {
-                _container.Register(Component.For<T>().UsingFactoryMethod(kernel => factoryMethod(kernel.Resolve<IConfigurationServiceProvider>()))
+                _container.Register(Component.For<T>().UsingFactoryMethod(kernel => factoryMethod(new WindsorConfigurationServiceProvider(kernel)))
                     .LifestyleSingleton());
             }
         }

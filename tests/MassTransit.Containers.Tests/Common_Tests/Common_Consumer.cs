@@ -80,8 +80,7 @@
             configurator.ConfigureConsumer<SimplerConsumer>(Registration);
         }
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<SimplerConsumer>();
             configurator.AddBus(provider => BusControl);
@@ -158,8 +157,7 @@
             await clientB.GetResponse<Response>(new Request());
         }
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<ConsumerA>(typeof(ConsumerADefinition))
                 .Endpoint(x => x.Name = "shared");

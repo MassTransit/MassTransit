@@ -1,11 +1,8 @@
 namespace MassTransit
 {
-    public interface IRegistrationContext<out TContainerContext> :
+    public interface IRegistrationContext :
         IRegistration
-        where TContainerContext : class
     {
-        TContainerContext Container { get; }
-
         void UseHealthCheck(IBusFactoryConfigurator configurator);
     }
 }

@@ -8,14 +8,13 @@ namespace MassTransit
 
     public static class EventHubIntegrationExtensions
     {
-        public static void UsingEventHub<TContainerContext>(this IRiderConfigurator<TContainerContext> configurator,
-            Action<IRiderRegistrationContext<TContainerContext>, IEventHubFactoryConfigurator> configure)
-            where TContainerContext : class
+        public static void UsingEventHub(this IRiderRegistrationConfigurator configurator,
+            Action<IRiderRegistrationContext, IEventHubFactoryConfigurator> configure)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var factory = new EventHubRegistrationRiderFactory<TContainerContext>(configure);
+            var factory = new EventHubRegistrationRiderFactory(configure);
             configurator.SetRiderFactory(factory);
         }
     }

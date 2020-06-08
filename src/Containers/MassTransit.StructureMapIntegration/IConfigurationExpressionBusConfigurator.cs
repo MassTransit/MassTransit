@@ -3,8 +3,8 @@ namespace MassTransit.StructureMapIntegration
     using StructureMap;
 
 
-    public interface IConfigurationExpressionConfigurator :
-        IRegistrationConfigurator<IContext>
+    public interface IConfigurationExpressionBusConfigurator :
+        IBusRegistrationConfigurator
     {
         ConfigurationExpression Builder { get; }
     }

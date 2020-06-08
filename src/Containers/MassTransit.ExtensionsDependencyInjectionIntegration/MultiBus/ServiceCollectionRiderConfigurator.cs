@@ -17,7 +17,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
         {
         }
 
-        public override void SetRiderFactory<TRider>(IRegistrationRiderFactory<IServiceProvider, TRider> riderFactory)
+        public override void SetRiderFactory<TRider>(IRegistrationRiderFactory<TRider> riderFactory)
         {
             if (riderFactory == null)
                 throw new ArgumentNullException(nameof(riderFactory));
@@ -28,11 +28,10 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             Collection.AddSingleton(provider => Bind<TBus>.Create(provider.GetRequiredService<IBusInstance<TBus>>().GetRider<TRider>()));
         }
 
-        IRiderRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
+        IRiderRegistrationContext GetRegistrationContext(IServiceProvider provider)
         {
-            return new RiderRegistrationContext<IServiceProvider>(CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),
-                provider.GetRequiredService<Bind<TBus, BusHealth>>().Value,
-                provider);
+            return new RiderRegistrationContext(CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),
+                provider.GetRequiredService<Bind<TBus, BusHealth>>().Value);
         }
     }
 }

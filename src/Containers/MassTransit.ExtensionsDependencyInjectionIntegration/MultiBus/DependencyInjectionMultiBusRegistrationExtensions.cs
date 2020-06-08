@@ -34,7 +34,7 @@ namespace MassTransit.MultiBus
                     $"AddMassTransit<{typeof(TBus).Name},{typeof(TBusInstance).Name}>() was already called and may only be called once per container. To configure additional bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");
             }
 
-            var configurator = new ServiceCollectionConfigurator<TBus, TBusInstance>(collection);
+            var configurator = new ServiceCollectionBusConfigurator<TBus, TBusInstance>(collection);
 
             configure(configurator);
 

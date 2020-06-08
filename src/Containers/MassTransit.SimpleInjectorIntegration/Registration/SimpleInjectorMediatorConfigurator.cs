@@ -13,7 +13,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         RegistrationConfigurator,
         ISimpleInjectorMediatorConfigurator
     {
-        Action<Container, IReceiveEndpointConfigurator> _configure;
+        Action<IRegistration, IReceiveEndpointConfigurator> _configure;
 
         public SimpleInjectorMediatorConfigurator(Container container)
             : base(new SimpleInjectorContainerMediatorRegistrar(container))
@@ -31,7 +31,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             ConfigureMediator((_, cfg) => configure(cfg));
         }
 
-        public void ConfigureMediator(Action<Container, IReceiveEndpointConfigurator> configure)
+        public void ConfigureMediator(Action<IRegistration, IReceiveEndpointConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
@@ -48,9 +48,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             return Bus.Factory.CreateMediator(cfg =>
             {
-                _configure?.Invoke(Container, cfg);
-
-                ConfigureMediator(cfg, provider);
+                base.ConfigureMediator(cfg, provider, _configure);
             });
         }
 
@@ -62,7 +60,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
                 Lifestyle.Scoped);
 
             container.RegisterSingleton<IConsumerScopeProvider>(() => new SimpleInjectorConsumerScopeProvider(container));
-            container.Register<IConfigurationServiceProvider>(() => new SimpleInjectorConfigurationServiceProvider(container));
+            container.RegisterSingleton<IConfigurationServiceProvider>(() => new SimpleInjectorConfigurationServiceProvider(container));
         }
     }
 }

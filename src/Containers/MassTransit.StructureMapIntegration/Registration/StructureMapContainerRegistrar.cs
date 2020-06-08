@@ -53,7 +53,7 @@ namespace MassTransit.StructureMapIntegration.Registration
         public void RegisterSagaRepository<TSaga>(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory)
             where TSaga : class, ISaga
         {
-            _expression.For<ISagaRepository<TSaga>>().Use(provider => repositoryFactory(provider.GetInstance<IConfigurationServiceProvider>())).Singleton();
+            RegisterSingleInstance(provider => repositoryFactory(provider));
         }
 
         void IContainerRegistrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>()
@@ -145,13 +145,13 @@ namespace MassTransit.StructureMapIntegration.Registration
         public void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
-            _expression.For<T>().Use(context => factoryMethod(context.GetInstance<IConfigurationServiceProvider>()));
+            _expression.For<T>().Use(context => factoryMethod(new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>())));
         }
 
         public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
-            _expression.For<T>().Use(context => factoryMethod(context.GetInstance<IConfigurationServiceProvider>()));
+            _expression.For<T>().Use(context => factoryMethod(new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>())));
         }
 
         public void RegisterSingleInstance<T>(T instance)

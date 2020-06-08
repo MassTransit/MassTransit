@@ -13,7 +13,7 @@ namespace MassTransit.StructureMapIntegration.Registration
         IConfigurationExpressionMediatorConfigurator
     {
         readonly ConfigurationExpression _expression;
-        Action<IContext, IReceiveEndpointConfigurator> _configure;
+        Action<IRegistration, IReceiveEndpointConfigurator> _configure;
 
         public ConfigurationExpressionMediatorConfigurator(ConfigurationExpression expression)
             : base(new StructureMapContainerMediatorRegistrar(expression))
@@ -29,12 +29,13 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Singleton();
 
             expression.For<IConfigurationServiceProvider>()
-                .Use(context => new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>()));
+                .Use(context => new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>()))
+                .Singleton();
         }
 
         ConfigurationExpression IConfigurationExpressionMediatorConfigurator.Builder => _expression;
 
-        public void ConfigureMediator(Action<IContext, IReceiveEndpointConfigurator> configure)
+        public void ConfigureMediator(Action<IRegistration, IReceiveEndpointConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
@@ -51,9 +52,7 @@ namespace MassTransit.StructureMapIntegration.Registration
 
             return Bus.Factory.CreateMediator(cfg =>
             {
-                _configure?.Invoke(context, cfg);
-
-                ConfigureMediator(cfg, provider);
+                base.ConfigureMediator(cfg, provider, _configure);
             });
         }
 

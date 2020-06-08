@@ -56,12 +56,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         public void RegisterSagaRepository<TSaga>(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory)
             where TSaga : class, ISaga
         {
-            _container.RegisterSingleton(() =>
-            {
-                var configurationServiceProvider = _container.GetInstance<IConfigurationServiceProvider>();
-
-                return repositoryFactory(configurationServiceProvider);
-            });
+            RegisterSingleInstance(provider => repositoryFactory(provider));
         }
 
         void IContainerRegistrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>()
@@ -170,13 +165,13 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         public void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
-            _container.Register(() => factoryMethod(_container.GetInstance<IConfigurationServiceProvider>()));
+            _container.Register(() => factoryMethod(new SimpleInjectorConfigurationServiceProvider(_container)));
         }
 
         public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
-            _container.RegisterSingleton(() => factoryMethod(_container.GetInstance<IConfigurationServiceProvider>()));
+            _container.RegisterSingleton(() => factoryMethod(new SimpleInjectorConfigurationServiceProvider(_container)));
         }
 
         public void RegisterSingleInstance<T>(T instance)

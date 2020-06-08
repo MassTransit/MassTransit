@@ -16,7 +16,7 @@ namespace MassTransit.KafkaIntegration
         /// <param name="configurator"></param>
         /// <param name="topicName">The topic name</param>
         /// <typeparam name="T">The message type</typeparam>
-        public static void AddProducer<T>(this IRiderConfigurator configurator, string topicName)
+        public static void AddProducer<T>(this IRiderRegistrationConfigurator configurator, string topicName)
             where T : class
         {
             configurator.Registrar.Register(provider => GetProducer<Null, T>(topicName, provider));
@@ -29,7 +29,7 @@ namespace MassTransit.KafkaIntegration
         /// <param name="configurator"></param>
         /// <param name="address">The topic address</param>
         /// <typeparam name="T">The message type</typeparam>
-        public static void AddProducer<T>(this IRiderConfigurator configurator, Uri address)
+        public static void AddProducer<T>(this IRiderRegistrationConfigurator configurator, Uri address)
             where T : class
         {
             configurator.Registrar.Register(provider => GetProducer<Null, T>(address, provider));
@@ -43,7 +43,7 @@ namespace MassTransit.KafkaIntegration
         /// <param name="topicName">The topic name</param>
         /// <typeparam name="T">The message type</typeparam>
         /// <typeparam name="TKey">The key type</typeparam>
-        public static void AddProducer<TKey, T>(this IRiderConfigurator configurator, string topicName)
+        public static void AddProducer<TKey, T>(this IRiderRegistrationConfigurator configurator, string topicName)
             where T : class
         {
             configurator.Registrar.Register(provider => GetProducer<TKey, T>(topicName, provider));
@@ -57,7 +57,7 @@ namespace MassTransit.KafkaIntegration
         /// <param name="address">The topic address</param>
         /// <typeparam name="T">The message type</typeparam>
         /// <typeparam name="TKey">The key type</typeparam>
-        public static void AddProducer<TKey, T>(this IRiderConfigurator configurator, Uri address)
+        public static void AddProducer<TKey, T>(this IRiderRegistrationConfigurator configurator, Uri address)
             where T : class
         {
             configurator.Registrar.Register(provider => GetProducer<TKey, T>(address, provider));

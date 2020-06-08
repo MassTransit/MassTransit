@@ -19,9 +19,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="expression"></param>
         /// <param name="configure"></param>
-        public static void AddMassTransit(this ConfigurationExpression expression, Action<IConfigurationExpressionConfigurator> configure = null)
+        public static void AddMassTransit(this ConfigurationExpression expression, Action<IConfigurationExpressionBusConfigurator> configure = null)
         {
-            var configurator = new ConfigurationExpressionConfigurator(expression);
+            var configurator = new ConfigurationExpressionBusConfigurator(expression);
 
             configure?.Invoke(configurator);
         }

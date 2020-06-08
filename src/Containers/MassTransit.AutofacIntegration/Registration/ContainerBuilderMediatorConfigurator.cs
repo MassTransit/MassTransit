@@ -8,20 +8,20 @@ namespace MassTransit.AutofacIntegration.Registration
     using Scoping;
 
 
-    public class ContainerBuilderRegistrationMediatorConfigurator :
+    public class ContainerBuilderMediatorConfigurator :
         RegistrationConfigurator,
         IContainerBuilderMediatorConfigurator
     {
         readonly ContainerBuilder _builder;
         readonly AutofacContainerRegistrar _registrar;
-        Action<IComponentContext, IReceiveEndpointConfigurator> _configure;
+        Action<IRegistration, IReceiveEndpointConfigurator> _configure;
 
-        public ContainerBuilderRegistrationMediatorConfigurator(ContainerBuilder builder)
+        public ContainerBuilderMediatorConfigurator(ContainerBuilder builder)
             : this(builder, new AutofacContainerMediatorRegistrar(builder))
         {
         }
 
-        ContainerBuilderRegistrationMediatorConfigurator(ContainerBuilder builder, AutofacContainerRegistrar registrar)
+        ContainerBuilderMediatorConfigurator(ContainerBuilder builder, AutofacContainerRegistrar registrar)
             : base(registrar)
         {
             _builder = builder;
@@ -36,6 +36,7 @@ namespace MassTransit.AutofacIntegration.Registration
 
             builder.Register(context => new AutofacConfigurationServiceProvider(context.Resolve<ILifetimeScope>()))
                 .As<IConfigurationServiceProvider>()
+                .SingleInstance()
                 .IfNotRegistered(typeof(IConfigurationServiceProvider));
 
             builder.Register(MediatorFactory)
@@ -57,7 +58,7 @@ namespace MassTransit.AutofacIntegration.Registration
             set => _registrar.ConfigureScope = value;
         }
 
-        public void ConfigureMediator(Action<IComponentContext, IReceiveEndpointConfigurator> configure)
+        public void ConfigureMediator(Action<IRegistration, IReceiveEndpointConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
@@ -74,9 +75,7 @@ namespace MassTransit.AutofacIntegration.Registration
 
             return Bus.Factory.CreateMediator(cfg =>
             {
-                _configure?.Invoke(context, cfg);
-
-                ConfigureMediator(cfg, provider);
+                ConfigureMediator(cfg, provider, _configure);
             });
         }
 

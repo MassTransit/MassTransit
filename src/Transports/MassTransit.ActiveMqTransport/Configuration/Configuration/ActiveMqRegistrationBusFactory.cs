@@ -6,20 +6,19 @@ namespace MassTransit.ActiveMqTransport.Configuration
     using Registration;
 
 
-    public class ActiveMqRegistrationBusFactory<TContainerContext> :
-        TransportRegistrationBusFactory<TContainerContext>
-        where TContainerContext : class
+    public class ActiveMqRegistrationBusFactory :
+        TransportRegistrationBusFactory
     {
         readonly ActiveMqBusConfiguration _busConfiguration;
-        readonly Action<IRegistrationContext<TContainerContext>, IActiveMqBusFactoryConfigurator> _configure;
+        readonly Action<IRegistrationContext, IActiveMqBusFactoryConfigurator> _configure;
 
-        public ActiveMqRegistrationBusFactory(Action<IRegistrationContext<TContainerContext>, IActiveMqBusFactoryConfigurator> configure)
+        public ActiveMqRegistrationBusFactory(Action<IRegistrationContext, IActiveMqBusFactoryConfigurator> configure)
             : this(new ActiveMqBusConfiguration(new ActiveMqTopologyConfiguration(ActiveMqBusFactory.MessageTopology)), configure)
         {
         }
 
         ActiveMqRegistrationBusFactory(ActiveMqBusConfiguration busConfiguration,
-            Action<IRegistrationContext<TContainerContext>, IActiveMqBusFactoryConfigurator> configure)
+            Action<IRegistrationContext, IActiveMqBusFactoryConfigurator> configure)
             : base(busConfiguration.HostConfiguration)
         {
             _configure = configure;
@@ -27,7 +26,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
             _busConfiguration = busConfiguration;
         }
 
-        public override IBusInstance CreateBus(IRegistrationContext<TContainerContext> context, IEnumerable<IBusInstanceSpecification> specifications)
+        public override IBusInstance CreateBus(IRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
         {
             var configurator = new ActiveMqBusFactoryConfigurator(_busConfiguration);
 

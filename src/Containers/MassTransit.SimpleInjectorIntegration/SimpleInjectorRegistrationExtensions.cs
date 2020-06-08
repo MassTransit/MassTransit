@@ -20,7 +20,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="container"></param>
         /// <param name="configure"></param>
-        public static Container AddMassTransit(this Container container, Action<ISimpleInjectorConfigurator> configure = null)
+        public static Container AddMassTransit(this Container container, Action<ISimpleInjectorBusConfigurator> configure = null)
         {
             if (container.GetCurrentRegistrations().Any(d => d.ServiceType == typeof(IRegistration)))
             {
@@ -28,7 +28,7 @@ namespace MassTransit
                     "AddBus() was already called. To configure multiple bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");
             }
 
-            var configurator = new SimpleInjectorConfigurator(container);
+            var configurator = new SimpleInjectorBusConfigurator(container);
 
             configure?.Invoke(configurator);
 

@@ -9,19 +9,19 @@ namespace MassTransit.AutofacIntegration.Registration
     using Transports;
 
 
-    public class ContainerBuilderRegistrationConfigurator :
+    public class ContainerBuilderBusRegistrationConfigurator :
         RegistrationConfigurator,
-        IContainerBuilderConfigurator
+        IContainerBuilderBusConfigurator
     {
         readonly ContainerBuilder _builder;
         readonly AutofacContainerRegistrar _registrar;
 
-        public ContainerBuilderRegistrationConfigurator(ContainerBuilder builder)
+        public ContainerBuilderBusRegistrationConfigurator(ContainerBuilder builder)
             : this(builder, new AutofacContainerRegistrar(builder))
         {
         }
 
-        ContainerBuilderRegistrationConfigurator(ContainerBuilder builder, AutofacContainerRegistrar registrar)
+        ContainerBuilderBusRegistrationConfigurator(ContainerBuilder builder, AutofacContainerRegistrar registrar)
             : base(registrar)
         {
             _builder = builder;
@@ -61,6 +61,7 @@ namespace MassTransit.AutofacIntegration.Registration
 
             builder.Register(context => new AutofacConfigurationServiceProvider(context.Resolve<ILifetimeScope>()))
                 .As<IConfigurationServiceProvider>()
+                .SingleInstance()
                 .IfNotRegistered(typeof(IConfigurationServiceProvider));
 
             builder.Register(provider => CreateRegistration(provider.Resolve<IConfigurationServiceProvider>()))
@@ -74,7 +75,7 @@ namespace MassTransit.AutofacIntegration.Registration
             set => _registrar.ScopeName = value;
         }
 
-        ContainerBuilder IContainerBuilderConfigurator.Builder => _builder;
+        ContainerBuilder IContainerBuilderBusConfigurator.Builder => _builder;
 
         public Action<ContainerBuilder, ConsumeContext> ConfigureScope
         {
@@ -82,7 +83,7 @@ namespace MassTransit.AutofacIntegration.Registration
             set => _registrar.ConfigureScope = value;
         }
 
-        public void AddBus(Func<IRegistrationContext<IComponentContext>, IBusControl> busFactory)
+        public void AddBus(Func<IRegistrationContext, IBusControl> busFactory)
         {
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
@@ -96,23 +97,23 @@ namespace MassTransit.AutofacIntegration.Registration
         }
 
         public void SetBusFactory<T>(T busFactory)
-            where T : IRegistrationBusFactory<IComponentContext>
+            where T : IRegistrationBusFactory
         {
             throw new NotImplementedException();
         }
 
-        public void AddRider(Action<IRiderConfigurator<IComponentContext>> configure)
+        public void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
             throw new NotImplementedException();
         }
 
-        IBusControl BusFactory(IComponentContext componentContext, Func<IRegistrationContext<IComponentContext>, IBusControl> busFactory)
+        IBusControl BusFactory(IComponentContext componentContext, Func<IRegistrationContext, IBusControl> busFactory)
         {
             var provider = componentContext.Resolve<IConfigurationServiceProvider>();
 
             ConfigureLogContext(provider);
 
-            IRegistrationContext<IComponentContext> context = GetRegistrationContext(componentContext);
+            var context = GetRegistrationContext(componentContext);
 
             return busFactory(context);
         }
@@ -140,12 +141,11 @@ namespace MassTransit.AutofacIntegration.Registration
             return new PublishEndpoint(new ScopedPublishEndpointProvider<ILifetimeScope>(context.Resolve<IBus>(), context.Resolve<ILifetimeScope>()));
         }
 
-        IRegistrationContext<IComponentContext> GetRegistrationContext(IComponentContext context)
+        IRegistrationContext GetRegistrationContext(IComponentContext context)
         {
-            return new RegistrationContext<IComponentContext>(
+            return new RegistrationContext(
                 CreateRegistration(context.Resolve<IConfigurationServiceProvider>()),
-                context.Resolve<BusHealth>(),
-                context
+                context.Resolve<BusHealth>()
             );
         }
     }

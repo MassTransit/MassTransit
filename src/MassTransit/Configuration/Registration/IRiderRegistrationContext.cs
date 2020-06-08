@@ -3,12 +3,9 @@ namespace MassTransit.Registration
     using Riders;
 
 
-    public interface IRiderRegistrationContext<out TContainerContext> :
+    public interface IRiderRegistrationContext :
         IRegistration
-        where TContainerContext : class
     {
-        TContainerContext Container { get; }
-
         void UseHealthCheck(IRiderFactoryConfigurator configurator);
     }
 }

@@ -4,8 +4,8 @@ namespace MassTransit.AutofacIntegration
     using Autofac;
 
 
-    public interface IContainerBuilderConfigurator :
-        IRegistrationConfigurator<IComponentContext>
+    public interface IContainerBuilderBusConfigurator :
+        IBusRegistrationConfigurator
     {
         ContainerBuilder Builder { get; }
 

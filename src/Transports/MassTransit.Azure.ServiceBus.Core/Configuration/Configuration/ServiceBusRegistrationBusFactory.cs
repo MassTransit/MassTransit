@@ -6,20 +6,19 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
     using Registration;
 
 
-    public class ServiceBusRegistrationBusFactory<TContainerContext> :
-        TransportRegistrationBusFactory<TContainerContext>
-        where TContainerContext : class
+    public class ServiceBusRegistrationBusFactory :
+        TransportRegistrationBusFactory
     {
         readonly ServiceBusBusConfiguration _busConfiguration;
-        readonly Action<IRegistrationContext<TContainerContext>, IServiceBusBusFactoryConfigurator> _configure;
+        readonly Action<IRegistrationContext, IServiceBusBusFactoryConfigurator> _configure;
 
-        public ServiceBusRegistrationBusFactory(Action<IRegistrationContext<TContainerContext>, IServiceBusBusFactoryConfigurator> configure)
+        public ServiceBusRegistrationBusFactory(Action<IRegistrationContext, IServiceBusBusFactoryConfigurator> configure)
             : this(new ServiceBusBusConfiguration(new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology)), configure)
         {
         }
 
         ServiceBusRegistrationBusFactory(ServiceBusBusConfiguration busConfiguration,
-            Action<IRegistrationContext<TContainerContext>, IServiceBusBusFactoryConfigurator> configure)
+            Action<IRegistrationContext, IServiceBusBusFactoryConfigurator> configure)
             : base(busConfiguration.HostConfiguration)
         {
             _configure = configure;
@@ -27,7 +26,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
             _busConfiguration = busConfiguration;
         }
 
-        public override IBusInstance CreateBus(IRegistrationContext<TContainerContext> context, IEnumerable<IBusInstanceSpecification> specifications)
+        public override IBusInstance CreateBus(IRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
         {
             var configurator = new ServiceBusBusFactoryConfigurator(_busConfiguration);
 

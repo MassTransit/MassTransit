@@ -12,13 +12,13 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
     using Transports;
 
 
-    public class ServiceCollectionConfigurator<TBus, TBusInstance> :
-        ServiceCollectionConfigurator,
+    public class ServiceCollectionBusConfigurator<TBus, TBusInstance> :
+        ServiceCollectionBusConfigurator,
         IServiceCollectionConfigurator<TBus>
         where TBus : class, IBus
         where TBusInstance : BusInstance<TBus>, TBus
     {
-        public ServiceCollectionConfigurator(IServiceCollection collection)
+        public ServiceCollectionBusConfigurator(IServiceCollection collection)
             : base(collection, new DependencyInjectionContainerRegistrar<TBus>(collection))
         {
             collection.AddSingleton(provider => Bind<TBus>.Create(GetSendEndpointProvider(provider)));
@@ -32,9 +32,9 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             collection.AddSingleton(provider => Bind<TBus>.Create(CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>())));
         }
 
-        public override void AddBus(Func<IRegistrationContext<IServiceProvider>, IBusControl> busFactory)
+        public override void AddBus(Func<IRegistrationContext, IBusControl> busFactory)
         {
-            SetBusFactory(new RegistrationBusFactory<IServiceProvider>(busFactory));
+            SetBusFactory(new RegistrationBusFactory(busFactory));
         }
 
         public override void SetBusFactory<T>(T busFactory)
@@ -50,14 +50,14 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value.BusInstance);
         }
 
-        public override void AddRider(Action<IRiderConfigurator<IServiceProvider>> configure)
+        public override void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
             var configurator = new ServiceCollectionRiderConfigurator<TBus>(Collection, Registrar);
             configure?.Invoke(configurator);
         }
 
         IBusInstance<TBus> CreateBus<T>(T busFactory, IServiceProvider provider)
-            where T : IRegistrationBusFactory<IServiceProvider>
+            where T : IRegistrationBusFactory
         {
             IEnumerable<IBusInstanceSpecification> specifications = provider.GetServices<Bind<TBus, IBusInstanceSpecification>>().Select(x => x.Value);
 
@@ -78,12 +78,11 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             return new PublishEndpoint(new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<TBus>(), provider));
         }
 
-        IRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
+        IRegistrationContext GetRegistrationContext(IServiceProvider provider)
         {
-            return new RegistrationContext<IServiceProvider>(
+            return new RegistrationContext(
                 CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),
-                provider.GetRequiredService<Bind<TBus, BusHealth>>().Value,
-                provider);
+                provider.GetRequiredService<Bind<TBus, BusHealth>>().Value);
         }
     }
 }

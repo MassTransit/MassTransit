@@ -32,9 +32,9 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             configurator.ConfigureServiceEndpoints(GetRegistrationContext(), Options);
         }
 
-        IRegistrationContext<IComponentContext> GetRegistrationContext()
+        IRegistrationContext GetRegistrationContext()
         {
-            return new RegistrationContext<IComponentContext>(_container.Resolve<IRegistration>(), _container.Resolve<BusHealth>(), _container);
+            return new RegistrationContext(_container.Resolve<IRegistration>(), _container.Resolve<BusHealth>());
         }
 
         protected override IClientFactory GetClientFactory()

@@ -3,10 +3,9 @@ namespace MassTransit.Registration
     using Riders;
 
 
-    public interface IRegistrationRiderFactory<in TContainerContext, in TRider>
-        where TContainerContext : class
+    public interface IRegistrationRiderFactory<in TRider>
         where TRider : IRider
     {
-        IBusInstanceSpecification CreateRider(IRiderRegistrationContext<TContainerContext> context);
+        IBusInstanceSpecification CreateRider(IRiderRegistrationContext context);
     }
 }

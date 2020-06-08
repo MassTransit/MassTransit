@@ -22,12 +22,10 @@
         /// </summary>
         /// <param name="configurator">The registration configurator (configured via AddMassTransit)</param>
         /// <param name="configure">The configuration callback for the bus factory</param>
-        /// <typeparam name="T">The container context type</typeparam>
-        public static void UsingAzureServiceBus<T>(this IRegistrationConfigurator<T> configurator,
-            Action<IRegistrationContext<T>, IServiceBusBusFactoryConfigurator> configure = null)
-            where T : class
+        public static void UsingAzureServiceBus(this IBusRegistrationConfigurator configurator,
+            Action<IRegistrationContext, IServiceBusBusFactoryConfigurator> configure = null)
         {
-            configurator.SetBusFactory(new ServiceBusRegistrationBusFactory<T>(configure));
+            configurator.SetBusFactory(new ServiceBusRegistrationBusFactory(configure));
         }
     }
 }

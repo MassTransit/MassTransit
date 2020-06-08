@@ -81,8 +81,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                     .BuildServiceProvider();
             }
 
-            protected void ConfigureRegistration<TContainerContext>(IRegistrationConfigurator<TContainerContext> configurator)
-                where TContainerContext : class
+            protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .EntityFrameworkRepository(r =>
@@ -163,8 +162,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                     .BuildServiceProvider();
             }
 
-            protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-                where T : class
+            protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .EntityFrameworkRepository(r =>

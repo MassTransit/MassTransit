@@ -21,7 +21,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="builder"></param>
         /// <param name="configure"></param>
-        public static ContainerBuilder AddMassTransit(this ContainerBuilder builder, Action<IContainerBuilderConfigurator> configure = null)
+        public static ContainerBuilder AddMassTransit(this ContainerBuilder builder, Action<IContainerBuilderBusConfigurator> configure = null)
         {
             if (builder.ComponentRegistryBuilder.IsRegistered(new TypedService(typeof(IRegistration))))
             {
@@ -29,7 +29,7 @@ namespace MassTransit
                     "AddBus() was already called. To configure multiple bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");
             }
 
-            var configurator = new ContainerBuilderRegistrationConfigurator(builder);
+            var configurator = new ContainerBuilderBusRegistrationConfigurator(builder);
 
             configure?.Invoke(configurator);
 
@@ -46,7 +46,7 @@ namespace MassTransit
             if (builder.ComponentRegistryBuilder.IsRegistered(new TypedService(typeof(IMediator))))
                 throw new ConfigurationException("AddMediator() was already called and may only be called once per container.");
 
-            var configurator = new ContainerBuilderRegistrationMediatorConfigurator(builder);
+            var configurator = new ContainerBuilderMediatorConfigurator(builder);
 
             configure?.Invoke(configurator);
 

@@ -20,12 +20,10 @@
         /// </summary>
         /// <param name="configurator">The registration configurator (configured via AddMassTransit)</param>
         /// <param name="configure">The configuration callback for the bus factory</param>
-        /// <typeparam name="T"></typeparam>
-        public static void UsingAmazonSqs<T>(this IRegistrationConfigurator<T> configurator,
-            Action<IRegistrationContext<T>, IAmazonSqsBusFactoryConfigurator> configure = null)
-            where T : class
+        public static void UsingAmazonSqs(this IBusRegistrationConfigurator configurator,
+            Action<IRegistrationContext, IAmazonSqsBusFactoryConfigurator> configure = null)
         {
-            configurator.SetBusFactory(new AmazonSqsRegistrationBusFactory<T>(configure));
+            configurator.SetBusFactory(new AmazonSqsRegistrationBusFactory(configure));
         }
     }
 }

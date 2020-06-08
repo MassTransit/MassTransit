@@ -45,12 +45,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         void IContainerRegistrar.RegisterSagaRepository<TSaga>(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory)
         {
-            _collection.AddSingleton(provider =>
-            {
-                var configurationServiceProvider = provider.GetRequiredService<IConfigurationServiceProvider>();
-
-                return repositoryFactory(configurationServiceProvider);
-            });
+            RegisterSingleInstance(provider => repositoryFactory(provider));
         }
 
         void IContainerRegistrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>()
@@ -141,15 +136,17 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         public void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
-            _collection.TryAddScoped(provider => factoryMethod(provider.GetRequiredService<IConfigurationServiceProvider>()));
+            _collection.TryAddScoped(provider => factoryMethod(new DependencyInjectionConfigurationServiceProvider(provider)));
         }
 
-        void IContainerRegistrar.RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+        public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
+            where T : class
         {
-            _collection.TryAddSingleton(provider => factoryMethod(provider.GetRequiredService<IConfigurationServiceProvider>()));
+            _collection.TryAddSingleton(provider => factoryMethod(new DependencyInjectionConfigurationServiceProvider(provider)));
         }
 
-        void IContainerRegistrar.RegisterSingleInstance<T>(T instance)
+        public void RegisterSingleInstance<T>(T instance)
+            where T : class
         {
             _collection.TryAddSingleton(instance);
         }

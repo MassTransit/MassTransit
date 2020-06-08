@@ -32,9 +32,9 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             configurator.ConfigureServiceEndpoints(GetRegistrationContext(), Options);
         }
 
-        IRegistrationContext<IServiceContext> GetRegistrationContext()
+        IRegistrationContext GetRegistrationContext()
         {
-            return new RegistrationContext<IServiceContext>(_container.GetInstance<IRegistration>(), _container.GetInstance<BusHealth>(), _container);
+            return new RegistrationContext(_container.GetInstance<IRegistration>(), _container.GetInstance<BusHealth>());
         }
 
         protected override IClientFactory GetClientFactory()

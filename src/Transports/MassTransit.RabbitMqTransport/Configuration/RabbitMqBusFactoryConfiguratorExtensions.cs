@@ -20,12 +20,10 @@
         /// </summary>
         /// <param name="configurator">The registration configurator (configured via AddMassTransit)</param>
         /// <param name="configure">The configuration callback for the bus factory</param>
-        /// <typeparam name="T"></typeparam>
-        public static void UsingRabbitMq<T>(this IRegistrationConfigurator<T> configurator,
-            Action<IRegistrationContext<T>, IRabbitMqBusFactoryConfigurator> configure = null)
-            where T : class
+        public static void UsingRabbitMq(this IBusRegistrationConfigurator configurator,
+            Action<IRegistrationContext, IRabbitMqBusFactoryConfigurator> configure = null)
         {
-            configurator.SetBusFactory(new RabbitMqRegistrationBusFactory<T>(configure));
+            configurator.SetBusFactory(new RabbitMqRegistrationBusFactory(configure));
         }
     }
 }

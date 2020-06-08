@@ -10,13 +10,13 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using Transports;
 
 
-    public class SimpleInjectorConfigurator :
+    public class SimpleInjectorBusConfigurator :
         RegistrationConfigurator,
-        ISimpleInjectorConfigurator
+        ISimpleInjectorBusConfigurator
     {
         readonly Lifestyle _hybridLifestyle;
 
-        public SimpleInjectorConfigurator(Container container)
+        public SimpleInjectorBusConfigurator(Container container)
             : base(new SimpleInjectorContainerRegistrar(container))
         {
             Container = container;
@@ -46,7 +46,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             AddBus(_ => busFactory());
         }
 
-        public void AddBus(Func<IRegistrationContext<Container>, IBusControl> busFactory)
+        public void AddBus(Func<IRegistrationContext, IBusControl> busFactory)
         {
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
@@ -59,7 +59,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
                 ConfigureLogContext(provider);
 
-                IRegistrationContext<Container> context = GetRegistrationContext();
+                var context = GetRegistrationContext();
 
                 return busFactory(context);
             }
@@ -69,12 +69,12 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         }
 
         public void SetBusFactory<T>(T busFactory)
-            where T : IRegistrationBusFactory<Container>
+            where T : IRegistrationBusFactory
         {
             throw new NotImplementedException();
         }
 
-        public void AddRider(Action<IRiderConfigurator<Container>> configure)
+        public void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
             throw new NotImplementedException();
         }
@@ -91,12 +91,11 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<Container>(Container.GetInstance<IBus>(), Container));
         }
 
-        IRegistrationContext<Container> GetRegistrationContext()
+        IRegistrationContext GetRegistrationContext()
         {
-            return new RegistrationContext<Container>(
+            return new RegistrationContext(
                 CreateRegistration(Container.GetInstance<IConfigurationServiceProvider>()),
-                Container.GetInstance<BusHealth>(),
-                Container
+                Container.GetInstance<BusHealth>()
             );
         }
 
@@ -112,7 +111,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             container.Register(GetPublishEndpoint, _hybridLifestyle);
 
             container.RegisterSingleton<IConsumerScopeProvider>(() => new SimpleInjectorConsumerScopeProvider(container));
-            container.Register<IConfigurationServiceProvider>(() => new SimpleInjectorConfigurationServiceProvider(container));
+            container.RegisterSingleton<IConfigurationServiceProvider>(() => new SimpleInjectorConfigurationServiceProvider(container));
         }
     }
 }

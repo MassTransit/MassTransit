@@ -37,8 +37,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(ReferenceEquals(messageConsumeContext, sendEndpointProvider), "ReferenceEquals(messageConsumeContext, sendEndpointProvider)");
         }
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<DependentConsumer>();
             configurator.AddBus(provider => BusControl);
@@ -90,8 +89,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
         }
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<DependentConsumer>();
             configurator.AddBus(provider => BusControl);
@@ -145,8 +143,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
         }
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<FlyingSoloConsumer>();
             configurator.AddBus(provider => BusControl);

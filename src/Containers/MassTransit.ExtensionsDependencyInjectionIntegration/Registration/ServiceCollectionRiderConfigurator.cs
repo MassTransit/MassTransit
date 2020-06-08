@@ -19,7 +19,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         public IServiceCollection Collection { get; }
 
-        public virtual void SetRiderFactory<TRider>(IRegistrationRiderFactory<IServiceProvider, TRider> riderFactory)
+        public virtual void SetRiderFactory<TRider>(IRegistrationRiderFactory<TRider> riderFactory)
             where TRider : class, IRider
         {
             if (riderFactory == null)
@@ -32,11 +32,10 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, TRider>>().Value);
         }
 
-        IRiderRegistrationContext<IServiceProvider> GetRegistrationContext(IServiceProvider provider)
+        IRiderRegistrationContext GetRegistrationContext(IServiceProvider provider)
         {
-            return new RiderRegistrationContext<IServiceProvider>(CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),
-                provider.GetRequiredService<BusHealth>(),
-                provider);
+            return new RiderRegistrationContext(CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),
+                provider.GetRequiredService<BusHealth>());
         }
     }
 }

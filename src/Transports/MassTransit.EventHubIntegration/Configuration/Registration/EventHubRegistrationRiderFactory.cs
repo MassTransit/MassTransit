@@ -6,18 +6,17 @@ namespace MassTransit.EventHubIntegration.Registration
     using Transport;
 
 
-    public class EventHubRegistrationRiderFactory<TContainerContext> :
-        RegistrationRiderFactory<TContainerContext, IEventHubRider>
-        where TContainerContext : class
+    public class EventHubRegistrationRiderFactory :
+        RegistrationRiderFactory<IEventHubRider>
     {
-        readonly Action<IRiderRegistrationContext<TContainerContext>, IEventHubFactoryConfigurator> _configure;
+        readonly Action<IRiderRegistrationContext, IEventHubFactoryConfigurator> _configure;
 
-        public EventHubRegistrationRiderFactory(Action<IRiderRegistrationContext<TContainerContext>, IEventHubFactoryConfigurator> configure)
+        public EventHubRegistrationRiderFactory(Action<IRiderRegistrationContext, IEventHubFactoryConfigurator> configure)
         {
             _configure = configure;
         }
 
-        public override IBusInstanceSpecification CreateRider(IRiderRegistrationContext<TContainerContext> context)
+        public override IBusInstanceSpecification CreateRider(IRiderRegistrationContext context)
         {
             var configurator = new EventHubFactoryConfigurator();
 

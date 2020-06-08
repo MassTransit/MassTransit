@@ -106,8 +106,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             configurator.ConfigureConsumer<SimplerConsumer>(Registration);
         }
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<SimplerConsumer>();
             configurator.AddBus(provider => BusControl);

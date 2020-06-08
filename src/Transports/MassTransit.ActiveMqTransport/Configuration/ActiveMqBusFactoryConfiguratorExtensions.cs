@@ -19,12 +19,10 @@
         /// </summary>
         /// <param name="configurator">The registration configurator (configured via AddMassTransit)</param>
         /// <param name="configure">The configuration callback for the bus factory</param>
-        /// <typeparam name="T"></typeparam>
-        public static void UsingActiveMq<T>(this IRegistrationConfigurator<T> configurator,
-            Action<IRegistrationContext<T>, IActiveMqBusFactoryConfigurator> configure = null)
-            where T : class
+        public static void UsingActiveMq(this IBusRegistrationConfigurator configurator,
+            Action<IRegistrationContext, IActiveMqBusFactoryConfigurator> configure = null)
         {
-            configurator.SetBusFactory(new ActiveMqRegistrationBusFactory<T>(configure));
+            configurator.SetBusFactory(new ActiveMqRegistrationBusFactory(configure));
         }
     }
 }

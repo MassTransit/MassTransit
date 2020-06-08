@@ -6,20 +6,19 @@ namespace MassTransit.Transports.InMemory.Configuration
     using Registration;
 
 
-    public class InMemoryRegistrationBusFactory<TContainerContext> :
-        TransportRegistrationBusFactory<TContainerContext>
-        where TContainerContext : class
+    public class InMemoryRegistrationBusFactory :
+        TransportRegistrationBusFactory
     {
         readonly InMemoryBusConfiguration _busConfiguration;
-        readonly Action<IRegistrationContext<TContainerContext>, IInMemoryBusFactoryConfigurator> _configure;
+        readonly Action<IRegistrationContext, IInMemoryBusFactoryConfigurator> _configure;
 
-        public InMemoryRegistrationBusFactory(Uri baseAddress, Action<IRegistrationContext<TContainerContext>, IInMemoryBusFactoryConfigurator> configure)
+        public InMemoryRegistrationBusFactory(Uri baseAddress, Action<IRegistrationContext, IInMemoryBusFactoryConfigurator> configure)
             : this(new InMemoryBusConfiguration(new InMemoryTopologyConfiguration(InMemoryBus.MessageTopology), baseAddress), configure)
         {
         }
 
         InMemoryRegistrationBusFactory(InMemoryBusConfiguration busConfiguration,
-            Action<IRegistrationContext<TContainerContext>, IInMemoryBusFactoryConfigurator> configure)
+            Action<IRegistrationContext, IInMemoryBusFactoryConfigurator> configure)
             : base(busConfiguration.HostConfiguration)
         {
             _configure = configure;
@@ -27,7 +26,7 @@ namespace MassTransit.Transports.InMemory.Configuration
             _busConfiguration = busConfiguration;
         }
 
-        public override IBusInstance CreateBus(IRegistrationContext<TContainerContext> context, IEnumerable<IBusInstanceSpecification> specifications)
+        public override IBusInstance CreateBus(IRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
         {
             var configurator = new InMemoryBusFactoryConfigurator(_busConfiguration);
 

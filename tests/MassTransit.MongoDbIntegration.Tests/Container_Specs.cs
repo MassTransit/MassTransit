@@ -55,8 +55,7 @@ namespace MassTransit.MongoDbIntegration.Tests
                     .BuildServiceProvider();
             }
 
-            protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-                where T : class
+            protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .MongoDbRepository(r =>

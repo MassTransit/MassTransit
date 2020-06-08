@@ -13,7 +13,7 @@
         /// released/sent until the ambient transaction is committed. This is only meant to be used outside of a consumer.
         /// If you want an outbox for Consumers, it is recommended to use the InMemoryOutbox.
         /// </summary>
-        public static void AddTransactionOutbox(this ISimpleInjectorConfigurator builder)
+        public static void AddTransactionOutbox(this ISimpleInjectorBusConfigurator builder)
         {
             builder.Container
                 .RegisterSingleton(() =>

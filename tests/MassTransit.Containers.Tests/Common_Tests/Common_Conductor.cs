@@ -50,8 +50,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected abstract IClientFactory GetClientFactory();
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.SetKebabCaseEndpointNameFormatter();
 

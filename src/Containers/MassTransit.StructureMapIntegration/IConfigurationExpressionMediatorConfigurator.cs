@@ -4,7 +4,7 @@ namespace MassTransit.StructureMapIntegration
 
 
     public interface IConfigurationExpressionMediatorConfigurator :
-        IMediatorConfigurator<IContext>
+        IMediatorRegistrationConfigurator
     {
         ConfigurationExpression Builder { get; }
     }

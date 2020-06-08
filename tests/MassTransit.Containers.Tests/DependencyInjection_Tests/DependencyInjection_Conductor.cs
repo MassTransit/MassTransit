@@ -25,10 +25,9 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             configurator.ConfigureServiceEndpoints(GetRegistrationContext(), Options);
         }
 
-        IRegistrationContext<IServiceProvider> GetRegistrationContext()
+        IRegistrationContext GetRegistrationContext()
         {
-            return new RegistrationContext<IServiceProvider>(_provider.GetRequiredService<IRegistration>(), _provider.GetRequiredService<BusHealth>(),
-                _provider);
+            return new RegistrationContext(_provider.GetRequiredService<IRegistration>(), _provider.GetRequiredService<BusHealth>());
         }
 
         protected override IClientFactory GetClientFactory()

@@ -1,11 +1,10 @@
 namespace MassTransit.WindsorIntegration
 {
-    using Castle.MicroKernel;
     using Castle.Windsor;
 
 
-    public interface IWindsorContainerConfigurator :
-        IRegistrationConfigurator<IKernel>
+    public interface IWindsorContainerBusConfigurator :
+        IBusRegistrationConfigurator
     {
         IWindsorContainer Container { get; }
     }

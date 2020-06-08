@@ -9,13 +9,13 @@ namespace MassTransit.StructureMapIntegration.Registration
     using Transports;
 
 
-    public class ConfigurationExpressionConfigurator :
+    public class ConfigurationExpressionBusConfigurator :
         RegistrationConfigurator,
-        IConfigurationExpressionConfigurator
+        IConfigurationExpressionBusConfigurator
     {
         readonly ConfigurationExpression _expression;
 
-        public ConfigurationExpressionConfigurator(ConfigurationExpression expression)
+        public ConfigurationExpressionBusConfigurator(ConfigurationExpression expression)
             : base(new StructureMapContainerRegistrar(expression))
         {
             _expression = expression;
@@ -53,16 +53,17 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Singleton();
 
             expression.For<IConfigurationServiceProvider>()
-                .Use(context => new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>()));
+                .Use(context => new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>()))
+                .Singleton();
 
             expression.For<IRegistration>()
                 .Use(provider => CreateRegistration(provider.GetInstance<IConfigurationServiceProvider>()))
                 .Singleton();
         }
 
-        ConfigurationExpression IConfigurationExpressionConfigurator.Builder => _expression;
+        ConfigurationExpression IConfigurationExpressionBusConfigurator.Builder => _expression;
 
-        public void AddBus(Func<IRegistrationContext<IContext>, IBusControl> busFactory)
+        public void AddBus(Func<IRegistrationContext, IBusControl> busFactory)
         {
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
@@ -79,23 +80,23 @@ namespace MassTransit.StructureMapIntegration.Registration
         }
 
         public void SetBusFactory<T>(T busFactory)
-            where T : IRegistrationBusFactory<IContext>
+            where T : IRegistrationBusFactory
         {
             throw new NotImplementedException();
         }
 
-        public void AddRider(Action<IRiderConfigurator<IContext>> configure)
+        public void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
             throw new NotImplementedException();
         }
 
-        IBusControl BusFactory(IContext context, Func<IRegistrationContext<IContext>, IBusControl> busFactory)
+        IBusControl BusFactory(IContext context, Func<IRegistrationContext, IBusControl> busFactory)
         {
             var provider = context.GetInstance<IConfigurationServiceProvider>();
 
             ConfigureLogContext(provider);
 
-            IRegistrationContext<IContext> registrationContext = GetRegistrationContext(context);
+            var registrationContext = GetRegistrationContext(context);
 
             return busFactory(registrationContext);
         }
@@ -117,12 +118,11 @@ namespace MassTransit.StructureMapIntegration.Registration
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), context.GetInstance<IContainer>()));
         }
 
-        IRegistrationContext<IContext> GetRegistrationContext(IContext context)
+        IRegistrationContext GetRegistrationContext(IContext context)
         {
-            return new RegistrationContext<IContext>(
+            return new RegistrationContext(
                 CreateRegistration(context.GetInstance<IConfigurationServiceProvider>()),
-                context.GetInstance<BusHealth>(),
-                context
+                context.GetInstance<BusHealth>()
             );
         }
     }

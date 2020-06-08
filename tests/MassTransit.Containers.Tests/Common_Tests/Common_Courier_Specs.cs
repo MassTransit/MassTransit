@@ -179,8 +179,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected abstract void ConfigureFilter(IConsumePipeConfigurator configurator);
 
-        protected void ConfigureRegistration<T>(IRegistrationConfigurator<T> configurator)
-            where T : class
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.AddActivity<TestActivity, TestArguments, TestLog>();
             configurator.AddBus(provider => BusControl);

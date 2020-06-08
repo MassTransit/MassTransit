@@ -1,6 +1,5 @@
 namespace MassTransit.Containers.Tests.Windsor_Tests
 {
-    using Castle.MicroKernel;
     using Castle.Windsor;
     using Common_Tests;
     using Monitoring.Health;
@@ -31,9 +30,9 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             configurator.ConfigureServiceEndpoints(GetRegistrationContext(), Options);
         }
 
-        IRegistrationContext<IKernel> GetRegistrationContext()
+        IRegistrationContext GetRegistrationContext()
         {
-            return new RegistrationContext<IKernel>(_container.Resolve<IRegistration>(), _container.Resolve<BusHealth>(), _container.Kernel);
+            return new RegistrationContext(_container.Resolve<IRegistration>(), _container.Resolve<BusHealth>());
         }
 
         protected override IClientFactory GetClientFactory()
