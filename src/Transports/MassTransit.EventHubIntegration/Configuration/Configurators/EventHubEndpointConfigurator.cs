@@ -101,10 +101,9 @@ namespace MassTransit.EventHubIntegration.Configurators
             var context = CreateContext();
             var blobClient = CreateBlobClient();
             var processor = CreateEventProcessorClient(blobClient);
-            var transport = new EventHubDataReceiver(context);
 
-            IProcessorLockContext lockContext = new ProcessorLockContext(processor, context.LogContext, _checkpointInterval, _checkpointMessageCount);
-            context.AddOrUpdatePayload(() => lockContext, _ => lockContext);
+            var lockContext = new ProcessorLockContext(processor, context.LogContext, _checkpointInterval, _checkpointMessageCount);
+            var transport = new EventHubDataReceiver(context, lockContext);
 
             return new EventHubReceiveEndpoint(processor, Math.Max(1000, _checkpointMessageCount / 10), _concurrencyLimit, blobClient, transport, context);
         }

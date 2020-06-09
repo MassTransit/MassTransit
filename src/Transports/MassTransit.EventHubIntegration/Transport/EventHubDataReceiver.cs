@@ -15,11 +15,13 @@
         IEventHubDataReceiver
     {
         readonly ReceiveEndpointContext _context;
+        readonly IProcessorLockContext _lockContext;
         readonly IReceivePipeDispatcher _dispatcher;
 
-        public EventHubDataReceiver(ReceiveEndpointContext context)
+        public EventHubDataReceiver(ReceiveEndpointContext context, IProcessorLockContext lockContext)
         {
             _context = context;
+            _lockContext = lockContext;
             _dispatcher = context.CreateReceivePipeDispatcher();
         }
 
@@ -29,24 +31,20 @@
             scope.Add("type", "event-data");
         }
 
-        public async Task Handle(ProcessEventArgs @event, CancellationToken cancellationToken)
+        public async Task Handle(ProcessEventArgs eventArgs, CancellationToken cancellationToken)
         {
-            if (!@event.HasEvent)
+            if (!eventArgs.HasEvent)
                 return;
 
-            var context = new EventDataReceiveContext(@event.Data, _context);
+            var context = new EventDataReceiveContext(eventArgs, _context, _lockContext);
 
             CancellationTokenRegistration registration;
             if (cancellationToken.CanBeCanceled)
                 registration = cancellationToken.Register(context.Cancel);
 
-            var receiveLock = context.TryGetPayload(out IProcessorLockContext lockContext)
-                ? new ProcessEventLockContext(lockContext, @event, cancellationToken)
-                : default;
-
             try
             {
-                await _dispatcher.Dispatch(context, receiveLock).ConfigureAwait(false);
+                await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
             }
             finally
             {

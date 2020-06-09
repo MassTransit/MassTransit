@@ -30,24 +30,24 @@ namespace MassTransit.EventHubIntegration
             _consumeContext = consumeContext;
         }
 
-        public Task Produce<TValue>(TValue value, CancellationToken cancellationToken = default)
-            where TValue : class
+        public Task Produce<T>(T message, CancellationToken cancellationToken = default)
+            where T : class
         {
-            return Produce(value, Pipe.Empty<EventHubSendContext<TValue>>(), cancellationToken);
+            return Produce(message, Pipe.Empty<EventHubSendContext<T>>(), cancellationToken);
         }
 
-        public Task Produce<TValue>(IEnumerable<TValue> values, CancellationToken cancellationToken = default)
-            where TValue : class
+        public Task Produce<T>(IEnumerable<T> messages, CancellationToken cancellationToken = default)
+            where T : class
         {
-            return Produce(values, Pipe.Empty<EventHubSendContext<TValue>>(), cancellationToken);
+            return Produce(messages, Pipe.Empty<EventHubSendContext<T>>(), cancellationToken);
         }
 
-        public async Task Produce<TValue>(TValue value, IPipe<EventHubSendContext<TValue>> pipe, CancellationToken cancellationToken)
-            where TValue : class
+        public async Task Produce<T>(T message, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken)
+            where T : class
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            var context = new EventHubMessageSendContext<TValue>(value, cancellationToken) {Serializer = _context.Serializer};
+            var context = new EventHubMessageSendContext<T>(message, cancellationToken) {Serializer = _context.Serializer};
 
             if (_consumeContext != null)
                 context.TransferConsumeContextHeaders(_consumeContext);
@@ -101,16 +101,16 @@ namespace MassTransit.EventHubIntegration
             }
         }
 
-        public async Task Produce<TValue>(IEnumerable<TValue> values, IPipe<EventHubSendContext<TValue>> pipe, CancellationToken cancellationToken = default)
-            where TValue : class
+        public async Task Produce<T>(IEnumerable<T> messages, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken = default)
+            where T : class
         {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
+            if (messages == null)
+                throw new ArgumentNullException(nameof(messages));
 
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            EventHubMessageSendContext<TValue>[] contexts = values
-                .Select(x => new EventHubMessageSendContext<TValue>(x, cancellationToken) {Serializer = _context.Serializer})
+            EventHubMessageSendContext<T>[] contexts = messages
+                .Select(x => new EventHubMessageSendContext<T>(x, cancellationToken) {Serializer = _context.Serializer})
                 .ToArray();
 
             if (contexts.Length == 0)
@@ -118,7 +118,7 @@ namespace MassTransit.EventHubIntegration
 
             NewId[] ids = NewId.Next(contexts.Length);
 
-            async Task Send(EventHubMessageSendContext<TValue> c, int idx)
+            async Task Send(EventHubMessageSendContext<T> c, int idx)
             {
                 if (_consumeContext != null)
                     c.TransferConsumeContextHeaders(_consumeContext);
@@ -136,7 +136,7 @@ namespace MassTransit.EventHubIntegration
 
             await Task.WhenAll(contexts.Select(Send)).ConfigureAwait(false);
 
-            EventHubMessageSendContext<TValue> context = contexts[0];
+            EventHubMessageSendContext<T> context = contexts[0];
             var options = new CreateBatchOptions
             {
                 PartitionId = context.PartitionId,
@@ -144,8 +144,8 @@ namespace MassTransit.EventHubIntegration
             };
 
             StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context,
-                (nameof(EventHubMessageSendContext<TValue>.PartitionId), options.PartitionId),
-                (nameof(EventHubMessageSendContext<TValue>.PartitionKey), options.PartitionKey));
+                (nameof(EventHubMessageSendContext<T>.PartitionId), options.PartitionId),
+                (nameof(EventHubMessageSendContext<T>.PartitionKey), options.PartitionKey));
             try
             {
                 var eventDataBatch = await _context.CreateBatch(options, context.CancellationToken).ConfigureAwait(false);
@@ -161,7 +161,7 @@ namespace MassTransit.EventHubIntegration
 
                 for (var i = 0; i < contexts.Length; i++)
                 {
-                    EventHubMessageSendContext<TValue> c = contexts[i];
+                    EventHubMessageSendContext<T> c = contexts[i];
 
                     var eventData = new EventData(c.Body);
 
@@ -197,28 +197,28 @@ namespace MassTransit.EventHubIntegration
             }
         }
 
-        public Task Produce<TValue>(object values, CancellationToken cancellationToken = default)
-            where TValue : class
+        public Task Produce<T>(object values, CancellationToken cancellationToken = default)
+            where T : class
         {
-            return Produce(values, Pipe.Empty<EventHubSendContext<TValue>>(), cancellationToken);
+            return Produce(values, Pipe.Empty<EventHubSendContext<T>>(), cancellationToken);
         }
 
-        public Task Produce<TValue>(IEnumerable<object> values, CancellationToken cancellationToken = default)
-            where TValue : class
+        public Task Produce<T>(IEnumerable<object> values, CancellationToken cancellationToken = default)
+            where T : class
         {
-            return Produce(values, Pipe.Empty<EventHubSendContext<TValue>>(), cancellationToken);
+            return Produce(values, Pipe.Empty<EventHubSendContext<T>>(), cancellationToken);
         }
 
-        public Task Produce<TValue>(object values, IPipe<EventHubSendContext<TValue>> pipe, CancellationToken cancellationToken = default)
-            where TValue : class
+        public Task Produce<T>(object values, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken = default)
+            where T : class
         {
-            Task<InitializeContext<TValue>> messageTask = MessageInitializerCache<TValue>.Initialize(values, cancellationToken);
+            Task<InitializeContext<T>> messageTask = MessageInitializerCache<T>.Initialize(values, cancellationToken);
             if (messageTask.IsCompletedSuccessfully())
                 return Produce(messageTask.GetAwaiter().GetResult().Message, pipe, cancellationToken);
 
             async Task ProduceAsync()
             {
-                InitializeContext<TValue> context = await messageTask.ConfigureAwait(false);
+                InitializeContext<T> context = await messageTask.ConfigureAwait(false);
 
                 await Produce(context.Message, pipe, cancellationToken).ConfigureAwait(false);
             }
@@ -226,16 +226,16 @@ namespace MassTransit.EventHubIntegration
             return ProduceAsync();
         }
 
-        public Task Produce<TValue>(IEnumerable<object> values, IPipe<EventHubSendContext<TValue>> pipe, CancellationToken cancellationToken = default)
-            where TValue : class
+        public Task Produce<T>(IEnumerable<object> values, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken = default)
+            where T : class
         {
-            Task<InitializeContext<TValue>>[] messageTasks = values
-                .Select(value => MessageInitializerCache<TValue>.Initialize(value, cancellationToken))
+            Task<InitializeContext<T>>[] messageTasks = values
+                .Select(value => MessageInitializerCache<T>.Initialize(value, cancellationToken))
                 .ToArray();
 
             async Task ProduceAsync()
             {
-                InitializeContext<TValue>[] contexts = await Task.WhenAll(messageTasks).ConfigureAwait(false);
+                InitializeContext<T>[] contexts = await Task.WhenAll(messageTasks).ConfigureAwait(false);
 
                 await Produce(contexts.Select(x => x.Message), pipe, cancellationToken).ConfigureAwait(false);
             }

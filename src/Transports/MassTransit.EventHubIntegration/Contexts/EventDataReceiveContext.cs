@@ -3,22 +3,30 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
+    using Azure.Messaging.EventHubs.Processor;
     using Context;
     using Transports;
+    using Util;
 
 
     public sealed class EventDataReceiveContext :
         BaseReceiveContext,
-        EventDataContext
+        EventDataContext,
+        ReceiveLockContext
     {
+        readonly ProcessEventArgs _eventArgs;
         readonly EventData _eventData;
+        readonly IProcessorLockContext _lockContext;
         byte[] _body;
 
-        public EventDataReceiveContext(EventData eventData, ReceiveEndpointContext receiveEndpointContext)
+        public EventDataReceiveContext(ProcessEventArgs eventArgs, ReceiveEndpointContext receiveEndpointContext, IProcessorLockContext lockContext)
             : base(false, receiveEndpointContext)
         {
-            _eventData = eventData;
+            _eventArgs = eventArgs;
+            _eventData = eventArgs.Data;
+            _lockContext = lockContext;
         }
 
         protected override IHeaderProvider HeaderProvider => new DictionaryHeaderProvider(_eventData.Properties);
@@ -29,6 +37,21 @@
         public IDictionary<string, object> Properties => _eventData.Properties;
         public long SequenceNumber => _eventData.SequenceNumber;
         public IReadOnlyDictionary<string, object> SystemProperties => _eventData.SystemProperties;
+
+        public Task Complete()
+        {
+            return _lockContext.Complete(_eventArgs);
+        }
+
+        public Task Faulted(Exception exception)
+        {
+            return TaskUtil.Completed;
+        }
+
+        public Task ValidateLockStatus()
+        {
+            return TaskUtil.Completed;
+        }
 
         public override byte[] GetBody()
         {

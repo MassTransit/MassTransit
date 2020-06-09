@@ -20,11 +20,11 @@
         IProbeSite
     {
         /// <summary>
-        /// Handles the <paramref name="event" />
+        /// Handles the <paramref name="eventArgs" />
         /// </summary>
-        /// <param name="event"></param>
+        /// <param name="eventArgs"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task Handle(ProcessEventArgs @event, CancellationToken cancellationToken);
+        Task Handle(ProcessEventArgs eventArgs, CancellationToken cancellationToken);
     }
 }

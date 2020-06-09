@@ -2,7 +2,6 @@ namespace MassTransit.EventHubIntegration.Contexts
 {
     using System;
     using System.Diagnostics;
-    using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
@@ -28,7 +27,7 @@ namespace MassTransit.EventHubIntegration.Contexts
             client.PartitionClosingAsync += OnPartitionClosing;
         }
 
-        public Task Complete(ProcessEventArgs eventArgs, CancellationToken cancellationToken)
+        public Task Complete(ProcessEventArgs eventArgs)
         {
             LogContext.SetCurrentIfNull(_logContext);
 
