@@ -96,8 +96,9 @@
 
                             await _hostConfiguration.ConnectionContextSupervisor.Send(_connectionPipe, Stopped).ConfigureAwait(false);
                         }
-                        catch (OperationCanceledException)
+                        catch (OperationCanceledException ex)
                         {
+                            throw await ConvertToAmazonSqsConnectionException(ex, "Start Canceled").ConfigureAwait(false);
                         }
                         catch (Exception ex)
                         {

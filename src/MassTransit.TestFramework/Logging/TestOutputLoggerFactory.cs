@@ -1,6 +1,7 @@
 namespace MassTransit.TestFramework.Logging
 {
     using Microsoft.Extensions.Logging;
+    using NUnit.Framework.Internal;
 
 
     public class TestOutputLoggerFactory :
@@ -13,9 +14,11 @@ namespace MassTransit.TestFramework.Logging
             _enabled = enabled;
         }
 
-        public ILogger CreateLogger(string name)
+        public TestExecutionContext Current { get; set; }
+
+        public Microsoft.Extensions.Logging.ILogger CreateLogger(string name)
         {
-            return new TestOutputLogger(_enabled);
+            return new TestOutputLogger(this, _enabled);
         }
 
         public void AddProvider(ILoggerProvider provider)

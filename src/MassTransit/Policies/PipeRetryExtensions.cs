@@ -5,6 +5,7 @@ namespace MassTransit.Policies
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using Internals.Extensions;
 
 
     public static class PipeRetryExtensions
@@ -96,6 +97,7 @@ namespace MassTransit.Policies
                 }
                 catch (OperationCanceledException exception) when (exception.CancellationToken == context.CancellationToken)
                 {
+                    retryContext.Exception?.Rethrow();
                     throw;
                 }
                 catch (Exception exception)
@@ -127,6 +129,7 @@ namespace MassTransit.Policies
                 }
                 catch (OperationCanceledException exception) when (exception.CancellationToken == context.CancellationToken)
                 {
+                    retryContext.Exception?.Rethrow();
                     throw;
                 }
                 catch (Exception exception)

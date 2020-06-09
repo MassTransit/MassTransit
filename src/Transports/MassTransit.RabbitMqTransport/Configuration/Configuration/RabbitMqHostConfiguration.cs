@@ -9,6 +9,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using MassTransit.Configuration;
     using MassTransit.Configurators;
     using MassTransit.Topology;
+    using RabbitMQ.Client.Exceptions;
     using Topology;
     using Topology.Settings;
     using Topology.Topologies;
@@ -59,6 +60,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 return Retry.CreatePolicy(x =>
                 {
                     x.Handle<RabbitMqConnectionException>();
+                    x.Ignore<AuthenticationFailureException>();
 
                     x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
                 });

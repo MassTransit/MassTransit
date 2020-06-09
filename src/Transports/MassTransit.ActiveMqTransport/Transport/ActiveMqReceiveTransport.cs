@@ -103,9 +103,9 @@
                     {
                         throw await ConvertToActiveMqConnectionException(ex, "NMSConnectionException").ConfigureAwait(false);
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException ex)
                     {
-                        throw;
+                        throw await ConvertToActiveMqConnectionException(ex, "Start Canceled").ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {

@@ -86,8 +86,14 @@
 
                             await _clientContextSupervisor.Send(_clientPipe, Stopped).ConfigureAwait(false);
                         }
-                        catch (OperationCanceledException)
+                        catch (OperationCanceledException ex)
                         {
+                            LogContext.Error?.Log(ex, "Start canceled: {InputAddress}", _context.InputAddress);
+
+                            await _context.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_context.InputAddress, ex))
+                                .ConfigureAwait(false);
+
+                            throw;
                         }
                         catch (Exception ex)
                         {

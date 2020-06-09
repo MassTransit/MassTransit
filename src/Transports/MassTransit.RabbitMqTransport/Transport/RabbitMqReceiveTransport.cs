@@ -101,9 +101,9 @@
                     {
                         throw await ConvertToRabbitMqConnectionException(ex, "Operation interrupted: ").ConfigureAwait(false);
                     }
-                    catch (OperationCanceledException)
+                    catch (OperationCanceledException ex)
                     {
-                        throw;
+                        throw await ConvertToRabbitMqConnectionException(ex, "Start canceled: ").ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {

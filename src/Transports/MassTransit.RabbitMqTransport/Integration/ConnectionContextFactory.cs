@@ -20,20 +20,11 @@
         IPipeContextFactory<ConnectionContext>
     {
         readonly Lazy<ConnectionFactory> _connectionFactory;
-        readonly IRetryPolicy _connectionRetryPolicy;
         readonly IRabbitMqHostConfiguration _hostConfiguration;
 
         public ConnectionContextFactory(IRabbitMqHostConfiguration hostConfiguration)
         {
             _hostConfiguration = hostConfiguration;
-
-            _connectionRetryPolicy = Retry.CreatePolicy(x =>
-            {
-                x.Handle<RabbitMqConnectionException>();
-                x.Ignore<AuthenticationFailureException>();
-
-                x.Exponential(1000, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
-            });
 
             _connectionFactory = new Lazy<ConnectionFactory>(() => _hostConfiguration.Settings.GetConnectionFactory());
         }
@@ -75,7 +66,7 @@
 
         async Task<ConnectionContext> CreateConnection(ISupervisor supervisor)
         {
-            return await _connectionRetryPolicy.Retry(async () =>
+            return await _hostConfiguration.ConnectionRetryPolicy.Retry(async () =>
             {
                 var description = _hostConfiguration.Settings.ToDescription();
 

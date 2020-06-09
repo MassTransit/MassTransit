@@ -2,53 +2,25 @@ namespace MassTransit.TestFramework.Logging
 {
     using System;
     using Microsoft.Extensions.Logging;
-    using NUnit.Framework;
-
-
-    public class TestOutputLogger<T> :
-        ILogger<T>
-    {
-        readonly ILogger _logger;
-
-        public TestOutputLogger(ILoggerFactory factory)
-        {
-            _logger = factory.CreateLogger<T>();
-        }
-
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return _logger.BeginScope(state);
-        }
-
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return _logger.IsEnabled(logLevel);
-        }
-
-        public void Log<TState>(LogLevel logLevel,
-            EventId eventId,
-            TState state,
-            Exception exception,
-            Func<TState, Exception, string> formatter)
-        {
-            _logger.Log(logLevel, eventId, state, exception, formatter);
-        }
-    }
+    using NUnit.Framework.Internal;
 
 
     public class TestOutputLogger :
-        ILogger
+        Microsoft.Extensions.Logging.ILogger
     {
+        readonly TestOutputLoggerFactory _factory;
+
         readonly Func<LogLevel, bool> _filter;
         object _scope;
 
-        public TestOutputLogger(bool enabled)
-            : this(_ => enabled)
+        public TestOutputLogger(TestOutputLoggerFactory factory, bool enabled)
+            : this(factory, _ => enabled)
         {
         }
 
-        public TestOutputLogger(Func<LogLevel, bool> filter)
+        public TestOutputLogger(TestOutputLoggerFactory factory, Func<LogLevel, bool> filter)
         {
+            _factory = factory;
             _filter = filter;
         }
 
@@ -77,7 +49,14 @@ namespace MassTransit.TestFramework.Logging
             if (exception != null)
                 message += Environment.NewLine + Environment.NewLine + exception;
 
-            TestContext.WriteLine(message);
+            var currentContext = TestExecutionContext.CurrentContext;
+
+            if (currentContext.CurrentTest is TestMethod)
+                _factory.Current = currentContext;
+
+            var executionContext = _factory.Current ??= currentContext;
+
+            executionContext.OutWriter.WriteLine(message);
         }
 
         public bool IsEnabled(LogLevel logLevel)

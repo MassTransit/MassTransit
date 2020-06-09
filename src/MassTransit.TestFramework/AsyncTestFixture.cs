@@ -36,6 +36,15 @@ namespace MassTransit.TestFramework
         }
 
         /// <summary>
+        /// Timeout for detecting bus activity
+        /// </summary>
+        protected TimeSpan TestInactivityTimeout
+        {
+            get => AsyncTestHarness.TestInactivityTimeout;
+            set => AsyncTestHarness.TestInactivityTimeout = value;
+        }
+
+        /// <summary>
         /// Forces the test to be cancelled, aborting any awaiting tasks
         /// </summary>
         protected void CancelTest()
