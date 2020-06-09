@@ -44,7 +44,7 @@ namespace MassTransit.EventHubIntegration.Tests
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
 
-                        k.Subscribe(Configuration.EventHubName, c =>
+                        k.Endpoint(Configuration.EventHubName, c =>
                         {
                             c.ConfigureConsumer<EventHubMessageConsumer>(context);
                         });
@@ -86,7 +86,7 @@ namespace MassTransit.EventHubIntegration.Tests
                 Assert.AreEqual(message.Text, result.Message.Text);
 
                 Assert.AreEqual(result.CorrelationId, ping.InitiatorId);
-                Assert.That(ping.SourceAddress, Is.EqualTo(new Uri($"loopback://localhost/event-hub/{Configuration.EventHubName}")));
+                Assert.That(ping.SourceAddress, Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
             }
             finally
             {

@@ -8,7 +8,9 @@ namespace MassTransit.EventHubIntegration
 
 
     public interface IEventHubFactoryConfigurator :
-        IRiderFactoryConfigurator
+        IRiderFactoryConfigurator,
+        ISendObserverConnector,
+        ISendPipelineConfigurator
     {
         /// <summary>
         /// Configure EventHub namespace using connection string
@@ -77,6 +79,12 @@ namespace MassTransit.EventHubIntegration
         /// <param name="eventHubName">EventHub Name</param>
         /// <param name="consumerGroup">Consumer Group</param>
         /// <param name="configure"></param>
-        void Subscribe(string eventHubName, string consumerGroup, Action<IEventHubConfigurator> configure);
+        void Endpoint(string eventHubName, string consumerGroup, Action<IEventHubReceiveEndpointConfigurator> configure);
+
+        /// <summary>
+        /// Sets the outbound message serializer
+        /// </summary>
+        /// <param name="serializerFactory">The factory to create the message serializer</param>
+        void SetMessageSerializer(SerializerFactory serializerFactory);
     }
 }

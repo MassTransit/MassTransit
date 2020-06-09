@@ -10,12 +10,11 @@ namespace MassTransit.EventHubIntegration.Configurators
     using Contexts;
     using MassTransit.Registration;
     using Riders;
-    using Transport;
 
 
-    public class EventHubConfigurator :
+    public class EventHubReceiveEndpointConfigurator :
         ReceiverConfiguration,
-        IEventHubConfigurator
+        IEventHubReceiveEndpointConfigurator
     {
         readonly IBusInstance _busInstance;
         readonly string _consumerGroup;
@@ -31,7 +30,7 @@ namespace MassTransit.EventHubIntegration.Configurators
         Func<PartitionClosingEventArgs, Task> _partitionClosingHandler;
         Func<PartitionInitializingEventArgs, Task> _partitionInitializingHandler;
 
-        public EventHubConfigurator(string eventHubName, string consumerGroup, IHostSettings hostSettings, IStorageSettings storageSettings,
+        public EventHubReceiveEndpointConfigurator(string eventHubName, string consumerGroup, IHostSettings hostSettings, IStorageSettings storageSettings,
             IBusInstance busInstance,
             IReceiveEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)

@@ -6,19 +6,8 @@ namespace MassTransit.EventHubIntegration.Specifications
     public class HostSettings :
         IHostSettings
     {
-        public HostSettings(string connectionString)
-        {
-            ConnectionString = connectionString;
-        }
-
-        public HostSettings(string fullyQualifiedNamespace, TokenCredential tokenCredential)
-        {
-            FullyQualifiedNamespace = fullyQualifiedNamespace;
-            TokenCredential = tokenCredential;
-        }
-
-        public string ConnectionString { get; }
-        public string FullyQualifiedNamespace { get; }
-        public TokenCredential TokenCredential { get; }
+        public string ConnectionString { get; set; }
+        public string FullyQualifiedNamespace { get; set; }
+        public TokenCredential TokenCredential { get; set; }
     }
 }

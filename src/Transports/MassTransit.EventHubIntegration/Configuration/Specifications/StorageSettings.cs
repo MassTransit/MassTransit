@@ -9,36 +9,10 @@ namespace MassTransit.EventHubIntegration.Specifications
     public class StorageSettings :
         IStorageSettings
     {
-        public StorageSettings(string connectionString, Action<BlobClientOptions> configure)
-        {
-            ConnectionString = connectionString;
-            Configure = configure;
-        }
-
-        public StorageSettings(Uri containerUri, Action<BlobClientOptions> configure)
-        {
-            ContainerUri = containerUri;
-            Configure = configure;
-        }
-
-        public StorageSettings(Uri containerUri, TokenCredential tokenCredential, Action<BlobClientOptions> configure)
-        {
-            ContainerUri = containerUri;
-            TokenCredential = tokenCredential;
-            Configure = configure;
-        }
-
-        public StorageSettings(Uri containerUri, StorageSharedKeyCredential sharedKeyCredential, Action<BlobClientOptions> configure)
-        {
-            ContainerUri = containerUri;
-            SharedKeyCredential = sharedKeyCredential;
-            Configure = configure;
-        }
-
-        public string ConnectionString { get; }
-        public Uri ContainerUri { get; }
-        public StorageSharedKeyCredential SharedKeyCredential { get; }
-        public TokenCredential TokenCredential { get; }
-        public Action<BlobClientOptions> Configure { get; }
+        public string ConnectionString { get; set; }
+        public Uri ContainerUri { get; set; }
+        public StorageSharedKeyCredential SharedKeyCredential { get; set; }
+        public TokenCredential TokenCredential { get; set; }
+        public Action<BlobClientOptions> Configure { get; set; }
     }
 }

@@ -1,7 +1,6 @@
 namespace MassTransit.KafkaIntegration.Tests
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Context;
@@ -82,7 +81,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
                 Assert.AreEqual(result.CorrelationId, ping.InitiatorId);
 
-                Assert.That(ping.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/kafka/test2")));
+                Assert.That(ping.SourceAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
             }
             finally
             {

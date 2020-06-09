@@ -6,7 +6,7 @@ namespace MassTransit.EventHubIntegration
     using Azure.Messaging.EventHubs.Processor;
 
 
-    public interface IEventHubConfigurator :
+    public interface IEventHubReceiveEndpointConfigurator :
         IReceiveEndpointConfigurator
     {
         /// <summary>

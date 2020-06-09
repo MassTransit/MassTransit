@@ -1,7 +1,6 @@
 namespace MassTransit.KafkaIntegration.Tests
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Context;
@@ -76,7 +75,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
                 Assert.AreEqual(message.Value.Text, result.Message.Text);
                 Assert.AreEqual(sendContext.MessageId, result.MessageId);
-                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri("loopback://localhost/kafka/test")));
+                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
             }
             finally
             {

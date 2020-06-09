@@ -13,12 +13,12 @@ namespace MassTransit.EventHubIntegration
         /// <param name="eventHubName">Event Hub name</param>
         /// <param name="configure"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void Subscribe(this IEventHubFactoryConfigurator configurator, string eventHubName, Action<IEventHubConfigurator> configure)
+        public static void Endpoint(this IEventHubFactoryConfigurator configurator, string eventHubName, Action<IEventHubReceiveEndpointConfigurator> configure)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            configurator.Subscribe(eventHubName, EventHubConsumerClient.DefaultConsumerGroupName, configure);
+            configurator.Endpoint(eventHubName, EventHubConsumerClient.DefaultConsumerGroupName, configure);
         }
     }
 }

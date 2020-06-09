@@ -1,4 +1,4 @@
-﻿namespace MassTransit.EventHubIntegration.Transport
+﻿namespace MassTransit.EventHubIntegration
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -20,7 +20,7 @@
         IProbeSite
     {
         /// <summary>
-        /// Handles the <paramref name="@event" />
+        /// Handles the <paramref name="event" />
         /// </summary>
         /// <param name="event"></param>
         /// <param name="cancellationToken"></param>

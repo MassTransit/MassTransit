@@ -1,4 +1,4 @@
-namespace MassTransit.EventHubIntegration.Transport
+namespace MassTransit.EventHubIntegration
 {
     using Riders;
 
@@ -6,5 +6,6 @@ namespace MassTransit.EventHubIntegration.Transport
     public interface IEventHubRider :
         IRider
     {
+        IProducerProvider GetProducerProvider(ConsumeContext consumeContext = default);
     }
 }

@@ -23,6 +23,7 @@ namespace MassTransit.KafkaIntegration.Configurators
         readonly List<IKafkaConsumerSpecification> _topics;
         IHeadersDeserializer _headersDeserializer;
         IHeadersSerializer _headersSerializer;
+        bool _isHostConfigured;
 
         public KafkaFactoryConfigurator(ClientConfig clientConfig)
         {
@@ -41,6 +42,10 @@ namespace MassTransit.KafkaIntegration.Configurators
         {
             if (servers == null || !servers.Any())
                 throw new ArgumentException(nameof(servers));
+
+            if (_isHostConfigured)
+                throw new ConfigurationException("Host may not be specified more than once.");
+            _isHostConfigured = true;
 
             const string serverSeparator = ",";
 

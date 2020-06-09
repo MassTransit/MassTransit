@@ -1,17 +1,19 @@
 namespace MassTransit
 {
-    using EventHubIntegration.Transport;
+    using System.Collections.Generic;
+    using EventHubIntegration;
+    using EventHubIntegration.Contexts;
     using GreenPipes;
     using Pipeline.Observables;
     using Registration;
-    using Riders;
 
 
     public static class EventHubRiderExtensions
     {
-        public static ConnectHandle ConnectEventHub(this IBusInstance busInstance, RiderObservable observers, params IEventHubReceiveEndpoint[] endpoints)
+        public static ConnectHandle ConnectEventHub(this IBusInstance busInstance, RiderObservable observers, IEventHubProducerSharedContext sharedContext,
+            IEnumerable<IEventHubReceiveEndpoint> endpoints)
         {
-            var rider = new EventHubRider(endpoints, observers);
+            var rider = new EventHubRider(endpoints, sharedContext, observers);
             return busInstance.ConnectRider(rider);
         }
     }

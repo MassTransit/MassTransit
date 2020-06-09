@@ -2,11 +2,10 @@ namespace MassTransit.EventHubIntegration.Specifications
 {
     using GreenPipes;
     using MassTransit.Registration;
-    using Transport;
     using Transports;
 
 
-    public interface IEventHubSpecification :
+    public interface IEventHubReceiveEndpointSpecification :
         IReceiveEndpointObserverConnector,
         ISpecification
     {

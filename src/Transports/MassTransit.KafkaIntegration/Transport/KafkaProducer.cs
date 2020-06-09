@@ -18,13 +18,13 @@ namespace MassTransit.KafkaIntegration.Transport
         where TValue : class
     {
         readonly ConsumeContext _consumeContext;
-        readonly IKafkaProducerContext<TKey, TValue> _producerContext;
+        readonly IKafkaProducerContext<TKey, TValue> _context;
         readonly KafkaTopicAddress _topicAddress;
 
-        public KafkaProducer(KafkaTopicAddress topicAddress, IKafkaProducerContext<TKey, TValue> producerContext, ConsumeContext consumeContext = null)
+        public KafkaProducer(KafkaTopicAddress topicAddress, IKafkaProducerContext<TKey, TValue> context, ConsumeContext consumeContext = null)
         {
             _topicAddress = topicAddress;
-            _producerContext = producerContext;
+            _context = context;
             _consumeContext = consumeContext;
         }
 
@@ -35,7 +35,7 @@ namespace MassTransit.KafkaIntegration.Transport
 
         public async Task Produce(TKey key, TValue value, IPipe<KafkaSendContext<TValue>> pipe, CancellationToken cancellationToken)
         {
-            LogContext.SetCurrentIfNull(_producerContext.LogContext);
+            LogContext.SetCurrentIfNull(_context.LogContext);
 
             var context = new KafkaMessageSendContext<TValue>(value, cancellationToken);
 
@@ -44,20 +44,20 @@ namespace MassTransit.KafkaIntegration.Transport
 
             context.DestinationAddress = _topicAddress;
 
-            await _producerContext.Send(context).ConfigureAwait(false);
+            await _context.Send(context).ConfigureAwait(false);
 
             if (pipe.IsNotEmpty())
                 await pipe.Send(context).ConfigureAwait(false);
 
-            context.SourceAddress ??= _producerContext.HostAddress;
+            context.SourceAddress ??= _context.HostAddress;
             context.ConversationId ??= NewId.NextGuid();
 
             StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context,
-                (nameof(context.Partition), context.Partition.ToString()));
+                (nameof(context.Partition), (_topicAddress.Partition ?? context.Partition).ToString()));
             try
             {
-                if (_producerContext.SendObservers.Count > 0)
-                    await _producerContext.SendObservers.PreSend(context).ConfigureAwait(false);
+                if (_context.SendObservers.Count > 0)
+                    await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
                 var message = new Message<TKey, TValue>
                 {
@@ -68,23 +68,23 @@ namespace MassTransit.KafkaIntegration.Transport
                 if (context.SentTime.HasValue)
                     message.Timestamp = new Timestamp(context.SentTime.Value);
 
-                message.Headers = _producerContext.HeadersSerializer.Serialize(context);
+                message.Headers = _context.HeadersSerializer.Serialize(context);
 
                 var topic = new TopicPartition(_topicAddress.Topic, _topicAddress.Partition ?? context.Partition);
 
-                await _producerContext.Produce(topic, message, context.CancellationToken).ConfigureAwait(false);
+                await _context.Produce(topic, message, context.CancellationToken).ConfigureAwait(false);
 
                 context.LogSent();
 
-                if (_producerContext.SendObservers.Count > 0)
-                    await _producerContext.SendObservers.PostSend(context).ConfigureAwait(false);
+                if (_context.SendObservers.Count > 0)
+                    await _context.SendObservers.PostSend(context).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
                 context.LogFaulted(exception);
 
-                if (_producerContext.SendObservers.Count > 0)
-                    await _producerContext.SendObservers.SendFault(context, exception).ConfigureAwait(false);
+                if (_context.SendObservers.Count > 0)
+                    await _context.SendObservers.SendFault(context, exception).ConfigureAwait(false);
 
                 throw;
             }
@@ -117,7 +117,7 @@ namespace MassTransit.KafkaIntegration.Transport
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _producerContext.SendObservers.Connect(observer);
+            return _context.SendObservers.Connect(observer);
         }
     }
 }

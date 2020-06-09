@@ -3,7 +3,7 @@ namespace MassTransit.KafkaIntegration
     using Confluent.Kafka;
 
 
-    public interface KafkaProduceContext :
+    public interface KafkaSendContext :
         SendContext
     {
         Partition Partition { get; set; }
@@ -12,7 +12,7 @@ namespace MassTransit.KafkaIntegration
 
     public interface KafkaSendContext<out T> :
         SendContext<T>,
-        KafkaProduceContext
+        KafkaSendContext
         where T : class
     {
     }

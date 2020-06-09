@@ -7,20 +7,19 @@ namespace MassTransit.EventHubIntegration.Specifications
     using MassTransit.Configurators;
     using MassTransit.Registration;
     using Pipeline.Observables;
-    using Transport;
 
 
-    public class EventHubSpecification :
-        IEventHubSpecification
+    public class EventHubReceiveEndpointSpecification :
+        IEventHubReceiveEndpointSpecification
     {
-        readonly Action<IEventHubConfigurator> _configure;
+        readonly Action<IEventHubReceiveEndpointConfigurator> _configure;
         readonly string _consumerGroup;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly IHostSettings _hostSettings;
         readonly IStorageSettings _storageSettings;
 
-        public EventHubSpecification(string eventHubName, string consumerGroup, IHostSettings hostSettings, IStorageSettings storageSettings,
-            Action<IEventHubConfigurator> configure)
+        public EventHubReceiveEndpointSpecification(string eventHubName, string consumerGroup, IHostSettings hostSettings, IStorageSettings storageSettings,
+            Action<IEventHubReceiveEndpointConfigurator> configure)
         {
             _consumerGroup = consumerGroup;
             _hostSettings = hostSettings;
@@ -57,10 +56,11 @@ namespace MassTransit.EventHubIntegration.Specifications
 
         public IEventHubReceiveEndpoint Create(IBusInstance busInstance)
         {
-            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration($"event-hub/{Name}");
+            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration($"{EventHubEndpointAddress.PathPrefix}/{Name}");
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
-            var configurator = new EventHubConfigurator(Name, _consumerGroup, _hostSettings, _storageSettings, busInstance, endpointConfiguration);
+            var configurator =
+                new EventHubReceiveEndpointConfigurator(Name, _consumerGroup, _hostSettings, _storageSettings, busInstance, endpointConfiguration);
             _configure?.Invoke(configurator);
 
             var result = BusConfigurationResult.CompileResults(configurator.Validate());

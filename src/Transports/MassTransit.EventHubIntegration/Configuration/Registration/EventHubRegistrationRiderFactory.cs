@@ -3,7 +3,6 @@ namespace MassTransit.EventHubIntegration.Registration
     using System;
     using Configurators;
     using MassTransit.Registration;
-    using Transport;
 
 
     public class EventHubRegistrationRiderFactory :
