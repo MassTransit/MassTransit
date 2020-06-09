@@ -6,7 +6,8 @@ namespace MassTransit.KafkaIntegration
 
 
     public interface IKafkaProducerConfigurator :
-        ISendObserverConnector
+        ISendObserverConnector,
+        ISendPipelineConfigurator
     {
         /// <summary>
         /// Maximum number of messages batched in one MessageSet. The total MessageSet size is also limited by message.max.bytes.

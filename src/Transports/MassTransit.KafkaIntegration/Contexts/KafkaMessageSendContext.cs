@@ -5,12 +5,12 @@ namespace MassTransit.KafkaIntegration.Contexts
     using Context;
 
 
-    public class MessageKafkaProduceContext<T> :
+    public class KafkaMessageSendContext<T> :
         MessageSendContext<T>,
-        KafkaProduceContext<T>
+        KafkaSendContext<T>
         where T : class
     {
-        public MessageKafkaProduceContext(T message, CancellationToken cancellationToken)
+        public KafkaMessageSendContext(T message, CancellationToken cancellationToken)
             : base(message, cancellationToken)
         {
             Partition = Partition.Any;

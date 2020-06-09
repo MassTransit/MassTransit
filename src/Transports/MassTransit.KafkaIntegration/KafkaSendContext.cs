@@ -10,7 +10,7 @@ namespace MassTransit.KafkaIntegration
     }
 
 
-    public interface KafkaProduceContext<out T> :
+    public interface KafkaSendContext<out T> :
         SendContext<T>,
         KafkaProduceContext
         where T : class

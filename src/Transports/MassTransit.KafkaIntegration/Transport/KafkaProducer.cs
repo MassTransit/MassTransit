@@ -30,19 +30,21 @@ namespace MassTransit.KafkaIntegration.Transport
 
         public Task Produce(TKey key, TValue value, CancellationToken cancellationToken = default)
         {
-            return Produce(key, value, Pipe.Empty<KafkaProduceContext<TValue>>(), cancellationToken);
+            return Produce(key, value, Pipe.Empty<KafkaSendContext<TValue>>(), cancellationToken);
         }
 
-        public async Task Produce(TKey key, TValue value, IPipe<KafkaProduceContext<TValue>> pipe, CancellationToken cancellationToken)
+        public async Task Produce(TKey key, TValue value, IPipe<KafkaSendContext<TValue>> pipe, CancellationToken cancellationToken)
         {
             LogContext.SetCurrentIfNull(_producerContext.LogContext);
 
-            var context = new MessageKafkaProduceContext<TValue>(value, cancellationToken);
+            var context = new KafkaMessageSendContext<TValue>(value, cancellationToken);
 
             if (_consumeContext != null)
                 context.TransferConsumeContextHeaders(_consumeContext);
 
             context.DestinationAddress = _topicAddress;
+
+            await _producerContext.Send(context).ConfigureAwait(false);
 
             if (pipe.IsNotEmpty())
                 await pipe.Send(context).ConfigureAwait(false);
@@ -94,10 +96,10 @@ namespace MassTransit.KafkaIntegration.Transport
 
         public Task Produce(TKey key, object values, CancellationToken cancellationToken = default)
         {
-            return Produce(key, values, Pipe.Empty<KafkaProduceContext<TValue>>(), cancellationToken);
+            return Produce(key, values, Pipe.Empty<KafkaSendContext<TValue>>(), cancellationToken);
         }
 
-        public Task Produce(TKey key, object values, IPipe<KafkaProduceContext<TValue>> pipe, CancellationToken cancellationToken = default)
+        public Task Produce(TKey key, object values, IPipe<KafkaSendContext<TValue>> pipe, CancellationToken cancellationToken = default)
         {
             Task<InitializeContext<TValue>> messageTask = MessageInitializerCache<TValue>.Initialize(values, cancellationToken);
             if (messageTask.IsCompletedSuccessfully())

@@ -12,15 +12,16 @@ namespace MassTransit.KafkaIntegration.Tests
     using Transport;
 
 
-    public class Producer_Specs :
+    public class ProducerPipe_Specs :
         InMemoryTestFixture
     {
-        const string Topic = "producer";
+        const string Topic = "producer-pipe";
 
         [Test]
         public async Task Should_produce()
         {
             TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
+            TaskCompletionSource<SendContext> sendFilterTaskCompletionSource = GetTask<SendContext>();
             var services = new ServiceCollection();
             services.AddSingleton(taskCompletionSource);
 
@@ -40,7 +41,7 @@ namespace MassTransit.KafkaIntegration.Tests
                     {
                         k.Host("localhost:9092");
 
-                        k.TopicEndpoint<Null, KafkaMessage>(Topic, nameof(Producer_Specs), c =>
+                        k.TopicEndpoint<Null, KafkaMessage>(Topic, nameof(ProducerPipe_Specs), c =>
                         {
                             c.AutoOffsetReset = AutoOffsetReset.Earliest;
                             c.ConfigureConsumer<KafkaMessageConsumer>(context);
@@ -48,6 +49,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
                         k.TopicProducer<Null, KafkaMessage>(Topic, c =>
                         {
+                            c.ConfigureSend(s => s.UseFilter(new SendFilter(sendFilterTaskCompletionSource)));
                         });
                     });
                 });
@@ -66,37 +68,18 @@ namespace MassTransit.KafkaIntegration.Tests
             try
             {
                 var correlationId = NewId.NextGuid();
-                var conversationId = NewId.NextGuid();
-                var initiatorId = NewId.NextGuid();
-                var messageId = NewId.NextGuid();
-                await producer.Produce(new {Text = "text"}, Pipe.Execute<SendContext>(context =>
-                    {
-                        context.CorrelationId = correlationId;
-                        context.MessageId = messageId;
-                        context.InitiatorId = initiatorId;
-                        context.ConversationId = conversationId;
-                        context.Headers.Set("Special", new
-                        {
-                            Key = "Hello",
-                            Value = "World"
-                        });
-                    }),
-                    TestCancellationToken);
+                await producer.Produce(new
+                {
+                    CorrelationId = correlationId,
+                    Text = "text"
+                }, TestCancellationToken);
 
-                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
+                var result = await sendFilterTaskCompletionSource.Task;
 
-                Assert.AreEqual("text", result.Message.Text);
-                Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
+                Assert.AreEqual(correlationId, result.CorrelationId);
                 Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/kafka/{Topic}")));
-                Assert.That(result.MessageId, Is.EqualTo(messageId));
-                Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
-                Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
-                Assert.That(result.ConversationId, Is.EqualTo(conversationId));
 
-                var headerType = result.Headers.Get<HeaderType>("Special");
-                Assert.That(headerType, Is.Not.Null);
-                Assert.That(headerType.Key, Is.EqualTo("Hello"));
-                Assert.That(headerType.Value, Is.EqualTo("World"));
+                await taskCompletionSource.Task;
             }
             finally
             {
@@ -126,15 +109,30 @@ namespace MassTransit.KafkaIntegration.Tests
         }
 
 
-        public interface HeaderType
+        class SendFilter :
+            IFilter<SendContext>
         {
-            string Key { get; }
-            string Value { get; }
+            readonly TaskCompletionSource<SendContext> _taskCompletionSource;
+
+            public SendFilter(TaskCompletionSource<SendContext> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public async Task Send(SendContext context, IPipe<SendContext> next)
+            {
+                _taskCompletionSource.TrySetResult(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
         }
 
 
         public interface KafkaMessage
         {
+            Guid CorrelationId { get; }
             string Text { get; }
         }
     }

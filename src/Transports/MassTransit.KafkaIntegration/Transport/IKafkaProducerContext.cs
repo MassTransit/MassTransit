@@ -5,11 +5,14 @@ namespace MassTransit.KafkaIntegration.Transport
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Context;
+    using Pipeline;
     using Pipeline.Observables;
     using Serializers;
 
 
-    public interface IKafkaProducerContext<TKey, TValue>
+    public interface IKafkaProducerContext<TKey, TValue> :
+        ISendPipe,
+        IDisposable
         where TValue : class
     {
         Uri HostAddress { get; }

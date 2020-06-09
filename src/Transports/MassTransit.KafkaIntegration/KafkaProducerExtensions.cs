@@ -28,7 +28,7 @@ namespace MassTransit.KafkaIntegration
         /// <param name="value">The message value</param>
         /// <param name="pipe">A pipe which is called to customize the produced message context</param>
         /// <param name="cancellationToken"></param>
-        public static Task Produce<TValue>(this IKafkaProducer<Null, TValue> producer, TValue value, IPipe<KafkaProduceContext<TValue>> pipe,
+        public static Task Produce<TValue>(this IKafkaProducer<Null, TValue> producer, TValue value, IPipe<KafkaSendContext<TValue>> pipe,
             CancellationToken cancellationToken = default)
             where TValue : class
         {
@@ -54,7 +54,7 @@ namespace MassTransit.KafkaIntegration
         /// <param name="values">An object which is used to initialize the message</param>
         /// <param name="pipe">A pipe which is called to customize the produced message context</param>
         /// <param name="cancellationToken"></param>
-        public static Task Produce<TValue>(this IKafkaProducer<Null, TValue> producer, object values, IPipe<KafkaProduceContext<TValue>> pipe,
+        public static Task Produce<TValue>(this IKafkaProducer<Null, TValue> producer, object values, IPipe<KafkaSendContext<TValue>> pipe,
             CancellationToken cancellationToken = default)
             where TValue : class
         {
@@ -80,7 +80,7 @@ namespace MassTransit.KafkaIntegration
         /// <param name="value">The message value</param>
         /// <param name="pipe">A pipe which is called to customize the produced message context</param>
         /// <param name="cancellationToken"></param>
-        public static Task Produce<TValue>(this IKafkaProducer<Ignore, TValue> producer, TValue value, IPipe<KafkaProduceContext<TValue>> pipe,
+        public static Task Produce<TValue>(this IKafkaProducer<Ignore, TValue> producer, TValue value, IPipe<KafkaSendContext<TValue>> pipe,
             CancellationToken cancellationToken = default)
             where TValue : class
         {
@@ -106,7 +106,7 @@ namespace MassTransit.KafkaIntegration
         /// <param name="values">An object which is used to initialize the message</param>
         /// <param name="pipe">A pipe which is called to customize the produced message context</param>
         /// <param name="cancellationToken"></param>
-        public static Task Produce<TValue>(this IKafkaProducer<Ignore, TValue> producer, object values, IPipe<KafkaProduceContext<TValue>> pipe,
+        public static Task Produce<TValue>(this IKafkaProducer<Ignore, TValue> producer, object values, IPipe<KafkaSendContext<TValue>> pipe,
             CancellationToken cancellationToken = default)
             where TValue : class
         {
