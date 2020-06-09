@@ -22,13 +22,13 @@ namespace MassTransit
             Action<StoreOptions> configureOptions)
             where T : class, ISaga
         {
-            var redisConfigurator = new MartenSagaRepositoryConfigurator<T>();
+            var martenConfigurator = new MartenSagaRepositoryConfigurator<T>();
 
-            redisConfigurator.Connection(connectionString, configureOptions);
+            martenConfigurator.Connection(connectionString, configureOptions);
 
-            BusConfigurationResult.CompileResults(redisConfigurator.Validate());
+            BusConfigurationResult.CompileResults(martenConfigurator.Validate());
 
-            configurator.Repository(x => redisConfigurator.Register(x));
+            configurator.Repository(x => martenConfigurator.Register(x));
 
             return configurator;
         }
@@ -45,13 +45,13 @@ namespace MassTransit
             Func<NpgsqlConnection> connectionFactory, Action<StoreOptions> configureOptions)
             where T : class, ISaga
         {
-            var redisConfigurator = new MartenSagaRepositoryConfigurator<T>();
+            var martenConfigurator = new MartenSagaRepositoryConfigurator<T>();
 
-            redisConfigurator.Connection(connectionFactory, configureOptions);
+            martenConfigurator.Connection(connectionFactory, configureOptions);
 
-            BusConfigurationResult.CompileResults(redisConfigurator.Validate());
+            BusConfigurationResult.CompileResults(martenConfigurator.Validate());
 
-            configurator.Repository(x => redisConfigurator.Register(x));
+            configurator.Repository(x => martenConfigurator.Register(x));
 
             return configurator;
         }
@@ -66,13 +66,13 @@ namespace MassTransit
         public static ISagaRegistrationConfigurator<T> MartenRepository<T>(this ISagaRegistrationConfigurator<T> configurator, string connectionString)
             where T : class, ISaga
         {
-            var redisConfigurator = new MartenSagaRepositoryConfigurator<T>();
+            var martenConfigurator = new MartenSagaRepositoryConfigurator<T>();
 
-            redisConfigurator.Connection(connectionString);
+            martenConfigurator.Connection(connectionString);
 
-            BusConfigurationResult.CompileResults(redisConfigurator.Validate());
+            BusConfigurationResult.CompileResults(martenConfigurator.Validate());
 
-            configurator.Repository(x => redisConfigurator.Register(x));
+            configurator.Repository(x => martenConfigurator.Register(x));
 
             return configurator;
         }
