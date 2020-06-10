@@ -26,8 +26,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             {
                 var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
                 var busHealth = serviceProvider.GetRequiredService<BusHealth>();
-                return new BusRegistrationContext(provider, busHealth, EndpointRegistrations, ConsumerRegistrations, SagaRegistrations,
-                    ExecuteActivityRegistrations, ActivityRegistrations);
+                return new BusRegistrationContext(provider, busHealth, Endpoints, Consumers, Sagas, ExecuteActivities, Activities);
             }
 
             collection.AddSingleton(provider => ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>(),

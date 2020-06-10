@@ -1,7 +1,6 @@
 namespace MassTransit.Registration
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Linq;
     using Definition;
     using Internals.Extensions;
@@ -11,32 +10,25 @@ namespace MassTransit.Registration
 
     public static class SagaDefinitionRegistrationCache
     {
-        static CachedRegistration GetOrAdd(Type type)
+        public static void Register(Type sagaDefinitionType, IContainerRegistrar registrar)
+        {
+            Cached.Instance.GetOrAdd(sagaDefinitionType).Register(registrar);
+        }
+
+        static CachedRegistration Factory(Type type)
         {
             if (!type.HasInterface(typeof(ISagaDefinition<>)))
                 throw new ArgumentException($"The type is not a saga definition: {TypeMetadataCache.GetShortName(type)}", nameof(type));
 
             var sagaType = type.GetClosingArguments(typeof(ISagaDefinition<>)).Single();
 
-            return Cached.Instance.GetOrAdd(sagaType,
-                _ => (CachedRegistration)Activator.CreateInstance(typeof(CachedRegistration<,>).MakeGenericType(type, sagaType)));
-        }
-
-        public static void Register(Type sagaDefinitionType, IContainerRegistrar registrar)
-        {
-            GetOrAdd(sagaDefinitionType).Register(registrar);
+            return (CachedRegistration)Activator.CreateInstance(typeof(CachedRegistration<,>).MakeGenericType(type, sagaType));
         }
 
 
         static class Cached
         {
-            internal static readonly ConcurrentDictionary<Type, CachedRegistration> Instance = new ConcurrentDictionary<Type, CachedRegistration>();
-        }
-
-
-        interface CachedRegistration
-        {
-            void Register(IContainerRegistrar registrar);
+            internal static readonly ContainerRegistrationCache Instance = new ContainerRegistrationCache(Factory);
         }
 
 

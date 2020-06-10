@@ -22,8 +22,7 @@ namespace MassTransit.WindsorIntegration.Registration
             {
                 var provider = context.Resolve<IConfigurationServiceProvider>();
                 var busHealth = context.Resolve<BusHealth>();
-                return new BusRegistrationContext(provider, busHealth, EndpointRegistrations, ConsumerRegistrations, SagaRegistrations,
-                    ExecuteActivityRegistrations, ActivityRegistrations);
+                return new BusRegistrationContext(provider, busHealth, Endpoints, Consumers, Sagas, ExecuteActivities, Activities);
             }
 
             Container = container;

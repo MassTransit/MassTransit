@@ -1,7 +1,6 @@
 namespace MassTransit.Registration
 {
     using System;
-    using System.Collections.Generic;
     using ConsumeConfigurators;
     using Metadata;
     using Saga;
@@ -11,14 +10,14 @@ namespace MassTransit.Registration
         IRegistration
     {
         readonly IConfigurationServiceProvider _configurationServiceProvider;
-        protected readonly IDictionary<Type, IActivityRegistration> Activities;
-        protected readonly IDictionary<Type, IConsumerRegistration> Consumers;
-        protected readonly IDictionary<Type, IExecuteActivityRegistration> ExecuteActivities;
-        protected readonly IDictionary<Type, ISagaRegistration> Sagas;
+        protected readonly IRegistrationCache<IActivityRegistration> Activities;
+        protected readonly IRegistrationCache<IConsumerRegistration> Consumers;
+        protected readonly IRegistrationCache<IExecuteActivityRegistration> ExecuteActivities;
+        protected readonly IRegistrationCache<ISagaRegistration> Sagas;
 
-        public Registration(IConfigurationServiceProvider configurationServiceProvider, IDictionary<Type, IConsumerRegistration> consumers,
-            IDictionary<Type, ISagaRegistration> sagas, IDictionary<Type, IExecuteActivityRegistration> executeActivities,
-            IDictionary<Type, IActivityRegistration> activities)
+        public Registration(IConfigurationServiceProvider configurationServiceProvider, IRegistrationCache<IConsumerRegistration> consumers,
+            IRegistrationCache<ISagaRegistration> sagas, IRegistrationCache<IExecuteActivityRegistration> executeActivities,
+            IRegistrationCache<IActivityRegistration> activities)
         {
             _configurationServiceProvider = configurationServiceProvider;
             Consumers = consumers;

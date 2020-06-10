@@ -1,7 +1,6 @@
 namespace MassTransit.Registration
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Linq;
     using Internals.Extensions;
     using Metadata;
@@ -9,37 +8,30 @@ namespace MassTransit.Registration
 
     public static class EndpointRegistrationCache
     {
-        static CachedRegistration GetOrAdd(Type type)
+        public static IEndpointRegistration CreateRegistration(Type definitionType, IContainerRegistrar registrar)
+        {
+            return Cached.Instance.GetOrAdd(definitionType).CreateRegistration(registrar);
+        }
+
+        static CachedRegistration Factory(Type type)
         {
             if (!type.HasInterface(typeof(IEndpointDefinition<>)))
                 throw new ArgumentException($"The type is not an execute activity: {TypeMetadataCache.GetShortName(type)}", nameof(type));
 
             var targetType = type.GetClosingArguments(typeof(IEndpointDefinition<>)).Single();
 
-            return Cached.Instance.GetOrAdd(type,
-                _ => (CachedRegistration)Activator.CreateInstance(typeof(CachedRegistration<,>).MakeGenericType(type, targetType)));
-        }
-
-        public static void Register(Type definitionType, IContainerRegistrar registrar)
-        {
-            GetOrAdd(definitionType).Register(registrar);
-        }
-
-        public static IEndpointRegistration CreateRegistration(Type definitionType, IContainerRegistrar registrar)
-        {
-            return GetOrAdd(definitionType).CreateRegistration(registrar);
+            return (CachedRegistration)Activator.CreateInstance(typeof(CachedRegistration<,>).MakeGenericType(type, targetType));
         }
 
 
         static class Cached
         {
-            internal static readonly ConcurrentDictionary<Type, CachedRegistration> Instance = new ConcurrentDictionary<Type, CachedRegistration>();
+            internal static readonly RegistrationCache<CachedRegistration> Instance = new RegistrationCache<CachedRegistration>(Factory);
         }
 
 
         interface CachedRegistration
         {
-            void Register(IContainerRegistrar registrar);
             IEndpointRegistration CreateRegistration(IContainerRegistrar registrar);
         }
 
@@ -49,14 +41,9 @@ namespace MassTransit.Registration
             where TDefinition : class, IEndpointDefinition<T>
             where T : class
         {
-            public void Register(IContainerRegistrar registrar)
-            {
-                registrar.RegisterEndpointDefinition<TDefinition, T>();
-            }
-
             public IEndpointRegistration CreateRegistration(IContainerRegistrar registrar)
             {
-                Register(registrar);
+                registrar.RegisterEndpointDefinition<TDefinition, T>();
 
                 return new EndpointRegistration<T>();
             }

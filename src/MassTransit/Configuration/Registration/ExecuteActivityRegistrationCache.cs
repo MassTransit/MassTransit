@@ -1,7 +1,6 @@
 namespace MassTransit.Registration
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Linq;
     using Courier;
     using Internals.Extensions;
@@ -10,7 +9,17 @@ namespace MassTransit.Registration
 
     public static class ExecuteActivityRegistrationCache
     {
-        static CachedRegistration GetOrAdd(Type activityType)
+        public static void Register(Type activityType, IContainerRegistrar registrar)
+        {
+            Cached.Instance.GetOrAdd(activityType).Register(registrar);
+        }
+
+        public static IExecuteActivityRegistration CreateRegistration(Type activityType, Type activityDefinitionType, IContainerRegistrar registrar)
+        {
+            return Cached.Instance.GetOrAdd(activityType).CreateRegistration(activityDefinitionType, registrar);
+        }
+
+        static CachedRegistration Factory(Type activityType)
         {
             if (!activityType.HasInterface(typeof(IExecuteActivity<>)))
                 throw new ArgumentException($"The type is not an execute activity: {TypeMetadataCache.GetShortName(activityType)}", nameof(activityType));
@@ -23,24 +32,13 @@ namespace MassTransit.Registration
 
             var argumentType = activityType.GetClosingArguments(typeof(IExecuteActivity<>)).Single();
 
-            return Cached.Instance.GetOrAdd(activityType,
-                _ => (CachedRegistration)Activator.CreateInstance(typeof(CachedRegistration<,>).MakeGenericType(activityType, argumentType)));
-        }
-
-        public static void Register(Type activityType, IContainerRegistrar registrar)
-        {
-            GetOrAdd(activityType).Register(registrar);
-        }
-
-        public static IExecuteActivityRegistration CreateRegistration(Type activityType, Type activityDefinitionType, IContainerRegistrar registrar)
-        {
-            return GetOrAdd(activityType).CreateRegistration(activityDefinitionType, registrar);
+            return (CachedRegistration)Activator.CreateInstance(typeof(CachedRegistration<,>).MakeGenericType(activityType, argumentType));
         }
 
 
         static class Cached
         {
-            internal static readonly ConcurrentDictionary<Type, CachedRegistration> Instance = new ConcurrentDictionary<Type, CachedRegistration>();
+            internal static readonly RegistrationCache<CachedRegistration> Instance = new RegistrationCache<CachedRegistration>(Factory);
         }
 
 

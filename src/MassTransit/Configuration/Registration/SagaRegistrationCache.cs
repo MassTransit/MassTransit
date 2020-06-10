@@ -1,25 +1,19 @@
 namespace MassTransit.Registration
 {
     using System;
-    using System.Collections.Concurrent;
     using Saga;
 
 
     public static class SagaRegistrationCache
     {
-        static CachedRegistration GetOrAdd(Type type)
-        {
-            return Cached.Instance.GetOrAdd(type, _ => (CachedRegistration)Activator.CreateInstance(typeof(CachedRegistration<>).MakeGenericType(type)));
-        }
-
         public static void Register(Type sagaType, IContainerRegistrar registrar)
         {
-            GetOrAdd(sagaType).Register(registrar);
+            Cached.Instance.GetOrAdd(sagaType).Register(registrar);
         }
 
         public static ISagaRegistration CreateRegistration(Type sagaType, Type sagaDefinitionType, IContainerRegistrar registrar)
         {
-            return GetOrAdd(sagaType).CreateRegistration(sagaDefinitionType, registrar);
+            return Cached.Instance.GetOrAdd(sagaType).CreateRegistration(sagaDefinitionType, registrar);
         }
 
         /// <summary>
@@ -29,13 +23,18 @@ namespace MassTransit.Registration
         /// <param name="sagaType"></param>
         public static void DoNotRegister(Type sagaType)
         {
-            GetOrAdd(sagaType).DoNotRegister();
+            Cached.Instance.GetOrAdd(sagaType).DoNotRegister();
+        }
+
+        static CachedRegistration Factory(Type type)
+        {
+            return (CachedRegistration)Activator.CreateInstance(typeof(CachedRegistration<>).MakeGenericType(type));
         }
 
 
         static class Cached
         {
-            internal static readonly ConcurrentDictionary<Type, CachedRegistration> Instance = new ConcurrentDictionary<Type, CachedRegistration>();
+            internal static readonly RegistrationCache<CachedRegistration> Instance = new RegistrationCache<CachedRegistration>(Factory);
         }
 
 
@@ -43,7 +42,6 @@ namespace MassTransit.Registration
         {
             void Register(IContainerRegistrar registrar);
             ISagaRegistration CreateRegistration(Type sagaDefinitionType, IContainerRegistrar registrar);
-
             void DoNotRegister();
         }
 

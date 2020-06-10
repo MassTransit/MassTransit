@@ -1,6 +1,5 @@
 namespace MassTransit.Registration
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Definition;
@@ -12,11 +11,11 @@ namespace MassTransit.Registration
         IBusRegistrationContext
     {
         readonly BusHealth _busHealth;
-        readonly IDictionary<Type, IEndpointRegistration> _endpoints;
+        readonly IRegistrationCache<IEndpointRegistration> _endpoints;
 
-        public BusRegistrationContext(IConfigurationServiceProvider provider, BusHealth busHealth, IDictionary<Type, IEndpointRegistration> endpoints,
-            IDictionary<Type, IConsumerRegistration> consumers, IDictionary<Type, ISagaRegistration> sagas,
-            IDictionary<Type, IExecuteActivityRegistration> executeActivities, IDictionary<Type, IActivityRegistration> activities)
+        public BusRegistrationContext(IConfigurationServiceProvider provider, BusHealth busHealth, IRegistrationCache<IEndpointRegistration> endpoints,
+            IRegistrationCache<IConsumerRegistration> consumers, IRegistrationCache<ISagaRegistration> sagas,
+            IRegistrationCache<IExecuteActivityRegistration> executeActivities, IRegistrationCache<IActivityRegistration> activities)
             : base(provider, consumers, sagas, executeActivities, activities)
         {
             _busHealth = busHealth;

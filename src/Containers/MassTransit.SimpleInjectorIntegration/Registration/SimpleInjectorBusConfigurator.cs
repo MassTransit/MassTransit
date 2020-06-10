@@ -23,8 +23,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             {
                 var provider = Container.GetInstance<IConfigurationServiceProvider>();
                 var busHealth = Container.GetInstance<BusHealth>();
-                return new BusRegistrationContext(provider, busHealth, EndpointRegistrations, ConsumerRegistrations, SagaRegistrations,
-                    ExecuteActivityRegistrations, ActivityRegistrations);
+                return new BusRegistrationContext(provider, busHealth, Endpoints, Consumers, Sagas, ExecuteActivities, Activities);
             }
 
             Container = container;

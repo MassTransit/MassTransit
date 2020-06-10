@@ -1,9 +1,6 @@
 namespace MassTransit.Registration
 {
     using System;
-    using System.Collections.Concurrent;
-    using System.Collections.Generic;
-    using System.Linq;
     using Automatonymous;
     using ConsumeConfigurators;
     using Context;
@@ -21,32 +18,29 @@ namespace MassTransit.Registration
     public class RegistrationConfigurator :
         IRegistrationConfigurator
     {
-        readonly ConcurrentDictionary<Type, IActivityRegistration> _activityRegistrations;
-        readonly ConcurrentDictionary<Type, IConsumerRegistration> _consumerRegistrations;
-        readonly ConcurrentDictionary<Type, IEndpointRegistration> _endpointRegistrations;
-        readonly ConcurrentDictionary<Type, IExecuteActivityRegistration> _executeActivityRegistrations;
-        readonly ConcurrentDictionary<Type, ISagaRegistration> _sagaRegistrations;
+        readonly RegistrationCache<IActivityRegistration> _activities;
+        readonly RegistrationCache<IConsumerRegistration> _consumers;
+        readonly RegistrationCache<IEndpointRegistration> _endpoints;
+        readonly RegistrationCache<IExecuteActivityRegistration> _executeActivities;
+        readonly RegistrationCache<ISagaRegistration> _sagas;
         bool _configured;
 
         protected RegistrationConfigurator(IContainerRegistrar registrar = null)
         {
             Registrar = registrar ?? new NullContainerRegistrar();
 
-            _consumerRegistrations = new ConcurrentDictionary<Type, IConsumerRegistration>();
-            _sagaRegistrations = new ConcurrentDictionary<Type, ISagaRegistration>();
-            _executeActivityRegistrations = new ConcurrentDictionary<Type, IExecuteActivityRegistration>();
-            _activityRegistrations = new ConcurrentDictionary<Type, IActivityRegistration>();
-            _endpointRegistrations = new ConcurrentDictionary<Type, IEndpointRegistration>();
+            _consumers = new RegistrationCache<IConsumerRegistration>();
+            _sagas = new RegistrationCache<ISagaRegistration>();
+            _executeActivities = new RegistrationCache<IExecuteActivityRegistration>();
+            _activities = new RegistrationCache<IActivityRegistration>();
+            _endpoints = new RegistrationCache<IEndpointRegistration>();
         }
 
-        protected Dictionary<Type, IActivityRegistration> ActivityRegistrations => _activityRegistrations.ToDictionary(x => x.Key, x => x.Value);
-        protected Dictionary<Type, IConsumerRegistration> ConsumerRegistrations => _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value);
-        protected Dictionary<Type, IEndpointRegistration> EndpointRegistrations => _endpointRegistrations.ToDictionary(x => x.Key, x => x.Value);
-
-        protected Dictionary<Type, IExecuteActivityRegistration> ExecuteActivityRegistrations =>
-            _executeActivityRegistrations.ToDictionary(x => x.Key, x => x.Value);
-
-        protected Dictionary<Type, ISagaRegistration> SagaRegistrations => _sagaRegistrations.ToDictionary(x => x.Key, x => x.Value);
+        protected IRegistrationCache<IActivityRegistration> Activities => _activities;
+        protected IRegistrationCache<IConsumerRegistration> Consumers => _consumers;
+        protected IRegistrationCache<IEndpointRegistration> Endpoints => _endpoints;
+        protected IRegistrationCache<IExecuteActivityRegistration> ExecuteActivities => _executeActivities;
+        protected IRegistrationCache<ISagaRegistration> Sagas => _sagas;
 
         public IContainerRegistrar Registrar { get; }
 
@@ -74,7 +68,7 @@ namespace MassTransit.Registration
                 return new ConsumerRegistration<T>();
             }
 
-            var registration = _consumerRegistrations.GetOrAdd(typeof(T), ValueFactory);
+            var registration = _consumers.GetOrAdd(typeof(T), ValueFactory);
 
             registration.AddConfigureAction(configure);
 
@@ -99,7 +93,7 @@ namespace MassTransit.Registration
                 return (IConsumerRegistration)Activator.CreateInstance(typeof(ConsumerRegistration<>).MakeGenericType(type));
             }
 
-            _consumerRegistrations.GetOrAdd(consumerType, ValueFactory);
+            _consumers.GetOrAdd(consumerType, ValueFactory);
         }
 
         public ISagaRegistrationConfigurator<T> AddSaga<T>(Action<ISagaConfigurator<T>> configure)
@@ -124,7 +118,7 @@ namespace MassTransit.Registration
                 return new SagaRegistration<T>();
             }
 
-            var registration = _sagaRegistrations.GetOrAdd(typeof(T), ValueFactory);
+            var registration = _sagas.GetOrAdd(typeof(T), ValueFactory);
 
             registration.AddConfigureAction(configure);
 
@@ -136,7 +130,7 @@ namespace MassTransit.Registration
             if (sagaType.HasInterface<SagaStateMachineInstance>())
                 throw new ArgumentException($"State machine sagas must be registered using AddSagaStateMachine: {TypeMetadataCache.GetShortName(sagaType)}");
 
-            _sagaRegistrations.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, sagaDefinitionType, Registrar));
+            _sagas.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, sagaDefinitionType, Registrar));
         }
 
         public ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(Action<ISagaConfigurator<T>> configure = null)
@@ -160,7 +154,7 @@ namespace MassTransit.Registration
                 return new SagaStateMachineRegistration<T>();
             }
 
-            var registration = _sagaRegistrations.GetOrAdd(typeof(T), ValueFactory);
+            var registration = _sagas.GetOrAdd(typeof(T), ValueFactory);
 
             registration.AddConfigureAction(configure);
 
@@ -195,7 +189,7 @@ namespace MassTransit.Registration
                 return new ExecuteActivityRegistration<TActivity, TArguments>();
             }
 
-            var registration = _executeActivityRegistrations.GetOrAdd(typeof(TActivity), ValueFactory);
+            var registration = _executeActivities.GetOrAdd(typeof(TActivity), ValueFactory);
 
             registration.AddConfigureAction(configure);
 
@@ -204,7 +198,7 @@ namespace MassTransit.Registration
 
         public void AddExecuteActivity(Type activityType, Type activityDefinitionType)
         {
-            _executeActivityRegistrations.GetOrAdd(activityType,
+            _executeActivities.GetOrAdd(activityType,
                 type => ExecuteActivityRegistrationCache.CreateRegistration(type, activityDefinitionType, Registrar));
         }
 
@@ -235,7 +229,7 @@ namespace MassTransit.Registration
                 return new ActivityRegistration<TActivity, TArguments, TLog>();
             }
 
-            var registration = _activityRegistrations.GetOrAdd(typeof(TActivity), ValueFactory);
+            var registration = _activities.GetOrAdd(typeof(TActivity), ValueFactory);
 
             registration.AddConfigureAction(configureExecute);
             registration.AddConfigureAction(configureCompensate);
@@ -245,13 +239,13 @@ namespace MassTransit.Registration
 
         public void AddActivity(Type activityType, Type activityDefinitionType)
         {
-            _activityRegistrations.GetOrAdd(activityType,
+            _activities.GetOrAdd(activityType,
                 type => ActivityRegistrationCache.CreateRegistration(type, activityDefinitionType, Registrar));
         }
 
         public void AddEndpoint(Type definitionType)
         {
-            _endpointRegistrations.GetOrAdd(definitionType, type => EndpointRegistrationCache.CreateRegistration(definitionType, Registrar));
+            _endpoints.GetOrAdd(definitionType, type => EndpointRegistrationCache.CreateRegistration(definitionType, Registrar));
         }
 
         public void AddEndpoint<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings)
@@ -265,7 +259,7 @@ namespace MassTransit.Registration
                 return new EndpointRegistration<T>();
             }
 
-            _endpointRegistrations.GetOrAdd(typeof(TDefinition), ValueFactory);
+            _endpoints.GetOrAdd(typeof(TDefinition), ValueFactory);
         }
 
         public void AddRequestClient<T>(RequestTimeout timeout)
@@ -301,7 +295,7 @@ namespace MassTransit.Registration
 
         protected IRegistration CreateRegistration(IConfigurationServiceProvider provider)
         {
-            return new Registration(provider, ConsumerRegistrations, SagaRegistrations, ExecuteActivityRegistrations, ActivityRegistrations);
+            return new Registration(provider, Consumers, Sagas, ExecuteActivities, Activities);
         }
 
         protected void ThrowIfAlreadyConfigured(string methodName)

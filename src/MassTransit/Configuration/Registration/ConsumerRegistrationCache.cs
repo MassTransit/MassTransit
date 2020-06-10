@@ -1,32 +1,24 @@
 namespace MassTransit.Registration
 {
     using System;
-    using System.Collections.Concurrent;
 
 
     public static class ConsumerRegistrationCache
     {
-        static CachedRegistration GetOrAdd(Type type)
-        {
-            return Cached.Instance.GetOrAdd(type, _ =>
-                (CachedRegistration)Activator.CreateInstance(typeof(CachedRegistration<>).MakeGenericType(type)));
-        }
-
         public static void Register(Type consumerType, IContainerRegistrar registrar)
         {
-            GetOrAdd(consumerType).Register(registrar);
+            Cached.Instance.GetOrAdd(consumerType).Register(registrar);
+        }
+
+        static CachedRegistration Factory(Type type)
+        {
+            return (CachedRegistration)Activator.CreateInstance(typeof(CachedRegistration<>).MakeGenericType(type));
         }
 
 
         static class Cached
         {
-            internal static readonly ConcurrentDictionary<Type, CachedRegistration> Instance = new ConcurrentDictionary<Type, CachedRegistration>();
-        }
-
-
-        interface CachedRegistration
-        {
-            void Register(IContainerRegistrar registrar);
+            internal static readonly ContainerRegistrationCache Instance = new ContainerRegistrationCache(Factory);
         }
 
 

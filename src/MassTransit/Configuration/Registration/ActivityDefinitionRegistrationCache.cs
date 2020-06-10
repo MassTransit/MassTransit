@@ -1,7 +1,6 @@
 namespace MassTransit.Registration
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Linq;
     using Courier;
     using Definition;
@@ -11,7 +10,12 @@ namespace MassTransit.Registration
 
     public static class ActivityDefinitionRegistrationCache
     {
-        static CachedRegistration GetOrAdd(Type type)
+        public static void Register(Type sagaDefinitionType, IContainerRegistrar registrar)
+        {
+            Cached.Instance.GetOrAdd(sagaDefinitionType).Register(registrar);
+        }
+
+        static CachedRegistration Factory(Type type)
         {
             if (!type.HasInterface(typeof(IActivityDefinition<,,>)))
                 throw new ArgumentException($"The type is not an activity definition: {TypeMetadataCache.GetShortName(type)}", nameof(type));
@@ -19,24 +23,13 @@ namespace MassTransit.Registration
             Type[] argumentLogTypes = type.GetClosingArguments(typeof(IActivityDefinition<,,>)).ToArray();
             var genericType = typeof(CachedRegistration<,,,>).MakeGenericType(type, argumentLogTypes[0], argumentLogTypes[1], argumentLogTypes[2]);
 
-            return Cached.Instance.GetOrAdd(type, _ => (CachedRegistration)Activator.CreateInstance(genericType));
-        }
-
-        public static void Register(Type sagaDefinitionType, IContainerRegistrar registrar)
-        {
-            GetOrAdd(sagaDefinitionType).Register(registrar);
+            return (CachedRegistration)Activator.CreateInstance(genericType);
         }
 
 
         static class Cached
         {
-            internal static readonly ConcurrentDictionary<Type, CachedRegistration> Instance = new ConcurrentDictionary<Type, CachedRegistration>();
-        }
-
-
-        interface CachedRegistration
-        {
-            void Register(IContainerRegistrar registrar);
+            internal static readonly ContainerRegistrationCache Instance = new ContainerRegistrationCache(Factory);
         }
 
 
