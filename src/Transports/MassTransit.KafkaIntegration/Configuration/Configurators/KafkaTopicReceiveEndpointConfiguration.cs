@@ -38,7 +38,9 @@ namespace MassTransit.KafkaIntegration.Configurators
             _endpointConfiguration = endpointConfiguration;
             _consumerConfig = consumerConfig;
             _topic = topic;
-            SetValueDeserializer(new MassTransitSerializer<TValue>());
+
+            SetValueDeserializer(new MassTransitJsonDeserializer<TValue>());
+            SetKeyDeserializer(new MassTransitJsonDeserializer<TKey>());
             SetHeadersDeserializer(headersDeserializer);
 
             CheckpointInterval = TimeSpan.FromMinutes(1);

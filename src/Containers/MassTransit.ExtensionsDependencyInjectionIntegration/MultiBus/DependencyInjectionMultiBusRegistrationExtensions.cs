@@ -5,7 +5,6 @@ namespace MassTransit.MultiBus
     using ExtensionsDependencyInjectionIntegration.MultiBus;
     using Internals.Reflection;
     using Microsoft.Extensions.DependencyInjection;
-    using Registration;
 
 
     /// <summary>
@@ -28,7 +27,7 @@ namespace MassTransit.MultiBus
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
-            if (collection.Any(d => d.ServiceType == typeof(Bind<TBus, IRegistration>)))
+            if (collection.Any(d => d.ServiceType == typeof(TBus)))
             {
                 throw new ConfigurationException(
                     $"AddMassTransit<{typeof(TBus).Name},{typeof(TBusInstance).Name}>() was already called and may only be called once per container. To configure additional bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");

@@ -79,7 +79,7 @@
             public BusServiceRegistry()
             {
                 For<IBusControl>().Use(context => Bus.Factory.CreateUsingInMemory(x =>
-                        x.ReceiveEndpoint("input_queue", e => e.ConfigureConsumers(context.GetInstance<IRegistration>()))))
+                        x.ReceiveEndpoint("input_queue", e => e.ConfigureConsumers(context.GetInstance<IBusRegistrationContext>()))))
                     .Singleton();
             }
         }

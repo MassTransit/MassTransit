@@ -49,7 +49,7 @@ namespace MassTransit.Containers.Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureSaga<TestInstance>(_container.Resolve<IRegistration>());
+            configurator.ConfigureSaga<TestInstance>(_container.Resolve<IBusRegistrationContext>());
         }
 
         [OneTimeTearDown]

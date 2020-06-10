@@ -10,15 +10,15 @@ namespace MassTransit.RabbitMqTransport.Configuration
         TransportRegistrationBusFactory
     {
         readonly RabbitMqBusConfiguration _busConfiguration;
-        readonly Action<IRegistrationContext, IRabbitMqBusFactoryConfigurator> _configure;
+        readonly Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator> _configure;
 
-        public RabbitMqRegistrationBusFactory(Action<IRegistrationContext, IRabbitMqBusFactoryConfigurator> configure)
+        public RabbitMqRegistrationBusFactory(Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator> configure)
             : this(new RabbitMqBusConfiguration(new RabbitMqTopologyConfiguration(RabbitMqBusFactory.MessageTopology)), configure)
         {
         }
 
         RabbitMqRegistrationBusFactory(RabbitMqBusConfiguration busConfiguration,
-            Action<IRegistrationContext, IRabbitMqBusFactoryConfigurator> configure)
+            Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator> configure)
             : base(busConfiguration.HostConfiguration)
         {
             _configure = configure;
@@ -26,7 +26,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _busConfiguration = busConfiguration;
         }
 
-        public override IBusInstance CreateBus(IRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
+        public override IBusInstance CreateBus(IBusRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
         {
             var configurator = new RabbitMqBusFactoryConfigurator(_busConfiguration);
 

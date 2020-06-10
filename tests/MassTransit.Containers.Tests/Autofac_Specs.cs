@@ -38,7 +38,7 @@
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureConsumer<SimpleConsumer>(_container.Resolve<IRegistration>());
+            configurator.ConfigureConsumer<SimpleConsumer>(_container.Resolve<IBusRegistrationContext>());
         }
     }
 
@@ -95,7 +95,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.ConfigureEndpoints(_container.Resolve<IRegistration>());
+            configurator.ConfigureEndpoints(_container.Resolve<IBusRegistrationContext>());
         }
     }
 
@@ -126,7 +126,7 @@
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureSaga<SimpleSaga>(_container.Resolve<IRegistration>());
+            configurator.ConfigureSaga<SimpleSaga>(_container.Resolve<IBusRegistrationContext>());
         }
 
         protected override ISagaRepository<T> GetSagaRepository<T>()

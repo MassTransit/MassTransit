@@ -19,6 +19,14 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         public SimpleInjectorBusConfigurator(Container container)
             : base(new SimpleInjectorContainerRegistrar(container))
         {
+            IBusRegistrationContext CreateRegistrationContext()
+            {
+                var provider = Container.GetInstance<IConfigurationServiceProvider>();
+                var busHealth = Container.GetInstance<BusHealth>();
+                return new BusRegistrationContext(provider, busHealth, EndpointRegistrations, ConsumerRegistrations, SagaRegistrations,
+                    ExecuteActivityRegistrations, ActivityRegistrations);
+            }
+
             Container = container;
 
             _hybridLifestyle = Lifestyle.CreateHybrid(container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
@@ -31,7 +39,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             Container.RegisterSingleton<IBusInstance, DefaultBusInstance>();
 
-            Container.RegisterSingleton(() => CreateRegistration(container.GetInstance<IConfigurationServiceProvider>()));
+            Container.RegisterSingleton(() => CreateRegistrationContext());
 
             Container.RegisterSingleton(() => ClientFactoryProvider(Container.GetInstance<IConfigurationServiceProvider>(), Container.GetInstance<IBus>()));
         }
@@ -46,7 +54,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             AddBus(_ => busFactory());
         }
 
-        public void AddBus(Func<IRegistrationContext, IBusControl> busFactory)
+        public void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
         {
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
@@ -59,7 +67,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
                 ConfigureLogContext(provider);
 
-                var context = GetRegistrationContext();
+                var context = Container.GetInstance<IBusRegistrationContext>();
 
                 return busFactory(context);
             }
@@ -89,14 +97,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         {
             return (IPublishEndpoint)Container.GetConsumeContext()
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<Container>(Container.GetInstance<IBus>(), Container));
-        }
-
-        IRegistrationContext GetRegistrationContext()
-        {
-            return new RegistrationContext(
-                CreateRegistration(Container.GetInstance<IConfigurationServiceProvider>()),
-                Container.GetInstance<BusHealth>()
-            );
         }
 
         void AddMassTransitComponents(Container container)

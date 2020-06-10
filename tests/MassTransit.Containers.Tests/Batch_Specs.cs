@@ -43,7 +43,7 @@ namespace MassTransit.Containers.Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureConsumers(_provider.GetRequiredService<IRegistration>());
+            configurator.ConfigureConsumers(_provider.GetRequiredService<IBusRegistrationContext>());
         }
     }
 
@@ -87,7 +87,7 @@ namespace MassTransit.Containers.Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureConsumers(_provider.GetRequiredService<IRegistration>());
+            configurator.ConfigureConsumers(_provider.GetRequiredService<IBusRegistrationContext>());
         }
     }
 
@@ -132,7 +132,7 @@ namespace MassTransit.Containers.Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.ConfigureEndpoints(_provider.GetRequiredService<IRegistration>());
+            configurator.ConfigureEndpoints(_provider.GetRequiredService<IBusRegistrationContext>());
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

@@ -2,6 +2,7 @@ namespace MassTransit.Registration
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
     using Automatonymous;
     using ConsumeConfigurators;
@@ -27,7 +28,7 @@ namespace MassTransit.Registration
         readonly ConcurrentDictionary<Type, ISagaRegistration> _sagaRegistrations;
         bool _configured;
 
-        public RegistrationConfigurator(IContainerRegistrar registrar = null)
+        protected RegistrationConfigurator(IContainerRegistrar registrar = null)
         {
             Registrar = registrar ?? new NullContainerRegistrar();
 
@@ -37,6 +38,15 @@ namespace MassTransit.Registration
             _activityRegistrations = new ConcurrentDictionary<Type, IActivityRegistration>();
             _endpointRegistrations = new ConcurrentDictionary<Type, IEndpointRegistration>();
         }
+
+        protected Dictionary<Type, IActivityRegistration> ActivityRegistrations => _activityRegistrations.ToDictionary(x => x.Key, x => x.Value);
+        protected Dictionary<Type, IConsumerRegistration> ConsumerRegistrations => _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value);
+        protected Dictionary<Type, IEndpointRegistration> EndpointRegistrations => _endpointRegistrations.ToDictionary(x => x.Key, x => x.Value);
+
+        protected Dictionary<Type, IExecuteActivityRegistration> ExecuteActivityRegistrations =>
+            _executeActivityRegistrations.ToDictionary(x => x.Key, x => x.Value);
+
+        protected Dictionary<Type, ISagaRegistration> SagaRegistrations => _sagaRegistrations.ToDictionary(x => x.Key, x => x.Value);
 
         public IContainerRegistrar Registrar { get; }
 
@@ -291,9 +301,7 @@ namespace MassTransit.Registration
 
         protected IRegistration CreateRegistration(IConfigurationServiceProvider provider)
         {
-            return new Registration(provider, _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value),
-                _sagaRegistrations.ToDictionary(x => x.Key, x => x.Value), _executeActivityRegistrations.ToDictionary(x => x.Key, x => x.Value),
-                _activityRegistrations.ToDictionary(x => x.Key, x => x.Value), _endpointRegistrations.ToDictionary(x => x.Key, x => x.Value));
+            return new Registration(provider, ConsumerRegistrations, SagaRegistrations, ExecuteActivityRegistrations, ActivityRegistrations);
         }
 
         protected void ThrowIfAlreadyConfigured(string methodName)
@@ -309,18 +317,6 @@ namespace MassTransit.Registration
             var loggerFactory = provider.GetService<ILoggerFactory>();
             if (loggerFactory != null)
                 LogContext.ConfigureCurrentLogContext(loggerFactory);
-        }
-
-        protected void ConfigureMediator(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider provider,
-            Action<IRegistration, IReceiveEndpointConfigurator> configure)
-        {
-            var registration = new Registration(provider, _consumerRegistrations.ToDictionary(x => x.Key, x => x.Value),
-                _sagaRegistrations.ToDictionary(x => x.Key, x => x.Value), _executeActivityRegistrations.ToDictionary(x => x.Key, x => x.Value),
-                _activityRegistrations.ToDictionary(x => x.Key, x => x.Value), _endpointRegistrations.ToDictionary(x => x.Key, x => x.Value));
-
-            configure?.Invoke(registration, configurator);
-            registration.ConfigureConsumers(configurator);
-            registration.ConfigureSagas(configurator);
         }
 
         static IClientFactory BusClientFactoryProvider(IConfigurationServiceProvider provider, IBus bus)

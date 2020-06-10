@@ -33,6 +33,6 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 
         protected override IRequestClient<InitialRequest> RequestClient => _provider.CreateRequestClient<InitialRequest>();
 
-        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
     }
 }

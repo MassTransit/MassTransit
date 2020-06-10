@@ -14,11 +14,17 @@ namespace MassTransit.WindsorIntegration.Registration
         RegistrationConfigurator,
         IWindsorContainerMediatorConfigurator
     {
-        Action<MassTransit.IRegistration, IReceiveEndpointConfigurator> _configure;
+        Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> _configure;
 
         public WindsorContainerMediatorConfigurator(IWindsorContainer container)
             : base(new WindsorContainerMediatorRegistrar(container))
         {
+            IMediatorRegistrationContext CreateRegistrationContext(IKernel kernel)
+            {
+                var registration = CreateRegistration(kernel.Resolve<IConfigurationServiceProvider>());
+                return new MediatorRegistrationContext(registration);
+            }
+
             Container = container;
 
             container.RegisterScopedContextProviderIfNotPresent();
@@ -42,11 +48,17 @@ namespace MassTransit.WindsorIntegration.Registration
                     .UsingFactoryMethod(MediatorFactory)
                     .LifestyleSingleton()
             );
+
+            container.Register(
+                Component.For<IMediatorRegistrationContext>()
+                    .UsingFactoryMethod(CreateRegistrationContext)
+                    .LifestyleSingleton()
+            );
         }
 
         public IWindsorContainer Container { get; }
 
-        public void ConfigureMediator(Action<MassTransit.IRegistration, IReceiveEndpointConfigurator> configure)
+        public void ConfigureMediator(Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
@@ -61,9 +73,13 @@ namespace MassTransit.WindsorIntegration.Registration
 
             ConfigureLogContext(provider);
 
+            var context = kernel.Resolve<IMediatorRegistrationContext>();
+
             return Bus.Factory.CreateMediator(cfg =>
             {
-                base.ConfigureMediator(cfg, provider, _configure);
+                _configure?.Invoke(context, cfg);
+                cfg.ConfigureConsumers(context);
+                cfg.ConfigureSagas(context);
             });
         }
     }

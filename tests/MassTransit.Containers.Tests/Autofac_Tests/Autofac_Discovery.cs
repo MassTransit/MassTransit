@@ -34,7 +34,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             _container = builder.Build();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
 
         [OneTimeTearDown]
         public async Task Close_container()

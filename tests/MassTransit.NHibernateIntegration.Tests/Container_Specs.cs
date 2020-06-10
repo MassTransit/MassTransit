@@ -63,7 +63,7 @@ namespace MassTransit.NHibernateIntegration.Tests
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 configurator.UseInMemoryOutbox();
-                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IRegistration>());
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IBusRegistrationContext>());
             }
         }
 
@@ -121,7 +121,7 @@ namespace MassTransit.NHibernateIntegration.Tests
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
-                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IRegistration>());
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IBusRegistrationContext>());
             }
         }
 

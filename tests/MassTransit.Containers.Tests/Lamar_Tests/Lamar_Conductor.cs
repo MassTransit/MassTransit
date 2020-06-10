@@ -2,9 +2,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
 {
     using Common_Tests;
     using Lamar;
-    using Monitoring.Health;
     using NUnit.Framework;
-    using Registration;
 
 
     public class Lamar_Conductor :
@@ -29,12 +27,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
 
         protected override void ConfigureServiceEndpoints(IBusFactoryConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
-            configurator.ConfigureServiceEndpoints(GetRegistrationContext(), Options);
-        }
-
-        IRegistrationContext GetRegistrationContext()
-        {
-            return new RegistrationContext(_container.GetInstance<IRegistration>(), _container.GetInstance<BusHealth>());
+            configurator.ConfigureServiceEndpoints(_container.GetInstance<IBusRegistrationContext>(), Options);
         }
 
         protected override IClientFactory GetClientFactory()

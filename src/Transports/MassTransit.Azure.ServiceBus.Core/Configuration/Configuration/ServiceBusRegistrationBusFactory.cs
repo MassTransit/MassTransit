@@ -10,15 +10,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
         TransportRegistrationBusFactory
     {
         readonly ServiceBusBusConfiguration _busConfiguration;
-        readonly Action<IRegistrationContext, IServiceBusBusFactoryConfigurator> _configure;
+        readonly Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator> _configure;
 
-        public ServiceBusRegistrationBusFactory(Action<IRegistrationContext, IServiceBusBusFactoryConfigurator> configure)
+        public ServiceBusRegistrationBusFactory(Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator> configure)
             : this(new ServiceBusBusConfiguration(new ServiceBusTopologyConfiguration(AzureBusFactory.MessageTopology)), configure)
         {
         }
 
         ServiceBusRegistrationBusFactory(ServiceBusBusConfiguration busConfiguration,
-            Action<IRegistrationContext, IServiceBusBusFactoryConfigurator> configure)
+            Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator> configure)
             : base(busConfiguration.HostConfiguration)
         {
             _configure = configure;
@@ -26,7 +26,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
             _busConfiguration = busConfiguration;
         }
 
-        public override IBusInstance CreateBus(IRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
+        public override IBusInstance CreateBus(IBusRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
         {
             var configurator = new ServiceBusBusFactoryConfigurator(_busConfiguration);
 

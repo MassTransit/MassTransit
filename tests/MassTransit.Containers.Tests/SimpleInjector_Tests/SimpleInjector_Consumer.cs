@@ -43,7 +43,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Register<AnotherMessageConsumer, AnotherMessageConsumerImpl>(Lifestyle.Scoped);
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -81,6 +81,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             });
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
     }
 }

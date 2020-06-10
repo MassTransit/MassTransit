@@ -29,6 +29,6 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             _container.Dispose();
         }
 
-        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.GetRequiredService<IBusRegistrationContext>();
     }
 }

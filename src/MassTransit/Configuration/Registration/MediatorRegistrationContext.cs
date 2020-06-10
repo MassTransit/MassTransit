@@ -2,26 +2,34 @@ namespace MassTransit.Registration
 {
     using System;
     using ConsumeConfigurators;
-    using Monitoring.Health;
     using Saga;
 
 
-    public class RegistrationContext :
-        IRegistrationContext
+    public class MediatorRegistrationContext :
+        IMediatorRegistrationContext
     {
-        readonly BusHealth _busHealth;
         readonly IRegistration _registration;
 
-        public RegistrationContext(IRegistration registration, BusHealth busHealth)
+        public MediatorRegistrationContext(IRegistration registration)
         {
             _registration = registration;
-            _busHealth = busHealth;
         }
 
-        public void UseHealthCheck(IBusFactoryConfigurator configurator)
+        public object GetService(Type serviceType)
         {
-            configurator.ConnectBusObserver(_busHealth);
-            configurator.ConnectEndpointConfigurationObserver(_busHealth);
+            return _registration.GetService(serviceType);
+        }
+
+        public T GetRequiredService<T>()
+            where T : class
+        {
+            return _registration.GetRequiredService<T>();
+        }
+
+        public T GetService<T>()
+            where T : class
+        {
+            return _registration.GetService<T>();
         }
 
         public void ConfigureConsumer(Type consumerType, IReceiveEndpointConfigurator configurator)
@@ -75,27 +83,6 @@ namespace MassTransit.Registration
         public void ConfigureActivityCompensate(Type activityType, IReceiveEndpointConfigurator compensateEndpointConfigurator)
         {
             _registration.ConfigureActivityCompensate(activityType, compensateEndpointConfigurator);
-        }
-
-        public void ConfigureEndpoints<T>(IReceiveConfigurator<T> configurator, IEndpointNameFormatter endpointNameFormatter = null)
-            where T : IReceiveEndpointConfigurator
-        {
-            _registration.ConfigureEndpoints(configurator, endpointNameFormatter);
-        }
-
-        object IServiceProvider.GetService(Type serviceType)
-        {
-            return _registration.GetService(serviceType);
-        }
-
-        T IConfigurationServiceProvider.GetRequiredService<T>()
-        {
-            return _registration.GetRequiredService<T>();
-        }
-
-        T IConfigurationServiceProvider.GetService<T>()
-        {
-            return _registration.GetService<T>();
         }
     }
 }

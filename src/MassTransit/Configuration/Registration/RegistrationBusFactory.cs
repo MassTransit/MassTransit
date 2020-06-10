@@ -9,14 +9,14 @@ namespace MassTransit.Registration
     public class RegistrationBusFactory :
         IRegistrationBusFactory
     {
-        readonly Func<IRegistrationContext, IBusControl> _configure;
+        readonly Func<IBusRegistrationContext, IBusControl> _configure;
 
-        public RegistrationBusFactory(Func<IRegistrationContext, IBusControl> configure)
+        public RegistrationBusFactory(Func<IBusRegistrationContext, IBusControl> configure)
         {
             _configure = configure ?? throw new ArgumentNullException(nameof(configure));
         }
 
-        public IBusInstance CreateBus(IRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
+        public IBusInstance CreateBus(IBusRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
         {
             var loggerFactory = context.GetService<ILoggerFactory>();
             if (loggerFactory != null)

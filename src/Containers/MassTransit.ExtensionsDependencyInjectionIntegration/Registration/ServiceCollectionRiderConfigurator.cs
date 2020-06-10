@@ -1,6 +1,7 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 {
     using System;
+    using System.Collections.Generic;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
     using Monitoring.Health;
@@ -11,9 +12,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         RegistrationConfigurator,
         IServiceCollectionRiderConfigurator
     {
-        public ServiceCollectionRiderConfigurator(IServiceCollection collection, IContainerRegistrar registrar)
+        readonly HashSet<Type> _riderTypes;
+
+        public ServiceCollectionRiderConfigurator(IServiceCollection collection, IContainerRegistrar registrar, HashSet<Type> riderTypes)
             : base(registrar)
         {
+            _riderTypes = riderTypes;
             Collection = collection;
         }
 
@@ -25,17 +29,28 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             if (riderFactory == null)
                 throw new ArgumentNullException(nameof(riderFactory));
 
-            ThrowIfAlreadyConfigured(nameof(SetRiderFactory));
+            ThrowIfAlreadyConfigured<TRider>();
 
-            Collection.AddSingleton(provider => Bind<IBus>.Create(riderFactory.CreateRider(GetRegistrationContext(provider))));
+            IRiderRegistrationContext CreateRegistrationContext(IServiceProvider provider)
+            {
+                var registration = CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>());
+                var busHealth = provider.GetRequiredService<BusHealth>();
+                return new RiderRegistrationContext(registration, busHealth);
+            }
+
+            Collection.AddSingleton(provider => Bind<IBus, TRider>.Create(CreateRegistrationContext(provider)));
+            Collection.AddSingleton(provider =>
+                Bind<IBus>.Create(riderFactory.CreateRider(provider.GetRequiredService<Bind<IBus, TRider, IRiderRegistrationContext>>().Value)));
             Collection.AddSingleton(provider => Bind<IBus>.Create(provider.GetRequiredService<IBusInstance>().GetRider<TRider>()));
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, TRider>>().Value);
         }
 
-        IRiderRegistrationContext GetRegistrationContext(IServiceProvider provider)
+        protected void ThrowIfAlreadyConfigured<TRider>()
+            where TRider : IRider
         {
-            return new RiderRegistrationContext(CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),
-                provider.GetRequiredService<BusHealth>());
+            ThrowIfAlreadyConfigured(nameof(SetRiderFactory));
+            if (!_riderTypes.Add(typeof(TRider)))
+                throw new ConfigurationException($"'{typeof(TRider).Name}' can be added only once.");
         }
     }
 }

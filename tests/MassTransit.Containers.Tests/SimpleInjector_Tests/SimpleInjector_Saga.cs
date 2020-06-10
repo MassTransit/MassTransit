@@ -33,7 +33,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Dispose();
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {
@@ -62,7 +62,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.AddMassTransit(ConfigureRegistration);
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {

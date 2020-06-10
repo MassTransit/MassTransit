@@ -22,7 +22,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
         protected abstract IRequestClient<InitialRequest> RequestClient { get; }
 
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_receive_the_response()

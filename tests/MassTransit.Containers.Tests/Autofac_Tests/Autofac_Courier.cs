@@ -32,7 +32,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             await _container.DisposeAsync();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
     }
 
 
@@ -62,7 +62,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             await _container.DisposeAsync();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
     }
 
 
@@ -90,7 +90,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             await _container.DisposeAsync();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
     }
 
 
@@ -120,7 +120,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             await _container.DisposeAsync();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
     }
 
 
@@ -153,6 +153,6 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             AutofacFilterExtensions.UseExecuteActivityFilter(configurator, typeof(ScopedFilter<>), Registration);
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
     }
 }

@@ -62,9 +62,14 @@ namespace MassTransit.EventHubIntegration
             context.SourceAddress ??= _context.HostAddress;
             context.ConversationId ??= NewId.NextGuid();
 
+            var options = new SendEventOptions
+            {
+                PartitionId = context.PartitionId,
+                PartitionKey = context.PartitionKey
+            };
+
             StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context,
-                (nameof(context.PartitionId), _topicAddress.PartitionId ?? context.PartitionId),
-                (nameof(context.PartitionKey), _topicAddress.PartitionKey ?? context.PartitionKey));
+                (nameof(context.PartitionId), options.PartitionId), (nameof(context.PartitionKey), options.PartitionKey));
             try
             {
                 if (_context.SendObservers.Count > 0)
@@ -73,12 +78,6 @@ namespace MassTransit.EventHubIntegration
                 var eventData = new EventData(context.Body);
 
                 eventData.Properties.Set(context.Headers);
-
-                var options = new SendEventOptions
-                {
-                    PartitionId = _topicAddress.PartitionId ?? context.PartitionId,
-                    PartitionKey = _topicAddress.PartitionKey ?? context.PartitionKey
-                };
 
                 await _context.Produce(new[] {eventData}, options, context.CancellationToken).ConfigureAwait(false);
 
@@ -140,8 +139,8 @@ namespace MassTransit.EventHubIntegration
             EventHubMessageSendContext<TValue> context = contexts[0];
             var options = new CreateBatchOptions
             {
-                PartitionId = _topicAddress.PartitionId ?? context.PartitionId,
-                PartitionKey = _topicAddress.PartitionKey ?? context.PartitionKey
+                PartitionId = context.PartitionId,
+                PartitionKey = context.PartitionKey
             };
 
             StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context,

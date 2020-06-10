@@ -35,13 +35,9 @@ namespace MassTransit.KafkaIntegration.Specifications
             _headersSerializer = headersSerializer;
             _sendObservers = new SendObservable();
 
-            SetValueSerializer(new MassTransitSerializer<TValue>());
+            SetKeySerializer(new MassTransitJsonSerializer<TKey>());
+            SetValueSerializer(new MassTransitJsonSerializer<TValue>());
             SetHeadersSerializer(headersSerializer);
-        }
-
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
-        {
-            return _sendObservers.Connect(observer);
         }
 
         public int? BatchNumMessages
@@ -154,11 +150,6 @@ namespace MassTransit.KafkaIntegration.Specifications
             _headersSerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }
 
-        public void ConfigureSend(Action<ISendPipeConfigurator> callback)
-        {
-            _configureSend = callback ?? throw new ArgumentNullException(nameof(callback));
-        }
-
         public IKafkaProducerFactory CreateProducerFactory(IBusInstance busInstance)
         {
             var logContext = busInstance.HostConfiguration.SendLogContext;
@@ -178,13 +169,23 @@ namespace MassTransit.KafkaIntegration.Specifications
             var context = new KafkaProducerContext(producerBuilder.Build(), busInstance.HostConfiguration, sendConfiguration, _sendObservers,
                 _headersSerializer);
 
-            return new KafkaProducerFactory<TKey, TValue>(_topicName, context);
+            return new KafkaProducerFactory<TKey, TValue>(new KafkaTopicAddress(busInstance.HostConfiguration.HostAddress, _topicName), context);
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
             if (string.IsNullOrEmpty(_producerConfig.BootstrapServers))
                 yield return this.Failure("BootstrapServers", "should not be empty. Please use cfg.Host() to configure it");
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _sendObservers.Connect(observer);
+        }
+
+        public void ConfigureSend(Action<ISendPipeConfigurator> callback)
+        {
+            _configureSend = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
 

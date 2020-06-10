@@ -10,7 +10,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_SagaStateMachine :
         InMemoryTestFixture
     {
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_handle_the_first_event()
@@ -56,7 +56,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             TaskCompletionSource = GetTask<MyId>();
         }
 
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_use_scope()

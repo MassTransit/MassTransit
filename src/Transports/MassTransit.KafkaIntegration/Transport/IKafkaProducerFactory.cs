@@ -6,6 +6,6 @@ namespace MassTransit.KafkaIntegration.Transport
     public interface IKafkaProducerFactory :
         IDisposable
     {
-        string TopicName { get; }
+        Uri TopicAddress { get; }
     }
 }

@@ -13,7 +13,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_ConsumeContext :
         InMemoryTestFixture
     {
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
         protected abstract Task<ConsumeContext> ConsumeContext { get; }
         protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
         protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
@@ -58,7 +58,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             TestTimeout = TimeSpan.FromSeconds(3);
         }
 
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
         protected abstract Task<ConsumeContext> ConsumeContext { get; }
         protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
         protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
@@ -112,7 +112,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             TestTimeout = TimeSpan.FromSeconds(3);
         }
 
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
         protected abstract Task<ConsumeContext> ConsumeContext { get; }
         protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
         protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }

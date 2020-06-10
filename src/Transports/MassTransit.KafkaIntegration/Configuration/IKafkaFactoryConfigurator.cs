@@ -9,7 +9,8 @@ namespace MassTransit.KafkaIntegration
 
     public interface IKafkaFactoryConfigurator :
         IRiderFactoryConfigurator,
-        ISendObserverConnector
+        ISendObserverConnector,
+        ISendPipelineConfigurator
     {
         /// <summary>
         /// This field indicates the number of acknowledgements the leader broker must receive from ISR brokers
@@ -268,7 +269,7 @@ namespace MassTransit.KafkaIntegration
         /// <param name="configure"></param>
         /// <typeparam name="TKey">Message key type</typeparam>
         /// <typeparam name="TValue">Value key type</typeparam>
-        void TopicProducer<TKey, TValue>(string topicName, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
+        internal void TopicProducer<TKey, TValue>(string topicName, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
             where TValue : class;
 
         /// <summary>
@@ -279,7 +280,7 @@ namespace MassTransit.KafkaIntegration
         /// <param name="configure"></param>
         /// <typeparam name="TKey">Message key type</typeparam>
         /// <typeparam name="TValue">Value key type</typeparam>
-        void TopicProducer<TKey, TValue>(string topicName, ProducerConfig producerConfig, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
+        internal void TopicProducer<TKey, TValue>(string topicName, ProducerConfig producerConfig, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
             where TValue : class;
 
         /// <summary>

@@ -20,7 +20,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
                 .BuildServiceProvider(true);
         }
 
-        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {
@@ -42,7 +42,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
                 .BuildServiceProvider();
         }
 
-        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {

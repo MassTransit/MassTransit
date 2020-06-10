@@ -58,8 +58,8 @@ namespace MassTransit.KafkaIntegration
         /// <param name="topicName">The topic name</param>
         /// <param name="configure"></param>
         /// <typeparam name="T">Value key type</typeparam>
-        public static void TopicProducer<T>(this IKafkaFactoryConfigurator configurator, string topicName,
-            Action<IKafkaProducerConfigurator<Null, T>> configure)
+        internal static void TopicProducer<T>(this IKafkaFactoryConfigurator configurator, string topicName,
+            Action<IKafkaProducerConfigurator<Ignore, T>> configure)
             where T : class
         {
             configurator.TopicProducer(topicName, configure);
@@ -72,9 +72,24 @@ namespace MassTransit.KafkaIntegration
         /// <param name="topicName">The topic name</param>
         /// <param name="producerConfig">Producer config</param>
         /// <param name="configure"></param>
+        /// <typeparam name="TValue">Value key type</typeparam>
+        internal static void TopicProducer<TValue>(this IKafkaFactoryConfigurator configurator, string topicName, ProducerConfig producerConfig,
+            Action<IKafkaProducerConfigurator<Ignore, TValue>> configure)
+            where TValue : class
+        {
+            configurator.TopicProducer(topicName, producerConfig, configure);
+        }
+
+        /// <summary>
+        /// Configure kafka topic producer
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="topicName">The topic name</param>
+        /// <param name="producerConfig">Producer config</param>
+        /// <param name="configure"></param>
         /// <typeparam name="TKey">Message key type</typeparam>
         /// <typeparam name="TValue">Value key type</typeparam>
-        public static void TopicProducer<TKey, TValue>(this IKafkaFactoryConfigurator configurator, string topicName, ProducerConfig producerConfig,
+        internal static void TopicProducer<TKey, TValue>(this IKafkaFactoryConfigurator configurator, string topicName, ProducerConfig producerConfig,
             Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
             where TValue : class
         {

@@ -35,7 +35,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override MassTransit.IRegistration Registration => _container.Resolve<MassTransit.IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
     }
 
 
@@ -69,6 +69,6 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override MassTransit.IRegistration Registration => _container.Resolve<MassTransit.IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
     }
 }

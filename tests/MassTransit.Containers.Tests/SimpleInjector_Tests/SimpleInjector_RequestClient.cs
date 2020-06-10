@@ -39,6 +39,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 
         protected override IRequestClient<InitialRequest> RequestClient => _container.GetInstance<IRequestClient<InitialRequest>>();
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
     }
 }

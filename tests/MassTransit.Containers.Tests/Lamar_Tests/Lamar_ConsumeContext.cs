@@ -29,7 +29,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             });
         }
 
-        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.GetRequiredService<IBusRegistrationContext>();
         protected override Task<ConsumeContext> ConsumeContext => _container.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
         protected override Task<IPublishEndpoint> PublishEndpoint => _container.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
 
@@ -65,7 +65,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             });
         }
 
-        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.GetRequiredService<IBusRegistrationContext>();
         protected override Task<ConsumeContext> ConsumeContext => _container.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
         protected override Task<IPublishEndpoint> PublishEndpoint => _container.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
 
@@ -100,7 +100,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             });
         }
 
-        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.GetRequiredService<IBusRegistrationContext>();
         protected override Task<ConsumeContext> ConsumeContext => _container.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
         protected override Task<IPublishEndpoint> PublishEndpoint => _container.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
 

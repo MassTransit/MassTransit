@@ -21,7 +21,7 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static IServiceCollection AddMassTransit(this IServiceCollection collection, Action<IServiceCollectionBusConfigurator> configure = null)
         {
-            if (collection.Any(d => d.ServiceType == typeof(IRegistration)))
+            if (collection.Any(d => d.ServiceType == typeof(IBus)))
             {
                 throw new ConfigurationException(
                     "AddMassTransit() was already called and may only be called once per container. To configure additional bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");

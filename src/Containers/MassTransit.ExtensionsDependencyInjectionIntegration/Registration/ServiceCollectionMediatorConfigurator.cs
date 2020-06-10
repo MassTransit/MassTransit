@@ -13,20 +13,27 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         RegistrationConfigurator,
         IServiceCollectionMediatorConfigurator
     {
-        Action<IRegistration, IReceiveEndpointConfigurator> _configure;
+        Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> _configure;
 
         public ServiceCollectionMediatorConfigurator(IServiceCollection collection)
             : base(new DependencyInjectionMediatorContainerRegistrar(collection))
         {
+            IMediatorRegistrationContext CreateRegistrationContext(IServiceProvider provider)
+            {
+                var registration = CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>());
+                return new MediatorRegistrationContext(registration);
+            }
+
             Collection = collection;
 
             Collection.AddSingleton(MediatorFactory);
+            Collection.AddSingleton(CreateRegistrationContext);
             AddMassTransitComponents(collection);
         }
 
         public IServiceCollection Collection { get; }
 
-        public void ConfigureMediator(Action<IRegistration, IReceiveEndpointConfigurator> configure)
+        public void ConfigureMediator(Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
@@ -49,9 +56,13 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
             ConfigureLogContext(provider);
 
+            var context = serviceProvider.GetRequiredService<IMediatorRegistrationContext>();
+
             return Bus.Factory.CreateMediator(cfg =>
             {
-                base.ConfigureMediator(cfg, provider, _configure);
+                _configure?.Invoke(context, cfg);
+                cfg.ConfigureConsumers(context);
+                cfg.ConfigureSagas(context);
             });
         }
     }

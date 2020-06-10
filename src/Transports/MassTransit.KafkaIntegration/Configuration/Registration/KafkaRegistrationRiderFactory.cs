@@ -4,6 +4,7 @@ namespace MassTransit.KafkaIntegration.Registration
     using Configurators;
     using Confluent.Kafka;
     using MassTransit.Registration;
+    using Microsoft.Extensions.DependencyInjection;
     using Transport;
 
 
@@ -30,6 +31,9 @@ namespace MassTransit.KafkaIntegration.Registration
             var configurator = new KafkaFactoryConfigurator(_clientConfig ?? context.GetService<ClientConfig>() ?? new ClientConfig());
 
             ConfigureRider(configurator, context);
+
+            foreach (var registration in context.GetServices<IKafkaProducerRegistration>())
+                registration.Register(configurator);
 
             _configure?.Invoke(context, configurator);
 

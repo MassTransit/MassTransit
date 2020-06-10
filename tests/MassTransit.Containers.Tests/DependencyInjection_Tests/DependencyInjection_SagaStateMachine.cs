@@ -21,7 +21,7 @@
                 .BuildServiceProvider(true);
         }
 
-        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
     }
 
 
@@ -46,6 +46,6 @@
             DependencyInjectionFilterExtensions.UseConsumeFilter(configurator, typeof(ScopedFilter<>), Registration);
         }
 
-        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
     }
 }

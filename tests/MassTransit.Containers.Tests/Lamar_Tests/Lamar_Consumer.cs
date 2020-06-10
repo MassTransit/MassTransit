@@ -37,7 +37,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             });
         }
 
-        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.GetRequiredService<IBusRegistrationContext>();
     }
 
 
@@ -67,6 +67,6 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
             });
         }
 
-        protected override IRegistration Registration => _container.GetRequiredService<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.GetRequiredService<IBusRegistrationContext>();
     }
 }

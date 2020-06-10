@@ -33,7 +33,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
             });
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
 
         [OneTimeTearDown]
         public void Close_container()

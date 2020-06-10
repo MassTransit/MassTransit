@@ -5,6 +5,6 @@ namespace MassTransit.Registration
 
     public interface IRegistrationBusFactory
     {
-        IBusInstance CreateBus(IRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications = null);
+        IBusInstance CreateBus(IBusRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications = null);
     }
 }

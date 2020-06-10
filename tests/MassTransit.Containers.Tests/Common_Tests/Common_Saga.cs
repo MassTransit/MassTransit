@@ -13,7 +13,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_Saga :
         InMemoryTestFixture
     {
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_handle_first_message()
@@ -94,7 +94,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_Saga_Endpoint :
         InMemoryTestFixture
     {
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_handle_the_message()

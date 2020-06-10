@@ -5,9 +5,7 @@ namespace MassTransit.KafkaIntegration
     using Serializers;
 
 
-    public interface IKafkaProducerConfigurator :
-        ISendObserverConnector,
-        ISendPipelineConfigurator
+    public interface IKafkaProducerConfigurator
     {
         /// <summary>
         /// Maximum number of messages batched in one MessageSet. The total MessageSet size is also limited by message.max.bytes.
@@ -188,6 +186,12 @@ namespace MassTransit.KafkaIntegration
         /// importance: low
         /// </summary>
         bool? EnableBackgroundPoll { set; }
+
+        /// <summary>
+        /// Set the serializer to use to serialize headers.
+        /// </summary>
+        /// <param name="serializer"></param>
+        void SetHeadersSerializer(IHeadersSerializer serializer);
     }
 
 
@@ -213,11 +217,5 @@ namespace MassTransit.KafkaIntegration
         /// Consume.
         /// </remarks>
         void SetValueSerializer(ISerializer<TValue> serializer);
-
-        /// <summary>
-        /// Set the serializer to use to serialize headers.
-        /// </summary>
-        /// <param name="serializer"></param>
-        void SetHeadersSerializer(IHeadersSerializer serializer);
     }
 }

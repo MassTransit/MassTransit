@@ -22,7 +22,7 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static Container AddMassTransit(this Container container, Action<ISimpleInjectorBusConfigurator> configure = null)
         {
-            if (container.GetCurrentRegistrations().Any(d => d.ServiceType == typeof(IRegistration)))
+            if (container.GetCurrentRegistrations().Any(d => d.ServiceType == typeof(IBus)))
             {
                 throw new ConfigurationException(
                     "AddBus() was already called. To configure multiple bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");

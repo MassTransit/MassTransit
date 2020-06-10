@@ -93,11 +93,5 @@ namespace MassTransit.Registration
         {
             _registration.ConfigureActivityCompensate(activityType, compensateEndpointConfigurator);
         }
-
-        public void ConfigureEndpoints<T>(IReceiveConfigurator<T> configurator, IEndpointNameFormatter endpointNameFormatter)
-            where T : IReceiveEndpointConfigurator
-        {
-            _registration.ConfigureEndpoints(configurator, endpointNameFormatter);
-        }
     }
 }

@@ -78,7 +78,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             TaskCompletionSource = GetTask<MyId>();
         }
 
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         protected abstract MyId MyId { get; }
 

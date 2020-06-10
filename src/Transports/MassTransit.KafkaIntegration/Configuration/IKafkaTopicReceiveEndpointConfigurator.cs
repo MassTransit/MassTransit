@@ -134,6 +134,12 @@
         /// importance: high
         /// </summary>
         void UseIsolationLevel(IsolationLevel isolationLevel);
+
+        /// <summary>
+        /// Set the deserializer to use to deserialize headers.
+        /// </summary>
+        /// <param name="deserializer"></param>
+        void SetHeadersDeserializer(IHeadersDeserializer deserializer);
     }
 
 
@@ -160,12 +166,6 @@
         /// Consume.
         /// </remarks>
         void SetValueDeserializer(IDeserializer<TValue> deserializer);
-
-        /// <summary>
-        /// Set the deserializer to use to deserialize headers.
-        /// </summary>
-        /// <param name="deserializer"></param>
-        void SetHeadersDeserializer(IHeadersDeserializer deserializer);
 
         /// <summary>
         /// A handler that is called to report the result of (automatic) offset

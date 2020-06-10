@@ -18,7 +18,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         Uri _executeAddress;
         Guid _trackingNumber;
 
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_register_and_execute_the_activity()
@@ -61,7 +61,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Guid _trackingNumber;
 
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_register_and_execute_the_activity()
@@ -100,7 +100,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         Uri _executeAddress;
         Guid _trackingNumber;
 
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_register_and_execute_the_activity()
@@ -146,7 +146,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             ExecuteTaskCompletionSource = GetTask<MyId>();
         }
 
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_use_scope()
@@ -219,7 +219,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
         Guid _trackingNumber;
 
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_register_and_execute_the_activity()

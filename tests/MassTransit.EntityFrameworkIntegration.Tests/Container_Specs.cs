@@ -12,6 +12,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         using Mappings;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
+        using Registration;
         using TestFramework;
         using TestFramework.Sagas;
 
@@ -76,7 +77,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
             {
                 configurator.UseMessageRetry(r => r.Immediate(5));
                 configurator.UseInMemoryOutbox();
-                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IRegistration>());
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IRiderRegistrationContext>());
             }
         }
 
@@ -143,7 +144,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
             {
                 configurator.UseMessageRetry(r => r.Immediate(5));
                 configurator.UseInMemoryOutbox();
-                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IRegistration>());
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IBusRegistrationContext>());
             }
         }
 

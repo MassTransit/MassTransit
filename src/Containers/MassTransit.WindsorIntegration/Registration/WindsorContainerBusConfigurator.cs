@@ -18,6 +18,14 @@ namespace MassTransit.WindsorIntegration.Registration
         public WindsorContainerBusConfigurator(IWindsorContainer container)
             : base(new WindsorContainerRegistrar(container))
         {
+            IBusRegistrationContext CreateRegistrationContext(IKernel context)
+            {
+                var provider = context.Resolve<IConfigurationServiceProvider>();
+                var busHealth = context.Resolve<BusHealth>();
+                return new BusRegistrationContext(provider, busHealth, EndpointRegistrations, ConsumerRegistrations, SagaRegistrations,
+                    ExecuteActivityRegistrations, ActivityRegistrations);
+            }
+
             Container = container;
 
             if (!container.Kernel.HasComponent(typeof(IBusDepot)))
@@ -40,8 +48,8 @@ namespace MassTransit.WindsorIntegration.Registration
             }
 
             container.Register(
-                Component.For<MassTransit.IRegistration>()
-                    .UsingFactoryMethod(provider => CreateRegistration(provider.Resolve<IConfigurationServiceProvider>()))
+                Component.For<IBusRegistrationContext>()
+                    .UsingFactoryMethod(provider => CreateRegistrationContext(provider))
                     .LifestyleSingleton(),
                 Component.For<ISendEndpointProvider>()
                     .UsingFactoryMethod(GetCurrentSendEndpointProvider)
@@ -64,7 +72,7 @@ namespace MassTransit.WindsorIntegration.Registration
 
         public IWindsorContainer Container { get; }
 
-        public void AddBus(Func<IRegistrationContext, IBusControl> busFactory)
+        public void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
         {
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
@@ -89,13 +97,13 @@ namespace MassTransit.WindsorIntegration.Registration
             throw new NotImplementedException();
         }
 
-        IBusControl BusFactory(IKernel kernel, Func<IRegistrationContext, IBusControl> busFactory)
+        IBusControl BusFactory(IKernel kernel, Func<IBusRegistrationContext, IBusControl> busFactory)
         {
             var provider = kernel.Resolve<IConfigurationServiceProvider>();
 
             ConfigureLogContext(provider);
 
-            var context = GetRegistrationContext(kernel);
+            var context = kernel.Resolve<IBusRegistrationContext>();
 
             return busFactory(context);
         }
@@ -110,14 +118,6 @@ namespace MassTransit.WindsorIntegration.Registration
         {
             return (IPublishEndpoint)context.GetConsumeContext()
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IKernel>(context.Resolve<IBus>(), context));
-        }
-
-        IRegistrationContext GetRegistrationContext(IKernel context)
-        {
-            return new RegistrationContext(
-                CreateRegistration(context.Resolve<IConfigurationServiceProvider>()),
-                context.Resolve<BusHealth>()
-            );
         }
     }
 }

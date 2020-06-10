@@ -38,7 +38,7 @@ namespace MassTransit.KafkaIntegration.Tests
                     {
                         k.Host("localhost:9092");
 
-                        k.TopicEndpoint<Null, KafkaMessage>(Topic, nameof(Receive_Specs), c =>
+                        k.TopicEndpoint<KafkaMessage>(Topic, nameof(Receive_Specs), c =>
                         {
                             c.AutoOffsetReset = AutoOffsetReset.Earliest;
                             c.ConfigureConsumer<KafkaMessageConsumer>(context);
@@ -58,7 +58,7 @@ namespace MassTransit.KafkaIntegration.Tests
                 var config = new ProducerConfig {BootstrapServers = "localhost:9092"};
 
                 using IProducer<Null, KafkaMessage> p = new ProducerBuilder<Null, KafkaMessage>(config)
-                    .SetValueSerializer(new MassTransitSerializer<KafkaMessage>())
+                    .SetValueSerializer(new MassTransitJsonSerializer<KafkaMessage>())
                     .Build();
 
                 var kafkaMessage = new KafkaMessageClass("test");

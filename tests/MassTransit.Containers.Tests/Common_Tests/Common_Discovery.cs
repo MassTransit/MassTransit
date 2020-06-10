@@ -222,7 +222,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_Discovery :
         InMemoryTestFixture
     {
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_receive_the_response_from_the_consumer()

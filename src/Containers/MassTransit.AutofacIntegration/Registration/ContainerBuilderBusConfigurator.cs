@@ -24,6 +24,14 @@ namespace MassTransit.AutofacIntegration.Registration
         ContainerBuilderBusRegistrationConfigurator(ContainerBuilder builder, AutofacContainerRegistrar registrar)
             : base(registrar)
         {
+            IBusRegistrationContext CreateRegistrationContext(IComponentContext context)
+            {
+                var provider = context.Resolve<IConfigurationServiceProvider>();
+                var busHealth = context.Resolve<BusHealth>();
+                return new BusRegistrationContext(provider, busHealth, EndpointRegistrations, ConsumerRegistrations, SagaRegistrations,
+                    ExecuteActivityRegistrations, ActivityRegistrations);
+            }
+
             _builder = builder;
             _registrar = registrar;
 
@@ -64,8 +72,8 @@ namespace MassTransit.AutofacIntegration.Registration
                 .SingleInstance()
                 .IfNotRegistered(typeof(IConfigurationServiceProvider));
 
-            builder.Register(provider => CreateRegistration(provider.Resolve<IConfigurationServiceProvider>()))
-                .As<IRegistration>()
+            builder.Register(provider => CreateRegistrationContext(provider))
+                .As<IBusRegistrationContext>()
                 .SingleInstance();
         }
 
@@ -83,7 +91,7 @@ namespace MassTransit.AutofacIntegration.Registration
             set => _registrar.ConfigureScope = value;
         }
 
-        public void AddBus(Func<IRegistrationContext, IBusControl> busFactory)
+        public void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
         {
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
@@ -107,13 +115,13 @@ namespace MassTransit.AutofacIntegration.Registration
             throw new NotImplementedException();
         }
 
-        IBusControl BusFactory(IComponentContext componentContext, Func<IRegistrationContext, IBusControl> busFactory)
+        IBusControl BusFactory(IComponentContext componentContext, Func<IBusRegistrationContext, IBusControl> busFactory)
         {
             var provider = componentContext.Resolve<IConfigurationServiceProvider>();
 
             ConfigureLogContext(provider);
 
-            var context = GetRegistrationContext(componentContext);
+            var context = componentContext.Resolve<IBusRegistrationContext>();
 
             return busFactory(context);
         }
@@ -139,14 +147,6 @@ namespace MassTransit.AutofacIntegration.Registration
                 return consumeContext;
 
             return new PublishEndpoint(new ScopedPublishEndpointProvider<ILifetimeScope>(context.Resolve<IBus>(), context.Resolve<ILifetimeScope>()));
-        }
-
-        IRegistrationContext GetRegistrationContext(IComponentContext context)
-        {
-            return new RegistrationContext(
-                CreateRegistration(context.Resolve<IConfigurationServiceProvider>()),
-                context.Resolve<BusHealth>()
-            );
         }
     }
 }

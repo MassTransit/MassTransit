@@ -14,7 +14,7 @@ namespace MassTransit
         /// This method is being deprecated. Use the transport-specific UsingRabbitMq, UsingActiveMq, etc. methods instead.
         /// </summary>
         /// <param name="busFactory"></param>
-        void AddBus(Func<IRegistrationContext, IBusControl> busFactory);
+        void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory);
 
         /// <summary>
         /// Sets the bus factory. This is used by the transport extension methods (such as UsingRabbitMq, Using ActiveMq, etc.) to

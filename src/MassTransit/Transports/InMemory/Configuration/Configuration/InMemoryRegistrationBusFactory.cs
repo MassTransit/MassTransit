@@ -10,15 +10,15 @@ namespace MassTransit.Transports.InMemory.Configuration
         TransportRegistrationBusFactory
     {
         readonly InMemoryBusConfiguration _busConfiguration;
-        readonly Action<IRegistrationContext, IInMemoryBusFactoryConfigurator> _configure;
+        readonly Action<IBusRegistrationContext, IInMemoryBusFactoryConfigurator> _configure;
 
-        public InMemoryRegistrationBusFactory(Uri baseAddress, Action<IRegistrationContext, IInMemoryBusFactoryConfigurator> configure)
+        public InMemoryRegistrationBusFactory(Uri baseAddress, Action<IBusRegistrationContext, IInMemoryBusFactoryConfigurator> configure)
             : this(new InMemoryBusConfiguration(new InMemoryTopologyConfiguration(InMemoryBus.MessageTopology), baseAddress), configure)
         {
         }
 
         InMemoryRegistrationBusFactory(InMemoryBusConfiguration busConfiguration,
-            Action<IRegistrationContext, IInMemoryBusFactoryConfigurator> configure)
+            Action<IBusRegistrationContext, IInMemoryBusFactoryConfigurator> configure)
             : base(busConfiguration.HostConfiguration)
         {
             _configure = configure;
@@ -26,7 +26,7 @@ namespace MassTransit.Transports.InMemory.Configuration
             _busConfiguration = busConfiguration;
         }
 
-        public override IBusInstance CreateBus(IRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
+        public override IBusInstance CreateBus(IBusRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
         {
             var configurator = new InMemoryBusFactoryConfigurator(_busConfiguration);
 

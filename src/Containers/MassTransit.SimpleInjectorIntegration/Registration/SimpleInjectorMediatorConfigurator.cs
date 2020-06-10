@@ -13,14 +13,21 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         RegistrationConfigurator,
         ISimpleInjectorMediatorConfigurator
     {
-        Action<IRegistration, IReceiveEndpointConfigurator> _configure;
+        Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> _configure;
 
         public SimpleInjectorMediatorConfigurator(Container container)
             : base(new SimpleInjectorContainerMediatorRegistrar(container))
         {
+            IMediatorRegistrationContext CreateRegistrationContext()
+            {
+                var registration = CreateRegistration(Container.GetInstance<IConfigurationServiceProvider>());
+                return new MediatorRegistrationContext(registration);
+            }
+
             Container = container;
 
             Container.RegisterSingleton(MediatorFactory);
+            Container.RegisterSingleton(CreateRegistrationContext);
             AddMassTransitComponents(Container);
         }
 
@@ -31,7 +38,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             ConfigureMediator((_, cfg) => configure(cfg));
         }
 
-        public void ConfigureMediator(Action<IRegistration, IReceiveEndpointConfigurator> configure)
+        public void ConfigureMediator(Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
@@ -46,9 +53,13 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             ConfigureLogContext(provider);
 
+            var context = Container.GetInstance<IMediatorRegistrationContext>();
+
             return Bus.Factory.CreateMediator(cfg =>
             {
-                base.ConfigureMediator(cfg, provider, _configure);
+                _configure?.Invoke(context, cfg);
+                cfg.ConfigureConsumers(context);
+                cfg.ConfigureSagas(context);
             });
         }
 

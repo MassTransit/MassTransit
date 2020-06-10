@@ -74,7 +74,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             DependencyInjectionFilterExtensions.UseSendFilter(configurator, typeof(ScopedFilter<>), Registration);
         }
 
-        protected override IRegistration Registration => _provider.GetRequiredService<IRegistration>();
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
         protected override MyId MyId => _scope.ServiceProvider.GetRequiredService<MyId>();
         protected override ISendEndpointProvider SendEndpointProvider => _scope.ServiceProvider.GetRequiredService<ISendEndpointProvider>();
     }

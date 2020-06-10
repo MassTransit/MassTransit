@@ -17,29 +17,41 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         RegistrationConfigurator,
         IServiceCollectionBusConfigurator
     {
+        protected readonly HashSet<Type> RiderTypes;
+
         public ServiceCollectionBusConfigurator(IServiceCollection collection)
             : this(collection, new DependencyInjectionContainerRegistrar(collection))
         {
+            IBusRegistrationContext CreateRegistrationContext(IServiceProvider serviceProvider)
+            {
+                var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
+                var busHealth = serviceProvider.GetRequiredService<BusHealth>();
+                return new BusRegistrationContext(provider, busHealth, EndpointRegistrations, ConsumerRegistrations, SagaRegistrations,
+                    ExecuteActivityRegistrations, ActivityRegistrations);
+            }
+
             collection.AddSingleton(provider => ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>(),
                 provider.GetRequiredService<IBus>()));
 
             collection.AddSingleton(provider => new BusHealth(nameof(IBus)));
             collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<BusHealth>());
 
-            collection.AddSingleton(provider => CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()));
+            collection.AddSingleton(provider => Bind<IBus>.Create(CreateRegistrationContext(provider)));
+            collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusRegistrationContext>>().Value);
         }
 
         protected ServiceCollectionBusConfigurator(IServiceCollection collection, IContainerRegistrar registrar)
             : base(registrar)
         {
             Collection = collection;
+            RiderTypes = new HashSet<Type>();
 
             AddMassTransitComponents(collection);
         }
 
         public IServiceCollection Collection { get; }
 
-        public virtual void AddBus(Func<IRegistrationContext, IBusControl> busFactory)
+        public virtual void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
         {
             SetBusFactory(new RegistrationBusFactory(busFactory));
         }
@@ -61,16 +73,16 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         public virtual void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
-            var configurator = new ServiceCollectionRiderConfigurator(Collection, Registrar);
+            var configurator = new ServiceCollectionRiderConfigurator(Collection, Registrar, RiderTypes);
             configure?.Invoke(configurator);
         }
 
-        IBusInstance CreateBus<T>(T busFactory, IServiceProvider provider)
+        static IBusInstance CreateBus<T>(T busFactory, IServiceProvider provider)
             where T : IRegistrationBusFactory
         {
             IEnumerable<IBusInstanceSpecification> specifications = provider.GetServices<Bind<IBus, IBusInstanceSpecification>>().Select(x => x.Value);
 
-            var busInstance = busFactory.CreateBus(GetRegistrationContext(provider), specifications);
+            var busInstance = busFactory.CreateBus(provider.GetRequiredService<Bind<IBus, IBusRegistrationContext>>().Value, specifications);
 
             return busInstance;
         }
@@ -99,13 +111,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         {
             return (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ?? new PublishEndpoint(
                 new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<IBus>(), provider));
-        }
-
-        IRegistrationContext GetRegistrationContext(IServiceProvider provider)
-        {
-            return new RegistrationContext(
-                CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),
-                provider.GetRequiredService<BusHealth>());
         }
     }
 }

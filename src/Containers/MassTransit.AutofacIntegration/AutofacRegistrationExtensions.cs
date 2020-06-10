@@ -23,7 +23,7 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static ContainerBuilder AddMassTransit(this ContainerBuilder builder, Action<IContainerBuilderBusConfigurator> configure = null)
         {
-            if (builder.ComponentRegistryBuilder.IsRegistered(new TypedService(typeof(IRegistration))))
+            if (builder.ComponentRegistryBuilder.IsRegistered(new TypedService(typeof(IBus))))
             {
                 throw new ConfigurationException(
                     "AddBus() was already called. To configure multiple bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");

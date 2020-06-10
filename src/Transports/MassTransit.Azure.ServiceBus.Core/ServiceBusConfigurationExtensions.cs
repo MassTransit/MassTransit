@@ -23,7 +23,7 @@
         /// <param name="configurator">The registration configurator (configured via AddMassTransit)</param>
         /// <param name="configure">The configuration callback for the bus factory</param>
         public static void UsingAzureServiceBus(this IBusRegistrationConfigurator configurator,
-            Action<IRegistrationContext, IServiceBusBusFactoryConfigurator> configure = null)
+            Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator> configure = null)
         {
             configurator.SetBusFactory(new ServiceBusRegistrationBusFactory(configure));
         }

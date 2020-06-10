@@ -24,7 +24,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {
@@ -51,7 +51,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container.Dispose();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
 
         protected override ISagaRepository<T> GetSagaRepository<T>()
         {

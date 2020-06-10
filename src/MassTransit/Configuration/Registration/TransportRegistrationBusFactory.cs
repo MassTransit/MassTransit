@@ -19,10 +19,10 @@ namespace MassTransit.Registration
             _hostConfiguration = hostConfiguration;
         }
 
-        public abstract IBusInstance CreateBus(IRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications);
+        public abstract IBusInstance CreateBus(IBusRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications);
 
-        protected IBusInstance CreateBus<T, TConfigurator>(T configurator, IRegistrationContext context,
-            Action<IRegistrationContext, TConfigurator> configure, IEnumerable<IBusInstanceSpecification> specifications)
+        protected IBusInstance CreateBus<T, TConfigurator>(T configurator, IBusRegistrationContext context,
+            Action<IBusRegistrationContext, TConfigurator> configure, IEnumerable<IBusInstanceSpecification> specifications)
             where T : TConfigurator, IBusFactory
             where TConfigurator : IBusFactoryConfigurator
         {

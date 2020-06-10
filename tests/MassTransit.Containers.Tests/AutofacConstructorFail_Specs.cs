@@ -43,7 +43,7 @@ namespace MassTransit.Containers.Tests
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureConsumers(_container.Resolve<IRegistration>());
+            configurator.ConfigureConsumers(_container.Resolve<IBusRegistrationContext>());
         }
 
 

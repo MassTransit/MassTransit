@@ -19,8 +19,8 @@ namespace MassTransit
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="endpointNameFormatter">Optional, the endpoint name formatter</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
-        public static void ConfigureEndpoints<T>(this IReceiveConfigurator<T> configurator,
-            IRegistration registration, IEndpointNameFormatter endpointNameFormatter = null)
+        public static void ConfigureEndpoints<T>(this IReceiveConfigurator<T> configurator, IBusRegistrationContext registration,
+            IEndpointNameFormatter endpointNameFormatter = null)
             where T : IReceiveEndpointConfigurator
         {
             registration.ConfigureEndpoints(configurator, endpointNameFormatter);
@@ -33,8 +33,8 @@ namespace MassTransit
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="options">Optional service instance options to start</param>
         /// <typeparam name="T">The bus factory type (depends upon the transport)</typeparam>
-        public static void ConfigureServiceEndpoints<T>(this IBusFactoryConfigurator<T> configurator,
-            IRegistration registration, ServiceInstanceOptions options = null)
+        public static void ConfigureServiceEndpoints<T>(this IBusFactoryConfigurator<T> configurator, IBusRegistrationContext registration,
+            ServiceInstanceOptions options = null)
             where T : IReceiveEndpointConfigurator
         {
             options ??= new ServiceInstanceOptions();

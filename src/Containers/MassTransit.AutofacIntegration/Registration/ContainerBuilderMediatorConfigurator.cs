@@ -14,7 +14,7 @@ namespace MassTransit.AutofacIntegration.Registration
     {
         readonly ContainerBuilder _builder;
         readonly AutofacContainerRegistrar _registrar;
-        Action<IRegistration, IReceiveEndpointConfigurator> _configure;
+        Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> _configure;
 
         public ContainerBuilderMediatorConfigurator(ContainerBuilder builder)
             : this(builder, new AutofacContainerMediatorRegistrar(builder))
@@ -24,6 +24,12 @@ namespace MassTransit.AutofacIntegration.Registration
         ContainerBuilderMediatorConfigurator(ContainerBuilder builder, AutofacContainerRegistrar registrar)
             : base(registrar)
         {
+            IMediatorRegistrationContext CreateRegistrationContext(IComponentContext context)
+            {
+                var registration = CreateRegistration(context.Resolve<IConfigurationServiceProvider>());
+                return new MediatorRegistrationContext(registration);
+            }
+
             _builder = builder;
             _registrar = registrar;
 
@@ -42,6 +48,10 @@ namespace MassTransit.AutofacIntegration.Registration
             builder.Register(MediatorFactory)
                 .As<IMediator>()
                 .SingleInstance();
+
+            builder.Register(CreateRegistrationContext)
+                .As<IMediatorRegistrationContext>()
+                .SingleInstance();
         }
 
         public string ScopeName
@@ -58,7 +68,7 @@ namespace MassTransit.AutofacIntegration.Registration
             set => _registrar.ConfigureScope = value;
         }
 
-        public void ConfigureMediator(Action<IRegistration, IReceiveEndpointConfigurator> configure)
+        public void ConfigureMediator(Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
@@ -73,9 +83,13 @@ namespace MassTransit.AutofacIntegration.Registration
 
             ConfigureLogContext(provider);
 
+            var registrationContext = context.Resolve<IMediatorRegistrationContext>();
+
             return Bus.Factory.CreateMediator(cfg =>
             {
-                ConfigureMediator(cfg, provider, _configure);
+                _configure?.Invoke(registrationContext, cfg);
+                cfg.ConfigureConsumers(registrationContext);
+                cfg.ConfigureSagas(registrationContext);
             });
         }
 

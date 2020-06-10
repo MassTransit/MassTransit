@@ -10,15 +10,15 @@ namespace MassTransit.AmazonSqsTransport.Configuration
         TransportRegistrationBusFactory
     {
         readonly AmazonSqsBusConfiguration _busConfiguration;
-        readonly Action<IRegistrationContext, IAmazonSqsBusFactoryConfigurator> _configure;
+        readonly Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator> _configure;
 
-        public AmazonSqsRegistrationBusFactory(Action<IRegistrationContext, IAmazonSqsBusFactoryConfigurator> configure)
+        public AmazonSqsRegistrationBusFactory(Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator> configure)
             : this(new AmazonSqsBusConfiguration(new AmazonSqsTopologyConfiguration(AmazonSqsBusFactory.MessageTopology)), configure)
         {
         }
 
         AmazonSqsRegistrationBusFactory(AmazonSqsBusConfiguration busConfiguration,
-            Action<IRegistrationContext, IAmazonSqsBusFactoryConfigurator> configure)
+            Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator> configure)
             : base(busConfiguration.HostConfiguration)
         {
             _configure = configure;
@@ -26,7 +26,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration
             _busConfiguration = busConfiguration;
         }
 
-        public override IBusInstance CreateBus(IRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
+        public override IBusInstance CreateBus(IBusRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
         {
             var configurator = new AmazonSqsBusFactoryConfigurator(_busConfiguration);
 

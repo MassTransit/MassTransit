@@ -16,6 +16,7 @@ namespace MassTransit.KafkaIntegration.Configurators
         IKafkaFactoryConfigurator
     {
         readonly ClientConfig _clientConfig;
+        readonly List<Action<ISendPipeConfigurator>> _configureSend;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly RiderObservable _observers;
         readonly List<IKafkaProducerSpecification> _producers;
@@ -33,6 +34,7 @@ namespace MassTransit.KafkaIntegration.Configurators
             _observers = new RiderObservable();
             _endpointObservers = new ReceiveEndpointObservable();
             _sendObservers = new SendObservable();
+            _configureSend = new List<Action<ISendPipeConfigurator>>();
 
             SetHeadersDeserializer(DictionaryHeadersSerialize.Deserializer);
             SetHeadersSerializer(DictionaryHeadersSerialize.Serializer);
@@ -90,15 +92,18 @@ namespace MassTransit.KafkaIntegration.Configurators
             _topics.Add(topic);
         }
 
-        public void TopicProducer<TKey, TValue>(string topicName, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
+        void IKafkaFactoryConfigurator.TopicProducer<TKey, TValue>(string topicName, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
             where TValue : class
         {
-            TopicProducer(topicName, new ProducerConfig(_clientConfig), configure);
+            this.TopicProducer(topicName, new ProducerConfig(_clientConfig), configure);
         }
 
-        public void TopicProducer<TKey, TValue>(string topicName, ProducerConfig producerConfig, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
+        void IKafkaFactoryConfigurator.TopicProducer<TKey, TValue>(string topicName, ProducerConfig producerConfig,
+            Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
             where TValue : class
         {
+            if (string.IsNullOrWhiteSpace(topicName))
+                throw new ArgumentException(nameof(topicName));
             if (producerConfig == null)
                 throw new ArgumentNullException(nameof(producerConfig));
 
@@ -106,6 +111,7 @@ namespace MassTransit.KafkaIntegration.Configurators
             configure?.Invoke(configurator);
 
             configurator.ConnectSendObserver(_sendObservers);
+            configurator.ConfigureSend(x => _configureSend.ForEach(c => c(x)));
             _producers.Add(configurator);
         }
 
@@ -257,6 +263,11 @@ namespace MassTransit.KafkaIntegration.Configurators
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _sendObservers.Connect(observer);
+        }
+
+        public void ConfigureSend(Action<ISendPipeConfigurator> callback)
+        {
+            _configureSend.Add(callback ?? throw new ArgumentNullException(nameof(callback)));
         }
 
         public IBusInstanceSpecification Build()

@@ -46,6 +46,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             return _container.GetInstance<IRequestClient<PingMessage>>();
         }
 
-        protected override IRegistration Registration => _container.GetInstance<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
     }
 }

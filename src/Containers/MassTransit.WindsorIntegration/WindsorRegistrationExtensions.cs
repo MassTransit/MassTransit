@@ -22,7 +22,7 @@ namespace MassTransit
         /// <param name="configure"></param>
         public static IWindsorContainer AddMassTransit(this IWindsorContainer container, Action<IWindsorContainerBusConfigurator> configure = null)
         {
-            if (container.Kernel.HasComponent(typeof(IRegistration)))
+            if (container.Kernel.HasComponent(typeof(IBus)))
             {
                 throw new ConfigurationException(
                     "AddBus() was already called. To configure multiple bus instances, refer to the documentation: https://masstransit-project.com/usage/containers/multibus.html");

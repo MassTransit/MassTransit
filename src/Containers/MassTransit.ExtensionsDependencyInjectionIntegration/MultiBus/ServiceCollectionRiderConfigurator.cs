@@ -1,6 +1,7 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
 {
     using System;
+    using System.Collections.Generic;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
     using Monitoring.Health;
@@ -12,8 +13,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
         IServiceCollectionRiderConfigurator<TBus>
         where TBus : class, IBus
     {
-        public ServiceCollectionRiderConfigurator(IServiceCollection collection, IContainerRegistrar registrar)
-            : base(collection, registrar)
+        public ServiceCollectionRiderConfigurator(IServiceCollection collection, IContainerRegistrar registrar, HashSet<Type> riderTypes)
+            : base(collection, registrar, riderTypes)
         {
         }
 
@@ -22,16 +23,19 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             if (riderFactory == null)
                 throw new ArgumentNullException(nameof(riderFactory));
 
-            ThrowIfAlreadyConfigured(nameof(SetRiderFactory));
+            ThrowIfAlreadyConfigured<TRider>();
 
-            Collection.AddSingleton(provider => Bind<TBus>.Create(riderFactory.CreateRider(GetRegistrationContext(provider))));
+            IRiderRegistrationContext CreateRegistrationContext(IServiceProvider provider)
+            {
+                var registration = CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>());
+                var busHealth = provider.GetRequiredService<Bind<TBus, BusHealth>>();
+                return new RiderRegistrationContext(registration, busHealth.Value);
+            }
+
+            Collection.AddSingleton(provider => Bind<TBus, TRider>.Create(CreateRegistrationContext(provider)));
+            Collection.AddSingleton(provider =>
+                Bind<TBus>.Create(riderFactory.CreateRider(provider.GetRequiredService<Bind<TBus, TRider, IRiderRegistrationContext>>().Value)));
             Collection.AddSingleton(provider => Bind<TBus>.Create(provider.GetRequiredService<IBusInstance<TBus>>().GetRider<TRider>()));
-        }
-
-        IRiderRegistrationContext GetRegistrationContext(IServiceProvider provider)
-        {
-            return new RiderRegistrationContext(CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>()),
-                provider.GetRequiredService<Bind<TBus, BusHealth>>().Value);
         }
     }
 }

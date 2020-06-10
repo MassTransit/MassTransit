@@ -2,9 +2,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
 {
     using Castle.Windsor;
     using Common_Tests;
-    using Monitoring.Health;
     using NUnit.Framework;
-    using Registration;
 
 
     public class Windsor_Conductor :
@@ -27,12 +25,7 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
 
         protected override void ConfigureServiceEndpoints(IBusFactoryConfigurator<IInMemoryReceiveEndpointConfigurator> configurator)
         {
-            configurator.ConfigureServiceEndpoints(GetRegistrationContext(), Options);
-        }
-
-        IRegistrationContext GetRegistrationContext()
-        {
-            return new RegistrationContext(_container.Resolve<IRegistration>(), _container.Resolve<BusHealth>());
+            configurator.ConfigureServiceEndpoints(_container.Resolve<IBusRegistrationContext>(), Options);
         }
 
         protected override IClientFactory GetClientFactory()

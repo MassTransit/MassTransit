@@ -77,7 +77,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             AutofacFilterExtensions.UseSendFilter(configurator, typeof(ScopedFilter<>), Registration);
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
         protected override MyId MyId => _scope.Resolve<MyId>();
         protected override ISendEndpointProvider SendEndpointProvider => _scope.Resolve<ISendEndpointProvider>();
     }

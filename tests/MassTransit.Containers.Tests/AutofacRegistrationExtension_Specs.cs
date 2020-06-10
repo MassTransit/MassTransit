@@ -34,7 +34,7 @@
             {
                 x.ReceiveEndpoint("input_queue", e =>
                 {
-                    var registration = container.Resolve<IRegistration>();
+                    var registration = container.Resolve<IBusRegistrationContext>();
 
                     e.ConfigureConsumers(registration);
                     e.ConfigureSagas(registration);

@@ -19,7 +19,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
                 .Build();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
 
         [OneTimeTearDown]
         public async Task Close_container()
@@ -46,7 +46,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
                 .Build();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
 
         [OneTimeTearDown]
         public async Task Close_container()

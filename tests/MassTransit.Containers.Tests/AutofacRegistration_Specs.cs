@@ -90,7 +90,7 @@
                 builder.Register(context =>
                     {
                         return Bus.Factory.CreateUsingInMemory(x =>
-                            x.ReceiveEndpoint("input_queue", e => e.ConfigureConsumers(context.Resolve<IRegistration>())));
+                            x.ReceiveEndpoint("input_queue", e => e.ConfigureConsumers(context.Resolve<IBusRegistrationContext>())));
                     })
                     .As<IBus>()
                     .As<IBusControl>()

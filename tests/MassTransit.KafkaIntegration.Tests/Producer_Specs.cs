@@ -40,14 +40,10 @@ namespace MassTransit.KafkaIntegration.Tests
                     {
                         k.Host("localhost:9092");
 
-                        k.TopicEndpoint<Null, KafkaMessage>(Topic, nameof(Producer_Specs), c =>
+                        k.TopicEndpoint<KafkaMessage>(Topic, nameof(Producer_Specs), c =>
                         {
                             c.AutoOffsetReset = AutoOffsetReset.Earliest;
                             c.ConfigureConsumer<KafkaMessageConsumer>(context);
-                        });
-
-                        k.TopicProducer<Null, KafkaMessage>(Topic, c =>
-                        {
                         });
                     });
                 });
@@ -61,7 +57,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var serviceScope = provider.CreateScope();
 
-            var producer = serviceScope.ServiceProvider.GetRequiredService<IKafkaProducer<Null, KafkaMessage>>();
+            var producer = serviceScope.ServiceProvider.GetRequiredService<IKafkaProducer<KafkaMessage>>();
 
             try
             {

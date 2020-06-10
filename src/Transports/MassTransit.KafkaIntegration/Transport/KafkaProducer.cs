@@ -30,14 +30,14 @@ namespace MassTransit.KafkaIntegration.Transport
 
         public Task Produce(TKey key, TValue value, CancellationToken cancellationToken = default)
         {
-            return Produce(key, value, Pipe.Empty<KafkaSendContext<TValue>>(), cancellationToken);
+            return Produce(key, value, Pipe.Empty<KafkaSendContext<TKey, TValue>>(), cancellationToken);
         }
 
-        public async Task Produce(TKey key, TValue value, IPipe<KafkaSendContext<TValue>> pipe, CancellationToken cancellationToken)
+        public async Task Produce(TKey key, TValue value, IPipe<KafkaSendContext<TKey, TValue>> pipe, CancellationToken cancellationToken)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            var context = new KafkaMessageSendContext<TValue>(value, cancellationToken);
+            var context = new KafkaMessageSendContext<TKey, TValue>(key, value, cancellationToken);
 
             if (_consumeContext != null)
                 context.TransferConsumeContextHeaders(_consumeContext);
@@ -53,7 +53,7 @@ namespace MassTransit.KafkaIntegration.Transport
             context.ConversationId ??= NewId.NextGuid();
 
             StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context,
-                (nameof(context.Partition), (_topicAddress.Partition ?? context.Partition).ToString()));
+                (nameof(context.Partition), context.Partition.ToString()));
             try
             {
                 if (_context.SendObservers.Count > 0)
@@ -61,7 +61,7 @@ namespace MassTransit.KafkaIntegration.Transport
 
                 var message = new Message<TKey, TValue>
                 {
-                    Key = key,
+                    Key = context.Key,
                     Value = context.Message
                 };
 
@@ -70,7 +70,7 @@ namespace MassTransit.KafkaIntegration.Transport
 
                 message.Headers = _context.HeadersSerializer.Serialize(context);
 
-                var topic = new TopicPartition(_topicAddress.Topic, _topicAddress.Partition ?? context.Partition);
+                var topic = new TopicPartition(_topicAddress.Topic, context.Partition);
 
                 await _context.Produce(topic, message, context.CancellationToken).ConfigureAwait(false);
 
@@ -96,10 +96,10 @@ namespace MassTransit.KafkaIntegration.Transport
 
         public Task Produce(TKey key, object values, CancellationToken cancellationToken = default)
         {
-            return Produce(key, values, Pipe.Empty<KafkaSendContext<TValue>>(), cancellationToken);
+            return Produce(key, values, Pipe.Empty<KafkaSendContext<TKey, TValue>>(), cancellationToken);
         }
 
-        public Task Produce(TKey key, object values, IPipe<KafkaSendContext<TValue>> pipe, CancellationToken cancellationToken = default)
+        public Task Produce(TKey key, object values, IPipe<KafkaSendContext<TKey, TValue>> pipe, CancellationToken cancellationToken = default)
         {
             Task<InitializeContext<TValue>> messageTask = MessageInitializerCache<TValue>.Initialize(values, cancellationToken);
             if (messageTask.IsCompletedSuccessfully())

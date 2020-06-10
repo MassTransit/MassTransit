@@ -20,7 +20,7 @@
         /// <param name="configurator">The registration configurator (configured via AddMassTransit)</param>
         /// <param name="configure">The configuration callback for the bus factory</param>
         public static void UsingActiveMq(this IBusRegistrationConfigurator configurator,
-            Action<IRegistrationContext, IActiveMqBusFactoryConfigurator> configure = null)
+            Action<IBusRegistrationContext, IActiveMqBusFactoryConfigurator> configure = null)
         {
             configurator.SetBusFactory(new ActiveMqRegistrationBusFactory(configure));
         }

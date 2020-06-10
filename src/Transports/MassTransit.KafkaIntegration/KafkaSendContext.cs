@@ -16,4 +16,12 @@ namespace MassTransit.KafkaIntegration
         where T : class
     {
     }
+
+
+    public interface KafkaSendContext<TKey, out T> :
+        KafkaSendContext<T>
+        where T : class
+    {
+        TKey Key { get; set; }
+    }
 }

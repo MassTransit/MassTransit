@@ -56,14 +56,14 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Use(context => new StructureMapConfigurationServiceProvider(context.GetInstance<IContainer>()))
                 .Singleton();
 
-            expression.For<IRegistration>()
-                .Use(provider => CreateRegistration(provider.GetInstance<IConfigurationServiceProvider>()))
+            expression.For<IBusRegistrationContext>()
+                .Use(context => CreateRegistrationContext(context))
                 .Singleton();
         }
 
         ConfigurationExpression IConfigurationExpressionBusConfigurator.Builder => _expression;
 
-        public void AddBus(Func<IRegistrationContext, IBusControl> busFactory)
+        public void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
         {
             if (busFactory == null)
                 throw new ArgumentNullException(nameof(busFactory));
@@ -90,13 +90,13 @@ namespace MassTransit.StructureMapIntegration.Registration
             throw new NotImplementedException();
         }
 
-        IBusControl BusFactory(IContext context, Func<IRegistrationContext, IBusControl> busFactory)
+        IBusControl BusFactory(IContext context, Func<IBusRegistrationContext, IBusControl> busFactory)
         {
             var provider = context.GetInstance<IConfigurationServiceProvider>();
 
             ConfigureLogContext(provider);
 
-            var registrationContext = GetRegistrationContext(context);
+            var registrationContext = context.GetInstance<IBusRegistrationContext>();
 
             return busFactory(registrationContext);
         }
@@ -118,12 +118,12 @@ namespace MassTransit.StructureMapIntegration.Registration
                 ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), context.GetInstance<IContainer>()));
         }
 
-        IRegistrationContext GetRegistrationContext(IContext context)
+        IBusRegistrationContext CreateRegistrationContext(IContext context)
         {
-            return new RegistrationContext(
-                CreateRegistration(context.GetInstance<IConfigurationServiceProvider>()),
-                context.GetInstance<BusHealth>()
-            );
+            var provider = context.GetInstance<IConfigurationServiceProvider>();
+            var busHealth = context.GetInstance<BusHealth>();
+            return new BusRegistrationContext(provider, busHealth, EndpointRegistrations, ConsumerRegistrations, SagaRegistrations,
+                ExecuteActivityRegistrations, ActivityRegistrations);
         }
     }
 }

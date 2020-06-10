@@ -35,7 +35,7 @@
         /// <param name="configurator">The registration configurator (configured via AddMassTransit)</param>
         /// <param name="configure">The configuration callback for the bus factory</param>
         public static void UsingInMemory(this IBusRegistrationConfigurator configurator,
-            Action<IRegistrationContext, IInMemoryBusFactoryConfigurator> configure = null)
+            Action<IBusRegistrationContext, IInMemoryBusFactoryConfigurator> configure = null)
         {
             UsingInMemory(configurator, null, configure);
         }
@@ -47,7 +47,7 @@
         /// <param name="baseAddress">The base Address of the transport</param>
         /// <param name="configure">The configuration callback for the bus factory</param>
         public static void UsingInMemory(this IBusRegistrationConfigurator configurator, Uri baseAddress,
-            Action<IRegistrationContext, IInMemoryBusFactoryConfigurator> configure = null)
+            Action<IBusRegistrationContext, IInMemoryBusFactoryConfigurator> configure = null)
         {
             configurator.SetBusFactory(new InMemoryRegistrationBusFactory(baseAddress, configure));
         }

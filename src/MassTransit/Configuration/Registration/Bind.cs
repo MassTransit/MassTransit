@@ -14,6 +14,24 @@ namespace MassTransit.Registration
         }
 
         public TValue Value { get; }
+
+        public static Bind<TKey, TValue, T> Create<T>(T value)
+            where T : class
+        {
+            return new Bind<TKey, TValue, T>(value);
+        }
+    }
+
+
+    public class Bind<TKey1, TKey2, TValue>
+        where TValue : class
+    {
+        public Bind(TValue value)
+        {
+            Value = value;
+        }
+
+        public TValue Value { get; }
     }
 
 

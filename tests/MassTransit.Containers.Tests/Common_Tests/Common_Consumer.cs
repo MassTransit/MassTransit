@@ -16,7 +16,7 @@
     public abstract class Common_Consumer :
         InMemoryTestFixture
     {
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_receive_using_the_first_consumer()
@@ -57,7 +57,7 @@
             TaskCompletionSource = GetTask<MyId>();
         }
 
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_use_scope()
@@ -116,7 +116,7 @@
     public abstract class Common_Consumer_Endpoint :
         InMemoryTestFixture
     {
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_receive_on_the_custom_endpoint()
@@ -143,7 +143,7 @@
     public abstract class Common_Consumers_Endpoint :
         InMemoryTestFixture
     {
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_receive_on_the_custom_endpoint()
@@ -246,7 +246,7 @@
     public abstract class Common_Consumer_ServiceEndpoint :
         InMemoryTestFixture
     {
-        protected abstract IRegistration Registration { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
         public async Task Should_handle_the_request()

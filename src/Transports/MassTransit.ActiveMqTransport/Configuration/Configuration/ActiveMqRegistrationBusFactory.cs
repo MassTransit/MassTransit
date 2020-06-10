@@ -10,15 +10,15 @@ namespace MassTransit.ActiveMqTransport.Configuration
         TransportRegistrationBusFactory
     {
         readonly ActiveMqBusConfiguration _busConfiguration;
-        readonly Action<IRegistrationContext, IActiveMqBusFactoryConfigurator> _configure;
+        readonly Action<IBusRegistrationContext, IActiveMqBusFactoryConfigurator> _configure;
 
-        public ActiveMqRegistrationBusFactory(Action<IRegistrationContext, IActiveMqBusFactoryConfigurator> configure)
+        public ActiveMqRegistrationBusFactory(Action<IBusRegistrationContext, IActiveMqBusFactoryConfigurator> configure)
             : this(new ActiveMqBusConfiguration(new ActiveMqTopologyConfiguration(ActiveMqBusFactory.MessageTopology)), configure)
         {
         }
 
         ActiveMqRegistrationBusFactory(ActiveMqBusConfiguration busConfiguration,
-            Action<IRegistrationContext, IActiveMqBusFactoryConfigurator> configure)
+            Action<IBusRegistrationContext, IActiveMqBusFactoryConfigurator> configure)
             : base(busConfiguration.HostConfiguration)
         {
             _configure = configure;
@@ -26,7 +26,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
             _busConfiguration = busConfiguration;
         }
 
-        public override IBusInstance CreateBus(IRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
+        public override IBusInstance CreateBus(IBusRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications)
         {
             var configurator = new ActiveMqBusFactoryConfigurator(_busConfiguration);
 

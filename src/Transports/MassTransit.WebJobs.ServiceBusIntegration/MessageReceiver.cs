@@ -17,9 +17,9 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
         readonly IAsyncBusHandle _busHandle;
         readonly IServiceBusHostConfiguration _hostConfiguration;
         readonly ConcurrentDictionary<string, IBrokeredMessageReceiver> _receivers;
-        readonly IRegistration _registration;
+        readonly IBusRegistrationContext _registration;
 
-        public MessageReceiver(IRegistration registration, IAsyncBusHandle busHandle, IBusInstance busInstance)
+        public MessageReceiver(IBusRegistrationContext registration, IAsyncBusHandle busHandle, IBusInstance busInstance)
         {
             if (busInstance.HostConfiguration == null)
                 throw new ArgumentNullException(nameof(busInstance), "The bus instance was not created properly, the hostConfiguration was not present.");

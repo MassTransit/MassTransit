@@ -43,6 +43,6 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             return _container.Resolve<IRequestClient<PingMessage>>();
         }
 
-        protected override IRegistration Registration => _container.Resolve<IRegistration>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
     }
 }
