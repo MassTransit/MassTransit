@@ -1,6 +1,8 @@
 namespace MassTransit.Registration
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using ConsumeConfigurators;
     using Monitoring.Health;
     using Riders;
@@ -12,11 +14,18 @@ namespace MassTransit.Registration
     {
         readonly BusHealth _health;
         readonly IRegistration _registration;
+        readonly IRegistrationCache<object> _registrations;
 
-        public RiderRegistrationContext(IRegistration registration, BusHealth health)
+        public RiderRegistrationContext(IRegistration registration, BusHealth health, IRegistrationCache<object> registrations)
         {
             _registration = registration;
             _health = health;
+            _registrations = registrations;
+        }
+
+        public IEnumerable<T> GetRegistrations<T>()
+        {
+            return _registrations.Values.OfType<T>();
         }
 
         public void UseHealthCheck(IRiderFactoryConfigurator configurator)

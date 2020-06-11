@@ -29,7 +29,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             {
                 var registration = CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>());
                 var busHealth = provider.GetRequiredService<Bind<TBus, BusHealth>>();
-                return new RiderRegistrationContext(registration, busHealth.Value);
+                return new RiderRegistrationContext(registration, busHealth.Value, Registrations);
             }
 
             Collection.AddSingleton(provider => Bind<TBus, TRider>.Create(CreateRegistrationContext(provider)));

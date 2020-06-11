@@ -54,7 +54,7 @@ namespace MassTransit.KafkaIntegration
 
             var registration = new KafkaProducerRegistrationConfigurator<TKey, T>(topicName);
             configurator.Registrar.Register(provider => GetProducer<TKey, T>(topicName, provider));
-            configurator.Registrar.RegisterSingleInstance<IKafkaProducerRegistration>(registration);
+            configurator.AddRegistration(registration);
             return registration;
         }
 
@@ -78,7 +78,7 @@ namespace MassTransit.KafkaIntegration
 
             var registration = new KafkaProducerRegistrationConfigurator<TKey, T>(topicName, producerConfig);
             configurator.Registrar.Register(provider => GetProducer<TKey, T>(topicName, provider));
-            configurator.Registrar.RegisterSingleInstance<IKafkaProducerRegistration>(registration);
+            configurator.AddRegistration(registration);
             return registration;
         }
 

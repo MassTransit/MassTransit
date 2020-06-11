@@ -8,6 +8,9 @@ namespace MassTransit.Registration
     {
         IContainerRegistrar Registrar { get; }
 
+        void AddRegistration<T>(T registration)
+            where T : class;
+
         /// <summary>
         /// Add the rider to the container, configured properly
         /// </summary>

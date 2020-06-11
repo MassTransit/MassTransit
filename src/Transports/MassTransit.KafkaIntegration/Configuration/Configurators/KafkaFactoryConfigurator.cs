@@ -16,12 +16,12 @@ namespace MassTransit.KafkaIntegration.Configurators
         IKafkaFactoryConfigurator
     {
         readonly ClientConfig _clientConfig;
-        readonly List<Action<ISendPipeConfigurator>> _configureSend;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly RiderObservable _observers;
         readonly List<IKafkaProducerSpecification> _producers;
         readonly SendObservable _sendObservers;
         readonly List<IKafkaConsumerSpecification> _topics;
+        Action<ISendPipeConfigurator> _configureSend;
         IHeadersDeserializer _headersDeserializer;
         IHeadersSerializer _headersSerializer;
         bool _isHostConfigured;
@@ -34,7 +34,6 @@ namespace MassTransit.KafkaIntegration.Configurators
             _observers = new RiderObservable();
             _endpointObservers = new ReceiveEndpointObservable();
             _sendObservers = new SendObservable();
-            _configureSend = new List<Action<ISendPipeConfigurator>>();
 
             SetHeadersDeserializer(DictionaryHeadersSerialize.Deserializer);
             SetHeadersSerializer(DictionaryHeadersSerialize.Serializer);
@@ -111,7 +110,9 @@ namespace MassTransit.KafkaIntegration.Configurators
             configure?.Invoke(configurator);
 
             configurator.ConnectSendObserver(_sendObservers);
-            configurator.ConfigureSend(x => _configureSend.ForEach(c => c(x)));
+            if (_configureSend != null)
+                configurator.ConfigureSend(_configureSend);
+
             _producers.Add(configurator);
         }
 
@@ -267,7 +268,7 @@ namespace MassTransit.KafkaIntegration.Configurators
 
         public void ConfigureSend(Action<ISendPipeConfigurator> callback)
         {
-            _configureSend.Add(callback ?? throw new ArgumentNullException(nameof(callback)));
+            _configureSend = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
         public IBusInstanceSpecification Build()

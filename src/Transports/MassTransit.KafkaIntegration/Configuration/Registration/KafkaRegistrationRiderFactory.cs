@@ -4,7 +4,6 @@ namespace MassTransit.KafkaIntegration.Registration
     using Configurators;
     using Confluent.Kafka;
     using MassTransit.Registration;
-    using Microsoft.Extensions.DependencyInjection;
     using Transport;
 
 
@@ -32,10 +31,10 @@ namespace MassTransit.KafkaIntegration.Registration
 
             ConfigureRider(configurator, context);
 
-            foreach (var registration in context.GetServices<IKafkaProducerRegistration>())
-                registration.Register(configurator);
-
             _configure?.Invoke(context, configurator);
+
+            foreach (var registration in context.GetRegistrations<IKafkaProducerRegistration>())
+                registration.Register(configurator);
 
             return configurator.Build();
         }

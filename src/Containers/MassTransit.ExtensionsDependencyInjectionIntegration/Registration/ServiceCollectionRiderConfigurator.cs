@@ -13,15 +13,23 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         IServiceCollectionRiderConfigurator
     {
         readonly HashSet<Type> _riderTypes;
+        protected readonly RegistrationCache<object> Registrations;
 
         public ServiceCollectionRiderConfigurator(IServiceCollection collection, IContainerRegistrar registrar, HashSet<Type> riderTypes)
             : base(registrar)
         {
             _riderTypes = riderTypes;
             Collection = collection;
+            Registrations = new RegistrationCache<object>();
         }
 
         public IServiceCollection Collection { get; }
+
+        public void AddRegistration<T>(T registration)
+            where T : class
+        {
+            Registrations.GetOrAdd(typeof(T), _ => registration);
+        }
 
         public virtual void SetRiderFactory<TRider>(IRegistrationRiderFactory<TRider> riderFactory)
             where TRider : class, IRider
@@ -35,7 +43,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             {
                 var registration = CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>());
                 var busHealth = provider.GetRequiredService<BusHealth>();
-                return new RiderRegistrationContext(registration, busHealth);
+                return new RiderRegistrationContext(registration, busHealth, Registrations);
             }
 
             Collection.AddSingleton(provider => Bind<IBus, TRider>.Create(CreateRegistrationContext(provider)));

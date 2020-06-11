@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../../signing.props" />
+  <Import Project="../../../signing.props"/>
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -13,25 +13,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Confluent.Kafka" Version="1.4.3" />
+    <PackageReference Include="Confluent.Kafka" Version="1.4.3"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-    <ProjectReference Include="..\..\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
-    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Transport\KafkaProduceTransport.cs" />
-    <Compile Remove="Transport\IKafkaProduceTransport.cs" />
-    <Compile Remove="Transport\IKafkaProduceEndpoint.cs" />
-    <Compile Remove="Contexts\ProduceEndpointContext.cs" />
-    <Compile Remove="Contexts\ProduceContext.cs" />
-    <Compile Remove="Contexts\KafkaProduceTransportContext.cs" />
-    <Compile Remove="Contexts\IProduceEndpointContextSupervisor.cs" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj"/>
   </ItemGroup>
 
 </Project>
-
-
