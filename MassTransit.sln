@@ -34,11 +34,11 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".solution", ".solution", "{2C8A15FA-A445-4916-AAC2-3BE53AA247A7}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
-		docs.yml = docs.yml
 		build.cake = build.cake
 		build.ps1 = build.ps1
 		build.sh = build.sh
 		Directory.Build.props = Directory.Build.props
+		docs.yml = docs.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -66,9 +66,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.MartenIntegrati
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.MartenIntegration.Tests", "tests\MassTransit.MartenIntegration.Tests\MassTransit.MartenIntegration.Tests.csproj", "{92BE64BB-FF25-4CC8-B64F-3BF02F18F089}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.DocumentDbIntegration", "src\Persistence\MassTransit.DocumentDbIntegration\MassTransit.DocumentDbIntegration.csproj", "{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Azure.Cosmos", "src\Persistence\MassTransit.Azure.Cosmos\MassTransit.Azure.Cosmos.csproj", "{7CADB8D7-9B91-4CF3-BE46-E3682CEDEB27}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.DocumentDbIntegration.Tests", "tests\MassTransit.DocumentDbIntegration.Tests\MassTransit.DocumentDbIntegration.Tests.csproj", "{54363F5F-A51A-489B-8BE7-71C10104A0A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Azure.Cosmos.Tests", "tests\MassTransit.Azure.Cosmos.Tests\MassTransit.Azure.Cosmos.Tests.csproj", "{54363F5F-A51A-489B-8BE7-71C10104A0A5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.ExtensionsDependencyInjectionIntegration", "src\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj", "{B1C50EC4-8E99-4D1B-A79D-A15FCAAC47D9}"
 EndProject
@@ -124,17 +124,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.PrometheusInteg
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interoperability", "Interoperability", "{4F40E08B-7C24-4D2A-8476-B7F93D0A2910}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Interop.NServiceBus", "src\MassTransit.Interop.NServiceBus\MassTransit.Interop.NServiceBus.csproj", "{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Interop.NServiceBus", "src\MassTransit.Interop.NServiceBus\MassTransit.Interop.NServiceBus.csproj", "{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.KafkaIntegration", "src\Transports\MassTransit.KafkaIntegration\MassTransit.KafkaIntegration.csproj", "{1FC221F1-E49D-473C-9869-4452B2C4EBEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.KafkaIntegration", "src\Transports\MassTransit.KafkaIntegration\MassTransit.KafkaIntegration.csproj", "{1FC221F1-E49D-473C-9869-4452B2C4EBEE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.KafkaIntegration.Tests", "tests\MassTransit.KafkaIntegration.Tests\MassTransit.KafkaIntegration.Tests.csproj", "{555EC658-5EF6-4C10-ABA0-B717896398BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.KafkaIntegration.Tests", "tests\MassTransit.KafkaIntegration.Tests\MassTransit.KafkaIntegration.Tests.csproj", "{555EC658-5EF6-4C10-ABA0-B717896398BE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Riders", "Riders", "{F4CD08DB-40C0-4476-A135-DB8E0BCB79F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.EventHubIntegration", "src\Transports\MassTransit.EventHubIntegration\MassTransit.EventHubIntegration.csproj", "{D9472BBD-99CA-4FD4-9C8F-DA4F418F43EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EventHubIntegration", "src\Transports\MassTransit.EventHubIntegration\MassTransit.EventHubIntegration.csproj", "{D9472BBD-99CA-4FD4-9C8F-DA4F418F43EB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.EventHubIntegration.Tests", "tests\MassTransit.EventHubIntegration.Tests\MassTransit.EventHubIntegration.Tests.csproj", "{24CC1B47-AE01-4871-A939-2BF6EB789860}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EventHubIntegration.Tests", "tests\MassTransit.EventHubIntegration.Tests\MassTransit.EventHubIntegration.Tests.csproj", "{24CC1B47-AE01-4871-A939-2BF6EB789860}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -765,9 +765,9 @@ Global
 		{1AF687AB-41DE-4B2A-97F5-E9BBF5E51C75} = {DE40BDEC-6277-4E14-8EB6-D0B6863571BC}
 		{A29B1D94-6F11-487E-B4A1-3460928EC2C0} = {DE40BDEC-6277-4E14-8EB6-D0B6863571BC}
 		{F7F32EF2-0586-4FD8-90AD-AD7C792DF5E7} = {4F40E08B-7C24-4D2A-8476-B7F93D0A2910}
-		{F4CD08DB-40C0-4476-A135-DB8E0BCB79F8} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{1FC221F1-E49D-473C-9869-4452B2C4EBEE} = {F4CD08DB-40C0-4476-A135-DB8E0BCB79F8}
 		{555EC658-5EF6-4C10-ABA0-B717896398BE} = {F4CD08DB-40C0-4476-A135-DB8E0BCB79F8}
+		{F4CD08DB-40C0-4476-A135-DB8E0BCB79F8} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{D9472BBD-99CA-4FD4-9C8F-DA4F418F43EB} = {F4CD08DB-40C0-4476-A135-DB8E0BCB79F8}
 		{24CC1B47-AE01-4871-A939-2BF6EB789860} = {F4CD08DB-40C0-4476-A135-DB8E0BCB79F8}
 	EndGlobalSection

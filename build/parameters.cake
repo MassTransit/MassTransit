@@ -23,7 +23,7 @@ public class BuildParameters
     {
         get
         {
-            return !IsLocalBuild && IsRunningOnWindows && !IsPullRequest && IsMainMassTransitRepo && (IsMasterBranch || IsDevelopBranch || IsVNext);
+            return !IsLocalBuild && IsRunningOnUnix && !IsPullRequest && IsMainMassTransitRepo && (IsMasterBranch || IsDevelopBranch || IsVNext);
         }
     }
 
