@@ -23,6 +23,7 @@ MassTransit Nuget Packages
 | **Main** |
 | [MassTransit][MassTransit.nuget] | 2.0 |
 | **Other** |
+| [MassTransit.Analyzers][Analyzers.nuget] | 2.0 |
 | [MassTransit.SignalR][SignalR.nuget] | 2.0 |
 | [MassTransit.TestFramework][TestFramework.nuget] | 2.0 |
 | **Containers** |
@@ -34,16 +35,19 @@ MassTransit Nuget Packages
 | **ASP.NET Core** |
 | [MassTransit.AspNetCore][AspNetCore.nuget] | - | 3.1 |
 | **Monitoring** |
-| [MassTransit.Prometheus][Prometheus.nuget] | 2.0 | 
+| [MassTransit.Prometheus][Prometheus.nuget] | 2.0 |
 | **Persistence** |
+| [MassTransit.Azure.Cosmos][Cosmos.nuget] | 2.0 |
 | [MassTransit.Dapper][Dapper.nuget] | 2.0 |
-| [MassTransit.DocumentDb][DocumentDb.nuget] | 2.0 |
 | [MassTransit.EntityFrameworkCore][EFCore.nuget] | 2.0 |
 | [MassTransit.EntityFramework][EF.nuget] | 2.1 |
 | [MassTransit.Marten][Marten.nuget] | 2.0 |
 | [MassTransit.MongoDb][MongoDb.nuget] | 2.0 |
 | [MassTransit.NHibernate][NHibernate.nuget] | 2.0 |
 | [MassTransit.Redis][Redis.nuget] | 2.0 |
+| **Scheduling** |
+| [MassTransit.Hangfire][Hangfire.nuget] | 2.0 |
+| [MassTransit.Quartz][Quartz.nuget] | 2.0 |
 | **Transports** |
 | [MassTransit.ActiveMQ][ActiveMQ.nuget] | 2.0 |
 | [MassTransit.AmazonSQS][AmazonSQS.nuget] | 2.0 |
@@ -51,6 +55,7 @@ MassTransit Nuget Packages
 | [MassTransit.RabbitMQ][RabbitMQ.nuget] | 2.0 |
 | [MassTransit.WebJobs.EventHubs][EventHubs.nuget] | 2.0 |
 | [MassTransit.WebJobs.ServiceBus][AzureFunc.nuget] | 2.0 |
+
 
 ## Getting started with MassTransit
 
@@ -117,12 +122,12 @@ MassTransit is built on [AppVeyor](https://ci.appveyor.com/project/phatboyg/mass
 Logo Design by _The Agile Badger_
 
 [MassTransit.nuget]: https://www.nuget.org/packages/MassTransit
+[Analyzers.nuget]: https://www.nuget.org/packages/MassTransit.Analyzers
 [SignalR.nuget]: https://www.nuget.org/packages/MassTransit.SignalR
 [TestFramework.nuget]: https://www.nuget.org/packages/MassTransit.TestFramework
 
 [Autofac.nuget]: https://www.nuget.org/packages/MassTransit.Autofac
 [CoreDI.nuget]: https://www.nuget.org/packages/MassTransit.Extensions.DependencyInjection
-[Lamar.nuget]: https://www.nuget.org/packages/MassTransit.Lamar
 [SimpleInjector.nuget]: https://www.nuget.org/packages/MassTransit.SimpleInjector
 [StructureMap.nuget]: https://www.nuget.org/packages/MassTransit.StructureMap
 [Windsor.nuget]: https://www.nuget.org/packages/MassTransit.CastleWindsor
@@ -130,14 +135,17 @@ Logo Design by _The Agile Badger_
 [AspNetCore.nuget]: https://www.nuget.org/packages/MassTransit.AspNetCore
 [Prometheus.nuget]: https://www.nuget.org/packages/MassTransit.Prometheus
 
+[Cosmos.nuget]: https://www.nuget.org/packages/MassTransit.Azure.Cosmos
 [Dapper.nuget]: https://www.nuget.org/packages/MassTransit.Dapper
-[DocumentDb.nuget]: https://www.nuget.org/packages/MassTransit.DocumentDb
 [EFCore.nuget]: https://www.nuget.org/packages/MassTransit.EntityFrameworkCore
 [EF.nuget]: https://www.nuget.org/packages/MassTransit.EntityFramework
 [Marten.nuget]: https://www.nuget.org/packages/MassTransit.Marten
 [MongoDb.nuget]: https://www.nuget.org/packages/MassTransit.MongoDb
 [NHibernate.nuget]: https://www.nuget.org/packages/MassTransit.NHibernate
 [Redis.nuget]: https://www.nuget.org/packages/MassTransit.Redis
+
+[Hangfire.nuget]: https://www.nuget.org/packages/MassTransit.Hangfire
+[Quartz.nuget]: https://www.nuget.org/packages/MassTransit.Quartz
 
 [ActiveMQ.nuget]: https://www.nuget.org/packages/MassTransit.ActiveMQ
 [AmazonSQS.nuget]: https://www.nuget.org/packages/MassTransit.AmazonSQS

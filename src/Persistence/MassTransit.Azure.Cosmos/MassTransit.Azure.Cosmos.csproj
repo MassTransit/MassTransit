@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../signing.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>MassTransit.AzureCosmos</PackageId>
+    <Title>MassTransit.Cosmos</Title>
+    <PackageTags>MassTransit;Cosmos;Azure</PackageTags>
+    <Description>MassTransit Azure Cosmos persistence support; $(Description)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.9.1" />
+  </ItemGroup>
+
+</Project>

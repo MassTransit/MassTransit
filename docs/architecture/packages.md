@@ -19,7 +19,6 @@ The officially supported MassTransit packages include:
 
     [![alt NewId](https://ci.appveyor.com/api/projects/status/github/phatboyg/NewId?svg=true "NewId")](https://ci.appveyor.com/project/phatboyg/NewId) [![alt NewId on NuGet](https://img.shields.io/nuget/v/NewId.svg "NewId on NuGet")](https://nuget.org/packages/NewId/)
 
-
 ### Transports
 
 * [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/)
@@ -28,22 +27,18 @@ The officially supported MassTransit packages include:
   * [MassTransit.WebJobs.EventHubs](https://nuget.org/packages/MassTransit.WebJobs.EventHubs/)
 * [MassTransit.ActiveMQ](https://nuget.org/packages/MassTransit.ActiveMQ/)
 * [MassTransit.AmazonSQS](https://nuget.org/packages/MassTransit.AmazonSQS/)
-* [MassTransit.Http](https://nuget.org/packages/MassTransit.Http/)
 
 ### Containers
 
 * [MassTransit.Autofac](https://nuget.org/packages/MassTransit.Autofac/)
 * [MassTransit.CastleWindsor](https://nuget.org/packages/MassTransit.CastleWindsor/)
 * [MassTransit.Extensions.DependencyInjection](https://nuget.org/packages/MassTransit.Extensions.DependencyInjection/)
-* [MassTransit.Lamar](https://nuget.org/packages/MassTransit.Lamar/)
-* [MassTransit.Ninject](https://nuget.org/packages/MassTransit.Ninject/)
 * [MassTransit.SimpleInjector](https://nuget.org/packages/MassTransit.SimpleInjector/)
 * [MassTransit.StructureMap](https://nuget.org/packages/MassTransit.StructureMap/)
-* [MassTransit.Unity](https://nuget.org/packages/MassTransit.Unity/)
 
 ### Saga Persistence
 
-* [MassTransit.DocumentDb](https://nuget.org/packages/MassTransit.DocumentDb/)
+* [MassTransit.Azure.Cosmos](https://nuget.org/packages/MassTransit.Azure.Cosmos/)
 * [MassTransit.EntityFramework](https://nuget.org/packages/MassTransit.EntityFramework/)
 * [MassTransit.EntityFrameworkCore](https://nuget.org/packages/MassTransit.EntityFrameworkCore/)
 * [MassTransit.Marten](https://nuget.org/packages/MassTransit.Marten/)
@@ -56,11 +51,14 @@ The officially supported MassTransit packages include:
 * [MassTransit.Quartz](https://nuget.org/packages/MassTransit.Quartz/)
 * [MassTransit.Hangfire](https://nuget.org/packages/MassTransit.Hangfire/)
 
-### Other
+### ASP.NET Core
 
 * [MassTransit.AspNetCore](https://nuget.org/packages/MassTransit.AspNetCore/)
-* [MassTransit.Host](https://nuget.org/packages/MassTransit.Host/)
-* [MassTransit.Reactive](https://nuget.org/packages/MassTransit.Reactive/)
+
+### Other
+
+* [MassTransit.Analyzers](https://nuget.org/packages/MassTransit.Analyzers/)
+* [MassTransit.SignalR](https://nuget.org/packages/MassTransit.SignalR/)
 * [MassTransit.TestFramework](https://nuget.org/packages/MassTransit.TestFramework/)
 
 ### Interoperability
