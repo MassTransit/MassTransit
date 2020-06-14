@@ -18,7 +18,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
         IAsyncDisposable
     {
         readonly IConnection _connection;
-        readonly LimitedConcurrencyLevelTaskScheduler _taskScheduler;
+        readonly ChannelExecutor _executor;
 
         public ActiveMqConnectionContext(IConnection connection, IActiveMqHostConfiguration hostConfiguration, CancellationToken cancellationToken)
             : base(cancellationToken)
@@ -30,7 +30,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
             Topology = hostConfiguration.HostTopology;
 
-            _taskScheduler = new LimitedConcurrencyLevelTaskScheduler(1);
+            _executor = new ChannelExecutor(1);
         }
 
         IConnection ConnectionContext.Connection => _connection;
@@ -42,13 +42,10 @@ namespace MassTransit.ActiveMqTransport.Contexts
         {
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
 
-            var session = await Task.Factory.StartNew(() => _connection.CreateSession(AcknowledgementMode.ClientAcknowledge),
-                tokenSource.Token, TaskCreationOptions.None, _taskScheduler).ConfigureAwait(false);
-
-            return session;
+            return await _executor.Run(() => _connection.CreateSession(AcknowledgementMode.ClientAcknowledge), tokenSource.Token).ConfigureAwait(false);
         }
 
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
             TransportLogMessages.DisconnectHost(Description);
 
@@ -59,6 +56,8 @@ namespace MassTransit.ActiveMqTransport.Contexts
                 TransportLogMessages.DisconnectedHost(Description);
 
                 _connection.Dispose();
+
+                await _executor.DisposeAsync().ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -66,8 +65,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
             }
 
             TransportLogMessages.DisconnectedHost(Description);
-
-            return default;
         }
     }
 }

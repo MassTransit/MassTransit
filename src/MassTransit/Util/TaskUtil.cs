@@ -127,7 +127,7 @@
             var previousContext = SynchronizationContext.Current;
             try
             {
-                var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
+                using var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
                 SynchronizationContext.SetSynchronizationContext(syncContext);
 
                 var t = taskFactory();
@@ -141,7 +141,7 @@
                     if (cancellationToken.IsCancellationRequested)
                         throw new OperationCanceledException("The task was not completed before being cancelled");
 
-                    syncContext.RunOnCurrentThread(cancellationToken);
+                    Thread.Sleep(3);
                 }
 
                 syncContext.SetComplete();
@@ -162,7 +162,7 @@
             var previousContext = SynchronizationContext.Current;
             try
             {
-                var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
+                using var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
                 SynchronizationContext.SetSynchronizationContext(syncContext);
 
                 var awaiter = task.GetAwaiter();
@@ -172,7 +172,7 @@
                     if (cancellationToken.IsCancellationRequested)
                         throw new OperationCanceledException("The task was not completed before being cancelled");
 
-                    syncContext.RunOnCurrentThread(cancellationToken);
+                    Thread.Sleep(3);
                 }
 
                 syncContext.SetComplete();
@@ -193,7 +193,7 @@
             var previousContext = SynchronizationContext.Current;
             try
             {
-                var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
+                using var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
                 SynchronizationContext.SetSynchronizationContext(syncContext);
 
                 Task<T> t = taskFactory();
@@ -207,7 +207,7 @@
                     if (cancellationToken.IsCancellationRequested)
                         throw new OperationCanceledException("The task was not completed before being cancelled");
 
-                    syncContext.RunOnCurrentThread(cancellationToken);
+                    Thread.Sleep(3);
                 }
 
                 syncContext.SetComplete();
@@ -244,17 +244,17 @@
 
 
         sealed class SingleThreadSynchronizationContext :
-            SynchronizationContext
+            SynchronizationContext,
+            IDisposable
         {
             readonly CancellationToken _cancellationToken;
-
-            readonly BlockingCollection<Tuple<SendOrPostCallback, object>> _queue;
+            readonly ChannelExecutor _executor;
             bool _completed;
 
             public SingleThreadSynchronizationContext(CancellationToken cancellationToken)
             {
                 _cancellationToken = cancellationToken;
-                _queue = new BlockingCollection<Tuple<SendOrPostCallback, object>>();
+                _executor = new ChannelExecutor(1);
             }
 
             public override void Post(SendOrPostCallback callback, object state)
@@ -267,7 +267,7 @@
 
                 try
                 {
-                    _queue.Add(Tuple.Create(callback, state), _cancellationToken);
+                    _executor?.Push(async () => callback(state), _cancellationToken);
                 }
                 catch (InvalidOperationException)
                 {
@@ -279,15 +279,14 @@
                 throw new NotSupportedException("Synchronously sending is not supported.");
             }
 
-            public void RunOnCurrentThread(CancellationToken cancellationToken)
-            {
-                while (_queue.TryTake(out Tuple<SendOrPostCallback, object> callback, 50, cancellationToken))
-                    callback.Item1(callback.Item2);
-            }
-
             public void SetComplete()
             {
                 _completed = true;
+            }
+
+            public void Dispose()
+            {
+                _executor.DisposeAsync().GetAwaiter().GetResult();
             }
         }
     }
