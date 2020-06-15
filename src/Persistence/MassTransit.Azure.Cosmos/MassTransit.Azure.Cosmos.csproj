@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>MassTransit.AzureCosmos</PackageId>
-    <Title>MassTransit.Cosmos</Title>
+    <PackageId>MassTransit.Azure.Cosmos</PackageId>
+    <Title>MassTransit.Azure.Cosmos</Title>
     <PackageTags>MassTransit;Cosmos;Azure</PackageTags>
     <Description>MassTransit Azure Cosmos persistence support; $(Description)</Description>
   </PropertyGroup>
