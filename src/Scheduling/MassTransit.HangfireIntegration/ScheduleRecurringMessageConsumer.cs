@@ -30,7 +30,7 @@ namespace MassTransit.HangfireIntegration
             var jobKey = GetJobKey(context.Message.ScheduleId, context.Message.ScheduleGroup);
             _recurringJobManager.RemoveIfExists(jobKey);
 
-            LogContext.Debug?.Log("Cancelled Recurring Message: {Key}", jobKey);
+            LogContext.Debug?.Log("Canceled Recurring Message: {Key}", jobKey);
         }
 
         public async Task Consume(ConsumeContext<ScheduleRecurringMessage> context)

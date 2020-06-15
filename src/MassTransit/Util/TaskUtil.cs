@@ -139,7 +139,7 @@
                 while (!awaiter.IsCompleted)
                 {
                     if (cancellationToken.IsCancellationRequested)
-                        throw new OperationCanceledException("The task was not completed before being cancelled");
+                        throw new OperationCanceledException("The task was not completed before being canceled");
 
                     Thread.Sleep(3);
                 }
@@ -170,7 +170,7 @@
                 while (!awaiter.IsCompleted)
                 {
                     if (cancellationToken.IsCancellationRequested)
-                        throw new OperationCanceledException("The task was not completed before being cancelled");
+                        throw new OperationCanceledException("The task was not completed before being canceled");
 
                     Thread.Sleep(3);
                 }
@@ -205,7 +205,7 @@
                 while (!awaiter.IsCompleted)
                 {
                     if (cancellationToken.IsCancellationRequested)
-                        throw new OperationCanceledException("The task was not completed before being cancelled");
+                        throw new OperationCanceledException("The task was not completed before being canceled");
 
                     Thread.Sleep(3);
                 }

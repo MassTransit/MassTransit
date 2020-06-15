@@ -62,7 +62,7 @@ namespace MassTransit.Courier.Hosts
                 if (exception.CancellationToken == context.CancellationToken)
                     throw;
 
-                throw new ConsumerCanceledException($"The operation was cancelled by the activity: {TypeMetadataCache<TActivity>.ShortName}");
+                throw new ConsumerCanceledException($"The operation was canceled by the activity: {TypeMetadataCache<TActivity>.ShortName}");
             }
             catch (Exception ex)
             {

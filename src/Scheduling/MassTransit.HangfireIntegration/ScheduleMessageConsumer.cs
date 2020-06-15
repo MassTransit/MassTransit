@@ -32,7 +32,7 @@ namespace MassTransit.HangfireIntegration
             using var connection = _jobStorage.GetConnection();
             var correlationId = context.Message.TokenId.ToString("N");
             if (TryRemoveJob(connection, correlationId, out var jobId))
-                LogContext.Debug?.Log("Cancelled Scheduled Message: {Id} at {Timestamp}", jobId, context.Message.Timestamp);
+                LogContext.Debug?.Log("Canceled Scheduled Message: {Id} at {Timestamp}", jobId, context.Message.Timestamp);
             else
                 LogContext.Debug?.Log("CancelScheduledMessage: no message found for {Id}", jobId);
         }
@@ -45,7 +45,7 @@ namespace MassTransit.HangfireIntegration
             using var connection = _jobStorage.GetConnection();
             using var transaction = connection.CreateWriteTransaction();
             if (TryRemoveJob(connection, correlationId, out var jobId))
-                LogContext.Debug?.Log("Cancelled Scheduled Message: {Id}", jobId);
+                LogContext.Debug?.Log("Canceled Scheduled Message: {Id}", jobId);
             jobId = _backgroundJobClient.Schedule<ScheduleJob>(
                 x => x.SendMessage(message, null),
                 context.Message.ScheduledTime);

@@ -63,7 +63,7 @@ namespace MassTransit.Pipeline.Filters
                 if (exception.CancellationToken == context.CancellationToken)
                     throw;
 
-                throw new ConsumerCanceledException($"The operation was cancelled by the consumer: {TypeMetadataCache<MessageHandler<TMessage>>.ShortName}");
+                throw new ConsumerCanceledException($"The operation was canceled by the consumer: {TypeMetadataCache<MessageHandler<TMessage>>.ShortName}");
             }
             catch (Exception ex)
             {

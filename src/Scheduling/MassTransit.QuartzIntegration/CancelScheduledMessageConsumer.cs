@@ -25,7 +25,7 @@ namespace MassTransit.QuartzIntegration
             var deletedJob = await _scheduler.DeleteJob(jobKey, context.CancellationToken).ConfigureAwait(false);
 
             if (deletedJob)
-                LogContext.Debug?.Log("Cancelled Scheduled Message: {Id} at {Timestamp}", jobKey, context.Message.Timestamp);
+                LogContext.Debug?.Log("Canceled Scheduled Message: {Id} at {Timestamp}", jobKey, context.Message.Timestamp);
             else
                 LogContext.Debug?.Log("CancelScheduledMessage: no message found for {Id}", jobKey);
         }
