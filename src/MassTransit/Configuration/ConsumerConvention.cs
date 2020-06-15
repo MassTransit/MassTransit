@@ -13,25 +13,25 @@ namespace MassTransit
         /// Register a consumer convention to be used for finding message types
         /// </summary>
         /// <typeparam name="T">The convention type</typeparam>
-        public static void Register<T>()
+        public static bool Register<T>()
             where T : IConsumerConvention, new()
         {
             var convention = new T();
 
-            ConsumerConventionCache.Add(convention);
+            return ConsumerConventionCache.TryAdd(convention);
         }
 
         /// <summary>
         /// Register a consumer convention to be used for finding message types
         /// </summary>
         /// <typeparam name="T">The convention type</typeparam>
-        public static void Register<T>(T convention)
+        public static bool Register<T>(T convention)
             where T : IConsumerConvention
         {
             if (convention == null)
                 throw new ArgumentNullException(nameof(convention));
 
-            ConsumerConventionCache.Add(convention);
+            return ConsumerConventionCache.TryAdd(convention);
         }
 
         /// <summary>

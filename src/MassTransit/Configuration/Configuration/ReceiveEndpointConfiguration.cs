@@ -15,7 +15,7 @@
         IReceiveEndpointConfiguration
     {
         readonly Lazy<IConsumePipe> _consumePipe;
-        readonly IList<IReceiveEndpointDependency> _dependencies;
+        readonly HashSet<IReceiveEndpointDependency> _dependencies;
         readonly IList<string> _lateConfigurationKeys;
         readonly IList<IReceiveEndpointSpecification> _specifications;
         IReceiveEndpoint _receiveEndpoint;
@@ -28,7 +28,7 @@
             _consumePipe = new Lazy<IConsumePipe>(() => Consume.Specification.BuildConsumePipe());
             _specifications = new List<IReceiveEndpointSpecification>();
             _lateConfigurationKeys = new List<string>();
-            _dependencies = new List<IReceiveEndpointDependency>();
+            _dependencies = new HashSet<IReceiveEndpointDependency>();
 
             EndpointObservers = new ReceiveEndpointObservable();
             ReceiveObservers = new ReceiveObservable();

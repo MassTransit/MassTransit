@@ -3,14 +3,25 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests.Turnout
     using System;
     using System.Threading.Tasks;
     using Conductor.Configuration;
-    using Contracts.Turnout;
+    using Contracts.JobService;
     using Definition;
+    using JobService;
     using NUnit.Framework;
 
 
     public interface CrunchTheNumbers
     {
         TimeSpan Duration { get; }
+    }
+
+
+    public class CrunchTheNumbersConsumer :
+        IJobConsumer<CrunchTheNumbers>
+    {
+        public async Task Run(JobContext<CrunchTheNumbers> context)
+        {
+            await Task.Delay(context.Job.Duration);
+        }
     }
 
 
@@ -80,19 +91,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests.Turnout
 
             configurator.ServiceInstance(options, instance =>
             {
-                instance.Turnout(x =>
+                instance.ConfigureJobServiceEndpoints();
+
+                instance.ReceiveEndpoint(instance.EndpointNameFormatter.Message<CrunchTheNumbers>(), e =>
                 {
-                    x.Job<CrunchTheNumbers>(cfg =>
-                    {
-                        cfg.ConcurrentJobLimit = 10;
-
-                        cfg.JobTimeout = TimeSpan.FromSeconds(90);
-
-                        cfg.SetJobFactory(async context =>
-                        {
-                            await Task.Delay(context.Job.Duration);
-                        });
-                    });
+                    e.Consumer(() => new CrunchTheNumbersConsumer());
                 });
             });
         }

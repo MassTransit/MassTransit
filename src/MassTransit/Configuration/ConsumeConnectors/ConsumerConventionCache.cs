@@ -12,10 +12,15 @@ namespace MassTransit.ConsumeConnectors
             ConsumerConvention.Register<BatchConsumerConvention>();
         }
 
-        public static void Add<T>(T convention)
+        public static bool TryAdd<T>(T convention)
             where T : IConsumerConvention
         {
+            if (Cached.Registered.Any(x => x.GetType() == convention.GetType()))
+                return false;
+
             Cached.Registered.Add(convention);
+
+            return true;
         }
 
         public static bool Remove<T>()

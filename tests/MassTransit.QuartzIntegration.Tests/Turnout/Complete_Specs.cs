@@ -4,8 +4,9 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     using System.Linq;
     using System.Threading.Tasks;
     using Conductor.Configuration;
-    using Contracts.Turnout;
+    using Contracts.JobService;
     using Definition;
+    using JobService;
     using NUnit.Framework;
     using Util;
 
@@ -13,6 +14,16 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     public interface CrunchTheNumbers
     {
         TimeSpan Duration { get; }
+    }
+
+
+    public class CrunchTheNumbersConsumer :
+        IJobConsumer<CrunchTheNumbers>
+    {
+        public async Task Run(JobContext<CrunchTheNumbers> context)
+        {
+            await Task.Delay(context.Job.Duration);
+        }
     }
 
 
@@ -82,19 +93,11 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
             configurator.ServiceInstance(options, instance =>
             {
-                instance.Turnout(x =>
+                instance.ConfigureJobServiceEndpoints();
+
+                instance.ReceiveEndpoint(instance.EndpointNameFormatter.Message<CrunchTheNumbers>(), e =>
                 {
-                    x.Job<CrunchTheNumbers>(cfg =>
-                    {
-                        cfg.ConcurrentJobLimit = 10;
-
-                        cfg.JobTimeout = TimeSpan.FromSeconds(90);
-
-                        cfg.SetJobFactory(async context =>
-                        {
-                            await Task.Delay(context.Job.Duration);
-                        });
-                    });
+                    e.Consumer(() => new CrunchTheNumbersConsumer());
                 });
             });
         }
@@ -116,7 +119,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
         [Order(1)]
         public async Task Should_get_the_job_accepted()
         {
-            IRequestClient<SubmitJob<CrunchTheNumbers>> requestClient = Bus.CreateRequestClient<SubmitJob<CrunchTheNumbers>>();
+            IRequestClient<SubmitJob<CrunchTheNumbers>> requestClient = Bus.CreateRequestClient<SubmitJob<CrunchTheNumbers>>(_serviceAddress);
 
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
@@ -155,6 +158,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
         Task<ConsumeContext<JobCompleted>> _completed;
         Task<ConsumeContext<JobSubmitted>> _submitted;
         Task<ConsumeContext<JobStarted>> _started;
+        Uri _serviceAddress;
 
         [OneTimeSetUp]
         public async Task Arrange()
@@ -172,19 +176,16 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
             configurator.ServiceInstance(options, instance =>
             {
-                instance.Turnout(x =>
+                instance.ConfigureJobServiceEndpoints();
+
+                instance.ReceiveEndpoint(instance.EndpointNameFormatter.Message<CrunchTheNumbers>(), e =>
                 {
-                    x.Job<CrunchTheNumbers>(cfg =>
+                    e.Consumer(() => new CrunchTheNumbersConsumer(), cfg =>
                     {
-                        cfg.ConcurrentJobLimit = 10;
-
-                        cfg.JobTimeout = TimeSpan.FromSeconds(90);
-
-                        cfg.SetJobFactory(async context =>
-                        {
-                            await Task.Delay(context.Job.Duration);
-                        });
+                        cfg.Options<JobOptions<CrunchTheNumbers>>(jobOptions => jobOptions.SetJobTimeout(TimeSpan.FromSeconds(90)));
                     });
+
+                    _serviceAddress = e.InputAddress;
                 });
             });
         }
@@ -269,19 +270,16 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
             configurator.ServiceInstance(options, instance =>
             {
-                instance.Turnout(x =>
+                instance.ConfigureJobServiceEndpoints(x =>
                 {
                     x.JobSlotWaitTime = TimeSpan.FromSeconds(1);
-                    x.Job<CrunchTheNumbers>(cfg =>
+                });
+
+                instance.ReceiveEndpoint(instance.EndpointNameFormatter.Message<CrunchTheNumbers>(), e =>
+                {
+                    e.Consumer(() => new CrunchTheNumbersConsumer(), cfg =>
                     {
-                        cfg.ConcurrentJobLimit = 3;
-
-                        cfg.JobTimeout = TimeSpan.FromSeconds(90);
-
-                        cfg.SetJobFactory(async context =>
-                        {
-                            await Task.Delay(context.Job.Duration);
-                        });
+                        cfg.Options<JobOptions<CrunchTheNumbers>>(o => o.SetJobTimeout(TimeSpan.FromSeconds(90)).SetConcurrentJobLimit(3));
                     });
                 });
             });

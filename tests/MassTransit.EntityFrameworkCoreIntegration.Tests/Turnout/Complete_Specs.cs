@@ -3,9 +3,10 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
     using System;
     using System.Threading.Tasks;
     using Conductor.Configuration;
-    using Contracts.Turnout;
+    using Contracts.JobService;
     using Definition;
-    using EntityFrameworkCoreIntegration.Turnout;
+    using JobService;
+    using MassTransit.JobService;
     using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
     using Shared;
@@ -17,10 +18,20 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
     }
 
 
+    public class CrunchTheNumbersConsumer :
+        IJobConsumer<CrunchTheNumbers>
+    {
+        public async Task Run(JobContext<CrunchTheNumbers> context)
+        {
+            await Task.Delay(context.Job.Duration);
+        }
+    }
+
+
     [TestFixture(typeof(SqlServerTestDbParameters))]
     [TestFixture(typeof(PostgresTestDbParameters))]
     public class Submitting_a_job_to_turnout<T> :
-        QuartzEntityFrameworkTestFixture<T, TurnoutSagaDbContext>
+        QuartzEntityFrameworkTestFixture<T, JobServiceSagaDbContext>
         where T : ITestDbParameters, new()
     {
         [Test]
@@ -74,7 +85,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
         {
             _jobId = NewId.NextGuid();
 
-            await using var context = new TurnoutSagaDbContextFactory().CreateDbContext(DbContextOptionsBuilder);
+            await using var context = new JobServiceSagaDbContextFactory().CreateDbContext(DbContextOptionsBuilder);
 
             await context.Database.MigrateAsync();
         }
@@ -82,7 +93,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
         [OneTimeTearDown]
         public async Task TearDown()
         {
-            await using var context = new TurnoutSagaDbContextFactory().CreateDbContext(DbContextOptionsBuilder);
+            await using var context = new JobServiceSagaDbContextFactory().CreateDbContext(DbContextOptionsBuilder);
 
             await context.Database.EnsureDeletedAsync();
         }
@@ -97,22 +108,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
 
             configurator.ServiceInstance(options, instance =>
             {
-                instance.Turnout(x =>
+                instance.ConfigureJobServiceEndpoints(x =>
                 {
-                    x.UseEntityFrameworkCoreSagaRepository(() => new TurnoutSagaDbContextFactory().CreateDbContext(DbContextOptionsBuilder),
+                    x.UseEntityFrameworkCoreSagaRepository(() => new JobServiceSagaDbContextFactory().CreateDbContext(DbContextOptionsBuilder),
                         RawSqlLockStatements);
+                });
 
-                    x.Job<CrunchTheNumbers>(cfg =>
-                    {
-                        cfg.ConcurrentJobLimit = 10;
-
-                        cfg.JobTimeout = TimeSpan.FromSeconds(90);
-
-                        cfg.SetJobFactory(async context =>
-                        {
-                            await Task.Delay(context.Job.Duration);
-                        });
-                    });
+                instance.ReceiveEndpoint(instance.EndpointNameFormatter.Message<CrunchTheNumbers>(), e =>
+                {
+                    e.Consumer(() => new CrunchTheNumbersConsumer());
                 });
             });
         }

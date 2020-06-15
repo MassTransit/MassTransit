@@ -3,8 +3,9 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     using System;
     using System.Threading.Tasks;
     using Conductor.Configuration;
-    using Contracts.Turnout;
+    using Contracts.JobService;
     using Definition;
+    using JobService;
     using NUnit.Framework;
     using TestFramework;
 
@@ -81,20 +82,13 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
             configurator.ServiceInstance(options, instance =>
             {
-                instance.Turnout(x =>
+                instance.ConfigureJobServiceEndpoints();
+
+                instance.ReceiveEndpoint(instance.EndpointNameFormatter.Message<GrindTheGears>(), e =>
                 {
-                    x.Job<GrindTheGears>(cfg =>
+                    e.Consumer(() => new GrindTheGearsConsumer(), cfg =>
                     {
-                        cfg.ConcurrentJobLimit = 10;
-
-                        cfg.JobTimeout = TimeSpan.FromSeconds(61);
-
-                        cfg.SetJobFactory(async context =>
-                        {
-                            await Task.Delay(context.Job.Duration);
-
-                            throw new IntentionalTestException("Grinding gears, dropped the transmission");
-                        });
+                        cfg.Options<JobOptions<GrindTheGears>>(jobOptions => jobOptions.SetJobTimeout(TimeSpan.FromSeconds(90)));
                     });
                 });
             });
@@ -105,6 +99,18 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             _submitted = Handled<JobSubmitted>(configurator, context => context.Message.JobId == _jobId);
             _started = Handled<JobStarted>(configurator, context => context.Message.JobId == _jobId);
             _faulted = Handled<JobFaulted>(configurator, context => context.Message.JobId == _jobId);
+        }
+
+
+        public class GrindTheGearsConsumer :
+            IJobConsumer<GrindTheGears>
+        {
+            public async Task Run(JobContext<GrindTheGears> context)
+            {
+                await Task.Delay(context.Job.Duration);
+
+                throw new IntentionalTestException("Grinding gears, dropped the transmission");
+            }
         }
     }
 }
