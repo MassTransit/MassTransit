@@ -8,13 +8,14 @@
 
     // https://github.com/Azure/azure-cosmos-dotnet-v3/issues/551
 
+
     /// <summary>
     /// The default Cosmos JSON.NET serializer.
     /// </summary>
     public class CosmosJsonDotNetSerializer : CosmosSerializer
     {
-        private static readonly Encoding DefaultEncoding = new UTF8Encoding(false, true);
-        private readonly JsonSerializerSettings _serializerSettings;
+        static readonly Encoding DefaultEncoding = new UTF8Encoding(false, true);
+        readonly JsonSerializerSettings _serializerSettings;
 
         /// <summary>
         /// Create a serializer that uses the JSON.net serializer
@@ -39,15 +40,13 @@
             using (stream)
             {
                 if (typeof(Stream).IsAssignableFrom(typeof(T)))
-                {
                     return (T)(object)stream;
-                }
 
-                using (StreamReader sr = new StreamReader(stream))
+                using (var sr = new StreamReader(stream))
                 {
-                    using (JsonTextReader jsonTextReader = new JsonTextReader(sr))
+                    using (var jsonTextReader = new JsonTextReader(sr))
                     {
-                        JsonSerializer jsonSerializer = this.GetSerializer();
+                        var jsonSerializer = GetSerializer();
                         return jsonSerializer.Deserialize<T>(jsonTextReader);
                     }
                 }
@@ -62,13 +61,13 @@
         /// <returns>An open readable stream containing the JSON of the serialized object</returns>
         public override Stream ToStream<T>(T input)
         {
-            MemoryStream streamPayload = new MemoryStream();
-            using (StreamWriter streamWriter = new StreamWriter(streamPayload, encoding: CosmosJsonDotNetSerializer.DefaultEncoding, bufferSize: 1024, leaveOpen: true))
+            var streamPayload = new MemoryStream();
+            using (var streamWriter = new StreamWriter(streamPayload, DefaultEncoding, 1024, true))
             {
                 using (JsonWriter writer = new JsonTextWriter(streamWriter))
                 {
-                    writer.Formatting = Newtonsoft.Json.Formatting.None;
-                    JsonSerializer jsonSerializer = this.GetSerializer();
+                    writer.Formatting = Formatting.None;
+                    var jsonSerializer = GetSerializer();
                     jsonSerializer.Serialize(writer, input);
                     writer.Flush();
                     streamWriter.Flush();
@@ -83,7 +82,7 @@
         /// JsonSerializer has hit a race conditions with custom settings that cause null reference exception.
         /// To avoid the race condition a new JsonSerializer is created for each call
         /// </summary>
-        private JsonSerializer GetSerializer()
+        JsonSerializer GetSerializer()
         {
             return JsonSerializer.Create(_serializerSettings);
         }

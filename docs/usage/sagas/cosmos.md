@@ -30,7 +30,7 @@ container.AddMassTransit(cfg =>
         {
             r.DatabaseId = "production-db"; // required
 
-            // the default collection name, 'sagas', is used if not specified
+            // kebab case formatter is used by default if not specified (OrderState -> order-state)
             r.CollectionId = "sagas";
         });
 });

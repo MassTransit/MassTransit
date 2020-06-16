@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Azure.Cosmos.Saga
 {
     using System;
+    using CollectionIdFormatters;
     using Context;
     using MassTransit.Saga;
     using Microsoft.Azure.Cosmos;
@@ -9,22 +10,25 @@
     public static class CosmosSagaRepository<TSaga>
         where TSaga : class, IVersionedSaga
     {
-        const string DefaultCollectionName = "sagas";
-
         public static ISagaRepository<TSaga> Create(CosmosClient client, string databaseName)
         {
-            return Create(client, databaseName, DefaultCollectionName);
+            return Create(client, databaseName, KebabCaseCollectionIdFormatter.Instance);
         }
 
-        public static ISagaRepository<TSaga> Create(CosmosClient client, string databaseName, string collectionName)
+        public static ISagaRepository<TSaga> Create(CosmosClient client, string databaseName, string collectionId)
         {
-            if (string.IsNullOrWhiteSpace(collectionName))
-                throw new ArgumentNullException(nameof(collectionName));
+            if (string.IsNullOrWhiteSpace(collectionId))
+                throw new ArgumentNullException(nameof(collectionId));
 
-            if (collectionName.Length > 120)
-                throw new ArgumentException("Collection names must be no longer than 120 characters", nameof(collectionName));
+            return Create(client, databaseName, new DefaultCollectionIdFormatter(collectionId));
+        }
 
-            var databaseContext = new CosmosDatabaseContext<TSaga>(client, databaseName, collectionName ?? DefaultCollectionName);
+        public static ISagaRepository<TSaga> Create(CosmosClient client, string databaseName, ICollectionIdFormatter collectionIdFormatter)
+        {
+            if (collectionIdFormatter == null)
+                throw new ArgumentNullException(nameof(collectionIdFormatter));
+
+            var databaseContext = new CosmosDatabaseContext<TSaga>(client.GetContainer(databaseName, collectionIdFormatter.Saga<TSaga>()));
 
             var consumeContextFactory = new SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>();
 

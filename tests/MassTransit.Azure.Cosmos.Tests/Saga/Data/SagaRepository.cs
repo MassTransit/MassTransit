@@ -4,22 +4,28 @@
     using System.Net;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos;
-    using Newtonsoft.Json;
 
 
     public sealed class SagaRepository<TSaga>
-            where TSaga : class, IVersionedSaga
+        where TSaga : class, IVersionedSaga
     {
         static readonly SagaRepository<TSaga> _instance = new SagaRepository<TSaga>();
-
-        SagaRepository()
-        {
-        }
 
         public static readonly SagaRepository<TSaga> Instance = _instance;
 
         public static string DatabaseName = "sagaTest";
         public static string CollectionName = typeof(TSaga).Name;
+        Container _container;
+
+        Database _database;
+
+        SagaRepository()
+        {
+            Client = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
+                new CosmosClientOptions {Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<TSaga>())});
+        }
+
+        public CosmosClient Client { get; }
 
         public async Task Initialize()
         {
@@ -30,10 +36,6 @@
             _database = databaseResponse.Database;
             _container = containerResponse.Container;
         }
-
-        public CosmosClient Client { get; } = new CosmosClient(Configuration.EndpointUri, Configuration.Key, new CosmosClientOptions { Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<TSaga>()) });
-        private Database _database;
-        private Container _container;
 
         public async Task<ItemResponse<TSaga>> InsertSaga(TSaga saga)
         {
@@ -56,7 +58,7 @@
         {
             try
             {
-                var responseDoc = await _container.ReadItemAsync<TSaga>(correlationId.ToString(), new PartitionKey(correlationId.ToString()));
+                ItemResponse<TSaga> responseDoc = await _container.ReadItemAsync<TSaga>(correlationId.ToString(), new PartitionKey(correlationId.ToString()));
 
                 return responseDoc.Resource;
             }
@@ -70,7 +72,7 @@
         {
             try
             {
-                var responseDoc = await _container.ReadItemAsync<TSaga>(correlationId.ToString(), new PartitionKey(correlationId.ToString()));
+                ItemResponse<TSaga> responseDoc = await _container.ReadItemAsync<TSaga>(correlationId.ToString(), new PartitionKey(correlationId.ToString()));
 
                 return responseDoc;
             }

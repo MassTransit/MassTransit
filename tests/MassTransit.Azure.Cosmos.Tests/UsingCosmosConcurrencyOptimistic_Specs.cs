@@ -2,13 +2,12 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Net;
     using System.Threading.Tasks;
-    using Azure.Cosmos;
-    using Azure.Cosmos.Saga;
+    using Cosmos.Saga;
     using GreenPipes;
     using MassTransit.Saga;
     using Microsoft.Azure.Cosmos;
-    using Newtonsoft.Json;
     using NUnit.Framework;
     using TestFramework;
 
@@ -19,116 +18,29 @@
     public class When_using_CosmosConcurrencyOptimistic :
         InMemoryTestFixture
     {
-        ChoirStateMachine _machine;
-        private Database _database;
-        private Container _container;
-        readonly CosmosClient _cosmosClient;
-        readonly string _databaseName;
-        readonly string _collectionName;
-        readonly Lazy<ISagaRepository<ChoirStateOptimistic>> _repository;
-
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            _machine = new ChoirStateMachine();
-
-            configurator.UseRetry(x =>
-            {
-                x.Handle<CosmosConcurrencyException>();
-                x.Interval(5, 300);
-            });
-            configurator.StateMachineSaga(_machine, _repository.Value);
-        }
-
-        public When_using_CosmosConcurrencyOptimistic()
-        {
-            _databaseName = "choirSagas";
-            _collectionName = "sagas";
-            _cosmosClient = new CosmosClient(Configuration.EndpointUri, Configuration.Key, new CosmosClientOptions { Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<ChoirStateOptimistic>()) });
-
-            _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() => CosmosSagaRepository<ChoirStateOptimistic>.Create(_cosmosClient,
-                _databaseName));
-        }
-
-        [OneTimeSetUp]
-        public async Task Setup()
-        {
-            var dbResponse = await _cosmosClient.CreateDatabaseIfNotExistsAsync(_databaseName).ConfigureAwait(false);
-            _database = dbResponse.Database;
-            var cResponse = await _database
-                .CreateContainerIfNotExistsAsync(_collectionName, "/id")
-                .ConfigureAwait(false);
-            _container = cResponse.Container;
-        }
-
-        [OneTimeTearDown]
-        public async Task Teardown()
-        {
-            await _container.DeleteContainerAsync().ConfigureAwait(false);
-            await _database.DeleteAsync().ConfigureAwait(false);
-        }
-
-        async Task<ChoirStateOptimistic> GetSaga(Guid id)
-        {
-            try
-            {
-                var document = await _container.ReadItemAsync<ChoirStateOptimistic>(id.ToString(), new PartitionKey(id.ToString()));
-                return document.Resource;
-            }
-            catch (CosmosException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                return null;
-            }
-        }
-
-        async Task<ChoirStateOptimistic> GetSagaRetry(Guid id, TimeSpan timeout, Func<ChoirStateOptimistic, bool> filterExpression = null)
-        {
-            DateTime giveUpAt = DateTime.Now + timeout;
-
-            while (DateTime.Now < giveUpAt)
-            {
-                try
-                {
-                    var document = await _container.ReadItemAsync<ChoirStateOptimistic>(id.ToString(), new PartitionKey(id.ToString()));
-
-                    var saga = document.Resource;
-
-                    if (filterExpression?.Invoke(saga) == false)
-                        continue;
-                    return saga;
-                }
-                catch (CosmosException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
-                {
-                    await Task.Delay(400).ConfigureAwait(false);
-
-                    continue;
-                }
-            }
-
-            return null;
-        }
-
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Should_capture_all_events_many_sagas()
         {
             var tasks = new List<Task>();
 
-            Guid[] sagaIds = new Guid[20];
-            for (int i = 0; i < 20; i++)
+            var sagaIds = new Guid[20];
+            for (var i = 0; i < 20; i++)
             {
-                Guid correlationId = NewId.NextGuid();
+                var correlationId = NewId.NextGuid();
 
                 await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
 
                 sagaIds[i] = correlationId;
             }
 
-            for (int i = 0; i < 20; i++)
+            for (var i = 0; i < 20; i++)
             {
                 var saga = await GetSagaRetry(sagaIds[i], TestTimeout);
                 Assert.IsNotNull(saga);
             }
 
-            for (int i = 0; i < 20; i++)
+            for (var i = 0; i < 20; i++)
             {
                 tasks.Add(InputQueueSendEndpoint.Send(new Bass
                 {
@@ -159,17 +71,18 @@
 
             foreach (var sid in sagaIds)
             {
-                ChoirStateOptimistic instance = await GetSagaRetry(sid, TestTimeout, x => x.CurrentState == _machine.Harmony.Name);
+                var instance = await GetSagaRetry(sid, TestTimeout, x => x.CurrentState == _machine.Harmony.Name);
 
                 Assert.IsNotNull(instance);
                 Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
             }
         }
 
-        [Test, Explicit]
+        [Test]
+        [Explicit]
         public async Task Should_capture_all_events_single_saga()
         {
-            Guid correlationId = Guid.NewGuid();
+            var correlationId = NewId.NextGuid();
 
             await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
 
@@ -205,9 +118,101 @@
             Assert.IsNotNull(saga);
             Assert.IsTrue(saga.CurrentState == _machine.Harmony.Name);
 
-            ChoirStateOptimistic instance = await GetSaga(correlationId);
+            var instance = await GetSaga(correlationId);
 
             Assert.IsTrue(instance.CurrentState.Equals("Harmony"));
+        }
+
+        ChoirStateMachine _machine;
+        Database _database;
+        Container _container;
+        readonly CosmosClient _cosmosClient;
+        readonly string _databaseName;
+        readonly string _collectionName;
+        readonly Lazy<ISagaRepository<ChoirStateOptimistic>> _repository;
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _machine = new ChoirStateMachine();
+
+            configurator.UseRetry(x =>
+            {
+                x.Handle<CosmosConcurrencyException>();
+                x.Interval(5, 300);
+            });
+            configurator.StateMachineSaga(_machine, _repository.Value);
+        }
+
+        public When_using_CosmosConcurrencyOptimistic()
+        {
+            _databaseName = "choirSagas";
+            _collectionName = "sagas";
+            _cosmosClient = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
+                new CosmosClientOptions
+                {
+                    Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<ChoirStateOptimistic>())
+                });
+
+            _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() =>
+                CosmosSagaRepository<ChoirStateOptimistic>.Create(_cosmosClient, _databaseName, _collectionName));
+        }
+
+        [OneTimeSetUp]
+        public async Task Setup()
+        {
+            var dbResponse = await _cosmosClient.CreateDatabaseIfNotExistsAsync(_databaseName).ConfigureAwait(false);
+            _database = dbResponse.Database;
+            var cResponse = await _database
+                .CreateContainerIfNotExistsAsync(_collectionName, "/id")
+                .ConfigureAwait(false);
+            _container = cResponse.Container;
+        }
+
+        [OneTimeTearDown]
+        public async Task Teardown()
+        {
+            await _container.DeleteContainerAsync().ConfigureAwait(false);
+            await _database.DeleteAsync().ConfigureAwait(false);
+        }
+
+        async Task<ChoirStateOptimistic> GetSaga(Guid id)
+        {
+            try
+            {
+                ItemResponse<ChoirStateOptimistic> document =
+                    await _container.ReadItemAsync<ChoirStateOptimistic>(id.ToString(), new PartitionKey(id.ToString()));
+                return document.Resource;
+            }
+            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+        }
+
+        async Task<ChoirStateOptimistic> GetSagaRetry(Guid id, TimeSpan timeout, Func<ChoirStateOptimistic, bool> filterExpression = null)
+        {
+            var giveUpAt = DateTime.Now + timeout;
+
+            while (DateTime.Now < giveUpAt)
+            {
+                try
+                {
+                    ItemResponse<ChoirStateOptimistic> document =
+                        await _container.ReadItemAsync<ChoirStateOptimistic>(id.ToString(), new PartitionKey(id.ToString()));
+
+                    var saga = document.Resource;
+
+                    if (filterExpression?.Invoke(saga) == false)
+                        continue;
+                    return saga;
+                }
+                catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+                {
+                    await Task.Delay(400).ConfigureAwait(false);
+                }
+            }
+
+            return null;
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

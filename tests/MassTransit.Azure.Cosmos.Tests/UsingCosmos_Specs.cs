@@ -1,8 +1,9 @@
 ﻿namespace MassTransit.Azure.Cosmos.Tests
 {
     using System;
+    using System.Net;
     using System.Threading.Tasks;
-    using Azure.Cosmos.Saga;
+    using Cosmos.Saga;
     using GreenPipes;
     using MassTransit.Saga;
     using Microsoft.Azure.Cosmos;
@@ -15,9 +16,48 @@
     public class When_using_Cosmos :
         InMemoryTestFixture
     {
+        [Test]
+        public async Task Should_have_removed_the_state_machine()
+        {
+            var correlationId = NewId.NextGuid();
+
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
+
+            var saga = await GetSagaRetry(correlationId, TestTimeout);
+            Assert.IsNotNull(saga);
+
+            await InputQueueSendEndpoint.Send(new SodOff {CorrelationId = correlationId});
+
+            saga = await GetNoSagaRetry(correlationId, TestTimeout);
+            Assert.IsNull(saga);
+        }
+
+        [Test]
+        public async Task Should_have_the_state_machine()
+        {
+            var correlationId = NewId.NextGuid();
+
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
+
+            var saga = await GetSagaRetry(correlationId, TestTimeout);
+
+            Assert.IsNotNull(saga);
+
+            await InputQueueSendEndpoint.Send(new GotHitByACar {CorrelationId = correlationId});
+
+            saga = await GetSagaRetry(correlationId, TestTimeout, x => x.CurrentState == _machine.Dead.Name);
+
+            Assert.IsNotNull(saga);
+            Assert.IsTrue(saga.CurrentState == _machine.Dead.Name);
+
+            var instance = await GetSaga(correlationId);
+
+            Assert.IsTrue(instance.Screwed);
+        }
+
         SuperShopper _machine;
-        private Database _database;
-        private Container _container;
+        Database _database;
+        Container _container;
         readonly CosmosClient _cosmosClient;
         readonly string _databaseName;
         readonly string _collectionName;
@@ -38,9 +78,11 @@
         {
             _databaseName = "shoppingChoreSagas";
             _collectionName = "sagas";
-            _cosmosClient = new CosmosClient(Configuration.EndpointUri, Configuration.Key, new CosmosClientOptions { Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<ShoppingChore>()) });
+            _cosmosClient = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
+                new CosmosClientOptions {Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<ShoppingChore>())});
 
-            _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => CosmosSagaRepository<ShoppingChore>.Create(_cosmosClient, _databaseName));
+            _repository = new Lazy<ISagaRepository<ShoppingChore>>(() =>
+                CosmosSagaRepository<ShoppingChore>.Create(_cosmosClient, _databaseName, _collectionName));
         }
 
         [OneTimeSetUp]
@@ -65,10 +107,10 @@
         {
             try
             {
-                var document = await _container.ReadItemAsync<ShoppingChore>(id.ToString(), new PartitionKey(id.ToString()));
+                ItemResponse<ShoppingChore> document = await _container.ReadItemAsync<ShoppingChore>(id.ToString(), new PartitionKey(id.ToString()));
                 return document.Resource;
             }
-            catch (CosmosException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
                 return null;
             }
@@ -76,20 +118,20 @@
 
         async Task<ShoppingChore> GetNoSagaRetry(Guid id, TimeSpan timeout)
         {
-            DateTime giveUpAt = DateTime.Now + timeout;
+            var giveUpAt = DateTime.Now + timeout;
             ShoppingChore saga = null;
 
             while (DateTime.Now < giveUpAt)
             {
                 try
                 {
-                    var document = await _container.ReadItemAsync<ShoppingChore>(id.ToString(), new PartitionKey(id.ToString()));
+                    ItemResponse<ShoppingChore> document = await _container.ReadItemAsync<ShoppingChore>(id.ToString(), new PartitionKey(id.ToString()));
 
                     saga = document.Resource;
 
                     await Task.Delay(10).ConfigureAwait(false);
                 }
-                catch (CosmosException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+                catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
                 {
                     saga = null;
                     break;
@@ -101,65 +143,26 @@
 
         async Task<ShoppingChore> GetSagaRetry(Guid id, TimeSpan timeout, Func<ShoppingChore, bool> filterExpression = null)
         {
-            DateTime giveUpAt = DateTime.Now + timeout;
+            var giveUpAt = DateTime.Now + timeout;
 
             while (DateTime.Now < giveUpAt)
             {
                 try
                 {
-                    var document = await _container.ReadItemAsync<ShoppingChore>(id.ToString(), new PartitionKey(id.ToString()));
+                    ItemResponse<ShoppingChore> document = await _container.ReadItemAsync<ShoppingChore>(id.ToString(), new PartitionKey(id.ToString()));
                     var saga = document.Resource;
 
                     if (filterExpression?.Invoke(saga) == false)
                         continue;
                     return saga;
                 }
-                catch (CosmosException e) when (e.StatusCode == System.Net.HttpStatusCode.NotFound)
+                catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
                 {
                     await Task.Delay(10).ConfigureAwait(false);
                 }
             }
 
             return null;
-        }
-
-        [Test]
-        public async Task Should_have_removed_the_state_machine()
-        {
-            Guid correlationId = Guid.NewGuid();
-
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
-
-            var saga = await GetSagaRetry(correlationId, TestTimeout);
-            Assert.IsNotNull(saga);
-
-            await InputQueueSendEndpoint.Send(new SodOff {CorrelationId = correlationId});
-
-            saga = await GetNoSagaRetry(correlationId, TestTimeout);
-            Assert.IsNull(saga);
-        }
-
-        [Test]
-        public async Task Should_have_the_state_machine()
-        {
-            Guid correlationId = Guid.NewGuid();
-
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
-
-            var saga = await GetSagaRetry(correlationId, TestTimeout);
-
-            Assert.IsNotNull(saga);
-
-            await InputQueueSendEndpoint.Send(new GotHitByACar {CorrelationId = correlationId});
-
-            saga = await GetSagaRetry(correlationId, TestTimeout, x => x.CurrentState == _machine.Dead.Name);
-
-            Assert.IsNotNull(saga);
-            Assert.IsTrue(saga.CurrentState == _machine.Dead.Name);
-
-            ShoppingChore instance = await GetSaga(correlationId);
-
-            Assert.IsTrue(instance.Screwed);
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

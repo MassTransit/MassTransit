@@ -108,7 +108,7 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
         {
             QueryRequestOptions queryOptions = null;
 
-            if(_context.QueryRequestOptions != null)
+            if (_context.QueryRequestOptions != null)
             {
                 queryOptions = new QueryRequestOptions();
                 _context.QueryRequestOptions?.Invoke(queryOptions);
@@ -121,7 +121,7 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
                 .QueryAsync(cancellationToken)
                 .ConfigureAwait(false);
 
-            return new LoadedSagaRepositoryQueryContext<TSaga>(this, instances.ToList());
+            return new LoadedSagaRepositoryQueryContext<TSaga>(this, instances);
         }
 
         public Task<TSaga> Load(Guid correlationId)

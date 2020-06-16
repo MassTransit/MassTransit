@@ -8,7 +8,7 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
     using MassTransit.Saga;
-    using Microsoft.Azure.Cosmos;
+
 
     public class CosmosSagaRepositoryContextFactory<TSaga> :
         ISagaRepositoryContextFactory<TSaga>
@@ -47,7 +47,7 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
 
             var repositoryContext = new CosmosSagaRepositoryContext<TSaga, T>(_context, context, _factory);
 
-            var queryContext = new LoadedSagaRepositoryQueryContext<TSaga, T>(repositoryContext, sagas.ToList());
+            var queryContext = new LoadedSagaRepositoryQueryContext<TSaga, T>(repositoryContext, sagas);
 
             await next.Send(queryContext).ConfigureAwait(false);
         }

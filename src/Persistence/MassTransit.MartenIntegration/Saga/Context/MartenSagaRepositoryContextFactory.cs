@@ -45,7 +45,7 @@ namespace MassTransit.MartenIntegration.Saga.Context
                 .ToListAsync().ConfigureAwait(false);
 
 
-            var queryContext = new LoadedSagaRepositoryQueryContext<TSaga, T>(repositoryContext, instances.ToList());
+            var queryContext = new LoadedSagaRepositoryQueryContext<TSaga, T>(repositoryContext, instances);
 
             await next.Send(queryContext).ConfigureAwait(false);
         }

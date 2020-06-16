@@ -2,7 +2,6 @@ namespace MassTransit.DapperIntegration.Context
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -96,7 +95,7 @@ namespace MassTransit.DapperIntegration.Context
         {
             IEnumerable<TSaga> instances = await _context.QueryAsync(query.FilterExpression, cancellationToken).ConfigureAwait(false);
 
-            return new LoadedSagaRepositoryQueryContext<TSaga>(this, instances.ToList());
+            return new LoadedSagaRepositoryQueryContext<TSaga>(this, instances);
         }
 
         public Task<TSaga> Load(Guid correlationId)

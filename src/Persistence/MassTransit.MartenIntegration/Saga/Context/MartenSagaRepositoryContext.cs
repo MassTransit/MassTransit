@@ -125,7 +125,7 @@ namespace MassTransit.MartenIntegration.Saga.Context
                 .Where(query.FilterExpression)
                 .ToListAsync(cancellationToken).ConfigureAwait(false);
 
-            return new LoadedSagaRepositoryQueryContext<TSaga>(this, instances.ToList());
+            return new LoadedSagaRepositoryQueryContext<TSaga>(this, instances);
         }
     }
 }

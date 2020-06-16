@@ -2,7 +2,6 @@ namespace MassTransit.DapperIntegration.Context
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -49,7 +48,7 @@ namespace MassTransit.DapperIntegration.Context
 
             var repositoryContext = new DapperSagaRepositoryContext<TSaga, T>(databaseContext, context, _factory);
 
-            var queryContext = new LoadedSagaRepositoryQueryContext<TSaga, T>(repositoryContext, instances.ToList());
+            var queryContext = new LoadedSagaRepositoryQueryContext<TSaga, T>(repositoryContext, instances);
 
             await next.Send(queryContext).ConfigureAwait(false);
 

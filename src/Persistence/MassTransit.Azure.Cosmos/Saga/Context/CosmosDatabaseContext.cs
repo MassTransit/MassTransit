@@ -8,47 +8,48 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
 
 
     public class CosmosDatabaseContext<TSaga> :
-        DatabaseContext<TSaga>
+        DatabaseContext<TSaga>,
+        IDisposable
         where TSaga : class, IVersionedSaga
     {
+        readonly CosmosClient _client;
 
-        public CosmosDatabaseContext(
-            CosmosClient client,
-            string databaseId,
-            string containerId,
-            Action<ItemRequestOptions> itemRequestOptions = null,
-            Action<QueryRequestOptions> queryRequestOptions = null,
-            Func<TSaga, PartitionKey> partitionKeyExpression = null)
+        public CosmosDatabaseContext(Container container, Action<ItemRequestOptions> itemRequestOptions = null,
+            Action<QueryRequestOptions> queryRequestOptions = null)
         {
-            Client = client;
-
             ItemRequestOptions = itemRequestOptions;
 
             QueryRequestOptions = queryRequestOptions;
 
-            Container = client.GetContainer(databaseId, containerId);
-
-            PartitionKeyExpression = partitionKeyExpression;
+            Container = container;
         }
 
-        public CosmosClient Client { get; }
+        internal CosmosDatabaseContext(CosmosClient client, Container container, Action<ItemRequestOptions> itemRequestOptions,
+            Action<QueryRequestOptions> queryRequestOptions)
+            : this(container, itemRequestOptions, queryRequestOptions)
+        {
+            _client = client;
+        }
+
         public Container Container { get; }
         public Action<ItemRequestOptions> ItemRequestOptions { get; }
         public Action<QueryRequestOptions> QueryRequestOptions { get; }
-        public Func<TSaga, PartitionKey> PartitionKeyExpression { get; }
 
         public async Task<TSaga> Load(Guid correlationId, CancellationToken cancellationToken)
         {
             try
             {
                 ItemRequestOptions requestOptions = null;
-                if(ItemRequestOptions != null)
+                if (ItemRequestOptions != null)
                 {
                     requestOptions = new ItemRequestOptions();
                     ItemRequestOptions(requestOptions);
                 }
 
-                var response = await Container.ReadItemAsync<TSaga>(correlationId.ToString(), new PartitionKey(correlationId.ToString()), requestOptions, cancellationToken).ConfigureAwait(false);
+                var id = correlationId.ToString();
+                var partitionKey = new PartitionKey(id);
+
+                ItemResponse<TSaga> response = await Container.ReadItemAsync<TSaga>(id, partitionKey, requestOptions, cancellationToken).ConfigureAwait(false);
 
                 return response.Resource;
             }
@@ -62,18 +63,17 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
         {
             try
             {
-                var requestOptions = new ItemRequestOptions
-                {
-                    EnableContentResponseOnWrite = false
-                };
-
+                var requestOptions = new ItemRequestOptions {EnableContentResponseOnWrite = false};
                 ItemRequestOptions?.Invoke(requestOptions);
 
-                await Container.CreateItemAsync(instance, PartitionKeyExpression?.Invoke(instance) ?? null, requestOptions, cancellationToken).ConfigureAwait(false);
+                var partitionKey = new PartitionKey(instance.CorrelationId.ToString());
+
+                await Container.CreateItemAsync(instance, partitionKey, requestOptions, cancellationToken).ConfigureAwait(false);
             }
-            catch (CosmosException)
+            catch (CosmosException exception)
             {
-                throw new CosmosConcurrencyException("Unable to update saga. It may not have been found or may have been updated by another process.");
+                throw new CosmosConcurrencyException(
+                    $"Unable to add saga {instance.CorrelationId}. It may not have been found or may have been updated by another process.", exception);
             }
         }
 
@@ -81,20 +81,19 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
         {
             try
             {
-                var requestOptions = new ItemRequestOptions
-                {
-                    EnableContentResponseOnWrite = true
-                };
-
+                var requestOptions = new ItemRequestOptions {EnableContentResponseOnWrite = true};
                 ItemRequestOptions?.Invoke(requestOptions);
 
-                var response = await Container.CreateItemAsync(instance, PartitionKeyExpression?.Invoke(instance) ?? null, requestOptions, cancellationToken).ConfigureAwait(false);
+                var partitionKey = new PartitionKey(instance.CorrelationId.ToString());
+
+                ItemResponse<TSaga> response = await Container.CreateItemAsync(instance, partitionKey, requestOptions, cancellationToken).ConfigureAwait(false);
 
                 return response.Resource;
             }
-            catch (CosmosException)
+            catch (CosmosException exception)
             {
-                throw new CosmosConcurrencyException("Unable to update saga. It may not have been found or may have been updated by another process.");
+                throw new CosmosConcurrencyException(
+                    $"Unable to insert saga {instance.CorrelationId}. It may not have been found or may have been updated by another process.", exception);
             }
         }
 
@@ -105,16 +104,20 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
                 var requestOptions = new ItemRequestOptions
                 {
                     EnableContentResponseOnWrite = false,
-                    IfMatchEtag = instance.ETag,
+                    IfMatchEtag = instance.ETag
                 };
 
                 ItemRequestOptions?.Invoke(requestOptions);
 
-                await Container.ReplaceItemAsync(instance, instance.CorrelationId.ToString(), PartitionKeyExpression?.Invoke(instance) ?? null, requestOptions, cancellationToken).ConfigureAwait(false);
+                var id = instance.CorrelationId.ToString();
+                var partitionKey = new PartitionKey(id);
+
+                await Container.ReplaceItemAsync(instance, id, partitionKey, requestOptions, cancellationToken).ConfigureAwait(false);
             }
-            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.PreconditionFailed)
+            catch (CosmosException exception) when (exception.StatusCode == HttpStatusCode.PreconditionFailed)
             {
-                throw new CosmosConcurrencyException("Unable to update saga. It may not have been found or may have been updated by another process.");
+                throw new CosmosConcurrencyException(
+                    $"Unable to update saga {instance.CorrelationId}. It may not have been found or may have been updated by another process.", exception);
             }
         }
 
@@ -125,17 +128,26 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
                 var requestOptions = new ItemRequestOptions
                 {
                     EnableContentResponseOnWrite = false,
-                    IfMatchEtag = instance.ETag,
+                    IfMatchEtag = instance.ETag
                 };
 
                 ItemRequestOptions?.Invoke(requestOptions);
 
-                await Container.DeleteItemAsync<TSaga>(instance.CorrelationId.ToString(), PartitionKeyExpression?.Invoke(instance) ?? new PartitionKey(instance.CorrelationId.ToString()), requestOptions, cancellationToken).ConfigureAwait(false);
+                var id = instance.CorrelationId.ToString();
+                var partitionKey = new PartitionKey(id);
+
+                await Container.DeleteItemAsync<TSaga>(id, partitionKey, requestOptions, cancellationToken).ConfigureAwait(false);
             }
-            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.PreconditionFailed)
+            catch (CosmosException exception) when (exception.StatusCode == HttpStatusCode.PreconditionFailed)
             {
-                throw new CosmosConcurrencyException("Unable to update saga. It may not have been found or may have been updated by another process.");
+                throw new CosmosConcurrencyException(
+                    $"Unable to delete saga {instance.CorrelationId}. It may not have been found or may have been updated by another process.", exception);
             }
+        }
+
+        public void Dispose()
+        {
+            _client?.Dispose();
         }
     }
 }

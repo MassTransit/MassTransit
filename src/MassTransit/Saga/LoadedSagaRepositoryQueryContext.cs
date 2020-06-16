@@ -22,19 +22,17 @@ namespace MassTransit.Saga
         where TMessage : class
     {
         readonly IDictionary<Guid, TSaga> _index;
-        readonly IList<TSaga> _instances;
         readonly SagaRepositoryContext<TSaga, TMessage> _repositoryContext;
 
-        public LoadedSagaRepositoryQueryContext(SagaRepositoryContext<TSaga, TMessage> repositoryContext, IList<TSaga> instances)
+        public LoadedSagaRepositoryQueryContext(SagaRepositoryContext<TSaga, TMessage> repositoryContext, IEnumerable<TSaga> instances)
             : base(repositoryContext)
         {
             _repositoryContext = repositoryContext;
-            _instances = instances;
 
             _index = instances.ToDictionary(x => x.CorrelationId);
         }
 
-        public int Count => _instances.Count;
+        public int Count => _index.Count;
 
         public Task<SagaConsumeContext<TSaga, TMessage>> Add(TSaga instance)
         {
@@ -76,7 +74,7 @@ namespace MassTransit.Saga
 
         public IEnumerator<Guid> GetEnumerator()
         {
-            return _instances.Select(x => x.CorrelationId).GetEnumerator();
+            return _index.Keys.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -102,19 +100,17 @@ namespace MassTransit.Saga
         where TSaga : class, ISaga
     {
         readonly IDictionary<Guid, TSaga> _index;
-        readonly IList<TSaga> _instances;
         readonly SagaRepositoryContext<TSaga> _repositoryContext;
 
-        public LoadedSagaRepositoryQueryContext(SagaRepositoryContext<TSaga> repositoryContext, IList<TSaga> instances)
+        public LoadedSagaRepositoryQueryContext(SagaRepositoryContext<TSaga> repositoryContext, IEnumerable<TSaga> instances)
             : base(repositoryContext)
         {
             _repositoryContext = repositoryContext;
-            _instances = instances;
 
             _index = instances.ToDictionary(x => x.CorrelationId);
         }
 
-        public int Count => _instances.Count;
+        public int Count => _index.Count;
 
         public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken = default)
         {
@@ -131,7 +127,7 @@ namespace MassTransit.Saga
 
         public IEnumerator<Guid> GetEnumerator()
         {
-            return _instances.Select(x => x.CorrelationId).GetEnumerator();
+            return _index.Keys.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

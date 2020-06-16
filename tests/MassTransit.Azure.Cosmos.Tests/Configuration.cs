@@ -1,13 +1,12 @@
 namespace MassTransit.Azure.Cosmos.Tests
 {
-    using System;
-    using Azure.Cosmos.Configuration;
+    using Cosmos.Configuration;
 
 
     public static class Configuration
     {
-        public static readonly string EndpointUri = EmulatorConstants.EndpointUri;
+        public const string EndpointUri = EmulatorConstants.EndpointUri;
 
-        public static readonly string Key = EmulatorConstants.Key;
+        public const string Key = EmulatorConstants.Key;
     }
 }

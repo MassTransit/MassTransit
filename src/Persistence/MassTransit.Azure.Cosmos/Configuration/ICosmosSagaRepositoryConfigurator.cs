@@ -1,10 +1,12 @@
-using Microsoft.Azure.Cosmos;
-using System;
-
 namespace MassTransit.Azure.Cosmos
 {
-    public interface ICosmosSagaRepositoryConfigurator<TSaga>
-        where TSaga : class, IVersionedSaga
+    using System;
+    using Microsoft.Azure.Cosmos;
+    using Registration;
+    using Saga.CollectionIdFormatters;
+
+
+    public interface ICosmosSagaRepositoryConfigurator
     {
         string EndpointUri { set; }
         string Key { set; }
@@ -19,6 +21,18 @@ namespace MassTransit.Azure.Cosmos
         void ConfigureEmulator();
 
         /// <summary>
+        /// Use CollectionId formatter
+        /// </summary>
+        /// <param name="collectionIdFormatter"></param>
+        void SetCollectionIdFormatter(ICollectionIdFormatter collectionIdFormatter);
+
+        /// <summary>
+        /// Use CollectionId formatter
+        /// </summary>
+        /// <param name="collectionIdFormatterFactory"></param>
+        void SetCollectionIdFormatter(Func<IConfigurationServiceProvider, ICollectionIdFormatter> collectionIdFormatterFactory);
+
+        /// <summary>
         /// Configure the ItemRequestOptions
         /// </summary>
         void ConfigureItemRequestOptions(Action<ItemRequestOptions> cfg);
@@ -27,10 +41,11 @@ namespace MassTransit.Azure.Cosmos
         /// Configure the QueryRequestOptions
         /// </summary>
         void ConfigureQueryRequestOptions(Action<QueryRequestOptions> cfg);
+    }
 
-        /// <summary>
-        /// Configure the PartitionKey Expression
-        /// </summary>
-        void AddPartitionKeyExpression(Func<TSaga, PartitionKey> expression);
+
+    public interface ICosmosSagaRepositoryConfigurator<TSaga> :
+        ICosmosSagaRepositoryConfigurator
+    {
     }
 }
