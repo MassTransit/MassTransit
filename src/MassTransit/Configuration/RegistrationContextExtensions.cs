@@ -4,6 +4,7 @@ namespace MassTransit
     using Conductor.Configuration;
     using ConsumeConfigurators;
     using Definition;
+    using JobService;
     using Saga;
 
 
@@ -47,6 +48,11 @@ namespace MassTransit
 
             configurator.ServiceInstance(options, instanceConfigurator =>
             {
+                if (options.TryGetOptions(out JobServiceOptions jobServiceOptions))
+                {
+                    instanceConfigurator.ConfigureJobServiceEndpoints(jobServiceOptions);
+                }
+
                 registration.ConfigureEndpoints(instanceConfigurator, instanceConfigurator.EndpointNameFormatter);
             });
         }

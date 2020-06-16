@@ -11,6 +11,7 @@
     using Definition;
     using GreenPipes.Internals.Extensions;
     using Internals.Extensions;
+    using JobService;
     using Saga;
 
 
@@ -65,6 +66,7 @@
 
             return interfaces.Any(t =>
                 Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(IConsumer<>))
+                || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(IJobConsumer<>))
                 || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(IConsumerDefinition<>)));
         }
 
@@ -389,7 +391,8 @@
         {
             Type[] interfaces = typeof(T).GetTypeInfo().GetInterfaces();
 
-            return interfaces.Any(t => Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(IConsumer<>)));
+            return interfaces.Any(t => Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(IConsumer<>))
+                || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(IJobConsumer<>)));
         }
 
         static bool ScanForSagaInterfaces()

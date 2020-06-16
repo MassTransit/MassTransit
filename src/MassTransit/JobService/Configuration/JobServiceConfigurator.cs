@@ -31,8 +31,6 @@ namespace MassTransit.JobService.Configuration
 
             JobService = new JobService(_instanceConfigurator.InstanceAddress);
 
-            ConsumerConvention.Register<JobConsumerConvention>();
-
             _optionsSet = new OptionsSet();
 
             instanceConfigurator.ConnectBusObserver(new JobServiceBusObserver(JobService));
@@ -41,6 +39,7 @@ namespace MassTransit.JobService.Configuration
             _optionsSet.Configure<JobServiceOptions>(options =>
             {
                 options.JobService = JobService;
+
                 options.JobTypeSagaEndpointName = _instanceConfigurator.EndpointNameFormatter.Saga<JobTypeSaga>();
                 options.JobStateSagaEndpointName = _instanceConfigurator.EndpointNameFormatter.Saga<JobSaga>();
                 options.JobAttemptSagaEndpointName = _instanceConfigurator.EndpointNameFormatter.Saga<JobAttemptSaga>();
@@ -48,6 +47,22 @@ namespace MassTransit.JobService.Configuration
         }
 
         IJobService JobService { get; }
+
+        public void Apply(JobServiceOptions jobServiceOptions)
+        {
+            _optionsSet.Configure<JobServiceOptions>(options =>
+            {
+                options.SlotWaitTime = jobServiceOptions.SlotWaitTime;
+                options.StatusCheckInterval = jobServiceOptions.StatusCheckInterval;
+
+                if (!string.IsNullOrWhiteSpace(jobServiceOptions.JobTypeSagaEndpointName))
+                    options.JobTypeSagaEndpointName = jobServiceOptions.JobTypeSagaEndpointName;
+                if (!string.IsNullOrWhiteSpace(jobServiceOptions.JobStateSagaEndpointName))
+                    options.JobStateSagaEndpointName = jobServiceOptions.JobStateSagaEndpointName;
+                if (!string.IsNullOrWhiteSpace(jobServiceOptions.JobAttemptSagaEndpointName))
+                    options.JobAttemptSagaEndpointName = jobServiceOptions.JobAttemptSagaEndpointName;
+            });
+        }
 
         public ISagaRepository<JobTypeSaga> Repository
         {

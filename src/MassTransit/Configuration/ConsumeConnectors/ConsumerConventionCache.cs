@@ -2,6 +2,7 @@ namespace MassTransit.ConsumeConnectors
 {
     using System.Collections.Generic;
     using System.Linq;
+    using JobService.Configuration;
 
 
     public static class ConsumerConventionCache
@@ -10,6 +11,7 @@ namespace MassTransit.ConsumeConnectors
         {
             ConsumerConvention.Register<AsyncConsumerConvention>();
             ConsumerConvention.Register<BatchConsumerConvention>();
+            ConsumerConvention.Register<JobConsumerConvention>();
         }
 
         public static bool TryAdd<T>(T convention)

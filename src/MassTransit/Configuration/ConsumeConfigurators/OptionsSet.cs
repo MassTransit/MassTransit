@@ -36,5 +36,23 @@ namespace MassTransit.ConsumeConfigurators
                 return options;
             }
         }
+
+        public bool TryGetOptions<T>(out T options)
+            where T : IOptions
+        {
+            if (_options.TryGetValue(typeof(T), out var existingOptions))
+            {
+                if (existingOptions is T matchingOptions)
+                {
+                    options = matchingOptions;
+                    return true;
+                }
+
+                throw new ArgumentException($"The options type did not match: {TypeMetadataCache<T>.ShortName}");
+            }
+
+            options = default;
+            return false;
+        }
     }
 }

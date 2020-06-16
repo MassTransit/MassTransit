@@ -1,13 +1,19 @@
 namespace MassTransit.Conductor.Configuration
 {
+    using System;
+    using ConsumeConfigurators;
+    using JobService;
     using MassTransit.Definition;
 
 
     public class ServiceInstanceOptions
     {
+        readonly OptionsSet _optionsSet;
+
         public ServiceInstanceOptions()
         {
             EndpointNameFormatter = DefaultEndpointNameFormatter.Instance;
+            _optionsSet = new OptionsSet();
         }
 
         public bool InstanceEndpointEnabled { get; private set; }
@@ -29,6 +35,17 @@ namespace MassTransit.Conductor.Configuration
         }
 
         /// <summary>
+        /// Enable the job service endpoints, so that <see cref="IJobConsumer{TJob}"/> consumers
+        /// can be configured.
+        /// </summary>
+        public ServiceInstanceOptions EnableJobServiceEndpoints()
+        {
+            _optionsSet.Configure<JobServiceOptions>();
+
+            return this;
+        }
+
+        /// <summary>
         /// Create instance-specific service endpoints, so every service endpoint instance will have
         /// a queue for each instance (10 instances, 2 receive endpoints = 22 queues).
         /// </summary>
@@ -44,6 +61,38 @@ namespace MassTransit.Conductor.Configuration
             EndpointNameFormatter = endpointNameFormatter;
 
             return this;
+        }
+
+        /// <summary>
+        /// Configure options on the service instance, which may be used to configure conductor capabilities
+        /// </summary>
+        /// <param name="configure"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public ServiceInstanceOptions ConfigureOptions<T>(Action<T> configure = null)
+            where T : IOptions, new()
+        {
+            _optionsSet.Configure(configure);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Configure options on the service instance, which may be used to configure conductor capabilities
+        /// </summary>
+        /// <param name="configure"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public T Options<T>(Action<T> configure = null)
+            where T : IOptions, new()
+        {
+            return _optionsSet.Configure(configure);
+        }
+
+        public bool TryGetOptions<T>(out T options)
+            where T : IOptions
+        {
+            return _optionsSet.TryGetOptions(out options);
         }
     }
 }

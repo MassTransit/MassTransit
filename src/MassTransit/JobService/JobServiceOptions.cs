@@ -81,6 +81,21 @@ namespace MassTransit.JobService
         /// </summary>
         public IJobService JobService { get; set; }
 
+        IEnumerable<ValidationResult> ISpecification.Validate()
+        {
+            if (SlotWaitTime < TimeSpan.FromSeconds(1))
+                yield return this.Failure(nameof(SlotWaitTime), "must be >= 1 second");
+            if (StatusCheckInterval < TimeSpan.FromSeconds(30))
+                yield return this.Failure(nameof(StatusCheckInterval), "must be >= 30 seconds");
+
+            if (string.IsNullOrWhiteSpace(JobTypeSagaEndpointName))
+                yield return this.Failure(nameof(JobTypeSagaEndpointName), "must not be null or empty");
+            if (string.IsNullOrWhiteSpace(JobStateSagaEndpointName))
+                yield return this.Failure(nameof(JobStateSagaEndpointName), "must not be null or empty");
+            if (string.IsNullOrWhiteSpace(JobAttemptSagaEndpointName))
+                yield return this.Failure(nameof(JobAttemptSagaEndpointName), "must not be null or empty");
+        }
+
         public JobServiceOptions Set(JobServiceOptions options)
         {
             JobService = options.JobService;
@@ -95,21 +110,6 @@ namespace MassTransit.JobService
             _jobTypeSagaEndpointName = options._jobTypeSagaEndpointName;
 
             return this;
-        }
-
-        IEnumerable<ValidationResult> ISpecification.Validate()
-        {
-            if (SlotWaitTime < TimeSpan.FromSeconds(1))
-                yield return this.Failure(nameof(SlotWaitTime), "must be >= 1 second");
-            if (StatusCheckInterval < TimeSpan.FromSeconds(30))
-                yield return this.Failure(nameof(StatusCheckInterval), "must be >= 30 seconds");
-
-            if (string.IsNullOrWhiteSpace(JobTypeSagaEndpointName))
-                yield return this.Failure(nameof(JobTypeSagaEndpointName), "must not be null or empty");
-            if (string.IsNullOrWhiteSpace(JobStateSagaEndpointName))
-                yield return this.Failure(nameof(JobStateSagaEndpointName), "must not be null or empty");
-            if (string.IsNullOrWhiteSpace(JobAttemptSagaEndpointName))
-                yield return this.Failure(nameof(JobAttemptSagaEndpointName), "must not be null or empty");
         }
     }
 }
