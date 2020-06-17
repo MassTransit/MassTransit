@@ -1,6 +1,7 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit
 {
     using System;
+    using EventHubIntegration;
     using Newtonsoft.Json;
     using Serialization;
 

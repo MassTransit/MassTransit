@@ -96,8 +96,8 @@ namespace MassTransit.KafkaIntegration
             where T : class
         {
             IKafkaProducerRegistrationConfigurator<TKey, T> registration = configurator.AddProducer<TKey, T>(topicName);
-            configurator.Registrar.Register<IKafkaProducer<T>>(provider =>
-                new KeyedKafkaProducer<TKey, T>(provider.GetRequiredService<IKafkaProducer<TKey, T>>(), keyResolver));
+            configurator.Registrar.Register<ITopicProducer<T>>(provider =>
+                new KeyedTopicProducer<TKey, T>(provider.GetRequiredService<ITopicProducer<TKey, T>>(), keyResolver));
 
             return registration;
         }
@@ -117,13 +117,13 @@ namespace MassTransit.KafkaIntegration
             where T : class
         {
             IKafkaProducerRegistrationConfigurator<TKey, T> registration = configurator.AddProducer<TKey, T>(topicName, producerConfig);
-            configurator.Registrar.Register<IKafkaProducer<T>>(provider =>
-                new KeyedKafkaProducer<TKey, T>(provider.GetRequiredService<IKafkaProducer<TKey, T>>(), keyResolver));
+            configurator.Registrar.Register<ITopicProducer<T>>(provider =>
+                new KeyedTopicProducer<TKey, T>(provider.GetRequiredService<ITopicProducer<TKey, T>>(), keyResolver));
 
             return registration;
         }
 
-        static IKafkaProducer<TKey, T> GetProducer<TKey, T>(string topicName, IConfigurationServiceProvider provider)
+        static ITopicProducer<TKey, T> GetProducer<TKey, T>(string topicName, IConfigurationServiceProvider provider)
             where T : class
         {
             var address = new Uri($"topic:{topicName}");
@@ -131,20 +131,20 @@ namespace MassTransit.KafkaIntegration
             return GetProducer<TKey, T>(address, provider);
         }
 
-        static IKafkaProducer<TKey, T> GetProducer<TKey, T>(Uri address, IConfigurationServiceProvider provider)
+        static ITopicProducer<TKey, T> GetProducer<TKey, T>(Uri address, IConfigurationServiceProvider provider)
             where T : class
         {
-            IKafkaProducerProvider producerProvider = provider.GetRequiredService<IKafkaRider>();
+            var rider = provider.GetRequiredService<IKafkaRider>();
 
             var contextProvider = provider.GetService<ScopedConsumeContextProvider>();
             if (contextProvider != null)
             {
                 return contextProvider.HasContext
-                    ? producerProvider.GetProducer<TKey, T>(address, contextProvider.GetContext())
-                    : producerProvider.GetProducer<TKey, T>(address);
+                    ? rider.GetProducer<TKey, T>(address, contextProvider.GetContext())
+                    : rider.GetProducer<TKey, T>(address);
             }
 
-            return producerProvider.GetProducer<TKey, T>(address, provider.GetService<ConsumeContext>());
+            return rider.GetProducer<TKey, T>(address, provider.GetService<ConsumeContext>());
         }
     }
 }

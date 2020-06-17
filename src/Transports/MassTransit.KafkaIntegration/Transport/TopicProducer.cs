@@ -13,15 +13,15 @@ namespace MassTransit.KafkaIntegration.Transport
     using Transports;
 
 
-    public class KafkaProducer<TKey, TValue> :
-        IKafkaProducer<TKey, TValue>
+    public class TopicProducer<TKey, TValue> :
+        ITopicProducer<TKey, TValue>
         where TValue : class
     {
         readonly ConsumeContext _consumeContext;
         readonly IKafkaProducerContext<TKey, TValue> _context;
         readonly KafkaTopicAddress _topicAddress;
 
-        public KafkaProducer(KafkaTopicAddress topicAddress, IKafkaProducerContext<TKey, TValue> context, ConsumeContext consumeContext = null)
+        public TopicProducer(KafkaTopicAddress topicAddress, IKafkaProducerContext<TKey, TValue> context, ConsumeContext consumeContext = null)
         {
             _topicAddress = topicAddress;
             _context = context;

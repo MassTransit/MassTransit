@@ -1,4 +1,4 @@
-namespace MassTransit.KafkaIntegration.Transport
+namespace MassTransit.KafkaIntegration
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -10,7 +10,7 @@ namespace MassTransit.KafkaIntegration.Transport
     /// </summary>
     /// <typeparam name="TKey">The Kafka topic key type</typeparam>
     /// <typeparam name="TValue">The Kafka topic value type</typeparam>
-    public interface IKafkaProducer<TKey, TValue> :
+    public interface ITopicProducer<TKey, TValue> :
         ISendObserverConnector
         where TValue : class
     {
@@ -54,7 +54,7 @@ namespace MassTransit.KafkaIntegration.Transport
     /// Kafka messages are a combination of headers, a Null key type, and a value.
     /// </summary>
     /// <typeparam name="TValue">The Kafka topic value type</typeparam>
-    public interface IKafkaProducer<TValue> :
+    public interface ITopicProducer<TValue> :
         ISendObserverConnector
         where TValue : class
     {

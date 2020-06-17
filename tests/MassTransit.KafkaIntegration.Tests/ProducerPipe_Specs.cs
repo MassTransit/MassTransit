@@ -9,7 +9,6 @@ namespace MassTransit.KafkaIntegration.Tests
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
-    using Transport;
 
 
     public class ProducerPipe_Specs :
@@ -60,7 +59,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var serviceScope = provider.CreateScope();
 
-            var producer = serviceScope.ServiceProvider.GetRequiredService<IKafkaProducer<KafkaMessage>>();
+            var producer = serviceScope.ServiceProvider.GetRequiredService<ITopicProducer<KafkaMessage>>();
 
             try
             {
@@ -185,7 +184,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var serviceScope = provider.CreateScope();
 
-            var producer = serviceScope.ServiceProvider.GetRequiredService<IKafkaProducer<KafkaMessage>>();
+            var producer = serviceScope.ServiceProvider.GetRequiredService<ITopicProducer<KafkaMessage>>();
 
             try
             {
