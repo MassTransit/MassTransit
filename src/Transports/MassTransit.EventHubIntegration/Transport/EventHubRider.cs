@@ -24,9 +24,9 @@ namespace MassTransit.EventHubIntegration
             _producerSharedContext = producerSharedContext;
         }
 
-        public IProducerProvider GetProducerProvider(ConsumeContext consumeContext = default)
+        public IEventHubProducerProvider GetProducerProvider(ConsumeContext consumeContext = default)
         {
-            return new ProducerProvider(_producerSharedContext, consumeContext);
+            return new EventHubProducerProvider(_producerSharedContext, consumeContext);
         }
 
         protected override Task StartRider(CancellationToken cancellationToken)

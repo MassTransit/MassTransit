@@ -1,11 +1,10 @@
-namespace MassTransit
+namespace MassTransit.EventHubIntegration
 {
     using System.Collections.Generic;
-    using EventHubIntegration;
-    using EventHubIntegration.Contexts;
+    using Contexts;
     using GreenPipes;
+    using MassTransit.Registration;
     using Pipeline.Observables;
-    using Registration;
 
 
     public static class EventHubRiderExtensions

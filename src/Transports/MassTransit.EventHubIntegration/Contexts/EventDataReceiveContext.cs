@@ -33,6 +33,7 @@
 
         public DateTimeOffset EnqueuedTime => _eventData.EnqueuedTime;
         public long Offset => _eventData.Offset;
+        public string PartitionId => _eventArgs.Partition.PartitionId;
         public string PartitionKey => _eventData.PartitionKey;
         public IDictionary<string, object> Properties => _eventData.Properties;
         public long SequenceNumber => _eventData.SequenceNumber;

@@ -23,9 +23,9 @@ namespace MassTransit.KafkaIntegration.Transport
             _context.Dispose();
         }
 
-        public IKafkaProducer<TKey, TValue> CreateProducer(ConsumeContext consumeContext = null)
+        public ITopicProducer<TKey, TValue> CreateProducer(ConsumeContext consumeContext = null)
         {
-            return new KafkaProducer<TKey, TValue>(_topicAddress, _context, consumeContext);
+            return new TopicProducer<TKey, TValue>(_topicAddress, _context, consumeContext);
         }
     }
 }

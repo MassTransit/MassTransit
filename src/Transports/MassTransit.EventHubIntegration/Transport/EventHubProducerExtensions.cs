@@ -5,7 +5,7 @@ namespace MassTransit.EventHubIntegration
 
     public static class EventHubProducerExtensions
     {
-        public static IEventHubProducer GetProducer(this IProducerProvider producerProvider, string eventHubName)
+        public static IEventHubProducer GetProducer(this IEventHubProducerProvider producerProvider, string eventHubName)
         {
             if (producerProvider == null)
                 throw new ArgumentNullException(nameof(producerProvider));

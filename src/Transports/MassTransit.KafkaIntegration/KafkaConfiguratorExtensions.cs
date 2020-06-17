@@ -1,7 +1,8 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit
 {
     using System;
     using Confluent.Kafka;
+    using KafkaIntegration;
 
 
     public static class KafkaConfiguratorExtensions

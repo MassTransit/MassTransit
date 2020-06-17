@@ -13,13 +13,13 @@ namespace MassTransit.EventHubIntegration
     using Pipeline.Observables;
 
 
-    public class ProducerProvider :
-        IProducerProvider
+    public class EventHubProducerProvider :
+        IEventHubProducerProvider
     {
         readonly ConsumeContext _consumeContext;
         readonly IEventHubProducerSharedContext _context;
 
-        public ProducerProvider(IEventHubProducerSharedContext context, ConsumeContext consumeContext)
+        public EventHubProducerProvider(IEventHubProducerSharedContext context, ConsumeContext consumeContext)
         {
             _context = context;
             _consumeContext = consumeContext;

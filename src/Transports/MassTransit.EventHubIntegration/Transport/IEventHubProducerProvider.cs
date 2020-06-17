@@ -3,7 +3,7 @@ namespace MassTransit.EventHubIntegration
     using System;
 
 
-    public interface IProducerProvider
+    public interface IEventHubProducerProvider
     {
         IEventHubProducer GetProducer(Uri address);
     }

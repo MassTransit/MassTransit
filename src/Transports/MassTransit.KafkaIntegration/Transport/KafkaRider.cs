@@ -28,7 +28,7 @@ namespace MassTransit.KafkaIntegration.Transport
             _producerFactories = producerFactories.ToDictionary(x => x.TopicAddress);
         }
 
-        public IKafkaProducer<TKey, TValue> GetProducer<TKey, TValue>(Uri address, ConsumeContext consumeContext)
+        public ITopicProducer<TKey, TValue> GetProducer<TKey, TValue>(Uri address, ConsumeContext consumeContext)
             where TValue : class
         {
             if (address == null)

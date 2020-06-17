@@ -6,22 +6,22 @@ namespace MassTransit.KafkaIntegration.Transport
     using Util;
 
 
-    public class KeyedKafkaProducer<TKey, TValue> :
-        IKafkaProducer<TValue>
+    public class KeyedTopicProducer<TKey, TValue> :
+        ITopicProducer<TValue>
         where TValue : class
     {
         readonly KafkaKeyResolver<TKey, TValue> _keyResolver;
-        readonly IKafkaProducer<TKey, TValue> _producer;
+        readonly ITopicProducer<TKey, TValue> _topicProducer;
 
-        public KeyedKafkaProducer(IKafkaProducer<TKey, TValue> producer, KafkaKeyResolver<TKey, TValue> keyResolver)
+        public KeyedTopicProducer(ITopicProducer<TKey, TValue> topicProducer, KafkaKeyResolver<TKey, TValue> keyResolver)
         {
-            _producer = producer;
+            _topicProducer = topicProducer;
             _keyResolver = keyResolver;
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _producer.ConnectSendObserver(observer);
+            return _topicProducer.ConnectSendObserver(observer);
         }
 
         public Task Produce(TValue message, CancellationToken cancellationToken = default)
@@ -31,7 +31,7 @@ namespace MassTransit.KafkaIntegration.Transport
 
         public Task Produce(TValue message, IPipe<KafkaSendContext<TValue>> pipe, CancellationToken cancellationToken = default)
         {
-            return _producer.Produce(default, message, new SetKeyPipe(_keyResolver, pipe), cancellationToken);
+            return _topicProducer.Produce(default, message, new SetKeyPipe(_keyResolver, pipe), cancellationToken);
         }
 
         public Task Produce(object values, CancellationToken cancellationToken = default)
@@ -41,7 +41,7 @@ namespace MassTransit.KafkaIntegration.Transport
 
         public Task Produce(object values, IPipe<KafkaSendContext<TValue>> pipe, CancellationToken cancellationToken = default)
         {
-            return _producer.Produce(default, values, new SetKeyPipe(_keyResolver, pipe), cancellationToken);
+            return _topicProducer.Produce(default, values, new SetKeyPipe(_keyResolver, pipe), cancellationToken);
         }
 
 

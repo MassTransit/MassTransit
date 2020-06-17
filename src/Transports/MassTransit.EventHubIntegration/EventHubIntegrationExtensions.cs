@@ -21,7 +21,7 @@ namespace MassTransit
             configurator.Registrar.Register(GetCurrentProducerProvider);
         }
 
-        static IProducerProvider GetCurrentProducerProvider(IConfigurationServiceProvider provider)
+        static IEventHubProducerProvider GetCurrentProducerProvider(IConfigurationServiceProvider provider)
         {
             var producerProvider = provider.GetRequiredService<IEventHubRider>();
 
