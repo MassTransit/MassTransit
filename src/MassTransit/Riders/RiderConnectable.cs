@@ -1,5 +1,6 @@
 namespace MassTransit.Riders
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -12,7 +13,7 @@ namespace MassTransit.Riders
         IRider
     {
         readonly Connectable<IRider> _connectable;
-        readonly IList<IRider> _riders;
+        readonly List<IRider> _riders;
 
         public RiderConnectable()
         {
@@ -33,7 +34,7 @@ namespace MassTransit.Riders
         public ConnectHandle Connect(IRider rider)
         {
             _riders.Add(rider);
-            return new RiderConnectHandle(_connectable.Connect(rider), rider, _riders);
+            return new RiderConnectHandle(_connectable.Connect(rider), () => _riders.Remove(rider));
         }
 
         public T Get<T>()
@@ -47,14 +48,12 @@ namespace MassTransit.Riders
             ConnectHandle
         {
             readonly ConnectHandle _handle;
-            readonly IRider _rider;
-            readonly IList<IRider> _riders;
+            readonly Action _onDisconnect;
 
-            public RiderConnectHandle(ConnectHandle handle, IRider rider, IList<IRider> riders)
+            public RiderConnectHandle(ConnectHandle handle, Action onDisconnect)
             {
                 _handle = handle;
-                _rider = rider;
-                _riders = riders;
+                _onDisconnect = onDisconnect;
             }
 
             public void Dispose()
@@ -65,7 +64,7 @@ namespace MassTransit.Riders
             public void Disconnect()
             {
                 _handle.Disconnect();
-                _riders.Remove(_rider);
+                _onDisconnect();
             }
         }
     }

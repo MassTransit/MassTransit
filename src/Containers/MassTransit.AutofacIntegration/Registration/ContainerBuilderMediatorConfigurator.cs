@@ -12,7 +12,6 @@ namespace MassTransit.AutofacIntegration.Registration
         RegistrationConfigurator,
         IContainerBuilderMediatorConfigurator
     {
-        readonly ContainerBuilder _builder;
         readonly AutofacContainerRegistrar _registrar;
         Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> _configure;
 
@@ -30,7 +29,7 @@ namespace MassTransit.AutofacIntegration.Registration
                 return new MediatorRegistrationContext(registration);
             }
 
-            _builder = builder;
+            Builder = builder;
             _registrar = registrar;
 
             ScopeName = "message";
@@ -60,7 +59,7 @@ namespace MassTransit.AutofacIntegration.Registration
             set => _registrar.ScopeName = value;
         }
 
-        ContainerBuilder IContainerBuilderMediatorConfigurator.Builder => _builder;
+        public ContainerBuilder Builder { get; }
 
         public Action<ContainerBuilder, ConsumeContext> ConfigureScope
         {

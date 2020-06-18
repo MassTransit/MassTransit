@@ -44,10 +44,6 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Use<BusHealth>()
                 .Singleton();
 
-            _expression.For<IBusInstance>()
-                .Use<DefaultBusInstance>()
-                .Singleton();
-
             expression.For<IConsumerScopeProvider>()
                 .Use(context => CreateConsumerScopeProvider(context))
                 .Singleton();
@@ -65,40 +61,33 @@ namespace MassTransit.StructureMapIntegration.Registration
 
         public void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
         {
-            if (busFactory == null)
-                throw new ArgumentNullException(nameof(busFactory));
-
-            ThrowIfAlreadyConfigured(nameof(AddBus));
-
-            _expression.For<IBusControl>()
-                .Use(context => BusFactory(context, busFactory))
-                .Singleton();
-
-            _expression.For<IBus>()
-                .Use(context => context.GetInstance<IBusControl>())
-                .Singleton();
+            SetBusFactory(new RegistrationBusFactory(busFactory));
         }
 
         public void SetBusFactory<T>(T busFactory)
             where T : IRegistrationBusFactory
         {
-            throw new NotImplementedException();
+            if (busFactory == null)
+                throw new ArgumentNullException(nameof(busFactory));
+
+            ThrowIfAlreadyConfigured(nameof(SetBusFactory));
+
+            _expression.For<IBusInstance>()
+                .Use(context => busFactory.CreateBus(context.GetInstance<IBusRegistrationContext>(), null))
+                .Singleton();
+
+            _expression.For<IBusControl>()
+                .Use(context => context.GetInstance<IBusInstance>().BusControl)
+                .Singleton();
+
+            _expression.For<IBus>()
+                .Use(context => context.GetInstance<IBusInstance>().Bus)
+                .Singleton();
         }
 
         public void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
-            throw new NotImplementedException();
-        }
-
-        IBusControl BusFactory(IContext context, Func<IBusRegistrationContext, IBusControl> busFactory)
-        {
-            var provider = context.GetInstance<IConfigurationServiceProvider>();
-
-            ConfigureLogContext(provider);
-
-            var registrationContext = context.GetInstance<IBusRegistrationContext>();
-
-            return busFactory(registrationContext);
+            throw new NotSupportedException("Riders are only supported with Microsoft DI and Autofac");
         }
 
         static IConsumerScopeProvider CreateConsumerScopeProvider(IContext context)

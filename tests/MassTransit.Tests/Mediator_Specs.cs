@@ -110,6 +110,16 @@ namespace MassTransit.Tests
 
             await mediator.Publish(new PingMessage());
         }
+
+        [Test]
+        public async Task Should_throw_when_publishing_with_mandatory_without_consumer()
+        {
+            var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
+            {
+            });
+
+            Assert.ThrowsAsync<MessageNotConsumedException>(() => mediator.Publish(new PingMessage(), context => context.Mandatory = true));
+        }
     }
 
 

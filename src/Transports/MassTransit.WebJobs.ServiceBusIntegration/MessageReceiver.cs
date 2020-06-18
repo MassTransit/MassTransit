@@ -21,12 +21,8 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
 
         public MessageReceiver(IBusRegistrationContext registration, IAsyncBusHandle busHandle, IBusInstance busInstance)
         {
-            if (busInstance.HostConfiguration == null)
-                throw new ArgumentNullException(nameof(busInstance), "The bus instance was not created properly, the hostConfiguration was not present.");
-
-            _hostConfiguration = busInstance.HostConfiguration as IServiceBusHostConfiguration;
-            if (_hostConfiguration == null)
-                throw new ArgumentException("The hostConfiguration was not configured for Azure Service Bus", nameof(busInstance));
+            _hostConfiguration = busInstance.HostConfiguration as IServiceBusHostConfiguration
+                ?? throw new ConfigurationException("The hostConfiguration was not properly configured for Azure Service Bus");
 
             _registration = registration;
             _busHandle = busHandle;

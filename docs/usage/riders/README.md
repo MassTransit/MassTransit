@@ -8,7 +8,7 @@ Meanwhile, event streaming has become mainstream, and both Kafka and Event Hub a
 
 To interact with the bus, riders should use either _ConsumeContext_, _ISendEndpointProvider_, or _IPublishEndpoint_ – the implementations of these interfaces will transfer contextual headers to the outgoing messages and will be injected into the consumer and its dependencies by the container.
 
-To produce messages, the rider-specific producer interfaces should be used (if available). For example, the Kafka rider includes the _IKafkaProducer_ interface.
+To produce messages, the rider-specific producer interfaces should be used (if available). For example, the Kafka rider includes the _ITopicProducer_ interface.
 
 ## Kafka
 

@@ -36,8 +36,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             Container.RegisterSingleton<IBusHealth>(() => Container.GetInstance<BusHealth>());
 
-            Container.RegisterSingleton<IBusInstance, DefaultBusInstance>();
-
             Container.RegisterSingleton(() => CreateRegistrationContext());
 
             Container.RegisterSingleton(() => ClientFactoryProvider(Container.GetInstance<IConfigurationServiceProvider>(), Container.GetInstance<IBus>()));
@@ -55,35 +53,25 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         public void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
         {
-            if (busFactory == null)
-                throw new ArgumentNullException(nameof(busFactory));
-
-            ThrowIfAlreadyConfigured(nameof(AddBus));
-
-            IBusControl BusFactory()
-            {
-                var provider = Container.GetInstance<IConfigurationServiceProvider>();
-
-                ConfigureLogContext(provider);
-
-                var context = Container.GetInstance<IBusRegistrationContext>();
-
-                return busFactory(context);
-            }
-
-            Container.RegisterSingleton(BusFactory);
-            Container.RegisterSingleton<IBus>(() => Container.GetInstance<IBusControl>());
+            SetBusFactory(new RegistrationBusFactory(busFactory));
         }
 
         public void SetBusFactory<T>(T busFactory)
             where T : IRegistrationBusFactory
         {
-            throw new NotImplementedException();
+            if (busFactory == null)
+                throw new ArgumentNullException(nameof(busFactory));
+
+            ThrowIfAlreadyConfigured(nameof(SetBusFactory));
+
+            Container.RegisterSingleton(() => busFactory.CreateBus(Container.GetInstance<IBusRegistrationContext>()));
+            Container.RegisterSingleton(() => Container.GetInstance<IBusInstance>().BusControl);
+            Container.RegisterSingleton(() => Container.GetInstance<IBusInstance>().Bus);
         }
 
         public void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("Riders are only supported with Microsoft DI and Autofac");
         }
 
         ISendEndpointProvider GetSendEndpointProvider()

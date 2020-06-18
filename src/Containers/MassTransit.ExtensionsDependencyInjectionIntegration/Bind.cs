@@ -1,4 +1,4 @@
-namespace MassTransit.Registration
+namespace MassTransit.ExtensionsDependencyInjectionIntegration
 {
     /// <summary>
     /// Bind is used to store types bound to their owner, such as an IBusControl to an IMyBus.

@@ -62,9 +62,6 @@ namespace MassTransit.WindsorIntegration.Registration
                 Component.For<BusHealth>()
                     .Forward<IBusHealth>()
                     .UsingFactoryMethod(() => new BusHealth(nameof(IBus)))
-                    .LifestyleSingleton(),
-                Component.For<IBusInstance>()
-                    .ImplementedBy<DefaultBusInstance>()
                     .LifestyleSingleton()
             );
         }
@@ -73,38 +70,33 @@ namespace MassTransit.WindsorIntegration.Registration
 
         public void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
         {
-            if (busFactory == null)
-                throw new ArgumentNullException(nameof(busFactory));
-
-            ThrowIfAlreadyConfigured(nameof(AddBus));
-
-            Container.Register(
-                Component.For<IBusControl>()
-                    .Forward<IBus>()
-                    .UsingFactoryMethod(kernel => BusFactory(kernel, busFactory))
-                    .LifestyleSingleton());
+            SetBusFactory(new RegistrationBusFactory(busFactory));
         }
 
         public void SetBusFactory<T>(T busFactory)
             where T : IRegistrationBusFactory
         {
-            throw new NotImplementedException();
+            if (busFactory == null)
+                throw new ArgumentNullException(nameof(busFactory));
+
+            ThrowIfAlreadyConfigured(nameof(SetBusFactory));
+
+            Container.Register(
+                Component.For<IBusInstance>()
+                    .UsingFactoryMethod(kernel => busFactory.CreateBus(kernel.Resolve<IBusRegistrationContext>()))
+                    .LifestyleSingleton(),
+                Component.For<IBusControl>()
+                    .UsingFactoryMethod(kernel => kernel.Resolve<IBusInstance>().BusControl)
+                    .LifestyleSingleton(),
+                Component.For<IBus>()
+                    .UsingFactoryMethod(kernel => kernel.Resolve<IBusInstance>().Bus)
+                    .LifestyleSingleton()
+            );
         }
 
         public void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
-            throw new NotImplementedException();
-        }
-
-        IBusControl BusFactory(IKernel kernel, Func<IBusRegistrationContext, IBusControl> busFactory)
-        {
-            var provider = kernel.Resolve<IConfigurationServiceProvider>();
-
-            ConfigureLogContext(provider);
-
-            var context = kernel.Resolve<IBusRegistrationContext>();
-
-            return busFactory(context);
+            throw new NotSupportedException("Riders are only supported with Microsoft DI and Autofac");
         }
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IKernel context)

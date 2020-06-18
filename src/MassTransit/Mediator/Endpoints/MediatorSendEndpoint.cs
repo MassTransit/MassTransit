@@ -193,7 +193,7 @@ namespace MassTransit.Mediator.Endpoints
             await pipe.Send(context).ConfigureAwait(false);
 
             var receiveContext = new MediatorReceiveContext<T>(context, this, this, _publishTopology, _receiveObservers,
-                cancellationToken) {IsDelivered = context.IsPublish};
+                cancellationToken) {IsDelivered = context.IsPublish && !context.Mandatory};
 
             try
             {

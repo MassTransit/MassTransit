@@ -38,7 +38,7 @@ namespace KafkaProducer
             await busControl.StartAsync(new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
             try
             {
-                var producer = provider.GetRequiredService<IKafkaProducer<KafkaMessage>>();
+                var producer = provider.GetRequiredService<ITopicProducer<KafkaMessage>>();
                 do
                 {
                     string value = await Task.Run(() =>
