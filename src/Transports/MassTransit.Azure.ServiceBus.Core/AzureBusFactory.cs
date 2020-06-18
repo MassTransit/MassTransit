@@ -40,7 +40,7 @@
 
             static Cached()
             {
-                _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(new ServiceBusMessageNameFormatter(false));
+                _entityNameFormatter = new MessageNameFormatterEntityNameFormatter(new ServiceBusMessageNameFormatter());
             }
         }
     }

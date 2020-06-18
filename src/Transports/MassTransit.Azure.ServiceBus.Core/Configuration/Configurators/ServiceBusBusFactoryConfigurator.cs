@@ -94,6 +94,11 @@
             _hostConfiguration.SetNamespaceSeparatorToTilde();
         }
 
+        public void SetNamespaceSeparatorToUnderscore()
+        {
+            _hostConfiguration.SetNamespaceSeparatorToUnderscore();
+        }
+
         public void SetNamespaceSeparatorTo(string separator)
         {
             _hostConfiguration.SetNamespaceSeparatorTo(separator);

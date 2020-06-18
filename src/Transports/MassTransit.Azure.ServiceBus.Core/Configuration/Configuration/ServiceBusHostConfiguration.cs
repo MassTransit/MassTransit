@@ -57,7 +57,7 @@
                 _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
 
                 if (_hostSettings.TokenProvider is ManagedIdentityTokenProvider)
-                    SetNamespaceSeparatorToTilde();
+                    SetNamespaceSeparatorToUnderscore();
             }
         }
 
@@ -84,13 +84,19 @@
 
         public void SetNamespaceSeparatorToTilde()
         {
-            _messageNameFormatter = new ServiceBusMessageNameFormatter(true);
+            _messageNameFormatter = new ServiceBusMessageNameFormatter("~");
+            _topologyConfiguration.Message.SetEntityNameFormatter(new MessageNameFormatterEntityNameFormatter(_messageNameFormatter));
+        }
+
+        public void SetNamespaceSeparatorToUnderscore()
+        {
+            _messageNameFormatter = new ServiceBusMessageNameFormatter("_");
             _topologyConfiguration.Message.SetEntityNameFormatter(new MessageNameFormatterEntityNameFormatter(_messageNameFormatter));
         }
 
         public void SetNamespaceSeparatorTo(string separator)
         {
-            _messageNameFormatter = new DefaultMessageNameFormatter("---", "--", separator ?? throw new ArgumentNullException(nameof(separator)), "-");
+            _messageNameFormatter = new ServiceBusMessageNameFormatter(separator);
             _topologyConfiguration.Message.SetEntityNameFormatter(new MessageNameFormatterEntityNameFormatter(_messageNameFormatter));
         }
 

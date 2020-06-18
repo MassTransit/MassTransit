@@ -48,6 +48,8 @@
 
         void SetNamespaceSeparatorToTilde();
 
+        void SetNamespaceSeparatorToUnderscore();
+
         void SetNamespaceSeparatorTo(string separator);
     }
 }
