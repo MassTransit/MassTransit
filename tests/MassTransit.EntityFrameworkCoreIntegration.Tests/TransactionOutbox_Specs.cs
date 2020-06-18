@@ -7,7 +7,6 @@
     using MassTransit.Tests.Saga.Messages;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
-    using Microsoft.Extensions.Logging.Abstractions;
     using NUnit.Framework;
     using TestFramework;
     using Transactions;
@@ -26,7 +25,7 @@
         {
             var message = new InitiateSimpleSaga();
             var product = new Product {Name = "Should_not_publish_properly"};
-            var transactionOutbox = new TransactionOutbox(Bus, Bus, new NullLoggerFactory());
+            var transactionOutbox = new TransactionalBus(Bus);
 
             using (var dbContext = GetDbContext())
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -50,7 +49,7 @@
         {
             var message = new InitiateSimpleSaga();
             var product = new Product {Name = "Should_publish_after_db_create"};
-            var transactionOutbox = new TransactionOutbox(Bus, Bus, new NullLoggerFactory());
+            var transactionOutbox = new TransactionalBus(Bus);
 
             using (var dbContext = GetDbContext())
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))

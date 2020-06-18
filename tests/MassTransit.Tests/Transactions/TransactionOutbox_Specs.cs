@@ -5,7 +5,6 @@
     using System.Transactions;
     using GreenPipes.Internals.Extensions;
     using MassTransit.Transactions;
-    using Microsoft.Extensions.Logging.Abstractions;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -19,7 +18,7 @@
         public async Task Should_publish_properly()
         {
             var message = new PingMessage();
-            var transactionOutbox = new TransactionOutbox(Bus, Bus, new NullLoggerFactory());
+            var transactionOutbox = new TransactionalBus(Bus);
 
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -52,7 +51,7 @@
         public async Task Should_send_properly()
         {
             var message = new PingMessage();
-            var transactionOutbox = new TransactionOutbox(Bus, Bus, new NullLoggerFactory());
+            var transactionOutbox = new TransactionalBus(Bus);
 
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -84,7 +83,7 @@
         public async Task Should_not_publish_properly()
         {
             var message = new PingMessage();
-            var transactionOutbox = new TransactionOutbox(Bus, Bus, new NullLoggerFactory());
+            var transactionOutbox = new TransactionalBus(Bus);
 
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -111,7 +110,7 @@
         public async Task Should_not_send_properly()
         {
             var message = new PingMessage();
-            var transactionOutbox = new TransactionOutbox(Bus, Bus, new NullLoggerFactory());
+            var transactionOutbox = new TransactionalBus(Bus);
 
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {

@@ -8,6 +8,7 @@ namespace MassTransit.WindsorIntegration.Registration
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
+    using Transactions;
     using Transports;
 
 
@@ -102,13 +103,13 @@ namespace MassTransit.WindsorIntegration.Registration
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IKernel context)
         {
             return (ISendEndpointProvider)context.GetConsumeContext()
-                ?? new ScopedSendEndpointProvider<IKernel>(context.Resolve<IBus>(), context);
+                ?? new ScopedSendEndpointProvider<IKernel>(context.TryResolve<ITransactionalBus>() ?? context.Resolve<IBus>(), context);
         }
 
         static IPublishEndpoint GetCurrentPublishEndpoint(IKernel context)
         {
             return (IPublishEndpoint)context.GetConsumeContext()
-                ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IKernel>(context.Resolve<IBus>(), context));
+                ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IKernel>(context.TryResolve<ITransactionalBus>() ?? context.Resolve<IBus>(), context));
         }
     }
 }
