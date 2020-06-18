@@ -2,11 +2,10 @@
 {
     using Autofac;
     using AutofacIntegration;
-    using Microsoft.Extensions.Logging;
     using Transactions;
 
 
-    public static class AutofacTransactionOutboxExtensions
+    public static class AutofacTransactionExtensions
     {
         /// <summary>
         /// Decorates the IPublishEndpoint and ISendEndpointProvider with a Transaction Outbox. Messages will not be
@@ -15,14 +14,9 @@
         /// </summary>
         public static void AddTransactionOutbox(this IContainerBuilderBusConfigurator builder)
         {
-            builder.Builder
-                .Register(c =>
-                {
-                    var busControl = c.Resolve<IBusControl>();
-                    return new TransactionOutbox(busControl, busControl, c.ResolveOptional<ILoggerFactory>());
-                })
+            builder.Builder.Register(c => new TransactionalBus(c.Resolve<IBus>()))
                 .SingleInstance()
-                .AsImplementedInterfaces();
+                .As<TransactionalBus>();
         }
     }
 }

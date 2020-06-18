@@ -6,6 +6,7 @@ namespace MassTransit.StructureMapIntegration.Registration
     using ScopeProviders;
     using Scoping;
     using StructureMap;
+    using Transactions;
     using Transports;
 
 
@@ -98,13 +99,15 @@ namespace MassTransit.StructureMapIntegration.Registration
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IContext context)
         {
             return (ISendEndpointProvider)context.TryGetInstance<ConsumeContext>()
-                ?? new ScopedSendEndpointProvider<IContainer>(context.GetInstance<IBus>(), context.GetInstance<IContainer>());
+                ?? new ScopedSendEndpointProvider<IContainer>(context.TryGetInstance<TransactionalBus>() ?? context.GetInstance<IBus>(),
+                    context.GetInstance<IContainer>());
         }
 
         static IPublishEndpoint GetCurrentPublishEndpoint(IContext context)
         {
             return (IPublishEndpoint)context.TryGetInstance<ConsumeContext>()
-                ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IContainer>(context.GetInstance<IBus>(), context.GetInstance<IContainer>()));
+                ?? new PublishEndpoint(new ScopedPublishEndpointProvider<IContainer>(context.TryGetInstance<TransactionalBus>() ?? context.GetInstance<IBus>(),
+                    context.GetInstance<IContainer>()));
         }
 
         IBusRegistrationContext CreateRegistrationContext(IContext context)

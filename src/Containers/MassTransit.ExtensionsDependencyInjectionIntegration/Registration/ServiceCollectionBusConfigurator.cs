@@ -10,6 +10,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
+    using Transactions;
     using Transports;
 
 
@@ -29,8 +30,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
                 return new BusRegistrationContext(provider, busHealth, Endpoints, Consumers, Sagas, ExecuteActivities, Activities);
             }
 
-            collection.AddSingleton(provider => ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>(),
-                provider.GetRequiredService<IBus>()));
+            collection.AddSingleton(provider =>
+                ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>(), provider.GetRequiredService<IBus>()));
 
             collection.AddSingleton(provider => new BusHealth(nameof(IBus)));
             collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<BusHealth>());
@@ -102,14 +103,22 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         static ISendEndpointProvider GetCurrentSendEndpointProvider(IServiceProvider provider)
         {
-            return (ISendEndpointProvider)provider.GetService<ScopedConsumeContextProvider>()?.GetContext()
-                ?? new ScopedSendEndpointProvider<IServiceProvider>(provider.GetRequiredService<IBus>(), provider);
+            var consumeContextProvider = provider.GetRequiredService<ScopedConsumeContextProvider>();
+            if (consumeContextProvider.HasContext)
+                return consumeContextProvider.GetContext();
+
+            var bus = provider.GetService<TransactionalBus>() ?? (ISendEndpointProvider)provider.GetRequiredService<IBus>();
+            return new ScopedSendEndpointProvider<IServiceProvider>(bus, provider);
         }
 
         static IPublishEndpoint GetCurrentPublishEndpoint(IServiceProvider provider)
         {
-            return (IPublishEndpoint)provider.GetService<ScopedConsumeContextProvider>()?.GetContext() ?? new PublishEndpoint(
-                new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<IBus>(), provider));
+            var consumeContextProvider = provider.GetRequiredService<ScopedConsumeContextProvider>();
+            if (consumeContextProvider.HasContext)
+                return consumeContextProvider.GetContext();
+
+            var bus = provider.GetService<TransactionalBus>() ?? provider.GetRequiredService<IBus>();
+            return new PublishEndpoint(new ScopedPublishEndpointProvider<IServiceProvider>(bus, provider));
         }
     }
 }

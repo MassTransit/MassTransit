@@ -4,24 +4,23 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using System.Transactions;
-    using Microsoft.Extensions.Logging;
+    using Context;
     using Util;
 
 
-    public class TransactionOutboxEnlistment : IEnlistmentNotification
+    public class TransactionalBusEnlistment :
+        IEnlistmentNotification
     {
-        readonly ILogger<TransactionOutboxEnlistment> _logger;
         readonly List<Func<Task>> _pendingActions;
 
-        public TransactionOutboxEnlistment(ILoggerFactory loggerFactory)
+        public TransactionalBusEnlistment()
         {
-            _logger = loggerFactory?.CreateLogger<TransactionOutboxEnlistment>();
             _pendingActions = new List<Func<Task>>();
         }
 
         public void Prepare(PreparingEnlistment preparingEnlistment)
         {
-            _logger?.LogDebug("Prepare notification received");
+            LogContext.Debug?.Log("Prepare notification received");
 
             try
             {
@@ -32,7 +31,7 @@
             }
             catch (Exception e)
             {
-                _logger?.LogError(e, "MassTransit: Error executing pending actions");
+                LogContext.Error?.Log(e, "MassTransit: Error executing pending actions");
 
                 // We can't stop any messages that might have been already published, but we can stop the rest from publishing.
                 // With a message broker, you should support idempotence, and so retry is a valid mechanism to handle this scenario
@@ -43,7 +42,7 @@
 
         public void Commit(Enlistment enlistment)
         {
-            _logger?.LogDebug("Commit notification received");
+            LogContext.Debug?.Log("Commit notification received");
 
             DiscardPendingActions();
 
@@ -52,7 +51,7 @@
 
         public void Rollback(Enlistment enlistment)
         {
-            _logger?.LogDebug("Rollback notification received");
+            LogContext.Debug?.Log("Rollback notification received");
 
             DiscardPendingActions();
 
@@ -61,7 +60,7 @@
 
         public void InDoubt(Enlistment enlistment)
         {
-            _logger?.LogDebug("In doubt notification received");
+            LogContext.Debug?.Log("In doubt notification received");
 
             DiscardPendingActions();
 

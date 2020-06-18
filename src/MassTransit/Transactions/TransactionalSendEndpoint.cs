@@ -6,15 +6,15 @@
     using GreenPipes;
 
 
-    public class TransactionOutboxSendEndpoint :
+    public class TransactionalSendEndpoint :
         ISendEndpoint
     {
         readonly ISendEndpoint _sendEndpoint;
-        readonly TransactionOutbox _transactionOutbox;
+        readonly TransactionalBus _transactionalBus;
 
-        public TransactionOutboxSendEndpoint(TransactionOutbox transactionOutbox, ISendEndpoint sendEndpoint)
+        public TransactionalSendEndpoint(TransactionalBus transactionalBus, ISendEndpoint sendEndpoint)
         {
-            _transactionOutbox = transactionOutbox;
+            _transactionalBus = transactionalBus;
             _sendEndpoint = sendEndpoint;
         }
 
@@ -26,57 +26,57 @@
         public Task Send<T>(T message, CancellationToken cancellationToken = default)
             where T : class
         {
-            return _transactionOutbox.Outbox(() => _sendEndpoint.Send(message, cancellationToken));
+            return _transactionalBus.Outbox(() => _sendEndpoint.Send(message, cancellationToken));
         }
 
         public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            return _transactionOutbox.Outbox(() => _sendEndpoint.Send(message, pipe, cancellationToken));
+            return _transactionalBus.Outbox(() => _sendEndpoint.Send(message, pipe, cancellationToken));
         }
 
         public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            return _transactionOutbox.Outbox(() => _sendEndpoint.Send(message, pipe, cancellationToken));
+            return _transactionalBus.Outbox(() => _sendEndpoint.Send(message, pipe, cancellationToken));
         }
 
         public Task Send(object message, CancellationToken cancellationToken = default)
         {
-            return _transactionOutbox.Outbox(() => _sendEndpoint.Send(message, cancellationToken));
+            return _transactionalBus.Outbox(() => _sendEndpoint.Send(message, cancellationToken));
         }
 
         public Task Send(object message, Type messageType, CancellationToken cancellationToken = default)
         {
-            return _transactionOutbox.Outbox(() => _sendEndpoint.Send(message, messageType, cancellationToken));
+            return _transactionalBus.Outbox(() => _sendEndpoint.Send(message, messageType, cancellationToken));
         }
 
         public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
         {
-            return _transactionOutbox.Outbox(() => _sendEndpoint.Send(message, pipe, cancellationToken));
+            return _transactionalBus.Outbox(() => _sendEndpoint.Send(message, pipe, cancellationToken));
         }
 
         public Task Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
         {
-            return _transactionOutbox.Outbox(() => _sendEndpoint.Send(message, messageType, pipe, cancellationToken));
+            return _transactionalBus.Outbox(() => _sendEndpoint.Send(message, messageType, pipe, cancellationToken));
         }
 
         public Task Send<T>(object values, CancellationToken cancellationToken = default)
             where T : class
         {
-            return _transactionOutbox.Outbox(() => _sendEndpoint.Send<T>(values, cancellationToken));
+            return _transactionalBus.Outbox(() => _sendEndpoint.Send<T>(values, cancellationToken));
         }
 
         public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            return _transactionOutbox.Outbox(() => _sendEndpoint.Send(values, pipe, cancellationToken));
+            return _transactionalBus.Outbox(() => _sendEndpoint.Send(values, pipe, cancellationToken));
         }
 
         public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            return _transactionOutbox.Outbox(() => _sendEndpoint.Send<T>(values, pipe, cancellationToken));
+            return _transactionalBus.Outbox(() => _sendEndpoint.Send<T>(values, pipe, cancellationToken));
         }
     }
 }

@@ -7,6 +7,7 @@ namespace MassTransit.AutofacIntegration.Registration
     using Monitoring.Health;
     using ScopeProviders;
     using Scoping;
+    using Transactions;
     using Transports;
 
 
@@ -142,7 +143,8 @@ namespace MassTransit.AutofacIntegration.Registration
             if (context.TryResolve(out ConsumeContext consumeContext))
                 return consumeContext;
 
-            return new ScopedSendEndpointProvider<ILifetimeScope>(context.Resolve<IBus>(), context.Resolve<ILifetimeScope>());
+            var bus = context.ResolveOptional<TransactionalBus>() ?? context.Resolve<IBus>();
+            return new ScopedSendEndpointProvider<ILifetimeScope>(bus, context.Resolve<ILifetimeScope>());
         }
 
         static IPublishEndpoint GetCurrentPublishEndpoint(IComponentContext context)
@@ -150,7 +152,8 @@ namespace MassTransit.AutofacIntegration.Registration
             if (context.TryResolve(out ConsumeContext consumeContext))
                 return consumeContext;
 
-            return new PublishEndpoint(new ScopedPublishEndpointProvider<ILifetimeScope>(context.Resolve<IBus>(), context.Resolve<ILifetimeScope>()));
+            var bus = context.ResolveOptional<TransactionalBus>() ?? context.Resolve<IBus>();
+            return new PublishEndpoint(new ScopedPublishEndpointProvider<ILifetimeScope>(bus, context.Resolve<ILifetimeScope>()));
         }
     }
 }
