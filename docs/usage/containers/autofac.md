@@ -45,7 +45,7 @@ namespace Example
                 x.AddConsumers(typeof(ConsumerOne), typeof(ConsumerTwo));
 
                 // add the bus to the container
-                x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
+                x.UsingRabbitMq(cfg =>
                 {
                     cfg.Host("localhost");
 

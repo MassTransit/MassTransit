@@ -1,180 +1,115 @@
 # RabbitMQ
 
-This is the recommended approach for configuring MassTransit for use with RabbitMQ.
+With tens of thousands of users, RabbitMQ is one of the most popular open source message brokers. RabbitMQ is lightweight and easy to deploy on premises and in the cloud. RabbitMQ can be deployed in distributed and federated configurations to meet high-scale, high-availability requirements.
 
-The code below configures one bus instance and one host with the specified base address. This bus instance can be used to send and publish messages.
+MassTransit fully supports RabbitMQ, including many of the advanced features and capabilities. 
 
-```csharp
-var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-{
-    cfg.Host(new Uri("rabbitmq://a-machine-name/a-virtual-host"), host =>
-    {
-        host.Username("username");
-        host.Password("password");
-    });
-});
-await busControl.StartAsync();
-```
-
-In order to consume messages, you must configure one or more receive endpoints. To do this, include the endpoint configuration inside the configuration delegate:
-
-```csharp
-namespace MyApplication
-{
-    public class MyMessage
-    {
-    }
-
-    public class MyMessageConsumer :
-        IConsumer<MyMessage>
-    {
-        public async Task Consume(ConsumeContext<MyMessage> context)
-        {            
-        }
-    }
-
-    // configured in Program.cs, or wherever
-    cfg.Host("localhost", "virtual-host");
-
-    cfg.ReceiveEndpoint("queue-name", ec => 
-    {
-        // for example, MyMessageConsumer consumes MyMessage
-        ec.Consumer<MyMessageConsumer>(); 
-    });
-}
-```
-
-RabbitMQ transport will then set up necessary infrastructure elements, such as:
- * Endpoint queue `queue-name`
- * Endpoint exchange `queue-name`
- * Message type exchange `MyApplication.MyMessage`
- * Binding between `MyApplication.MyMessage`and `queue-name` exchanges
- * Binding between `queue-name` exchange and `queue-name` queue
-
-This will result in all messages that will be published to the `MyMessage` exchange to be also delivered to the `queue-name` queue.
-
-When a message is published, the following happens under the hood:
-
-- Application calls _Publish_ passing _MyMessage_.
-- MassTransit serializes the message and sends it to the `MyApplication.MyMessage` exchange
-- RabbitMQ routes the message to the `queue-name` exchange
-- RabbitMQ delivers the message to the `queue-name` queue
-
-The infrastructure elements are only created if they do not exist yet. All elements are by default durable. MassTransit will also create a number of elements that are not durable and these will be removed as soon as the service stops. By default, _Fanout_ exchanges are used.
-
-::: warning
-If a message is published prior to starting the receive endpoint (which configures the broker topology), the exchange
-<i>MyApplication.MyMessage</i> will be created by _Publish_. However, it won't be bound to anything until the receive endpoint is started.
-Until the message exchange is bound, published messages will just disappear.
+::: tip Getting Started
+To get started with RabbitMQ, refer to the [configuration](/usage/configuration) section which uses RabbitMQ in the examples.
 :::
 
-All durable elements remain running on RabbitMQ and this means that even if the service is down and not consuming messages, messages will still be accumulated in the queue so when the service comes online, all queued messages will be consumed.
+## Broker Topology
 
-There are additional configuration options for RabbitMQ transport, that can be applied when the bus is being configured:
+With RabbitMQ, which supports exchanges and queues, messages are _sent_ or _published_ to exchanges and RabbitMQ routes those messages through exchanges to the appropriate queues.
 
-| Level | Property                | Type   | Default | Description 
-|-------|-------------------------|--------|---------|------------------
-| Bus   | `PrefetchCount`         | `ushort` | Processor count multiplied by 4 | The number of messages to fetch in the buffer
-| Bus   | `PurgeOnStartup`        | `bool`   | `false` | Forces the bus to clean up messages from the queue when starting
-| Host  | `Username`              | `string` |       | User name for RabbitMQ
-| Host  | `Password`              | `string` |       | Password for RabbitMQ
-| Host  | `ClusterMembers`        | `string[]` |     | List of cluster member addresses
-| Host  | `PublisherConfirmation` | `bool` | `true` | instructs if MassTransit should wait for a confirmation when publishing or sending messages. 
+In the example below, which configures a receive endpoint, consumer, and message type, the bus is configured to use RabbitMQ.
+
+<<< @/docs/code/transports/RabbitMqConsoleListener.cs
+
+The configuration includes:
+
+* The RabbitMQ host
+  - Host name: _localhost_
+  - Virtual host: /
+  - Username and password used to connect to the virtual host (credentials are virtual-host specific)
+* The receive endpoint
+  - Queue name: _order-events-listener_
+  - Consumer: _OrderSubmittedEventConsumer_
+    - Message type: _OrderSystem.Events.OrderSubmitted_
+
+When the bus is started, MassTransit will create exchanges and queues on the virtual host for the receive endpoint. MassTransit creates durable, _fanout_ exchanges by default, and queues are also durable by default.
+
+| Name | Description |
+|:---|:---|
+| order-events-listener | Queue for the receive endpoint
+| order-events-listener | An exchange, bound to the queue, used to _send_ messages
+| OrderSystem.Events:OrderSubmitted | An exchange, named by the message-type, bound to the _order-events-listener_ exchange, used to _publish_ messages
+
+When a message is sent, the endpoint address can be one of two values:
+
+`exchange:order-events-listener`
+
+Send the message to the _order-events-listener_ exchange. If the exchange does not exist, it will be created. _MassTransit translates topic: to exchange: when using RabbitMQ, so that topic: addresses can be resolved – since RabbitMQ is the only supported transport that doesn't have topics._
+
+`queue:order-events-listener`
+
+Send the message to the _order-events-listener_ exchange. If the exchange or queue does not exist, they will created and the exchange will be bound to the queue.
+
+With either address, RabbitMQ will route the message from the _order-events-listener_ exchange to the _order-events-listener_ queue.
+
+When a message is published, the message is sent to the _OrderSystem.Events:OrderSubmitted_ exchange. If the exchange does not exist, it will created. RabbitMQ will route the message from the _OrderSystem.Events:OrderSubmitted_ exchange to the _order-events-listener_ exchange, and subsequently to the _order-events-listener_ queue. If other receive endpoints connected to the same virtual host include consumers that consume the _OrderSubmitted_ message, a copy of the message would be routed to each of those endpoints as well.
+
+::: warning
+If a message is published before starting the bus, so that MassTransit can create the exchanges and queues, the exchange _OrderSystem.Events:OrderSubmitted_ will be created. However, until the bus has been started at least once, there won't be a queue bound to the exchange and any published messages will be lost. Once the bus has been started, the queue will remain bound to the exchange even when the bus is stopped.
+:::
+
+Durable exchanges and queues remain configured on the virtual host, so even if the bus is stopped messages will continue to be routed to the queue. When the bus is restarted, queued messages will be consumed.
+
+## Configuration
+
+MassTransit includes several host-level configuration options that control the behavior for the entire bus.
+
+|  Property                      | Type   | Description 
+|-------|------------------------|--------|---
+| PublisherConfirmation        | bool | MassTransit will wait until RabbitMQ confirms messages when publishing or sending messages (default: true)
+| Heartbeat                    | TimeSpan |The heartbeat interval used by the RabbitMQ client to keep the connection alive
+| RequestedChannelMax          | ushort | The maximum number of channels allowed on the connection
+| RequestedConnectionTimeout   | TimeSpan | The connection timeout
+
+#### UseCluster
+
+MassTransit can connect to a cluster of RabbitMQ virtual hosts and treat them as a single virtual host. To configure a cluster, call the `UseCluster` methods, and add the cluster nodes, each of which becomes part of the virtual host identified by the host name. Each cluster node can specify either a `host` or a `host:port` combination.
+
+#### ConfigureBatch
+
+MassTransit will briefly buffer messages before sending them to RabbitMQ, to increase message throughput. While use of the default values is recommended, the batch options can be configured.
+
+|  Property               | Type   | Default |Description 
+|-------|------------------------|-----|--------|---
+| Enabled        | bool | true | Enable or disable batch sends to RabbitMQ
+| MessageLimit        | int | 100 | Limit the number of messages per batch
+| SizeLimit        | int | 64K | A rough limit of the total message size
+| Timeout        | TimeSpan | 4ms | The time to wait for additional messages before sending
+
+MassTransit includes several receive endpoint level configuration options that control receive endpoint behavior.
+
+| Property                | Type   | Description 
+|-------------------------|--------|------------------
+| PrefetchCount         | ushort | The number of unacknowledged messages that can be processed concurrently (default based on CPU count)
+| PurgeOnStartup        | bool   | Removes all messages from the queue when the bus is started (default: false)
+| AutoDelete         | bool | If true, the queue will be automatically deleted when the bus is stopped (default: false)
+| Durable        | bool   | If true, messages are persisted to disk before being acknowledged (default: true)
 
 
 ## CloudAMQP
 
-MassTransit works great with CloudAMQP, and is an easy way to get started. It's highly recommended to use SSL, an example configuration is shown below. Note that the port number _may_ need to be specified, in addition to the `UseSsl` configuration.
+MassTransit can be used with CloudAMQP, which is a great SaaS-based solution to host your RabbitMQ broker. To configure MassTransit, the host and virtual host must be specified, and _UseSsl_ must be configured. 
 
-```csharp
-var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
-{
-    var host = x.Host(new Uri("rabbitmq://wombat.rmq.cloudamqp.com:5671/your_vhost/"), h =>
-    {
-        h.Username("your_username");
-        h.Password("your_password");
+<<< @/docs/code/transports/CloudAmqpConsoleListener.cs
 
-        h.UseSsl(s =>
-        {
-            s.Protocol = SslProtocols.Tls12;
-        });
-    });
-});
-```
+## Guidance
 
+The following recommendations should be considered _best practices_ for building applications using MassTransit, specifically with RabbitMQ.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Publishing a message
-
-When you publish a message on the bus here is what happens:
-
-- Publish `MySystem.Messages.SomeMessage`
-- This message gets published by the publishing logic to the exchange `MySystem.Messages.SomeMessage`
-- The message is routed by messaging infrastructure to the `my_endpoint` exchange
-- The message is then routed to the `my_endpoint` queue
-
-<div class="alert alert-info">
-<b>Note:</b>
-If you publish a message before the consumer has been started (and created its configuration), the exchange
-<i>MySystem.Messages.SomeMessage</i> will be created. It will not be bound to anything until the consumer starts,
-so if you publish to it, the message will just disappear.
-</div>
-
-## Queues
-
-- Each application you write should use a unique queue name.
-- If you run multiple copies  of your consumer service, they would listen to the same queue (as they are copies).
-  This would mean you have multiple applications listening to `my_endpoint` queue
-  This would result in a 'competing consumer' scenario.  (Which is what you want if you run same service multiple times)
-- If there is an exception from your consumer, the message will be sent to `my_endpoint_error` queue.
-- If a message is received in a queue that the consumer does not know how to handle, the message will be sent to `my_endpoint_skipped` queue.
-
-## Design Benefits
-
-- Any application can listen to any message and that will not affect any other application that may or may not be listening for that message
-- Any application(s) that bind a group of messages to the same queue will result in the competing consumer pattern.
-- You do not have to concern yourself with anything but what message type to produce and what message type to consume.
-
-## Faq
-
-- How many messages at a time will be simultaneously processed?
-  - Each endpoint you create represents 1 queue.  That queue can receive any number of different message types (based on what you subscribe to it)
-  - The configuration of each endpoint you can set the number of consumers with a call to `PrefetchCount(x)`.
-  - This is the total number of consumers for all message types sent to this queue.
-  - In MT2, you had to add ?prefetch=X to the Rabbit URL. This is handled automatically now.
-
-- Can I have a set number of consumers per message type?
-  - Yes. This uses middleware.
-
-    `x.Consumer(new AutofacConsumerFactory<…>(), p => p.UseConcurrencyLimit(1));  x.PrefetchCount=16;`
-
-     PrefetchCount should be relatively high, a multiple of your concurrency limit for all message types so that RabbitMQ doesn't choke delivery messages due to network delays. Always have a queue ready to receive the message.
-
-- When my consumer is not running, I do not want the messages to wait in the queue.  How can I do this?
-  - There are two ways.  Note that each of these imply you would never use a 'competing consumer' pattern, so make sure that is the case.
-    1. Set `PurgeOnStartup=true` in the endpoint configuration. When the bus starts, it will empty the queue of all messages.
-    1. Set `AutoDelete=true` in the endpoint configuration. This causes the queue to be removed when your application stops.
-
-- How are Retries handled?
-  - This is handled by [middleware](../../advanced/middleware/README.md). Each endpoint has a [retry policy](../exceptions.md#retry).
-
-- Can I have a different retry policy per each message type?
-  - No. This is set at an endpoint level. You would have to have a specific queue per consumer to achieve this.
-
-
-
-
+- Published messages are routed to a receive endpoint queue by message type, using exchanges and exchange bindings. A service's receive endpoints do not affect other services or their receive endpoints, as long as they do not share the same queue. 
+- Consumers and sagas should have their own receive endpoint, with a unique queue name
+  - Each receive endpoint maps to one queue
+  - A queue may contain more than one message type, the message type is used to deliver the message to the appropriate consumer configured on the receive endpoint.
+  - If a received message is not handled by a consumer, the skipped message will be moved to a skipped queue, which is named with a \_skipped suffix.
+- When running multiple instances of the same service
+  - Use the same queue name for each instance
+  - Messages from the queue will be load balanced across all instances (the _competing consumer_ pattern)
+- If a consumer exception is thrown, the faulted message will be moved to an error queue, which is named with the \_error suffix.
+- The number of concurrently processed messages can be up to the _PrefetchCount_, depending upon the number of cores available.
+- For temporary receive endpoints, set _AutoDelete = true_ and _Durable = false_
+- To configure _PrefetchCount_ higher than the desired concurrent message count, add _UseConcurrencyLimit(n)_ to the configuration. _This must be added before any consumers are configured._ Depending upon your consumer duration, higher values may greatly improve overall message throughput.

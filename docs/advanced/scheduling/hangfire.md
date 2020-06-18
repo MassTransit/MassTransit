@@ -14,12 +14,6 @@ By default MassTransit is using static Hangfire configuration
 
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-    {
-        h.Username("guest");
-        h.Password("guest");
-    });
-
     cfg.UseHangfireScheduler("hangfire", options => { /*configure background server*/ });
 });
 ```
@@ -33,13 +27,7 @@ address. To configure the address, use the extension method shown below.
 ```csharp
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-    {
-        h.Username("guest");
-        h.Password("guest");
-    });
-
-    cfg.UseMessageScheduler(new Uri("rabbitmq://localhost/hangfire"));
+    cfg.UseMessageScheduler(new Uri("queue:hangfire"));
 });
 ```
 
@@ -70,7 +58,7 @@ public class ServiceProviderHangfireComponentResolver :
 
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
+    cfg.Host(new Uri("rabbitmq://localhost/"), h =>
     {
         h.Username("guest");
         h.Password("guest");

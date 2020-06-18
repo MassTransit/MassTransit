@@ -11,7 +11,7 @@ instead, which has all of the same methods as <i>IBus</i>, but is scoped to the 
 messages can be tracked between consumers, and are sent from the proper address.
 :::
 
- ```csharp
+ ```cs
 public static void Main(string[] args)
 {
     var container = new Container(cfg =>
@@ -28,12 +28,12 @@ public static void Main(string[] args)
             x.AddConsumers(typeof(ConsumerOne), typeof(ConsumerTwo));
 
             // add the bus to the container, may need to create Local function
-            x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
+            x.UsingRabbitMq(cfg =>
             {
-                var host = cfg.Host("localhost/");
+                cfg.Host("localhost/");
 
                 cfg.ReceiveEndpoint("customer_update", ec =>
-               {
+                {
                     // Configure a single consumer
                     ec.ConfigureConsumer<UpdateCustomerConsumer>(context);
 

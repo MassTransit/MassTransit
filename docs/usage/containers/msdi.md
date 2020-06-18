@@ -25,10 +25,8 @@ public class Startup
         {
             x.AddConsumer<OrderConsumer>();
 
-            x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
+            x.UsingRabbitMq(cfg =>
             {
-                cfg.Host("localhost");
-
                 cfg.ReceiveEndpoint("submit-order", e =>
                 {
                     e.PrefetchCount = 16;
@@ -41,7 +39,7 @@ public class Startup
 
                 // or, configure the endpoints by convention
                 cfg.ConfigureEndpoints(context);
-            }));
+            });
 
             x.AddRequestClient<SubmitOrder>();
         });

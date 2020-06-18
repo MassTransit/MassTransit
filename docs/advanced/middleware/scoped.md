@@ -42,12 +42,10 @@ public class Startup
           
         services.AddMassTransit(x =>
         {
-          	// configuration
-            x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
+            x.UsingRabbitMq(cfg =>
             {
-               // bus configuration
               cfg.UseSendFilter(typeof(MySendFilter<>), context); //generic filter
-            }));
+            });
         });
     }
 }

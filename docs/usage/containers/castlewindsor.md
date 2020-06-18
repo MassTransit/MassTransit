@@ -27,10 +27,8 @@ public static void Main(string[] args)
         x.AddConsumers(typeof(ConsumerOne), typeof(ConsumerTwo));
 
         // add the bus to the container
-        x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
+        x.UsingRabbitMq(cfg =>
         {
-            var host = cfg.Host("localhost/");
-
             cfg.ReceiveEndpoint("customer_update", ec =>
             {
                 // Configure a single consumer

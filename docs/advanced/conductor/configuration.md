@@ -12,7 +12,7 @@ public class Startup
             x.AddConsumer<SubmitOrderConsumer>();
             x.AddConsumer<AuthorizeOrderConsumer>()
 
-            x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
+            x.UsingRabbitMq(cfg =>
             {
                 cfg.Host("localhost");
 
@@ -21,7 +21,7 @@ public class Startup
                     .SetEndpointNameFormatter(KebabCaseEndpointNameFormatter.Instance);
 
                 cfg.ConfigureServiceEndpoints(context, serviceInstanceOptions);
-            }));
+            });
 
             x.AddServiceClient();
             x.AddRequestClient<SubmitOrder>();

@@ -16,11 +16,10 @@ public void ConfigureServices(IServiceCollection services)
     // this registration is simplified
     services.AddMassTransit(x =>
     {
-
-        x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
+        x.UsingRabbitMq((context, cfg) =>
         {
             cfg.UsePrometheusMetrics(serviceName: "order_service");
-        }));
+        });
     });
 }
 ```

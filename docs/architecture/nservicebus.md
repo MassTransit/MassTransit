@@ -103,7 +103,7 @@ services.AddMassTransit(x =>
 {
     x.AddConsumer<TimeConsumer>();
 
-    x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
+    x.UsingRabbitMq((context, cfg) =>
     {
         cfg.UseNServiceBusJsonSerializer();
 

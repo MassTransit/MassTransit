@@ -12,13 +12,7 @@ address. To configure the address, use the extension method shown below.
 ```csharp
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-    {
-        h.Username("guest");
-        h.Password("guest");
-    });
-
-    cfg.UseMessageScheduler(new Uri("rabbitmq://localhost/quartz"));
+    cfg.UseMessageScheduler(new Uri("queue:quartz"));
 });
 ```
 

@@ -28,7 +28,6 @@ module.exports = {
       indexName: 'masstransit'
     },
     nav: [
-      { text: "Updates", link: "/updates/" },
       { text: "Discord", link: "/discord" },
       { text: 'NuGet', link: 'https://nuget.org/packages/MassTransit' }
     ],
@@ -58,7 +57,16 @@ module.exports = {
               '/usage/transports/azure-sb',
               '/usage/transports/activemq',
               '/usage/transports/amazonsqs',
-              '/usage/transports/in-memory',
+              '/usage/transports/in-memory'
+            ]
+          },
+          {
+            title: 'Riders',
+            path: '/usage/riders/',
+            collapsable: true,
+            children: [
+              '/usage/riders/kafka',
+              '/usage/riders/eventhub'
             ]
           },
           '/usage/messages',
@@ -100,11 +108,8 @@ module.exports = {
               ['/usage/containers/msdi', 'Microsoft'],
               ['/usage/containers/autofac', 'Autofac'],
               ['/usage/containers/castlewindsor', 'Castle Windsor'],
-              ['/usage/containers/lamar', 'Lamar'],
               ['/usage/containers/simpleinjector', 'Simple Injector'],
-              ['/usage/containers/structuremap', 'StructureMap'],
-              ['/usage/containers/ninject', 'Ninject'],
-              ['/usage/containers/unity', 'Unity']
+              ['/usage/containers/structuremap', 'StructureMap']
             ]
           },
           ['/usage/testing', 'Testing'],
@@ -203,7 +208,7 @@ module.exports = {
               },
               'advanced/audit',
               'advanced/batching',
-              'advanced/turnout/'
+              'advanced/job-consumers'
             ]
           }
         ]

@@ -36,13 +36,7 @@ To enable the `Redeliver` method, the Quartz endpoint must be setup on the bus.
 ```csharp
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-    {
-        h.Username("guest");
-        h.Password("guest");
-    });
-
-    cfg.UseMessageScheduler(new Uri("rabbitmq://localhost/quartz"));
+    cfg.UseMessageScheduler(new Uri("queue:quartz"));
 });
 ```
 

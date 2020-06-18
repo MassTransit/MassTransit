@@ -4,11 +4,10 @@
   "description": "MassTransit Documentation",
   "main": "index.js",
   "devDependencies": {
-    "@vuepress/plugin-active-header-links": "^1.5.0",
-    "@vuepress/plugin-back-to-top": "^1.5.0",
-    "@vuepress/plugin-blog": "^1.9.2",
-    "@vuepress/plugin-google-analytics": "^1.5.0",
-    "vuepress": "^1.5.0"
+    "@vuepress/plugin-active-header-links": "^1.5.2",
+    "@vuepress/plugin-back-to-top": "^1.5.2",
+    "@vuepress/plugin-google-analytics": "^1.5.2",
+    "vuepress": "^1.5.2"
   },
   "dependencies": {
     "esm": "^3.2.25",

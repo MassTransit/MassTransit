@@ -8,11 +8,6 @@ However, with broader use of cloud-based platforms comes a greater variety of me
 
 > And by specific, right now it is very specific: Microsoft.Extensions.DependencyInjection. Though technically, any container that supports `IServiceCollection` for configuration _might_ work.
 
-::: warning
-This capability should be considered early-access. MultiBus has undergone limited testing, and while it has good test coverage there are likely edge cases related to container behavior or MassTransit use that complicate matters. 
-:::
-
-
 ### Standard Configuration
 
 To review the standard [configuration](/usage/configuration.md#asp-net-core), configuring MassTransit is done using the _AddMassTransit_ method as shown.
@@ -28,13 +23,13 @@ public void ConfigureServices(IServiceCollection services)
         x.AddConsumer<SubmitOrderConsumer>();
         x.AddRequestClient<SubmitOrder>();
 
-        x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
+        x.UsingRabbitMq(cfg =>
         {
             cfg.Host("localhost");
             cfg.UseHealthCheck(context);
 
             cfg.ConfigureEndpoints(context);
-        }));
+        });
     });
     services.AddMassTransitHostedService();
 }
@@ -84,13 +79,13 @@ public void ConfigureServices(IServiceCollection services)
         x.AddConsumer<AllocateInventoryConsumer>();
         x.AddRequestClient<AllocateInventory>();
 
-        x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
+        x.UsingRabbitMq(cfg =>
         {
             cfg.Host("remote-host");
             cfg.UseHealthCheck(context);
 
             cfg.ConfigureEndpoints(context);;
-        }));
+        });
     });
 
     // call to AddMassTransitHostedService ommitted to focus
@@ -165,13 +160,13 @@ public void ConfigureServices(IServiceCollection services)
         x.AddConsumer<DestroyAllHumansConsumer>();
         x.AddRequestClient<DestroyAllHumans>();
 
-        x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
+        x.UsingRabbitMq(cfg =>
         {
             cfg.Host("another-planet");
             cfg.UseHealthCheck(context);
 
             cfg.ConfigureEndpoints(context);;
-        }));
+        });
     });
 
     // call to AddMassTransitHostedService ommitted to focus

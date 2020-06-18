@@ -36,8 +36,6 @@ MassTransit includes transaction middleware to share a single committable transa
 ```cs
 Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
-    cfg.Host("localhost");
-
     cfg.ReceiveEndpoint("event_queue", e =>
     {
         e.UseTransaction(x =>
@@ -91,9 +89,9 @@ While the [In Memory Outbox](/usage/exceptions#outbox) is the best choice for an
 ```cs
 services.AddMassTransit(x =>
 {
-    x.AddBus(context => Bus.Factory.CreateUsingRabbitMq(cfg =>
+    x.UsingRabbitMq(cfg =>
     {
-        var host = cfg.Host("localhost", "/");
+        cfg.Host("localhost", "/");
     }));
 
     // This needs to be after AddBus, because it registers a decorator over IPublishEndpoint and ISendEndpointProvider, and DI Registration order matters (last registration wins)

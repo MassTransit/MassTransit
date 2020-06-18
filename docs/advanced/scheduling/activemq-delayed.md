@@ -11,7 +11,7 @@ var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
 {
     cfg.UseDelayedExchangeMessageScheduler();
 
-    var host = cfg.Host(new Uri("activemq://localhost/"), h =>
+    cfg.Host(new Uri("activemq://localhost/"), h =>
     {
         h.Username("admin");
         h.Password("admin");

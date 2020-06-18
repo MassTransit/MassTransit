@@ -1,106 +1,26 @@
 # Testing
 
-Unit testing consumers, sagas, and routing slip activities is supported by using the test harnesses included with MassTransit. The harnesses can be used with any unit testing framework. There is also a _MassTransit.TestFramework_ assembly for use with [NUnit](https://nuget.org/packages/NuGet), which is used by MassTransit for its own unit tests.
+MassTransit is a framework, and follows the Hollywood principle – don't call us, we'll call you. This inversion of control, combined with asynchronous execution, can complicate unit tests. To make it easy, MassTransit includes test harnesses to create unit tests that run entirely in-memory but behave close to an actual message broker. In fact, the included memory-based messaging fabric was inspired by RabbitMQ exchanges and queues.
 
-## Test Harness
+To create a unit test with the in-memory test harness, create and start the harness as shown.
 
-A test harness is provided that handles the entire setup, startup, and shutdown of a bus instance. Every transport has its own test harness, and each test harness is based upon the same core test harness.
+> Uses [MassTransit](https://nuget.org/packages/MassTransit/),  [NUnit](https://nuget.org/packages/NuGet)
 
 To create the harness in a unit test, start, and then stop it:
 
-```cs
-public async Task Should_start_and_stop_the_test_harness()
-{
-    var harness = new InMemoryTestHarness();
-    await harness.Start();
+<<< @/docs/code/testing/UsingInMemoryTestHarness.cs
 
-    await harness.Stop();
-}
-```
+The test harness encapsulates the bus configuration, providing various hooks to customize the bus  and receive endpoint configuration. The in-memory harness is the easiest to use, is lightning fast, and runs entirely in-memory without any external dependencies. Each setup and teardown of the harness provides a completed, end-to-end test environment. Messages sent, published, and consumed go through an entire lifecycle, including serialization, dispatch, deserialization, consumer instantiation, and asynchronous execution.
 
-The example above is for the in-memory test harness, which is the fastest option for creating unit tests. Each test gets the benefit of having a complete end-to-end environment for test execution. This includes message serialization, consumer instantiation, asynchronous execution, basically all the things.
+Each supported transport has its own test harness, built from a common base.
 
 ## Consumer
 
-To test a consumer, using the consumer test harness (which can be used with any transport):
+To test a consumer, use the consumer test harness (available with any transport).
 
-```cs
-public async Task Should_test_the_consumer()
-{
-    var harness = new InMemoryTestHarness();
-    var consumerHarness = harness.Consumer<MyConsumer>();
+<<< @/docs/code/testing/UsingInMemoryTestHarnessConsumer.cs
 
-    await harness.Start();
-    try
-    {
-        await harness.InputQueueSendEndpoint.Send(new MyMessage());
-
-        // did the endpoint consume the message
-        Assert.IsTrue(harness.Consumed.Select<MyMessage>().Any());
-
-        // did the actual consumer consume the message
-        Assert.IsTrue(consumerHarness.Consumed.Select<MyMessage>().Any());
-    }
-    finally
-    {
-        await harness.Stop();
-    }
-}
-```
-
-Adding the consumer harness to the test harness will configure the consumer on the receive endpoint. As messages are received and consumed, they are added to collections via observers so that test assertions can be used to verify message consumption.
-
-If you want to test for consumer exceptions you can check for published `Fault<T>` messages
-
-```cs
-public async Task Should_test_the_consumer()
-{
-    var harness = new InMemoryTestHarness();
-    var consumerHarness = harness.Consumer<MyConsumer>();
-
-    await harness.Start();
-    try
-    {
-        await harness.InputQueueSendEndpoint.Send(new MyMessage());
-
-        // did the endpoint consume the message
-        Assert.IsTrue(harness.Consumed.Select<MyMessage>().Any());
-
-        // did the actual consumer consume the message
-        Assert.IsTrue(consumerHarness.Consumed.Select<MyMessage>().Any());
-
-        // did the actual consumer throws exception
-        Assert.IsTrue(harness.Published.Select<Fault<MyMessage>>().Any();
-    }
-    finally
-    {
-        await harness.Stop();
-    }
-}
-```
-
-If the consumer published an event, that too could be observed:
-
-```cs
-class MyConsumer :
-    IConsumer<MyMessage>
-{
-    public async Task Consume(ConsumeContext<MyMessage> context)
-    {
-        context.Publish(new MyEvent());
-    }
-}
-
-public async Task Should_start_and_stop_the_test_harness()
-{
-    // ...
-
-    // did the consumer publish the event
-    Assert.IsTrue(harness.Published.Select<MyEvent>().Any());
-
-    // ...
-}
-```
+The harness configures the consumer on its receive endpoint. The test sends the _SubmitOrder_ event, and assertions are added using harness's observer collections.
 
 ## Saga
 

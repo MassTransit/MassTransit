@@ -14,12 +14,6 @@ You can use the delayed exchange to scheduled messages instead of Quartz. To ena
 var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
     cfg.UseDelayedExchangeMessageScheduler();
-
-    var host = cfg.Host(new Uri("rabbitmq://localhost/"), h =>
-    {
-        h.Username("guest");
-        h.Password("guest");
-    });
 }
 ```
 

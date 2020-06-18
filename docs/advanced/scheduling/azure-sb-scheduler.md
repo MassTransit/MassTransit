@@ -9,10 +9,7 @@ To configure the bus (or a receive endpoint) to use the enqueue time for message
 ```csharp
 var busControl = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
 {
-    var host = cfg.Host(serviceAddress, h =>
-    {
-        // ...
-    });
+    cfg.Host(connectionString);
 
     cfg.UseServiceBusMessageScheduler();
 });

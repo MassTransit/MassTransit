@@ -1,129 +1,70 @@
 # Containers
 
-MassTransit supports several popular dependency injection containers. However, MassTransit does not require a container, so don't just reach for one when getting started. If you are already using a container in your application, see if your container is supported and reference the appropriate NuGet package.
+MassTransit supports several dependency injection containers. And since Microsoft introduced its own container, it has become the most commonly used container.
 
-MassTransit has a consistent API for registration and configuration when used with a container, and also includes conventions for configuring receive endpoints for the registered consumers, sagas, and routing slip activities. Under the hood, each container is configured to properly interact with MassTransit, leveraging available container features, such as nested scopes for message consumers, without requiring the developer to explictly configure every consumer.
-
-::: tip NOTE
-Dependency Injection styles are a personal choice that each developer or organization must make on their own. We recognize this choice, and respect it, and will not judge those who don't use a particular container or style of dependency injection. In short, we care.
+::: tip Optional
+MassTransit does not require a container, as demonstrated in the [configuration example](/usage/configuration). So if you aren't already using a container, you can get started without having adopt one. However, when you're ready to use a container, perhaps to deploy your service using the .NET Generic Host, you will likely want to use Microsoft's built-in solution.
 :::
 
-## Registration
+Regardless of which container is used, supported containers have a consistent registration syntax used to add consumers, sagas, and activities, as well as configure the bus. Behind the scenes, MassTransit is configuring the container, including container-specific features such as scoped lifecycles, consistently and correctly. Use of the registration syntax has drastically reduced container configuration support questions.
 
-MassTransit supports registration of consumers, sagas, and Courier activities for Autofac, Castle Windsor, Lamar, Microsoft Extensions Dependency Injection, Simple Injector, and StructureMap. When using one of these containers, the following registration methods should be used.
+## Consumer Registration
 
-The `.AddMassTransit` extension method, which is specific to each container, supports both registration and bus configuration.
+> Uses [MassTransit.Extensions.DependencyInjection](https://www.nuget.org/packages/MassTransit.Extensions.DependencyInjection/)
 
-```cs
-containerBuilder.AddMassTransit(r =>
-{
-    // register consumers, sagas, and Courier activities
+To configure a bus using RabbitMQ and register the consumers, sagas, and activities to be used by the bus, call the `AddMassTransit` extension method. The _UsingRabbitMq_ method can be changed to the appropriate method for the proper transport if RabbitMQ is not being used.
 
-    // register the bus in the container
-    r.AddBus(context => Bus.Factory.CreateUsingInMemory(cfg =>
-    {
-        // configure receive endpoints, etc.
-    }));
-});
-```
+<<< @/docs/code/containers/MicrosoftContainer.cs
 
-### Consumer Registration
+The `AddConsumer` method is one of several methods used to register consumers, some of which are shown below.
 
-To add a consumer registration, there are various methods available.
+<<< @/docs/code/containers/MicrosoftContainerAddConsumer.cs
 
-```cs
-containerBuilder.AddMassTransit(r =>
-{
-    // add a consumer
-    r.AddConsumer<UpdateCustomerAddressConsumer>();
+## Consumer Definition
 
-    // add a consumer by type
-    r.AddConsumer(typeof(UpdateCustomerAddressConsumer));
+A consumer definition is used to configure the receive endpoint and pipeline behavior for the consumer. When scanning assemblies or namespaces for consumers, consumer definitions are also found and added to the container. The _SubmitOrderConsumer_ and matching definition are shown below.
 
-    // add a consumer by type, including a consumer definition for that consumer
-    r.AddConsumer(typeof(UpdateCustomerAddressConsumer), typeof(UpdateCustomerAddressConsumerDefinition))
+<<< @/docs/code/containers/ContainerConsumers.cs
 
-    // add all consumers in the specified assembly
-    r.AddConsumers(Assembly.GetExecutingAssembly());
+## Endpoint Definition
 
-    // add multiple consumers and/or consumer definitions by type
-    r.AddConsumers(typeof(ConsumerOne), typeof(ConsumerTwo));
+To configure the endpoint for a consumer registration, or override the endpoint configuration in the definition, the `Endpoint` method can be added to the consumer registration. This will create an endpoint definition for the consumer, and register it in the container. This method is available on consumer and saga registrations, with separate execute and compensate endpoint methods for activities.
 
-    // adds ConsumerOne and its definition, and also adds ConsumerTwo
-    r.AddConsumers(typeof(ConsumerOne), typeof(ConsumerOneDefinition), typeof(ConsumerTwo));
+<<< @/docs/code/containers/MicrosoftContainerAddConsumerEndpoint.cs
 
-    // add consumers from the namespace containing the type
-    r.AddConsumersFromNamespaceContaining<UpdateCustomerAddressConsumer>();
-    r.AddConsumersFromNamespaceContaining(typeof(UpdateCustomerAddressConsumer));
-});
-```
+When the endpoint is configured after the _AddConsumer_ method, the configuration overrides any endpoint configuration in the consumer definition.
 
-To add a consumer registration and configure the consumer endpoint in the same expression, a definition can automatically be created.
+## Bus Configuration
 
-```cs
-containerBuilder.AddMassTransit(r =>
-{
-    r.AddConsumer<UpdateCustomerAddressConsumer>()
-        .Endpoint(e =>
-        {
-            // customize the endpoint name
-            e.Name = "customer-update";
+In the above examples, the bus is configured by the _UsingRabbitMq_ method, which is passed two arguments. `context` is the registration context, used to configure endpoints. `cfg` is the bus factory configurator, used to configure the bus. The above examples use the default conventions to configure the endpoints. Alternatively, endpoints can be explicitly configured. However, when configuring endpoints manually, the _ConfigureEndpoints_ methods should not be used (duplicate endpoints may result).
 
-            // specify the endpoint as temporary (may be non-durable, auto-delete, etc.)
-            e.Temporary = false;
+_ConfigureEndpoints_ uses an `IEndpointNameFormatter` to generate endpoint names, which by default uses a _PascalCase_ formatter. There are two additional endpoint name formatters included, snake and kebab case.
 
-            // specify an optional concurrent message limit for the consumer
-            e.ConcurrentMessageLimit = 8;
+For the _SubmitOrderConsumer_, the endpoint names would be:
 
-            // only use if needed, a sensible default is provided, and a reasonable
-            // value is automatically calculated based upon ConcurrentMessageLimit if 
-            // the transport supports it.
-            e.PrefetchCount = 16;
-        });
-});
-```
+| Formatter | Name
+|:---|:---
+| Default | `SubmitOrder`
+| Snake Case | `submit_order`
+| Kebab Case | `submit-order`
 
-> The endpoint configuration is available for all registration types, including consumers, sagas and Courier activities.
+All of the included formatters trim the _Consumer_, _Saga_, or _Activity_ suffix from the end of the class name. If the consumer name is generic, the generic parameter type is used instead of the generic type.
 
+The endpoint name formatter can be set as shown below.
 
+<<< @/docs/code/containers/MicrosoftContainerFormatter.cs
 
-## Endpoint Configuration
+The endpoint formatter can also be passed to the _ConfigureEndpoints_ method as shown.
 
-When configuring the bus, using `.AddBus`, recieve endpoints can be explicitly configured, or configured using the registered consumers, sagas, and Courier activities along with an _endpoint name formatter_.
+<<< @/docs/code/containers/MicrosoftContainerFormatterInline.cs
 
-```cs
-containerBuilder.AddMassTransit(r =>
-{
-    // register consumers, sagas, and Courier activities
+To explicitly configure endpoints, use the _ConfigureConsumer_ and/or _ConfigureConsumers_ methods.
 
-    // register the bus in the container
-    r.AddBus(context => Bus.Factory.CreateUsingInMemory(cfg =>
-    {
-        // configure endpoints for all registered consumer, saga, and Courier activities
-        cfg.ConfigureEndpoints(context);
-    }));
-});
-```
+<<< @/docs/code/containers/MicrosoftContainerConfigureConsumer.cs
 
-There are three endpoint name formatters included:
+When using _ConfigureConsumer_, the _EndpointName_, _PrefetchCount_, and _Temporary_ properties of the consumer definition are not used.
 
-- Default, which trims the _Consumer_, _Saga_, or _Activity_ extension from the class name and uses it for the queue
-- SnakeCase, which trims and inserts an underscore before each uppercase letter
-- KababCase, which trims and inserts a hyphen before each uppercase letter
-
-The default requires no additional configuration, whereas the other two can either be registered in the container or specified on the `ConfigureEndpoints` call.
-
-```cs
-containerBuilder.AddMassTransit(r =>
-{
-    r.AddBus(context => Bus.Factory.CreateUsingInMemory(cfg =>
-    {
-        cfg.ConfigureEndpoints(context, KebabCaseEndpointNameFormatter.Instance);
-    }));
-});
-```
-
-### Saga Registration
+## Saga Registration
 
 To add a state machine saga, use the _AddSagaStateMachine_ methods. For a consumer saga, use the _AddSaga_ methods.
 
@@ -177,17 +118,3 @@ containerBuilder.AddMassTransit(r =>
 ```
 
 Supported saga persistence storage engines are documented in the [saga documentation](/usage/sagas/persistence) section.
-
-> Endpoint configuration is available for all registration types, including consumers, sagas and Courier activities. Endpoint configuration can also be specifed in the definition, and overridden if specified in the .Add/.Endpoint methods.
-
-**Hey! Where is my container??**
-
-Containers come and go, so if you don't see your container here, or feel that the support for you container is weaksauce, pull requests are always welcome. Using an existing container it should be straight forward to add support for your favorite ÜberContainer.
-
-* [Autofac](autofac)
-* [Ninject](ninject)
-* [StructureMap](structuremap)
-* [Lamar](lamar)
-* [Unity](unity)
-* [Castle Windsor](castlewindsor)
-* [Microsoft Dependency Injection](msdi)
