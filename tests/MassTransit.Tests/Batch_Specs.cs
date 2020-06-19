@@ -1,11 +1,15 @@
 ﻿namespace MassTransit.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
+    using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
+    using TestFramework.Logging;
     using TestFramework.Messages;
     using Util;
 
@@ -200,25 +204,94 @@
     public class Using_a_batch_consumer :
         InMemoryTestFixture
     {
-        [Test]
-        public async Task Should_show_me_the_pipe()
+        public Using_a_batch_consumer()
         {
-            Console.WriteLine(Bus.GetProbeResult().ToJsonString());
+            TestTimeout = TimeSpan.FromMinutes(2);
         }
 
-        TestBatchConsumer _consumer;
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+        }
+
+        [Test]
+        public async Task Should_not_deliver_duplicate_messages()
+        {
+            var messages = Enumerable.Range(0, Count).Select(x => new DoWork());
+            foreach (var msg in messages)
+            {
+                await InputQueueSendEndpoint.Send(msg);
+            }
+
+            await _completed.Task;
+
+            Assert.That(_duplicateMessages.Count, Is.EqualTo(0));
+        }
+
+        readonly HashSet<Guid> _alreadyReceivedMessages = new HashSet<Guid>();
+        readonly HashSet<Guid> _duplicateMessages = new HashSet<Guid>();
+        TaskCompletionSource<int> _completed;
+        const int Count = 15000;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            _consumer = new TestBatchConsumer(GetTask<Batch<PingMessage>>());
+            _completed = GetTask<int>();
 
-            configurator.Batch<PingMessage>(x =>
+            configurator.Batch<DoWork>(x =>
             {
-                x.MessageLimit = 2;
-                x.TimeLimit = TimeSpan.FromMilliseconds(500);
+                x.MessageLimit = 100;
+                x.TimeLimit = TimeSpan.FromMilliseconds(50);
 
-                x.Consumer(() => _consumer);
+                x.Consumer(() => new DoWorkConsumer(_alreadyReceivedMessages, _duplicateMessages, _completed));
             });
+        }
+
+
+        public class DoWork
+        {
+        }
+
+
+        class DoWorkConsumer :
+            IConsumer<Batch<DoWork>>
+        {
+            readonly HashSet<Guid> _alreadyReceivedMessages;
+            readonly HashSet<Guid> _duplicateMessages;
+            readonly TaskCompletionSource<int> _completed;
+
+            public DoWorkConsumer(HashSet<Guid> alreadyReceivedMessages, HashSet<Guid> duplicateMessages, TaskCompletionSource<int> completed)
+            {
+                _alreadyReceivedMessages = alreadyReceivedMessages;
+                _duplicateMessages = duplicateMessages;
+                _completed = completed;
+            }
+
+            public async Task Consume(ConsumeContext<Batch<DoWork>> context)
+            {
+                lock (_alreadyReceivedMessages)
+                {
+                    foreach (var msg in context.Message)
+                    {
+                        if (_alreadyReceivedMessages.Contains(msg.MessageId.Value))
+                        {
+                            _duplicateMessages.Add(msg.MessageId.Value);
+
+                            return;
+                        }
+
+                        _alreadyReceivedMessages.Add(msg.MessageId.Value);
+                        if (_alreadyReceivedMessages.Count == Count)
+                            _completed.TrySetResult(Count);
+                    }
+                }
+
+                for (int i = 0; i < 50000000; i++)
+                {
+                    if (i % 5000000 == 0)
+                    {
+                        await Task.Yield();
+                    }
+                }
+            }
         }
     }
 

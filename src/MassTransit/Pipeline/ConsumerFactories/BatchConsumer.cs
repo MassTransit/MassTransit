@@ -22,15 +22,15 @@
         readonly DateTime _firstMessage;
         readonly int _messageLimit;
         readonly SortedDictionary<Guid, ConsumeContext<TMessage>> _messages;
-        readonly TaskScheduler _taskScheduler;
+        readonly ChannelExecutor _executor;
         readonly Timer _timer;
         DateTime _lastMessage;
 
-        public BatchConsumer(int messageLimit, TimeSpan timeLimit, TaskScheduler taskScheduler, IConsumerFactory<TConsumer> consumerFactory,
+        public BatchConsumer(int messageLimit, TimeSpan timeLimit, ChannelExecutor executor, IConsumerFactory<TConsumer> consumerFactory,
             IPipe<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> consumerPipe)
         {
             _messageLimit = messageLimit;
-            _taskScheduler = taskScheduler;
+            _executor = executor;
             _consumerFactory = consumerFactory;
             _consumerPipe = consumerPipe;
             _messages = new SortedDictionary<Guid, ConsumeContext<TMessage>>();
@@ -64,20 +64,20 @@
 
         void TimeLimitExpired(object state)
         {
-            Task.Factory.StartNew(() =>
+            Task.Run(() => _executor.Push(() =>
             {
                 IsCompleted = true;
 
-                if (_messages.Count > 0)
-                {
-                    List<ConsumeContext<TMessage>> messages = _messages.Values.ToList();
+                if (_messages.Count <= 0)
+                    return TaskUtil.Completed;
 
-                    Deliver(messages[0], messages, BatchCompletionMode.Time);
-                }
-            }, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
+                List<ConsumeContext<TMessage>> messages = _messages.Values.ToList();
+
+                return Deliver(messages[0], messages, BatchCompletionMode.Time);
+            }));
         }
 
-        public void Add(ConsumeContext<TMessage> context)
+        public Task Add(ConsumeContext<TMessage> context)
         {
             var messageId = context.MessageId ?? NewId.NextGuid();
             _messages.Add(messageId, context);
@@ -88,8 +88,10 @@
             {
                 IsCompleted = true;
 
-                Deliver(context, _messages.Values.ToList(), BatchCompletionMode.Size);
+                return Deliver(context, _messages.Values.ToList(), BatchCompletionMode.Size);
             }
+
+            return TaskUtil.Completed;
         }
 
         bool IsReadyToDeliver(ConsumeContext<TMessage> context)
@@ -100,18 +102,17 @@
             return _messages.Count == _messageLimit;
         }
 
-        public void ForceComplete()
+        public Task ForceComplete()
         {
             IsCompleted = true;
 
             List<ConsumeContext<TMessage>> consumeContexts = _messages.Values.ToList();
-            if (consumeContexts.Count == 0)
-                return;
-
-            Deliver(consumeContexts.Last(), consumeContexts, BatchCompletionMode.Forced);
+            return consumeContexts.Count == 0
+                ? TaskUtil.Completed
+                : Deliver(consumeContexts.Last(), consumeContexts, BatchCompletionMode.Forced);
         }
 
-        async void Deliver(ConsumeContext context, IReadOnlyList<ConsumeContext<TMessage>> messages, BatchCompletionMode batchCompletionMode)
+        async Task Deliver(ConsumeContext context, IReadOnlyList<ConsumeContext<TMessage>> messages, BatchCompletionMode batchCompletionMode)
         {
             _timer.Dispose();
 
