@@ -21,23 +21,19 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         public Task Complete()
         {
-            _model.BasicAck(_deliveryTag, false);
-
-            return TaskUtil.Completed;
+            return _model.BasicAck(_deliveryTag, false);
         }
 
-        public Task Faulted(Exception exception)
+        public async Task Faulted(Exception exception)
         {
             try
             {
-                _model.BasicNack(_deliveryTag, false, true);
+                await _model.BasicNack(_deliveryTag, false, true).ConfigureAwait(false);
             }
             catch (Exception ackEx)
             {
                 LogContext.Error?.Log(ackEx, "Message NACK failed: {DeliveryTag}, Original Exception: {Exception}", _deliveryTag, exception);
             }
-
-            return TaskUtil.Completed;
         }
 
         public Task ValidateLockStatus()

@@ -131,14 +131,14 @@
             return _executor.Run(() => _model.BasicQos(prefetchSize, prefetchCount, global), CancellationToken);
         }
 
-        void ModelContext.BasicAck(ulong deliveryTag, bool multiple)
+        Task ModelContext.BasicAck(ulong deliveryTag, bool multiple)
         {
-            _model.BasicAck(deliveryTag, multiple);
+            return _executor.Run(() => _model.BasicAck(deliveryTag, multiple), CancellationToken);
         }
 
-        void ModelContext.BasicNack(ulong deliveryTag, bool multiple, bool requeue)
+        Task ModelContext.BasicNack(ulong deliveryTag, bool multiple, bool requeue)
         {
-            _model.BasicNack(deliveryTag, multiple, requeue);
+            return _executor.Run(() => _model.BasicNack(deliveryTag, multiple, requeue), CancellationToken);
         }
 
         Task<string> ModelContext.BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer)

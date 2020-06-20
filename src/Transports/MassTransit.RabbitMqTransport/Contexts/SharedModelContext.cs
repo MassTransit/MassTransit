@@ -69,14 +69,14 @@
             return _context.BasicQos(prefetchSize, prefetchCount, global);
         }
 
-        void ModelContext.BasicAck(ulong deliveryTag, bool multiple)
+        Task ModelContext.BasicAck(ulong deliveryTag, bool multiple)
         {
-            _context.BasicAck(deliveryTag, multiple);
+            return _context.BasicAck(deliveryTag, multiple);
         }
 
-        void ModelContext.BasicNack(ulong deliveryTag, bool multiple, bool requeue)
+        Task ModelContext.BasicNack(ulong deliveryTag, bool multiple, bool requeue)
         {
-            _context.BasicNack(deliveryTag, multiple, requeue);
+            return _context.BasicNack(deliveryTag, multiple, requeue);
         }
 
         Task<string> ModelContext.BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer)

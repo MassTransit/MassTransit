@@ -49,8 +49,9 @@
 
         Task BasicQos(uint prefetchSize, ushort prefetchCount, bool global);
 
-        void BasicAck(ulong deliveryTag, bool multiple);
-        void BasicNack(ulong deliveryTag, bool multiple, bool requeue);
+        Task BasicAck(ulong deliveryTag, bool multiple);
+
+        Task BasicNack(ulong deliveryTag, bool multiple, bool requeue);
 
         Task<string> BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer);
 
