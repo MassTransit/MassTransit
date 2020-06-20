@@ -48,10 +48,27 @@
                 topology.Apply(builder);
         }
 
+        public bool TryGetConvention<TConvention>(out TConvention convention)
+            where TConvention : class, IMessageSendTopologyConvention<TMessage>
+        {
+            for (var i = 0; i < _conventions.Count; i++)
+            {
+                convention = _conventions[i] as TConvention;
+                if (convention != null)
+                {
+                    return true;
+                }
+            }
+
+            convention = default;
+            return false;
+        }
+
         public bool TryAddConvention(IMessageSendTopologyConvention<TMessage> convention)
         {
             if (_conventions.Any(x => x.GetType() == convention.GetType()))
                 return false;
+
             _conventions.Add(convention);
             return true;
         }

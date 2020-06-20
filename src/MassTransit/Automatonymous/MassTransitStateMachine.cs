@@ -12,6 +12,8 @@
     using MassTransit.Internals.Extensions;
     using MassTransit.Metadata;
     using MassTransit.Scheduling;
+    using MassTransit.Topology.Conventions;
+    using MassTransit.Topology.Topologies;
     using MassTransit.Util;
     using Requests;
     using SagaConfigurators;
@@ -476,10 +478,21 @@
                 var @event = (Event<TData>)_propertyInfo.GetValue(machine);
                 if (@event != null)
                 {
-                    var correlationType = typeof(UncorrelatedEventCorrelation<,>).MakeGenericType(typeof(TInstance), typeof(TData));
-                    var correlation = (EventCorrelation<TInstance, TData>)Activator.CreateInstance(correlationType, @event);
+                    if (GlobalTopology.Send.GetMessageTopology<TData>().TryGetConvention(out ICorrelationIdMessageSendTopologyConvention<TData> convention)
+                        && convention.TryGetMessageCorrelationId(out var messageCorrelationId))
+                    {
+                        var builderType = typeof(MessageCorrelationIdEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(TData));
+                        var builder = (IEventCorrelationBuilder)Activator.CreateInstance(builderType, machine, @event, messageCorrelationId);
 
-                    machine._eventCorrelations[@event] = correlation;
+                        machine._eventCorrelations[@event] = builder.Build();
+                    }
+                    else
+                    {
+                        var correlationType = typeof(UncorrelatedEventCorrelation<,>).MakeGenericType(typeof(TInstance), typeof(TData));
+                        var correlation = (EventCorrelation<TInstance, TData>)Activator.CreateInstance(correlationType, @event);
+
+                        machine._eventCorrelations[@event] = correlation;
+                    }
                 }
             }
         }

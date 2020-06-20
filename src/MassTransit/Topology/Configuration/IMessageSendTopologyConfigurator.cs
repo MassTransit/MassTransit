@@ -48,6 +48,15 @@ namespace MassTransit.Topology
         /// <returns></returns>
         void AddOrUpdateConvention<TConvention>(Func<TConvention> add, Func<TConvention, TConvention> update)
             where TConvention : class, IMessageSendTopologyConvention<TMessage>;
+
+        /// <summary>
+        /// Returns the convention, if found
+        /// </summary>
+        /// <param name="convention"></param>
+        /// <typeparam name="TConvention"></typeparam>
+        /// <returns></returns>
+        bool TryGetConvention<TConvention>(out TConvention convention)
+            where TConvention : class, IMessageSendTopologyConvention<TMessage>;
     }
 
 

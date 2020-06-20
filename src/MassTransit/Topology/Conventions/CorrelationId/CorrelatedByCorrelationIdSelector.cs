@@ -10,17 +10,17 @@ namespace MassTransit.Topology.Conventions.CorrelationId
         ICorrelationIdSelector<T>
         where T : class
     {
-        public bool TryGetSetCorrelationId(out ISetCorrelationId<T> setCorrelationId)
+        public bool TryGetSetCorrelationId(out IMessageCorrelationId<T> messageCorrelationId)
         {
             var correlatedByInterface = typeof(T).GetInterface<CorrelatedBy<Guid>>();
             if (correlatedByInterface != null)
             {
-                var objectType = typeof(CorrelatedBySetCorrelationId<>).MakeGenericType(typeof(T));
-                setCorrelationId = (ISetCorrelationId<T>)Activator.CreateInstance(objectType);
+                var objectType = typeof(CorrelatedByMessageCorrelationId<>).MakeGenericType(typeof(T));
+                messageCorrelationId = (IMessageCorrelationId<T>)Activator.CreateInstance(objectType);
                 return true;
             }
 
-            setCorrelationId = null;
+            messageCorrelationId = null;
             return false;
         }
     }

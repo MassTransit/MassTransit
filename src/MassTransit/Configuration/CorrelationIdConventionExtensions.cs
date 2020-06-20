@@ -23,13 +23,13 @@
                 () =>
                 {
                     var convention = new CorrelationIdMessageSendTopologyConvention<T>();
-                    convention.SetCorrelationId(new DelegateSetCorrelationId<T>(correlationIdSelector));
+                    convention.SetCorrelationId(new DelegateMessageCorrelationId<T>(correlationIdSelector));
 
                     return convention;
                 },
                 update =>
                 {
-                    update.SetCorrelationId(new DelegateSetCorrelationId<T>(correlationIdSelector));
+                    update.SetCorrelationId(new DelegateMessageCorrelationId<T>(correlationIdSelector));
 
                     return update;
                 });
@@ -49,13 +49,13 @@
                 () =>
                 {
                     var convention = new CorrelationIdMessageSendTopologyConvention<T>();
-                    convention.SetCorrelationId(new NullableDelegateSetCorrelationId<T>(correlationIdSelector));
+                    convention.SetCorrelationId(new NullableDelegateMessageCorrelationId<T>(correlationIdSelector));
 
                     return convention;
                 },
                 update =>
                 {
-                    update.SetCorrelationId(new NullableDelegateSetCorrelationId<T>(correlationIdSelector));
+                    update.SetCorrelationId(new NullableDelegateMessageCorrelationId<T>(correlationIdSelector));
 
                     return update;
                 });

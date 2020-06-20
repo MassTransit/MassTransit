@@ -6,6 +6,6 @@ namespace MassTransit.Topology.Conventions.CorrelationId
     public interface ICorrelationIdSelector<T>
         where T : class
     {
-        bool TryGetSetCorrelationId(out ISetCorrelationId<T> setCorrelationId);
+        bool TryGetSetCorrelationId(out IMessageCorrelationId<T> messageCorrelationId);
     }
 }

@@ -7,16 +7,16 @@ namespace MassTransit.Topology.Conventions.CorrelationId
         ICorrelationIdSelector<T>
         where T : class
     {
-        readonly ISetCorrelationId<T> _setCorrelationId;
+        readonly IMessageCorrelationId<T> _messageCorrelationId;
 
-        public SetCorrelationIdSelector(ISetCorrelationId<T> setCorrelationId)
+        public SetCorrelationIdSelector(IMessageCorrelationId<T> messageCorrelationId)
         {
-            _setCorrelationId = setCorrelationId;
+            _messageCorrelationId = messageCorrelationId;
         }
 
-        public bool TryGetSetCorrelationId(out ISetCorrelationId<T> setCorrelationId)
+        public bool TryGetSetCorrelationId(out IMessageCorrelationId<T> messageCorrelationId)
         {
-            setCorrelationId = _setCorrelationId;
+            messageCorrelationId = _messageCorrelationId;
             return true;
         }
     }

@@ -13,16 +13,17 @@
         IFilter<SendContext<T>>
         where T : class
     {
-        readonly ISetCorrelationId<T> _setCorrelationId;
+        readonly IMessageCorrelationId<T> _messageCorrelationId;
 
-        public SetCorrelationIdFilter(ISetCorrelationId<T> setCorrelationId)
+        public SetCorrelationIdFilter(IMessageCorrelationId<T> messageCorrelationId)
         {
-            _setCorrelationId = setCorrelationId;
+            _messageCorrelationId = messageCorrelationId;
         }
 
         public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
         {
-            _setCorrelationId.SetCorrelationId(context);
+            if (_messageCorrelationId.TryGetCorrelationId(context.Message, out var correlationId))
+                context.CorrelationId = correlationId;
 
             return next.Send(context);
         }

@@ -30,22 +30,31 @@
 
         bool IMessageSendTopologyConvention<TMessage>.TryGetMessageSendTopology(out IMessageSendTopology<TMessage> messageSendTopology)
         {
-            foreach (ICorrelationIdSelector<TMessage> selector in _selectors)
+            if (TryGetMessageCorrelationId(out IMessageCorrelationId<TMessage> messageCorrelationId))
             {
-                if (selector.TryGetSetCorrelationId(out ISetCorrelationId<TMessage> setCorrelationId))
-                {
-                    messageSendTopology = new SetCorrelationIdMessageSendTopology<TMessage>(setCorrelationId);
-                    return true;
-                }
+                messageSendTopology = new SetCorrelationIdMessageSendTopology<TMessage>(messageCorrelationId);
+                return true;
             }
 
             messageSendTopology = null;
             return false;
         }
 
-        public void SetCorrelationId(ISetCorrelationId<TMessage> setCorrelationId)
+        public void SetCorrelationId(IMessageCorrelationId<TMessage> messageCorrelationId)
         {
-            _selectors.Insert(0, new SetCorrelationIdSelector<TMessage>(setCorrelationId));
+            _selectors.Insert(0, new SetCorrelationIdSelector<TMessage>(messageCorrelationId));
+        }
+
+        public bool TryGetMessageCorrelationId(out IMessageCorrelationId<TMessage> messageCorrelationId)
+        {
+            foreach (ICorrelationIdSelector<TMessage> selector in _selectors)
+            {
+                if (selector.TryGetSetCorrelationId(out messageCorrelationId))
+                    return true;
+            }
+
+            messageCorrelationId = null;
+            return false;
         }
     }
 }

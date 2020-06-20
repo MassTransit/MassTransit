@@ -12,12 +12,12 @@ namespace MassTransit.Topology.Conventions.CorrelationId
     {
         readonly IFilter<SendContext<T>> _filter;
 
-        public SetCorrelationIdMessageSendTopology(ISetCorrelationId<T> setCorrelationId)
+        public SetCorrelationIdMessageSendTopology(IMessageCorrelationId<T> messageCorrelationId)
         {
-            if (setCorrelationId == null)
-                throw new ArgumentNullException(nameof(setCorrelationId));
+            if (messageCorrelationId == null)
+                throw new ArgumentNullException(nameof(messageCorrelationId));
 
-            _filter = new SetCorrelationIdFilter<T>(setCorrelationId);
+            _filter = new SetCorrelationIdFilter<T>(messageCorrelationId);
         }
 
         public void Apply(ITopologyPipeBuilder<SendContext<T>> builder)

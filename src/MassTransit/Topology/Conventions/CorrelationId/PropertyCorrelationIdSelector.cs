@@ -16,22 +16,22 @@ namespace MassTransit.Topology.Conventions.CorrelationId
             _propertyName = propertyName;
         }
 
-        public bool TryGetSetCorrelationId(out ISetCorrelationId<T> setCorrelationId)
+        public bool TryGetSetCorrelationId(out IMessageCorrelationId<T> messageCorrelationId)
         {
             var propertyInfo = typeof(T).GetProperty(_propertyName);
             if (propertyInfo != null && propertyInfo.PropertyType == typeof(Guid))
             {
-                setCorrelationId = new PropertySetCorrelationId<T>(propertyInfo);
+                messageCorrelationId = new PropertyMessageCorrelationId<T>(propertyInfo);
                 return true;
             }
 
             if (propertyInfo != null && propertyInfo.PropertyType == typeof(Guid?))
             {
-                setCorrelationId = new NullablePropertySetCorrelationId<T>(propertyInfo);
+                messageCorrelationId = new NullablePropertyMessageCorrelationId<T>(propertyInfo);
                 return true;
             }
 
-            setCorrelationId = null;
+            messageCorrelationId = null;
             return false;
         }
     }
