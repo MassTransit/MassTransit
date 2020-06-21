@@ -37,7 +37,7 @@
             _completed = TaskUtil.GetTask<DateTime>();
             _firstMessage = DateTime.UtcNow;
 
-            _timer = new Timer(TimeLimitExpired, null, timeLimit, TimeSpan.Zero);
+            _timer = new Timer(TimeLimitExpired, null, timeLimit, TimeSpan.FromMilliseconds(-1));
         }
 
         public bool IsCompleted { get; set; }
@@ -66,6 +66,9 @@
         {
             Task.Run(() => _executor.Push(() =>
             {
+                if (IsCompleted)
+                    return TaskUtil.Completed;
+
                 IsCompleted = true;
 
                 if (_messages.Count <= 0)
