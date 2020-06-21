@@ -22,6 +22,11 @@
         int MessageLimit { set; }
 
         /// <summary>
+        /// Set the maximum number of concurrent batches which can execute at the same time
+        /// </summary>
+        int ConcurrencyLimit { set; }
+
+        /// <summary>
         /// Specify the consumer factory for the batch message consumer
         /// </summary>
         /// <param name="consumerFactory"></param>

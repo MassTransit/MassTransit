@@ -13,24 +13,26 @@
         {
             _configurator = configurator;
 
+            ConcurrencyLimit = 1;
             MessageLimit = 10;
             TimeLimit = TimeSpan.FromSeconds(10);
         }
 
         public TimeSpan TimeLimit { private get; set; }
         public int MessageLimit { private get; set; }
+        public int ConcurrencyLimit { private get; set; }
 
         void IBatchConfigurator<TMessage>.Consumer<TConsumer>(IConsumerFactory<TConsumer> consumerFactory,
             Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>> configure)
         {
-            var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory, _configurator);
-            consumerConfigurator.ConnectConsumerConfigurationObserver(_configurator);
+            var configurator = new ConsumerConfigurator<TConsumer>(consumerFactory, _configurator);
+            configurator.ConnectConsumerConfigurationObserver(_configurator);
 
-            consumerConfigurator.Options<BatchOptions>(options => options.SetMessageLimit(MessageLimit).SetTimeLimit(TimeLimit));
+            configurator.Options<BatchOptions>(options => options.SetMessageLimit(MessageLimit).SetTimeLimit(TimeLimit).SetConcurrencyLimit(ConcurrencyLimit));
 
-            consumerConfigurator.ConsumerMessage(configure);
+            configurator.ConsumerMessage(configure);
 
-            _configurator.AddEndpointSpecification(consumerConfigurator);
+            _configurator.AddEndpointSpecification(configurator);
         }
     }
 }

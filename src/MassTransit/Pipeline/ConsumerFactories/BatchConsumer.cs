@@ -8,6 +8,7 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using Metadata;
     using Util;
 
 
@@ -23,16 +24,18 @@
         readonly int _messageLimit;
         readonly SortedDictionary<Guid, ConsumeContext<TMessage>> _messages;
         readonly ChannelExecutor _executor;
+        readonly ChannelExecutor _dispatcher;
         readonly Timer _timer;
         DateTime _lastMessage;
 
-        public BatchConsumer(int messageLimit, TimeSpan timeLimit, ChannelExecutor executor, IConsumerFactory<TConsumer> consumerFactory,
-            IPipe<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> consumerPipe)
+        public BatchConsumer(int messageLimit, TimeSpan timeLimit, ChannelExecutor executor, ChannelExecutor dispatcher,
+            IConsumerFactory<TConsumer> consumerFactory, IPipe<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> consumerPipe)
         {
             _messageLimit = messageLimit;
             _executor = executor;
             _consumerFactory = consumerFactory;
             _consumerPipe = consumerPipe;
+            _dispatcher = dispatcher;
             _messages = new SortedDictionary<Guid, ConsumeContext<TMessage>>();
             _completed = TaskUtil.GetTask<DateTime>();
             _firstMessage = DateTime.UtcNow;
@@ -40,7 +43,7 @@
             _timer = new Timer(TimeLimitExpired, null, timeLimit, TimeSpan.FromMilliseconds(-1));
         }
 
-        public bool IsCompleted { get; set; }
+        public bool IsCompleted { get; private set; }
 
         async Task IConsumer<TMessage>.Consume(ConsumeContext<TMessage> context)
         {
@@ -76,7 +79,7 @@
 
                 List<ConsumeContext<TMessage>> messages = _messages.Values.ToList();
 
-                return Deliver(messages[0], messages, BatchCompletionMode.Time);
+                return _dispatcher.Push(() => Deliver(messages[0], messages, BatchCompletionMode.Time));
             }));
         }
 
@@ -91,13 +94,13 @@
             {
                 IsCompleted = true;
 
-                return Deliver(context, _messages.Values.ToList(), BatchCompletionMode.Size);
+                return _dispatcher.Push(() => Deliver(context, _messages.Values.ToList(), BatchCompletionMode.Size));
             }
 
             return TaskUtil.Completed;
         }
 
-        bool IsReadyToDeliver(ConsumeContext<TMessage> context)
+        bool IsReadyToDeliver(ConsumeContext context)
         {
             if (context.GetRetryAttempt() > 0)
                 return true;
@@ -112,7 +115,7 @@
             List<ConsumeContext<TMessage>> consumeContexts = _messages.Values.ToList();
             return consumeContexts.Count == 0
                 ? TaskUtil.Completed
-                : Deliver(consumeContexts.Last(), consumeContexts, BatchCompletionMode.Forced);
+                : _dispatcher.Push(() => Deliver(consumeContexts.Last(), consumeContexts, BatchCompletionMode.Forced));
         }
 
         async Task Deliver(ConsumeContext context, IReadOnlyList<ConsumeContext<TMessage>> messages, BatchCompletionMode batchCompletionMode)

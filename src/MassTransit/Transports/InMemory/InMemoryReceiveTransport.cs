@@ -129,9 +129,13 @@ namespace MassTransit.Transports.InMemory
 
                 _consumerHandle.Disconnect();
 
-                var completed = new ReceiveTransportCompletedEvent(_transport._inputAddress, _transport._dispatcher.GetMetrics());
+                var metrics = _transport._dispatcher.GetMetrics();
+                var completed = new ReceiveTransportCompletedEvent(_transport._inputAddress, metrics);
 
                 await _transport._context.TransportObservers.Completed(completed).ConfigureAwait(false);
+
+                LogContext.Debug?.Log("Consumer completed {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent",
+                    _transport._inputAddress, metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
             }
         }
     }

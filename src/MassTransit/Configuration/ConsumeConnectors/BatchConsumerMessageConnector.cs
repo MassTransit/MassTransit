@@ -1,6 +1,7 @@
 namespace MassTransit.ConsumeConnectors
 {
     using System;
+    using System.Threading.Tasks;
     using ConsumerSpecifications;
     using GreenPipes;
     using Pipeline;
@@ -27,6 +28,7 @@ namespace MassTransit.ConsumeConnectors
 
             var messageLimit = options.MessageLimit;
             var timeLimit = options.TimeLimit;
+            var concurrencyLimit = options.ConcurrencyLimit;
 
             IConsumerMessageSpecification<TConsumer, Batch<TMessage>> batchMessageSpecification = specification.GetMessageSpecification<Batch<TMessage>>();
 
@@ -34,7 +36,7 @@ namespace MassTransit.ConsumeConnectors
 
             IPipe<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> batchConsumerPipe = batchMessageSpecification.Build(consumeFilter);
 
-            var batchConsumerFactory = new BatchConsumerFactory<TConsumer, TMessage>(consumerFactory, messageLimit, timeLimit, batchConsumerPipe);
+            var factory = new BatchConsumerFactory<TConsumer, TMessage>(consumerFactory, messageLimit, concurrencyLimit, timeLimit, batchConsumerPipe);
 
             IConsumerSpecification<IConsumer<TMessage>> messageConsumerSpecification =
                 ConsumerConnectorCache<IConsumer<TMessage>>.Connector.CreateConsumerSpecification<IConsumer<TMessage>>();
@@ -47,10 +49,43 @@ namespace MassTransit.ConsumeConnectors
 
             IPipe<ConsumeContext<TMessage>> messagePipe = messageSpecification.BuildMessagePipe(x =>
             {
-                x.UseFilter(new ConsumerMessageFilter<IConsumer<TMessage>, TMessage>(batchConsumerFactory, consumerPipe));
+                x.UseFilter(new ConsumerMessageFilter<IConsumer<TMessage>, TMessage>(factory, consumerPipe));
             });
 
-            return consumePipe.ConnectConsumePipe(messagePipe);
+            var handle = consumePipe.ConnectConsumePipe(messagePipe);
+
+            return new BatchConnectHandle(handle, factory);
+        }
+
+
+        class BatchConnectHandle :
+            ConnectHandle
+        {
+            readonly BatchConsumerFactory<TConsumer, TMessage> _factory;
+            readonly ConnectHandle _handle;
+
+            public BatchConnectHandle(ConnectHandle handle, BatchConsumerFactory<TConsumer, TMessage> factory)
+            {
+                _handle = handle;
+                _factory = factory;
+            }
+
+            public void Dispose()
+            {
+                Disconnect();
+            }
+
+            public void Disconnect()
+            {
+                _handle.Disconnect();
+
+                async Task DisposeConsumerFactory()
+                {
+                    await _factory.DisposeAsync().ConfigureAwait(false);
+                }
+
+                Task.Run(DisposeConsumerFactory);
+            }
         }
     }
 }
