@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Threading.Tasks;
@@ -10,7 +9,6 @@
     using MassTransit;
     using MassTransit.Context;
     using MassTransit.Internals.Extensions;
-    using MassTransit.Metadata;
     using MassTransit.Scheduling;
     using MassTransit.Topology.Conventions;
     using MassTransit.Topology.Topologies;
@@ -32,12 +30,12 @@
         where TInstance : class, SagaStateMachineInstance
     {
         readonly Dictionary<Event, EventCorrelation> _eventCorrelations;
-        readonly Lazy<StateMachineRegistration[]> _registrations;
+        readonly Lazy<EventRegistration[]> _registrations;
         Func<TInstance, Task<bool>> _isCompleted;
 
         protected MassTransitStateMachine()
         {
-            _registrations = new Lazy<StateMachineRegistration[]>(GetRegistrations);
+            _registrations = new Lazy<EventRegistration[]>(GetRegistrations);
 
             _eventCorrelations = new Dictionary<Event, EventCorrelation>();
             _isCompleted = NotCompletedByDefault;
@@ -208,7 +206,7 @@
 
             var request = new StateMachineRequest<TInstance, TRequest, TResponse>(property.Name, requestIdExpression, settings);
 
-            property.SetValue(this, request);
+            InitializeRequest(this, property, request);
 
             Event(propertyExpression, x => x.Completed, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
             Event(propertyExpression, x => x.Faulted, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
@@ -273,7 +271,7 @@
 
             var request = new StateMachineRequest<TInstance, TRequest, TResponse, TResponse2>(property.Name, requestIdExpression, settings);
 
-            property.SetValue(this, request);
+            InitializeRequest(this, property, request);
 
             Event(propertyExpression, x => x.Completed, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
             Event(propertyExpression, x => x.Completed2, x => x.CorrelateBy(requestIdExpression, context => context.RequestId));
@@ -333,7 +331,7 @@
 
             var schedule = new StateMachineSchedule<TInstance, TMessage>(name, tokenIdExpression, settings);
 
-            property.SetValue(this, schedule);
+            InitializeSchedule(this, property, schedule);
 
             Event(propertyExpression, x => x.Received);
 
@@ -382,28 +380,46 @@
             return TaskUtil.False;
         }
 
+        static void InitializeSchedule<T>(AutomatonymousStateMachine<TInstance> stateMachine, PropertyInfo property, Schedule<TInstance, T> schedule)
+            where T : class
+        {
+            if (property.CanWrite)
+                property.SetValue(stateMachine, schedule);
+            else if (ConfigurationHelpers.TryGetBackingField(stateMachine.GetType().GetTypeInfo(), property, out var backingField))
+                backingField.SetValue(stateMachine, schedule);
+            else
+                throw new ArgumentException($"The schedule property is not writable: {property.Name}");
+        }
+
+        static void InitializeRequest<TRequest, TResponse>(AutomatonymousStateMachine<TInstance> stateMachine, PropertyInfo property,
+            Request<TInstance, TRequest, TResponse> request)
+            where TRequest : class
+            where TResponse : class
+        {
+            if (property.CanWrite)
+                property.SetValue(stateMachine, request);
+            else if (ConfigurationHelpers.TryGetBackingField(stateMachine.GetType().GetTypeInfo(), property, out var backingField))
+                backingField.SetValue(stateMachine, request);
+            else
+                throw new ArgumentException($"The request property is not writable: {property.Name}");
+        }
+
         /// <summary>
         /// Register all remaining events and states that have not been explicitly declared.
         /// </summary>
         void RegisterImplicit()
         {
-            foreach (var declaration in _registrations.Value)
-                declaration.Declare(this);
+            foreach (var registration in _registrations.Value)
+                registration.RegisterCorrelation(this);
         }
 
-        static IEnumerable<PropertyInfo> GetStateMachineProperties(Type typeInfo)
+        EventRegistration[] GetRegistrations()
         {
-            return TypeMetadataCache.GetProperties(typeInfo)
-                .Where(x => x.CanRead && x.CanWrite);
-        }
+            var events = new List<EventRegistration>();
 
-        StateMachineRegistration[] GetRegistrations()
-        {
-            var events = new List<StateMachineRegistration>();
+            var machineType = GetType().GetTypeInfo();
 
-            var machineType = GetType();
-
-            IEnumerable<PropertyInfo> properties = GetStateMachineProperties(machineType);
+            IEnumerable<PropertyInfo> properties = ConfigurationHelpers.GetStateMachineProperties(machineType);
 
             foreach (var propertyInfo in properties)
             {
@@ -417,15 +433,15 @@
                 var messageType = arguments[0];
                 if (messageType.HasInterface<CorrelatedBy<Guid>>())
                 {
-                    var declarationType = typeof(CorrelatedEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType, messageType);
+                    var declarationType = typeof(CorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType);
                     var declaration = Activator.CreateInstance(declarationType, propertyInfo);
-                    events.Add((StateMachineRegistration)declaration);
+                    events.Add((EventRegistration)declaration);
                 }
                 else
                 {
-                    var declarationType = typeof(UncorrelatedEventRegistration<,>).MakeGenericType(typeof(TInstance), machineType, messageType);
+                    var declarationType = typeof(UncorrelatedEventRegistration<>).MakeGenericType(typeof(TInstance), messageType);
                     var declaration = Activator.CreateInstance(declarationType, propertyInfo);
-                    events.Add((StateMachineRegistration)declaration);
+                    events.Add((EventRegistration)declaration);
                 }
             }
 
@@ -433,9 +449,8 @@
         }
 
 
-        class CorrelatedEventRegistration<TStateMachine, TData> :
-            StateMachineRegistration
-            where TStateMachine : MassTransitStateMachine<TInstance>
+        class CorrelatedEventRegistration<TData> :
+            EventRegistration
             where TData : class, CorrelatedBy<Guid>
         {
             readonly PropertyInfo _propertyInfo;
@@ -445,24 +460,22 @@
                 _propertyInfo = propertyInfo;
             }
 
-            public void Declare(object stateMachine)
+            public void RegisterCorrelation(MassTransitStateMachine<TInstance> machine)
             {
-                var machine = (TStateMachine)stateMachine;
                 var @event = (Event<TData>)_propertyInfo.GetValue(machine);
-                if (@event != null)
-                {
-                    var builderType = typeof(CorrelatedByEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(TData));
-                    var builder = (IEventCorrelationBuilder)Activator.CreateInstance(builderType, machine, @event);
+                if (@event == null)
+                    return;
 
-                    machine._eventCorrelations[@event] = builder.Build();
-                }
+                var builderType = typeof(CorrelatedByEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(TData));
+                var builder = (IEventCorrelationBuilder)Activator.CreateInstance(builderType, machine, @event);
+
+                machine._eventCorrelations[@event] = builder.Build();
             }
         }
 
 
-        class UncorrelatedEventRegistration<TStateMachine, TData> :
-            StateMachineRegistration
-            where TStateMachine : MassTransitStateMachine<TInstance>
+        class UncorrelatedEventRegistration<TData> :
+            EventRegistration
             where TData : class
         {
             readonly PropertyInfo _propertyInfo;
@@ -472,35 +485,34 @@
                 _propertyInfo = propertyInfo;
             }
 
-            public void Declare(object stateMachine)
+            public void RegisterCorrelation(MassTransitStateMachine<TInstance> machine)
             {
-                var machine = (TStateMachine)stateMachine;
                 var @event = (Event<TData>)_propertyInfo.GetValue(machine);
-                if (@event != null)
+                if (@event == null)
+                    return;
+
+                if (GlobalTopology.Send.GetMessageTopology<TData>().TryGetConvention(out ICorrelationIdMessageSendTopologyConvention<TData> convention)
+                    && convention.TryGetMessageCorrelationId(out var messageCorrelationId))
                 {
-                    if (GlobalTopology.Send.GetMessageTopology<TData>().TryGetConvention(out ICorrelationIdMessageSendTopologyConvention<TData> convention)
-                        && convention.TryGetMessageCorrelationId(out var messageCorrelationId))
-                    {
-                        var builderType = typeof(MessageCorrelationIdEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(TData));
-                        var builder = (IEventCorrelationBuilder)Activator.CreateInstance(builderType, machine, @event, messageCorrelationId);
+                    var builderType = typeof(MessageCorrelationIdEventCorrelationBuilder<,>).MakeGenericType(typeof(TInstance), typeof(TData));
+                    var builder = (IEventCorrelationBuilder)Activator.CreateInstance(builderType, machine, @event, messageCorrelationId);
 
-                        machine._eventCorrelations[@event] = builder.Build();
-                    }
-                    else
-                    {
-                        var correlationType = typeof(UncorrelatedEventCorrelation<,>).MakeGenericType(typeof(TInstance), typeof(TData));
-                        var correlation = (EventCorrelation<TInstance, TData>)Activator.CreateInstance(correlationType, @event);
+                    machine._eventCorrelations[@event] = builder.Build();
+                }
+                else
+                {
+                    var correlationType = typeof(UncorrelatedEventCorrelation<,>).MakeGenericType(typeof(TInstance), typeof(TData));
+                    var correlation = (EventCorrelation<TInstance, TData>)Activator.CreateInstance(correlationType, @event);
 
-                        machine._eventCorrelations[@event] = correlation;
-                    }
+                    machine._eventCorrelations[@event] = correlation;
                 }
             }
         }
 
 
-        interface StateMachineRegistration
+        interface EventRegistration
         {
-            void Declare(object stateMachine);
+            void RegisterCorrelation(MassTransitStateMachine<TInstance> machine);
         }
     }
 }

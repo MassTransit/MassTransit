@@ -94,9 +94,10 @@
                         .Finalize());
             }
 
-            public State Running { get; private set; }
-            public Event<Start> Started { get; private set; }
-            public Event<Stop> Stopped { get; private set; }
+            // ReSharper disable UnassignedGetOnlyAutoProperty
+            public State Running { get; }
+            public Event<Start> Started { get; }
+            public Event<Stop> Stopped { get; }
         }
 
 

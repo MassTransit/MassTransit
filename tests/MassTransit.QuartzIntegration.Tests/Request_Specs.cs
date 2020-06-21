@@ -259,17 +259,18 @@
                         .TransitionTo(NameValidationTimeout));
             }
 
-            public Request<TestState, ValidateAddress, AddressValidated> ValidateAddress { get; private set; }
-            public Request<TestState, ValidateName, NameValidated> ValidateName { get; private set; }
+            // ReSharper disable UnassignedGetOnlyAutoProperty
+            public Request<TestState, ValidateAddress, AddressValidated> ValidateAddress { get; }
+            public Request<TestState, ValidateName, NameValidated> ValidateName { get; }
 
-            public Event<RegisterMember> Register { get; private set; }
+            public Event<RegisterMember> Register { get; }
 
-            public State Registered { get; private set; }
-            public State AddressValidationFaulted { get; private set; }
-            public State AddressValidationTimeout { get; private set; }
+            public State Registered { get; }
+            public State AddressValidationFaulted { get; }
+            public State AddressValidationTimeout { get; }
 
-            public State NameValidationFaulted { get; private set; }
-            public State NameValidationTimeout { get; private set; }
+            public State NameValidationFaulted { get; }
+            public State NameValidationTimeout { get; }
         }
     }
 }

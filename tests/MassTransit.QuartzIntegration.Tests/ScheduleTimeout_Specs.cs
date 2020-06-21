@@ -172,12 +172,13 @@
                 SetCompletedWhenFinalized();
             }
 
-            public Schedule<TestState, CartExpired> CartTimeout { get; private set; }
+            // ReSharper disable UnassignedGetOnlyAutoProperty
+            public Schedule<TestState, CartExpired> CartTimeout { get; }
 
-            public Event<CartItemAdded> ItemAdded { get; private set; }
-            public Event<OrderSubmitted> Submitted { get; private set; }
+            public Event<CartItemAdded> ItemAdded { get; }
+            public Event<OrderSubmitted> Submitted { get; }
 
-            public State Active { get; private set; }
+            public State Active { get; }
         }
     }
 }
