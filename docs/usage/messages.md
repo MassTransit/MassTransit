@@ -84,47 +84,55 @@ MassTransit encapsulates every sent or published message in a message envelope (
 
 Message headers can be read using the `ConsumeContext` interface and specified using the `SendContext` interface.
 
-## Message Correlation
+## Correlation
 
-Since messages usually do not live in isolation, publishing one message usually leads to publishing another message, and then another, and so on. It is useful to trace such sequences, however, to find them these messages need to have some information detailing how they relate to each other.
+Messages are usually part of a conversation and identifiers are used to connect messages to that conversation. In the previous section, the headers supported by MassTransit, including _ConversationId_, _CorrelationId_, and _InitiatorId_, are used to combine separate messages into a conversation. Outbound messages that are published or sent by a consumer will have the same _ConversationId_ as the consumed message. If the consumed message has a _CorrelationId_, that value will be copied to the _InitiatorId_. These headers capture the flow of messages involved in the conversation.
 
-Correlation is the principle of connecting messages together, usually by using a unique identifier that is included in every message that is part of a logical sequence. In MassTransit, the unique identifier is referred to as the `CorrelationId`, which is included in the message envelope and available via the `ConsumeContext` or the `SendContext`. MassTransit also includes a `ConversationId` which is the same across an entire set of related messages.
+_CorrelationId_ may be set, when appropriate, by the developer publishing or sending a message. _CorrelationId_ can be set explicitly on the _PublishContext_ or _SendContext_ or when using a message initializer via the *\_\_CorrelationId* property. The example below shows how either of these methods can be used.
 
-In a distributed message-based system, message correlation is very important. Since operations are potentially executing across hundreds of nodes, the ability to correlate different messages to build a path through the system is absolutely necessary for engineers to troubleshoot problems.
-
-The headers on the message envelope provided by MassTransit already make it easy to specify correlation values. In fact, most are setup by default if not specified by the developer.
-
-MassTransit provides the interface `CorrelatedBy<T>`, which can be used to setup a default correlationId. This is used by sagas as well, since all sagas have a unique `CorrelationId` for each instance of the saga. If a message implements `CorrelatedBy<Guid>`, it will automatically be directed to the saga instance with the matching identifier. If a new saga instance is created by the event, it will be assigned the `CorrelationId` from the initiating message.
-
-For message types that have a correlation identifier, but are not using the `CorrelatedBy` interface, it is possible to declare the identifier for the message type and MassTransit will use that identifier by default for correlation.
-
-```csharp
-MessageCorrelation.UseCorrelationId<YourMessageClass>(x => x.SomeGuidValue);
-```
-
-::: tip
-This should be called before you start the bus. We currently recommend that you put all of these in a static method for easy grouping and then call it at the beginning of the MassTransit configuration block.
-:::
-
-Most transactions in a system will end up being logged and wide scale correlation is likely. Therefore, the use of consistent correlation identifiers is recommended. In fact, using a `Guid` type is highly recommended. MassTransit uses the [NewId](https://www.nuget.org/packages/NewId) library to generate identifiers that are unique and sequential that are represented as a `Guid`. The identifiers are clustered-index friendly, being ordered in a way that SQL Server can efficiently insert them into a database with the *uniqueidentifier* as the primary key. Just use `NewId.NextGuid()` to generate an identifier -- it's fast, fun, and all your friends are doing it.
-
-::: tip
-So, what does correlated actually mean? In short it means that this message is a part of a larger conversation. For instance, you may have a message that says <i>New Order (Item:Hammers; Qty:22; OrderNumber:45)</i> and there may be another message that is a response to that message that says <i>Order Allocated(OrderNumber:45)</i>. In this case, the order number is acting as your correlation identifier, it ties the messages together.
-:::
+<<< @/docs/code/usage/UsageMessageCorrelation.cs{20-31}
 
 ### Correlation Conventions
 
-In addition to the explicit `CorrelateBy<T>` interface, a convention-based correlation is supported. If the message contract has a property named ``CorrelationId``, ``CommandId``, or ``EventId``, the correlationId header is automatically populated on Send or Publish. It can also be manually specified using the ``SendContext``.
+_CorrelationId_ can also be set by convention. MassTransit includes several conventions by default, which may be used as the source to initialize the _CorrelationId_ header.
 
-Bear in mind that sagas default `CorrelateById()` only support messages where the explicit `CorrelateBy<Guid>` interface is implemented. However, the header is still useful if you do not use sagas, for example for message flow analysis and debugging.
+1. If the message implements the `CorrelatedBy<Guid>` interface, which has a `Guid CorrelationId` property, its value will be used.
+1. If the message has a property named _CorrelationId_, _CommandId_, or _EventId_ that is a _Guid_ or _Guid?_, its value will be used.
+1. If the developer registered a _CorrelationId_ provider for the message type, it will be used get the value.
 
-## Guidelines
+The final convention requires the developer to register a _CorrelationId_ provider prior to bus creation. The convention can be registered two ways, one of which is the new way, and the other which is the original approach that simply calls the new way. An example of the new approach, as well as the previous method, is shown below.
 
-Given everything that was stated above, here are a few guidelines.
+<<< @/docs/code/usage/UsageMessageSetCorrelation.cs
 
-1. Interface-based inheritance is OK, don't be afraid, but don't go nuts.
-1. Class-based inheritance is to be approached with caution.
-1. Composing messages together ends up pushing us into content-based routing which is something we don't recommend.
-1. Message Design is not OO Design (a message is just state, no behavior). There is a greater focus on interop and contract design.
-1. As messages are more about contracts, we suggest subscribing to interfaces that way you can easily evolve the message definition.
-1. A big base class may cause pain down the road as each change will have a larger ripple. This can be especially bad when you need to support multiple versions.
+The convention can also be specified during bus configuration, as shown. In this case, the convention applies to the configured bus instance. The previous approach was a global configuration shared by all bus instances.
+
+<<< @/docs/code/usage/UsageMessageSendCorrelation.cs
+
+Registering _CorrelationId_ providers should be done early in the application, prior to bus configuration. An easy approach is putting the registration methods into a class method and calling it during application startup.
+
+### Saga Correlation
+
+Sagas _must_ have a _CorrelationId_, it is the primary key used by the saga repository and the way messages are correlated to a specific saga instance. MassTransit follows the conventions above to obtain the _CorrelationId_ used to create a new or load an existing saga instance. Newly created saga instances will be assigned the _CorrelationId_ from the initiating message.
+
+::: tip New in Version 7
+Previous versions of MassTransit only supported automatic correlation when the message implemented the `CorrelatedBy<Guid>` interface. Starting with Version 7, all of the above conventions are used.
+:::
+
+### Identifiers
+
+MassTransit uses and highly encourages the use of _Guid_ identifiers. Distributed systems would crumble using monotonically incrementing identifiers (such as _int_ or _long_) due to the bottleneck of locking and incrementing a shared counter. Historically, certain types (okay, we'll call them out - SQL DBAs) have argued against using _Guid_ (or, their term, _uniqueidentifier_) as a key – a clustered primary key in particular. However, with MassTransit, we solved that problem.
+
+MassTransit uses [NewId](https://www.nuget.org/packages/NewId) to generate identifiers that are unique, sequential, and represented as a _Guid_. The generated identifiers are clustered-index friendly, and are ordered so that SQL Server can efficiently insert them into a database with the *uniqueidentifier* as the primary key.
+
+To create a _Guid_, call `NewId.NextGuid()` where you would otherwise call `Guid.NewGuid()` – and start enjoying the benefits of fast, distributed identifiers.
+
+## Guidance
+
+When defining message contracts, what follows is general guidance based upon years of using MassTransit combined with continued questions raised by developers new to MassTransit.
+
+-	Use interfaces and message initializers. Once you adjust it starts to make more sense. Use the Roslyn Analyzer to identify missing or incompatible property initializers.
+	-	Inheritance is okay, but keep it sensible as the type hierarchy will be applied to the broker. A message type containing a dozen interfaces is a bit annoying to untangle if you need to delve deep into message routing to troubleshoot an issue.
+-	Class inheritance has the same guidance as interfaces, but with more caution.
+	-	Consuming a base class type, and expecting polymorphic method behavior almost always leads to problems.
+	-	Message design is not object-oriented design. Messages should contain state, not behavior. Behavior should be in a separate class or service.
+	-	A big base class may cause pain down the road as changes are made, particularly when supporting multiple message versions.

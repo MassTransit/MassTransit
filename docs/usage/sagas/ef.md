@@ -66,9 +66,9 @@ Once the class map and associated _DbContext_ class have been created, the saga 
 > When using container configuration, the `DbContext` used by the saga repository is scoped.
 
 ```cs
-services.AddMassTransit(cfg =>
+services.AddMassTransit(x =>
 {
-    cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
+    x.AddSagaStateMachine<OrderStateMachine, OrderState>()
         .EntityFrameworkRepository(r =>
         {
             r.ConcurrencyMode = ConcurrencyMode.Pessimistic; // or use Optimistic, which requires RowVersion
@@ -85,7 +85,7 @@ If you are using optimistic concurrency, it's best to configure the endpoint to 
 ```cs
 services.AddMassTransit(x =>
 {
-    cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
+    x.AddSagaStateMachine<OrderStateMachine, OrderState>()
         .EntityFrameworkRepository(r =>
         {
             r.ConcurrencyMode = ConcurrencyMode.Optimistic;
@@ -93,7 +93,7 @@ services.AddMassTransit(x =>
             r.DatabaseFactory(() => new OrderStateDbContext(connectionString));
         });
 
-    x.AddBus(context => Bus.Factory.CreateUsingInMemory(cfg =>
+    x.UsingInMemory(cfg =>
     {
         cfg.ReceiveEndpoint("order-state", e =>
         {

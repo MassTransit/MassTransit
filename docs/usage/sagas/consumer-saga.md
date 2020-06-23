@@ -108,12 +108,12 @@ var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
 If you're using a container, saga registration is fully supported. The example below configures the saga using an in-memory repository with an in-memory transport.
 
 ```cs
-services.AddMassTransit(cfg =>
+services.AddMassTransit(x =>
 {
-    cfg.AddSaga<OrderSaga>()
+    x.AddSaga<OrderSaga>()
         .InMemoryRepository();
 
-    cfg.AddBus(context => Bus.Factory.CreateUsingInMemory(cfg =>
+    x.UsingInMemory(cfg =>
     {
         cfg.ConfigureEndpoints(context);
     }));

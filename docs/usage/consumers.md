@@ -1,187 +1,105 @@
 # Consumers
 
-A consumer is a class that may consume one or more message types. Each message type is defined by the `IConsumer<T>` interface, where `T` is the message type.
+Consumer is a widely used noun for something that _consumes_ something. In MassTransit, a consumer consumes one or more message types when configured on or connected to a receive endpoint. MassTransit includes many consumer types, including consumers, [sagas](/usage/sagas/), saga state machines, [routing slip activities](/advanced/courier/), handlers, and [job consumers](/advanced/job-consumers).
+
+A consumer, which is the most common consumer type, is a class that consumes one or more messages types. For each message type, the `IConsumer<T>` interface is implemented where `T` is the consumed message type. The interface has one method, _Consume_, as shown below.
 
 ```cs
-public class UpdateCustomerConsumer :
-    IConsumer<UpdateCustomerAddress>
+public interface IConsumer<in TMessage> :
+    IConsumer
+    where TMessage : class
 {
-    public async Task Consume(ConsumeContext<UpdateCustomerAddress> context)
-    {
-        await Console.Out.WriteLineAsync($"Updating customer: {context.Message.CustomerId}");
-
-        // update the customer address
-    }
+    Task Consume(ConsumeContext<TMessage> context);
 }
 ```
 
-When a consumer is configured on a receive endpoint, and a message type consumed by the consumer is received, an instance of the consumer is created (using a consumer factory, which is a delegate, or a container-specific consumer factory from one of the supported [containers](/usage/containers/)). The message (wrapped in a `ConsumeContext`) is then delivered to the consumer via the `Consume` method.
+> Messages must be reference types, and interfaces are supported (and recommended). The [messages](/usage/messages) section has more details on message types. 
 
-The `Consume` method is asynchronous, and returns a Task. The task is awaited by MassTransit, during which time the message is unavailable to other receive endpoints. If the consume method completes successfully (a task status of RanToCompletion), the message is acknowledged and removed from the queue.
+An example class that consumes the _SubmitOrder_ message type is shown below.
 
-::: warning
-If the consumer faults (such as throwing an exception, resulting in a task status of Faulted), or is somehow cancelled (TaskStatus of Canceled), the exception is propagated back up the pipeline where it can ultimately be retried or moved to an error queue.
-:::
+<<< @/docs/code/usage/UsageConsumer.cs
+
+MassTransit embraces _The Hollywood Principle_, which states, "Don't call us, we'll call you." It is influenced by the Dependency Inversion Principle in that control flows from the framework into the developer's code in response to an event, which in this case involves the delivery of a message by the transport. When a message is delivered from the transport on a receive endpoint and the message type is consumed by the consumer, MassTransit creates a consumer instance (using a consumer factory), and executes the _Consume_ method passing a `ConsumeContext<T>` containing the message.
+
+The _Consume_ method returns a _Task_ that is awaited by MassTransit. While the consumer method is executing, the message is unavailable to other receive endpoints. If the _Task_ completes successfully, the message is acknowledged and removed from the queue.
+
+If the _Task_ faults in the event of an exception, or is canceled (explicitly, or via an _OperationCanceledException_), the consumer instance is released and the exception is propagated back up the pipeline. If the exception does not trigger a retry, the default pipeline will move the message to an error queue.
 
 ## Consumer
 
-For a consumer to receive messages, the consumer must be connected to a receive endpoint. This is done during bus configuration, particularly within the configuration of a receive endpoint.
+To receive messages, a consumer must be configured on a receive endpoint and receive endpoints are configured with the bus. A configuration example with a single receive endpoint containing the _SubmitOrderConsumer_ above is shown below.
 
-An example of connecting a consumer to a receive endpoint is shown below.
+<<< @/docs/code/usage/UsageConsumerBus.cs
 
-```csharp
-var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-{
-    cfg.Host("localhost");
+The consumer is configured on a receive endpoint, which will receive messages from the `order-service` queue, using the `.Consumer<T>()` method. Since the consumer has a default constructor (no constructor implies a default constructor), it can be configured without specifying a consumer factory.
 
-    cfg.ReceiveEndpoint("customer_update_queue", e =>
-    {
-        e.Consumer<UpdateCustomerConsumer>();
-    });
-});
-```
+::: tip Under the Hood
+When a consumer is configured on a receive endpoint, the consumer message types (one for each `IConsumer<T>`) are used to configure the receive endpoint's _consume topology_. The consume topology is then used to configure the broker so that published messages are delivered to the queue. The broker topology varies by transport. For example, the RabbitMQ example above would result in the creation of an exchange for the _SubmitOrder_ message type and a binding from the exchange to an exchange with the same name as the queue (the latter exchange then being bound directly to the queue).
 
-The example creates a bus, which connects to the RabbitMQ running on the local machine, using the default username and password (guest/guest). On that bus. a single receive endpoint is created with the name *customer_update_queue*. The consumer is connected using the simplest method, which accepts a consumer class with a default constructor.
-
-::: tip NOTE
-When a consumer is connected to a receive endpoint, the combined set of message types consumed by all of the consumers connected to the same receive endpoint are *subscribed* to the queue. The subscription method varies by broker, in the case of RabbitMQ exchange bindings are created for the message types to the exchange/queue for the receive endpoint.
-
-These subscriptions are persistent, and remain in place after the process exits. This ensures that messages published or sent that would be delivered to one of the receive endpoint consumers are saved even is the process is terminated. When the process is started, messages waiting in the queue will be delivered to the consumer(s).
+If the queue is persistent (_AutoDelete_ is false, which is the default), the topology remains in place even after the bus has stopped. When the bus is recreated and started, the broker entities are reconfigured to ensure they are properly configured. Any messages waiting in the queue will continue to be delivered to the receive endpoint once the bus is started.
 :::
+
+### Skipped Messages
+
+When a consumer is removed (or disconnected) from a receive endpoint, a message type is removed from a consumer, or if a message is mistakenly sent to a receive endpoint, messages may be delivered to the receive endpoint that do not have a consumer. 
+
+If this occurs, the unconsumed message is moved to a *_skipped* queue (prefixed by the original queue name). The original message content is retained and additional headers are added to identify the host that skipped the message.
+
+::: warning Manual Intervention
+It may be necessary to use the broker management tools to remove an exchange binding or topic subscription that is no longer used by the receive endpoint to prevent further skipped messages.
+:::
+
 
 ### Consumer Factories
 
-The above example connects the consumer using a default constructor consumer factory. There are several other consumer factories supported, as shown below.
+In the example shown above, the consumer had a default constructor so the default constructor consumer factory was used. There are several over consumer factories included, some of which are shown below. If you are using MassTransit with a container, MassTransit includes support for several containers and integrates with them to provide container scope for consumers. Refer to the [containers](/usage/containers) section for details.
 
-```csharp
-var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-{
-    cfg.Host("localhost");
+<<< @/docs/code/usage/UsageConsumerOverloads.cs
 
-    cfg.ReceiveEndpoint("customer_update_queue", e =>
-    {
-        // an anonymous factory method
-        e.Consumer(() => new YourConsumer());
+To reiterate, the consumer factory is called for each message to create a consumer instance. Once the _Consume_ method completes, the consumer is dereferenced.
 
-        // an existing consumer factory for the consumer type
-        e.Consumer(consumerFactory);
+::: tip IDispose / IAsyncDisposable
+If using the default or delegate consumer factory and the consumer supports either `IAsyncDisposable` or `IDisposable`, the appropriate dispose method will be called.
 
-        // a type-based factory that returns an object (container friendly)
-        e.Consumer(consumerType, type => Activator.CreateInstance(type));
-
-        // an anonymous factory method, with some middleware goodness
-        e.Consumer(() => new YourConsumer(), x =>
-        {
-            // add middleware to the consumer pipeline
-            x.UseExecuteAsync(context => Console.Out.WriteLineAsync("Consumer created"));
-        });
-    });
-});
-```
+When using a container, it is responsible for consumer disposal when the scope is disposed.
+:::
 
 ### Connect Consumers
 
-Once a bus has been configured, returning an `IBusControl` reference, the receive endpoints have been created and cannot be modified. The bus itself, however, provides a temporary (auto-delete) queue which can be used to receive messages. To connect a consumer to the bus temporary queue, a series of *Connect* methods can be used.
+Once a bus has been configured, the receive endpoints have been created and cannot be modified. However, the bus creates a temporary, auto-delete endpoint for itself. Consumers can be connected to the bus endpoint using any of the `Connect` methods. The bus endpoint is designed to receive responses (via the request client, see the [requests](/usage/requests) section) and **messages sent directly to the bus endpoint**.
 
-::: warning
-Published messages will not be received by the temporary queue. Because the queue is temporary, when consumers are connected no bindings or subscriptions are created. This makes it very fast for transient consumers, and avoids thrashing the message broker with temporary bindings.
+::: warning Consume Topology
+The bus endpoint does not use its consume topology to configure the broker, and message type exchanges are not created, bound, or otherwise subscribed to the bus endpoint queue. _Published_ messages will not be delivered to the bus endpoint queue and subsequently will not be delivered to consumers connected to the bus endpoint.
+
+This makes the bus endpoint very fast short-lived consumers, such as the request client.
 :::
 
-The temporary queue is useful to receive request responses and faults (via the response/fault address header) and routing slip events (via an event subscription in the routing slip).
+The following example connects a consumer to the bus endpoint, and then sets the _ResponseAddress_ header on the _SubmitOrder_ message to the bus endpoint address.
 
-```csharp
-var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-{
-    cfg.Host("localhost");
-});
+<<< @/docs/code/usage/UsageConsumerConnect.cs
 
-busControl.Start();
-
-ConnectHandle handle = busControl.ConnectConsumer<FaultConsumer>();
-
-handle.Disconnect(); // disconnect the consumer from the bus pipeline
-```
-
-In addition to the `ConnectConsumer` method, methods for each consumer type are also included (`ConnectHandler`, `ConnectInstance`, `ConnectSaga`, and `ConnectStateMachineSaga`).
+There are connect methods for the other consumer types as well, including handlers, instances, sagas, and saga state machines.
 
 ## Instance
 
-While using a consumer instance per message is highly suggested, it is possible to connect an existing consumer instance which will be called for every message. The consumer *must* be thread-safe, as the ```Consume``` method will be called from multiple threads simultaneously. To connect an existing instance, see the example below.
+Creating a new consumer instance for each message is highly suggested. However, it is possible to configure an existing consumer instance to which every received message will be delivered (if the message type is consumed by the consumer).
 
-```csharp
-var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-{
-    cfg.Host("localhost");
+::: tip Thread Safety
+An instance consumer **must** be thread-safe since the _Consume_ method may be called from multiple threads simultaneously.
+:::
 
-    cfg.ReceiveEndpoint("customer_update_queue", e =>
-    {
-        e.Instance(existingConsumer);
-    });
-});
-```
+An example instance configuration is shown below.
 
-### Undeliverable Messages
-
-If the configuration of an endpoint changes, or if a message is mistakenly sent to an endpoint, it is possible that a message type is received that does not have any connected consumers. If this occurs, the message is moved to a *_skipped* queue (prefixed by the original queue name). The original message content is retained, and additional headers are added to indicate the host which moved the message.
+<<< @/docs/code/usage/UsageInstance.cs
 
 ## Handler
 
 While creating a consumer is the preferred way to consume messages, it is also possible to create a simple message handler. By specifying a method, anonymous method, or lambda method, a message can be consumed on a receive endpoint.
 
-To configure a simple message handler, refer to the example below.
+> This is great for unit testing, and other simple scenarios. Beyond that, use a consumer.
 
-```csharp
-var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-{
-    cfg.Host("localhost");
+A simple handler example is shown below.
 
-    cfg.ReceiveEndpoint("customer_update_queue", e =>
-    {
-        e.Handler<UpdateCustomerAddress>(context =>
-            return Console.Out.WriteLineAsync($"Update customer address received: {context.Message.CustomerId}"));
-    });
-});
-```
+<<< @/docs/code/usage/UsageHandler.cs
 
-In this case, the method is called for each message received. No consumer is created, and no lifecycle management is performed.
-
-## Observer
-
-With the addition of the `IObserver` interface, the concept of an observer was added to the .NET framework. MassTransit supports the direct connection of observers to receive endpoints.
-
-> Unfortunately, observers are not asynchronous. Because of this, it is not possible to play nice with the async support provided by the compiler when using an observer.
-
-An observer is defined using the built-in `IObserver<T>` interface, as shown below.
-
-```csharp
-public class CustomerAddressUpdatedObserver :
-    IObserver<ConsumeContext<CustomerAddressUpdated>>
-{
-    public void OnNext(ConsumeContext<CustomerAddressUpdated> context)
-    {
-        Console.WriteLine("Customer address was updated: {0}", context.Message.CustomerId);
-    }
-
-    public void OnError(Exception error)
-    {
-    }
-
-    public void OnCompleted()
-    {
-    }
-}
-```
-
-Once created, the observer is connected to the receive endpoint similar to a consumer instance.
-
-```csharp
-var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-{
-    cfg.Host("localhost");
-
-    cfg.ReceiveEndpoint("customer_update_queue", e =>
-    {
-        e.Observer<CustomerAddressUpdatedObserver>();
-    });
-});
-```
+The asynchronous handler method is called for each message delivered to the receive endpoint. Since there is no consumer to create, no scope is created if using a container, and nothing is disposed.

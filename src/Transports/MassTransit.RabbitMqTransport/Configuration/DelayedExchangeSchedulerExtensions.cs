@@ -7,10 +7,8 @@
     public static class DelayedExchangeSchedulerExtensions
     {
         /// <summary>
-        /// Uses the RabbitMQ Delayed ExchangeName plugin to schedule messages for future delivery. A lightweight
-        /// alternative to Quartz, which does not require any storage outside of RabbitMQ.
+        /// Uses the RabbitMQ delayed-exchange plug-in for message scheduling.
         /// </summary>
-        /// <param name="configurator"></param>
         public static void UseDelayedExchangeMessageScheduler(this IBusFactoryConfigurator configurator)
         {
             if (configurator == null)
@@ -19,6 +17,14 @@
             var specification = new DelayedExchangeMessageSchedulerSpecification();
 
             configurator.AddPipeSpecification(specification);
+        }
+
+        /// <summary>
+        /// Uses the RabbitMQ delayed-exchange plug-in for message scheduling.
+        /// </summary>
+        public static void UseRabbitMqMessageScheduler(this IBusFactoryConfigurator configurator)
+        {
+            UseDelayedExchangeMessageScheduler(configurator);
         }
     }
 }

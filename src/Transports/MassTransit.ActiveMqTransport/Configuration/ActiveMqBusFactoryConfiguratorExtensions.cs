@@ -1,7 +1,8 @@
-﻿namespace MassTransit.ActiveMqTransport
+﻿namespace MassTransit
 {
     using System;
-    using Configuration;
+    using ActiveMqTransport;
+    using ActiveMqTransport.Configuration;
 
 
     public static class ActiveMqBusFactoryConfiguratorExtensions

@@ -69,6 +69,7 @@ module.exports = {
               '/usage/riders/eventhub'
             ]
           },
+          '/usage/mediator',
           '/usage/messages',
           '/usage/consumers',
           '/usage/producers',
@@ -106,6 +107,7 @@ module.exports = {
             children: [
               ['/usage/containers/definitions', 'Definitions'],
               ['/usage/containers/msdi', 'Microsoft'],
+              '/usage/containers/multibus',
               ['/usage/containers/autofac', 'Autofac'],
               ['/usage/containers/castlewindsor', 'Castle Windsor'],
               ['/usage/containers/simpleinjector', 'Simple Injector'],
@@ -124,12 +126,11 @@ module.exports = {
                 collapsable: true,
                 children: [
                   '/advanced/scheduling/scheduling-api',
-                  '/advanced/scheduling/in-memory',
-                  '/advanced/scheduling/azure-sb-scheduler',
+                  '/advanced/scheduling/activemq-delayed',
                   '/advanced/scheduling/amazonsqs-scheduler',
+                  '/advanced/scheduling/azure-sb-scheduler',
                   '/advanced/scheduling/rabbitmq-delayed',
-                  '/advanced/scheduling/hangfire',
-                  '/advanced/scheduling/redeliver'
+                  '/advanced/scheduling/hangfire'
                 ]
               },
               {
@@ -165,8 +166,6 @@ module.exports = {
                   '/advanced/conductor/configuration'
                 ]
               },
-              '/usage/mediator',
-              '/usage/containers/multibus',
               '/usage/message-data',
               {
                 title: 'Monitoring',

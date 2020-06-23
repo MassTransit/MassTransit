@@ -82,20 +82,26 @@ The connection (and by use of the connection, the command) are enlisted in the t
 
 While not shown here, a class that provides the connection, and enlists the connection upon creation, should be added to the container to ensure that the transaction is not enlisted twice (not sure that's a bad thing though, it should be ignored). Also, as long as only a single connection string is enlisted, the DTC should not get involved. Using the same transaction across multiple connection strings is a bad thing, as it will make the DTC come into play which slows the world down significantly.
 
-## Transaction Outbox
 
-While the [In Memory Outbox](/usage/exceptions#outbox) is the best choice for an outbox when within a consumer, sometimes you need to Publish/Send a message onto the bus from outside a consumer. Such scenarios might be from a console app, or maybe an HTTP Endpoint. Below is an example of registration and usage for the Transaction Outbox.
+## Transactional Bus
+
+Transports don't typically support transactions, so sending messages during a transaction only to encounter an exception resulting in a transaction rollback may lead to messages that were sent without the transaction being committed.
+
+::: tip In Memory Outbox
+MassTransit has an in-memory outbox to deal with this problem, which can be used within a message consumer. It leverages the durable nature of a message transport to ensure that messages are ultimately sent. There is an extensive article and [video](https://youtu.be/P41IsVAc1nI) explaining the outbox behavior. This approach is preferred to performing transactional database writes outside of a consumer.
+:::
+
+However, sometimes you are coming from the database first and can't get around it. For those situations, MassTransit has a _very simple_ transactional bus which enlists in the current transaction and defers outgoing messages until the transaction is being committed. There is still no rollback, once the messages are delivered to the broker, there is no pulling them back.
+
 
 ```cs
 services.AddMassTransit(x =>
 {
-    x.UsingRabbitMq(cfg =>
+    x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("localhost", "/");
-    }));
+    });
 
-    // This needs to be after AddBus, because it registers a decorator over IPublishEndpoint and ISendEndpointProvider, and DI Registration order matters (last registration wins)
-    x.AddTransactionOutbox();
+    x.AddTransactionalBus();
 });
 ```
 
@@ -145,7 +151,7 @@ public class Program
 
         await bus.StartAsync(); // This is important!
 
-        var outbox = new TransactionOutbox(bus, bus, new NullLogger()); // Treat this as a singleton, thread safe.
+        var transactionalBus = new TransactionalBus(bus);
 
         while(/*some condition*/)
         {
@@ -153,8 +159,8 @@ public class Program
             {
                 // Do whatever business logic you need.
 
-                await outbox.Publish(new ReportQueued{...});
-                await outbox.Send(new CalculateReport{...});
+                await transactionalBus.Publish(new ReportQueued{...});
+                await transactionalBus.Send(new CalculateReport{...});
 
                 // Maybe other business logic
 

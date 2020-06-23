@@ -22,8 +22,15 @@ namespace MassTransit.Pipeline.ConsumerFactories
             }
             finally
             {
-                var disposable = consumer as IDisposable;
-                disposable?.Dispose();
+                switch (consumer)
+                {
+                    case IAsyncDisposable asyncDisposable:
+                        await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                        break;
+                    case IDisposable disposable:
+                        disposable.Dispose();
+                        break;
+                }
             }
         }
 

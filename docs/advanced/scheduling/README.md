@@ -1,23 +1,48 @@
 # Scheduling
 
-Time matters, particularly in distributed applications. Most sophisticated systems need to schedule things, and MassTransit has excellent scheduling support. From broker-based scheduling to leveraging Quartz.NET as a standalone message scheduler, MassTransit provides a consistent scheduling API.
+Time is important, particularly in distributed applications. Sophisticated systems need to schedule things, and MassTransit has extensive scheduling support.
 
+MassTransit supports two different methods of message scheduling:
 
+1. Scheduler-based, using either Quartz.NET or Hangfire, where the scheduler runs in a service and schedules messages using a queue.
+1. Transport-based, using the transports built-in message scheduling/delay capabilities. In some cases, such as RabbitMQ, this requires an additional plug-in to be installed and configured.
 
-MassTransit uses Quartz.NET to schedule messages, making it possible to build complex time-based workflows. Several extensions are available to message consumers, as well as middleware for using message scheduling.
+> Recurring schedules are only supported by scheduler-based solutions (Option 1).
 
-In a production system, Quartz.NET is run as a service with multiple instances active for high availability and load balancing. Quartz can use any SQL database to coordinate scheduled jobs across servers, making it suitable for this type of use.
+## Configuration
 
-There is a standalone MassTransit service, MassTransit.QuartzService, which can be installed and used on servers for this purpose. It is configured via the `App.config` file and is a good example of how to build a standalone MassTransit service.
+Depending upon the scheduling method used, the bus must be configured to use the appropriate scheduler.
 
-> This service will likely move to be hosted in the MassTransit.Host, making the service logic reusable across any message transport.
+### Quartz.NET / Hangfire
 
-Message scheduling is described in details in the following articles:
+To configure the bus to use either Quartz.NET or Hangfire for message scheduling, add the _UseMessageScheduler_ method as shown below.
 
-* [Scheduling API](scheduling-api)
-* [In-memory scheduling](in-memory)
-* [Azure Service Bus](azure-sb-scheduler)
+<<< @/docs/code/scheduling/SchedulingEndpoint.cs
+
+The _UseMessageScheduler_ configures the bus to use the scheduler endpoint. The _AddMessageScheduler_ adds _IMessageScheduler_ to the container, which will use the same scheduler endpoint.
+
+::: tip Quartz.NET Docker Image
+MassTransit provides a [Docker Image](https://hub.docker.com/r/masstransit/quartz) with Quartz.NET ready-to-run using SQL Server. A complementary [SQL Server Image](https://hub.docker.com/r/masstransit/sqlserver-quartz) configured to run with Quartz.NET is also available. Combined, these images make getting started with Quartz easy.
+:::
+
+Quartz.NET can also be configured in-memory, which is great for unit testing. 
+
+> Uses [MassTransit.Quartz](https://nuget.org/packages/MassTransit.Quartz)
+
+<<< @/docs/code/scheduling/SchedulingInMemory.cs
+
+The _UseInMemoryScheduler_ method initializes Quartz.NET for standalone in-memory operation, and configures a receive endpoint named `scheduler`. The _AddMessageScheduler_ adds _IMessageScheduler_ to the container, which will use the same scheduler endpoint.
+
+::: warning
+Using the in-memory scheduler uses non-durable storage. If the process terminates, any scheduled messages will be lost, immediately, never to be found again. For any production system, using a standalone service is recommended with persistent storage.
+:::
+
+### Transport-based
+
+To configure transport-based message scheduling, refer to the transport-specific section for details.
+
+* [ActiveMQ](activemq-delayed)
 * [Amazon SQS](amazonsqs-scheduler)
-* [RabbitMQ Delayed Exchange](rabbitmq-delayed)
-* [Redelivering messages](redeliver)
+* [Azure Service Bus](azure-sb-scheduler)
+* [RabbitMQ](rabbitmq-delayed)
 

@@ -8,11 +8,17 @@ A job consumer is a specialized consumer type designed to execute _jobs_, and is
 Job Consumers replace Turnout, a previous feature of MassTransit, which was poorly supported and very limited. While Turnout is now deprecated, job consumers offer a much better developer experience and are better integrated.
 :::
 
+### IJobConsumer
+
+<<< @/src/MassTransit/JobService/IJobConsumer.cs
+
 ### Configuration
 
 The example below configures a job consumer on a receive endpoint named using an _IEndpointNameFormatter_ passing the consumer type.
 
 <<< @/docs/code/turnout/JobSystemConsoleService.cs
+
+In this example, the job timeout as well as the number of concurrent jobs allowed is specified using `JobOptions<T>` when configuring the consumer. The job options can also be specified using a consumer definition in the same way.
 
 ### Client
 
@@ -25,5 +31,3 @@ To submit jobs to the job consumer, use the service client to create a request c
 When the job service endpoints are configured, a set of saga state machines are configured used to track job execution across multiple service instances. This ensure that each job execution is tracked, faults are observed, and retry attempts are scheduled.
 
 Conductor is used to manage the _service instance_, including the service instance endpoint. Each service instance has its own endpoint which is used to communicate with the job consumers executing on that instance.
-
-

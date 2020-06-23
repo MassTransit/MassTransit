@@ -10,30 +10,9 @@ However, with broader use of cloud-based platforms comes a greater variety of me
 
 ### Standard Configuration
 
-To review the standard [configuration](/usage/configuration.md#asp-net-core), configuring MassTransit is done using the _AddMassTransit_ method as shown.
+To review, the configuration for a single bus is shown below.
 
-```cs
-using MassTransit;
-using MassTransit.AspNetCore;
-
-public void ConfigureServices(IServiceCollection services)
-{
-    services.AddMassTransit(x =>
-    {
-        x.AddConsumer<SubmitOrderConsumer>();
-        x.AddRequestClient<SubmitOrder>();
-
-        x.UsingRabbitMq(cfg =>
-        {
-            cfg.Host("localhost");
-            cfg.UseHealthCheck(context);
-
-            cfg.ConfigureEndpoints(context);
-        });
-    });
-    services.AddMassTransitHostedService();
-}
-```
+<<< @/docs/code/containers/MultiBusContainer.cs
 
 This configures the container so that there is a bus, using RabbitMQ, with a single consumer _SubmitOrderConsumer_, using automatic endpoint configuration. The MassTransit hosted service, which configures the bus health checks and starts/stop the bus via `IHostedService`, is also added to the container.
 
@@ -55,49 +34,15 @@ When a consumer, a saga, or an activity is consuming a message the _ConsumeConte
 
 To support multiple bus instances in a single container, the interface behaviors described above had to be considered carefully. There are expectations as to how these interfaces behave, and it was important to ensure consistent behavior whether an application has one, two, or a dozen bus instances (please, not a dozen – think of the children). A way to differentiate between different bus instances ensuring that sent or published messages end up on the right queues or topics is needed. The ability to configure each bus instance separately, yet leverage the power of a single shared container is also a must.
 
-To configure additional bus instances, create a new interface that includes _IBus_.
+To configure additional bus instances, create a new interface that includes _IBus_. Then, using that interface, configure the additional bus using the `AddMassTransit<T>` method, which is included in the **_MassTransit.MultiBus_** namespace.
 
-```cs
-public interface ISecondBus :
-    IBus
-{    
-}
-```
-
-Using that interface, configure the additional bus using the `AddMassTransit<T>` method, which is included in the **_MassTransit.MultiBus_** namespace.
-
-```cs
-using MassTransit;
-using MassTransit.MultiBus;
-
-public void ConfigureServices(IServiceCollection services)
-{
-    // previous AddMassTransit call omitted to focus
-
-    services.AddMassTransit<ISecondBus>(x =>
-    {
-        x.AddConsumer<AllocateInventoryConsumer>();
-        x.AddRequestClient<AllocateInventory>();
-
-        x.UsingRabbitMq(cfg =>
-        {
-            cfg.Host("remote-host");
-            cfg.UseHealthCheck(context);
-
-            cfg.ConfigureEndpoints(context);;
-        });
-    });
-
-    // call to AddMassTransitHostedService ommitted to focus
-}
-```
+<<< @/docs/code/containers/MultiBusTwoContainer.cs{31-42}
 
 This configures the container so that there is an additional bus, using RabbitMQ, with a single consumer _AllocateInventoryConsumer_, using automatic endpoint configuration. Only a single hosted service is required that will start all bus instances so there is no need to add it twice.
 
 Notable differences in the new method:
 
 - The generic argument, _ISecondBus_, is the type that will be added to the container instead of _IBus_. This ensures that access to the additional bus is directly available without confusion.
-- The _AddBus_ argument, `context`, is now a registration context instead of the container type (which is _IServiceProvider_ for Microsoft Dependency Injection). It should be used for the _ConfigureConsumer_, _ConfigureSaga_, _ConfigureEndpoints_, etc. methods. If access to the container is neeced, the _Container_ property can be used.
 
 The registered interfaces are slightly different for additional bus instances.
 
@@ -124,54 +69,7 @@ In the example above, which should be the most common of this hopefully uncommon
 
 To specify a class, as well as take advantage of the container to bring additional properties along with it, take a look at the following types and configuration.
 
-```cs
-public interface IThirdBus :
-    IBus
-{    
-    ISomeService SomeService { get; }
-}
-
-public class ThirdBus :
-    BusInstance<IThirdBus>,
-    IThirdBus
-{
-    public ThirdBus(IBusControl busControl, ISomeService someService)
-        : base(busControl)
-    {
-        SomeService = someService;
-    }
-
-    public ISomeService SomeService { get; }
-}
-```
-
-Then, to specify the class in the configuration.
-
-```cs
-using MassTransit;
-using MassTransit.MultiBus;
-
-public void ConfigureServices(IServiceCollection services)
-{
-    // previous AddMassTransit call omitted to focus
-
-    services.AddMassTransit<IThirdBus, ThirdBus>(x =>
-    {
-        x.AddConsumer<DestroyAllHumansConsumer>();
-        x.AddRequestClient<DestroyAllHumans>();
-
-        x.UsingRabbitMq(cfg =>
-        {
-            cfg.Host("another-planet");
-            cfg.UseHealthCheck(context);
-
-            cfg.ConfigureEndpoints(context);;
-        });
-    });
-
-    // call to AddMassTransitHostedService ommitted to focus
-}
-```
+<<< @/docs/code/containers/MultiBusThreeContainer.cs
 
 This would add a third bus instance, the same as the second, but using the instance class specified. The class is resolved from the container and given `IBusControl`, which must be passed to the base class ensuring that it is properly configured.
 

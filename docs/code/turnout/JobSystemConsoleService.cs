@@ -35,7 +35,12 @@ namespace JobSystemConsoleService
 
                     instance.ReceiveEndpoint(queueName, e =>
                     {
-                        e.Consumer(() => new ConvertVideoJobConsumer());
+                        e.Consumer(() => new ConvertVideoJobConsumer(), c =>
+                        {
+                            c.Options<JobOptions<ConvertVideo>>(options => options
+                                .SetJobTimeout(TimeSpan.FromMinutes(15))
+                                .SetConcurrentJobLimit(10));
+                        });
                     });
                 });
             });

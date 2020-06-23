@@ -1,89 +1,18 @@
-# Message Scheduler
+# Schedule Messages
 
-The scheduling API consists of several extension methods that send messages to an endpoint where
-the Quartz scheduling consumers are connected.
+### From a Consumer
 
-### Configuring the Quartz address
+To schedule messages from a consumer, use any of the _ConsumeContext_ extension methods, such as _ScheduleSend_, to schedule messages.
 
-The bus has an internal context that is used to make it so that consumers that need to schedule 
-messages do not have to be aware of the specific scheduler type being used, or the message scheduler 
-address. To configure the address, use the extension method shown below.
+<<< @/docs/code/scheduling/SchedulingConsumeContext.cs
 
-```csharp
-var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-{
-    cfg.UseMessageScheduler(new Uri("queue:quartz"));
-});
-```
+The message scheduler, specified during bus configuration, will be used to schedule the message.
 
-Once configured, messages may be scheduled from any message consumer as shown below.
+### From a Bus
 
-### Scheduling a message from a consumer
+To schedule messages from a bus, use _IMessageScheduler_ from the container (or create a new one using the bus and appropriate scheduler).
 
-To schedule a message, call the `ScheduleSend` method with the message to be delivered.
-
-```csharp
-public interface ScheduleNotification
-{
-    DateTime DeliveryTime { get; }
-    string EmailAddress { get; }
-    string Body { get; }
-}
-
-public interface SendNotification
-{
-    string EmailAddress { get; }
-    string Body { get; }
-}
-
-public class ScheduleNotificationConsumer :
-    IConsumer<ScheduleNotification>
-{
-    Uri _notificationService;
-
-    public async Task Consume(ConsumeContext<ScheduleNotification> context)
-    {
-        await context.ScheduleSend(_notificationService,
-            context.Message.DeliveryTime,
-            new SendNotification
-            {
-                EmailAddress = context.Message.EmailAddress,
-                Body =  context.Message.Body
-            });
-    }
-
-    class SendNotificationCommand :
-        SendNotification
-    {
-        public string EmailAddress { get; set; }
-        public string Body { get; set; }
-    }
-}
-```
-
-The `ScheduleMessage` command message will be sent to the Quartz endpoint, which will
-schedule a job in Quartz to deliver the message (and save the message body to be delivered).
-When the job is triggered, the message will be sent to the destination address.
-
-### Scheduling a message from the bus
-
-If a message needs to be scheduled from the bus itself (not in the context of consuming a message), the 
-`SendEndpoint` for the Quartz scheduler should be retrieved and used to schedule the send.
-
-```csharp
-var schedulerEndpoint = await bus.GetSendEndpoint(_schedulerAddress);    
-                                                                    
-await schedulerEndpoint.ScheduleSend(_notificationService,                   
-    context.Message.DeliveryTime,                                            
-    new SendNotification                                                     
-    {                                                                        
-        EmailAddress = context.Message.EmailAddress,                         
-        Body =  context.Message.Body                                         
-    });
-```
-
-This should only be used outside of a consume context, however, as the lineage of the message will be lost 
-(things like ConversationId, InitiatorId, etc.).
+<<< @/docs/code/scheduling/SchedulingScheduler.cs
 
 ### Recurring Messages
 

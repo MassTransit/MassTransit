@@ -176,13 +176,13 @@
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression,
-            Action<IRequestConfigurator> configureRequest)
+            Action<IRequestConfigurator> configureRequest = default)
             where TRequest : class
             where TResponse : class
         {
             var configurator = new StateMachineRequestConfigurator<TRequest>();
 
-            configureRequest(configurator);
+            configureRequest?.Invoke(configurator);
 
             Request(propertyExpression, requestIdExpression, configurator.Settings);
         }
@@ -238,14 +238,14 @@
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
         protected void Request<TRequest, TResponse, TResponse2>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression,
-            Action<IRequestConfigurator> configureRequest)
+            Action<IRequestConfigurator> configureRequest = default)
             where TRequest : class
             where TResponse : class
             where TResponse2 : class
         {
             var configurator = new StateMachineRequestConfigurator<TRequest>();
 
-            configureRequest(configurator);
+            configureRequest?.Invoke(configurator);
 
             Request(propertyExpression, requestIdExpression, configurator.Settings);
         }
@@ -303,12 +303,12 @@
         /// <param name="configureSchedule">The callback to configure the schedule</param>
         protected void Schedule<TMessage>(Expression<Func<Schedule<TInstance, TMessage>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> tokenIdExpression,
-            Action<IScheduleConfigurator<TInstance, TMessage>> configureSchedule)
+            Action<IScheduleConfigurator<TInstance, TMessage>> configureSchedule = default)
             where TMessage : class
         {
             var configurator = new StateMachineScheduleConfigurator<TInstance, TMessage>();
 
-            configureSchedule(configurator);
+            configureSchedule?.Invoke(configurator);
 
             Schedule(propertyExpression, tokenIdExpression, configurator.Settings);
         }

@@ -1,43 +1,19 @@
 # ActiveMQ
 
-ActiveMQ has a native support for deferred dispatch. It is supported by MassTransit, but we cannot guarantee anything more than the feature guarantees itself. Please read the message on the plugin [project home page](1) to get full understanding of the current status and limitations.
+MassTransit uses the built-in ActiveMQ scheduler to schedule messages.
 
-### Scheduling messages
+::: tip Quartz.NET Docker Image
+MassTransit provides a [Docker Image](https://hub.docker.com/r/masstransit/activemq) with ActiveMQ ready to run, including scheduler support.
+:::
 
-You can use the delayed exchange to scheduled messages instead of Quartz. To enable this, you need to configure your bus properly:
+### Configuration
 
-```csharp
-var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
-{
-    cfg.UseDelayedExchangeMessageScheduler();
+To configure the ActiveMQ message scheduler, see the example below.
 
-    cfg.Host(new Uri("activemq://localhost/"), h =>
-    {
-        h.Username("admin");
-        h.Password("admin");
-    });
-}
-```
+<<< @/docs/code/scheduling/SchedulingActiveMQ.cs
 
-**Important:** there is no support for unscheduling messages that are scheduled with the delayed exchange.
-
-### Redelivery
-
-You also can use the delayed exchange to implement message redelivery (second-level retries). All you need to do is to call the `context.Defer(TimeSpan delay)` method in your consumer.
-
-```csharp
-public async Task Consume(ConsumeContext<MyMessage> context)
-{
-    try
-    {
-        // process message
-    }
-    catch (MyTemporaryException e)
-    {
-        // we will try again later
-        context.Defer(TimeSpan.FromSeconds(10));
-    }
-}
-```
+::: warning
+Scheduled messages cannot be canceled when using the ActiveMQ message scheduler
+:::
 
 [1]: https://activemq.apache.org/delay-and-schedule-message-delivery

@@ -1,27 +1,13 @@
-# Amazon SQS Scheduler
+# Amazon SQS
 
-Amazon SQS includes a _DelaySeconds_ property, which can be used to defer message delivery. MassTransit can use this feature to provide _scheduled_ message delivery.
+Amazon SQS includes a _DelaySeconds_ property, which can be used to defer message delivery. MassTransit uses this feature to provide _scheduled_ message delivery.
 
-### Scheduling messages
+### Configuration
 
-To enable the Amazon SQS message scheduler:
+To configure the Amazon SQS message scheduler, see the example below.
 
-```cs {3}
-var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
-{
-    cfg.UseAmazonSqsMessageScheduler();
-
-    cfg.Host("region", hc =>
-    {
-        hc.Credentials(...);
-    });
-}
-```
+<<< @/docs/code/scheduling/SchedulingAmazonSQS.cs
 
 ::: warning
-Unscheduling messages is not supported using Amazon SQS delayed delivery.
+Scheduled messages cannot be canceled when using the Amazon SQS message scheduler
 :::
-
-### Redelivery
-
-Amazon SQS delayed delivery can be used with the `UseScheduledRedelivery` feature, which is explained in the [exceptions](/usage/exceptions.md#redelivery) section.

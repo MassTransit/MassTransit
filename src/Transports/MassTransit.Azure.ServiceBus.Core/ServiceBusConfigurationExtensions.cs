@@ -1,7 +1,8 @@
-﻿namespace MassTransit.Azure.ServiceBus.Core
+﻿namespace MassTransit
 {
     using System;
-    using Configuration;
+    using Azure.ServiceBus.Core;
+    using Azure.ServiceBus.Core.Configuration;
 
 
     public static class ServiceBusConfigurationExtensions
