@@ -59,3 +59,9 @@ IMessageScheduler scheduler = new MessageScheduler(new ServiceBusScheduleMessage
 
 await scheduler.ScheduleSend(destinationAddress, scheduledTime, message, cancellationToken);
 ```
+
+To publish a scheduled message outside of a consumer using IBus, you can adjust the Service Bus ScheduledEnqueueTime:
+
+```cs
+await bus.Publish(message, context => context.SetScheduledEnqueueTime(TimeSpanDelayToDelivery));
+```
