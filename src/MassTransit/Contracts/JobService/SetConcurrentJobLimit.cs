@@ -8,9 +8,9 @@ namespace MassTransit.Contracts.JobService
     /// </summary>
     public interface SetConcurrentJobLimit
     {
-        Guid ConsumerTypeId { get; }
+        Guid JobTypeId { get; }
 
-        int ConcurrentLimit { get; }
+        int ConcurrentJobLimit { get; }
 
         ConcurrentLimitKind Kind { get; }
 

@@ -20,6 +20,7 @@ namespace MassTransit.JobService.Components.StateMachines
         public Guid JobTypeId { get; set; }
 
         public Guid AttemptId { get; set; }
+        public int RetryAttempt { get; set; }
 
         public DateTime? Started { get; set; }
 
@@ -32,7 +33,9 @@ namespace MassTransit.JobService.Components.StateMachines
         public Guid? StartJobRequestId { get; set; }
         public Guid? JobSlotRequestId { get; set; }
         public Guid? JobSlotWaitToken { get; set; }
+        public Guid? JobRetryDelayToken { get; set; }
 
         public Guid CorrelationId { get; set; }
+
     }
 }

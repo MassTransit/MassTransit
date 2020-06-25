@@ -17,6 +17,13 @@ namespace MassTransit.JobService.Pipeline
         where TConsumer : class, IJobConsumer<TJob>
         where TJob : class
     {
+        readonly IRetryPolicy _retryPolicy;
+
+        public JobConsumerMessageFilter(IRetryPolicy retryPolicy)
+        {
+            _retryPolicy = retryPolicy;
+        }
+
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("consume");
@@ -34,9 +41,11 @@ namespace MassTransit.JobService.Pipeline
             throw new ConsumerMessageException(message);
         }
 
-        static async Task RunJob(PipeContext context, IJobConsumer<TJob> jobConsumer)
+        async Task RunJob(PipeContext context, IJobConsumer<TJob> jobConsumer)
         {
             var jobContext = context.GetPayload<JobContext<TJob>>();
+
+            RetryPolicyContext<JobContext<TJob>> policyContext = _retryPolicy.CreatePolicyContext(jobContext);
 
             try
             {
@@ -46,17 +55,49 @@ namespace MassTransit.JobService.Pipeline
 
                 await jobContext.NotifyCompleted().ConfigureAwait(false);
             }
-            catch (TaskCanceledException)
-            {
-                await jobContext.NotifyCanceled("Task canceled").ConfigureAwait(false);
-            }
             catch (OperationCanceledException)
             {
                 await jobContext.NotifyCanceled("Operation canceled").ConfigureAwait(false);
             }
             catch (Exception exception)
             {
-                await jobContext.NotifyFaulted(exception).ConfigureAwait(false);
+                if (!policyContext.CanRetry(exception, out RetryContext<JobContext<TJob>> retryContext))
+                {
+                    if (_retryPolicy.IsHandled(exception))
+                    {
+                        context.GetOrAddPayload(() => retryContext);
+
+                        await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+                    }
+
+                    await jobContext.NotifyFaulted(exception).ConfigureAwait(false);
+                    return;
+                }
+
+                var currentRetryAttempt = jobContext.RetryAttempt;
+                for (var retryIndex = 0; retryIndex < currentRetryAttempt; retryIndex++)
+                {
+                    if (!retryContext.CanRetry(exception, out retryContext))
+                    {
+                        if (_retryPolicy.IsHandled(exception))
+                        {
+                            context.GetOrAddPayload(() => retryContext);
+
+                            await retryContext.RetryFaulted(exception).ConfigureAwait(false);
+                        }
+
+                        await jobContext.NotifyFaulted(exception).ConfigureAwait(false);
+                        return;
+                    }
+                }
+
+                var delay = retryContext.Delay ?? TimeSpan.Zero;
+
+                await jobContext.NotifyFaulted(exception, delay).ConfigureAwait(false);
+            }
+            finally
+            {
+                policyContext.Dispose();
             }
         }
     }

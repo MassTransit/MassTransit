@@ -12,13 +12,12 @@ namespace MassTransit.JobService.Components.StateMachines
         public JobAttemptStateMachine(JobServiceOptions options)
         {
             Event(() => StartJobAttempt, x => x.CorrelateById(context => context.Message.AttemptId));
-
             Event(() => StartJobFaulted, x => x.CorrelateById(context => context.Message.Message.AttemptId));
 
-            Event(() => AttemptStarted, x => x.CorrelateById(context => context.Message.AttemptId));
+            Event(() => AttemptCanceled, x => x.CorrelateById(context => context.Message.AttemptId));
             Event(() => AttemptCompleted, x => x.CorrelateById(context => context.Message.AttemptId));
             Event(() => AttemptFaulted, x => x.CorrelateById(context => context.Message.AttemptId));
-            Event(() => AttemptCanceled, x => x.CorrelateById(context => context.Message.AttemptId));
+            Event(() => AttemptStarted, x => x.CorrelateById(context => context.Message.AttemptId));
 
             Schedule(() => StatusCheckRequested, instance => instance.StatusCheckTokenId, x =>
             {
@@ -86,28 +85,27 @@ namespace MassTransit.JobService.Components.StateMachines
                 Ignore(AttemptFaulted));
         }
 
-        public State Waiting { get; private set; }
-        public State Starting { get; private set; }
-        public State Running { get; private set; }
-        public State Faulted { get; private set; }
+        // ReSharper disable UnassignedGetOnlyAutoProperty
+        public State Waiting { get; }
+        public State Starting { get; }
+        public State Running { get; }
+        public State Faulted { get; }
 
-        public Event<StartJobAttempt> StartJobAttempt { get; private set; }
+        public Event<StartJobAttempt> StartJobAttempt { get; }
+        public Event<Fault<StartJob>> StartJobFaulted { get; }
 
-        public Event<Fault<StartJob>> StartJobFaulted { get; private set; }
+        public Event<JobAttemptStarted> AttemptStarted { get; }
+        public Event<JobAttemptFaulted> AttemptFaulted { get; }
+        public Event<JobAttemptCompleted> AttemptCompleted { get; }
+        public Event<JobAttemptCanceled> AttemptCanceled { get; }
 
-        public Event<JobAttemptStarted> AttemptStarted { get; private set; }
-        public Event<JobAttemptFaulted> AttemptFaulted { get; private set; }
-        public Event<JobAttemptCompleted> AttemptCompleted { get; private set; }
-        public Event<JobAttemptCanceled> AttemptCanceled { get; private set; }
-
-        public Schedule<JobAttemptSaga, JobStatusCheckRequested> StatusCheckRequested { get; private set; }
+        public Schedule<JobAttemptSaga, JobStatusCheckRequested> StatusCheckRequested { get; }
     }
 
 
     static class TurnoutJobAttemptStateMachineBehaviorExtensions
     {
-        public static EventActivityBinder<JobAttemptSaga, StartJobAttempt> SendStartJob(
-            this EventActivityBinder<JobAttemptSaga, StartJobAttempt> binder)
+        public static EventActivityBinder<JobAttemptSaga, StartJobAttempt> SendStartJob(this EventActivityBinder<JobAttemptSaga, StartJobAttempt> binder)
         {
             return binder.SendAsync(context => context.Instance.ServiceAddress, context => context.Init<StartJob>(new
             {

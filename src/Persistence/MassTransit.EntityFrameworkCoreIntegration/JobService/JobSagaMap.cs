@@ -24,6 +24,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.JobService
             entity.Property(x => x.JobTypeId);
 
             entity.Property(x => x.AttemptId);
+            entity.Property(x => x.RetryAttempt);
 
             entity.Property(x => x.Started);
 

@@ -6,22 +6,25 @@ namespace MassTransit.JobService.Components.StateMachines
     using Automatonymous.Binders;
     using Context;
     using MassTransit.Contracts.JobService;
+    using Topology.Topologies;
 
 
     public sealed class JobTypeStateMachine :
         MassTransitStateMachine<JobTypeSaga>
     {
+        static JobTypeStateMachine()
+        {
+            GlobalTopology.Send.UseCorrelationId<AllocateJobSlot>(x => x.JobTypeId);
+            GlobalTopology.Send.UseCorrelationId<JobSlotReleased>(x => x.JobTypeId);
+            GlobalTopology.Send.UseCorrelationId<SetConcurrentJobLimit>(x => x.JobTypeId);
+        }
+
         public JobTypeStateMachine()
         {
             InstanceState(x => x.CurrentState, Active, Idle);
 
-            Event(() => JobSlotRequested, x => x.CorrelateById(context => context.Message.JobTypeId));
-            Event(() => JobSlotReleased, x => x.CorrelateById(context => context.Message.JobTypeId));
-            Event(() => SetConcurrentJobLimit, x => x.CorrelateById(context => context.Message.ConsumerTypeId));
-
             During(Initial, Active, Idle,
                 When(JobSlotRequested)
-                    .TransitionTo(Active)
                     .IfElse(context => context.IsSlotAvailable(),
                         allocate => allocate
                             .Then(context =>
@@ -35,7 +38,8 @@ namespace MassTransit.JobService.Components.StateMachines
 
                                 LogContext.Debug?.Log("Allocated Job Slot: {JobId} ({JobCount})", context.Data.JobId, context.Instance.ActiveJobCount);
                             })
-                            .RespondAsync(context => context.Init<JobSlotAllocated>(new {context.Data.JobId})),
+                            .RespondAsync(context => context.Init<JobSlotAllocated>(new {context.Data.JobId}))
+                            .TransitionTo(Active),
                         unavailable => unavailable
                             .RespondAsync(context => context.Init<JobSlotUnavailable>(new {context.Data.JobId}))));
 
@@ -53,9 +57,9 @@ namespace MassTransit.JobService.Components.StateMachines
 
                                     LogContext.Debug?.Log("Released Job Slot: {JobId} ({JobCount})", context.Data.JobId, context.Instance.ActiveJobCount);
                                 }
-                            })
-                            .If(context => context.Instance.ActiveJobCount == 0,
-                                empty => empty.TransitionTo(Idle))));
+                            }))
+                    .If(context => context.Instance.ActiveJobCount == 0,
+                        empty => empty.TransitionTo(Idle)));
 
 
             During(Initial,
@@ -68,12 +72,13 @@ namespace MassTransit.JobService.Components.StateMachines
                     .SetConcurrentLimit());
         }
 
-        public State Active { get; private set; }
-        public State Idle { get; private set; }
+        // ReSharper disable UnassignedGetOnlyAutoProperty
+        public State Active { get; }
+        public State Idle { get; }
 
-        public Event<AllocateJobSlot> JobSlotRequested { get; private set; }
-        public Event<JobSlotReleased> JobSlotReleased { get; private set; }
-        public Event<SetConcurrentJobLimit> SetConcurrentJobLimit { get; private set; }
+        public Event<AllocateJobSlot> JobSlotRequested { get; }
+        public Event<JobSlotReleased> JobSlotReleased { get; }
+        public Event<SetConcurrentJobLimit> SetConcurrentJobLimit { get; }
     }
 
 
@@ -100,11 +105,17 @@ namespace MassTransit.JobService.Components.StateMachines
             return binder.Then(context =>
             {
                 if (context.Data.Kind == ConcurrentLimitKind.Configured)
-                    context.Instance.ConcurrentJobLimit = context.Data.ConcurrentLimit;
+                {
+                    context.Instance.ConcurrentJobLimit = context.Data.ConcurrentJobLimit;
+
+                    LogContext.Debug?.Log("Concurrent Job Limit: {ConcurrencyLimit}", context.Instance.ConcurrentJobLimit);
+                }
                 else if (context.Data.Kind == ConcurrentLimitKind.Override)
                 {
-                    context.Instance.OverrideJobLimit = context.Data.ConcurrentLimit;
+                    context.Instance.OverrideJobLimit = context.Data.ConcurrentJobLimit;
                     context.Instance.OverrideLimitExpiration = DateTime.Now + (context.Data.Duration ?? TimeSpan.FromMinutes(30));
+
+                    LogContext.Debug?.Log("Override Concurrent Job Limit: {ConcurrencyLimit}", context.Instance.OverrideJobLimit);
                 }
             });
         }

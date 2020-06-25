@@ -19,14 +19,11 @@ namespace MassTransit.JobService.Pipeline
         where TJob : class
     {
         readonly IConsumerConnector _cancelJobConsumerConnector;
-        readonly IConsumerMessageFilter<TConsumer, TJob> _executeJobFilter;
         readonly IConsumerConnector _startJobConsumerConnector;
         readonly IConsumerConnector _submitJobConsumerConnector;
 
         public JobConsumerMessageConnector()
         {
-            _executeJobFilter = new JobConsumerMessageFilter<TConsumer, TJob>();
-
             _submitJobConsumerConnector = ConsumerConnectorCache<SubmitJobConsumer<TJob>>.Connector;
             _startJobConsumerConnector = ConsumerConnectorCache<StartJobConsumer<TJob>>.Connector;
             _cancelJobConsumerConnector = ConsumerConnectorCache<CancelJobConsumer<TJob>>.Connector;
@@ -66,7 +63,11 @@ namespace MassTransit.JobService.Pipeline
         {
             IConsumerMessageSpecification<TConsumer, TJob> messageSpecification = specification.GetMessageSpecification<TJob>();
 
-            IPipe<ConsumerConsumeContext<TConsumer, TJob>> consumerPipe = messageSpecification.Build(_executeJobFilter);
+            var options = specification.Options<JobOptions<TJob>>();
+
+            var jobFilter = new JobConsumerMessageFilter<TConsumer, TJob>(options.RetryPolicy);
+
+            IPipe<ConsumerConsumeContext<TConsumer, TJob>> consumerPipe = messageSpecification.Build(jobFilter);
 
             IPipe<ConsumeContext<TJob>> messagePipe = messageSpecification.BuildMessagePipe(x =>
             {

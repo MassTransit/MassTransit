@@ -27,12 +27,6 @@
             return _jobs.TryGetValue(jobId, out jobReference);
         }
 
-        public void Add(JobHandle jobReference)
-        {
-            if (!_jobs.TryAdd(jobReference.JobId, jobReference))
-                throw new JobAlreadyExistsException(jobReference.JobId);
-        }
-
         public bool TryRemoveJob(Guid jobId, out JobHandle jobHandle)
         {
             var removed = _jobs.TryRemove(jobId, out jobHandle);
@@ -52,6 +46,9 @@
             where T : class
         {
             var startJob = context.Message;
+
+            if (_jobs.ContainsKey(startJob.JobId))
+                throw new JobAlreadyExistsException(startJob.JobId);
 
             var jobContext = new ConsumeJobContext<T>(context, InstanceAddress, startJob.JobId, startJob.AttemptId, startJob.RetryAttempt, job, timeout);
 
@@ -92,6 +89,17 @@
                     }
                 }
             }
+        }
+
+        void Add(JobHandle jobHandle)
+        {
+            if (!_jobs.TryAdd(jobHandle.JobId, jobHandle))
+                throw new JobAlreadyExistsException(jobHandle.JobId);
+
+            jobHandle.JobTask.ContinueWith(innerTask =>
+            {
+                TryRemoveJob(jobHandle.JobId, out _);
+            });
         }
     }
 }

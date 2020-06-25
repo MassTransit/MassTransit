@@ -93,7 +93,7 @@
             });
         }
 
-        public Task NotifyFaulted(Exception exception)
+        public Task NotifyFaulted(Exception exception, TimeSpan? delay)
         {
             LogContext.Debug?.Log(exception, "Job Faulted: {JobId} {AttemptId} ({RetryAttempt})", JobId, AttemptId, RetryAttempt);
 
@@ -102,6 +102,7 @@
                 JobId,
                 AttemptId,
                 RetryAttempt,
+                RetryDelay = delay,
                 InVar.Timestamp,
                 Job = SerializerCache.GetObjectAsDictionary(Job),
                 Exceptions = exception

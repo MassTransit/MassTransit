@@ -16,6 +16,8 @@ namespace MassTransit.JobService.Components
         /// </summary>
         JobStatus Status { get; }
 
+        Task JobTask { get; }
+
         /// <summary>
         /// Cancel the job task
         /// </summary>

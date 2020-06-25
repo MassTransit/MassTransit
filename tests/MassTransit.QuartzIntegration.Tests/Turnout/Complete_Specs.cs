@@ -47,7 +47,6 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));
 
-            // just to capture all the test output in a single window
             ConsumeContext<JobCompleted> completed = await _completed;
         }
 

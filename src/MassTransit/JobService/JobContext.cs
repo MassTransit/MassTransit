@@ -20,7 +20,7 @@ namespace MassTransit.JobService
         Task NotifyCanceled(string reason = null);
         Task NotifyStarted();
         Task NotifyCompleted();
-        Task NotifyFaulted(Exception exception);
+        Task NotifyFaulted(Exception exception, TimeSpan? delay = default);
     }
 
 

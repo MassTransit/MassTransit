@@ -19,6 +19,7 @@
         }
 
         public Guid JobId => _context.JobId;
+        public Task JobTask => _task;
 
         public JobStatus Status
         {
