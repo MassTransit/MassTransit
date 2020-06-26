@@ -4,7 +4,7 @@ A routing slip contains an itinerary, variables, and activity/compensation logs.
 
 - A tracking number, which should be unique for each routing slip
 - An itinerary, which is an ordered list of activities
-- An activity log, containing an ordered list of previously executed activites
+- An activity log, containing an ordered list of previously executed activities
 - A compensation log, containing an order list of previous executed activities which may be compensated if the routing slip faults
 - A collection of variables, which can be mapped to activity arguments
 - A collection of subscriptions, which can be added to notify consumers of routing slip events
@@ -35,8 +35,8 @@ Each activity declares an activity argument type, which must be an interface. Wh
 
 The argument properties are mapped, by name, to the argument type from the routing slip using:
 
-- Explictly declared arguments, added to the itinerary with the activity
-- Implictly mapped arguments, added as variables to the routing slip
+- Explicitly declared arguments, added to the itinerary with the activity
+- Implicitly mapped arguments, added as variables to the routing slip
 
 To specify an explicit activity argument, specify the argument value while adding the activity using the routing slip builder.
 

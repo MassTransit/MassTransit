@@ -1,8 +1,9 @@
 namespace MassTransit.AmazonSqsTransport.Configurators
 {
-    using Conductor.Configuration.Configurators;
+    using Conductor.Configurators;
 
 
+    // ReSharper disable once UnusedType.Global
     public class AmazonSqsServiceInstanceTransportConfigurator :
         IServiceInstanceTransportConfigurator<IAmazonSqsReceiveEndpointConfigurator>
     {

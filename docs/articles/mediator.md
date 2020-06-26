@@ -1,11 +1,8 @@
 ---
-title: "Enter the Mediator"
-date: 2020-02-23
-author: "Chris"
-tag: 
-  - Patterns
-  - Mediator
+title: "Mediator"
 ---
+
+# Enter the Mediator
 
 This post covers a new MassTransit feature, _Mediator_, and how it can be used to consume messages from any transport using MassTransit consumers and sagas.
 
@@ -30,7 +27,7 @@ However, it _would_ be pretty awesome to process messages read from a Kafka topi
 
 Mediator is fast. Even using the in-memory transport, MassTransit will serialize and deserialize messages, which adds considerable overhead. Mediator doesn't serialize, which means it isn't slow. Using the [MassTransit-Benchmark](https://github.com/MassTransit/MassTransit-Benchmark) with the `--mediator` option, send/consume is blazingly fast (over 650,000 messages/second on my 8-core Windows desktop), and request/response is pretty fast as well. Of course, these are fairly synthetic numbers – consumers will typically do more than just add a counter to a bucket.
 
-## Using Mediator
+### Using Mediator
 
 To configure mediator in an ASP.NET Core project, add the following to the _ConfigureServices_ method.
 
@@ -131,6 +128,8 @@ public class OrderController :
 ```
 
 ### What about Kafka?
+
+Update: [Kafka support is now built-in!](/usage/riders/kafka)
 
 Using the Confluent Kafka client, AVRO, and the schema registry – it is possible to send messages to _mediator_.
 

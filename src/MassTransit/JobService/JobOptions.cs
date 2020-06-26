@@ -1,11 +1,11 @@
 namespace MassTransit.JobService
 {
     using System;
-    using ConsumeConfigurators;
     using GreenPipes;
     using GreenPipes.Configurators;
     using GreenPipes.Observers;
     using GreenPipes.Specifications;
+    using MassTransit.Configuration;
 
 
     /// <summary>

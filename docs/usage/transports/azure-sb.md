@@ -1,22 +1,34 @@
 # Azure Service Bus
 
-```csharp
-var busControl = Bus.Factory.CreateUsingAzureServiceBus(x =>
-{
-    x.Host(serviceUri, h =>
-    {
-        h.SharedAccessSignature(s =>
-        {
-            s.KeyName = "keyName";
-            s.SharedAccessKey = "key";
-            s.TokenTimeToLive = TimeSpan.FromDays(1);
-            s.TokenScope = TokenScope.Namespace;
-        });
-    });
-});
-```
+> [MassTransit.Azure.ServiceBus.Core](https://nuget.org/packages/MassTransit.Azure.ServiceBus.Core/)
 
-## Azure Functions
+To configure Azure Service Bus, use the connection string (from the Azure portal) to configure the host as shown below.
+
+<<< @/docs/code/transports/ServiceBusConsoleListener.cs
+
+Additional host properties include:
+
+| Property                |  Description 
+|-------------------------|------------------
+| TokenProvider         | Use a specific token provider, such as a managed identity token provider, to access the namespace
+| TransportType         | Change the transport type from the default (AMQP) to use WebSockets
+
+
+Azure Service Bus queues includes an extensive set a properties that can be configured. All of these are optional, MassTransit uses sensible defaults, but the control is there when needed.
+
+<<< @/docs/code/transports/ServiceBusReceiveEndpoint.cs
+
+| Property                | Type   | Description 
+|-------------------------|--------|------------------
+| PrefetchCount         | int | The number of unacknowledged messages that can be processed concurrently (default based on CPU count)
+| MaxConcurrentCalls         | int | How many concurrent messages to dispatch (transport-throttled)
+| LockDuration        | TimeSpan   | How long to hold message locks (max is 5 minutes)
+| MaxAutoRenewDuration        | TimeSpan   | How long to renew message locks (maximum consumer duration)
+| RequiresSession        | bool   | If true, a message SessionId must be specified when sending messages to the queue
+| MaxDeliveryCount        | int   | How many times the transport will redeliver the message on negative acknowledgment. This is different from retry, this is the transport redelivering the message to a receive endpoint before moving it to the dead letter queue.
+
+
+### Azure Functions
 
 Azure Functions is a consumption-based compute solution that only runs code when there is work to be done. MassTransit supports Azure Service Bus and Azure Event Hubs when running as an Azure Function.
 

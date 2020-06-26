@@ -12,7 +12,7 @@ public class Startup
             x.AddConsumer<SubmitOrderConsumer>();
             x.AddConsumer<AuthorizeOrderConsumer>()
 
-            x.UsingRabbitMq(cfg =>
+            x.UsingRabbitMq((context, cfg) =>
             {
                 cfg.Host("localhost");
 

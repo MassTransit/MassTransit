@@ -2,7 +2,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Conductor.Configuration;
+    using Conductor;
     using ConductorComponents;
     using ConductorContracts;
     using Definition;

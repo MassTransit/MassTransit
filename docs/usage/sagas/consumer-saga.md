@@ -113,10 +113,10 @@ services.AddMassTransit(x =>
     x.AddSaga<OrderSaga>()
         .InMemoryRepository();
 
-    x.UsingInMemory(cfg =>
+    x.UsingInMemory((context, cfg) =>
     {
         cfg.ConfigureEndpoints(context);
-    }));
+    });
 });
 ```
 

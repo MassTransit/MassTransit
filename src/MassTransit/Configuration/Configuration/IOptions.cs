@@ -1,4 +1,4 @@
-namespace MassTransit.ConsumeConfigurators
+namespace MassTransit.Configuration
 {
     public interface IOptions
     {

@@ -2,8 +2,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Conductor.Configuration;
-    using Contracts.Conductor;
+    using Conductor;
     using Contracts.JobService;
     using Definition;
     using JobConsumerComponents;
@@ -73,7 +72,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
     namespace JobConsumerComponents
     {
-        using JobConsumerContracts;
         using JobService;
 
 

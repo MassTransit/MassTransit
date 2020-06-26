@@ -54,7 +54,7 @@ Once activity processing is complete, the activity returns an *ExecutionResult* 
 
 ## Terminating a routing slip
 
-In some situations, it may make sense to terminate the routing slip without executing any of the subsequent activites in the itinerary. This might be due to a business rule, in which the routing slip shouldn't be faulted, but needs to end immediately.
+In some situations, it may make sense to terminate the routing slip without executing any of the subsequent activities in the itinerary. This might be due to a business rule, in which the routing slip shouldn't be faulted, but needs to end immediately.
 
 To terminate a routing slip, call _Terminate_ as shown.
 

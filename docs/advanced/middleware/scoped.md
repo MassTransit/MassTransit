@@ -42,7 +42,7 @@ public class Startup
           
         services.AddMassTransit(x =>
         {
-            x.UsingRabbitMq(cfg =>
+            x.UsingRabbitMq((context, cfg) =>
             {
               cfg.UseSendFilter(typeof(MySendFilter<>), context); //generic filter
             });

@@ -1,4 +1,4 @@
-namespace MassTransit.Conductor.Configuration.Configurators
+namespace MassTransit.Conductor.Configurators
 {
     using System.Collections.Generic;
     using EndpointConfigurators;

@@ -3,8 +3,8 @@ namespace MassTransit.JobService
     using System;
     using System.Collections.Generic;
     using Components;
-    using ConsumeConfigurators;
     using GreenPipes;
+    using MassTransit.Configuration;
 
 
     public class JobServiceOptions :
@@ -20,7 +20,7 @@ namespace MassTransit.JobService
             StatusCheckInterval = TimeSpan.FromMinutes(1);
             SlotWaitTime = TimeSpan.FromSeconds(30);
             StartJobTimeout = TimeSpan.FromMinutes(2);
-            JobSlotRequestTimeout = TimeSpan.FromSeconds(10);
+            SlotRequestTimeout = TimeSpan.FromSeconds(10);
         }
 
         public string JobTypeSagaEndpointName
@@ -69,9 +69,14 @@ namespace MassTransit.JobService
         public Uri JobAttemptSagaEndpointAddress { get; private set; }
 
         /// <summary>
-        /// The time after which the status of a job should be checked
+        /// The job service for the endpoint
         /// </summary>
-        public TimeSpan StatusCheckInterval { get; set; }
+        public IJobService JobService { get; set; }
+
+        /// <summary>
+        /// Timeout for the Allocate Job Slot Request
+        /// </summary>
+        public TimeSpan SlotRequestTimeout { get; set; }
 
         /// <summary>
         /// The time to wait for a job slot when one is unavailable
@@ -84,14 +89,9 @@ namespace MassTransit.JobService
         public TimeSpan StartJobTimeout { get; set; }
 
         /// <summary>
-        /// Timeout for the Allocate Job Slot Request
+        /// The time after which the status of a job should be checked
         /// </summary>
-        public TimeSpan JobSlotRequestTimeout { get; set; }
-
-        /// <summary>
-        /// The job service for the endpoint
-        /// </summary>
-        public IJobService JobService { get; set; }
+        public TimeSpan StatusCheckInterval { get; set; }
 
         IEnumerable<ValidationResult> ISpecification.Validate()
         {
@@ -108,11 +108,14 @@ namespace MassTransit.JobService
                 yield return this.Failure(nameof(JobAttemptSagaEndpointName), "must not be null or empty");
         }
 
-        public JobServiceOptions Set(JobServiceOptions options)
+        public void Set(JobServiceOptions options)
         {
             JobService = options.JobService;
+            SlotRequestTimeout = options.SlotRequestTimeout;
             SlotWaitTime = options.SlotWaitTime;
+            StartJobTimeout = options.StartJobTimeout;
             StatusCheckInterval = options.StatusCheckInterval;
+
             JobSagaEndpointAddress = options.JobSagaEndpointAddress;
             JobAttemptSagaEndpointAddress = options.JobAttemptSagaEndpointAddress;
             JobTypeSagaEndpointAddress = options.JobTypeSagaEndpointAddress;
@@ -120,8 +123,6 @@ namespace MassTransit.JobService
             _jobAttemptSagaEndpointName = options._jobAttemptSagaEndpointName;
             _jobSagaEndpointName = options._jobSagaEndpointName;
             _jobTypeSagaEndpointName = options._jobTypeSagaEndpointName;
-
-            return this;
         }
     }
 }

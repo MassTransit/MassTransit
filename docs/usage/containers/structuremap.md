@@ -28,7 +28,7 @@ public static void Main(string[] args)
             x.AddConsumers(typeof(ConsumerOne), typeof(ConsumerTwo));
 
             // add the bus to the container, may need to create Local function
-            x.UsingRabbitMq(cfg =>
+            x.UsingRabbitMq((context, cfg) =>
             {
                 cfg.Host("localhost/");
 

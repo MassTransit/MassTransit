@@ -2,6 +2,8 @@ namespace MassTransit.Registration
 {
     using System;
     using Automatonymous;
+    using Conductor;
+    using Conductor.Configurators;
     using ConsumeConfigurators;
     using Context;
     using Courier;
@@ -276,9 +278,11 @@ namespace MassTransit.Registration
 
         public void AddServiceClient(Action<IServiceClientConfigurator> configure = default)
         {
-            var options = new ServiceClientOptions();
+            var configurator = new ServiceClientConfigurator();
 
-            Registrar.RegisterSingleInstance(options);
+            configure?.Invoke(configurator);
+
+            Registrar.RegisterSingleInstance(configurator.Options);
 
             ClientFactoryProvider = ServiceClientClientFactoryProvider;
         }

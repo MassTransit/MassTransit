@@ -1,7 +1,7 @@
 namespace MassTransit
 {
     using System;
-    using ConsumeConfigurators;
+    using Configuration;
 
 
     /// <summary>

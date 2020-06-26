@@ -1,12 +1,82 @@
 # Upgrading
 
-There have been several changes to v6 to reduce complexity, along with a few enhancements.
+## Version 7
 
-::: tip NOTE
-MassTransit requires either .NET Standard 2.0 or .NET Framework 4.6.1 (or later). .NET 4.5.2 is no longer supported.
-:::
+As with previous major versions, MassTransit V7 includes a number of new features, but has also deprecated or changed from previous configuration syntax. For the most part, consumers, sagas, etc. should work exactly as they did with previous releases. However, some of the configuration aspects may have been updated to be more consistent.
 
-## Automatonymous
+### .NET Standard 2.0
+
+MassTransit is now built for .NET Standard 2.0 only. The packages should be compatible with .NET Standard 2.0 (or later), as well as .NET Framework 4.6.1 (or later). Specific .NET Framework packages are no longer built or packaged.
+
+### Riders
+
+[Riders](/usage/riders/) are an entirely new feature which adds Kafka and Azure Event Hub support to MassTransit. A huge thanks to Denys Kozhevnikov [GitHub](https://github.com/MassTransit/MassTransit/commits?author=NooNameR) [@noonamer](https://twitter.com/noonamer) for his amazing effort!
+
+### Configuration
+
+Configuring MassTransit using a container has been streamlined. Refer to the [configuration](/usage/configuration) section for details. A brief summary:
+
+-   The `.Host` methods are now void. The _IHost_ interfaces are no longer accessible (or needed).
+-   `AddBus` has been superseded by `UsingRabbitMQ` (and other transport-specific extension methods)
+
+### Sagas
+
+The SagaRepository standardization is now completed, and all other repositories have been removed (InMemorySagaRepository is still there though).
+
+The send topology can now be used to configure the _CorrelationId_ that should be used, allowing state machine sagas to automatically configure events that correlate on a property that isn't implemented by `CorrelatedBy<Guid>`.
+
+### Message Scheduler
+
+A number of new container configuration options for configuring and registering the [message scheduler](/advanced/scheduling/scheduling-api) have been added. 
+
+### Turnout
+
+Turnout, which has been poorly supported since the beginning, has been rewritten from the ground up. Consumers can now use the `IJobConsumer<T>` interface to support long-running jobs managed by MassTransit. They are supported using Conductor, and a series of state machines to track job execution, retry, and concurrency. Check out the [job consumers](/advanced/job-consumers) section for details.
+
+### Mediator
+
+- Container configuration has changed, and now uses the `AddMediator` method (instead of `AddMassTransit`).
+- Publish no longer throws if there are no consumers. To throw when publishing and no consumers are registered, set the _Mandatory_ flag on the _PublishContext_.
+- Consumers can now be connected/detached after the mediator has been created.
+
+### Testing
+
+-   Test harnesses now use an inactivity timer to complete sooner once the bus stops processing messages.
+-   Message lists, such as Consumed, Received, Sent, and Published, now have async _Any_ methods
+
+### Transactions
+
+The _transaction outbox_ has been renamed to _TransactionalBus_, to avoid confusion. See the [transactions section](/advanced/middleware/transactions) for details.
+
+### Changed, Deprecated
+
+The following packages have been deprecated and replaced with a new package:
+
+* [MassTransit.DocumentDb](https://nuget.org/packages/MassTransit.DocumentDb/) <br/>Use [MassTransit.Azure.Cosmos](https://nuget.org/packages/MassTransit.Azure.Cosmos/) instead.
+* [MassTransit.Lamar](https://nuget.org/packages/MassTransit.Lamar/) <br/> Use [MassTransit.Extensions.DependencyInjection](https://nuget.org/packages/MassTransit.Extensions.DependencyInjection/) to configure the container.
+* [MassTransit.Host](https://nuget.org/packages/MassTransit.Host/) <br/>Use [MassTransit Platform](/platform) instead.
+
+The following packages have been deprecated and are no longer supported:
+
+* [MassTransit.Http](https://nuget.org/packages/MassTransit.Http/)
+* [MassTransit.Ninject](https://nuget.org/packages/MassTransit.Ninject/)
+* [MassTransit.Reactive](https://nuget.org/packages/MassTransit.Reactive/)
+* [MassTransit.Unity](https://nuget.org/packages/MassTransit.Unity/)
+
+
+
+
+
+
+
+
+
+
+## Version 6
+
+
+
+### Automatonymous
 
 In previous version, using Automatonymous required an additional package, `MassTransit.Automatonymous`. The contents of that package are now
 included in the `MassTransit` assembly/package, which now depends on `Automatonymous`. This was done to reduce the number of extra packages
@@ -22,11 +92,8 @@ The following packages are available for the supported containers:
 
 - MassTransit.Autofac
 - MassTransit.Extensions.DependencyInjection
-- MassTransit.Lamar
-- MassTransit.Ninject (no registration support)
 - MassTransit.SimpleInjector
 - MassTransit.StructureMap
-- MassTransit.Unity (no registration support)
 - MassTransit.Windsor
 
 ### Saga Repository Update (v6.1+)

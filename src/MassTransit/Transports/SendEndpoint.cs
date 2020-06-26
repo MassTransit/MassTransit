@@ -207,8 +207,7 @@
                 if (_pipe.IsNotEmpty())
                     await _pipe.Send(context).ConfigureAwait(false);
 
-                if (!context.ConversationId.HasValue)
-                    context.ConversationId = NewId.NextGuid();
+                context.ConversationId ??= NewId.NextGuid();
             }
         }
     }

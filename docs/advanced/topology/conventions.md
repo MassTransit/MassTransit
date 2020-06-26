@@ -17,7 +17,7 @@ If there isn't a property named `CorrelationId`, the convention also checks for 
 
 If the message implements the `CorrelatedBy<Guid>` interface, that would be used before referencing any properties by name.
 
-During bus creation, it is possible to explictly configure a message type (or any of the message type's inherited interfaces) to use a specific property for the `CorrelationId`. In the example below, the OrderId property is specified as the CorrelationId.
+During bus creation, it is possible to explicitly configure a message type (or any of the message type's inherited interfaces) to use a specific property for the `CorrelationId`. In the example below, the OrderId property is specified as the CorrelationId.
 
 ```csharp
 public interface OrderSubmitted

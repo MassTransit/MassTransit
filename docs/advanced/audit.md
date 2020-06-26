@@ -67,7 +67,7 @@ Please remember that observers need to be configured before the bus starts.
 ## Filters
 
 Sometimes there are messages in the system that are technical. These could be some monitoring and
-healthcheck messages, which are being sent often and could pollute the audit log. Another example
+health check messages, which are being sent often and could pollute the audit log. Another example
 could be the `Fault<T>` events.
 
 In order not to save these messages to the audit store, you can filter them out. You can configure

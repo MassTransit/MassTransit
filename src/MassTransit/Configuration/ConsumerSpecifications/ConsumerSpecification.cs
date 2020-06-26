@@ -3,24 +3,24 @@ namespace MassTransit.ConsumerSpecifications
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Configuration;
     using ConsumeConfigurators;
     using GreenPipes;
     using Metadata;
 
 
     public class ConsumerSpecification<TConsumer> :
+        OptionsSet,
         IConsumerSpecification<TConsumer>
         where TConsumer : class
     {
         readonly ConnectHandle[] _handles;
         readonly IReadOnlyDictionary<Type, IConsumerMessageSpecification<TConsumer>> _messageTypes;
         readonly ConsumerConfigurationObservable _observers;
-        readonly OptionsSet _optionsSet;
 
         public ConsumerSpecification(IEnumerable<IConsumerMessageSpecification<TConsumer>> messageSpecifications)
         {
             _messageTypes = messageSpecifications.ToDictionary(x => x.MessageType);
-            _optionsSet = new OptionsSet();
 
             _observers = new ConsumerConfigurationObservable();
             _handles = _messageTypes.Values.Select(x => x.ConnectConsumerConfigurationObserver(_observers)).ToArray();
@@ -40,12 +40,6 @@ namespace MassTransit.ConsumerSpecifications
             IConsumerMessageSpecification<TConsumer, T> specification = GetMessageSpecification<T>();
 
             configure?.Invoke(specification);
-        }
-
-        public T Options<T>(Action<T> configure = null)
-            where T : IOptions, new()
-        {
-            return _optionsSet.Configure(configure);
         }
 
         public IConsumerMessageSpecification<TConsumer, T> GetMessageSpecification<T>()

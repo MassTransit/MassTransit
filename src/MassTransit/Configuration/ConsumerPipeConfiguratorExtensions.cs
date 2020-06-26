@@ -22,7 +22,7 @@
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new ConsumerPipeSpecification<TConsumer, T>(filter);
+            var specification = new ConsumerFilterSpecification<TConsumer, T>(filter);
 
             configurator.AddPipeSpecification(specification);
         }

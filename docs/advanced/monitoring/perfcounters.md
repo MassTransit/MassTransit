@@ -17,7 +17,7 @@ performance counters and errors will be logged.
 
 ### Windows installer
 
-When deploying your mass transit enabled application it is possible to have Windows Installer create your performance counters for you. Below is Xml used by Wix 3.0 to define the Masstransit performance counters.
+When deploying your mass transit enabled application it is possible to have Windows Installer create your performance counters for you. Below is Xml used by Wix 3.0 to define the MassTransit performance counters.
 
 ```xml
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"

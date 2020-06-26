@@ -1,4 +1,4 @@
-namespace MassTransit.Conductor.Configuration.Configurators
+namespace MassTransit.Conductor.Configurators
 {
     public interface IServiceInstanceTransportConfigurator<in TEndpointConfigurator>
         where TEndpointConfigurator : IReceiveEndpointConfigurator

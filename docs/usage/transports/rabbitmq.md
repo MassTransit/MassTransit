@@ -1,5 +1,7 @@
 # RabbitMQ
 
+> [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/)
+
 With tens of thousands of users, RabbitMQ is one of the most popular open source message brokers. RabbitMQ is lightweight and easy to deploy on premises and in the cloud. RabbitMQ can be deployed in distributed and federated configurations to meet high-scale, high-availability requirements.
 
 MassTransit fully supports RabbitMQ, including many of the advanced features and capabilities. 
@@ -19,13 +21,13 @@ In the example below, which configures a receive endpoint, consumer, and message
 The configuration includes:
 
 * The RabbitMQ host
-  - Host name: _localhost_
-  - Virtual host: /
-  - Username and password used to connect to the virtual host (credentials are virtual-host specific)
+  - Host name: `localhost`
+  - Virtual host: `/`
+  - User name and password used to connect to the virtual host (credentials are virtual-host specific)
 * The receive endpoint
-  - Queue name: _order-events-listener_
-  - Consumer: _OrderSubmittedEventConsumer_
-    - Message type: _OrderSystem.Events.OrderSubmitted_
+  - Queue name: `order-events-listener`
+  - Consumer: `OrderSubmittedEventConsumer`
+    - Message type: `OrderSystem.Events.OrderSubmitted`
 
 When the bus is started, MassTransit will create exchanges and queues on the virtual host for the receive endpoint. MassTransit creates durable, _fanout_ exchanges by default, and queues are also durable by default.
 

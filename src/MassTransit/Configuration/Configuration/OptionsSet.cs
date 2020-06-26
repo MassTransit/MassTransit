@@ -1,11 +1,12 @@
-namespace MassTransit.ConsumeConfigurators
+namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
     using Metadata;
 
 
-    public class OptionsSet
+    public class OptionsSet :
+        IOptionsSet
     {
         readonly IDictionary<Type, IOptions> _options;
 
@@ -14,7 +15,13 @@ namespace MassTransit.ConsumeConfigurators
             _options = new Dictionary<Type, IOptions>();
         }
 
-        public T Configure<T>(Action<T> configure = null)
+        /// <summary>
+        /// Configure the options, adding the option type if it is not present
+        /// </summary>
+        /// <param name="configure"></param>
+        /// <typeparam name="T">The option type</typeparam>
+        /// <returns></returns>
+        public T Options<T>(Action<T> configure = null)
             where T : IOptions, new()
         {
             if (_options.TryGetValue(typeof(T), out var existingOptions))
@@ -37,6 +44,11 @@ namespace MassTransit.ConsumeConfigurators
             }
         }
 
+        /// <summary>
+        /// Return the options, if present
+        /// </summary>
+        /// <param name="options"></param>
+        /// <typeparam name="T">The option type</typeparam>
         public bool TryGetOptions<T>(out T options)
             where T : IOptions
         {

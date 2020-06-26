@@ -1,13 +1,16 @@
 # Topology
 
-Topology is how MassTransit configures the broker capabilities (exchanges and queues for RabbitMQ, topics, subscriptions, and queues for Azure Service Bus) to support sending, publishing, and consuming messages. MassTransit's topology provides access to advanced broker features, making it easy to configure and use them in applications. Topology is also used to define conventions which can be applied to each message type, reducing the amount of code written to handle things like message correlation identifiers and setting broker message properties.
+In MassTransit, _Topology_ is how message types are used to configure broker topics (exchanges in RabbitMQ) and queues. Topology is also used to access specific broker capabilities, such as RabbitMQ direct exchanges and routing keys.
 
-Topology also defines how things are named, including RabbitMQ exchanges and Azure Service Bus topics -- both of which are used for publishing messages.
+Topology is separate from the send, publish, and consume pipelines which are focused more on middleware inside MassTransit. Topology allows conventions to be created that can create message-specific topology configuration at runtime as messages are published and sent.
 
-* [Message](message)
-* [Publish](publish)
-* [Send](send)
-* [Consume](consume)
-* [Conventions](conventions)
-* [RabbitMQ](rabbitmq)
-* [Azure Service Bus](servicebus)
+### Bus Topology
+
+Once the bus is created, access to topology is via the _Topology_ property on _IBus_. The _IBusTopology_ interface is shown below.
+
+<<< @/src/MassTransit/Topology/IBusTopology.cs
+
+The message, publish, and send topologies can be accessed using this interface. It is also possible to retrieve a message's publish address. The _Topology_ property may support other interfaces, such as a transport-specific host topology. Pattern matching can be used to check the host topology type as shown below.
+
+<<< @/docs/code/advanced/BusHostTopologyMatch.cs
+

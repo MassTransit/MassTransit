@@ -2,9 +2,9 @@ namespace MassTransit
 {
     using System;
     using System.Linq;
-    using Conductor.Configuration;
-    using Conductor.Configuration.Configurators;
-    using Conductor.Configuration.Definition;
+    using Conductor;
+    using Conductor.Configurators;
+    using Conductor.Definition;
     using Conductor.Server;
     using Internals.Extensions;
     using Metadata;

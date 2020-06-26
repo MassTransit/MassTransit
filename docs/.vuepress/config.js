@@ -228,6 +228,14 @@ module.exports = {
         ]
       },
       {
+        title: 'Articles',
+        collapsable: true,
+        children: [
+          '/articles/mediator',
+          '/articles/outbox'
+        ]
+      },
+      {
         title: "Platform",
         path: '/platform/',
         collapsable: true,

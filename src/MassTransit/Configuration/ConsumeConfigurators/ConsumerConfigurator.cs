@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Configuration;
     using ConsumeConnectors;
     using ConsumerSpecifications;
     using GreenPipes;
@@ -51,6 +52,12 @@
             where T : IOptions, new()
         {
             return _specification.Options(configure);
+        }
+
+        public bool TryGetOptions<T>(out T options)
+            where T : IOptions
+        {
+            return _specification.TryGetOptions(out options);
         }
 
         public IEnumerable<ValidationResult> Validate()

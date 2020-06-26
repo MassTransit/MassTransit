@@ -1,4 +1,4 @@
-namespace MassTransit.Conductor.Configuration.Definition
+namespace MassTransit.Conductor.Definition
 {
     using Configurators;
 

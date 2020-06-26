@@ -10,7 +10,7 @@ To understand how middleware components are built, an understanding of filters a
 
 ## Filters
 
-A filter is a middleware component that performs a specific function, and should adhere to the single responsibility principal – do one thing, one thing only (and hopefully do it well). By sticking to this approach, developers are able to opt-in to each behavior without including unneccesary or unwatched functionality.
+A filter is a middleware component that performs a specific function, and should adhere to the single responsibility principal – do one thing, one thing only (and hopefully do it well). By sticking to this approach, developers are able to opt-in to each behavior without including unnecessary or unwatched functionality.
 
 There are many filters included with GreenPipes, and a whole lot more of them are included with MassTransit. In fact, the entire MassTransit message flow is built around pipes and filters.
 
@@ -39,7 +39,7 @@ The _Send_ method is used to send contexts through the pipe to each filter. _Con
 
 ### PipeContext
 
-The _context_ type has a `PipeContext` constrait, which is another core atom in _GreenPipes_. A pipe context can include _payloads_, which are kept in a last-in, first-out (LIFO) collection. Payloads are identified by _type_, and can be retrieved, added, and updated using the `PipeContext` methods:
+The _context_ type has a `PipeContext` constraint, which is another core atom in _GreenPipes_. A pipe context can include _payloads_, which are kept in a last-in, first-out (LIFO) collection. Payloads are identified by _type_, and can be retrieved, added, and updated using the `PipeContext` methods:
 
 ```cs
 public interface PipeContext
@@ -136,7 +136,7 @@ IPipe<CustomContext> pipe = Pipe.New<CustomContext>(x =>
 })
 ```
 
-The `IPipe` interface is similar to `IFilter`, but a pipe hides the _next_ parameter as it is part of the pipe's structure. It is the pipe's responsiblity to pass the
+The `IPipe` interface is similar to `IFilter`, but a pipe hides the _next_ parameter as it is part of the pipe's structure. It is the pipe's responsibility to pass the
 appropriate _next_ parameter to the individual filters in the pipe.
 
 ```cs

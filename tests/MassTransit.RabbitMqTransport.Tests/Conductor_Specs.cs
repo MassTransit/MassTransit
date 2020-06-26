@@ -3,7 +3,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     namespace ConductorTests
     {
         using System.Threading.Tasks;
-        using Conductor.Configuration;
+        using Conductor;
         using Contracts;
         using Definition;
         using NUnit.Framework;

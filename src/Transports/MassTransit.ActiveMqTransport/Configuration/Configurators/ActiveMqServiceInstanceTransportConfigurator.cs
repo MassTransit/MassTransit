@@ -1,8 +1,9 @@
 namespace MassTransit.ActiveMqTransport.Configurators
 {
-    using Conductor.Configuration.Configurators;
+    using Conductor.Configurators;
 
 
+    // ReSharper disable once UnusedType.Global
     public class ActiveMqServiceInstanceTransportConfigurator :
         IServiceInstanceTransportConfigurator<IActiveMqReceiveEndpointConfigurator>
     {

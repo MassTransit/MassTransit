@@ -2,7 +2,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
 {
     using System;
     using System.Threading.Tasks;
-    using Conductor.Configuration;
+    using Conductor;
     using Definition;
     using JobService;
     using MassTransit.Contracts.JobService;

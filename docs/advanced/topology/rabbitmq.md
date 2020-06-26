@@ -2,14 +2,14 @@
 
 The send and publish topologies are extended to support RabbitMQ features, and make it possible to configure how exchanged are created.
 
-## Exchange Properties
+## Exchanges
 
 When a message is published, MassTransit sends it to an exchange that is named based upon the message type. Using topology, the exchange name, as well as the exchange properties can be configured to support a custom behavior.
 
 To configure the properties used when an exchange is created, the publish topology can be configured during bus creation:
 
 ```csharp
-Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
+Bus.Factory.CreateUsingRabbitMQ(cfg =>
 {
     cfg.Publish<OrderSubmitted>(x =>
     {
@@ -20,18 +20,18 @@ Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
 });
 ```
 
-## Hierarchical Exchange Layout
+### Exchange Layout
 
 In versions of MassTransit prior to 4.x, every implemented type was connected directly to the top-level exchange for the published message type. Starting with v4.0, the broker topology for inherited types can be configured to maintain the type hierarchy, which can significantly reduce the number of exchange bindings in some cases. To configure this new behavior, the publish topology is used to specify the broker topology option.
 
 ```csharp
-Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
+Bus.Factory.CreateUsingRabbitMQ(cfg =>
 {
     cfg.PublishTopology.BrokerTopologyOptions = PublishBrokerTopologyOptions.MaintainHierarchy;
 });
 ```
 
-## Exchange Binding
+### Exchange Binding
 
 To bind an exchange to a receive endpoint:
 
@@ -62,7 +62,7 @@ cfg.ReceiveEndpoint("input-queue", e =>
 
 The above will create an exchange binding between the `exchange-name` and the `input-queue` exchange, using the configured properties.
 
-## Routing Key
+## RoutingKey
 
 The routing key on published/sent messages can be configured by convention, allowing the same method to be used for messages which implement a common interface type. If no common type is shared, each message type may be configured individually using various conventional selectors. Alternatively, developers may create their own convention to fit their needs.
 
@@ -76,7 +76,7 @@ public interface SubmitOrder
     // ...
 }
 
-Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
+Bus.Factory.CreateUsingRabbitMQ(cfg =>
 {
     cfg.Send<SubmitOrder>(x =>
     {
@@ -112,7 +112,7 @@ public class OrderConsumer :
 And then connected to a receive endpoint:
 
 ```csharp
-Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
+Bus.Factory.CreateUsingRabbitMQ(cfg =>
 {
     cfg.ReceiveEndpoint("priority-orders", x =>
     {
@@ -144,7 +144,7 @@ Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
 
 This would split the messages sent to the exchange, by routing key, to the proper endpoint, using the CustomerType property.
 
-## Addresses
+## Addressing
 
 Query string parameters supported:
 
@@ -159,8 +159,7 @@ Query string parameters supported:
 | queue            | string| Bind to queue name         | bind = true
 
 
-
-## Default Topology
+## Broker Topology
 
 In this example topology, two commands and events are used.
 

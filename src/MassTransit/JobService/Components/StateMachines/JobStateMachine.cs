@@ -41,7 +41,7 @@ namespace MassTransit.JobService.Components.StateMachines
             Request(() => RequestJobSlot, instance => instance.JobSlotRequestId, x =>
             {
                 x.ServiceAddress = options.JobTypeSagaEndpointAddress;
-                x.Timeout = options.JobSlotRequestTimeout;
+                x.Timeout = options.SlotRequestTimeout;
             });
 
             InstanceState(x => x.CurrentState, Submitted, WaitingToStart, WaitingForSlot, Started, Completed, Faulted, Canceled,

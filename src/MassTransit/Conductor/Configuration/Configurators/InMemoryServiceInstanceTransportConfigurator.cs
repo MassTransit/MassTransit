@@ -1,5 +1,6 @@
-namespace MassTransit.Conductor.Configuration.Configurators
+namespace MassTransit.Conductor.Configurators
 {
+    // ReSharper disable once UnusedType.Global
     public class InMemoryServiceInstanceTransportConfigurator :
         IServiceInstanceTransportConfigurator<IInMemoryReceiveEndpointConfigurator>
     {

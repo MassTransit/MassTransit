@@ -7,7 +7,7 @@ namespace MassTransit.Tests.Conductor
     using Contracts.Conductor;
     using Definition;
     using GreenPipes;
-    using MassTransit.Conductor.Configuration;
+    using MassTransit.Conductor;
     using NUnit.Framework;
     using TestFramework;
     using TestService;

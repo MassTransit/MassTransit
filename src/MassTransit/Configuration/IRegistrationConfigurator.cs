@@ -2,6 +2,7 @@ namespace MassTransit
 {
     using System;
     using Automatonymous;
+    using Conductor;
     using ConsumeConfigurators;
     using Courier;
     using Definition;

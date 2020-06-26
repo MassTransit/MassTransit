@@ -43,11 +43,21 @@ namespace MassTransit.JobService.Configuration
         /// <summary>
         /// The time to wait before attempting to allocate a job slot when no slots are available
         /// </summary>
-        TimeSpan JobSlotWaitTime { set; }
+        TimeSpan SlotWaitTime { set; }
 
         /// <summary>
         /// Time to wait before checking the status of a job to ensure it is still running (not dead)
         /// </summary>
-        TimeSpan JobStatusCheckInterval { set; }
+        TimeSpan StatusCheckInterval { set; }
+
+        /// <summary>
+        /// Timeout on request to allocate a job slot
+        /// </summary>
+        TimeSpan SlotRequestTimeout { set; }
+
+        /// <summary>
+        /// Timeout to wait for a job to start
+        /// </summary>
+        TimeSpan StartJobTimeout { set; }
     }
 }

@@ -2,7 +2,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
 {
     using System;
     using System.Threading.Tasks;
-    using Conductor.Configuration;
+    using Conductor;
     using Contracts.JobService;
     using Definition;
     using JobService;

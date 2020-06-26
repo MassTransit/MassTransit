@@ -27,7 +27,7 @@ public static void Main(string[] args)
         x.AddConsumers(typeof(ConsumerOne), typeof(ConsumerTwo));
 
         // add the bus to the container
-        x.UsingRabbitMq(cfg =>
+        x.UsingRabbitMq((context, cfg) =>
         {
             cfg.ReceiveEndpoint("customer_update", ec =>
             {

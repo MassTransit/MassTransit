@@ -79,7 +79,7 @@ namespace MassTransit.EventHubIntegration
         /// <param name="eventHubName">EventHub Name</param>
         /// <param name="consumerGroup">Consumer Group</param>
         /// <param name="configure"></param>
-        void Endpoint(string eventHubName, string consumerGroup, Action<IEventHubReceiveEndpointConfigurator> configure);
+        void ReceiveEndpoint(string eventHubName, string consumerGroup, Action<IEventHubReceiveEndpointConfigurator> configure);
 
         /// <summary>
         /// Sets the outbound message serializer

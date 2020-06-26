@@ -15,7 +15,7 @@ namespace MassTransit
         /// <typeparam name="TSaga"></typeparam>
         /// <param name="configurator">The pipe configurator</param>
         /// <param name="filter">The already built pipe</param>
-        public static void Filter<TSaga, T>(this IPipeConfigurator<SagaConsumeContext<TSaga, T>> configurator,
+        public static void UseFilter<TSaga, T>(this IPipeConfigurator<SagaConsumeContext<TSaga, T>> configurator,
             IFilter<SagaConsumeContext<TSaga>> filter)
             where T : class
             where TSaga : class, ISaga

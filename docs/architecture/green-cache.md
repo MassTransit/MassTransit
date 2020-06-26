@@ -45,7 +45,7 @@ A subsequent reader for the same key may receive one of the following results:
 If a subsequent reader does not provide a missing value factory, the reader will receive one of the following results:
 
 * The value created by a previous reader, if any previous reader's factory method ran to completion.
-* A `KeyNotFoundException` if no previous reader's factory method ran to completion (either cancelled or faulted).
+* A `KeyNotFoundException` if no previous reader's factory method ran to completion (either canceled or faulted).
 
 Once the value has been created, the placeholder is replaced with a cached node by the node tracker. If the cache has multiple indices, the value is then propagated to the other indices, making it available to readers.
 

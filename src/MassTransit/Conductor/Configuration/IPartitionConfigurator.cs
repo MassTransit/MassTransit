@@ -1,4 +1,4 @@
-namespace MassTransit.Conductor.Configuration
+namespace MassTransit.Conductor
 {
     using System;
 

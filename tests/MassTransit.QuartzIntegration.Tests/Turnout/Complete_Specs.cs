@@ -3,7 +3,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Conductor.Configuration;
+    using Conductor;
     using Contracts.JobService;
     using Definition;
     using JobService;
@@ -271,7 +271,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
             {
                 instance.ConfigureJobServiceEndpoints(x =>
                 {
-                    x.JobSlotWaitTime = TimeSpan.FromSeconds(1);
+                    x.SlotWaitTime = TimeSpan.FromSeconds(1);
                 });
 
                 instance.ReceiveEndpoint(instance.EndpointNameFormatter.Message<CrunchTheNumbers>(), e =>

@@ -11,6 +11,7 @@
     <PackageReference Include="MassTransit.Quartz" Version="7.0.0-develop.2841" />
     <PackageReference Include="MassTransit.RabbitMQ" Version="7.0.0-develop.2841" />
     <PackageReference Include="MassTransit.Kafka" Version="7.0.0-develop.2841" />
+    <PackageReference Include="MassTransit.EventHub" Version="7.0.0-develop.2841" />
     <PackageReference Include="MassTransit.ActiveMQ" Version="7.0.0-develop.2841" />
     <PackageReference Include="MassTransit.AmazonSQS" Version="7.0.0-develop.2841" />
     <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="7.0.0-develop.2841" />

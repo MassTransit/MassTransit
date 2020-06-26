@@ -1,7 +1,7 @@
 namespace MassTransit
 {
     using System;
-    using Conductor.Configuration;
+    using Conductor;
     using JobService;
     using JobService.Configuration;
 
@@ -43,7 +43,7 @@ namespace MassTransit
         {
             var turnoutConfigurator = new JobServiceConfigurator<T>(configurator);
 
-            turnoutConfigurator.Apply(options);
+            turnoutConfigurator.ApplyJobServiceOptions(options);
 
             turnoutConfigurator.ConfigureJobServiceEndpoints();
 

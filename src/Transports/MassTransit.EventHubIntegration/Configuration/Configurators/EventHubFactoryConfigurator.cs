@@ -117,7 +117,7 @@ namespace MassTransit.EventHubIntegration.Configurators
             _storageSettings.Configure = configure;
         }
 
-        public void Endpoint(string eventHubName, string consumerGroup, Action<IEventHubReceiveEndpointConfigurator> configure)
+        public void ReceiveEndpoint(string eventHubName, string consumerGroup, Action<IEventHubReceiveEndpointConfigurator> configure)
         {
             if (string.IsNullOrWhiteSpace(eventHubName))
                 throw new ArgumentException(nameof(eventHubName));

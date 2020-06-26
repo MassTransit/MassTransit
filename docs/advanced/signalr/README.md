@@ -1,6 +1,6 @@
 # SignalR Backplane
 
-MassTransit offers a package which provides an easy option to get a SignalR Backplane up and running in with just a few lines of configuration. We won't go over the concept of a SignalR Backplane, more details can be found out about it [here](https://docs.microsoft.com/en-us/aspnet/signalr/overview/performance/scaleout-in-signalr). This page is old, and references the .NET Framework SignalR, but the concepts of scaleout are the same for the newer .NET Core SignalR.
+MassTransit offers a package which provides an easy option to get a SignalR Backplane up and running in with just a few lines of configuration. We won't go over the concept of a SignalR Backplane, more details can be found out about it [here](https://docs.microsoft.com/en-us/aspnet/signalr/overview/performance/scaleout-in-signalr). This page is old, and references the .NET Framework SignalR, but the concepts of scale out are the same for the newer .NET Core SignalR.
 
 **.NET Framework SignalR _(which MassTransit does not support)_ Backplane Options:**
 * SQLServer

@@ -35,7 +35,7 @@ namespace MassTransit.EventHubIntegration.Tests
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
 
-                        k.Endpoint(Configuration.EventHubName, c =>
+                        k.ReceiveEndpoint(Configuration.EventHubName, c =>
                         {
                             c.ConfigureConsumer<EventHubMessageConsumer>(context);
                         });

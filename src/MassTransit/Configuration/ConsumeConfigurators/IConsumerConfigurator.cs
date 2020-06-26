@@ -14,7 +14,8 @@
     public interface IConsumerConfigurator<TConsumer> :
         IPipeConfigurator<ConsumerConsumeContext<TConsumer>>,
         IConsumerConfigurationObserverConnector,
-        IConsumeConfigurator
+        IConsumeConfigurator,
+        IOptionsSet
         where TConsumer : class
     {
         /// <summary>
@@ -33,15 +34,5 @@
         /// <param name="configure">The callback to configure the message pipeline</param>
         void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TConsumer, T>> configure)
             where T : class;
-
-        /// <summary>
-        /// Configure an options class, associated with the consumer, which may be used to configure
-        /// aspects of the consumer.
-        /// </summary>
-        /// <param name="configure"></param>
-        /// <typeparam name="T">The options type</typeparam>
-        /// <returns></returns>
-        T Options<T>(Action<T> configure = null)
-            where T : IOptions, new();
     }
 }

@@ -1,12 +1,8 @@
 ---
-title: "In-Memory Outbox, Take out the Trash"
-date: 2020-02-08
-author: "Chris"
-tag: 
-  - Patterns
-  - Outbox
-  - 2PC
+title: "In-Memory Outbox"
 ---
+
+# In-Memory Outbox, Take out the Trash
 
 This post details the _In-Memory Outbox_, including what it does, how to configure it, and how it ensures eventual consistency in the presence of database or message transport failures.
 
@@ -22,13 +18,13 @@ export default {
 
 MassTransit implements messaging patterns, many of which are designed to ease the transition from a tightly-coupled, database-centric application to a set of services that are highly available, reliable, and eventually consistent. Some of these patterns are obvious, but some of them require a little more explanation to truly understand how they are best utilized.
 
-## Commands
+### Commands
 
 Commands are used to do things, like update a database record. Updating a database record usually includes publishing events to notify services that a change in state has occurred.
 
 In a transactional mindset, updating the database and publishing the event is expected to be performed as a single atomic operation. In distributed systems, performing a distributed transaction between the database and the message broker is unrealistic.
 
-## Sagas
+### Sagas
 
 In MassTransit, sagas are message handlers that maintain state. An initial message creates a saga _instance_ and subsequent messages may correlate to the same instance. Between messages, the saga instance _state_ is persisted using a database. While consuming a message, a saga may send commands and/or publish events.
 
@@ -42,13 +38,13 @@ Step 2 is where _the magic happens_. The state can be changed, messages can be s
 
 So, what's the problem? A few things.
 
-### Failures
+#### Failures
 
 An obvious problem is a database failure saving the saga instance. If messages were already sent or published, and the instance was not saved, other services would receive those messages yet the database has not been updated.
 
 A race condition is another concern, since the events may be consumed before the database update is complete. Yes, message brokers are _fast_, and many times messages are already being consumed long before (in computer time) the database update is started.
 
-#### So, retry?
+##### So, retry?
 
 Retrying operations is a key trait of a resilient system. Transient failures happen, even more so in distributed systems, so it makes sense to retry failures in the presence of failures. Of course, not all failures are transient. For instance, trying to take out the trash when it has already been taken out isn't possible (well, until tomorrow).
 
@@ -60,11 +56,11 @@ If retrying the database failure isn't enough, it may make sense to retry the en
 
 A new retry-related issue is duplicate messages. Messages may be sent or published multiple times – once for each attempt. This can create non-deterministic behavior in services that consume those messages. Therefore, a method to delay messages from being sent until the saga instance is saved is needed.
 
-## The Outbox
+### The Outbox
 
 The outbox holds messages and delivers them after the _transactional_ portion of the message processing has completed. With a saga, the messages are delivered after the saga instance is saved successfully. This ensures that the database is updated before any consumers can start processing any of the produced messages.
 
-### The In-Memory Outbox
+#### The In-Memory Outbox
 
 The In-Memory Outbox, a feature included with MassTransit, holds published and sent messages in memory until the message is processed successfully (such as the saga being saved to the database). Once the received message has been processed, the message is delivered to the broker and the received message is acknowledged as successful.
 
@@ -83,11 +79,11 @@ cfg.ReceiveEndpoint("r-trashy-saga", e =>
 
 > In the example above, retry and redelivery was left out on purpose. The broker will redeliver the message if the process crashes or the network splits. For production services, retry filters should be added to handle transient database errors and ignore failures caused by business constraint violations.
 
-### But what if the message doesn't send?
+#### But what if the message doesn't send?
 
 This question comes up, and it is a fair question. If the broker goes down, the outbox would be unable to deliver the messages. If the process crashes, the messages in the outbox would be lost. Both of these failures can happen, though it is rare. And if computer science has one rule, it is that the rare will always happen. In production. On a Friday afternoon.
 
-## Time to Take out the Trash
+### Time to Take out the Trash
 
 Imagine you're twelve, sitting on the sofa, playing video games with your friends. Suddenly, from the other room, you hear your mom call out, "Take out the trash!" Of course, you're in the middle of a battle, and while you've explained many times that you can't pause a multiplayer game, mom just doesn't get it. So you do what any 12-year-old does, you ignore her. The trash remains right where it is, in the kitchen.
 
@@ -95,7 +91,7 @@ After a while, the lack of a door opening and closing, the still present smell o
 
 More time passes, the squad is ready and you're about to get on the bus. Your mom, however, didn't hear from you and shouts once more, "I said take out the trash." "Mom, I already took it out" you reply, realizing after that you forgot to mute your mic. The jests and jokes commence as you thank the bus driver and head out.
 
-### The Story
+#### The Story
 
 This real-world example includes both failures scenarios that are brought up when considering the in-memory outbox.
 
@@ -113,7 +109,7 @@ When the message is attempted a third time (and face it, the third time is dange
 
 The correct thing to do at this point is to use the state in the database, along with any information that is contained in the message, to produce the same commands and events that were produced in the previous attempt. Those messages will be delivered by the outbox, and the message will be acknowledged.
 
-### !! Victory !!
+#### !! Victory !!
 
 That's it, an easy-to-use, reliable solution to perform atomic operations that update a database and send/publish messages, and it works for any database updates that are sent as commands (delivered by durable message queues).
 
@@ -121,7 +117,7 @@ And a big thank you to Jimmy Bogard, who's tweet prompted me to write this artic
 
 <Tweet id="1225424085498417153" :options="{ theme: 'dark', dnt: 'true' }"></Tweet>
 
-#### Other Reading
+##### Other Reading
 
 [Transactional Outbox](https://microservices.io/patterns/data/transactional-outbox.html)
 [NServiceBus Outbox](https://docs.particular.net/nservicebus/outbox/)

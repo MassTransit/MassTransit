@@ -93,7 +93,7 @@ services.AddMassTransit(x =>
             r.DatabaseFactory(() => new OrderStateDbContext(connectionString));
         });
 
-    x.UsingInMemory(cfg =>
+    x.UsingInMemory((context, cfg) =>
     {
         cfg.ReceiveEndpoint("order-state", e =>
         {
@@ -110,7 +110,7 @@ services.AddMassTransit(x =>
 
             e.ConfigureSaga<OrderState>(context);
         });
-    }));
+    });
 });
 ```
 

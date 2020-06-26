@@ -1,6 +1,6 @@
 namespace MassTransit.Conductor.Observers
 {
-    using Configuration.Configurators;
+    using Configurators;
     using ConsumeConfigurators;
     using Courier.Contracts;
     using PipeConfigurators;

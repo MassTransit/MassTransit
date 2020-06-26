@@ -1,4 +1,4 @@
-namespace MassTransit.Conductor.Configuration
+namespace MassTransit.Conductor
 {
     using System;
     using BusConfigurators;
@@ -8,6 +8,7 @@ namespace MassTransit.Conductor.Configuration
 
     public interface IServiceInstanceConfigurator<out TEndpointConfigurator> :
         IReceiveConfigurator<TEndpointConfigurator>,
+        IOptionsSet,
         IBusObserverConnector,
         IReceiveEndpointObserverConnector
         where TEndpointConfigurator : IReceiveEndpointConfigurator

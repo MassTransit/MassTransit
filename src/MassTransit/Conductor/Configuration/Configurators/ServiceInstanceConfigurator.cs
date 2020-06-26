@@ -1,7 +1,8 @@
-namespace MassTransit.Conductor.Configuration.Configurators
+namespace MassTransit.Conductor.Configurators
 {
     using System;
     using System.Collections.Generic;
+    using Configuration;
     using Definition;
     using EndpointConfigurators;
     using GreenPipes;
@@ -127,6 +128,18 @@ namespace MassTransit.Conductor.Configuration.Configurators
                 return _instanceEndpointConfigurator.ConnectReceiveEndpointObserver(observer);
 
             return new EmptyConnectHandle();
+        }
+
+        public T Options<T>(Action<T> configure = null)
+            where T : IOptions, new()
+        {
+            return _options.Options(configure);
+        }
+
+        public bool TryGetOptions<T>(out T options)
+            where T : IOptions
+        {
+            return _options.TryGetOptions(out options);
         }
 
         void ConfigureServiceEndpoint(TEndpointConfigurator endpointConfigurator, TEndpointConfigurator controlEndpointConfigurator,

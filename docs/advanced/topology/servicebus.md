@@ -4,12 +4,12 @@
 The send and publish topologies are extended to support the Azure Service Bus features, and make it possible to configure how topics are created.
 
 
-## Topic Properties
+## Topics
 
 To specify properties used when a topic is created, the publish topology can be configured during bus creation:
 
 ```csharp
-Bus.Factory.CreateUsingAzureServiceBus(..., cfg =>
+Bus.Factory.CreateUsingAzureServiceBus(cfg =>
 {
     cfg.Publish<OrderSubmitted>(x =>
     {
@@ -18,7 +18,7 @@ Bus.Factory.CreateUsingAzureServiceBus(..., cfg =>
 });
 ```
 
-## PartitionKey Convention
+## PartitionKey
 
 The PartitionKey on published/sent messages can be configured by convention, allowing the same method to be used for messages which implement a common interface type. If no common type is shared, each message type may be configured individually using various conventional selectors. Alternatively, developers may create their own convention to fit their needs.
 
@@ -32,7 +32,7 @@ public interface SubmitOrder
     // ...
 }
 
-Bus.Factory.CreateUsingAzureServiceBus(..., cfg =>
+Bus.Factory.CreateUsingAzureServiceBus(cfg =>
 {
     cfg.Send<SubmitOrder>(x =>
     {
@@ -41,7 +41,7 @@ Bus.Factory.CreateUsingAzureServiceBus(..., cfg =>
 });
 ```
 
-## SessionId Convention
+## SessionId
 
 The SessionId on published/sent messages can be configured by convention, allowing the same method to be used for messages which implement a common interface type. If no common type is shared, each message type may be configured individually using various conventional selectors. Alternatively, developers may create their own convention to fit their needs.
 
@@ -54,7 +54,7 @@ public interface UpdateUserStatus
     string Status { get; }
 }
 
-Bus.Factory.CreateUsingAzureServiceBus(..., cfg =>
+Bus.Factory.CreateUsingAzureServiceBus(cfg =>
 {
     cfg.Send<UpdateUserStatus>(x =>
     {
@@ -63,7 +63,7 @@ Bus.Factory.CreateUsingAzureServiceBus(..., cfg =>
 });
 ```
 
-## Topic Subscriptions
+## Subscriptions
 
 In Azure, topics and topic subscriptions provide a mechanism for one-to-many communication (versus queues that are designed for one-to-one). A topic subscription acts as a virtual queue. To subscribe to a topic subscription directly the `SubscriptionEndpoint` should be used:
 
@@ -74,7 +74,7 @@ cfg.SubscriptionEndpoint<MessageType>("subscription-name", e =>
 })
 ```
 
-Note that a topic subscription's messages can be forwarded to a receive endpoint (an Azure Service Bus queue), in the following way. Behind the scenes MassTransit is setting up [Service Bus Autoforwarding](https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-auto-forwarding) between a topic subscription and a queue.
+Note that a topic subscription's messages can be forwarded to a receive endpoint (an Azure Service Bus queue), in the following way. Behind the scenes MassTransit is setting up [Service Bus Auto-forwarding](https://docs.microsoft.com/en-us/azure/service-bus-messaging/service-bus-auto-forwarding) between a topic subscription and a queue.
 
 ```csharp
 cfg.ReceiveEndpoint("input-queue", e =>

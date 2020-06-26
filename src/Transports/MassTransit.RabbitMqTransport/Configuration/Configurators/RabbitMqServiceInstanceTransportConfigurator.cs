@@ -1,9 +1,10 @@
 namespace MassTransit.RabbitMqTransport.Configurators
 {
     using System;
-    using Conductor.Configuration.Configurators;
+    using Conductor.Configurators;
 
 
+    // ReSharper disable once UnusedType.Global
     public class RabbitMqServiceInstanceTransportConfigurator :
         IServiceInstanceTransportConfigurator<IRabbitMqReceiveEndpointConfigurator>
     {
