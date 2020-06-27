@@ -15,13 +15,14 @@ namespace MassTransit.Azure.Table.Contexts
     {
         readonly Func<CloudTable> _databaseFactory;
         readonly ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> _factory;
+        readonly ISagaKeyFormatter<TSaga> _keyFormatter;
 
         public AzureTableSagaRepositoryContextFactory(Func<CloudTable> databaseFactory,
             ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> factory)
         {
             _databaseFactory = databaseFactory;
-
             _factory = factory;
+            _keyFormatter = new ConstantSagaKeyFormatter<TSaga>(typeof(TSaga).Name);
         }
 
         public AzureTableSagaRepositoryContextFactory(CloudTable databaseFactory,
@@ -30,6 +31,7 @@ namespace MassTransit.Azure.Table.Contexts
             _databaseFactory = () => databaseFactory;
 
             _factory = factory;
+            _keyFormatter = new ConstantSagaKeyFormatter<TSaga>(typeof(TSaga).Name);
         }
 
         public void Probe(ProbeContext context)
@@ -42,7 +44,7 @@ namespace MassTransit.Azure.Table.Contexts
         {
             var database = _databaseFactory();
 
-            var databaseContext = new AzureTableDatabaseContext<TSaga>(database);
+            var databaseContext = new AzureTableDatabaseContext<TSaga>(database, _keyFormatter);
 
             var repositoryContext = new AzureTableSagaRepositoryContext<TSaga, T>(databaseContext, context, _factory);
 
@@ -60,7 +62,7 @@ namespace MassTransit.Azure.Table.Contexts
         {
             var database = _databaseFactory();
 
-            var databaseContext = new AzureTableDatabaseContext<TSaga>(database);
+            var databaseContext = new AzureTableDatabaseContext<TSaga>(database, _keyFormatter);
             var repositoryContext = new CosmosTableSagaRepositoryContext<TSaga>(databaseContext, cancellationToken);
 
             return await asyncMethod(repositoryContext).ConfigureAwait(false);

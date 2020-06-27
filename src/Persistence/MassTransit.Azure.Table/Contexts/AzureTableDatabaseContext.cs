@@ -12,13 +12,13 @@ namespace MassTransit.Azure.Table.Contexts
         DatabaseContext<TSaga>
         where TSaga : class, IVersionedSaga
     {
-        readonly string _partitionKey;
+        readonly ISagaKeyFormatter<TSaga> _keyFormatter;
         readonly CloudTable _table;
 
-        public AzureTableDatabaseContext(CloudTable table)
+        public AzureTableDatabaseContext(CloudTable table, ISagaKeyFormatter<TSaga> keyFormatter)
         {
             _table = table;
-            _partitionKey = typeof(TSaga).Name;
+            _keyFormatter = keyFormatter;
         }
 
         public Task Add(SagaConsumeContext<TSaga> context)
@@ -29,16 +29,21 @@ namespace MassTransit.Azure.Table.Contexts
         public async Task Insert(TSaga instance, CancellationToken cancellationToken)
         {
             IDictionary<string, EntityProperty> entityProperties = TableEntity.Flatten(instance, new OperationContext());
+            entityProperties.Remove(nameof(IVersionedSaga.ETag));
 
-            var operation = TableOperation.Insert(new DynamicTableEntity(_partitionKey, instance.CorrelationId.ToString()) {Properties = entityProperties});
+            var (partitionKey, rowKey) = _keyFormatter.Format(instance.CorrelationId);
+
+            var operation = TableOperation.Insert(new DynamicTableEntity(partitionKey, rowKey) {Properties = entityProperties});
             var result = await _table.ExecuteAsync(operation, cancellationToken).ConfigureAwait(false);
-
-            instance.ETag = result.Etag;
+            if (result.Result is DynamicTableEntity tableEntity)
+                instance.ETag = tableEntity.ETag;
         }
 
         public async Task<TSaga> Load(Guid correlationId, CancellationToken cancellationToken)
         {
-            var operation = TableOperation.Retrieve<DynamicTableEntity>(_partitionKey, correlationId.ToString());
+            var (partitionKey, rowKey) = _keyFormatter.Format(correlationId);
+
+            var operation = TableOperation.Retrieve<DynamicTableEntity>(partitionKey, rowKey);
             var result = await _table.ExecuteAsync(operation, cancellationToken).ConfigureAwait(false);
 
             if (result.Result is DynamicTableEntity tableEntity)
@@ -60,12 +65,18 @@ namespace MassTransit.Azure.Table.Contexts
             try
             {
                 IDictionary<string, EntityProperty> entityProperties = TableEntity.Flatten(instance, new OperationContext());
-                var operation = TableOperation.Replace(new DynamicTableEntity(_partitionKey, instance.CorrelationId.ToString())
+                entityProperties.Remove(nameof(IVersionedSaga.ETag));
+
+                var (partitionKey, rowKey) = _keyFormatter.Format(instance.CorrelationId);
+
+                var operation = TableOperation.Replace(new DynamicTableEntity(partitionKey, rowKey)
                 {
                     Properties = entityProperties,
                     ETag = instance.ETag
                 });
-                await _table.ExecuteAsync(operation, context.CancellationToken).ConfigureAwait(false);
+                var result = await _table.ExecuteAsync(operation, context.CancellationToken).ConfigureAwait(false);
+                if (result.Result is DynamicTableEntity tableEntity)
+                    instance.ETag = tableEntity.ETag;
             }
             catch (Exception exception)
             {
@@ -79,7 +90,9 @@ namespace MassTransit.Azure.Table.Contexts
 
             IDictionary<string, EntityProperty> entityProperties = TableEntity.Flatten(instance, new OperationContext());
 
-            var operation = TableOperation.Delete(new DynamicTableEntity(_partitionKey, instance.CorrelationId.ToString(), instance.ETag, entityProperties));
+            var (partitionKey, rowKey) = _keyFormatter.Format(instance.CorrelationId);
+
+            var operation = TableOperation.Delete(new DynamicTableEntity(partitionKey, rowKey, instance.ETag, entityProperties));
 
             await _table.ExecuteAsync(operation, context.CancellationToken).ConfigureAwait(false);
         }
