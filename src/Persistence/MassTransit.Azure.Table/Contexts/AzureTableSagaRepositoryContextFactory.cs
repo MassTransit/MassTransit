@@ -1,9 +1,10 @@
-namespace MassTransit.Azure.Table
+namespace MassTransit.Azure.Table.Contexts
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using MassTransit.Saga;
     using Microsoft.Azure.Cosmos.Table;
     using Saga;
 
@@ -43,16 +44,9 @@ namespace MassTransit.Azure.Table
 
             var databaseContext = new AzureTableDatabaseContext<TSaga>(database);
 
-            try
-            {
-                var repositoryContext = new AzureTableSagaRepositoryContext<TSaga, T>(databaseContext, context, _factory);
+            var repositoryContext = new AzureTableSagaRepositoryContext<TSaga, T>(databaseContext, context, _factory);
 
-                await next.Send(repositoryContext).ConfigureAwait(false);
-            }
-            finally
-            {
-                await databaseContext.DisposeAsync().ConfigureAwait(false);
-            }
+            await next.Send(repositoryContext).ConfigureAwait(false);
         }
 
         public async Task SendQuery<T>(ConsumeContext<T> context, ISagaQuery<TSaga> query, IPipe<SagaRepositoryQueryContext<TSaga, T>> next)
@@ -67,16 +61,9 @@ namespace MassTransit.Azure.Table
             var database = _databaseFactory();
 
             var databaseContext = new AzureTableDatabaseContext<TSaga>(database);
-            try
-            {
-                var repositoryContext = new CosmosTableSagaRepositoryContext<TSaga>(databaseContext, cancellationToken);
+            var repositoryContext = new CosmosTableSagaRepositoryContext<TSaga>(databaseContext, cancellationToken);
 
-                return await asyncMethod(repositoryContext).ConfigureAwait(false);
-            }
-            finally
-            {
-                await databaseContext.DisposeAsync().ConfigureAwait(false);
-            }
+            return await asyncMethod(repositoryContext).ConfigureAwait(false);
         }
     }
 }

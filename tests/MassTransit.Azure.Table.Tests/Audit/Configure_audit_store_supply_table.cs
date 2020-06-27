@@ -7,6 +7,7 @@
     using Microsoft.Azure.Cosmos.Table;
     using NUnit.Framework;
     using Shouldly;
+    using Table.Audit;
 
 
     [TestFixture]

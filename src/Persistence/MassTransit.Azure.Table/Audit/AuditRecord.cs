@@ -1,15 +1,23 @@
-namespace MassTransit.Azure.Table
+namespace MassTransit.Azure.Table.Audit
 {
     using System;
-    using System.Collections.Generic;
     using System.Text;
-    using Audit;
+    using MassTransit.Audit;
+    using Metadata;
     using Microsoft.Azure.Cosmos.Table;
     using Newtonsoft.Json;
 
 
-    public class AuditRecord : TableEntity
+    public class AuditRecord :
+        TableEntity
     {
+        static readonly char[] _disallowedCharacters;
+
+        static AuditRecord()
+        {
+            _disallowedCharacters = new[] {'/', '\\', '#', '?'};
+        }
+
         public Guid? MessageId { get; set; }
         public Guid? ConversationId { get; set; }
         public Guid? CorrelationId { get; set; }
@@ -27,14 +35,12 @@ namespace MassTransit.Azure.Table
         public string Headers { get; set; }
         public string Message { get; set; }
 
-        internal static AuditRecord Create<T>(T message, string messageType, MessageAuditMetadata metadata,
-            Func<string, AuditRecord, string> partitionKeyStrategy)
+        internal static AuditRecord Create<T>(T message, MessageAuditMetadata metadata, IPartitionKeyFormatter partitionKeyFormatter)
             where T : class
         {
             var record = new AuditRecord
             {
-                RowKey =
-                    $"{DateTime.MaxValue.Subtract(metadata.SentTime ?? DateTime.UtcNow).TotalMilliseconds}",
+                RowKey = $"{DateTime.MaxValue.Subtract(metadata.SentTime ?? DateTime.UtcNow).TotalMilliseconds}",
                 ContextType = metadata.ContextType,
                 MessageId = metadata.MessageId,
                 ConversationId = metadata.ConversationId,
@@ -50,30 +56,35 @@ namespace MassTransit.Azure.Table
                 Headers = JsonConvert.SerializeObject(metadata.Headers),
                 Custom = JsonConvert.SerializeObject(metadata.Custom),
                 Message = JsonConvert.SerializeObject(message),
-                MessageType = messageType
+                MessageType = TypeMetadataCache<T>.ShortName
             };
-            record.PartitionKey = CleanDisallowedPartitionKeyCharacters(partitionKeyStrategy.Invoke(messageType, record));
+
+            record.PartitionKey = SanitizePartitionKey(partitionKeyFormatter.Format<T>(record));
+
             return record;
         }
 
-        /// <summary>
-        /// </summary>
-        /// <param name="candidatePartitionKey"></param>
-        /// <returns></returns>
-        static string CleanDisallowedPartitionKeyCharacters(string candidatePartitionKey)
+        static string SanitizePartitionKey(string partitionKey)
         {
-            var disallowedCharacters = new HashSet<char>
+            if (partitionKey.IndexOfAny(_disallowedCharacters) < 0)
+                return partitionKey;
+
+            var key = new StringBuilder(partitionKey.Length);
+
+            foreach (var c in partitionKey)
             {
-                '/',
-                '\\',
-                '#',
-                '?'
-            };
-            var key = new StringBuilder();
-            foreach (var character in candidatePartitionKey)
-            {
-                if (!disallowedCharacters.Contains(character))
-                    key.Append(character);
+                switch (c)
+                {
+                    case '/':
+                    case '\\':
+                    case '#':
+                    case '?':
+                        continue;
+
+                    default:
+                        key.Append(c);
+                        break;
+                }
             }
 
             return key.ToString();

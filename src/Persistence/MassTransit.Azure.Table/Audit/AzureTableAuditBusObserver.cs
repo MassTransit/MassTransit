@@ -1,4 +1,4 @@
-namespace MassTransit.Azure.Table
+namespace MassTransit.Azure.Table.Audit
 {
     using System;
     using System.Threading.Tasks;
@@ -11,24 +11,24 @@ namespace MassTransit.Azure.Table
         IBusObserver
     {
         readonly Action<IMessageFilterConfigurator> _filter;
-        readonly Func<string, AuditRecord, string> _partitionKeyStrategy;
+        readonly IPartitionKeyFormatter _partitionKeyFormatter;
         readonly CloudTable _table;
 
-        public AzureTableAuditBusObserver(CloudTable table, Action<IMessageFilterConfigurator> filter,
-            Func<string, AuditRecord, string> partitionKeyStrategy)
+        public AzureTableAuditBusObserver(CloudTable table, Action<IMessageFilterConfigurator> filter, IPartitionKeyFormatter partitionKeyFormatter)
         {
             _table = table;
-            _partitionKeyStrategy = partitionKeyStrategy;
             _filter = filter;
+            _partitionKeyFormatter = partitionKeyFormatter;
         }
 
         public async Task PostCreate(IBus bus)
         {
-            LogContext.Debug?.Log($"Connecting Azure Table Audit Store against table {_table.Name}");
-            var auditStore = new AzureTableAuditStore(_table, _partitionKeyStrategy);
+            LogContext.Debug?.Log($"Connecting Azure Table Audit Store: {_table.Name}");
+
+            var auditStore = new AzureTableAuditStore(_table, _partitionKeyFormatter);
+
             bus.ConnectSendAuditObservers(auditStore, _filter);
             bus.ConnectConsumeAuditObserver(auditStore, _filter);
-            LogContext.Debug?.Log($"Azure Table Audit store connected. {_table.Name}");
         }
 
         public Task CreateFaulted(Exception exception)

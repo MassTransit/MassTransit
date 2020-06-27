@@ -1,8 +1,9 @@
-﻿namespace MassTransit.Azure.Table
+﻿namespace MassTransit.Azure.Table.Saga
 {
     using System;
+    using Contexts;
+    using MassTransit.Saga;
     using Microsoft.Azure.Cosmos.Table;
-    using Saga;
 
 
     public static class AzureTableSagaRepository<TSaga>

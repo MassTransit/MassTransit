@@ -1,6 +1,6 @@
-﻿namespace MassTransit.Azure.Table
+﻿namespace MassTransit.Azure.Table.Saga
 {
-    using Saga;
+    using MassTransit.Saga;
 
 
     public interface IVersionedSaga :

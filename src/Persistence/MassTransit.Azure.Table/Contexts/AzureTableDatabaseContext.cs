@@ -1,10 +1,11 @@
-namespace MassTransit.Azure.Table
+namespace MassTransit.Azure.Table.Contexts
 {
     using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
+    using Saga;
 
 
     public class AzureTableDatabaseContext<TSaga> :
@@ -22,20 +23,34 @@ namespace MassTransit.Azure.Table
 
         public Task Add(SagaConsumeContext<TSaga> context)
         {
-            return Insert(context.Saga);
+            return Insert(context.Saga, context.CancellationToken);
         }
 
-        public Task Insert(TSaga instance)
+        public async Task Insert(TSaga instance, CancellationToken cancellationToken)
         {
-            Guid? rowKey = instance.CorrelationId;
-            IDictionary<string, EntityProperty> dynamicEntity = TableEntity.Flatten(instance, new OperationContext());
-            return _table.ExecuteAsync(TableOperation.InsertOrReplace(new DynamicTableEntity(_partitionKey, rowKey.ToString()) {Properties = dynamicEntity}),
-                CancellationToken.None);
+            IDictionary<string, EntityProperty> entityProperties = TableEntity.Flatten(instance, new OperationContext());
+
+            var operation = TableOperation.Insert(new DynamicTableEntity(_partitionKey, instance.CorrelationId.ToString()) {Properties = entityProperties});
+            var result = await _table.ExecuteAsync(operation, cancellationToken).ConfigureAwait(false);
+
+            instance.ETag = result.Etag;
         }
 
-        public Task<TSaga> Load(Guid correlationId)
+        public async Task<TSaga> Load(Guid correlationId, CancellationToken cancellationToken)
         {
-            return Get(correlationId);
+            var operation = TableOperation.Retrieve<DynamicTableEntity>(_partitionKey, correlationId.ToString());
+            var result = await _table.ExecuteAsync(operation, cancellationToken).ConfigureAwait(false);
+
+            if (result.Result is DynamicTableEntity tableEntity)
+            {
+                var instance = TableEntity.ConvertBack<TSaga>(tableEntity.Properties, new OperationContext());
+
+                instance.ETag = tableEntity.ETag;
+
+                return instance;
+            }
+
+            return default;
         }
 
         public async Task Update(SagaConsumeContext<TSaga> context)
@@ -44,18 +59,13 @@ namespace MassTransit.Azure.Table
 
             try
             {
-                var existingInstanceTableEntity = await GetTableEntity(instance.CorrelationId).ConfigureAwait(false);
-                var existingInstance = ConvertTableEntityToSagaInstance(existingInstanceTableEntity);
-                existingInstance.ETag = existingInstanceTableEntity.ETag;
-
-                Guid? rowKey = instance.CorrelationId;
-                IDictionary<string, EntityProperty> dynamicEntity = TableEntity.Flatten(instance, new OperationContext());
-                var replacementOperation = TableOperation.Replace(new DynamicTableEntity(_partitionKey, rowKey.ToString())
+                IDictionary<string, EntityProperty> entityProperties = TableEntity.Flatten(instance, new OperationContext());
+                var operation = TableOperation.Replace(new DynamicTableEntity(_partitionKey, instance.CorrelationId.ToString())
                 {
-                    Properties = dynamicEntity,
-                    ETag = existingInstance.ETag
+                    Properties = entityProperties,
+                    ETag = instance.ETag
                 });
-                await _table.ExecuteAsync(replacementOperation, context.CancellationToken).ConfigureAwait(false);
+                await _table.ExecuteAsync(operation, context.CancellationToken).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -63,39 +73,15 @@ namespace MassTransit.Azure.Table
             }
         }
 
-        public Task Delete(SagaConsumeContext<TSaga> context)
+        public async Task Delete(SagaConsumeContext<TSaga> context)
         {
-            return Delete(context.Saga.CorrelationId);
-        }
+            var instance = context.Saga;
 
-        public ValueTask DisposeAsync()
-        {
-            return default;
-        }
+            IDictionary<string, EntityProperty> entityProperties = TableEntity.Flatten(instance, new OperationContext());
 
-        async Task<DynamicTableEntity> GetTableEntity(Guid correlationId)
-        {
-            Guid? rowKey = correlationId;
-            var op = TableOperation.Retrieve<DynamicTableEntity>(_partitionKey, rowKey.ToString());
-            var entity = await _table.ExecuteAsync(op);
-            return entity.Result as DynamicTableEntity;
-        }
+            var operation = TableOperation.Delete(new DynamicTableEntity(_partitionKey, instance.CorrelationId.ToString(), instance.ETag, entityProperties));
 
-        async Task<TSaga> Get(Guid correlationId)
-        {
-            var tableEntity = await GetTableEntity(correlationId).ConfigureAwait(false);
-            return ConvertTableEntityToSagaInstance(tableEntity);
-        }
-
-        static TSaga ConvertTableEntityToSagaInstance(DynamicTableEntity tableEntity)
-        {
-            return tableEntity != null ? TableEntity.ConvertBack<TSaga>(tableEntity.Properties, new OperationContext()) : null;
-        }
-
-        async Task Delete(Guid correlationId)
-        {
-            var tableEntity = await GetTableEntity(correlationId).ConfigureAwait(false);
-            await _table.ExecuteAsync(TableOperation.Delete(tableEntity));
+            await _table.ExecuteAsync(operation, context.CancellationToken).ConfigureAwait(false);
         }
     }
 }

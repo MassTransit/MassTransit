@@ -1,8 +1,10 @@
-namespace MassTransit.Azure.Table
+namespace MassTransit.Azure.Table.Configurators
 {
     using System;
     using System.Collections.Generic;
+    using Contexts;
     using GreenPipes;
+    using MassTransit.Saga;
     using Microsoft.Azure.Cosmos.Table;
     using Registration;
     using Saga;
@@ -11,12 +13,9 @@ namespace MassTransit.Azure.Table
     public class AzureTableSagaRepositoryConfigurator<TSaga> :
         IAzureTableSagaRepositoryConfigurator<TSaga>,
         ISpecification
+        where TSaga : class, ISaga
     {
         Func<IConfigurationServiceProvider, CloudTable> _connectionFactory;
-
-        public AzureTableSagaRepositoryConfigurator()
-        {
-        }
 
         /// <summary>
         /// Supply factory for retrieving the Cloud Table.

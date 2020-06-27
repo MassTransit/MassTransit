@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using NUnit.Framework;
     using Shouldly;
+    using Table.Audit;
 
 
     [TestFixture]
@@ -37,7 +38,7 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseAzureTableAuditStore(TestCloudTable,builder => builder.Exclude(typeof(B)));
+            configurator.UseAzureTableAuditStore(TestCloudTable, builder => builder.Exclude(typeof(B)));
             base.ConfigureInMemoryBus(configurator);
         }
 

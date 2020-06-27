@@ -2,6 +2,8 @@ namespace MassTransit
 {
     using System;
     using Azure.Table;
+    using Azure.Table.Configurators;
+    using Azure.Table.Saga;
     using Configurators;
 
 
@@ -18,13 +20,13 @@ namespace MassTransit
             Action<IAzureTableSagaRepositoryConfigurator<T>> configure = null)
             where T : class, IVersionedSaga
         {
-            var cosmosTableConfigurator = new AzureTableSagaRepositoryConfigurator<T>();
+            var sagaRepositoryConfigurator = new AzureTableSagaRepositoryConfigurator<T>();
 
-            configure?.Invoke(cosmosTableConfigurator);
+            configure?.Invoke(sagaRepositoryConfigurator);
 
-            BusConfigurationResult.CompileResults(cosmosTableConfigurator.Validate());
+            BusConfigurationResult.CompileResults(sagaRepositoryConfigurator.Validate());
 
-            configurator.Repository(x => cosmosTableConfigurator.Register(x));
+            configurator.Repository(x => sagaRepositoryConfigurator.Register(x));
 
             return configurator;
         }

@@ -7,6 +7,7 @@
     using Microsoft.Azure.Cosmos.Table;
     using NUnit.Framework;
     using Shouldly;
+    using Table.Audit;
 
 
     [TestFixture]
@@ -32,13 +33,30 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseAzureTableAuditStore(TestCloudTable,(messageType, record) => PartitionKey);
-            base.ConfigureInMemoryBus(configurator);
+            configurator.UseAzureTableAuditStore(TestCloudTable, new ConstantPartitionKeyFormatter(PartitionKey));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             EndpointConvention.Map<A>(new Uri($"{configurator.InputAddress}"));
+        }
+
+
+        class ConstantPartitionKeyFormatter :
+            IPartitionKeyFormatter
+        {
+            readonly string _partitionKey;
+
+            public ConstantPartitionKeyFormatter(string partitionKey)
+            {
+                _partitionKey = partitionKey;
+            }
+
+            public string Format<T>(AuditRecord record)
+                where T : class
+            {
+                return _partitionKey;
+            }
         }
 
 

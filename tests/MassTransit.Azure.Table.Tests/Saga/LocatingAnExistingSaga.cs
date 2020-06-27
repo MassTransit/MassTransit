@@ -5,6 +5,7 @@
     using MassTransit.Saga;
     using NUnit.Framework;
     using Shouldly;
+    using Table.Saga;
     using Testing;
 
 

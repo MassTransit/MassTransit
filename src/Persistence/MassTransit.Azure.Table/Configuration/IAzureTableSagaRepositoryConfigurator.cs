@@ -1,7 +1,15 @@
 ﻿namespace MassTransit.Azure.Table
 {
     using System;
+    using MassTransit.Saga;
     using Microsoft.Azure.Cosmos.Table;
+
+
+    public interface IAzureTableSagaRepositoryConfigurator<TSaga> :
+        IAzureTableSagaRepositoryConfigurator
+        where TSaga : class, ISaga
+    {
+    }
 
 
     public interface IAzureTableSagaRepositoryConfigurator
@@ -11,11 +19,5 @@
         /// </summary>
         /// <param name="connectionFactory"></param>
         void ConnectionFactory(Func<CloudTable> connectionFactory);
-    }
-
-
-    public interface IAzureTableSagaRepositoryConfigurator<TSaga> :
-        IAzureTableSagaRepositoryConfigurator
-    {
     }
 }

@@ -1,18 +1,18 @@
-﻿namespace MassTransit.Azure.Table
+﻿namespace MassTransit.Azure.Table.Contexts
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using MassTransit.Saga;
     using Saga;
     using Util;
 
 
     public class AzureTableSagaRepositoryContext<TSaga, TMessage> :
         ConsumeContextScope<TMessage>,
-        SagaRepositoryContext<TSaga, TMessage>,
-        IAsyncDisposable
+        SagaRepositoryContext<TSaga, TMessage>
         where TSaga : class, IVersionedSaga
         where TMessage : class
     {
@@ -29,11 +29,6 @@
             _factory = factory;
         }
 
-        public ValueTask DisposeAsync()
-        {
-            return _context.DisposeAsync();
-        }
-
         public Task<SagaConsumeContext<TSaga, TMessage>> Add(TSaga instance)
         {
             return _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Add);
@@ -43,7 +38,7 @@
         {
             try
             {
-                await _context.Insert(instance).ConfigureAwait(false);
+                await _context.Insert(instance, CancellationToken).ConfigureAwait(false);
 
                 _consumeContext.LogInsert<TSaga, TMessage>(instance.CorrelationId);
 
@@ -59,7 +54,7 @@
 
         public async Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId)
         {
-            var instance = await _context.Load(correlationId).ConfigureAwait(false);
+            var instance = await _context.Load(correlationId, CancellationToken).ConfigureAwait(false);
             if (instance == null)
                 return default;
 
@@ -96,8 +91,7 @@
 
     public class CosmosTableSagaRepositoryContext<TSaga> :
         BasePipeContext,
-        SagaRepositoryContext<TSaga>,
-        IAsyncDisposable
+        SagaRepositoryContext<TSaga>
         where TSaga : class, IVersionedSaga
     {
         readonly DatabaseContext<TSaga> _context;
@@ -108,11 +102,6 @@
             _context = context;
         }
 
-        public ValueTask DisposeAsync()
-        {
-            return _context.DisposeAsync();
-        }
-
         public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)
         {
             throw new NotImplementedByDesignException("Azure Table saga repository does not support queries");
@@ -120,7 +109,7 @@
 
         public Task<TSaga> Load(Guid correlationId)
         {
-            return _context.Load(correlationId);
+            return _context.Load(correlationId, CancellationToken);
         }
     }
 }

@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using MassTransit.Saga;
+    using Table.Saga;
 
 
     public class SimpleSaga :
@@ -22,7 +23,7 @@
         }
 
         public Guid CorrelationId { get; set; }
-        public  string ETag { get; set; }
+        public string ETag { get; set; }
 
         public async Task Consume(ConsumeContext<CompleteSimpleSaga> message)
         {

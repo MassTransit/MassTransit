@@ -18,10 +18,9 @@ namespace MassTransit
         /// <param name="connector">The bus</param>
         /// <param name="store">Audit store</param>
         /// <param name="configureFilter">Filter configuration delegate</param>
-        /// <param name="metadataFactory">Message metadata factory. If omited, the default one will be used.</param>
+        /// <param name="metadataFactory">Message metadata factory. If omitted, the default one will be used.</param>
         public static ConnectHandle ConnectSendAuditObservers<T>(this T connector, IMessageAuditStore store,
-            Action<IMessageFilterConfigurator> configureFilter = null,
-            ISendMetadataFactory metadataFactory = null)
+            Action<IMessageFilterConfigurator> configureFilter = null, ISendMetadataFactory metadataFactory = null)
             where T : ISendObserverConnector, IPublishObserverConnector
         {
             var specification = new SendMessageFilterSpecification();
@@ -41,7 +40,7 @@ namespace MassTransit
         /// <param name="connector">The bus or endpoint</param>
         /// <param name="store">The audit store</param>
         /// <param name="configureFilter">Filter configuration delegate</param>
-        /// <param name="metadataFactory">Message metadata factory. If omited, the default one will be used.</param>
+        /// <param name="metadataFactory">Message metadata factory. If omitted, the default one will be used.</param>
         public static ConnectHandle ConnectConsumeAuditObserver(this IConsumeObserverConnector connector, IMessageAuditStore store,
             Action<IMessageFilterConfigurator> configureFilter = null, IConsumeMetadataFactory metadataFactory = null)
         {

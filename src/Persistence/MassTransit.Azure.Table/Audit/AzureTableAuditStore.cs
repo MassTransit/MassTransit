@@ -1,26 +1,25 @@
-﻿namespace MassTransit.Azure.Table
+﻿namespace MassTransit.Azure.Table.Audit
 {
-    using System;
     using System.Threading.Tasks;
-    using Audit;
-    using Metadata;
+    using MassTransit.Audit;
     using Microsoft.Azure.Cosmos.Table;
 
 
-    public class AzureTableAuditStore : IMessageAuditStore
+    public class AzureTableAuditStore :
+        IMessageAuditStore
     {
-        readonly Func<string, AuditRecord, string> _partitionKeyStrategy;
+        readonly IPartitionKeyFormatter _partitionKeyFormatter;
         readonly CloudTable _table;
 
-        public AzureTableAuditStore(CloudTable table, Func<string, AuditRecord, string> partitionKeyStrategy)
+        public AzureTableAuditStore(CloudTable table, IPartitionKeyFormatter partitionKeyFormatter)
         {
             _table = table;
-            _partitionKeyStrategy = partitionKeyStrategy;
+            _partitionKeyFormatter = partitionKeyFormatter;
         }
 
         Task IMessageAuditStore.StoreMessage<T>(T message, MessageAuditMetadata metadata)
         {
-            var auditRecord = AuditRecord.Create(message, TypeMetadataCache<T>.ShortName, metadata, _partitionKeyStrategy);
+            var auditRecord = AuditRecord.Create(message, metadata, _partitionKeyFormatter);
             var insertOrMergeOperation = TableOperation.InsertOrMerge(auditRecord);
             return _table.ExecuteAsync(insertOrMergeOperation);
         }
