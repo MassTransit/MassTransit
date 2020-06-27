@@ -55,7 +55,7 @@ namespace MassTransit.Azure.Table
                     Properties = dynamicEntity,
                     ETag = existingInstance.ETag
                 });
-                await _table.ExecuteAsync(replacementOperation, CancellationToken.None).ConfigureAwait(false);
+                await _table.ExecuteAsync(replacementOperation, context.CancellationToken).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
