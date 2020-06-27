@@ -7,6 +7,10 @@ MassTransit is a _free, open-source_ distributed application framework for .NET.
 
 MassTransit is Apache 2.0 licensed.
 
+## Documentation
+
+Get started by [reading through the documentation](https://masstransit-project.com/).
+
 Build Status
 ------------
 
@@ -55,26 +59,9 @@ MassTransit Nuget Packages
 | [MassTransit.RabbitMQ][RabbitMQ.nuget] | 2.0 |
 | [MassTransit.WebJobs.EventHubs][EventHubs.nuget] | 2.0 |
 | [MassTransit.WebJobs.ServiceBus][AzureFunc.nuget] | 2.0 |
-
-
-## Getting started with MassTransit
-
-In order to get started with MassTransit, you can have a look at the
-documentation, which is located at [https://masstransit-project.com/](https://masstransit-project.com/).
-
-### Downloads
-
-Download from NuGet 'MassTransit' [Search NuGet for MassTransit](https://nuget.org/packages?q=masstransit)
-
-Download the continuously integrated Nuget packages from [AppVeyor](https://ci.appveyor.com/project/phatboyg/masstransit/build/artifacts).
-
-### Supported transports
-
-We support RabbitMQ and Azure Service Bus message brokers.
-
-## Mailing list
-
-[MassTransit Discuss](https://groups.google.com/group/masstransit-discuss)
+| **Riders** |
+| [MassTransit.Kafka][Kafka.nuget] | 2.0 |
+| [MassTransit.EventHub][EventHub.nuget] | 2.0 |
 
 ## Discord 
 
@@ -153,3 +140,6 @@ Logo Design by _The Agile Badger_
 [RabbitMQ.nuget]: https://www.nuget.org/packages/MassTransit.RabbitMQ
 [EventHubs.nuget]: https://www.nuget.org/packages/MassTransit.WebJobs.EventHubs
 [AzureFunc.nuget]: https://www.nuget.org/packages/MassTransit.WebJobs.ServiceBus
+
+[Kafka.nuget]: https://www.nuget.org/packages/MassTransit.Kafka
+[EventHub.nuget]: https://www.nuget.org/packages/MassTransit.EventHub

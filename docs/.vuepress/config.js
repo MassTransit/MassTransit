@@ -89,7 +89,6 @@ module.exports = {
                 children: [
                   '/usage/sagas/efcore',
                   '/usage/sagas/dapper',
-                  '/usage/sagas/documentdb',
                   '/usage/sagas/ef',
                   '/usage/sagas/marten',
                   '/usage/sagas/mongodb',
