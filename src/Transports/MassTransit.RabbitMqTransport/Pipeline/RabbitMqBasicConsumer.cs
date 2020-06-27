@@ -241,7 +241,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             {
                 await _deliveryComplete.Task.ConfigureAwait(false);
 
-                _model.BasicNack(deliveryTag, false, true);
+                await _model.BasicNack(deliveryTag, false, true).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
