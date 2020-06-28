@@ -50,9 +50,27 @@ services.AddMassTransit(x =>
 {
     x.AddBus(provider => Bus.Factory.CreateUsingInMemory(bus =>
     {
-        bus.UseAzureTableAuditStore(table, (messageType, messageData) => "CustomPartitionKey");
+        bus.UseAzureTableAuditStore(table, new ConstantPartitionKeyFormatter());
     }));
 });
+
+
+class ConstantPartitionKeyFormatter :
+    IPartitionKeyFormatter
+{
+    readonly string _partitionKey;
+
+    public ConstantPartitionKeyFormatter(string partitionKey)
+    {
+        _partitionKey = partitionKey;
+    }
+
+    public string Format<T>(AuditRecord record)
+        where T : class
+    {
+        return _partitionKey;
+    }
+}
 ```
 
 ## Audit Filter
