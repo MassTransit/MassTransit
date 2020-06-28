@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.JobServiceSagaDb
 {
-    public partial class JobService : Migration
+    public partial class JobServiceUpdate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -38,14 +38,14 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.JobService
                     Job = table.Column<string>(nullable: true),
                     JobTypeId = table.Column<Guid>(nullable: false),
                     AttemptId = table.Column<Guid>(nullable: false),
+                    RetryAttempt = table.Column<int>(nullable: false),
                     Started = table.Column<DateTime>(nullable: true),
                     Completed = table.Column<DateTime>(nullable: true),
                     Duration = table.Column<TimeSpan>(nullable: true),
                     Faulted = table.Column<DateTime>(nullable: true),
                     Reason = table.Column<string>(nullable: true),
-                    StartJobRequestId = table.Column<Guid>(nullable: true),
-                    JobSlotRequestId = table.Column<Guid>(nullable: true),
-                    JobSlotWaitToken = table.Column<Guid>(nullable: true)
+                    JobSlotWaitToken = table.Column<Guid>(nullable: true),
+                    JobRetryDelayToken = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -73,18 +73,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.JobService
                 name: "IX_JobAttemptSaga_JobId_RetryAttempt",
                 table: "JobAttemptSaga",
                 columns: new[] { "JobId", "RetryAttempt" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_JobSaga_JobSlotRequestId",
-                table: "JobSaga",
-                column: "JobSlotRequestId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_JobSaga_StartJobRequestId",
-                table: "JobSaga",
-                column: "StartJobRequestId",
                 unique: true);
         }
 

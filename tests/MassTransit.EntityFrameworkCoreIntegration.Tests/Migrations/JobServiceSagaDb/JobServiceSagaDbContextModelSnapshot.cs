@@ -82,9 +82,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.JobService
                     b.Property<Guid?>("JobRetryDelayToken")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("JobSlotRequestId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("JobSlotWaitToken")
                         .HasColumnType("uniqueidentifier");
 
@@ -103,9 +100,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.JobService
                     b.Property<string>("ServiceAddress")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("StartJobRequestId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("Started")
                         .HasColumnType("datetime2");
 
@@ -113,12 +107,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.JobService
                         .HasColumnType("datetime2");
 
                     b.HasKey("CorrelationId");
-
-                    b.HasIndex("JobSlotRequestId")
-                        .IsUnique();
-
-                    b.HasIndex("StartJobRequestId")
-                        .IsUnique();
 
                     b.ToTable("JobSaga");
                 });
