@@ -11,14 +11,14 @@ module.exports = {
       ['meta', { name: "msapplication-TileColor", content: "#3a0839"}],
       ['meta', { name: "msapplication-config", content: "/browserconfig.xml"}],
       ['meta', { name: "theme-color", content: "#ffffff"}],
-    ],  
+    ],
   plugins: [
     '@vuepress/active-header-links',
     '@vuepress/back-to-top',
     [
       '@vuepress/google-analytics', {
         'ga': 'UA-156512132-1'
-      }      
+      }
     ]
   ],
   themeConfig: {
@@ -87,9 +87,10 @@ module.exports = {
                 path: '/usage/sagas/persistence',
                 collapsable: false,
                 children: [
-                  '/usage/sagas/efcore',
+                  '/usage/sagas/cosmos',
                   '/usage/sagas/dapper',
                   '/usage/sagas/ef',
+                  '/usage/sagas/efcore',
                   '/usage/sagas/marten',
                   '/usage/sagas/mongodb',
                   '/usage/sagas/nhibernate',
