@@ -8,7 +8,7 @@
 
 
     public static class CosmosSagaRepository<TSaga>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISaga
     {
         public static ISagaRepository<TSaga> Create(CosmosClient client, string databaseName)
         {

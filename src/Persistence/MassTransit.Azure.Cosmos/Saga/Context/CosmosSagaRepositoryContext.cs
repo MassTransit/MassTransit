@@ -3,6 +3,7 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
@@ -15,7 +16,7 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
     public class CosmosSagaRepositoryContext<TSaga, TMessage> :
         ConsumeContextScope<TMessage>,
         SagaRepositoryContext<TSaga, TMessage>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISaga
         where TMessage : class
     {
         readonly ConsumeContext<TMessage> _consumeContext;
@@ -46,32 +47,62 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
         {
             try
             {
-                await _context.Insert(instance, _consumeContext.CancellationToken).ConfigureAwait(false);
+                var options = _context.GetItemRequestOptions() ?? new ItemRequestOptions();
+                options.EnableContentResponseOnWrite = true;
+
+                var partitionKey = new PartitionKey(instance.CorrelationId.ToString());
+
+                ItemResponse<TSaga> response = await _context.Container.CreateItemAsync(instance, partitionKey, options, CancellationToken)
+                    .ConfigureAwait(false);
 
                 _consumeContext.LogInsert<TSaga, TMessage>(instance.CorrelationId);
 
-                return await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Insert).ConfigureAwait(false);
+                return await CreateSagaConsumeContext(response, SagaConsumeContextMode.Insert).ConfigureAwait(false);
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                _consumeContext.LogInsertFault<TSaga, TMessage>(ex, instance.CorrelationId);
+                _consumeContext.LogInsertFault<TSaga, TMessage>(exception, instance.CorrelationId);
             }
 
-            return null;
+            return default;
         }
 
         public async Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId)
         {
-            var instance = await _context.Load(correlationId, CancellationToken).ConfigureAwait(false);
-            if (instance == null)
-                return null;
+            try
+            {
+                var options = _context.GetItemRequestOptions();
 
-            return await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
+                var id = correlationId.ToString();
+                var partitionKey = new PartitionKey(id);
+
+                ItemResponse<TSaga> response = await _context.Container.ReadItemAsync<TSaga>(id, partitionKey, options, CancellationToken)
+                    .ConfigureAwait(false);
+
+                return await CreateSagaConsumeContext(response, SagaConsumeContextMode.Load).ConfigureAwait(false);
+            }
+            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
         }
 
-        public Task Save(SagaConsumeContext<TSaga> context)
+        public async Task Save(SagaConsumeContext<TSaga> context)
         {
-            return _context.Add(context.Saga, CancellationToken);
+            try
+            {
+                var options = _context.GetItemRequestOptions() ?? new ItemRequestOptions();
+                options.EnableContentResponseOnWrite = false;
+
+                var partitionKey = new PartitionKey(context.Saga.CorrelationId.ToString());
+
+                await _context.Container.CreateItemAsync(context.Saga, partitionKey, options, context.CancellationToken).ConfigureAwait(false);
+            }
+            catch (CosmosException exception)
+            {
+                throw new CosmosConcurrencyException(
+                    $"Saga Create Faulted: {context.Saga.CorrelationId} It may not have been found or may have been updated by another process.", exception);
+            }
         }
 
         public Task Discard(SagaConsumeContext<TSaga> context)
@@ -79,14 +110,65 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
             return TaskUtil.Completed;
         }
 
-        public Task Update(SagaConsumeContext<TSaga> context)
+        public async Task Update(SagaConsumeContext<TSaga> context)
         {
-            return _context.Update(context.Saga, CancellationToken);
+            try
+            {
+                var options = GetItemRequestOptions(context);
+
+                var id = context.Saga.CorrelationId.ToString();
+                var partitionKey = new PartitionKey(id);
+
+                await _context.Container.ReplaceItemAsync(context.Saga, id, partitionKey, options, context.CancellationToken).ConfigureAwait(false);
+            }
+            catch (CosmosException exception) when (exception.StatusCode == HttpStatusCode.PreconditionFailed)
+            {
+                throw new CosmosConcurrencyException(
+                    $"Saga Update Faulted: {context.Saga.CorrelationId} It may not have been found or may have been updated by another process.", exception);
+            }
         }
 
-        public Task Delete(SagaConsumeContext<TSaga> context)
+        public async Task Delete(SagaConsumeContext<TSaga> context)
         {
-            return _context.Delete(context.Saga, CancellationToken);
+            try
+            {
+                var options = GetItemRequestOptions(context);
+
+                var id = context.Saga.CorrelationId.ToString();
+                var partitionKey = new PartitionKey(id);
+
+                await _context.Container.DeleteItemAsync<TSaga>(id, partitionKey, options, context.CancellationToken).ConfigureAwait(false);
+            }
+            catch (CosmosException exception) when (exception.StatusCode == HttpStatusCode.PreconditionFailed)
+            {
+                throw new CosmosConcurrencyException(
+                    $"Saga Delete Faulted: {context.Saga.CorrelationId} It may not have been found or may have been updated by another process.", exception);
+            }
+        }
+
+        ItemRequestOptions GetItemRequestOptions(PipeContext context, bool enableContentResponseOnWrite = false)
+        {
+            var eTag = context.GetPayload<SagaETag>();
+
+            var options = _context.GetItemRequestOptions() ?? new ItemRequestOptions();
+            options.EnableContentResponseOnWrite = enableContentResponseOnWrite;
+            options.IfMatchEtag = eTag.ETag;
+
+            return options;
+        }
+
+        async Task<SagaConsumeContext<TSaga, TMessage>> CreateSagaConsumeContext(Response<TSaga> response, SagaConsumeContextMode mode)
+        {
+            var instance = response.Resource;
+
+            SagaConsumeContext<TSaga, TMessage> sagaConsumeContext = await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, mode)
+                .ConfigureAwait(false);
+
+            var eTag = new SagaETag(response.ETag);
+
+            sagaConsumeContext.AddOrUpdatePayload(() => eTag, _ => eTag);
+
+            return sagaConsumeContext;
         }
     }
 
@@ -94,7 +176,7 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
     public class CosmosSagaRepositoryContext<TSaga> :
         BasePipeContext,
         SagaRepositoryContext<TSaga>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISaga
     {
         readonly DatabaseContext<TSaga> _context;
 
@@ -124,9 +206,24 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
             return new LoadedSagaRepositoryQueryContext<TSaga>(this, instances);
         }
 
-        public Task<TSaga> Load(Guid correlationId)
+        public async Task<TSaga> Load(Guid correlationId)
         {
-            return _context.Load(correlationId, CancellationToken);
+            try
+            {
+                var options = _context.GetItemRequestOptions();
+
+                var id = correlationId.ToString();
+                var partitionKey = new PartitionKey(id);
+
+                ItemResponse<TSaga> response = await _context.Container.ReadItemAsync<TSaga>(id, partitionKey, options, CancellationToken)
+                    .ConfigureAwait(false);
+
+                return response.Resource;
+            }
+            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            {
+                return default;
+            }
         }
     }
 }

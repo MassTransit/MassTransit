@@ -3,11 +3,12 @@
     using System;
     using System.Net;
     using System.Threading.Tasks;
+    using MassTransit.Saga;
     using Microsoft.Azure.Cosmos;
 
 
     public sealed class SagaRepository<TSaga>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISaga
     {
         static readonly SagaRepository<TSaga> _instance = new SagaRepository<TSaga>();
 

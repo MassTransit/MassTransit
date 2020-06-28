@@ -26,7 +26,7 @@
     }
 
 
-    public class ShoppingChore : IVersionedSaga,
+    public class ShoppingChore :
         SagaStateMachineInstance
     {
         protected ShoppingChore()

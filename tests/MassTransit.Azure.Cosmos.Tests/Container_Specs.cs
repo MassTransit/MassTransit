@@ -6,6 +6,7 @@ namespace MassTransit.Azure.Cosmos.Tests
         using System.Threading.Tasks;
         using Automatonymous;
         using GreenPipes;
+        using MassTransit.Saga;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
         using TestFramework;
@@ -73,8 +74,7 @@ namespace MassTransit.Azure.Cosmos.Tests
 
 
         public class TestInstance :
-            SagaStateMachineInstance,
-            IVersionedSaga
+            SagaStateMachineInstance
         {
             public string CurrentState { get; set; }
             public string Key { get; set; }

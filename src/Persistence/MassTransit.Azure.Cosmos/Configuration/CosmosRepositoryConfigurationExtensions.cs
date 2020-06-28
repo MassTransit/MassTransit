@@ -3,6 +3,7 @@ namespace MassTransit.Azure.Cosmos
     using System;
     using Configuration;
     using Configurators;
+    using MassTransit.Saga;
 
 
     public static class CosmosRepositoryConfigurationExtensions
@@ -16,7 +17,7 @@ namespace MassTransit.Azure.Cosmos
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<TSaga> CosmosRepository<TSaga>(this ISagaRegistrationConfigurator<TSaga> configurator,
             Action<ICosmosSagaRepositoryConfigurator<TSaga>> configure)
-            where TSaga : class, IVersionedSaga
+            where TSaga : class, ISaga
         {
             var repositoryConfigurator = new CosmosSagaRepositoryConfigurator<TSaga>();
 
@@ -40,7 +41,7 @@ namespace MassTransit.Azure.Cosmos
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<TSaga> CosmosRepository<TSaga>(this ISagaRegistrationConfigurator<TSaga> configurator,
             string accountEndpoint, string key, Action<ICosmosSagaRepositoryConfigurator<TSaga>> configure)
-            where TSaga : class, IVersionedSaga
+            where TSaga : class, ISaga
         {
             var repositoryConfigurator = new CosmosSagaRepositoryConfigurator<TSaga>
             {

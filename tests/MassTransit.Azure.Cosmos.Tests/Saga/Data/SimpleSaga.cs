@@ -12,7 +12,7 @@
         InitiatedBy<InitiateSimpleSaga>,
         Orchestrates<CompleteSimpleSaga>,
         Observes<ObservableSagaMessage, SimpleSaga>,
-        IVersionedSaga
+        ISaga
     {
         public bool Completed { get; private set; }
 
@@ -33,8 +33,6 @@
         }
 
         public Guid CorrelationId { get; set; }
-
-        public string ETag { get; set; }
 
         public Task Consume(ConsumeContext<ObservableSagaMessage> message)
         {

@@ -39,8 +39,7 @@
 
 
     public class ChoirStateOptimistic :
-        SagaStateMachineInstance,
-        IVersionedSaga
+        SagaStateMachineInstance
     {
         protected ChoirStateOptimistic()
         {

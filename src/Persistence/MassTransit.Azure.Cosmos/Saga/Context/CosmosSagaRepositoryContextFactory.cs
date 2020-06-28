@@ -12,7 +12,7 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
 
     public class CosmosSagaRepositoryContextFactory<TSaga> :
         ISagaRepositoryContextFactory<TSaga>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISaga
     {
         readonly DatabaseContext<TSaga> _context;
         readonly ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> _factory;
@@ -47,7 +47,7 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
 
             var repositoryContext = new CosmosSagaRepositoryContext<TSaga, T>(_context, context, _factory);
 
-            var queryContext = new LoadedSagaRepositoryQueryContext<TSaga, T>(repositoryContext, sagas);
+            var queryContext = new DefaultSagaRepositoryQueryContext<TSaga, T>(repositoryContext, sagas.Select(x => x.CorrelationId).ToList());
 
             await next.Send(queryContext).ConfigureAwait(false);
         }

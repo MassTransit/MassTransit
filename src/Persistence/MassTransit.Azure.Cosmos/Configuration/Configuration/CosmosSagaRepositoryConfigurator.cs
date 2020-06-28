@@ -18,7 +18,7 @@ namespace MassTransit.Azure.Cosmos.Configuration
     public class CosmosSagaRepositoryConfigurator<TSaga> :
         ICosmosSagaRepositoryConfigurator<TSaga>,
         ISpecification
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISaga
     {
         readonly JsonSerializerSettings _serializerSettings;
         Func<IConfigurationServiceProvider, ICollectionIdFormatter> _collectionIdFormatter;
@@ -103,20 +103,13 @@ namespace MassTransit.Azure.Cosmos.Configuration
 
         static JsonSerializerSettings GetSerializerSettingsIfNeeded()
         {
-            var correlationId = TypeMetadataCache<TSaga>.Properties.Single(x => x.Name == nameof(IVersionedSaga.CorrelationId));
-            var etag = TypeMetadataCache<TSaga>.Properties.Single(x => x.Name == nameof(IVersionedSaga.ETag));
+            var correlationId = TypeMetadataCache<TSaga>.Properties.Single(x => x.Name == nameof(ISaga.CorrelationId));
 
-            var hasId = correlationId.GetAttribute<JsonPropertyAttribute>().Any(x => x.PropertyName == "id");
-            var hasETag = etag.GetAttribute<JsonPropertyAttribute>().Any(x => x.PropertyName == "_etag");
-
-            if (hasId && hasETag)
+            if (correlationId.GetAttribute<JsonPropertyAttribute>().Any(x => x.PropertyName == "id"))
                 return default;
 
             var resolver = new PropertyRenameSerializerContractResolver();
-            if (!hasId)
-                resolver.RenameProperty(typeof(TSaga), nameof(IVersionedSaga.CorrelationId), "id");
-            if (!hasETag)
-                resolver.RenameProperty(typeof(TSaga), nameof(IVersionedSaga.ETag), "_etag");
+            resolver.RenameProperty(typeof(TSaga), nameof(ISaga.CorrelationId), "id");
 
             return new JsonSerializerSettings {ContractResolver = resolver};
         }
