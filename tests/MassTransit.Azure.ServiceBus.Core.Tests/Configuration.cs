@@ -9,12 +9,12 @@
         public static string KeyName =>
             TestContext.Parameters.Exists(nameof(KeyName))
                 ? TestContext.Parameters.Get(nameof(KeyName))
-                : Environment.GetEnvironmentVariable("MT_ASB_NAMESPACE") ?? "MassTransitBuild";
+                : Environment.GetEnvironmentVariable("MT_ASB_KEYNAME") ?? "MassTransitBuild";
 
         public static string ServiceNamespace =>
             TestContext.Parameters.Exists(nameof(ServiceNamespace))
                 ? TestContext.Parameters.Get(nameof(ServiceNamespace))
-                : Environment.GetEnvironmentVariable("MT_ASB_KEYNAME") ?? "masstransit-build";
+                : Environment.GetEnvironmentVariable("MT_ASB_NAMESPACE") ?? "masstransit-build";
 
         public static string SharedAccessKey =>
             TestContext.Parameters.Exists(nameof(SharedAccessKey))
