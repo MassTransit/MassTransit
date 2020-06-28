@@ -19,8 +19,8 @@ namespace MassTransit.JobService
         {
             StatusCheckInterval = TimeSpan.FromMinutes(1);
             SlotWaitTime = TimeSpan.FromSeconds(30);
-            StartJobTimeout = TimeSpan.FromMinutes(2);
-            SlotRequestTimeout = TimeSpan.FromSeconds(10);
+            StartJobTimeout = TimeSpan.Zero;
+            SlotRequestTimeout = TimeSpan.Zero;
         }
 
         public string JobTypeSagaEndpointName
