@@ -8,6 +8,10 @@ Out of the box, the only additional saga property required to use Azure Tables i
 Azure Tables currently only supports Optimistic Concurrency.
 :::
 
+::: warning
+Be sure to set DateTime properties as nullable when updated later in the saga. Failure to do this can result in 400 bad requests from Table Storage.
+:::
+
 ```cs {10}
 public class OrderState :
     SagaStateMachineInstance,

@@ -87,6 +87,7 @@ module.exports = {
                 path: '/usage/sagas/persistence',
                 collapsable: false,
                 children: [
+                  '/usage/sagas/azure-table',
                   '/usage/sagas/cosmos',
                   '/usage/sagas/dapper',
                   '/usage/sagas/ef',
