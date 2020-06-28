@@ -87,9 +87,11 @@ module.exports = {
                 path: '/usage/sagas/persistence',
                 collapsable: false,
                 children: [
-                  '/usage/sagas/efcore',
+                  '/usage/sagas/azure-table',
+                  '/usage/sagas/cosmos',
                   '/usage/sagas/dapper',
                   '/usage/sagas/ef',
+                  '/usage/sagas/efcore',
                   '/usage/sagas/marten',
                   '/usage/sagas/mongodb',
                   '/usage/sagas/nhibernate',
