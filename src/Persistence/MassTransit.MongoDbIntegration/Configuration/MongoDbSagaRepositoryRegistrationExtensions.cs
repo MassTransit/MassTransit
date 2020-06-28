@@ -3,8 +3,8 @@ namespace MassTransit.MongoDbIntegration
     using System;
     using Configurators;
     using MassTransit.Configurators;
+    using MassTransit.Saga;
     using MongoDB.Driver;
-    using Saga;
 
 
     public static class MongoDbSagaRepositoryRegistrationExtensions
@@ -18,7 +18,7 @@ namespace MassTransit.MongoDbIntegration
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<TSaga> MongoDbRepository<TSaga>(this ISagaRegistrationConfigurator<TSaga> configurator,
             Action<IMongoDbSagaRepositoryConfigurator<TSaga>> configure = null)
-            where TSaga : class, IVersionedSaga
+            where TSaga : class, ISagaVersion
         {
             var mongoDbConfigurator = new MongoDbSagaRepositoryConfigurator<TSaga>();
 
@@ -41,7 +41,7 @@ namespace MassTransit.MongoDbIntegration
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<TSaga> MongoDbRepository<TSaga>(this ISagaRegistrationConfigurator<TSaga> configurator,
             string connectionString, Action<IMongoDbSagaRepositoryConfigurator<TSaga>> configure)
-            where TSaga : class, IVersionedSaga
+            where TSaga : class, ISagaVersion
         {
             return configurator.MongoDbRepository(cfg =>
             {
@@ -60,7 +60,7 @@ namespace MassTransit.MongoDbIntegration
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<TSaga> MongoDbRepository<TSaga>(this ISagaRegistrationConfigurator<TSaga> configurator,
             IMongoDatabase database, Action<IMongoDbSagaRepositoryConfigurator<TSaga>> configure)
-            where TSaga : class, IVersionedSaga
+            where TSaga : class, ISagaVersion
         {
             return configurator.MongoDbRepository(cfg =>
             {

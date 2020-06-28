@@ -3,13 +3,15 @@ namespace MassTransit.JobService.Components.StateMachines
     using System;
     using System.Collections.Generic;
     using Automatonymous;
+    using Saga;
 
 
     /// <summary>
     /// Every job type has one entry in this state machine
     /// </summary>
     public class JobTypeSaga :
-        SagaStateMachineInstance
+        SagaStateMachineInstance,
+        ISagaVersion
     {
         public JobTypeSaga()
         {
@@ -34,7 +36,7 @@ namespace MassTransit.JobService.Components.StateMachines
         public int? OverrideJobLimit { get; set; }
 
         /// <summary>
-        /// If an <see cref="OverrideJobLimit"/> is specified, the time when the override job limit expires
+        /// If an <see cref="OverrideJobLimit" /> is specified, the time when the override job limit expires
         /// </summary>
         public DateTime? OverrideLimitExpiration { get; set; }
 
@@ -42,6 +44,8 @@ namespace MassTransit.JobService.Components.StateMachines
         /// The last known active jobs
         /// </summary>
         public List<ActiveJob> ActiveJobs { get; set; }
+
+        public int Version { get; set; }
 
         /// <summary>
         /// The MD5 hash of the job type

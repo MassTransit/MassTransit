@@ -7,9 +7,9 @@
     using Courier;
     using Courier.Documents;
     using Courier.Events;
+    using MassTransit.Saga;
     using MongoDB.Bson.Serialization;
     using MongoDB.Bson.Serialization.Conventions;
-    using Saga;
 
 
     public class MassTransitMongoDbConventions
@@ -51,7 +51,7 @@
 
         static bool IsSagaClass(Type type)
         {
-            return type.GetTypeInfo().IsClass && typeof(IVersionedSaga).IsAssignableFrom(type);
+            return type.GetTypeInfo().IsClass && typeof(ISagaVersion).IsAssignableFrom(type);
         }
 
         public static void RegisterClass<T>(Expression<Func<T, Guid>> id)

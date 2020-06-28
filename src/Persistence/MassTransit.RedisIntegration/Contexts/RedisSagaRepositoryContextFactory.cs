@@ -10,7 +10,7 @@ namespace MassTransit.RedisIntegration.Contexts
 
     public class RedisSagaRepositoryContextFactory<TSaga> :
         ISagaRepositoryContextFactory<TSaga>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISagaVersion
     {
         readonly Func<IDatabase> _databaseFactory;
         readonly ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> _factory;

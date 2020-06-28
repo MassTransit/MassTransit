@@ -2,6 +2,7 @@ namespace MassTransit.RedisIntegration
 {
     using System;
     using Registration;
+    using Saga;
     using StackExchange.Redis;
 
 
@@ -53,7 +54,7 @@ namespace MassTransit.RedisIntegration
 
     public interface IRedisSagaRepositoryConfigurator<TSaga> :
         IRedisSagaRepositoryConfigurator
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISagaVersion
     {
     }
 }

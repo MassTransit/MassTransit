@@ -8,7 +8,7 @@
     public class SimpleSaga :
         InitiatedBy<InitiateSimpleSaga>,
         Orchestrates<CompleteSimpleSaga>,
-        IVersionedSaga
+        ISagaVersion
     {
         public bool Moved { get; private set; }
         public bool Initiated { get; private set; }

@@ -43,8 +43,6 @@
         public bool Screwed { get; set; }
 
         public Guid CorrelationId { get; set; }
-
-        public string ETag { get; set; }
     }
 
 

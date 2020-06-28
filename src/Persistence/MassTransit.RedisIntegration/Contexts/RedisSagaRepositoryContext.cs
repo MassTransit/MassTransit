@@ -13,7 +13,7 @@ namespace MassTransit.RedisIntegration.Contexts
         ConsumeContextScope<TMessage>,
         SagaRepositoryContext<TSaga, TMessage>,
         IAsyncDisposable
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISagaVersion
         where TMessage : class
     {
         readonly ConsumeContext<TMessage> _consumeContext;
@@ -98,7 +98,7 @@ namespace MassTransit.RedisIntegration.Contexts
         BasePipeContext,
         SagaRepositoryContext<TSaga>,
         IAsyncDisposable
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISagaVersion
     {
         readonly DatabaseContext<TSaga> _context;
 

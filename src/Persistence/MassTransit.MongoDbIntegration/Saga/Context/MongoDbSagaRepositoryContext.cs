@@ -14,7 +14,7 @@ namespace MassTransit.MongoDbIntegration.Saga.Context
     public class MongoDbSagaRepositoryContext<TSaga, TMessage> :
         ConsumeContextScope<TMessage>,
         SagaRepositoryContext<TSaga, TMessage>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISagaVersion
         where TMessage : class
     {
         readonly ConsumeContext<TMessage> _consumeContext;
@@ -107,7 +107,7 @@ namespace MassTransit.MongoDbIntegration.Saga.Context
     public class MongoDbSagaRepositoryContext<TSaga> :
         BasePipeContext,
         SagaRepositoryContext<TSaga>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISagaVersion
     {
         readonly IMongoCollection<TSaga> _context;
 

@@ -2,7 +2,6 @@
 {
     using System;
     using Automatonymous;
-    using Newtonsoft.Json;
 
 
     /// <summary>
@@ -42,15 +41,11 @@
         public int Everything { get; set; }
         public bool Screwed { get; set; }
 
-        [JsonProperty("_etag")]
-        public string ETag { get; set; }
-
-        [JsonProperty("id")]
         public Guid CorrelationId { get; set; }
     }
 
 
-    public class SuperShopper :
+    public sealed class SuperShopper :
         MassTransitStateMachine<ShoppingChore>
     {
         public SuperShopper()

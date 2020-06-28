@@ -7,7 +7,7 @@
 
 
     public static class MongoDbSagaRepository<TSaga>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISagaVersion
     {
         public static ISagaRepository<TSaga> Create(string connectionString, string database, string collectionName = null)
         {

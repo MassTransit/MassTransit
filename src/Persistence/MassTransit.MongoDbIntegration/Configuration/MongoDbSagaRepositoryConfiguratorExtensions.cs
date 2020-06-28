@@ -1,10 +1,10 @@
 namespace MassTransit.MongoDbIntegration
 {
     using System;
+    using MassTransit.Saga;
     using MongoDB.Bson.Serialization;
     using MongoDB.Driver;
     using Registration;
-    using Saga;
     using Saga.CollectionNameFormatters;
 
 
@@ -48,7 +48,7 @@ namespace MassTransit.MongoDbIntegration
         /// <typeparam name="TSaga"></typeparam>
         public static void ClassMap<TSaga>(this IMongoDbSagaRepositoryConfigurator<TSaga> configurator,
             Action<BsonClassMap<TSaga>> classMapConfigurator)
-            where TSaga : class, IVersionedSaga
+            where TSaga : class, ISagaVersion
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
@@ -66,7 +66,7 @@ namespace MassTransit.MongoDbIntegration
         /// <typeparam name="TSaga"></typeparam>
         public static void ClassMap<TSaga>(this IMongoDbSagaRepositoryConfigurator<TSaga> configurator,
             Func<IConfigurationServiceProvider, Action<BsonClassMap<TSaga>>> classMapConfigurator)
-            where TSaga : class, IVersionedSaga
+            where TSaga : class, ISagaVersion
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
@@ -83,7 +83,7 @@ namespace MassTransit.MongoDbIntegration
         /// <param name="classMap"></param>
         /// <typeparam name="TSaga"></typeparam>
         public static void ClassMap<TSaga>(this IMongoDbSagaRepositoryConfigurator<TSaga> configurator, BsonClassMap<TSaga> classMap)
-            where TSaga : class, IVersionedSaga
+            where TSaga : class, ISagaVersion
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));

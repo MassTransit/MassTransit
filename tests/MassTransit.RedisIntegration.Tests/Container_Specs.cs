@@ -8,6 +8,7 @@ namespace MassTransit.RedisIntegration.Tests
         using GreenPipes;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
+        using Saga;
         using TestFramework;
         using TestFramework.Sagas;
 
@@ -119,7 +120,7 @@ namespace MassTransit.RedisIntegration.Tests
 
         public class TestInstance :
             SagaStateMachineInstance,
-            IVersionedSaga
+            ISagaVersion
         {
             public string CurrentState { get; set; }
             public string Key { get; set; }

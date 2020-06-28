@@ -1,10 +1,10 @@
 namespace MassTransit.MongoDbIntegration
 {
     using System;
+    using MassTransit.Saga;
     using MongoDB.Bson.Serialization;
     using MongoDB.Driver;
     using Registration;
-    using Saga;
     using Saga.CollectionNameFormatters;
 
 
@@ -41,7 +41,7 @@ namespace MassTransit.MongoDbIntegration
 
     public interface IMongoDbSagaRepositoryConfigurator<TSaga> :
         IMongoDbSagaRepositoryConfigurator
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISagaVersion
     {
         /// <summary>
         /// Configure class map using <see cref="BsonClassMap{TClass}" />

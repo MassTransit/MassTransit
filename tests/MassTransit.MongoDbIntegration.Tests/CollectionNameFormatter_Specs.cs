@@ -4,6 +4,7 @@ namespace MassTransit.MongoDbIntegration.Tests
     using MongoDbIntegration.Saga.CollectionNameFormatters;
     using NUnit.Framework;
     using Saga;
+    using Saga.Data;
 
 
     [TestFixture]

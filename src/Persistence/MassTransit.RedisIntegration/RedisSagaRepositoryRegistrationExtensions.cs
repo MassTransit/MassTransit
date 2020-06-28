@@ -4,6 +4,7 @@ namespace MassTransit
     using Configurators;
     using RedisIntegration;
     using RedisIntegration.Configuration;
+    using Saga;
 
 
     public static class RedisSagaRepositoryRegistrationExtensions
@@ -17,7 +18,7 @@ namespace MassTransit
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<T> RedisRepository<T>(this ISagaRegistrationConfigurator<T> configurator,
             Action<IRedisSagaRepositoryConfigurator<T>> configure = null)
-            where T : class, IVersionedSaga
+            where T : class, ISagaVersion
         {
             var redisConfigurator = new RedisSagaRepositoryConfigurator<T>();
 
@@ -40,7 +41,7 @@ namespace MassTransit
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<T> RedisRepository<T>(this ISagaRegistrationConfigurator<T> configurator, string configuration,
             Action<IRedisSagaRepositoryConfigurator<T>> configure = null)
-            where T : class, IVersionedSaga
+            where T : class, ISagaVersion
         {
             var redisConfigurator = new RedisSagaRepositoryConfigurator<T>();
 

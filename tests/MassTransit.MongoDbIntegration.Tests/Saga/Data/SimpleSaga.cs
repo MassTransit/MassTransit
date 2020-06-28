@@ -1,18 +1,17 @@
-﻿namespace MassTransit.MongoDbIntegration.Tests.Saga
+﻿namespace MassTransit.MongoDbIntegration.Tests.Saga.Data
 {
     using System;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using MassTransit.Saga;
     using MongoDB.Bson.Serialization.Attributes;
-    using MongoDbIntegration.Saga;
 
 
     public class SimpleSaga :
         InitiatedBy<InitiateSimpleSaga>,
         Orchestrates<CompleteSimpleSaga>,
         Observes<ObservableSagaMessage, SimpleSaga>,
-        IVersionedSaga
+        ISagaVersion
     {
         public bool Completed { get; private set; }
 

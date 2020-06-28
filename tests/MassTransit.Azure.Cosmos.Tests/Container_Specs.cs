@@ -79,7 +79,6 @@ namespace MassTransit.Azure.Cosmos.Tests
             public string CurrentState { get; set; }
             public string Key { get; set; }
 
-            public string ETag { get; set; }
             public Guid CorrelationId { get; set; }
         }
 

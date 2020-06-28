@@ -7,7 +7,7 @@
 
 
     public static class RedisSagaRepository<TSaga>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISagaVersion
     {
         public static ISagaRepository<TSaga> Create(Func<IDatabase> redisDbFactory, bool optimistic = true, TimeSpan? lockTimeout = null, TimeSpan?
             lockRetryTimeout = null, string keyPrefix = "", TimeSpan? expiry = null)

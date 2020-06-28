@@ -12,7 +12,7 @@ namespace MassTransit.RedisIntegration.Configuration
     public class RedisSagaRepositoryConfigurator<TSaga> :
         IRedisSagaRepositoryConfigurator<TSaga>,
         ISpecification
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISagaVersion
     {
         ConfigurationOptions _configurationOptions;
         Func<IConfigurationServiceProvider, ConnectionMultiplexer> _connectionFactory;
@@ -73,7 +73,7 @@ namespace MassTransit.RedisIntegration.Configuration
         }
 
         public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)
-            where T : class, IVersionedSaga
+            where T : class, ISagaVersion
         {
             configurator.RegisterSingleInstance(_connectionFactory);
             configurator.RegisterSingleInstance(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix, _databaseSelector,

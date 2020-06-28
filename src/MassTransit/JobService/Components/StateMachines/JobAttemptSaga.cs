@@ -2,13 +2,15 @@ namespace MassTransit.JobService.Components.StateMachines
 {
     using System;
     using Automatonymous;
+    using Saga;
 
 
     /// <summary>
     /// Each attempt to run a job is tracked by this state
     /// </summary>
     public class JobAttemptSaga :
-        SagaStateMachineInstance
+        SagaStateMachineInstance,
+        ISagaVersion
     {
         public int CurrentState { get; set; }
 
@@ -22,6 +24,7 @@ namespace MassTransit.JobService.Components.StateMachines
         public DateTime? Faulted { get; set; }
 
         public Guid? StatusCheckTokenId { get; set; }
+        public int Version { get; set; }
 
         // AttemptId
         public Guid CorrelationId { get; set; }

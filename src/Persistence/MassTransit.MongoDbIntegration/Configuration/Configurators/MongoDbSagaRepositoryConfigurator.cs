@@ -15,7 +15,7 @@ namespace MassTransit.MongoDbIntegration.Configurators
     class MongoDbSagaRepositoryConfigurator<TSaga> :
         IMongoDbSagaRepositoryConfigurator<TSaga>,
         ISpecification
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISagaVersion
     {
         Func<IConfigurationServiceProvider, BsonClassMap<TSaga>> _classMapFactory;
         Func<IConfigurationServiceProvider, ICollectionNameFormatter> _collectionNameFormatterFactory;
@@ -94,7 +94,7 @@ namespace MassTransit.MongoDbIntegration.Configurators
         }
 
         public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)
-            where T : class, IVersionedSaga
+            where T : class, ISagaVersion
         {
             IMongoCollection<TSaga> MongoCollectionFactory(IConfigurationServiceProvider provider)
             {

@@ -52,7 +52,6 @@
 
         public string CurrentState { get; set; }
         public int Harmony { get; set; }
-        public string ETag { get; set; }
         public byte[] RowVersion { get; set; }
         public string BassName { get; set; }
         public string BaritoneName { get; set; }

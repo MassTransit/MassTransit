@@ -6,12 +6,13 @@ namespace MassTransit.RedisIntegration.Contexts
     using Context;
     using Metadata;
     using Policies;
+    using Saga;
     using StackExchange.Redis;
 
 
     public class RedisDatabaseContext<TSaga> :
         DatabaseContext<TSaga>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISagaVersion
     {
         readonly IDatabase _database;
         readonly RedisSagaRepositoryOptions<TSaga> _options;

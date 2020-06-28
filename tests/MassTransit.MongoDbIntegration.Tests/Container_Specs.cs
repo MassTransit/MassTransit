@@ -6,8 +6,8 @@ namespace MassTransit.MongoDbIntegration.Tests
         using System.Threading.Tasks;
         using Automatonymous;
         using GreenPipes;
+        using MassTransit.Saga;
         using Microsoft.Extensions.DependencyInjection;
-        using MongoDbIntegration.Saga;
         using NUnit.Framework;
         using TestFramework;
         using TestFramework.Sagas;
@@ -77,7 +77,7 @@ namespace MassTransit.MongoDbIntegration.Tests
 
         public class TestInstance :
             SagaStateMachineInstance,
-            IVersionedSaga
+            ISagaVersion
         {
             public string CurrentState { get; set; }
             public string Key { get; set; }

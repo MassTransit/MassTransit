@@ -2,11 +2,12 @@ namespace MassTransit.RedisIntegration.Contexts
 {
     using System;
     using System.Threading.Tasks;
+    using Saga;
 
 
     public interface DatabaseContext<TSaga> :
         IAsyncDisposable
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISagaVersion
     {
         Task Add(SagaConsumeContext<TSaga> context);
 

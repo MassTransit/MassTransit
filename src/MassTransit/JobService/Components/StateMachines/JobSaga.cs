@@ -3,13 +3,15 @@ namespace MassTransit.JobService.Components.StateMachines
     using System;
     using System.Collections.Generic;
     using Automatonymous;
+    using Saga;
 
 
     /// <summary>
     /// Individual turnout jobs are tracked by this state
     /// </summary>
     public class JobSaga :
-        SagaStateMachineInstance
+        SagaStateMachineInstance,
+        ISagaVersion
     {
         public int CurrentState { get; set; }
 
@@ -34,8 +36,8 @@ namespace MassTransit.JobService.Components.StateMachines
         public Guid? JobSlotRequestId { get; set; }
         public Guid? JobSlotWaitToken { get; set; }
         public Guid? JobRetryDelayToken { get; set; }
+        public int Version { get; set; }
 
         public Guid CorrelationId { get; set; }
-
     }
 }
