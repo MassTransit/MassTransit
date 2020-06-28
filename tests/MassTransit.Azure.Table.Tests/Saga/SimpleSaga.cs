@@ -3,13 +3,12 @@
     using System;
     using System.Threading.Tasks;
     using MassTransit.Saga;
-    using Table.Saga;
 
 
     public class SimpleSaga :
         InitiatedBy<InitiateSimpleSaga>,
         Orchestrates<CompleteSimpleSaga>,
-        IVersionedSaga
+        ISaga
     {
         public bool Moved { get; private set; }
         public bool Initiated { get; private set; }
@@ -23,7 +22,6 @@
         }
 
         public Guid CorrelationId { get; set; }
-        public string ETag { get; set; }
 
         public async Task Consume(ConsumeContext<CompleteSimpleSaga> message)
         {

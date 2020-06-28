@@ -7,7 +7,6 @@ namespace MassTransit.Azure.Table.Configurators
     using MassTransit.Saga;
     using Microsoft.Azure.Cosmos.Table;
     using Registration;
-    using Saga;
 
 
     public class AzureTableSagaRepositoryConfigurator<TSaga> :
@@ -33,7 +32,7 @@ namespace MassTransit.Azure.Table.Configurators
         }
 
         public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)
-            where T : class, IVersionedSaga
+            where T : class, ISaga
         {
             configurator.RegisterSingleInstance(_connectionFactory);
             configurator.RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>,

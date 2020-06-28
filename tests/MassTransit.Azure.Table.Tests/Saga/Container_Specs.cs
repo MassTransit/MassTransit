@@ -8,7 +8,6 @@ namespace MassTransit.Azure.Table.Tests.Saga
         using GreenPipes;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
-        using Table.Saga;
         using TestFramework.Sagas;
 
 
@@ -70,12 +69,10 @@ namespace MassTransit.Azure.Table.Tests.Saga
 
 
         public class TestInstance :
-            SagaStateMachineInstance,
-            IVersionedSaga
+            SagaStateMachineInstance
         {
             public string CurrentState { get; set; }
             public string Key { get; set; }
-            public string ETag { get; set; }
             public Guid CorrelationId { get; set; }
         }
 

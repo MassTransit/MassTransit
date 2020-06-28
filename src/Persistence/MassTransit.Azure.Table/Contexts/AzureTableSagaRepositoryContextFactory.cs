@@ -11,7 +11,7 @@ namespace MassTransit.Azure.Table.Contexts
 
     public class AzureTableSagaRepositoryContextFactory<TSaga> :
         ISagaRepositoryContextFactory<TSaga>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISaga
     {
         readonly Func<CloudTable> _databaseFactory;
         readonly ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> _factory;

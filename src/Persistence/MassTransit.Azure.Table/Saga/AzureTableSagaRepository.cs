@@ -7,7 +7,7 @@
 
 
     public static class AzureTableSagaRepository<TSaga>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISaga
     {
         public static ISagaRepository<TSaga> Create(Func<CloudTable> tableFactory)
         {

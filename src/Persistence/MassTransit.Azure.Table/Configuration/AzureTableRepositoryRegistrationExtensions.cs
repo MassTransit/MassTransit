@@ -3,8 +3,8 @@ namespace MassTransit
     using System;
     using Azure.Table;
     using Azure.Table.Configurators;
-    using Azure.Table.Saga;
     using Configurators;
+    using Saga;
 
 
     public static class AzureTableRepositoryRegistrationExtensions
@@ -18,7 +18,7 @@ namespace MassTransit
         /// <returns></returns>
         public static ISagaRegistrationConfigurator<T> AzureTableRepository<T>(this ISagaRegistrationConfigurator<T> configurator,
             Action<IAzureTableSagaRepositoryConfigurator<T>> configure = null)
-            where T : class, IVersionedSaga
+            where T : class, ISaga
         {
             var sagaRepositoryConfigurator = new AzureTableSagaRepositoryConfigurator<T>();
 

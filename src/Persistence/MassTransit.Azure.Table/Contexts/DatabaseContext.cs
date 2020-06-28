@@ -1,22 +1,14 @@
 namespace MassTransit.Azure.Table.Contexts
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
+    using MassTransit.Saga;
+    using Microsoft.Azure.Cosmos.Table;
     using Saga;
 
 
     public interface DatabaseContext<TSaga>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISaga
     {
-        Task Add(SagaConsumeContext<TSaga> context);
-
-        Task Insert(TSaga instance, CancellationToken cancellationToken);
-
-        Task<TSaga> Load(Guid correlationId, CancellationToken cancellationToken);
-
-        Task Update(SagaConsumeContext<TSaga> context);
-
-        Task Delete(SagaConsumeContext<TSaga> context);
+        ISagaKeyFormatter<TSaga> Formatter { get; }
+        CloudTable Table { get; }
     }
 }

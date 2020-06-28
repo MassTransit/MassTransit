@@ -1,19 +1,20 @@
 ﻿namespace MassTransit.Azure.Table.Contexts
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
     using MassTransit.Saga;
-    using Saga;
+    using Microsoft.Azure.Cosmos.Table;
     using Util;
 
 
     public class AzureTableSagaRepositoryContext<TSaga, TMessage> :
         ConsumeContextScope<TMessage>,
         SagaRepositoryContext<TSaga, TMessage>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISaga
         where TMessage : class
     {
         readonly ConsumeContext<TMessage> _consumeContext;
@@ -38,42 +39,79 @@
         {
             try
             {
-                await _context.Insert(instance, CancellationToken).ConfigureAwait(false);
+                var result = await TableInsert(instance).ConfigureAwait(false);
+                if (result.Result is DynamicTableEntity tableEntity)
+                {
+                    _consumeContext.LogInsert<TSaga, TMessage>(instance.CorrelationId);
 
-                _consumeContext.LogInsert<TSaga, TMessage>(instance.CorrelationId);
-
-                return await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Insert).ConfigureAwait(false);
+                    return await CreateSagaConsumeContext(tableEntity, SagaConsumeContextMode.Insert).ConfigureAwait(false);
+                }
             }
             catch (Exception ex)
             {
                 _consumeContext.LogInsertFault<TSaga, TMessage>(ex, instance.CorrelationId);
-
-                return default;
             }
+
+            return default;
         }
 
         public async Task<SagaConsumeContext<TSaga, TMessage>> Load(Guid correlationId)
         {
-            var instance = await _context.Load(correlationId, CancellationToken).ConfigureAwait(false);
-            if (instance == null)
-                return default;
+            var (partitionKey, rowKey) = _context.Formatter.Format(correlationId);
 
-            return await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, SagaConsumeContextMode.Load).ConfigureAwait(false);
+            var operation = TableOperation.Retrieve<DynamicTableEntity>(partitionKey, rowKey);
+            var result = await _context.Table.ExecuteAsync(operation, CancellationToken).ConfigureAwait(false);
+
+            if (result.Result is DynamicTableEntity tableEntity)
+                return await CreateSagaConsumeContext(tableEntity, SagaConsumeContextMode.Load).ConfigureAwait(false);
+
+            return default;
         }
 
         public Task Save(SagaConsumeContext<TSaga> context)
         {
-            return _context.Add(context);
+            return TableInsert(context.Saga);
         }
 
-        public Task Update(SagaConsumeContext<TSaga> context)
+        public async Task Update(SagaConsumeContext<TSaga> context)
         {
-            return _context.Update(context);
+            var instance = context.Saga;
+
+            try
+            {
+                IDictionary<string, EntityProperty> entityProperties = TableEntity.Flatten(instance, new OperationContext());
+
+                var (partitionKey, rowKey) = _context.Formatter.Format(instance.CorrelationId);
+
+                var eTag = context.GetPayload<SagaETag>();
+
+                var operation = TableOperation.Replace(new DynamicTableEntity(partitionKey, rowKey)
+                {
+                    Properties = entityProperties,
+                    ETag = eTag.ETag
+                });
+
+                await _context.Table.ExecuteAsync(operation, context.CancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                throw new SagaException("Saga update failed", typeof(TSaga), instance.CorrelationId, exception);
+            }
         }
 
-        public Task Delete(SagaConsumeContext<TSaga> context)
+        public async Task Delete(SagaConsumeContext<TSaga> context)
         {
-            return _context.Delete(context);
+            var instance = context.Saga;
+
+            IDictionary<string, EntityProperty> entityProperties = TableEntity.Flatten(instance, new OperationContext());
+
+            var (partitionKey, rowKey) = _context.Formatter.Format(instance.CorrelationId);
+
+            var eTag = context.GetPayload<SagaETag>();
+
+            var operation = TableOperation.Delete(new DynamicTableEntity(partitionKey, rowKey, eTag.ETag, entityProperties));
+
+            await _context.Table.ExecuteAsync(operation, context.CancellationToken).ConfigureAwait(false);
         }
 
         public Task Discard(SagaConsumeContext<TSaga> context)
@@ -86,13 +124,38 @@
         {
             return _factory.CreateSagaConsumeContext(_context, consumeContext, instance, mode);
         }
+
+        Task<TableResult> TableInsert(TSaga instance)
+        {
+            IDictionary<string, EntityProperty> entityProperties = TableEntity.Flatten(instance, new OperationContext());
+
+            var (partitionKey, rowKey) = _context.Formatter.Format(instance.CorrelationId);
+
+            var operation = TableOperation.Insert(new DynamicTableEntity(partitionKey, rowKey) {Properties = entityProperties});
+
+            return _context.Table.ExecuteAsync(operation, CancellationToken);
+        }
+
+        async Task<SagaConsumeContext<TSaga, TMessage>> CreateSagaConsumeContext(DynamicTableEntity entity, SagaConsumeContextMode mode)
+        {
+            var instance = TableEntity.ConvertBack<TSaga>(entity.Properties, new OperationContext());
+
+            SagaConsumeContext<TSaga, TMessage> sagaConsumeContext = await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, mode)
+                .ConfigureAwait(false);
+
+            var eTag = new SagaETag(entity.ETag);
+
+            sagaConsumeContext.AddOrUpdatePayload(() => eTag, _ => eTag);
+
+            return sagaConsumeContext;
+        }
     }
 
 
     public class CosmosTableSagaRepositoryContext<TSaga> :
         BasePipeContext,
         SagaRepositoryContext<TSaga>
-        where TSaga : class, IVersionedSaga
+        where TSaga : class, ISaga
     {
         readonly DatabaseContext<TSaga> _context;
 
@@ -107,9 +170,16 @@
             throw new NotImplementedByDesignException("Azure Table saga repository does not support queries");
         }
 
-        public Task<TSaga> Load(Guid correlationId)
+        public async Task<TSaga> Load(Guid correlationId)
         {
-            return _context.Load(correlationId, CancellationToken);
+            var (partitionKey, rowKey) = _context.Formatter.Format(correlationId);
+
+            var operation = TableOperation.Retrieve<DynamicTableEntity>(partitionKey, rowKey);
+            var result = await _context.Table.ExecuteAsync(operation, CancellationToken).ConfigureAwait(false);
+            if (result.Result is DynamicTableEntity tableEntity)
+                return TableEntity.ConvertBack<TSaga>(tableEntity.Properties, new OperationContext());
+
+            return default;
         }
     }
 }
