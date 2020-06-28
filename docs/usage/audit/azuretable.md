@@ -45,14 +45,34 @@ Note: Please consider the official documentation for guidance on partition key s
 :::
 
 ```cs
+string PartitionKey = "ConstantPartitionKey";
+
 CloudTable table;
 services.AddMassTransit(x =>
 {
     x.AddBus(provider => Bus.Factory.CreateUsingInMemory(bus =>
     {
-        bus.UseAzureTableAuditStore(table, (messageType, messageData) => "CustomPartitionKey");
+        bus.UseAzureTableAuditStore(table, new ConstantPartitionKeyFormatter(PartitionKey));
     }));
 });
+
+
+class ConstantPartitionKeyFormatter :
+    IPartitionKeyFormatter
+{
+    readonly string _partitionKey;
+
+    public ConstantPartitionKeyFormatter(string partitionKey)
+    {
+        _partitionKey = partitionKey;
+    }
+
+    public string Format<T>(AuditRecord record)
+        where T : class
+    {
+        return _partitionKey;
+    }
+}
 ```
 
 ## Audit Filter
