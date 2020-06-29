@@ -6,10 +6,6 @@
     using System.Reflection;
     using Microsoft.Azure.Cosmos.Table;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
-    using Serialization;
-    using Serialization.JsonConverters;
-
 
     public static class ObjectFlattener
     {
@@ -49,7 +45,7 @@
             EntityProperty keyVal;
             foreach (var prop in properties)
             {
-                if (entity.TryGetValue(prop.Name, out keyVal) || entity.TryGetValue($"JSON_{prop.Name}", out keyVal))
+                if (entity.TryGetValue(prop.Name, out keyVal))
                 {
                     var val = keyVal.PropertyType switch
                     {
