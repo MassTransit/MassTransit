@@ -32,7 +32,7 @@ namespace EventHubConsumer
 
                         k.Storage("connection-string");
 
-                        k.Endpoint("input-event-hub", c =>
+                        k.ReceiveEndpoint("input-event-hub", c =>
                         {
                             c.ConfigureConsumer<EventHubMessageConsumer>(context);
                         });

@@ -1,10 +1,11 @@
-namespace MassTransit.MongoDbIntegration
+namespace MassTransit
 {
     using System;
     using Configurators;
-    using MassTransit.Configurators;
-    using MassTransit.Saga;
     using MongoDB.Driver;
+    using MongoDbIntegration;
+    using MongoDbIntegration.Configurators;
+    using Saga;
 
 
     public static class MongoDbSagaRepositoryRegistrationExtensions
