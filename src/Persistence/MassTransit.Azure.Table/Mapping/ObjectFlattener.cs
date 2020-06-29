@@ -39,12 +39,12 @@
 
         public static T ConvertBack<T>(IDictionary<string, EntityProperty> entity)
         {
-            var obj = (T) Activator.CreateInstance(typeof (T));
-            var type = typeof(T);
-            IEnumerable<PropertyInfo> properties = GetProperties(type);
-            EntityProperty keyVal;
+            var instance = (T) Activator.CreateInstance(typeof (T));
+            var entityType = typeof(T);
+            IEnumerable<PropertyInfo> properties = GetProperties(entityType);
             foreach (var prop in properties)
             {
+                EntityProperty keyVal;
                 if (entity.TryGetValue(prop.Name, out keyVal))
                 {
                     var val = keyVal.PropertyType switch
@@ -57,13 +57,13 @@
                         EdmType.Guid => keyVal.GuidValue,
                         EdmType.Int32 => keyVal.Int32Value,
                         EdmType.Int64 => keyVal.Int64Value,
-                        _ => default
+                        _ => null
                     };
-                    prop.SetValue(obj, val);
+                    prop.SetValue(instance, val);
                 }
             }
 
-            return obj;
+            return instance;
         }
 
         static object ExtractStringValue(PropertyInfo prop, EntityProperty keyVal)
