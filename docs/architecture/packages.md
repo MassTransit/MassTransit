@@ -21,12 +21,15 @@ The officially supported MassTransit packages include:
 
 ### Transports
 
-* [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/)
+* [MassTransit.ActiveMQ](https://nuget.org/packages/MassTransit.ActiveMQ/)
+* [MassTransit.AmazonSQS](https://nuget.org/packages/MassTransit.AmazonSQS/)
 * [MassTransit.Azure.ServiceBus.Core](https://nuget.org/packages/MassTransit.Azure.ServiceBus.Core/)
   * [MassTransit.WebJobs.ServiceBus](https://nuget.org/packages/MassTransit.WebJobs.ServiceBus/)
   * [MassTransit.WebJobs.EventHubs](https://nuget.org/packages/MassTransit.WebJobs.EventHubs/)
-* [MassTransit.ActiveMQ](https://nuget.org/packages/MassTransit.ActiveMQ/)
-* [MassTransit.AmazonSQS](https://nuget.org/packages/MassTransit.AmazonSQS/)
+* [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/)
+* **Riders**
+  * [MassTransit.EventHub](https://nuget.org/packages/MassTransit.EventHub/)
+  * [MassTransit.Kafka](https://nuget.org/packages/MassTransit.Kafka/)
 
 ### Containers
 
@@ -48,8 +51,8 @@ The officially supported MassTransit packages include:
 
 ### Scheduling
 
-* [MassTransit.Quartz](https://nuget.org/packages/MassTransit.Quartz/)
 * [MassTransit.Hangfire](https://nuget.org/packages/MassTransit.Hangfire/)
+* [MassTransit.Quartz](https://nuget.org/packages/MassTransit.Quartz/)
 
 ### ASP.NET Core
 
