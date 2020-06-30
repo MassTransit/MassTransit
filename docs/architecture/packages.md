@@ -42,6 +42,7 @@ The officially supported MassTransit packages include:
 ### Saga Persistence
 
 * [MassTransit.Azure.Cosmos](https://nuget.org/packages/MassTransit.Azure.Cosmos/)
+* [MassTransit.Azure.Cosmos.Table](https://nuget.org/packages/MassTransit.Azure.Cosmos.Table/)
 * [MassTransit.EntityFramework](https://nuget.org/packages/MassTransit.EntityFramework/)
 * [MassTransit.EntityFrameworkCore](https://nuget.org/packages/MassTransit.EntityFrameworkCore/)
 * [MassTransit.Marten](https://nuget.org/packages/MassTransit.Marten/)
