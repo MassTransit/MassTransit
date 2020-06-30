@@ -29,7 +29,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             var queueOk = await context.QueueDeclarePassive(_queueName).ConfigureAwait(false);
 
-            if (queueOk.ConsumerCount > 0)
+            if (queueOk.ConsumerCount == 0 && queueOk.MessageCount > 0)
                 await PurgeIfRequested(context, queueOk, _queueName).ConfigureAwait(false);
 
             await next.Send(context).ConfigureAwait(false);
