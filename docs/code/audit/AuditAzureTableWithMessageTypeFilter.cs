@@ -1,15 +1,16 @@
 namespace AuditAzureTableWithMessageTypeFilter
 {
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Azure.Cosmos.Table;
     using System.Collections.Generic;
-    
+    using MassTransit;
+    using Microsoft.Azure.Cosmos.Table;
+    using Microsoft.Extensions.DependencyInjection;
+
     class Program
     {
         static void Main(string[] args)
         {
             var services = new ServiceCollection();
-            
+
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse("INSERT STORAGE ACCOUNT CONNECTION STRING");
             string auditTableName = "messageaudittable";
 
@@ -23,12 +24,12 @@ namespace AuditAzureTableWithMessageTypeFilter
         }
     }
 
-    internal class SecretMessage
+    class SecretMessage
     {
         public string TopSecretData { get; set; }
     }
 
-    internal class LargeMessage
+    class LargeMessage
     {
         public IEnumerable<string> HugeArray { get; set; }
     }

@@ -2,7 +2,7 @@ namespace RedisSagaContainerConfiguration
 {
     using System;
     using MassTransit;
-    using MassTransit.MongoDbIntegration;
+    using MassTransit.RedisIntegration;
     using Microsoft.Extensions.DependencyInjection;
     using MongoDbSaga;
 
@@ -22,7 +22,7 @@ namespace RedisSagaContainerConfiguration
                         r.DatabaseConfiguration(configurationString);
 
                         // Default is Optimistic
-                        r.ConcurrencyMode = ConcurrentMode.Pessimistic;
+                        r.ConcurrencyMode = ConcurrencyMode.Pessimistic;
 
                         // Optional, prefix each saga instance key with the string specified
                         // resulting dev:c6cfd285-80b2-4c12-bcd3-56a00d994736

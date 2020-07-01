@@ -1,15 +1,16 @@
 namespace AuditAzureTableWithCustomPartitionKey
 {
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Azure.Cosmos.Table;
+    using MassTransit;
     using MassTransit.Azure.Table.Audit;
-    
+    using Microsoft.Azure.Cosmos.Table;
+    using Microsoft.Extensions.DependencyInjection;
+
     class Program
     {
         static void Main(string[] args)
         {
             var services = new ServiceCollection();
-            
+
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse("INSERT STORAGE ACCOUNT CONNECTION STRING");
             string auditTableName = "messageaudittable";
             string PartitionKey = "CustomPartitionKey";
@@ -23,7 +24,7 @@ namespace AuditAzureTableWithCustomPartitionKey
             });
         }
     }
-    
+
     class ConstantPartitionKeyFormatter :
         IPartitionKeyFormatter
     {
