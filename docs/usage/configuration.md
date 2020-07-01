@@ -3,7 +3,7 @@
 MassTransit can be configured in most .NET application types. Several commonly used application types are documented below, including the package references used, and show the minimal configuration required. More thorough configuration details can be found throughout the documentation.
 
 ::: tip Containers
-Unless the application type requires a dependency injection container, the examples below to not include container configuration. To learn about container configuration, including examples, refer to the [containers](/usage/containers) section.
+Unless the application type requires a dependency injection container, the examples below do not include examples of using one. To learn about container configuration, including examples, refer to the [containers](/usage/containers) section.
 :::
 
 The configuration examples all use the `EventContracts.ValueEntered` message type. The message type is only included in the first example's source code.
