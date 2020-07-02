@@ -52,7 +52,7 @@ It may be necessary to use the broker management tools to remove an exchange bin
 
 ### Consumer Factories
 
-In the example shown above, the consumer had a default constructor so the default constructor consumer factory was used. There are several over consumer factories included, some of which are shown below. If you are using MassTransit with a container, MassTransit includes support for several containers and integrates with them to provide container scope for consumers. Refer to the [containers](/usage/containers) section for details.
+In the example shown above, the consumer had a default constructor so the default constructor consumer factory was used. There are several other consumer factories included, some of which are shown below. If you are using MassTransit with a container, MassTransit includes support for several containers and integrates with them to provide container scope for consumers. Refer to the [containers](/usage/containers) section for details.
 
 <<< @/docs/code/usage/UsageConsumerOverloads.cs
 
