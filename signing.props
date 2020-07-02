@@ -6,6 +6,5 @@
     <!-- Assembly Signing -->
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)MassTransit.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
-    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
   </PropertyGroup>
 </Project>
