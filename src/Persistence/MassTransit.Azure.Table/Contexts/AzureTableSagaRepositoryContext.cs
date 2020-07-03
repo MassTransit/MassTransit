@@ -80,7 +80,7 @@
 
             try
             {
-                IDictionary<string, EntityProperty> entityProperties = ObjectFlattener.Flatten(instance);
+                IDictionary<string, EntityProperty> entityProperties = _context.Converter.GetDictionary(instance);
 
                 var (partitionKey, rowKey) = _context.Formatter.Format(instance.CorrelationId);
 
@@ -104,7 +104,7 @@
         {
             var instance = context.Saga;
 
-            IDictionary<string, EntityProperty> entityProperties = ObjectFlattener.Flatten(instance);
+            IDictionary<string, EntityProperty> entityProperties = _context.Converter.GetDictionary(instance);
 
             var (partitionKey, rowKey) = _context.Formatter.Format(instance.CorrelationId);
 
@@ -128,7 +128,7 @@
 
         Task<TableResult> TableInsert(TSaga instance)
         {
-            IDictionary<string, EntityProperty> entityProperties = ObjectFlattener.Flatten(instance);
+            IDictionary<string, EntityProperty> entityProperties = _context.Converter.GetDictionary(instance);
 
             var (partitionKey, rowKey) = _context.Formatter.Format(instance.CorrelationId);
 
@@ -139,7 +139,7 @@
 
         async Task<SagaConsumeContext<TSaga, TMessage>> CreateSagaConsumeContext(DynamicTableEntity entity, SagaConsumeContextMode mode)
         {
-            var instance = ObjectFlattener.ConvertBack<TSaga>(entity.Properties);
+            var instance = _context.Converter.GetObject(entity.Properties);
 
             SagaConsumeContext<TSaga, TMessage> sagaConsumeContext = await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, mode)
                 .ConfigureAwait(false);
@@ -177,8 +177,9 @@
 
             var operation = TableOperation.Retrieve<DynamicTableEntity>(partitionKey, rowKey);
             var result = await _context.Table.ExecuteAsync(operation, CancellationToken).ConfigureAwait(false);
-            if (result.Result is DynamicTableEntity tableEntity)
-                return ObjectFlattener.ConvertBack<TSaga>(tableEntity.Properties);
+            if (result.Result is DynamicTableEntity entity)
+                return _context.Converter.GetObject(entity.Properties);
+
 
             return default;
         }
