@@ -4,6 +4,7 @@ namespace MassTransit.Topology.Topologies
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Security.Cryptography;
     using System.Text;
     using GreenPipes;
     using Metadata;
@@ -15,13 +16,15 @@ namespace MassTransit.Topology.Topologies
         IConsumeTopologyConfigurator,
         IConsumeTopologyConfigurationObserver
     {
+        readonly int _maxQueueNameLength;
         readonly IList<IMessageConsumeTopologyConvention> _conventions;
         readonly object _lock = new object();
         readonly ConcurrentDictionary<Type, IMessageConsumeTopologyConfigurator> _messageTypes;
         readonly ConsumeTopologyConfigurationObservable _observers;
 
-        protected ConsumeTopology()
+        protected ConsumeTopology(int maxQueueNameLength = 1024)
         {
+            _maxQueueNameLength = maxQueueNameLength;
             _messageTypes = new ConcurrentDictionary<Type, IMessageConsumeTopologyConfigurator>();
 
             _observers = new ConsumeTopologyConfigurationObservable();
@@ -67,7 +70,28 @@ namespace MassTransit.Topology.Topologies
             sb.Append('_');
             sb.Append(NewId.Next().ToString(FormatUtil.Formatter));
 
-            return sb.ToString();
+            return ShrinkToFit(sb.ToString(), _maxQueueNameLength);
+        }
+
+        static string ShrinkToFit(string inputName, int maxLength)
+        {
+            string name;
+            if (inputName.Length > maxLength)
+            {
+                string hashed;
+                using (var hasher = new SHA1Managed())
+                {
+                    byte[] buffer = Encoding.UTF8.GetBytes(inputName);
+                    byte[] hash = hasher.ComputeHash(buffer);
+                    hashed = FormatUtil.Formatter.Format(hash).Substring(0, 6);
+                }
+
+                name = $"{inputName.Substring(0, maxLength - 7)}-{hashed}";
+            }
+            else
+                name = inputName;
+
+            return name;
         }
 
         IMessageConsumeTopologyConfigurator<T> IConsumeTopologyConfigurator.GetMessageTopology<T>()
