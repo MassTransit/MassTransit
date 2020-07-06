@@ -19,10 +19,12 @@
         EntityFrameworkTestFixture<T, AuditDbContext>
         where T : ITestDbParameters, new()
     {
+        AuditContextFactory _contextFactory;
+
         [Test]
         public async Task Should_have_consume_audit_records()
         {
-            var consumed = _harness.Consumed;
+            var consumed = InMemoryTestHarness.Consumed;
             await Task.Delay(2000);
             (await GetAuditRecords("Consume", consumed.Count(), TimeSpan.FromSeconds(10))).ShouldBe(consumed.Count());
         }
@@ -30,7 +32,7 @@
         [Test]
         public async Task Should_have_send_audit_record()
         {
-            var sent = _harness.Sent;
+            var sent = InMemoryTestHarness.Sent;
             await Task.Delay(2000);
             (await GetAuditRecords("Send", sent.Count(), TimeSpan.FromSeconds(10))).ShouldBe(sent.Count());
         }
@@ -40,45 +42,33 @@
         {
         }
 
-        InMemoryTestHarness _harness;
-        EntityFrameworkAuditStore _store;
-
-        [OneTimeSetUp]
-        public async Task SetUp()
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            var contextFactory = new AuditContextFactory();
+            configurator.UseEntityFrameworkCoreAuditStore(DbContextOptionsBuilder, "EFCoreAudit");
+            base.ConfigureInMemoryBus(configurator);
+        }
 
-            await using (var context = contextFactory.CreateDbContext(DbContextOptionsBuilder))
-            {
-                await context.Database.MigrateAsync();
-            }
-
-            _store = new EntityFrameworkAuditStore(DbContextOptionsBuilder.Options, "EfCoreAudit");
-
-            _harness = new InMemoryTestHarness();
-            _harness.OnConnectObservers += bus =>
-            {
-                bus.ConnectSendAuditObservers(_store);
-                bus.ConnectConsumeAuditObserver(_store);
-            };
-            _harness.Consumer<TestConsumer>();
-
-            await _harness.Start();
-
-            await _harness.InputQueueSendEndpoint.Send(new A());
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.Consumer<TestConsumer>();
         }
 
         [OneTimeTearDown]
         public async Task Teardown()
         {
-            await _harness.Stop();
-
             var contextFactory = new AuditContextFactory();
+            await using var context = contextFactory.CreateDbContext(DbContextOptionsBuilder);
+            await context.Database.EnsureDeletedAsync();
+        }
 
-            await using (var context = contextFactory.CreateDbContext(DbContextOptionsBuilder))
-            {
-                context.Database.EnsureDeleted();
-            }
+        [OneTimeSetUp]
+        public async Task SetUp()
+        {
+            _contextFactory = new AuditContextFactory();
+            await using var context = _contextFactory.CreateDbContext(DbContextOptionsBuilder);
+            await context.Database.MigrateAsync();
+
+            await InputQueueSendEndpoint.Send(new A());
         }
 
         async Task<int> GetAuditRecords(string contextType, int expected, TimeSpan timeout)
@@ -88,7 +78,7 @@
             var count = 0;
             while (DateTime.Now < giveUpAt)
             {
-                await using (var dbContext = _store.AuditContext)
+                await using (var dbContext = _contextFactory.CreateDbContext(DbContextOptionsBuilder))
                 {
                     count = await dbContext.Set<AuditRecord>()
                         .Where(x => x.ContextType == contextType)
