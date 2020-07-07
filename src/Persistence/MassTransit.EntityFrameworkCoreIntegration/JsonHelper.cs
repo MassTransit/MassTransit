@@ -1,4 +1,4 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.JobService
+namespace MassTransit.EntityFrameworkCoreIntegration
 {
     using Newtonsoft.Json;
 
