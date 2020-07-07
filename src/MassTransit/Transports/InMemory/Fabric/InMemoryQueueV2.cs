@@ -2,10 +2,10 @@
 {
     using System;
     using System.Threading;
-    using System.Threading.Channels;
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Util;
+    using MassTransit.Util;
 
     public class InMemoryQueueV2 :
         IInMemoryQueue
@@ -14,23 +14,19 @@
         readonly TaskCompletionSource<IInMemoryQueueConsumer> _consumer;
         readonly Connectable<IInMemoryQueueConsumer> _consumers;
         readonly string _name;
-        readonly int _concurrencyLevel;
         int _queueDepth;
-        int _readersStarted;
-        readonly Channel<InMemoryTransportMessage> _channel = Channel.CreateUnbounded<InMemoryTransportMessage>(new UnboundedChannelOptions() {
-            AllowSynchronousContinuations = false
-        });
+        readonly ChannelExecutor _channelExecutor;
 
         public InMemoryQueueV2(string name, int concurrencyLevel)
         {
             _name = name;
-            _concurrencyLevel = concurrencyLevel;
             _cancellationToken = new CancellationTokenSource();
 
             _consumers = new Connectable<IInMemoryQueueConsumer>();
             _consumer = Util.TaskUtil.GetTask<IInMemoryQueueConsumer>();
-            _cancellationToken.Token.Register(() => {
-                _channel.Writer.Complete();
+            _channelExecutor = new ChannelExecutor(concurrencyLevel, false);
+            _cancellationToken.Token.Register(async () => {
+                await _channelExecutor.DisposeAsync();
                 _consumer.TrySetCanceled();
             });
         }
@@ -40,9 +36,7 @@
             try
             {
                 var handle = _consumers.Connect(consumer);
-
                 _consumer.SetResult(consumer);
-                CreateChannelReaders();
                 return handle;
             }
             catch (Exception exception)
@@ -56,36 +50,22 @@
         {
             if (context.WasAlreadyDelivered(this))
                 return Task.FromResult(false);
-            return _channel.Writer.WriteAsync(context.Package, _cancellationToken.Token).AsTask();
+            return _channelExecutor.Push(() => ReadNextMessage(context.Package));
         }
 
-        void CreateChannelReaders() {
-            if (Interlocked.CompareExchange(ref _readersStarted, 1, 1) == 1) {
-                return;
-            }
-            for (var i = 0; i < _concurrencyLevel; i++) {
-                Task.Run(ReadNextMessage);
-            }
-        }
-
-        async Task ReadNextMessage() {
+        async Task ReadNextMessage(InMemoryTransportMessage message) {
             await _consumer.Task.ConfigureAwait(false);
-            while (await _channel.Reader.WaitToReadAsync()) {
-                var message = await _channel.Reader.ReadAsync();
-                Interlocked.Increment(ref _queueDepth);
-                if (_cancellationToken.IsCancellationRequested)
-                    return;
-                try
-                {
-                    await _consumers.ForEachAsync(x => x.Consume(message, _cancellationToken.Token)).ConfigureAwait(false);
-                }
-                catch
-                {
-                }
-                finally
-                {
-                    Interlocked.Decrement(ref _queueDepth);
-                }
+            try
+            {
+                await _consumers.ForEachAsync(x => x.Consume(message, _cancellationToken.Token))
+                    .ConfigureAwait(false);
+            }
+            catch
+            {
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _queueDepth);
             }
         }
 
