@@ -121,5 +121,13 @@
                 throw new InvalidOperationException("The exchange binding would create a cycle in the messaging fabric.", exception);
             }
         }
+
+        public async ValueTask DisposeAsync()
+        {
+            foreach (var queue in _queues.Values)
+            {
+                await queue.DisposeAsync().ConfigureAwait(false);
+            }
+        }
     }
 }

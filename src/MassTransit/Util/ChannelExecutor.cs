@@ -33,10 +33,13 @@ namespace MassTransit.Util
         }
 
         public ChannelExecutor(int concurrencyLimit)
+            :this (concurrencyLimit, true){ }
+
+        public ChannelExecutor(int concurrencyLimit, bool allowSynchronousContinuations)
         {
             var channelOptions = new UnboundedChannelOptions
             {
-                AllowSynchronousContinuations = true,
+                AllowSynchronousContinuations = allowSynchronousContinuations,
                 SingleReader = concurrencyLimit == 1,
                 SingleWriter = false
             };

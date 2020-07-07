@@ -85,6 +85,11 @@ namespace MassTransit.Containers.Tests
             _provider = collection.BuildServiceProvider(true);
         }
 
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.TransportConcurrencyLimit = 16;
+        }
+
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.ConfigureConsumers(_provider.GetRequiredService<IBusRegistrationContext>());

@@ -90,18 +90,18 @@ namespace MassTransit.Transports.InMemory
             _messageFabric.Value.Probe(context);
         }
 
-        public IInMemoryPublishTopologyBuilder CreatePublishTopologyBuilder(PublishEndpointTopologyBuilder.Options options =
-            PublishEndpointTopologyBuilder.Options.MaintainHierarchy)
+        protected override async Task StopSupervisor(StopSupervisorContext context)
         {
-            return new PublishEndpointTopologyBuilder(_messageFabric.Value, options);
+            await base.StopSupervisor(context).ConfigureAwait(false);
+
+            if (_messageFabric.IsValueCreated)
+                await _messageFabric.Value.DisposeAsync().ConfigureAwait(false);
         }
 
         void ApplyTopologyToMessageFabric<T>(IInMemoryMessagePublishTopology<T> publishTopology)
             where T : class
         {
-            var builder = CreatePublishTopologyBuilder();
-
-            publishTopology.Apply(builder);
+            publishTopology.Apply(new PublishEndpointTopologyBuilder(_messageFabric.Value));
         }
     }
 }

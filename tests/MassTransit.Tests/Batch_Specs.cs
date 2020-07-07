@@ -164,6 +164,11 @@
 
         TestBatchConsumer _consumer;
 
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.TransportConcurrencyLimit = 16;
+        }
+
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _consumer = new TestBatchConsumer(GetTask<Batch<PingMessage>>());

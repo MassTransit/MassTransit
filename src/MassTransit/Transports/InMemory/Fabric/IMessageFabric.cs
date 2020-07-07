@@ -1,11 +1,13 @@
 ﻿namespace MassTransit.Transports.InMemory.Fabric
 {
+    using System;
     using System.Threading.Tasks;
     using GreenPipes;
 
 
     public interface IMessageFabric :
-        IProbeSite
+        IProbeSite,
+        IAsyncDisposable
     {
         int ConcurrencyLimit { set; }
         Task Send(string exchangeName, InMemoryTransportMessage message);
