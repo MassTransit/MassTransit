@@ -38,7 +38,7 @@
 
         public void QueueDeclare(string name, int concurrencyLimit)
         {
-            _queues.GetOrAdd(name, x => new InMemoryQueue(x, concurrencyLimit == 0 ? _concurrencyLimit : concurrencyLimit));
+            _queues.GetOrAdd(name, x => new InMemoryQueueV2(x, concurrencyLimit == 0 ? _concurrencyLimit : concurrencyLimit));
         }
 
         public void ExchangeBind(string source, string destination)
@@ -59,7 +59,7 @@
         {
             var sourceExchange = _exchanges.GetOrAdd(source, x => new InMemoryExchange(x));
 
-            var destinationQueue = _queues.GetOrAdd(destination, x => new InMemoryQueue(destination, _concurrencyLimit));
+            var destinationQueue = _queues.GetOrAdd(destination, x => new InMemoryQueueV2(destination, _concurrencyLimit));
 
             ValidateBinding(destinationQueue, sourceExchange);
 
@@ -68,7 +68,7 @@
 
         public IInMemoryQueue GetQueue(string name)
         {
-            return _queues.GetOrAdd(name, x => new InMemoryQueue(x, _concurrencyLimit));
+            return _queues.GetOrAdd(name, x => new InMemoryQueueV2(x, _concurrencyLimit));
         }
 
         public IInMemoryExchange GetExchange(string name)
