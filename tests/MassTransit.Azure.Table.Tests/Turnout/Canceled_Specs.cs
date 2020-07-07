@@ -63,7 +63,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
             ConsumeContext<JobSubmitted> submitted = await _submitted;
         }
 
-        Guid _jobId;
+        readonly Guid _jobId = NewId.NextGuid();
         Task<ConsumeContext<JobCanceled>> _cancelled;
         Task<ConsumeContext<JobSubmitted>> _submitted;
         Task<ConsumeContext<JobStarted>> _started;
