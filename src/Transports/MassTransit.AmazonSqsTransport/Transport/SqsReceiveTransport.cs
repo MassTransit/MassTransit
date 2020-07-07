@@ -40,7 +40,15 @@
         {
             var scope = context.CreateScope("transport");
             scope.Add("type", "AmazonSQS");
-            scope.Set(_settings);
+            scope.Set(new
+            {
+                _settings.EntityName,
+                _settings.Durable,
+                _settings.AutoDelete,
+                _settings.PrefetchCount,
+                _settings.WaitTimeSeconds,
+                _settings.PurgeOnStartup
+            });
             var topologyScope = scope.CreateScope("topology");
             _context.BrokerTopology.Probe(topologyScope);
         }
