@@ -8,6 +8,7 @@
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
+    using Microsoft.Azure.ServiceBus;
     using Pipeline;
     using Policies;
     using Transports;
@@ -88,21 +89,15 @@
                         }
                         catch (OperationCanceledException ex)
                         {
-                            LogContext.Error?.Log(ex, "Start canceled: {InputAddress}", _context.InputAddress);
-
-                            await _context.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_context.InputAddress, ex))
-                                .ConfigureAwait(false);
-
-                            throw;
+                            throw await ConvertToServiceBusConnectionException(ex, "Operation interrupted: ").ConfigureAwait(false);
+                        }
+                        catch (UnauthorizedException ex)
+                        {
+                            throw await ConvertToServiceBusConnectionException(ex, "Unauthorized: ").ConfigureAwait(false);
                         }
                         catch (Exception ex)
                         {
-                            LogContext.Error?.Log(ex, "Receive transport faulted: {InputAddress}", _context.InputAddress);
-
-                            await _context.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_context.InputAddress, ex))
-                                .ConfigureAwait(false);
-
-                            throw;
+                            throw await ConvertToServiceBusConnectionException(ex, "ReceiveTransport Faulted, Restarting: ").ConfigureAwait(false);
                         }
                     }, Stopping).ConfigureAwait(false);
                 }
@@ -111,6 +106,22 @@
                     // i said, nothing to see here
                 }
             }
+        }
+
+        async Task<ServiceBusConnectionException> ConvertToServiceBusConnectionException(Exception ex, string message)
+        {
+            var exception = new ServiceBusConnectionException(message + _context.InputAddress, ex);
+
+            await NotifyFaulted(exception).ConfigureAwait(false);
+
+            return exception;
+        }
+
+        Task NotifyFaulted(ServiceBusConnectionException exception)
+        {
+            LogContext.Error?.Log(exception, "Receive Transport Faulted: {InputAddress}", _context.InputAddress);
+
+            return _context.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_context.InputAddress, exception));
         }
 
 

@@ -72,6 +72,8 @@
                     x.Ignore<MessageNotFoundException>();
                     x.Ignore<MessageSizeExceededException>();
 
+                    x.Ignore<UnauthorizedException>();
+
                     x.Handle<ServerBusyException>(exception => exception.IsTransient);
                     x.Handle<TimeoutException>();
 

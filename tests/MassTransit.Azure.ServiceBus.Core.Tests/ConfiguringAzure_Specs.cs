@@ -5,6 +5,7 @@
         using System;
         using System.Threading;
         using System.Threading.Tasks;
+        using Context;
         using GreenPipes;
         using GreenPipes.Internals.Extensions;
         using MassTransit.Testing;
@@ -151,6 +152,8 @@
 
                 var bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {
+                    BusTestFixture.ConfigureBusDiagnostics(x);
+
                     x.Host(serviceUri, h =>
                     {
                         h.SharedAccessSignature(s =>
@@ -180,7 +183,7 @@
                     });
                 });
 
-                var busHandle = await bus.StartAsync();
+                var busHandle = await bus.StartAsync(TestCancellationToken);
                 try
                 {
                 }
