@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Azure.ServiceBus.Core.Configuration
+namespace MassTransit.Azure.ServiceBus.Core.Configuration
 {
     using System;
     using Builders;
@@ -7,14 +7,14 @@
     using Transport;
 
 
-    public class BrokeredMessageReceiverConfiguration :
+    public class SubscriptionBrokeredMessageReceiverConfiguration :
         ReceiverConfiguration
     {
-        readonly IServiceBusReceiveEndpointConfiguration _endpointConfiguration;
+        readonly IServiceBusSubscriptionEndpointConfiguration _endpointConfiguration;
         readonly IServiceBusHostConfiguration _hostConfiguration;
 
-        public BrokeredMessageReceiverConfiguration(IServiceBusHostConfiguration hostConfiguration,
-            IServiceBusReceiveEndpointConfiguration endpointConfiguration)
+        public SubscriptionBrokeredMessageReceiverConfiguration(IServiceBusHostConfiguration hostConfiguration,
+            IServiceBusSubscriptionEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
@@ -27,7 +27,7 @@
 
             try
             {
-                var builder = new ServiceBusReceiveEndpointBuilder(_hostConfiguration, _endpointConfiguration);
+                var builder = new ServiceBusSubscriptionEndpointBuilder(_hostConfiguration, _endpointConfiguration);
 
                 foreach (var specification in Specifications)
                     specification.Configure(builder);
