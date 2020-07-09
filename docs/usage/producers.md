@@ -259,7 +259,7 @@ await endpoint.Send<SubmitOrder>(new
 });
 ```
 
-The anonymous object is loosely typed, the properties are matched by name, and there is an extensive set of type conversions that may occur to obtain match the types defined by the interface. Most numeric, string, and date/time conversations are supported, as well as several advanced conversions (including variables, and asynchronous `Task<T>` results).
+The anonymous object is loosely typed, the properties are matched by name, and there is an extensive set of type conversions that may occur to obtain match the types defined by the interface. Most numeric, string, and date/time conversions are supported, as well as several advanced conversions (including variables, and asynchronous `Task<T>` results).
 
 Collections, including arrays, lists, and dictionaries, are broadly supported, including the conversion of list elements, as well as dictionary keys and values. For instance, a dictionary of (int,decimal) could be converted on the fly to (long, string) using the default format conversions.
 

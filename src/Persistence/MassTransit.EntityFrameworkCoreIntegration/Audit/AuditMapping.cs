@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.EntityFrameworkCoreIntegration.Audit
 {
+    using System.Collections.Generic;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -35,9 +36,13 @@
             builder.Property(x => x.FaultAddress);
             builder.Property(x => x.InputAddress);
             builder.Property(x => x.MessageType);
-            builder.Property(x => x._headers).HasColumnName("Headers");
-            builder.Property(x => x._custom).HasColumnName("Custom");
-            builder.Property(x => x._message).HasColumnName("Message");
+
+            builder.Property(x => x.Headers)
+                .HasConversion(new JsonValueConverter<Dictionary<string, string>>());
+            builder.Property(x => x.Custom)
+                .HasConversion(new JsonValueConverter<Dictionary<string, string>>());
+            builder.Property(x => x.Message)
+                .HasConversion(new JsonValueConverter<object>());
         }
     }
 }

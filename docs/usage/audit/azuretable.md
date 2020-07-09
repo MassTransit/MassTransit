@@ -8,33 +8,19 @@ There are support for several different configuraiton options depending on your 
 
 ### Supply storage account
 
-```cs
-CloudStorageAccount storageAccount;
 
-services.AddMassTransit(x =>
-{
-    x.AddBus(provider => Bus.Factory.CreateUsingInMemory(bus =>
-    {
-        bus.UseAzureTableAuditStore(storageAccount, "AuditTableName");
-    }));
-});
+> Uses [MassTransit.Azure.Cosmos.Table](https://nuget.org/packages/MassTransit.Azure.Cosmos.Table/)</br>
+> Uses [MassTransit.Extensions.DependencyInjection](https://nuget.org/packages/MassTransit.Extensions.DependencyInjection/)
 
-```
+<<< @/docs/code/audit/AuditAzureTableWithStorageAccount.cs
 
 ### Supply your own table
 
-```cs
-CloudTable table;
+> Uses [MassTransit.Azure.Cosmos.Table](https://nuget.org/packages/MassTransit.Azure.Cosmos.Table/)</br>
+> Uses [MassTransit.Extensions.DependencyInjection](https://nuget.org/packages/MassTransit.Extensions.DependencyInjection/)
 
-services.AddMassTransit(x =>
-{
-    x.AddBus(provider => Bus.Factory.CreateUsingInMemory(bus =>
-    {
-        bus.UseAzureTableAuditStore(table);
-    }));
-});
 
-```
+<<< @/docs/code/audit/AuditAzureTableWithTableSupplied.cs
 
 ## Partition Key Strategy
 
@@ -44,48 +30,18 @@ When using Azure Tables it is important to use the relevant partition key strate
 Note: Please consider the official documentation for guidance on partition key strategy [here](https://docs.microsoft.com/en-us/rest/api/storageservices/designing-a-scalable-partitioning-strategy-for-azure-table-storage)
 :::
 
-```cs
-string PartitionKey = "ConstantPartitionKey";
-
-CloudTable table;
-services.AddMassTransit(x =>
-{
-    x.AddBus(provider => Bus.Factory.CreateUsingInMemory(bus =>
-    {
-        bus.UseAzureTableAuditStore(table, new ConstantPartitionKeyFormatter(PartitionKey));
-    }));
-});
+> Uses [MassTransit.Azure.Cosmos.Table](https://nuget.org/packages/MassTransit.Azure.Cosmos.Table/)</br>
+> Uses [MassTransit.Extensions.DependencyInjection](https://nuget.org/packages/MassTransit.Extensions.DependencyInjection/)
 
 
-class ConstantPartitionKeyFormatter :
-    IPartitionKeyFormatter
-{
-    readonly string _partitionKey;
-
-    public ConstantPartitionKeyFormatter(string partitionKey)
-    {
-        _partitionKey = partitionKey;
-    }
-
-    public string Format<T>(AuditRecord record)
-        where T : class
-    {
-        return _partitionKey;
-    }
-}
-```
+<<< @/docs/code/audit/AuditAzureTableWithCustomPartitionKey.cs
 
 ## Audit Filter
 
 You can configure the message filter on auditing as below.
 
-```cs
-CloudTable table;
-services.AddMassTransit(x =>
-{
-    x.AddBus(provider => Bus.Factory.CreateUsingInMemory(bus =>
-    {
-        bus.UseAzureTableAuditStore(table, filter => filter.Exclude(typeof(LargeMessage), typeof(SecretMessage)));
-    }));
-});
-```
+> Uses [MassTransit.Azure.Cosmos.Table](https://nuget.org/packages/MassTransit.Azure.Cosmos.Table/)</br>
+> Uses [MassTransit.Extensions.DependencyInjection](https://nuget.org/packages/MassTransit.Extensions.DependencyInjection/)
+
+
+<<< @/docs/code/audit/AuditAzureTableWithMessageTypeFilter.cs

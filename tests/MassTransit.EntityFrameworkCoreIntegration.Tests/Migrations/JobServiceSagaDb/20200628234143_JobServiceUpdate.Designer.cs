@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.JobServiceSagaDb
 {
     [DbContext(typeof(JobServiceSagaDbContext))]
-    [Migration("20200625044708_AddedRetryAttempt")]
-    partial class AddedRetryAttempt
+    [Migration("20200628234143_JobServiceUpdate")]
+    partial class JobServiceUpdate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -84,9 +84,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.JobService
                     b.Property<Guid?>("JobRetryDelayToken")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("JobSlotRequestId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("JobSlotWaitToken")
                         .HasColumnType("uniqueidentifier");
 
@@ -105,9 +102,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.JobService
                     b.Property<string>("ServiceAddress")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("StartJobRequestId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime?>("Started")
                         .HasColumnType("datetime2");
 
@@ -115,12 +109,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Migrations.JobService
                         .HasColumnType("datetime2");
 
                     b.HasKey("CorrelationId");
-
-                    b.HasIndex("JobSlotRequestId")
-                        .IsUnique();
-
-                    b.HasIndex("StartJobRequestId")
-                        .IsUnique();
 
                     b.ToTable("JobSaga");
                 });

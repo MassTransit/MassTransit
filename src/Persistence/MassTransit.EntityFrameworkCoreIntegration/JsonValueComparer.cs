@@ -1,4 +1,4 @@
-namespace MassTransit.EntityFrameworkCoreIntegration.JobService
+namespace MassTransit.EntityFrameworkCoreIntegration
 {
     using System;
     using Microsoft.EntityFrameworkCore.ChangeTracking;

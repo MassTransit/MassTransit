@@ -19,6 +19,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
         readonly IList<IAmazonSqsConsumeTopologySpecification> _specifications;
 
         public AmazonSqsConsumeTopology(IMessageTopology messageTopology, IAmazonSqsPublishTopology publishTopology)
+            : base(80)
         {
             _messageTopology = messageTopology;
             _publishTopology = publishTopology;

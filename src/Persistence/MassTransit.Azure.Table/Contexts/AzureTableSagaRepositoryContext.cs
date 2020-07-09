@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using Mapping;
     using MassTransit.Saga;
     using Microsoft.Azure.Cosmos.Table;
     using Util;
@@ -79,7 +80,7 @@
 
             try
             {
-                IDictionary<string, EntityProperty> entityProperties = TableEntity.Flatten(instance, new OperationContext());
+                IDictionary<string, EntityProperty> entityProperties = _context.Converter.GetDictionary(instance);
 
                 var (partitionKey, rowKey) = _context.Formatter.Format(instance.CorrelationId);
 
@@ -103,7 +104,7 @@
         {
             var instance = context.Saga;
 
-            IDictionary<string, EntityProperty> entityProperties = TableEntity.Flatten(instance, new OperationContext());
+            IDictionary<string, EntityProperty> entityProperties = _context.Converter.GetDictionary(instance);
 
             var (partitionKey, rowKey) = _context.Formatter.Format(instance.CorrelationId);
 
@@ -127,7 +128,7 @@
 
         Task<TableResult> TableInsert(TSaga instance)
         {
-            IDictionary<string, EntityProperty> entityProperties = TableEntity.Flatten(instance, new OperationContext());
+            IDictionary<string, EntityProperty> entityProperties = _context.Converter.GetDictionary(instance);
 
             var (partitionKey, rowKey) = _context.Formatter.Format(instance.CorrelationId);
 
@@ -138,7 +139,7 @@
 
         async Task<SagaConsumeContext<TSaga, TMessage>> CreateSagaConsumeContext(DynamicTableEntity entity, SagaConsumeContextMode mode)
         {
-            var instance = TableEntity.ConvertBack<TSaga>(entity.Properties, new OperationContext());
+            var instance = _context.Converter.GetObject(entity.Properties);
 
             SagaConsumeContext<TSaga, TMessage> sagaConsumeContext = await _factory.CreateSagaConsumeContext(_context, _consumeContext, instance, mode)
                 .ConfigureAwait(false);
@@ -176,8 +177,9 @@
 
             var operation = TableOperation.Retrieve<DynamicTableEntity>(partitionKey, rowKey);
             var result = await _context.Table.ExecuteAsync(operation, CancellationToken).ConfigureAwait(false);
-            if (result.Result is DynamicTableEntity tableEntity)
-                return TableEntity.ConvertBack<TSaga>(tableEntity.Properties, new OperationContext());
+            if (result.Result is DynamicTableEntity entity)
+                return _context.Converter.GetObject(entity.Properties);
+
 
             return default;
         }

@@ -20,6 +20,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
         readonly IList<IServiceBusConsumeTopologySpecification> _specifications;
 
         public ServiceBusConsumeTopology(IMessageTopology messageTopology, IServiceBusPublishTopology publishTopology)
+            : base(260)
         {
             _messageTopology = messageTopology;
             _publishTopology = publishTopology;

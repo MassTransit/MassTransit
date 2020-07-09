@@ -32,8 +32,6 @@ namespace MassTransit.JobService.Components.StateMachines
         public DateTime? Faulted { get; set; }
         public string Reason { get; set; }
 
-        public Guid? StartJobRequestId { get; set; }
-        public Guid? JobSlotRequestId { get; set; }
         public Guid? JobSlotWaitToken { get; set; }
         public Guid? JobRetryDelayToken { get; set; }
         public int Version { get; set; }

@@ -2,9 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations.Schema;
     using MassTransit.Audit;
-    using Newtonsoft.Json;
 
 
     public class AuditRecord
@@ -23,42 +21,9 @@
         public string InputAddress { get; set; }
         public string ContextType { get; set; }
         public string MessageType { get; set; }
-
-        internal string _custom { get; set; }
-
-        [NotMapped]
-        public Dictionary<string, string> Custom
-        {
-            get =>
-                string.IsNullOrEmpty(_custom)
-                    ? new Dictionary<string, string>()
-                    : JsonConvert.DeserializeObject<Dictionary<string, string>>(_custom);
-            set => _custom = JsonConvert.SerializeObject(value);
-        }
-
-        internal string _headers { get; set; }
-
-        [NotMapped]
-        public Dictionary<string, string> Headers
-        {
-            get =>
-                string.IsNullOrEmpty(_headers)
-                    ? new Dictionary<string, string>()
-                    : JsonConvert.DeserializeObject<Dictionary<string, string>>(_headers);
-            set => _headers = JsonConvert.SerializeObject(value);
-        }
-
-        internal string _message { get; set; }
-
-        [NotMapped]
-        public object Message
-        {
-            get =>
-                string.IsNullOrEmpty(_message)
-                    ? null
-                    : JsonConvert.DeserializeObject(_message);
-            set => _message = JsonConvert.SerializeObject(value);
-        }
+        public Dictionary<string, string> Custom { get; set; }
+        public Dictionary<string, string> Headers { get; set; }
+        public object Message { get; set; }
 
         internal static AuditRecord Create<T>(T message, string messageType, MessageAuditMetadata metadata)
             where T : class

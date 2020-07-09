@@ -40,6 +40,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".solution", ".solution", "{
 		Directory.Build.props = Directory.Build.props
 		docs.yml = docs.yml
 		README.md = README.md
+		signing.props = signing.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scheduling", "Scheduling", "{FDC1A760-D4E5-44F4-B0D9-C19F2E14253A}"

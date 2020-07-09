@@ -36,13 +36,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.JobService
             entity.Property(x => x.Faulted);
             entity.Property(x => x.Reason);
 
-            entity.Property(x => x.StartJobRequestId);
-            entity.HasIndex(x => x.StartJobRequestId).IsUnique().HasFilter(null);
-
-            entity.Property(x => x.JobSlotRequestId);
-            entity.HasIndex(x => x.JobSlotRequestId).IsUnique().HasFilter(null);
-
             entity.Property(x => x.JobSlotWaitToken);
+            entity.Property(x => x.JobRetryDelayToken);
         }
     }
 }

@@ -83,6 +83,16 @@ namespace MassTransit.JobService.Components.StateMachines
             During(Faulted,
                 Ignore(StatusCheckRequested.Received),
                 Ignore(AttemptFaulted));
+
+            During(Initial,
+                When(AttemptCompleted)
+                    .Finalize(),
+                When(AttemptCanceled)
+                    .Finalize(),
+                When(StatusCheckRequested.Received)
+                    .Finalize());
+
+            SetCompletedWhenFinalized();
         }
 
         // ReSharper disable UnassignedGetOnlyAutoProperty

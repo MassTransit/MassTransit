@@ -7,14 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MassTransit.AspNetCore" Version="7.0.0-develop.2841" />
-    <PackageReference Include="MassTransit.Quartz" Version="7.0.0-develop.2841" />
-    <PackageReference Include="MassTransit.RabbitMQ" Version="7.0.0-develop.2841" />
-    <PackageReference Include="MassTransit.Kafka" Version="7.0.0-develop.2841" />
-    <PackageReference Include="MassTransit.EventHub" Version="7.0.0-develop.2841" />
-    <PackageReference Include="MassTransit.ActiveMQ" Version="7.0.0-develop.2841" />
-    <PackageReference Include="MassTransit.AmazonSQS" Version="7.0.0-develop.2841" />
-    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="7.0.0-develop.2841" />
+    <PackageReference Include="MassTransit.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="MassTransit.Quartz" Version="7.0.0" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="7.0.0" />
+    <PackageReference Include="MassTransit.Kafka" Version="7.0.0" />
+    <PackageReference Include="MassTransit.EventHub" Version="7.0.0" />
+    <PackageReference Include="MassTransit.ActiveMQ" Version="7.0.0" />
+    <PackageReference Include="MassTransit.AmazonSQS" Version="7.0.0" />
+    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="7.0.0" />
+    <PackageReference Include="MassTransit.MongoDb" Version="7.0.0" />
+    <PackageReference Include="MassTransit.Azure.Cosmos.Table" Version="7.0.0" />
+    <PackageReference Include="MassTransit.Redis" Version="7.0.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="Topshelf" Version="4.2.1" />
   </ItemGroup>

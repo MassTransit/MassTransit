@@ -11,22 +11,19 @@
     public class InMemoryQueue :
         IInMemoryQueue
     {
-        readonly CancellationTokenSource _cancellationToken;
         readonly TaskCompletionSource<IInMemoryQueueConsumer> _consumer;
         readonly Connectable<IInMemoryQueueConsumer> _consumers;
+        readonly ChannelExecutor _executor;
         readonly string _name;
-        readonly LimitedConcurrencyLevelTaskScheduler _scheduler;
-        int _queueDepth;
 
         public InMemoryQueue(string name, int concurrencyLevel)
         {
             _name = name;
-            _scheduler = new LimitedConcurrencyLevelTaskScheduler(concurrencyLevel);
-            _cancellationToken = new CancellationTokenSource();
 
             _consumers = new Connectable<IInMemoryQueueConsumer>();
             _consumer = Util.TaskUtil.GetTask<IInMemoryQueueConsumer>();
-            _cancellationToken.Token.Register(() => _consumer.TrySetCanceled());
+
+            _executor = new ChannelExecutor(concurrencyLevel, false);
         }
 
         public ConnectHandle ConnectConsumer(IInMemoryQueueConsumer consumer)
@@ -47,33 +44,27 @@
 
         public Task Deliver(DeliveryContext<InMemoryTransportMessage> context)
         {
-            if (context.WasAlreadyDelivered(this))
-                return Task.FromResult(false);
+            return context.WasAlreadyDelivered(this)
+                ? Task.FromResult(false)
+                : _executor.Push(() => DispatchMessage(context.Package));
+        }
 
-            Interlocked.Increment(ref _queueDepth);
-
-            Task.Factory.StartNew(() => DispatchMessage(context.Package), _cancellationToken.Token, TaskCreationOptions.None, _scheduler);
-
-            return Task.FromResult(true);
+        public ValueTask DisposeAsync()
+        {
+            return _executor.DisposeAsync();
         }
 
         async Task DispatchMessage(InMemoryTransportMessage message)
         {
-            var consumer = await _consumer.Task.ConfigureAwait(false);
-
-            if (_cancellationToken.IsCancellationRequested)
-                return;
+            await _consumer.Task.ConfigureAwait(false);
 
             try
             {
-                await _consumers.ForEachAsync(x => x.Consume(message, _cancellationToken.Token)).ConfigureAwait(false);
+                await _consumers.ForEachAsync(x => x.Consume(message, CancellationToken.None)).ConfigureAwait(false);
             }
+            // ReSharper disable once EmptyGeneralCatchClause
             catch
             {
-            }
-            finally
-            {
-                Interlocked.Decrement(ref _queueDepth);
             }
         }
 
