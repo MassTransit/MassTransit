@@ -1,5 +1,6 @@
 namespace MassTransit.PipeConfigurators
 {
+    using System;
     using ConsumeConfigurators;
 
 
@@ -8,10 +9,12 @@ namespace MassTransit.PipeConfigurators
         where TConsumer : class
     {
         readonly IConsumerConfigurator<TConsumer> _configurator;
+        readonly Action<IOutboxConfigurator> _configure;
 
-        public InMemoryOutboxConsumerConfigurationObserver(IConsumerConfigurator<TConsumer> configurator)
+        public InMemoryOutboxConsumerConfigurationObserver(IConsumerConfigurator<TConsumer> configurator, Action<IOutboxConfigurator> configure)
         {
             _configurator = configurator;
+            _configure = configure;
         }
 
         void IConsumerConfigurationObserver.ConsumerConfigured<T>(IConsumerConfigurator<T> configurator)
@@ -21,6 +24,8 @@ namespace MassTransit.PipeConfigurators
         void IConsumerConfigurationObserver.ConsumerMessageConfigured<T, TMessage>(IConsumerMessageConfigurator<T, TMessage> configurator)
         {
             var specification = new InMemoryOutboxSpecification<TMessage>();
+
+            _configure?.Invoke(specification);
 
             _configurator.Message<TMessage>(x => x.AddPipeSpecification(specification));
         }

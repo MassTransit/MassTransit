@@ -1,5 +1,6 @@
 namespace MassTransit.PipeConfigurators
 {
+    using System;
     using ConsumeConfigurators;
 
 
@@ -10,9 +11,18 @@ namespace MassTransit.PipeConfigurators
     public class InMemoryOutboxHandlerConfigurationObserver :
         IHandlerConfigurationObserver
     {
+        readonly Action<IOutboxConfigurator> _configure;
+
+        public InMemoryOutboxHandlerConfigurationObserver(Action<IOutboxConfigurator> configure)
+        {
+            _configure = configure;
+        }
+
         void IHandlerConfigurationObserver.HandlerConfigured<T>(IHandlerConfigurator<T> configurator)
         {
             var specification = new InMemoryOutboxSpecification<T>();
+
+            _configure?.Invoke(specification);
 
             configurator.AddPipeSpecification(specification);
         }

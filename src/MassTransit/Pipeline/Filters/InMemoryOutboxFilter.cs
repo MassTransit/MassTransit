@@ -12,10 +12,12 @@
         where TResult : TContext, OutboxContext
     {
         readonly Func<TContext, TResult> _contextFactory;
+        readonly bool _concurrentMessageDelivery;
 
-        public InMemoryOutboxFilter(Func<TContext, TResult> contextFactory)
+        public InMemoryOutboxFilter(Func<TContext, TResult> contextFactory, bool concurrentMessageDelivery)
         {
             _contextFactory = contextFactory;
+            _concurrentMessageDelivery = concurrentMessageDelivery;
         }
 
         public async Task Send(TContext context, IPipe<TContext> next)
@@ -26,7 +28,7 @@
             {
                 await next.Send(outboxContext).ConfigureAwait(false);
 
-                await outboxContext.ExecutePendingActions().ConfigureAwait(false);
+                await outboxContext.ExecutePendingActions(_concurrentMessageDelivery).ConfigureAwait(false);
 
                 await outboxContext.ConsumeCompleted.ConfigureAwait(false);
             }

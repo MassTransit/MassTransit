@@ -2,6 +2,7 @@ namespace MassTransit.Context
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Util;
 
@@ -40,7 +41,7 @@ namespace MassTransit.Context
                 _pendingActions.Add(method);
         }
 
-        public async Task ExecutePendingActions()
+        public async Task ExecutePendingActions(bool concurrentMessageDelivery)
         {
             _clearToSend.TrySetResult(this);
 
@@ -48,11 +49,25 @@ namespace MassTransit.Context
             lock (_pendingActions)
                 pendingActions = _pendingActions.ToArray();
 
-            foreach (Func<Task> action in pendingActions)
+            if (pendingActions.Length > 0)
             {
-                var task = action();
-                if (task != null)
-                    await task.ConfigureAwait(false);
+                if (concurrentMessageDelivery)
+                {
+                    var collection = new PendingTaskCollection(pendingActions.Length);
+
+                    collection.Add(pendingActions.Select(action => action()));
+
+                    await collection.Completed().ConfigureAwait(false);
+                }
+                else
+                {
+                    foreach (Func<Task> action in pendingActions)
+                    {
+                        var task = action();
+                        if (task != null)
+                            await task.ConfigureAwait(false);
+                    }
+                }
             }
 
             if (_outboxSchedulerContext != null)

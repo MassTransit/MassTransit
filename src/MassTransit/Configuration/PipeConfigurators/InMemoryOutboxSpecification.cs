@@ -7,12 +7,15 @@
 
 
     public class InMemoryOutboxSpecification<T> :
-        IPipeSpecification<ConsumeContext<T>>
+        IPipeSpecification<ConsumeContext<T>>,
+        IOutboxConfigurator
         where T : class
     {
+        public bool ConcurrentMessageDelivery { get; set; }
+
         public void Apply(IPipeBuilder<ConsumeContext<T>> builder)
         {
-            builder.AddFilter(new InMemoryOutboxFilter<ConsumeContext<T>, InMemoryOutboxConsumeContext<T>>(Factory));
+            builder.AddFilter(new InMemoryOutboxFilter<ConsumeContext<T>, InMemoryOutboxConsumeContext<T>>(Factory, ConcurrentMessageDelivery));
         }
 
         public IEnumerable<ValidationResult> Validate()

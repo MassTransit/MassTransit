@@ -24,8 +24,9 @@
         /// <summary>
         /// Execute all the pending outbox operations (success case)
         /// </summary>
+        /// <param name="concurrentMessageDelivery"></param>
         /// <returns></returns>
-        Task ExecutePendingActions();
+        Task ExecutePendingActions(bool concurrentMessageDelivery);
 
         /// <summary>
         /// Discard any pending outbox operations, and cancel any scheduled messages

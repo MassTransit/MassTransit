@@ -1,5 +1,6 @@
 namespace MassTransit.PipeConfigurators
 {
+    using System;
     using Automatonymous;
     using Saga;
     using SagaConfigurators;
@@ -10,10 +11,12 @@ namespace MassTransit.PipeConfigurators
         where TSaga : class, ISaga
     {
         readonly ISagaConfigurator<TSaga> _configurator;
+        readonly Action<IOutboxConfigurator> _configure;
 
-        public InMemoryOutboxSagaConfigurationObserver(ISagaConfigurator<TSaga> configurator)
+        public InMemoryOutboxSagaConfigurationObserver(ISagaConfigurator<TSaga> configurator, Action<IOutboxConfigurator> configure)
         {
             _configurator = configurator;
+            _configure = configure;
         }
 
         void ISagaConfigurationObserver.SagaConfigured<T>(ISagaConfigurator<T> configurator)
@@ -28,6 +31,8 @@ namespace MassTransit.PipeConfigurators
         void ISagaConfigurationObserver.SagaMessageConfigured<T, TMessage>(ISagaMessageConfigurator<T, TMessage> configurator)
         {
             var specification = new InMemoryOutboxSpecification<TMessage>();
+
+            _configure?.Invoke(specification);
 
             _configurator.Message<TMessage>(x => x.AddPipeSpecification(specification));
         }

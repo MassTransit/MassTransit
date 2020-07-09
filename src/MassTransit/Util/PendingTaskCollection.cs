@@ -17,6 +17,12 @@ namespace MassTransit.Util
             _tasks = new Dictionary<long, Task>(capacity);
         }
 
+        public void Add(IEnumerable<Task> tasks)
+        {
+            foreach (var task in tasks)
+                Add(task);
+        }
+
         public void Add(Task task)
         {
             if (task == null)
@@ -33,12 +39,7 @@ namespace MassTransit.Util
             task.ContinueWith(x => Remove(id), TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously);
         }
 
-        public Task Completed(CancellationToken cancellationToken = default)
-        {
-            return ReceiveTasksCompleted(cancellationToken);
-        }
-
-        async Task ReceiveTasksCompleted(CancellationToken cancellationToken)
+        public async Task Completed(CancellationToken cancellationToken = default)
         {
             Task[] tasks;
             do

@@ -8,12 +8,16 @@ namespace MassTransit.PipeConfigurators
 
 
     public class InMemoryExecuteContextOutboxSpecification<TArguments> :
-        IPipeSpecification<ExecuteContext<TArguments>>
+        IPipeSpecification<ExecuteContext<TArguments>>,
+        IOutboxConfigurator
         where TArguments : class
     {
+        public bool ConcurrentMessageDelivery { get; set; }
+
         public void Apply(IPipeBuilder<ExecuteContext<TArguments>> builder)
         {
-            builder.AddFilter(new InMemoryOutboxFilter<ExecuteContext<TArguments>, InMemoryOutboxExecuteContext<TArguments>>(Factory));
+            builder.AddFilter(
+                new InMemoryOutboxFilter<ExecuteContext<TArguments>, InMemoryOutboxExecuteContext<TArguments>>(Factory, ConcurrentMessageDelivery));
         }
 
         public IEnumerable<ValidationResult> Validate()
