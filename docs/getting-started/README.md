@@ -6,23 +6,73 @@ Getting started with MassTransit is fast and easy. This quick start guide uses R
 
 To create a service using MassTransit, create a console application via the Command Prompt.
 
-```
+```bash
 $ mkdir GettingStarted
 $ dotnet new console -o GettingStarted
 ```
 
-Add some references to the newly created console application:
+## With In-Memory Bus
 
-```
+Add MassTransit package to the console application:
+
+```bash
 $ cd GettingStarted
-$ dotnet add package MassTransit.RabbitMQ
+$ dotnet add package MassTransit
 ```
 
 At this point, the project should compile, but there is more work to be done. You can verify the project builds by executing:
 
-```
+```bash
 $ dotnet run
 ```
+
+### Edit Program.cs
+
+```csharp
+public class Message
+{ 
+    public string Text { get; set; }
+}
+
+public class Program
+{
+    public static async Task Main()
+    {
+        var bus = Bus.Factory.CreateUsingInMemory(sbc =>
+        {
+            sbc.ReceiveEndpoint("test_queue", ep =>
+            {
+                ep.Handler<Message>(context =>
+                {
+                    return Console.Out.WriteLineAsync($"Received: {context.Message.Text}");
+                });
+            });
+        });
+
+        await bus.StartAsync(); // This is important!
+
+        await bus.Publish(new Message{Text = "Hi"});
+        
+        Console.WriteLine("Press any key to exit");
+        await Task.Run(() => Console.ReadKey());
+        
+        await bus.StopAsync();
+    }
+}
+```
+
+Save the file, and execute _`dotnet run`_, and you should see the message *Received: Hi* displayed. If you see anything else, something went wrong. Verify your installed packages and your .NET Core setup. All the things that could possibly go wrong you should fix.
+
+## With RabbitMQ
+
+Add RabbitMQ for MassTransit package to the console application:
+
+```bash
+$ cd GettingStarted
+$ dotnet add package MassTransit.RabbitMQ
+```
+
+If you've skipped the in-memory version, don't worry, the MassTransit package will be added as well.
 
 If you have any errors at this point, you might want to get them resolved.
 
