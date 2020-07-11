@@ -4,7 +4,7 @@ MassTransit is a framework, and follows the Hollywood principle – don't call 
 
 To create a unit test with the in-memory test harness, create and start the harness as shown.
 
-> Uses [MassTransit](https://nuget.org/packages/MassTransit/),  [NUnit](https://nuget.org/packages/NuGet)
+> Uses [MassTransit](https://nuget.org/packages/MassTransit/),  [NUnit](https://nuget.org/packages/NUnit/)
 
 To create the harness in a unit test, start, and then stop it:
 
