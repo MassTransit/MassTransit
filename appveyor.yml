@@ -1,4 +1,4 @@
-version: 7.0.1.{build}
+version: 7.0.2.{build}
 
 branches:
   only:
@@ -49,7 +49,7 @@ build_script:
   - ps: .\Build.ps1
   - sh: >-
       wget https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/v3.8.0/rabbitmq_delayed_message_exchange-3.8.0.ez
-      
+
       sudo mkdir /usr/lib/rabbitmq/plugins
 
       sudo mv ./rabbitmq_delayed_message_exchange-3.8.0.ez /usr/lib/rabbitmq/plugins/
