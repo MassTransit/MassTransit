@@ -3,7 +3,9 @@
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using MassTransit.Scheduling;
     using NUnit.Framework;
+    using Scheduling;
 
 
     public class ScheduleMessage_Specs :
@@ -133,6 +135,58 @@
                 await context.ScheduleSend(TimeSpan.FromSeconds(3), new SecondMessage());
 
                 await context.ReceiveContext.ReceiveCompleted;
+            });
+
+            _second = Handled<SecondMessage>(configurator);
+        }
+
+
+        public class FirstMessage
+        {
+        }
+
+
+        public class SecondMessage
+        {
+        }
+    }
+
+
+    public class Should_not_schedule_subsequent_messages :
+        ActiveMqTestFixture
+    {
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        Task<ConsumeContext<SecondMessage>> _second;
+
+        [Test]
+        public async Task Should_get_both_messages()
+        {
+            var scheduler = new MessageScheduler(new ActiveMqScheduleMessageProvider(Bus), Bus.Topology);
+
+            await scheduler.ScheduleSend(InputQueueAddress, TimeSpan.FromSeconds(3), new FirstMessage());
+
+            await _first;
+
+            var timer = Stopwatch.StartNew();
+
+            await _second;
+
+            timer.Stop();
+
+            Assert.That(timer.Elapsed, Is.LessThan(TimeSpan.FromSeconds(1)));
+        }
+
+        protected override void ConfigureActiveMqBus(IActiveMqBusFactoryConfigurator configurator)
+        {
+            configurator.UseActiveMqMessageScheduler();
+        }
+
+        protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
+        {
+            _first = Handler<FirstMessage>(configurator, async context =>
+            {
+                await context.Send(InputQueueAddress, new SecondMessage());
             });
 
             _second = Handled<SecondMessage>(configurator);

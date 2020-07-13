@@ -91,8 +91,6 @@
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
-                    byte[] body = context.Body;
-
                     var transportMessage = sessionContext.Session.CreateBytesMessage();
 
                     transportMessage.Properties.SetHeaders(context.Headers);
@@ -113,7 +111,7 @@
                     if (context.Priority.HasValue)
                         transportMessage.NMSPriority = context.Priority.Value;
 
-                    transportMessage.Content = body;
+                    transportMessage.Content = context.Body;
 
                     var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
 
