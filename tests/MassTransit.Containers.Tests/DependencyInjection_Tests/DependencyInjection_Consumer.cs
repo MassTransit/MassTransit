@@ -2,9 +2,11 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 {
     using System;
     using Common_Tests;
+    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Scenarios;
+    using TestFramework.Sagas;
 
 
     [TestFixture]
@@ -98,5 +100,43 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
         }
 
         protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
+    public class DependencyInjection_Consumer_FilterOrder :
+        Common_Consumer_FilterOrder
+    {
+        readonly IServiceProvider _provider;
+
+        public DependencyInjection_Consumer_FilterOrder()
+        {
+            _provider = new ServiceCollection()
+                .AddSingleton(MessageCompletion)
+                .AddSingleton(ConsumerCompletion)
+                .AddSingleton(ConsumerMessageCompletion)
+                .AddSingleton<IFilter<ConsumeContext<EasyMessage>>, MessageFilter<EasyMessage, IServiceProvider>>()
+                .AddSingleton<IFilter<ConsumerConsumeContext<EasyConsumer>>, ConsumerFilter<EasyConsumer, IServiceProvider>>()
+                .AddSingleton<IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>>, ConsumerMessageFilter<EasyConsumer, EasyMessage, IServiceProvider>>()
+                .AddMassTransit(ConfigureRegistration)
+                .BuildServiceProvider();
+        }
+
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
+
+        protected override IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>> CreateConsumerMessageFilter()
+        {
+            return _provider.GetRequiredService<IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>>>();
+        }
+
+        protected override IFilter<ConsumerConsumeContext<EasyConsumer>> CreateConsumerFilter()
+        {
+            return _provider.GetRequiredService<IFilter<ConsumerConsumeContext<EasyConsumer>>>();
+        }
+
+        protected override IFilter<ConsumeContext<EasyMessage>> CreateMessageFilter()
+        {
+            return _provider.GetRequiredService<IFilter<ConsumeContext<EasyMessage>>>();
+        }
     }
 }

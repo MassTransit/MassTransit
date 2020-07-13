@@ -4,6 +4,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
     using System.Threading.Tasks;
     using Autofac;
     using Common_Tests;
+    using GreenPipes;
     using NUnit.Framework;
     using Scenarios;
 
@@ -131,4 +132,51 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
         protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
     }
+
+
+    [TestFixture]
+    public class Autofac_Consumer_FilterOrder :
+        Common_Consumer_FilterOrder
+    {
+        readonly IContainer _container;
+
+        public Autofac_Consumer_FilterOrder()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterInstance(MessageCompletion);
+            builder.RegisterInstance(ConsumerCompletion);
+            builder.RegisterInstance(ConsumerMessageCompletion);
+            builder.RegisterType<MessageFilter<EasyMessage, ILifetimeScope>>().As<IFilter<ConsumeContext<EasyMessage>>>();
+            builder.RegisterType<ConsumerFilter<EasyConsumer, ILifetimeScope>>().As<IFilter<ConsumerConsumeContext<EasyConsumer>>>();
+            builder.RegisterType<ConsumerMessageFilter<EasyConsumer, EasyMessage, ILifetimeScope>>().As<IFilter<ConsumerConsumeContext<EasyConsumer,
+            EasyMessage>>>();
+            builder.AddMassTransit(ConfigureRegistration);
+
+            _container = builder.Build();
+        }
+
+        [OneTimeTearDown]
+        public async Task Close_container()
+        {
+            await _container.DisposeAsync();
+        }
+
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
+
+        protected override IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>> CreateConsumerMessageFilter()
+        {
+            return _container.Resolve<IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>>>();
+        }
+
+        protected override IFilter<ConsumerConsumeContext<EasyConsumer>> CreateConsumerFilter()
+        {
+            return _container.Resolve<IFilter<ConsumerConsumeContext<EasyConsumer>>>();
+        }
+
+        protected override IFilter<ConsumeContext<EasyMessage>> CreateMessageFilter()
+        {
+            return _container.Resolve<IFilter<ConsumeContext<EasyMessage>>>();
+        }
+    }
+
 }

@@ -272,4 +272,164 @@
             configurator.ServiceInstance(x => x.ConfigureEndpoints(Registration));
         }
     }
+
+
+    public abstract class Common_Consumer_FilterOrder :
+        InMemoryTestFixture
+    {
+        protected readonly TaskCompletionSource<ConsumeContext<EasyMessage>> MessageCompletion;
+        protected readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer, EasyMessage>> ConsumerMessageCompletion;
+        protected readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer>> ConsumerCompletion;
+
+        protected Common_Consumer_FilterOrder()
+        {
+            MessageCompletion = GetTask<ConsumeContext<EasyMessage>>();
+            ConsumerCompletion = GetTask<ConsumerConsumeContext<EasyConsumer>>();
+            ConsumerMessageCompletion = GetTask<ConsumerConsumeContext<EasyConsumer, EasyMessage>>();
+        }
+
+        protected abstract IBusRegistrationContext Registration { get; }
+
+        [Test]
+        public async Task Should_include_container_scope()
+        {
+            await InputQueueSendEndpoint.Send(new EasyMessage {CorrelationId = NewId.NextGuid()});
+
+            await MessageCompletion.Task;
+
+            await ConsumerCompletion.Task;
+
+            await ConsumerMessageCompletion.Task;
+        }
+
+        protected abstract IFilter<ConsumerConsumeContext<EasyConsumer>> CreateConsumerFilter();
+        protected abstract IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>> CreateConsumerMessageFilter();
+        protected abstract IFilter<ConsumeContext<EasyMessage>> CreateMessageFilter();
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.ConfigureConsumer<EasyConsumer>(Registration, x =>
+            {
+                x.Message<EasyMessage>(m => m.UseFilter(CreateMessageFilter()));
+
+                x.UseFilter(CreateConsumerFilter());
+
+                x.ConsumerMessage<EasyMessage>(m => m.UseFilter(CreateConsumerMessageFilter()));
+            });
+        }
+
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<EasyConsumer>();
+            configurator.AddBus(provider => BusControl);
+        }
+
+
+        public class EasyMessage
+        {
+            public Guid CorrelationId { get; set; }
+        }
+
+
+        protected class EasyConsumer :
+            IConsumer<EasyMessage>
+        {
+            readonly TaskCompletionSource<ConsumeContext<EasyMessage>> _received;
+
+            public EasyConsumer(TaskCompletionSource<ConsumeContext<EasyMessage>> received)
+            {
+                _received = received;
+            }
+
+            public async Task Consume(ConsumeContext<EasyMessage> context)
+            {
+                _received.TrySetResult(context);
+            }
+        }
+
+
+        protected class ConsumerFilter<TConsumer, TScope> :
+            IFilter<ConsumerConsumeContext<TConsumer>>
+            where TConsumer : class, IConsumer
+            where TScope : class
+        {
+            readonly TaskCompletionSource<ConsumerConsumeContext<TConsumer>> _taskCompletionSource;
+
+            public ConsumerFilter(TaskCompletionSource<ConsumerConsumeContext<TConsumer>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public Task Send(ConsumerConsumeContext<TConsumer> context, IPipe<ConsumerConsumeContext<TConsumer>> next)
+            {
+                if (context.TryGetPayload(out TScope _))
+                    _taskCompletionSource.TrySetResult(context);
+                else
+                    _taskCompletionSource.TrySetException(new PayloadException("Service Provider not found"));
+
+                return next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+        }
+
+
+        protected class ConsumerMessageFilter<TConsumer, TMessage, TScope> :
+            IFilter<ConsumerConsumeContext<TConsumer, TMessage>>
+            where TConsumer : class
+            where TMessage : class
+            where TScope : class
+        {
+            readonly TaskCompletionSource<ConsumerConsumeContext<TConsumer, TMessage>> _taskCompletionSource;
+
+            public ConsumerMessageFilter(TaskCompletionSource<ConsumerConsumeContext<TConsumer, TMessage>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public Task Send(ConsumerConsumeContext<TConsumer, TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
+            {
+                if (context.TryGetPayload(out TScope _))
+                    _taskCompletionSource.TrySetResult(context);
+                else
+                    _taskCompletionSource.TrySetException(new PayloadException("Service Provider not found"));
+
+                return next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+        }
+
+
+        protected class MessageFilter<TMessage, TScope> :
+            IFilter<ConsumeContext<TMessage>>
+            where TMessage : class
+            where TScope : class
+        {
+            readonly TaskCompletionSource<ConsumeContext<TMessage>> _taskCompletionSource;
+
+            public MessageFilter(TaskCompletionSource<ConsumeContext<TMessage>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
+            {
+                if (context.TryGetPayload(out TScope _))
+                    _taskCompletionSource.TrySetException(new PayloadException("Service Provider should not be present"));
+                else
+                    _taskCompletionSource.TrySetResult(context);
+
+                return next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+        }
+    }
 }
