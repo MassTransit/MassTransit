@@ -23,7 +23,8 @@ namespace MassTransit
             if (lifetimeScopeProvider == null)
                 throw new ArgumentNullException(nameof(lifetimeScopeProvider));
 
-            var observer = new ScopedConsumePipeSpecificationObserver(configurator, filterType, lifetimeScopeProvider);
+            configurator.ConnectConsumerConfigurationObserver(new ScopedConsumerConsumePipeSpecificationObserver(filterType, lifetimeScopeProvider));
+            configurator.ConnectSagaConfigurationObserver(new ScopedSagaConsumePipeSpecificationObserver(filterType, lifetimeScopeProvider));
         }
 
         /// <summary>

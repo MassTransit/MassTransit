@@ -1,6 +1,7 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 {
     using System;
+    using System.Threading.Tasks;
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Scoping.Filters;
@@ -20,8 +21,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 
         public IFilterContextScope<TContext> Create(TContext context)
         {
-            var scope = new DependencyInjectionFilterContextScope(context, _serviceProvider);
-            return scope;
+            return new DependencyInjectionFilterContextScope(context, _serviceProvider);
         }
 
 
@@ -36,9 +36,11 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
                 _scope = context.TryGetPayload(out IServiceProvider provider) ? new NoopScope(provider) : serviceProvider.CreateScope();
             }
 
-            public void Dispose()
+            public ValueTask DisposeAsync()
             {
                 _scope.Dispose();
+
+                return default;
             }
 
             public IFilter<TContext> Filter => _scope.ServiceProvider.GetService<TFilter>();

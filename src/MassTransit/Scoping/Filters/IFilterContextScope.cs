@@ -5,7 +5,7 @@ namespace MassTransit.Scoping.Filters
 
 
     public interface IFilterContextScope<TContext> :
-        IDisposable
+        IAsyncDisposable
         where TContext : class, PipeContext
     {
         IFilter<TContext> Filter { get; }

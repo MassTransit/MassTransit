@@ -8,16 +8,17 @@ namespace MassTransit.Scoping.Filters
         IFilter<TContext>
         where TContext : class, PipeContext
     {
-        readonly IFilterContextScopeProvider<TContext> _filterContextScopeProvider;
+        readonly IFilterContextScopeProvider<TContext> _scopeProvider;
 
-        public ScopedFilter(IFilterContextScopeProvider<TContext> filterContextScopeProvider)
+        public ScopedFilter(IFilterContextScopeProvider<TContext> scopeProvider)
         {
-            _filterContextScopeProvider = filterContextScopeProvider;
+            _scopeProvider = scopeProvider;
         }
 
         public async Task Send(TContext context, IPipe<TContext> next)
         {
-            using IFilterContextScope<TContext> scope = _filterContextScopeProvider.Create(context);
+            await using IFilterContextScope<TContext> scope = _scopeProvider.Create(context);
+
             await scope.Filter.Send(scope.Context, next).ConfigureAwait(false);
         }
 

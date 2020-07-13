@@ -21,7 +21,9 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(registration));
 
             var provider = registration.GetRequiredService<IServiceProvider>();
-            var observer = new ScopedConsumePipeSpecificationObserver(configurator, filterType, provider);
+
+            configurator.ConnectConsumerConfigurationObserver(new ScopedConsumerConsumePipeSpecificationObserver(filterType, provider));
+            configurator.ConnectSagaConfigurationObserver(new ScopedSagaConsumePipeSpecificationObserver(filterType, provider));
         }
 
         /// <summary>
