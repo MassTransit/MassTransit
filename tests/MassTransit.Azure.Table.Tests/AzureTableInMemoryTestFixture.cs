@@ -1,10 +1,13 @@
 namespace MassTransit.Azure.Table.Tests
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
     using NUnit.Framework;
+    using Quartz;
+    using Scheduling;
     using TestFramework;
 
 
@@ -14,14 +17,32 @@ namespace MassTransit.Azure.Table.Tests
         protected readonly string ConnectionString;
         protected readonly CloudTable TestCloudTable;
         protected readonly string TestTableName;
+        readonly Lazy<IMessageScheduler> _messageScheduler;
+        IScheduler _scheduler;
 
         public AzureTableInMemoryTestFixture()
         {
+            QuartzAddress = new Uri("loopback://localhost/quartz");
             ConnectionString = Configuration.StorageAccount;
             TestTableName = "azuretabletests";
             var storageAccount = CloudStorageAccount.Parse(ConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
             TestCloudTable = tableClient.GetTableReference(TestTableName);
+            _messageScheduler = new Lazy<IMessageScheduler>(() =>
+                new MessageScheduler(new EndpointScheduleMessageProvider(() => GetSendEndpoint(QuartzAddress)), Bus.Topology));
+        }
+
+        protected Uri QuartzAddress { get; }
+
+        protected ISendEndpoint QuartzEndpoint { get; set; }
+
+        protected IMessageScheduler Scheduler => _messageScheduler.Value;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseInMemoryScheduler(out _scheduler);
+
+            base.ConfigureInMemoryBus(configurator);
         }
 
         public IEnumerable<T> GetRecords<T>()
@@ -41,6 +62,8 @@ namespace MassTransit.Azure.Table.Tests
             TestCloudTable.CreateIfNotExists();
 
             IEnumerable<DynamicTableEntity> entities = GetTableEntities();
+
+            QuartzEndpoint = await GetSendEndpoint(QuartzAddress);
 
             foreach (IGrouping<string, DynamicTableEntity> key in entities.GroupBy(x => x.PartitionKey))
             {
