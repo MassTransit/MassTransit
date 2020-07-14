@@ -59,5 +59,11 @@ namespace MassTransit.JobService.Configuration
         /// Timeout to wait for a job to start
         /// </summary>
         TimeSpan StartJobTimeout { set; }
+
+        /// <summary>
+        /// If specified, overrides the default saga partition count to reduce conflicts when using optimistic concurrency.
+        /// If using a saga repository with pessimistic concurrency, this is not recommended.
+        /// </summary>
+        int? SagaPartitionCount { set; }
     }
 }

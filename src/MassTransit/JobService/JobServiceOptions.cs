@@ -93,6 +93,12 @@ namespace MassTransit.JobService
         /// </summary>
         public TimeSpan StatusCheckInterval { get; set; }
 
+        /// <summary>
+        /// If specified, overrides the default saga partition count to reduce conflicts when using optimistic concurrency.
+        /// If using a saga repository with pessimistic concurrency, this is not recommended.
+        /// </summary>
+        public int? SagaPartitionCount { get; set; }
+
         IEnumerable<ValidationResult> ISpecification.Validate()
         {
             if (SlotWaitTime < TimeSpan.FromSeconds(1))
