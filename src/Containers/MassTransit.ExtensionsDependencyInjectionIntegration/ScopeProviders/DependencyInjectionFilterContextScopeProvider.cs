@@ -33,7 +33,11 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             public DependencyInjectionFilterContextScope(TContext context, IServiceProvider serviceProvider)
             {
                 Context = context;
-                _scope = context.TryGetPayload(out IServiceProvider provider) ? new NoopScope(provider) : serviceProvider.CreateScope();
+                _scope = context.TryGetPayload(out IServiceProvider provider)
+                    ? new NoopScope(provider)
+                    : context.TryGetPayload(out ConsumeContext consumeContext) && consumeContext.TryGetPayload(out provider)
+                        ? new NoopScope(provider)
+                        : serviceProvider.CreateScope();
             }
 
             public ValueTask DisposeAsync()
@@ -43,7 +47,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
                 return default;
             }
 
-            public IFilter<TContext> Filter => _scope.ServiceProvider.GetService<TFilter>();
+            public IFilter<TContext> Filter => _scope.ServiceProvider.GetRequiredService<TFilter>();
 
             public TContext Context { get; }
 

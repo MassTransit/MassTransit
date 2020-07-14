@@ -10,6 +10,7 @@
     using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
+    using Testing;
     using Util;
 
 
@@ -103,6 +104,181 @@
             public Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
             {
                 _taskCompletionSource.TrySetResult(_myId);
+                return next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+        }
+    }
+
+
+    public abstract class Common_Consume_FilterScope :
+        InMemoryTestFixture
+    {
+        protected readonly TaskCompletionSource<ScopedContext> ScopedContextSource;
+        protected readonly TaskCompletionSource<ConsumeContext<EasyA>> EasyASource;
+        protected readonly TaskCompletionSource<ConsumeContext<EasyB>> EasyBSource;
+
+        protected Common_Consume_FilterScope()
+        {
+            ScopedContextSource = GetTask<ScopedContext>();
+            EasyASource = GetTask<ConsumeContext<EasyA>>();
+            EasyBSource = GetTask<ConsumeContext<EasyB>>();
+        }
+
+        protected abstract IBusRegistrationContext Registration { get; }
+
+        [Test]
+        public async Task Should_use_the_same_scope_for_consume_and_send()
+        {
+            await InputQueueSendEndpoint.Send<EasyA>(new {InVar.CorrelationId});
+
+            await EasyASource.Task;
+            await EasyBSource.Task;
+
+            ScopedContext context = await ScopedContextSource.Task.OrCanceled(InactivityToken);
+
+            await context.ConsumeContext.Task.OrCanceled(InactivityToken);
+
+            await context.ConsumeContextEasyA.Task.OrCanceled(InactivityToken);
+
+            await context.SendContext.Task.OrCanceled(InactivityToken);
+
+            Assert.ThrowsAsync<TimeoutException>(async () => await context.ConsumeContextEasyB.Task.OrTimeout(s: 2));
+        }
+
+        protected abstract void ConfigureFilters(IInMemoryReceiveEndpointConfigurator configurator);
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            ConfigureFilters(configurator);
+
+            configurator.ConfigureConsumer<EasyAConsumer>(Registration);
+            configurator.ConfigureConsumer<EasyBConsumer>(Registration);
+        }
+
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<EasyAConsumer>();
+            configurator.AddConsumer<EasyBConsumer>();
+            configurator.AddBus(provider => BusControl);
+        }
+
+
+        public class EasyA
+        {
+            public Guid CorrelationId { get; set; }
+        }
+
+
+        public class EasyB
+        {
+            public Guid CorrelationId { get; set; }
+        }
+
+
+        protected class EasyAConsumer :
+            IConsumer<EasyA>
+        {
+            readonly TaskCompletionSource<ConsumeContext<EasyA>> _received;
+            readonly ScopedContext _scopedContext;
+
+            public EasyAConsumer(TaskCompletionSource<ConsumeContext<EasyA>> received, ScopedContext scopedContext)
+            {
+                _received = received;
+                _scopedContext = scopedContext;
+            }
+
+            public async Task Consume(ConsumeContext<EasyA> context)
+            {
+                await context.Send(context.ReceiveContext.InputAddress, new EasyB());
+
+                _received.TrySetResult(context);
+                _scopedContext.ConsumeContextEasyA.TrySetResult(context);
+            }
+        }
+
+
+        protected class EasyBConsumer :
+            IConsumer<EasyB>
+        {
+            readonly TaskCompletionSource<ConsumeContext<EasyB>> _received;
+            readonly ScopedContext _scopedContext;
+
+            public EasyBConsumer(TaskCompletionSource<ConsumeContext<EasyB>> received, ScopedContext scopedContext)
+            {
+                _received = received;
+                _scopedContext = scopedContext;
+            }
+
+            public async Task Consume(ConsumeContext<EasyB> context)
+            {
+                _received.TrySetResult(context);
+                _scopedContext.ConsumeContextEasyB.TrySetResult(context);
+            }
+        }
+
+
+        public class ScopedContext
+        {
+            public ScopedContext(TaskCompletionSource<ScopedContext> taskCompletionSource, AsyncTestHarness harness)
+            {
+                ConsumeContext = harness.GetTask<ConsumeContext>();
+                ConsumeContextEasyA = harness.GetTask<ConsumeContext<EasyA>>();
+                ConsumeContextEasyB = harness.GetTask<ConsumeContext<EasyB>>();
+                SendContext = harness.GetTask<SendContext>();
+
+                taskCompletionSource.TrySetResult(this);
+            }
+
+            public TaskCompletionSource<ConsumeContext> ConsumeContext { get; }
+            public TaskCompletionSource<ConsumeContext<EasyA>> ConsumeContextEasyA { get; }
+            public TaskCompletionSource<ConsumeContext<EasyB>> ConsumeContextEasyB { get; }
+            public TaskCompletionSource<SendContext> SendContext { get; }
+        }
+
+
+        protected class ScopedConsumeFilter<T> :
+            IFilter<ConsumeContext<T>>
+            where T : class
+        {
+            readonly ScopedContext _scopedContext;
+
+            public ScopedConsumeFilter(ScopedContext scopedContext)
+            {
+                _scopedContext = scopedContext;
+            }
+
+            public Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
+            {
+                _scopedContext.ConsumeContext.TrySetResult(context);
+
+                return next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+        }
+
+
+        protected class ScopedSendFilter<T> :
+            IFilter<SendContext<T>>
+            where T : class
+        {
+            readonly ScopedContext _scopedContext;
+
+            public ScopedSendFilter(ScopedContext scopedContext)
+            {
+                _scopedContext = scopedContext;
+            }
+
+            public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
+            {
+                _scopedContext.SendContext.TrySetResult(context);
+
                 return next.Send(context);
             }
 

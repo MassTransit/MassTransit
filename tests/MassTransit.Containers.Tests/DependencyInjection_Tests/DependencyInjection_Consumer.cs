@@ -6,7 +6,6 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Scenarios;
-    using TestFramework.Sagas;
 
 
     [TestFixture]
@@ -97,6 +96,36 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
         protected override void ConfigureFilter(IConsumePipeConfigurator configurator)
         {
             DependencyInjectionFilterExtensions.UseConsumeFilter(configurator, typeof(ScopedFilter<>), Registration);
+        }
+
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
+    public class DependencyInjection_Consume_FilterScope :
+        Common_Consume_FilterScope
+    {
+        readonly IServiceProvider _provider;
+
+        public DependencyInjection_Consume_FilterScope()
+        {
+            _provider = new ServiceCollection()
+                .AddSingleton(EasyASource)
+                .AddSingleton(EasyBSource)
+                .AddSingleton(ScopedContextSource)
+                .AddSingleton(AsyncTestHarness)
+                .AddScoped<ScopedContext>()
+                .AddScoped(typeof(ScopedConsumeFilter<>))
+                .AddScoped(typeof(ScopedSendFilter<>))
+                .AddMassTransit(ConfigureRegistration)
+                .BuildServiceProvider();
+        }
+
+        protected override void ConfigureFilters(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            DependencyInjectionFilterExtensions.UseConsumeFilter(configurator, typeof(ScopedConsumeFilter<>), Registration);
+            DependencyInjectionFilterExtensions.UseSendFilter(configurator, typeof(ScopedSendFilter<>), Registration);
         }
 
         protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();

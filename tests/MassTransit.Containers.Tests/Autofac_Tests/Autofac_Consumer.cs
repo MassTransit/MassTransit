@@ -135,6 +135,36 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
 
     [TestFixture]
+    public class Autofac_Consume_FilterScope :
+        Common_Consume_FilterScope
+    {
+        readonly IContainer _container;
+
+        public Autofac_Consume_FilterScope()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterType<ScopedContext>().InstancePerLifetimeScope();
+            builder.RegisterGeneric(typeof(ScopedConsumeFilter<>)).InstancePerLifetimeScope();
+            builder.RegisterGeneric(typeof(ScopedSendFilter<>)).InstancePerLifetimeScope();
+            builder.RegisterInstance(EasyASource);
+            builder.RegisterInstance(EasyBSource);
+            builder.RegisterInstance(ScopedContextSource);
+            builder.RegisterInstance(AsyncTestHarness);
+            builder.AddMassTransit(ConfigureRegistration);
+            _container = builder.Build();
+        }
+
+        protected override void ConfigureFilters(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            AutofacFilterExtensions.UseConsumeFilter(configurator, typeof(ScopedConsumeFilter<>), Registration);
+            AutofacFilterExtensions.UseSendFilter(configurator, typeof(ScopedSendFilter<>), Registration);
+        }
+
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class Autofac_Consumer_FilterOrder :
         Common_Consumer_FilterOrder
     {
@@ -148,8 +178,8 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             builder.RegisterInstance(ConsumerMessageCompletion);
             builder.RegisterType<MessageFilter<EasyMessage, ILifetimeScope>>().As<IFilter<ConsumeContext<EasyMessage>>>();
             builder.RegisterType<ConsumerFilter<EasyConsumer, ILifetimeScope>>().As<IFilter<ConsumerConsumeContext<EasyConsumer>>>();
-            builder.RegisterType<ConsumerMessageFilter<EasyConsumer, EasyMessage, ILifetimeScope>>().As<IFilter<ConsumerConsumeContext<EasyConsumer,
-            EasyMessage>>>();
+            builder.RegisterType<ConsumerMessageFilter<EasyConsumer, EasyMessage, ILifetimeScope>>()
+                .As<IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>>>();
             builder.AddMassTransit(ConfigureRegistration);
 
             _container = builder.Build();
@@ -178,5 +208,4 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             return _container.Resolve<IFilter<ConsumeContext<EasyMessage>>>();
         }
     }
-
 }

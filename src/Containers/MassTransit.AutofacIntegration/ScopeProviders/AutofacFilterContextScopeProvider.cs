@@ -37,7 +37,11 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
             public AutofacFilterContextScope(TContext context, ILifetimeScope lifetimeScope)
             {
                 Context = context;
-                _lifetimeScope = context.TryGetPayload(out ILifetimeScope scope) ? new NoopLifetimeScope(scope) : lifetimeScope.BeginLifetimeScope();
+                _lifetimeScope = context.TryGetPayload(out ILifetimeScope scope)
+                    ? new NoopLifetimeScope(scope)
+                    : context.TryGetPayload(out ConsumeContext consumeContext) && consumeContext.TryGetPayload(out scope)
+                        ? new NoopLifetimeScope(scope)
+                        : lifetimeScope.BeginLifetimeScope();
             }
 
             public ValueTask DisposeAsync()
