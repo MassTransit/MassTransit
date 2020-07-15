@@ -101,6 +101,11 @@ namespace MassTransit.JobService.Configuration
             set => _options.SagaPartitionCount = value;
         }
 
+        public bool FinalizeCompleted
+        {
+            set => _options.FinalizeCompleted = value;
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             ISpecification turnoutOptions = _options;
@@ -120,8 +125,6 @@ namespace MassTransit.JobService.Configuration
 
             _instanceConfigurator.ReceiveEndpoint(_options.JobStateSagaEndpointName, e =>
             {
-                e.AddDependency(_instanceConfigurator);
-
                 e.UseMessageRetry(r => r.Intervals(100, 1000, 2000, 5000));
                 e.UseInMemoryOutbox();
 
@@ -154,8 +157,6 @@ namespace MassTransit.JobService.Configuration
 
             _instanceConfigurator.ReceiveEndpoint(_options.JobAttemptSagaEndpointName, e =>
             {
-                e.AddDependency(_instanceConfigurator);
-
                 e.UseMessageRetry(r => r.Intervals(100, 1000, 2000, 5000));
                 e.UseInMemoryOutbox();
 
@@ -182,8 +183,6 @@ namespace MassTransit.JobService.Configuration
 
             _instanceConfigurator.ReceiveEndpoint(_options.JobTypeSagaEndpointName, e =>
             {
-                e.AddDependency(_instanceConfigurator);
-
                 e.UseMessageRetry(r => r.Intervals(100, 200, 300, 500, 1000, 2000, 5000));
                 e.UseInMemoryOutbox();
 
@@ -206,7 +205,6 @@ namespace MassTransit.JobService.Configuration
 
             _instanceConfigurator.ConnectEndpointConfigurationObserver(new JobServiceEndpointConfigurationObserver(_options, cfg =>
             {
-                cfg.AddDependency(_instanceConfigurator);
                 cfg.AddDependency(_jobTypeSagaEndpointConfigurator);
                 cfg.AddDependency(_jobSagaEndpointConfigurator);
                 cfg.AddDependency(_jobAttemptSagaEndpointConfigurator);

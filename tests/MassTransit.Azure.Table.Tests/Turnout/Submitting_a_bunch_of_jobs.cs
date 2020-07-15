@@ -87,6 +87,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
                 {
                     x.SlotWaitTime = TimeSpan.FromSeconds(1);
                     x.SagaPartitionCount = 16;
+                    x.FinalizeCompleted = true;
 
                     x.UseAzureTableSagaRepository(() => TestCloudTable);
                 });

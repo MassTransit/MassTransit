@@ -31,6 +31,8 @@ namespace MassTransit.JobService.Components.StateMachines
             Event(() => AttemptFaulted, x => x.CorrelateById(m => m.Message.JobId));
             Event(() => AttemptStarted, x => x.CorrelateById(m => m.Message.JobId));
 
+            Event(() => JobCompleted, x => x.CorrelateById(m => m.Message.JobId));
+
             Schedule(() => JobSlotWaitElapsed, instance => instance.JobSlotWaitToken, x =>
             {
                 x.Delay = options.SlotWaitTime;
@@ -96,7 +98,9 @@ namespace MassTransit.JobService.Components.StateMachines
 
             During(Completed,
                 When(AttemptCompleted)
-                    .PublishJobCompleted());
+                    .PublishJobCompleted(),
+                When(JobCompleted)
+                    .If(_ => options.FinalizeCompleted, x => x.Finalize()));
 
             During(StartingJobAttempt, WaitingToStart, Started,
                 When(AttemptFaulted)
@@ -145,6 +149,8 @@ namespace MassTransit.JobService.Components.StateMachines
             WhenEnter(Canceled, x => x.SendJobSlotReleased(options.JobTypeSagaEndpointAddress));
             WhenEnter(Faulted, x => x.SendJobSlotReleased(options.JobTypeSagaEndpointAddress));
             WhenEnter(WaitingToRetry, x => x.SendJobSlotReleased(options.JobTypeSagaEndpointAddress));
+
+            SetCompletedWhenFinalized();
         }
 
         public Uri JobTypeSagaEndpointAddress { get; }
@@ -176,6 +182,8 @@ namespace MassTransit.JobService.Components.StateMachines
         public Event<JobAttemptCompleted> AttemptCompleted { get; }
         public Event<JobAttemptCanceled> AttemptCanceled { get; }
         public Event<JobAttemptFaulted> AttemptFaulted { get; }
+
+        public Event<JobCompleted> JobCompleted { get; }
 
         public Schedule<JobSaga, JobSlotWaitElapsed> JobSlotWaitElapsed { get; }
 

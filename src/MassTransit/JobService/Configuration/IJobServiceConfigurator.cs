@@ -65,5 +65,10 @@ namespace MassTransit.JobService.Configuration
         /// If using a saga repository with pessimistic concurrency, this is not recommended.
         /// </summary>
         int? SagaPartitionCount { set; }
+
+        /// <summary>
+        /// If true, completed jobs are finalized, removing them from the saga repository
+        /// </summary>
+        bool FinalizeCompleted { set; }
     }
 }

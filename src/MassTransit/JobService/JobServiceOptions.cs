@@ -99,6 +99,11 @@ namespace MassTransit.JobService
         /// </summary>
         public int? SagaPartitionCount { get; set; }
 
+        /// <summary>
+        /// If true, completed jobs will be finalized, removing the saga from the repository
+        /// </summary>
+        public bool FinalizeCompleted { get; set; }
+
         IEnumerable<ValidationResult> ISpecification.Validate()
         {
             if (SlotWaitTime < TimeSpan.FromSeconds(1))
