@@ -64,15 +64,15 @@ namespace MassTransit.Registration
             {
                 ConsumerRegistrationCache.Register(type, Registrar);
 
-                if (consumerDefinitionType != null)
-                    ConsumerDefinitionRegistrationCache.Register(consumerDefinitionType, Registrar);
-
                 return new ConsumerRegistration<T>();
             }
 
             var registration = _consumers.GetOrAdd(typeof(T), ValueFactory);
 
             registration.AddConfigureAction(configure);
+
+            if (consumerDefinitionType != null)
+                ConsumerDefinitionRegistrationCache.Register(consumerDefinitionType, Registrar);
 
             return new ConsumerRegistrationConfigurator<T>(this);
         }
@@ -89,13 +89,13 @@ namespace MassTransit.Registration
             {
                 ConsumerRegistrationCache.Register(type, Registrar);
 
-                if (consumerDefinitionType != null)
-                    ConsumerDefinitionRegistrationCache.Register(consumerDefinitionType, Registrar);
-
                 return (IConsumerRegistration)Activator.CreateInstance(typeof(ConsumerRegistration<>).MakeGenericType(type));
             }
 
             _consumers.GetOrAdd(consumerType, ValueFactory);
+
+            if (consumerDefinitionType != null)
+                ConsumerDefinitionRegistrationCache.Register(consumerDefinitionType, Registrar);
         }
 
         public ISagaRegistrationConfigurator<T> AddSaga<T>(Action<ISagaConfigurator<T>> configure)
@@ -114,15 +114,15 @@ namespace MassTransit.Registration
             {
                 SagaRegistrationCache.Register(type, Registrar);
 
-                if (sagaDefinitionType != null)
-                    SagaDefinitionRegistrationCache.Register(sagaDefinitionType, Registrar);
-
                 return new SagaRegistration<T>();
             }
 
             var registration = _sagas.GetOrAdd(typeof(T), ValueFactory);
 
             registration.AddConfigureAction(configure);
+
+            if (sagaDefinitionType != null)
+                SagaDefinitionRegistrationCache.Register(sagaDefinitionType, Registrar);
 
             return new SagaRegistrationConfigurator<T>(this, Registrar);
         }
@@ -132,7 +132,10 @@ namespace MassTransit.Registration
             if (sagaType.HasInterface<SagaStateMachineInstance>())
                 throw new ArgumentException($"State machine sagas must be registered using AddSagaStateMachine: {TypeMetadataCache.GetShortName(sagaType)}");
 
-            _sagas.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, sagaDefinitionType, Registrar));
+            _sagas.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, Registrar));
+
+            if (sagaDefinitionType != null)
+                SagaDefinitionRegistrationCache.Register(sagaDefinitionType, Registrar);
         }
 
         public ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(Action<ISagaConfigurator<T>> configure = null)
@@ -150,15 +153,15 @@ namespace MassTransit.Registration
             {
                 SagaStateMachineRegistrationCache.Register(typeof(TStateMachine), Registrar);
 
-                if (sagaDefinitionType != null)
-                    SagaDefinitionRegistrationCache.Register(sagaDefinitionType, Registrar);
-
                 return new SagaStateMachineRegistration<T>();
             }
 
             var registration = _sagas.GetOrAdd(typeof(T), ValueFactory);
 
             registration.AddConfigureAction(configure);
+
+            if (sagaDefinitionType != null)
+                SagaDefinitionRegistrationCache.Register(sagaDefinitionType, Registrar);
 
             return new SagaRegistrationConfigurator<T>(this, Registrar);
         }
@@ -185,15 +188,15 @@ namespace MassTransit.Registration
             {
                 ExecuteActivityRegistrationCache.Register(type, Registrar);
 
-                if (executeActivityDefinitionType != null)
-                    ExecuteActivityDefinitionRegistrationCache.Register(executeActivityDefinitionType, Registrar);
-
                 return new ExecuteActivityRegistration<TActivity, TArguments>();
             }
 
             var registration = _executeActivities.GetOrAdd(typeof(TActivity), ValueFactory);
 
             registration.AddConfigureAction(configure);
+
+            if (executeActivityDefinitionType != null)
+                ExecuteActivityDefinitionRegistrationCache.Register(executeActivityDefinitionType, Registrar);
 
             return new ExecuteActivityRegistrationConfigurator<TActivity, TArguments>(this);
         }
@@ -225,9 +228,6 @@ namespace MassTransit.Registration
             {
                 ActivityRegistrationCache.Register(type, Registrar);
 
-                if (activityDefinitionType != null)
-                    ActivityDefinitionRegistrationCache.Register(activityDefinitionType, Registrar);
-
                 return new ActivityRegistration<TActivity, TArguments, TLog>();
             }
 
@@ -235,6 +235,9 @@ namespace MassTransit.Registration
 
             registration.AddConfigureAction(configureExecute);
             registration.AddConfigureAction(configureCompensate);
+
+            if (activityDefinitionType != null)
+                ActivityDefinitionRegistrationCache.Register(activityDefinitionType, Registrar);
 
             return new ActivityRegistrationConfigurator<TActivity, TArguments, TLog>(this);
         }

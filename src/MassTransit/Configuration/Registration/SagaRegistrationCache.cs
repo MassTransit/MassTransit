@@ -11,9 +11,9 @@ namespace MassTransit.Registration
             Cached.Instance.GetOrAdd(sagaType).Register(registrar);
         }
 
-        public static ISagaRegistration CreateRegistration(Type sagaType, Type sagaDefinitionType, IContainerRegistrar registrar)
+        public static ISagaRegistration CreateRegistration(Type sagaType, IContainerRegistrar registrar)
         {
-            return Cached.Instance.GetOrAdd(sagaType).CreateRegistration(sagaDefinitionType, registrar);
+            return Cached.Instance.GetOrAdd(sagaType).CreateRegistration(registrar);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace MassTransit.Registration
         interface CachedRegistration
         {
             void Register(IContainerRegistrar registrar);
-            ISagaRegistration CreateRegistration(Type sagaDefinitionType, IContainerRegistrar registrar);
+            ISagaRegistration CreateRegistration(IContainerRegistrar registrar);
             void DoNotRegister();
         }
 
@@ -62,12 +62,9 @@ namespace MassTransit.Registration
                 _registrar.RegisterSaga<T>();
             }
 
-            public ISagaRegistration CreateRegistration(Type sagaDefinitionType, IContainerRegistrar registrar)
+            public ISagaRegistration CreateRegistration(IContainerRegistrar registrar)
             {
                 Register(registrar);
-
-                if (sagaDefinitionType != null)
-                    SagaDefinitionRegistrationCache.Register(sagaDefinitionType, registrar);
 
                 return new SagaRegistration<T>();
             }
