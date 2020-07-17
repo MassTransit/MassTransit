@@ -143,7 +143,7 @@ namespace MassTransit.QuartzIntegration
         /// <param name="bundle"></param>
         string CreatePayloadHeaderString(TriggerFiredBundle bundle)
         {
-            var timeHeaders = new Dictionary<string, DateTimeOffset?> {{MessageHeaders.Quartz.Sent, bundle.FireTimeUtc}};
+            var timeHeaders = new Dictionary<string, object> {{MessageHeaders.Quartz.Sent, bundle.FireTimeUtc}};
             if (bundle.ScheduledFireTimeUtc.HasValue)
                 timeHeaders.Add(MessageHeaders.Quartz.Scheduled, bundle.ScheduledFireTimeUtc);
 
@@ -152,6 +152,9 @@ namespace MassTransit.QuartzIntegration
 
             if (bundle.PrevFireTimeUtc.HasValue)
                 timeHeaders.Add(MessageHeaders.Quartz.PreviousSent, bundle.PrevFireTimeUtc);
+
+            if (bundle.JobDetail.JobDataMap.TryGetValue("TokenId", out var tokenId))
+                timeHeaders.Add(MessageHeaders.SchedulingTokenId, tokenId);
 
             return JsonConvert.SerializeObject(timeHeaders);
         }

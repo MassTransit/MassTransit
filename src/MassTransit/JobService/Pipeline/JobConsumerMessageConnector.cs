@@ -18,7 +18,7 @@ namespace MassTransit.JobService.Pipeline
         where TConsumer : class, IJobConsumer<TJob>
         where TJob : class
     {
-        readonly IConsumerConnector _cancelJobConsumerConnector;
+        readonly IConsumerConnector _superviseJobConsumerConnector;
         readonly IConsumerConnector _startJobConsumerConnector;
         readonly IConsumerConnector _submitJobConsumerConnector;
 
@@ -26,7 +26,7 @@ namespace MassTransit.JobService.Pipeline
         {
             _submitJobConsumerConnector = ConsumerConnectorCache<SubmitJobConsumer<TJob>>.Connector;
             _startJobConsumerConnector = ConsumerConnectorCache<StartJobConsumer<TJob>>.Connector;
-            _cancelJobConsumerConnector = ConsumerConnectorCache<CancelJobConsumer<TJob>>.Connector;
+            _superviseJobConsumerConnector = ConsumerConnectorCache<SuperviseJobConsumer<TJob>>.Connector;
         }
 
         public Type MessageType => typeof(TJob);
@@ -54,7 +54,7 @@ namespace MassTransit.JobService.Pipeline
             var startJobHandle = ConnectStartJobConsumer(consumePipe, turnoutSpecification.StartJobSpecification, options, jobServiceOptions.JobService,
                 CreateJobPipe(consumerFactory, specification));
 
-            var cancelJobHandle = ConnectCancelJobConsumer(consumePipe, turnoutSpecification.CancelJobSpecification, jobServiceOptions.JobService);
+            var cancelJobHandle = ConnectSuperviseJobConsumer(consumePipe, turnoutSpecification.SuperviseJobSpecification, jobServiceOptions.JobService);
 
             return new MultipleConnectHandle(submitJobHandle, startJobHandle, cancelJobHandle);
         }
@@ -93,12 +93,12 @@ namespace MassTransit.JobService.Pipeline
             return _startJobConsumerConnector.ConnectConsumer(consumePipe, consumerFactory, specification);
         }
 
-        ConnectHandle ConnectCancelJobConsumer(IConsumePipeConnector consumePipe, IConsumerSpecification<CancelJobConsumer<TJob>> specification,
+        ConnectHandle ConnectSuperviseJobConsumer(IConsumePipeConnector consumePipe, IConsumerSpecification<SuperviseJobConsumer<TJob>> specification,
             IJobService jobService)
         {
-            var consumerFactory = new DelegateConsumerFactory<CancelJobConsumer<TJob>>(() => new CancelJobConsumer<TJob>(jobService));
+            var consumerFactory = new DelegateConsumerFactory<SuperviseJobConsumer<TJob>>(() => new SuperviseJobConsumer<TJob>(jobService));
 
-            return _cancelJobConsumerConnector.ConnectConsumer(consumePipe, consumerFactory, specification);
+            return _superviseJobConsumerConnector.ConnectConsumer(consumePipe, consumerFactory, specification);
         }
     }
 }

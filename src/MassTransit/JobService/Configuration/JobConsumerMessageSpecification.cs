@@ -18,14 +18,14 @@ namespace MassTransit.JobService.Configuration
     {
         readonly IConsumerSpecification<SubmitJobConsumer<TJob>> _submitJobSpecification;
         readonly IConsumerSpecification<StartJobConsumer<TJob>> _startJobSpecification;
-        readonly IConsumerSpecification<CancelJobConsumer<TJob>> _cancelJobSpecification;
+        readonly IConsumerSpecification<SuperviseJobConsumer<TJob>> _superviseJobSpecification;
         readonly ConsumerMessageSpecification<TConsumer, TJob> _consumerSpecification;
 
         public JobConsumerMessageSpecification()
         {
             _submitJobSpecification = ConsumerConnectorCache<SubmitJobConsumer<TJob>>.Connector.CreateConsumerSpecification<SubmitJobConsumer<TJob>>();
             _startJobSpecification = ConsumerConnectorCache<StartJobConsumer<TJob>>.Connector.CreateConsumerSpecification<StartJobConsumer<TJob>>();
-            _cancelJobSpecification = ConsumerConnectorCache<CancelJobConsumer<TJob>>.Connector.CreateConsumerSpecification<CancelJobConsumer<TJob>>();
+            _superviseJobSpecification = ConsumerConnectorCache<SuperviseJobConsumer<TJob>>.Connector.CreateConsumerSpecification<SuperviseJobConsumer<TJob>>();
 
             _consumerSpecification = new ConsumerMessageSpecification<TConsumer, TJob>();
         }
@@ -34,7 +34,7 @@ namespace MassTransit.JobService.Configuration
 
         public IConsumerSpecification<StartJobConsumer<TJob>> StartJobSpecification => _startJobSpecification;
 
-        public IConsumerSpecification<CancelJobConsumer<TJob>> CancelJobSpecification => _cancelJobSpecification;
+        public IConsumerSpecification<SuperviseJobConsumer<TJob>> SuperviseJobSpecification => _superviseJobSpecification;
 
         public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer, TJob>> specification)
         {
@@ -49,7 +49,7 @@ namespace MassTransit.JobService.Configuration
         public IEnumerable<ValidationResult> Validate()
         {
             return _consumerSpecification.Validate()
-                .Concat(_cancelJobSpecification.Validate())
+                .Concat(_superviseJobSpecification.Validate())
                 .Concat(_startJobSpecification.Validate())
                 .Concat(_submitJobSpecification.Validate());
         }
@@ -87,7 +87,7 @@ namespace MassTransit.JobService.Configuration
         public ConnectHandle ConnectConsumerConfigurationObserver(IConsumerConfigurationObserver observer)
         {
             return new MultipleConnectHandle(_consumerSpecification.ConnectConsumerConfigurationObserver(observer),
-                _cancelJobSpecification.ConnectConsumerConfigurationObserver(observer),
+                _superviseJobSpecification.ConnectConsumerConfigurationObserver(observer),
                 _startJobSpecification.ConnectConsumerConfigurationObserver(observer),
                 _submitJobSpecification.ConnectConsumerConfigurationObserver(observer));
         }

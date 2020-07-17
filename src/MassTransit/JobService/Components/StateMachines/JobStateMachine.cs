@@ -203,7 +203,7 @@ namespace MassTransit.JobService.Components.StateMachines
     }
 
 
-    static class TurnoutJobStateMachineBehaviorExtensions
+    static class JobStateMachineBehaviorExtensions
     {
         public static EventActivityBinder<JobSaga, T> RequestJobSlot<T>(this EventActivityBinder<JobSaga, T> binder,
             JobStateMachine machine)
@@ -223,7 +223,7 @@ namespace MassTransit.JobService.Components.StateMachines
         {
             return binder.SendAsync(machine.JobAttemptSagaEndpointAddress, context => context.Init<StartJobAttempt>(new
                 {
-                    context.Data.JobId,
+                    JobId = context.Instance.CorrelationId,
                     context.Instance.AttemptId,
                     context.Instance.ServiceAddress,
                     context.Instance.RetryAttempt,
@@ -252,7 +252,7 @@ namespace MassTransit.JobService.Components.StateMachines
         {
             return binder.PublishAsync(context => context.Init<JobStarted>(new
             {
-                context.Data.JobId,
+                JobId = context.Instance.CorrelationId,
                 context.Data.AttemptId,
                 context.Data.RetryAttempt,
                 context.Data.Timestamp
@@ -263,10 +263,10 @@ namespace MassTransit.JobService.Components.StateMachines
         {
             return binder.PublishAsync(context => context.Init<JobCompleted>(new
             {
-                context.Data.JobId,
+                JobId = context.Instance.CorrelationId,
+                context.Instance.Job,
                 context.Data.Timestamp,
-                context.Data.Duration,
-                context.Data.Job
+                context.Data.Duration
             }));
         }
 
@@ -274,10 +274,10 @@ namespace MassTransit.JobService.Components.StateMachines
         {
             return binder.PublishAsync(context => context.Init<JobFaulted>(new
             {
-                context.Data.JobId,
+                JobId = context.Instance.CorrelationId,
+                context.Instance.Job,
                 context.Data.Exceptions,
-                context.Data.Timestamp,
-                context.Data.Job
+                context.Data.Timestamp
             }));
         }
 
@@ -285,7 +285,7 @@ namespace MassTransit.JobService.Components.StateMachines
         {
             return binder.PublishAsync(context => context.Init<JobCanceled>(new
             {
-                context.Data.JobId,
+                JobId = context.Instance.CorrelationId,
                 context.Data.Timestamp
             }));
         }
@@ -294,8 +294,8 @@ namespace MassTransit.JobService.Components.StateMachines
         {
             return binder.PublishAsync(context => context.Init<JobFaulted>(new
             {
-                context.Data.Message.JobId,
-                context.Data.Message.Job,
+                JobId = context.Instance.CorrelationId,
+                context.Instance.Job,
                 context.Data.Timestamp,
                 context.Data.Exceptions
             }));

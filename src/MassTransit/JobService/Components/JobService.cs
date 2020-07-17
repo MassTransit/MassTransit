@@ -32,7 +32,7 @@
             var removed = _jobs.TryRemove(jobId, out jobHandle);
             if (removed)
             {
-                LogContext.Debug?.Log("Removed job: {JobId} ({JobStatus})", jobId, jobHandle.Status);
+                LogContext.Debug?.Log("Removed job: {JobId} ({Status})", jobId, jobHandle.JobTask.Status);
 
                 return true;
             }
@@ -73,20 +73,20 @@
 
             foreach (var jobHandle in pendingJobs)
             {
-                if (jobHandle.Status == JobStatus.Created || jobHandle.Status == JobStatus.Running)
+                if (jobHandle.JobTask.IsCompleted)
+                    continue;
+
+                try
                 {
-                    try
-                    {
-                        LogContext.Debug?.Log("Cancelling job: {JobId}", jobHandle.JobId);
+                    LogContext.Debug?.Log("Canceling job: {JobId}", jobHandle.JobId);
 
-                        await jobHandle.Cancel().ConfigureAwait(false);
+                    await jobHandle.Cancel().ConfigureAwait(false);
 
-                        TryRemoveJob(jobHandle.JobId, out _);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogContext.Error?.Log(ex, "Cancel job faulted: {JobId}", jobHandle.JobId);
-                    }
+                    TryRemoveJob(jobHandle.JobId, out _);
+                }
+                catch (Exception ex)
+                {
+                    LogContext.Error?.Log(ex, "Cancel job faulted: {JobId}", jobHandle.JobId);
                 }
             }
         }

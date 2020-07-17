@@ -34,12 +34,12 @@ namespace MassTransit.HangfireIntegration
         {
             var message = new HangfireScheduledMessageData();
 
-            SetBaseProperties(message, context, context.Message.Destination);
+            SetBaseProperties(message, context, context.Message.Destination, context.Message.CorrelationId);
 
             return message;
         }
 
-        protected static void SetBaseProperties(HangfireScheduledMessageData message, ConsumeContext context, Uri destination)
+        protected static void SetBaseProperties(HangfireScheduledMessageData message, ConsumeContext context, Uri destination, Guid? tokenId = default)
         {
             message.DestinationAddress = destination?.ToString() ?? "";
             message.Body = ExtractBody(context.ReceiveContext.ContentType?.MediaType, context.ReceiveContext.GetBody(), destination);

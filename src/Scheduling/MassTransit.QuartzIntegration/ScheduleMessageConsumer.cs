@@ -33,7 +33,7 @@
 
             var jobKey = new JobKey(correlationId);
 
-            var jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey).ConfigureAwait(false);
+            var jobDetail = await CreateJobDetail(context, context.Message.Destination, jobKey, context.Message.CorrelationId).ConfigureAwait(false);
 
             var triggerKey = new TriggerKey(correlationId);
             var trigger = TriggerBuilder.Create()
@@ -178,33 +178,32 @@
 
         static string TranslateXmlBody(string body, string destination)
         {
-            using (var reader = new StringReader(body))
-            {
-                var document = XDocument.Load(reader);
+            using var reader = new StringReader(body);
 
-                var envelope = (from e in document.Descendants("envelope") select e).Single();
+            var document = XDocument.Load(reader);
 
-                var destinationAddress = (from a in envelope.Descendants("destinationAddress") select a).Single();
+            var envelope = (from e in document.Descendants("envelope") select e).Single();
 
-                var message = (from m in envelope.Descendants("message") select m).Single();
-                IEnumerable<XElement> messageType = from mt in envelope.Descendants("messageType") select mt;
+            var destinationAddress = (from a in envelope.Descendants("destinationAddress") select a).Single();
 
-                var payload = (from p in message.Descendants("payload") select p).Single();
-                IEnumerable<XElement> payloadType = from pt in message.Descendants("payloadType") select pt;
+            var message = (from m in envelope.Descendants("message") select m).Single();
+            IEnumerable<XElement> messageType = from mt in envelope.Descendants("messageType") select mt;
 
-                message.Remove();
-                messageType.Remove();
+            var payload = (from p in message.Descendants("payload") select p).Single();
+            IEnumerable<XElement> payloadType = from pt in message.Descendants("payloadType") select pt;
 
-                destinationAddress.Value = destination;
+            message.Remove();
+            messageType.Remove();
 
-                message = new XElement("message");
-                message.Add(payload.Descendants());
-                envelope.Add(message);
+            destinationAddress.Value = destination;
 
-                envelope.Add(payloadType.Select(x => new XElement("messageType", x.Value)));
+            message = new XElement("message");
+            message.Add(payload.Descendants());
+            envelope.Add(message);
 
-                return document.ToString(SaveOptions.DisableFormatting);
-            }
+            envelope.Add(payloadType.Select(x => new XElement("messageType", x.Value)));
+
+            return document.ToString(SaveOptions.DisableFormatting);
         }
     }
 }

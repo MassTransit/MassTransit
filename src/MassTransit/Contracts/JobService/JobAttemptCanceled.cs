@@ -1,7 +1,6 @@
 namespace MassTransit.Contracts.JobService
 {
     using System;
-    using System.Collections.Generic;
 
 
     public interface JobAttemptCanceled
@@ -10,6 +9,5 @@ namespace MassTransit.Contracts.JobService
         Guid AttemptId { get; }
         int RetryAttempt { get; }
         DateTime Timestamp { get; }
-        IDictionary<string, object> Job { get; }
     }
 }

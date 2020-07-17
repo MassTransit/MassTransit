@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit;
+    using MassTransit.Scheduling;
 
 
     public class UnscheduleActivity<TInstance> :
@@ -53,16 +54,21 @@
 
         async Task Execute(BehaviorContext<TInstance> context)
         {
-            var consumeContext = context.GetPayload<ConsumeContext>();
-
-            var schedulerContext = context.GetPayload<MessageSchedulerContext>();
-
             Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
             if (previousTokenId.HasValue)
             {
-                await schedulerContext.CancelScheduledSend(consumeContext.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
+                if (context.TryGetPayload(out ConsumeContext consumeContext))
+                {
+                    Guid? messageTokenId = consumeContext.GetSchedulingTokenId();
+                    if (!messageTokenId.HasValue || previousTokenId.Value != messageTokenId.Value)
+                    {
+                        var schedulerContext = context.GetPayload<MessageSchedulerContext>();
 
-                _schedule.SetTokenId(context.Instance, default);
+                        await schedulerContext.CancelScheduledSend(consumeContext.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
+
+                        _schedule.SetTokenId(context.Instance, default);
+                    }
+                }
             }
         }
     }

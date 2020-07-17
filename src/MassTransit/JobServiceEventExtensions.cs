@@ -8,48 +8,6 @@ namespace MassTransit
     public static class JobServiceEventExtensions
     {
         /// <summary>
-        /// Deserializes the job from the message
-        /// </summary>
-        /// <typeparam name="T">The job type</typeparam>
-        /// <param name="message">The message event</param>
-        /// <returns></returns>
-        public static T GetJob<T>(this JobAttemptFaulted message)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            return ObjectTypeDeserializer.Deserialize<T>(message.Job);
-        }
-
-        /// <summary>
-        /// Deserializes the job from the message
-        /// </summary>
-        /// <typeparam name="T">The job type</typeparam>
-        /// <param name="message">The message event</param>
-        /// <returns></returns>
-        public static T GetJob<T>(this JobAttemptCanceled message)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            return ObjectTypeDeserializer.Deserialize<T>(message.Job);
-        }
-
-        /// <summary>
-        /// Deserializes the job from the message
-        /// </summary>
-        /// <typeparam name="T">The job type</typeparam>
-        /// <param name="message">The message event</param>
-        /// <returns></returns>
-        public static T GetJob<T>(this JobAttemptCompleted message)
-        {
-            if (message == null)
-                throw new ArgumentNullException(nameof(message));
-
-            return ObjectTypeDeserializer.Deserialize<T>(message.Job);
-        }
-
-        /// <summary>
         /// Returns the job from the message
         /// </summary>
         /// <typeparam name="TJob"></typeparam>

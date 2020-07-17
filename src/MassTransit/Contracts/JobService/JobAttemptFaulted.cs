@@ -1,7 +1,6 @@
 namespace MassTransit.Contracts.JobService
 {
     using System;
-    using System.Collections.Generic;
 
 
     public interface JobAttemptFaulted
@@ -19,8 +18,8 @@ namespace MassTransit.Contracts.JobService
         /// </summary>
         TimeSpan? RetryDelay { get; }
 
-        IDictionary<string, object> Job { get; }
         DateTime Timestamp { get; }
+
         ExceptionInfo Exceptions { get; }
     }
 }

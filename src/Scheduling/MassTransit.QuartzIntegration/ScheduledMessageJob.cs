@@ -21,7 +21,6 @@
 
         public string Destination { get; set; }
         public string MessageType { get; set; }
-        public string TokenId { get; set; }
 
         public async Task Execute(IJobExecutionContext context)
         {
@@ -30,7 +29,7 @@
                 var destinationAddress = new Uri(Destination);
                 var sourceAddress = _bus.Address;
 
-                IPipe<SendContext> sendPipe = CreateMessageContext(sourceAddress, context.Trigger.Key.Name);
+                IPipe<SendContext> sendPipe = CreateMessageContext(sourceAddress);
 
                 var endpoint = await _bus.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
@@ -63,29 +62,9 @@
 
         Uri SerializedMessage.Destination => new Uri(Destination);
 
-        IPipe<SendContext> CreateMessageContext(Uri sourceAddress, string triggerKey)
+        IPipe<SendContext> CreateMessageContext(Uri sourceAddress)
         {
-            IPipe<SendContext> sendPipe = Pipe.Execute<SendContext>(context =>
-            {
-                Guid? tokenId = ConvertIdToGuid(TokenId);
-                if (tokenId.HasValue)
-                    context.Headers.Set(MessageHeaders.SchedulingTokenId, tokenId.Value.ToString("N"));
-
-                context.Headers.Set(MessageHeaders.QuartzTriggerKey, triggerKey);
-            });
-
-            return new SerializedMessageContextAdapter(sendPipe, this, sourceAddress);
-        }
-
-        static Guid? ConvertIdToGuid(string id)
-        {
-            if (string.IsNullOrWhiteSpace(id))
-                return default;
-
-            if (Guid.TryParse(id, out var messageId))
-                return messageId;
-
-            throw new FormatException("The Id was not a Guid: " + id);
+            return new SerializedMessageContextAdapter(Pipe.Empty<SendContext>(), this, sourceAddress);
         }
 
 

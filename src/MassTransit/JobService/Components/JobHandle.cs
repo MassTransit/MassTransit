@@ -11,11 +11,6 @@ namespace MassTransit.JobService.Components
     {
         Guid JobId { get; }
 
-        /// <summary>
-        /// The job's status, derived from the underlying Task status
-        /// </summary>
-        JobStatus Status { get; }
-
         Task JobTask { get; }
 
         /// <summary>

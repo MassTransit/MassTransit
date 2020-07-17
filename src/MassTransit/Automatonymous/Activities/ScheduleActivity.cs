@@ -76,6 +76,8 @@
 
         async Task Execute(BehaviorContext<TInstance> context)
         {
+            Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
+
             ConsumeEventContext<TInstance> consumeContext = context.CreateConsumeContext();
 
             var schedulerContext = context.GetPayload<MessageSchedulerContext>();
@@ -86,11 +88,14 @@
 
             ScheduledMessage<TMessage> scheduledMessage = await schedulerContext.ScheduleSend(delay, message, _sendPipe).ConfigureAwait(false);
 
-            Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
-            if (previousTokenId.HasValue)
-                await schedulerContext.CancelScheduledSend(consumeContext.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
-
             _schedule?.SetTokenId(context.Instance, scheduledMessage.TokenId);
+
+            if (previousTokenId.HasValue)
+            {
+                Guid? messageTokenId = consumeContext.GetSchedulingTokenId();
+                if (!messageTokenId.HasValue || previousTokenId.Value != messageTokenId.Value)
+                    await schedulerContext.CancelScheduledSend(consumeContext.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
+            }
         }
     }
 
@@ -142,6 +147,8 @@
 
         async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
         {
+            Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
+
             ConsumeEventContext<TInstance, TData> consumeContext = context.CreateConsumeContext();
 
             var schedulerContext = context.GetPayload<MessageSchedulerContext>();
@@ -152,11 +159,14 @@
 
             ScheduledMessage<TMessage> scheduledMessage = await schedulerContext.ScheduleSend(scheduledTime, message, _sendPipe).ConfigureAwait(false);
 
-            Guid? previousTokenId = _schedule.GetTokenId(context.Instance);
-            if (previousTokenId.HasValue)
-                await schedulerContext.CancelScheduledSend(consumeContext.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
-
             _schedule?.SetTokenId(context.Instance, scheduledMessage.TokenId);
+
+            if (previousTokenId.HasValue)
+            {
+                Guid? messageTokenId = consumeContext.GetSchedulingTokenId();
+                if (!messageTokenId.HasValue || previousTokenId.Value != messageTokenId.Value)
+                    await schedulerContext.CancelScheduledSend(consumeContext.ReceiveContext.InputAddress, previousTokenId.Value).ConfigureAwait(false);
+            }
 
             await next.Execute(context).ConfigureAwait(false);
         }

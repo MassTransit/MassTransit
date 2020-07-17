@@ -58,8 +58,7 @@
                 JobId,
                 AttemptId,
                 RetryAttempt,
-                InVar.Timestamp,
-                Job = SerializerCache.GetObjectAsDictionary(Job)
+                InVar.Timestamp
             });
         }
 
@@ -73,8 +72,7 @@
                 AttemptId,
                 RetryAttempt,
                 InVar.Timestamp,
-                InstanceAddress = _instanceAddress,
-                Job = SerializerCache.GetObjectAsDictionary(Job)
+                InstanceAddress = _instanceAddress
             });
         }
 
@@ -88,8 +86,7 @@
                 AttemptId,
                 RetryAttempt,
                 InVar.Timestamp,
-                Duration = ElapsedTime,
-                Job = SerializerCache.GetObjectAsDictionary(Job)
+                Duration = ElapsedTime
             });
         }
 
@@ -104,7 +101,6 @@
                 RetryAttempt,
                 RetryDelay = delay,
                 InVar.Timestamp,
-                Job = SerializerCache.GetObjectAsDictionary(Job),
                 Exceptions = exception
             });
         }
