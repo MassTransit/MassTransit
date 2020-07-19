@@ -25,6 +25,11 @@
             _endpoint = endpoint;
         }
 
+        /// <summary>
+        /// The actual endpoint, wrapped by the outbox
+        /// </summary>
+        internal ISendEndpoint Endpoint => _endpoint;
+
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _endpoint.ConnectSendObserver(observer);

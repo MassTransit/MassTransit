@@ -21,6 +21,8 @@ namespace MassTransit.Transports
             _endpoint = endpoint;
         }
 
+        internal ISendEndpoint Endpoint => _endpoint;
+
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _endpoint.ConnectSendObserver(observer);

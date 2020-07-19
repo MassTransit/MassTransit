@@ -420,4 +420,79 @@
             });
         }
     }
+
+
+    [TestFixture]
+    public class Sending_a_request_through_the_outbox :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_skip_the_outbox()
+        {
+            IRequestClient<A> client = Bus.CreateRequestClient<A>(InputQueueAddress);
+
+            await client.GetResponse<D>(new A());
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseInMemoryOutbox();
+
+            configurator.Consumer(() => new ConsumerA(Bus));
+            configurator.Consumer(() => new ConsumerB());
+        }
+
+
+        class ConsumerA :
+            IConsumer<A>
+        {
+            readonly IBus _bus;
+
+            public ConsumerA(IBus bus)
+            {
+                _bus = bus;
+            }
+
+            public async Task Consume(ConsumeContext<A> context)
+            {
+                var client = context.CreateRequestClient<B>(_bus, context.ReceiveContext.InputAddress);
+
+                await client.GetResponse<C>(new B());
+
+                await context.RespondAsync(new D());
+            }
+        }
+
+
+        class ConsumerB :
+            IConsumer<B>
+        {
+            public async Task Consume(ConsumeContext<B> context)
+            {
+                await context.RespondAsync(new C());
+            }
+        }
+
+
+        class A
+        {
+        }
+
+
+        class B
+        {
+        }
+
+
+        class C
+        {
+        }
+
+
+        class D
+        {
+        }
+    }
 }
+
+

@@ -25,7 +25,7 @@
 
         public async Task<TRequest> Send(Guid requestId, object values, IPipe<SendContext<TRequest>> pipe, CancellationToken cancellationToken)
         {
-            var endpoint = await _provider.GetSendEndpoint(_destinationAddress).ConfigureAwait(false);
+            var endpoint = await GetSendEndpoint().ConfigureAwait(false);
 
             IMessageInitializer<TRequest> initializer = MessageInitializerCache<TRequest>.GetInitializer(values.GetType());
 
@@ -42,13 +42,20 @@
 
         public async Task Send(Guid requestId, TRequest message, IPipe<SendContext<TRequest>> pipe, CancellationToken cancellationToken)
         {
-            var endpoint = await _provider.GetSendEndpoint(_destinationAddress).ConfigureAwait(false);
+            var endpoint = await GetSendEndpoint().ConfigureAwait(false);
 
             IPipe<SendContext<TRequest>> consumePipe = _consumeContext != null
                 ? new ConsumeSendPipeAdapter<TRequest>(_consumeContext, pipe, requestId)
                 : pipe;
 
             await endpoint.Send(message, consumePipe, cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task<ISendEndpoint> GetSendEndpoint()
+        {
+            var endpoint = await _provider.GetSendEndpoint(_destinationAddress).ConfigureAwait(false);
+
+            return endpoint.SkipOutbox();
         }
     }
 }
