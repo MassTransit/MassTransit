@@ -136,16 +136,20 @@ namespace MassTransit.JobService.Configuration
                     {
                         var partition = e.CreatePartitioner(_options.SagaPartitionCount.Value);
 
+                        x.Message<JobSubmitted>(m => m.UsePartitioner(partition, p => p.Message.JobId.ToByteArray()));
+
                         x.Message<JobSlotAllocated>(m => m.UsePartitioner(partition, p => p.Message.JobId.ToByteArray()));
                         x.Message<JobSlotUnavailable>(m => m.UsePartitioner(partition, p => p.Message.JobId.ToByteArray()));
                         x.Message<Fault<AllocateJobSlot>>(m => m.UsePartitioner(partition, p => p.Message.Message.JobId.ToByteArray()));
+
                         x.Message<JobAttemptCreated>(m => m.UsePartitioner(partition, p => p.Message.JobId.ToByteArray()));
                         x.Message<Fault<StartJobAttempt>>(m => m.UsePartitioner(partition, p => p.Message.Message.JobId.ToByteArray()));
-                        x.Message<JobSubmitted>(m => m.UsePartitioner(partition, p => p.Message.JobId.ToByteArray()));
-                        x.Message<JobAttemptStarted>(m => m.UsePartitioner(partition, p => p.Message.JobId.ToByteArray()));
-                        x.Message<JobAttemptCompleted>(m => m.UsePartitioner(partition, p => p.Message.JobId.ToByteArray()));
+
                         x.Message<JobAttemptCanceled>(m => m.UsePartitioner(partition, p => p.Message.JobId.ToByteArray()));
+                        x.Message<JobAttemptCompleted>(m => m.UsePartitioner(partition, p => p.Message.JobId.ToByteArray()));
                         x.Message<JobAttemptFaulted>(m => m.UsePartitioner(partition, p => p.Message.JobId.ToByteArray()));
+                        x.Message<JobAttemptStarted>(m => m.UsePartitioner(partition, p => p.Message.JobId.ToByteArray()));
+
                         x.Message<JobSlotWaitElapsed>(m => m.UsePartitioner(partition, p => p.Message.JobId.ToByteArray()));
                         x.Message<JobRetryDelayElapsed>(m => m.UsePartitioner(partition, p => p.Message.JobId.ToByteArray()));
                     }
@@ -170,10 +174,13 @@ namespace MassTransit.JobService.Configuration
 
                         x.Message<StartJobAttempt>(m => m.UsePartitioner(partition, p => p.Message.AttemptId.ToByteArray()));
                         x.Message<Fault<StartJob>>(m => m.UsePartitioner(partition, p => p.Message.Message.AttemptId.ToByteArray()));
+
                         x.Message<JobAttemptStarted>(m => m.UsePartitioner(partition, p => p.Message.AttemptId.ToByteArray()));
                         x.Message<JobAttemptCompleted>(m => m.UsePartitioner(partition, p => p.Message.AttemptId.ToByteArray()));
                         x.Message<JobAttemptCanceled>(m => m.UsePartitioner(partition, p => p.Message.AttemptId.ToByteArray()));
                         x.Message<JobAttemptFaulted>(m => m.UsePartitioner(partition, p => p.Message.AttemptId.ToByteArray()));
+
+                        x.Message<JobAttemptStatus>(m => m.UsePartitioner(partition, p => p.Message.AttemptId.ToByteArray()));
                         x.Message<JobStatusCheckRequested>(m => m.UsePartitioner(partition, p => p.Message.AttemptId.ToByteArray()));
                     }
                 });
