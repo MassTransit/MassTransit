@@ -3,54 +3,55 @@
     using System;
     using System.Collections.Generic;
     using Context;
+    using Microsoft.Azure.ServiceBus;
 
 
     public class ServiceBusHeaderProvider :
         IHeaderProvider
     {
-        readonly ServiceBusReceiveContext _context;
+        readonly Message _message;
 
-        public ServiceBusHeaderProvider(ServiceBusReceiveContext context)
+        public ServiceBusHeaderProvider(Message message)
         {
-            _context = context;
+            _message = message;
         }
 
         public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
-            if (!string.IsNullOrWhiteSpace(_context.MessageId))
-                yield return new KeyValuePair<string, object>(MessageHeaders.MessageId, _context.MessageId);
-            if (!string.IsNullOrWhiteSpace(_context.CorrelationId))
-                yield return new KeyValuePair<string, object>(nameof(_context.CorrelationId), _context.CorrelationId);
-            if (_context.ContentType != null)
-                yield return new KeyValuePair<string, object>("Content-Type", _context.ContentType);
+            if (!string.IsNullOrWhiteSpace(_message.MessageId))
+                yield return new KeyValuePair<string, object>(MessageHeaders.MessageId, _message.MessageId);
+            if (!string.IsNullOrWhiteSpace(_message.CorrelationId))
+                yield return new KeyValuePair<string, object>(nameof(_message.CorrelationId), _message.CorrelationId);
+            if (!string.IsNullOrWhiteSpace(_message.ContentType))
+                yield return new KeyValuePair<string, object>(MessageHeaders.ContentType, _message.ContentType);
 
-            if (_context.Properties != null)
+            if (_message.UserProperties != null)
             {
-                foreach (KeyValuePair<string, object> header in _context.Properties)
+                foreach (KeyValuePair<string, object> header in _message.UserProperties)
                     yield return header;
             }
         }
 
         public bool TryGetHeader(string key, out object value)
         {
-            if (_context.Properties != null && _context.Properties.TryGetValue(key, out value))
+            if (_message.UserProperties != null && _message.UserProperties.TryGetValue(key, out value))
                 return true;
 
-            if (nameof(_context.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))
+            if (nameof(_message.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))
             {
-                value = _context.MessageId;
-                return !string.IsNullOrWhiteSpace(_context.MessageId);
+                value = _message.MessageId;
+                return !string.IsNullOrWhiteSpace(_message.MessageId);
             }
 
-            if (nameof(_context.CorrelationId).Equals(key, StringComparison.OrdinalIgnoreCase))
+            if (nameof(_message.CorrelationId).Equals(key, StringComparison.OrdinalIgnoreCase))
             {
-                value = _context.CorrelationId;
-                return !string.IsNullOrWhiteSpace(_context.CorrelationId);
+                value = _message.CorrelationId;
+                return !string.IsNullOrWhiteSpace(_message.CorrelationId);
             }
 
-            if ("Content-Type".Equals(key, StringComparison.OrdinalIgnoreCase))
+            if (MessageHeaders.ContentType.Equals(key, StringComparison.OrdinalIgnoreCase))
             {
-                value = _context.ContentType?.MediaType;
+                value = _message.ContentType;
                 return value != null;
             }
 

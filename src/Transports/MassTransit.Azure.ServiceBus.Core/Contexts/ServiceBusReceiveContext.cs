@@ -20,7 +20,7 @@
             _message = message;
         }
 
-        protected override IHeaderProvider HeaderProvider => new ServiceBusHeaderProvider(this);
+        protected override IHeaderProvider HeaderProvider => new ServiceBusHeaderProvider(_message);
 
         public string MessageId => _message.MessageId;
 
