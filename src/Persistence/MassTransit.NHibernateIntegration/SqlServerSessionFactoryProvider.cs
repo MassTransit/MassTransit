@@ -15,7 +15,7 @@
         {
         }
 
-        static void Integrate(IDbIntegrationConfigurationProperties db, string connectionString)
+        static void Integrate(DbIntegrationConfigurationProperties db, string connectionString)
         {
             db.Dialect<MsSql2008Dialect>();
             db.ConnectionString = connectionString;

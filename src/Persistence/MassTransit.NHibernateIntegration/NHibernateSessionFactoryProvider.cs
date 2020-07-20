@@ -19,7 +19,7 @@
     public class NHibernateSessionFactoryProvider
     {
         static readonly Mutex _factoryMutex = new Mutex();
-        readonly Action<IDbIntegrationConfigurationProperties> _databaseIntegration;
+        readonly Action<DbIntegrationConfigurationProperties> _databaseIntegration;
         readonly IEnumerable<Type> _mappedTypes;
         bool _computed;
         ISessionFactory _sessionFactory;
@@ -31,7 +31,7 @@
             Configuration = CreateConfiguration();
         }
 
-        public NHibernateSessionFactoryProvider(IEnumerable<Type> mappedTypes, Action<IDbIntegrationConfigurationProperties> databaseIntegration)
+        public NHibernateSessionFactoryProvider(IEnumerable<Type> mappedTypes, Action<DbIntegrationConfigurationProperties> databaseIntegration)
         {
             _mappedTypes = mappedTypes;
             _databaseIntegration = databaseIntegration;
