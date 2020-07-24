@@ -45,11 +45,11 @@ Send the message to the _order-events-listener_ exchange. If the exchange does n
 
 `queue:order-events-listener`
 
-Send the message to the _order-events-listener_ exchange. If the exchange or queue does not exist, they will created and the exchange will be bound to the queue.
+Send the message to the _order-events-listener_ exchange. If the exchange or queue does not exist, they will be created and the exchange will be bound to the queue.
 
 With either address, RabbitMQ will route the message from the _order-events-listener_ exchange to the _order-events-listener_ queue.
 
-When a message is published, the message is sent to the _OrderSystem.Events:OrderSubmitted_ exchange. If the exchange does not exist, it will created. RabbitMQ will route the message from the _OrderSystem.Events:OrderSubmitted_ exchange to the _order-events-listener_ exchange, and subsequently to the _order-events-listener_ queue. If other receive endpoints connected to the same virtual host include consumers that consume the _OrderSubmitted_ message, a copy of the message would be routed to each of those endpoints as well.
+When a message is published, the message is sent to the _OrderSystem.Events:OrderSubmitted_ exchange. If the exchange does not exist, it will be created. RabbitMQ will route the message from the _OrderSystem.Events:OrderSubmitted_ exchange to the _order-events-listener_ exchange, and subsequently to the _order-events-listener_ queue. If other receive endpoints connected to the same virtual host include consumers that consume the _OrderSubmitted_ message, a copy of the message would be routed to each of those endpoints as well.
 
 ::: warning
 If a message is published before starting the bus, so that MassTransit can create the exchanges and queues, the exchange _OrderSystem.Events:OrderSubmitted_ will be created. However, until the bus has been started at least once, there won't be a queue bound to the exchange and any published messages will be lost. Once the bus has been started, the queue will remain bound to the exchange even when the bus is stopped.
