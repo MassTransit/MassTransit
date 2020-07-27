@@ -6,7 +6,7 @@
     using Topology;
 
 
-    public class ServiceBusEntityReceiveEndpointContext :
+    public sealed class ServiceBusEntityReceiveEndpointContext :
         BaseReceiveEndpointContext,
         ServiceBusReceiveEndpointContext
     {
@@ -14,11 +14,13 @@
 
         public ServiceBusEntityReceiveEndpointContext(IServiceBusHostConfiguration hostConfiguration, IServiceBusEntityEndpointConfiguration configuration,
             BrokerTopology brokerTopology)
-            : base(configuration)
+            : base(hostConfiguration, configuration)
         {
             _hostConfiguration = hostConfiguration;
 
             BrokerTopology = brokerTopology;
+
+            GetOrAddPayload(() => _hostConfiguration.HostTopology);
         }
 
         public BrokerTopology BrokerTopology { get; }

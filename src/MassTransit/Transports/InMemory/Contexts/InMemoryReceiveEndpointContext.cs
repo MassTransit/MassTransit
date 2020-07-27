@@ -10,7 +10,7 @@
         readonly IInMemoryHostConfiguration _hostConfiguration;
 
         public InMemoryReceiveEndpointContext(IInMemoryHostConfiguration hostConfiguration, IInMemoryReceiveEndpointConfiguration configuration)
-            : base(configuration)
+            : base(hostConfiguration, configuration)
         {
             _hostConfiguration = hostConfiguration;
         }

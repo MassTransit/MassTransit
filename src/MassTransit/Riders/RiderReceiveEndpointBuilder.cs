@@ -36,7 +36,7 @@ namespace MassTransit.Riders
             readonly IBusInstance _busInstance;
 
             public RiderReceiveEndpointContext(IBusInstance busInstance, IReceiveEndpointConfiguration configuration)
-                : base(configuration)
+                : base(busInstance.HostConfiguration, configuration)
             {
                 _busInstance = busInstance;
             }

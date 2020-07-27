@@ -15,7 +15,7 @@
         readonly IServiceBusHostConfiguration _hostConfiguration;
 
         public EventDataReceiverConfiguration(IServiceBusHostConfiguration hostConfiguration, IServiceBusReceiveEndpointConfiguration endpointConfiguration)
-            : base(endpointConfiguration)
+            : base(hostConfiguration, endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;

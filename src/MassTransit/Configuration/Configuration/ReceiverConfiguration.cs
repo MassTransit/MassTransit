@@ -15,13 +15,14 @@ namespace MassTransit.Configuration
         readonly IReceiveEndpointConfiguration _configuration;
         protected readonly IList<IReceiveEndpointSpecification> Specifications;
 
-        protected ReceiverConfiguration(IReceiveEndpointConfiguration endpointConfiguration)
+        protected ReceiverConfiguration(IHostConfiguration hostConfiguration, IReceiveEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)
         {
             _configuration = endpointConfiguration;
 
             Specifications = new List<IReceiveEndpointSpecification>();
 
+            LogContext.Current ??= hostConfiguration.LogContext;
             if (LogContext.Current == null)
                 LogContext.ConfigureCurrentLogContext();
 

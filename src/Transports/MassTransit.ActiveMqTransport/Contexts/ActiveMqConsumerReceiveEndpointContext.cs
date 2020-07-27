@@ -13,7 +13,7 @@
 
         public ActiveMqConsumerReceiveEndpointContext(IActiveMqHostConfiguration hostConfiguration, IActiveMqReceiveEndpointConfiguration configuration,
             BrokerTopology brokerTopology)
-            : base(configuration)
+            : base(hostConfiguration, configuration)
         {
             _hostConfiguration = hostConfiguration;
             BrokerTopology = brokerTopology;

@@ -16,24 +16,17 @@
         Agent,
         IReceiveEndpointCollection
     {
-        readonly ConsumeObservable _consumeObservers;
         readonly Dictionary<string, IReceiveEndpointControl> _endpoints;
         readonly Dictionary<string, HostReceiveEndpointHandle> _handles;
         readonly object _mutateLock = new object();
-        readonly PublishObservable _publishObservers;
         readonly ReceiveEndpointObservable _receiveEndpointObservers;
-        readonly ReceiveObservable _receiveObservers;
-        readonly SendObservable _sendObservers;
 
         public ReceiveEndpointCollection()
         {
+            _receiveEndpointObservers = new ReceiveEndpointObservable();
+
             _endpoints = new Dictionary<string, IReceiveEndpointControl>(StringComparer.OrdinalIgnoreCase);
             _handles = new Dictionary<string, HostReceiveEndpointHandle>(StringComparer.OrdinalIgnoreCase);
-            _receiveObservers = new ReceiveObservable();
-            _receiveEndpointObservers = new ReceiveEndpointObservable();
-            _consumeObservers = new ConsumeObservable();
-            _publishObservers = new PublishObservable();
-            _sendObservers = new SendObservable();
         }
 
         public void Add(string endpointName, IReceiveEndpointControl endpoint)
@@ -93,11 +86,6 @@
             }
         }
 
-        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
-        {
-            return _receiveObservers.Connect(observer);
-        }
-
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
             return _receiveEndpointObservers.Connect(observer);
@@ -107,21 +95,6 @@
             where T : class
         {
             return new MultipleConnectHandle(_endpoints.Values.Select(x => x.ConnectConsumeMessageObserver(observer)));
-        }
-
-        public ConnectHandle ConnectConsumeObserver(IConsumeObserver observer)
-        {
-            return _consumeObservers.Connect(observer);
-        }
-
-        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
-        {
-            return _publishObservers.Connect(observer);
-        }
-
-        public ConnectHandle ConnectSendObserver(ISendObserver observer)
-        {
-            return _sendObservers.Connect(observer);
         }
 
         protected override async Task StopAgent(StopContext context)
@@ -141,15 +114,10 @@
             {
                 var endpointReady = new ReceiveEndpointReadyObserver(endpoint, cancellationToken);
 
-                var consumeObserver = endpoint.ConnectConsumeObserver(_consumeObservers);
-                var receiveObserver = endpoint.ConnectReceiveObserver(_receiveObservers);
                 var receiveEndpointObserver = endpoint.ConnectReceiveEndpointObserver(_receiveEndpointObservers);
-                var publishObserver = endpoint.ConnectPublishObserver(_publishObservers);
-                var sendObserver = endpoint.ConnectSendObserver(_sendObservers);
                 var endpointHandle = endpoint.Start();
 
-                var handle = new Handle(endpointHandle, endpoint, endpointReady.Ready, () => Remove(endpointName),
-                    receiveObserver, receiveEndpointObserver, consumeObserver, publishObserver, sendObserver);
+                var handle = new Handle(endpointHandle, endpoint, endpointReady.Ready, () => Remove(endpointName), receiveEndpointObserver);
 
                 lock (_mutateLock)
                     _handles.Add(endpointName, handle);

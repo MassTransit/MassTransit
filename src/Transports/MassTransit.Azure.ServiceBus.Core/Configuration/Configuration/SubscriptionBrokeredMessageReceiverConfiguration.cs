@@ -15,7 +15,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
 
         public SubscriptionBrokeredMessageReceiverConfiguration(IServiceBusHostConfiguration hostConfiguration,
             IServiceBusSubscriptionEndpointConfiguration endpointConfiguration)
-            : base(endpointConfiguration)
+            : base(hostConfiguration, endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;

@@ -1,15 +1,18 @@
 namespace MassTransit.KafkaIntegration.Tests
 {
     using System;
+    using System.Linq;
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Context;
+    using GreenPipes.Internals.Extensions;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using Serializers;
     using TestFramework;
+    using Testing;
 
 
     public class Receive_Specs :
@@ -51,6 +54,9 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var busControl = provider.GetRequiredService<IBusControl>();
 
+            var observer = GetConsumeObserver();
+            busControl.ConnectConsumeObserver(observer);
+
             await busControl.StartAsync(TestCancellationToken);
 
             try
@@ -76,6 +82,8 @@ namespace MassTransit.KafkaIntegration.Tests
                 Assert.AreEqual(message.Value.Text, result.Message.Text);
                 Assert.AreEqual(sendContext.MessageId, result.MessageId);
                 Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+
+                Assert.That(await observer.Messages.Any<KafkaMessage>());
             }
             finally
             {

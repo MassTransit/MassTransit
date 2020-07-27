@@ -33,7 +33,7 @@
         protected readonly PublishObservable PublishObservers;
         protected readonly SendObservable SendObservers;
 
-        protected BaseReceiveEndpointContext(IReceiveEndpointConfiguration configuration)
+        protected BaseReceiveEndpointContext(IHostConfiguration hostConfiguration, IReceiveEndpointConfiguration configuration)
         {
             InputAddress = configuration.InputAddress;
             HostAddress = configuration.HostAddress;
@@ -62,6 +62,8 @@
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
             _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
             _publishTransportProvider = new Lazy<IPublishTransportProvider>(CreatePublishTransportProvider);
+
+            hostConfiguration.ConnectReceiveContextContext(this);
         }
 
         protected Uri HostAddress { get; }

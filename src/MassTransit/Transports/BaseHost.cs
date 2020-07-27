@@ -45,12 +45,12 @@ namespace MassTransit.Transports
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
         {
-            return ReceiveEndpoints.ConnectConsumeObserver(observer);
+            return _hostConfiguration.ConnectConsumeObserver(observer);
         }
 
         ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return ReceiveEndpoints.ConnectReceiveObserver(observer);
+            return _hostConfiguration.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
@@ -65,12 +65,12 @@ namespace MassTransit.Transports
 
         ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
         {
-            return ReceiveEndpoints.ConnectPublishObserver(observer);
+            return _hostConfiguration.ConnectPublishObserver(observer);
         }
 
         ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
         {
-            return ReceiveEndpoints.ConnectSendObserver(observer);
+            return _hostConfiguration.ConnectSendObserver(observer);
         }
 
         public virtual Task<HostHandle> Start(CancellationToken cancellationToken)

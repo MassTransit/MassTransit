@@ -15,8 +15,8 @@ namespace MassTransit.Configuration
     {
         readonly IReceiveEndpointConfiguration _endpointConfiguration;
 
-        public ReceivePipeDispatcherConfiguration(IReceiveEndpointConfiguration endpointConfiguration)
-            : base(endpointConfiguration)
+        public ReceivePipeDispatcherConfiguration(IHostConfiguration hostConfiguration, IReceiveEndpointConfiguration endpointConfiguration)
+            : base(hostConfiguration, endpointConfiguration)
         {
             _endpointConfiguration = endpointConfiguration;
         }

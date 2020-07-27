@@ -14,7 +14,7 @@
 
         public RabbitMqQueueReceiveEndpointContext(IRabbitMqHostConfiguration hostConfiguration, IRabbitMqReceiveEndpointConfiguration configuration,
             BrokerTopology brokerTopology)
-            : base(configuration)
+            : base(hostConfiguration, configuration)
         {
             _hostConfiguration = hostConfiguration;
 

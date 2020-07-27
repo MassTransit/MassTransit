@@ -27,14 +27,14 @@ namespace MassTransit
 
             var endpointConfiguration = busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration("mediator");
 
-            var configurator = new ReceivePipeDispatcherConfiguration(endpointConfiguration);
+            var configurator = new ReceivePipeDispatcherConfiguration(busConfiguration.HostConfiguration, endpointConfiguration);
 
             configure(configurator);
 
             var mediatorDispatcher = configurator.Build();
 
             var responseEndpointConfiguration = busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration("response");
-            var responseConfigurator = new ReceivePipeDispatcherConfiguration(responseEndpointConfiguration);
+            var responseConfigurator = new ReceivePipeDispatcherConfiguration(busConfiguration.HostConfiguration, responseEndpointConfiguration);
 
             var responseDispatcher = responseConfigurator.Build();
 

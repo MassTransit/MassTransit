@@ -7,12 +7,8 @@
 
 
     public interface IReceiveEndpointCollection :
-        IReceiveObserverConnector,
         IReceiveEndpointObserverConnector,
         IConsumeMessageObserverConnector,
-        IConsumeObserverConnector,
-        IPublishObserverConnector,
-        ISendObserverConnector,
         IAgent,
         IProbeSite
     {

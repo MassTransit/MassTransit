@@ -32,7 +32,7 @@ namespace MassTransit.KafkaIntegration.Configurators
 
         public KafkaTopicReceiveEndpointConfiguration(ConsumerConfig consumerConfig, string topic, IBusInstance busInstance,
             IReceiveEndpointConfiguration endpointConfiguration, IHeadersDeserializer headersDeserializer)
-            : base(endpointConfiguration)
+            : base(busInstance.HostConfiguration, endpointConfiguration)
         {
             _busInstance = busInstance;
             _endpointConfiguration = endpointConfiguration;

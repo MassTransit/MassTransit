@@ -43,11 +43,7 @@
         {
             var topologyLayout = BuildTopology(_configuration.Settings);
 
-            var context = new ServiceBusEntityReceiveEndpointContext(_hostConfiguration, _configuration, topologyLayout);
-
-            context.GetOrAddPayload(() => _hostConfiguration.HostTopology);
-
-            return context;
+            return new ServiceBusEntityReceiveEndpointContext(_hostConfiguration, _configuration, topologyLayout);
         }
 
         string GenerateSubscriptionName()
