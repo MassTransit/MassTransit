@@ -197,7 +197,7 @@ namespace MassTransit.AutofacIntegration.Registration
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());
 
-            return new AutofacExecuteActivityScopeProvider<TActivity, TArguments>(lifetimeScopeProvider, "message");
+            return new AutofacExecuteActivityScopeProvider<TActivity, TArguments>(lifetimeScopeProvider, ScopeName, ConfigureScope);
         }
 
         ICompensateActivityScopeProvider<TActivity, TLog> CreateCompensateActivityScopeProvider<TActivity, TLog>(IComponentContext context)
@@ -206,7 +206,7 @@ namespace MassTransit.AutofacIntegration.Registration
         {
             var lifetimeScopeProvider = new SingleLifetimeScopeProvider(context.Resolve<ILifetimeScope>());
 
-            return new AutofacCompensateActivityScopeProvider<TActivity, TLog>(lifetimeScopeProvider, "message");
+            return new AutofacCompensateActivityScopeProvider<TActivity, TLog>(lifetimeScopeProvider, ScopeName, ConfigureScope);
         }
 
         protected virtual IClientFactory GetClientFactory(IComponentContext componentContext)
