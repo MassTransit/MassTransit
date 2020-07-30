@@ -120,7 +120,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             TransportLogMessages.DeleteTopic(topicInfo.Arn);
 
-            var response = await _amazonSns.DeleteTopicAsync(topicInfo.Arn, _cancellationToken).ConfigureAwait(false);
+            var response = await _amazonSns.DeleteTopicAsync(topicInfo.Arn, CancellationToken.None).ConfigureAwait(false);
 
             response.EnsureSuccessfulResponse();
 
@@ -133,7 +133,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             TransportLogMessages.DeleteQueue(queueInfo.Url);
 
-            var response = await _amazonSqs.DeleteQueueAsync(queueInfo.Url, _cancellationToken).ConfigureAwait(false);
+            var response = await _amazonSqs.DeleteQueueAsync(queueInfo.Url, CancellationToken.None).ConfigureAwait(false);
 
             response.EnsureSuccessfulResponse();
 
