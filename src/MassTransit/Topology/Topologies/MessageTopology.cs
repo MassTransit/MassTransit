@@ -29,7 +29,7 @@
 
         public void SetEntityNameFormatter(IEntityNameFormatter entityNameFormatter)
         {
-            EntityNameFormatter = entityNameFormatter ?? throw new ArgumentNullException("The entity name formatter cannot be null");
+            EntityNameFormatter = entityNameFormatter ?? throw new ArgumentNullException(nameof(entityNameFormatter));
         }
 
         IMessageTopologyConfigurator<T> IMessageTopologyConfigurator.GetMessageTopology<T>()
@@ -102,6 +102,9 @@
         {
             if (_entityName.IsValueCreated)
             {
+                if (_entityName.Value == entityNameFormatter.FormatEntityName())
+                    return;
+
                 throw new ConfigurationException(
                     $"The message type {TypeMetadataCache<TMessage>.ShortName} entity name was already evaluated: {_entityName.Value}");
             }
