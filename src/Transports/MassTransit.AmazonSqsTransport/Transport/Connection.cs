@@ -23,12 +23,12 @@ namespace MassTransit.AmazonSqsTransport.Transport
 
         public IAmazonSQS CreateAmazonSqsClient()
         {
-            return new AmazonSQSClient(_credentials, _amazonSqsConfig);
+            return _credentials == null ? new AmazonSQSClient(_amazonSqsConfig) : new AmazonSQSClient(_credentials, _amazonSqsConfig);
         }
 
         public IAmazonSimpleNotificationService CreateAmazonSnsClient()
         {
-            return new AmazonSimpleNotificationServiceClient(_credentials, _amazonSnsConfig);
+            return _credentials == null ? new AmazonSimpleNotificationServiceClient(_amazonSnsConfig) : new AmazonSimpleNotificationServiceClient(_credentials, _amazonSnsConfig);
         }
     }
 }
