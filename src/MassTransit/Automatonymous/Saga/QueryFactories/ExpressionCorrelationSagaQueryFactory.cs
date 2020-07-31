@@ -20,12 +20,13 @@
             _correlationExpression = correlationExpression;
         }
 
-        ISagaQuery<TInstance> ISagaQueryFactory<TInstance, TData>.CreateQuery(ConsumeContext<TData> context)
+        bool ISagaQueryFactory<TInstance, TData>.TryCreateQuery(ConsumeContext<TData> context, out ISagaQuery<TInstance> query)
         {
             Expression<Func<TInstance, bool>> filter = new EventCorrelationExpressionConverter<TInstance, TData>(context)
                 .Convert(_correlationExpression);
 
-            return new SagaQuery<TInstance>(filter);
+            query = new SagaQuery<TInstance>(filter);
+            return true;
         }
 
         void IProbeSite.Probe(ProbeContext context)

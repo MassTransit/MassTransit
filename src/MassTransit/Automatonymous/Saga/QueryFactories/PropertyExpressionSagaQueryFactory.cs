@@ -13,21 +13,27 @@
         where TData : class
     {
         readonly Expression<Func<TInstance, TProperty>> _propertyExpression;
-        readonly Func<ConsumeContext<TData>, TProperty> _selector;
+        readonly ISagaQueryPropertySelector<TData, TProperty> _selector;
 
-        public PropertyExpressionSagaQueryFactory(Expression<Func<TInstance, TProperty>> propertyExpression, Func<ConsumeContext<TData>, TProperty> selector)
+        public PropertyExpressionSagaQueryFactory(Expression<Func<TInstance, TProperty>> propertyExpression,
+            ISagaQueryPropertySelector<TData, TProperty> selector)
         {
             _propertyExpression = propertyExpression;
             _selector = selector;
         }
 
-        ISagaQuery<TInstance> ISagaQueryFactory<TInstance, TData>.CreateQuery(ConsumeContext<TData> context)
+        bool ISagaQueryFactory<TInstance, TData>.TryCreateQuery(ConsumeContext<TData> context, out ISagaQuery<TInstance> query)
         {
-            var propertyValue = _selector(context);
+            if (_selector.TryGetProperty(context, out var propertyValue))
+            {
+                Expression<Func<TInstance, bool>> filterExpression = CreateExpression(propertyValue);
 
-            Expression<Func<TInstance, bool>> filterExpression = CreateExpression(propertyValue);
+                query = new SagaQuery<TInstance>(filterExpression);
+                return true;
+            }
 
-            return new SagaQuery<TInstance>(filterExpression);
+            query = default;
+            return false;
         }
 
         void IProbeSite.Probe(ProbeContext context)

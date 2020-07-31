@@ -72,7 +72,8 @@
 
             _sagaFilterFactory = (repository, policy, sagaPipe) =>
             {
-                var queryFactory = new PropertyExpressionSagaQueryFactory<TInstance, TData, T>(propertyExpression, selector);
+                var propertySelector = new NotDefaultValueTypeSagaQueryPropertySelector<TData, T>(selector);
+                var queryFactory = new PropertyExpressionSagaQueryFactory<TInstance, TData, T>(propertyExpression, propertySelector);
 
                 return new QuerySagaFilter<TInstance, TData>(repository, policy, queryFactory, sagaPipe);
             };
@@ -92,7 +93,8 @@
 
             _sagaFilterFactory = (repository, policy, sagaPipe) =>
             {
-                var queryFactory = new PropertyExpressionSagaQueryFactory<TInstance, TData, T?>(propertyExpression, selector);
+                var propertySelector = new HasValueTypeSagaQueryPropertySelector<TData, T>(selector);
+                var queryFactory = new PropertyExpressionSagaQueryFactory<TInstance, TData, T?>(propertyExpression, propertySelector);
 
                 return new QuerySagaFilter<TInstance, TData>(repository, policy, queryFactory, sagaPipe);
             };
@@ -112,7 +114,8 @@
 
             _sagaFilterFactory = (repository, policy, sagaPipe) =>
             {
-                var queryFactory = new PropertyExpressionSagaQueryFactory<TInstance, TData, T>(propertyExpression, selector);
+                var propertySelector = new SagaQueryPropertySelector<TData, T>(selector);
+                var queryFactory = new PropertyExpressionSagaQueryFactory<TInstance, TData, T>(propertyExpression, propertySelector);
 
                 return new QuerySagaFilter<TInstance, TData>(repository, policy, queryFactory, sagaPipe);
             };

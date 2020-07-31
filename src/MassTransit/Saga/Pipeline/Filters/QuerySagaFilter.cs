@@ -51,15 +51,16 @@ namespace MassTransit.Saga.Pipeline.Filters
             var timer = Stopwatch.StartNew();
             try
             {
-                await Task.Yield();
+                if (_queryFactory.TryCreateQuery(context, out ISagaQuery<TSaga> query))
+                {
+                    await Task.Yield();
 
-                ISagaQuery<TSaga> query = _queryFactory.CreateQuery(context);
+                    await _sagaRepository.SendQuery(context, query, _policy, _messagePipe).ConfigureAwait(false);
 
-                await _sagaRepository.SendQuery(context, query, _policy, _messagePipe).ConfigureAwait(false);
+                    await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TSaga>.ShortName).ConfigureAwait(false);
+                }
 
                 await next.Send(context).ConfigureAwait(false);
-
-                await context.NotifyConsumed(timer.Elapsed, TypeMetadataCache<TSaga>.ShortName).ConfigureAwait(false);
             }
             catch (OperationCanceledException exception)
             {

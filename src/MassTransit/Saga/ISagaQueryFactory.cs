@@ -17,7 +17,8 @@ namespace MassTransit.Saga
         /// Creates a saga query from the specified message context
         /// </summary>
         /// <param name="context">The message context</param>
+        /// <param name="query"></param>
         /// <returns></returns>
-        ISagaQuery<TSaga> CreateQuery(ConsumeContext<TMessage> context);
+        bool TryCreateQuery(ConsumeContext<TMessage> context, out ISagaQuery<TSaga> query);
     }
 }
