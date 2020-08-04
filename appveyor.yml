@@ -30,8 +30,10 @@ build: off
 test: off
 
 artifacts:
-  - path: artifacts/*.*nupkg
-    name: Packages
+  - path: artifacts/*.nupkg
+    name: NuGet
+  - path: artifacts/*.snupkg
+    name: Symbols
 
 environment:
   APPVEYOR_YML_DISABLE_PS_LINUX: true
@@ -72,6 +74,7 @@ deploy:
 - provider: NuGet
   name: PrePrerelease
   symbol_server: https://www.nuget.org
+  artifact: NuGet, Symbols
   api_key:
     secure: IXB1AHgV9Bp8wic6oljIngn3e2gQuLZhpxa1yi8JpX1psFpKIDjYlyyDya01z56o
   on:
@@ -79,6 +82,7 @@ deploy:
 - provider: NuGet
   name: Prerelease
   symbol_server: https://www.nuget.org
+  artifact: NuGet, Symbols
   api_key:
     secure: IXB1AHgV9Bp8wic6oljIngn3e2gQuLZhpxa1yi8JpX1psFpKIDjYlyyDya01z56o
   on:
@@ -86,6 +90,7 @@ deploy:
 - provider: NuGet
   name: Release
   symbol_server: https://www.nuget.org
+  artifact: NuGet, Symbols
   api_key:
     secure: IXB1AHgV9Bp8wic6oljIngn3e2gQuLZhpxa1yi8JpX1psFpKIDjYlyyDya01z56o
   on:
