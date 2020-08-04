@@ -10,6 +10,109 @@ namespace MassTransit.Tests.Saga
 
 
     [TestFixture]
+    public class Using_the_universal_saga_repository_with_insert_on_initial :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_reach_the_saga()
+        {
+            Task<ConsumeContext<CreateCompleted>> createCompleted = ConnectPublishHandler<CreateCompleted>();
+            Task<ConsumeContext<FinallyCompleted>> finallyCompleted = ConnectPublishHandler<FinallyCompleted>();
+
+            var values = new { InVar.CorrelationId };
+            await InputQueueSendEndpoint.Send<Create>(values);
+            ConsumeContext<CreateCompleted> createContext = await createCompleted;
+            ConsumeContext<FinallyCompleted> finallyContext = await finallyCompleted;
+
+            createCompleted = ConnectPublishHandler<CreateCompleted>();
+            finallyCompleted = ConnectPublishHandler<FinallyCompleted>();
+
+            values = new { InVar.CorrelationId };
+            await InputQueueSendEndpoint.Send<Create>(values);
+            createContext = await createCompleted;
+            finallyContext = await finallyCompleted;
+        }
+
+        InsertOnInitialTestStateMachine _machine;
+        ISagaRepository<Instance> _repository;
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _machine = new InsertOnInitialTestStateMachine();
+            _repository = CreateInMemorySagaRepository<Instance>();
+
+            configurator.StateMachineSaga(_machine, _repository);
+        }
+
+        ISagaRepository<T> CreateInMemorySagaRepository<T>()
+            where T : class, ISaga
+        {
+            var dictionary = new IndexedSagaDictionary<T>();
+
+            ISagaConsumeContextFactory<IndexedSagaDictionary<T>, T> factory = new InMemorySagaConsumeContextFactory<T>();
+
+            ISagaRepositoryContextFactory<T> repositoryContextFactory = new InMemorySagaRepositoryContextFactory<T>(dictionary, factory);
+
+            return new SagaRepository<T>(repositoryContextFactory);
+        }
+
+        public interface Create :
+            CorrelatedBy<Guid>
+        {
+        }
+
+        public interface CreateCompleted :
+            CorrelatedBy<Guid>
+        {
+        }
+
+        public interface FinallyCompleted :
+            CorrelatedBy<Guid>
+        {
+        }
+
+        public class Instance :
+            SagaStateMachineInstance
+        {
+            public State CurrentState { get; set; }
+            public Guid CorrelationId { get; set; }
+        }
+
+        class InsertOnInitialTestStateMachine :
+            MassTransitStateMachine<Instance>
+        {
+            public InsertOnInitialTestStateMachine()
+            {
+                InstanceState(x => x.CurrentState);
+                SetCompletedWhenFinalized();
+
+                Event(() => Created,
+                    x =>
+                    {
+                        x.InsertOnInitial = true;
+                        x.SetSagaFactory(context => new Instance { CorrelationId = context.Message.CorrelationId });
+                    });
+
+                Initially(
+                    When(Created)
+                        .PublishAsync(x => x.Init<CreateCompleted>(x.Instance))
+                        .TransitionTo(Active)
+                        .ThenAsync(x => x.Raise(Destroyed)));
+
+                During(Active,
+                    When(Destroyed)
+                        .Finalize());
+
+                Finally(binder => binder.PublishAsync(x=> x.Init<FinallyCompleted>(x.Instance)));
+            }
+
+            public State Active { get; private set; }
+            public Event<Create> Created { get; private set; }
+            public Event Destroyed { get; private set; }
+        }
+    }
+
+    [TestFixture]
     public class Using_the_universal_saga_repository :
         InMemoryTestFixture
     {
@@ -83,7 +186,6 @@ namespace MassTransit.Tests.Saga
             public State CurrentState { get; set; }
             public Guid CorrelationId { get; set; }
         }
-
 
         class TestStateMachine :
             MassTransitStateMachine<Instance>
