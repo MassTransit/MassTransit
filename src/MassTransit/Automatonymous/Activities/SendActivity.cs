@@ -12,39 +12,65 @@
         where TMessage : class
     {
         readonly AsyncEventMessageFactory<TInstance, TMessage> _asyncMessageFactory;
+        readonly SendContextCallback<TInstance, TMessage> _contextCallback;
         readonly DestinationAddressProvider<TInstance> _destinationAddressProvider;
         readonly EventMessageFactory<TInstance, TMessage> _messageFactory;
-        readonly IPipe<SendContext<TMessage>> _sendPipe;
 
         public SendActivity(DestinationAddressProvider<TInstance> destinationAddressProvider, EventMessageFactory<TInstance, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
-            : this(messageFactory, contextCallback)
+            : this(messageFactory, Convert(contextCallback))
         {
             _destinationAddressProvider = destinationAddressProvider;
         }
 
         public SendActivity(DestinationAddressProvider<TInstance> destinationAddressProvider, AsyncEventMessageFactory<TInstance, TMessage> messageFactory,
             Action<SendContext<TMessage>> contextCallback)
-            : this(messageFactory, contextCallback)
+            : this(messageFactory, Convert(contextCallback))
         {
             _destinationAddressProvider = destinationAddressProvider;
         }
 
         public SendActivity(EventMessageFactory<TInstance, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
-            : this(contextCallback)
+            : this(Convert(contextCallback))
         {
             _messageFactory = messageFactory;
         }
 
         public SendActivity(AsyncEventMessageFactory<TInstance, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
+            : this(Convert(contextCallback))
+        {
+            _asyncMessageFactory = messageFactory;
+        }
+
+        public SendActivity(DestinationAddressProvider<TInstance> destinationAddressProvider, EventMessageFactory<TInstance, TMessage> messageFactory,
+            SendContextCallback<TInstance, TMessage> contextCallback)
+            : this(messageFactory, contextCallback)
+        {
+            _destinationAddressProvider = destinationAddressProvider;
+        }
+
+        public SendActivity(DestinationAddressProvider<TInstance> destinationAddressProvider, AsyncEventMessageFactory<TInstance, TMessage> messageFactory,
+            SendContextCallback<TInstance, TMessage> contextCallback)
+            : this(messageFactory, contextCallback)
+        {
+            _destinationAddressProvider = destinationAddressProvider;
+        }
+
+        public SendActivity(EventMessageFactory<TInstance, TMessage> messageFactory, SendContextCallback<TInstance, TMessage> contextCallback)
+            : this(contextCallback)
+        {
+            _messageFactory = messageFactory;
+        }
+
+        public SendActivity(AsyncEventMessageFactory<TInstance, TMessage> messageFactory, SendContextCallback<TInstance, TMessage> contextCallback)
             : this(contextCallback)
         {
             _asyncMessageFactory = messageFactory;
         }
 
-        SendActivity(Action<SendContext<TMessage>> contextCallback)
+        SendActivity(SendContextCallback<TInstance, TMessage> contextCallback)
         {
-            _sendPipe = contextCallback != null ? Pipe.Execute(contextCallback) : Pipe.Empty<SendContext<TMessage>>();
+            _contextCallback = contextCallback;
         }
 
         public void Accept(StateMachineVisitor inspector)
@@ -54,8 +80,7 @@
 
         public void Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("send");
-            _sendPipe.Probe(scope);
+            context.CreateScope("send");
         }
 
         async Task Activity<TInstance>.Execute(BehaviorContext<TInstance> context, Behavior<TInstance> next)
@@ -88,16 +113,32 @@
 
             var message = _messageFactory?.Invoke(consumeContext) ?? await _asyncMessageFactory(consumeContext).ConfigureAwait(false);
 
+            IPipe<SendContext<TMessage>> sendPipe = _contextCallback != null
+                ? Pipe.Execute<SendContext<TMessage>>(sendContext =>
+                {
+                    _contextCallback(consumeContext, sendContext);
+                })
+                : Pipe.Empty<SendContext<TMessage>>();
+
             if (_destinationAddressProvider != null)
             {
                 var destinationAddress = _destinationAddressProvider(consumeContext);
 
                 var endpoint = await consumeContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-                await endpoint.Send(message, _sendPipe).ConfigureAwait(false);
+
+                await endpoint.Send(message, sendPipe).ConfigureAwait(false);
             }
             else
-                await consumeContext.Send(message, _sendPipe).ConfigureAwait(false);
+                await consumeContext.Send(message, sendPipe).ConfigureAwait(false);
+        }
+
+        static SendContextCallback<TInstance, TMessage> Convert(Action<SendContext<TMessage>> contextCallback)
+        {
+            if (contextCallback == null)
+                return null;
+
+            return (_, sendContext) => contextCallback(sendContext);
         }
     }
 
@@ -109,39 +150,66 @@
         where TMessage : class
     {
         readonly AsyncEventMessageFactory<TInstance, TData, TMessage> _asyncMessageFactory;
+        readonly SendContextCallback<TInstance, TData, TMessage> _contextCallback;
         readonly DestinationAddressProvider<TInstance, TData> _destinationAddressProvider;
         readonly EventMessageFactory<TInstance, TData, TMessage> _messageFactory;
-        readonly IPipe<SendContext<TMessage>> _sendPipe;
 
         public SendActivity(DestinationAddressProvider<TInstance, TData> destinationAddressProvider,
             EventMessageFactory<TInstance, TData, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
-            : this(messageFactory, contextCallback)
+            : this(messageFactory, Convert(contextCallback))
         {
             _destinationAddressProvider = destinationAddressProvider;
         }
 
         public SendActivity(DestinationAddressProvider<TInstance, TData> destinationAddressProvider,
             AsyncEventMessageFactory<TInstance, TData, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
-            : this(messageFactory, contextCallback)
+            : this(messageFactory, Convert(contextCallback))
         {
             _destinationAddressProvider = destinationAddressProvider;
         }
 
         public SendActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
-            : this(contextCallback)
+            : this(Convert(contextCallback))
         {
             _messageFactory = messageFactory;
         }
 
         public SendActivity(AsyncEventMessageFactory<TInstance, TData, TMessage> messageFactory, Action<SendContext<TMessage>> contextCallback)
+            : this(Convert(contextCallback))
+        {
+            _asyncMessageFactory = messageFactory;
+        }
+
+        public SendActivity(DestinationAddressProvider<TInstance, TData> destinationAddressProvider,
+            EventMessageFactory<TInstance, TData, TMessage> messageFactory, SendContextCallback<TInstance, TData, TMessage> contextCallback)
+            : this(messageFactory, contextCallback)
+        {
+            _destinationAddressProvider = destinationAddressProvider;
+        }
+
+        public SendActivity(DestinationAddressProvider<TInstance, TData> destinationAddressProvider,
+            AsyncEventMessageFactory<TInstance, TData, TMessage> messageFactory, SendContextCallback<TInstance, TData, TMessage> contextCallback)
+            : this(messageFactory, contextCallback)
+        {
+            _destinationAddressProvider = destinationAddressProvider;
+        }
+
+        public SendActivity(EventMessageFactory<TInstance, TData, TMessage> messageFactory, SendContextCallback<TInstance, TData, TMessage> contextCallback)
+            : this(contextCallback)
+        {
+            _messageFactory = messageFactory;
+        }
+
+        public SendActivity(AsyncEventMessageFactory<TInstance, TData, TMessage> messageFactory,
+            SendContextCallback<TInstance, TData, TMessage> contextCallback)
             : this(contextCallback)
         {
             _asyncMessageFactory = messageFactory;
         }
 
-        SendActivity(Action<SendContext<TMessage>> contextCallback)
+        SendActivity(SendContextCallback<TInstance, TData, TMessage> contextCallback)
         {
-            _sendPipe = contextCallback != null ? Pipe.Execute(contextCallback) : Pipe.Empty<SendContext<TMessage>>();
+            _contextCallback = contextCallback;
         }
 
         void Visitable.Accept(StateMachineVisitor inspector)
@@ -151,8 +219,7 @@
 
         public void Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("send");
-            _sendPipe.Probe(scope);
+            context.CreateScope("send");
         }
 
         async Task Activity<TInstance, TData>.Execute(BehaviorContext<TInstance, TData> context, Behavior<TInstance, TData> next)
@@ -161,16 +228,23 @@
 
             var message = _messageFactory?.Invoke(consumeContext) ?? await _asyncMessageFactory(consumeContext).ConfigureAwait(false);
 
+            IPipe<SendContext<TMessage>> sendPipe = _contextCallback != null
+                ? Pipe.Execute<SendContext<TMessage>>(sendContext =>
+                {
+                    _contextCallback(consumeContext, sendContext);
+                })
+                : Pipe.Empty<SendContext<TMessage>>();
+
             if (_destinationAddressProvider != null)
             {
                 var destinationAddress = _destinationAddressProvider(consumeContext);
 
                 var endpoint = await consumeContext.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-                await endpoint.Send(message, _sendPipe).ConfigureAwait(false);
+                await endpoint.Send(message, sendPipe).ConfigureAwait(false);
             }
             else
-                await consumeContext.Send(message, _sendPipe).ConfigureAwait(false);
+                await consumeContext.Send(message, sendPipe).ConfigureAwait(false);
 
             await next.Execute(context).ConfigureAwait(false);
         }
@@ -179,6 +253,14 @@
             Behavior<TInstance, TData> next)
         {
             return next.Faulted(context);
+        }
+
+        static SendContextCallback<TInstance, TData, TMessage> Convert(Action<SendContext<TMessage>> contextCallback)
+        {
+            if (contextCallback == null)
+                return null;
+
+            return (_, sendContext) => contextCallback(sendContext);
         }
     }
 }
