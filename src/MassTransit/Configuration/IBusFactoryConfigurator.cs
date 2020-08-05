@@ -19,7 +19,11 @@ namespace MassTransit
         IConsumePipeConfigurator,
         ISendPipelineConfigurator,
         IPublishPipelineConfigurator,
-        IBusObserverConnector
+        IBusObserverConnector,
+        IReceiveObserverConnector,
+        IConsumeObserverConnector,
+        ISendObserverConnector,
+        IPublishObserverConnector
     {
         IMessageTopologyConfigurator MessageTopology { get; }
         IConsumeTopologyConfigurator ConsumeTopology { get; }

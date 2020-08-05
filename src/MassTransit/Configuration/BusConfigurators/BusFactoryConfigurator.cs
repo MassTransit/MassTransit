@@ -21,7 +21,11 @@
         ISendPipelineConfigurator,
         IPublishPipelineConfigurator,
         IEndpointConfigurationObserverConnector,
-        IBusObserverConnector
+        IBusObserverConnector,
+        IReceiveObserverConnector,
+        IConsumeObserverConnector,
+        ISendObserverConnector,
+        IPublishObserverConnector
     {
         readonly IBusConfiguration _busConfiguration;
 
@@ -48,6 +52,11 @@
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
             return _busConfiguration.ConnectBusObserver(observer);
+        }
+
+        public ConnectHandle ConnectConsumeObserver(IConsumeObserver observer)
+        {
+            return _busConfiguration.HostConfiguration.ConnectConsumeObserver(observer);
         }
 
         public virtual bool AutoStart
@@ -155,12 +164,27 @@
             return _busConfiguration.ConnectEndpointConfigurationObserver(observer);
         }
 
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
+        {
+            return _busConfiguration.HostConfiguration.ConnectPublishObserver(observer);
+        }
+
         public void ConfigurePublish(Action<IPublishPipeConfigurator> callback)
         {
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
             callback(_busConfiguration.Publish.Configurator);
+        }
+
+        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
+        {
+            return _busConfiguration.HostConfiguration.ConnectReceiveObserver(observer);
+        }
+
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
+        {
+            return _busConfiguration.HostConfiguration.ConnectSendObserver(observer);
         }
 
         public void ConfigureSend(Action<ISendPipeConfigurator> callback)
