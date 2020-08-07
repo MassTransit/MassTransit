@@ -222,7 +222,7 @@
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressProvider, x => message, contextCallback));
+            return source.Add(new FaultedSendActivity<TInstance, TException, TMessage>(destinationAddressProvider, x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TException> SendAsync<TInstance, TException, TMessage>(
@@ -232,7 +232,7 @@
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressProvider, x => message, contextCallback));
+            return source.Add(new FaultedSendActivity<TInstance, TException, TMessage>(destinationAddressProvider, x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TException> Send<TInstance, TException, TMessage>(
@@ -285,7 +285,7 @@
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressProvider, x => message, contextCallback));
+            return source.Add(new FaultedSendActivity<TInstance, TData, TException, TMessage>(destinationAddressProvider, x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
@@ -296,7 +296,7 @@
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new SendActivity<TInstance, TData, TMessage>(x => destinationAddressProvider(x.Instance, x.Data), x => message, contextCallback));
+            return source.Add(new FaultedSendActivity<TInstance, TData, TException, TMessage>(x => destinationAddressProvider(x.Instance, x.Data), x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> SendAsync<TInstance, TData, TException, TMessage>(
@@ -307,7 +307,7 @@
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressProvider, x => message, contextCallback));
+            return source.Add(new FaultedSendActivity<TInstance, TData, TException, TMessage>(destinationAddressProvider, x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> SendAsync<TInstance, TData, TException, TMessage>(
@@ -318,7 +318,7 @@
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new SendActivity<TInstance, TData, TMessage>(x => destinationAddressProvider(x.Instance, x.Data), x => message, contextCallback));
+            return source.Add(new FaultedSendActivity<TInstance, TData, TException, TMessage>(x => destinationAddressProvider(x.Instance, x.Data), x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
@@ -573,7 +573,7 @@
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressProvider, x => message, contextCallback));
+            return source.Add(new FaultedSendActivity<TInstance, TException, TMessage>(destinationAddressProvider, x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TException> SendAsync<TInstance, TException, TMessage>(
@@ -583,7 +583,7 @@
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new SendActivity<TInstance, TMessage>(destinationAddressProvider, x => message, contextCallback));
+            return source.Add(new FaultedSendActivity<TInstance, TException, TMessage>(destinationAddressProvider, x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TException> Send<TInstance, TException, TMessage>(
@@ -660,7 +660,7 @@
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressProvider, x => message, contextCallback));
+            return source.Add(new FaultedSendActivity<TInstance, TData, TException, TMessage>(destinationAddressProvider, x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
@@ -671,7 +671,7 @@
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new SendActivity<TInstance, TData, TMessage>(x => destinationAddressProvider(x.Instance, x.Data), x => message, contextCallback));
+            return source.Add(new FaultedSendActivity<TInstance, TData, TException, TMessage>(x => destinationAddressProvider(x.Instance, x.Data), x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> SendAsync<TInstance, TData, TException, TMessage>(
@@ -682,7 +682,7 @@
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new SendActivity<TInstance, TData, TMessage>(destinationAddressProvider, x => message, contextCallback));
+            return source.Add(new FaultedSendActivity<TInstance, TData, TException, TMessage>(destinationAddressProvider, x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> SendAsync<TInstance, TData, TException, TMessage>(
@@ -693,7 +693,7 @@
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new SendActivity<TInstance, TData, TMessage>(x => destinationAddressProvider(x.Instance, x.Data), x => message, contextCallback));
+            return source.Add(new FaultedSendActivity<TInstance, TData, TException, TMessage>(x => destinationAddressProvider(x.Instance, x.Data), x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> Send<TInstance, TData, TException, TMessage>(
