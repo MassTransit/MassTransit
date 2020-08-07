@@ -22,6 +22,10 @@ To test a consumer, use the consumer test harness (available with any transport)
 
 The harness configures the consumer on its receive endpoint. The test sends the _SubmitOrder_ event, and assertions are added using harness's observer collections.
 
+::: tip
+Checking whether a message has been processed, for instance with the `Any()` method, will wait for the consumer to finish but only if it takes less than the `TestInactivityTimeout` configured on the harness. You may need to adjust this value for long-running consumers or if you are debugging a test with breakpoints.
+:::
+
 ## Saga
 
 A standard class-based saga can be testing using the saga test harness.
