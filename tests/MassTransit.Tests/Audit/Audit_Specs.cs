@@ -34,10 +34,10 @@
         {
             _store = new InMemoryAuditStore();
             _harness = new InMemoryTestHarness();
-            _harness.OnConnectObservers += bus =>
+            _harness.OnConfigureInMemoryBus += configurator =>
             {
-                bus.ConnectSendAuditObservers(_store);
-                bus.ConnectConsumeAuditObserver(_store);
+                configurator.ConnectSendAuditObservers(_store);
+                configurator.ConnectConsumeAuditObserver(_store);
             };
             _harness.Consumer<TestConsumer>();
 

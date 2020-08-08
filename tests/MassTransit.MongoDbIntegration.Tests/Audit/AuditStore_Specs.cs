@@ -48,7 +48,7 @@
         public async Task Setup()
         {
             _harness = new InMemoryTestHarness();
-            _harness.OnConnectObservers += bus => bus.ConnectSendAuditObservers(AuditStore);
+            _harness.OnConfigureInMemoryBus += configurator => configurator.ConnectSendAuditObservers(AuditStore);
             _harness.Consumer<TestConsumer>();
 
             await _harness.Start();
@@ -105,7 +105,7 @@
         public async Task Send_message_to_test_consumer()
         {
             _harness = new InMemoryTestHarness();
-            _harness.OnConnectObservers += bus => bus.ConnectConsumeAuditObserver(AuditStore);
+            _harness.OnConfigureInMemoryBus += configurator => configurator.ConnectConsumeAuditObserver(AuditStore);
 
             ConsumerTestHarness<TestConsumer> consumer = _harness.Consumer<TestConsumer>();
 
@@ -158,10 +158,10 @@
         public async Task Send_message_to_test_consumer()
         {
             _harness = new InMemoryTestHarness();
-            _harness.OnConnectObservers += bus =>
+            _harness.OnConfigureInMemoryBus += configurator =>
             {
-                bus.ConnectConsumeAuditObserver(AuditStore);
-                bus.ConnectSendAuditObservers(AuditStore);
+                configurator.ConnectConsumeAuditObserver(AuditStore);
+                configurator.ConnectSendAuditObservers(AuditStore);
             };
 
             ConsumerTestHarness<TestConsumer> consumer = _harness.Consumer<TestConsumer>();

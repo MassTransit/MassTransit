@@ -6,7 +6,6 @@ namespace MassTransit
     using Audit.Observers;
     using Configurators;
     using GreenPipes;
-    using Pipeline;
     using Util;
 
 

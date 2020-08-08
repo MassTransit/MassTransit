@@ -1,7 +1,6 @@
 namespace MassTransit
 {
     using System;
-    using BusConfigurators;
     using EntityFrameworkCoreIntegration.Audit;
     using Microsoft.EntityFrameworkCore;
 
@@ -34,10 +33,13 @@ namespace MassTransit
             ConfigureAuditStore(configurator, dbContextOptions, auditTableName);
         }
 
-        static void ConfigureAuditStore(IBusObserverConnector configurator, DbContextOptionsBuilder dbContextOptions, string auditTableName,
+        static void ConfigureAuditStore(IBusFactoryConfigurator configurator, DbContextOptionsBuilder dbContextOptions, string auditTableName,
             Action<IMessageFilterConfigurator> configureFilter = default)
         {
-            configurator.ConnectBusObserver(new AuditBusObserver(dbContextOptions, auditTableName, configureFilter));
+            var auditStore = new EntityFrameworkAuditStore(dbContextOptions.Options, auditTableName);
+
+            configurator.ConnectSendAuditObservers(auditStore, configureFilter);
+            configurator.ConnectConsumeAuditObserver(auditStore, configureFilter);
         }
     }
 }

@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using Azure.Table.Audit;
-    using BusConfigurators;
     using Microsoft.Azure.Cosmos.Table;
 
 
@@ -124,10 +123,13 @@ namespace MassTransit
             ConfigureAuditStore(configurator, table);
         }
 
-        static void ConfigureAuditStore(IBusObserverConnector configurator, CloudTable table, Action<IMessageFilterConfigurator> configureFilter = default,
+        static void ConfigureAuditStore(IBusFactoryConfigurator configurator, CloudTable table, Action<IMessageFilterConfigurator> configureFilter = default,
             IPartitionKeyFormatter formatter = default)
         {
-            configurator.ConnectBusObserver(new AzureTableAuditBusObserver(table, configureFilter, formatter ?? new DefaultPartitionKeyFormatter()));
+            var auditStore = new AzureTableAuditStore(table, formatter ?? new DefaultPartitionKeyFormatter());
+
+            configurator.ConnectSendAuditObservers(auditStore, configureFilter);
+            configurator.ConnectConsumeAuditObserver(auditStore, configureFilter);
         }
     }
 }
