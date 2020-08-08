@@ -5,6 +5,8 @@ namespace MassTransit.Testing.Observers
 
     public interface IInactivityObserver
     {
+        void Connected(IInactivityObservationSource source);
+
         Task NoActivity();
     }
 }

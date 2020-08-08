@@ -77,6 +77,76 @@ namespace MassTransit.Tests.Testing
 
 
     [TestFixture]
+    public class When_a_slow_consumer_is_being_tested
+    {
+        [Test]
+        public void Should_have_called_the_consumer_method()
+        {
+            Assert.That(async () => await _consumer.Consumed.Any<A>(), Is.True);
+        }
+
+        [Test]
+        public void Should_have_sent_the_response_from_the_consumer()
+        {
+            Assert.That(async () => await _harness.Published.Any<B>(), Is.True);
+        }
+
+        [Test]
+        public void Should_receive_the_message_type_a()
+        {
+            Assert.That(async () => await _harness.Consumed.Any<A>(), Is.True);
+        }
+
+        [Test]
+        public void Should_send_the_initial_message_to_the_consumer()
+        {
+            Assert.That(async () => await _harness.Sent.Any<A>(), Is.True);
+        }
+
+        InMemoryTestHarness _harness;
+        ConsumerTestHarness<Testsumer> _consumer;
+
+        [OneTimeSetUp]
+        public async Task A_consumer_is_being_tested()
+        {
+            _harness = new InMemoryTestHarness();
+            _consumer = _harness.Consumer<Testsumer>();
+
+            await _harness.Start();
+
+            await _harness.InputQueueSendEndpoint.Send(new A());
+        }
+
+        [OneTimeTearDown]
+        public async Task Teardown()
+        {
+            await _harness.Stop();
+        }
+
+
+        class Testsumer :
+            IConsumer<A>
+        {
+            public async Task Consume(ConsumeContext<A> context)
+            {
+                await Task.Delay(2000);
+                await context.RespondAsync(new B());
+            }
+        }
+
+
+        class A
+        {
+        }
+
+
+        class B
+        {
+        }
+    }
+
+
+    [TestFixture]
     public class When_a_consumer_of_interfaces_is_being_tested
     {
         [Test]

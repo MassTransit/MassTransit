@@ -4,13 +4,14 @@
     using System.Threading;
     using System.Threading.Tasks;
     using MessageObservers;
-    using Util;
 
 
     public class BusTestConsumeObserver :
+        InactivityTestObserver,
         IConsumeObserver
     {
         readonly ReceivedMessageList _messages;
+        int _activeCount;
 
         public BusTestConsumeObserver(TimeSpan timeout, CancellationToken testCompleted)
         {
@@ -19,10 +20,14 @@
 
         public IReceivedMessageList Messages => _messages;
 
+        public override bool IsInactive => Interlocked.CompareExchange(ref _activeCount, int.MinValue, int.MinValue) == 0;
+
         public Task PreConsume<T>(ConsumeContext<T> context)
             where T : class
         {
-            return TaskUtil.Completed;
+            Interlocked.Increment(ref _activeCount);
+
+            return Task.CompletedTask;
         }
 
         public Task PostConsume<T>(ConsumeContext<T> context)
@@ -30,7 +35,9 @@
         {
             _messages.Add(context);
 
-            return TaskUtil.Completed;
+            Interlocked.Decrement(ref _activeCount);
+
+            return Task.CompletedTask;
         }
 
         public Task ConsumeFault<T>(ConsumeContext<T> context, Exception exception)
@@ -38,7 +45,10 @@
         {
             _messages.Add(context, exception);
 
-            return TaskUtil.Completed;
+            if (Interlocked.Decrement(ref _activeCount) == 0)
+                NotifyInactive();
+
+            return Task.CompletedTask;
         }
     }
 }
