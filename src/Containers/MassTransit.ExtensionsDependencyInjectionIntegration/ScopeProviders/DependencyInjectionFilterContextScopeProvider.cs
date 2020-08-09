@@ -9,7 +9,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 
     public class DependencyInjectionFilterContextScopeProvider<TFilter, TContext> :
         IFilterContextScopeProvider<TContext>
-        where TFilter : IFilter<TContext>
+        where TFilter : class, IFilter<TContext>
         where TContext : class, PipeContext
     {
         readonly IServiceProvider _serviceProvider;
@@ -34,8 +34,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             {
                 Context = context;
                 _scope = context.TryGetPayload(out IServiceProvider provider)
-                    ? new NoopScope(provider)
-                    : context.TryGetPayload(out ConsumeContext consumeContext) && consumeContext.TryGetPayload(out provider)
+                    || context.TryGetPayload(out ConsumeContext consumeContext) && consumeContext.TryGetPayload(out provider)
                         ? new NoopScope(provider)
                         : serviceProvider.CreateScope();
             }
@@ -47,7 +46,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
                 return default;
             }
 
-            public IFilter<TContext> Filter => _scope.ServiceProvider.GetRequiredService<TFilter>();
+            public IFilter<TContext> Filter => ActivatorUtilities.GetServiceOrCreateInstance<TFilter>(_scope.ServiceProvider);
 
             public TContext Context { get; }
 
