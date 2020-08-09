@@ -38,7 +38,6 @@ public class Startup
     {
       	//other configuration
       	services.AddScoped<IMyDependency, MyDependency>(); //register dependency
-        services.AddScoped(typeof(MySendFilter<>)); //register generic filter
           
         services.AddMassTransit(x =>
         {

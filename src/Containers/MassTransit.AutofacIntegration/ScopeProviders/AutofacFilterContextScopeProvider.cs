@@ -12,7 +12,7 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
 
     public class AutofacFilterContextScopeProvider<TFilter, TContext> :
         IFilterContextScopeProvider<TContext>
-        where TFilter : IFilter<TContext>
+        where TFilter : class, IFilter<TContext>
         where TContext : class, PipeContext
     {
         readonly ILifetimeScopeProvider _lifetimeScopeProvider;
@@ -38,8 +38,7 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
             {
                 Context = context;
                 _lifetimeScope = context.TryGetPayload(out ILifetimeScope scope)
-                    ? new NoopLifetimeScope(scope)
-                    : context.TryGetPayload(out ConsumeContext consumeContext) && consumeContext.TryGetPayload(out scope)
+                    || context.TryGetPayload(out ConsumeContext consumeContext) && consumeContext.TryGetPayload(out scope)
                         ? new NoopLifetimeScope(scope)
                         : lifetimeScope.BeginLifetimeScope();
             }
@@ -49,7 +48,7 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
                 return _lifetimeScope.DisposeAsync();
             }
 
-            public IFilter<TContext> Filter => _lifetimeScope.Resolve<TFilter>();
+            public IFilter<TContext> Filter => ActivatorUtils.GetOrCreateInstance<TFilter>(_lifetimeScope);
 
             public TContext Context { get; }
 
