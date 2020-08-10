@@ -39,6 +39,8 @@ namespace MassTransit.Conductor.Configurators
                 ? _instanceEndpointConfigurator.InputAddress
                 : throw new ConfigurationException("The instance address is not available, InstanceEndpoint is not enabled");
 
+        public IReceiveConfigurator<TEndpointConfigurator> BusConfigurator => _configurator;
+
         public void AddSpecification(ISpecification specification)
         {
             if (_instanceEndpointConfigurator != null)

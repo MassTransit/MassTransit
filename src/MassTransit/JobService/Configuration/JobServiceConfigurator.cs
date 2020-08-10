@@ -133,7 +133,7 @@ namespace MassTransit.JobService.Configuration
             if (_endpointsConfigured)
                 return;
 
-            _instanceConfigurator.ReceiveEndpoint(_options.JobStateSagaEndpointName, e =>
+            _instanceConfigurator.BusConfigurator.ReceiveEndpoint(_options.JobStateSagaEndpointName, e =>
             {
                 e.UseMessageRetry(r => r.Intervals(100, 1000, 2000, 5000));
                 e.UseInMemoryOutbox();
@@ -169,7 +169,7 @@ namespace MassTransit.JobService.Configuration
                 _jobSagaEndpointConfigurator = e;
             });
 
-            _instanceConfigurator.ReceiveEndpoint(_options.JobAttemptSagaEndpointName, e =>
+            _instanceConfigurator.BusConfigurator.ReceiveEndpoint(_options.JobAttemptSagaEndpointName, e =>
             {
                 e.UseMessageRetry(r => r.Intervals(100, 1000, 2000, 5000));
                 e.UseInMemoryOutbox();
@@ -198,7 +198,7 @@ namespace MassTransit.JobService.Configuration
                 _jobAttemptSagaEndpointConfigurator = e;
             });
 
-            _instanceConfigurator.ReceiveEndpoint(_options.JobTypeSagaEndpointName, e =>
+            _instanceConfigurator.BusConfigurator.ReceiveEndpoint(_options.JobTypeSagaEndpointName, e =>
             {
                 e.UseMessageRetry(r => r.Intervals(100, 200, 300, 500, 1000, 2000, 5000));
                 e.UseInMemoryOutbox();
