@@ -107,6 +107,7 @@ namespace MassTransit.JobService.Components.StateMachines
                     .Then(context =>
                     {
                         context.Instance.Faulted = context.Data.Timestamp;
+                        context.Instance.Reason = context.Data.Exceptions.Message;
                     })
                     .IfElse(context => context.Data.RetryDelay.HasValue,
                         retry => retry
@@ -137,6 +138,7 @@ namespace MassTransit.JobService.Components.StateMachines
                     .Then(context =>
                     {
                         context.Instance.Faulted = context.Data.Timestamp;
+                        context.Instance.Reason = "Job attempt canceled";
                     })
                     .PublishJobCanceled()
                     .TransitionTo(Canceled));
