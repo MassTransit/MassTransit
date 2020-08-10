@@ -11,7 +11,7 @@ namespace MassTransit.JobService.Configuration
         readonly IReceiveEndpointConfigurator _configurator;
         readonly Action<IReceiveEndpointConfigurator> _configureEndpoint;
         readonly JobServiceOptions _jobServiceOptions;
-        bool _configured;
+        bool _endpointConfigured;
 
         public JobServiceConsumerConfigurationObserver(IReceiveEndpointConfigurator configurator, JobServiceOptions jobServiceOptions,
             Action<IReceiveEndpointConfigurator> configureEndpoint)
@@ -27,12 +27,12 @@ namespace MassTransit.JobService.Configuration
             {
                 configurator.Options<JobServiceOptions>(options => options.Set(_jobServiceOptions));
 
-                if (_configured)
+                if (_endpointConfigured)
                     return;
 
                 _configureEndpoint(_configurator);
 
-                _configured = true;
+                _endpointConfigured = true;
             }
         }
 

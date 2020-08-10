@@ -42,6 +42,16 @@ namespace MassTransit.JobService.Configuration
                 options.JobStateSagaEndpointName = _instanceConfigurator.EndpointNameFormatter.Saga<JobSaga>();
                 options.JobAttemptSagaEndpointName = _instanceConfigurator.EndpointNameFormatter.Saga<JobAttemptSaga>();
             });
+
+            _instanceConfigurator.ConnectEndpointConfigurationObserver(new JobServiceEndpointConfigurationObserver(_options, cfg =>
+            {
+                if (_jobTypeSagaEndpointConfigurator != null)
+                    cfg.AddDependency(_jobTypeSagaEndpointConfigurator);
+                if (_jobSagaEndpointConfigurator != null)
+                    cfg.AddDependency(_jobSagaEndpointConfigurator);
+                if (_jobAttemptSagaEndpointConfigurator != null)
+                    cfg.AddDependency(_jobAttemptSagaEndpointConfigurator);
+            }));
         }
 
         IJobService JobService { get; }
@@ -209,13 +219,6 @@ namespace MassTransit.JobService.Configuration
 
                 _jobTypeSagaEndpointConfigurator = e;
             });
-
-            _instanceConfigurator.ConnectEndpointConfigurationObserver(new JobServiceEndpointConfigurationObserver(_options, cfg =>
-            {
-                cfg.AddDependency(_jobTypeSagaEndpointConfigurator);
-                cfg.AddDependency(_jobSagaEndpointConfigurator);
-                cfg.AddDependency(_jobAttemptSagaEndpointConfigurator);
-            }));
 
             _endpointsConfigured = true;
         }
