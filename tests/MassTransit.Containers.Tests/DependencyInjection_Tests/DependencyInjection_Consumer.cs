@@ -1,6 +1,7 @@
 namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 {
     using System;
+    using System.Threading.Tasks;
     using Common_Tests;
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
@@ -165,6 +166,57 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
         protected override IFilter<ConsumeContext<EasyMessage>> CreateMessageFilter()
         {
             return _provider.GetRequiredService<IFilter<ConsumeContext<EasyMessage>>>();
+        }
+    }
+
+
+    [TestFixture]
+    public class DependencyInjection_Consumer_ScopedFilterOrder :
+        Common_Consumer_ScopedFilterOrder<IServiceProvider>
+    {
+        readonly IServiceProvider _provider;
+
+        public DependencyInjection_Consumer_ScopedFilterOrder()
+        {
+            _provider = new ServiceCollection()
+                .AddSingleton(MessageCompletion)
+                .AddMassTransit(ConfigureRegistration)
+                .BuildServiceProvider();
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
+            DependencyInjectionFilterExtensions.UseConsumeFilter(configurator, typeof(MessageFilter<>), Registration);
+        }
+
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
+
+
+        class MessageFilter<TMessage> :
+            IFilter<ConsumeContext<TMessage>>
+            where TMessage : class
+        {
+            readonly TaskCompletionSource<ConsumeContext<TMessage>> _taskCompletionSource;
+
+            public MessageFilter(TaskCompletionSource<ConsumeContext<TMessage>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
+            {
+                if (context.TryGetPayload(out IServiceProvider _))
+                    _taskCompletionSource.TrySetResult(context);
+                else
+                    _taskCompletionSource.TrySetException(new PayloadException("Service Provider not found"));
+
+                return next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
         }
     }
 }
