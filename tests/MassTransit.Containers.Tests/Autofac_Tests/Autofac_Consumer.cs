@@ -207,4 +207,62 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             return _container.Resolve<IFilter<ConsumeContext<EasyMessage>>>();
         }
     }
+
+
+    [TestFixture]
+    public class Autofac_Consumer_ScopedFilterOrder :
+        Common_Consumer_ScopedFilterOrder<ILifetimeScope>
+    {
+        readonly IContainer _container;
+
+        public Autofac_Consumer_ScopedFilterOrder()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterInstance(MessageCompletion);
+            builder.AddMassTransit(ConfigureRegistration);
+
+            _container = builder.Build();
+        }
+
+        [OneTimeTearDown]
+        public async Task Close_container()
+        {
+            await _container.DisposeAsync();
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
+            AutofacFilterExtensions.UseConsumeFilter(configurator, typeof(MessageFilter<>), Registration);
+        }
+
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
+
+
+        class MessageFilter<TMessage> :
+            IFilter<ConsumeContext<TMessage>>
+            where TMessage : class
+        {
+            readonly TaskCompletionSource<ConsumeContext<TMessage>> _taskCompletionSource;
+
+            public MessageFilter(TaskCompletionSource<ConsumeContext<TMessage>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
+            {
+                if (context.TryGetPayload(out ILifetimeScope _))
+                    _taskCompletionSource.TrySetResult(context);
+                else
+                    _taskCompletionSource.TrySetException(new PayloadException("Service Provider not found"));
+
+                return next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+        }
+    }
 }

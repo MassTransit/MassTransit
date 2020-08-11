@@ -117,9 +117,9 @@
     public abstract class Common_Consume_FilterScope :
         InMemoryTestFixture
     {
-        protected readonly TaskCompletionSource<ScopedContext> ScopedContextSource;
         protected readonly TaskCompletionSource<ConsumeContext<EasyA>> EasyASource;
         protected readonly TaskCompletionSource<ConsumeContext<EasyB>> EasyBSource;
+        protected readonly TaskCompletionSource<ScopedContext> ScopedContextSource;
 
         protected Common_Consume_FilterScope()
         {
@@ -138,7 +138,7 @@
             await EasyASource.Task;
             await EasyBSource.Task;
 
-            ScopedContext context = await ScopedContextSource.Task.OrCanceled(InactivityToken);
+            var context = await ScopedContextSource.Task.OrCanceled(InactivityToken);
 
             await context.ConsumeContext.Task.OrCanceled(InactivityToken);
 
@@ -453,9 +453,9 @@
     public abstract class Common_Consumer_FilterOrder :
         InMemoryTestFixture
     {
-        protected readonly TaskCompletionSource<ConsumeContext<EasyMessage>> MessageCompletion;
-        protected readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer, EasyMessage>> ConsumerMessageCompletion;
         protected readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer>> ConsumerCompletion;
+        protected readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer, EasyMessage>> ConsumerMessageCompletion;
+        protected readonly TaskCompletionSource<ConsumeContext<EasyMessage>> MessageCompletion;
 
         protected Common_Consumer_FilterOrder()
         {
@@ -599,6 +599,134 @@
                     _taskCompletionSource.TrySetException(new PayloadException("Service Provider should not be present"));
                 else
                     _taskCompletionSource.TrySetResult(context);
+
+                return next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+        }
+    }
+
+
+    public abstract class Common_Consumer_ScopedFilterOrder<TScope> :
+        InMemoryTestFixture
+        where TScope : class
+    {
+        readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer>> _consumerCompletion;
+        readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer, EasyMessage>> _consumerMessageCompletion;
+        protected readonly TaskCompletionSource<ConsumeContext<EasyMessage>> MessageCompletion;
+
+        protected Common_Consumer_ScopedFilterOrder()
+        {
+            MessageCompletion = GetTask<ConsumeContext<EasyMessage>>();
+            _consumerCompletion = GetTask<ConsumerConsumeContext<EasyConsumer>>();
+            _consumerMessageCompletion = GetTask<ConsumerConsumeContext<EasyConsumer, EasyMessage>>();
+        }
+
+        protected abstract IBusRegistrationContext Registration { get; }
+
+        [Test]
+        public async Task Should_include_container_scope()
+        {
+            await InputQueueSendEndpoint.Send(new EasyMessage {CorrelationId = NewId.NextGuid()});
+
+            ConsumerConsumeContext<EasyConsumer> consumerContext = await _consumerCompletion.Task;
+            var scope = consumerContext.GetPayload<TScope>();
+
+            ConsumerConsumeContext<EasyConsumer, EasyMessage> consumerMessageContext = await _consumerMessageCompletion.Task;
+            Assert.AreEqual(scope, consumerMessageContext.GetPayload<TScope>());
+
+            ConsumeContext<EasyMessage> messageContext = await MessageCompletion.Task;
+            Assert.AreEqual(scope, messageContext.GetPayload<TScope>());
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.ConfigureConsumer<EasyConsumer>(Registration, x =>
+            {
+                x.UseFilter(new ConsumerFilter<EasyConsumer>(_consumerCompletion));
+
+                x.ConsumerMessage<EasyMessage>(m => m.UseFilter(new ConsumerMessageFilter<EasyConsumer, EasyMessage>(_consumerMessageCompletion)));
+            });
+        }
+
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<EasyConsumer>();
+            configurator.AddBus(provider => BusControl);
+        }
+
+
+        public class EasyMessage
+        {
+            public Guid CorrelationId { get; set; }
+        }
+
+
+        class EasyConsumer :
+            IConsumer<EasyMessage>
+        {
+            readonly TaskCompletionSource<ConsumeContext<EasyMessage>> _received;
+
+            public EasyConsumer(TaskCompletionSource<ConsumeContext<EasyMessage>> received)
+            {
+                _received = received;
+            }
+
+            public async Task Consume(ConsumeContext<EasyMessage> context)
+            {
+                _received.TrySetResult(context);
+            }
+        }
+
+
+        class ConsumerFilter<TConsumer> :
+            IFilter<ConsumerConsumeContext<TConsumer>>
+            where TConsumer : class, IConsumer
+        {
+            readonly TaskCompletionSource<ConsumerConsumeContext<TConsumer>> _taskCompletionSource;
+
+            public ConsumerFilter(TaskCompletionSource<ConsumerConsumeContext<TConsumer>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public Task Send(ConsumerConsumeContext<TConsumer> context, IPipe<ConsumerConsumeContext<TConsumer>> next)
+            {
+                if (context.TryGetPayload(out TScope _))
+                    _taskCompletionSource.TrySetResult(context);
+                else
+                    _taskCompletionSource.TrySetException(new PayloadException("Service Provider not found"));
+
+                return next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+        }
+
+
+        class ConsumerMessageFilter<TConsumer, TMessage> :
+            IFilter<ConsumerConsumeContext<TConsumer, TMessage>>
+            where TConsumer : class
+            where TMessage : class
+        {
+            readonly TaskCompletionSource<ConsumerConsumeContext<TConsumer, TMessage>> _taskCompletionSource;
+
+            public ConsumerMessageFilter(TaskCompletionSource<ConsumerConsumeContext<TConsumer, TMessage>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public Task Send(ConsumerConsumeContext<TConsumer, TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
+            {
+                if (context.TryGetPayload(out TScope _))
+                    _taskCompletionSource.TrySetResult(context);
+                else
+                    _taskCompletionSource.TrySetException(new PayloadException("Service Provider not found"));
 
                 return next.Send(context);
             }
