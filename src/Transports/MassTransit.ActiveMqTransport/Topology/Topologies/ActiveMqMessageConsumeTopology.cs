@@ -27,9 +27,11 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
             _messageTopology = messageTopology;
             _publishTopology = publishTopology;
 
-            _consumerName = $"Consumer.{{queue}}.VirtualTopic.{messageTopology.EntityName}";
+            _consumerName = $"VirtualTopic.{messageTopology.EntityName}::Consumer.{{queue}}.VirtualTopic.{messageTopology.EntityName}";
 
             _specifications = new List<IActiveMqConsumeTopologySpecification>();
+
+
         }
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)

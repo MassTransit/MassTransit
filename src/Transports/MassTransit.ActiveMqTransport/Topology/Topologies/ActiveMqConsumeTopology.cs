@@ -70,8 +70,12 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
 
         public override string CreateTemporaryQueueName(string tag)
         {
+            //var result = base.CreateTemporaryQueueName(tag);
+            //return new string(result.Where(c => c != '.').ToArray());
             var result = base.CreateTemporaryQueueName(tag);
-            return new string(result.Where(c => c != '.').ToArray());
+            var tempName = new string(result.Where(c => c != '.').ToArray());
+
+            return $"avgpv.{tempName}";
         }
 
         public override IEnumerable<ValidationResult> Validate()
