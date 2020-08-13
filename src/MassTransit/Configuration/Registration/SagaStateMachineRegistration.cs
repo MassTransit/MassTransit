@@ -38,6 +38,11 @@ namespace MassTransit.Registration
         {
             var stateMachine = configurationServiceProvider.GetRequiredService<SagaStateMachine<TInstance>>();
             var repository = configurationServiceProvider.GetRequiredService<ISagaRepository<TInstance>>();
+
+            var decoratorRegistration = configurationServiceProvider.GetService<ISagaRepositoryDecoratorRegistration<TInstance>>();
+            if (decoratorRegistration != null)
+                repository = decoratorRegistration.DecorateSagaRepository(repository);
+
             var stateMachineConfigurator = new StateMachineSagaConfigurator<TInstance>(stateMachine, repository, configurator);
 
             GetSagaDefinition(configurationServiceProvider)

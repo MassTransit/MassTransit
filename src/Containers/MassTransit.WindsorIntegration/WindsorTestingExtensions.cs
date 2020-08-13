@@ -8,7 +8,7 @@ namespace MassTransit.Testing
 
     public static class WindsorTestingExtensions
     {
-        public static IWindsorContainer AddInMemoryTestHarness(this IWindsorContainer container, Action<IWindsorContainerBusConfigurator> configure = null)
+        public static IWindsorContainer AddMassTransitInMemoryTestHarness(this IWindsorContainer container, Action<IWindsorContainerBusConfigurator> configure = null)
         {
             container.Register(Component.For<InMemoryTestHarness>().UsingFactoryMethod(kernel =>
             {

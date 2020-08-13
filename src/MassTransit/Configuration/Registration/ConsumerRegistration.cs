@@ -36,7 +36,12 @@ namespace MassTransit.Registration
         void IConsumerRegistration.Configure(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider)
         {
             var scopeProvider = configurationServiceProvider.GetRequiredService<IConsumerScopeProvider>();
-            var consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
+            IConsumerFactory<TConsumer> consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
+
+            var decoratorRegistration = configurationServiceProvider.GetService<IConsumerFactoryDecoratorRegistration<TConsumer>>();
+            if (decoratorRegistration != null)
+                consumerFactory = decoratorRegistration.DecorateConsumerFactory(consumerFactory);
+
             var consumerConfigurator = new ConsumerConfigurator<TConsumer>(consumerFactory, configurator);
 
             GetConsumerDefinition(configurationServiceProvider)

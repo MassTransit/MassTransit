@@ -35,6 +35,11 @@ namespace MassTransit.Registration
         void ISagaRegistration.Configure(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider)
         {
             var repository = configurationServiceProvider.GetRequiredService<ISagaRepository<TSaga>>();
+
+            var decoratorRegistration = configurationServiceProvider.GetService<ISagaRepositoryDecoratorRegistration<TSaga>>();
+            if (decoratorRegistration != null)
+                repository = decoratorRegistration.DecorateSagaRepository(repository);
+
             var sagaConfigurator = new SagaConfigurator<TSaga>(repository, configurator);
 
             GetSagaDefinition(configurationServiceProvider)

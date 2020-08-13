@@ -7,7 +7,7 @@ namespace MassTransit.Testing
 
     public static class StructureMapTestingExtensions
     {
-        public static ConfigurationExpression AddInMemoryTestHarness(this ConfigurationExpression configuration,
+        public static ConfigurationExpression AddMassTransitInMemoryTestHarness(this ConfigurationExpression configuration,
             Action<IConfigurationExpressionBusConfigurator> configure = null)
         {
             configuration.For<InMemoryTestHarness>().Use(provider => CreateInMemoryTestHarness(provider)).Singleton();

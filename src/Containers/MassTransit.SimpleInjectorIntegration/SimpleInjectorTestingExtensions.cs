@@ -7,7 +7,7 @@ namespace MassTransit.Testing
 
     public static class SimpleInjectorTestingExtensions
     {
-        public static Container AddInMemoryTestHarness(this Container container,
+        public static Container AddMassTransitInMemoryTestHarness(this Container container,
             Action<ISimpleInjectorBusConfigurator> configure = null)
         {
             container.RegisterSingleton(() =>

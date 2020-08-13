@@ -15,7 +15,7 @@ namespace MassTransit.Containers.Tests
         public async Task Should_support_the_test_harness()
         {
             var container = new WindsorContainer()
-                .AddInMemoryTestHarness(cfg =>
+                .AddMassTransitInMemoryTestHarness(cfg =>
                 {
                     cfg.AddConsumer<PingRequestConsumer>();
                 });

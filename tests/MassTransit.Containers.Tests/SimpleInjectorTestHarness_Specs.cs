@@ -18,7 +18,7 @@ namespace MassTransit.Containers.Tests
             var container = new Container();
             container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
 
-            container.AddInMemoryTestHarness(cfg =>
+            container.AddMassTransitInMemoryTestHarness(cfg =>
             {
                 cfg.AddConsumer<PingRequestConsumer>();
             });

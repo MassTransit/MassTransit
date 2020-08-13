@@ -7,19 +7,29 @@ namespace MassTransit.Testing
     using Saga;
 
 
-    public class StateMachineSagaTestHarness<TInstance, TStateMachine> :
-        SagaTestHarness<TInstance>,
+    public class RegistrationStateMachineSagaTestHarness<TInstance, TStateMachine> :
+        BaseSagaTestHarness<TInstance>,
         IStateMachineSagaTestHarness<TInstance, TStateMachine>
         where TInstance : class, SagaStateMachineInstance
         where TStateMachine : SagaStateMachine<TInstance>
     {
         readonly TStateMachine _stateMachine;
 
-        public StateMachineSagaTestHarness(BusTestHarness testHarness, ISagaRepository<TInstance> repository, TStateMachine stateMachine, string queueName)
-            : base(testHarness, repository, queueName)
+        public RegistrationStateMachineSagaTestHarness(SagaTestHarnessRegistration<TInstance> registration, ISagaRepository<TInstance> repository,
+            TStateMachine stateMachine)
+            : base(repository, registration.TestTimeout)
         {
             _stateMachine = stateMachine;
+            Consumed = registration.Consumed;
+            Created = registration.Created;
+            Sagas = registration.Sagas;
         }
+
+        public IReceivedMessageList Consumed { get; }
+
+        public ISagaList<TInstance> Sagas { get; }
+
+        public ISagaList<TInstance> Created { get; }
 
         /// <summary>
         /// Waits until a saga exists with the specified correlationId in the specified state
@@ -61,19 +71,6 @@ namespace MassTransit.Testing
             }
 
             return default;
-        }
-
-        protected override void ConfigureReceiveEndpoint(IReceiveEndpointConfigurator configurator)
-        {
-            configurator.StateMachineSaga(_stateMachine, TestRepository);
-        }
-
-        protected override void ConfigureNamedReceiveEndpoint(IBusFactoryConfigurator configurator, string queueName)
-        {
-            configurator.ReceiveEndpoint(queueName, x =>
-            {
-                x.StateMachineSaga(_stateMachine, TestRepository);
-            });
         }
     }
 }

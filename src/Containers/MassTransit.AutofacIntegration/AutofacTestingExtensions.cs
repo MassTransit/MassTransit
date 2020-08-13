@@ -7,7 +7,10 @@ namespace MassTransit.AutofacIntegration
 
     public static class AutofacTestingExtensions
     {
-        public static ContainerBuilder AddInMemoryTestHarness(this ContainerBuilder builder,
+        /// <summary>
+        /// Add the In-Memory test harness to the container, and configure it using the callback specified.
+        /// </summary>
+        public static ContainerBuilder AddMassTransitInMemoryTestHarness(this ContainerBuilder builder,
             Action<IContainerBuilderBusConfigurator> configure = null)
         {
             builder.Register(provider =>
