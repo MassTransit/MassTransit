@@ -13,7 +13,7 @@
         /// <typeparam name="TActivity"></typeparam>
         /// <returns></returns>
         EventActivityBinder<TInstance, TData> OfType<TActivity>()
-            where TActivity : Activity<TInstance, TData>;
+            where TActivity : class, Activity<TInstance, TData>;
 
         /// <summary>
         /// An activity that only accepts the instance, and does not require the event data
@@ -21,7 +21,7 @@
         /// <typeparam name="TActivity"></typeparam>
         /// <returns></returns>
         EventActivityBinder<TInstance, TData> OfInstanceType<TActivity>()
-            where TActivity : Activity<TInstance>;
+            where TActivity : class, Activity<TInstance>;
     }
 
 
@@ -34,6 +34,6 @@
         /// <typeparam name="TActivity"></typeparam>
         /// <returns></returns>
         EventActivityBinder<TInstance> OfType<TActivity>()
-            where TActivity : Activity<TInstance>;
+            where TActivity : class, Activity<TInstance>;
     }
 }

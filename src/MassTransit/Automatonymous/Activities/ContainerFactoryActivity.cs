@@ -7,7 +7,7 @@
 
     public class ContainerFactoryActivity<TInstance, TActivity> :
         Activity<TInstance>
-        where TActivity : Activity<TInstance>
+        where TActivity : class, Activity<TInstance>
     {
         void Visitable.Accept(StateMachineVisitor visitor)
         {
@@ -53,7 +53,7 @@
 
     public class ContainerFactoryActivity<TInstance, TData, TActivity> :
         Activity<TInstance, TData>
-        where TActivity : Activity<TInstance, TData>
+        where TActivity : class, Activity<TInstance, TData>
     {
         void Visitable.Accept(StateMachineVisitor visitor)
         {

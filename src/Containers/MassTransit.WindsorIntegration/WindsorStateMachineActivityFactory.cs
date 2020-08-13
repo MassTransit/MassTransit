@@ -11,7 +11,7 @@
         public static readonly IStateMachineActivityFactory Instance = new WindsorStateMachineActivityFactory();
 
         public Activity<TInstance, TData> GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
-            where TActivity : Activity<TInstance, TData>
+            where TActivity : class, Activity<TInstance, TData>
         {
             var container = context.GetPayload<IKernel>();
 
@@ -19,7 +19,7 @@
         }
 
         public Activity<TInstance> GetActivity<TActivity, TInstance>(BehaviorContext<TInstance> context)
-            where TActivity : Activity<TInstance>
+            where TActivity : class, Activity<TInstance>
         {
             var container = context.GetPayload<IKernel>();
 

@@ -3,6 +3,7 @@
     using Autofac;
     using Automatonymous;
     using GreenPipes;
+    using ScopeProviders;
 
 
     public class AutofacStateMachineActivityFactory :
@@ -11,19 +12,19 @@
         public static readonly IStateMachineActivityFactory Instance = new AutofacStateMachineActivityFactory();
 
         public Activity<TInstance, TData> GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
-            where TActivity : Activity<TInstance, TData>
+            where TActivity : class, Activity<TInstance, TData>
         {
             var lifetimeScope = context.GetPayload<ILifetimeScope>();
 
-            return lifetimeScope.Resolve<TActivity>();
+            return ActivatorUtils.GetOrCreateInstance<TActivity>(lifetimeScope);
         }
 
         public Activity<TInstance> GetActivity<TActivity, TInstance>(BehaviorContext<TInstance> context)
-            where TActivity : Activity<TInstance>
+            where TActivity : class, Activity<TInstance>
         {
             var lifetimeScope = context.GetPayload<ILifetimeScope>();
 
-            return lifetimeScope.Resolve<TActivity>();
+            return ActivatorUtils.GetOrCreateInstance<TActivity>(lifetimeScope);
         }
     }
 }

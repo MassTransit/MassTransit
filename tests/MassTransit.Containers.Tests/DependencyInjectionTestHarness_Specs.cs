@@ -5,6 +5,7 @@ namespace MassTransit.Containers.Tests
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Automatonymous;
+    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Saga;
@@ -252,12 +253,14 @@ namespace MassTransit.Containers.Tests
 
                 Assert.That(await sagaHarness.Consumed.Any<Start>());
 
+                Assert.That(await sagaHarness.Created.Any(x => x.CorrelationId == sagaId));
+
                 var machine = provider.GetRequiredService<TestStateMachine>();
 
                 var instance = sagaHarness.Created.ContainsInState(sagaId, machine, machine.Running);
                 Assert.IsNotNull(instance, "Saga instance not found");
 
-                Assert.That(await sagaHarness.Created.Any(x => x.CorrelationId == sagaId));
+                Assert.IsTrue(await harness.Published.Any<Started>(), "Event not published");
             }
             finally
             {
@@ -292,21 +295,51 @@ namespace MassTransit.Containers.Tests
             {
                 InstanceState(x => x.CurrentState);
 
-                Event(() => Started);
-                Event(() => Stopped, x => x.CorrelateById(context => context.Message.CorrelationId));
+                Event(() => StartReceived);
 
                 Initially(
-                    When(Started)
+                    When(StartReceived)
+                        .Activity(x => x.OfType<StartupActivity>())
                         .TransitionTo(Running));
-
-                During(Running,
-                    When(Stopped)
-                        .Finalize());
             }
 
-            public State Running { get; private set; }
-            public Event<Start> Started { get; private set; }
-            public Event<Stop> Stopped { get; private set; }
+            // ReSharper disable UnassignedGetOnlyAutoProperty
+            public State Running { get; }
+            public Event<Start> StartReceived { get; }
+        }
+
+
+        class StartupActivity :
+            Activity<Instance, Start>
+        {
+            readonly IPublishEndpoint _publishEndpoint;
+
+            public StartupActivity(IPublishEndpoint publishEndpoint)
+            {
+                _publishEndpoint = publishEndpoint;
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+
+            public void Accept(StateMachineVisitor visitor)
+            {
+                visitor.Visit(this);
+            }
+
+            public async Task Execute(BehaviorContext<Instance, Start> context, Behavior<Instance, Start> next)
+            {
+                await _publishEndpoint.Publish(new Started {CorrelationId = context.Instance.CorrelationId});
+
+                await next.Execute(context);
+            }
+
+            public Task Faulted<TException>(BehaviorExceptionContext<Instance, Start, TException> context, Behavior<Instance, Start> next)
+                where TException : Exception
+            {
+                return next.Faulted(context);
+            }
         }
 
 
@@ -317,7 +350,8 @@ namespace MassTransit.Containers.Tests
         }
 
 
-        class Stop
+        class Started :
+            CorrelatedBy<Guid>
         {
             public Guid CorrelationId { get; set; }
         }

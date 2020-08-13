@@ -11,7 +11,7 @@
         /// <param name="context"></param>
         /// <returns></returns>
         Activity<TInstance, TData> GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
-            where TActivity : Activity<TInstance, TData>;
+            where TActivity : class, Activity<TInstance, TData>;
 
         /// <summary>
         /// Creates a state machine activity for the specified context
@@ -21,6 +21,6 @@
         /// <param name="context"></param>
         /// <returns></returns>
         Activity<TInstance> GetActivity<TActivity, TInstance>(BehaviorContext<TInstance> context)
-            where TActivity : Activity<TInstance>;
+            where TActivity : class, Activity<TInstance>;
     }
 }

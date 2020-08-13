@@ -7,13 +7,13 @@ namespace Automatonymous
         IStateMachineActivityFactory
     {
         public Activity<TInstance, TData> GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
-            where TActivity : Activity<TInstance, TData>
+            where TActivity : class, Activity<TInstance, TData>
         {
             return (Activity<TInstance, TData>)Activator.CreateInstance(typeof(TActivity));
         }
 
         public Activity<TInstance> GetActivity<TActivity, TInstance>(BehaviorContext<TInstance> context)
-            where TActivity : Activity<TInstance>
+            where TActivity : class, Activity<TInstance>
         {
             return (Activity<TInstance>)Activator.CreateInstance(typeof(TActivity));
         }
