@@ -19,7 +19,7 @@
         {
             var builder = new PublishEndpointBrokerTopologyBuilder();
 
-            builder.CreateQueue(EntityName, Durable, AutoDelete, null, null, QueueTags);
+            builder.CreateQueue(EntityName, Durable, AutoDelete, QueueAttributes, QueueSubscriptionAttributes, QueueTags);
 
             return builder.BuildBrokerTopology();
         }
