@@ -76,7 +76,7 @@ deploy:
   symbol_server: https://www.nuget.org
   artifact: NuGet, Symbols
   api_key:
-    secure: IXB1AHgV9Bp8wic6oljIngn3e2gQuLZhpxa1yi8JpX1psFpKIDjYlyyDya01z56o
+    secure: rkQJpJebuP2jux5eZQLIiNSXs0NZmbC9s372eNosloj77PkdBQbLgMUYpzjn5lLE
   on:
     branch: vnext
 - provider: NuGet
@@ -84,7 +84,7 @@ deploy:
   symbol_server: https://www.nuget.org
   artifact: NuGet, Symbols
   api_key:
-    secure: IXB1AHgV9Bp8wic6oljIngn3e2gQuLZhpxa1yi8JpX1psFpKIDjYlyyDya01z56o
+    secure: rkQJpJebuP2jux5eZQLIiNSXs0NZmbC9s372eNosloj77PkdBQbLgMUYpzjn5lLE
   on:
     branch: develop
 - provider: NuGet
@@ -92,7 +92,7 @@ deploy:
   symbol_server: https://www.nuget.org
   artifact: NuGet, Symbols
   api_key:
-    secure: IXB1AHgV9Bp8wic6oljIngn3e2gQuLZhpxa1yi8JpX1psFpKIDjYlyyDya01z56o
+    secure: rkQJpJebuP2jux5eZQLIiNSXs0NZmbC9s372eNosloj77PkdBQbLgMUYpzjn5lLE
   on:
     branch: master
 
