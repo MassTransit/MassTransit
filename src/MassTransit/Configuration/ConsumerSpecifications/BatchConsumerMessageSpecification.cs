@@ -47,11 +47,19 @@ namespace MassTransit.ConsumerSpecifications
 
         public IEnumerable<ValidationResult> Validate()
         {
-            var specification = this as IConsumerMessageConfigurator<TConsumer, TMessage>;
+            var specification = this as IConsumerMessageConfigurator<IConsumer<TMessage>, TMessage>;
 
             _observers.All(observer =>
             {
                 observer.ConsumerMessageConfigured(specification);
+                return true;
+            });
+
+            var batchSpecification = this as IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>;
+
+            _observers.All(observer =>
+            {
+                observer.ConsumerMessageConfigured(batchSpecification);
                 return true;
             });
 

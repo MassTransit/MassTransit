@@ -28,6 +28,15 @@
             configurator.AddPipeSpecification(specification);
         }
 
+        public override void BatchConsumerConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, Batch<TMessage>> configurator)
+        {
+            var specification = new InMemoryOutboxSpecification<Batch<TMessage>>();
+
+            _configure?.Invoke(specification);
+
+            configurator.Message(m => m.AddPipeSpecification(specification));
+        }
+
         public override void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
         {
             var specification = new InMemoryExecuteContextOutboxSpecification<TArguments>();

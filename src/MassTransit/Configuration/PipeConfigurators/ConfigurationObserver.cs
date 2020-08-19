@@ -7,6 +7,7 @@
     using Courier;
     using Courier.Contracts;
     using GreenPipes.Util;
+    using Internals.Extensions;
     using Saga;
     using SagaConfigurators;
 
@@ -65,7 +66,15 @@
 
         void IConsumerConfigurationObserver.ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
         {
-            NotifyObserver<TMessage>();
+            if (typeof(TMessage).ClosesType(typeof(Batch<>), out Type[] types))
+            {
+                typeof(ConfigurationObserver)
+                    .GetMethod(nameof(BatchConsumerConfigured))
+                    .MakeGenericMethod(typeof(TConsumer), types[0])
+                    .Invoke(this, new object[] {configurator});
+            }
+            else
+                NotifyObserver<TMessage>();
         }
 
         void IHandlerConfigurationObserver.HandlerConfigured<TMessage>(IHandlerConfigurator<TMessage> configurator)
@@ -85,6 +94,12 @@
         void ISagaConfigurationObserver.SagaMessageConfigured<TSaga, TMessage>(ISagaMessageConfigurator<TSaga, TMessage> configurator)
         {
             NotifyObserver<TMessage>();
+        }
+
+        public virtual void BatchConsumerConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, Batch<TMessage>> configurator)
+            where TConsumer : class, IConsumer<Batch<TMessage>>
+            where TMessage : class
+        {
         }
 
         void NotifyObserver<TMessage>()

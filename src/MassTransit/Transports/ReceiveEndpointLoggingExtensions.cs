@@ -30,8 +30,8 @@ namespace MassTransit.Transports
         static readonly LogMessage<Uri, string> _logSkipped = LogContext.Define<Uri, string>(LogLevel.Debug,
             "SKIP {InputAddress} {MessageId}");
 
-        static readonly LogMessage<Uri, Guid?> _logRetry = LogContext.Define<Uri, Guid?>(LogLevel.Warning,
-            "R-RETRY {InputAddress} {MessageId}");
+        static readonly LogMessage<Uri, Guid?, string> _logRetry = LogContext.Define<Uri, Guid?, string>(LogLevel.Warning,
+            "R-RETRY {InputAddress} {MessageId} {MessageType}");
 
         static readonly LogMessage<Uri, string> _logFault = LogContext.Define<Uri, string>(LogLevel.Error,
             "T-FAULT {InputAddress} {MessageId}");
@@ -97,7 +97,14 @@ namespace MassTransit.Transports
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogRetry(this ConsumeContext context, Exception exception)
         {
-            _logRetry(context.ReceiveContext.InputAddress, context.MessageId, exception);
+            _logRetry(context.ReceiveContext.InputAddress, context.MessageId, TypeMetadataCache.GetShortName(context.GetType()), exception);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void LogRetry<TContext>(this TContext context, Exception exception)
+            where TContext : class, ConsumeContext
+        {
+            _logRetry(context.ReceiveContext.InputAddress, context.MessageId, TypeMetadataCache<TContext>.ShortName, exception);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

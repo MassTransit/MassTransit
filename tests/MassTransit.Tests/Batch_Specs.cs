@@ -3,13 +3,13 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using Microsoft.Extensions.Logging;
+    using Microsoft.VisualStudio.TestPlatform.Utilities;
     using NUnit.Framework;
     using TestFramework;
-    using TestFramework.Logging;
     using TestFramework.Messages;
     using Util;
 
@@ -179,6 +179,113 @@
 
 
     [TestFixture]
+    public class Configuring_the_batch_consumer_pipeline :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_include_the_outbox()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            Batch<PingMessage> batch = await _consumer.Completed;
+
+            Assert.That(batch.Length, Is.EqualTo(4));
+        }
+
+        TestOutboxBatchConsumer _consumer;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.TransportConcurrencyLimit = 16;
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new TestOutboxBatchConsumer(GetTask<Batch<PingMessage>>());
+
+            configurator.Consumer(() => _consumer, x =>
+            {
+                x.Message<Batch<PingMessage>>(m => m.UseInMemoryOutbox());
+            });
+        }
+    }
+
+
+    [TestFixture]
+    public class Configuring_the_batch_endpoint_pipeline :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_include_the_outbox()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            Batch<PingMessage> batch = await _consumer.Completed;
+
+            Assert.That(batch.Length, Is.EqualTo(4));
+        }
+
+        TestOutboxBatchConsumer _consumer;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.TransportConcurrencyLimit = 16;
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new TestOutboxBatchConsumer(GetTask<Batch<PingMessage>>());
+
+            configurator.UseInMemoryOutbox();
+
+            configurator.Consumer(() => _consumer);
+        }
+    }
+
+
+    [TestFixture]
+    public class Configuring_the_batch_endpoint_pipeline_with_retry :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_include_the_outbox_and_retry_the_same_batch()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            Batch<PingMessage> batch = await _consumer.Completed;
+
+            Assert.That(batch.Length, Is.EqualTo(4));
+        }
+
+        TestRetryOutboxBatchConsumer _consumer;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.TransportConcurrencyLimit = 16;
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new TestRetryOutboxBatchConsumer(GetTask<Batch<PingMessage>>());
+
+            configurator.UseMessageRetry(r => r.Immediate(2));
+            configurator.UseInMemoryOutbox();
+
+            configurator.Consumer(() => _consumer);
+        }
+    }
+
+
+    [TestFixture]
     public class Receiving_a_bunch_of_messages_in_a_batch_by_convention_using_mediator :
         InMemoryTestFixture
     {
@@ -209,6 +316,18 @@
     public class Using_a_batch_consumer :
         InMemoryTestFixture
     {
+        [Test]
+        public async Task Should_not_deliver_duplicate_messages()
+        {
+            IEnumerable<DoWork> messages = Enumerable.Range(0, Count).Select(x => new DoWork());
+            foreach (var msg in messages)
+                await InputQueueSendEndpoint.Send(msg);
+
+            await _completed.Task;
+
+            Assert.That(_duplicateMessages.Count, Is.EqualTo(0));
+        }
+
         public Using_a_batch_consumer()
         {
             TestTimeout = TimeSpan.FromMinutes(2);
@@ -216,20 +335,6 @@
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-        }
-
-        [Test]
-        public async Task Should_not_deliver_duplicate_messages()
-        {
-            var messages = Enumerable.Range(0, Count).Select(x => new DoWork());
-            foreach (var msg in messages)
-            {
-                await InputQueueSendEndpoint.Send(msg);
-            }
-
-            await _completed.Task;
-
-            Assert.That(_duplicateMessages.Count, Is.EqualTo(0));
         }
 
         readonly HashSet<Guid> _alreadyReceivedMessages = new HashSet<Guid>();
@@ -260,8 +365,8 @@
             IConsumer<Batch<DoWork>>
         {
             readonly HashSet<Guid> _alreadyReceivedMessages;
-            readonly HashSet<Guid> _duplicateMessages;
             readonly TaskCompletionSource<int> _completed;
+            readonly HashSet<Guid> _duplicateMessages;
 
             public DoWorkConsumer(HashSet<Guid> alreadyReceivedMessages, HashSet<Guid> duplicateMessages, TaskCompletionSource<int> completed)
             {
@@ -274,7 +379,7 @@
             {
                 lock (_alreadyReceivedMessages)
                 {
-                    foreach (var msg in context.Message)
+                    foreach (ConsumeContext<DoWork> msg in context.Message)
                     {
                         if (_alreadyReceivedMessages.Contains(msg.MessageId.Value))
                         {
@@ -289,12 +394,10 @@
                     }
                 }
 
-                for (int i = 0; i < 50000000; i++)
+                for (var i = 0; i < 50000000; i++)
                 {
                     if (i % 5000000 == 0)
-                    {
                         await Task.Yield();
-                    }
                 }
             }
         }
@@ -316,6 +419,62 @@
         public Task Consume(ConsumeContext<Batch<PingMessage>> context)
         {
             _messageTask.TrySetResult(context.Message);
+
+            return TaskUtil.Completed;
+        }
+    }
+
+
+    class TestOutboxBatchConsumer :
+        IConsumer<Batch<PingMessage>>
+    {
+        readonly TaskCompletionSource<Batch<PingMessage>> _messageTask;
+
+        public TestOutboxBatchConsumer(TaskCompletionSource<Batch<PingMessage>> messageTask)
+        {
+            _messageTask = messageTask;
+        }
+
+        public Task<Batch<PingMessage>> Completed => _messageTask.Task;
+
+        public Task Consume(ConsumeContext<Batch<PingMessage>> context)
+        {
+            if (context.TryGetPayload<InMemoryOutboxConsumeContext>(out var outboxContext))
+                _messageTask.TrySetResult(context.Message);
+            else
+                _messageTask.TrySetException(new InvalidOperationException("Outbox context is not available at this point"));
+
+            return TaskUtil.Completed;
+        }
+    }
+
+
+    class TestRetryOutboxBatchConsumer :
+        IConsumer<Batch<PingMessage>>
+    {
+        readonly TaskCompletionSource<Batch<PingMessage>> _messageTask;
+        int _attempt;
+
+        public TestRetryOutboxBatchConsumer(TaskCompletionSource<Batch<PingMessage>> messageTask)
+        {
+            _messageTask = messageTask;
+        }
+
+        public Task<Batch<PingMessage>> Completed => _messageTask.Task;
+
+        public Task Consume(ConsumeContext<Batch<PingMessage>> context)
+        {
+            if (context.TryGetPayload<InMemoryOutboxConsumeContext>(out var outboxContext))
+            {
+                if (Interlocked.Increment(ref _attempt) == 1)
+                {
+                    throw new Exception("Force Retry");
+                }
+
+                _messageTask.TrySetResult(context.Message);
+            }
+            else
+                _messageTask.TrySetException(new InvalidOperationException("Outbox context is not available at this point"));
 
             return TaskUtil.Completed;
         }
