@@ -16,7 +16,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
         IAmazonSqsMessagePublishTopologyConfigurator<TMessage>
         where TMessage : class
     {
-        readonly IList<IAmazonSqsMessagePublishTopology> _implementedMessageTypes;
         readonly IMessageTopology<TMessage> _messageTopology;
         readonly TopicConfigurator _topic;
 
@@ -32,8 +31,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
             var autoDelete = temporary;
 
             _topic = new TopicConfigurator(topicName, durable, autoDelete);
-
-            _implementedMessageTypes = new List<IAmazonSqsMessagePublishTopology>();
         }
 
         public Topic Topic => _topic;
@@ -69,9 +66,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
                 _topic.TopicSubscriptionAttributes, _topic.Tags);
 
             builder.Topic ??= topicHandle;
-
-            foreach (var configurator in _implementedMessageTypes)
-                configurator.Apply(builder);
         }
 
         public PublishSettings GetPublishSettings(Uri hostAddress)
@@ -86,39 +80,6 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
             Apply(builder);
 
             return builder.BuildBrokerTopology();
-        }
-
-        public void AddImplementedMessageConfigurator<T>(IAmazonSqsMessagePublishTopologyConfigurator<T> configurator, bool direct)
-            where T : class
-        {
-            var adapter = new ImplementedTypeAdapter<T>(configurator, direct);
-
-            _implementedMessageTypes.Add(adapter);
-        }
-
-
-        class ImplementedTypeAdapter<T> :
-            IAmazonSqsMessagePublishTopology
-            where T : class
-        {
-            readonly IAmazonSqsMessagePublishTopologyConfigurator<T> _configurator;
-            readonly bool _direct;
-
-            public ImplementedTypeAdapter(IAmazonSqsMessagePublishTopologyConfigurator<T> configurator, bool direct)
-            {
-                _configurator = configurator;
-                _direct = direct;
-            }
-
-            public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
-            {
-                if (_direct)
-                {
-                    var implementedBuilder = builder.CreateImplementedBuilder();
-
-                    _configurator.Apply(implementedBuilder);
-                }
-            }
         }
     }
 }
