@@ -24,6 +24,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
                 .AddSingleton(sendEndpointProviderTask)
                 .AddSingleton(publishEndpointTask)
                 .AddScoped<IService, Service>()
+                .AddScoped<IAnotherService, AnotherService>()
                 .AddMassTransit(ConfigureRegistration)
                 .BuildServiceProvider(true);
         }
@@ -58,6 +59,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
                 .AddSingleton(sendEndpointProviderTask)
                 .AddSingleton(publishEndpointTask)
                 .AddScoped<IService, Service>()
+                .AddScoped<IAnotherService, AnotherService>()
                 .AddMassTransit(ConfigureRegistration)
                 .BuildServiceProvider(true);
         }

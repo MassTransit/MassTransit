@@ -166,20 +166,20 @@ namespace MassTransit.Containers.Tests.Common_Tests
         class DependentConsumer :
             IConsumer<PingMessage>
         {
-            readonly TaskCompletionSource<ConsumeContext> _consumeContextTask;
             readonly IService _service;
+            readonly IAnotherService _anotherService;
 
-            public DependentConsumer(IService service, TaskCompletionSource<ConsumeContext> consumeContextTask)
+            public DependentConsumer(IService service, IAnotherService anotherService)
             {
                 _service = service;
-                _consumeContextTask = consumeContextTask;
+                _anotherService = anotherService;
             }
 
             public async Task Consume(ConsumeContext<PingMessage> context)
             {
-                _consumeContextTask.TrySetResult(context);
-
                 await _service.DoIt();
+
+                _anotherService.Done();
 
                 throw new IntentionalTestException();
             }
@@ -214,14 +214,14 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
 
-        interface IService
+        public interface ServiceDidIt
         {
-            Task DoIt();
         }
 
 
-        public interface ServiceDidIt
+        interface IService
         {
+            Task DoIt();
         }
 
 
@@ -242,6 +242,31 @@ namespace MassTransit.Containers.Tests.Common_Tests
             public async Task DoIt()
             {
                 await _publishEndpoint.Publish<ServiceDidIt>(new { });
+            }
+        }
+
+
+        interface IAnotherService
+        {
+            void Done();
+        }
+
+
+        class AnotherService :
+            IAnotherService
+        {
+            readonly ConsumeContext _context;
+            readonly TaskCompletionSource<ConsumeContext> _consumeContextTask;
+
+            public AnotherService(ConsumeContext context, TaskCompletionSource<ConsumeContext> consumeContextTask)
+            {
+                _context = context;
+                _consumeContextTask = consumeContextTask;
+            }
+
+            public void Done()
+            {
+                _consumeContextTask.TrySetResult(_context);
             }
         }
     }

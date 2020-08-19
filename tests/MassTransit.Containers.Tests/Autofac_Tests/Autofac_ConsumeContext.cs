@@ -25,6 +25,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             builder.RegisterInstance(publishEndpointTask);
 
             builder.RegisterType<Service>().As<IService>().InstancePerLifetimeScope();
+            builder.RegisterType<AnotherService>().As<IAnotherService>().InstancePerLifetimeScope();
             builder.AddMassTransit(ConfigureRegistration);
 
             _container = builder.Build();
@@ -61,6 +62,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             builder.RegisterInstance(publishEndpointTask);
 
             builder.RegisterType<Service>().As<IService>().InstancePerLifetimeScope();
+            builder.RegisterType<AnotherService>().As<IAnotherService>().InstancePerLifetimeScope();
             builder.AddMassTransit(ConfigureRegistration);
 
             _container = builder.Build();

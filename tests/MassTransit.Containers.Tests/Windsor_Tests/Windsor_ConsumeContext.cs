@@ -22,7 +22,9 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container = new WindsorContainer()
                 .AddMassTransit(ConfigureRegistration);
 
-            _container.Register(Component.For<IService>().ImplementedBy<Service>().LifestyleScoped(),
+            _container.Register(
+                Component.For<IService>().ImplementedBy<Service>().LifestyleScoped(),
+                Component.For<IAnotherService>().ImplementedBy<AnotherService>().LifestyleScoped(),
                 Component.For<TaskCompletionSource<ConsumeContext>>().Instance(pingTask),
                 Component.For<TaskCompletionSource<IPublishEndpoint>>().Instance(publishEndpointTask),
                 Component.For<TaskCompletionSource<ISendEndpointProvider>>().Instance(sendEndpointProviderTask)
@@ -56,7 +58,9 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
             _container = new WindsorContainer()
                 .AddMassTransit(ConfigureRegistration);
 
-            _container.Register(Component.For<IService>().ImplementedBy<Service>().LifestyleScoped(),
+            _container.Register(
+                Component.For<IService>().ImplementedBy<Service>().LifestyleScoped(),
+                Component.For<IAnotherService>().ImplementedBy<AnotherService>().LifestyleScoped(),
                 Component.For<TaskCompletionSource<ConsumeContext>>().Instance(pingTask),
                 Component.For<TaskCompletionSource<IPublishEndpoint>>().Instance(publishEndpointTask),
                 Component.For<TaskCompletionSource<ISendEndpointProvider>>().Instance(sendEndpointProviderTask)

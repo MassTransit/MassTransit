@@ -27,6 +27,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
                 expression.For<TaskCompletionSource<ISendEndpointProvider>>().Use(sendEndpointProviderTask);
 
                 expression.For<IService>().Use<Service>();
+                expression.For<IAnotherService>().Use<AnotherService>();
             });
         }
 
@@ -63,6 +64,7 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
                 expression.For<TaskCompletionSource<ISendEndpointProvider>>().Use(sendEndpointProviderTask);
 
                 expression.For<IService>().Use<Service>();
+                expression.For<IAnotherService>().Use<AnotherService>();
             });
         }
 

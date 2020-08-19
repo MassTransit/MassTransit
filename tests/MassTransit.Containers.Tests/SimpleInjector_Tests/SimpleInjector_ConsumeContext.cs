@@ -27,6 +27,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.RegisterInstance(publishEndpointTask);
 
             _container.Register<IService, Service>(Lifestyle.Scoped);
+            _container.Register<IAnotherService, AnotherService>(Lifestyle.Scoped);
             _container.AddMassTransit(ConfigureRegistration);
         }
 
@@ -62,6 +63,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.RegisterInstance(publishEndpointTask);
 
             _container.Register<IService, Service>(Lifestyle.Scoped);
+            _container.Register<IAnotherService, AnotherService>(Lifestyle.Scoped);
             _container.AddMassTransit(ConfigureRegistration);
         }
 

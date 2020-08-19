@@ -25,6 +25,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
                 registry.AddSingleton(sendEndpointProviderTask);
                 registry.AddSingleton(publishEndpointTask);
                 registry.AddScoped<IService, Service>();
+                registry.AddScoped<IAnotherService, AnotherService>();
                 registry.AddMassTransit(ConfigureRegistration);
             });
         }
@@ -61,6 +62,7 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
                 registry.AddSingleton(sendEndpointProviderTask);
                 registry.AddSingleton(publishEndpointTask);
                 registry.AddScoped<IService, Service>();
+                registry.AddScoped<IAnotherService, AnotherService>();
                 registry.AddMassTransit(ConfigureRegistration);
             });
         }
