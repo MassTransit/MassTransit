@@ -21,6 +21,7 @@
         public TimeSpan TimeLimit { private get; set; }
         public int MessageLimit { private get; set; }
         public int ConcurrencyLimit { private get; set; }
+        public Func<ConsumeContext, object> GroupingExpression { private get; set; }
 
         void IBatchConfigurator<TMessage>.Consumer<TConsumer>(IConsumerFactory<TConsumer> consumerFactory,
             Action<IConsumerMessageConfigurator<TConsumer, Batch<TMessage>>> configure)
@@ -28,7 +29,12 @@
             var configurator = new ConsumerConfigurator<TConsumer>(consumerFactory, _configurator);
             configurator.ConnectConsumerConfigurationObserver(_configurator);
 
-            configurator.Options<BatchOptions>(options => options.SetMessageLimit(MessageLimit).SetTimeLimit(TimeLimit).SetConcurrencyLimit(ConcurrencyLimit));
+            configurator.Options<BatchOptions>(options => options
+                .SetMessageLimit(MessageLimit)
+                .SetTimeLimit(TimeLimit)
+                .SetConcurrencyLimit(ConcurrencyLimit)
+                .GroupBy(GroupingExpression)
+            );
 
             configurator.ConsumerMessage(configure);
 

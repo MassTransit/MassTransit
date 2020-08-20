@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Pipeline.ConsumerFactories
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
@@ -20,15 +21,17 @@
         readonly ChannelExecutor _dispatcher;
         readonly int _messageLimit;
         readonly TimeSpan _timeLimit;
-        BatchConsumer<TConsumer, TMessage> _currentConsumer;
+        readonly Func<ConsumeContext, object> _groupingExpression;
+        readonly CurrentConsumersDictionary _currentConsumers = new CurrentConsumersDictionary();
 
         public BatchConsumerFactory(IConsumerFactory<TConsumer> consumerFactory, int messageLimit, int concurrencyLimit, TimeSpan timeLimit,
-            IPipe<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> consumerPipe)
+            Func<ConsumeContext, object> groupingExpression, IPipe<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> consumerPipe)
         {
             _consumerFactory = consumerFactory;
             _messageLimit = messageLimit;
             _timeLimit = timeLimit;
-            _consumerPipe = consumerPipe;
+            _groupingExpression = groupingExpression;
+            _consumerPipe = CreateConsumePipe(consumerPipe);
 
             _collector = new ChannelExecutor(1);
             _dispatcher = new ChannelExecutor(concurrencyLimit);
@@ -52,6 +55,22 @@
             await next.Send(new ConsumerConsumeContextScope<BatchConsumer<TConsumer, TMessage>, T>(context, consumer)).ConfigureAwait(false);
         }
 
+        IPipe<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> CreateConsumePipe(IPipe<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> consumerPipe)
+        {
+            return Pipe.ExecuteAsync<ConsumerConsumeContext<TConsumer, Batch<TMessage>>>(async ctx =>
+            {
+                try
+                {
+                    await consumerPipe.Send(ctx).ConfigureAwait(false);
+                }
+                finally
+                {
+                    var groupKey = GetGroupKey(ctx);
+                    _currentConsumers.Release(groupKey);
+                }
+            });
+        }
+
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateConsumerFactoryScope<IConsumer<TMessage>>("batch");
@@ -65,18 +84,67 @@
 
         async Task<BatchConsumer<TConsumer, TMessage>> Add(ConsumeContext<TMessage> context)
         {
-            if (_currentConsumer != null)
+            var groupKey = GetGroupKey(context);
+            BatchConsumer<TConsumer, TMessage> consumer = _currentConsumers.Get(groupKey);
+
+            if (consumer != null)
             {
                 if (context.GetRetryAttempt() > 0)
-                    await _currentConsumer.ForceComplete().ConfigureAwait(false);
+                    await consumer.ForceComplete().ConfigureAwait(false);
             }
 
-            if (_currentConsumer == null || _currentConsumer.IsCompleted)
-                _currentConsumer = new BatchConsumer<TConsumer, TMessage>(_messageLimit, _timeLimit, _collector, _dispatcher, _consumerFactory, _consumerPipe);
+            if (consumer == null || consumer.IsCompleted)
+            {
+                consumer = new BatchConsumer<TConsumer, TMessage>(_messageLimit, _timeLimit, _collector, _dispatcher, _consumerFactory, _consumerPipe);
+                _currentConsumers.Set(groupKey, consumer);
+            }
 
-            await _currentConsumer.Add(context).ConfigureAwait(false);
+            await consumer.Add(context).ConfigureAwait(false);
 
-            return _currentConsumer;
+            return consumer;
+        }
+
+        object GetGroupKey(ConsumeContext context)
+        {
+            return _groupingExpression?.Invoke(context);
+        }
+
+
+        class CurrentConsumersDictionary
+        {
+            BatchConsumer<TConsumer, TMessage> _defaultConsumer;
+            readonly Dictionary<object, BatchConsumer<TConsumer, TMessage>> _consumers = new Dictionary<object, BatchConsumer<TConsumer, TMessage>>();
+
+            public BatchConsumer<TConsumer, TMessage> Get(object groupKey)
+            {
+                if (groupKey == null)
+                    return _defaultConsumer;
+
+                _consumers.TryGetValue(groupKey, out BatchConsumer<TConsumer, TMessage> consumer);
+                return consumer;
+            }
+
+            public void Set(object groupKey, BatchConsumer<TConsumer, TMessage> consumer)
+            {
+                if (groupKey == null)
+                {
+                    _defaultConsumer = consumer;
+                    return;
+                }
+
+                _consumers[groupKey] = consumer;
+            }
+
+            public void Release(object groupKey)
+            {
+                if (groupKey == null)
+                {
+                    _defaultConsumer = null;
+                    return;
+                }
+
+                _consumers.Remove(groupKey);
+            }
         }
     }
 }

@@ -34,6 +34,11 @@ namespace MassTransit
         public TimeSpan TimeLimit { get; set; }
 
         /// <summary>
+        /// The condition upon which to group messages in different batches
+        /// </summary>
+        public Func<ConsumeContext, object> GroupingExpression { get; set; }
+
+        /// <summary>
         /// Sets the maximum number of messages in a single batch
         /// </summary>
         /// <param name="limit">The message limit</param>
@@ -74,6 +79,16 @@ namespace MassTransit
                 throw new ArgumentException("The timeout must be > 0");
 
             TimeLimit = timeSpan;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the condition upon which to group messages in different batches
+        /// </summary>
+        /// <param name="groupingExpression">Batches grouping expression</param>
+        public BatchOptions GroupBy(Func<ConsumeContext, object> groupingExpression)
+        {
+            GroupingExpression = groupingExpression;
             return this;
         }
     }

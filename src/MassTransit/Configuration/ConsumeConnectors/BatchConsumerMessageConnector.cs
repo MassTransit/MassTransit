@@ -29,6 +29,7 @@ namespace MassTransit.ConsumeConnectors
             var messageLimit = options.MessageLimit;
             var timeLimit = options.TimeLimit;
             var concurrencyLimit = options.ConcurrencyLimit;
+            var groupingExpression = options.GroupingExpression;
 
             IConsumerMessageSpecification<TConsumer, Batch<TMessage>> batchMessageSpecification = specification.GetMessageSpecification<Batch<TMessage>>();
 
@@ -41,7 +42,7 @@ namespace MassTransit.ConsumeConnectors
                 x.UseFilter(new ConsumerMessageFilter<TConsumer, Batch<TMessage>>(consumerFactory, batchConsumerPipe));
             });
 
-            var factory = new BatchConsumerFactory<TConsumer, TMessage>(consumerFactory, messageLimit, concurrencyLimit, timeLimit, batchMessagePipe);
+            var factory = new BatchConsumerFactory<TConsumer, TMessage>(consumerFactory, messageLimit, concurrencyLimit, timeLimit, groupingExpression, batchMessagePipe);
 
             IConsumerSpecification<IConsumer<TMessage>> messageConsumerSpecification =
                 ConsumerConnectorCache<IConsumer<TMessage>>.Connector.CreateConsumerSpecification<IConsumer<TMessage>>();

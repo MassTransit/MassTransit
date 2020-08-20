@@ -7,6 +7,7 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using MassTransit.Testing;
     using Microsoft.VisualStudio.TestPlatform.Utilities;
     using NUnit.Framework;
     using TestFramework;
@@ -174,6 +175,44 @@
             _consumer = new TestBatchConsumer(GetTask<Batch<PingMessage>>());
 
             configurator.Consumer(() => _consumer);
+        }
+    }
+
+
+    [TestFixture]
+    public class Receiving_and_grouping_messages :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_receive_one_batch_per_group()
+        {
+            var correlation1 = NewId.NextGuid();
+            var correlation2 = NewId.NextGuid();
+
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(ctx => ctx.CorrelationId = correlation1));
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(ctx => ctx.CorrelationId = correlation1));
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(ctx => ctx.CorrelationId = correlation2));
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(ctx => ctx.CorrelationId = correlation2));
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(ctx => ctx.CorrelationId = correlation2));
+
+            var count = await BusTestHarness.Consumed.SelectAsync<PingMessage>().CountUntilOrTimeout(6);
+
+            Assert.That(count, Is.EqualTo(6));
+            Assert.That(_batches.Select(x => x.Length), Is.EquivalentTo(new[] {1, 2, 3}));
+        }
+
+        readonly List<Batch<PingMessage>> _batches = new List<Batch<PingMessage>>();
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.Consumer(() =>
+            {
+                TaskCompletionSource<Batch<PingMessage>> tcs = GetTask<Batch<PingMessage>>();
+                tcs.Task.ContinueWith(t => _batches.Add(t.Result));
+                var consumer = new TestBatchConsumer(tcs);
+                return consumer;
+            }, cc => cc.Options<BatchOptions>(x => x.GroupBy(ctx => ctx.CorrelationId)));
         }
     }
 

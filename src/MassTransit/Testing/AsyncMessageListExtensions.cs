@@ -35,6 +35,22 @@ namespace MassTransit.Testing
             return count;
         }
 
+        public static async Task<int> CountUntilOrTimeout<TElement>(this IAsyncEnumerable<TElement> elements, int limit)
+            where TElement : class, IAsyncListElement
+        {
+            var count = 0;
+            await foreach (var _ in elements.ConfigureAwait(false))
+            {
+                count++;
+                if (count == limit)
+                {
+                    break;
+                }
+            }
+
+            return count;
+        }
+
         public static async Task<TElement> FirstOrDefault<TElement>(this IAsyncEnumerable<TElement> elements)
             where TElement : class, IAsyncListElement
         {

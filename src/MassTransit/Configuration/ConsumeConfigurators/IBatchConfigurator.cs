@@ -27,6 +27,11 @@
         int ConcurrencyLimit { set; }
 
         /// <summary>
+        /// Set the condition upon which to group messages in different batches
+        /// </summary>
+        Func<ConsumeContext, object> GroupingExpression { set; }
+
+        /// <summary>
         /// Specify the consumer factory for the batch message consumer
         /// </summary>
         /// <param name="consumerFactory"></param>
