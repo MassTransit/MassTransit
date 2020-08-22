@@ -3,28 +3,30 @@ namespace MassTransit.Testing
     using System;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
+    using Registration;
     using WindsorIntegration;
 
 
     public static class WindsorTestingExtensions
     {
-        public static IWindsorContainer AddMassTransitInMemoryTestHarness(this IWindsorContainer container, Action<IWindsorContainerBusConfigurator> configure = null)
+        public static IWindsorContainer AddMassTransitInMemoryTestHarness(this IWindsorContainer container,
+            Action<IWindsorContainerBusConfigurator> configure = null)
         {
             container.Register(Component.For<InMemoryTestHarness>().UsingFactoryMethod(kernel =>
             {
-                var testHarness = new InMemoryTestHarness();
+                var busInstance = kernel.Resolve<IBusInstance>();
 
-                var busRegistrationContext = kernel.Resolve<IBusRegistrationContext>();
-                testHarness.OnConfigureInMemoryBus += configurator => configurator.ConfigureEndpoints(busRegistrationContext);
+                if (busInstance is InMemoryTestHarnessBusInstance instance)
+                    return instance.Harness;
 
-                return testHarness;
+                throw new ConfigurationException("Test Harness configuration is invalid");
             }).LifestyleSingleton());
 
             container.AddMassTransit(cfg =>
             {
                 configure?.Invoke(cfg);
 
-                cfg.AddBus(context => context.GetRequiredService<InMemoryTestHarness>().BusControl);
+                cfg.SetBusFactory(new InMemoryTestHarnessRegistrationBusFactory());
             });
 
             return container;

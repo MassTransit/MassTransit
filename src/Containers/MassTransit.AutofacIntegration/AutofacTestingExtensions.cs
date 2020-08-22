@@ -2,6 +2,7 @@ namespace MassTransit.AutofacIntegration
 {
     using System;
     using Autofac;
+    using MassTransit.Registration;
     using Testing;
 
 
@@ -13,22 +14,24 @@ namespace MassTransit.AutofacIntegration
         public static ContainerBuilder AddMassTransitInMemoryTestHarness(this ContainerBuilder builder,
             Action<IContainerBuilderBusConfigurator> configure = null)
         {
-            builder.Register(provider =>
-            {
-                var testHarness = new InMemoryTestHarness();
-
-                var busRegistrationContext = provider.Resolve<IBusRegistrationContext>();
-                testHarness.OnConfigureInMemoryBus += configurator => configurator.ConfigureEndpoints(busRegistrationContext);
-
-                return testHarness;
-            }).SingleInstance();
-
             builder.AddMassTransit(cfg =>
             {
                 configure?.Invoke(cfg);
 
-                cfg.AddBus(context => context.GetRequiredService<InMemoryTestHarness>().BusControl);
+                cfg.SetBusFactory(new InMemoryTestHarnessRegistrationBusFactory());
             });
+            builder.Register(provider =>
+                {
+                    var busInstance = provider.Resolve<IBusInstance>();
+
+                    if (busInstance is InMemoryTestHarnessBusInstance instance)
+                        return instance.Harness;
+
+                    throw new ConfigurationException("Test Harness configuration is invalid");
+                })
+                .SingleInstance()
+                .As<InMemoryTestHarness>()
+                .As<BusTestHarness>();
 
             return builder;
         }

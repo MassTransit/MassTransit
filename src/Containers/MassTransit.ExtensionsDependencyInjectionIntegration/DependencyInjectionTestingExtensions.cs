@@ -16,23 +16,22 @@ namespace MassTransit.Testing
         public static IServiceCollection AddMassTransitInMemoryTestHarness(this IServiceCollection services,
             Action<IServiceCollectionBusConfigurator> configure = null)
         {
-            services.AddSingleton(provider =>
-            {
-                var testHarness = new InMemoryTestHarness();
-
-                var busRegistrationContext = provider.GetRequiredService<IBusRegistrationContext>();
-                testHarness.OnConfigureInMemoryBus += configurator => configurator.ConfigureEndpoints(busRegistrationContext);
-
-                return testHarness;
-            });
-            services.AddSingleton<BusTestHarness>(provider => provider.GetRequiredService<InMemoryTestHarness>());
-
             services.AddMassTransit(cfg =>
             {
                 configure?.Invoke(cfg);
 
-                cfg.AddBus(context => context.GetRequiredService<InMemoryTestHarness>().BusControl);
+                cfg.SetBusFactory(new InMemoryTestHarnessRegistrationBusFactory());
             });
+            services.AddSingleton(provider =>
+            {
+                var busInstance = provider.GetRequiredService<IBusInstance>();
+
+                if (busInstance is InMemoryTestHarnessBusInstance instance)
+                    return instance.Harness;
+
+                throw new ConfigurationException("Test Harness configuration is invalid");
+            });
+            services.AddSingleton<BusTestHarness>(provider => provider.GetRequiredService<InMemoryTestHarness>());
 
             return services;
         }

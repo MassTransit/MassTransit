@@ -1,7 +1,6 @@
 namespace MassTransit.Containers.Tests
 {
     using System;
-    using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Automatonymous;
@@ -11,7 +10,6 @@ namespace MassTransit.Containers.Tests
     using Saga;
     using Scenarios;
     using TestFramework.Messages;
-    using TestFramework.Sagas;
     using Testing;
 
 
@@ -301,9 +299,7 @@ namespace MassTransit.Containers.Tests
                     When(StartReceived)
                         .Activity(x => x.OfType<StartupActivity>())
                         .TransitionTo(Running));
-            }
-
-            // ReSharper disable UnassignedGetOnlyAutoProperty
+            } // ReSharper disable UnassignedGetOnlyAutoProperty
             public State Running { get; }
             public Event<Start> StartReceived { get; }
         }
