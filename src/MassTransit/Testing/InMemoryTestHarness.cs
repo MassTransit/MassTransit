@@ -1,21 +1,38 @@
 ﻿namespace MassTransit.Testing
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
+    using Configuration;
+    using GreenPipes;
+    using Registration;
+    using Transports.InMemory.Configuration;
+    using Transports.InMemory.Configurators;
 
 
     public class InMemoryTestHarness :
         BusTestHarness
     {
+        readonly InMemoryBusConfiguration _busConfiguration;
         readonly string _inputQueueName;
+        readonly IEnumerable<IBusInstanceSpecification> _specifications;
 
         public InMemoryTestHarness(string virtualHost = null)
+            : this(virtualHost, Enumerable.Empty<IBusInstanceSpecification>())
+        {
+        }
+
+        public InMemoryTestHarness(string virtualHost, IEnumerable<IBusInstanceSpecification> specifications)
         {
             BaseAddress = new Uri("loopback://localhost/");
             if (!string.IsNullOrWhiteSpace(virtualHost))
                 BaseAddress = new Uri(BaseAddress, virtualHost.Trim('/') + '/');
 
             _inputQueueName = "input_queue";
+            _busConfiguration = new InMemoryBusConfiguration(new InMemoryTopologyConfiguration(InMemoryBus.MessageTopology), BaseAddress);
+            _specifications = specifications;
+
             InputQueueAddress = new Uri(BaseAddress, _inputQueueName);
         }
 
@@ -23,6 +40,8 @@
 
         public override Uri InputQueueAddress { get; }
         public override string InputQueueName => _inputQueueName;
+
+        internal IHostConfiguration HostConfiguration => _busConfiguration?.HostConfiguration;
 
         public event Action<IInMemoryBusFactoryConfigurator> OnConfigureInMemoryBus;
         public event Action<IInMemoryReceiveEndpointConfigurator> OnConfigureInMemoryReceiveEndpoint;
@@ -51,21 +70,20 @@
 
         protected override IBusControl CreateBus()
         {
-            return MassTransit.Bus.Factory.CreateUsingInMemory(BaseAddress, x =>
+            var configurator = new InMemoryBusFactoryConfigurator(_busConfiguration);
+
+            ConfigureBus(configurator);
+
+            ConfigureInMemoryBus(configurator);
+
+            configurator.ReceiveEndpoint(InputQueueName, e =>
             {
-                ConfigureBus(x);
+                ConfigureReceiveEndpoint(e);
 
-                x.Host(BaseAddress);
-
-                ConfigureInMemoryBus(x);
-
-                x.ReceiveEndpoint(InputQueueName, configurator =>
-                {
-                    ConfigureReceiveEndpoint(configurator);
-
-                    ConfigureInMemoryReceiveEndpoint(configurator);
-                });
+                ConfigureInMemoryReceiveEndpoint(e);
             });
+
+            return configurator.Build(_specifications ?? Enumerable.Empty<ISpecification>());
         }
     }
 }

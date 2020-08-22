@@ -16,7 +16,7 @@
     [TestFixture(TypeArgs = new[] {typeof(ThrowConsumer)})]
     [TestFixture(TypeArgs = new[] {typeof(RandomConsumer)})]
     public class BusActivityMonitor_Specs<TConsumer> :
-        BusActivityMonitor_Specs
+        InMemoryTestFixture
         where TConsumer : class, IConsumer<PingMessage>, new()
     {
         [Test]
@@ -33,17 +33,15 @@
         }
 
         IBusActivityMonitor _activityMonitor;
-        IEnumerator<IRetryPolicy> _retryEnumerator;
-
-        static readonly IRetryPolicy[] retryPolicies = {Retry.None, Retry.Interval(3, TimeSpan.FromMilliseconds(50)), Retry.Immediate(3)};
+        static IEnumerator<IRetryPolicy> RetryEnumerator => GetNextRetryPolicy().GetEnumerator();
 
         const int RetryPoliciesLength = 3;
 
-        IEnumerable<IRetryPolicy> GetNextRetryPolicy()
+        static IEnumerable<IRetryPolicy> GetNextRetryPolicy()
         {
             while (true)
             {
-                foreach (var retryPolicy in retryPolicies)
+                foreach (var retryPolicy in new[] {Retry.None, Retry.Interval(3, TimeSpan.FromMilliseconds(50)), Retry.Immediate(3)})
                     yield return retryPolicy;
             }
         }
@@ -55,8 +53,8 @@
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            _retryEnumerator.MoveNext();
-            var retryPolicy = _retryEnumerator.Current;
+            RetryEnumerator.MoveNext();
+            var retryPolicy = RetryEnumerator.Current;
         #pragma warning disable 618
             configurator.UseRetry(r => r.SetRetryPolicy(x => retryPolicy));
         #pragma warning restore 618
@@ -66,16 +64,10 @@
                 });
         }
 
-        [OneTimeSetUp]
-        public void BusActivityMonitor_SpecsSetup()
-        {
-            _retryEnumerator = GetNextRetryPolicy().GetEnumerator();
-        }
-
         [OneTimeTearDown]
         public void BusActivityMonitor_SpecsTeardown()
         {
-            _retryEnumerator?.Dispose();
+            RetryEnumerator?.Dispose();
         }
 
         async Task ActivityTask()
@@ -88,17 +80,6 @@
             }
 
             Console.WriteLine($"Activity Ended : {DateTime.Now}");
-        }
-    }
-
-
-    public class BusActivityMonitor_Specs :
-        InMemoryTestFixture
-    {
-        public BusActivityMonitor_Specs()
-            :
-            base(true)
-        {
         }
     }
 

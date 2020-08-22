@@ -1,6 +1,7 @@
 namespace MassTransit.Testing
 {
     using System;
+    using Registration;
     using StructureMap;
     using StructureMapIntegration;
 
@@ -10,26 +11,26 @@ namespace MassTransit.Testing
         public static ConfigurationExpression AddMassTransitInMemoryTestHarness(this ConfigurationExpression configuration,
             Action<IConfigurationExpressionBusConfigurator> configure = null)
         {
-            configuration.For<InMemoryTestHarness>().Use(provider => CreateInMemoryTestHarness(provider)).Singleton();
-
             configuration.AddMassTransit(cfg =>
             {
                 configure?.Invoke(cfg);
 
-                cfg.AddBus(context => context.GetRequiredService<InMemoryTestHarness>().BusControl);
+                cfg.SetBusFactory(new InMemoryTestHarnessRegistrationBusFactory());
             });
+
+            configuration.For<InMemoryTestHarness>().Use(provider => CreateInMemoryTestHarness(provider)).Singleton();
 
             return configuration;
         }
 
         static InMemoryTestHarness CreateInMemoryTestHarness(IContext provider)
         {
-            var testHarness = new InMemoryTestHarness();
+            var busInstance = provider.GetInstance<IBusInstance>();
 
-            var busRegistrationContext = provider.GetInstance<IBusRegistrationContext>();
-            testHarness.OnConfigureInMemoryBus += configurator => configurator.ConfigureEndpoints(busRegistrationContext);
+            if (busInstance is InMemoryTestHarnessBusInstance instance)
+                return instance.Harness;
 
-            return testHarness;
+            throw new ConfigurationException("Test Harness configuration is invalid");
         }
     }
 }
