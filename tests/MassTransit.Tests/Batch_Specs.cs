@@ -7,7 +7,6 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using Microsoft.VisualStudio.TestPlatform.Utilities;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;

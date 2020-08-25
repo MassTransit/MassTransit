@@ -2,6 +2,7 @@
 {
     using System.Threading.Tasks;
     using Autofac;
+    using AutofacScanning;
     using NUnit.Framework;
     using Scenarios;
     using TestFramework.Messages;
@@ -14,7 +15,7 @@
         public void Registration_extension_method_for_consumers()
         {
             var container = new ContainerBuilder()
-                .AddMassTransit(cfg => cfg.AddConsumersFromNamespaceContaining<AutofacContainer_RegistrationExtension>())
+                .AddMassTransit(cfg => cfg.AddConsumersFromNamespaceContaining<Marker>())
                 .Build();
 
             Assert.That(container.IsRegistered<TestConsumer>(), Is.True);
@@ -25,7 +26,7 @@
         {
             var container = new ContainerBuilder().AddMassTransit(cfg =>
             {
-                cfg.AddConsumersFromNamespaceContaining<AutofacContainer_RegistrationExtension>();
+                cfg.AddConsumersFromNamespaceContaining<Marker>();
                 cfg.AddSaga<SimpleSaga>()
                     .InMemoryRepository();
             }).Build();
@@ -50,11 +51,19 @@
     }
 
 
-    public class TestConsumer :
-        IConsumer<PingMessage>
+    namespace AutofacScanning
     {
-        public async Task Consume(ConsumeContext<PingMessage> context)
+        struct Marker
         {
+        }
+
+
+        public class TestConsumer :
+            IConsumer<PingMessage>
+        {
+            public async Task Consume(ConsumeContext<PingMessage> context)
+            {
+            }
         }
     }
 }

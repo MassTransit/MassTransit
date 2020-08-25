@@ -18,9 +18,9 @@ namespace MassTransit.JobService.Pipeline
         where TConsumer : class, IJobConsumer<TJob>
         where TJob : class
     {
-        readonly IConsumerConnector _superviseJobConsumerConnector;
         readonly IConsumerConnector _startJobConsumerConnector;
         readonly IConsumerConnector _submitJobConsumerConnector;
+        readonly IConsumerConnector _superviseJobConsumerConnector;
 
         public JobConsumerMessageConnector()
         {
@@ -41,6 +41,12 @@ namespace MassTransit.JobService.Pipeline
         {
             var jobServiceOptions = specification.Options<JobServiceOptions>();
 
+            if (jobServiceOptions.JobService == null)
+            {
+                throw new ConfigurationException(
+                    "The job service must be configured prior to configuring a job consumer, using either ConfigureJobServiceEndpoints or ConfigureJobService");
+            }
+
             var options = specification.Options<JobOptions<TJob>>();
 
             IConsumerMessageSpecification<TConsumer, TJob> messageSpecification = specification.GetMessageSpecification<TJob>();
@@ -59,7 +65,7 @@ namespace MassTransit.JobService.Pipeline
             return new MultipleConnectHandle(submitJobHandle, startJobHandle, cancelJobHandle);
         }
 
-        public IPipe<ConsumeContext<TJob>> CreateJobPipe(IConsumerFactory<TConsumer> consumerFactory, IConsumerSpecification<TConsumer> specification)
+        static IPipe<ConsumeContext<TJob>> CreateJobPipe(IConsumerFactory<TConsumer> consumerFactory, IConsumerSpecification<TConsumer> specification)
         {
             IConsumerMessageSpecification<TConsumer, TJob> messageSpecification = specification.GetMessageSpecification<TJob>();
 
