@@ -24,9 +24,9 @@ So, what does correlated actually mean? In short it means that this message is a
 
 ### Correlation by convention
 
-In addition to the explicit `CorrelateBy<T>` interface, a convention-based correlation is supported. If the message contract has a property named ``CorrelationId``, ``CommandId``, or ``EventId``, the correlationId header is automatically populated on Send or Publish. It can also be manually specified using the ``SendContext``.
+In addition to the explicit `CorrelatedBy<T>` interface, a convention-based correlation is supported. If the message contract has a property named ``CorrelationId``, ``CommandId``, or ``EventId``, the correlationId header is automatically populated on Send or Publish. It can also be manually specified using the ``SendContext``.
 
-Bear in mind that sagas default `CorrelateById()` only support messages where the explicit `CorrelateBy<Guid>` interface is implemented. However, the header is still useful if you do not use sagas, for example for message flow analysis and debugging.
+Bear in mind that sagas default `CorrelateById()` only support messages where the explicit `CorrelatedBy<Guid>` interface is implemented. However, the header is still useful if you do not use sagas, for example for message flow analysis and debugging.
 
 ## Tracing conversations
 
