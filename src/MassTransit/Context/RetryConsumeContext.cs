@@ -1,8 +1,6 @@
 ﻿namespace MassTransit.Context
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using GreenPipes;
     using Metadata;
@@ -14,7 +12,7 @@
         ConsumeRetryContext
     {
         readonly ConsumeContext _context;
-        readonly IList<PendingFault> _pendingFaults;
+        readonly PendingFaultCollection _pendingFaults;
 
         public RetryConsumeContext(ConsumeContext context, IRetryPolicy retryPolicy, RetryContext retryContext)
             : base(context)
@@ -28,7 +26,7 @@
                 RetryCount = retryContext.RetryCount;
             }
 
-            _pendingFaults = new List<PendingFault>();
+            _pendingFaults = new PendingFaultCollection();
         }
 
         protected IRetryPolicy RetryPolicy { get; }
@@ -45,7 +43,7 @@
 
         public Task NotifyPendingFaults()
         {
-            return Task.WhenAll(_pendingFaults.Select(x => x.Notify(_context)));
+            return _pendingFaults.Notify(_context);
         }
 
         public override Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
@@ -62,36 +60,6 @@
         public RetryConsumeContext CreateNext(RetryContext retryContext)
         {
             return new RetryConsumeContext(_context, RetryPolicy, retryContext);
-        }
-
-
-        interface PendingFault
-        {
-            Task Notify(ConsumeContext context);
-        }
-
-
-        class PendingFault<T> :
-            PendingFault
-            where T : class
-        {
-            readonly string _consumerType;
-            readonly ConsumeContext<T> _context;
-            readonly TimeSpan _elapsed;
-            readonly Exception _exception;
-
-            public PendingFault(ConsumeContext<T> context, TimeSpan elapsed, string consumerType, Exception exception)
-            {
-                _context = context;
-                _elapsed = elapsed;
-                _consumerType = consumerType;
-                _exception = exception;
-            }
-
-            public Task Notify(ConsumeContext context)
-            {
-                return context.NotifyFaulted(_context, _elapsed, _consumerType, _exception);
-            }
         }
     }
 
