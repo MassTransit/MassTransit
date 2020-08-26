@@ -3,9 +3,11 @@ namespace MassTransit.PipeConfigurators
     using System;
     using System.Threading;
     using ConsumeConfigurators;
+    using ConsumerSpecifications;
     using Context;
     using GreenPipes;
     using GreenPipes.Configurators;
+    using Internals.Extensions;
 
 
     /// <summary>
@@ -35,11 +37,37 @@ namespace MassTransit.PipeConfigurators
 
         void IConsumerConfigurationObserver.ConsumerMessageConfigured<T, TMessage>(IConsumerMessageConfigurator<T, TMessage> configurator)
         {
-            var specification = new ConsumeContextRetryPipeSpecification<ConsumeContext<TMessage>, RetryConsumeContext<TMessage>>(Factory, _cancellationToken);
+            if (typeof(TMessage).ClosesType(typeof(Batch<>), out Type[] types))
+            {
+                typeof(MessageRetryConsumerConfigurationObserver<TConsumer>)
+                    .GetMethod(nameof(BatchConsumerConfigured))
+                    .MakeGenericMethod(typeof(TConsumer), types[0])
+                    .Invoke(this, new object[] {configurator});
+            }
+            else
+            {
+                var specification = new ConsumeContextRetryPipeSpecification<ConsumeContext<TMessage>, RetryConsumeContext<TMessage>>(Factory,
+                    _cancellationToken);
+
+                _configure?.Invoke(specification);
+
+                _configurator.Message<TMessage>(x => x.AddPipeSpecification(specification));
+            }
+        }
+
+        public void BatchConsumerConfigured<TMessage>(IConsumerMessageConfigurator<TConsumer, Batch<TMessage>> configurator)
+            where TMessage : class
+        {
+            var consumerSpecification = configurator as IConsumerMessageSpecification<TConsumer, Batch<TMessage>>;
+            if (consumerSpecification == null)
+                throw new ArgumentException("The configurator must be a consumer specification");
+
+            var specification = new ConsumeContextRetryPipeSpecification<ConsumeContext<Batch<TMessage>>, RetryConsumeContext<Batch<TMessage>>>(Factory,
+                _cancellationToken);
 
             _configure?.Invoke(specification);
 
-            _configurator.Message<TMessage>(x => x.AddPipeSpecification(specification));
+            consumerSpecification.AddPipeSpecification(specification);
         }
 
         static RetryConsumeContext<TMessage> Factory<TMessage>(ConsumeContext<TMessage> context, IRetryPolicy retryPolicy, RetryContext retryContext)

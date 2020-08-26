@@ -8,18 +8,15 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using Metadata;
     using Util;
 
 
-    public class BatchConsumer<TConsumer, TMessage> :
+    public class BatchConsumer<TMessage> :
         IConsumer<TMessage>
         where TMessage : class
-        where TConsumer : class
     {
         readonly TaskCompletionSource<DateTime> _completed;
-        readonly IConsumerFactory<TConsumer> _consumerFactory;
-        readonly IPipe<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> _consumerPipe;
+        readonly IPipe<ConsumeContext<Batch<TMessage>>> _consumerPipe;
         readonly DateTime _firstMessage;
         readonly int _messageLimit;
         readonly SortedDictionary<Guid, ConsumeContext<TMessage>> _messages;
@@ -28,12 +25,10 @@
         readonly Timer _timer;
         DateTime _lastMessage;
 
-        public BatchConsumer(int messageLimit, TimeSpan timeLimit, ChannelExecutor executor, ChannelExecutor dispatcher,
-            IConsumerFactory<TConsumer> consumerFactory, IPipe<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> consumerPipe)
+        public BatchConsumer(int messageLimit, TimeSpan timeLimit, ChannelExecutor executor, ChannelExecutor dispatcher, IPipe<ConsumeContext<Batch<TMessage>>> consumerPipe)
         {
             _messageLimit = messageLimit;
             _executor = executor;
-            _consumerFactory = consumerFactory;
             _consumerPipe = consumerPipe;
             _dispatcher = dispatcher;
             _messages = new SortedDictionary<Guid, ConsumeContext<TMessage>>();
@@ -124,11 +119,11 @@
 
             Batch<TMessage> batch = new Batch(_firstMessage, _lastMessage, batchCompletionMode, messages);
 
+            ConsumeContext<Batch<TMessage>> batchConsumeContext = new BatchConsumeContext<TMessage>(context, batch);
+
             try
             {
-                var proxy = new MessageConsumeContext<Batch<TMessage>>(context, batch);
-
-                await _consumerFactory.Send(proxy, _consumerPipe).ConfigureAwait(false);
+                await _consumerPipe.Send(batchConsumeContext).ConfigureAwait(false);
 
                 _completed.TrySetResult(DateTime.UtcNow);
             }
@@ -138,6 +133,14 @@
             }
             catch (Exception exception)
             {
+                if (batchConsumeContext.TryGetPayload(out RetryContext<ConsumeContext<Batch<TMessage>>> retryContext))
+                {
+                    for (int i = 0; i < messages.Count; i++)
+                    {
+                        messages[i].GetOrAddPayload(() => retryContext);
+                    }
+                }
+
                 _completed.TrySetException(exception);
             }
         }

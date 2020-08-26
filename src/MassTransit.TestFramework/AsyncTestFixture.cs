@@ -32,6 +32,11 @@ namespace MassTransit.TestFramework
         protected CancellationToken InactivityToken => AsyncTestHarness.InactivityToken;
 
         /// <summary>
+        /// Task that is completed when the bus inactivity timeout has elapsed with no bus activity
+        /// </summary>
+        protected Task InactivityTask => AsyncTestHarness.InactivityTask;
+
+        /// <summary>
         /// Timeout for the test, used for any delay timers
         /// </summary>
         protected TimeSpan TestTimeout

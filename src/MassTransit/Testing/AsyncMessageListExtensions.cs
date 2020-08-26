@@ -35,6 +35,22 @@ namespace MassTransit.Testing
             return count;
         }
 
+        public static async IAsyncEnumerable<TElement> Take<TElement>(this IAsyncEnumerable<TElement> elements, int quantity)
+            where TElement : class, IAsyncListElement
+        {
+            var count = 0;
+            await foreach (var element in elements.ConfigureAwait(false))
+            {
+                yield return element;
+
+                count++;
+                if (count == quantity)
+                {
+                    yield break;
+                }
+            }
+        }
+
         public static async Task<TElement> FirstOrDefault<TElement>(this IAsyncEnumerable<TElement> elements)
             where TElement : class, IAsyncListElement
         {

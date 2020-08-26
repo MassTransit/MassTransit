@@ -120,12 +120,12 @@ namespace MassTransit.Context
 
         public virtual Task NotifyConsumed(TimeSpan duration, string consumerType)
         {
-            return base.NotifyConsumed(this, duration, consumerType);
+            return NotifyConsumed(this, duration, consumerType);
         }
 
         public virtual Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            return base.NotifyFaulted(this, duration, consumerType, exception);
+            return NotifyFaulted(this, duration, consumerType, exception);
         }
     }
 }

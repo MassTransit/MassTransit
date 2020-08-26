@@ -7,6 +7,7 @@ namespace MassTransit.ConsumerSpecifications
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
+    using Pipeline.ConsumerFactories;
 
 
     /// <summary>
@@ -47,7 +48,7 @@ namespace MassTransit.ConsumerSpecifications
 
         public IEnumerable<ValidationResult> Validate()
         {
-            var specification = this as IConsumerMessageConfigurator<IConsumer<TMessage>, TMessage>;
+            var specification = this as IConsumerMessageConfigurator<BatchConsumer<TMessage>, TMessage>;
 
             _observers.All(observer =>
             {

@@ -12,8 +12,7 @@
     /// of the context is only added at the scope level and below.
     /// </summary>
     public abstract class ConsumeContextProxy :
-        BaseConsumeContext,
-        ConsumeContext
+        BaseConsumeContext
     {
         readonly ConsumeContext _context;
 
@@ -158,12 +157,12 @@
 
         public virtual Task NotifyConsumed(TimeSpan duration, string consumerType)
         {
-            return base.NotifyConsumed(this, duration, consumerType);
+            return NotifyConsumed(this, duration, consumerType);
         }
 
         public virtual Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            return base.NotifyFaulted(this, duration, consumerType, exception);
+            return NotifyFaulted(this, duration, consumerType, exception);
         }
     }
 }

@@ -3,6 +3,7 @@
     using System;
     using System.Threading;
     using ConsumeConfigurators;
+    using ConsumerSpecifications;
     using Context;
     using GreenPipes;
     using GreenPipes.Configurators;
@@ -37,12 +38,16 @@
 
         public override void BatchConsumerConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, Batch<TMessage>> configurator)
         {
+            var consumerSpecification = configurator as IConsumerMessageSpecification<TConsumer, Batch<TMessage>>;
+            if (consumerSpecification == null)
+                throw new ArgumentException("The configurator must be a consumer specification");
+
             var specification = new ConsumeContextRetryPipeSpecification<ConsumeContext<Batch<TMessage>>, RetryConsumeContext<Batch<TMessage>>>(Factory,
                 _cancellationToken);
 
             _configure?.Invoke(specification);
 
-            configurator.Message(m => m.AddPipeSpecification(specification));
+            consumerSpecification.AddPipeSpecification(specification);
         }
 
         public override void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)

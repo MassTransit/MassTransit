@@ -2,6 +2,7 @@ namespace MassTransit
 {
     using System;
     using Configuration;
+    using ConsumeConnectors;
 
 
     /// <summary>
@@ -32,6 +33,11 @@ namespace MassTransit
         /// The maximum time to wait before delivering a partial batch
         /// </summary>
         public TimeSpan TimeLimit { get; set; }
+
+        /// <summary>
+        /// The property to group by
+        /// </summary>
+        public object GroupKeyProvider { get; private set; }
 
         /// <summary>
         /// Sets the maximum number of messages in a single batch
@@ -74,6 +80,24 @@ namespace MassTransit
                 throw new ArgumentException("The timeout must be > 0");
 
             TimeLimit = timeSpan;
+            return this;
+        }
+
+        public BatchOptions GroupBy<T, TProperty>(Func<ConsumeContext<T>, TProperty?> provider)
+            where T : class
+            where TProperty : struct
+        {
+            GroupKeyProvider = new ValueTypeGroupKeyProvider<T, TProperty>(provider);
+
+            return this;
+        }
+
+        public BatchOptions GroupBy<T, TProperty>(Func<ConsumeContext<T>, TProperty> provider)
+            where T : class
+            where TProperty : class
+        {
+            GroupKeyProvider = new GroupKeyProvider<T, TProperty>(provider);
+
             return this;
         }
     }
