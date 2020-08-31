@@ -46,6 +46,57 @@
 
 
     [TestFixture]
+    public class When_a_batch_consumer_is_being_tested
+    {
+        [Test]
+        [Order(1)]
+        public async Task Should_have_the_goods()
+        {
+            await _harness.InputQueueSendEndpoint.Send(new PingMessage());
+            await _harness.InputQueueSendEndpoint.Send(new PingMessage());
+
+            Batch<PingMessage> batch = await _batchConsumer.Completed;
+
+            Assert.That(batch.Length, Is.EqualTo(2));
+        }
+
+        [Test]
+        [Order(2)]
+        public async Task Should_have_called_the_consumer_method()
+        {
+            Assert.That(await _consumer.Consumed.SelectAsync<Batch<PingMessage>>().Count(), Is.EqualTo(1));
+        }
+
+        [Test]
+        [Order(5)]
+        public async Task Should_send_the_initial_message_to_the_consumer()
+        {
+            Assert.That(await _harness.Sent.SelectAsync<PingMessage>().Count(), Is.EqualTo(2));
+        }
+
+        InMemoryTestHarness _harness;
+        ConsumerTestHarness<TestBatchConsumer> _consumer;
+        TestBatchConsumer _batchConsumer;
+
+        [OneTimeSetUp]
+        public async Task A_consumer_is_being_tested()
+        {
+            _harness = new InMemoryTestHarness();
+            _batchConsumer = new TestBatchConsumer(_harness.GetTask<Batch<PingMessage>>());
+            _consumer = _harness.Consumer(() => _batchConsumer, c => c.Options<BatchOptions>(o => o.SetMessageLimit(2)));
+
+            await _harness.Start();
+        }
+
+        [OneTimeTearDown]
+        public async Task Teardown()
+        {
+            await _harness.Stop();
+        }
+    }
+
+
+    [TestFixture]
     public class When_I_like_big_batches_and_I_cannot_lie :
         InMemoryTestFixture
     {
