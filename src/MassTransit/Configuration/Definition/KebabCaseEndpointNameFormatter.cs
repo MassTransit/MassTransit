@@ -9,8 +9,13 @@ namespace MassTransit.Definition
     public class KebabCaseEndpointNameFormatter :
         SnakeCaseEndpointNameFormatter
     {
-        public KebabCaseEndpointNameFormatter()
+        protected KebabCaseEndpointNameFormatter()
             : base("-")
+        {
+        }
+
+        public KebabCaseEndpointNameFormatter(bool includeNamespace)
+            : base("-", includeNamespace)
         {
         }
 

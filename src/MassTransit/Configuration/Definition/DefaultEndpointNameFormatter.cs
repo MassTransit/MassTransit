@@ -16,8 +16,16 @@ namespace MassTransit.Definition
     public class DefaultEndpointNameFormatter :
         IEndpointNameFormatter
     {
+        readonly bool _includeNamespace;
+
         protected DefaultEndpointNameFormatter()
         {
+            _includeNamespace = false;
+        }
+
+        public DefaultEndpointNameFormatter(bool includeNamespace = false)
+        {
+            _includeNamespace = includeNamespace;
         }
 
         public static IEndpointNameFormatter Instance { get; } = new DefaultEndpointNameFormatter();
@@ -55,7 +63,7 @@ namespace MassTransit.Definition
         public string Consumer<T>()
             where T : class, IConsumer
         {
-            return GetConsumerName(typeof(T));
+            return GetConsumerName<T>();
         }
 
         public string Message<T>()
@@ -67,14 +75,14 @@ namespace MassTransit.Definition
         public string Saga<T>()
             where T : class, ISaga
         {
-            return GetSagaName(typeof(T).Name);
+            return GetSagaName<T>();
         }
 
         public string ExecuteActivity<T, TArguments>()
             where T : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
-            var activityName = GetActivityName(typeof(T).Name);
+            var activityName = GetActivityName<T>();
 
             return $"{activityName}_execute";
         }
@@ -83,7 +91,7 @@ namespace MassTransit.Definition
             where T : class, ICompensateActivity<TLog>
             where TLog : class
         {
-            var activityName = GetActivityName(typeof(T).Name);
+            var activityName = GetActivityName<T>();
 
             return $"{activityName}_compensate";
         }
@@ -93,13 +101,16 @@ namespace MassTransit.Definition
             return name;
         }
 
-        string GetConsumerName(Type type)
+        string GetConsumerName<T>()
         {
-            if (type.IsGenericType)
-                return SanitizeName(type.GetGenericArguments()[0].Name);
+            if (typeof(T).IsGenericType)
+                return SanitizeName(typeof(T).GetGenericArguments()[0].Name);
 
             const string consumer = "Consumer";
-            var consumerName = type.Name;
+
+            var consumerName = _includeNamespace
+                ? TypeMetadataCache<T>.ShortName.Replace(".", "_").Replace("+", "_")
+                : typeof(T).Name;
 
             if (consumerName.EndsWith(consumer, StringComparison.InvariantCultureIgnoreCase))
                 consumerName = consumerName.Substring(0, consumerName.Length - consumer.Length);
@@ -117,22 +128,28 @@ namespace MassTransit.Definition
             return SanitizeName(messageName);
         }
 
-        string GetSagaName(string typeName)
+        string GetSagaName<T>()
         {
             const string saga = "Saga";
 
-            var sagaName = typeName;
+            var sagaName = _includeNamespace
+                ? TypeMetadataCache<T>.ShortName.Replace(".", "_").Replace("+", "_")
+                : typeof(T).Name;
+
             if (sagaName.EndsWith(saga, StringComparison.InvariantCultureIgnoreCase))
                 sagaName = sagaName.Substring(0, sagaName.Length - saga.Length);
 
             return SanitizeName(sagaName);
         }
 
-        string GetActivityName(string typeName)
+        string GetActivityName<T>()
         {
             const string activity = "Activity";
 
-            var activityName = typeName;
+            var activityName = _includeNamespace
+                ? TypeMetadataCache<T>.ShortName.Replace(".", "_").Replace("+", "_")
+                : typeof(T).Name;
+
             if (activityName.EndsWith(activity, StringComparison.InvariantCultureIgnoreCase))
                 activityName = activityName.Substring(0, activityName.Length - activity.Length);
 

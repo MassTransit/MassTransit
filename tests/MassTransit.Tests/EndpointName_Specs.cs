@@ -12,7 +12,7 @@ namespace MassTransit.Tests
         [Test]
         public void Should_convert_to_snake_case()
         {
-            var formatter = new SnakeCaseEndpointNameFormatter();
+            var formatter = SnakeCaseEndpointNameFormatter.Instance;
 
             var name = formatter.Consumer<SomeReallyCoolConsumer>();
 
@@ -22,7 +22,7 @@ namespace MassTransit.Tests
         [Test]
         public void Should_convert_to_snake_case_with_digits()
         {
-            var formatter = new SnakeCaseEndpointNameFormatter();
+            var formatter = SnakeCaseEndpointNameFormatter.Instance;
 
             var name = formatter.Consumer<OneOr2MessageConsumer>();
 
@@ -32,11 +32,21 @@ namespace MassTransit.Tests
         [Test]
         public void Should_convert_to_snake_case_with_uppercase_ids()
         {
-            var formatter = new SnakeCaseEndpointNameFormatter();
+            var formatter = SnakeCaseEndpointNameFormatter.Instance;
 
             var name = formatter.Consumer<SomeSuperIDFormatConsumer>();
 
             Assert.That(name, Is.EqualTo("some_super_idformat"));
+        }
+
+        [Test]
+        public void Should_include_the_namespace()
+        {
+            var formatter = new KebabCaseEndpointNameFormatter(true);
+
+            var name = formatter.Consumer<SomeReallyCoolConsumer>();
+
+            Assert.That(name, Is.EqualTo("mass-transit-tests-endpoint-name-specs-some-really-cool"));
         }
 
 
