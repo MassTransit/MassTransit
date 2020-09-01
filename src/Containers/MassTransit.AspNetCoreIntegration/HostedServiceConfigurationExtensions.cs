@@ -38,7 +38,7 @@ namespace MassTransit
             services.AddOptions();
             services.AddHealthChecks();
             services.AddSingleton<IConfigureOptions<HealthCheckServiceOptions>>(provider =>
-                new ConfigureBusHealthCheckServiceOptions(provider.GetServices<IBusHealth>(), new[] {"ready"}));
+                new ConfigureBusHealthCheckServiceOptions(provider.GetServices<IBusHealth>(), new[] {"ready","MassTransit"}));
         }
     }
 }
