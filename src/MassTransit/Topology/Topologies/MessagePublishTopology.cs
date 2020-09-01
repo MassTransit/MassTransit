@@ -4,6 +4,7 @@ namespace MassTransit.Topology.Topologies
     using System.Collections.Generic;
     using System.Linq;
     using GreenPipes;
+    using Internals.Extensions;
 
 
     public class MessagePublishTopology<TMessage> :
@@ -12,7 +13,6 @@ namespace MassTransit.Topology.Topologies
     {
         readonly IList<IMessagePublishTopologyConvention<TMessage>> _conventions;
         readonly IList<IMessagePublishTopology<TMessage>> _delegateTopologies;
-        readonly IList<IImplementedMessagePublishTopologyConfigurator<TMessage>> _implementedMessageTypes;
         readonly IList<IMessagePublishTopology<TMessage>> _topologies;
 
         public MessagePublishTopology()
@@ -20,8 +20,12 @@ namespace MassTransit.Topology.Topologies
             _conventions = new List<IMessagePublishTopologyConvention<TMessage>>();
             _topologies = new List<IMessagePublishTopology<TMessage>>();
             _delegateTopologies = new List<IMessagePublishTopology<TMessage>>();
-            _implementedMessageTypes = new List<IImplementedMessagePublishTopologyConfigurator<TMessage>>();
+
+            if (typeof(TMessage).HasAttribute<ExcludeFromTopologyAttribute>())
+                Exclude = true;
         }
+
+        public bool Exclude { get; set; }
 
         public void Add(IMessagePublishTopology<TMessage> publishTopology)
         {
@@ -85,27 +89,6 @@ namespace MassTransit.Topology.Topologies
         public virtual IEnumerable<ValidationResult> Validate()
         {
             return Enumerable.Empty<ValidationResult>();
-        }
-
-        public void AddImplementedMessageConfigurator<T>(IMessagePublishTopologyConfigurator<T> configurator)
-            where T : class
-        {
-            var adapter = new ImplementedTypeAdapter<T>(configurator);
-
-            _implementedMessageTypes.Add(adapter);
-        }
-
-
-        class ImplementedTypeAdapter<T> :
-            IImplementedMessagePublishTopologyConfigurator<TMessage>
-            where T : class
-        {
-            readonly IMessagePublishTopologyConfigurator<T> _configurator;
-
-            public ImplementedTypeAdapter(IMessagePublishTopologyConfigurator<T> configurator)
-            {
-                _configurator = configurator;
-            }
         }
     }
 }

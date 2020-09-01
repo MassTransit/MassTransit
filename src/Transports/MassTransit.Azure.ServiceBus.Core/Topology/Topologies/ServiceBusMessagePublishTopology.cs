@@ -120,6 +120,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
 
         public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
         {
+            if (Exclude)
+                return;
+
             var topicHandle = builder.CreateTopic(_topicDescription.Value);
 
             builder.Topic = topicHandle;

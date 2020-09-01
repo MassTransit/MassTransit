@@ -47,5 +47,9 @@ namespace MassTransit.Topology
         IMessagePublishTopology,
         ISpecification
     {
+        /// <summary>
+        /// Exclude the message type from being created as a topic/exchange.
+        /// </summary>
+        bool Exclude { set; }
     }
 }

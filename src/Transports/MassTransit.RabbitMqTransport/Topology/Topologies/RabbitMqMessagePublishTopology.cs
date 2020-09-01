@@ -49,6 +49,9 @@
 
         public void Apply(IPublishEndpointBrokerTopologyBuilder builder)
         {
+            if (Exclude)
+                return;
+
             var exchangeHandle = builder.ExchangeDeclare(_exchange.ExchangeName, _exchange.ExchangeType, _exchange.Durable, _exchange.AutoDelete,
                 _exchange.ExchangeArguments);
 
