@@ -1,5 +1,6 @@
 ﻿namespace MassTransit
 {
+    using System;
     using System.Collections.Generic;
     using Context;
     using GreenPipes;
@@ -129,6 +130,36 @@
 
                 headers.Set(header.Key, header.Value, false);
             }
+        }
+
+        /// <summary>
+        /// Sets the ConversationId to a new value, starting a new conversation. If a message was being consumed, and the
+        /// ConversationId was present, that value is stored in an MT-InitiatingConversationId header.
+        /// </summary>
+        /// <param name="context">The send context</param>
+        /// <returns></returns>
+        public static SendContext StartNewConversation(this SendContext context)
+        {
+            return StartNewConversation(context, NewId.NextGuid());
+        }
+
+        /// <summary>
+        /// Sets the ConversationId to a new value, starting a new conversation. If a message was being consumed, and the
+        /// ConversationId was present, that value is stored in an MT-InitiatingConversationId header.
+        /// </summary>
+        /// <param name="context">The send context</param>
+        /// <param name="conversationId">The new ConversationId</param>
+        /// <returns></returns>
+        public static SendContext StartNewConversation(this SendContext context, Guid conversationId)
+        {
+            if (context.ConversationId.HasValue)
+            {
+                context.Headers.Set(MessageHeaders.InitiatingConversationId, context.ConversationId.Value.ToString());
+            }
+
+            context.ConversationId = conversationId;
+
+            return context;
         }
     }
 }

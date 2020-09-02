@@ -17,7 +17,7 @@
         /// <param name="message">The message</param>
         /// <param name="callback">The callback for the send context</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task RespondAsync<T>(this ConsumeContext<T> context, T message, Action<SendContext<T>> callback)
+        public static Task RespondAsync<T>(this ConsumeContext context, T message, Action<SendContext<T>> callback)
             where T : class
         {
             return context.RespondAsync(message, Pipe.Execute(callback));
@@ -33,7 +33,7 @@
         /// <param name="message">The message</param>
         /// <param name="callback">The callback for the send context</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task RespondAsync<T>(this ConsumeContext<T> context, T message, Action<SendContext> callback)
+        public static Task RespondAsync<T>(this ConsumeContext context, T message, Action<SendContext> callback)
             where T : class
         {
             return context.RespondAsync(message, Pipe.Execute(callback));
@@ -49,7 +49,7 @@
         /// <param name="message">The message</param>
         /// <param name="callback">The callback for the send context</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task RespondAsync<T>(this ConsumeContext<T> context, T message, Func<SendContext<T>, Task> callback)
+        public static Task RespondAsync<T>(this ConsumeContext context, T message, Func<SendContext<T>, Task> callback)
             where T : class
         {
             return context.RespondAsync(message, Pipe.ExecuteAsync(callback));
@@ -65,7 +65,7 @@
         /// <param name="message">The message</param>
         /// <param name="callback">The callback for the send context</param>
         /// <returns>The task which is completed once the Send is acknowledged by the broker</returns>
-        public static Task RespondAsync<T>(this ConsumeContext<T> context, T message, Func<SendContext, Task> callback)
+        public static Task RespondAsync<T>(this ConsumeContext context, T message, Func<SendContext, Task> callback)
             where T : class
         {
             return context.RespondAsync(message, Pipe.ExecuteAsync(callback));

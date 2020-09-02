@@ -78,6 +78,11 @@
         public const string EndpointId = "MT-Request-EndpointId";
 
         /// <summary>
+        /// The initiating conversation id if a new conversation was started by this message
+        /// </summary>
+        public const string InitiatingConversationId = "MT-InitiatingConversationId";
+
+        /// <summary>
         /// The messageId, which is typically only in a transport header
         /// </summary>
         public const string MessageId = "MessageId";
