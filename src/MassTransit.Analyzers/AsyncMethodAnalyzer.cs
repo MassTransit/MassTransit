@@ -20,7 +20,7 @@ namespace MassTransit.Analyzers
             "MassTransit method is not awaited or captured",
             "Method {0} is not awaited or captured and may result in message loss",
             Category, DiagnosticSeverity.Warning, true,
-            "MassTransit method is not awaited or captured");
+            "MassTransit method is not awaited or captured.");
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(MissingAwaitRule);
 

@@ -51,7 +51,7 @@ namespace ConsoleApplication1
             {
                 Id = "MCA0003",
                 Message =
-                    "Anonymous type is missing properties that are in the message contract 'ProcessDocument'. The following properties are missing: Id, CustomerId, Document",
+                    "Anonymous type is missing properties that are in the message contract 'ProcessDocument'. The following properties are missing: Id, CustomerId, Document.",
                 Severity = DiagnosticSeverity.Info,
                 Locations =
                     new[] {new DiagnosticResultLocation("Test0.cs", 25, 48)}
@@ -86,7 +86,7 @@ namespace ConsoleApplication1
             {
                 Id = "MCA0001",
                 Message =
-                    "Anonymous type does not map to message contract 'ProcessDocument'. The following properties of the anonymous type are incompatible: Document",
+                    "Anonymous type does not map to message contract 'ProcessDocument'. The following properties of the anonymous type are incompatible: Document.",
                 Severity = DiagnosticSeverity.Error,
                 Locations =
                     new[] {new DiagnosticResultLocation("Test0.cs", 25, 48)}

@@ -27,21 +27,21 @@ namespace MassTransit.Analyzers
 
         static readonly DiagnosticDescriptor StructurallyCompatibleRule = new DiagnosticDescriptor(StructurallyCompatibleRuleId,
             "Anonymous type does not map to message contract",
-            "Anonymous type does not map to message contract '{0}'. The following properties of the anonymous type are incompatible: {1}",
+            "Anonymous type does not map to message contract '{0}'. The following properties of the anonymous type are incompatible: {1}.",
             Category, DiagnosticSeverity.Error, true,
-            "Anonymous type should map to message contract");
+            "Anonymous type should map to message contract.");
 
         static readonly DiagnosticDescriptor ValidMessageContractStructureRule = new DiagnosticDescriptor(ValidMessageContractStructureRuleId,
             "Message contract does not have a valid structure",
             "Message contract '{0}' does not have a valid structure",
             Category, DiagnosticSeverity.Error, true,
-            "Message contract should have a valid structure. Properties should be primitive, string or IReadOnlyList or ImmutableArray of a primitive, string or message contract");
+            "Message contract should have a valid structure. Properties should be primitive, string or IReadOnlyList or ImmutableArray of a primitive, string or message contract.");
 
         static readonly DiagnosticDescriptor MissingPropertiesRule = new DiagnosticDescriptor(MissingPropertiesRuleId,
             "Anonymous type is missing properties that are in the message contract",
-            "Anonymous type is missing properties that are in the message contract '{0}'. The following properties are missing: {1}",
+            "Anonymous type is missing properties that are in the message contract '{0}'. The following properties are missing: {1}.",
             Category, DiagnosticSeverity.Info, true,
-            "Anonymous type misses properties that are in the message contract");
+            "Anonymous type misses properties that are in the message contract.");
 
         readonly ConcurrentDictionary<SemanticModel, Lazy<TypeConversionHelper>> _typeConverterHelpers =
             new ConcurrentDictionary<SemanticModel, Lazy<TypeConversionHelper>>();
