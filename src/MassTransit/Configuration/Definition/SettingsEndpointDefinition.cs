@@ -14,9 +14,25 @@ namespace MassTransit.Definition
 
         public string GetEndpointName(IEndpointNameFormatter formatter)
         {
-            return _endpointName ??= string.IsNullOrWhiteSpace(_settings.Name)
-                ? FormatEndpointName(formatter)
-                : _settings.Name;
+            string FormatName()
+            {
+                return string.IsNullOrWhiteSpace(_settings.Name)
+                    ? FormatEndpointName(formatter)
+                    : _settings.Name;
+            }
+
+            string GetSeparator()
+            {
+                return formatter switch
+                {
+                    SnakeCaseEndpointNameFormatter f => f.Separator,
+                    _ => ""
+                };
+            }
+
+            return _endpointName ??= string.IsNullOrWhiteSpace(_settings.InstanceId)
+                ? FormatName()
+                : formatter.SanitizeName(FormatName() + GetSeparator() + _settings.InstanceId);
         }
 
         public bool IsTemporary => _settings.IsTemporary;

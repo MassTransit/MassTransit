@@ -38,6 +38,11 @@ namespace MassTransit.Registration
             set => _settings.ConfigureConsumeTopology = value;
         }
 
+        public string InstanceId
+        {
+            set => _settings.InstanceId = value;
+        }
+
         public IEndpointSettings<IEndpointDefinition<T>> Settings => _settings;
     }
 }

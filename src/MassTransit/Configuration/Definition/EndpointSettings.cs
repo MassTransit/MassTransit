@@ -18,5 +18,7 @@ namespace MassTransit.Definition
         public int? ConcurrentMessageLimit { get; set; }
 
         public bool ConfigureConsumeTopology { get; set; }
+
+        public string InstanceId { get; set; }
     }
 }

@@ -37,6 +37,8 @@ namespace MassTransit.Definition
             _separator = separator ?? "_";
         }
 
+        public string Separator => _separator;
+
         public new static IEndpointNameFormatter Instance { get; } = new SnakeCaseEndpointNameFormatter();
 
         public override string SanitizeName(string name)

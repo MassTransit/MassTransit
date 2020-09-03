@@ -33,5 +33,11 @@ namespace MassTransit.Registration
         /// activities since <see cref="RoutingSlip" /> should never be published).
         /// </summary>
         bool ConfigureConsumeTopology { set; }
+
+        /// <summary>
+        /// Specifies an identifier that uniquely identifies the endpoint instance, which is appended to the
+        /// end of the endpoint name.
+        /// </summary>
+        string InstanceId { set; }
     }
 }
