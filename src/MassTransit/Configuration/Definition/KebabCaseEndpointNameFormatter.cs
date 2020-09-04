@@ -9,13 +9,29 @@ namespace MassTransit.Definition
     public class KebabCaseEndpointNameFormatter :
         SnakeCaseEndpointNameFormatter
     {
-        protected KebabCaseEndpointNameFormatter()
-            : base("-")
+        const char KebabCaseSeparator = '-';
+
+        /// <summary>
+        /// Kebab case endpoint formatter, which uses dashes between words
+        /// </summary>
+        /// <param name="includeNamespace">If true, the namespace is included in the name</param>
+        public KebabCaseEndpointNameFormatter(bool includeNamespace)
+            : base(KebabCaseSeparator, null, includeNamespace)
         {
         }
 
-        public KebabCaseEndpointNameFormatter(bool includeNamespace)
-            : base("-", includeNamespace)
+        /// <summary>
+        /// Kebab case endpoint formatter, which uses dashes between words
+        /// </summary>
+        /// <param name="prefix">Prefix to start the name, should match the casing of the formatter (such as Dev or PreProd)</param>
+        /// <param name="includeNamespace">If true, the namespace is included in the name</param>
+        public KebabCaseEndpointNameFormatter(string prefix, bool includeNamespace)
+            : base(KebabCaseSeparator, prefix, includeNamespace)
+        {
+        }
+
+        protected KebabCaseEndpointNameFormatter()
+            : base(KebabCaseSeparator, null, false)
         {
         }
 
@@ -23,7 +39,7 @@ namespace MassTransit.Definition
 
         public override string SanitizeName(string name)
         {
-            return base.SanitizeName(name).Replace('_', '-');
+            return base.SanitizeName(name).Replace(SnakeCaseSeparator, KebabCaseSeparator);
         }
     }
 }

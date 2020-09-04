@@ -16,16 +16,34 @@ namespace MassTransit.Definition
     public class DefaultEndpointNameFormatter :
         IEndpointNameFormatter
     {
+        static readonly char[] _removeChars = {'.', '+'};
+
         readonly bool _includeNamespace;
+        readonly string _prefix;
+
+        /// <summary>
+        /// Default endpoint formatter, which does not have a separator between words
+        /// </summary>
+        /// <param name="includeNamespace">If true, the namespace is included in the name</param>
+        public DefaultEndpointNameFormatter(bool includeNamespace)
+        {
+            _includeNamespace = includeNamespace;
+        }
+
+        /// <summary>
+        /// Default endpoint formatter, which does not have a separator between words
+        /// </summary>
+        /// <param name="prefix">Prefix to start the name, should match the casing of the formatter (such as Dev or PreProd)</param>
+        /// <param name="includeNamespace">If true, the namespace is included in the name</param>
+        public DefaultEndpointNameFormatter(string prefix, bool includeNamespace)
+        {
+            _prefix = prefix;
+            _includeNamespace = includeNamespace;
+        }
 
         protected DefaultEndpointNameFormatter()
         {
             _includeNamespace = false;
-        }
-
-        public DefaultEndpointNameFormatter(bool includeNamespace = false)
-        {
-            _includeNamespace = includeNamespace;
         }
 
         public static IEndpointNameFormatter Instance { get; } = new DefaultEndpointNameFormatter();
@@ -108,9 +126,7 @@ namespace MassTransit.Definition
 
             const string consumer = "Consumer";
 
-            var consumerName = _includeNamespace
-                ? TypeMetadataCache<T>.ShortName.Replace(".", "_").Replace("+", "_")
-                : typeof(T).Name;
+            var consumerName = FormatName<T>();
 
             if (consumerName.EndsWith(consumer, StringComparison.InvariantCultureIgnoreCase))
                 consumerName = consumerName.Substring(0, consumerName.Length - consumer.Length);
@@ -132,9 +148,7 @@ namespace MassTransit.Definition
         {
             const string saga = "Saga";
 
-            var sagaName = _includeNamespace
-                ? TypeMetadataCache<T>.ShortName.Replace(".", "_").Replace("+", "_")
-                : typeof(T).Name;
+            var sagaName = FormatName<T>();
 
             if (sagaName.EndsWith(saga, StringComparison.InvariantCultureIgnoreCase))
                 sagaName = sagaName.Substring(0, sagaName.Length - saga.Length);
@@ -146,14 +160,21 @@ namespace MassTransit.Definition
         {
             const string activity = "Activity";
 
-            var activityName = _includeNamespace
-                ? TypeMetadataCache<T>.ShortName.Replace(".", "_").Replace("+", "_")
-                : typeof(T).Name;
+            var activityName = FormatName<T>();
 
             if (activityName.EndsWith(activity, StringComparison.InvariantCultureIgnoreCase))
                 activityName = activityName.Substring(0, activityName.Length - activity.Length);
 
             return SanitizeName(activityName);
+        }
+
+        string FormatName<T>()
+        {
+            var name = _includeNamespace
+                ? string.Join("", TypeMetadataCache<T>.ShortName.Split(_removeChars))
+                : typeof(T).Name;
+
+            return string.IsNullOrWhiteSpace(_prefix) ? name : _prefix + name;
         }
     }
 }
