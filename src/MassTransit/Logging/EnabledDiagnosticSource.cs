@@ -70,7 +70,7 @@ namespace MassTransit.Logging
             if (baggage != null)
                 context.Headers.Set(DiagnosticHeaders.ActivityCorrelationContext, baggage);
 
-            EnabledScope? scope = LogContext.BeginScope();
+            EnabledScope? scope = BeginScope(startActivity);
 
             return new StartedActivity(_source, startActivity, scope);
         }
@@ -97,7 +97,7 @@ namespace MassTransit.Logging
 
             var startActivity = _source.StartActivity(activity, context);
 
-            EnabledScope? scope = LogContext.BeginScope();
+            EnabledScope? scope = BeginScope(startActivity);
 
             var receiveActivity = new StartedActivity(_source, startActivity, scope);
 
@@ -201,7 +201,7 @@ namespace MassTransit.Logging
 
             var startActivity = _source.StartActivity(activity, context);
 
-            EnabledScope? scope = LogContext.BeginScope();
+            EnabledScope? scope = BeginScope(startActivity);
 
             return new StartedActivity(_source, startActivity, scope);
         }
@@ -225,6 +225,61 @@ namespace MassTransit.Logging
                 parentActivityId = activityId;
 
             return parentActivityId;
+        }
+
+        static EnabledScope? BeginScope(System.Diagnostics.Activity activity)
+        {
+            EnabledScope? scope = LogContext.BeginScope();
+            if (scope.HasValue)
+            {
+                var spanId = activity.GetSpanId();
+                if (!string.IsNullOrWhiteSpace(spanId))
+                    scope.Value.Add("SpanId", spanId);
+
+                var traceId = activity.GetTraceId();
+                if (!string.IsNullOrWhiteSpace(traceId))
+                    scope.Value.Add("TraceId", traceId);
+
+                var parentId = activity.GetParentId();
+                if (!string.IsNullOrWhiteSpace(parentId))
+                    scope.Value.Add("ParentId", parentId);
+            }
+
+            return scope;
+        }
+    }
+
+
+    static class ActivityExtensions
+    {
+        public static string GetSpanId(this System.Diagnostics.Activity activity)
+        {
+            return activity.IdFormat switch
+            {
+                ActivityIdFormat.Hierarchical => activity.Id,
+                ActivityIdFormat.W3C => activity.SpanId.ToHexString(),
+                _ => null,
+            } ?? string.Empty;
+        }
+
+        public static string GetTraceId(this System.Diagnostics.Activity activity)
+        {
+            return activity.IdFormat switch
+            {
+                ActivityIdFormat.Hierarchical => activity.RootId,
+                ActivityIdFormat.W3C => activity.TraceId.ToHexString(),
+                _ => null,
+            } ?? string.Empty;
+        }
+
+        public static string GetParentId(this System.Diagnostics.Activity activity)
+        {
+            return activity.IdFormat switch
+            {
+                ActivityIdFormat.Hierarchical => activity.ParentId,
+                ActivityIdFormat.W3C => activity.ParentSpanId.ToHexString(),
+                _ => null,
+            } ?? string.Empty;
         }
     }
 }
