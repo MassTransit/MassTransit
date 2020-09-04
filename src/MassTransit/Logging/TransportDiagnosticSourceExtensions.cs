@@ -1,7 +1,9 @@
 namespace MassTransit.Logging
 {
     using System.Collections.Generic;
+    using System.Linq;
     using Context;
+    using Newtonsoft.Json.Linq;
 
 
     public static class TransportDiagnosticSourceExtensions
@@ -24,15 +26,24 @@ namespace MassTransit.Logging
             activity.AddBaggage(DiagnosticHeaders.CorrelationId, context.CorrelationId);
             activity.AddBaggage(DiagnosticHeaders.ConversationId, context.ConversationId);
 
-            if (context.Headers.TryGetHeader(DiagnosticHeaders.ActivityCorrelationContext, out var correlationHeader)
-                && correlationHeader is IEnumerable<KeyValuePair<string, string>> correlationValues)
+            if (context.Headers.TryGetHeader(DiagnosticHeaders.ActivityCorrelationContext, out var correlationHeader))
             {
-                foreach (KeyValuePair<string, string> value in correlationValues)
+                foreach (KeyValuePair<string, string> value in GetValues(correlationHeader))
                 {
                     if (!string.IsNullOrWhiteSpace(value.Value))
                         activity.AddBaggage(value.Key, value.Value);
                 }
             }
+        }
+
+        static IEnumerable<KeyValuePair<string, string>> GetValues(object values)
+        {
+            return values switch
+            {
+                JArray array => array.ToObject<KeyValuePair<string, string>[]>(),
+                IEnumerable<KeyValuePair<string, string>> enumerable => enumerable,
+                _ => Enumerable.Empty<KeyValuePair<string, string>>()
+            };
         }
     }
 }
