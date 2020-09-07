@@ -83,7 +83,7 @@ namespace MassTransit.Policies
         {
             while (context.CancellationToken.IsCancellationRequested == false)
             {
-                LogContext.Error?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
+                LogContext.Warning?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
 
                 try
                 {
@@ -117,7 +117,7 @@ namespace MassTransit.Policies
         {
             while (context.CancellationToken.IsCancellationRequested == false)
             {
-                LogContext.Error?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
+                LogContext.Warning?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay, retryContext.Exception.Message);
 
                 try
                 {
