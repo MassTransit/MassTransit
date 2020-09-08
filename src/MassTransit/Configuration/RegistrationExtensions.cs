@@ -389,11 +389,17 @@ namespace MassTransit
 
         static IEnumerable<Type> FindTypesInNamespace(Type type, Func<Type, bool> typeFilter)
         {
+            if (type.Namespace == null)
+                throw new ArgumentException("The type must have a valid namespace", nameof(type));
+
+            var dottedNamespace = type.Namespace + ".";
+
             bool Filter(Type candidate)
             {
                 return typeFilter(candidate)
                     && candidate.Namespace != null
-                    && candidate.Namespace.StartsWith(type.Namespace, StringComparison.OrdinalIgnoreCase);
+                    && (candidate.Namespace.StartsWith(dottedNamespace, StringComparison.OrdinalIgnoreCase)
+                        || candidate.Namespace.Equals(type.Namespace, StringComparison.OrdinalIgnoreCase));
             }
 
             return AssemblyTypeCache.FindTypes(type.Assembly, TypeClassification.Concrete | TypeClassification.Closed, Filter).GetAwaiter().GetResult();
