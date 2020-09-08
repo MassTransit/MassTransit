@@ -39,7 +39,15 @@ module.exports = {
         collapsable: false,
         children: [
           '/getting-started/live-coding',
-          '/getting-started/upgrade-v6'
+          '/getting-started/upgrade-v6',
+          {
+            title: 'Release Notes',
+            path: '/releases/',
+            collapsable: true,
+            children: [
+              '/releases/v7.0.4'
+            ]
+          }
         ]
       },
       {
