@@ -201,6 +201,10 @@
                             dictionary[header.Key] = value;
                             break;
 
+                        case bool value when value:
+                            dictionary[header.Key] = bool.TrueString;
+                            break;
+
                         case IFormattable formatValue:
                             if (header.Value.GetType().IsValueType)
                                 dictionary[header.Key] = header.Value;

@@ -31,6 +31,9 @@ namespace MassTransit
                 case string stringValue:
                     result = new HeaderValue<string>(Key, stringValue);
                     return true;
+                case bool boolValue when boolValue:
+                    result = new HeaderValue<string>(Key, bool.TrueString);
+                    return true;
                 case IFormattable formatValue when formatValue.GetType().IsValueType:
                     result = new HeaderValue<string>(Key, formatValue.ToString());
                     return true;
@@ -68,6 +71,9 @@ namespace MassTransit
                     return false;
                 case string stringValue:
                     result = new HeaderValue<string>(Key, stringValue);
+                    return true;
+                case bool boolValue when boolValue:
+                    result = new HeaderValue<string>(Key, bool.TrueString);
                     return true;
                 case IFormattable formatValue when formatValue.GetType().IsValueType:
                     result = new HeaderValue<string>(Key, formatValue.ToString());

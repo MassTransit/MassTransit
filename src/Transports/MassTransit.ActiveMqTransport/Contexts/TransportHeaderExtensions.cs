@@ -48,6 +48,10 @@
                         dictionary[header.Key] = s;
                         break;
 
+                    case bool boolValue when boolValue:
+                        dictionary[header.Key] = bool.TrueString;
+                        break;
+
                     case IFormattable formatValue:
                         if (header.Value.GetType().IsValueType)
                             dictionary[header.Key] = header.Value;
