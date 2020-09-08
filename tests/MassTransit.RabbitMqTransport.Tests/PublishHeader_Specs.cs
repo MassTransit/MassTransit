@@ -12,7 +12,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class Publishing_a_message_in_a_consumer_with_baggage :
         RabbitMqTestFixture
     {
-        [Test]
+        [Test, Explicit]
         public async Task Should_source_address_from_the_endpoint()
         {
             Task<ConsumeContext<PongMessage>> responseHandled = ConnectPublishHandler<PongMessage>(pongContext =>
