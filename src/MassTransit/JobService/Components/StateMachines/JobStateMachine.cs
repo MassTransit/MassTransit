@@ -96,12 +96,6 @@ namespace MassTransit.JobService.Components.StateMachines
                     .PublishJobCompleted()
                     .TransitionTo(Completed));
 
-            During(Completed,
-                When(AttemptCompleted)
-                    .PublishJobCompleted(),
-                When(JobCompleted)
-                    .If(_ => options.FinalizeCompleted, x => x.Finalize()));
-
             During(StartingJobAttempt, WaitingToStart, Started,
                 When(AttemptFaulted)
                     .Then(context =>
@@ -118,9 +112,21 @@ namespace MassTransit.JobService.Components.StateMachines
                             .PublishJobFaulted()
                             .TransitionTo(Faulted)));
 
+            During(Completed,
+                When(AttemptCompleted)
+                    .PublishJobCompleted(),
+                When(AttemptStarted)
+                    .Then(context => context.Instance.Started = context.Data.Timestamp)
+                    .PublishJobStarted(),
+                When(JobCompleted)
+                    .If(_ => options.FinalizeCompleted, x => x.Finalize()));
+
             During(Faulted,
                 When(AttemptFaulted)
-                    .PublishJobFaulted());
+                    .PublishJobFaulted(),
+                When(AttemptStarted)
+                    .Then(context => context.Instance.Started = context.Data.Timestamp)
+                    .PublishJobStarted());
 
             During(WaitingToRetry,
                 Ignore(AttemptFaulted),
