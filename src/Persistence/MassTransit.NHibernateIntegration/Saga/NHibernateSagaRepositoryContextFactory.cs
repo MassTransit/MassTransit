@@ -89,7 +89,7 @@ namespace MassTransit.NHibernateIntegration.Saga
             }
             catch (Exception)
             {
-                if (transaction.IsActive)
+                if (transaction != null && transaction.IsActive)
                 {
                     try
                     {
