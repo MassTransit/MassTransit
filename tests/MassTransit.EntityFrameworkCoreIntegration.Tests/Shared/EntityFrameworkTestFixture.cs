@@ -25,5 +25,10 @@
         {
             _testDbParameters.Apply(typeof(TDbContext), builder);
         }
+
+        protected void ApplyBuilderOptions(DbContextOptionsBuilder builder)
+        {
+            _testDbParameters.Apply(typeof(TDbContext), builder);
+        }
     }
 }
