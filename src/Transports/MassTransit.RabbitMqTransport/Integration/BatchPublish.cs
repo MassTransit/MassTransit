@@ -13,14 +13,14 @@ namespace MassTransit.RabbitMqTransport.Integration
         readonly string _exchange;
         readonly IBasicProperties _properties;
         readonly string _routingKey;
-        byte[] _body;
+        ReadOnlyMemory<byte> _body;
 
         public BatchPublish(string exchange, string routingKey, IBasicProperties properties, byte[] body, bool awaitAck)
         {
             _exchange = exchange;
             _routingKey = routingKey;
             _properties = properties;
-            _body = body;
+            _body = new ReadOnlyMemory<byte>(body);
             _awaitAck = awaitAck;
 
             _confirmed = new TaskCompletionSource<ulong>(TaskCreationOptions.RunContinuationsAsynchronously);
