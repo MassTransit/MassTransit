@@ -209,5 +209,14 @@ namespace MassTransit
         /// </summary>
         /// <param name="registration"></param>
         void AddMessageScheduler(IMessageSchedulerRegistration registration);
+
+        /// <summary>
+        /// Add a saga repository for the specified saga type, by specifying the repository type via method chaining. Using this
+        /// method alone does nothing, it should be followed with the appropriate repository configuration method.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        ISagaRegistrationConfigurator<T> AddSagaRepository<T>()
+            where T : class, ISaga;
     }
 }

@@ -300,6 +300,12 @@ namespace MassTransit.Registration
             registration.Register(Registrar);
         }
 
+        public ISagaRegistrationConfigurator<T> AddSagaRepository<T>()
+            where T : class, ISaga
+        {
+            return new SagaRegistrationConfigurator<T>(this, Registrar);
+        }
+
         protected IRegistration CreateRegistration(IConfigurationServiceProvider provider)
         {
             return new Registration(provider, Consumers, Sagas, ExecuteActivities, Activities);
