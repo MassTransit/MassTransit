@@ -81,5 +81,60 @@ services.AddMassTransit(cfg =>
 });
 ```
 
+#### Single DbContext
+
+> New in 7.0.5
+
+A single `DbContext` can be registered in the container which can then be used to configure sagas that are mapped by the `DbContext`. For example, [Job Consumers](/advanced/job-consumers) need three saga repositories, and the Entity Framework Core package includes the `JobServiceSagaDbContext` which can be configured using the `AddSagaRepository` method as shown below.
+
+```cs
+services.AddDbContext<JobServiceSagaDbContext>(builder =>
+    builder.UseNpgsql(Configuration.GetConnectionString("JobService"), m =>
+    {
+        m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+        m.MigrationsHistoryTable($"__{nameof(JobServiceSagaDbContext)}");
+    }));
+
+services.AddMassTransit(x =>
+{
+    x.AddSagaRepository<JobSaga>()
+        .EntityFrameworkRepository(r =>
+        {
+            r.ExistingDbContext<JobServiceSagaDbContext>();
+            r.LockStatementProvider = new PostgresLockStatementProvider();
+        });
+    x.AddSagaRepository<JobTypeSaga>()
+        .EntityFrameworkRepository(r =>
+        {
+            r.ExistingDbContext<JobServiceSagaDbContext>();
+            r.LockStatementProvider = new PostgresLockStatementProvider();
+        });
+    x.AddSagaRepository<JobAttemptSaga>()
+        .EntityFrameworkRepository(r =>
+        {
+            r.ExistingDbContext<JobServiceSagaDbContext>();
+            r.LockStatementProvider = new PostgresLockStatementProvider();
+        });
+
+    // other configuration, such as consumers, etc.
+});
+```
+
+The above code using the standard Entity Framework configuration extensions to add the _DbContext_ to the container, using PostgreSQL. Because the job service state machine receive endpoints are configured by _ConfigureJobServiceEndpoints_, the saga repositories must be configured separately. The _AddSagaRepository_ method is used to register a repository for a saga that has already been added, and uses the same extension methods as the _AddSaga_ and _AddSagaStateMachine_ methods.
+
+Once configured, the job service sagas can be configured as shown below.
+
+```cs
+cfg.ServiceInstance(options, instance =>
+{
+    instance.ConfigureJobServiceEndpoints(js =>
+    {
+        js.ConfigureSagaRepositories(context);
+    });
+});
+```
+
+The [Job Consumers](https://github.com/MassTransit/Sample-JobConsumers) sample is a working version of this configuration style.
+
 
 
