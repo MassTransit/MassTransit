@@ -23,8 +23,7 @@
 
                 await InputQueueSendEndpoint.Send<CartItemAdded>(new {MemberNumber = memberNumber});
 
-                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == memberNumber
-                    && GetCurrentState(x) == _machine.Active, TestTimeout);
+                Guid? saga = await _repository.ShouldContainSagaInState(x => x.MemberNumber == memberNumber, _machine, _machine.Active, TestTimeout);
 
                 Assert.IsTrue(saga.HasValue);
 
@@ -56,8 +55,7 @@
 
                 await InputQueueSendEndpoint.Send<CartItemAdded>(new {MemberNumber = memberNumber});
 
-                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == memberNumber
-                    && GetCurrentState(x) == _machine.Active, TestTimeout);
+                Guid? saga = await _repository.ShouldContainSagaInState(x => x.MemberNumber == memberNumber, _machine, _machine.Active, TestTimeout);
 
                 Assert.IsTrue(saga.HasValue);
 
@@ -68,11 +66,6 @@
 
             InMemorySagaRepository<TestState> _repository;
             TestStateMachine _machine;
-
-            State GetCurrentState(TestState state)
-            {
-                return _machine.GetState(state).Result;
-            }
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
@@ -170,9 +163,7 @@
                             context => TimeSpan.FromSeconds(context.Instance.ExpiresAfterSeconds)));
 
                 SetCompletedWhenFinalized();
-            }
-
-            // ReSharper disable UnassignedGetOnlyAutoProperty
+            } // ReSharper disable UnassignedGetOnlyAutoProperty
             public Schedule<TestState, CartExpired> CartTimeout { get; }
 
             public Event<CartItemAdded> ItemAdded { get; }

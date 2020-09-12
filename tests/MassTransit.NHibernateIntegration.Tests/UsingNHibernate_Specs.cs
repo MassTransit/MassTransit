@@ -44,7 +44,7 @@
 
             await InputQueueSendEndpoint.Send(new GotHitByACar {CorrelationId = correlationId});
 
-            sagaId = await _repository.ShouldContainSaga(x => x.CorrelationId == correlationId && x.CurrentState == _machine.Dead.Name, TestTimeout);
+            sagaId = await _repository.ShouldContainSagaInState(correlationId, _machine, x => x.Dead, TestTimeout);
 
             Assert.IsTrue(sagaId.HasValue);
 

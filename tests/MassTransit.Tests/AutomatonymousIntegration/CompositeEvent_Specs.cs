@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
-    using Automatonymous.Contexts;
     using MassTransit.Saga;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -23,13 +22,11 @@
 
             await Bus.Publish(message);
 
-            Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-                && GetCurrentState(x).Result == _machine.Waiting, TestTimeout);
+            Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, x => x.Waiting, TestTimeout);
             Assert.IsTrue(saga.HasValue);
 
             await Bus.Publish(new FirstMessage(message.CorrelationId));
-            saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-                && GetCurrentState(x).Result == _machine.WaitingForSecond, TestTimeout);
+            saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, x => x.WaitingForSecond, TestTimeout);
             Assert.IsTrue(saga.HasValue);
 
             await Bus.Publish(new SecondMessage(message.CorrelationId));
@@ -48,13 +45,6 @@
         }
 
         TestStateMachine _machine;
-
-        async Task<State> GetCurrentState(Instance state)
-        {
-            var context = new StateMachineInstanceContext<Instance>(state);
-
-            return await _machine.GetState(context.Instance);
-        }
 
 
         class Instance :

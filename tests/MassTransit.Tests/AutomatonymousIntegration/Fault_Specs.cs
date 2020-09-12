@@ -57,9 +57,7 @@
 
             await InputQueueSendEndpoint.Send(message);
 
-            Guid? saga = await _repository.ShouldContainSaga(
-                x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.WaitingToStart, TestTimeout);
-
+            Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, _machine.WaitingToStart, TestTimeout);
 
             await InputQueueSendEndpoint.Send(new Start(message.CorrelationId));
 
@@ -67,8 +65,7 @@
 
             Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
 
-            saga = await _repository.ShouldContainSaga(
-                x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.FailedToStart, TestTimeout);
+            saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, _machine.FailedToStart, TestTimeout);
 
             Assert.IsTrue(saga.HasValue);
         }

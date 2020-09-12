@@ -30,8 +30,7 @@
 
                 ConsumeContext<MemberRegistered> registered = await handler;
 
-                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == memberNumber && Equals(GetCurrentState(x), _machine.Registered),
-                    TestTimeout);
+                Guid? saga = await _repository.ShouldContainSagaInState(x => x.MemberNumber == memberNumber, _machine, x => x.Registered, TestTimeout);
 
                 Assert.IsTrue(saga.HasValue);
 
@@ -47,11 +46,6 @@
 
             InMemorySagaRepository<TestState> _repository;
             TestStateMachine _machine;
-
-            State GetCurrentState(TestState state)
-            {
-                return _machine.GetState(state).Result;
-            }
 
             public Sending_a_request_from_a_state_machine()
             {

@@ -44,11 +44,13 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
 
             await activityMonitor.AwaitBusInactivity(TestTimeout);
 
-            await _sagaRepository.Value.ShouldContainSaga(sagaId, s => s.Counter == 2 && s.CurrentState == "DidIncrement", TestTimeout);
+            await _sagaRepository.Value.ShouldContainSagaInState(s => s.CorrelationId == sagaId && s.Counter == 2, _machine, _machine.DidIncrement,
+                TestTimeout);
         }
 
         readonly Lazy<ISagaRepository<SlowConcurrentSaga>> _sagaRepository;
         readonly SagaTestHarness<SlowConcurrentSaga> _sagaTestHarness;
+        readonly SlowConcurrentSagaStateMachine _machine;
 
         public SlowConcurrentSaga_Specs()
         {
@@ -62,7 +64,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
                     () => new SlowConcurrentSagaContextFactory().CreateDbContext(DbContextOptionsBuilder),
                     notWorkingRowLockStatements));
 
-            _sagaTestHarness = BusTestHarness.StateMachineSaga(new SlowConcurrentSagaStateMachine(), _sagaRepository.Value);
+            _machine = new SlowConcurrentSagaStateMachine();
+            _sagaTestHarness = BusTestHarness.StateMachineSaga(_machine, _sagaRepository.Value);
         }
 
         [OneTimeSetUp]

@@ -67,8 +67,7 @@
 
             foreach (var sid in sagaIds)
             {
-                Guid? sagaId = await _repository.Value.ShouldContainSaga(x => x.CorrelationId == sid
-                    && x.CurrentState == _machine.Warmup.Name, TestTimeout);
+                Guid? sagaId = await _repository.Value.ShouldContainSagaInState(sid, _machine, _machine.Warmup, TestTimeout);
 
                 Assert.IsTrue(sagaId.HasValue);
             }
@@ -108,8 +107,7 @@
                 })
             );
 
-            sagaId = await _repository.Value.ShouldContainSaga(x => x.CorrelationId == correlationId
-                && x.CurrentState == _machine.Warmup.Name, TestTimeout);
+            sagaId = await _repository.Value.ShouldContainSagaInState(correlationId, _machine, _machine.Warmup, TestTimeout);
 
             Assert.IsTrue(sagaId.HasValue);
         }

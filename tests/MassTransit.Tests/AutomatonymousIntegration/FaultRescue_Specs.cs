@@ -21,8 +21,7 @@
 
             await InputQueueSendEndpoint.Send(message);
 
-            Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-                && Equals(x.CurrentState, _machine.FailedToStart), TestTimeout);
+            Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, _machine.FailedToStart, TestTimeout);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

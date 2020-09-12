@@ -20,7 +20,7 @@
 
             await InputQueueSendEndpoint.Send(new Start {CorrelationId = sagaId});
 
-            Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == sagaId && Equals(x.CurrentState, _machine.RunningFaster), TestTimeout);
+            Guid? saga = await _repository.ShouldContainSagaInState(sagaId, _machine, _machine.RunningFaster, TestTimeout);
             Assert.IsTrue(saga.HasValue);
 
             Assert.AreEqual(1, _repository[saga.Value].Instance.OnEnter);

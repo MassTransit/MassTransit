@@ -2,7 +2,6 @@ namespace MassTransit.HangfireIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Automatonymous;
     using NUnit.Framework;
     using Request_Specs;
     using Saga;
@@ -25,18 +24,13 @@ namespace MassTransit.HangfireIntegration.Tests
                 Address = "123 American Way"
             });
 
-            Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == memberNumber
-                && GetCurrentState(x) == _machine.AddressValidationTimeout, TestTimeout);
+            Guid? saga = await _repository.ShouldContainSagaInState(x => x.MemberNumber == memberNumber, _machine, x => x.AddressValidationTimeout,
+                TestTimeout);
             Assert.IsTrue(saga.HasValue);
         }
 
         InMemorySagaRepository<TestState> _repository;
         TestStateMachine _machine;
-
-        State GetCurrentState(TestState state)
-        {
-            return _machine.GetState(state).Result;
-        }
 
         public Sending_a_request_that_times_out()
         {

@@ -21,9 +21,7 @@ namespace MassTransit.Tests.AutomatonymousIntegration
 
             await Bus.Publish(new Start {CorrelationId = sagaId});
 
-
-            Guid? saga =
-                await _repository.ShouldContainSaga(x => x.CorrelationId == sagaId && x.CurrentState == _machine.Running, TestTimeout);
+            Guid? saga = await _repository.ShouldContainSagaInState(sagaId, _machine, x => x.Running, TestTimeout);
 
             Assert.IsTrue(saga.HasValue);
         }

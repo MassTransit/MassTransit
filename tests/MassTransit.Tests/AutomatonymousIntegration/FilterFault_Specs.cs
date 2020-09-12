@@ -22,16 +22,15 @@
             var message = new Initialize();
             await InputQueueSendEndpoint.Send(message);
 
-            Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-                && GetCurrentState(x) == _machine.WaitingToStart, TimeSpan.FromSeconds(8));
+            Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, _machine.WaitingToStart, TimeSpan.FromSeconds(8));
             Assert.IsTrue(saga.HasValue);
 
             await InputQueueSendEndpoint.Send(new Start(message.CorrelationId));
 
             await faulted;
 
-            saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-                && GetCurrentState(x) == _machine.WaitingToStart && x.StartAttempts == 1, TimeSpan.FromSeconds(8));
+            saga = await _repository.ShouldContainSagaInState(x => x.CorrelationId == message.CorrelationId && x.StartAttempts == 1, _machine,
+                _machine.WaitingToStart, TimeSpan.FromSeconds(8));
             Assert.IsTrue(saga.HasValue);
         }
 
@@ -47,11 +46,6 @@
             });
 
             configurator.StateMachineSaga(_machine, _repository);
-        }
-
-        State GetCurrentState(Instance state)
-        {
-            return _machine.GetState(state).Result;
         }
 
         TestStateMachine _machine;

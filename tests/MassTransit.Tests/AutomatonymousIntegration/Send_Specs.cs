@@ -31,8 +31,7 @@
 
             Assert.AreEqual(InputQueueAddress, received.SourceAddress, "The published message should have the input queue source address");
 
-            Guid? saga =
-                await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId && Equals(x.CurrentState, _machine.Running), TestTimeout);
+            Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, _machine.Running, TestTimeout);
 
             Assert.IsTrue(saga.HasValue);
         }

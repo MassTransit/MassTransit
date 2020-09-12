@@ -2,6 +2,7 @@ namespace MassTransit.Testing
 {
     using System;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Automatonymous;
     using Saga;
@@ -46,15 +47,45 @@ namespace MassTransit.Testing
             return ContainsInState(sagas, correlationId, machine, state);
         }
 
-        public static TSaga ContainsInState<TSaga>(this ISagaList<TSaga> sagas, Guid correlationId, SagaStateMachine<TSaga> machine, State state)
-            where TSaga : class, SagaStateMachineInstance
+        public static T ContainsInState<T>(this ISagaList<T> sagas, Guid correlationId, SagaStateMachine<T> machine, State state)
+            where T : class, SagaStateMachineInstance
         {
-            var any = sagas.Select(x => x.CorrelationId == correlationId && machine.GetState(x).Result.Equals(state)).Any();
+            Func<T, bool> filter = machine.CreateSagaFilter(x => x.CorrelationId == correlationId, state);
+
+            var any = sagas.Select(x => filter(x)).Any();
             return any ? sagas.Contains(correlationId) : null;
         }
 
-        public static async Task<Guid?> ShouldContainSagaInState<TStateMachine, TInstance>(this ISagaRepository<TInstance> repository, Guid correlationId,
+        public static Task<Guid?> ShouldContainSagaInState<TStateMachine, TInstance>(this ISagaRepository<TInstance> repository, Guid correlationId,
             TStateMachine machine, Func<TStateMachine, State> stateSelector, TimeSpan timeout)
+            where TStateMachine : SagaStateMachine<TInstance>
+            where TInstance : class, SagaStateMachineInstance
+        {
+            var state = stateSelector(machine);
+
+            return ShouldContainSagaInState(repository, correlationId, machine, state, timeout);
+        }
+
+        public static Task<Guid?> ShouldContainSagaInState<TStateMachine, TInstance>(this ISagaRepository<TInstance> repository, Guid correlationId,
+            TStateMachine machine, State state, TimeSpan timeout)
+            where TStateMachine : SagaStateMachine<TInstance>
+            where TInstance : class, SagaStateMachineInstance
+        {
+            return ShouldContainSagaInState(repository, x => x.CorrelationId == correlationId, machine, state, timeout);
+        }
+
+        public static Task<Guid?> ShouldContainSagaInState<TStateMachine, TInstance>(this ISagaRepository<TInstance> repository,
+            Expression<Func<TInstance, bool>> expression, TStateMachine machine, Func<TStateMachine, State> stateSelector, TimeSpan timeout)
+            where TStateMachine : SagaStateMachine<TInstance>
+            where TInstance : class, SagaStateMachineInstance
+        {
+            var state = stateSelector(machine);
+
+            return ShouldContainSagaInState(repository, expression, machine, state, timeout);
+        }
+
+        public static async Task<Guid?> ShouldContainSagaInState<TStateMachine, TInstance>(this ISagaRepository<TInstance> repository,
+            Expression<Func<TInstance, bool>> expression, TStateMachine machine, State state, TimeSpan timeout)
             where TStateMachine : SagaStateMachine<TInstance>
             where TInstance : class, SagaStateMachineInstance
         {
@@ -62,10 +93,9 @@ namespace MassTransit.Testing
             if (querySagaRepository == null)
                 throw new ArgumentException("The repository must support querying", nameof(repository));
 
-            var state = stateSelector(machine);
-
             var giveUpAt = DateTime.Now + timeout;
-            var query = new SagaQuery<TInstance>(x => x.CorrelationId == correlationId && machine.GetState(x).Result.Equals(state));
+
+            ISagaQuery<TInstance> query = machine.CreateSagaQuery(expression, state);
 
             while (DateTime.Now < giveUpAt)
             {

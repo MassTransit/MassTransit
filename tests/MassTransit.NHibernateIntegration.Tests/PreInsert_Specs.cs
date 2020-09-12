@@ -3,6 +3,7 @@
     namespace PreInsert
     {
         using System;
+        using System.Linq.Expressions;
         using System.Threading.Tasks;
         using Automatonymous;
         using MassTransit.Saga;
@@ -113,8 +114,7 @@
 
                 Assert.AreEqual(received.SourceAddress, InputQueueAddress, "The published message should have the input queue source address");
 
-                Guid? saga =
-                    await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.Running.Name, TestTimeout);
+                Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, x => x.Running, TestTimeout);
 
                 Assert.IsTrue(saga.HasValue);
             }
@@ -197,8 +197,7 @@
 
                 Assert.AreEqual(received.SourceAddress, InputQueueAddress, "The published message should have the input queue source address");
 
-                Guid? saga =
-                    await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId && x.CurrentState == _machine.Running.Name, TestTimeout);
+                Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, x => x.Running, TestTimeout);
 
                 Assert.IsTrue(saga.HasValue);
             }

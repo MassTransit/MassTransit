@@ -21,13 +21,13 @@
 
             await Bus.Publish<BeginTransaction>(new {TransactionId = id});
 
-            Guid? saga = await _repository.ShouldContainSaga(state => state.TransactionId == id && state.CurrentState == _machine.Active, TestTimeout);
+            Guid? saga = await _repository.ShouldContainSagaInState(state => state.TransactionId == id, _machine, x => x.Active, TestTimeout);
 
             Assert.IsTrue(saga.HasValue);
 
             await Bus.Publish<CommitTransaction>(new {TransactionId = id});
 
-            saga = await _repository.ShouldContainSaga(state => state.TransactionId == id && state.CurrentState == _machine.Final, TestTimeout);
+            saga = await _repository.ShouldContainSagaInState(state => state.TransactionId == id, _machine, x => x.Final, TestTimeout);
             Assert.IsTrue(saga.HasValue);
         }
 

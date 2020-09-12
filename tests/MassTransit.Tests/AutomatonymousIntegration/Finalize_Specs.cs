@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Automatonymous;
-    using Automatonymous.Contexts;
     using MassTransit.Saga;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -26,8 +25,7 @@
 
             await InputQueueSendEndpoint.Send(firstMessage);
 
-            Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == correlationId
-                && GetCurrentState(x).Result == _machine.OtherState, TestTimeout);
+            Guid? saga = await _repository.ShouldContainSagaInState(correlationId, _machine, x => x.OtherState, TestTimeout);
             Assert.IsTrue(saga.HasValue);
 
             _taskCompletionSource.SetResult(true);
@@ -42,12 +40,6 @@
             _repository = new InMemorySagaRepository<Instance>();
 
             configurator.StateMachineSaga(_machine, _repository);
-        }
-
-        async Task<State> GetCurrentState(Instance state)
-        {
-            var context = new StateMachineInstanceContext<Instance>(state);
-            return await _machine.GetState(context.Instance);
         }
 
 

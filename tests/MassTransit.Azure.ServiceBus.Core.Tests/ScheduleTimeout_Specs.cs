@@ -22,8 +22,7 @@
 
                 await InputQueueSendEndpoint.Send<CartItemAdded>(new {MemberNumber = memberNumber});
 
-                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == memberNumber
-                    && GetCurrentState(x) == _machine.Active, TestTimeout);
+                Guid? saga = await _repository.ShouldContainSagaInState(x => x.MemberNumber == memberNumber, _machine, _machine.Active, TestTimeout);
 
                 Assert.IsTrue(saga.HasValue);
 
@@ -53,8 +52,7 @@
 
                 await InputQueueSendEndpoint.Send<CartItemAdded>(new {MemberNumber = memberNumber});
 
-                Guid? saga = await _repository.ShouldContainSaga(x => x.MemberNumber == memberNumber
-                    && GetCurrentState(x) == _machine.Active, TestTimeout);
+                Guid? saga = await _repository.ShouldContainSagaInState(x => x.MemberNumber == memberNumber, _machine, _machine.Active, TestTimeout);
 
                 Assert.IsTrue(saga.HasValue);
 
@@ -66,11 +64,6 @@
             InMemorySagaRepository<TestState> _repository;
             TestStateMachine _machine;
             Task<ConsumeContext<CartRemoved>> _cartRemoved;
-
-            State GetCurrentState(TestState state)
-            {
-                return _machine.GetState(state).Result;
-            }
 
             protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
             {

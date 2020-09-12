@@ -6,10 +6,12 @@ namespace MassTransit.MartenIntegration.Tests
         using System.Threading.Tasks;
         using Automatonymous;
         using GreenPipes;
+        using MassTransit.Saga;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
         using TestFramework;
         using TestFramework.Sagas;
+        using Testing;
 
 
         public class Using_the_container_integration :
@@ -39,6 +41,13 @@ namespace MassTransit.MartenIntegration.Tests
                 });
 
                 await started;
+
+                var repository = _provider.GetRequiredService<ISagaRepository<TestInstance>>();
+
+                var machine = _provider.GetRequiredService<TestStateMachineSaga>();
+
+                var sagaId = await repository.ShouldContainSagaInState(correlationId, machine, x => x.Active, TestTimeout);
+                Assert.That(sagaId.HasValue);
 
                 await InputQueueSendEndpoint.Send(new UpdateTest
                 {

@@ -25,8 +25,7 @@
 
             await Bus.Publish(new Stop {CorrelationId = sagaId});
 
-            saga =
-                await _repository.ShouldContainSaga(x => x.CorrelationId == sagaId && Equals(x.CurrentState, _machine.Final), TestTimeout);
+            saga = await _repository.ShouldContainSagaInState(sagaId, _machine, x => x.Final, TestTimeout);
             Assert.IsTrue(saga.HasValue);
         }
 
@@ -37,9 +36,8 @@
 
             await Bus.Publish(new Start {CorrelationId = sagaId});
 
+            Guid? saga = await _repository.ShouldContainSagaInState(sagaId, _machine, x => x.Running, TestTimeout);
 
-            Guid? saga =
-                await _repository.ShouldContainSaga(x => x.CorrelationId == sagaId && Equals(x.CurrentState, _machine.Running), TestTimeout);
             Assert.IsTrue(saga.HasValue);
         }
 
