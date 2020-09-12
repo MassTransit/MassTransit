@@ -3,7 +3,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
     using System;
     using System.Threading.Tasks;
     using Conductor;
-    using ContainerTests;
     using Contracts.JobService;
     using Definition;
     using JobService;
