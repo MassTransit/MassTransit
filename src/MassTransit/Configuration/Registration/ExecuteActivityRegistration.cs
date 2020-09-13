@@ -23,6 +23,8 @@ namespace MassTransit.Registration
             _configureActions = new List<Action<IExecuteActivityConfigurator<TActivity, TArguments>>>();
         }
 
+        public Type ActivityType => typeof(TActivity);
+
         void IExecuteActivityRegistration.AddConfigureAction<T, TArgs>(Action<IExecuteActivityConfigurator<T, TArgs>> configure)
         {
             if (configure is Action<IExecuteActivityConfigurator<TActivity, TArguments>> action)

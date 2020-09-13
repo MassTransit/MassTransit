@@ -7,6 +7,8 @@ namespace MassTransit.Registration
 
     public interface IConsumerRegistration
     {
+        Type ConsumerType { get; }
+
         void AddConfigureAction<T>(Action<IConsumerConfigurator<T>> configure)
             where T : class, IConsumer;
 

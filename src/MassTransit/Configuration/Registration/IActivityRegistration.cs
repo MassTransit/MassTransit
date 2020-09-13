@@ -10,6 +10,8 @@ namespace MassTransit.Registration
     /// </summary>
     public interface IActivityRegistration
     {
+        Type ActivityType { get; }
+
         void AddConfigureAction<T, TArguments>(Action<IExecuteActivityConfigurator<T, TArguments>> configure)
             where T : class, IExecuteActivity<TArguments>
             where TArguments : class;

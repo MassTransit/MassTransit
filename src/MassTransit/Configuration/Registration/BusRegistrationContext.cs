@@ -1,5 +1,6 @@
 namespace MassTransit.Registration
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using Definition;
@@ -31,29 +32,50 @@ namespace MassTransit.Registration
         public void ConfigureEndpoints<T>(IReceiveConfigurator<T> configurator, IEndpointNameFormatter endpointNameFormatter = null)
             where T : IReceiveEndpointConfigurator
         {
+            ConfigureEndpoints(configurator, endpointNameFormatter, NoFilter);
+        }
+
+        public void ConfigureEndpoints<T>(IReceiveConfigurator<T> configurator, IEndpointNameFormatter endpointNameFormatter,
+            Action<IRegistrationFilterConfigurator> configureFilter)
+            where T : IReceiveEndpointConfigurator
+        {
             endpointNameFormatter ??= GetService<IEndpointNameFormatter>() ?? DefaultEndpointNameFormatter.Instance;
 
-            IEnumerable<IGrouping<string, IConsumerDefinition>> consumersByEndpoint = Consumers.Values
+            var builder = new RegistrationFilterConfigurator();
+            configureFilter?.Invoke(builder);
+
+            var registrationFilter = builder.Filter;
+
+            List<IGrouping<string, IConsumerDefinition>> consumersByEndpoint = Consumers.Values
+                .Where(x => registrationFilter.Matches(x) && !WasConfigured(x.ConsumerType))
                 .Select(x => x.GetDefinition(this))
-                .GroupBy(x => x.GetEndpointName(endpointNameFormatter));
+                .GroupBy(x => x.GetEndpointName(endpointNameFormatter))
+                .ToList();
 
-            IEnumerable<IGrouping<string, ISagaDefinition>> sagasByEndpoint = Sagas.Values
+            List<IGrouping<string, ISagaDefinition>> sagasByEndpoint = Sagas.Values
+                .Where(x => registrationFilter.Matches(x) && !WasConfigured(x.SagaType))
                 .Select(x => x.GetDefinition(this))
-                .GroupBy(x => x.GetEndpointName(endpointNameFormatter));
+                .GroupBy(x => x.GetEndpointName(endpointNameFormatter))
+                .ToList();
 
-            IActivityDefinition[] activities = Activities.Values
+            List<IActivityDefinition> activities = Activities.Values
+                .Where(x => registrationFilter.Matches(x) && !WasConfigured(x.ActivityType))
                 .Select(x => x.GetDefinition(this))
-                .ToArray();
+                .ToList();
 
-            IEnumerable<IGrouping<string, IActivityDefinition>> activitiesByExecuteEndpoint = activities
-                .GroupBy(x => x.GetExecuteEndpointName(endpointNameFormatter));
+            List<IGrouping<string, IActivityDefinition>> activitiesByExecuteEndpoint = activities
+                .GroupBy(x => x.GetExecuteEndpointName(endpointNameFormatter))
+                .ToList();
 
-            IEnumerable<IGrouping<string, IActivityDefinition>> activitiesByCompensateEndpoint = activities
-                .GroupBy(x => x.GetCompensateEndpointName(endpointNameFormatter));
+            List<IGrouping<string, IActivityDefinition>> activitiesByCompensateEndpoint = activities
+                .GroupBy(x => x.GetCompensateEndpointName(endpointNameFormatter))
+                .ToList();
 
-            IEnumerable<IGrouping<string, IExecuteActivityDefinition>> executeActivitiesByEndpoint = ExecuteActivities.Values
+            List<IGrouping<string, IExecuteActivityDefinition>> executeActivitiesByEndpoint = ExecuteActivities.Values
+                .Where(x => registrationFilter.Matches(x) && !WasConfigured(x.ActivityType))
                 .Select(x => x.GetDefinition(this))
-                .GroupBy(x => x.GetExecuteEndpointName(endpointNameFormatter));
+                .GroupBy(x => x.GetExecuteEndpointName(endpointNameFormatter))
+                .ToList();
 
             var endpointsWithName = _endpoints.Values
                 .Select(x => x.GetDefinition(this))
@@ -66,7 +88,8 @@ namespace MassTransit.Registration
                 {
                     Name = name,
                     Definition = values.Select(x => x.Definition).Combine()
-                });
+                })
+                .ToList();
 
             IEnumerable<string> endpointNames = consumersByEndpoint.Select(x => x.Key)
                 .Union(sagasByEndpoint.Select(x => x.Key))
@@ -151,6 +174,10 @@ namespace MassTransit.Registration
                     }
                 });
             }
+        }
+
+        static void NoFilter(IRegistrationFilterConfigurator configurator)
+        {
         }
     }
 }

@@ -27,6 +27,8 @@ namespace MassTransit.Registration
             _configureActions = new List<Action<ISagaConfigurator<TInstance>>>();
         }
 
+        public Type SagaType => typeof(TInstance);
+
         public void AddConfigureAction<T>(Action<ISagaConfigurator<T>> configure)
             where T : class, ISaga
         {

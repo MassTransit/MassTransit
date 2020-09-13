@@ -27,6 +27,8 @@ namespace MassTransit.Registration
             _configureActions = new List<Action<IConsumerConfigurator<TConsumer>>>();
         }
 
+        public Type ConsumerType => typeof(TConsumer);
+
         void IConsumerRegistration.AddConfigureAction<T>(Action<IConsumerConfigurator<T>> configure)
         {
             if (configure is Action<IConsumerConfigurator<TConsumer>> action)

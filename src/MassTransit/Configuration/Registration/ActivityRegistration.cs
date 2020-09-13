@@ -26,6 +26,8 @@ namespace MassTransit.Registration
             _compensateActions = new List<Action<ICompensateActivityConfigurator<TActivity, TLog>>>();
         }
 
+        public Type ActivityType => typeof(TActivity);
+
         public void AddConfigureAction<T, TA>(Action<IExecuteActivityConfigurator<T, TA>> configure)
             where T : class, IExecuteActivity<TA>
             where TA : class

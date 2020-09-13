@@ -1,10 +1,13 @@
 namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Courier;
     using Courier.Contracts;
     using Discovery;
+    using EndpointConfigurators;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -216,12 +219,45 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 return context.Completed();
             }
         }
+
+
+        public class DiscoveryPongConsumer :
+            IConsumer<PongMessage>
+        {
+            public async Task Consume(ConsumeContext<PongMessage> context)
+            {
+            }
+        }
+    }
+
+
+    public class ReceiveEndpointConfigurationObserver :
+        IEndpointConfigurationObserver
+    {
+        readonly HashSet<string> _endpoints;
+
+        public ReceiveEndpointConfigurationObserver()
+        {
+            _endpoints = new HashSet<string>();
+        }
+
+        public void EndpointConfigured<T>(T configurator)
+            where T : IReceiveEndpointConfigurator
+        {
+            _endpoints.Add(configurator.InputAddress.AbsolutePath.Split('/').Last());
+        }
+
+        public bool WasConfigured(string name)
+        {
+            return _endpoints.Contains(name);
+        }
     }
 
 
     public abstract class Common_Discovery :
         InMemoryTestFixture
     {
+        ReceiveEndpointConfigurationObserver _endpointObserver;
         protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
@@ -261,11 +297,26 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(routingSlipCompleted.Message.TrackingNumber, Is.EqualTo(builder.TrackingNumber));
         }
 
+        [Test]
+        public void Should_have_properly_configured_every_endpoint()
+        {
+            Assert.That(_endpointObserver.WasConfigured("ping-queue"));
+            Assert.That(_endpointObserver.WasConfigured("discovery-ping-state"));
+            Assert.That(_endpointObserver.WasConfigured("Ping_execute"));
+            Assert.That(_endpointObserver.WasConfigured("Ping_compensate"));
+            Assert.That(_endpointObserver.WasConfigured("DiscoveryPing"));
+
+            Assert.That(_endpointObserver.WasConfigured("DiscoveryPong"), Is.False);
+        }
+
         protected abstract IRequestClient<PingMessage> GetRequestClient();
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.ConfigureEndpoints(Registration);
+            _endpointObserver = new ReceiveEndpointConfigurationObserver();
+            configurator.ConnectEndpointConfigurationObserver(_endpointObserver);
+
+            configurator.ConfigureEndpoints(Registration, filter => filter.Exclude<DiscoveryPongConsumer>());
         }
     }
 }

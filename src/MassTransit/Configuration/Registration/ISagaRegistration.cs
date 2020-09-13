@@ -7,6 +7,8 @@ namespace MassTransit.Registration
 
     public interface ISagaRegistration
     {
+        Type SagaType { get; }
+
         void AddConfigureAction<T>(Action<ISagaConfigurator<T>> configure)
             where T : class, ISaga;
 

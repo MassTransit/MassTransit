@@ -26,6 +26,8 @@ namespace MassTransit.Registration
             _configureActions = new List<Action<ISagaConfigurator<TSaga>>>();
         }
 
+        public Type SagaType => typeof(TSaga);
+
         void ISagaRegistration.AddConfigureAction<T>(Action<ISagaConfigurator<T>> configure)
         {
             if (configure is Action<ISagaConfigurator<TSaga>> action)
