@@ -13,7 +13,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         RegistrationConfigurator,
         IServiceCollectionMediatorConfigurator
     {
-        Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> _configure;
+        Action<IMediatorRegistrationContext, IMediatorConfigurator> _configure;
 
         public ServiceCollectionMediatorConfigurator(IServiceCollection collection)
             : base(new DependencyInjectionMediatorContainerRegistrar(collection))
@@ -33,7 +33,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
         public IServiceCollection Collection { get; }
 
-        public void ConfigureMediator(Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> configure)
+        public void ConfigureMediator(Action<IMediatorRegistrationContext, IMediatorConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));

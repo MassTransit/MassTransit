@@ -14,7 +14,7 @@ namespace MassTransit.WindsorIntegration.Registration
         RegistrationConfigurator,
         IWindsorContainerMediatorConfigurator
     {
-        Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> _configure;
+        Action<IMediatorRegistrationContext, IMediatorConfigurator> _configure;
 
         public WindsorContainerMediatorConfigurator(IWindsorContainer container)
             : base(new WindsorContainerMediatorRegistrar(container))
@@ -58,7 +58,7 @@ namespace MassTransit.WindsorIntegration.Registration
 
         public IWindsorContainer Container { get; }
 
-        public void ConfigureMediator(Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> configure)
+        public void ConfigureMediator(Action<IMediatorRegistrationContext, IMediatorConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));

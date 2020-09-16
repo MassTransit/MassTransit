@@ -11,6 +11,8 @@
     /// </summary>
     public interface IReceivePipeDispatcher :
         IConsumePipeConnector,
+        IConsumeObserverConnector,
+        IConsumeMessageObserverConnector,
         IRequestPipeConnector,
         IDispatchMetrics,
         IReceiveObserverConnector,

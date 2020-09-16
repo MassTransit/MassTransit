@@ -10,6 +10,7 @@ namespace MassTransit.Tests
         using Shouldly;
         using TestFramework;
         using TestFramework.Messages;
+        using Util;
 
 
         [TestFixture]
@@ -49,6 +50,86 @@ namespace MassTransit.Tests
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 Handled<PingMessage>(configurator);
+            }
+        }
+
+
+        [TestFixture]
+        [Category("Unit")]
+        public class Observing_consumer_messages_with_mediator :
+            InMemoryTestFixture
+        {
+            [Test]
+            public async Task Should_trigger_the_consume_message_observer()
+            {
+                var observer = GetConsumeObserver();
+                TestConsumeMessageObserver<PingMessage> pingObserver = GetConsumeObserver<PingMessage>();
+
+                var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
+                {
+                });
+
+                mediator.ConnectConsumeObserver(observer);
+                mediator.ConnectConsumeMessageObserver(pingObserver);
+
+                TaskCompletionSource<ConsumeContext<PingMessage>> received = GetTask<ConsumeContext<PingMessage>>();
+
+                var handle = mediator.ConnectHandler<PingMessage>(x =>
+                {
+                    received.SetResult(x);
+
+                    return TaskUtil.Completed;
+                });
+
+                await mediator.Publish(new PingMessage());
+
+                await received.Task;
+
+                handle.Disconnect();
+
+                await pingObserver.PostConsumed;
+
+                IReceivedMessage<PingMessage> context = observer.Messages.Select<PingMessage>().First();
+
+                context.ShouldNotBeNull();
+            }
+
+            [Test]
+            public async Task Should_trigger_the_consume_message_observer_for_both()
+            {
+                var observer = GetConsumeObserver();
+                TestConsumeMessageObserver<PingMessage> pingObserver = GetConsumeObserver<PingMessage>();
+
+                var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
+                {
+                });
+
+                mediator.ConnectConsumeObserver(observer);
+                mediator.ConnectConsumeMessageObserver(pingObserver);
+
+                TaskCompletionSource<ConsumeContext<PingMessage>> received = GetTask<ConsumeContext<PingMessage>>();
+
+                var handle = mediator.ConnectHandler<PingMessage>(x =>
+                {
+                    received.SetResult(x);
+
+                    return x.RespondAsync(new PongMessage(x.Message.CorrelationId));
+                });
+
+                IRequestClient<PingMessage> client = mediator.CreateRequestClient<PingMessage>();
+
+                var pingMessage = new PingMessage();
+
+                Response<PongMessage> response = await client.GetResponse<PongMessage>(pingMessage);
+
+                await received.Task;
+
+                handle.Disconnect();
+
+                await pingObserver.PostConsumed;
+
+                Assert.That(observer.Messages.Select<PingMessage>().First(), Is.Not.Null);
+                Assert.That(observer.Messages.Select<PongMessage>().First(), Is.Not.Null);
             }
         }
     }

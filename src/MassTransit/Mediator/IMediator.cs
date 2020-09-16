@@ -8,7 +8,9 @@ namespace MassTransit.Mediator
         IPublishEndpoint,
         IClientFactory,
         IConsumePipeConnector,
-        IRequestPipeConnector
+        IRequestPipeConnector,
+        IConsumeObserverConnector,
+        IConsumeMessageObserverConnector
     {
     }
 }

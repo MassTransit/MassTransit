@@ -11,6 +11,6 @@ namespace MassTransit
         /// Optionally configure the pipeline used by the mediator
         /// </summary>
         /// <param name="configure"></param>
-        void ConfigureMediator(Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> configure);
+        void ConfigureMediator(Action<IMediatorRegistrationContext, IMediatorConfigurator> configure);
     }
 }

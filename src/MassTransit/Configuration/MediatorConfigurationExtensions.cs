@@ -17,7 +17,7 @@ namespace MassTransit
         /// <param name="configure"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static IMediator CreateMediator(this IBusFactorySelector selector, Action<IReceiveEndpointConfigurator> configure)
+        public static IMediator CreateMediator(this IBusFactorySelector selector, Action<IMediatorConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
@@ -27,7 +27,7 @@ namespace MassTransit
 
             var endpointConfiguration = busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration("mediator");
 
-            var configurator = new ReceivePipeDispatcherConfiguration(busConfiguration.HostConfiguration, endpointConfiguration);
+            var configurator = new MediatorConfiguration(busConfiguration.HostConfiguration, endpointConfiguration);
 
             configure(configurator);
 

@@ -13,7 +13,7 @@ namespace MassTransit.AutofacIntegration.Registration
         IContainerBuilderMediatorConfigurator
     {
         readonly AutofacContainerRegistrar _registrar;
-        Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> _configure;
+        Action<IMediatorRegistrationContext, IMediatorConfigurator> _configure;
 
         public ContainerBuilderMediatorConfigurator(ContainerBuilder builder)
             : this(builder, new AutofacContainerMediatorRegistrar(builder))
@@ -67,7 +67,7 @@ namespace MassTransit.AutofacIntegration.Registration
             set => _registrar.ConfigureScope = value;
         }
 
-        public void ConfigureMediator(Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> configure)
+        public void ConfigureMediator(Action<IMediatorRegistrationContext, IMediatorConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));

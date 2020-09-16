@@ -13,6 +13,7 @@ namespace MassTransit.Mediator
     using Pipeline;
     using Pipeline.Observables;
     using Transports;
+    using Util;
 
 
     /// <summary>
@@ -24,10 +25,12 @@ namespace MassTransit.Mediator
         readonly IClientFactory _clientFactory;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly MediatorSendEndpoint _endpoint;
+        readonly IReceivePipeDispatcher _responseDispatcher;
 
         public MassTransitMediator(ILogContext logContext, IReceiveEndpointConfiguration configuration, IReceivePipeDispatcher dispatcher,
             IReceiveEndpointConfiguration responseConfiguration, IReceivePipeDispatcher responseDispatcher)
         {
+            _responseDispatcher = responseDispatcher;
             _dispatcher = dispatcher;
             var sendObservable = new SendObservable();
 
@@ -230,6 +233,17 @@ namespace MassTransit.Mediator
             where T : class
         {
             return _dispatcher.ConnectRequestPipe(requestId, pipe);
+        }
+
+        public ConnectHandle ConnectConsumeObserver(IConsumeObserver observer)
+        {
+            return new MultipleConnectHandle(_dispatcher.ConnectConsumeObserver(observer), _responseDispatcher.ConnectConsumeObserver(observer));
+        }
+
+        public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+            where T : class
+        {
+            return new MultipleConnectHandle(_dispatcher.ConnectConsumeMessageObserver(observer), _responseDispatcher.ConnectConsumeMessageObserver(observer));
         }
 
         async Task PublishInternal<T>(CancellationToken cancellationToken, T message, IPipe<PublishContext<T>> pipe = default)

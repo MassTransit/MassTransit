@@ -105,6 +105,17 @@ namespace MassTransit.Transports
             return _receivePipe.ConnectRequestPipe(requestId, pipe);
         }
 
+        public ConnectHandle ConnectConsumeObserver(IConsumeObserver observer)
+        {
+            return _receivePipe.ConnectConsumeObserver(observer);
+        }
+
+        public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+            where T : class
+        {
+            return _receivePipe.ConnectConsumeMessageObserver(observer);
+        }
+
         ActiveDispatch StartDispatch()
         {
             var current = Interlocked.Increment(ref _activeDispatchCount);

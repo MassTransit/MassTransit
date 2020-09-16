@@ -13,7 +13,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         RegistrationConfigurator,
         ISimpleInjectorMediatorConfigurator
     {
-        Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> _configure;
+        Action<IMediatorRegistrationContext, IMediatorConfigurator> _configure;
 
         public SimpleInjectorMediatorConfigurator(Container container)
             : base(new SimpleInjectorContainerMediatorRegistrar(container))
@@ -33,12 +33,12 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         public Container Container { get; }
 
-        public void ConfigureMediator(Action<IReceiveEndpointConfigurator> configure)
+        public void ConfigureMediator(Action<IMediatorConfigurator> configure)
         {
             ConfigureMediator((_, cfg) => configure(cfg));
         }
 
-        public void ConfigureMediator(Action<IMediatorRegistrationContext, IReceiveEndpointConfigurator> configure)
+        public void ConfigureMediator(Action<IMediatorRegistrationContext, IMediatorConfigurator> configure)
         {
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));

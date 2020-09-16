@@ -13,6 +13,6 @@ namespace MassTransit.SimpleInjectorIntegration
         /// Optionally configure the pipeline used by the mediator
         /// </summary>
         /// <param name="configure"></param>
-        void ConfigureMediator(Action<IReceiveEndpointConfigurator> configure);
+        void ConfigureMediator(Action<IMediatorConfigurator> configure);
     }
 }

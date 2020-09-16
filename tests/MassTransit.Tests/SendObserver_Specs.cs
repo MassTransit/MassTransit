@@ -11,6 +11,7 @@
         using Shouldly;
         using TestFramework;
         using TestFramework.Messages;
+        using Util;
 
 
         [TestFixture]
@@ -228,6 +229,79 @@
                 _observer = new SendObserver(this);
 
                 bus.ConnectSendObserver(_observer);
+            }
+        }
+
+
+        [TestFixture]
+        [Category("Unit")]
+        public class Observing_sent_messages_with_mediator :
+            InMemoryTestFixture
+        {
+            [Test]
+            public async Task Should_trigger_the_send_message_observer()
+            {
+                var observer = new SendObserver(this);
+
+                var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
+                {
+                });
+
+                mediator.ConnectSendObserver(observer);
+
+                TaskCompletionSource<ConsumeContext<PingMessage>> received = GetTask<ConsumeContext<PingMessage>>();
+
+                var handle = mediator.ConnectHandler<PingMessage>(x =>
+                {
+                    received.SetResult(x);
+
+                    return TaskUtil.Completed;
+                });
+
+                await mediator.Send(new PingMessage());
+
+                await received.Task;
+
+                handle.Disconnect();
+
+                await observer.PreSent;
+                await observer.PostSent;
+
+                Assert.That(observer.PreSentCount, Is.EqualTo(1));
+                Assert.That(observer.PostSentCount, Is.EqualTo(1));
+            }
+
+            [Test]
+            public async Task Should_trigger_the_send_message_observer_for_both_messages()
+            {
+                var observer = new SendObserver(this);
+
+                var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
+                {
+                });
+
+                mediator.ConnectSendObserver(observer);
+
+                TaskCompletionSource<ConsumeContext<PingMessage>> received = GetTask<ConsumeContext<PingMessage>>();
+
+                var handle = mediator.ConnectHandler<PingMessage>(x =>
+                {
+                    received.SetResult(x);
+
+                    return x.RespondAsync(new PongMessage());
+                });
+
+                await mediator.Send(new PingMessage());
+
+                await received.Task;
+
+                handle.Disconnect();
+
+                await observer.PreSent;
+                await observer.PostSent;
+
+                Assert.That(observer.PreSentCount, Is.EqualTo(2));
+                Assert.That(observer.PostSentCount, Is.EqualTo(2));
             }
         }
 
