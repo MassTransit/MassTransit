@@ -59,6 +59,10 @@ public class OrderStateDbContext :
 }
 ```
 
+::: warning Important
+In case your application has its own `DbContext` with a custom `DbConfiguration`, it is mandatory to use the config file / static method call approach in order to set the `DbConfiguration`. More details can be found on [Code-based configuration - Setting DbConfiguration explicitly](https://docs.microsoft.com/en-us/ef/ef6/fundamentals/configuring/code-based#setting-dbconfiguration-explicitly).
+:::
+
 ### Container Integration
 
 Once the class map and associated _DbContext_ class have been created, the saga repository can be configured with the saga registration, which is done using the configuration method passed to _AddMassTransit_. The following example shows how the repository is configured for using Microsoft Dependency Injection Extensions, which are used by default with Entity Framework.
