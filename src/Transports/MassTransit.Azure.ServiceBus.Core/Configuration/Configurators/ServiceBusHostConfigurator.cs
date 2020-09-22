@@ -21,7 +21,7 @@
         {
             var builder = new ServiceBusConnectionStringBuilder(connectionString);
 
-            var serviceUri = new Uri(builder.Endpoint);
+            var serviceUri = GetFullEndpointUri(connectionString);
 
             _settings = new HostSettings
             {
@@ -68,6 +68,13 @@
         public int RetryLimit
         {
             set => _settings.RetryLimit = value;
+        }
+
+        public Uri GetFullEndpointUri(string connectionString) {
+            var endpoint = "endpoint=";
+            var startIndex = connectionString.IndexOf(endpoint, StringComparison.InvariantCultureIgnoreCase) + endpoint.Length;
+            var lengthOfEndpoint = connectionString.IndexOf(";", startIndex) - endpoint.Length;
+            return new Uri(connectionString.Substring(startIndex, lengthOfEndpoint));
         }
     }
 }
