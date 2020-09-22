@@ -21,7 +21,7 @@
         {
             var builder = new ServiceBusConnectionStringBuilder(connectionString);
 
-            var serviceUri = new Uri(builder.Endpoint);
+            var serviceUri = ParseEndpointWithScope(connectionString);
 
             _settings = new HostSettings
             {
@@ -68,6 +68,25 @@
         public int RetryLimit
         {
             set => _settings.RetryLimit = value;
+        }
+
+        // Code copied from: https://github.com/Azure/azure-service-bus-dotnet/blob/8f619194132faab19507811f38137a9a8582f488/src/Microsoft.Azure.ServiceBus/ServiceBusConnectionStringBuilder.cs#L294
+        static Uri ParseEndpointWithScope(string connectionString)
+        {
+            string[] keyValuePairs = connectionString.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var keyValuePair in keyValuePairs)
+            {
+                // Now split based on the _first_ '='
+                string[] keyAndValue = keyValuePair.Split(new[] {'='}, 2);
+                var key = keyAndValue[0];
+                if (keyAndValue.Length != 2)
+                    throw new UriFormatException($"Value for the connection string parameter name '{key}' was not found.");
+
+                if (key.Equals("Endpoint", StringComparison.OrdinalIgnoreCase))
+                    return new Uri(keyAndValue[1].Trim());
+            }
+
+            return null;
         }
     }
 }
