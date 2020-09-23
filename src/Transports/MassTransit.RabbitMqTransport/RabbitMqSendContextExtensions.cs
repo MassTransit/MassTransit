@@ -10,23 +10,22 @@
     {
         public static void SetTransportHeader(this RabbitMqSendContext context, string key, object value)
         {
-            if (context.BasicProperties.Headers == null)
-                context.BasicProperties.Headers = new Dictionary<string, object>();
-
             SetHeader(context.BasicProperties, key, value);
         }
 
         public static void SetHeader(this IBasicProperties basicProperties, string key, object value)
         {
-            if (basicProperties.Headers == null)
-                basicProperties.Headers = new Dictionary<string, object>();
+            if (value == null)
+                return;
 
-            if (value is DateTime dateTime)
-                value = dateTime.ToString("O");
-            else if (value is DateTimeOffset dateTimeOffset)
-                value = dateTimeOffset.ToString("O");
+            basicProperties.Headers ??= new Dictionary<string, object>();
 
-            basicProperties.Headers[key] = value;
+            basicProperties.Headers[key] = value switch
+            {
+                DateTime dateTime => dateTime.ToString("O"),
+                DateTimeOffset dateTimeOffset => dateTimeOffset.ToString("O"),
+                _ => value
+            };
         }
 
         /// <summary>

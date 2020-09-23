@@ -56,7 +56,7 @@
         {
             var provider = base.GetSendEndpointProvider();
 
-            return Properties.IsReplyToPresent()
+            return Properties.IsReplyToPresent() && !string.IsNullOrWhiteSpace(Properties.ReplyTo)
                 ? new ReceiveSendEndpointProvider(provider, Properties.ReplyTo)
                 : provider;
         }

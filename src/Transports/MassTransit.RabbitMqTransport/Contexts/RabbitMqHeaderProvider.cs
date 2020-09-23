@@ -30,7 +30,7 @@
             if (!string.IsNullOrWhiteSpace(_context.Properties.CorrelationId))
                 yield return new KeyValuePair<string, object>(nameof(_context.Properties.CorrelationId), _context.Properties.CorrelationId);
 
-            if (_context.Properties.IsHeadersPresent())
+            if (_context.Properties.IsHeadersPresent() && _context.Properties.Headers != null)
             {
                 foreach (KeyValuePair<string, object> header in _context.Properties.Headers)
                 {
@@ -53,7 +53,7 @@
 
         public bool TryGetHeader(string key, out object value)
         {
-            if (_context.Properties.IsHeadersPresent() && _context.Properties.Headers.TryGetValue(key, out value))
+            if (_context.Properties.IsHeadersPresent() && _context.Properties.Headers != null && _context.Properties.Headers.TryGetValue(key, out value))
             {
                 if (value is byte[] bytes)
                 {

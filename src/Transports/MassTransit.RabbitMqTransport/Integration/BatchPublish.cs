@@ -84,7 +84,7 @@ namespace MassTransit.RabbitMqTransport.Integration
         {
             PublishTag = publishTag;
 
-            if (_properties.IsHeadersPresent())
+            if (_properties.Headers != null)
                 _properties.Headers["publishId"] = publishTag.ToString("F0");
         }
     }

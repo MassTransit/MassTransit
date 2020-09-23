@@ -24,8 +24,7 @@
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            if (_basicProperties.Headers == null)
-                _basicProperties.Headers = new Dictionary<string, object>();
+            _basicProperties.Headers ??= new Dictionary<string, object>();
 
             if (value == null)
                 _basicProperties.Headers.Remove(key);
@@ -38,8 +37,7 @@
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            if (_basicProperties.Headers == null)
-                _basicProperties.Headers = new Dictionary<string, object>();
+            _basicProperties.Headers ??= new Dictionary<string, object>();
 
             if (value == null)
                 _basicProperties.Headers.Remove(key);
@@ -60,8 +58,8 @@
             var found = _basicProperties.Headers.TryGetValue(key, out value);
             if (found)
             {
-                if (value is byte[])
-                    value = Encoding.UTF8.GetString((byte[])value);
+                if (value is byte[] bytes)
+                    value = Encoding.UTF8.GetString(bytes);
             }
 
             return found;
@@ -69,35 +67,31 @@
 
         public IEnumerable<KeyValuePair<string, object>> GetAll()
         {
-            if (_basicProperties.IsHeadersPresent())
-                return _basicProperties.Headers;
-
-            return Enumerable.Empty<KeyValuePair<string, object>>();
+            return _basicProperties.IsHeadersPresent() && _basicProperties.Headers != null
+                ? _basicProperties.Headers
+                : Enumerable.Empty<KeyValuePair<string, object>>();
         }
 
         T MassTransit.Headers.Get<T>(string key, T defaultValue)
         {
-            if (TryGetHeader(key, out var value))
-                return ObjectTypeDeserializer.Deserialize(value, defaultValue);
-
-            return defaultValue;
+            return TryGetHeader(key, out var value)
+                ? ObjectTypeDeserializer.Deserialize(value, defaultValue)
+                : defaultValue;
         }
 
         public T? Get<T>(string key, T? defaultValue)
             where T : struct
         {
-            if (TryGetHeader(key, out var value))
-                return ObjectTypeDeserializer.Deserialize(value, defaultValue);
-
-            return defaultValue;
+            return TryGetHeader(key, out var value)
+                ? ObjectTypeDeserializer.Deserialize(value, defaultValue)
+                : defaultValue;
         }
 
         public IEnumerator<HeaderValue> GetEnumerator()
         {
-            if (_basicProperties.IsHeadersPresent())
-                return _basicProperties.Headers.Select(x => new HeaderValue(x)).GetEnumerator();
-
-            return Enumerable.Empty<HeaderValue>().GetEnumerator();
+            return _basicProperties.IsHeadersPresent() && _basicProperties.Headers != null
+                ? _basicProperties.Headers.Select(x => new HeaderValue(x)).GetEnumerator()
+                : Enumerable.Empty<HeaderValue>().GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
