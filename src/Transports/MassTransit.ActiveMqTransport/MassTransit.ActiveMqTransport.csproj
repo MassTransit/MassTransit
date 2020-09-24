@@ -4,10 +4,16 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>MassTransit.ActiveMQ</PackageId>
+    <PackageId>MassTransit.ActiveMQ.Artemis</PackageId>
     <Title>MassTransit.ActiveMQ</Title>
     <PackageTags>MassTransit;ActiveMQ</PackageTags>
     <Description>MassTransit ActiveMQ transport support; $(Description)</Description>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <AssemblyName>MassTransit.ActiveMqArtemisTransport</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
