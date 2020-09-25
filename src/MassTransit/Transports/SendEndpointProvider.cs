@@ -25,7 +25,7 @@ namespace MassTransit.Transports
             _sourceAddress = sourceAddress;
             _sendPipe = sendPipe;
 
-            _cache = new SendEndpointCache<Uri>();
+            _cache = SendEndpointCacheFactory.Create<Uri>();
             _observers = observers;
         }
 

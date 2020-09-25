@@ -27,7 +27,7 @@ namespace MassTransit.Transports
             return sendEndpoint;
         }
 
-        async Task<CachedSendEndpoint<TKey>> GetSendEndpointFromFactory(TKey address, SendEndpointFactory<TKey> factory)
+        static async Task<CachedSendEndpoint<TKey>> GetSendEndpointFromFactory(TKey address, SendEndpointFactory<TKey> factory)
         {
             var sendEndpoint = await factory(address).ConfigureAwait(false);
 
