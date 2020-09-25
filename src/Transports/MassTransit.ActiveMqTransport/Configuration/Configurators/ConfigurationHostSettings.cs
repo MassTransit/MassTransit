@@ -4,6 +4,9 @@ namespace MassTransit.ActiveMqTransport.Configurators
     using System.Collections.Generic;
     using System.Linq;
     using Apache.NMS;
+    using Context;
+    using Microsoft.Extensions.Logging;
+    using Newtonsoft.Json;
 
 
     public class ConfigurationHostSettings :
@@ -53,10 +56,30 @@ namespace MassTransit.ActiveMqTransport.Configurators
         public Uri HostAddress => _hostAddress.Value;
         public Uri BrokerAddress => _brokerAddress.Value;
 
+        static readonly LogMessage<string> _logDebug = LogContext.Define<string>(LogLevel.Debug, "DEBUG {info}");
+
         public IConnection CreateConnection()
         {
             var factory = new NMSConnectionFactory(BrokerAddress);
-            return factory.CreateConnection(Username, Password);
+            _logDebug($"Creating connection to {BrokerAddress}");
+
+            var connection = factory.CreateConnection(Username, Password);
+            connection.ConnectionInterruptedListener += () =>
+            {
+                _logDebug($"Connection interrupted: {JsonConvert.SerializeObject(connection)}");
+            };
+
+            connection.ConnectionResumedListener += () =>
+            {
+                _logDebug($"Connection resumed: {JsonConvert.SerializeObject(connection)}");
+            };
+
+            connection.ExceptionListener += e =>
+            {
+                _logDebug($"An exception occurred: {e.Message}", e);
+            };
+
+            return connection;
         }
 
         Uri FormatHostAddress()
