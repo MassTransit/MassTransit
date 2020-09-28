@@ -21,7 +21,7 @@
     {
         readonly ActiveMqSendTransportContext _context;
 
-        static readonly LogMessage<string> _logConnectionInfo = LogContext.Define<string>(LogLevel.Debug, "CONNECT {info}");
+        static readonly LogMessage<string> _logConnectionInfo = LogContext.Define<string>(LogLevel.Debug, "Connection info: {info}");
 
         public ActiveMqSendTransport(ActiveMqSendTransportContext context)
         {

@@ -56,7 +56,7 @@ namespace MassTransit.ActiveMqTransport.Configurators
         public Uri HostAddress => _hostAddress.Value;
         public Uri BrokerAddress => _brokerAddress.Value;
 
-        static readonly LogMessage<string> _logDebug = LogContext.Define<string>(LogLevel.Debug, "DEBUG {info}");
+        static readonly LogMessage<string> _logDebug = LogContext.Define<string>(LogLevel.Debug, "Connection info: {info}");
 
         public IConnection CreateConnection()
         {

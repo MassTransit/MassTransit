@@ -60,7 +60,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;
         int DeliveryMetrics.ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
 
-        static readonly LogMessage<string> _logConnectionInfo = LogContext.Define<string>(LogLevel.Debug, "CONNECT {info}");
+        static readonly LogMessage<string> _logConnectionInfo = LogContext.Define<string>(LogLevel.Debug, "Connection info: {info}");
 
         Uri GetRemoteAddress(IConnection connection)
         {
