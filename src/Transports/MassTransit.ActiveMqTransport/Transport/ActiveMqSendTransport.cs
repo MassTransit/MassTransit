@@ -3,6 +3,7 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
     using Apache.NMS;
     using Context;
     using Contexts;
@@ -19,6 +20,8 @@
         IAsyncDisposable
     {
         readonly ActiveMqSendTransportContext _context;
+
+        static readonly LogMessage<string> _logConnectionInfo = LogContext.Define<string>(LogLevel.Debug, "Connection info: {info}");
 
         public ActiveMqSendTransport(ActiveMqSendTransportContext context)
         {
@@ -72,9 +75,20 @@
                 _cancellationToken = cancellationToken;
             }
 
+            Uri GetRemoteAddress(IConnection connection)
+            {
+                if (connection is Apache.NMS.ActiveMQ.Connection conn)
+                {
+                    return conn.ITransport?.RemoteAddress;
+                }
+
+                return null;
+            }
             public async Task Send(SessionContext sessionContext)
             {
                 LogContext.SetCurrentIfNull(_context.LogContext);
+
+                _logConnectionInfo($"Sending to {GetRemoteAddress(sessionContext.ConnectionContext?.Connection)}");
 
                 await _context.ConfigureTopologyPipe.Send(sessionContext).ConfigureAwait(false);
 
@@ -119,12 +133,16 @@
 
                     context.LogSent();
 
+                    _logConnectionInfo($"Sent to {GetRemoteAddress(sessionContext.ConnectionContext?.Connection)}");
+
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PostSend(context).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     context.LogFaulted(ex);
+
+                    _logConnectionInfo($"Could not send to {sessionContext.ConnectionContext?.Connection}");
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);
