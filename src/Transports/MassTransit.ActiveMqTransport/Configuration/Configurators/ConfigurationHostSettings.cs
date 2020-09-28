@@ -64,14 +64,16 @@ namespace MassTransit.ActiveMqTransport.Configurators
             _logDebug($"Creating connection to {BrokerAddress}");
 
             var connection = factory.CreateConnection(Username, Password);
+            _logDebug($"Connection created: {GetRemoteAddress(connection)}");
+
             connection.ConnectionInterruptedListener += () =>
             {
-                _logDebug($"Connection interrupted: {JsonConvert.SerializeObject(connection)}");
+                _logDebug($"Connection interrupted: {GetRemoteAddress(connection)}");
             };
 
             connection.ConnectionResumedListener += () =>
             {
-                _logDebug($"Connection resumed: {JsonConvert.SerializeObject(connection)}");
+                _logDebug($"Connection resumed: {GetRemoteAddress(connection)}");
             };
 
             connection.ExceptionListener += e =>
@@ -80,6 +82,16 @@ namespace MassTransit.ActiveMqTransport.Configurators
             };
 
             return connection;
+        }
+
+        Uri GetRemoteAddress(IConnection connection)
+        {
+            if (connection is Apache.NMS.ActiveMQ.Connection conn)
+            {
+                return conn.ITransport?.RemoteAddress;
+            }
+
+            return null;
         }
 
         Uri FormatHostAddress()
