@@ -59,7 +59,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             {
                 existingServiceScope.UpdateScope(context);
 
-                var consumer = existingServiceScope.ServiceProvider.GetService<TConsumer>();
+                var consumer = ActivatorUtilities.GetServiceOrCreateInstance<TConsumer>(existingServiceScope.ServiceProvider);
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
@@ -76,7 +76,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             {
                 serviceScope.UpdateScope(context);
 
-                var consumer = serviceScope.ServiceProvider.GetService<TConsumer>();
+                var consumer = ActivatorUtilities.GetServiceOrCreateInstance<TConsumer>(existingServiceScope.ServiceProvider);
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
