@@ -73,7 +73,7 @@ Get help live at the MassTransit Discord server.
 
 **Pay attention**
 
-Please do not open an issue on github, unless you have spotted an actual bug in MassTransit. 
+Please do not open an issue on GitHub, unless you have spotted an actual bug in MassTransit. 
 If you are unsure, ask on the mailing list, and if we confirm it's a bug, we'll ask you to create the issue. 
 Issues are not the place for questions, and they'll likely be closed.
 
