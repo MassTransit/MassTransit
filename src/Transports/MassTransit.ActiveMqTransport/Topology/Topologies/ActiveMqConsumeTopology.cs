@@ -18,6 +18,10 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         readonly IActiveMqPublishTopology _publishTopology;
         readonly IList<IActiveMqConsumeTopologySpecification> _specifications;
 
+        protected string _temporaryQueueNamePrefix = string.Empty;  // e.g. "mobilitydv.avgpv." 
+        //if dot seperated then you need to add the dot to the prefix
+        public static string TemporaryQueueNamePrefix { get; set; }
+
         public ActiveMqConsumeTopology(IMessageTopology messageTopology, IActiveMqPublishTopology publishTopology)
         {
             _messageTopology = messageTopology;
@@ -75,7 +79,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
             var result = base.CreateTemporaryQueueName(tag);
             var tempName = new string(result.Where(c => c != '.').ToArray());
 
-            return $"avgpv.{tempName}";
+            return $"{TemporaryQueueNamePrefix}{tempName}";
         }
 
         public override IEnumerable<ValidationResult> Validate()
