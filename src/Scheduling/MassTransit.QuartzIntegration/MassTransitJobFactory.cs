@@ -1,14 +1,12 @@
+using Microsoft.Extensions.Options;
+
 namespace MassTransit.QuartzIntegration
 {
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Linq.Expressions;
-    using System.Reflection;
     using GreenPipes.Internals.Extensions;
     using GreenPipes.Internals.Reflection;
-    using Internals.Reflection;
-    using Metadata;
     using Newtonsoft.Json;
     using Quartz;
     using Quartz.Spi;
@@ -17,12 +15,14 @@ namespace MassTransit.QuartzIntegration
     public class MassTransitJobFactory :
         IJobFactory
     {
-        readonly IBus _bus;
+        readonly IServiceProvider _serviceProvider;
+        readonly IOptions<QuartzOptions> _options;
         readonly ConcurrentDictionary<Type, IJobFactory> _typeFactories;
 
-        public MassTransitJobFactory(IBus bus)
+        public MassTransitJobFactory(IServiceProvider serviceProvider, IOptions<QuartzOptions> options)
         {
-            _bus = bus;
+            _serviceProvider = serviceProvider;
+            _options = options;
             _typeFactories = new ConcurrentDictionary<Type, IJobFactory>();
         }
 
@@ -45,94 +45,35 @@ namespace MassTransit.QuartzIntegration
         IJobFactory CreateJobFactory(Type type)
         {
             var genericType = typeof(MassTransitJobFactory<>).MakeGenericType(type);
-
-            return (IJobFactory)Activator.CreateInstance(genericType, _bus);
+            return (IJobFactory) Activator.CreateInstance(genericType, _serviceProvider, _options);
         }
     }
 
 
     public class MassTransitJobFactory<T> :
-        IJobFactory
+        MicrosoftDependencyInjectionJobFactory
         where T : IJob
     {
-        readonly IBus _bus;
-        readonly Func<IBus, T> _factory;
-
-        public MassTransitJobFactory(IBus bus)
+        public MassTransitJobFactory(IServiceProvider serviceProvider, IOptions<QuartzOptions> options) : base(serviceProvider, options)
         {
-            _bus = bus;
-            _factory = CreateConstructor();
         }
 
-        public IJob NewJob(TriggerFiredBundle bundle, IScheduler scheduler)
+        protected override JobDataMap BuildJobDataMap(TriggerFiredBundle bundle, IScheduler scheduler)
         {
-            try
+            var jobData = base.BuildJobDataMap(bundle, scheduler);
+            jobData.Put("PayloadMessageHeadersAsJson", CreatePayloadHeaderString(bundle));
+            return jobData;
+        }
+
+        protected override void SetJobProperty(IJob job, string name, object value)
+        {
+            if (TypeCache<T>.ReadWritePropertyCache.TryGetProperty(name, out ReadWriteProperty<T> property))
             {
-                var job = _factory(_bus);
+                if (property.Property.PropertyType == typeof(Uri))
+                    value = new Uri(value.ToString());
 
-                var jobData = new JobDataMap();
-                jobData.PutAll(scheduler.Context);
-                jobData.PutAll(bundle.JobDetail.JobDataMap);
-                jobData.PutAll(bundle.Trigger.JobDataMap);
-                jobData.Put("PayloadMessageHeadersAsJson", CreatePayloadHeaderString(bundle));
-
-                SetObjectProperties(job, jobData);
-
-                return job;
+                property.Set((T) job, value);
             }
-            catch (Exception ex)
-            {
-                throw new SchedulerException($"Problem instantiating class '{TypeMetadataCache.GetShortName(bundle.JobDetail.JobType)}'", ex);
-            }
-        }
-
-        public void ReturnJob(IJob job)
-        {
-        }
-
-        void SetObjectProperties(T job, JobDataMap jobData)
-        {
-            foreach (var key in jobData.Keys)
-            {
-                if (TypeCache<T>.ReadWritePropertyCache.TryGetProperty(key, out ReadWriteProperty<T> property))
-                {
-                    var value = jobData[key];
-
-                    if (property.Property.PropertyType == typeof(Uri))
-                        value = new Uri(value.ToString());
-
-                    property.Set(job, value);
-                }
-            }
-        }
-
-        Func<IBus, T> CreateConstructor()
-        {
-            var ctor = typeof(T).GetConstructor(new[] {typeof(IBus)});
-            if (ctor != null)
-                return CreateServiceBusConstructor(ctor);
-
-            ctor = typeof(T).GetConstructor(Type.EmptyTypes);
-            if (ctor != null)
-                return CreateDefaultConstructor(ctor);
-
-            throw new SchedulerException($"The job class does not have a supported constructor: {TypeMetadataCache<T>.ShortName}");
-        }
-
-        Func<IBus, T> CreateDefaultConstructor(ConstructorInfo constructorInfo)
-        {
-            var bus = Expression.Parameter(typeof(IBus), "bus");
-            var @new = Expression.New(constructorInfo);
-
-            return Expression.Lambda<Func<IBus, T>>(@new, bus).CompileFast();
-        }
-
-        Func<IBus, T> CreateServiceBusConstructor(ConstructorInfo constructorInfo)
-        {
-            var bus = Expression.Parameter(typeof(IBus), "bus");
-            var @new = Expression.New(constructorInfo, bus);
-
-            return Expression.Lambda<Func<IBus, T>>(@new, bus).CompileFast();
         }
 
         /// <summary>

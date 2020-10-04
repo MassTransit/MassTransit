@@ -44,7 +44,6 @@
 
             await busReady.ConfigureAwait(false);
 
-            _scheduler.JobFactory = new MassTransitJobFactory(bus);
             await _scheduler.Start().ConfigureAwait(false);
 
             LogContext.Debug?.Log("Quartz Scheduler Started: {InputAddress} ({Name}/{InstanceId})", _schedulerEndpointAddress, _scheduler.SchedulerName,
