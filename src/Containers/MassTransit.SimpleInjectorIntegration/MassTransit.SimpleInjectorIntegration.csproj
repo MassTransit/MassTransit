@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-        <PackageReference Include="SimpleInjector" Version="4.10.2" />
+        <PackageReference Include="SimpleInjector" Version="[4.10.2,5.0.0)" />
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
         <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
