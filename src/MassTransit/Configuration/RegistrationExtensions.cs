@@ -5,6 +5,7 @@ namespace MassTransit
     using System.Linq;
     using System.Reflection;
     using Automatonymous;
+    using ConsumeConfigurators;
     using Courier;
     using Definition;
     using Internals.Extensions;
@@ -16,6 +17,21 @@ namespace MassTransit
 
     public static class RegistrationExtensions
     {
+        /// <summary>
+        /// Adds the consumer, allowing configuration when it is configured on an endpoint
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        /// <typeparam name="T">The consumer type</typeparam>
+        /// <typeparam name="TDefinition">The consumer definition type</typeparam>
+        public static IConsumerRegistrationConfigurator<T> AddConsumer<T, TDefinition>(this IRegistrationConfigurator configurator,
+            Action<IConsumerConfigurator<T>> configure = null)
+            where T : class, IConsumer
+            where TDefinition : class, IConsumerDefinition<T>
+        {
+            return configurator.AddConsumer(typeof(TDefinition), configure);
+        }
+
         /// <summary>
         /// Adds all consumers in the specified assemblies
         /// </summary>
@@ -97,6 +113,22 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Adds the saga, allowing configuration when it is configured on the endpoint. This should not
+        /// be used for state machine (Automatonymous) sagas.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        /// <typeparam name="T">The saga type</typeparam>
+        /// <typeparam name="TDefinition">The saga definition type</typeparam>
+        public static ISagaRegistrationConfigurator<T> AddSaga<T, TDefinition>(this IRegistrationConfigurator configurator,
+            Action<ISagaConfigurator<T>> configure = null)
+            where T : class, ISaga
+            where TDefinition : class, ISagaDefinition<T>
+        {
+            return configurator.AddSaga(typeof(TDefinition), configure);
+        }
+
+        /// <summary>
         /// Adds all sagas in the specified assemblies. If using state machine sagas, they should be added first using AddSagaStateMachines.
         /// </summary>
         /// <param name="configurator"></param>
@@ -174,6 +206,24 @@ namespace MassTransit
 
             foreach (var saga in sagas)
                 configurator.AddSaga(saga.SagaType, saga.DefinitionType);
+        }
+
+        /// <summary>
+        /// Adds a SagaStateMachine to the registry and updates the registrar prior to registering so that the default
+        /// saga registrar isn't notified.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        /// <typeparam name="TStateMachine">The state machine type</typeparam>
+        /// <typeparam name="T">The state machine instance type</typeparam>
+        /// <typeparam name="TDefinition">The saga definition type</typeparam>
+        public static ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T, TDefinition>(this IRegistrationConfigurator configurator,
+            Action<ISagaConfigurator<T>> configure = null)
+            where T : class, SagaStateMachineInstance
+            where TStateMachine : class, SagaStateMachine<T>
+            where TDefinition : class, ISagaDefinition<T>
+        {
+            return configurator.AddSagaStateMachine<TStateMachine, T>(typeof(TDefinition), configure);
         }
 
         /// <summary>
@@ -278,6 +328,47 @@ namespace MassTransit
 
                 SagaStateMachineRegistrationCache.Register(type, registrar);
             }
+        }
+
+        /// <summary>
+        /// Adds an execute activity (Courier), allowing configuration when it is configured on the endpoint.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        /// <typeparam name="TActivity">The activity type</typeparam>
+        /// <typeparam name="TArguments">The argument type</typeparam>
+        /// <typeparam name="TDefinition">The activity definition type</typeparam>
+        /// <returns></returns>
+        public static IExecuteActivityRegistrationConfigurator<TActivity, TArguments> AddExecuteActivity<TActivity, TArguments, TDefinition>(
+            this IRegistrationConfigurator configurator, Action<IExecuteActivityConfigurator<TActivity, TArguments>> configure = null)
+            where TActivity : class, IExecuteActivity<TArguments>
+            where TArguments : class
+            where TDefinition : class, IExecuteActivityDefinition<TActivity, TArguments>
+        {
+            return configurator.AddExecuteActivity(typeof(TDefinition), configure);
+        }
+
+        /// <summary>
+        /// Adds an activity (Courier), allowing configuration when it is configured on the endpoint.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configureExecute">The execute configuration callback</param>
+        /// <param name="configureCompensate">The compensate configuration callback</param>
+        /// <typeparam name="TActivity">The activity type</typeparam>
+        /// <typeparam name="TArguments">The argument type</typeparam>
+        /// <typeparam name="TLog">The log type</typeparam>
+        /// <typeparam name="TDefinition">The activity definition type</typeparam>
+        /// <returns></returns>
+        public static IActivityRegistrationConfigurator<TActivity, TArguments, TLog> AddActivity<TActivity, TArguments, TLog, TDefinition>(
+            this IRegistrationConfigurator configurator,
+            Action<IExecuteActivityConfigurator<TActivity, TArguments>> configureExecute = null,
+            Action<ICompensateActivityConfigurator<TActivity, TLog>> configureCompensate = null)
+            where TActivity : class, IActivity<TArguments, TLog>
+            where TArguments : class
+            where TDefinition : class, IActivityDefinition<TActivity, TArguments, TLog>
+            where TLog : class
+        {
+            return configurator.AddActivity(typeof(TDefinition), configureExecute, configureCompensate);
         }
 
         /// <summary>
