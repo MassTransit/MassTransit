@@ -17,7 +17,7 @@
     /// so this was the easiest project to add a test spec to which has EF Core already referenced.
     /// </summary>
     [TestFixture]
-    public class TransactionOutbox_Specs :
+    public class TransactionalBusOutbox_Specs :
         InMemoryTestFixture
     {
         [Test]
@@ -88,7 +88,7 @@
             _received = Handled<InitiateSimpleSaga>(configurator);
         }
 
-        public TransactionOutbox_Specs()
+        public TransactionalBusOutbox_Specs()
         {
             using (var dbContext = GetDbContext())
             {

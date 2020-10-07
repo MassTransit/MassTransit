@@ -6,12 +6,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using Metadata;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Internal;
-
+    using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
     public class SqlLockStatementProvider :
         ILockStatementProvider
     {
-        protected static readonly ConcurrentDictionary<Type, SchemaTablePair> TableNames = new ConcurrentDictionary<Type, SchemaTablePair>();
+        protected static readonly ConcurrentDictionary<Type, SchemaTableColumnTrio> TableNames = new ConcurrentDictionary<Type, SchemaTableColumnTrio>();
         readonly bool _enableSchemaCaching;
 
         public SqlLockStatementProvider(string defaultSchema, string rowLockStatement, bool enableSchemaCaching = true)
@@ -33,12 +33,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         string FormatLockStatement<TSaga>(IDbContextDependencies context)
             where TSaga : class, ISaga
         {
-            var schemaTablePair = GetSchemaAndTableName(context, typeof(TSaga));
+            var schemaTableTrio = GetSchemaAndTableNameAndColumnName(context, typeof(TSaga));
 
-            return string.Format(RowLockStatement, schemaTablePair.Schema, schemaTablePair.Table);
+            return string.Format(RowLockStatement, schemaTableTrio.Schema, schemaTableTrio.Table, schemaTableTrio.ColumnName);
         }
 
-        SchemaTablePair GetSchemaAndTableName(IDbContextDependencies dependencies, Type type)
+        SchemaTableColumnTrio GetSchemaAndTableNameAndColumnName(IDbContextDependencies dependencies, Type type)
         {
             if (TableNames.TryGetValue(type, out var result) && _enableSchemaCaching)
                 return result;
@@ -48,10 +48,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             var schema = entityType.GetSchema();
             var tableName = entityType.GetTableName();
 
+            var columnName = entityType.GetProperty(nameof(ISaga.CorrelationId)).GetColumnName();
+
             if (string.IsNullOrWhiteSpace(tableName))
                 throw new MassTransitException($"Unable to determine saga table name: {TypeMetadataCache.GetShortName(type)} (using model metadata).");
 
-            result = new SchemaTablePair(schema ?? DefaultSchema, tableName);
+            result = new SchemaTableColumnTrio(schema ?? DefaultSchema, tableName, columnName);
 
             if (_enableSchemaCaching)
                 TableNames.TryAdd(type, result);
@@ -60,16 +62,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         }
 
 
-        protected readonly struct SchemaTablePair
+        protected readonly struct SchemaTableColumnTrio
         {
-            public SchemaTablePair(string schema, string table)
+            public SchemaTableColumnTrio(string schema, string table, string columnName)
             {
                 Schema = schema;
                 Table = table;
+                ColumnName = columnName;
             }
 
             public readonly string Schema;
             public readonly string Table;
+            public readonly string ColumnName;
         }
     }
 }
