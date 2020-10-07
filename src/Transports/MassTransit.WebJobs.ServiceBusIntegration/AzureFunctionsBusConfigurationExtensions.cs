@@ -21,10 +21,10 @@ namespace MassTransit
         /// <param name="configure">
         /// Configure via <see cref="DependencyInjectionRegistrationExtensions.AddMassTransit" />, to configure consumers, etc.
         /// </param>
-        /// <param name="configureBus">Optional, configure the service bus settings</param>
+        /// <param name="configureBus">Optional, the configuration callback for the bus factory</param>
         /// <returns></returns>
         public static IServiceCollection AddMassTransitForAzureFunctions(this IServiceCollection services, Action<IServiceCollectionBusConfigurator> configure,
-            Action<IServiceBusBusFactoryConfigurator> configureBus = default)
+            Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator> configureBus = default)
         {
             ConfigureApplicationInsights(services);
 
@@ -44,7 +44,7 @@ namespace MassTransit
                         cfg.Host(options.Value.ConnectionString);
                         cfg.UseServiceBusMessageScheduler();
 
-                        configureBus?.Invoke(cfg);
+                        configureBus?.Invoke(context, cfg);
                     });
                 });
 
