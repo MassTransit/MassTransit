@@ -78,4 +78,41 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 
         protected override IPublishEndpoint PublishEndpoint => _scope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
     }
+
+
+    [TestFixture]
+    public class DependencyInjection_Publish_Filter_Fault :
+        Common_Publish_Filter_Fault
+    {
+        readonly IServiceProvider _provider;
+
+        public DependencyInjection_Publish_Filter_Fault()
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton(TaskCompletionSource);
+
+            services.AddMassTransit(ConfigureRegistration);
+
+            _provider = services.BuildServiceProvider();
+        }
+
+        [OneTimeTearDown]
+        public void Close_container()
+        {
+        }
+
+        protected override void ConfigureFilter(IPublishPipelineConfigurator configurator)
+        {
+            DependencyInjectionFilterExtensions.UsePublishFilter(configurator, typeof(ScopedFilter<>), Registration);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseServiceScope(_provider);
+
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
+        }
+
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
+    }
 }

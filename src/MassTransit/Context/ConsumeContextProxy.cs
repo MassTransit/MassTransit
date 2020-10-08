@@ -62,16 +62,6 @@
             return false;
         }
 
-        public override Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
-        {
-            return _context.NotifyConsumed(context, duration, consumerType);
-        }
-
-        public override Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
-        {
-            return _context.NotifyFaulted(context, duration, consumerType, exception);
-        }
-
         public override void AddConsumeTask(Task task)
         {
             _context.AddConsumeTask(task);

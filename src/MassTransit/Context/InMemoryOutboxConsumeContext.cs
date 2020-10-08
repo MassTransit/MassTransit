@@ -12,12 +12,14 @@ namespace MassTransit.Context
         OutboxContext
     {
         readonly TaskCompletionSource<InMemoryOutboxConsumeContext> _clearToSend;
+        readonly ConsumeContext _context;
         readonly InMemoryOutboxMessageSchedulerContext _outboxSchedulerContext;
         readonly List<Func<Task>> _pendingActions;
 
         public InMemoryOutboxConsumeContext(ConsumeContext context)
             : base(context)
         {
+            _context = context;
             var outboxReceiveContext = new InMemoryOutboxReceiveContext(this, context.ReceiveContext);
 
             ReceiveContext = outboxReceiveContext;
@@ -99,6 +101,16 @@ namespace MassTransit.Context
                     LogContext.Warning?.Log(e, "One or more messages could not be unscheduled.", e);
                 }
             }
+        }
+
+        public override Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        {
+            return _context.NotifyConsumed(context, duration, consumerType);
+        }
+
+        public override Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        {
+            return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
     }
 
