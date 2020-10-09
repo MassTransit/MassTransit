@@ -1,16 +1,15 @@
+﻿using GreenPipes;
+using System.Threading.Tasks;
+
 namespace MassTransit.Transactions
 {
-    using System.Threading.Tasks;
-    using GreenPipes;
-
-
-    public class TransactionalPublishEndpointProvider :
+    public class OutboxBusPublishEndpointProvider :
         IPublishEndpointProvider
     {
-        readonly TransactionalBus _bus;
-        readonly IPublishEndpointProvider _publishEndpointProvider;
+        private readonly BaseOutboxBus _bus;
+        private readonly IPublishEndpointProvider _publishEndpointProvider;
 
-        public TransactionalPublishEndpointProvider(TransactionalBus bus, IPublishEndpointProvider publishEndpointProvider)
+        public OutboxBusPublishEndpointProvider(BaseOutboxBus bus, IPublishEndpointProvider publishEndpointProvider)
         {
             _bus = bus;
             _publishEndpointProvider = publishEndpointProvider;
@@ -26,7 +25,7 @@ namespace MassTransit.Transactions
         {
             var endpoint = await _publishEndpointProvider.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
-            return new TransactionalSendEndpoint(_bus, endpoint);
+            return new OutboxBusSendEndpoint(_bus, endpoint);
         }
     }
 }

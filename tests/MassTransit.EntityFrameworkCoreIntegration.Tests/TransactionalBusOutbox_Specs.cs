@@ -74,6 +74,36 @@
             }
         }
 
+        [Test]
+        [Category("Flakey")]
+        public async Task Should_publish_after_db_create_outbox_bus()
+        {
+            var message = new InitiateSimpleSaga();
+            var product = new Product { Name = "Should_publish_after_db_create" };
+            var bus = new OutboxBus(Bus);
+
+            using (var dbContext = GetDbContext())
+            {
+                dbContext.Products.Add(product);
+                await dbContext.SaveChangesAsync();
+
+                await bus.Publish(message);
+
+                // Hasn't published yet
+                Assert.That(async () => await _received.OrTimeout(s: 3), Throws.TypeOf<TimeoutException>());
+            }
+
+            await bus.Release();
+
+            // Now has published
+            await _received;
+
+            using (var dbContext = GetDbContext())
+            {
+                Assert.IsTrue(await dbContext.Products.AnyAsync(x => x.Id == product.Id));
+            }
+        }
+
         Task<ConsumeContext<InitiateSimpleSaga>> _received;
 
         TransactionOutboxTestsDbContext GetDbContext()

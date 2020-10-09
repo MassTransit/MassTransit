@@ -6,15 +6,15 @@
     using GreenPipes;
 
 
-    public class TransactionalSendEndpoint :
+    public class OutboxBusSendEndpoint :
         ISendEndpoint
     {
         readonly ISendEndpoint _sendEndpoint;
-        readonly TransactionalBus _transactionalBus;
+        readonly BaseOutboxBus _outboxBus;
 
-        public TransactionalSendEndpoint(TransactionalBus transactionalBus, ISendEndpoint sendEndpoint)
+        public OutboxBusSendEndpoint(BaseOutboxBus outboxBus, ISendEndpoint sendEndpoint)
         {
-            _transactionalBus = transactionalBus;
+            _outboxBus = outboxBus;
             _sendEndpoint = sendEndpoint;
         }
 
@@ -26,57 +26,67 @@
         public Task Send<T>(T message, CancellationToken cancellationToken = default)
             where T : class
         {
-            return _transactionalBus.Enlist(() => _sendEndpoint.Send(message, cancellationToken));
+            _outboxBus.Add(() => _sendEndpoint.Send(message, cancellationToken));
+            return Task.CompletedTask;
         }
 
         public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            return _transactionalBus.Enlist(() => _sendEndpoint.Send(message, pipe, cancellationToken));
+            _outboxBus.Add(() => _sendEndpoint.Send(message, pipe, cancellationToken));
+            return Task.CompletedTask;
         }
 
         public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            return _transactionalBus.Enlist(() => _sendEndpoint.Send(message, pipe, cancellationToken));
+            _outboxBus.Add(() => _sendEndpoint.Send(message, pipe, cancellationToken));
+            return Task.CompletedTask;
         }
 
         public Task Send(object message, CancellationToken cancellationToken = default)
         {
-            return _transactionalBus.Enlist(() => _sendEndpoint.Send(message, cancellationToken));
+            _outboxBus.Add(() => _sendEndpoint.Send(message, cancellationToken));
+            return Task.CompletedTask;
         }
 
         public Task Send(object message, Type messageType, CancellationToken cancellationToken = default)
         {
-            return _transactionalBus.Enlist(() => _sendEndpoint.Send(message, messageType, cancellationToken));
+            _outboxBus.Add(() => _sendEndpoint.Send(message, messageType, cancellationToken));
+            return Task.CompletedTask;
         }
 
         public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
         {
-            return _transactionalBus.Enlist(() => _sendEndpoint.Send(message, pipe, cancellationToken));
+            _outboxBus.Add(() => _sendEndpoint.Send(message, pipe, cancellationToken));
+            return Task.CompletedTask;
         }
 
         public Task Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
         {
-            return _transactionalBus.Enlist(() => _sendEndpoint.Send(message, messageType, pipe, cancellationToken));
+            _outboxBus.Add(() => _sendEndpoint.Send(message, messageType, pipe, cancellationToken));
+            return Task.CompletedTask;
         }
 
         public Task Send<T>(object values, CancellationToken cancellationToken = default)
             where T : class
         {
-            return _transactionalBus.Enlist(() => _sendEndpoint.Send<T>(values, cancellationToken));
+            _outboxBus.Add(() => _sendEndpoint.Send<T>(values, cancellationToken));
+            return Task.CompletedTask;
         }
 
         public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            return _transactionalBus.Enlist(() => _sendEndpoint.Send(values, pipe, cancellationToken));
+            _outboxBus.Add(() => _sendEndpoint.Send(values, pipe, cancellationToken));
+            return Task.CompletedTask;
         }
 
         public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            return _transactionalBus.Enlist(() => _sendEndpoint.Send<T>(values, pipe, cancellationToken));
+            _outboxBus.Add(() => _sendEndpoint.Send<T>(values, pipe, cancellationToken));
+            return Task.CompletedTask;
         }
     }
 }
