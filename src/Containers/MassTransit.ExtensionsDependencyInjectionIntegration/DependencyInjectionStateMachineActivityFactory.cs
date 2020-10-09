@@ -25,10 +25,10 @@
         static TActivity GetActivity<TActivity>(PipeContext context)
         {
             if (context.TryGetPayload(out IServiceScope serviceScope))
-                return ActivatorUtilities.CreateInstance<TActivity>(serviceScope.ServiceProvider);
+                return serviceScope.ServiceProvider.GetService<TActivity>() ?? ActivatorUtilities.CreateInstance<TActivity>(serviceScope.ServiceProvider);
 
             if (context.TryGetPayload(out IServiceProvider serviceProvider))
-                return ActivatorUtilities.CreateInstance<TActivity>(serviceProvider);
+                return serviceProvider.GetService<TActivity>() ?? ActivatorUtilities.CreateInstance<TActivity>(serviceProvider);
 
             throw new PayloadNotFoundException($"IServiceProvider or IServiceScope was not found to create activity: {TypeMetadataCache<TActivity>.ShortName}");
         }

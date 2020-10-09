@@ -63,14 +63,14 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             configure?.Invoke(configurator);
         }
 
-        IBusInstance<TBus> CreateBus<T>(T busFactory, IServiceProvider provider)
+        static IBusInstance<TBus> CreateBus<T>(T busFactory, IServiceProvider provider)
             where T : IRegistrationBusFactory
         {
             IEnumerable<IBusInstanceSpecification> specifications = provider.GetServices<Bind<TBus, IBusInstanceSpecification>>().Select(x => x.Value);
 
             var instance = busFactory.CreateBus(provider.GetRequiredService<Bind<TBus, IBusRegistrationContext>>().Value, specifications);
 
-            var busInstance = ActivatorUtilities.CreateInstance<TBusInstance>(provider, instance.BusControl);
+            var busInstance = provider.GetService<TBusInstance>() ?? ActivatorUtilities.CreateInstance<TBusInstance>(provider, instance.BusControl);
 
             return new MultiBusInstance<TBus>(busInstance, instance);
         }
