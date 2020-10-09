@@ -16,5 +16,15 @@
         {
             busConfigurator.Collection.TryAddSingleton<ITransactionalBus>(provider => new TransactionalBus(provider.GetService<IBus>()));
         }
+
+        /// <summary>
+        /// Adds <see cref="IOutboxBus"/> to the container, which can be used to release the messages to the bus
+        /// immediately after a transaction commit. This has a very limited purpose and is not meant for general use.
+        /// It is recommended this is scoped within a unit of work (e.g. Http Request)
+        /// </summary>
+        public static void AddOutboxBus(this IServiceCollectionBusConfigurator busConfigurator)
+        {
+            busConfigurator.Collection.TryAddScoped<IOutboxBus>(provider => new OutboxBus(provider.GetService<IBus>()));
+        }
     }
 }

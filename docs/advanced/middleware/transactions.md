@@ -175,3 +175,159 @@ public class Program
     }
 }
 ```
+
+## Outbox Bus
+
+Here we are again, another option for holding onto the messages and releasing them as close to the database transaction Commit as possible. We made this alternative because using TransactionScope from above, could [in certain cases](https://github.com/MassTransit/MassTransit/issues/2075) still cause a 2 phase commit escalation (not to mention that TransactionScope doesn't truely have async support, so we make [concessions by calling TaskUtil.Await](https://github.com/MassTransit/MassTransit/blob/develop/src/MassTransit/Transactions/TransactionalBusEnlistment.cs#L83)). So to offer an alternative to these drawbacks, MassTransit provides an Outbox Bus.
+
+::: warning  
+Never use the TransactionalBus or OutboxBus when writing consumers. These tools are very specific and should be used only in the scenarios described.
+:::
+
+The examples will show it's usage in an ASP.NET MVC application, which is where we most commonly use Scoped lifetime for our DbContext and therefore we want the same for our OutboxBus. You could possibly use it in some console applications, but ones WITHOUT a MT Consumer. Once you have consumers you will ALWAYS use `ConsumeContext` to interact with the bus, and never the `IBus`.
+
+
+First Register the outbox bus.
+
+```cs
+services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+    });
+
+    x.AddOutboxBus();
+});
+```
+
+Then use within your controller.
+
+```cs
+public class MyController : ControllerBase
+{
+    private readonly IOutboxBus _outboxBus;
+    private readonly MyDbContext _dbContext;
+
+    public ValuesController(IOutboxBus outboxBus, MyDbContext dbContext)
+    {
+        _outboxBus = outboxBus;
+        _dbContext = dbContext;
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Post([FromBody] string value)
+    {
+        using(var transaction = await _dbContext.BeginTransactionAsync())
+        {
+            try
+            {
+                _dbContext.Posts.Add(new Post{...});
+                await _dbContext.SaveChangesAsync();
+
+                await _outboxBus.Publish(new PostCreated{...});
+
+                await transaction.CommitAsync();
+                await _outboxBus.Release(); // Immediately after CommitAsync
+            }
+            catch (Exception)
+            {
+                transaction.Rollback();
+            }
+
+        }
+
+        return Ok();
+    }
+}
+```
+
+One option to remove some of the boilerplate of opening a transaction each Action that writes to the DB is to make a Filter. You can then include all of the boilerplate code to begin the transaction, and release the outbox.
+
+```cs
+public class DbContextTransactionFilter : TypeFilterAttribute
+{
+    public DbContextTransactionFilter()
+        : base(typeof(DbContextTransactionFilterImpl))
+    {
+    }
+
+    // This will be scoped per http request
+    private class DbContextTransactionFilterImpl : IAsyncActionFilter
+    {
+        private readonly MyDbContext _db;
+        private readonly ILogger _logger;
+        private readonly IOutboxBus _outboxBus;
+
+        public DbContextTransactionFilterImpl(
+            MyDbContext db,
+            ILogger<DbContextTransactionFilter> logger,
+            IOutboxBus outboxBus)
+        {
+            _db = db;
+            _logger = logger;
+            _outboxBus = outboxBus;
+        }
+
+        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
+            using var transaction = await _db.Database.BeginTransactionAsync();
+
+            try
+            {
+                var actionExecuted = await next();
+                if (actionExecuted.Exception != null && !actionExecuted.ExceptionHandled)
+                {
+                    await transaction.RollbackAsync();
+                }
+                else
+                {
+                    await transaction.CommitAsync();
+                    await _outboxBus.Release(); // Immediately after CommitAsync
+                }
+            }
+            catch (Exception)
+            {
+                try
+                {
+                    await transaction.RollbackAsync();
+                }
+                catch (Exception e)
+                {
+                    // Swallow failed rollback
+                    _logger.LogWarning(e, "Tried to rollback transaction but failed, swallow exception.");
+                }
+
+                throw;
+            }
+        }
+    }
+}
+```
+
+Now your Controller Action will look like:
+
+```cs
+public class MyController : ControllerBase
+{
+    private readonly IOutboxBus _outboxBus;
+    private readonly MyDbContext _dbContext;
+
+    public ValuesController(IOutboxBus outboxBus, MyDbContext dbContext)
+    {
+        _outboxBus = outboxBus;
+        _dbContext = dbContext;
+    }
+
+    [HttpPost]
+    [DbContextTransactionFilter]
+    public async Task<IActionResult> Post([FromBody] string value)
+    {
+        _dbContext.Posts.Add(new Post{...});
+        await _dbContext.SaveChangesAsync();
+
+        await _outboxBus.Publish(new PostCreated{...});
+
+        return Ok();
+    }
+}
+```
