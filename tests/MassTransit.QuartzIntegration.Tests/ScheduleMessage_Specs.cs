@@ -23,7 +23,7 @@
             await _second;
 
             if (_secondActivityId != null && _firstActivityId != null)
-                Assert.That(_secondActivityId.StartsWith(_firstActivityId), Is.True);
+                Assert.AreEqual(_firstActivityId, _secondActivityId);
         }
 
         Task<ConsumeContext<SecondMessage>> _second;
@@ -41,7 +41,7 @@
 
             _second = Handler<SecondMessage>(configurator, async context =>
             {
-                _secondActivityId = Activity.Current?.Id;
+                _secondActivityId = Activity.Current?.ParentId;
             });
         }
 
