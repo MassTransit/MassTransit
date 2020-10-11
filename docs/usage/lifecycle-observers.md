@@ -34,7 +34,7 @@ public class BusObserver : IBusObserver
         // called just before the bus is started
     }
 
-    public Task PostStart(IBus bus, Task busReady)
+    public Task PostStart(IBus bus, Task<BusReady> busReady)
     {
         // called once the bus has been started successfully. The task can be used to wait for
         // all of the receive endpoints to be ready.
