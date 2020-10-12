@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using Context;
     using Quartz;
+    using Quartz.Spi;
     using Util;
 
 
@@ -15,11 +16,19 @@
     {
         readonly IScheduler _scheduler;
         readonly Uri _schedulerEndpointAddress;
+        readonly IJobFactory _defaultJobFactory;
 
-        public SchedulerBusObserver(IScheduler scheduler, Uri schedulerEndpointAddress)
+        /// <summary>
+        /// Creates the bus observer to initialize the Quartz scheduler.
+        /// </summary>
+        /// <param name="scheduler">The Quartz scheduler instance</param>
+        /// <param name="schedulerEndpointAddress">The endpoint address of the quartz service</param>
+        /// <param name="defaultJobFactory">Optional, can be used to specify a job factory for non-MassTransit job types</param>
+        public SchedulerBusObserver(IScheduler scheduler, Uri schedulerEndpointAddress, IJobFactory defaultJobFactory = default)
         {
             _scheduler = scheduler;
             _schedulerEndpointAddress = schedulerEndpointAddress;
+            _defaultJobFactory = defaultJobFactory;
         }
 
         public Task PostCreate(IBus bus)
@@ -44,7 +53,7 @@
 
             await busReady.ConfigureAwait(false);
 
-            _scheduler.JobFactory = new MassTransitJobFactory(bus);
+            _scheduler.JobFactory = new MassTransitJobFactory(bus, _defaultJobFactory);
             await _scheduler.Start().ConfigureAwait(false);
 
             LogContext.Debug?.Log("Quartz Scheduler Started: {InputAddress} ({Name}/{InstanceId})", _schedulerEndpointAddress, _scheduler.SchedulerName,
