@@ -192,6 +192,7 @@ namespace MassTransit.KafkaIntegration.Specifications
         class KafkaProducerContext :
             IKafkaProducerContext<TKey, TValue>
         {
+            readonly IHostConfiguration _hostConfiguration;
             readonly IProducer<TKey, TValue> _producer;
             readonly ISendPipe _sendPipe;
 
@@ -199,15 +200,14 @@ namespace MassTransit.KafkaIntegration.Specifications
                 SendObservable sendObservers, IHeadersSerializer headersSerializer)
             {
                 _producer = producer;
+                _hostConfiguration = hostConfiguration;
                 _sendPipe = sendConfiguration.CreatePipe();
                 SendObservers = sendObservers;
-                HostAddress = hostConfiguration.HostAddress;
-                LogContext = hostConfiguration.SendLogContext;
                 HeadersSerializer = headersSerializer;
             }
 
-            public Uri HostAddress { get; }
-            public ILogContext LogContext { get; }
+            public Uri HostAddress => _hostConfiguration.HostAddress;
+            public ILogContext LogContext => _hostConfiguration.SendLogContext;
             public SendObservable SendObservers { get; }
 
             public IHeadersSerializer HeadersSerializer { get; }

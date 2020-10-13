@@ -37,16 +37,14 @@ namespace MassTransit.EventHubIntegration
         class EventHubProducerContext :
             IEventHubProducerContext
         {
+            readonly IEventHubProducerSharedContext _context;
             readonly ISendPipe _pipe;
             readonly EventHubProducerClient _producerClient;
 
             public EventHubProducerContext(EventHubProducerClient producerClient, IEventHubProducerSharedContext context)
             {
                 _producerClient = producerClient;
-                HostAddress = context.HostAddress;
-                LogContext = context.LogContext;
-                SendObservers = context.SendObservers;
-                Serializer = context.Serializer;
+                _context = context;
                 _pipe = context.SendPipe;
             }
 
@@ -61,10 +59,10 @@ namespace MassTransit.EventHubIntegration
                 _pipe.Probe(context);
             }
 
-            public Uri HostAddress { get; }
-            public ILogContext LogContext { get; }
-            public SendObservable SendObservers { get; }
-            public IMessageSerializer Serializer { get; }
+            public Uri HostAddress => _context.HostAddress;
+            public ILogContext LogContext => _context.LogContext;
+            public SendObservable SendObservers => _context.SendObservers;
+            public IMessageSerializer Serializer => _context.Serializer;
 
             public Task Produce(IEnumerable<EventData> eventData, SendEventOptions options, CancellationToken cancellationToken)
             {
