@@ -1,19 +1,19 @@
 ﻿namespace MassTransit.Containers.Tests
 {
+    using System.Threading.Tasks;
     using NUnit.Framework;
     using Saga;
     using Scenarios;
     using SimpleInjector;
-    using SimpleInjector.Lifestyles;
 
 
     public class SimpleInjector_Consumer :
         When_registering_a_consumer
     {
         [TearDown]
-        public void Close_container()
+        public async Task Close_container()
         {
-            _container.Dispose();
+            await _container.DisposeAsync();
         }
 
         readonly Container _container;
@@ -21,7 +21,7 @@
         public SimpleInjector_Consumer()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetRequiredOptions();
 
             _container.AddMassTransit(cfg => cfg.AddConsumer<SimpleConsumer>());
 
@@ -42,9 +42,9 @@
         When_registering_a_saga
     {
         [OneTimeTearDown]
-        public void Close_container()
+        public async Task Close_container()
         {
-            _container.Dispose();
+            await _container.DisposeAsync();
         }
 
         readonly Container _container;
@@ -52,7 +52,7 @@
         public SimpleInjector_Saga()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetRequiredOptions();
             _container.RegisterInMemorySagaRepository<SimpleSaga>();
         }
 

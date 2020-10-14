@@ -1,10 +1,10 @@
 namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 {
+    using System.Threading.Tasks;
     using Common_Tests;
     using NUnit.Framework;
     using Saga;
     using SimpleInjector;
-    using SimpleInjector.Lifestyles;
 
 
     [TestFixture]
@@ -22,15 +22,15 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public SimpleInjector_Saga()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetRequiredOptions();
 
             _container.AddMassTransit(ConfigureRegistration);
         }
 
         [OneTimeTearDown]
-        public void Close_container()
+        public async Task Close_container()
         {
-            _container.Dispose();
+            await _container.DisposeAsync();
         }
 
         protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
@@ -57,7 +57,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public SimpleInjector_Saga_Endpoint()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetRequiredOptions();
 
             _container.AddMassTransit(ConfigureRegistration);
         }

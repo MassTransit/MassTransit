@@ -4,7 +4,6 @@ namespace MassTransit.Containers.Tests
     using NUnit.Framework;
     using Scenarios;
     using SimpleInjector;
-    using SimpleInjector.Lifestyles;
     using TestFramework.Messages;
     using Testing;
 
@@ -16,7 +15,7 @@ namespace MassTransit.Containers.Tests
         public async Task Should_support_the_test_harness()
         {
             var container = new Container();
-            container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            container.SetRequiredOptions();
 
             container.AddMassTransitInMemoryTestHarness(cfg =>
             {
@@ -40,7 +39,7 @@ namespace MassTransit.Containers.Tests
             {
                 await harness.Stop();
 
-                container.Dispose();
+                await container.DisposeAsync();
             }
         }
     }

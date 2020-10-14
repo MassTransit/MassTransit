@@ -5,7 +5,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     using Common_Tests.ConsumeContextTestSubjects;
     using NUnit.Framework;
     using SimpleInjector;
-    using SimpleInjector.Lifestyles;
 
 
     public class SimpleInjector_ConsumeContext :
@@ -20,7 +19,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             TaskCompletionSource<ISendEndpointProvider> publishEndpointTask = GetTask<ISendEndpointProvider>();
 
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetRequiredOptions();
 
             _container.RegisterInstance(pingTask);
             _container.RegisterInstance(sendEndpointProviderTask);
@@ -37,9 +36,9 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.GetInstance<TaskCompletionSource<ISendEndpointProvider>>().Task;
 
         [OneTimeTearDown]
-        public void TearDown()
+        public async Task TearDown()
         {
-            _container.Dispose();
+            await _container.DisposeAsync();
         }
     }
 
@@ -56,7 +55,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             TaskCompletionSource<ISendEndpointProvider> publishEndpointTask = GetTask<ISendEndpointProvider>();
 
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetRequiredOptions();
 
             _container.RegisterInstance(pingTask);
             _container.RegisterInstance(sendEndpointProviderTask);
@@ -73,9 +72,9 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.GetInstance<TaskCompletionSource<ISendEndpointProvider>>().Task;
 
         [OneTimeTearDown]
-        public void TearDown()
+        public async Task TearDown()
         {
-            _container.Dispose();
+            await _container.DisposeAsync();
         }
     }
 
@@ -92,7 +91,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             TaskCompletionSource<ISendEndpointProvider> publishEndpointTask = GetTask<ISendEndpointProvider>();
 
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetRequiredOptions();
 
             _container.RegisterInstance(pingTask);
             _container.RegisterInstance(sendEndpointProviderTask);
@@ -107,9 +106,9 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         protected override Task<ISendEndpointProvider> SendEndpointProvider => _container.GetInstance<TaskCompletionSource<ISendEndpointProvider>>().Task;
 
         [OneTimeTearDown]
-        public void TearDown()
+        public async Task TearDown()
         {
-            _container.Dispose();
+            await _container.DisposeAsync();
         }
     }
 }

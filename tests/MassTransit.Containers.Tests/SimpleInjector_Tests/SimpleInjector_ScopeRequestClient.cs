@@ -1,6 +1,7 @@
 namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 {
     using System;
+    using System.Threading.Tasks;
     using Common_Tests;
     using GreenPipes;
     using NUnit.Framework;
@@ -26,7 +27,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public SimpleInjector_ScopeRequestClient()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetRequiredOptions();
 
             _container.AddMassTransit(cfg =>
             {
@@ -38,10 +39,10 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         }
 
         [OneTimeTearDown]
-        public void Close_container()
+        public async Task Close_container()
         {
-            _childContainer.Dispose();
-            _container.Dispose();
+            await _childContainer.DisposeAsync();
+            await _container.DisposeAsync();
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

@@ -3,7 +3,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     using Common_Tests;
     using NUnit.Framework;
     using SimpleInjector;
-    using SimpleInjector.Lifestyles;
     using TestFramework.Courier;
 
 
@@ -22,7 +21,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public SimpleInjectorCourier_ExecuteActivity()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetRequiredOptions();
             _container.AddMassTransit(cfg =>
             {
                 cfg.AddExecuteActivity<SetVariableActivity, SetVariableArguments>();
@@ -49,7 +48,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public SimpleInjectorCourier_ExecuteActivity_Endpoint()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetRequiredOptions();
             _container.AddMassTransit(cfg =>
             {
                 cfg.AddExecuteActivity<SetVariableActivity, SetVariableArguments>()
@@ -78,7 +77,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public SimpleInjectorCourier_Activity()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetRequiredOptions();
             _container.AddMassTransit(cfg =>
             {
                 cfg.AddActivity<TestActivity, TestArguments, TestLog>();
@@ -88,7 +87,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 
         protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
     }
-
 
     [TestFixture]
     public class SimpleInjectorCourier_Activity_Endpoint :
@@ -105,7 +103,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public SimpleInjectorCourier_Activity_Endpoint()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetRequiredOptions();
             _container.AddMassTransit(cfg =>
             {
                 cfg.AddActivity<TestActivity, TestArguments, TestLog>()

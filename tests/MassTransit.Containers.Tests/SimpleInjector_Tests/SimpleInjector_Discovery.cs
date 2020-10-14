@@ -5,7 +5,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     using Common_Tests.Discovery;
     using NUnit.Framework;
     using SimpleInjector;
-    using SimpleInjector.Lifestyles;
     using TestFramework.Messages;
 
 
@@ -24,7 +23,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public SimpleInjector_Discovery()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetRequiredOptions();
 
             _container.AddMassTransit(x =>
             {
