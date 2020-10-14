@@ -1,12 +1,12 @@
 namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 {
     using System;
+    using System.Threading.Tasks;
     using Common_Tests;
     using GreenPipes;
     using NUnit.Framework;
     using Scenarios;
     using SimpleInjector;
-    using SimpleInjector.Lifestyles;
 
 
     [TestFixture]
@@ -19,10 +19,10 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Verify();
         }
 
-        [TearDown]
-        public void Close_container()
+        [OneTimeTearDown]
+        public async Task Close_container()
         {
-            _container.Dispose();
+            await _container.DisposeAsync();
         }
 
         readonly Container _container;
@@ -30,7 +30,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public SimpleInjector_Consumer()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetMassTransitContainerOptions();
 
             _container.AddMassTransit(cfg =>
             {
@@ -60,9 +60,9 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         Common_Consumer_Endpoint
     {
         [TearDown]
-        public void Close_container()
+        public async Task Close_container()
         {
-            _container.Dispose();
+            await _container.DisposeAsync();
         }
 
         readonly Container _container;
@@ -70,7 +70,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public SimpleInjector_Consumer_Endpoint()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetMassTransitContainerOptions();
 
             _container.AddMassTransit(cfg =>
             {

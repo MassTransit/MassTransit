@@ -3,7 +3,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     using Common_Tests;
     using NUnit.Framework;
     using SimpleInjector;
-    using SimpleInjector.Lifestyles;
 
 
     [TestFixture]
@@ -21,7 +20,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public SimpleInjector_RequestClient_Context()
         {
             _container = new Container();
-            _container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            _container.SetMassTransitContainerOptions();
 
             _container.AddMassTransit(x =>
             {
