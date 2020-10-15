@@ -85,8 +85,6 @@ This is a minimal message:
 
 ```json
 {
-    "destinationAddress": "rabbitmq://localhost/input_queue",
-    "headers": {},
     "message": {
         "value": "Some Value",
         "customerId": 27
