@@ -9,6 +9,7 @@
         {
             container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
             container.Options.EnableAutoVerification = false;
+            container.Options.ResolveUnregisteredConcreteTypes = true;
         }
     }
 }

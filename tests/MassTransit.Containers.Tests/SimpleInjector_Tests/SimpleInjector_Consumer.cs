@@ -19,7 +19,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             _container.Verify();
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public async Task Close_container()
         {
             await _container.DisposeAsync();
