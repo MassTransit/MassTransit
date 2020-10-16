@@ -4,6 +4,7 @@
     using GreenPipes;
     using Quartz;
     using Quartz.Impl;
+    using Quartz.Spi;
     using QuartzIntegration;
     using QuartzIntegration.Configuration;
     using Scheduling;
@@ -27,6 +28,12 @@
             return UseInMemoryScheduler(configurator, schedulerFactory, out _, queueName);
         }
 
+        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, ISchedulerFactory schedulerFactory, IJobFactory jobFactory,
+            string queueName = "quartz")
+        {
+            return UseInMemoryScheduler(configurator, schedulerFactory, jobFactory, out _, queueName);
+        }
+
         public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, out IScheduler scheduler, string queueName = "quartz")
         {
             ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
@@ -35,6 +42,16 @@
         }
 
         public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, ISchedulerFactory schedulerFactory, out IScheduler scheduler,
+            string queueName = "quartz")
+        {
+            return UseInMemoryScheduler(configurator, schedulerFactory, jobFactory: null, out scheduler, queueName);
+        }
+
+        public static Uri UseInMemoryScheduler(
+            this IBusFactoryConfigurator configurator,
+            ISchedulerFactory schedulerFactory,
+            IJobFactory jobFactory,
+            out IScheduler scheduler,
             string queueName = "quartz")
         {
             if (configurator == null)
@@ -60,7 +77,7 @@
 
                 configurator.UseMessageScheduler(e.InputAddress);
 
-                var observer = new SchedulerBusObserver(schedulerInstance, e.InputAddress);
+                var observer = new SchedulerBusObserver(schedulerInstance, e.InputAddress, jobFactory);
                 configurator.ConnectBusObserver(observer);
 
                 inputAddress = e.InputAddress;
