@@ -10,6 +10,7 @@ namespace MassTransit.QuartzIntegration.Tests
     public abstract class QuartzInMemoryActivityTestFixture :
         InMemoryActivityTestFixture
     {
+        Task<IScheduler> _schedulerTask;
         TimeSpan _testOffset;
 
         protected QuartzInMemoryActivityTestFixture()
@@ -24,14 +25,20 @@ namespace MassTransit.QuartzIntegration.Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseInMemoryScheduler();
+            configurator.UseInMemoryScheduler(out _schedulerTask);
 
             base.ConfigureInMemoryBus(configurator);
         }
 
-        protected void AdvanceTime(TimeSpan duration)
+        protected async Task AdvanceTime(TimeSpan duration)
         {
+            var scheduler = await _schedulerTask.ConfigureAwait(false);
+
+            await scheduler.Standby().ConfigureAwait(false);
+
             _testOffset += duration;
+
+            await scheduler.Start().ConfigureAwait(false);
         }
 
         [OneTimeSetUp]

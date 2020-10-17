@@ -35,7 +35,7 @@
             await faulted;
             await Task.Delay(1000);
 
-            AdvanceTime(TimeSpan.FromSeconds(20));
+            await AdvanceTime(TimeSpan.FromSeconds(20));
 
             Assert.That(async () => await _pongReceived.Task.OrTimeout(s: 5), Throws.TypeOf<TimeoutException>());
         }
@@ -92,7 +92,7 @@
 
             await faulted;
 
-            AdvanceTime(TimeSpan.FromSeconds(20));
+            await AdvanceTime(TimeSpan.FromSeconds(20));
 
             LogContext.Debug?.Log("Advanced the clock");
 

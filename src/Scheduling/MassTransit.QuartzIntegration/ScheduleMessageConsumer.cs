@@ -20,11 +20,18 @@
         IConsumer<ScheduleMessage>,
         IConsumer<ScheduleRecurringMessage>
     {
-        readonly IScheduler _scheduler;
+        readonly Task<IScheduler> _schedulerTask;
+        IScheduler _scheduler;
 
         public ScheduleMessageConsumer(IScheduler scheduler)
         {
             _scheduler = scheduler;
+            _schedulerTask = Task.FromResult(scheduler);
+        }
+
+        public ScheduleMessageConsumer(Task<IScheduler> schedulerTask)
+        {
+            _schedulerTask = schedulerTask;
         }
 
         public async Task Consume(ConsumeContext<ScheduleMessage> context)
@@ -43,10 +50,12 @@
                 .WithIdentity(triggerKey)
                 .Build();
 
-            if (await _scheduler.CheckExists(trigger.Key, context.CancellationToken).ConfigureAwait(false))
-                await _scheduler.UnscheduleJob(trigger.Key, context.CancellationToken).ConfigureAwait(false);
+            var scheduler = _scheduler ??= await _schedulerTask.ConfigureAwait(false);
 
-            await _scheduler.ScheduleJob(jobDetail, trigger, context.CancellationToken).ConfigureAwait(false);
+            if (await scheduler.CheckExists(trigger.Key, context.CancellationToken).ConfigureAwait(false))
+                await scheduler.UnscheduleJob(trigger.Key, context.CancellationToken).ConfigureAwait(false);
+
+            await scheduler.ScheduleJob(jobDetail, trigger, context.CancellationToken).ConfigureAwait(false);
 
             LogContext.Debug?.Log("Scheduled: {Key} {Schedule}", jobKey, trigger.GetNextFireTimeUtc());
         }
@@ -61,10 +70,12 @@
 
             var trigger = CreateTrigger(context.Message.Schedule, jobDetail, triggerKey);
 
-            if (await _scheduler.CheckExists(triggerKey, context.CancellationToken).ConfigureAwait(false))
-                await _scheduler.UnscheduleJob(triggerKey, context.CancellationToken).ConfigureAwait(false);
+            var scheduler = _scheduler ??= await _schedulerTask.ConfigureAwait(false);
 
-            await _scheduler.ScheduleJob(jobDetail, trigger, context.CancellationToken).ConfigureAwait(false);
+            if (await scheduler.CheckExists(triggerKey, context.CancellationToken).ConfigureAwait(false))
+                await scheduler.UnscheduleJob(triggerKey, context.CancellationToken).ConfigureAwait(false);
+
+            await scheduler.ScheduleJob(jobDetail, trigger, context.CancellationToken).ConfigureAwait(false);
 
             LogContext.Debug?.Log("Scheduled: {Key} {Schedule}", jobKey, trigger.GetNextFireTimeUtc());
         }
@@ -115,7 +126,7 @@
                 throw new InvalidOperationException("Only JSON and XML messages can be scheduled");
 
             var builder = JobBuilder.Create<ScheduledMessageJob>()
-                .RequestRecovery(true)
+                .RequestRecovery()
                 .WithIdentity(jobKey)
                 .UsingJobData("Destination", ToString(destination))
                 .UsingJobData("ResponseAddress", ToString(context.ResponseAddress))

@@ -18,7 +18,7 @@
 
             await _first;
 
-            AdvanceTime(TimeSpan.FromSeconds(10));
+            await AdvanceTime(TimeSpan.FromSeconds(10));
 
             await _second;
 
@@ -68,7 +68,7 @@
 
             await _first;
 
-            AdvanceTime(TimeSpan.FromSeconds(10));
+            await AdvanceTime(TimeSpan.FromSeconds(10));
 
             ConsumeContext<SecondMessage> second = await _second;
 

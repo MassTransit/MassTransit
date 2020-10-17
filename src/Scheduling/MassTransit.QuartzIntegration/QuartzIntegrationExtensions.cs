@@ -1,6 +1,7 @@
 ﻿namespace MassTransit
 {
     using System;
+    using System.Threading.Tasks;
     using GreenPipes;
     using Quartz;
     using Quartz.Impl;
@@ -8,7 +9,6 @@
     using QuartzIntegration;
     using QuartzIntegration.Configuration;
     using Scheduling;
-    using Util;
 
 
     public static class QuartzIntegrationExtensions
@@ -34,50 +34,45 @@
             return UseInMemoryScheduler(configurator, schedulerFactory, jobFactory, out _, queueName);
         }
 
-        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, out IScheduler scheduler, string queueName = "quartz")
+        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, out Task<IScheduler> schedulerTask, string queueName = "quartz")
         {
             ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
 
-            return UseInMemoryScheduler(configurator, schedulerFactory, out scheduler, queueName);
+            return UseInMemoryScheduler(configurator, schedulerFactory, out schedulerTask, queueName);
         }
 
-        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, ISchedulerFactory schedulerFactory, out IScheduler scheduler,
-            string queueName = "quartz")
+        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, ISchedulerFactory schedulerFactory,
+            out Task<IScheduler> schedulerTask, string queueName = "quartz")
         {
-            return UseInMemoryScheduler(configurator, schedulerFactory, jobFactory: null, out scheduler, queueName);
+            return UseInMemoryScheduler(configurator, schedulerFactory, null, out schedulerTask, queueName);
         }
 
-        public static Uri UseInMemoryScheduler(
-            this IBusFactoryConfigurator configurator,
-            ISchedulerFactory schedulerFactory,
-            IJobFactory jobFactory,
-            out IScheduler scheduler,
-            string queueName = "quartz")
+        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, ISchedulerFactory schedulerFactory, IJobFactory jobFactory,
+            out Task<IScheduler> schedulerTask, string queueName = "quartz")
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
             if (schedulerFactory == null)
                 throw new ArgumentNullException(nameof(schedulerFactory));
 
-            scheduler = TaskUtil.Await(() => schedulerFactory.GetScheduler());
-
             Uri inputAddress = null;
 
-            var schedulerInstance = scheduler;
+            var observer = new SchedulerBusObserver(schedulerFactory, new Uri($"queue:{queueName}"), jobFactory);
+
+            schedulerTask = observer.Scheduler;
 
             configurator.ReceiveEndpoint(queueName, e =>
             {
                 var partitioner = configurator.CreatePartitioner(Environment.ProcessorCount);
 
-                e.Consumer(() => new ScheduleMessageConsumer(schedulerInstance), x =>
+                e.Consumer(() => new ScheduleMessageConsumer(observer.Scheduler), x =>
                     x.Message<ScheduleMessage>(m => m.UsePartitioner(partitioner, p => p.Message.CorrelationId)));
 
-                e.Consumer(() => new CancelScheduledMessageConsumer(schedulerInstance), x =>
+                e.Consumer(() => new CancelScheduledMessageConsumer(observer.Scheduler), x =>
                     x.Message<CancelScheduledMessage>(m => m.UsePartitioner(partitioner, p => p.Message.TokenId)));
 
                 configurator.UseMessageScheduler(e.InputAddress);
 
-                var observer = new SchedulerBusObserver(schedulerInstance, e.InputAddress, jobFactory);
                 configurator.ConnectBusObserver(observer);
 
                 inputAddress = e.InputAddress;

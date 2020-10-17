@@ -25,11 +25,11 @@ namespace MassTransit.QuartzIntegration.Tests
             await opened;
             await Task.Delay(1000);
 
-            AdvanceTime(TimeSpan.FromDays(30));
+            await AdvanceTime(TimeSpan.FromDays(30));
 
             await defaulted;
 
-            AdvanceTime(TimeSpan.FromDays(60));
+            await AdvanceTime(TimeSpan.FromDays(60));
 
             await closed;
         }

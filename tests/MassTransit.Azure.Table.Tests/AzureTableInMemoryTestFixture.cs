@@ -6,7 +6,6 @@ namespace MassTransit.Azure.Table.Tests
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
     using NUnit.Framework;
-    using Quartz;
     using Scheduling;
     using TestFramework;
 
@@ -14,11 +13,10 @@ namespace MassTransit.Azure.Table.Tests
     public class AzureTableInMemoryTestFixture :
         InMemoryTestFixture
     {
+        readonly Lazy<IMessageScheduler> _messageScheduler;
         protected readonly string ConnectionString;
         protected readonly CloudTable TestCloudTable;
         protected readonly string TestTableName;
-        readonly Lazy<IMessageScheduler> _messageScheduler;
-        IScheduler _scheduler;
 
         public AzureTableInMemoryTestFixture()
         {
@@ -40,7 +38,7 @@ namespace MassTransit.Azure.Table.Tests
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseInMemoryScheduler(out _scheduler);
+            configurator.UseInMemoryScheduler();
 
             base.ConfigureInMemoryBus(configurator);
         }
