@@ -48,13 +48,21 @@
 
         protected Task ExceptionHandler(ExceptionReceivedEventArgs args)
         {
-            if (!(args.Exception is OperationCanceledException))
+            bool isTransientException = false;
+
+            if (args.Exception is ServiceBusException sbException)
             {
-                LogContext.Error?.Log(args.Exception, "Exception on Receiver {InputAddress} during {Action}", _context.InputAddress,
-                    args.ExceptionReceivedContext.Action);
+                isTransientException = sbException.IsTransient;
             }
 
-            if (_messageReceiver.ActiveDispatchCount == 0)
+            if (!(args.Exception is OperationCanceledException))
+            {
+                LogContext.Error?.Log(args.Exception, "Exception on Receiver {InputAddress} during {Action} ErrorIsTransient({isTransient})", _context.InputAddress,
+                    args.ExceptionReceivedContext.Action, isTransientException);
+            }
+
+
+            if (!isTransientException && _messageReceiver.ActiveDispatchCount == 0)
             {
                 LogContext.Debug?.Log("Receiver shutdown completed: {InputAddress}", _context.InputAddress);
 
