@@ -61,25 +61,33 @@ namespace MassTransit.ActiveMqTransport.Configurators
         public IConnection CreateConnection()
         {
             var factory = new NMSConnectionFactory(BrokerAddress);
-            _logDebug($"Creating connection to {BrokerAddress}");
+
+            if (ActiveMqArtemisSupport.EnableExtraConnectionLogging)
+            {
+                _logDebug($"Creating connection to {BrokerAddress}");
+            }
 
             var connection = factory.CreateConnection(Username, Password);
-            _logDebug($"Connection created: {GetRemoteAddress(connection)}");
 
-            connection.ConnectionInterruptedListener += () =>
+            if (ActiveMqArtemisSupport.EnableExtraConnectionLogging)
             {
-                _logDebug($"Connection interrupted: {GetRemoteAddress(connection)}");
-            };
+                _logDebug($"Connection created: {GetRemoteAddress(connection)}");
 
-            connection.ConnectionResumedListener += () =>
-            {
-                _logDebug($"Connection resumed: {GetRemoteAddress(connection)}");
-            };
+                connection.ConnectionInterruptedListener += () =>
+                {
+                    _logDebug($"Connection interrupted: {GetRemoteAddress(connection)}");
+                };
 
-            connection.ExceptionListener += e =>
-            {
-                _logDebug($"An exception occurred: {e.Message}", e);
-            };
+                connection.ConnectionResumedListener += () =>
+                {
+                    _logDebug($"Connection resumed: {GetRemoteAddress(connection)}");
+                };
+
+                connection.ExceptionListener += e =>
+                {
+                    _logDebug($"An exception occurred: {e.Message}", e);
+                };
+            }
 
             return connection;
         }

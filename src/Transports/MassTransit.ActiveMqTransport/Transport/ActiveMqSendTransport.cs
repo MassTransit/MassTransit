@@ -88,7 +88,10 @@
             {
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
-                _logConnectionInfo($"Sending to {GetRemoteAddress(sessionContext.ConnectionContext?.Connection)}");
+                if (ActiveMqArtemisSupport.EnableExtraConnectionLogging)
+                {
+                    _logConnectionInfo($"Sending to {GetRemoteAddress(sessionContext.ConnectionContext?.Connection)}");
+                }
 
                 await _context.ConfigureTopologyPipe.Send(sessionContext).ConfigureAwait(false);
 
@@ -133,7 +136,10 @@
 
                     context.LogSent();
 
-                    _logConnectionInfo($"Sent to {GetRemoteAddress(sessionContext.ConnectionContext?.Connection)}");
+                    if (ActiveMqArtemisSupport.EnableExtraConnectionLogging)
+                    {
+                        _logConnectionInfo($"Sent to {GetRemoteAddress(sessionContext.ConnectionContext?.Connection)}");
+                    }
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PostSend(context).ConfigureAwait(false);
@@ -142,7 +148,10 @@
                 {
                     context.LogFaulted(ex);
 
-                    _logConnectionInfo($"Could not send to {sessionContext.ConnectionContext?.Connection}");
+                    if (ActiveMqArtemisSupport.EnableExtraConnectionLogging)
+                    {
+                        _logConnectionInfo($"Could not send to {sessionContext.ConnectionContext?.Connection}");
+                    }
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.SendFault(context, ex).ConfigureAwait(false);

@@ -84,7 +84,10 @@ namespace MassTransit.ActiveMqTransport.Pipeline
                     return;
                 }
 
-                _logConnectionInfo($"Received message from {GetRemoteAddress(_session.ConnectionContext?.Connection)}");
+                if (ActiveMqArtemisSupport.EnableExtraConnectionLogging)
+                {
+                    _logConnectionInfo($"Received message from {GetRemoteAddress(_session.ConnectionContext?.Connection)}");
+                }
 
                 var context = new ActiveMqReceiveContext(message, _context, _receiveSettings, _session, _session.ConnectionContext);
 
