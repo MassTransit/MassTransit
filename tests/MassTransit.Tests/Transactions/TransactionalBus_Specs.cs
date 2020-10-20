@@ -17,7 +17,7 @@
         public async Task Should_publish_properly()
         {
             var message = new PingMessage();
-            var bus = new OutboxBus(Bus);
+            var bus = new TransactionalBus(Bus);
 
             await bus.Publish(message);
 
@@ -46,7 +46,7 @@
         public async Task Should_send_properly()
         {
             var message = new PingMessage();
-            var bus = new OutboxBus(Bus);
+            var bus = new TransactionalBus(Bus);
 
             var sendEndpoint = await bus.GetSendEndpoint(InputQueueAddress);
             await sendEndpoint.Send(message);
@@ -76,7 +76,7 @@
         public async Task Should_not_publish_properly()
         {
             var message = new PingMessage();
-            var bus = new OutboxBus(Bus);
+            var bus = new TransactionalBus(Bus);
 
             await bus.Publish(message);
 
@@ -100,7 +100,7 @@
         public async Task Should_not_send_properly()
         {
             var message = new PingMessage();
-            var bus = new OutboxBus(Bus);
+            var bus = new TransactionalBus(Bus);
 
             var sendEndpoint = await bus.GetSendEndpoint(InputQueueAddress);
             await sendEndpoint.Send(message);

@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 
 namespace MassTransit.Transactions
 {
-    public abstract class BaseOutboxBus : IBus
+    public abstract class BaseTransactionalBus : IBus
     {
         readonly IBus _bus;
         readonly IPublishEndpoint _publishEndpoint;
-        readonly OutboxBusPublishEndpointProvider _publishEndpointProvider;
+        readonly TransactionalBusPublishEndpointProvider _publishEndpointProvider;
 
-        public BaseOutboxBus(IBus bus)
+        public BaseTransactionalBus(IBus bus)
         {
             _bus = bus;
 
-            _publishEndpointProvider = new OutboxBusPublishEndpointProvider(this, bus);
+            _publishEndpointProvider = new TransactionalBusPublishEndpointProvider(this, bus);
             _publishEndpoint = new PublishEndpoint(_publishEndpointProvider);
         }
 
@@ -108,7 +108,7 @@ namespace MassTransit.Transactions
 
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
-            return new OutboxBusSendEndpoint(this, await _bus.GetSendEndpoint(address));
+            return new TransactionalBusSendEndpoint(this, await _bus.GetSendEndpoint(address));
         }
 
         public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)

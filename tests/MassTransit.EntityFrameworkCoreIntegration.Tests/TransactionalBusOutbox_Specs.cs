@@ -25,7 +25,7 @@
         {
             var message = new InitiateSimpleSaga();
             var product = new Product {Name = "Should_not_publish_properly"};
-            var transactionOutbox = new TransactionalBus(Bus);
+            var transactionOutbox = new TransactionalEnlistmentBus(Bus);
 
             using (var dbContext = GetDbContext())
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -49,7 +49,7 @@
         {
             var message = new InitiateSimpleSaga();
             var product = new Product {Name = "Should_publish_after_db_create"};
-            var transactionOutbox = new TransactionalBus(Bus);
+            var transactionOutbox = new TransactionalEnlistmentBus(Bus);
 
             using (var dbContext = GetDbContext())
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
@@ -80,7 +80,7 @@
         {
             var message = new InitiateSimpleSaga();
             var product = new Product { Name = "Should_publish_after_db_create" };
-            var bus = new OutboxBus(Bus);
+            var bus = new TransactionalBus(Bus);
 
             using (var dbContext = GetDbContext())
             {

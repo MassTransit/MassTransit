@@ -3,13 +3,13 @@ using System.Threading.Tasks;
 
 namespace MassTransit.Transactions
 {
-    public class OutboxBusPublishEndpointProvider :
+    public class TransactionalBusPublishEndpointProvider :
         IPublishEndpointProvider
     {
-        private readonly BaseOutboxBus _bus;
+        private readonly BaseTransactionalBus _bus;
         private readonly IPublishEndpointProvider _publishEndpointProvider;
 
-        public OutboxBusPublishEndpointProvider(BaseOutboxBus bus, IPublishEndpointProvider publishEndpointProvider)
+        public TransactionalBusPublishEndpointProvider(BaseTransactionalBus bus, IPublishEndpointProvider publishEndpointProvider)
         {
             _bus = bus;
             _publishEndpointProvider = publishEndpointProvider;
@@ -25,7 +25,7 @@ namespace MassTransit.Transactions
         {
             var endpoint = await _publishEndpointProvider.GetPublishSendEndpoint<T>().ConfigureAwait(false);
 
-            return new OutboxBusSendEndpoint(_bus, endpoint);
+            return new TransactionalBusSendEndpoint(_bus, endpoint);
         }
     }
 }

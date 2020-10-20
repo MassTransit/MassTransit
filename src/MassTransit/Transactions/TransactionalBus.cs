@@ -1,54 +1,31 @@
-﻿namespace MassTransit.Transactions
-{
-    using System;
-    using System.Collections.Concurrent;
-    using System.Threading.Tasks;
-    using System.Transactions;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
-    public class TransactionalBus : BaseOutboxBus, ITransactionalBus
+namespace MassTransit.Transactions
+{
+    public class TransactionalBus : BaseTransactionalBus, ITransactionalBus
     {
-        readonly ConcurrentDictionary<Transaction, TransactionalBusEnlistment> _pendingActions;
+        readonly ConcurrentBag<Func<Task>> _pendingActions;
 
         public TransactionalBus(IBus bus)
             : base(bus)
         {
-            _pendingActions = new ConcurrentDictionary<Transaction, TransactionalBusEnlistment>();
-        }
-
-        void ClearTransaction(Transaction transaction)
-        {
-            if (_pendingActions.TryRemove(transaction, out _))
-                transaction.TransactionCompleted -= TransactionCompleted;
+            _pendingActions = new ConcurrentBag<Func<Task>>();
         }
 
         public override Task Add(Func<Task> action)
         {
-            if (Transaction.Current == null)
-                return action();
-
-            var enlistment = GetOrCreateEnlistment();
-
-            enlistment.Add(action);
-
+            _pendingActions.Add(action);
             return Task.CompletedTask;
         }
 
-        TransactionalBusEnlistment GetOrCreateEnlistment()
+        public async Task Release()
         {
-            return _pendingActions.GetOrAdd(Transaction.Current, transaction =>
+            while(_pendingActions.TryTake(out var action))
             {
-                var transactionEnlistment = new TransactionalBusEnlistment();
-
-                transaction.TransactionCompleted += TransactionCompleted;
-                transaction.EnlistVolatile(transactionEnlistment, EnlistmentOptions.None);
-
-                return transactionEnlistment;
-            });
-        }
-
-        void TransactionCompleted(object sender, TransactionEventArgs e)
-        {
-            ClearTransaction(e.Transaction);
+                await action().ConfigureAwait(false);
+            }
         }
     }
 }

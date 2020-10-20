@@ -18,7 +18,7 @@
         public async Task Should_publish_properly()
         {
             var message = new PingMessage();
-            var transactionOutbox = new TransactionalBus(Bus);
+            var transactionOutbox = new TransactionalEnlistmentBus(Bus);
 
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -51,7 +51,7 @@
         public async Task Should_send_properly()
         {
             var message = new PingMessage();
-            var transactionOutbox = new TransactionalBus(Bus);
+            var transactionOutbox = new TransactionalEnlistmentBus(Bus);
 
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -83,7 +83,7 @@
         public async Task Should_not_publish_properly()
         {
             var message = new PingMessage();
-            var transactionOutbox = new TransactionalBus(Bus);
+            var transactionOutbox = new TransactionalEnlistmentBus(Bus);
 
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {
@@ -110,7 +110,7 @@
         public async Task Should_not_send_properly()
         {
             var message = new PingMessage();
-            var transactionOutbox = new TransactionalBus(Bus);
+            var transactionOutbox = new TransactionalEnlistmentBus(Bus);
 
             using (var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
             {

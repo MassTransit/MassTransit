@@ -6,13 +6,13 @@
     using GreenPipes;
 
 
-    public class OutboxBusSendEndpoint :
+    public class TransactionalBusSendEndpoint :
         ISendEndpoint
     {
         readonly ISendEndpoint _sendEndpoint;
-        readonly BaseOutboxBus _outboxBus;
+        readonly BaseTransactionalBus _outboxBus;
 
-        public OutboxBusSendEndpoint(BaseOutboxBus outboxBus, ISendEndpoint sendEndpoint)
+        public TransactionalBusSendEndpoint(BaseTransactionalBus outboxBus, ISendEndpoint sendEndpoint)
         {
             _outboxBus = outboxBus;
             _sendEndpoint = sendEndpoint;

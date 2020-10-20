@@ -82,8 +82,16 @@ The connection (and by use of the connection, the command) are enlisted in the t
 
 While not shown here, a class that provides the connection, and enlists the connection upon creation, should be added to the container to ensure that the transaction is not enlisted twice (not sure that's a bad thing though, it should be ignored). Also, as long as only a single connection string is enlisted, the DTC should not get involved. Using the same transaction across multiple connection strings is a bad thing, as it will make the DTC come into play which slows the world down significantly.
 
+## Unit of Work (Buffer)
 
-## Transactional Bus
+Sometimes you just have to integrate with Database first systems, but still want some of the perks that message buses have to offer. A good example is an API with your typical HTTP Requests. You want to manipulate your DB, commit, and then upon success, release the messages to the broker. This is NOT a distributed transaction. There's still a risk that you could have the DB up and the broker down, causing the messages to never be sent to the broker. So you've been warned!
+
+There are two options to provide this buffer:
+
+- Transactional Enlistment Bus
+- Transactional Bus
+
+## Transactional Enlistment Bus
 
 Transports don't typically support transactions, so sending messages during a transaction only to encounter an exception resulting in a transaction rollback may lead to messages that were sent without the transaction being committed.
 
@@ -101,7 +109,7 @@ services.AddMassTransit(x =>
     {
     });
 
-    x.AddTransactionalBus();
+    x.AddTransactionalEnlistmentBus();
 });
 ```
 
@@ -151,7 +159,7 @@ public class Program
 
         await bus.StartAsync(); // This is important!
 
-        var transactionalBus = new TransactionalBus(bus);
+        var transactionalBus = new TransactionalEnlistmentBus(bus);
 
         while(/*some condition*/)
         {
@@ -176,16 +184,15 @@ public class Program
 }
 ```
 
-## Outbox Bus
+## Transactional Bus
 
-Here we are again, another option for holding onto the messages and releasing them as close to the database transaction Commit as possible. We made this alternative because using TransactionScope from above, could [in certain cases](https://github.com/MassTransit/MassTransit/issues/2075) still cause a 2 phase commit escalation (not to mention that TransactionScope doesn't truely have async support, so we make [concessions by calling TaskUtil.Await](https://github.com/MassTransit/MassTransit/blob/develop/src/MassTransit/Transactions/TransactionalBusEnlistment.cs#L83)). So to offer an alternative to these drawbacks, MassTransit provides an Outbox Bus.
+Here we are again, another option for holding onto the messages and releasing them as close to the database transaction Commit as possible. We made this alternative because using TransactionScope from the previous section, could [in certain cases](https://github.com/MassTransit/MassTransit/issues/2075) still cause a 2 phase commit escalation (not to mention that TransactionScope doesn't truely have async support, so we make [concessions by calling TaskUtil.Await](https://github.com/MassTransit/MassTransit/blob/develop/src/MassTransit/Transactions/TransactionalBusEnlistment.cs#L83)). So to offer an alternative to these drawbacks, MassTransit provides an Outbox Bus.
 
 ::: warning  
-Never use the TransactionalBus or OutboxBus when writing consumers. These tools are very specific and should be used only in the scenarios described.
+Never use the TransactionalBus or TransactionalEnlistmentBus when writing consumers. These tools are very specific and should be used only in the scenarios described.
 :::
 
-The examples will show it's usage in an ASP.NET MVC application, which is where we most commonly use Scoped lifetime for our DbContext and therefore we want the same for our OutboxBus. You could possibly use it in some console applications, but ones WITHOUT a MT Consumer. Once you have consumers you will ALWAYS use `ConsumeContext` to interact with the bus, and never the `IBus`.
-
+The examples will show it's usage in an ASP.NET MVC application, which is where we most commonly use Scoped lifetime for our DbContext and therefore we want the same for our TransactionalBus. You could possibly use it in some console applications, but ones WITHOUT a MT Consumer. Once you have consumers you will ALWAYS use `ConsumeContext` to interact with the bus, and never the `IBus`.
 
 First Register the outbox bus.
 
@@ -196,7 +203,7 @@ services.AddMassTransit(x =>
     {
     });
 
-    x.AddOutboxBus();
+    x.AddTransactionalBus();
 });
 ```
 
@@ -205,12 +212,12 @@ Then use within your controller.
 ```cs
 public class MyController : ControllerBase
 {
-    private readonly IOutboxBus _outboxBus;
+    private readonly ITransactionalBus _transactionalBus;
     private readonly MyDbContext _dbContext;
 
-    public ValuesController(IOutboxBus outboxBus, MyDbContext dbContext)
+    public ValuesController(ITransactionalBus transactionalBus, MyDbContext dbContext)
     {
-        _outboxBus = outboxBus;
+        _transactionalBus = transactionalBus;
         _dbContext = dbContext;
     }
 
@@ -224,10 +231,10 @@ public class MyController : ControllerBase
                 _dbContext.Posts.Add(new Post{...});
                 await _dbContext.SaveChangesAsync();
 
-                await _outboxBus.Publish(new PostCreated{...});
+                await _transactionalBus.Publish(new PostCreated{...});
 
                 await transaction.CommitAsync();
-                await _outboxBus.Release(); // Immediately after CommitAsync
+                await _transactionalBus.Release(); // Immediately after CommitAsync
             }
             catch (Exception)
             {
@@ -256,16 +263,16 @@ public class DbContextTransactionFilter : TypeFilterAttribute
     {
         private readonly MyDbContext _db;
         private readonly ILogger _logger;
-        private readonly IOutboxBus _outboxBus;
+        private readonly ITransactionalBus _transactionalBus;
 
         public DbContextTransactionFilterImpl(
             MyDbContext db,
             ILogger<DbContextTransactionFilter> logger,
-            IOutboxBus outboxBus)
+            ITransactionalBus transactionalBus)
         {
             _db = db;
             _logger = logger;
-            _outboxBus = outboxBus;
+            _transactionalBus = transactionalBus;
         }
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -282,14 +289,14 @@ public class DbContextTransactionFilter : TypeFilterAttribute
                 else
                 {
                     await transaction.CommitAsync();
-                    await _outboxBus.Release(); // Immediately after CommitAsync
+                    await _transactionalBus.Release(); // Immediately after CommitAsync
                 }
             }
             catch (Exception)
             {
                 try
                 {
-                    await transaction.RollbackAsync();
+                    await _transactionalBus.RollbackAsync();
                 }
                 catch (Exception e)
                 {
@@ -309,12 +316,12 @@ Now your Controller Action will look like:
 ```cs
 public class MyController : ControllerBase
 {
-    private readonly IOutboxBus _outboxBus;
+    private readonly ITransactionalBus _transactionalBus;
     private readonly MyDbContext _dbContext;
 
-    public ValuesController(IOutboxBus outboxBus, MyDbContext dbContext)
+    public ValuesController(ITransactionalBus transactionalBus, MyDbContext dbContext)
     {
-        _outboxBus = outboxBus;
+        _transactionalBus = transactionalBus;
         _dbContext = dbContext;
     }
 
@@ -325,7 +332,7 @@ public class MyController : ControllerBase
         _dbContext.Posts.Add(new Post{...});
         await _dbContext.SaveChangesAsync();
 
-        await _outboxBus.Publish(new PostCreated{...});
+        await _transactionalBus.Publish(new PostCreated{...});
 
         return Ok();
     }

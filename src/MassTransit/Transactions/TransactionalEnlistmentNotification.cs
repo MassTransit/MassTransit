@@ -8,12 +8,12 @@
     using Util;
 
 
-    public class TransactionalBusEnlistment :
+    public class TransactionalEnlistmentNotification :
         IEnlistmentNotification
     {
         readonly List<Func<Task>> _pendingActions;
 
-        public TransactionalBusEnlistment()
+        public TransactionalEnlistmentNotification()
         {
             _pendingActions = new List<Func<Task>>();
         }
