@@ -65,6 +65,8 @@
                     _schedulerEndpointAddress,
                     _scheduler.SchedulerName,
                     _scheduler.SchedulerInstanceId);
+
+                return;
             }
 
             LogContext.Debug?.Log("Quartz Scheduler Starting: {InputAddress} ({Name}/{InstanceId})", _schedulerEndpointAddress, _scheduler.SchedulerName,
@@ -89,7 +91,7 @@
         {
             if (!_options.StartScheduler)
             {
-                return;;
+                return;
             }
 
             await _scheduler.Standby().ConfigureAwait(false);
