@@ -50,18 +50,33 @@
         public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, ISchedulerFactory schedulerFactory, IJobFactory jobFactory,
             out Task<IScheduler> schedulerTask, string queueName = "quartz")
         {
+            return UseInMemoryScheduler(configurator, out schedulerTask, options =>
+            {
+                options.SchedulerFactory = schedulerFactory;
+                options.QueueName = queueName;
+                options.JobFactory = jobFactory;
+            });
+        }
+
+        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, out Task<IScheduler> schedulerTask,
+            Action<InMemorySchedulerOptions> configure)
+        {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (schedulerFactory == null)
-                throw new ArgumentNullException(nameof(schedulerFactory));
+
+            var options = new InMemorySchedulerOptions();
+            configure?.Invoke(options);
+
+            if (options.SchedulerFactory == null)
+                throw new ArgumentNullException(nameof(options.SchedulerFactory));
 
             Uri inputAddress = null;
 
-            var observer = new SchedulerBusObserver(schedulerFactory, new Uri($"queue:{queueName}"), jobFactory);
+            var observer = new SchedulerBusObserver(options);
 
             schedulerTask = observer.Scheduler;
 
-            configurator.ReceiveEndpoint(queueName, e =>
+            configurator.ReceiveEndpoint(options.QueueName, e =>
             {
                 var partitioner = configurator.CreatePartitioner(Environment.ProcessorCount);
 
