@@ -4,9 +4,7 @@
     using System.Threading.Tasks;
     using Context;
     using Quartz;
-    using Quartz.Spi;
     using Util;
-
 
     /// <summary>
     /// Used to start and stop an in-memory scheduler using Quartz
@@ -14,24 +12,19 @@
     public class SchedulerBusObserver :
         IBusObserver
     {
-        readonly IJobFactory _defaultJobFactory;
+        readonly InMemorySchedulerOptions _options;
         readonly Uri _schedulerEndpointAddress;
-        readonly ISchedulerFactory _schedulerFactory;
         readonly TaskCompletionSource<IScheduler> _schedulerSource;
         IScheduler _scheduler;
 
         /// <summary>
         /// Creates the bus observer to initialize the Quartz scheduler.
         /// </summary>
-        /// <param name="schedulerFactory">Used to create the scheduler at bus start</param>
-        /// <param name="schedulerEndpointAddress">The endpoint address of the quartz service</param>
-        /// <param name="defaultJobFactory">Optional, can be used to specify a job factory for non-MassTransit job types</param>
-        public SchedulerBusObserver(ISchedulerFactory schedulerFactory, Uri schedulerEndpointAddress, IJobFactory defaultJobFactory = default)
+        /// <param name="options">Configuration to initialize with.</param>
+        public SchedulerBusObserver(InMemorySchedulerOptions options)
         {
-            _schedulerFactory = schedulerFactory;
-            _schedulerEndpointAddress = schedulerEndpointAddress;
-            _defaultJobFactory = defaultJobFactory;
-
+            _options = options;
+            _schedulerEndpointAddress = new Uri($"queue:{options.QueueName}");
             _schedulerSource = TaskUtil.GetTask<IScheduler>();
         }
 
@@ -53,7 +46,7 @@
 
             try
             {
-                _scheduler = await _schedulerFactory.GetScheduler().ConfigureAwait(false);
+                _scheduler = await _options.SchedulerFactory.GetScheduler().ConfigureAwait(false);
 
                 _schedulerSource.TrySetResult(_scheduler);
             }
@@ -66,12 +59,20 @@
 
         public async Task PostStart(IBus bus, Task<BusReady> busReady)
         {
+            if (!_options.StartScheduler)
+            {
+                LogContext.Debug?.Log("Quartz Scheduler: {InputAddress} ({Name}/{InstanceId}) initialized, but not started",
+                    _schedulerEndpointAddress,
+                    _scheduler.SchedulerName,
+                    _scheduler.SchedulerInstanceId);
+            }
+
             LogContext.Debug?.Log("Quartz Scheduler Starting: {InputAddress} ({Name}/{InstanceId})", _schedulerEndpointAddress, _scheduler.SchedulerName,
                 _scheduler.SchedulerInstanceId);
 
             await busReady.ConfigureAwait(false);
 
-            _scheduler.JobFactory = new MassTransitJobFactory(bus, _defaultJobFactory);
+            _scheduler.JobFactory = new MassTransitJobFactory(bus, _options.JobFactory);
 
             await _scheduler.Start().ConfigureAwait(false);
 
@@ -86,6 +87,11 @@
 
         public async Task PreStop(IBus bus)
         {
+            if (!_options.StartScheduler)
+            {
+                return;;
+            }
+
             await _scheduler.Standby().ConfigureAwait(false);
 
             LogContext.Debug?.Log("Quartz Scheduler Paused: {InputAddress} ({Name}/{InstanceId})", _schedulerEndpointAddress, _scheduler.SchedulerName,
