@@ -48,21 +48,25 @@
 
         protected Task ExceptionHandler(ExceptionReceivedEventArgs args)
         {
-            bool isTransientException = false;
+            int activeDispatchCount = _messageReceiver.ActiveDispatchCount;
+            bool requiresRecycle = true;
 
-            if (args.Exception is ServiceBusException sbException)
+            if (args.Exception is MessageLockLostException)
             {
-                isTransientException = sbException.IsTransient;
+                requiresRecycle = false;
             }
-
+            else if (args.Exception is ServiceBusException sbException)
+            {
+                requiresRecycle = !sbException.IsTransient;
+            }
+            
             if (!(args.Exception is OperationCanceledException))
             {
-                LogContext.Error?.Log(args.Exception, "Exception on Receiver {InputAddress} during {Action} ErrorIsTransient({isTransient})", _context.InputAddress,
-                    args.ExceptionReceivedContext.Action, isTransientException);
+                LogContext.Error?.Log(args.Exception, "Exception on Receiver {InputAddress} during {Action} ActiveDispatchCount({activeDispatch}) ErrorRequiresRecycle({requiresRecycle})",
+                    _context.InputAddress, args.ExceptionReceivedContext.Action, activeDispatchCount, requiresRecycle);
             }
 
-
-            if (!isTransientException && _messageReceiver.ActiveDispatchCount == 0)
+            if (activeDispatchCount == 0 && requiresRecycle)
             {
                 LogContext.Debug?.Log("Receiver shutdown completed: {InputAddress}", _context.InputAddress);
 
