@@ -287,6 +287,52 @@
     }
 
 
+    public class Scheduling_a_published_message_with_a_custom_topic_name :
+        AzureServiceBusTestFixture
+    {
+        [Test]
+        public async Task Should_get_both_messages()
+        {
+            var scheduler = Bus.CreateServiceBusMessageScheduler();
+
+            await scheduler.SchedulePublish(DateTime.Now, new FirstMessage());
+
+            await _first;
+
+            await _second;
+        }
+
+        Task<ConsumeContext<SecondMessage>> _second;
+        Task<ConsumeContext<FirstMessage>> _first;
+
+        protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
+        {
+            configurator.Message<FirstMessage>(x => x.SetEntityName("first-message-topic"));
+            base.ConfigureServiceBusBus(configurator);
+        }
+
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+            _first = Handler<FirstMessage>(configurator, async context =>
+            {
+                await context.SchedulePublish(TimeSpan.FromSeconds(1), new SecondMessage());
+            });
+
+            _second = Handled<SecondMessage>(configurator);
+        }
+
+
+        public class FirstMessage
+        {
+        }
+
+
+        public class SecondMessage
+        {
+        }
+    }
+
+
     public class Cancelling_a_scheduled_message :
         AzureServiceBusTestFixture
     {

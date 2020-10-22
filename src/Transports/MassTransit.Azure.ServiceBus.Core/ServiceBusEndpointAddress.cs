@@ -126,7 +126,11 @@ namespace MassTransit.Azure.ServiceBus.Core
                 if (Type != AddressType.Topic)
                     throw new ArgumentException("Address was not a topic");
 
-                var builder = new UriBuilder($"topic:{Scope}/{Name}");
+                var topicName = Scope == "/"
+                    ? $"{Name}"
+                    : $"{Scope}/{Name}";
+
+                var builder = new UriBuilder($"topic:{topicName}");
 
                 builder.Query += string.Join("&", GetQueryStringOptions());
 
