@@ -50,12 +50,17 @@
         public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, ISchedulerFactory schedulerFactory, IJobFactory jobFactory,
             out Task<IScheduler> schedulerTask, string queueName = "quartz")
         {
-            return UseInMemoryScheduler(configurator, out schedulerTask, options =>
+            return configurator.UseInMemoryScheduler(out schedulerTask, options =>
             {
                 options.SchedulerFactory = schedulerFactory;
                 options.QueueName = queueName;
                 options.JobFactory = jobFactory;
             });
+        }
+
+        public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, Action<InMemorySchedulerOptions> configure)
+        {
+            return configurator.UseInMemoryScheduler(out _, configure);
         }
 
         public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, out Task<IScheduler> schedulerTask,
