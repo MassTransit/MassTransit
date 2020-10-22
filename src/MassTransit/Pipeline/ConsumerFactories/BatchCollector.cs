@@ -145,7 +145,7 @@ namespace MassTransit.Pipeline.ConsumerFactories
                 if (_collectors.TryGetValue(key, out BatchConsumer<TMessage> consumer))
                 {
                     if (context.GetRetryAttempt() > 0)
-                        await _currentConsumer.ForceComplete().ConfigureAwait(false);
+                        await consumer.ForceComplete().ConfigureAwait(false);
                 }
 
                 if (consumer == null || consumer.IsCompleted)
