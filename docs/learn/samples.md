@@ -4,6 +4,34 @@ Working code is an excellent way to learn how to use MassTransit features. The s
 
 The new samples are standalone repositories, which use NuGet to pull dependencies exactly as a developerwould use MassTransit.
 
+### Sample Twitch
+
+This sample was created along with the [Twitch/YouTube video series](/getting-started/live-coding).
+
+Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-Twitch)
+
+### Trashlantis
+
+This sample was created to show how the in-memory outbox is used and ensures message delivery in the presence of transaction failures.
+
+Clone the sample: [GitHub Repository](https://github.com/phatboyg/Trashlantis)
+
+### Job Consumers
+
+Shows how to use the job consumers with Entity Framework Core.
+
+Features used:
+- Job Consumers
+- Entity Framework Core
+
+Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-JobConsumers)
+
+### Batch Processing using Sagas
+
+Shows how to perform batch processing and tracking using sagas.
+
+Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-Batch)
+
 ### Request Response
 
 This sample demonstrates how to create a client that sends a request to a service which responds with a response.
@@ -83,6 +111,18 @@ Features used:
 
 Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-Quartz)
 
+### Hangfire
+
+Features used:
+- Scheduling
+- Hangfire
+
+Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-Hangfire)
+
+### Application Insights
+
+Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-ApplicationInsights)
+
 ### RabbitMQ Direct Exchange
 
 Shows how to configure a consumer and a producer to use RabbitMQ direct exchange routing.
@@ -90,7 +130,7 @@ Shows how to configure a consumer and a producer to use RabbitMQ direct exchange
 Features used:
 - RabbitMQ
 
-Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-Quartz)
+Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-Direct)
 
 ### Benchmark
 
