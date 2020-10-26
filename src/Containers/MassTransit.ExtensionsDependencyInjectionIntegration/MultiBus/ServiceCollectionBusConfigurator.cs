@@ -28,8 +28,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
                 return new BusRegistrationContext(provider, busHealth.Value, Endpoints, Consumers, Sagas, ExecuteActivities, Activities);
             }
 
-            collection.AddSingleton(provider => Bind<TBus>.Create(GetSendEndpointProvider(provider)));
-            collection.AddSingleton(provider => Bind<TBus>.Create(GetPublishEndpoint(provider)));
+            collection.AddScoped(provider => Bind<TBus>.Create(GetSendEndpointProvider(provider)));
+            collection.AddScoped(provider => Bind<TBus>.Create(GetPublishEndpoint(provider)));
             collection.AddSingleton(provider =>
                 Bind<TBus>.Create(ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>(), provider.GetRequiredService<TBus>())));
 
