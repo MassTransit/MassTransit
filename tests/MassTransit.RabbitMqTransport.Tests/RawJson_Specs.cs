@@ -76,4 +76,61 @@ namespace MassTransit.RabbitMqTransport.Tests
             DateTime Timestamp { get; }
         }
     }
+
+
+    [TestFixture]
+    public class Sending_and_consuming_raw_json_with_headers :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_return_the_header_value_from_the_transport()
+        {
+            var message = new BagOfCrap
+            {
+                CommandId = NewId.NextGuid(),
+                ItemNumber = "27"
+            };
+
+            const string headerName = "Random-Header";
+            const string headerValue = "SomeValue";
+
+            await InputQueueSendEndpoint.Send(message, x => x.Headers.Set(headerName, headerValue));
+
+            ConsumeContext<Command> context = await _handled;
+
+            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(RawJsonMessageSerializer.RawJsonContentType),
+                $"unexpected content-type {context.ReceiveContext.ContentType}");
+
+            Assert.That(context.Message.CommandId, Is.EqualTo(message.CommandId));
+            Assert.That(context.Message.ItemNumber, Is.EqualTo(message.ItemNumber));
+
+            Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(headerValue));
+        }
+
+        Task<ConsumeContext<Command>> _handled;
+
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.UseRawJsonSerializer();
+        }
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _handled = Handled<Command>(configurator);
+        }
+
+
+        public interface Command
+        {
+            Guid CommandId { get; }
+            string ItemNumber { get; }
+        }
+
+
+        public class BagOfCrap
+        {
+            public Guid CommandId { get; set; }
+            public string ItemNumber { get; set; }
+        }
+    }
 }
