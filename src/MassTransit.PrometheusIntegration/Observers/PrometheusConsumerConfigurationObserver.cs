@@ -1,18 +1,42 @@
 namespace MassTransit.PrometheusIntegration.Observers
 {
+    using System;
     using ConsumeConfigurators;
+    using Internals.Extensions;
 
 
     public class PrometheusConsumerConfigurationObserver :
         IConsumerConfigurationObserver
     {
-        void IConsumerConfigurationObserver.ConsumerConfigured<T>(IConsumerConfigurator<T> configurator)
+        public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
+            where TConsumer : class
         {
         }
 
-        void IConsumerConfigurationObserver.ConsumerMessageConfigured<T, TMessage>(IConsumerMessageConfigurator<T, TMessage> configurator)
+        public void ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
+            where TConsumer : class
+            where TMessage : class
         {
-            var specification = new PrometheusConsumerSpecification<T, TMessage>();
+            if (typeof(TMessage).ClosesType(typeof(Batch<>), out Type[] types))
+            {
+                typeof(PrometheusConsumerConfigurationObserver)
+                    .GetMethod(nameof(BatchConsumerConfigured))
+                    .MakeGenericMethod(typeof(TConsumer), types[0])
+                    .Invoke(this, new object[] {configurator});
+            }
+            else
+            {
+                var specification = new PrometheusConsumerSpecification<TConsumer, TMessage>();
+
+                configurator.AddPipeSpecification(specification);
+            }
+        }
+
+        public void BatchConsumerConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, Batch<TMessage>> configurator)
+            where TConsumer : class, IConsumer<Batch<TMessage>>
+            where TMessage : class
+        {
+            var specification = new PrometheusConsumerSpecification<TConsumer, Batch<TMessage>>();
 
             configurator.AddPipeSpecification(specification);
         }

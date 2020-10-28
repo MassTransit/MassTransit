@@ -9,9 +9,12 @@ namespace MassTransit.Context
         ConsumeContext<Batch<TMessage>>
         where TMessage : class
     {
+        readonly ConsumeContext _context;
+
         public BatchConsumeContext(ConsumeContext context, Batch<TMessage> batch)
             : base(context)
         {
+            _context = context;
             Message = batch;
         }
 
@@ -29,12 +32,12 @@ namespace MassTransit.Context
 
         public Task NotifyConsumed(TimeSpan duration, string consumerType)
         {
-            return Task.CompletedTask;
+            return _context.NotifyConsumed(this, duration, consumerType);
         }
 
         public Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
         {
-            return Task.CompletedTask;
+            return _context.NotifyFaulted(this, duration, consumerType, exception);
         }
     }
 }

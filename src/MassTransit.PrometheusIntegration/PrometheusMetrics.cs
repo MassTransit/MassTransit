@@ -86,7 +86,7 @@ namespace MassTransit.PrometheusIntegration
             where T : class
         {
             var messageType = GetMessageTypeLabel<T>();
-            var cleanConsumerType = GetConsumerTypeLabel(consumerType);
+            var cleanConsumerType = GetConsumerTypeLabel(consumerType, TypeMetadataCache<T>.ShortName, messageType);
 
             _consumeTotal.Labels(_serviceLabel, messageType, cleanConsumerType).Inc();
             _consumeDuration.Labels(_serviceLabel, messageType, cleanConsumerType).Observe(duration.TotalSeconds);
@@ -183,7 +183,7 @@ namespace MassTransit.PrometheusIntegration
             where TMessage : class
         {
             var messageType = GetMessageTypeLabel<TMessage>();
-            var cleanConsumerType = GetConsumerTypeLabel(TypeMetadataCache<TConsumer>.ShortName);
+            var cleanConsumerType = GetConsumerTypeLabel(TypeMetadataCache<TConsumer>.ShortName, TypeMetadataCache<TMessage>.ShortName, messageType);
 
             return _consumerInProgress.Labels(_serviceLabel, messageType, cleanConsumerType).TrackInProgress();
         }
@@ -193,7 +193,7 @@ namespace MassTransit.PrometheusIntegration
             where TMessage : class
         {
             var messageType = GetMessageTypeLabel<TMessage>();
-            var cleanConsumerType = GetConsumerTypeLabel(TypeMetadataCache<TSaga>.ShortName);
+            var cleanConsumerType = GetConsumerTypeLabel(TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName, messageType);
 
             return _sagaInProgress.Labels(_serviceLabel, messageType, cleanConsumerType).TrackInProgress();
         }
@@ -407,12 +407,18 @@ namespace MassTransit.PrometheusIntegration
             _isConfigured = true;
         }
 
-        static string GetConsumerTypeLabel(string consumerType)
+        static string GetConsumerTypeLabel(string consumerType, string messageType, string messageLabel)
         {
             return _labelCache.GetOrAdd(consumerType, type =>
             {
                 if (type.StartsWith("MassTransit.MessageHandler<"))
                     return "Handler";
+
+                var genericMessageType = "<" + messageType + ">";
+                if (type.IndexOf(genericMessageType, StringComparison.Ordinal) >= 0)
+                {
+                    type = type.Replace(genericMessageType, "_" + messageLabel);
+                }
 
                 return type.Split('.', '+').Last().Replace("<", "_").Replace(">", "_");
             });
