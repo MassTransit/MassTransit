@@ -44,6 +44,8 @@ namespace MassTransit.PrometheusIntegration
         static Histogram _executeDuration;
         static Histogram _compensateDuration;
 
+        static readonly char[] _delimiters = {'<', '>'};
+
         public static void BusStarted()
         {
             _busInstances.WithLabels(_serviceLabel).Inc();
@@ -416,12 +418,32 @@ namespace MassTransit.PrometheusIntegration
 
                 var genericMessageType = "<" + messageType + ">";
                 if (type.IndexOf(genericMessageType, StringComparison.Ordinal) >= 0)
-                {
                     type = type.Replace(genericMessageType, "_" + messageLabel);
-                }
 
-                return type.Split('.', '+').Last().Replace("<", "_").Replace(">", "_");
+                return CleanupLabel(type);
             });
+        }
+
+        static string CleanupLabel(string label)
+        {
+            string SimpleClean(string text)
+            {
+                return text.Split('.', '+').Last();
+            }
+
+            var indexOf = label.IndexOfAny(_delimiters);
+            if (indexOf >= 0)
+            {
+                if (label[indexOf] == '<')
+                    return SimpleClean(label.Substring(0, indexOf)) + "_" + CleanupLabel(label.Substring(indexOf + 1));
+
+                if (label[indexOf] == '>')
+                    return SimpleClean(label.Substring(0, indexOf)) + CleanupLabel(label.Substring(indexOf + 1));
+
+                return SimpleClean(label);
+            }
+
+            return SimpleClean(label);
         }
 
         static string GetArgumentTypeLabel<TArguments>()
@@ -449,12 +471,6 @@ namespace MassTransit.PrometheusIntegration
         {
             if (type.IsGenericParameter)
                 return "";
-
-            if (type.IsNested)
-            {
-                FormatTypeName(sb, type.DeclaringType);
-                sb.Append('_');
-            }
 
             if (type.GetTypeInfo().IsGenericType)
             {

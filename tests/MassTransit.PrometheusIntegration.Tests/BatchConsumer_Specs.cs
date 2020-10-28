@@ -7,7 +7,6 @@ namespace MassTransit.PrometheusIntegration.Tests
     using NUnit.Framework;
     using Prometheus;
     using TestFramework;
-    using TestFramework.Messages;
     using Testing;
     using Testing.Indicators;
 
@@ -19,15 +18,15 @@ namespace MassTransit.PrometheusIntegration.Tests
         [Test]
         public async Task Should_capture_the_bus_instance_metric()
         {
-            await InputQueueSendEndpoint.Send(new PingMessage());
-            await InputQueueSendEndpoint.Send(new PingMessage());
-            await InputQueueSendEndpoint.Send(new PingMessage());
-            await InputQueueSendEndpoint.Send(new PingMessage());
-            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new BatchMessage());
+            await InputQueueSendEndpoint.Send(new BatchMessage());
+            await InputQueueSendEndpoint.Send(new BatchMessage());
+            await InputQueueSendEndpoint.Send(new BatchMessage());
+            await InputQueueSendEndpoint.Send(new BatchMessage());
 
-            await Bus.Publish(new PingMessage());
-            await Bus.Publish(new PingMessage());
-            await Bus.Publish(new PingMessage());
+            await Bus.Publish(new BatchMessage());
+            await Bus.Publish(new BatchMessage());
+            await Bus.Publish(new BatchMessage());
 
             await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
 
@@ -38,13 +37,13 @@ namespace MassTransit.PrometheusIntegration.Tests
 
             Console.WriteLine(text);
 
-            Assert.That(text.Contains("mt_publish_total{service_name=\"unit_test\",message_type=\"PingMessage\"} 3"), "publish");
-            Assert.That(text.Contains("mt_send_total{service_name=\"unit_test\",message_type=\"PingMessage\"} 5"), "send");
+            Assert.That(text.Contains("mt_publish_total{service_name=\"unit_test\",message_type=\"BatchMessage\"} 3"), "publish");
+            Assert.That(text.Contains("mt_send_total{service_name=\"unit_test\",message_type=\"BatchMessage\"} 5"), "send");
             Assert.That(text.Contains("mt_receive_total{service_name=\"unit_test\",endpoint_address=\"input_queue\"} 8"), "receive");
             Assert.That(
-                text.Contains("mt_consume_total{service_name=\"unit_test\",message_type=\"PingMessage\",consumer_type=\"BatchConsumer_PingMessage\"} 8"),
+                text.Contains("mt_consume_total{service_name=\"unit_test\",message_type=\"BatchMessage\",consumer_type=\"BatchConsumer_BatchMessage\"} 8"),
                 "batch");
-            Assert.That(text.Contains("mt_consume_total{service_name=\"unit_test\",message_type=\"Batch_PingMessage\",consumer_type=\"TestBatchConsumer\"} 1"),
+            Assert.That(text.Contains("mt_consume_total{service_name=\"unit_test\",message_type=\"Batch_BatchMessage\",consumer_type=\"TestBatchConsumer\"} 1"),
                 "consume");
         }
 
@@ -66,10 +65,15 @@ namespace MassTransit.PrometheusIntegration.Tests
         }
 
 
-        public class TestBatchConsumer :
-            IConsumer<Batch<PingMessage>>
+        public class BatchMessage
         {
-            public Task Consume(ConsumeContext<Batch<PingMessage>> context)
+        }
+
+
+        public class TestBatchConsumer :
+            IConsumer<Batch<BatchMessage>>
+        {
+            public Task Consume(ConsumeContext<Batch<BatchMessage>> context)
             {
                 return Task.CompletedTask;
             }
