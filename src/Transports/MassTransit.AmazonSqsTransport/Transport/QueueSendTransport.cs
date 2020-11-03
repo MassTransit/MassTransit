@@ -94,6 +94,7 @@
                     await context.SendMessage(_context.EntityName, message, sendContext.CancellationToken).ConfigureAwait(false);
 
                     sendContext.LogSent();
+                    activity.AddSendContextHeadersPostSend(sendContext);
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PostSend(sendContext).ConfigureAwait(false);

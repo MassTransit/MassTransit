@@ -8,6 +8,13 @@ namespace MassTransit.Logging
 
     public static class TransportDiagnosticSourceExtensions
     {
+        public static void AddSendContextHeadersPostSend<T>(this StartedActivityContext activity, SendContext<T> context)
+            where T : class
+        {
+            if (context is MessageSendContext<T> messageSendContext && messageSendContext.Serializer != null)
+                activity?.AddTag(DiagnosticHeaders.BodyBytes, messageSendContext.Body.LongLength.ToString());
+        }
+
         public static void AddConsumeContextHeaders(this StartedActivityContext activity, ConsumeContext context)
         {
             activity.AddTag(DiagnosticHeaders.MessageId, context.MessageId);

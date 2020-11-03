@@ -82,6 +82,7 @@ namespace MassTransit.EventHubIntegration
                 await _context.Produce(new[] {eventData}, options, context.CancellationToken).ConfigureAwait(false);
 
                 context.LogSent();
+                activity.AddSendContextHeadersPostSend(context);
 
                 if (_context.SendObservers.Count > 0)
                     await _context.SendObservers.PostSend(context).ConfigureAwait(false);
@@ -178,6 +179,7 @@ namespace MassTransit.EventHubIntegration
                     await FlushAsync(eventDataBatch);
 
                 context.LogSent();
+                activity.AddSendContextHeadersPostSend(context);
 
                 if (_context.SendObservers.Count > 0)
                     await Task.WhenAll(contexts.Select(c => _context.SendObservers.PostSend(c))).ConfigureAwait(false);

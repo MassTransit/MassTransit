@@ -47,6 +47,7 @@ namespace MassTransit.Transports.InMemory
                 await _context.Exchange.Send(transportMessage).ConfigureAwait(false);
 
                 context.LogSent();
+                activity.AddSendContextHeadersPostSend(context);
 
                 if (_context.SendObservers.Count > 0)
                     await _context.SendObservers.PostSend(context).ConfigureAwait(false);
