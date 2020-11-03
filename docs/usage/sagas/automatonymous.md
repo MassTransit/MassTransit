@@ -75,7 +75,7 @@ public class OrderStateMachine :
 }
 ```
 
-This results in the following values: 0 - Initial, 1 - Final, 2 - Submitted, 3 - Accepted
+This results in the following values: 0 - None, 1 - Initial, 2 - Final, 3 - Submitted, 4 - Accepted
 
 ### State
 
