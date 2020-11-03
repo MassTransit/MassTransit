@@ -15,6 +15,7 @@ namespace MassTransit.Logging
         public const string InputAddress = "input-address";
         public const string ConversationId = "conversation-id";
         public const string TrackingNumber = "tracking-number";
+        public const string BodyBytes = "body-bytes";
 
         public const string SourceHostMachine = "source-host-machine";
         public const string MessageTypes = "message-types";
