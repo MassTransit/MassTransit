@@ -47,7 +47,7 @@ namespace MassTransit.Logging
                 activity.AddTag(DiagnosticHeaders.SourceAddress, context.SourceAddress.ToString());
             if (context.DestinationAddress != null)
                 activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress.ToString());
-            if (context is MessageSendContext<T> messageSendContext)
+            if (context is MessageSendContext<T> messageSendContext && messageSendContext.Serializer != null)
                 activity.AddTag(DiagnosticHeaders.BodyBytes, messageSendContext.Body.LongLength.ToString());
 
             if (tags != null)
