@@ -1,5 +1,6 @@
 namespace MassTransit.Containers.Tests.Common_Tests
 {
+    using System;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
@@ -140,6 +141,114 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
+    public abstract class Common_Publish_Filter_Outbox :
+        InMemoryTestFixture
+    {
+        protected readonly TaskCompletionSource<MyId> MyIdSource;
+        protected readonly TaskCompletionSource<ProducingConsumer> ConsumerSource;
+
+        protected Common_Publish_Filter_Outbox()
+        {
+            MyIdSource = GetTask<MyId>();
+            ConsumerSource = GetTask<ProducingConsumer>();
+        }
+
+        protected abstract IBusRegistrationContext Registration { get; }
+
+        [Test]
+        [Explicit]
+        public void Display_the_pipeline()
+        {
+            var result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
+        [Test]
+        public async Task Should_use_scope()
+        {
+            await InputQueueSendEndpoint.Send<SimpleMessageInterface>(new {Name = "test"});
+
+            var myId = await MyIdSource.Task;
+
+            var consumer = await ConsumerSource.Task;
+
+            Assert.AreEqual(myId, consumer.MyId);
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            ConfigureFilter(configurator);
+        }
+
+        protected abstract void ConfigureFilter(IPublishPipelineConfigurator publishPipelineConfigurator);
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseInMemoryOutbox();
+            configurator.ConfigureConsumer<ProducingConsumer>(Registration);
+        }
+
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<ProducingConsumer>();
+            configurator.AddBus(provider => BusControl);
+        }
+
+
+        protected class ScopedFilter<T> :
+            IFilter<PublishContext<T>>
+            where T : class
+        {
+            readonly MyId _myId;
+            readonly TaskCompletionSource<MyId> _taskCompletionSource;
+
+            public ScopedFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId)
+            {
+                _taskCompletionSource = taskCompletionSource;
+                _myId = myId;
+            }
+
+            public Task Send(PublishContext<T> context, IPipe<PublishContext<T>> next)
+            {
+                _taskCompletionSource.TrySetResult(_myId);
+                return next.Send(context);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+        }
+
+
+        public class ProducingConsumer :
+            IConsumer<SimpleMessageInterface>
+        {
+            readonly TaskCompletionSource<ConsumeContext<SimpleMessageInterface>> _received;
+
+            public ProducingConsumer(TaskCompletionSource<ProducingConsumer> consumerCreated, MyId myId)
+            {
+                MyId = myId;
+
+                _received = TaskUtil.GetTask<ConsumeContext<SimpleMessageInterface>>();
+
+                consumerCreated.TrySetResult(this);
+            }
+
+            public MyId MyId { get; }
+
+            public Task<ConsumeContext<SimpleMessageInterface>> Last => _received.Task;
+
+            public async Task Consume(ConsumeContext<SimpleMessageInterface> context)
+            {
+                await context.Publish<SimplePublishedInterface>(context.Message);
+
+                _received.TrySetResult(context);
+            }
+        }
+    }
+
+
     public abstract class Common_Publish_Filter_Fault :
         InMemoryTestFixture
     {
@@ -161,7 +270,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             ConsumeContext<SimpleMessageInterface> lastConsumeContext = await lastConsumer.Last;
 
-            ConsumeContext result = await TaskCompletionSource.Task;
+            var result = await TaskCompletionSource.Task;
 
             Assert.That(lastConsumeContext, Is.Not.InstanceOf<MissingConsumeContext>());
         }
@@ -189,8 +298,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
             IFilter<PublishContext<T>>
             where T : class
         {
-            readonly TaskCompletionSource<ConsumeContext> _taskCompletionSource;
             readonly ConsumeContext _consumeContext;
+            readonly TaskCompletionSource<ConsumeContext> _taskCompletionSource;
 
             public ScopedFilter(TaskCompletionSource<ConsumeContext> taskCompletionSource, ConsumeContext consumeContext)
             {

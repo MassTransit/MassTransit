@@ -5,6 +5,7 @@
     using Autofac;
     using Autofac.Builder;
     using AutofacIntegration;
+    using AutofacIntegration.Registration;
     using AutofacIntegration.ScopeProviders;
     using GreenPipes;
     using GreenPipes.Specifications;
@@ -28,6 +29,26 @@
             var specification = new FilterPipeSpecification<ConsumeContext>(new ScopeConsumeFilter(scopeProvider));
 
             configurator.AddPipeSpecification(specification);
+        }
+
+        /// <summary>
+        /// Creates a service scope for each message type, compatible with UseMessageRetry and UseInMemoryOutbox
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="lifetimeScope"></param>
+        /// <param name="name">The name of the lifetime scope</param>
+        /// <param name="configureScope">Configuration for scope container</param>
+        public static void UseMessageLifetimeScope(this IConsumePipeConfigurator configurator, ILifetimeScope lifetimeScope, string name = "message",
+            Action<ContainerBuilder, ConsumeContext> configureScope = null)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (lifetimeScope == null)
+                throw new ArgumentNullException(nameof(lifetimeScope));
+            if (name == null)
+                throw new ArgumentNullException(nameof(name));
+
+            var observer = new MessageLifetimeScopeConfigurationObserver(configurator, new SingleLifetimeScopeProvider(lifetimeScope), name, configureScope);
         }
 
         /// <summary>

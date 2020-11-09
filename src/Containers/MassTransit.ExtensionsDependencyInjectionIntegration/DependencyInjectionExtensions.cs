@@ -26,6 +26,21 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Creates a service scope for each message type, compatible with UseMessageRetry and UseInMemoryOutbox
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="serviceProvider"></param>
+        public static void UseMessageScope(this IConsumePipeConfigurator configurator, IServiceProvider serviceProvider)
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+            if (serviceProvider == null)
+                throw new ArgumentNullException(nameof(serviceProvider));
+
+            var observer = new MessageScopeConfigurationObserver(configurator, serviceProvider);
+        }
+
+        /// <summary>
         /// Register the InMemory saga repository for the specified saga type
         /// </summary>
         /// <param name="collection"></param>

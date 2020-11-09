@@ -1,21 +1,22 @@
-namespace MassTransit.Pipeline.Filters
+﻿namespace MassTransit.Pipeline.Filters
 {
     using System.Threading.Tasks;
     using GreenPipes;
     using Scoping;
 
 
-    public class ScopeConsumeFilter :
-        IFilter<ConsumeContext>
+    public class ScopeMessageFilter<T> :
+        IFilter<ConsumeContext<T>>
+        where T : class
     {
-        readonly IConsumerScopeProvider _scopeProvider;
+        readonly IMessageScopeProvider _scopeProvider;
 
-        public ScopeConsumeFilter(IConsumerScopeProvider scopeProvider)
+        public ScopeMessageFilter(IMessageScopeProvider scopeProvider)
         {
             _scopeProvider = scopeProvider;
         }
 
-        public async Task Send(ConsumeContext context, IPipe<ConsumeContext> next)
+        public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
             using var scope = _scopeProvider.GetScope(context);
 
