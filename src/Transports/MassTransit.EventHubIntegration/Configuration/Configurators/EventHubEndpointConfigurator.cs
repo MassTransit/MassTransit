@@ -102,7 +102,8 @@ namespace MassTransit.EventHubIntegration.Configurators
             var blobClient = CreateBlobClient();
             var processor = CreateEventProcessorClient(blobClient);
 
-            var lockContext = new ProcessorLockContext(processor, context.LogContext, _checkpointInterval, _checkpointMessageCount);
+            var lockContext = new ProcessorLockContext(processor, context.LogContext, _checkpointInterval, _checkpointMessageCount,
+                _partitionInitializingHandler, _partitionClosingHandler);
             var transport = new EventHubDataReceiver(context, lockContext);
 
             return new EventHubReceiveEndpoint(processor, Math.Max(1000, _checkpointMessageCount / 10), _concurrencyLimit, blobClient, transport, context);
@@ -135,11 +136,6 @@ namespace MassTransit.EventHubIntegration.Configurators
                 ? new EventProcessorClient(blobClient, _consumerGroup, _hostSettings.ConnectionString, _eventHubName, options)
                 : new EventProcessorClient(blobClient, _consumerGroup, _hostSettings.FullyQualifiedNamespace, _eventHubName, _hostSettings.TokenCredential,
                     options);
-
-            if (_partitionClosingHandler != null)
-                client.PartitionClosingAsync += _partitionClosingHandler;
-            if (_partitionInitializingHandler != null)
-                client.PartitionInitializingAsync += _partitionInitializingHandler;
 
             return client;
         }
