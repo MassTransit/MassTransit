@@ -223,9 +223,8 @@
 
                 _readyToSend.TrySetException(exception);
 
-                var cancel = _sendContext.TrySetException(exception);
-                if (cancel)
-                    _cancellationTokenSource.Cancel();
+                _sendContext.TrySetException(exception);
+                _cancellationTokenSource.Cancel();
 
                 _message.TrySetException(exception);
 
@@ -247,9 +246,8 @@
 
             _readyToSend.TrySetCanceled();
 
-            var cancel = _sendContext.TrySetCanceled();
-            if (cancel)
-                _cancellationTokenSource.Cancel();
+            _sendContext.TrySetCanceled();
+            _cancellationTokenSource.Cancel();
 
             _message.TrySetCanceled();
 

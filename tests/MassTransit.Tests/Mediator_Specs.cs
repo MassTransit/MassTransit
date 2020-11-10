@@ -3,6 +3,7 @@ namespace MassTransit.Tests
     using System;
     using System.Diagnostics;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Testing;
     using MassTransit.Testing.MessageObservers;
@@ -85,6 +86,26 @@ namespace MassTransit.Tests
         }
 
         [Test]
+        public async Task Should_support_send_cancellation()
+        {
+            using var source = new CancellationTokenSource();
+
+            var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
+            {
+                cfg.Handler<PingMessage>(async context =>
+                {
+                    source.Cancel();
+
+                    await Task.Delay(5000, context.CancellationToken);
+                });
+            });
+
+            var pingMessage = new PingMessage();
+
+            Assert.That(async () => await mediator.Send(pingMessage, source.Token), Throws.TypeOf<TaskCanceledException>());
+        }
+
+        [Test]
         public async Task Should_handle_request_response()
         {
             var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
@@ -99,6 +120,32 @@ namespace MassTransit.Tests
             Response<PongMessage> response = await client.GetResponse<PongMessage>(pingMessage);
 
             Assert.That(response.Message.CorrelationId, Is.EqualTo(pingMessage.CorrelationId));
+        }
+
+        [Test]
+        public async Task Should_handle_request_response_cancellation()
+        {
+            using var source = new CancellationTokenSource();
+
+            var mediator = MassTransit.Bus.Factory.CreateMediator(cfg =>
+            {
+                cfg.Handler<PingMessage>(async context =>
+                {
+                    source.Cancel();
+
+                    await Task.Yield();
+
+                    await Task.Delay(5000, context.CancellationToken);
+
+                    await context.RespondAsync(new PongMessage(context.Message.CorrelationId));
+                });
+            });
+
+            IRequestClient<PingMessage> client = mediator.CreateRequestClient<PingMessage>();
+
+            var pingMessage = new PingMessage();
+
+            Assert.That(async () => await client.GetResponse<PongMessage>(pingMessage, source.Token), Throws.InstanceOf<OperationCanceledException>());
         }
 
         [Test]
