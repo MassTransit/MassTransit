@@ -242,7 +242,8 @@ module.exports = {
         collapsable: true,
         children: [
           '/articles/mediator',
-          '/articles/outbox'
+          '/articles/outbox',
+          '/articles/net5'
         ]
       },
       {
