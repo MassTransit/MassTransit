@@ -122,11 +122,11 @@ namespace MassTransit.Definition
         string GetConsumerName<T>()
         {
             if (typeof(T).IsGenericType)
-                return SanitizeName(typeof(T).GetGenericArguments()[0].Name);
+                return SanitizeName(FormatName(typeof(T).GetGenericArguments()[0]));
 
             const string consumer = "Consumer";
 
-            var consumerName = FormatName<T>();
+            var consumerName = FormatName(typeof(T));
 
             if (consumerName.EndsWith(consumer, StringComparison.InvariantCultureIgnoreCase))
                 consumerName = consumerName.Substring(0, consumerName.Length - consumer.Length);
@@ -137,7 +137,7 @@ namespace MassTransit.Definition
         string GetMessageName(Type type)
         {
             if (type.IsGenericType)
-                return SanitizeName(type.GetGenericArguments()[0].Name);
+                return SanitizeName(FormatName(type.GetGenericArguments()[0]));
 
             var messageName = type.Name;
 
@@ -148,7 +148,7 @@ namespace MassTransit.Definition
         {
             const string saga = "Saga";
 
-            var sagaName = FormatName<T>();
+            var sagaName = FormatName(typeof(T));
 
             if (sagaName.EndsWith(saga, StringComparison.InvariantCultureIgnoreCase))
                 sagaName = sagaName.Substring(0, sagaName.Length - saga.Length);
@@ -160,7 +160,7 @@ namespace MassTransit.Definition
         {
             const string activity = "Activity";
 
-            var activityName = FormatName<T>();
+            var activityName = FormatName(typeof(T));
 
             if (activityName.EndsWith(activity, StringComparison.InvariantCultureIgnoreCase))
                 activityName = activityName.Substring(0, activityName.Length - activity.Length);
@@ -168,11 +168,11 @@ namespace MassTransit.Definition
             return SanitizeName(activityName);
         }
 
-        string FormatName<T>()
+        string FormatName(Type type)
         {
             var name = _includeNamespace
-                ? string.Join("", TypeMetadataCache<T>.ShortName.Split(_removeChars))
-                : typeof(T).Name;
+                ? string.Join("", TypeMetadataCache.GetShortName(type).Split(_removeChars))
+                : type.Name;
 
             return string.IsNullOrWhiteSpace(_prefix) ? name : _prefix + name;
         }
