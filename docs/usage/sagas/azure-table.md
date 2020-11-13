@@ -33,6 +33,8 @@ container.AddMassTransit(cfg =>
         .AzureTableRepository(endpointUri, key, r =>
         {
            cfg.ConnectionFactory(() => cloudTable);
+           // optionally specify the key formatter to use: 
+           // cfg.KeyFormatter(() => new PartitionSagaKeyFormatter<OrderState>(typeof(OrderState).Name)))
         });
 });
 ```

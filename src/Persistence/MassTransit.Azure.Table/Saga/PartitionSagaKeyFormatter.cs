@@ -4,20 +4,20 @@ namespace MassTransit.Azure.Table.Saga
     using MassTransit.Saga;
 
 
-    public class ConstantSagaKeyFormatter<TSaga> :
+    public class PartitionSagaKeyFormatter<TSaga> :
         ISagaKeyFormatter<TSaga>
         where TSaga : class, ISaga
     {
-        readonly string _partitionKey;
+        readonly string _rowKey;
 
-        public ConstantSagaKeyFormatter(string partitionKey)
+        public PartitionSagaKeyFormatter(string rowKey)
         {
-            _partitionKey = partitionKey;
+            _rowKey = rowKey;
         }
 
         public (string partitionKey, string rowKey) Format(Guid correlationId)
         {
-            return (_partitionKey, correlationId.ToString());
+            return (correlationId.ToString(), _rowKey);
         }
     }
 }
