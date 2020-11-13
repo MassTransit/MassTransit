@@ -18,21 +18,22 @@ namespace MassTransit.Azure.Table.Contexts
         readonly ISagaKeyFormatter<TSaga> _keyFormatter;
 
         public AzureTableSagaRepositoryContextFactory(Func<CloudTable> databaseFactory,
-            ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> factory)
+            ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> factory,
+            ISagaKeyFormatter<TSaga> keyFormatter)
         {
             _databaseFactory = databaseFactory;
             _factory = factory;
-            _keyFormatter = new ConstantSagaKeyFormatter<TSaga>(typeof(TSaga).Name);
+            _keyFormatter = keyFormatter;
         }
+
 
         public AzureTableSagaRepositoryContextFactory(CloudTable databaseFactory,
-            ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> factory)
+            ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> factory,
+            ISagaKeyFormatter<TSaga> keyFormatter) :
+            this(() => databaseFactory, factory, keyFormatter)
         {
-            _databaseFactory = () => databaseFactory;
-
-            _factory = factory;
-            _keyFormatter = new ConstantSagaKeyFormatter<TSaga>(typeof(TSaga).Name);
         }
+
 
         public void Probe(ProbeContext context)
         {

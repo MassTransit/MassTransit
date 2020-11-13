@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Azure.Table
 {
     using System;
+    using MassTransit.Azure.Table.Saga;
     using MassTransit.Saga;
     using Microsoft.Azure.Cosmos.Table;
 
@@ -9,6 +10,12 @@
         IAzureTableSagaRepositoryConfigurator
         where TSaga : class, ISaga
     {
+
+        /// <summary>
+        /// Use a factory method to create the key formatter
+        /// </summary>
+        /// <param name="formatterFactory"></param>
+        void KeyFormatter(Func<ISagaKeyFormatter<TSaga>> formatterFactory);
     }
 
 
