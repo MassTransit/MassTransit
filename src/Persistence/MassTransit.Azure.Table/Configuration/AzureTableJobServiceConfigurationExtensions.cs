@@ -27,9 +27,9 @@
         {
             UseAzureTableSagaRepository(configurator,
                 contextFactory,
-                new RowSagaKeyFormatter<JobTypeSaga>(typeof(JobTypeSaga).Name),
-                new RowSagaKeyFormatter<JobSaga>(typeof(JobSaga).Name),
-                new RowSagaKeyFormatter<JobAttemptSaga>(typeof(JobAttemptSaga).Name));
+                new ConstPartitionSagaKeyFormatter<JobTypeSaga>(typeof(JobTypeSaga).Name),
+                new ConstPartitionSagaKeyFormatter<JobSaga>(typeof(JobSaga).Name),
+                new ConstPartitionSagaKeyFormatter<JobAttemptSaga>(typeof(JobAttemptSaga).Name));
         }
     }
 }

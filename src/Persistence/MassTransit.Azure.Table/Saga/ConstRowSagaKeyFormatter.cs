@@ -4,13 +4,13 @@ namespace MassTransit.Azure.Table.Saga
     using MassTransit.Saga;
 
 
-    public class PartitionSagaKeyFormatter<TSaga> :
+    public class ConstRowSagaKeyFormatter<TSaga> :
         ISagaKeyFormatter<TSaga>
         where TSaga : class, ISaga
     {
         readonly string _rowKey;
 
-        public PartitionSagaKeyFormatter(string rowKey)
+        public ConstRowSagaKeyFormatter(string rowKey)
         {
             _rowKey = rowKey;
         }

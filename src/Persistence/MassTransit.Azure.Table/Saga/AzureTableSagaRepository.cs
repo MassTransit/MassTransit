@@ -20,7 +20,7 @@
 
         public static ISagaRepository<TSaga> Create(Func<CloudTable> tableFactory)
         {
-            return Create(tableFactory, new RowSagaKeyFormatter<TSaga>(typeof(TSaga).Name));
+            return Create(tableFactory, new ConstPartitionSagaKeyFormatter<TSaga>(typeof(TSaga).Name));
         }
     }
 }

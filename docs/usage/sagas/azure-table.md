@@ -23,7 +23,7 @@ public class OrderState :
 
 ### Container Integration
 
-To configure Cosmos DB as the saga repository for a saga, use the code shown below using the _AddMassTransit_ container extension.
+To configure a Table as the saga repository for a saga, use the code shown below using the _AddMassTransit_ container extension.
 
 ```cs
 CloudTable cloudTable;
@@ -33,10 +33,25 @@ container.AddMassTransit(cfg =>
         .AzureTableRepository(endpointUri, key, r =>
         {
            cfg.ConnectionFactory(() => cloudTable);
-           // optionally specify the key formatter to use: 
-           // cfg.KeyFormatter(() => new PartitionSagaKeyFormatter<OrderState>(typeof(OrderState).Name)))
         });
 });
 ```
 
 The container extension will register the saga repository in the container. For more details on container configuration, review the [container configuration](/usage/containers/) section of the documentation.
+
+To configure the saga repository with a specific key formatter, use the code shown below with _KeyFormatter_ configuration extension.
+
+```cs
+CloudTable cloudTable;
+container.AddMassTransit(cfg =>
+{
+    cfg.AddSagaStateMachine<OrderStateMachine, OrderState>()
+        .AzureTableRepository(endpointUri, key, r =>
+        {
+           cfg.ConnectionFactory(() => cloudTable);
+           cfg.KeyFormatter(() => new ConstRowSagaKeyFormatter<OrderState>(typeof(OrderState).Name)))
+        });
+});
+```
+
+Unlike the default `ConstPartitionSagaKeyFormatter`, `ConstRowSagaKeyFormatter` in this example uses `PartitionKey` to store the correlationId which may benefit from [scale-out capability of Tables](https://docs.microsoft.com/en-us/rest/api/storageservices/designing-a-scalable-partitioning-strategy-for-azure-table-storage#scalability).

@@ -16,7 +16,7 @@ namespace MassTransit.Azure.Table.Configurators
         where TSaga : class, ISaga
     {
         Func<IConfigurationServiceProvider, CloudTable> _connectionFactory;
-        Func<IConfigurationServiceProvider, ISagaKeyFormatter<TSaga>> _formatterFactory = provider => new RowSagaKeyFormatter<TSaga>(typeof(TSaga).Name);
+        Func<IConfigurationServiceProvider, ISagaKeyFormatter<TSaga>> _formatterFactory = provider => new ConstPartitionSagaKeyFormatter<TSaga>(typeof(TSaga).Name);
 
         /// <summary>
         /// Supply factory for retrieving the Cloud Table.
