@@ -7,6 +7,7 @@
     using Newtonsoft.Json;
     using NUnit.Framework;
     using Testing;
+    using MassTransit.MongoDbIntegration.Configuration;
     using static MongoDbAuditStoreFixture;
 
 
@@ -158,11 +159,7 @@
         public async Task Send_message_to_test_consumer()
         {
             _harness = new InMemoryTestHarness();
-            _harness.OnConfigureInMemoryBus += configurator =>
-            {
-                configurator.ConnectConsumeAuditObserver(AuditStore);
-                configurator.ConnectSendAuditObservers(AuditStore);
-            };
+            _harness.OnConfigureInMemoryBus += configurator => configurator.UseMongoDbAuditStore(Database, AuditCollectionName);
 
             ConsumerTestHarness<TestConsumer> consumer = _harness.Consumer<TestConsumer>();
 
