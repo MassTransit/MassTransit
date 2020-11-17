@@ -5,6 +5,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
     using System.Linq;
     using Context;
     using MassTransit.Registration;
+    using MassTransit.Transports.Outbox;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Monitoring.Health;
@@ -117,7 +118,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             if (consumeContextProvider.HasContext)
                 return consumeContextProvider.GetContext();
 
-            var bus = provider.GetService<ITransactionalBus>() ?? (ISendEndpointProvider)provider.GetRequiredService<IBus>();
+            var bus = provider.GetService<ITransactionalBus>() ?? provider.GetRequiredService<IBus>();
             return new ScopedSendEndpointProvider<IServiceProvider>(bus, provider);
         }
 

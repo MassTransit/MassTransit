@@ -58,6 +58,11 @@
         {
             set => _busConfiguration.Transport.Configurator.PrefetchCount = value;
         }
+		
+		public bool UseOutboxTransport
+        {
+            set => _busConfiguration.HostConfiguration.UseOutbox = value;
+        }
 
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {

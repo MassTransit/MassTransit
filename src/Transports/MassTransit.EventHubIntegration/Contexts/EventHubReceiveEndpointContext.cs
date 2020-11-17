@@ -14,7 +14,7 @@ namespace MassTransit.EventHubIntegration.Contexts
 
 
     public class EventHubReceiveEndpointContext :
-        BaseReceiveEndpointContext,
+        BaseReceiveEndpointOutboxTransportContext,
         IEventHubReceiveEndpointContext
     {
         readonly IBusInstance _busInstance;

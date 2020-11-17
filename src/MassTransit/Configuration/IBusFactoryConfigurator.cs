@@ -45,6 +45,10 @@ namespace MassTransit
         /// Specify the number of concurrent messages that can be consumed (separate from prefetch count)
         /// </summary>
         int? ConcurrentMessageLimit { set; }
+		
+		/// Set to true if you want to use the relational db outbox
+        /// </summary>
+        bool UseOutboxTransport { set; }
 
         /// <summary>
         /// Configure the message topology for the message type (global across all bus instances of the same transport type)

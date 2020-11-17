@@ -13,7 +13,7 @@ namespace MassTransit.KafkaIntegration.Contexts
 
 
     public class KafkaReceiveEndpointContext<TKey, TValue> :
-        BaseReceiveEndpointContext,
+        BaseReceiveEndpointOutboxTransportContext,
         IKafkaReceiveEndpointContext<TKey, TValue>
         where TValue : class
     {

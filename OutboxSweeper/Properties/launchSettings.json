@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "OutboxSweeper": {
+      "commandName": "Project",
+      "commandLineArgs": "--name sweeper1"
+    }
+  }
+}

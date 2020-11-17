@@ -132,9 +132,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EventHubIntegra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EventHubIntegration.Tests", "tests\MassTransit.EventHubIntegration.Tests\MassTransit.EventHubIntegration.Tests.csproj", "{24CC1B47-AE01-4871-A939-2BF6EB789860}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Azure.Table", "src\Persistence\MassTransit.Azure.Table\MassTransit.Azure.Table.csproj", "{338E2B7E-4301-4547-9172-4415F739C029}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Azure.Table", "src\Persistence\MassTransit.Azure.Table\MassTransit.Azure.Table.csproj", "{338E2B7E-4301-4547-9172-4415F739C029}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Azure.Table.Tests", "tests\MassTransit.Azure.Table.Tests\MassTransit.Azure.Table.Tests.csproj", "{17E04A9B-5DB5-4857-99CD-E9AF22DA00E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Azure.Table.Tests", "tests\MassTransit.Azure.Table.Tests\MassTransit.Azure.Table.Tests.csproj", "{17E04A9B-5DB5-4857-99CD-E9AF22DA00E4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SampleApi", "SampleApi\SampleApi.csproj", "{E52E1D1B-C1B7-44DF-B74A-75599BC0E754}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OutboxSweeper", "OutboxSweeper\OutboxSweeper.csproj", "{DDB72788-4809-46CA-8CA6-B80EF9109454}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.GrpcTransport", "src\Transports\MassTransit.GrpcTransport\MassTransit.GrpcTransport.csproj", "{AF56509B-0B95-4ACE-9CFC-F9A79756C357}"
 EndProject
@@ -795,6 +799,30 @@ Global
 		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
 		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
 		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
+		{E52E1D1B-C1B7-44DF-B74A-75599BC0E754}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E52E1D1B-C1B7-44DF-B74A-75599BC0E754}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E52E1D1B-C1B7-44DF-B74A-75599BC0E754}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E52E1D1B-C1B7-44DF-B74A-75599BC0E754}.Debug|x86.Build.0 = Debug|Any CPU
+		{E52E1D1B-C1B7-44DF-B74A-75599BC0E754}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E52E1D1B-C1B7-44DF-B74A-75599BC0E754}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E52E1D1B-C1B7-44DF-B74A-75599BC0E754}.Release|x86.ActiveCfg = Release|Any CPU
+		{E52E1D1B-C1B7-44DF-B74A-75599BC0E754}.Release|x86.Build.0 = Release|Any CPU
+		{E52E1D1B-C1B7-44DF-B74A-75599BC0E754}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{E52E1D1B-C1B7-44DF-B74A-75599BC0E754}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{E52E1D1B-C1B7-44DF-B74A-75599BC0E754}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{E52E1D1B-C1B7-44DF-B74A-75599BC0E754}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{DDB72788-4809-46CA-8CA6-B80EF9109454}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDB72788-4809-46CA-8CA6-B80EF9109454}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDB72788-4809-46CA-8CA6-B80EF9109454}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DDB72788-4809-46CA-8CA6-B80EF9109454}.Debug|x86.Build.0 = Debug|Any CPU
+		{DDB72788-4809-46CA-8CA6-B80EF9109454}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDB72788-4809-46CA-8CA6-B80EF9109454}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDB72788-4809-46CA-8CA6-B80EF9109454}.Release|x86.ActiveCfg = Release|Any CPU
+		{DDB72788-4809-46CA-8CA6-B80EF9109454}.Release|x86.Build.0 = Release|Any CPU
+		{DDB72788-4809-46CA-8CA6-B80EF9109454}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{DDB72788-4809-46CA-8CA6-B80EF9109454}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{DDB72788-4809-46CA-8CA6-B80EF9109454}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{DDB72788-4809-46CA-8CA6-B80EF9109454}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -11,7 +11,6 @@
     using Topology;
     using Transports;
 
-
     public abstract class BaseReceiveEndpointContext :
         BasePipeContext,
         ReceiveEndpointContext
@@ -132,8 +131,8 @@
 
         public void Reset()
         {
-            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateSendTransportProvider);
-            _publishTransportProvider = new Lazy<IPublishTransportProvider>(CreatePublishTransportProvider);
+            _sendTransportProvider = new Lazy<ISendTransportProvider>(CreateDecoratedSendTransportProvider);
+            _publishTransportProvider = new Lazy<IPublishTransportProvider>(CreateDecoratedPublishTransportProvider);
 
             _sendEndpointProvider = new Lazy<ISendEndpointProvider>(CreateSendEndpointProvider);
             _publishEndpointProvider = new Lazy<IPublishEndpointProvider>(CreatePublishEndpointProvider);
@@ -159,7 +158,9 @@
         }
 
         protected abstract ISendTransportProvider CreateSendTransportProvider();
+        protected abstract ISendTransportProvider CreateDecoratedSendTransportProvider();
 
         protected abstract IPublishTransportProvider CreatePublishTransportProvider();
+        protected abstract IPublishTransportProvider CreateDecoratedPublishTransportProvider();
     }
 }

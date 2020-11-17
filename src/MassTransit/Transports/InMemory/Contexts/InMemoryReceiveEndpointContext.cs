@@ -1,4 +1,4 @@
-namespace MassTransit.Transports.InMemory.Contexts
+﻿namespace MassTransit.Transports.InMemory.Contexts
 {
     using Context;
     using Fabric;

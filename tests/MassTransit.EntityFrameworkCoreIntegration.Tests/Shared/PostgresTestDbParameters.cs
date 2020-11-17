@@ -1,6 +1,5 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Shared
 {
-    using System;
     using System.Reflection;
     using Microsoft.EntityFrameworkCore;
 
@@ -8,21 +7,23 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Shared
     public class PostgresTestDbParameters :
         ITestDbParameters
     {
-        public DbContextOptionsBuilder GetDbContextOptions(Type dbContextType)
+        public DbContextOptionsBuilder<TDbContext> GetDbContextOptions<TDbContext>()
+            where TDbContext : DbContext
         {
-            var builder = new DbContextOptionsBuilder();
+            var builder = new DbContextOptionsBuilder<TDbContext>();
 
-            Apply(dbContextType, builder);
+            Apply(builder);
 
             return builder;
         }
 
-        public void Apply(Type dbContextType, DbContextOptionsBuilder builder)
+        public void Apply<TDbContext>(DbContextOptionsBuilder<TDbContext> builder)
+            where TDbContext : DbContext
         {
             builder.UseNpgsql("host=localhost;user id=postgres;password=Password12!;database=MassTransitUnitTests;", m =>
             {
                 m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
-                m.MigrationsHistoryTable($"__{dbContextType.Name}");
+                m.MigrationsHistoryTable($"__{typeof(TDbContext).Name}");
             });
         }
 

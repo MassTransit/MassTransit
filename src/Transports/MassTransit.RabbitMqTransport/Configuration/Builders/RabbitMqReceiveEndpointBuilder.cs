@@ -46,6 +46,7 @@
             var deadLetterTransport = CreateDeadLetterTransport();
             var errorTransport = CreateErrorTransport();
 
+            //maybe decorate here?
             var context = new RabbitMqQueueReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology);
 
             context.GetOrAddPayload(() => deadLetterTransport);

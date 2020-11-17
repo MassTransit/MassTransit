@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Shared
 {
-    using System;
     using System.Reflection;
     using Microsoft.EntityFrameworkCore;
     using TestFramework;
@@ -13,21 +12,23 @@
         /// Get DB context options for SQL Server.
         /// </summary>
         /// <param name="dbContextType">Type of the DbContext, used for migration conventions</param>
-        public DbContextOptionsBuilder GetDbContextOptions(Type dbContextType)
+        public DbContextOptionsBuilder<TDbContext> GetDbContextOptions<TDbContext>()
+            where TDbContext : DbContext
         {
-            var builder = new DbContextOptionsBuilder();
+            var builder = new DbContextOptionsBuilder<TDbContext>();
 
-            Apply(dbContextType, builder);
+            Apply(builder);
 
             return builder;
         }
 
-        public void Apply(Type dbContextType, DbContextOptionsBuilder dbContextOptionsBuilder)
+        public void Apply<TDbContext>(DbContextOptionsBuilder<TDbContext> dbContextOptionsBuilder)
+            where TDbContext : DbContext
         {
             dbContextOptionsBuilder.UseSqlServer(LocalDbConnectionStringProvider.GetLocalDbConnectionString(), m =>
             {
                 m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
-                m.MigrationsHistoryTable($"__{dbContextType.Name}");
+                m.MigrationsHistoryTable($"__{typeof(TDbContext).Name}");
             });
         }
 
