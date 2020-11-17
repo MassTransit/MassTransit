@@ -48,7 +48,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
 
         public async Task<SagaConsumeContext<TSaga, TMessage>> Insert(TSaga instance)
         {
-            EntityEntry<TSaga> entry = await _dbContext.Set<TSaga>().AddAsync(instance, CancellationToken).ConfigureAwait(false);
+            EntityEntry<TSaga> entry = _dbContext.Set<TSaga>().Add(instance);
             try
             {
                 await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
@@ -84,7 +84,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             await _inUse.WaitAsync(context.CancellationToken).ConfigureAwait(false);
             try
             {
-                await _dbContext.Set<TSaga>().AddAsync(context.Saga).ConfigureAwait(false);
+                _dbContext.Set<TSaga>().Add(context.Saga);
 
                 await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
             }

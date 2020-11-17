@@ -36,6 +36,11 @@ namespace MassTransit
         bool DeployTopologyOnly { set; }
 
         /// <summary>
+        /// Set to true if you want to use the relational db outbox
+        /// </summary>
+        bool UseOutboxTransport { set; }
+
+        /// <summary>
         /// Configure the message topology for the message type (global across all bus instances of the same transport type)
         /// </summary>
         /// <param name="configureTopology"></param>

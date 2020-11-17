@@ -12,7 +12,7 @@
 
 
     public sealed class ServiceBusEntityReceiveEndpointContext :
-        BaseReceiveEndpointContext,
+        BaseReceiveEndpointOutboxTransportContext,
         ServiceBusReceiveEndpointContext
     {
         readonly Recycle<IClientContextSupervisor> _clientContext;

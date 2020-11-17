@@ -12,7 +12,7 @@
 
 
     public class RabbitMqQueueReceiveEndpointContext :
-        BaseReceiveEndpointContext,
+        BaseReceiveEndpointOutboxTransportContext,
         RabbitMqReceiveEndpointContext
     {
         readonly IRabbitMqHostConfiguration _hostConfiguration;

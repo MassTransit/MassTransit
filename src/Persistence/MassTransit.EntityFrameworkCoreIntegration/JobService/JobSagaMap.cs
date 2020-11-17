@@ -14,8 +14,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.JobService
         {
             entity.Property(x => x.CurrentState);
 
-            entity.Ignore(x => x.Version);
-
             entity.Property(x => x.Submitted);
             entity.Property(x => x.ServiceAddress);
             entity.Property(x => x.JobTimeout);

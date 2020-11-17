@@ -13,7 +13,7 @@
 
 
     public class SqsQueueReceiveEndpointContext :
-        BaseReceiveEndpointContext,
+        BaseReceiveEndpointOutboxTransportContext,
         SqsReceiveEndpointContext
     {
         readonly Recycle<IClientContextSupervisor> _clientContext;

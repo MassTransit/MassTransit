@@ -12,7 +12,7 @@
 
 
     public class ActiveMqConsumerReceiveEndpointContext :
-        BaseReceiveEndpointContext,
+        BaseReceiveEndpointOutboxTransportContext,
         ActiveMqReceiveEndpointContext
     {
         readonly IActiveMqHostConfiguration _hostConfiguration;

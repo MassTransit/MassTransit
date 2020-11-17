@@ -49,6 +49,11 @@
             set => _busConfiguration.HostConfiguration.DeployTopologyOnly = value;
         }
 
+        public bool UseOutboxTransport
+        {
+            set => _busConfiguration.HostConfiguration.UseOutbox = value;
+        }
+
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
             return _busConfiguration.ConnectBusObserver(observer);

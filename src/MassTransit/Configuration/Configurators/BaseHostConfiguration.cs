@@ -49,6 +49,7 @@ namespace MassTransit.Configurators
         public abstract Uri HostAddress { get; }
 
         public bool DeployTopologyOnly { get; set; }
+        public bool UseOutbox { get; set; }
 
         public ILogContext LogContext
         {
