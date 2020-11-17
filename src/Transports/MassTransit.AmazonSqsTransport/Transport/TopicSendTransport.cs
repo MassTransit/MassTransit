@@ -83,6 +83,7 @@
                     await context.Publish(request, sendContext.CancellationToken).ConfigureAwait(false);
 
                     sendContext.LogSent();
+                    activity.AddSendContextHeadersPostSend(sendContext);
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PostSend(sendContext).ConfigureAwait(false);

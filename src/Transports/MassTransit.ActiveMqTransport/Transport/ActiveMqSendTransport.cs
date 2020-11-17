@@ -118,6 +118,7 @@
                     await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
 
                     context.LogSent();
+                    activity.AddSendContextHeadersPostSend(context);
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PostSend(context).ConfigureAwait(false);
