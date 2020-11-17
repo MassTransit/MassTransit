@@ -95,6 +95,39 @@
             }
 
             [Test]
+            public async Task Should_startup_with_a_receive_endpoint()
+            {
+                ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
+
+                var serviceUri = AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace);
+
+                var bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
+                {
+                    BusTestFixture.ConfigureBusDiagnostics(x);
+                    x.Host(serviceUri, h => h.SharedAccessSignature(s =>
+                    {
+                        s.KeyName = settings.KeyName;
+                        s.SharedAccessKey = settings.SharedAccessKey;
+                        s.TokenTimeToLive = settings.TokenTimeToLive;
+                        s.TokenScope = settings.TokenScope;
+                    }));
+
+                    x.ReceiveEndpoint("no-messages-allowed", e =>
+                    {
+                    });
+                });
+
+                var busHandle = await bus.StartAsync();
+                try
+                {
+                }
+                finally
+                {
+                    await busHandle.StopAsync();
+                }
+            }
+
+            [Test]
             public async Task Should_not_fail_when_slash_is_missing()
             {
                 ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();

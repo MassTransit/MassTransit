@@ -19,6 +19,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
             MaxConcurrentCalls = Defaults.MaxConcurrentCalls;
             MaxAutoRenewDuration = Defaults.MaxAutoRenewDuration;
             MessageWaitTimeout = Defaults.MessageWaitTimeout;
+
+            ShutdownTimeout = Defaults.ShutdownTimeout;
         }
 
         public IEndpointEntityConfigurator Configurator { get; }
@@ -40,6 +42,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
         public int PrefetchCount { get; set; }
         public TimeSpan MaxAutoRenewDuration { get; set; }
         public TimeSpan MessageWaitTimeout { get; set; }
+        public TimeSpan ShutdownTimeout { get; set; }
 
         public abstract TimeSpan LockDuration { get; }
         public abstract bool RequiresSession { get; }

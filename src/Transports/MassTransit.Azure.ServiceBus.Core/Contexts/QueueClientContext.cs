@@ -17,6 +17,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     {
         readonly IQueueClient _queueClient;
         readonly ClientSettings _settings;
+        bool _unregisterMessageHandler;
+        bool _unregisterSessionHandler;
 
         public QueueClientContext(ConnectionContext connectionContext, IQueueClient queueClient, Uri inputAddress, ClientSettings settings)
         {
@@ -38,11 +40,42 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             {
                 await callback(_queueClient, message, token).ConfigureAwait(false);
             }, _settings.GetOnMessageOptions(exceptionHandler));
+
+            _unregisterMessageHandler = true;
         }
 
         public void OnSessionAsync(Func<IMessageSession, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
         {
             _queueClient.RegisterSessionHandler(callback, _settings.GetSessionHandlerOptions(exceptionHandler));
+
+            _unregisterSessionHandler = true;
+        }
+
+        public async Task ShutdownAsync()
+        {
+            try
+            {
+                if (_queueClient != null && !_queueClient.IsClosedOrClosing)
+                {
+                    if (_unregisterMessageHandler)
+                    {
+                        LogContext.Debug?.Log("Shutting down message handler: {InputAddress}", InputAddress);
+
+                        await _queueClient.UnregisterMessageHandlerAsync(_settings.ShutdownTimeout).ConfigureAwait(false);
+                    }
+
+                    if (_unregisterSessionHandler)
+                    {
+                        LogContext.Debug?.Log("Shutting down session handler: {InputAddress}", InputAddress);
+
+                        await _queueClient.UnregisterSessionHandlerAsync(_settings.ShutdownTimeout).ConfigureAwait(false);
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                LogContext.Warning?.Log(exception, "Shutdown client faulted: {InputAddress}", InputAddress);
+            }
         }
 
         public async Task CloseAsync()

@@ -17,6 +17,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     {
         readonly SubscriptionSettings _settings;
         readonly ISubscriptionClient _subscriptionClient;
+        bool _unregisterMessageHandler;
+        bool _unregisterSessionHandler;
 
         public SubscriptionClientContext(ConnectionContext connectionContext, ISubscriptionClient subscriptionClient, Uri inputAddress,
             SubscriptionSettings settings)
@@ -39,11 +41,42 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             {
                 await callback(_subscriptionClient, message, token).ConfigureAwait(false);
             }, _settings.GetOnMessageOptions(exceptionHandler));
+
+            _unregisterMessageHandler = true;
         }
 
         public void OnSessionAsync(Func<IMessageSession, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
         {
             _subscriptionClient.RegisterSessionHandler(callback, _settings.GetSessionHandlerOptions(exceptionHandler));
+
+            _unregisterSessionHandler = true;
+        }
+
+        public async Task ShutdownAsync()
+        {
+            try
+            {
+                if (_subscriptionClient != null && !_subscriptionClient.IsClosedOrClosing)
+                {
+                    if (_unregisterMessageHandler)
+                    {
+                        LogContext.Debug?.Log("Shutting down message handler: {InputAddress}", InputAddress);
+
+                        await _subscriptionClient.UnregisterMessageHandlerAsync(_settings.ShutdownTimeout).ConfigureAwait(false);
+                    }
+
+                    if (_unregisterSessionHandler)
+                    {
+                        LogContext.Debug?.Log("Shutting down session handler: {InputAddress}", InputAddress);
+
+                        await _subscriptionClient.UnregisterSessionHandlerAsync(_settings.ShutdownTimeout).ConfigureAwait(false);
+                    }
+                }
+            }
+            catch (Exception exception)
+            {
+                LogContext.Warning?.Log(exception, "Shutdown client faulted: {InputAddress}", InputAddress);
+            }
         }
 
         public async Task CloseAsync()

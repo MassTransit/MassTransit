@@ -38,6 +38,12 @@ namespace MassTransit.Azure.ServiceBus.Core
         void OnSessionAsync(Func<IMessageSession, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler);
 
         /// <summary>
+        /// Shutdown the message/session receivers
+        /// </summary>
+        /// <returns></returns>
+        Task ShutdownAsync();
+
+        /// <summary>
         /// Close down the message handler on the received
         /// </summary>
         /// <returns></returns>

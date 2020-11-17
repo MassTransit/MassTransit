@@ -51,6 +51,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         string Name { get; }
 
         /// <summary>
+        /// The time to wait for in-flight messages to complete during shutdown
+        /// </summary>
+        TimeSpan ShutdownTimeout { get; }
+
+        /// <summary>
         /// Get the input address for the client on the specified host
         /// </summary>
         Uri GetInputAddress(Uri serviceUri, string path);

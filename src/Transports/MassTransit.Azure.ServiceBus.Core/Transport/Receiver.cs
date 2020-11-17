@@ -59,10 +59,11 @@
             {
                 requiresRecycle = !sbException.IsTransient;
             }
-            
+
             if (!(args.Exception is OperationCanceledException))
             {
-                LogContext.Error?.Log(args.Exception, "Exception on Receiver {InputAddress} during {Action} ActiveDispatchCount({activeDispatch}) ErrorRequiresRecycle({requiresRecycle})",
+                LogContext.Error?.Log(args.Exception,
+                    "Exception on Receiver {InputAddress} during {Action} ActiveDispatchCount({activeDispatch}) ErrorRequiresRecycle({requiresRecycle})",
                     _context.InputAddress, args.ExceptionReceivedContext.Action, activeDispatchCount, requiresRecycle);
             }
 
@@ -87,6 +88,8 @@
         protected override async Task StopSupervisor(StopSupervisorContext context)
         {
             LogContext.Debug?.Log("Stopping receiver: {InputAddress}", _context.InputAddress);
+
+            await _context.ShutdownAsync().ConfigureAwait(false);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
@@ -114,9 +117,6 @@
 
         Task OnMessage(IReceiverClient messageReceiver, Message message, CancellationToken cancellationToken)
         {
-            if (IsStopping)
-                return WaitForDeliveryComplete();
-
             return _messageReceiver.Handle(message, cancellationToken, context => AddReceiveContextPayloads(context, messageReceiver, message));
         }
 
@@ -126,18 +126,6 @@
 
             receiveContext.GetOrAddPayload(() => lockContext);
             receiveContext.GetOrAddPayload(() => _context);
-        }
-
-        protected async Task WaitForDeliveryComplete()
-        {
-            try
-            {
-                await _deliveryComplete.Task.ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                LogContext.Error?.Log(exception, "Abandon message faulted during shutdown: {InputAddress}", _context.InputAddress);
-            }
         }
     }
 }

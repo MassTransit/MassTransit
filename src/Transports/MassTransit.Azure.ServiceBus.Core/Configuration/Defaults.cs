@@ -16,6 +16,8 @@
         public static TimeSpan TemporaryAutoDeleteOnIdle => TimeSpan.FromMinutes(5);
         public static TimeSpan MaxAutoRenewDuration => TimeSpan.FromMinutes(5);
         public static TimeSpan MessageWaitTimeout => TimeSpan.FromSeconds(10);
+        public static TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
+
         public static int MaxConcurrentCalls => Math.Max(Environment.ProcessorCount, 8);
         public static int PrefetchCount => Math.Max(MaxConcurrentCalls, 32);
 
@@ -39,37 +41,6 @@
                 AutoDeleteOnIdle = AutoDeleteOnIdle,
                 DefaultMessageTimeToLive = DefaultMessageTimeToLive,
                 EnableBatchedOperations = true
-            };
-        }
-
-        public static SubscriptionDescription CreateSubscriptionDescription(string topicPath, string subscriptionName, QueueDescription queue, string queuePath)
-        {
-            return new SubscriptionDescription(topicPath, subscriptionName)
-            {
-                AutoDeleteOnIdle = queue.AutoDeleteOnIdle,
-                DefaultMessageTimeToLive = queue.DefaultMessageTimeToLive,
-                EnableBatchedOperations = queue.EnableBatchedOperations,
-                EnableDeadLetteringOnMessageExpiration = queue.EnableDeadLetteringOnMessageExpiration,
-                ForwardTo = queuePath,
-                LockDuration = queue.LockDuration,
-                MaxDeliveryCount = queue.MaxDeliveryCount,
-                UserMetadata = queue.UserMetadata
-            };
-        }
-
-        public static SubscriptionDescription CreateSubscriptionDescription(string topicPath, string subscriptionName)
-        {
-            var queue = CreateQueueDescription(subscriptionName);
-
-            return new SubscriptionDescription(topicPath, subscriptionName)
-            {
-                AutoDeleteOnIdle = queue.AutoDeleteOnIdle,
-                DefaultMessageTimeToLive = queue.DefaultMessageTimeToLive,
-                EnableBatchedOperations = queue.EnableBatchedOperations,
-                EnableDeadLetteringOnMessageExpiration = queue.EnableDeadLetteringOnMessageExpiration,
-                LockDuration = queue.LockDuration,
-                MaxDeliveryCount = queue.MaxDeliveryCount,
-                UserMetadata = queue.UserMetadata
             };
         }
     }

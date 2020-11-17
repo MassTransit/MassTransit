@@ -31,12 +31,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         async Task OnSession(IMessageSession messageSession, Message message, CancellationToken cancellationToken)
         {
-            if (IsStopping)
-            {
-                await WaitForDeliveryComplete().ConfigureAwait(false);
-                return;
-            }
-
             LogContext.Debug?.Log("Receiving {SessionId}:{MessageId}({EntityPath})", message.SessionId, message.MessageId, _context.EntityPath);
 
             await _messageReceiver.Handle(message, cancellationToken, context => AddReceiveContextPayloads(context, messageSession, message))
