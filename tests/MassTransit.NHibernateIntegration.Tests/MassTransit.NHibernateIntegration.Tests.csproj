@@ -11,7 +11,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="Shouldly" Version="3.0.2" />
+    <PackageReference Include="Shouldly" Version="4.0.1" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
     <ProjectReference Include="..\..\src\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />

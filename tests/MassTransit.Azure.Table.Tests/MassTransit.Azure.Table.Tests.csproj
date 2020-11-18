@@ -8,7 +8,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.7.1" />
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="Shouldly" Version="3.0.2" />
+    <PackageReference Include="Shouldly" Version="4.0.1" />
     <ProjectReference Include="..\..\src\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
     <ProjectReference Include="..\..\src\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\..\src\MassTransit\MassTransit.csproj" />
