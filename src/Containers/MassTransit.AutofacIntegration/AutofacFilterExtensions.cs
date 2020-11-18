@@ -5,6 +5,7 @@ namespace MassTransit
     using AutofacIntegration;
     using AutofacIntegration.Filters;
     using Courier;
+    using Registration;
 
 
     public static class AutofacFilterExtensions
@@ -15,8 +16,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
         /// <param name="lifetimeScopeProvider">Lifetime Scope Provider</param>
-        public static void UseConsumeFilter(this IConsumePipeConfigurator configurator, Type filterType,
-            ILifetimeScopeProvider lifetimeScopeProvider)
+        public static void UseConsumeFilter(this IConsumePipeConfigurator configurator, Type filterType, ILifetimeScopeProvider lifetimeScopeProvider)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
@@ -32,15 +32,15 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
-        /// <param name="registration">Registration Context</param>
-        public static void UseConsumeFilter(this IConsumePipeConfigurator configurator, Type filterType, IRegistration registration)
+        /// <param name="provider">Configuration service provider</param>
+        public static void UseConsumeFilter(this IConsumePipeConfigurator configurator, Type filterType, IConfigurationServiceProvider provider)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (registration == null)
-                throw new ArgumentNullException(nameof(registration));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
 
-            var lifetimeScope = registration.GetRequiredService<ILifetimeScope>();
+            var lifetimeScope = provider.GetRequiredService<ILifetimeScope>();
             ILifetimeScopeProvider lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
             configurator.UseConsumeFilter(filterType, lifetimeScopeProvider);
         }
@@ -67,15 +67,15 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
-        /// <param name="registration">Registration Context</param>
-        public static void UseSendFilter(this ISendPipelineConfigurator configurator, Type filterType, IRegistration registration)
+        /// <param name="provider">Configuration service provider</param>
+        public static void UseSendFilter(this ISendPipelineConfigurator configurator, Type filterType, IConfigurationServiceProvider provider)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (registration == null)
-                throw new ArgumentNullException(nameof(registration));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
 
-            var lifetimeScope = registration.GetRequiredService<ILifetimeScope>();
+            var lifetimeScope = provider.GetRequiredService<ILifetimeScope>();
             ILifetimeScopeProvider lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
             configurator.UseSendFilter(filterType, lifetimeScopeProvider);
         }
@@ -102,15 +102,15 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
-        /// <param name="registration">Registration Context</param>
-        public static void UsePublishFilter(this IPublishPipelineConfigurator configurator, Type filterType, IRegistration registration)
+        /// <param name="provider">Configuration service provider</param>
+        public static void UsePublishFilter(this IPublishPipelineConfigurator configurator, Type filterType, IConfigurationServiceProvider provider)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (registration == null)
-                throw new ArgumentNullException(nameof(registration));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
 
-            var lifetimeScope = registration.GetRequiredService<ILifetimeScope>();
+            var lifetimeScope = provider.GetRequiredService<ILifetimeScope>();
             ILifetimeScopeProvider lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
             configurator.UsePublishFilter(filterType, lifetimeScopeProvider);
         }
@@ -121,8 +121,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
         /// <param name="lifetimeScopeProvider">Lifetime Scope Provider</param>
-        public static void UseExecuteActivityFilter(this IConsumePipeConfigurator configurator, Type filterType,
-            ILifetimeScopeProvider lifetimeScopeProvider)
+        public static void UseExecuteActivityFilter(this IConsumePipeConfigurator configurator, Type filterType, ILifetimeScopeProvider lifetimeScopeProvider)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
@@ -138,15 +137,15 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
-        /// <param name="registration">Registration Context</param>
-        public static void UseExecuteActivityFilter(this IConsumePipeConfigurator configurator, Type filterType, IRegistration registration)
+        /// <param name="provider">Configuration service provider</param>
+        public static void UseExecuteActivityFilter(this IConsumePipeConfigurator configurator, Type filterType, IConfigurationServiceProvider provider)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (registration == null)
-                throw new ArgumentNullException(nameof(registration));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
 
-            var lifetimeScope = registration.GetRequiredService<ILifetimeScope>();
+            var lifetimeScope = provider.GetRequiredService<ILifetimeScope>();
             ILifetimeScopeProvider lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
             configurator.UseExecuteActivityFilter(filterType, lifetimeScopeProvider);
         }
@@ -174,15 +173,15 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
-        /// <param name="registration">Registration Context</param>
-        public static void UseCompensateActivityFilter(this IConsumePipeConfigurator configurator, Type filterType, IRegistration registration)
+        /// <param name="provider">Configuration service provider</param>
+        public static void UseCompensateActivityFilter(this IConsumePipeConfigurator configurator, Type filterType, IConfigurationServiceProvider provider)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (registration == null)
-                throw new ArgumentNullException(nameof(registration));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
 
-            var lifetimeScope = registration.GetRequiredService<ILifetimeScope>();
+            var lifetimeScope = provider.GetRequiredService<ILifetimeScope>();
             ILifetimeScopeProvider lifetimeScopeProvider = new SingleLifetimeScopeProvider(lifetimeScope);
             configurator.UseCompensateActivityFilter(filterType, lifetimeScopeProvider);
         }

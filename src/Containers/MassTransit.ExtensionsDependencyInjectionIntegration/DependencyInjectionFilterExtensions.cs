@@ -3,6 +3,7 @@ namespace MassTransit
     using System;
     using Courier;
     using ExtensionsDependencyInjectionIntegration.Filters;
+    using Registration;
 
 
     public static class DependencyInjectionFilterExtensions
@@ -12,18 +13,18 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
-        /// <param name="registration">Registration Context</param>
-        public static void UseConsumeFilter(this IConsumePipeConfigurator configurator, Type filterType, IRegistration registration)
+        /// <param name="provider">Configuration service provider</param>
+        public static void UseConsumeFilter(this IConsumePipeConfigurator configurator, Type filterType, IConfigurationServiceProvider provider)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (registration == null)
-                throw new ArgumentNullException(nameof(registration));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
 
-            var provider = registration.GetRequiredService<IServiceProvider>();
+            var serviceProvider = provider.GetRequiredService<IServiceProvider>();
 
-            configurator.ConnectConsumerConfigurationObserver(new ScopedConsumerConsumePipeSpecificationObserver(filterType, provider));
-            configurator.ConnectSagaConfigurationObserver(new ScopedSagaConsumePipeSpecificationObserver(filterType, provider));
+            configurator.ConnectConsumerConfigurationObserver(new ScopedConsumerConsumePipeSpecificationObserver(filterType, serviceProvider));
+            configurator.ConnectSagaConfigurationObserver(new ScopedSagaConsumePipeSpecificationObserver(filterType, serviceProvider));
         }
 
         /// <summary>
@@ -31,16 +32,16 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
-        /// <param name="registration">Registration Context</param>
-        public static void UseSendFilter(this ISendPipelineConfigurator configurator, Type filterType, IRegistration registration)
+        /// <param name="provider">Configuration service provider</param>
+        public static void UseSendFilter(this ISendPipelineConfigurator configurator, Type filterType, IConfigurationServiceProvider provider)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (registration == null)
-                throw new ArgumentNullException(nameof(registration));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
 
-            var provider = registration.GetRequiredService<IServiceProvider>();
-            var observer = new ScopedSendPipeSpecificationObserver(filterType, provider);
+            var serviceProvider = provider.GetRequiredService<IServiceProvider>();
+            var observer = new ScopedSendPipeSpecificationObserver(filterType, serviceProvider);
             configurator.ConfigureSend(cfg => cfg.ConnectSendPipeSpecificationObserver(observer));
         }
 
@@ -49,16 +50,16 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
-        /// <param name="registration">Registration Context</param>
-        public static void UsePublishFilter(this IPublishPipelineConfigurator configurator, Type filterType, IRegistration registration)
+        /// <param name="provider">Configuration service provider</param>
+        public static void UsePublishFilter(this IPublishPipelineConfigurator configurator, Type filterType, IConfigurationServiceProvider provider)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (registration == null)
-                throw new ArgumentNullException(nameof(registration));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
 
-            var provider = registration.GetRequiredService<IServiceProvider>();
-            var observer = new ScopedPublishPipeSpecificationObserver(filterType, provider);
+            var serviceProvider = provider.GetRequiredService<IServiceProvider>();
+            var observer = new ScopedPublishPipeSpecificationObserver(filterType, serviceProvider);
             configurator.ConfigurePublish(cfg => cfg.ConnectPublishPipeSpecificationObserver(observer));
         }
 
@@ -67,16 +68,16 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
-        /// <param name="registration">Registration Context</param>
-        public static void UseExecuteActivityFilter(this IConsumePipeConfigurator configurator, Type filterType, IRegistration registration)
+        /// <param name="provider">Configuration service provider</param>
+        public static void UseExecuteActivityFilter(this IConsumePipeConfigurator configurator, Type filterType, IConfigurationServiceProvider provider)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (registration == null)
-                throw new ArgumentNullException(nameof(registration));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
 
-            var provider = registration.GetRequiredService<IServiceProvider>();
-            var observer = new ScopedExecuteActivityPipeSpecificationObserver(filterType, provider);
+            var serviceProvider = provider.GetRequiredService<IServiceProvider>();
+            var observer = new ScopedExecuteActivityPipeSpecificationObserver(filterType, serviceProvider);
             configurator.ConnectActivityConfigurationObserver(observer);
         }
 
@@ -85,16 +86,16 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="filterType">Filter type</param>
-        /// <param name="registration">Registration Context</param>
-        public static void UseCompensateActivityFilter(this IConsumePipeConfigurator configurator, Type filterType, IRegistration registration)
+        /// <param name="provider">Configuration service provider</param>
+        public static void UseCompensateActivityFilter(this IConsumePipeConfigurator configurator, Type filterType, IConfigurationServiceProvider provider)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
-            if (registration == null)
-                throw new ArgumentNullException(nameof(registration));
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
 
-            var provider = registration.GetRequiredService<IServiceProvider>();
-            var observer = new ScopedCompensateActivityPipeSpecificationObserver(filterType, provider);
+            var serviceProvider = provider.GetRequiredService<IServiceProvider>();
+            var observer = new ScopedCompensateActivityPipeSpecificationObserver(filterType, serviceProvider);
             configurator.ConnectActivityConfigurationObserver(observer);
         }
     }
