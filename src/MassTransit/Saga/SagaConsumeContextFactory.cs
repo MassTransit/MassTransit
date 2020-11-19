@@ -13,7 +13,7 @@ namespace MassTransit.Saga
             SagaConsumeContextMode mode)
             where T : class
         {
-            return Task.FromResult<SagaConsumeContext<TSaga, T>>(new DefaultSagaConsumeContext<TSaga, T>(consumeContext, instance, mode));
+            return Task.FromResult<SagaConsumeContext<TSaga, T>>(new DefaultSagaConsumeContext<TSaga, T>(consumeContext, instance));
         }
     }
 }

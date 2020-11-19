@@ -1,5 +1,6 @@
 namespace MassTransit.Context
 {
+    using System;
     using System.Threading.Tasks;
     using Saga;
 
@@ -22,6 +23,8 @@ namespace MassTransit.Context
         {
             _sagaContext = sagaContext;
         }
+
+        public override Guid? CorrelationId => Saga.CorrelationId;
 
         public TSaga Saga => _sagaContext.Saga;
 

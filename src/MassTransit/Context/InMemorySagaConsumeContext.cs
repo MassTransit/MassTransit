@@ -1,40 +1,27 @@
 ﻿namespace MassTransit.Context
 {
     using System;
-    using System.Threading.Tasks;
     using Saga;
     using Saga.InMemoryRepository;
 
 
     public class InMemorySagaConsumeContext<TSaga, TMessage> :
-        ConsumeContextScope<TMessage>,
-        SagaConsumeContext<TSaga, TMessage>,
+        DefaultSagaConsumeContext<TSaga, TMessage>,
         IDisposable
         where TMessage : class
         where TSaga : class, ISaga
     {
-        readonly SagaInstance<TSaga> _instance;
+        readonly SagaInstance<TSaga> _saga;
 
-        public InMemorySagaConsumeContext(ConsumeContext<TMessage> context, SagaInstance<TSaga> instance)
-            : base(context)
+        public InMemorySagaConsumeContext(ConsumeContext<TMessage> context, SagaInstance<TSaga> saga)
+            : base(context, saga.Instance)
         {
-            _instance = instance;
+            _saga = saga;
         }
 
         public void Dispose()
         {
-            _instance.Release();
-        }
-
-        public override Guid? CorrelationId => Saga.CorrelationId;
-
-        public bool IsCompleted { get; private set; }
-
-        public TSaga Saga => _instance.Instance;
-
-        public async Task SetCompleted()
-        {
-            IsCompleted = true;
+            _saga.Release();
         }
     }
 }

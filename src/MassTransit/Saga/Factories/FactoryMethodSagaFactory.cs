@@ -37,7 +37,7 @@ namespace MassTransit.Saga.Factories
 
             var instance = _factoryMethod(context);
 
-            var proxy = new NewSagaConsumeContext<TSaga, TMessage>(context, instance);
+            var proxy = new DefaultSagaConsumeContext<TSaga, TMessage>(context, instance);
 
             proxy.LogCreated();
 

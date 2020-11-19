@@ -3,6 +3,7 @@ namespace MassTransit.Context
     using System;
     using System.Threading.Tasks;
     using Saga;
+    using Util;
 
 
     public class DefaultSagaConsumeContext<TSaga, TMessage> :
@@ -11,23 +12,22 @@ namespace MassTransit.Context
         where TMessage : class
         where TSaga : class, ISaga
     {
-        bool _isCompleted;
-
-        public DefaultSagaConsumeContext(ConsumeContext<TMessage> context, TSaga instance, SagaConsumeContextMode mode)
+        public DefaultSagaConsumeContext(ConsumeContext<TMessage> context, TSaga instance)
             : base(context)
         {
             Saga = instance;
         }
 
-        Guid? MessageContext.CorrelationId => Saga.CorrelationId;
-
-        bool SagaConsumeContext<TSaga>.IsCompleted => _isCompleted;
-
-        async Task SagaConsumeContext<TSaga>.SetCompleted()
-        {
-            _isCompleted = true;
-        }
+        public override Guid? CorrelationId => Saga.CorrelationId;
 
         public TSaga Saga { get; }
+        public bool IsCompleted { get; private set; }
+
+        public Task SetCompleted()
+        {
+            IsCompleted = true;
+
+            return TaskUtil.Completed;
+        }
     }
 }
