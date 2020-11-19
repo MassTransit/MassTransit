@@ -18,6 +18,7 @@ namespace MassTransit.Metadata
         readonly SagaInterfaceType[] _initiatedByTypes;
         readonly SagaInterfaceType[] _observesTypes;
         readonly SagaInterfaceType[] _orchestratesTypes;
+        readonly SagaInterfaceType[] _initiatedByOrOrchestratesTypes;
         SagaInstanceFactoryMethod<TSaga> _factoryMethod;
 
         SagaMetadataCache()
@@ -25,6 +26,7 @@ namespace MassTransit.Metadata
             _initiatedByTypes = GetInitiatingTypes().ToArray();
             _orchestratesTypes = GetOrchestratingTypes().ToArray();
             _observesTypes = GetObservingTypes().ToArray();
+            _initiatedByOrOrchestratesTypes = GetInitiatingOrOrchestratingTypes().ToArray();
 
             GetActivatorSagaInstanceFactoryMethod();
         }
@@ -32,11 +34,13 @@ namespace MassTransit.Metadata
         public static SagaInterfaceType[] InitiatedByTypes => Cached.Instance.Value.InitiatedByTypes;
         public static SagaInterfaceType[] OrchestratesTypes => Cached.Instance.Value.OrchestratesTypes;
         public static SagaInterfaceType[] ObservesTypes => Cached.Instance.Value.ObservesTypes;
+        public static SagaInterfaceType[] InitiatedByOrOrchestratesTypes => Cached.Instance.Value.InitiatedByOrOrchestratesTypes;
         public static SagaInstanceFactoryMethod<TSaga> FactoryMethod => Cached.Instance.Value.FactoryMethod;
         SagaInstanceFactoryMethod<TSaga> ISagaMetadataCache<TSaga>.FactoryMethod => _factoryMethod;
         SagaInterfaceType[] ISagaMetadataCache<TSaga>.InitiatedByTypes => _initiatedByTypes;
         SagaInterfaceType[] ISagaMetadataCache<TSaga>.OrchestratesTypes => _orchestratesTypes;
         SagaInterfaceType[] ISagaMetadataCache<TSaga>.ObservesTypes => _observesTypes;
+        SagaInterfaceType[] ISagaMetadataCache<TSaga>.InitiatedByOrOrchestratesTypes => _initiatedByOrOrchestratesTypes;
 
         void GetActivatorSagaInstanceFactoryMethod()
         {
@@ -124,7 +128,7 @@ namespace MassTransit.Metadata
                 .Where(x => x.GetTypeInfo().IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(InitiatedBy<>))
                 .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
-                .Where(x => x.MessageType.GetTypeInfo().IsValueType == false && x.MessageType != typeof(string));
+                .Where(x => TypeMetadataCache.IsValidMessageType(x.MessageType));
         }
 
         static IEnumerable<SagaInterfaceType> GetOrchestratingTypes()
@@ -133,7 +137,7 @@ namespace MassTransit.Metadata
                 .Where(x => x.GetTypeInfo().IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(Orchestrates<>))
                 .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
-                .Where(x => x.MessageType.GetTypeInfo().IsValueType == false && x.MessageType != typeof(string));
+                .Where(x => TypeMetadataCache.IsValidMessageType(x.MessageType));
         }
 
         static IEnumerable<SagaInterfaceType> GetObservingTypes()
@@ -142,7 +146,16 @@ namespace MassTransit.Metadata
                 .Where(x => x.GetTypeInfo().IsGenericType)
                 .Where(x => x.GetGenericTypeDefinition() == typeof(Observes<,>))
                 .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
-                .Where(x => x.MessageType.GetTypeInfo().IsValueType == false && x.MessageType != typeof(string));
+                .Where(x => TypeMetadataCache.IsValidMessageType(x.MessageType));
+        }
+
+        static IEnumerable<SagaInterfaceType> GetInitiatingOrOrchestratingTypes()
+        {
+            return typeof(TSaga).GetInterfaces()
+                .Where(x => x.GetTypeInfo().IsGenericType)
+                .Where(x => x.GetGenericTypeDefinition() == typeof(InitiatedByOrOrchestrates<>))
+                .Select(x => new SagaInterfaceType(x, x.GetGenericArguments()[0], typeof(TSaga)))
+                .Where(x => TypeMetadataCache.IsValidMessageType(x.MessageType));
         }
 
 

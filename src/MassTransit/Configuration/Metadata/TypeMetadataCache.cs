@@ -84,6 +84,7 @@
 
             return interfaces.Any(t => Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(InitiatedBy<>))
                 || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(Orchestrates<>))
+                || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(InitiatedByOrOrchestrates<>))
                 || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(Observes<,>))
                 || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(ISagaDefinition<>)));
         }
@@ -304,6 +305,14 @@
                     return false;
                 }
 
+                if (typeDefinition == typeof(InitiatedByOrOrchestrates<>))
+                {
+                    _invalidMessageTypeReason =
+                        $"InitiatedByOrOrchestrates<{typeof(T).GetClosingArgument(typeof(InitiatedByOrOrchestrates<>)).Name} is not a valid message type";
+
+                    return false;
+                }
+
                 if (typeDefinition == typeof(Observes<,>))
                 {
                     Type[] closingArguments = Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(Observes<,>)).ToArray();
@@ -404,6 +413,7 @@
 
             return interfaces.Any(t => Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(InitiatedBy<>))
                 || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(Orchestrates<>))
+                || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(InitiatedByOrOrchestrates<>))
                 || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(Observes<,>)));
         }
 

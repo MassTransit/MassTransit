@@ -22,6 +22,7 @@ namespace MassTransit.Logging
             public const string SendQuery = "MassTransit.Saga.SendQuery";
             public const string Initiate = "MassTransit.Saga.Initiate";
             public const string Orchestrate = "MassTransit.Saga.Orchestrate";
+            public const string InitiateOrOrchestrate = "MassTransit.Saga.InitiateOrOrchestrate";
             public const string Observe = "MassTransit.Saga.Observe";
             public const string RaiseEvent = "MassTransit.Saga.RaiseEvent";
         }

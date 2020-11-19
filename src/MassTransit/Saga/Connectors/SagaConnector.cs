@@ -21,13 +21,11 @@
             try
             {
                 if (!TypeMetadataCache<TSaga>.HasSagaInterfaces)
-                {
-                    throw new ConfigurationException("The specified type is does not support any saga methods: "
-                        + TypeMetadataCache<TSaga>.ShortName);
-                }
+                    throw new ConfigurationException("The specified type is does not support any saga methods: " + TypeMetadataCache<TSaga>.ShortName);
 
                 _connectors = Initiates()
                     .Concat(Orchestrates())
+                    .Concat(InitiatesOrOrchestrates())
                     .Concat(Observes())
                     .Distinct((x, y) => x.MessageType == y.MessageType)
                     .ToList();
@@ -42,12 +40,9 @@
 
         ISagaSpecification<T> ISagaConnector.CreateSagaSpecification<T>()
         {
-            List<ISagaMessageSpecification<T>> messageSpecifications =
-                _connectors.Select(x => x.CreateSagaMessageSpecification())
-                    .Cast<ISagaMessageSpecification<T>>()
-                    .ToList();
-
-            return new SagaSpecification<T>(messageSpecifications);
+            return new SagaSpecification<T>(_connectors.Select(x => x.CreateSagaMessageSpecification())
+                .Cast<ISagaMessageSpecification<T>>()
+                .ToList());
         }
 
         ConnectHandle ISagaConnector.ConnectSaga<T>(IConsumePipeConnector consumePipe, ISagaRepository<T> repository, ISagaSpecification<T> specification)
@@ -85,6 +80,11 @@
         static IEnumerable<ISagaMessageConnector<TSaga>> Observes()
         {
             return SagaMetadataCache<TSaga>.ObservesTypes.Select(x => x.GetObservesConnector<TSaga>());
+        }
+
+        static IEnumerable<ISagaMessageConnector<TSaga>> InitiatesOrOrchestrates()
+        {
+            return SagaMetadataCache<TSaga>.InitiatedByOrOrchestratesTypes.Select(x => x.GetInitiatedByOrOrchestratesConnector<TSaga>());
         }
     }
 }
