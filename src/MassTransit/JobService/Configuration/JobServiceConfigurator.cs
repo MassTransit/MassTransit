@@ -106,6 +106,22 @@ namespace MassTransit.JobService.Configuration
             set => _options.StartJobTimeout = value;
         }
 
+        public int SuspectJobRetryCount
+        {
+            set => _options.SuspectJobRetryCount = value;
+        }
+
+        public TimeSpan SuspectJobRetryDelay
+        {
+            set
+            {
+                if (value <= TimeSpan.Zero)
+                    throw new ArgumentOutOfRangeException(nameof(value), "The delay must be > TimeSpan.Zero");
+
+                _options.SuspectJobRetryDelay = value;
+            }
+        }
+
         public int? SagaPartitionCount
         {
             set => _options.SagaPartitionCount = value;

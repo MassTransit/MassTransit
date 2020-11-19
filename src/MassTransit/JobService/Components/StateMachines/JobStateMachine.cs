@@ -101,7 +101,7 @@ namespace MassTransit.JobService.Components.StateMachines
                     .Then(context =>
                     {
                         context.Instance.Faulted = context.Data.Timestamp;
-                        context.Instance.Reason = context.Data.Exceptions.Message;
+                        context.Instance.Reason = context.Data.Exceptions?.Message ?? "Job Attempt Faulted (unknown reason)";
                     })
                     .IfElse(context => context.Data.RetryDelay.HasValue,
                         retry => retry

@@ -55,9 +55,10 @@ namespace MassTransit.JobService.Pipeline
 
                 await jobContext.NotifyCompleted().ConfigureAwait(false);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException exception)
             {
-                await jobContext.NotifyCanceled("Operation canceled").ConfigureAwait(false);
+                if (jobContext.CancellationToken == exception.CancellationToken)
+                    await jobContext.NotifyCanceled("Operation canceled").ConfigureAwait(false);
             }
             catch (Exception exception)
             {

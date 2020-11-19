@@ -61,6 +61,16 @@ namespace MassTransit.JobService.Configuration
         TimeSpan StartJobTimeout { set; }
 
         /// <summary>
+        /// The number of times to retry a suspect job before it is faulted. Defaults to zero.
+        /// </summary>
+        int SuspectJobRetryCount { set; }
+
+        /// <summary>
+        /// The delay before retrying a suspect job
+        /// </summary>
+        TimeSpan SuspectJobRetryDelay { set; }
+
+        /// <summary>
         /// If specified, overrides the default saga partition count to reduce conflicts when using optimistic concurrency.
         /// If using a saga repository with pessimistic concurrency, this is not recommended.
         /// </summary>

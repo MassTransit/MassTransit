@@ -5,8 +5,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using Courier;
-    using MassTransit.Contracts.JobService;
+    using Contracts.JobService;
 
 
     public class ConsumeJobContext<TJob> :
