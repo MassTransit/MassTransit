@@ -130,7 +130,7 @@ namespace MassTransit.Analyzers
                 {
                     if (inputProperty.Type.IsAnonymousType)
                     {
-                        if (contractProperty.Type.TypeKind == TypeKind.Interface)
+                        if (contractProperty.Type.TypeKind.IsClassOrInterface())
                         {
                             if (!TypesAreStructurallyCompatible(typeConverterHelper, contractProperty.Type,
                                 inputProperty.Type, Append(path, inputProperty.Name), incompatibleProperties))
@@ -144,15 +144,17 @@ namespace MassTransit.Analyzers
                     }
                     else if (contractProperty.Type.IsImmutableArray(out var contractElementType) ||
                         contractProperty.Type.IsList(out contractElementType) ||
-                        contractProperty.Type.IsArray(out contractElementType))
+                        contractProperty.Type.IsArray(out contractElementType) ||
+                        contractProperty.Type.IsCollection(out contractElementType))
                     {
                         if (inputProperty.Type.IsImmutableArray(out var inputElementType) ||
                             inputProperty.Type.IsList(out inputElementType) ||
-                            inputProperty.Type.IsArray(out inputElementType))
+                            inputProperty.Type.IsArray(out inputElementType) ||
+                            inputProperty.Type.IsCollection(out inputElementType))
                         {
                             if (!typeConverterHelper.CanConvert(contractElementType, inputElementType))
                             {
-                                if (contractElementType.TypeKind == TypeKind.Interface)
+                                if (contractElementType.TypeKind.IsClassOrInterface())
                                 {
                                     if (!TypesAreStructurallyCompatible(typeConverterHelper, contractElementType,
                                         inputElementType, Append(path, inputProperty.Name), incompatibleProperties))
@@ -180,7 +182,7 @@ namespace MassTransit.Analyzers
                             {
                                 if (!typeConverterHelper.CanConvert(contractValueType, inputValueType))
                                 {
-                                    if (contractValueType.TypeKind == TypeKind.Interface)
+                                    if (contractValueType.TypeKind.IsClassOrInterface())
                                     {
                                         if (!TypesAreStructurallyCompatible(typeConverterHelper, contractValueType,
                                             inputValueType, Append(path, inputProperty.Name), incompatibleProperties))
@@ -261,7 +263,7 @@ namespace MassTransit.Analyzers
                     contractProperty.Type.IsList(out contractElementType) ||
                     contractProperty.Type.IsArray(out contractElementType))
                 {
-                    if (contractElementType.TypeKind == TypeKind.Interface)
+                    if (contractElementType.TypeKind.IsClassOrInterface())
                     {
                         if (inputProperty.Type.IsImmutableArray(out var inputElementType) ||
                             inputProperty.Type.IsList(out inputElementType) ||
@@ -272,7 +274,7 @@ namespace MassTransit.Analyzers
                         }
                     }
                 }
-                else if (contractProperty.Type.TypeKind == TypeKind.Interface)
+                else if (contractProperty.Type.TypeKind.IsClassOrInterface())
                 {
                     if (inputProperty.Type.IsAnonymousType)
                     {
@@ -296,7 +298,9 @@ namespace MassTransit.Analyzers
 
             contractTypes.AddRange(contractType.AllInterfaces);
 
-            return contractTypes.SelectMany(i => i.GetMembers().OfType<IPropertySymbol>()).Distinct(PropertyNameEqualityComparer.Instance).ToList();
+            return contractTypes.SelectMany(i => i.GetMembers().OfType<IPropertySymbol>().Where(x => x.DeclaredAccessibility == Accessibility.Public))
+                .Distinct(PropertyNameEqualityComparer.Instance)
+                .ToList();
         }
 
         static string Append(string path, string propertyName)

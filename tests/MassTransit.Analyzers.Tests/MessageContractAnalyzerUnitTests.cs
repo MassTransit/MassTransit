@@ -983,7 +983,7 @@ namespace ConsoleApplication1
         }
 
         [Test]
-        public void WhenTypeNotValidStructure_ShouldHaveDiagnostic()
+        public void WhenTypeNotValidStructure_ShouldHaveDiagnostic_ButItLooksGoodToMe()
         {
             var test = Usings + Dtos + @"
 namespace ConsoleApplication1
@@ -1017,16 +1017,7 @@ namespace ConsoleApplication1
     }
 }
 ";
-            var expected = new DiagnosticResult
-            {
-                Id = "MCA0002",
-                Message = "Message contract 'OrderDto' does not have a valid structure",
-                Severity = DiagnosticSeverity.Error,
-                Locations =
-                    new[] {new DiagnosticResultLocation("Test0.cs", 37, 41)}
-            };
-
-            VerifyCSharpDiagnostic(test, expected);
+            VerifyCSharpDiagnostic(test);
         }
 
         [Test]
@@ -1992,6 +1983,32 @@ namespace ConsoleApplication1
         }
 
         [Test]
+        public void WhenRecordsWithVariablesAreStructurallyCompatibleAndNoMissingProperties_ShouldHaveNoDiagnostics()
+        {
+            var test = Usings + RecordContracts + @"
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static async Task Main()
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+            var sendEndpoint = await bus.GetSendEndpoint(null);
+
+            await sendEndpoint.Send<OrderSubmissionReceived>(new
+            {
+                Id = InVar.Id,
+                CustomerId = ""Customer""
+            });
+        }
+    }
+}
+";
+
+            VerifyCSharpDiagnostic(test);
+        }
+
+        [Test]
         public void WhenTypesWithVariablesAreStructurallyIncompatibleAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + MessageContracts + @"
@@ -2087,6 +2104,17 @@ namespace ConsoleApplication1
     {
         Guid OrderId { get; }
         string Status { get; }
+    }
+}
+";
+
+        readonly string RecordContracts = @"
+namespace ConsoleApplication1
+{
+    public record OrderSubmissionReceived
+    {
+        public Guid Id { get; init; }
+        public string CustomerId { get; init; }
     }
 }
 ";
