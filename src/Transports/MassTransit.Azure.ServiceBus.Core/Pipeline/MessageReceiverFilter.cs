@@ -32,6 +32,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
         async Task IFilter<ClientContext>.Send(ClientContext context, IPipe<ClientContext> next)
         {
+            if (context.IsClosedOrClosing)
+                return;
+
             LogContext.Debug?.Log("Creating message receiver for {InputAddress}", context.InputAddress);
 
             var receiver = CreateMessageReceiver(context, _messageReceiver);

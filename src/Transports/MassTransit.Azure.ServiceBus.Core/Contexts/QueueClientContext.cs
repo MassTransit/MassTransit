@@ -32,6 +32,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public string EntityPath => _queueClient.Path;
 
+        public bool IsClosedOrClosing => _queueClient.IsClosedOrClosing || _queueClient.ServiceBusConnection.IsClosedOrClosing;
+
         public Uri InputAddress { get; }
 
         public void OnMessageAsync(Func<IReceiverClient, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)

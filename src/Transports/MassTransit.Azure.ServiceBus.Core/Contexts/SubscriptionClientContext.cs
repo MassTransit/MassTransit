@@ -33,6 +33,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         public ConnectionContext ConnectionContext { get; }
 
         public string EntityPath => _settings.TopicDescription.Path;
+
+        public bool IsClosedOrClosing => _subscriptionClient.IsClosedOrClosing || _subscriptionClient.ServiceBusConnection.IsClosedOrClosing;
+
         public Uri InputAddress { get; }
 
         public void OnMessageAsync(Func<IReceiverClient, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)

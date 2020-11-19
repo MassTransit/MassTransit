@@ -29,6 +29,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public string EntityPath => _context.EntityPath;
 
+        public bool IsClosedOrClosing => _context.IsClosedOrClosing;
+
         public void OnMessageAsync(Func<IReceiverClient, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
         {
             _context.OnMessageAsync(callback, exceptionHandler);

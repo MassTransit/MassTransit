@@ -24,6 +24,11 @@ namespace MassTransit.Azure.ServiceBus.Core
         string EntityPath { get; }
 
         /// <summary>
+        /// True if the client or connection is closed or closing
+        /// </summary>
+        bool IsClosedOrClosing { get; }
+
+        /// <summary>
         /// Register an message handler for the client
         /// </summary>
         /// <param name="callback"></param>
