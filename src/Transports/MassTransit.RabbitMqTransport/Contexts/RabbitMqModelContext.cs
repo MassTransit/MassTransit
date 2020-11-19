@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Text;
     using System.Threading;
+    using System.Threading.Channels;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
@@ -136,9 +137,15 @@
             return _executor.Run(() => _model.BasicAck(deliveryTag, multiple), CancellationToken);
         }
 
-        Task ModelContext.BasicNack(ulong deliveryTag, bool multiple, bool requeue)
+        async Task ModelContext.BasicNack(ulong deliveryTag, bool multiple, bool requeue)
         {
-            return _executor.Run(() => _model.BasicNack(deliveryTag, multiple, requeue), CancellationToken);
+            try
+            {
+                await _executor.Run(() => _model.BasicNack(deliveryTag, multiple, requeue), CancellationToken).ConfigureAwait(false);
+            }
+            catch (ChannelClosedException) // if we are shutting down, the broker would already nack prefetched messages anyway
+            {
+            }
         }
 
         Task<string> ModelContext.BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer)

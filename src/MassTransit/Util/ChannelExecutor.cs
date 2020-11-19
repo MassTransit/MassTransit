@@ -32,10 +32,7 @@ namespace MassTransit.Util
                 _runTasks[i] = Task.Run(() => RunFromChannel());
         }
 
-        public ChannelExecutor(int concurrencyLimit)
-            :this (concurrencyLimit, true){ }
-
-        public ChannelExecutor(int concurrencyLimit, bool allowSynchronousContinuations)
+        public ChannelExecutor(int concurrencyLimit, bool allowSynchronousContinuations = true)
         {
             var channelOptions = new UnboundedChannelOptions
             {
