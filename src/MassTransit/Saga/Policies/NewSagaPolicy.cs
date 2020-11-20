@@ -25,6 +25,8 @@ namespace MassTransit.Saga.Policies
             _insertOnInitial = insertOnInitial;
         }
 
+        public bool IsReadOnly => false;
+
         public bool PreInsertInstance(ConsumeContext<TMessage> context, out TSaga instance)
         {
             if (_insertOnInitial)

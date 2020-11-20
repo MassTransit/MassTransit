@@ -64,6 +64,13 @@ namespace MassTransit.Saga
         /// <param name="context"></param>
         /// <returns></returns>
         Task Discard(SagaConsumeContext<TSaga> context);
+
+        /// <summary>
+        /// Undo the changes for the saga
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        Task Undo(SagaConsumeContext<TSaga> context);
     }
 
 

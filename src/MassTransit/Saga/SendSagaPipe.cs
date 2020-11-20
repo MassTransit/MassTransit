@@ -41,14 +41,21 @@ namespace MassTransit.Saga
 
                     await _policy.Existing(sagaConsumeContext, _next).ConfigureAwait(false);
 
-                    if (sagaConsumeContext.IsCompleted)
+                    if (_policy.IsReadOnly)
                     {
-                        await context.Delete(sagaConsumeContext).ConfigureAwait(false);
-
-                        sagaConsumeContext.LogRemoved();
+                        await context.Undo(sagaConsumeContext).ConfigureAwait(false);
                     }
                     else
-                        await context.Update(sagaConsumeContext).ConfigureAwait(false);
+                    {
+                        if (sagaConsumeContext.IsCompleted)
+                        {
+                            await context.Delete(sagaConsumeContext).ConfigureAwait(false);
+
+                            sagaConsumeContext.LogRemoved();
+                        }
+                        else
+                            await context.Update(sagaConsumeContext).ConfigureAwait(false);
+                    }
                 }
                 finally
                 {

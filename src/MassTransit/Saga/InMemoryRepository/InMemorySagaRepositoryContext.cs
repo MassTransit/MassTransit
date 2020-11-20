@@ -168,6 +168,11 @@ namespace MassTransit.Saga.InMemoryRepository
             return Delete(context);
         }
 
+        public Task Undo(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
+        }
+
         public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
             where T : class
         {

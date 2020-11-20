@@ -98,6 +98,13 @@ namespace MassTransit.MartenIntegration.Saga.Context
         {
             return TaskUtil.Completed;
         }
+
+        public Task Undo(SagaConsumeContext<TSaga> context)
+        {
+            _session.Eject(context.Saga);
+
+            return TaskUtil.Completed;
+        }
     }
 
 

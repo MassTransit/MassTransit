@@ -84,6 +84,13 @@ namespace MassTransit.NHibernateIntegration.Saga
             return TaskUtil.Completed;
         }
 
+        public Task Undo(SagaConsumeContext<TSaga> context)
+        {
+            _session.Evict(context.Saga);
+
+            return TaskUtil.Completed;
+        }
+
         public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
             where T : class
         {

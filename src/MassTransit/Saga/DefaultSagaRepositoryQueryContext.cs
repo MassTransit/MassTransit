@@ -52,6 +52,11 @@ namespace MassTransit.Saga
             return _context.Discard(context);
         }
 
+        public Task Undo(SagaConsumeContext<TSaga> context)
+        {
+            return _context.Undo(context);
+        }
+
         public Task Update(SagaConsumeContext<TSaga> context)
         {
             return _context.Update(context);

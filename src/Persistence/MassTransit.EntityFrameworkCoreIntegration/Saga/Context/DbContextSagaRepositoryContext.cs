@@ -127,6 +127,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             return TaskUtil.Completed;
         }
 
+        public Task Undo(SagaConsumeContext<TSaga> context)
+        {
+            var entity = _dbContext.ChangeTracker.Entries<TSaga>().FirstOrDefault(x => x.Entity.CorrelationId == context.Saga.CorrelationId);
+            if (entity != null)
+                entity.State = EntityState.Unchanged;
+
+            return TaskUtil.Completed;
+        }
+
         public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
             where T : class
         {

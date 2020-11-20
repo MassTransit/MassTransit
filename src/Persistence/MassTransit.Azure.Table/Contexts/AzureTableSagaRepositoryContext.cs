@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using Mapping;
     using MassTransit.Saga;
     using Microsoft.Azure.Cosmos.Table;
     using Util;
@@ -116,6 +115,11 @@
         }
 
         public Task Discard(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
+        }
+
+        public Task Undo(SagaConsumeContext<TSaga> context)
         {
             return TaskUtil.Completed;
         }

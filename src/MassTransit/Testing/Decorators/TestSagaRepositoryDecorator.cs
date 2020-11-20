@@ -100,6 +100,8 @@ namespace MassTransit.Testing.Decorators
                 _policy = policy;
             }
 
+            public bool IsReadOnly => _policy.IsReadOnly;
+
             public bool PreInsertInstance(ConsumeContext<TMessage> context, out TSaga instance)
             {
                 return _policy.PreInsertInstance(context, out instance);

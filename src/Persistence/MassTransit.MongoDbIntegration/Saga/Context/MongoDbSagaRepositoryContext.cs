@@ -101,6 +101,11 @@ namespace MassTransit.MongoDbIntegration.Saga.Context
         {
             return TaskUtil.Completed;
         }
+
+        public Task Undo(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
+        }
     }
 
 

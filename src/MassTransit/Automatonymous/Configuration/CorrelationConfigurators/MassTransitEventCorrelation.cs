@@ -20,11 +20,12 @@
         readonly IFilter<ConsumeContext<TData>> _messageFilter;
         readonly IPipe<ConsumeContext<TData>> _missingPipe;
         readonly Lazy<ISagaPolicy<TInstance, TData>> _policy;
+        readonly bool _readOnly;
         readonly ISagaFactory<TInstance, TData> _sagaFactory;
 
         public MassTransitEventCorrelation(SagaStateMachine<TInstance> machine, Event<TData> @event, SagaFilterFactory<TInstance, TData> sagaFilterFactory,
             IFilter<ConsumeContext<TData>> messageFilter, IPipe<ConsumeContext<TData>> missingPipe, ISagaFactory<TInstance, TData> sagaFactory,
-            bool insertOnInitial)
+            bool insertOnInitial, bool readOnly)
         {
             _event = @event;
             FilterFactory = sagaFilterFactory;
@@ -32,6 +33,7 @@
             _missingPipe = missingPipe;
             _sagaFactory = sagaFactory;
             _insertOnInitial = insertOnInitial;
+            _readOnly = readOnly;
             _machine = machine;
 
             _policy = new Lazy<ISagaPolicy<TInstance, TData>>(GetSagaPolicy);
@@ -49,21 +51,26 @@
 
         public IEnumerable<ValidationResult> Validate()
         {
-            yield break;
+            if (_insertOnInitial && _readOnly)
+                yield return this.Failure("ReadOnly", "ReadOnly cannot be set when InsertOnInitial is true");
+
+            if (IncludesInitial() && _readOnly)
+                yield return this.Failure("ReadOnly", "ReadOnly cannot be used for events in the initial state");
         }
 
         ISagaPolicy<TInstance, TData> GetSagaPolicy()
         {
-            State[] states = _machine.States
-                .Where(state => _machine.NextEvents(state).Contains(_event))
-                .ToArray();
-
-            var includesInitial = states.Any(x => x.Name.Equals(_machine.Initial.Name));
-
-            if (includesInitial)
+            if (IncludesInitial())
                 return new NewOrExistingSagaPolicy<TInstance, TData>(_sagaFactory, _insertOnInitial);
 
-            return new AnyExistingSagaPolicy<TInstance, TData>(_missingPipe);
+            return new AnyExistingSagaPolicy<TInstance, TData>(_missingPipe, _readOnly);
+        }
+
+        bool IncludesInitial()
+        {
+            return _machine.States
+                .Where(state => _machine.NextEvents(state).Contains(_event))
+                .Any(x => x.Name.Equals(_machine.Initial.Name));
         }
     }
 }

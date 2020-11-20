@@ -110,6 +110,11 @@ namespace MassTransit.Azure.Cosmos.Saga.Context
             return TaskUtil.Completed;
         }
 
+        public Task Undo(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
+        }
+
         public async Task Update(SagaConsumeContext<TSaga> context)
         {
             try

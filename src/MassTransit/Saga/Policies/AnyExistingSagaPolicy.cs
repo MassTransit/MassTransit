@@ -16,10 +16,13 @@ namespace MassTransit.Saga.Policies
     {
         readonly IPipe<ConsumeContext<TMessage>> _missingPipe;
 
-        public AnyExistingSagaPolicy(IPipe<ConsumeContext<TMessage>> missingPipe = null)
+        public AnyExistingSagaPolicy(IPipe<ConsumeContext<TMessage>> missingPipe = null, bool readOnly = false)
         {
+            IsReadOnly = readOnly;
             _missingPipe = missingPipe ?? Pipe.Empty<ConsumeContext<TMessage>>();
         }
+
+        public bool IsReadOnly { get; }
 
         public bool PreInsertInstance(ConsumeContext<TMessage> context, out TSaga instance)
         {

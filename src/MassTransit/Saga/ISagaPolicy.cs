@@ -9,6 +9,11 @@ namespace MassTransit.Saga
         where TMessage : class
     {
         /// <summary>
+        /// If true, changes should not be saved to the saga repository
+        /// </summary>
+        bool IsReadOnly { get; }
+
+        /// <summary>
         /// If true, the instance returned should be used to try and insert as a new saga instance, ignoring any failures
         /// </summary>
         /// <param name="context"></param>

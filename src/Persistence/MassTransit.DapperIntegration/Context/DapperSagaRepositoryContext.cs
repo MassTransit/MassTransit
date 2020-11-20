@@ -75,6 +75,11 @@ namespace MassTransit.DapperIntegration.Context
         {
             return TaskUtil.Completed;
         }
+
+        public Task Undo(SagaConsumeContext<TSaga> context)
+        {
+            return TaskUtil.Completed;
+        }
     }
 
 
