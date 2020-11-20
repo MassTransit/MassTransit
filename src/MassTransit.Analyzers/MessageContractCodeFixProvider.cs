@@ -77,7 +77,7 @@ namespace MassTransit.Analyzers
         static async Task FindAnonymousTypesWithMessageContractsInTree(IDictionary<AnonymousObjectCreationExpressionSyntax, ITypeSymbol> dictionary,
             AnonymousObjectCreationExpressionSyntax anonymousObject, ITypeSymbol contractType, SemanticModel semanticModel)
         {
-            List<IPropertySymbol> contractProperties = GetContractProperties(contractType);
+            List<IPropertySymbol> contractProperties = contractType.GetContractProperties();
 
             foreach (var initializer in anonymousObject.Initializers)
             {
@@ -146,14 +146,6 @@ namespace MassTransit.Analyzers
             return name;
         }
 
-        static List<IPropertySymbol> GetContractProperties(ITypeSymbol contractType)
-        {
-            var contractTypes = new List<ITypeSymbol> {contractType};
-            contractTypes.AddRange(contractType.AllInterfaces);
-
-            return contractTypes.SelectMany(i => i.GetMembers().OfType<IPropertySymbol>()).ToList();
-        }
-
         static SyntaxNode AddMissingProperties(SyntaxNode root, IDictionary<AnonymousObjectCreationExpressionSyntax, ITypeSymbol> dictionary)
         {
             var newRoot = root.TrackNodes(dictionary.Keys);
@@ -172,7 +164,7 @@ namespace MassTransit.Analyzers
         {
             var newRoot = root;
 
-            List<IPropertySymbol> contractProperties = GetContractProperties(contractType);
+            List<IPropertySymbol> contractProperties = contractType.GetContractProperties();
 
             var propertiesToAdd = new List<AnonymousObjectMemberDeclaratorSyntax>();
             foreach (var messageContractProperty in contractProperties)
@@ -198,7 +190,7 @@ namespace MassTransit.Analyzers
 
         static AnonymousObjectMemberDeclaratorSyntax[] CreateProperties(ITypeSymbol contractType)
         {
-            List<IPropertySymbol> contractProperties = GetContractProperties(contractType);
+            List<IPropertySymbol> contractProperties = contractType.GetContractProperties();
 
             var propertiesToAdd = new List<AnonymousObjectMemberDeclaratorSyntax>();
             foreach (var contractProperty in contractProperties)

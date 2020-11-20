@@ -110,7 +110,7 @@ namespace MassTransit.Analyzers
             if (SymbolEqualityComparer.Default.Equals(inputType, contractType))
                 return true;
 
-            List<IPropertySymbol> contractProperties = GetContractProperties(contractType);
+            List<IPropertySymbol> contractProperties = contractType.GetContractProperties();
             List<IPropertySymbol> inputProperties = GetInputProperties(inputType);
             var result = true;
 
@@ -246,7 +246,7 @@ namespace MassTransit.Analyzers
 
         static bool HasMissingProperties(ITypeSymbol inputType, ITypeSymbol contractType, string path, ICollection<string> missingProperties)
         {
-            List<IPropertySymbol> contractProperties = GetContractProperties(contractType);
+            List<IPropertySymbol> contractProperties = contractType.GetContractProperties();
             List<IPropertySymbol> inputProperties = GetInputProperties(inputType);
             var result = false;
 
@@ -292,17 +292,6 @@ namespace MassTransit.Analyzers
             return inputType.GetMembers().OfType<IPropertySymbol>().ToList();
         }
 
-        static List<IPropertySymbol> GetContractProperties(ITypeSymbol contractType)
-        {
-            var contractTypes = new List<ITypeSymbol> {contractType};
-
-            contractTypes.AddRange(contractType.AllInterfaces);
-
-            return contractTypes.SelectMany(i => i.GetMembers().OfType<IPropertySymbol>().Where(x => x.DeclaredAccessibility == Accessibility.Public))
-                .Distinct(PropertyNameEqualityComparer.Instance)
-                .ToList();
-        }
-
         static string Append(string path, string propertyName)
         {
             if (string.IsNullOrEmpty(path))
@@ -312,27 +301,6 @@ namespace MassTransit.Analyzers
                 return $"{path}{propertyName}";
 
             return $"{path}.{propertyName}";
-        }
-
-
-        class PropertyNameEqualityComparer :
-            IEqualityComparer<IPropertySymbol>
-        {
-            public static readonly PropertyNameEqualityComparer Instance = new PropertyNameEqualityComparer();
-
-            public bool Equals(IPropertySymbol x, IPropertySymbol y)
-            {
-                if (x == null && y == null)
-                    return true;
-                if (x == null || y == null)
-                    return false;
-                return x.Name.Equals(y.Name);
-            }
-
-            public int GetHashCode(IPropertySymbol obj)
-            {
-                return obj.GetHashCode();
-            }
         }
     }
 }

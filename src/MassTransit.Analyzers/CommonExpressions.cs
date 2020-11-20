@@ -151,6 +151,17 @@ namespace MassTransit.Analyzers
             return false;
         }
 
+        public static List<IPropertySymbol> GetContractProperties(this ITypeSymbol contractType)
+        {
+            var contractTypes = new List<ITypeSymbol> {contractType};
+
+            contractTypes.AddRange(contractType.AllInterfaces);
+
+            return contractTypes.SelectMany(i => i.GetMembers().OfType<IPropertySymbol>().Where(x => x.DeclaredAccessibility == Accessibility.Public))
+                .Distinct(PropertyNameEqualityComparer.Instance)
+                .ToList();
+        }
+
         public static bool IsDictionary(this ITypeSymbol type, out ITypeSymbol keyType, out ITypeSymbol valueType)
         {
             if ((type.TypeKind == TypeKind.Class && type.Name == "Dictionary"
