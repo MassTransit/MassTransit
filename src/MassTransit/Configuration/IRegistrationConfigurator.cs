@@ -193,6 +193,24 @@ namespace MassTransit
             where T : class;
 
         /// <summary>
+        /// Add a request client, for the request type, which uses the <see cref="ConsumeContext" /> if present, otherwise
+        /// uses the <see cref="IBus" />. The request is published, unless an endpoint convention is specified for the
+        /// request type.
+        /// </summary>
+        /// <param name="requestType">The request message type</param>
+        /// <param name="timeout">The request timeout</param>
+        void AddRequestClient(Type requestType, RequestTimeout timeout = default);
+
+        /// <summary>
+        /// Add a request client, for the request type, which uses the <see cref="ConsumeContext" /> if present, otherwise
+        /// uses the <see cref="IBus" />.
+        /// </summary>
+        /// <param name="requestType">The request message type</param>
+        /// <param name="destinationAddress">The destination address for the request</param>
+        /// <param name="timeout">The request timeout</param>
+        void AddRequestClient(Type requestType, Uri destinationAddress, RequestTimeout timeout = default);
+
+        /// <summary>
         /// Adds the service client, which enables service discovery via Conductor
         /// </summary>
         /// <param name="configure">Configure the service client</param>

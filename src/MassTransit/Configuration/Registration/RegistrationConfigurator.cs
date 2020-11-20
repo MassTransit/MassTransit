@@ -279,6 +279,16 @@ namespace MassTransit.Registration
             Registrar.RegisterRequestClient<T>(destinationAddress, timeout);
         }
 
+        public void AddRequestClient(Type requestType, RequestTimeout timeout = default)
+        {
+            RequestClientRegistrationCache.Register(requestType, timeout, Registrar);
+        }
+
+        public void AddRequestClient(Type requestType, Uri destinationAddress, RequestTimeout timeout = default)
+        {
+            RequestClientRegistrationCache.Register(requestType, destinationAddress, timeout, Registrar);
+        }
+
         public void AddServiceClient(Action<IServiceClientConfigurator> configure = default)
         {
             var configurator = new ServiceClientConfigurator();

@@ -23,7 +23,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
                 x.AddBus(context => BusControl);
 
                 x.AddRequestClient<InitialRequest>(InputQueueAddress);
-                x.AddRequestClient<SubsequentRequest>(SubsequentQueueAddress);
+                x.AddRequestClient(typeof(SubsequentRequest), SubsequentQueueAddress);
             });
 
             collection.AddSingleton<IConsumeMessageObserver<InitialRequest>>(context => GetConsumeObserver<InitialRequest>());
