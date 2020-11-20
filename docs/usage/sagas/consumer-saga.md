@@ -89,6 +89,33 @@ public class OrderSaga :
 }
 ```
 
+In some cases, a single message may either initiate a new saga instance or orchestrate an existing instance. Introduced in version 7.0.7, the `InitiatedByOrOrchestrates<T>` interface supports this in a consumer saga.
+
+```cs
+public interface OrderInvoiced :
+    CorrelatedBy<Guid>
+{
+    DateTime Timestamp { get; }
+    decimal Amount { get; }
+}
+
+public class OrderPaymentSaga :
+    ISaga,
+    InitiatedByOrOrchestrates<OrderInvoiced>
+{
+    public Guid CorrelationId { get; set; }
+
+    public DateTime? InvoiceDate { get; set; }
+    public decimal? Amount { get; set; }
+
+    public async Task Consume(ConsumeContext<OrderInvoiced> context)
+    {
+        InvoiceDate = context.Message.Timestamp;
+        Amount = context.Message.Amount;
+    }
+}
+```
+
 The saga is configured on a receive endpoint using the `.Saga` method.
 
 ```cs

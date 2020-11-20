@@ -46,7 +46,8 @@ module.exports = {
             collapsable: true,
             children: [
               '/releases/v7.0.4',
-              '/releases/v7.0.6'
+              '/releases/v7.0.6',
+              '/releases/v7.0.7'
             ]
           }
         ]
