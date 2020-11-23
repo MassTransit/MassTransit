@@ -116,7 +116,7 @@ Bus.Factory.CreateUsingRabbitMQ(cfg =>
 {
     cfg.ReceiveEndpoint("priority-orders", x =>
     {
-        x.BindMessageExchanges = false;
+        x.ConfigureConsumeTopology = false;
 
         x.Consumer<OrderConsumer>();
 
@@ -129,7 +129,7 @@ Bus.Factory.CreateUsingRabbitMQ(cfg =>
 
     cfg.ReceiveEndpoint("regular-orders", x =>
     {
-        x.BindMessageExchanges = false;
+        x.ConfigureConsumeTopology = false;
 
         x.Consumer<OrderConsumer>();
 
