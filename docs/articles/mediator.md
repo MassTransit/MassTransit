@@ -23,6 +23,8 @@ So while Kafka has atoms like _topics_ and _messages_, those atoms are semantica
 
 However, it _would_ be pretty awesome to process messages read from a Kafka topic using MassTransit. And that's how _mediator_ started – a way to send any type (call it `T`) to the [receive pipeline](/advanced/middleware/receive) so that it can be consumed. And like any endeavor to add functionality, the same question, "_how hard can it be?_" Using _mediator_ to consume Kafka messages is now possible by sending the deserialized type using `await mediator.Send<T>(T message)`. 
 
+> Note that [Kafka support is now built-in!](/usage/riders/kafka)
+
 #### Speed
 
 Mediator is fast. Even using the in-memory transport, MassTransit will serialize and deserialize messages, which adds considerable overhead. Mediator doesn't serialize, which means it isn't slow. Using the [MassTransit-Benchmark](https://github.com/MassTransit/MassTransit-Benchmark) with the `--mediator` option, send/consume is blazingly fast (over 650,000 messages/second on my 8-core Windows desktop), and request/response is pretty fast as well. Of course, these are fairly synthetic numbers – consumers will typically do more than just add a counter to a bucket.
@@ -38,14 +40,9 @@ public void ConfigureServices(IServiceCollection services)
 {
     services.AddControllers();
 
-    services.AddMassTransit(x =>
+    services.AddMediator(x =>
     {
         x.AddConsumersFromNamespaceContaining<OrderConsumer>();
-
-        x.AddMediator((provider, cfg) =>
-        {
-            cfg.ConfigureConsumers(provider);
-        });
 
         x.AddRequestClient<SubmitOrder>();
     });
@@ -57,10 +54,6 @@ Any consumers in the same namespace as the `OrderConsumer` will be added, along 
 > The configuration can include all kinds of middleware, including popular favorites such as `UseMessageRetry` and `UseConcurrencyLimit`.
 
 A request client is added for use by a controller where a response is expected. If no response is needed, call the `Send` method on the `IMediator` interface.
-
-::: warning
-Only a mediator, or a bus, can currently be configured. If you try to call both `.AddBus()` and `.AddMediator()` it's hard to know for sure what will happen.
-:::
 
 The consumer is a standard MassTransit consumer:
 
@@ -129,7 +122,9 @@ public class OrderController :
 
 ### What about Kafka?
 
-Update: [Kafka support is now built-in!](/usage/riders/kafka)
+::: tip UPDATE
+[Kafka support is now built-in!](/usage/riders/kafka) _This section is retained for historical purposes, but is no longer recommended_
+:::
 
 Using the Confluent Kafka client, AVRO, and the schema registry – it is possible to send messages to _mediator_.
 
@@ -170,10 +165,6 @@ var consumeTask = Task.Run(() =>
 ```
 
 This is just an example, based off a sample from the Confluent site.
-
-::: tip Be Kind
-This is a first pass attempt at getting Kafka and Avro into MassTransit. And really, it isn't _into_ MassTransit – it's just possible to use it with MassTransit consumers (and sagas, yes, they work in mediator). As people start to use it, there will likely be updates that add the ability to map headers into the `ConsumeContext`.
-:::
 
 
 
