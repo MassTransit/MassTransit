@@ -114,6 +114,7 @@ And then connected to a receive endpoint:
 ```csharp
 Bus.Factory.CreateUsingRabbitMQ(cfg =>
 {
+    // For newer version, please use ConfigureConsumeTopology instead of BindMessageExchanges
     cfg.ReceiveEndpoint("priority-orders", x =>
     {
         x.BindMessageExchanges = false;
