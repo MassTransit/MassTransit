@@ -36,11 +36,6 @@
             configurator.StateMachineSaga(_machine, _repository);
         }
 
-        State GetCurrentState(Instance state)
-        {
-            return _machine.GetState(state).Result;
-        }
-
         TestStateMachine _machine;
         InMemorySagaRepository<Instance> _repository;
 

@@ -20,15 +20,13 @@
             var message = new Initialize();
             await InputQueueSendEndpoint.Send(message);
 
-            Guid? saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-                && GetCurrentState(x) == _machine.WaitingToStart, TestTimeout);
+            Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, x => x.WaitingToStart, TestTimeout);
             Assert.IsTrue(saga.HasValue);
-
 
             await InputQueueSendEndpoint.Send(new Start(message.CorrelationId));
 
-            saga = await _repository.ShouldContainSaga(x => x.CorrelationId == message.CorrelationId
-                && GetCurrentState(x) == _machine.FailedToStart, TestTimeout);
+            saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, x => x.FailedToStart, TestTimeout);
+
             Assert.IsTrue(saga.HasValue);
         }
 
@@ -57,7 +55,7 @@
 
             await InputQueueSendEndpoint.Send(message);
 
-            Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, _machine.WaitingToStart, TestTimeout);
+            Guid? saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, x => x.WaitingToStart, TestTimeout);
 
             await InputQueueSendEndpoint.Send(new Start(message.CorrelationId));
 
@@ -65,7 +63,7 @@
 
             Assert.AreEqual(message.CorrelationId, fault.Message.Message.CorrelationId);
 
-            saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, _machine.FailedToStart, TestTimeout);
+            saga = await _repository.ShouldContainSagaInState(message.CorrelationId, _machine, x => x.FailedToStart, TestTimeout);
 
             Assert.IsTrue(saga.HasValue);
         }
@@ -100,11 +98,6 @@
             _repository = new InMemorySagaRepository<Instance>();
 
             configurator.StateMachineSaga(_machine, _repository);
-        }
-
-        State GetCurrentState(Instance state)
-        {
-            return _machine.GetState(state).Result;
         }
 
         TestStateMachine _machine;
