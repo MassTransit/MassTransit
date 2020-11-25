@@ -38,6 +38,71 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
+    public abstract class Common_Mediator_Bus :
+        InMemoryTestFixture
+    {
+        protected abstract IMediator Mediator { get; }
+        protected abstract IBusRegistrationContext Registration { get; }
+
+        [Test]
+        public async Task Should_transfer_message_headers()
+        {
+            var orderSubmitted = ConnectPublishHandler<OrderSubmitted>();
+
+            await Mediator.Send<SubmitOrder>(new
+            {
+                InVar.CorrelationId,
+                OrderNumber = "12345"
+            });
+
+            ConsumeContext<OrderSubmitted> submitted = await orderSubmitted;
+
+            // headers are not transferred from the mediator to the bus automatically
+            Assert.That(submitted.InitiatorId.HasValue, Is.False);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+        }
+
+        protected void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<SubmitOrderConsumer>();
+        }
+
+
+        class SubmitOrderConsumer :
+            IConsumer<SubmitOrder>
+        {
+            readonly IBus _bus;
+
+            public SubmitOrderConsumer(IBus bus)
+            {
+                _bus = bus;
+            }
+
+            public async Task Consume(ConsumeContext<SubmitOrder> context)
+            {
+                await _bus.Publish<OrderSubmitted>(context.Message);
+            }
+        }
+
+
+        public interface SubmitOrder
+        {
+            Guid CorrelationId { get; }
+            string OrderNumber { get; }
+        }
+
+
+        public interface OrderSubmitted
+        {
+            Guid CorrelationId { get; }
+            string OrderNumber { get; }
+        }
+    }
+
+
     public abstract class Common_Mediator_Request :
         InMemoryTestFixture
     {

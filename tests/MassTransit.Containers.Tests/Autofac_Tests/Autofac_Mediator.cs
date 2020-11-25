@@ -32,6 +32,31 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
 
     [TestFixture]
+    public class Autofac_Mediator_Bus :
+        Common_Mediator_Bus
+    {
+        readonly IContainer _container;
+
+        public Autofac_Mediator_Bus()
+        {
+            _container = new ContainerBuilder()
+                .AddMediator(ConfigureRegistration)
+                .AddMassTransit(x => x.AddBus(provider => BusControl))
+                .Build();
+        }
+
+        [OneTimeTearDown]
+        public async Task Close_container()
+        {
+            await _container.DisposeAsync();
+        }
+
+        protected override IMediator Mediator => _container.Resolve<IMediator>();
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class Autofac_Mediator_Request :
         Common_Mediator_Request
     {
