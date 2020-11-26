@@ -99,6 +99,12 @@ MassTransit can be used with CloudAMQP, which is a great SaaS-based solution to 
 
 <<< @/docs/code/transports/CloudAmqpConsoleListener.cs
 
+## AmazonMQ - RabbitMQ
+
+AmazonMQ now includes [RabbitMQ support](https://us-east-2.console.aws.amazon.com/amazon-mq/home), which means the best message broker can now be used easily on AWS. To configure MassTransit, the AMQPS endpoint address can be used to configure the host as shown below. 
+
+<<< @/docs/code/transports/AmazonRabbitMqConsoleListener.cs
+
 ## Guidance
 
 The following recommendations should be considered _best practices_ for building applications using MassTransit, specifically with RabbitMQ.
