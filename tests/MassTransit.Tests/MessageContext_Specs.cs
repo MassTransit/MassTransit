@@ -66,16 +66,15 @@ namespace MassTransit.Tests
         Guid _correlationId;
 
         [OneTimeSetUp]
-        public void Setup()
+        public async Task Setup()
         {
             _correlationId = Guid.NewGuid();
 
-            InputQueueSendEndpoint.Send(new PingMessage(), Pipe.New<SendContext<PingMessage>>(x => x.UseExecute(context =>
-                {
-                    context.CorrelationId = _correlationId;
-                    context.Headers.Set("One", "1");
-                })))
-                .Wait(TestCancellationToken);
+            await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.New<SendContext<PingMessage>>(x => x.UseExecute(context =>
+            {
+                context.CorrelationId = _correlationId;
+                context.Headers.Set("One", "1");
+            })));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -191,7 +190,7 @@ namespace MassTransit.Tests
 
         Task<ConsumeContext<PingMessage>> _ping;
         Task<ConsumeContext<PongMessage>> _responseHandler;
-        Task<(Task<Response<PingMessage>>, Task<Response<PingNotSupported>>)> _request;
+        Task<Response<PingMessage, PingNotSupported>> _request;
 
         [OneTimeSetUp]
         public async Task Setup()

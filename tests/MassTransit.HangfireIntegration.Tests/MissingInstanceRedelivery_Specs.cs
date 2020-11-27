@@ -16,7 +16,7 @@ namespace MassTransit.HangfireIntegration.Tests
         public async Task Should_schedule_the_message_and_redeliver_to_the_instance()
         {
             IRequestClient<CheckStatus> requestClient = Bus.CreateRequestClient<CheckStatus>(InputQueueAddress, TestTimeout);
-            Task<(Task<Response<Status>>, Task<Response<InstanceNotFound>>)> response =
+            Task<Response<Status, InstanceNotFound>> response =
                 requestClient.GetResponse<Status, InstanceNotFound>(new CheckStatus("A"), TestCancellationToken);
 
             await Task.Delay(500);

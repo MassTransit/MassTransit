@@ -34,5 +34,6 @@
         HostInfo MessageContext.Host => _context.Host;
 
         public TResult Message { get; }
+        object Response.Message => Message;
     }
 }

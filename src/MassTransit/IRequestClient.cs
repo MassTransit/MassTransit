@@ -72,7 +72,7 @@ namespace MassTransit
         /// <typeparam name="T1">The first response type</typeparam>
         /// <typeparam name="T2">The second response type</typeparam>
         /// <returns></returns>
-        Task<(Task<Response<T1>>, Task<Response<T2>>)> GetResponse<T1, T2>(TRequest message, CancellationToken cancellationToken = default,
+        Task<Response<T1, T2>> GetResponse<T1, T2>(TRequest message, CancellationToken cancellationToken = default,
             RequestTimeout timeout = default)
             where T1 : class
             where T2 : class;
@@ -88,7 +88,7 @@ namespace MassTransit
         /// <typeparam name="T1">The first response type</typeparam>
         /// <typeparam name="T2">The second response type</typeparam>
         /// <returns></returns>
-        Task<(Task<Response<T1>>, Task<Response<T2>>)> GetResponse<T1, T2>(object values, CancellationToken cancellationToken = default,
+        Task<Response<T1, T2>> GetResponse<T1, T2>(object values, CancellationToken cancellationToken = default,
             RequestTimeout timeout = default)
             where T1 : class
             where T2 : class;

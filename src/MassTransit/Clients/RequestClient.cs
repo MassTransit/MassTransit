@@ -73,7 +73,7 @@
             return GetResponseInternal<T>(Request, cancellationToken, timeout);
         }
 
-        public Task<(Task<Response<T1>>, Task<Response<T2>>)> GetResponse<T1, T2>(TRequest message, CancellationToken cancellationToken,
+        public Task<Response<T1, T2>> GetResponse<T1, T2>(TRequest message, CancellationToken cancellationToken,
             RequestTimeout timeout)
             where T1 : class
             where T2 : class
@@ -88,7 +88,7 @@
             return GetResponseInternal<T1, T2>(Request, cancellationToken, timeout);
         }
 
-        public Task<(Task<Response<T1>>, Task<Response<T2>>)> GetResponse<T1, T2>(object values, CancellationToken cancellationToken = default,
+        public Task<Response<T1, T2>> GetResponse<T1, T2>(object values, CancellationToken cancellationToken = default,
             RequestTimeout timeout = default)
             where T1 : class
             where T2 : class
@@ -113,8 +113,7 @@
             return await handle.GetResponse<T>().ConfigureAwait(false);
         }
 
-        async Task<(Task<Response<T1>>, Task<Response<T2>>)> GetResponseInternal<T1, T2>(ClientRequestHandle<TRequest>.SendRequestCallback request,
-            CancellationToken cancellationToken,
+        async Task<Response<T1, T2>> GetResponseInternal<T1, T2>(ClientRequestHandle<TRequest>.SendRequestCallback request, CancellationToken cancellationToken,
             RequestTimeout timeout)
             where T1 : class
             where T2 : class
@@ -126,7 +125,7 @@
 
             await Task.WhenAny(result1, result2).ConfigureAwait(false);
 
-            return (result1, result2);
+            return new Response<T1, T2>(result1, result2);
         }
     }
 }

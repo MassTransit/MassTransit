@@ -16,7 +16,7 @@ namespace MassTransit.QuartzIntegration.Tests
         public async Task Should_schedule_the_message_and_redeliver_to_the_instance()
         {
             IRequestClient<CheckStatus> requestClient = Bus.CreateRequestClient<CheckStatus>(InputQueueAddress, TestTimeout);
-            Task<(Task<Response<Status>>, Task<Response<InstanceNotFound>>)> response =
+            Task<Response<Status, InstanceNotFound>> response =
                 requestClient.GetResponse<Status, InstanceNotFound>(new CheckStatus("A"), TestCancellationToken);
 
             await Task.Delay(500);
@@ -25,13 +25,17 @@ namespace MassTransit.QuartzIntegration.Tests
 
             await InputQueueSendEndpoint.Send(message);
 
-            (Task<Response<Status>> status, Task<Response<InstanceNotFound>> notFound) = await response;
+            var result = await response;
 
-            Assert.That(async () => await notFound, Throws.TypeOf<TaskCanceledException>());
+            Assert.That(result.Is(out Response<InstanceNotFound> _), Is.False);
+            Assert.That(result.Is(out Response<Status> status), Is.True);
 
-            await status;
+            Assert.AreEqual("A", status.Message.ServiceName);
 
-            Assert.AreEqual("A", status.Result.Message.ServiceName);
+            (Task<Response<Status>> statusTask, Task<Response<InstanceNotFound>> notFoundTask) = result;
+
+            Assert.That(async () => await notFoundTask, Throws.TypeOf<TaskCanceledException>());
+            Assert.That(async () => await statusTask, Throws.Nothing);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
