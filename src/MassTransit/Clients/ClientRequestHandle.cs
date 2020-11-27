@@ -20,6 +20,7 @@
         public delegate Task<TRequest> SendRequestCallback(Guid requestId, IPipe<SendContext<TRequest>> pipe, CancellationToken cancellationToken);
 
 
+        readonly IList<string> _accept;
         readonly CancellationToken _cancellationToken;
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly ClientFactoryContext _context;
@@ -60,6 +61,7 @@
             _readyToSend = TaskUtil.GetTask<bool>();
             _cancellationTokenSource = new CancellationTokenSource();
             _responseHandlers = new Dictionary<Type, HandlerConnectHandle>();
+            _accept = new List<string>();
 
             if (cancellationToken != default && cancellationToken.CanBeCanceled)
                 _registration = cancellationToken.Register(Cancel);
@@ -79,6 +81,8 @@
 
             context.RequestId = _requestId;
             context.ResponseAddress = _context.ResponseAddress;
+
+            context.Headers.Set(MessageHeaders.Request.Accept, _accept);
 
             if (_timeToLive.HasValue)
                 context.TimeToLive = _timeToLive.Value;
@@ -119,6 +123,8 @@
         {
             Task<Response<T>> response = Response<T>();
 
+            AcceptRequest<T>();
+
             if (readyToSend)
                 _readyToSend.TrySetResult(true);
 
@@ -132,6 +138,12 @@
         }
 
         Task<TRequest> RequestHandle<TRequest>.Message => _message.Task;
+
+        void AcceptRequest<T>()
+            where T : class
+        {
+            _accept.Add(MessageUrn.ForTypeString<T>());
+        }
 
         async Task SendRequest()
         {

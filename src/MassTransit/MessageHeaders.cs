@@ -114,6 +114,8 @@
         public static class Request
         {
             public const string Remaining = "MT-Request-Remaining";
+
+            public const string Accept = "MT-Request-AcceptType";
         }
 
 

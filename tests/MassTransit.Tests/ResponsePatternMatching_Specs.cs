@@ -11,32 +11,34 @@ namespace MassTransit.Tests
         InMemoryTestFixture
     {
         [Test]
+        public async Task Should_fail_with_unsupported_response_type()
+        {
+            Assert.That(async () => await _client.GetResponse<ResponseA>(new Request()), Throws.TypeOf<RequestFaultException>());
+        }
+
+        [Test]
+        public async Task Should_pass_with_a_single_response_type()
+        {
+            Response<ResponseB> response = await _client.GetResponse<ResponseB>(new Request());
+        }
+
+        [Test]
         public async Task Should_use_the_new_syntax_to_be_awesome()
         {
-            IRequestClient<Request> client = Bus.CreateRequestClient<Request>();
-
-            Response<ResponseA, ResponseB> response = await client.GetResponse<ResponseA, ResponseB>(new Request());
+            Response<ResponseA, ResponseB> response = await _client.GetResponse<ResponseA, ResponseB>(new Request());
 
             if (response.Is(out Response<ResponseA> responseA))
-            {
                 Assert.Fail("Should have been responseB");
-            }
             else if (response.Is(out Response<ResponseB> responseB))
-            {
                 Assert.Pass("All good");
-            }
             else
-            {
                 Assert.Fail("No match");
-            }
         }
 
         [Test]
         public async Task Should_use_the_new_syntax_to_be_awesome_er()
         {
-            IRequestClient<Request> client = Bus.CreateRequestClient<Request>();
-
-            Response response = await client.GetResponse<ResponseA, ResponseB>(new Request());
+            Response response = await _client.GetResponse<ResponseA, ResponseB>(new Request());
 
             switch (response)
             {
@@ -59,16 +61,27 @@ namespace MassTransit.Tests
             }, Is.True);
         }
 
+        IRequestClient<Request> _client;
+
+        [OneTimeSetUp]
+        public void SetupClient()
+        {
+            _client = Bus.CreateRequestClient<Request>();
+        }
+
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.Handler<Request>(async context =>
+            configurator.Handler<Request>(context =>
             {
-                await context.RespondAsync(new ResponseB());
+                if (context.IsResponseAccepted<ResponseB>())
+                    return context.RespondAsync(new ResponseB());
+
+                throw new InvalidOperationException("The response type was not supported by the request");
             });
         }
 
 
-        class Request
+        public class Request
         {
         }
 
