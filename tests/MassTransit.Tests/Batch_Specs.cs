@@ -445,7 +445,7 @@
                 tcs.Task.ContinueWith(t => _batches.Add(t.Result));
                 var consumer = new TestBatchConsumer(tcs);
                 return consumer;
-            }, cc => cc.Options<BatchOptions>(x => x.GroupBy<PingMessage, Guid>(ctx => ctx.CorrelationId)));
+            }, cc => cc.Options<BatchOptions>(x => x.SetTimeLimit(TimeSpan.FromMilliseconds(300)).GroupBy<PingMessage, Guid>(ctx => ctx.CorrelationId)));
         }
     }
 

@@ -50,6 +50,39 @@
             return client.Create(message, cancellationToken);
         }
 
+        public RequestHandle<T> CreateRequest<T>(object values, CancellationToken cancellationToken, RequestTimeout timeout)
+            where T : class
+        {
+            IRequestClient<T> client = CreateRequestClient<T>(timeout);
+
+            return client.Create(values, cancellationToken);
+        }
+
+        public RequestHandle<T> CreateRequest<T>(Uri destinationAddress, object values, CancellationToken cancellationToken, RequestTimeout timeout)
+            where T : class
+        {
+            IRequestClient<T> client = CreateRequestClient<T>(destinationAddress, timeout);
+
+            return client.Create(values, cancellationToken);
+        }
+
+        public RequestHandle<T> CreateRequest<T>(ConsumeContext consumeContext, object values, CancellationToken cancellationToken, RequestTimeout timeout)
+            where T : class
+        {
+            IRequestClient<T> client = CreateRequestClient<T>(consumeContext, timeout);
+
+            return client.Create(values, cancellationToken);
+        }
+
+        public RequestHandle<T> CreateRequest<T>(ConsumeContext consumeContext, Uri destinationAddress, object values, CancellationToken cancellationToken,
+            RequestTimeout timeout)
+            where T : class
+        {
+            IRequestClient<T> client = CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
+
+            return client.Create(values, cancellationToken);
+        }
+
         public IRequestClient<T> CreateRequestClient<T>(RequestTimeout timeout)
             where T : class
         {

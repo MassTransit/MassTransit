@@ -55,6 +55,35 @@ namespace MassTransit.Conductor.Client
             return _clientFactory.CreateRequest(consumeContext, destinationAddress, message, cancellationToken, timeout);
         }
 
+        public RequestHandle<T> CreateRequest<T>(object values, CancellationToken cancellationToken, RequestTimeout timeout)
+            where T : class
+        {
+            IRequestClient<T> client = CreateRequestClient<T>(timeout);
+
+            return client.Create(values, cancellationToken);
+        }
+
+        public RequestHandle<T> CreateRequest<T>(Uri destinationAddress, object values, CancellationToken cancellationToken, RequestTimeout timeout)
+            where T : class
+        {
+            return _clientFactory.CreateRequest<T>(destinationAddress, values, cancellationToken, timeout);
+        }
+
+        public RequestHandle<T> CreateRequest<T>(ConsumeContext consumeContext, object values, CancellationToken cancellationToken, RequestTimeout timeout)
+            where T : class
+        {
+            IRequestClient<T> client = CreateRequestClient<T>(consumeContext, timeout);
+
+            return client.Create(values, cancellationToken);
+        }
+
+        public RequestHandle<T> CreateRequest<T>(ConsumeContext consumeContext, Uri destinationAddress, object values, CancellationToken cancellationToken,
+            RequestTimeout timeout)
+            where T : class
+        {
+            return _clientFactory.CreateRequest<T>(consumeContext, destinationAddress, values, cancellationToken, timeout);
+        }
+
         public IRequestClient<T> CreateRequestClient<T>(RequestTimeout timeout)
             where T : class
         {

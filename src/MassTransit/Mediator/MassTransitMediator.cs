@@ -201,6 +201,34 @@ namespace MassTransit.Mediator
             return _clientFactory.CreateRequest(consumeContext, destinationAddress, message, cancellationToken, timeout);
         }
 
+        public RequestHandle<T> CreateRequest<T>(object values, CancellationToken cancellationToken = default, RequestTimeout timeout = default)
+            where T : class
+        {
+            return _clientFactory.CreateRequest<T>(values, cancellationToken, timeout);
+        }
+
+        public RequestHandle<T> CreateRequest<T>(Uri destinationAddress, object values, CancellationToken cancellationToken = default,
+            RequestTimeout timeout = default)
+            where T : class
+        {
+            return _clientFactory.CreateRequest<T>(destinationAddress, values, cancellationToken, timeout);
+        }
+
+        public RequestHandle<T> CreateRequest<T>(ConsumeContext consumeContext, object values, CancellationToken cancellationToken = default,
+            RequestTimeout timeout = default)
+            where T : class
+        {
+            return _clientFactory.CreateRequest<T>(consumeContext, values, cancellationToken, timeout);
+        }
+
+        public RequestHandle<T> CreateRequest<T>(ConsumeContext consumeContext, Uri destinationAddress, object values,
+            CancellationToken cancellationToken = default,
+            RequestTimeout timeout = default)
+            where T : class
+        {
+            return _clientFactory.CreateRequest<T>(consumeContext, destinationAddress, values, cancellationToken, timeout);
+        }
+
         IRequestClient<T> IClientFactory.CreateRequestClient<T>(RequestTimeout timeout)
         {
             return _clientFactory.CreateRequestClient<T>(timeout);
