@@ -8,6 +8,7 @@
     using Contexts;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Logging;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Core;
     using Transports.Metrics;
@@ -48,21 +49,19 @@
 
         protected Task ExceptionHandler(ExceptionReceivedEventArgs args)
         {
-            int activeDispatchCount = _messageReceiver.ActiveDispatchCount;
-            bool requiresRecycle = true;
+            var activeDispatchCount = _messageReceiver.ActiveDispatchCount;
+            var requiresRecycle = true;
 
             if (args.Exception is MessageLockLostException)
-            {
                 requiresRecycle = false;
-            }
             else if (args.Exception is ServiceBusException sbException)
-            {
                 requiresRecycle = !sbException.IsTransient;
-            }
 
             if (!(args.Exception is OperationCanceledException))
             {
-                LogContext.Error?.Log(args.Exception,
+                EnabledLogger? logger = requiresRecycle ? LogContext.Error : LogContext.Warning;
+
+                logger?.Log(args.Exception,
                     "Exception on Receiver {InputAddress} during {Action} ActiveDispatchCount({activeDispatch}) ErrorRequiresRecycle({requiresRecycle})",
                     _context.InputAddress, args.ExceptionReceivedContext.Action, activeDispatchCount, requiresRecycle);
             }
