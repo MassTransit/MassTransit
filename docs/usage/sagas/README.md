@@ -14,6 +14,10 @@ MassTransit includes [Automatonymous](automatonymous), which provides a powerful
 
 MassTransit supports [consumer sagas](consumer-saga), which implement one or more interfaces to consume correlated saga events. This support is included so that it is easy to move applications from other saga implementations to MassTransit. 
 
+## Guidance
+
+To address some common questions related to sagas, retries, Outbox, and concurrency, this [page](guidance) has been compiled.
+
 
 [1]: http://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf
 [2]: http://www.rgoarchitects.com/Files/SOAPatterns/Saga.pdf
