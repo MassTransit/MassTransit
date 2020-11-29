@@ -47,7 +47,8 @@ module.exports = {
             children: [
               '/releases/v7.0.4',
               '/releases/v7.0.6',
-              '/releases/v7.0.7'
+              '/releases/v7.0.7',
+              '/releases/v7.0.8'
             ]
           }
         ]
