@@ -67,7 +67,16 @@ namespace MassTransit.Registration
 
         ISagaDefinition<TInstance> GetSagaDefinition(IConfigurationServiceProvider provider)
         {
-            return _definition ??= provider.GetService<ISagaDefinition<TInstance>>() ?? new DefaultSagaDefinition<TInstance>();
+            if (_definition != null)
+                return _definition;
+
+            _definition = provider.GetService<ISagaDefinition<TInstance>>() ?? new DefaultSagaDefinition<TInstance>();
+
+            var endpointDefinition = provider.GetService<IEndpointDefinition<TInstance>>();
+            if (endpointDefinition != null)
+                _definition.EndpointDefinition = endpointDefinition;
+
+            return _definition;
         }
     }
 }
