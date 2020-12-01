@@ -32,7 +32,52 @@ To configure the endpoint for a consumer registration, or override the endpoint 
 
 <<< @/docs/code/containers/MicrosoftContainerAddConsumerEndpoint.cs
 
-When the endpoint is configured after the _AddConsumer_ method, the configuration overrides any endpoint configuration in the consumer definition.
+When the endpoint is configured after the _AddConsumer_ method, the configuration overrides then endpoint configuration in the consumer definition. However, it cannot override the `EndpointName` if it is specified in the constructor. The order of precedence for endpoint naming is explained below.
+
+1. Specifying `EndpointName = "submit-order-extreme"` in the constructor which cannot be overridden
+
+    ```cs
+    x.AddConsumer<SubmitOrderConsumer, SubmitOrderConsumerDefinition>()
+
+    public SubmitOrderConsumerDefinition()
+    {
+        EndpointName = "submit-order-extreme";
+    }
+    ```
+
+2. Specifying `.Endpoint(x => x.Name = "submit-order-extreme")` in the consumer registration, chained to `AddConsumer`
+
+    ```cs
+    x.AddConsumer<SubmitOrderConsumer, SubmitOrderConsumerDefinition>()
+        .Endpoint(x => x.Name = "submit-order-extreme");
+
+    public SubmitOrderConsumerDefinition()
+    {
+        Endpoint(x => x.Name = "not used");
+    }
+    ```
+
+3. Specifying `Endpoint(x => x.Name = "submit-order-extreme")` in the constructor, which creates an endpoint definition
+
+    ```cs
+    x.AddConsumer<SubmitOrderConsumer, SubmitOrderConsumerDefinition>()
+
+    public SubmitOrderConsumerDefinition()
+    {
+        Endpoint(x => x.Name = "submit-order-extreme");
+    }
+    ```
+
+4. Unspecified, the endpoint name formatter is used (in this case, the endpoint name is `SubmitOrder` using the default formatter)
+
+    ```cs
+    x.AddConsumer<SubmitOrderConsumer, SubmitOrderConsumerDefinition>()
+
+    public SubmitOrderConsumerDefinition()
+    {
+    }
+    ```
+
 
 ## Bus Configuration
 
