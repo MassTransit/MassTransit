@@ -107,23 +107,23 @@ namespace MassTransit.ConsumerSpecifications
 
         public void Message(Action<IConsumerMessageConfigurator<Batch<TMessage>>> configure)
         {
-            configure?.Invoke(new ConsumerMessageConfigurator(_batchConfigurator));
+            configure?.Invoke(new ConsumerMessageConfigurator(_batchMessagePipeConfigurator));
         }
 
 
         class ConsumerMessageConfigurator :
             IConsumerMessageConfigurator<Batch<TMessage>>
         {
-            readonly IPipeConfigurator<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> _batchConfigurator;
+            readonly IBuildPipeConfigurator<ConsumeContext<Batch<TMessage>>> _batchConfigurator;
 
-            public ConsumerMessageConfigurator(IPipeConfigurator<ConsumerConsumeContext<TConsumer, Batch<TMessage>>> batchConfigurator)
+            public ConsumerMessageConfigurator(IBuildPipeConfigurator<ConsumeContext<Batch<TMessage>>> batchConfigurator)
             {
                 _batchConfigurator = batchConfigurator;
             }
 
             public void AddPipeSpecification(IPipeSpecification<ConsumeContext<Batch<TMessage>>> specification)
             {
-                _batchConfigurator.AddPipeSpecification(new ConsumerPipeSpecificationProxy<TConsumer, Batch<TMessage>>(specification));
+                _batchConfigurator.AddPipeSpecification(specification);
             }
         }
     }

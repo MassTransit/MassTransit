@@ -57,7 +57,7 @@ namespace MassTransit.ConsumeConnectors
                     throw new ConfigurationException("The GroupKeyProvider does not implement IGroupKeyProvider<TMessage,TKey>");
             }
 
-            var factory = new BatchConsumerFactory<TConsumer, TMessage>(consumerFactory, messageLimit, timeLimit, collector);
+            var factory = new BatchConsumerFactory<TMessage>(messageLimit, timeLimit, collector);
 
             IConsumerSpecification<BatchConsumer<TMessage>> messageConsumerSpecification =
                 ConsumerConnectorCache<BatchConsumer<TMessage>>.Connector.CreateConsumerSpecification<BatchConsumer<TMessage>>();
@@ -82,10 +82,10 @@ namespace MassTransit.ConsumeConnectors
         class BatchConnectHandle :
             ConnectHandle
         {
-            readonly BatchConsumerFactory<TConsumer, TMessage> _factory;
+            readonly BatchConsumerFactory<TMessage> _factory;
             readonly ConnectHandle _handle;
 
-            public BatchConnectHandle(ConnectHandle handle, BatchConsumerFactory<TConsumer, TMessage> factory)
+            public BatchConnectHandle(ConnectHandle handle, BatchConsumerFactory<TMessage> factory)
             {
                 _handle = handle;
                 _factory = factory;

@@ -5,6 +5,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using System.Threading.Tasks;
     using ConsumeContextTestSubjects;
     using Context;
+    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -89,6 +90,14 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
         }
 
+        [Test]
+        public void Display_the_pipeline()
+        {
+            var result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
         protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<DependentConsumer>();
@@ -100,6 +109,82 @@ namespace MassTransit.Containers.Tests.Common_Tests
             configurator.UseInMemoryOutbox();
 
             configurator.ConfigureConsumers(Registration);
+        }
+    }
+
+
+    public abstract class Common_ConsumeContext_Outbox_Batch :
+        InMemoryTestFixture
+    {
+        protected Common_ConsumeContext_Outbox_Batch()
+        {
+            TestTimeout = TimeSpan.FromSeconds(3);
+        }
+
+        protected abstract IBusRegistrationContext Registration { get; }
+        protected abstract Task<ConsumeContext> ConsumeContext { get; }
+        protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
+        protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
+
+        [Test]
+        public async Task Should_provide_the_outbox()
+        {
+            Task<ConsumeContext<Fault<PingMessage>>> fault = ConnectPublishHandler<Fault<PingMessage>>();
+
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            var consumeContext = await ConsumeContext;
+
+            Assert.That(
+                consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<Batch<PingMessage>> outboxConsumeContext),
+                "Is ConsumerConsumeContext");
+
+            var publishEndpoint = await PublishEndpoint;
+            var sendEndpointProvider = await SendEndpointProvider;
+
+            Assert.That(publishEndpoint, Is.TypeOf<InMemoryOutboxConsumeContext<Batch<PingMessage>>>());
+            Assert.That(sendEndpointProvider, Is.TypeOf<InMemoryOutboxConsumeContext<Batch<PingMessage>>>());
+            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+            Assert.That(ReferenceEquals(outboxConsumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+
+            await fault;
+
+            Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
+        }
+
+        [Test]
+        [Explicit]
+        public void Display_the_pipeline()
+        {
+            var result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<DependentBatchConsumer>(x =>
+                x.Options<BatchOptions>(b => b.SetTimeLimit(200).SetMessageLimit(4)));
+
+            configurator.AddBus(provider => BusControl);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseScheduledRedelivery(r => r.None());
+            configurator.UseMessageRetry(r => r.None());
+            configurator.UseInMemoryOutbox();
+
+            ConfigureUnitOfWork(configurator);
+
+            configurator.ConfigureConsumers(Registration);
+        }
+
+        protected virtual void ConfigureUnitOfWork(IInMemoryReceiveEndpointConfigurator configurator)
+        {
         }
     }
 
@@ -166,8 +251,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
         class DependentConsumer :
             IConsumer<PingMessage>
         {
-            readonly IService _service;
             readonly IAnotherService _anotherService;
+            readonly IService _service;
 
             public DependentConsumer(IService service, IAnotherService anotherService)
             {
@@ -180,6 +265,29 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 await _service.DoIt();
 
                 _anotherService.Done();
+
+                throw new IntentionalTestException();
+            }
+        }
+
+
+        class DependentBatchConsumer :
+            IConsumer<Batch<PingMessage>>
+        {
+            readonly IService _service;
+            readonly UnitOfWork _unitOfWork;
+
+            public DependentBatchConsumer(IService service, UnitOfWork unitOfWork)
+            {
+                _service = service;
+                _unitOfWork = unitOfWork;
+            }
+
+            public async Task Consume(ConsumeContext<Batch<PingMessage>> context)
+            {
+                await _service.DoIt();
+
+                _unitOfWork.Add();
 
                 throw new IntentionalTestException();
             }
@@ -255,8 +363,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
         class AnotherService :
             IAnotherService
         {
-            readonly ConsumeContext _context;
             readonly TaskCompletionSource<ConsumeContext> _consumeContextTask;
+            readonly ConsumeContext _context;
 
             public AnotherService(ConsumeContext context, TaskCompletionSource<ConsumeContext> consumeContextTask)
             {
@@ -265,6 +373,24 @@ namespace MassTransit.Containers.Tests.Common_Tests
             }
 
             public void Done()
+            {
+                _consumeContextTask.TrySetResult(_context);
+            }
+        }
+
+
+        public class UnitOfWork
+        {
+            readonly TaskCompletionSource<ConsumeContext> _consumeContextTask;
+            readonly ConsumeContext _context;
+
+            public UnitOfWork(ConsumeContext context, TaskCompletionSource<ConsumeContext> consumeContextTask)
+            {
+                _context = context;
+                _consumeContextTask = consumeContextTask;
+            }
+
+            public void Add()
             {
                 _consumeContextTask.TrySetResult(_context);
             }
