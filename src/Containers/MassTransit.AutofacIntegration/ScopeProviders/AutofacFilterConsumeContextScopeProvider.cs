@@ -7,18 +7,20 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
     using Autofac.Core.Lifetime;
     using Autofac.Core.Resolving;
     using GreenPipes;
+    using GreenPipes.Filters;
     using Metadata;
     using Scoping.Filters;
 
 
-    public class AutofacFilterContextScopeProvider<TFilter, TContext> :
+    public class AutofacConsumeFilterContextScopeProvider<TFilter, TContext, TMessage> :
         IFilterContextScopeProvider<TContext>
-        where TFilter : class, IFilter<TContext>
-        where TContext : class, PipeContext
+        where TFilter : class, IFilter<ConsumeContext<TMessage>>
+        where TContext : class, ConsumeContext
+        where TMessage : class
     {
         readonly ILifetimeScopeProvider _lifetimeScopeProvider;
 
-        public AutofacFilterContextScopeProvider(ILifetimeScopeProvider lifetimeScopeProvider)
+        public AutofacConsumeFilterContextScopeProvider(ILifetimeScopeProvider lifetimeScopeProvider)
         {
             _lifetimeScopeProvider = lifetimeScopeProvider;
         }
@@ -54,9 +56,27 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
                 return _lifetimeScope.DisposeAsync();
             }
 
-            public IFilter<TContext> Filter => ActivatorUtils.GetOrCreateInstance<TFilter>(_lifetimeScope);
+            public IFilter<TContext> Filter
+            {
+                get
+                {
+                    var filter = ActivatorUtils.GetOrCreateInstance<TFilter>(_lifetimeScope);
+
+                    return new SplitFilter<TContext, ConsumeContext<TMessage>>(filter, ContextProvider, InputContextProvider);
+                }
+            }
 
             public TContext Context { get; }
+
+            static TContext ContextProvider(TContext context, ConsumeContext<TMessage> splitContext)
+            {
+                return context;
+            }
+
+            static ConsumeContext<TMessage> InputContextProvider(TContext context)
+            {
+                return context as ConsumeContext<TMessage>;
+            }
 
 
             class NoopLifetimeScope :

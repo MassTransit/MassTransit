@@ -3,19 +3,21 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Filters;
     using Metadata;
     using Microsoft.Extensions.DependencyInjection;
     using Scoping.Filters;
 
 
-    public class DependencyInjectionFilterContextScopeProvider<TFilter, TContext> :
+    public class DependencyInjectionConsumeFilterContextScopeProvider<TFilter, TContext, TMessage> :
         IFilterContextScopeProvider<TContext>
-        where TFilter : class, IFilter<TContext>
-        where TContext : class, PipeContext
+        where TFilter : class, IFilter<ConsumeContext<TMessage>>
+        where TContext : class, ConsumeContext
+        where TMessage : class
     {
         readonly IServiceProvider _serviceProvider;
 
-        public DependencyInjectionFilterContextScopeProvider(IServiceProvider serviceProvider)
+        public DependencyInjectionConsumeFilterContextScopeProvider(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
@@ -52,9 +54,27 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
                 return default;
             }
 
-            public IFilter<TContext> Filter => ActivatorUtilities.GetServiceOrCreateInstance<TFilter>(_scope.ServiceProvider);
+            public IFilter<TContext> Filter
+            {
+                get
+                {
+                    var filter = ActivatorUtilities.GetServiceOrCreateInstance<TFilter>(_scope.ServiceProvider);
+
+                    return new SplitFilter<TContext, ConsumeContext<TMessage>>(filter, ContextProvider, InputContextProvider);
+                }
+            }
 
             public TContext Context { get; }
+
+            static TContext ContextProvider(TContext context, ConsumeContext<TMessage> splitContext)
+            {
+                return context;
+            }
+
+            static ConsumeContext<TMessage> InputContextProvider(TContext context)
+            {
+                return context as ConsumeContext<TMessage>;
+            }
 
 
             class NoopScope :

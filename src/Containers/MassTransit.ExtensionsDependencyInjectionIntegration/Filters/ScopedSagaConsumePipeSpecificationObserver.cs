@@ -35,15 +35,16 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Filters
             where TSaga : class, ISaga
             where TMessage : class
         {
-            var scopeProviderType = typeof(DependencyInjectionFilterContextScopeProvider<,>)
-                .MakeGenericType(_filterType.MakeGenericType(typeof(TMessage)), typeof(ConsumeContext<TMessage>));
+            var scopeProviderType = typeof(DependencyInjectionConsumeFilterContextScopeProvider<,,>)
+                .MakeGenericType(_filterType.MakeGenericType(typeof(TMessage)), typeof(SagaConsumeContext<TSaga, TMessage>), typeof(TMessage));
 
-            var scopeProvider = (IFilterContextScopeProvider<ConsumeContext<TMessage>>)Activator.CreateInstance(scopeProviderType, _serviceProvider);
+            var scopeProvider = (IFilterContextScopeProvider<SagaConsumeContext<TSaga, TMessage>>)Activator.CreateInstance(scopeProviderType,
+                _serviceProvider);
 
-            var filter = new ScopedFilter<ConsumeContext<TMessage>>(scopeProvider);
-            var specification = new FilterPipeSpecification<ConsumeContext<TMessage>>(filter);
+            var filter = new ScopedFilter<SagaConsumeContext<TSaga, TMessage>>(scopeProvider);
+            var specification = new FilterPipeSpecification<SagaConsumeContext<TSaga, TMessage>>(filter);
 
-            configurator.Message(m => m.AddPipeSpecification(specification));
+            configurator.AddPipeSpecification(specification);
         }
     }
 }

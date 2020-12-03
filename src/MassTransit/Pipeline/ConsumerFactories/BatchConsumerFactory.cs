@@ -7,21 +7,17 @@
     using Metadata;
 
 
-    public class BatchConsumerFactory<TConsumer, TMessage> :
+    public class BatchConsumerFactory<TMessage> :
         IConsumerFactory<BatchConsumer<TMessage>>,
         IAsyncDisposable
         where TMessage : class
-        where TConsumer : class, IConsumer<Batch<TMessage>>
     {
         readonly IBatchCollector<TMessage> _collector;
-        readonly IConsumerFactory<TConsumer> _consumerFactory;
         readonly int _messageLimit;
         readonly TimeSpan _timeLimit;
 
-        public BatchConsumerFactory(IConsumerFactory<TConsumer> consumerFactory, int messageLimit, TimeSpan timeLimit,
-            IBatchCollector<TMessage> collector)
+        public BatchConsumerFactory(int messageLimit, TimeSpan timeLimit, IBatchCollector<TMessage> collector)
         {
-            _consumerFactory = consumerFactory;
             _messageLimit = messageLimit;
             _timeLimit = timeLimit;
 
@@ -60,7 +56,6 @@
             scope.Add("timeLimit", _timeLimit);
             scope.Add("messageLimit", _messageLimit);
 
-            _consumerFactory.Probe(scope);
             _collector.Probe(scope);
         }
     }

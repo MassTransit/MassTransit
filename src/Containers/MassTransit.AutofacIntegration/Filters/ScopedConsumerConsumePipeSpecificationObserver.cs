@@ -28,15 +28,16 @@ namespace MassTransit.AutofacIntegration.Filters
             where TConsumer : class
             where TMessage : class
         {
-            var scopeProviderType = typeof(AutofacFilterContextScopeProvider<,>)
-                .MakeGenericType(_filterType.MakeGenericType(typeof(TMessage)), typeof(ConsumeContext<TMessage>));
+            var scopeProviderType = typeof(AutofacConsumeFilterContextScopeProvider<,,>)
+                .MakeGenericType(_filterType.MakeGenericType(typeof(TMessage)), typeof(ConsumerConsumeContext<TConsumer, TMessage>), typeof(TMessage));
 
-            var scopeProvider = (IFilterContextScopeProvider<ConsumeContext<TMessage>>)Activator.CreateInstance(scopeProviderType, _lifetimeScopeProvider);
+            var scopeProvider = (IFilterContextScopeProvider<ConsumerConsumeContext<TConsumer, TMessage>>)Activator.CreateInstance(scopeProviderType,
+                _lifetimeScopeProvider);
 
-            var filter = new ScopedFilter<ConsumeContext<TMessage>>(scopeProvider);
-            var specification = new FilterPipeSpecification<ConsumeContext<TMessage>>(filter);
+            var filter = new ScopedFilter<ConsumerConsumeContext<TConsumer, TMessage>>(scopeProvider);
+            var specification = new FilterPipeSpecification<ConsumerConsumeContext<TConsumer, TMessage>>(filter);
 
-            configurator.Message(m => m.AddPipeSpecification(specification));
+            configurator.AddPipeSpecification(specification);
         }
     }
 }
