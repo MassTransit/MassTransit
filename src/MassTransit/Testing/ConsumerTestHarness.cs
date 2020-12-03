@@ -50,7 +50,7 @@
         {
             var decorator = new TestConsumerFactoryDecorator<TConsumer>(_consumerFactory, _consumed);
 
-            configurator.Consumer(decorator);
+            configurator.Consumer(decorator, c => _configure?.Invoke(c));
         }
 
         protected virtual void ConfigureNamedReceiveEndpoint(IBusFactoryConfigurator configurator, string queueName)
