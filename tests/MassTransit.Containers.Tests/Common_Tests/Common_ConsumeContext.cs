@@ -189,6 +189,80 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
+    public abstract class Common_ConsumeContext_Filter_Batch :
+        InMemoryTestFixture
+    {
+        protected Common_ConsumeContext_Filter_Batch()
+        {
+            TestTimeout = TimeSpan.FromSeconds(3);
+        }
+
+        protected abstract IBusRegistrationContext Registration { get; }
+        protected abstract Task<ConsumeContext> ConsumeContext { get; }
+        protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
+        protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
+
+        [Test]
+        public async Task Should_provide_the_outbox()
+        {
+            Task<ConsumeContext<Fault<PingMessage>>> fault = ConnectPublishHandler<Fault<PingMessage>>();
+
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            var consumeContext = await ConsumeContext;
+
+            Assert.That(
+                consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<Batch<PingMessage>> outboxConsumeContext),
+                "Is ConsumerConsumeContext");
+
+            var publishEndpoint = await PublishEndpoint;
+            var sendEndpointProvider = await SendEndpointProvider;
+
+            Assert.That(publishEndpoint, Is.TypeOf<InMemoryOutboxConsumeContext<Batch<PingMessage>>>());
+            Assert.That(sendEndpointProvider, Is.TypeOf<InMemoryOutboxConsumeContext<Batch<PingMessage>>>());
+            Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
+            Assert.That(ReferenceEquals(outboxConsumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+
+            await fault;
+
+            Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
+        }
+
+        [Test]
+        [Explicit]
+        public void Display_the_pipeline()
+        {
+            var result = Bus.GetProbeResult();
+
+            Console.WriteLine(result.ToJsonString());
+        }
+
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<DependentBatchConsumer>(x =>
+                x.Options<BatchOptions>(b => b.SetTimeLimit(200).SetMessageLimit(4)));
+
+            configurator.AddBus(provider => BusControl);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseInMemoryOutbox();
+
+            ConfigureUnitOfWork(configurator);
+
+            configurator.ConfigureConsumers(Registration);
+        }
+
+        protected virtual void ConfigureUnitOfWork(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+        }
+    }
+
+
     public abstract class Common_ConsumeContext_Outbox_Solo :
         InMemoryTestFixture
     {

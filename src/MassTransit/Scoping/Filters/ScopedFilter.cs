@@ -24,6 +24,9 @@ namespace MassTransit.Scoping.Filters
 
         public void Probe(ProbeContext context)
         {
+            var scope =context.CreateFilterScope("scopedFilter");
+
+            _scopeProvider.Probe(scope);
         }
     }
 }

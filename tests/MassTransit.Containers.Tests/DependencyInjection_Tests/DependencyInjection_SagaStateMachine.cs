@@ -1,12 +1,10 @@
 ﻿namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 {
     using System;
-    using System.Threading.Tasks;
     using Common_Tests;
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
-    using Saga;
     using TestFramework.Sagas;
 
 
