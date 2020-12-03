@@ -5,6 +5,7 @@ namespace MassTransit.Transports.InMemory
     using Context;
     using Definition;
     using GreenPipes;
+    using GreenPipes.Agents;
     using MassTransit.Configurators;
     using Topology.Topologies;
 
@@ -22,8 +23,6 @@ namespace MassTransit.Transports.InMemory
             : base(hostConfiguration, hostTopology)
         {
             _hostConfiguration = hostConfiguration;
-
-            Add(hostConfiguration.TransportProvider);
         }
 
         public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
@@ -70,6 +69,11 @@ namespace MassTransit.Transports.InMemory
             context.Add("baseAddress", _hostConfiguration.HostAddress);
 
             _hostConfiguration.TransportProvider.Probe(context);
+        }
+
+        protected override IAgent[] GetAgentHandles()
+        {
+            return new IAgent[] {_hostConfiguration.TransportProvider};
         }
     }
 }

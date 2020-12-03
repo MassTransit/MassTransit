@@ -145,7 +145,7 @@ namespace MassTransit
                     cancellationToken = tokenSource.Token;
                 }
 
-                var hostHandle = await _host.Start(cancellationToken).ConfigureAwait(false);
+                var hostHandle = _host.Start(cancellationToken);
 
                 busHandle = new Handle(hostHandle, this, _busObservable, _logContext);
 
@@ -202,17 +202,19 @@ namespace MassTransit
             }
         }
 
-        public Task StopAsync(CancellationToken cancellationToken = new CancellationToken())
+        public async Task StopAsync(CancellationToken cancellationToken = new CancellationToken())
         {
             LogContext.SetCurrentIfNull(_logContext);
 
             if (_busHandle == null)
             {
                 LogContext.Warning?.Log("Failed to stop bus: {Address} ({Reason})", Address, "Not Started");
-                return TaskUtil.Completed;
+                return;
             }
 
-            return _busHandle.StopAsync(cancellationToken);
+            await _busHandle.StopAsync(cancellationToken).ConfigureAwait(false);
+
+            _busHandle = null;
         }
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
@@ -306,7 +308,11 @@ namespace MassTransit
 
                 try
                 {
-                    LogContext.Debug?.Log("Stopping host");
+                    Uri hostAddress = _hostHandle.Ready.IsCompletedSuccessfully()
+                        ? _hostHandle.Ready.GetAwaiter().GetResult().HostAddress
+                        : default;
+
+                    LogContext.Debug?.Log("Stopping host: {HostAddress}", hostAddress);
 
                     await _hostHandle.Stop(cancellationToken).ConfigureAwait(false);
 

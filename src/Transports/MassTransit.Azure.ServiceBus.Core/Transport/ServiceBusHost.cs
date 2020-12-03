@@ -23,11 +23,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         {
             _hostConfiguration = hostConfiguration;
             Topology = hostTopology;
-
-            Add(hostConfiguration.ConnectionContextSupervisor);
         }
 
-        public IServiceBusHostTopology Topology { get; }
+        public new IServiceBusHostTopology Topology { get; }
 
         public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IReceiveEndpointConfigurator> configureEndpoint = null)

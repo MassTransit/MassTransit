@@ -20,31 +20,31 @@ namespace MassTransit.Transports
         IReceiveEndpointControl
     {
         readonly ReceiveEndpointContext _context;
-        readonly IReceiveTransport _receiveTransport;
         readonly TaskCompletionSource<ReceiveEndpointReady> _started;
-        ConnectHandle _handle;
+        readonly IReceiveTransport _transport;
 
-        public ReceiveEndpoint(IReceiveTransport receiveTransport, ReceiveEndpointContext context)
+        public ReceiveEndpoint(IReceiveTransport transport, ReceiveEndpointContext context)
         {
             _context = context;
-            _receiveTransport = receiveTransport;
+            _transport = transport;
 
             _started = TaskUtil.GetTask<ReceiveEndpointReady>();
-            _handle = receiveTransport.ConnectReceiveTransportObserver(new Observer(this, context.EndpointObservers));
+
+            transport.ConnectReceiveTransportObserver(new Observer(this, context.EndpointObservers));
         }
 
         public Task<ReceiveEndpointReady> Started => _started.Task;
 
-        ReceiveEndpointHandle IReceiveEndpointControl.Start()
+        public ReceiveEndpointHandle Start(CancellationToken cancellationToken)
         {
-            var transportHandle = _receiveTransport.Start();
+            var transportHandle = _transport.Start();
 
             return new Handle(this, transportHandle, _context);
         }
 
         void IProbeSite.Probe(ProbeContext context)
         {
-            _receiveTransport.Probe(context);
+            _transport.Probe(context);
 
             _context.ReceivePipe.Probe(context);
         }
@@ -153,6 +153,8 @@ namespace MassTransit.Transports
                 await _context.EndpointObservers.Stopping(new ReceiveEndpointStoppingEvent(_context.InputAddress, _endpoint)).ConfigureAwait(false);
 
                 await _transportHandle.Stop(cancellationToken).ConfigureAwait(false);
+
+                _context.Reset();
             }
         }
     }

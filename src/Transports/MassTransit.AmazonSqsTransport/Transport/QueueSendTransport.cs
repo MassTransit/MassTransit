@@ -41,6 +41,13 @@
             return _context.ConnectSendObserver(observer);
         }
 
+        protected override Task StopSupervisor(StopSupervisorContext context)
+        {
+            LogContext.Debug?.Log("Stopping send transport: {EntityName}", _context.EntityName);
+
+            return base.StopSupervisor(context);
+        }
+
 
         class SendPipe<T> :
             IPipe<ClientContext>

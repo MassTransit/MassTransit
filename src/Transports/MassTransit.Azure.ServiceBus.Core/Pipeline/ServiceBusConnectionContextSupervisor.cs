@@ -6,14 +6,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     using Context;
     using Contexts;
     using GreenPipes;
-    using GreenPipes.Agents;
     using Topology;
     using Transport;
     using Transports;
 
 
     public class ServiceBusConnectionContextSupervisor :
-        PipeContextSupervisor<ConnectionContext>,
+        TransportPipeContextSupervisor<ConnectionContext>,
         IConnectionContextSupervisor
     {
         readonly IServiceBusHostConfiguration _hostConfiguration;
@@ -24,12 +23,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
         {
             _hostConfiguration = hostConfiguration;
             _topologyConfiguration = topologyConfiguration;
-        }
-
-        public void Probe(ProbeContext context)
-        {
-            if (HasContext)
-                context.Add("connected", true);
         }
 
         public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
@@ -80,7 +73,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
             var contextFactory = new SendEndpointContextFactory(this, configureTopology.ToPipe<SendEndpointContext>(), settings);
 
             var contextSupervisor = new SendEndpointContextSupervisor(contextFactory);
-            Add(contextSupervisor);
+
+            AddAgent(contextSupervisor);
 
             return contextSupervisor;
         }

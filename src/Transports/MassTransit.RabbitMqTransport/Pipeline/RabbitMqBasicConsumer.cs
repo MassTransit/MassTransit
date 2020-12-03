@@ -2,7 +2,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Linq;
     using System.Threading.Tasks;
     using Context;
     using Contexts;
@@ -21,7 +20,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     /// Receives messages from RabbitMQ, pushing them to the InboundPipe of the service endpoint.
     /// </summary>
     public class RabbitMqBasicConsumer :
-        Supervisor,
+        Agent,
         IAsyncBasicConsumer,
         IBasicConsumer,
         RabbitMqDeliveryMetrics
@@ -168,7 +167,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
             IBasicProperties properties, ReadOnlyMemory<byte> body)
         {
-            var bodyBytes = body.ToArray();
+            byte[] bodyBytes = body.ToArray();
 
             Task.Run(async () =>
             {
@@ -204,17 +203,17 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             });
         }
 
-        string RabbitMqDeliveryMetrics.ConsumerTag => _consumerTag;
-
-        long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;
-
-        int DeliveryMetrics.ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
-
         event EventHandler<ConsumerEventArgs> IBasicConsumer.ConsumerCancelled
         {
             add => _onConsumerCancelled += value;
             remove => _onConsumerCancelled -= value;
         }
+
+        string RabbitMqDeliveryMetrics.ConsumerTag => _consumerTag;
+
+        long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;
+
+        int DeliveryMetrics.ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
 
         Task OnConsumerCancelled(object obj, ConsumerEventArgs args)
         {
@@ -250,11 +249,11 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
         }
 
-        protected override async Task StopSupervisor(StopSupervisorContext context)
+        protected override async Task StopAgent(StopContext context)
         {
             LogContext.Debug?.Log("Stopping Consumer: {InputAddress} - {ConsumerTag}", _context.InputAddress, _consumerTag);
 
-            SetCompleted(ActiveAndActualAgentsCompleted(context));
+            await WaitForDeliveryCompleteAndCancel(context).ConfigureAwait(false);
 
             try
             {
@@ -269,10 +268,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
         }
 
-        async Task ActiveAndActualAgentsCompleted(StopSupervisorContext context)
+        async Task WaitForDeliveryCompleteAndCancel(StopContext context)
         {
-            await Task.WhenAll(context.Agents.Select(x => Completed)).OrCanceled(context.CancellationToken).ConfigureAwait(false);
-
             if (_dispatcher.ActiveDispatchCount > 0)
             {
                 try

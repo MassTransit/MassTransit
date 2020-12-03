@@ -46,7 +46,7 @@
 
             var receiveEndpointContext = builder.CreateReceiveEndpointContext();
 
-            var transport = _hostConfiguration.TransportProvider.GetReceiveTransport(_queueName, receiveEndpointContext);
+            var transport = new InMemoryReceiveTransport(receiveEndpointContext, _queueName);
 
             var receiveEndpoint = new ReceiveEndpoint(transport, receiveEndpointContext);
 

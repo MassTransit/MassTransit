@@ -58,7 +58,8 @@
 
             #pragma warning disable 4014
                 // ReSharper disable once MethodSupportsCancellation
-                asyncContext.Completed.ContinueWith(_ => connectionContext.Connection.ExceptionListener -= HandleConnectionException);
+                asyncContext.Completed.ContinueWith(_ => connectionContext.Connection.ExceptionListener -= HandleConnectionException,
+                    TaskContinuationOptions.ExecuteSynchronously);
             #pragma warning restore 4014
 
                 return new ActiveMqSessionContext(connectionContext, session, createCancellationToken);

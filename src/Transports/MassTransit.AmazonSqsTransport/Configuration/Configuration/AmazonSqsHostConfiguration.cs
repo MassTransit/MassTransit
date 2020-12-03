@@ -13,6 +13,7 @@
     using Topology.Settings;
     using Topology.Topologies;
     using Transport;
+    using Util;
 
 
     public class AmazonSqsHostConfiguration :
@@ -20,8 +21,9 @@
         IAmazonSqsHostConfiguration
     {
         readonly IAmazonSqsBusConfiguration _busConfiguration;
-        readonly IAmazonSqsTopologyConfiguration _topologyConfiguration;
+        readonly Recycle<IConnectionContextSupervisor> _connectionContext;
         readonly IAmazonSqsHostTopology _hostTopology;
+        readonly IAmazonSqsTopologyConfiguration _topologyConfiguration;
         AmazonSqsHostSettings _hostSettings;
 
         public AmazonSqsHostConfiguration(IAmazonSqsBusConfiguration busConfiguration, IAmazonSqsTopologyConfiguration
@@ -37,8 +39,10 @@
 
             _hostTopology = new AmazonSqsHostTopology(this, messageNameFormatter, topologyConfiguration);
 
-            ConnectionContextSupervisor = new ConnectionContextSupervisor(this, topologyConfiguration);
+            _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }
+
+        public IConnectionContextSupervisor ConnectionContextSupervisor => _connectionContext.Supervisor;
 
         public override Uri HostAddress => _hostSettings.HostAddress;
 
@@ -60,7 +64,9 @@
             }
         }
 
-        public IRetryPolicy ConnectionRetryPolicy
+        public override IHostTopology HostTopology => _hostTopology;
+
+        public override IRetryPolicy ReceiveTransportRetryPolicy
         {
             get
             {
@@ -72,8 +78,6 @@
                 });
             }
         }
-
-        public IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
         public void ApplyEndpointDefinition(IAmazonSqsReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
@@ -167,8 +171,6 @@
         {
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
         }
-
-        public override IHostTopology HostTopology => _hostTopology;
 
         public override IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IReceiveEndpointConfigurator> configure = null)

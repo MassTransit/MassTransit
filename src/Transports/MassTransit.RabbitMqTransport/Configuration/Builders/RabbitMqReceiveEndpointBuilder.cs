@@ -38,14 +38,14 @@
             return base.ConnectConsumePipe(pipe);
         }
 
-        public RabbitMqReceiveEndpointContext CreateReceiveEndpointContext()
+        public RabbitMqReceiveEndpointContext CreateReceiveEndpointContext(ReceiveSettings receiveSettings)
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
             var deadLetterTransport = CreateDeadLetterTransport();
             var errorTransport = CreateErrorTransport();
 
-            var context = new RabbitMqQueueReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology);
+            var context = new RabbitMqQueueReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology, receiveSettings);
 
             context.GetOrAddPayload(() => deadLetterTransport);
             context.GetOrAddPayload(() => errorTransport);

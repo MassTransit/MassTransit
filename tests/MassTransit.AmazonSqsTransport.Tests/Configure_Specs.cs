@@ -125,12 +125,12 @@
         {
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
             {
-                cfg.Host(new Uri("amazonsqs://localhost:4576"), h =>
+                cfg.Host(new Uri("amazonsqs://localhost:4566"), h =>
                 {
                     h.AccessKey("admin");
                     h.SecretKey("admin");
-                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4575"});
-                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4576"});
+                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
+                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
                 });
             });
 

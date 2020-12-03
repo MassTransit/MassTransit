@@ -36,8 +36,6 @@
 
         public async ValueTask DisposeAsync()
         {
-            LogContext.Debug?.Log("Closing session: {Host}", _connectionContext.Description);
-
             if (_session != null)
             {
                 try

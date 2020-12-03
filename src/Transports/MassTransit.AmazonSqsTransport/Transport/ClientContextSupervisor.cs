@@ -1,23 +1,15 @@
 namespace MassTransit.AmazonSqsTransport.Transport
 {
-    using GreenPipes;
-    using GreenPipes.Agents;
+    using Transports;
 
 
     public class ClientContextSupervisor :
-        PipeContextSupervisor<ClientContext>,
+        TransportPipeContextSupervisor<ClientContext>,
         IClientContextSupervisor
-
     {
-        public ClientContextSupervisor(IConnectionContextSupervisor connectionContextSupervisor)
-            : base(new ClientContextFactory(connectionContextSupervisor))
+        public ClientContextSupervisor(IConnectionContextSupervisor supervisor)
+            : base(supervisor, new ClientContextFactory(supervisor))
         {
-        }
-
-        public void Probe(ProbeContext context)
-        {
-            if (HasContext)
-                context.Add("connected", true);
         }
     }
 }

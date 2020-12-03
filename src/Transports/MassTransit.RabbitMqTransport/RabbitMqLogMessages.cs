@@ -20,6 +20,6 @@ namespace MassTransit.RabbitMqTransport
             "Declare queue: {Queue}");
 
         public static readonly LogMessage<ushort> PrefetchCount = LogContext.Define<ushort>(LogLevel.Debug,
-            "Prefetch Count: {PrefetchCount}");
+            "Set Prefetch Count: {PrefetchCount}");
     }
 }

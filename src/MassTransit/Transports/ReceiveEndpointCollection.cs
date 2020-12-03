@@ -17,7 +17,7 @@
         IReceiveEndpointCollection
     {
         readonly Dictionary<string, IReceiveEndpointControl> _endpoints;
-        readonly Dictionary<string, HostReceiveEndpointHandle> _handles;
+        readonly Dictionary<string, Handle> _handles;
         readonly object _mutateLock = new object();
         readonly ReceiveEndpointObservable _receiveEndpointObservers;
 
@@ -26,7 +26,7 @@
             _receiveEndpointObservers = new ReceiveEndpointObservable();
 
             _endpoints = new Dictionary<string, IReceiveEndpointControl>(StringComparer.OrdinalIgnoreCase);
-            _handles = new Dictionary<string, HostReceiveEndpointHandle>(StringComparer.OrdinalIgnoreCase);
+            _handles = new Dictionary<string, Handle>(StringComparer.OrdinalIgnoreCase);
         }
 
         public void Add(string endpointName, IReceiveEndpointControl endpoint)
@@ -48,11 +48,11 @@
 
         public HostReceiveEndpointHandle[] StartEndpoints(CancellationToken cancellationToken)
         {
-            KeyValuePair<string, IReceiveEndpointControl>[] startable;
+            KeyValuePair<string, IReceiveEndpointControl>[] endpointsToStart;
             lock (_mutateLock)
-                startable = _endpoints.Where(x => !_handles.ContainsKey(x.Key)).ToArray();
+                endpointsToStart = _endpoints.Where(x => !_handles.ContainsKey(x.Key)).ToArray();
 
-            return startable.Select(x => StartEndpoint(x.Key, x.Value, cancellationToken)).ToArray();
+            return endpointsToStart.Select(x => StartEndpoint(x.Key, x.Value, cancellationToken)).ToArray();
         }
 
         public HostReceiveEndpointHandle Start(string endpointName, CancellationToken cancellationToken)
@@ -99,13 +99,19 @@
 
         protected override async Task StopAgent(StopContext context)
         {
-            HostReceiveEndpointHandle[] handles;
+            KeyValuePair<string, Handle>[] handles;
             lock (_mutateLock)
-                handles = _handles.Values.ToArray();
+                handles = _handles.ToArray();
 
-            await Task.WhenAll(handles.Select(x => x.StopAsync(context.CancellationToken))).ConfigureAwait(false);
+            await Task.WhenAll(handles.Select(x => x.Value.StopAsync(false, context.CancellationToken))).ConfigureAwait(false);
 
             await base.StopAgent(context).ConfigureAwait(false);
+
+            lock (_mutateLock)
+            {
+                foreach (KeyValuePair<string, Handle> handle in handles)
+                    _handles.Remove(handle.Key);
+            }
         }
 
         HostReceiveEndpointHandle StartEndpoint(string endpointName, IReceiveEndpointControl endpoint, CancellationToken cancellationToken)
@@ -115,7 +121,7 @@
                 var endpointReady = new ReceiveEndpointReadyObserver(endpoint, cancellationToken);
 
                 var receiveEndpointObserver = endpoint.ConnectReceiveEndpointObserver(_receiveEndpointObservers);
-                var endpointHandle = endpoint.Start();
+                var endpointHandle = endpoint.Start(cancellationToken);
 
                 var handle = new Handle(endpointHandle, endpoint, endpointReady.Ready, () => Remove(endpointName), receiveEndpointObserver);
 
@@ -151,14 +157,14 @@
         {
             readonly ReceiveEndpointHandle _endpointHandle;
             readonly ConnectHandle[] _handles;
-            readonly Action _onStopped;
+            readonly Action _remove;
             bool _stopped;
 
-            public Handle(ReceiveEndpointHandle endpointHandle, IReceiveEndpoint receiveEndpoint, Task<ReceiveEndpointReady> ready, Action onStopped,
+            public Handle(ReceiveEndpointHandle endpointHandle, IReceiveEndpoint receiveEndpoint, Task<ReceiveEndpointReady> ready, Action remove,
                 params ConnectHandle[] handles)
             {
                 _endpointHandle = endpointHandle;
-                _onStopped = onStopped;
+                _remove = remove;
                 _handles = handles;
                 ReceiveEndpoint = receiveEndpoint;
 
@@ -168,17 +174,23 @@
             public IReceiveEndpoint ReceiveEndpoint { get; }
             public Task<ReceiveEndpointReady> Ready { get; }
 
-            public async Task StopAsync(CancellationToken cancellationToken)
+            public Task StopAsync(CancellationToken cancellationToken)
+            {
+                return StopAsync(true, cancellationToken);
+            }
+
+            public async Task StopAsync(bool removeEndpoint, CancellationToken cancellationToken)
             {
                 if (_stopped)
                     return;
 
+                await _endpointHandle.Stop(cancellationToken).ConfigureAwait(false);
+
                 foreach (var handle in _handles)
                     handle.Disconnect();
 
-                await _endpointHandle.Stop(cancellationToken).ConfigureAwait(false);
-
-                _onStopped();
+                if (removeEndpoint)
+                    _remove();
 
                 _stopped = true;
             }

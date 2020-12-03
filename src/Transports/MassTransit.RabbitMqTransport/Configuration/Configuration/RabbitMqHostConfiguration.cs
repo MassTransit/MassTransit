@@ -14,6 +14,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using Topology.Settings;
     using Topology.Topologies;
     using Transport;
+    using Util;
 
 
     public class RabbitMqHostConfiguration :
@@ -21,6 +22,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         IRabbitMqHostConfiguration
     {
         readonly IRabbitMqBusConfiguration _busConfiguration;
+        readonly Recycle<IConnectionContextSupervisor> _connectionContext;
         readonly IRabbitMqHostTopology _hostTopology;
         RabbitMqHostSettings _hostSettings;
 
@@ -42,10 +44,10 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             _hostTopology = new RabbitMqHostTopology(this, exchangeTypeSelector, messageNameFormatter, _hostSettings.HostAddress, topologyConfiguration);
 
-            ConnectionContextSupervisor = new ConnectionContextSupervisor(this, topologyConfiguration);
+            _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }
 
-        public IConnectionContextSupervisor ConnectionContextSupervisor { get; }
+        public IConnectionContextSupervisor ConnectionContextSupervisor => _connectionContext.Supervisor;
 
         public override Uri HostAddress => _hostSettings.HostAddress;
 
@@ -53,21 +55,21 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public BatchSettings BatchSettings => _hostSettings.BatchSettings;
 
-        public IRetryPolicy ConnectionRetryPolicy
+        IRabbitMqHostTopology IRabbitMqHostConfiguration.HostTopology => _hostTopology;
+
+        public override IRetryPolicy ReceiveTransportRetryPolicy
         {
             get
             {
                 return Retry.CreatePolicy(x =>
                 {
-                    x.Handle<RabbitMqConnectionException>();
+                    x.Handle<ConnectionException>();
                     x.Ignore<AuthenticationFailureException>();
 
                     x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
                 });
             }
         }
-
-        IRabbitMqHostTopology IRabbitMqHostConfiguration.HostTopology => _hostTopology;
 
         public override IHostTopology HostTopology => _hostTopology;
 

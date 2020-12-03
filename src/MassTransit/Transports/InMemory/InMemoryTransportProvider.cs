@@ -14,8 +14,8 @@ namespace MassTransit.Transports.InMemory
     using Topology.Configurators;
 
 
-    public class InMemoryTransportProvider :
-        Supervisor,
+    public sealed class InMemoryTransportProvider :
+        Agent,
         IInMemoryTransportProvider
     {
         readonly IInMemoryHostConfiguration _hostConfiguration;
@@ -28,27 +28,11 @@ namespace MassTransit.Transports.InMemory
             _topologyConfiguration = topologyConfiguration;
 
             _messageFabric = new Lazy<IMessageFabric>(() => new MessageFabric(hostConfiguration.TransportConcurrencyLimit));
+
+            SetReady();
         }
 
-        public IReceiveTransport GetReceiveTransport(string queueName, ReceiveEndpointContext receiveEndpointContext)
-        {
-            LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
-
-            TransportLogMessages.CreateReceiveTransport(receiveEndpointContext.InputAddress);
-
-            var queue = _messageFabric.Value.GetQueue(queueName);
-
-            IDeadLetterTransport deadLetterTransport = new InMemoryMessageDeadLetterTransport(_messageFabric.Value.GetExchange($"{queueName}_skipped"));
-            receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
-
-            IErrorTransport errorTransport = new InMemoryMessageErrorTransport(_messageFabric.Value.GetExchange($"{queueName}_error"));
-            receiveEndpointContext.GetOrAddPayload(() => errorTransport);
-
-            var transport = new InMemoryReceiveTransport(new Uri(_hostConfiguration.HostAddress, queueName), queue, receiveEndpointContext);
-            Add(transport);
-
-            return transport;
-        }
+        public IMessageFabric MessageFabric => _messageFabric.Value;
 
         public async Task<ISendTransport> GetSendTransport(Uri address)
         {
@@ -87,12 +71,13 @@ namespace MassTransit.Transports.InMemory
 
         public void Probe(ProbeContext context)
         {
-            _messageFabric.Value.Probe(context);
+            if (_messageFabric.IsValueCreated)
+                _messageFabric.Value.Probe(context);
         }
 
-        protected override async Task StopSupervisor(StopSupervisorContext context)
+        protected override async Task StopAgent(StopContext context)
         {
-            await base.StopSupervisor(context).ConfigureAwait(false);
+            await base.StopAgent(context).ConfigureAwait(false);
 
             if (_messageFabric.IsValueCreated)
                 await _messageFabric.Value.DisposeAsync().ConfigureAwait(false);

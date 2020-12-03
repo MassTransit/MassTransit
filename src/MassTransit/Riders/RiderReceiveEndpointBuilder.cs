@@ -4,6 +4,7 @@ namespace MassTransit.Riders
     using Builders;
     using Configuration;
     using Context;
+    using GreenPipes.Agents;
     using Registration;
 
 
@@ -44,6 +45,16 @@ namespace MassTransit.Riders
             protected override IPublishEndpointProvider CreatePublishEndpointProvider()
             {
                 return _busInstance.Bus;
+            }
+
+            public override void AddAgent(IAgent agent)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override Exception ConvertException(Exception exception, string message)
+            {
+                return exception;
             }
 
             protected override ISendEndpointProvider CreateSendEndpointProvider()

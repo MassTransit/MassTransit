@@ -11,6 +11,7 @@
     using Topology.Settings;
     using Topology.Topologies;
     using Transport;
+    using Util;
 
 
     public class ActiveMqHostConfiguration :
@@ -18,6 +19,7 @@
         IActiveMqHostConfiguration
     {
         readonly IActiveMqBusConfiguration _busConfiguration;
+        readonly Recycle<IConnectionContextSupervisor> _connectionContext;
         readonly IActiveMqHostTopology _hostTopology;
         ActiveMqHostSettings _hostSettings;
 
@@ -29,21 +31,18 @@
             _hostSettings = new ConfigurationHostSettings(new Uri("activemq://localhost"));
             _hostTopology = new ActiveMqHostTopology(this, topologyConfiguration);
 
-            ConnectionContextSupervisor = new ConnectionContextSupervisor(this, topologyConfiguration);
+            _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }
 
-        public string Description => _hostSettings.ToDescription();
         public override Uri HostAddress => _hostSettings.HostAddress;
 
-        public IConnectionContextSupervisor ConnectionContextSupervisor { get; }
-
-        public IRetryPolicy ConnectionRetryPolicy
+        public override IRetryPolicy ReceiveTransportRetryPolicy
         {
             get
             {
                 return Retry.CreatePolicy(x =>
                 {
-                    x.Handle<ActiveMqTransportException>();
+                    x.Handle<ConnectionException>();
 
                     x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
                 });
@@ -55,6 +54,10 @@
             get => _hostSettings;
             set => _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
         }
+
+        public IConnectionContextSupervisor ConnectionContextSupervisor => _connectionContext.Supervisor;
+
+        IActiveMqHostTopology IActiveMqHostConfiguration.HostTopology => _hostTopology;
 
         public void ApplyEndpointDefinition(IActiveMqReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
@@ -106,15 +109,17 @@
                 throw new ArgumentNullException(nameof(settings));
             if (endpointConfiguration == null)
                 throw new ArgumentNullException(nameof(endpointConfiguration));
+
             var configuration = new ActiveMqReceiveEndpointConfiguration(this, settings, endpointConfiguration);
+
             configure?.Invoke(configuration);
+
             Observers.EndpointConfigured(configuration);
 
             Add(configuration);
+
             return configuration;
         }
-
-        IActiveMqHostTopology IActiveMqHostConfiguration.HostTopology => _hostTopology;
 
         public override IHostTopology HostTopology => _hostTopology;
 
@@ -133,6 +138,7 @@
             Action<IActiveMqReceiveEndpointConfigurator> configureEndpoint = null)
         {
             var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
+
             ReceiveEndpoint(queueName, configurator =>
             {
                 ApplyEndpointDefinition(configurator, definition);
@@ -149,6 +155,16 @@
             Action<IReceiveEndpointConfigurator> configure = null)
         {
             return CreateReceiveEndpointConfiguration(queueName, configure);
+        }
+
+        public ISendTransportProvider CreateSendTransportProvider(ISessionContextSupervisor supervisor)
+        {
+            return new ActiveMqSendTransportProvider(ConnectionContextSupervisor, supervisor);
+        }
+
+        public IPublishTransportProvider CreatePublishTransportProvider(ISessionContextSupervisor supervisor)
+        {
+            return new ActiveMqPublishTransportProvider(ConnectionContextSupervisor, supervisor);
         }
 
         public override IHost Build()

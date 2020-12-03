@@ -5,5 +5,6 @@ namespace MassTransit.Configuration
         public const string CaseSensitiveDictionaryDeserializer = "Switch_CaseSensitiveDictionaryDeserializer";
         public const string RabbitMqBatchPublish = "Switch_RabbitMqBatchPublish";
         public const string UseInternalCache = "Switch_InternalCache";
+        public const string UseLegacyCache = "Switch_LegacyCache";
     }
 }

@@ -17,14 +17,13 @@ namespace MassTransit.Configurators
         IHostConfiguration
         where TReceiveEndpointConfiguration : IReceiveEndpointConfiguration
     {
+        readonly ConsumeObservable _consumeObservers;
         readonly EndpointConfigurationObservable _endpointObservable;
         readonly IList<TReceiveEndpointConfiguration> _endpoints;
-        ILogContext _logContext;
-
-        readonly ConsumeObservable _consumeObservers;
         readonly PublishObservable _publishObservers;
         readonly ReceiveObservable _receiveObservers;
         readonly SendObservable _sendObservers;
+        ILogContext _logContext;
 
         protected BaseHostConfiguration(IBusConfiguration busConfiguration)
         {
@@ -57,19 +56,17 @@ namespace MassTransit.Configurators
                 _logContext = value;
 
                 SendLogContext = value.CreateLogContext(LogCategoryName.Transport.Send);
-                ReceiveLogContext = value.CreateLogContext(LogCategoryName.Transport.Receive);
             }
         }
 
         public ILogContext SendLogContext { get; private set; }
-        public ILogContext ReceiveLogContext { get; private set; }
 
         public ConnectHandle ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
             return _endpointObservable.Connect(observer);
         }
 
-        public ConnectHandle ConnectReceiveContextContext(ReceiveEndpointContext context)
+        public ConnectHandle ConnectReceiveEndpointContext(ReceiveEndpointContext context)
         {
             var consume = context.ReceivePipe.ConnectConsumeObserver(_consumeObservers);
             var receive = context.ConnectReceiveObserver(_receiveObservers);
@@ -86,15 +83,12 @@ namespace MassTransit.Configurators
 
         public abstract IHostTopology HostTopology { get; }
 
+        public abstract IRetryPolicy ReceiveTransportRetryPolicy { get; }
+
         public abstract IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IReceiveEndpointConfigurator> configure = null);
 
         public abstract IHost Build();
-
-        protected void Add(TReceiveEndpointConfiguration configuration)
-        {
-            _endpoints.Add(configuration);
-        }
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
@@ -114,6 +108,11 @@ namespace MassTransit.Configurators
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _sendObservers.Connect(observer);
+        }
+
+        protected void Add(TReceiveEndpointConfiguration configuration)
+        {
+            _endpoints.Add(configuration);
         }
     }
 }

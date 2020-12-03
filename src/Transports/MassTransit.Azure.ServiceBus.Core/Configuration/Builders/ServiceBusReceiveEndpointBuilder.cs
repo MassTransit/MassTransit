@@ -6,6 +6,7 @@
     using Contexts;
     using GreenPipes;
     using MassTransit.Builders;
+    using Pipeline;
     using Topology;
     using Topology.Builders;
     using Transport;
@@ -43,7 +44,8 @@
         {
             var topologyLayout = BuildTopology(_configuration.Settings);
 
-            return new ServiceBusEntityReceiveEndpointContext(_hostConfiguration, _configuration, topologyLayout);
+            return new ServiceBusEntityReceiveEndpointContext(_hostConfiguration, _configuration, topologyLayout, ClientContextFactory,
+                _configuration.Settings);
         }
 
         string GenerateSubscriptionName()
@@ -63,6 +65,12 @@
             _configuration.Topology.Consume.Apply(topologyBuilder);
 
             return topologyBuilder.BuildBrokerTopology();
+        }
+
+        IClientContextSupervisor ClientContextFactory()
+        {
+            return new ClientContextSupervisor(_hostConfiguration.ConnectionContextSupervisor,
+                new QueueClientContextFactory(_hostConfiguration.ConnectionContextSupervisor, _configuration.Settings));
         }
     }
 }

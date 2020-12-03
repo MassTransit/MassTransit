@@ -7,14 +7,13 @@
     using Context;
     using Contexts;
     using GreenPipes;
-    using GreenPipes.Agents;
     using Pipeline;
     using Topology;
     using Transports;
 
 
     public class ConnectionContextSupervisor :
-        PipeContextSupervisor<ConnectionContext>,
+        TransportPipeContextSupervisor<ConnectionContext>,
         IConnectionContextSupervisor
     {
         readonly IActiveMqHostConfiguration _hostConfiguration;
@@ -27,18 +26,12 @@
             _topologyConfiguration = topologyConfiguration;
         }
 
-        public void Probe(ProbeContext context)
-        {
-            if (HasContext)
-                context.Add("connected", true);
-        }
-
         public Uri NormalizeAddress(Uri address)
         {
             return new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, address);
         }
 
-        Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
+        public Task<ISendTransport> CreateSendTransport(ISessionContextSupervisor sessionContextSupervisor, Uri address)
         {
             var endpointAddress = new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, address);
 
@@ -48,15 +41,13 @@
 
             var settings = _topologyConfiguration.Send.GetSendSettings(endpointAddress);
 
-            var sessionContextSupervisor = CreateSessionContextSupervisor();
-
             IPipe<SessionContext> configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology()).ToPipe();
 
             return CreateSendTransport(sessionContextSupervisor, configureTopology, settings.EntityName,
                 endpointAddress.Type == ActiveMqEndpointAddress.AddressType.Queue ? DestinationType.Queue : DestinationType.Topic);
         }
 
-        public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
+        public Task<ISendTransport> CreatePublishTransport<T>(ISessionContextSupervisor sessionContextSupervisor)
             where T : class
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
@@ -65,26 +56,19 @@
 
             var settings = publishTopology.GetSendSettings(_hostConfiguration.HostAddress);
 
-            var sessionContextSupervisor = CreateSessionContextSupervisor();
-
             IPipe<SessionContext> configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, publishTopology.GetBrokerTopology()).ToPipe();
 
             return CreateSendTransport(sessionContextSupervisor, configureTopology, settings.EntityName, DestinationType.Topic);
         }
 
-        ISessionContextSupervisor CreateSessionContextSupervisor()
-        {
-            return new SessionContextSupervisor(this);
-        }
-
-        Task<ISendTransport> CreateSendTransport(ISessionContextSupervisor supervisor, IPipe<SessionContext> pipe, string entityName,
+        public Task<ISendTransport> CreateSendTransport(ISessionContextSupervisor supervisor, IPipe<SessionContext> pipe, string entityName,
             DestinationType destinationType)
         {
-            var sendTransportContext = new SendTransportContext(supervisor, pipe, entityName, destinationType,
-                _hostConfiguration.SendLogContext);
+            var sendTransportContext = new SendTransportContext(supervisor, pipe, entityName, destinationType, _hostConfiguration.SendLogContext);
 
             var transport = new ActiveMqSendTransport(sendTransportContext);
-            Add(transport);
+
+            AddAgent(transport);
 
             return Task.FromResult<ISendTransport>(transport);
         }

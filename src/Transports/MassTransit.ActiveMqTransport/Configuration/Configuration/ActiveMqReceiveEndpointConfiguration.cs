@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using Builders;
     using GreenPipes;
-    using GreenPipes.Agents;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
     using MassTransit.Configuration;
@@ -12,7 +11,6 @@
     using Pipeline;
     using Topology;
     using Topology.Settings;
-    using Transport;
     using Transports;
     using Util;
 
@@ -55,33 +53,19 @@
 
             ApplySpecifications(builder);
 
-            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
+            var receiveEndpointContext = builder.CreateReceiveEndpointContext(_settings);
 
             _sessionConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology));
 
-            IAgent consumerAgent;
             if (_hostConfiguration.DeployTopologyOnly)
-            {
-                var transportReadyFilter = new TransportReadyFilter<SessionContext>(receiveEndpointContext);
-                _sessionConfigurator.UseFilter(transportReadyFilter);
-
-                consumerAgent = transportReadyFilter;
-            }
+                _sessionConfigurator.UseFilter(new TransportReadyFilter<SessionContext>(receiveEndpointContext));
             else
-            {
-                var consumerFilter = new ActiveMqConsumerFilter(receiveEndpointContext);
+                _sessionConfigurator.UseFilter(new ActiveMqConsumerFilter(receiveEndpointContext));
 
-                _sessionConfigurator.UseFilter(consumerFilter);
+            IPipe<SessionContext> sessionPipe = _sessionConfigurator.Build();
 
-                consumerAgent = consumerFilter;
-            }
-
-            IFilter<ConnectionContext> sessionFilter = new ReceiveSessionFilter(_sessionConfigurator.Build());
-
-            _connectionConfigurator.UseFilter(sessionFilter);
-
-            var transport = new ActiveMqReceiveTransport(_hostConfiguration, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
-            transport.Add(consumerAgent);
+            var transport = new ReceiveTransport<SessionContext>(_hostConfiguration, receiveEndpointContext,
+                () => receiveEndpointContext.SessionContextSupervisor, sessionPipe);
 
             var receiveEndpoint = new ReceiveEndpoint(transport, receiveEndpointContext);
 

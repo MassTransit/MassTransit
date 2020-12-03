@@ -11,7 +11,7 @@ namespace MassTransit.Transports.InMemory.Contexts
         readonly byte[] _body;
         readonly InMemoryTransportMessage _message;
 
-        public InMemoryReceiveContext(InMemoryTransportMessage message, ReceiveEndpointContext receiveEndpointContext)
+        public InMemoryReceiveContext(InMemoryTransportMessage message, InMemoryReceiveEndpointContext receiveEndpointContext)
             : base(message.DeliveryCount > 0, receiveEndpointContext)
         {
             _body = message.Body;

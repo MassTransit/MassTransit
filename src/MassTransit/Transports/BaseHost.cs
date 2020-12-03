@@ -13,25 +13,24 @@ namespace MassTransit.Transports
 
 
     public abstract class BaseHost :
-        Supervisor,
         IHost
     {
         readonly IHostConfiguration _hostConfiguration;
-        readonly IHostTopology _hostTopology;
         HostHandle _handle;
 
         protected BaseHost(IHostConfiguration hostConfiguration, IHostTopology hostTopology)
         {
             _hostConfiguration = hostConfiguration;
-            _hostTopology = hostTopology;
+            Topology = hostTopology;
 
             ReceiveEndpoints = new ReceiveEndpointCollection();
         }
 
         protected IReceiveEndpointCollection ReceiveEndpoints { get; }
 
-        Uri IHost.Address => _hostConfiguration.HostAddress;
-        IHostTopology IHost.Topology => _hostTopology;
+        public Uri Address => _hostConfiguration.HostAddress;
+
+        public IHostTopology Topology { get; }
 
         public abstract HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IReceiveEndpointConfigurator> configureEndpoint = null);
@@ -73,10 +72,15 @@ namespace MassTransit.Transports
             return _hostConfiguration.ConnectSendObserver(observer);
         }
 
-        public virtual Task<HostHandle> Start(CancellationToken cancellationToken)
+        public HostHandle Start(CancellationToken cancellationToken)
         {
             if (_handle != null)
-                throw new MassTransitException($"The host was already started: {_hostConfiguration.HostAddress}");
+            {
+                LogContext.Warning?.Log("Start called, but the host was already started: {Address} ({Reason})", _hostConfiguration.HostAddress,
+                    "Already Started");
+
+                return _handle;
+            }
 
             if (LogContext.Current == null)
                 throw new ConfigurationException("No valid LogContext was configured.");
@@ -89,7 +93,7 @@ namespace MassTransit.Transports
 
             _handle = new StartHostHandle(this, handles, GetAgentHandles());
 
-            return Task.FromResult(_handle);
+            return _handle;
         }
 
         public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
@@ -106,21 +110,16 @@ namespace MassTransit.Transports
             ReceiveEndpoints.Probe(scope);
         }
 
-        async Task IAgent.Stop(StopContext context)
+        public async Task Stop(CancellationToken cancellationToken)
         {
             LogContext.Current = _hostConfiguration.LogContext;
 
-            await ReceiveEndpoints.Stop(context).ConfigureAwait(false);
-
-            await base.Stop(context).ConfigureAwait(false);
-        }
-
-        protected override async Task StopSupervisor(StopSupervisorContext context)
-        {
-            await base.StopSupervisor(context).ConfigureAwait(false);
+            await ReceiveEndpoints.Stop(cancellationToken).ConfigureAwait(false);
 
             foreach (var agent in GetAgentHandles())
-                await agent.Stop(context).ConfigureAwait(false);
+                await agent.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
+
+            _handle = null;
         }
 
         protected abstract void Probe(ProbeContext context);

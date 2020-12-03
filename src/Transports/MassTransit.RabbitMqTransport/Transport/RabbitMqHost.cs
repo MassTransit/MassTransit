@@ -16,18 +16,15 @@ namespace MassTransit.RabbitMqTransport.Transport
         IRabbitMqHost
     {
         readonly IRabbitMqHostConfiguration _hostConfiguration;
-        readonly IRabbitMqHostTopology _hostTopology;
 
         public RabbitMqHost(IRabbitMqHostConfiguration hostConfiguration, IRabbitMqHostTopology hostTopology)
             : base(hostConfiguration, hostTopology)
         {
             _hostConfiguration = hostConfiguration;
-            _hostTopology = hostTopology;
-
-            Add(hostConfiguration.ConnectionContextSupervisor);
+            Topology = hostTopology;
         }
 
-        IRabbitMqHostTopology IRabbitMqHost.Topology => _hostTopology;
+        public new IRabbitMqHostTopology Topology { get; }
 
         public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IReceiveEndpointConfigurator> configureEndpoint = null)

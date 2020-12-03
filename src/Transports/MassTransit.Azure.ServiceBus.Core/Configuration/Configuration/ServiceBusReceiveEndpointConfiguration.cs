@@ -135,10 +135,5 @@
 
             return new BrokeredMessageDeadLetterTransport(_hostConfiguration.CreateSendEndpointContextSupervisor(settings));
         }
-
-        protected override IClientContextSupervisor CreateClientContextSupervisor(IConnectionContextSupervisor supervisor)
-        {
-            return new ClientContextSupervisor(new QueueClientContextFactory(supervisor, _settings));
-        }
     }
 }

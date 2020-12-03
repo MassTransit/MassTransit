@@ -5,7 +5,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     using Contexts;
     using Events;
     using GreenPipes;
-    using GreenPipes.Agents;
     using Topology;
 
 
@@ -13,14 +12,16 @@ namespace MassTransit.RabbitMqTransport.Pipeline
     /// A filter that uses the model context to create a basic consumer and connect it to the model
     /// </summary>
     public class RabbitMqConsumerFilter :
-        Supervisor,
         IFilter<ModelContext>
     {
         readonly RabbitMqReceiveEndpointContext _context;
+        string _consumerTag;
 
         public RabbitMqConsumerFilter(RabbitMqReceiveEndpointContext context)
         {
             _context = context;
+
+            _consumerTag = "";
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -33,13 +34,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             var consumer = new RabbitMqBasicConsumer(context, _context);
 
-            await context.BasicConsume(receiveSettings.QueueName, receiveSettings.NoAck, _context.ExclusiveConsumer, receiveSettings
-                    .ConsumeArguments, consumer)
-                .ConfigureAwait(false);
+            _consumerTag = await context.BasicConsume(receiveSettings.QueueName, receiveSettings.NoAck, _context.ExclusiveConsumer,
+                receiveSettings.ConsumeArguments, consumer, _consumerTag).ConfigureAwait(false);
 
             await consumer.Ready.ConfigureAwait(false);
 
-            Add(consumer);
+            _context.AddAgent(consumer);
 
             await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(_context.InputAddress)).ConfigureAwait(false);
 
@@ -55,6 +55,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 LogContext.Debug?.Log("Consumer completed {ConsumerTag}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent", metrics.ConsumerTag,
                     metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
             }
+
+            await next.Send(context).ConfigureAwait(false);
         }
     }
 }

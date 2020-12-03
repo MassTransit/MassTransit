@@ -53,7 +53,7 @@
 
         Task BasicNack(ulong deliveryTag, bool multiple, bool requeue);
 
-        Task<string> BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer);
+        Task<string> BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer, string consumerTag);
 
         Task BasicCancel(string consumerTag);
     }

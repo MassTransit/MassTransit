@@ -43,12 +43,12 @@
 
         void CreateClientContext(IAsyncPipeContextAgent<ClientContext> asyncContext, CancellationToken cancellationToken)
         {
-            static Task<ClientContext> CreateClientContext(ConnectionContext connectionContext, CancellationToken createCancellationToken)
+            static Task<ClientContext> Create(ConnectionContext connectionContext, CancellationToken createCancellationToken)
             {
                 return Task.FromResult(connectionContext.CreateClientContext(createCancellationToken));
             }
 
-            _connectionContextSupervisor.CreateAgent(asyncContext, CreateClientContext, cancellationToken);
+            _connectionContextSupervisor.CreateAgent(asyncContext, Create, cancellationToken);
         }
     }
 }

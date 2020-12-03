@@ -6,7 +6,7 @@
 
     [Serializable]
     public class AmazonSqsConnectException :
-        AmazonSqsTransportException
+        AmazonSqsConnectionException
     {
         public AmazonSqsConnectException()
         {

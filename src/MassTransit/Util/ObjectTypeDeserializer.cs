@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using Context;
     using Courier;
     using Metadata;
@@ -77,9 +76,7 @@
                 return null;
 
             if (token.Type == JTokenType.String && objectType.IsInterface && TypeMetadataCache.IsValidMessageType(objectType))
-            {
                 return JsonConvert.DeserializeObject((string)value, objectType, JsonMessageSerializer.DeserializerSettings);
-            }
 
             using var jsonReader = new JTokenReader(token);
 

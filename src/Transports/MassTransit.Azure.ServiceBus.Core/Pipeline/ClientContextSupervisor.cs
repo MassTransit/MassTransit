@@ -1,22 +1,16 @@
 namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 {
-    using GreenPipes;
     using GreenPipes.Agents;
+    using Transports;
 
 
     public class ClientContextSupervisor :
-        PipeContextSupervisor<ClientContext>,
+        TransportPipeContextSupervisor<ClientContext>,
         IClientContextSupervisor
     {
-        public ClientContextSupervisor(IPipeContextFactory<ClientContext> contextFactory)
-            : base(contextFactory)
+        public ClientContextSupervisor(IConnectionContextSupervisor supervisor, IPipeContextFactory<ClientContext> contextFactory)
+            : base(supervisor, contextFactory)
         {
-        }
-
-        public void Probe(ProbeContext context)
-        {
-            if (HasContext)
-                context.Add("connected", true);
         }
     }
 }

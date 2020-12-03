@@ -2,12 +2,11 @@ namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes.Agents;
     using Transports;
 
 
     public interface IConnectionContextSupervisor :
-        ISupervisor<ConnectionContext>
+        ITransportSupervisor<ConnectionContext>
     {
         Uri NormalizeAddress(Uri address);
 

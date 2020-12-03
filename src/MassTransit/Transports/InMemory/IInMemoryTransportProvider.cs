@@ -1,18 +1,18 @@
 namespace MassTransit.Transports.InMemory
 {
     using Builders;
-    using Context;
+    using Fabric;
     using GreenPipes;
     using GreenPipes.Agents;
 
 
     public interface IInMemoryTransportProvider :
-        ISupervisor,
+        IAgent,
         ISendTransportProvider,
         IPublishTransportProvider,
         IProbeSite
     {
-        IReceiveTransport GetReceiveTransport(string queueName, ReceiveEndpointContext receiveEndpointContext);
+        IMessageFabric MessageFabric { get; }
 
         IInMemoryConsumeTopologyBuilder CreateConsumeTopologyBuilder();
     }

@@ -15,14 +15,15 @@
     using Transports.InMemory;
     using Transports.InMemory.Builders;
     using Transports.InMemory.Configuration;
+    using Transports.InMemory.Contexts;
     using Transports.InMemory.Topology.Topologies;
 
 
     public static class TestConsumeContext
     {
-        static ReceiveEndpointContext _receiveEndpointContext;
+        static InMemoryReceiveEndpointContext _receiveEndpointContext;
 
-        static ReceiveEndpointContext Build()
+        static InMemoryReceiveEndpointContext Build()
         {
             var topologyConfiguration = new InMemoryTopologyConfiguration(InMemoryBus.MessageTopology);
             IInMemoryBusConfiguration busConfiguration = new InMemoryBusConfiguration(topologyConfiguration, null);
@@ -44,7 +45,7 @@
             return builder.CreateReceiveEndpointContext();
         }
 
-        public static ReceiveEndpointContext GetContext()
+        public static InMemoryReceiveEndpointContext GetContext()
         {
             return _receiveEndpointContext ??= Build();
         }

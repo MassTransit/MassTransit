@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Configuration
 {
     using System;
-    using GreenPipes;
     using MassTransit.Configuration;
     using Pipeline;
     using Settings;
@@ -18,8 +17,6 @@
         string BasePath { get; }
 
         IConnectionContextSupervisor ConnectionContextSupervisor { get; }
-
-        IRetryPolicy RetryPolicy { get; }
 
         new IServiceBusHostTopology HostTopology { get; }
 

@@ -26,9 +26,10 @@
 
         ILogContext LogContext { get; set; }
         ILogContext SendLogContext { get; }
-        ILogContext ReceiveLogContext { get; }
 
         IHostTopology HostTopology { get; }
+
+        IRetryPolicy ReceiveTransportRetryPolicy { get; }
 
         /// <summary>
         /// Create a receive endpoint configuration
@@ -43,7 +44,7 @@
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        ConnectHandle ConnectReceiveContextContext(ReceiveEndpointContext context);
+        ConnectHandle ConnectReceiveEndpointContext(ReceiveEndpointContext context);
 
         IHost Build();
     }

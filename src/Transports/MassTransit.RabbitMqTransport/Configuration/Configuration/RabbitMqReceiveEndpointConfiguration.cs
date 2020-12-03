@@ -4,7 +4,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System.Collections.Generic;
     using Builders;
     using GreenPipes;
-    using GreenPipes.Agents;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
     using Management;
@@ -15,7 +14,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using RabbitMQ.Client;
     using Topology;
     using Topology.Settings;
-    using Transport;
     using Transports;
     using Util;
 
@@ -68,18 +66,12 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
             ApplySpecifications(builder);
 
-            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
+            var receiveEndpointContext = builder.CreateReceiveEndpointContext(_settings);
 
             _modelConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology));
 
-            IAgent consumerAgent;
             if (_hostConfiguration.DeployTopologyOnly)
-            {
-                var transportReadyFilter = new TransportReadyFilter<ModelContext>(receiveEndpointContext);
-                _modelConfigurator.UseFilter(transportReadyFilter);
-
-                consumerAgent = transportReadyFilter;
-            }
+                _modelConfigurator.UseFilter(new TransportReadyFilter<ModelContext>(receiveEndpointContext));
             else
             {
                 if (_settings.PurgeOnStartup)
@@ -87,18 +79,13 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
                 _modelConfigurator.UseFilter(new PrefetchCountFilter(_managementPipe, _settings.PrefetchCount));
 
-                var consumerFilter = new RabbitMqConsumerFilter(receiveEndpointContext);
-
-                _modelConfigurator.UseFilter(consumerFilter);
-
-                consumerAgent = consumerFilter;
+                _modelConfigurator.UseFilter(new RabbitMqConsumerFilter(receiveEndpointContext));
             }
 
             IPipe<ModelContext> modelPipe = _modelConfigurator.Build();
 
-            var transport = new RabbitMqReceiveTransport(_hostConfiguration, _settings, modelPipe, receiveEndpointContext);
-
-            transport.Add(consumerAgent);
+            var transport = new ReceiveTransport<ModelContext>(_hostConfiguration, receiveEndpointContext, () => receiveEndpointContext.ModelContextSupervisor,
+                modelPipe);
 
             var receiveEndpoint = new ReceiveEndpoint(transport, receiveEndpointContext);
 

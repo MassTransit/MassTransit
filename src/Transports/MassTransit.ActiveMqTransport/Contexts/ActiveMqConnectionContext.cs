@@ -25,7 +25,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
         {
             _connection = connection;
 
-            Description = hostConfiguration.Description;
+            Description = hostConfiguration.Settings.ToDescription();
             HostAddress = hostConfiguration.HostAddress;
 
             Topology = hostConfiguration.HostTopology;
@@ -63,8 +63,6 @@ namespace MassTransit.ActiveMqTransport.Contexts
             {
                 LogContext.Warning?.Log(exception, "Close Connection Faulted: {Host}", Description);
             }
-
-            TransportLogMessages.DisconnectedHost(Description);
         }
     }
 }

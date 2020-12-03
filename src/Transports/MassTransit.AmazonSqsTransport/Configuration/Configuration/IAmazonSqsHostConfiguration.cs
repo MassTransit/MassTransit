@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.AmazonSqsTransport.Configuration
 {
     using System;
-    using GreenPipes;
     using MassTransit.Configuration;
     using Topology;
     using Topology.Settings;
@@ -13,8 +12,6 @@
         IReceiveConfigurator<IAmazonSqsReceiveEndpointConfigurator>
     {
         AmazonSqsHostSettings Settings { get; set; }
-
-        IRetryPolicy ConnectionRetryPolicy { get; }
 
         IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 

@@ -7,7 +7,7 @@
         EndpointConfiguration,
         IServiceBusEndpointConfiguration
     {
-        public ServiceBusEndpointConfiguration(IServiceBusTopologyConfiguration topologyConfiguration)
+        protected ServiceBusEndpointConfiguration(IServiceBusTopologyConfiguration topologyConfiguration)
             : base(topologyConfiguration)
         {
             Topology = topologyConfiguration;

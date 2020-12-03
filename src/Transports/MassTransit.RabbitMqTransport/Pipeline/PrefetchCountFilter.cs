@@ -33,8 +33,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         async Task IFilter<ModelContext>.Send(ModelContext context, IPipe<ModelContext> next)
         {
-            RabbitMqLogMessages.PrefetchCount(_prefetchCount);
-
             await context.BasicQos(0, _prefetchCount, false).ConfigureAwait(false);
 
             using (new SetPrefetchCountConsumer(_managementPipe, context, this))

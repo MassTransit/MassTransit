@@ -5,7 +5,6 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using Contexts;
     using Events;
     using GreenPipes;
-    using GreenPipes.Agents;
     using Topology;
     using Transports.Metrics;
 
@@ -14,7 +13,6 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     /// A filter that uses the model context to create a basic consumer and connect it to the model
     /// </summary>
     public class AmazonSqsConsumerFilter :
-        Supervisor,
         IFilter<ClientContext>
     {
         readonly SqsReceiveEndpointContext _context;
@@ -38,7 +36,9 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
             await receiver.Ready.ConfigureAwait(false);
 
-            Add(receiver);
+            _context.AddAgent(receiver);
+
+            LogContext.Debug?.Log("Receiver Ready: {InputAddress}", _context.InputAddress);
 
             await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
 

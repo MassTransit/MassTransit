@@ -37,19 +37,18 @@
             return base.ConnectConsumePipe(pipe);
         }
 
-        public SqsReceiveEndpointContext CreateReceiveEndpointContext()
+        public SqsReceiveEndpointContext CreateReceiveEndpointContext(ReceiveSettings settings)
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
             var headerAdapter = new TransportSetHeaderAdapter<MessageAttributeValue>(
-                new SqsHeaderValueConverter(_hostConfiguration.Settings.AllowTransportHeader),
-                TransportHeaderOptions.IncludeFaultMessage);
+                new SqsHeaderValueConverter(_hostConfiguration.Settings.AllowTransportHeader), TransportHeaderOptions.IncludeFaultMessage);
 
             var deadLetterTransport = CreateDeadLetterTransport(headerAdapter);
 
             var errorTransport = CreateErrorTransport(headerAdapter);
 
-            var context = new SqsQueueReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology);
+            var context = new SqsQueueReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology, settings);
 
             context.GetOrAddPayload(() => deadLetterTransport);
             context.GetOrAddPayload(() => errorTransport);

@@ -1,28 +1,14 @@
-﻿namespace MassTransit.Transports.InMemory.Contexts
+namespace MassTransit.Transports.InMemory.Contexts
 {
-    using Configuration;
     using Context;
+    using Fabric;
 
 
-    public class InMemoryReceiveEndpointContext :
-        BaseReceiveEndpointContext
+    public interface InMemoryReceiveEndpointContext :
+        ReceiveEndpointContext
     {
-        readonly IInMemoryHostConfiguration _hostConfiguration;
+        IMessageFabric MessageFabric { get; }
 
-        public InMemoryReceiveEndpointContext(IInMemoryHostConfiguration hostConfiguration, IInMemoryReceiveEndpointConfiguration configuration)
-            : base(hostConfiguration, configuration)
-        {
-            _hostConfiguration = hostConfiguration;
-        }
-
-        protected override ISendTransportProvider CreateSendTransportProvider()
-        {
-            return _hostConfiguration.TransportProvider;
-        }
-
-        protected override IPublishTransportProvider CreatePublishTransportProvider()
-        {
-            return _hostConfiguration.TransportProvider;
-        }
+        void ConfigureTopology();
     }
 }

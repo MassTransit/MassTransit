@@ -7,7 +7,6 @@
 
 
     public class TransportReadyFilter<T> :
-        Agent,
         IFilter<T>
         where T : class, PipeContext
     {
@@ -22,11 +21,14 @@
         {
             await _context.TransportObservers.NotifyReady(_context.InputAddress).ConfigureAwait(false);
 
-            SetReady();
+            var agent = new Agent();
+            agent.SetReady();
+
+            _context.AddAgent(agent);
 
             await next.Send(context).ConfigureAwait(false);
 
-            await Completed.ConfigureAwait(false);
+            await agent.Completed.ConfigureAwait(false);
         }
 
         public void Probe(ProbeContext context)

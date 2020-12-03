@@ -22,5 +22,13 @@
         /// <param name="cancellationToken">Cancel the stop operation in progress</param>
         /// <returns>An awaitable task that is completed once everything is stopped</returns>
         Task StopAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Stop the receive endpoint.
+        /// </summary>
+        /// <param name="removeEndpoint">If true, the endpoint is removed from the bus</param>
+        /// <param name="cancellationToken">Cancel the stop operation in progress</param>
+        /// <returns>An awaitable task that is completed once everything is stopped</returns>
+        Task StopAsync(bool removeEndpoint, CancellationToken cancellationToken = default);
     }
 }

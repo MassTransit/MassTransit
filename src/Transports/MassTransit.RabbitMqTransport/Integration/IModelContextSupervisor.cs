@@ -1,13 +1,13 @@
 namespace MassTransit.RabbitMqTransport.Integration
 {
-    using GreenPipes.Agents;
+    using Transports;
 
 
     /// <summary>
     /// Attaches a model context to the value
     /// </summary>
     public interface IModelContextSupervisor :
-        ISupervisor<ModelContext>
+        ITransportSupervisor<ModelContext>
     {
     }
 }

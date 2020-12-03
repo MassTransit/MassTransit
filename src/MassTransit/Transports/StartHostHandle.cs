@@ -5,7 +5,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Events;
-    using GreenPipes;
     using GreenPipes.Agents;
 
 
@@ -13,14 +12,14 @@
         HostHandle
     {
         readonly HostReceiveEndpointHandle[] _handles;
-        readonly IHost _host;
-        readonly IAgent[] _readyAgents;
+        readonly BaseHost _host;
+        readonly IAgent[] _agents;
 
-        public StartHostHandle(IHost host, HostReceiveEndpointHandle[] handles, params IAgent[] readyAgents)
+        public StartHostHandle(BaseHost host, HostReceiveEndpointHandle[] handles, params IAgent[] agents)
         {
             _host = host;
             _handles = handles;
-            _readyAgents = readyAgents;
+            _agents = agents;
         }
 
         Task<HostReady> HostHandle.Ready
@@ -30,7 +29,7 @@
 
         Task HostHandle.Stop(CancellationToken cancellationToken)
         {
-            return _host.Stop("Stopping Host", cancellationToken);
+            return _host.Stop(cancellationToken);
         }
 
         async Task<HostReady> ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> endpoints)
@@ -39,7 +38,7 @@
             foreach (Task<ReceiveEndpointReady> ready in readyTasks)
                 await ready.ConfigureAwait(false);
 
-            foreach (var agent in _readyAgents)
+            foreach (var agent in _agents)
                 await agent.Ready.ConfigureAwait(false);
 
             ReceiveEndpointReady[] endpointsReady = await Task.WhenAll(readyTasks).ConfigureAwait(false);

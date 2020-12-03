@@ -4,9 +4,10 @@
     using System.Runtime.Serialization;
 
 
+    [Obsolete("Use ActiveMQConnectionException instead")]
     [Serializable]
     public class ActiveMqConnectException :
-        ActiveMqTransportException
+        ActiveMqConnectionException
     {
         public ActiveMqConnectException()
         {

@@ -53,8 +53,6 @@
 
         public async ValueTask DisposeAsync()
         {
-            LogContext.Debug?.Log("Closing model: {ChannelNumber} {Host}", _model.ChannelNumber, _connectionContext.Description);
-
             try
             {
                 if (_confirmations != null && _model.IsOpen)
@@ -148,9 +146,10 @@
             }
         }
 
-        Task<string> ModelContext.BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer)
+        Task<string> ModelContext.BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer,
+            string consumerTag)
         {
-            return _executor.Run(() => _model.BasicConsume(consumer, queue, noAck, "", false, exclusive, arguments), CancellationToken);
+            return _executor.Run(() => _model.BasicConsume(consumer, queue, noAck, consumerTag, false, exclusive, arguments), CancellationToken);
         }
 
         public Task BasicCancel(string consumerTag)

@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Contexts
 {
     using Context;
-    using GreenPipes;
+    using Pipeline;
     using Topology;
 
 
@@ -10,6 +10,6 @@
     {
         BrokerTopology BrokerTopology { get; }
 
-        IRetryPolicy RetryPolicy { get; }
+        IClientContextSupervisor ClientContextSupervisor { get; }
     }
 }

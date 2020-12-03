@@ -6,7 +6,6 @@
     using Context;
     using Contexts;
     using GreenPipes;
-    using GreenPipes.Agents;
     using Pipeline;
     using Topology;
     using Transport;
@@ -14,7 +13,7 @@
 
 
     public class ConnectionContextSupervisor :
-        PipeContextSupervisor<ConnectionContext>,
+        TransportPipeContextSupervisor<ConnectionContext>,
         IConnectionContextSupervisor
     {
         readonly IRabbitMqHostConfiguration _hostConfiguration;
@@ -25,12 +24,6 @@
         {
             _hostConfiguration = hostConfiguration;
             _topologyConfiguration = topologyConfiguration;
-        }
-
-        public void Probe(ProbeContext context)
-        {
-            if (HasContext)
-                context.Add("connected", true);
         }
 
         public Uri NormalizeAddress(Uri address)
@@ -50,13 +43,11 @@
 
             var brokerTopology = settings.GetBrokerTopology();
 
-            IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
+            IPipe<ModelContext> configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
 
             var supervisor = new ModelContextSupervisor(modelContextSupervisor);
 
-            var transport = CreateSendTransport(supervisor, pipe, settings.ExchangeName);
-
-            return Task.FromResult(transport);
+            return CreateSendTransport(supervisor, configureTopology, settings.ExchangeName);
         }
 
         public Task<ISendTransport> CreatePublishTransport<T>(IModelContextSupervisor modelContextSupervisor)
@@ -72,21 +63,20 @@
 
             var supervisor = new ModelContextSupervisor(modelContextSupervisor);
 
-            IPipe<ModelContext> pipe = new ConfigureTopologyFilter<SendSettings>(sendSettings, brokerTopology).ToPipe();
+            IPipe<ModelContext> configureTopology = new ConfigureTopologyFilter<SendSettings>(sendSettings, brokerTopology).ToPipe();
 
-            var transport = CreateSendTransport(supervisor, pipe, publishTopology.Exchange.ExchangeName);
-
-            return Task.FromResult(transport);
+            return CreateSendTransport(supervisor, configureTopology, publishTopology.Exchange.ExchangeName);
         }
 
-        ISendTransport CreateSendTransport(IModelContextSupervisor modelContextSupervisor, IPipe<ModelContext> pipe, string exchangeName)
+        Task<ISendTransport> CreateSendTransport(IModelContextSupervisor modelContextSupervisor, IPipe<ModelContext> pipe, string exchangeName)
         {
             var sendTransportContext = new SendTransportContext(modelContextSupervisor, pipe, exchangeName, _hostConfiguration.SendLogContext);
 
             var transport = new RabbitMqSendTransport(sendTransportContext);
-            Add(transport);
 
-            return transport;
+            AddAgent(transport);
+
+            return Task.FromResult<ISendTransport>(transport);
         }
 
 

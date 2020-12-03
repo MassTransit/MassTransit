@@ -66,7 +66,7 @@
 
         async Task<ConnectionContext> CreateConnection(ISupervisor supervisor)
         {
-            return await _hostConfiguration.ConnectionRetryPolicy.Retry(async () =>
+            return await _hostConfiguration.ReceiveTransportRetryPolicy.Retry(async () =>
             {
                 var description = _hostConfiguration.Settings.ToDescription();
 

@@ -1,5 +1,6 @@
 namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 {
+    using Contexts;
     using Transport;
 
 
@@ -9,8 +10,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     public class MessageSessionReceiverFilter :
         MessageReceiverFilter
     {
-        public MessageSessionReceiverFilter(IBrokeredMessageReceiver messageReceiver, IReceiveTransportObserver transportObserver)
-            : base(messageReceiver, transportObserver)
+        public MessageSessionReceiverFilter(IBrokeredMessageReceiver messageReceiver, ServiceBusReceiveEndpointContext context)
+            : base(messageReceiver, context)
         {
         }
 

@@ -2,10 +2,12 @@
 {
     using System;
     using Definition;
+    using GreenPipes;
     using MassTransit.Configuration;
     using MassTransit.Configurators;
     using MassTransit.Topology;
     using Topology.Topologies;
+    using Util;
 
 
     public class InMemoryHostConfiguration :
@@ -15,6 +17,7 @@
     {
         readonly IInMemoryBusConfiguration _busConfiguration;
         readonly InMemoryHostTopology _hostTopology;
+        readonly Recycle<IInMemoryTransportProvider> _transportProvider;
         Uri _hostAddress;
 
         public InMemoryHostConfiguration(IInMemoryBusConfiguration busConfiguration, Uri baseAddress, IInMemoryTopologyConfiguration topologyConfiguration)
@@ -26,12 +29,13 @@
             _hostTopology = new InMemoryHostTopology(this, topologyConfiguration);
 
             TransportConcurrencyLimit = Environment.ProcessorCount;
-            TransportProvider = new InMemoryTransportProvider(this, topologyConfiguration);
+
+            _transportProvider = new Recycle<IInMemoryTransportProvider>(() => new InMemoryTransportProvider(this, topologyConfiguration));
         }
 
         public IInMemoryHostConfigurator Configurator => this;
 
-        public IInMemoryTransportProvider TransportProvider { get; }
+        public IInMemoryTransportProvider TransportProvider => _transportProvider.Supervisor;
 
         public override Uri HostAddress => _hostAddress;
 
@@ -108,6 +112,8 @@
         {
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
         }
+
+        public override IRetryPolicy ReceiveTransportRetryPolicy => Retry.None;
 
         public override IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IReceiveEndpointConfigurator> configure = null)

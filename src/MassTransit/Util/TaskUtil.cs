@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Util
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Runtime.CompilerServices;
     using System.Threading;
     using System.Threading.Tasks;
@@ -257,6 +256,11 @@
                 _executor = new ChannelExecutor(1);
             }
 
+            public void Dispose()
+            {
+                _executor.DisposeAsync().GetAwaiter().GetResult();
+            }
+
             public override void Post(SendOrPostCallback callback, object state)
             {
                 if (callback == null)
@@ -282,11 +286,6 @@
             public void SetComplete()
             {
                 _completed = true;
-            }
-
-            public void Dispose()
-            {
-                _executor.DisposeAsync().GetAwaiter().GetResult();
             }
         }
     }

@@ -18,6 +18,7 @@
     using Topology.Topologies;
     using Transport;
     using Transports;
+    using Util;
 
 
     public class ServiceBusHostConfiguration :
@@ -25,7 +26,7 @@
         IServiceBusHostConfiguration
     {
         readonly IServiceBusBusConfiguration _busConfiguration;
-        readonly ServiceBusConnectionContextSupervisor _connectionContextSupervisor;
+        readonly Recycle<IConnectionContextSupervisor> _connectionContext;
         readonly IServiceBusHostTopology _hostTopology;
         readonly IServiceBusTopologyConfiguration _topologyConfiguration;
         ServiceBusHostSettings _hostSettings;
@@ -40,14 +41,14 @@
             _hostSettings = new HostSettings();
             _hostTopology = new ServiceBusHostTopology(this, _topologyConfiguration);
 
-            _connectionContextSupervisor = new ServiceBusConnectionContextSupervisor(this, topologyConfiguration);
+            _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ServiceBusConnectionContextSupervisor(this, topologyConfiguration));
         }
 
         public override Uri HostAddress => _hostSettings.ServiceUri;
 
         string IServiceBusHostConfiguration.BasePath => _hostSettings.ServiceUri.AbsolutePath.Trim('/');
 
-        public IConnectionContextSupervisor ConnectionContextSupervisor => _connectionContextSupervisor;
+        public IConnectionContextSupervisor ConnectionContextSupervisor => _connectionContext.Supervisor;
 
         public ServiceBusHostSettings Settings
         {
@@ -61,7 +62,7 @@
             }
         }
 
-        public IRetryPolicy RetryPolicy
+        public override IRetryPolicy ReceiveTransportRetryPolicy
         {
             get
             {
@@ -132,7 +133,7 @@
 
         public ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(SendSettings settings)
         {
-            return _connectionContextSupervisor.CreateSendEndpointContextSupervisor(settings);
+            return _connectionContext.Supervisor.CreateSendEndpointContextSupervisor(settings);
         }
 
         public void ApplyEndpointDefinition(IServiceBusReceiveEndpointConfigurator configurator, IEndpointDefinition definition)

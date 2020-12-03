@@ -62,18 +62,10 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
                 if (_subscriptionClient != null && !_subscriptionClient.IsClosedOrClosing)
                 {
                     if (_unregisterMessageHandler)
-                    {
-                        LogContext.Debug?.Log("Shutting down message handler: {InputAddress}", InputAddress);
-
                         await _subscriptionClient.UnregisterMessageHandlerAsync(_settings.ShutdownTimeout).ConfigureAwait(false);
-                    }
 
                     if (_unregisterSessionHandler)
-                    {
-                        LogContext.Debug?.Log("Shutting down session handler: {InputAddress}", InputAddress);
-
                         await _subscriptionClient.UnregisterSessionHandlerAsync(_settings.ShutdownTimeout).ConfigureAwait(false);
-                    }
                 }
             }
             catch (Exception exception)
@@ -84,14 +76,10 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public async Task CloseAsync()
         {
-            LogContext.Debug?.Log("Closing client: {InputAddress}", InputAddress);
-
             try
             {
                 if (_subscriptionClient != null && !_subscriptionClient.IsClosedOrClosing)
                     await _subscriptionClient.CloseAsync().ConfigureAwait(false);
-
-                LogContext.Debug?.Log("Closed client: {InputAddress}", InputAddress);
             }
             catch (Exception exception)
             {

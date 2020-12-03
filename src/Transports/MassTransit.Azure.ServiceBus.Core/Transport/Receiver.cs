@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Transport
 {
     using System;
-    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -16,7 +15,7 @@
 
 
     public class Receiver :
-        Supervisor,
+        Agent,
         IReceiver
     {
         readonly ClientContext _context;
@@ -84,10 +83,8 @@
                 _deliveryComplete.TrySetResult(true);
         }
 
-        protected override async Task StopSupervisor(StopSupervisorContext context)
+        protected override async Task StopAgent(StopContext context)
         {
-            LogContext.Debug?.Log("Stopping receiver: {InputAddress}", _context.InputAddress);
-
             await _context.ShutdownAsync().ConfigureAwait(false);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
@@ -97,10 +94,8 @@
             await _context.CloseAsync().ConfigureAwait(false);
         }
 
-        async Task ActiveAndActualAgentsCompleted(StopSupervisorContext context)
+        async Task ActiveAndActualAgentsCompleted(StopContext context)
         {
-            await Task.WhenAll(context.Agents.Select(x => Completed)).OrCanceled(context.CancellationToken).ConfigureAwait(false);
-
             if (_messageReceiver.ActiveDispatchCount > 0)
             {
                 try

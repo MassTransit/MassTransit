@@ -30,8 +30,8 @@
             AccessKey = "admin";
             SecretKey = "admin";
 
-            AmazonSqsConfig = new AmazonSQSConfig {ServiceURL = "http://localhost:4576"};
-            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4575"};
+            AmazonSqsConfig = new AmazonSQSConfig {ServiceURL = "http://localhost:4566"};
+            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"};
 
             InputQueueName = "input_queue";
 

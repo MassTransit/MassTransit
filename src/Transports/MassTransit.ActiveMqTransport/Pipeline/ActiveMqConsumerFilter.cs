@@ -18,7 +18,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     /// A filter that uses the model context to create a basic consumer and connect it to the model
     /// </summary>
     public class ActiveMqConsumerFilter :
-        Supervisor,
         IFilter<SessionContext>
     {
         readonly ActiveMqReceiveEndpointContext _context;
@@ -52,6 +51,8 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var supervisor = CreateConsumerSupervisor(context, actualConsumers);
 
+            LogContext.Debug?.Log("Consumers Ready: {InputAddress}", _context.InputAddress);
+
             await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
 
             try
@@ -81,7 +82,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             foreach (var consumer in actualConsumers)
                 supervisor.Add(consumer);
 
-            Add(supervisor);
+            _context.AddAgent(supervisor);
 
             void HandleException(Exception exception)
             {

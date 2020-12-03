@@ -22,11 +22,9 @@
         {
             _hostConfiguration = hostConfiguration;
             Topology = hostTopology;
-
-            Add(_hostConfiguration.ConnectionContextSupervisor);
         }
 
-        public IAmazonSqsHostTopology Topology { get; }
+        public new IAmazonSqsHostTopology Topology { get; }
 
         public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IReceiveEndpointConfigurator> configureEndpoint = null)

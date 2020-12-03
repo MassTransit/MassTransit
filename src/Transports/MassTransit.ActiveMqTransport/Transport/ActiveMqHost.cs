@@ -22,11 +22,9 @@
         {
             _hostConfiguration = hostConfiguration;
             Topology = hostTopology;
-
-            Add(hostConfiguration.ConnectionContextSupervisor);
         }
 
-        public IActiveMqHostTopology Topology { get; }
+        public new IActiveMqHostTopology Topology { get; }
 
         public override HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IReceiveEndpointConfigurator> configureEndpoint = null)

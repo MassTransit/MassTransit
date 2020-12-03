@@ -20,7 +20,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     /// Receives messages from AmazonSQS, pushing them to the InboundPipe of the service endpoint.
     /// </summary>
     public sealed class AmazonSqsMessageReceiver :
-        Supervisor,
+        Agent,
         DeliveryMetrics
     {
         readonly ClientContext _client;
@@ -78,7 +78,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             SetCompleted(TaskUtil.Completed);
         }
 
-        protected override async Task StopSupervisor(StopSupervisorContext context)
+        protected override async Task StopAgent(StopContext context)
         {
             LogContext.Debug?.Log("Stopping consumer: {InputAddress}", _context.InputAddress);
 
@@ -131,12 +131,19 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
         async Task<int> ReceiveMessages(int messageLimit, ChannelExecutor executor)
         {
-            IList<Message> messages = await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, Stopping)
-                .ConfigureAwait(false);
+            try
+            {
+                IList<Message> messages = await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, Stopping)
+                    .ConfigureAwait(false);
 
-            await Task.WhenAll(messages.Select(message => executor.Push(() => HandleMessage(message), Stopping))).ConfigureAwait(false);
+                await Task.WhenAll(messages.Select(message => executor.Push(() => HandleMessage(message), Stopping))).ConfigureAwait(false);
 
-            return messages.Count;
+                return messages.Count;
+            }
+            catch (OperationCanceledException)
+            {
+                return 0;
+            }
         }
 
         Task HandleDeliveryComplete()
@@ -151,10 +158,8 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             return TaskUtil.Completed;
         }
 
-        async Task ActiveAndActualAgentsCompleted(StopSupervisorContext context)
+        async Task ActiveAndActualAgentsCompleted(StopContext context)
         {
-            await Task.WhenAll(context.Agents.Select(x => Completed)).OrCanceled(context.CancellationToken).ConfigureAwait(false);
-
             if (_dispatcher.ActiveDispatchCount > 0)
             {
                 try

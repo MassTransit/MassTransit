@@ -164,6 +164,7 @@ namespace MassTransit.Containers.Tests
         protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
             IConsumerConfigurator<TestBatchConsumer> consumerConfigurator)
         {
+            endpointConfigurator.UseInMemoryOutbox();
             consumerConfigurator.Options<BatchOptions>(o => o.SetMessageLimit(5).SetTimeLimit(2000));
         }
     }

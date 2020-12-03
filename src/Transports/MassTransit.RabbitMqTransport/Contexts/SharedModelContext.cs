@@ -79,9 +79,10 @@
             return _context.BasicNack(deliveryTag, multiple, requeue);
         }
 
-        Task<string> ModelContext.BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer)
+        Task<string> ModelContext.BasicConsume(string queue, bool noAck, bool exclusive, IDictionary<string, object> arguments, IBasicConsumer consumer,
+            string consumerTag)
         {
-            return _context.BasicConsume(queue, noAck, exclusive, arguments, consumer);
+            return _context.BasicConsume(queue, noAck, exclusive, arguments, consumer, consumerTag);
         }
 
         public Task BasicCancel(string consumerTag)

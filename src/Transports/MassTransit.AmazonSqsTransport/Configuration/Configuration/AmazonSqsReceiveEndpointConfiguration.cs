@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using Builders;
     using GreenPipes;
-    using GreenPipes.Agents;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
     using MassTransit.Configuration;
@@ -12,7 +11,6 @@
     using Pipeline;
     using Topology;
     using Topology.Settings;
-    using Transport;
     using Transports;
     using Util;
 
@@ -55,36 +53,24 @@
 
             ApplySpecifications(builder);
 
-            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
+            var receiveEndpointContext = builder.CreateReceiveEndpointContext(_settings);
 
             _clientConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology));
 
-            IAgent consumerAgent;
             if (_hostConfiguration.DeployTopologyOnly)
-            {
-                var transportReadyFilter = new TransportReadyFilter<ClientContext>(receiveEndpointContext);
-                _clientConfigurator.UseFilter(transportReadyFilter);
-
-                consumerAgent = transportReadyFilter;
-            }
+                _clientConfigurator.UseFilter(new TransportReadyFilter<ClientContext>(receiveEndpointContext));
             else
             {
                 if (_settings.PurgeOnStartup)
                     _clientConfigurator.UseFilter(new PurgeOnStartupFilter(_settings.EntityName));
 
-                var consumerFilter = new AmazonSqsConsumerFilter(receiveEndpointContext);
-
-                _clientConfigurator.UseFilter(consumerFilter);
-
-                consumerAgent = consumerFilter;
+                _clientConfigurator.UseFilter(new AmazonSqsConsumerFilter(receiveEndpointContext));
             }
 
-            IFilter<ConnectionContext> clientFilter = new ReceiveClientFilter(_clientConfigurator.Build());
+            IPipe<ClientContext> clientPipe = _clientConfigurator.Build();
 
-            _connectionConfigurator.UseFilter(clientFilter);
-
-            var transport = new SqsReceiveTransport(_hostConfiguration, _settings, _connectionConfigurator.Build(), receiveEndpointContext);
-            transport.Add(consumerAgent);
+            var transport = new ReceiveTransport<ClientContext>(_hostConfiguration, receiveEndpointContext,
+                () => receiveEndpointContext.ClientContextSupervisor, clientPipe);
 
             var receiveEndpoint = new ReceiveEndpoint(transport, receiveEndpointContext);
 

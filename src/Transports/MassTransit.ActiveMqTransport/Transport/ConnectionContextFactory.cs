@@ -68,21 +68,23 @@
 
         async Task<ConnectionContext> CreateConnection(ISupervisor supervisor)
         {
+            var description = _configuration.Settings.ToDescription();
+
             return await _connectionRetryPolicy.Retry(async () =>
             {
                 if (supervisor.Stopping.IsCancellationRequested)
-                    throw new OperationCanceledException($"The connection is stopping and cannot be used: {_configuration.Description}");
+                    throw new OperationCanceledException($"The connection is stopping and cannot be used: {description}");
 
                 IConnection connection = null;
                 try
                 {
-                    TransportLogMessages.ConnectHost(_configuration.Description);
+                    TransportLogMessages.ConnectHost(description);
 
                     connection = _configuration.Settings.CreateConnection();
 
                     connection.Start();
 
-                    LogContext.Debug?.Log("Connected: {Host} (client-id: {ClientId}, version: {Version})", _configuration.Description,
+                    LogContext.Debug?.Log("Connected: {Host} (client-id: {ClientId}, version: {Version})", description,
                         connection.ClientId, connection.MetaData.NMSVersion);
 
                     return new ActiveMqConnectionContext(connection, _configuration, supervisor.Stopped);
@@ -95,12 +97,12 @@
                 catch (NMSConnectionException ex)
                 {
                     connection?.Dispose();
-                    throw new ActiveMqConnectException("Connection exception: " + _configuration.Description, ex);
+                    throw new ActiveMqConnectionException("Connection exception: " + description, ex);
                 }
                 catch (Exception ex)
                 {
                     connection?.Dispose();
-                    throw new ActiveMqConnectException("Create Connection Faulted: " + _configuration.Description, ex);
+                    throw new ActiveMqConnectionException("Create Connection Faulted: " + description, ex);
                 }
             }, supervisor.Stopping).ConfigureAwait(false);
         }

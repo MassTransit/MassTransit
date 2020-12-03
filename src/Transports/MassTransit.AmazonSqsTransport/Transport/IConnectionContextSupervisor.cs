@@ -1,13 +1,10 @@
 namespace MassTransit.AmazonSqsTransport.Transport
 {
-    using GreenPipes.Agents;
+    using Transports;
 
 
-    /// <summary>
-    /// Attaches a connection context to the value (shared, of course)
-    /// </summary>
     public interface IConnectionContextSupervisor :
-        ISupervisor<ConnectionContext>,
+        ITransportSupervisor<ConnectionContext>,
         ISendTransportProvider,
         IPublishTransportProvider
     {

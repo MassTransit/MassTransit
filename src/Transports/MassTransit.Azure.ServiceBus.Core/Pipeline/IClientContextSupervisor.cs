@@ -1,10 +1,10 @@
 namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 {
-    using GreenPipes.Agents;
+    using Transports;
 
 
     public interface IClientContextSupervisor :
-        ISupervisor<ClientContext>
+        ITransportSupervisor<ClientContext>
     {
     }
 }
