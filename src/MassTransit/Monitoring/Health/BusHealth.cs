@@ -18,6 +18,11 @@ namespace MassTransit.Monitoring.Health
         string _failureMessage = "not started";
         bool _healthy;
 
+        public BusHealth()
+            : this("masstransit-bus")
+        {
+        }
+
         public BusHealth(string name)
         {
             Name = name;
@@ -34,7 +39,9 @@ namespace MassTransit.Monitoring.Health
 
             return _healthy && endpointHealthResult.Status == BusHealthStatus.Healthy
                 ? HealthResult.Healthy("Ready", data)
-                : HealthResult.Unhealthy($"Not ready: {_failureMessage}", data: data);
+                : _healthy && endpointHealthResult.Status == BusHealthStatus.Degraded
+                    ? HealthResult.Degraded(endpointHealthResult.Description, data: data)
+                    : HealthResult.Unhealthy($"Not ready: {_failureMessage}", data: data);
         }
 
         Task IBusObserver.CreateFaulted(Exception exception)

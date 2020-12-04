@@ -33,7 +33,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             collection.AddSingleton(provider =>
                 ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>(), provider.GetRequiredService<IBus>()));
 
-            collection.AddSingleton(provider => new BusHealth(nameof(IBus)));
+            collection.AddSingleton(provider => new BusHealth());
             collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<BusHealth>());
 
             collection.AddSingleton(provider => Bind<IBus>.Create(CreateRegistrationContext(provider)));

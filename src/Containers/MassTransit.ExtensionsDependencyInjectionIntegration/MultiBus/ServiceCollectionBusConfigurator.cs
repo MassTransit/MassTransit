@@ -3,6 +3,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Definition;
     using MassTransit.MultiBus;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
@@ -33,7 +34,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             collection.AddSingleton(provider =>
                 Bind<TBus>.Create(ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>(), provider.GetRequiredService<TBus>())));
 
-            collection.AddSingleton(provider => Bind<TBus>.Create(new BusHealth(typeof(TBus).Name)));
+            collection.AddSingleton(provider => Bind<TBus>.Create(new BusHealth(FormatBusHealthName())));
             collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<Bind<TBus, BusHealth>>().Value);
 
             collection.AddSingleton(provider => Bind<TBus>.Create(CreateRegistrationContext(provider)));
@@ -83,6 +84,15 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
         static IPublishEndpoint GetPublishEndpoint(IServiceProvider provider)
         {
             return new PublishEndpoint(new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<TBus>(), provider));
+        }
+
+        static string FormatBusHealthName()
+        {
+            string name = typeof(TBus).Name;
+            if (name.Length >= 2 && name[0] == 'I' && char.IsUpper(name[1]))
+                name = name.Substring(1);
+
+            return $"masstransit-{KebabCaseEndpointNameFormatter.Instance.SanitizeName(name)}";
         }
     }
 }

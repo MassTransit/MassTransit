@@ -43,7 +43,7 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IBusDepot>()
                 .SingleInstance();
 
-            Builder.Register(context => new BusHealth(nameof(IBus)))
+            Builder.Register(context => new BusHealth())
                 .As<BusHealth>()
                 .As<IBusHealth>()
                 .SingleInstance();

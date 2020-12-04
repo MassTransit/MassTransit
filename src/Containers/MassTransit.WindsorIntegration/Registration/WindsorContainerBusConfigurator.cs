@@ -62,7 +62,7 @@ namespace MassTransit.WindsorIntegration.Registration
                     .LifestyleSingleton(),
                 Component.For<BusHealth>()
                     .Forward<IBusHealth>()
-                    .UsingFactoryMethod(() => new BusHealth(nameof(IBus)))
+                    .UsingFactoryMethod(() => new BusHealth())
                     .LifestyleSingleton()
             );
         }

@@ -34,9 +34,14 @@ namespace MassTransit.Monitoring.Health
             Dictionary<string, object> data = _endpoints.ToDictionary(x => x.Key.ToString(), x => x.Value.GetData());
 
             HealthResult healthCheckResult;
-            if (faulted.Any())
+            if (faulted.Length == _endpoints.Values.Count)
             {
                 healthCheckResult = HealthResult.Unhealthy($"Unhealthy Endpoints: {string.Join(",", faulted.Select(x => x.InputAddress.GetLastPart()))}",
+                    faulted.Select(x => x.LastException).FirstOrDefault(e => e != null), data);
+            }
+            else if (faulted.Any())
+            {
+                healthCheckResult = HealthResult.Degraded($"Unhealthy Endpoints: {string.Join(",", faulted.Select(x => x.InputAddress.GetLastPart()))}",
                     faulted.Select(x => x.LastException).FirstOrDefault(e => e != null), data);
             }
             else

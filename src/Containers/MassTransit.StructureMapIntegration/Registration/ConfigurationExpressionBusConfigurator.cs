@@ -38,7 +38,7 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Singleton();
 
             _expression.For<BusHealth>()
-                .Use(context => new BusHealth(nameof(IBus)))
+                .Use(context => new BusHealth())
                 .Singleton();
 
             _expression.For<IBusHealth>()

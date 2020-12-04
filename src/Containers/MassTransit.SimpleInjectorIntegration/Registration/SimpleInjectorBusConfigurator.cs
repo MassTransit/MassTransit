@@ -33,7 +33,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             AddMassTransitComponents(Container);
 
-            Container.RegisterSingleton(() => new BusHealth(nameof(IBus)));
+            Container.RegisterSingleton(() => new BusHealth());
 
             Container.RegisterSingleton<IBusHealth>(() => Container.GetInstance<BusHealth>());
 
