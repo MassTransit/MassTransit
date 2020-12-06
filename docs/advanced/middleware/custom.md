@@ -160,7 +160,7 @@ public class MessageFilter<T> :
         var scope = context.CreateFilterScope("messageFilter");
     }
 
-    public async Task Send(T context, IPipe<T> next)
+    public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
     {
         // do something
 
