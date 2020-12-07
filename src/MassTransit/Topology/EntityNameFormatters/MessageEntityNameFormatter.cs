@@ -1,6 +1,8 @@
 namespace MassTransit.Topology.EntityNameFormatters
 {
+    using System;
     using System.Reflection;
+    using Internals.Extensions;
 
 
     public class MessageEntityNameFormatter<TMessage> :
@@ -31,6 +33,12 @@ namespace MassTransit.Topology.EntityNameFormatters
             var entityNameAttribute = typeof(TMessage).GetCustomAttribute<EntityNameAttribute>();
             if (entityNameAttribute != null)
                 _entityName = entityNameAttribute.EntityName;
+            else if (typeof(TMessage).ClosesType(typeof(Fault<>), out Type[] messageTypes))
+            {
+                var faultEntityNameAttribute = messageTypes[0].GetCustomAttribute<FaultEntityNameAttribute>();
+                if (faultEntityNameAttribute != null)
+                    _entityName = faultEntityNameAttribute.EntityName;
+            }
         }
     }
 }
