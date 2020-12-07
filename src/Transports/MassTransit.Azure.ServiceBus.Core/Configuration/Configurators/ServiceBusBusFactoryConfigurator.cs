@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Configurators
 {
     using System;
-    using System.Diagnostics;
     using BusConfigurators;
     using Configuration;
     using MassTransit.Builders;
@@ -38,12 +37,6 @@
             void ConfigureBusEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
             {
                 configurator.ConfigureConsumeTopology = false;
-            }
-
-            if (Activity.DefaultIdFormat != ActivityIdFormat.Hierarchical)
-            {
-                Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
-                Activity.ForceDefaultIdFormat = true;
             }
 
             var busReceiveEndpointConfiguration = _busConfiguration.HostConfiguration
