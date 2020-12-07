@@ -186,7 +186,7 @@ module.exports = {
                   '/advanced/monitoring/diagnostic-source',
                   '/advanced/monitoring/prometheus',
                   '/advanced/monitoring/applications-insights',
-                  '/advanced/monitoring/perfcounters',
+                  '/advanced/monitoring/perfcounters'
                 ]
               },
               '/advanced/connect-endpoint',
@@ -203,6 +203,7 @@ module.exports = {
                   '/advanced/topology/conventions',
                   '/advanced/topology/rabbitmq',
                   '/advanced/topology/servicebus',
+                  '/advanced/topology/deploy'
                 ]
               },
               {
