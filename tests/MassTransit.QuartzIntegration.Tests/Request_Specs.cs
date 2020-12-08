@@ -93,7 +93,10 @@
                 {
                     Console.WriteLine("Address validated: {0}", context.Message.CorrelationId);
 
-                    await context.RespondAsync<AddressValidated>(new { });
+                    if (context.IsResponseAccepted<AddressValidated>(false))
+                        await context.RespondAsync<AddressValidated>(new { });
+
+                    throw new InvalidOperationException("Response type not accepted");
                 });
 
                 configurator.Handler<ValidateName>(async context =>

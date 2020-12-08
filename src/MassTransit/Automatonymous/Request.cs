@@ -60,6 +60,12 @@
         /// <param name="instance"></param>
         /// <returns></returns>
         Guid? GetRequestId(TInstance instance);
+
+        /// <summary>
+        /// Set the headers on the outgoing request <see cref="SendContext{TRequest}"/>
+        /// </summary>
+        /// <param name="context"></param>
+        void SetSendContextHeaders(SendContext<TRequest> context);
     }
 
 

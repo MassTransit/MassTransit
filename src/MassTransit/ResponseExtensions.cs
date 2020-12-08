@@ -24,14 +24,15 @@ namespace MassTransit
         /// not present (downlevel client).
         /// </summary>
         /// <param name="context">The consumed message context</param>
+        /// <param name="defaultIfHeaderNotFound">Value to return if header was not present</param>
         /// <typeparam name="T">The response type</typeparam>
         /// <returns>True if explicitly support or header is missing, otherwise false</returns>
-        public static bool IsResponseAccepted<T>(this ConsumeContext context)
+        public static bool IsResponseAccepted<T>(this ConsumeContext context, bool defaultIfHeaderNotFound = true)
             where T : class
         {
             string[] acceptTypes = context.Headers.Get(MessageHeaders.Request.Accept, default(string[]));
             if (acceptTypes == null || acceptTypes.Length <= 0)
-                return true;
+                return defaultIfHeaderNotFound;
 
             string[] matchingTypeNames = TypeMetadataCache<T>.MessageTypeNames;
 

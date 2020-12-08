@@ -123,7 +123,7 @@
         {
             Task<Response<T>> response = Response<T>();
 
-            AcceptRequest<T>();
+            AcceptResponse<T>();
 
             if (readyToSend)
                 _readyToSend.TrySetResult(true);
@@ -139,7 +139,7 @@
 
         Task<TRequest> RequestHandle<TRequest>.Message => _message.Task;
 
-        void AcceptRequest<T>()
+        void AcceptResponse<T>()
             where T : class
         {
             _accept.Add(MessageUrn.ForTypeString<T>());

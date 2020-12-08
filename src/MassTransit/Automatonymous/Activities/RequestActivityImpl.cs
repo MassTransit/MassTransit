@@ -23,7 +23,7 @@
 
         protected async Task SendRequest(BehaviorContext<TInstance> context, ConsumeContext consumeContext, TRequest requestMessage, Uri serviceAddress)
         {
-            var pipe = new SendRequestPipe(consumeContext.ReceiveContext.InputAddress);
+            var pipe = new SendRequestPipe(_request, consumeContext.ReceiveContext.InputAddress);
 
             var endpoint = await consumeContext.GetSendEndpoint(serviceAddress).ConfigureAwait(false);
 
@@ -60,11 +60,14 @@
         class SendRequestPipe :
             IPipe<SendContext<TRequest>>
         {
+            readonly Request<TInstance, TRequest, TResponse> _request;
             readonly Uri _responseAddress;
 
-            public SendRequestPipe(Uri responseAddress)
+            public SendRequestPipe(Request<TInstance, TRequest, TResponse> request, Uri responseAddress)
             {
+                _request = request;
                 _responseAddress = responseAddress;
+
                 RequestId = NewId.NextGuid();
             }
 
@@ -78,6 +81,8 @@
             {
                 context.RequestId = RequestId;
                 context.ResponseAddress = _responseAddress;
+
+                _request.SetSendContextHeaders(context);
 
                 return TaskUtil.Completed;
             }

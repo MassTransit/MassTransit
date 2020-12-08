@@ -73,7 +73,7 @@ namespace MassTransit.Tests
         {
             configurator.Handler<Request>(context =>
             {
-                if (context.IsResponseAccepted<ResponseB>())
+                if (context.IsResponseAccepted<ResponseB>(false))
                     return context.RespondAsync(new ResponseB());
 
                 throw new InvalidOperationException("The response type was not supported by the request");

@@ -1,6 +1,7 @@
 namespace Automatonymous.Requests
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq.Expressions;
     using Events;
     using GreenPipes.Internals.Reflection;
@@ -14,6 +15,8 @@ namespace Automatonymous.Requests
         where TRequest : class
         where TResponse : class
     {
+        readonly IList<string> _accept;
+
         readonly string _name;
         readonly ReadWriteProperty<TInstance, Guid?> _requestIdProperty;
         readonly RequestSettings _settings;
@@ -22,6 +25,10 @@ namespace Automatonymous.Requests
         {
             _name = name;
             _settings = settings;
+
+            _accept = new List<string>();
+
+            AcceptResponse<TResponse>();
 
             _requestIdProperty = new ReadWriteProperty<TInstance, Guid?>(requestIdExpression.GetPropertyInfo());
         }
@@ -49,6 +56,11 @@ namespace Automatonymous.Requests
             return _requestIdProperty.Get(instance);
         }
 
+        public void SetSendContextHeaders(SendContext<TRequest> context)
+        {
+            context.Headers.Set(MessageHeaders.Request.Accept, _accept);
+        }
+
         public bool EventFilter(EventContext<TInstance, RequestTimeoutExpired<TRequest>> context)
         {
             if (!context.TryGetPayload(out ConsumeContext<RequestTimeoutExpired<TRequest>> consumeContext))
@@ -60,6 +72,12 @@ namespace Automatonymous.Requests
             Guid? requestId = _requestIdProperty.Get(context.Instance);
 
             return requestId.HasValue && requestId.Value == consumeContext.RequestId.Value;
+        }
+
+        protected void AcceptResponse<T>()
+            where T : class
+        {
+            _accept.Add(MessageUrn.ForTypeString<T>());
         }
     }
 
@@ -75,6 +93,7 @@ namespace Automatonymous.Requests
         public StateMachineRequest(string name, Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
             : base(name, requestIdExpression, settings)
         {
+            AcceptResponse<TResponse2>();
         }
 
         public Event<TResponse2> Completed2 { get; set; }
