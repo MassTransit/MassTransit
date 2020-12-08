@@ -56,7 +56,13 @@
             else if (args.Exception is ServiceBusException sbException)
                 requiresRecycle = !sbException.IsTransient;
 
-            if (!(args.Exception is OperationCanceledException))
+            if (args.Exception is ServiceBusCommunicationException communicationException && communicationException.IsTransient)
+            {
+                LogContext.Debug?.Log(args.Exception,
+                    "Exception on Receiver {InputAddress} during {Action} ActiveDispatchCount({activeDispatch}) ErrorRequiresRecycle({requiresRecycle})",
+                    _context.InputAddress, args.ExceptionReceivedContext.Action, activeDispatchCount, requiresRecycle);
+            }
+            else if (!(args.Exception is OperationCanceledException))
             {
                 EnabledLogger? logger = requiresRecycle ? LogContext.Error : LogContext.Warning;
 
