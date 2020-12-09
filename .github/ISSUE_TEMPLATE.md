@@ -1,13 +1,9 @@
+---
+name: Bug Report
+about: Create a bug report related to MassTransit
+---
 <!--
-  PLEASE READ THE FIRST SECTION :-)
--->
-
-### Is this a bug report?
-
-(write your answer here)
-
-<!--
-  If you answered "Yes":
+  If this is a bug report:
   
     Please note that your issue will be fixed much faster if you spend about
     half an hour preparing it, including the exact reproduction steps and a demo.
@@ -17,11 +13,18 @@
 
     In either case, please fill as many fields below as you can.
 
-  If you answered "No":
+  If not:
 
-    If this is a question or a discussion, please use [StackOverflow](https://stackoverflow.com/questions/tagged/masstransit) or [MT mailing list for questions](https://groups.google.com/forum/#!forum/masstransit-discuss)
+    Consider creating a discussion instead, using GitHub.
+    https://github.com/MassTransit/MassTransit/discussions
+
+    Alternatively, submit a question on Stack Overflow:
+    https://stackoverflow.com/questions/tagged/masstransit
 -->
 
+### Is this a bug report?
+
+(Yes/no)
 
 ### Can you also reproduce the problem with the latest version?
 
@@ -34,9 +37,9 @@
   Please fill in all the relevant fields.
 -->
 
-1. Operating system:
-2. Visual Studio version:
-3. Dotnet version:
+1. Dotnet version:
+2. Operating system:
+3. IDE (Rider, VS Code, Visual Studio): 
 
 ### Steps to Reproduce
 
