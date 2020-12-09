@@ -44,11 +44,19 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         public Task ValidateLockStatus()
         {
-            if (_message.LockedUntil <= DateTime.UtcNow)
-                throw new MessageLockExpiredException(_message.InputAddress, $"The message lock expired: {_message.MessageId}");
+            DateTime now = DateTime.UtcNow;
+            if (_message.LockedUntil <= now)
+                LogContext.Warning?.Log("Locked: {LockedUntil} <= Now: {Now}, Enqueued: {Enqueued}",
+                    _message.LockedUntil,
+                    now,
+                    _message.EnqueuedTime);
 
-            if (_message.ExpiresAt < DateTime.UtcNow)
-                throw new MessageTimeToLiveExpiredException(_message.InputAddress, $"The message expired: {_message.MessageId}");
+            if (_message.ExpiresAt < now)
+                LogContext.Warning?.Log("Expired: {Expire} <= Now: {Now}, Enqueued: {Enqueued}, TTL: {TTL}",
+                    _message.ExpiresAt,
+                    now,
+                    _message.EnqueuedTime,
+                    _message.TimeToLive.TotalSeconds);
 
             return TaskUtil.Completed;
         }

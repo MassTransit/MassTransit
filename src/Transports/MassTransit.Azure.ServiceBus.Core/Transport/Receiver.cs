@@ -117,6 +117,7 @@
 
         Task OnMessage(IReceiverClient messageReceiver, Message message, CancellationToken cancellationToken)
         {
+            LogContext.Warning?.Log("Received at {received} {expire}", DateTime.UtcNow, message.ExpiresAtUtc);
             return _messageReceiver.Handle(message, cancellationToken, context => AddReceiveContextPayloads(context, messageReceiver, message));
         }
 
