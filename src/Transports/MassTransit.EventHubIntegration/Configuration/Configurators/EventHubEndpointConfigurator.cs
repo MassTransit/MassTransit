@@ -118,7 +118,7 @@ namespace MassTransit.EventHubIntegration.Configurators
             if (!string.IsNullOrWhiteSpace(_storageSettings.ConnectionString))
                 return new BlobContainerClient(_storageSettings.ConnectionString, containerName, blobClientOptions);
 
-            var uri = new Uri(_storageSettings.ContainerUri, new Uri(containerName));
+            var uri = new Uri(_storageSettings.ContainerUri, containerName);
             if (_storageSettings.TokenCredential != null)
                 return new BlobContainerClient(uri, _storageSettings.TokenCredential, blobClientOptions);
 
