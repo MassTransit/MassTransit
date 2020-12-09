@@ -11,17 +11,20 @@ namespace MassTransit.Registration
     {
         readonly RiderConnectable _riders;
 
-        public TransportBusInstance(IBusControl busControl, IHostConfiguration hostConfiguration)
-            : this(busControl, hostConfiguration, new RiderConnectable())
+        public TransportBusInstance(IBusControl busControl, IHost host, IHostConfiguration hostConfiguration)
+            : this(busControl, host, hostConfiguration, new RiderConnectable())
         {
         }
 
-        public TransportBusInstance(IBusControl busControl, IHostConfiguration hostConfiguration, RiderConnectable riders)
+        public TransportBusInstance(IBusControl busControl, IHost host, IHostConfiguration hostConfiguration, RiderConnectable riders)
         {
             _riders = riders;
             BusControl = busControl;
+            Host = host;
             HostConfiguration = hostConfiguration;
         }
+
+        public IHost Host { get; }
 
         public Type InstanceType => typeof(IBus);
         public IBus Bus => BusControl;

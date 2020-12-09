@@ -27,7 +27,7 @@
 
             configure?.Invoke(configurator);
 
-            return configurator.Build();
+            return configurator.Build(busConfiguration);
         }
 
 

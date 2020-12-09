@@ -3,7 +3,7 @@ namespace MassTransit.Transports.InMemory.Configurators
     using System;
     using BusConfigurators;
     using Configuration;
-    using MassTransit.Builders;
+    using MassTransit.Configuration;
     using Topology.Configurators;
 
 
@@ -24,15 +24,11 @@ namespace MassTransit.Transports.InMemory.Configurators
             busConfiguration.BusEndpointConfiguration.Consume.Configurator.AutoStart = true;
         }
 
-        public IBusControl CreateBus()
+        public IReceiveEndpointConfiguration CreateBusEndpointConfiguration(Action<IReceiveEndpointConfigurator> configure)
         {
             var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
 
-            var busReceiveEndpointConfiguration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName, _busConfiguration.BusEndpointConfiguration);
-
-            var builder = new ConfigurationBusBuilder(_busConfiguration, busReceiveEndpointConfiguration);
-
-            return builder.Build();
+            return _hostConfiguration.CreateReceiveEndpointConfiguration(queueName, _busConfiguration.BusEndpointConfiguration, configure);
         }
 
         public override bool AutoStart

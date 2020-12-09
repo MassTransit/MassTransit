@@ -22,7 +22,7 @@
 
 
     public class ServiceBusHostConfiguration :
-        BaseHostConfiguration<IServiceBusEntityEndpointConfiguration>,
+        BaseHostConfiguration<IServiceBusEntityEndpointConfiguration, IServiceBusReceiveEndpointConfigurator>,
         IServiceBusHostConfiguration
     {
         readonly IServiceBusBusConfiguration _busConfiguration;
@@ -103,18 +103,7 @@
             _topologyConfiguration.Message.SetEntityNameFormatter(new MessageNameFormatterEntityNameFormatter(_messageNameFormatter));
         }
 
-        void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            ReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        void IReceiveConfigurator.ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
-        }
-
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+        public override void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint = null)
         {
             var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
@@ -126,7 +115,7 @@
             });
         }
 
-        public void ReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint)
+        public override void ReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint)
         {
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
         }

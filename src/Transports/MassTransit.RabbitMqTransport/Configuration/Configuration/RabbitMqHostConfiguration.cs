@@ -18,7 +18,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
 
     public class RabbitMqHostConfiguration :
-        BaseHostConfiguration<IRabbitMqReceiveEndpointConfiguration>,
+        BaseHostConfiguration<IRabbitMqReceiveEndpointConfiguration, IRabbitMqReceiveEndpointConfigurator>,
         IRabbitMqHostConfiguration
     {
         readonly IRabbitMqBusConfiguration _busConfiguration;
@@ -150,23 +150,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             return new RabbitMqPublishTransportProvider(ConnectionContextSupervisor, modelContextSupervisor);
         }
 
-        public IModelContextSupervisor CreateModelContextSupervisor()
-        {
-            return new ModelContextSupervisor(ConnectionContextSupervisor);
-        }
-
-        void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            ReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        void IReceiveConfigurator.ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
-        }
-
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+        public override void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
         {
             var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
@@ -178,7 +162,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
             });
         }
 
-        public void ReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint)
+        public override void ReceiveEndpoint(string queueName, Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint)
         {
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
         }

@@ -11,7 +11,7 @@
 
 
     public class InMemoryHostConfiguration :
-        BaseHostConfiguration<IInMemoryReceiveEndpointConfiguration>,
+        BaseHostConfiguration<IInMemoryReceiveEndpointConfiguration, IInMemoryReceiveEndpointConfigurator>,
         IInMemoryHostConfiguration,
         IInMemoryHostConfigurator
     {
@@ -33,11 +33,9 @@
             _transportProvider = new Recycle<IInMemoryTransportProvider>(() => new InMemoryTransportProvider(this, topologyConfiguration));
         }
 
-        public IInMemoryHostConfigurator Configurator => this;
-
-        public IInMemoryTransportProvider TransportProvider => _transportProvider.Supervisor;
-
         public override Uri HostAddress => _hostAddress;
+        public override IHostTopology HostTopology => _hostTopology;
+        public override IRetryPolicy ReceiveTransportRetryPolicy => Retry.None;
 
         public Uri BaseAddress
         {
@@ -45,6 +43,10 @@
         }
 
         public int TransportConcurrencyLimit { get; set; }
+
+        IInMemoryHostConfigurator IInMemoryHostConfiguration.Configurator => this;
+        IInMemoryTransportProvider IInMemoryHostConfiguration.TransportProvider => _transportProvider.Supervisor;
+        IInMemoryHostTopology IInMemoryHostConfiguration.HostTopology => _hostTopology;
 
         public void ApplyEndpointDefinition(IInMemoryReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
@@ -85,18 +87,7 @@
             return configuration;
         }
 
-        void IReceiveConfigurator.ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            ReceiveEndpoint(queueName, configureEndpoint);
-        }
-
-        void IReceiveConfigurator.ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
-            Action<IReceiveEndpointConfigurator> configureEndpoint)
-        {
-            ReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
-        }
-
-        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+        public override void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint = null)
         {
             var queueName = definition.GetEndpointName(endpointNameFormatter ?? DefaultEndpointNameFormatter.Instance);
@@ -108,22 +99,16 @@
             });
         }
 
-        public void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
+        public override void ReceiveEndpoint(string queueName, Action<IInMemoryReceiveEndpointConfigurator> configureEndpoint)
         {
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
         }
-
-        public override IRetryPolicy ReceiveTransportRetryPolicy => Retry.None;
 
         public override IReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IReceiveEndpointConfigurator> configure = null)
         {
             return CreateReceiveEndpointConfiguration(queueName, configure);
         }
-
-        IInMemoryHostTopology IInMemoryHostConfiguration.HostTopology => _hostTopology;
-
-        public override IHostTopology HostTopology => _hostTopology;
 
         public override IHost Build()
         {

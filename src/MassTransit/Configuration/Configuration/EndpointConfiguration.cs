@@ -27,18 +27,6 @@
             Serialization = new SerializationConfiguration();
         }
 
-        protected EndpointConfiguration(IBusConfiguration busConfiguration, ITopologyConfiguration topology)
-        {
-            Topology = topology;
-
-            Consume = new ConsumePipeConfiguration(busConfiguration.Consume.Specification);
-            Send = new SendPipeConfiguration(busConfiguration.Send.Specification);
-            Publish = new PublishPipeConfiguration(busConfiguration.Publish.Specification);
-            Receive = new ReceivePipeConfiguration();
-
-            Serialization = busConfiguration.Serialization.CreateSerializationConfiguration();
-        }
-
         protected EndpointConfiguration(IEndpointConfiguration parentConfiguration, ITopologyConfiguration topology)
         {
             Topology = topology;

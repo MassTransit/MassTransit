@@ -3,7 +3,7 @@
     using System;
     using BusConfigurators;
     using Configuration;
-    using MassTransit.Builders;
+    using MassTransit.Configuration;
     using Settings;
     using Topology;
     using Topology.Configurators;
@@ -32,19 +32,9 @@
             _settings = new ReceiveEndpointSettings(queueName, _queueConfigurator);
         }
 
-        public IBusControl CreateBus()
+        public IReceiveEndpointConfiguration CreateBusEndpointConfiguration(Action<IReceiveEndpointConfigurator> configure)
         {
-            void ConfigureBusEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
-            {
-                configurator.ConfigureConsumeTopology = false;
-            }
-
-            var busReceiveEndpointConfiguration = _busConfiguration.HostConfiguration
-                .CreateReceiveEndpointConfiguration(_settings, _busConfiguration.BusEndpointConfiguration, ConfigureBusEndpoint);
-
-            var builder = new ConfigurationBusBuilder(_busConfiguration, busReceiveEndpointConfiguration);
-
-            return builder.Build();
+            return _busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration(_settings, _busConfiguration.BusEndpointConfiguration, configure);
         }
 
         public TimeSpan DuplicateDetectionHistoryTimeWindow

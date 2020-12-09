@@ -5,7 +5,7 @@
     using BusConfigurators;
     using Configuration;
     using GreenPipes;
-    using MassTransit.Builders;
+    using MassTransit.Configuration;
     using Topology;
     using Topology.Settings;
 
@@ -107,19 +107,9 @@
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }
 
-        public IBusControl CreateBus()
+        public IReceiveEndpointConfiguration CreateBusEndpointConfiguration(Action<IReceiveEndpointConfigurator> configure)
         {
-            void ConfigureBusEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
-            {
-                configurator.ConfigureConsumeTopology = false;
-            }
-
-            var busReceiveEndpointConfiguration = _busConfiguration.HostConfiguration
-                .CreateReceiveEndpointConfiguration(_settings, _busConfiguration.BusEndpointConfiguration, ConfigureBusEndpoint);
-
-            var builder = new ConfigurationBusBuilder(_busConfiguration, busReceiveEndpointConfiguration);
-
-            return builder.Build();
+            return _busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration(_settings, _busConfiguration.BusEndpointConfiguration, configure);
         }
 
         public override IEnumerable<ValidationResult> Validate()

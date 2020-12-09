@@ -13,13 +13,15 @@ namespace MassTransit.Configurators
     using Util;
 
 
-    public abstract class BaseHostConfiguration<TReceiveEndpointConfiguration> :
-        IHostConfiguration
-        where TReceiveEndpointConfiguration : IReceiveEndpointConfiguration
+    public abstract class BaseHostConfiguration<TConfiguration, TConfigurator> :
+        IHostConfiguration,
+        IReceiveConfigurator<TConfigurator>
+        where TConfiguration : IReceiveEndpointConfiguration
+        where TConfigurator : IReceiveEndpointConfigurator
     {
         readonly ConsumeObservable _consumeObservers;
         readonly EndpointConfigurationObservable _endpointObservable;
-        readonly IList<TReceiveEndpointConfiguration> _endpoints;
+        readonly IList<TConfiguration> _endpoints;
         readonly PublishObservable _publishObservers;
         readonly ReceiveObservable _receiveObservers;
         readonly SendObservable _sendObservers;
@@ -28,7 +30,7 @@ namespace MassTransit.Configurators
         protected BaseHostConfiguration(IBusConfiguration busConfiguration)
         {
             BusConfiguration = busConfiguration;
-            _endpoints = new List<TReceiveEndpointConfiguration>();
+            _endpoints = new List<TConfiguration>();
 
             _endpointObservable = new EndpointConfigurationObservable();
 
@@ -40,7 +42,7 @@ namespace MassTransit.Configurators
 
         protected IEndpointConfigurationObserver Observers => _endpointObservable;
 
-        protected IEnumerable<TReceiveEndpointConfiguration> Endpoints => _endpoints;
+        protected IEnumerable<TConfiguration> Endpoints => _endpoints;
 
         public IBusConfiguration BusConfiguration { get; }
 
@@ -110,7 +112,23 @@ namespace MassTransit.Configurators
             return _sendObservers.Connect(observer);
         }
 
-        protected void Add(TReceiveEndpointConfiguration configuration)
+        public void ReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            ReceiveEndpoint(queueName, (TConfigurator configuration) => configureEndpoint(configuration));
+        }
+
+        public void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IReceiveEndpointConfigurator> configureEndpoint)
+        {
+            ReceiveEndpoint(definition, endpointNameFormatter, (TConfigurator configuration) => configureEndpoint(configuration));
+        }
+
+        public abstract void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<TConfigurator> configureEndpoint = null);
+
+        public abstract void ReceiveEndpoint(string queueName, Action<TConfigurator> configureEndpoint);
+
+        protected void Add(TConfiguration configuration)
         {
             _endpoints.Add(configuration);
         }

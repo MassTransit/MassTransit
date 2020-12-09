@@ -4,9 +4,12 @@ namespace MassTransit.Registration
     using System.Collections.Generic;
     using System.Linq;
     using Configuration;
+    using Configurators;
     using Context;
+    using GreenPipes;
     using Microsoft.Extensions.Logging;
     using Riders;
+    using Util;
 
 
     public abstract class TransportRegistrationBusFactory :
@@ -30,6 +33,8 @@ namespace MassTransit.Registration
             if (loggerFactory != null)
                 LogContext.ConfigureCurrentLogContext(loggerFactory);
 
+            IEnumerable<IBusInstanceSpecification> busInstanceSpecifications = specifications as IBusInstanceSpecification[] ?? specifications.ToArray();
+
             context.UseHealthCheck(configurator);
 
             var riders = new RiderConnectable();
@@ -39,14 +44,34 @@ namespace MassTransit.Registration
 
             specifications ??= Enumerable.Empty<IBusInstanceSpecification>();
 
-            var busControl = configurator.Build(specifications);
+            IEnumerable<ValidationResult> validationResult = configurator.Validate()
+                .Concat(busInstanceSpecifications.SelectMany(x => x.Validate()));
 
-            var instance = new TransportBusInstance(busControl, _hostConfiguration, riders);
+            var result = BusConfigurationResult.CompileResults(validationResult);
 
-            foreach (var specification in specifications)
-                specification.Configure(instance);
+            try
+            {
+                var busReceiveEndpointConfiguration = configurator.CreateBusEndpointConfiguration(x => x.ConfigureConsumeTopology = false);
 
-            return instance;
+                var host = _hostConfiguration.Build();
+
+                var bus = new MassTransitBus(host, _hostConfiguration.BusConfiguration.BusObservers, busReceiveEndpointConfiguration);
+
+                TaskUtil.Await(() => _hostConfiguration.BusConfiguration.BusObservers.PostCreate(bus));
+
+                var instance = new TransportBusInstance(bus, host, _hostConfiguration, riders);
+
+                foreach (var specification in busInstanceSpecifications)
+                    specification.Configure(instance);
+
+                return instance;
+            }
+            catch (Exception ex)
+            {
+                TaskUtil.Await(() => _hostConfiguration.BusConfiguration.BusObservers.CreateFaulted(ex));
+
+                throw new ConfigurationException(result, "An exception occurred during bus creation", ex);
+            }
         }
     }
 }

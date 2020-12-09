@@ -1,5 +1,7 @@
 namespace MassTransit
 {
+    using System;
+    using Configuration;
     using GreenPipes;
 
 
@@ -7,9 +9,9 @@ namespace MassTransit
         ISpecification
     {
         /// <summary>
-        /// Create the bus, returning the bus control interface
+        /// Create the bus endpoint configuration, which is used to create the bus
         /// </summary>
         /// <returns></returns>
-        IBusControl CreateBus();
+        IReceiveEndpointConfiguration CreateBusEndpointConfiguration(Action<IReceiveEndpointConfigurator> configure);
     }
 }
