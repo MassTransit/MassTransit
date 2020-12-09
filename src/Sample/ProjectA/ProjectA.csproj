@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <VersionPrefix>2.2.0</VersionPrefix>
+    <UserSecretsId>6a4abd8f-f321-444e-8292-7556e04c2964</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MessageContract\MessageContract.csproj" />
+    <ProjectReference Include="..\..\Containers\MassTransit.AspNetCoreIntegration\MassTransit.AspNetCoreIntegration.csproj" />
+    <ProjectReference Include="..\..\Transports\MassTransit.Azure.ServiceBus.Core\MassTransit.Azure.ServiceBus.Core.csproj" />
+  </ItemGroup>
+
+</Project>
