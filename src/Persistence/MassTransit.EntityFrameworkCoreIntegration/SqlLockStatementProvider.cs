@@ -2,11 +2,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Linq;
     using MassTransit.Saga;
     using Metadata;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Internal;
-    using Microsoft.EntityFrameworkCore.Metadata.Internal;
+
 
     public class SqlLockStatementProvider :
         ILockStatementProvider
@@ -48,7 +49,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             var schema = entityType.GetSchema();
             var tableName = entityType.GetTableName();
 
-            var columnName = entityType.GetProperty(nameof(ISaga.CorrelationId)).GetColumnName();
+            var property = entityType.GetProperties().Single(x => x.Name.Equals(nameof(ISaga.CorrelationId), StringComparison.OrdinalIgnoreCase));
+            var columnName = property.GetColumnName();
 
             if (string.IsNullOrWhiteSpace(tableName))
                 throw new MassTransitException($"Unable to determine saga table name: {TypeMetadataCache.GetShortName(type)} (using model metadata).");
