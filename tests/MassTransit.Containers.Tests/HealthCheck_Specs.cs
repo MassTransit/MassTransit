@@ -48,24 +48,12 @@ namespace MassTransit.Containers.Tests
 
             var hostedServices = provider.GetRequiredService<IEnumerable<IHostedService>>();
 
-            var result = await healthChecks.CheckHealthAsync(TestCancellationToken);
-            Assert.That(result.Status == HealthStatus.Unhealthy);
+            await WaitForHealthStatus(healthChecks, HealthStatus.Unhealthy);
 
             await Task.WhenAll(hostedServices.Select(x => x.StartAsync(TestCancellationToken)));
             try
             {
-                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                do
-                {
-                    result = await healthChecks.CheckHealthAsync(TestCancellationToken);
-
-                    Console.WriteLine("Health Check: {0}", FormatHealthCheck(result));
-
-                    await Task.Delay(100, TestCancellationToken);
-                }
-                while (result.Status == HealthStatus.Unhealthy);
-
-                Assert.That(result.Status == HealthStatus.Healthy);
+                await WaitForHealthStatus(healthChecks, HealthStatus.Healthy);
 
                 var busControl = provider.GetRequiredService<IBusControl>();
 
@@ -73,27 +61,13 @@ namespace MassTransit.Containers.Tests
 
                 await busControl.StopAsync(stop.Token);
 
-                result = await healthChecks.CheckHealthAsync(TestCancellationToken);
-
-                Console.WriteLine("Health Check: {0}", FormatHealthCheck(result));
-
-                Assert.That(result.Status, Is.EqualTo(HealthStatus.Unhealthy));
+                await WaitForHealthStatus(healthChecks, HealthStatus.Unhealthy);
 
                 using var start = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
                 await busControl.StartAsync(start.Token);
 
-                do
-                {
-                    result = await healthChecks.CheckHealthAsync(TestCancellationToken);
-
-                    Console.WriteLine("Health Check: {0}", FormatHealthCheck(result));
-
-                    await Task.Delay(100, TestCancellationToken);
-                }
-                while (result.Status == HealthStatus.Unhealthy);
-
-                Assert.That(result.Status, Is.EqualTo(HealthStatus.Healthy));
+                await WaitForHealthStatus(healthChecks, HealthStatus.Healthy);
             }
             finally
             {
@@ -101,6 +75,22 @@ namespace MassTransit.Containers.Tests
 
                 await Task.WhenAll(hostedServices.Select(x => x.StopAsync(cts.Token)));
             }
+        }
+
+        async Task WaitForHealthStatus(HealthCheckService healthChecks, HealthStatus expectedStatus)
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+            HealthReport result;
+            do
+            {
+                result = await healthChecks.CheckHealthAsync(TestCancellationToken);
+
+                await Task.Delay(100, TestCancellationToken);
+            }
+            while (result.Status != expectedStatus);
+
+            Assert.That(result.Status, Is.EqualTo(expectedStatus));
         }
 
         [Test]
