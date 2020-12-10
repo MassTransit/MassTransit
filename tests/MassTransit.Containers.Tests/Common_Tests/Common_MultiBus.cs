@@ -8,6 +8,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
     using MultiBus;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using NUnit.Framework;
     using Scenarios;
     using TestFramework;
@@ -64,30 +66,48 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [OneTimeSetUp]
         public async Task Setup()
         {
-            var result = await HealthCheckService.CheckHealthAsync(TestCancellationToken);
-            Assert.That(result.Status == HealthStatus.Unhealthy);
-
             await Task.WhenAll(HostedServices.Select(x => x.StartAsync(TestCancellationToken)));
 
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            do
-            {
-                result = await HealthCheckService.CheckHealthAsync(TestCancellationToken);
-
-                Console.WriteLine("Health Check: {0}",
-                    string.Join(", ", result.Entries.Select(x => string.Join("=", x.Key, x.Value.Status))));
-
-                await Task.Delay(100, TestCancellationToken);
-            }
-            while (result.Status == HealthStatus.Unhealthy);
-
-            Assert.That(result.Status == HealthStatus.Healthy);
+            await WaitForHealthStatus(HealthCheckService, HealthStatus.Healthy);
         }
 
         [OneTimeTearDown]
         public async Task TearDown()
         {
             await Task.WhenAll(HostedServices.Select(x => x.StopAsync(TestCancellationToken)));
+        }
+
+        async Task WaitForHealthStatus(HealthCheckService healthChecks, HealthStatus expectedStatus)
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+            HealthReport result;
+            do
+            {
+                result = await healthChecks.CheckHealthAsync(TestCancellationToken);
+
+                await Task.Delay(100, TestCancellationToken);
+            }
+            while (result.Status != expectedStatus);
+
+            if (result.Status != expectedStatus)
+            {
+                await TestContext.Out.WriteLineAsync(FormatHealthCheck(result));
+            }
+
+            Assert.That(result.Status, Is.EqualTo(expectedStatus));
+        }
+
+        public string FormatHealthCheck(HealthReport result)
+        {
+            var json = new JObject(
+                new JProperty("status", result.Status.ToString()),
+                new JProperty("results", new JObject(result.Entries.Select(entry => new JProperty(entry.Key, new JObject(
+                    new JProperty("status", entry.Value.Status.ToString()),
+                    new JProperty("description", entry.Value.Description),
+                    new JProperty("data", JObject.FromObject(entry.Value.Data))))))));
+
+            return json.ToString(Formatting.Indented);
         }
 
 
