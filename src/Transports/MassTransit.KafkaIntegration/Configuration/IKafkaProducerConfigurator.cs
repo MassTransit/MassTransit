@@ -188,6 +188,15 @@ namespace MassTransit.KafkaIntegration
         bool? EnableBackgroundPoll { set; }
 
         /// <summary>
+        /// Default timeout for network requests.
+        /// Producer: ProduceRequests will use the lesser value of `socket.timeout.ms` and remaining `message.timeout.ms` for the first message in the batch.
+        /// Consumer: FetchRequests will use `fetch.wait.max.ms` + `socket.timeout.ms`. Admin: Admin requests will use `socket.timeout.ms` or explicitly set `rd_kafka_AdminOptions_set_operation_timeout()` value.
+        /// default: 60000
+        /// importance: low
+        /// </summary>
+        TimeSpan? SocketTimeout { set; }
+
+        /// <summary>
         /// Set the serializer to use to serialize headers.
         /// </summary>
         /// <param name="serializer"></param>

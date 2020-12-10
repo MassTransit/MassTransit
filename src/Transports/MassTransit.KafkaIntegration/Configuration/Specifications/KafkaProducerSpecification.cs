@@ -27,6 +27,7 @@ namespace MassTransit.KafkaIntegration.Specifications
         IHeadersSerializer _headersSerializer;
         ISerializer<TKey> _keySerializer;
         ISerializer<TValue> _valueSerializer;
+        int _socketTimeout;
 
         public KafkaProducerSpecification(ProducerConfig producerConfig, string topicName, IHeadersSerializer headersSerializer)
         {
@@ -62,7 +63,7 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public TimeSpan? RetryBackoff
         {
-            set => _producerConfig.RetryBackoffMs = value?.Milliseconds;
+            set => _producerConfig.RetryBackoffMs = Convert.ToInt32(value?.TotalMilliseconds);
         }
 
         public int? MessageSendMaxRetries
@@ -72,7 +73,7 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public TimeSpan? Linger
         {
-            set => _producerConfig.LingerMs = value?.Milliseconds;
+            set => _producerConfig.LingerMs = Convert.ToInt32(value?.TotalMilliseconds);
         }
 
         public int? QueueBufferingMaxKbytes
@@ -97,7 +98,7 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public TimeSpan? TransactionTimeout
         {
-            set => _producerConfig.TransactionTimeoutMs = value?.Milliseconds;
+            set => _producerConfig.TransactionTimeoutMs = Convert.ToInt32(value?.TotalMilliseconds);
         }
 
         public string TransactionalId
@@ -112,12 +113,12 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public TimeSpan? MessageTimeout
         {
-            set => _producerConfig.MessageTimeoutMs = value?.Milliseconds;
+            set => _producerConfig.MessageTimeoutMs = Convert.ToInt32(value?.TotalMilliseconds);
         }
 
         public TimeSpan? RequestTimeout
         {
-            set => _producerConfig.RequestTimeoutMs = value?.Milliseconds;
+            set => _producerConfig.RequestTimeoutMs = Convert.ToInt32(value?.TotalMilliseconds);
         }
 
         public string DeliveryReportFields
@@ -133,6 +134,11 @@ namespace MassTransit.KafkaIntegration.Specifications
         public bool? EnableBackgroundPoll
         {
             set => _producerConfig.EnableBackgroundPoll = value;
+        }
+
+        public TimeSpan? SocketTimeout
+        {
+            set => _producerConfig.SocketTimeoutMs = Convert.ToInt32(value?.TotalMilliseconds);
         }
 
         public void SetKeySerializer(ISerializer<TKey> serializer)
