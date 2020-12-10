@@ -27,7 +27,6 @@ namespace MassTransit.KafkaIntegration.Specifications
         IHeadersSerializer _headersSerializer;
         ISerializer<TKey> _keySerializer;
         ISerializer<TValue> _valueSerializer;
-        int _socketTimeout;
 
         public KafkaProducerSpecification(ProducerConfig producerConfig, string topicName, IHeadersSerializer headersSerializer)
         {
@@ -134,11 +133,6 @@ namespace MassTransit.KafkaIntegration.Specifications
         public bool? EnableBackgroundPoll
         {
             set => _producerConfig.EnableBackgroundPoll = value;
-        }
-
-        public TimeSpan? SocketTimeout
-        {
-            set => _producerConfig.SocketTimeoutMs = Convert.ToInt32(value?.TotalMilliseconds);
         }
 
         public void SetKeySerializer(ISerializer<TKey> serializer)
