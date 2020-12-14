@@ -18,18 +18,10 @@
         IPipeContextFactory<ConnectionContext>
     {
         readonly IActiveMqHostConfiguration _configuration;
-        readonly IRetryPolicy _connectionRetryPolicy;
 
         public ConnectionContextFactory(IActiveMqHostConfiguration configuration)
         {
             _configuration = configuration;
-
-            _connectionRetryPolicy = Retry.CreatePolicy(x =>
-            {
-                x.Handle<ActiveMqTransportException>();
-
-                x.Exponential(1000, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
-            });
         }
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
@@ -70,7 +62,7 @@
         {
             var description = _configuration.Settings.ToDescription();
 
-            return await _connectionRetryPolicy.Retry(async () =>
+            return await _configuration.ReceiveTransportRetryPolicy.Retry(async () =>
             {
                 if (supervisor.Stopping.IsCancellationRequested)
                     throw new OperationCanceledException($"The connection is stopping and cannot be used: {description}");
