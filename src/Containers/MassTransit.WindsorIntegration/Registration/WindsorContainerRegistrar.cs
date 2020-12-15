@@ -28,18 +28,20 @@ namespace MassTransit.WindsorIntegration.Registration
         public void RegisterConsumer<T>()
             where T : class, IConsumer
         {
-            _container.Register(
-                Component.For<T>()
-                    .LifestyleScoped());
+            if (!_container.Kernel.HasComponent(typeof(T)))
+                _container.Register(
+                    Component.For<T>()
+                        .LifestyleScoped());
         }
 
         public void RegisterConsumerDefinition<TDefinition, TConsumer>()
             where TDefinition : class, IConsumerDefinition<TConsumer>
             where TConsumer : class, IConsumer
         {
-            _container.Register(
-                Component.For<IConsumerDefinition<TConsumer>>()
-                    .ImplementedBy<TDefinition>());
+            if (!_container.Kernel.HasComponent(typeof(IConsumerDefinition<TConsumer>)))
+                _container.Register(
+                    Component.For<IConsumerDefinition<TConsumer>>()
+                        .ImplementedBy<TDefinition>());
         }
 
         public void RegisterSaga<T>()
@@ -78,9 +80,10 @@ namespace MassTransit.WindsorIntegration.Registration
             where TDefinition : class, ISagaDefinition<TSaga>
             where TSaga : class, ISaga
         {
-            _container.Register(
-                Component.For<ISagaDefinition<TSaga>>()
-                    .ImplementedBy<TDefinition>());
+            if (!_container.Kernel.HasComponent(typeof(ISagaDefinition<TSaga>)))
+                _container.Register(
+                    Component.For<ISagaDefinition<TSaga>>()
+                        .ImplementedBy<TDefinition>());
         }
 
         public void RegisterExecuteActivity<TActivity, TArguments>()

@@ -40,6 +40,44 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
 
 
     [TestFixture]
+    public class Windsor_Consumer_From_Container :
+        Common_Consumer
+    {
+        readonly IWindsorContainer _container;
+
+        public Windsor_Consumer_From_Container()
+        {
+            var container = new WindsorContainer();
+
+            container.Register(
+                Component.For<SimpleConsumer>()
+                    .LifestyleScoped());
+
+            container.AddMassTransit(x =>
+            {
+                x.AddConsumersFromContainer(container);
+
+                x.AddBus(provider => BusControl);
+            });
+
+            container.Register(Component.For<ISimpleConsumerDependency>().ImplementedBy<SimpleConsumerDependency>().LifestyleScoped(),
+                Component.For<AnotherMessageConsumer>().ImplementedBy<AnotherMessageConsumerImpl>().LifestyleScoped()
+            );
+
+            _container = container;
+        }
+
+        [OneTimeTearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class Windsor_Consumer_Endpoint :
         Common_Consumer_Endpoint
     {
