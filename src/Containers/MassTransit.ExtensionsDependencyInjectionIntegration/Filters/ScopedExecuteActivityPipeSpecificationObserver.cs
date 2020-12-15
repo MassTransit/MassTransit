@@ -3,21 +3,19 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Filters
     using System;
     using ConsumeConfigurators;
     using Courier;
-    using GreenPipes;
     using ScopeProviders;
-    using Scoping.Filters;
 
 
     public class ScopedExecuteActivityPipeSpecificationObserver :
         IActivityConfigurationObserver
     {
         readonly Type _filterType;
-        readonly IServiceProvider _serviceProvider;
+        readonly IServiceProvider _provider;
 
-        public ScopedExecuteActivityPipeSpecificationObserver(Type filterType, IServiceProvider serviceProvider)
+        public ScopedExecuteActivityPipeSpecificationObserver(Type filterType, IServiceProvider provider)
         {
             _filterType = filterType;
-            _serviceProvider = serviceProvider;
+            _provider = provider;
         }
 
         public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
@@ -31,13 +29,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Filters
             where TActivity : class, IExecuteActivity<TArguments>
             where TArguments : class
         {
-            var scopeProviderType =
-                typeof(DependencyInjectionFilterContextScopeProvider<,>).MakeGenericType(_filterType.MakeGenericType(typeof(TArguments)),
-                    typeof(ExecuteContext<TArguments>));
-            var scopeProvider = (IFilterContextScopeProvider<ExecuteContext<TArguments>>)Activator.CreateInstance(scopeProviderType, _serviceProvider);
-            var filter = new ScopedFilter<ExecuteContext<TArguments>>(scopeProvider);
-
-            configurator.Arguments(a => a.UseFilter(filter));
+            configurator.AddScopedFilter<ExecuteActivityContext<TActivity, TArguments>, ExecuteContext<TArguments>, TArguments>(_filterType, _provider);
         }
 
         public void CompensateActivityConfigured<TActivity, TLog>(ICompensateActivityConfigurator<TActivity, TLog> configurator)

@@ -110,6 +110,7 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             var services = new ServiceCollection();
             services.AddScoped(_ => new MyId(Guid.NewGuid()));
             services.AddScoped(typeof(ScopedFilter<>));
+            services.AddSingleton(ActivityTaskCompletionSource);
             services.AddSingleton(ExecuteTaskCompletionSource);
 
             services.AddMassTransit(ConfigureRegistration);

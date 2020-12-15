@@ -3,21 +3,19 @@ namespace MassTransit.AutofacIntegration.Filters
     using System;
     using ConsumeConfigurators;
     using Courier;
-    using GreenPipes;
     using ScopeProviders;
-    using Scoping.Filters;
 
 
     public class ScopedCompensateActivityPipeSpecificationObserver :
         IActivityConfigurationObserver
     {
         readonly Type _filterType;
-        readonly ILifetimeScopeProvider _lifetimeScopeProvider;
+        readonly ILifetimeScopeProvider _provider;
 
-        public ScopedCompensateActivityPipeSpecificationObserver(Type filterType, ILifetimeScopeProvider lifetimeScopeProvider)
+        public ScopedCompensateActivityPipeSpecificationObserver(Type filterType, ILifetimeScopeProvider provider)
         {
             _filterType = filterType;
-            _lifetimeScopeProvider = lifetimeScopeProvider;
+            _provider = provider;
         }
 
         public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
@@ -36,13 +34,7 @@ namespace MassTransit.AutofacIntegration.Filters
             where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
-            var scopeProviderType =
-                typeof(AutofacFilterContextScopeProvider<,>).MakeGenericType(_filterType.MakeGenericType(typeof(TLog)),
-                    typeof(CompensateContext<TLog>));
-            var scopeProvider = (IFilterContextScopeProvider<CompensateContext<TLog>>)Activator.CreateInstance(scopeProviderType, _lifetimeScopeProvider);
-            var filter = new ScopedFilter<CompensateContext<TLog>>(scopeProvider);
-
-            configurator.Log(a => a.UseFilter(filter));
+            configurator.AddScopedFilter<CompensateActivityContext<TActivity, TLog>, CompensateContext<TLog>, TLog>(_filterType, _provider);
         }
     }
 }

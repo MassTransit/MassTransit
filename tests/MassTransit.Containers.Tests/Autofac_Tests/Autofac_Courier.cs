@@ -135,6 +135,7 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
             var builder = new ContainerBuilder();
             builder.Register(_ => new MyId(Guid.NewGuid())).InstancePerLifetimeScope();
             builder.RegisterGeneric(typeof(ScopedFilter<>)).InstancePerLifetimeScope();
+            builder.RegisterInstance(ActivityTaskCompletionSource);
             builder.RegisterInstance(ExecuteTaskCompletionSource);
 
             builder.AddMassTransit(ConfigureRegistration);

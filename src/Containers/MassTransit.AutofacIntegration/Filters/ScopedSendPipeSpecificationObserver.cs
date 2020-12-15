@@ -1,9 +1,7 @@
 namespace MassTransit.AutofacIntegration.Filters
 {
     using System;
-    using GreenPipes;
     using ScopeProviders;
-    using Scoping.Filters;
     using SendPipeSpecifications;
 
 
@@ -11,23 +9,18 @@ namespace MassTransit.AutofacIntegration.Filters
         ISendPipeSpecificationObserver
     {
         readonly Type _filterType;
-        readonly ILifetimeScopeProvider _lifetimeScopeProvider;
+        readonly ILifetimeScopeProvider _provider;
 
-        public ScopedSendPipeSpecificationObserver(Type filterType, ILifetimeScopeProvider lifetimeScopeProvider)
+        public ScopedSendPipeSpecificationObserver(Type filterType, ILifetimeScopeProvider provider)
         {
             _filterType = filterType;
-            _lifetimeScopeProvider = lifetimeScopeProvider;
+            _provider = provider;
         }
 
         public void MessageSpecificationCreated<T>(IMessageSendPipeSpecification<T> specification)
             where T : class
         {
-            var scopeProviderType =
-                typeof(AutofacFilterContextScopeProvider<,>).MakeGenericType(_filterType.MakeGenericType(typeof(T)), typeof(SendContext<T>));
-            var scopeProvider = (IFilterContextScopeProvider<SendContext<T>>)Activator.CreateInstance(scopeProviderType, _lifetimeScopeProvider);
-            var filter = new ScopedFilter<SendContext<T>>(scopeProvider);
-
-            specification.UseFilter(filter);
+            specification.AddScopedFilter<SendContext<T>, T>(_filterType, _provider);
         }
     }
 }

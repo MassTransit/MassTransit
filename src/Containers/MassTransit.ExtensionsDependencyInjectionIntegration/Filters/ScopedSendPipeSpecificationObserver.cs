@@ -1,9 +1,7 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.Filters
 {
     using System;
-    using GreenPipes;
     using ScopeProviders;
-    using Scoping.Filters;
     using SendPipeSpecifications;
 
 
@@ -11,23 +9,18 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Filters
         ISendPipeSpecificationObserver
     {
         readonly Type _filterType;
-        readonly IServiceProvider _serviceProvider;
+        readonly IServiceProvider _provider;
 
-        public ScopedSendPipeSpecificationObserver(Type filterType, IServiceProvider serviceProvider)
+        public ScopedSendPipeSpecificationObserver(Type filterType, IServiceProvider provider)
         {
             _filterType = filterType;
-            _serviceProvider = serviceProvider;
+            _provider = provider;
         }
 
         public void MessageSpecificationCreated<T>(IMessageSendPipeSpecification<T> specification)
             where T : class
         {
-            var scopeProviderType =
-                typeof(DependencyInjectionFilterContextScopeProvider<,>).MakeGenericType(_filterType.MakeGenericType(typeof(T)), typeof(SendContext<T>));
-            var scopeProvider = (IFilterContextScopeProvider<SendContext<T>>)Activator.CreateInstance(scopeProviderType, _serviceProvider);
-            var filter = new ScopedFilter<SendContext<T>>(scopeProvider);
-
-            specification.UseFilter(filter);
+            specification.AddScopedFilter<SendContext<T>, T>(_filterType, _provider);
         }
     }
 }

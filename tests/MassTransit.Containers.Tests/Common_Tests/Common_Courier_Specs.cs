@@ -138,11 +138,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_Activity_Filter :
         InMemoryTestFixture
     {
+        protected readonly TaskCompletionSource<(TestActivity, MyId)> ActivityTaskCompletionSource;
         protected readonly TaskCompletionSource<MyId> ExecuteTaskCompletionSource;
         Uri _executeAddress;
 
         protected Common_Activity_Filter()
         {
+            ActivityTaskCompletionSource = GetTask<(TestActivity, MyId)>();
             ExecuteTaskCompletionSource = GetTask<MyId>();
         }
 
@@ -161,6 +163,12 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             var result = await ExecuteTaskCompletionSource.Task;
             Assert.IsNotNull(result);
+
+            var activityResult = await ActivityTaskCompletionSource.Task;
+            Assert.IsNotNull(activityResult);
+
+            Assert.That(result, Is.EqualTo(activityResult.Item2));
+
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -183,6 +191,41 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.AddActivity<TestActivity, TestArguments, TestLog>();
             configurator.AddBus(provider => BusControl);
+        }
+
+
+        public class TestActivity :
+            IActivity<TestArguments, TestLog>
+        {
+            readonly MyId _myId;
+            readonly TaskCompletionSource<(TestActivity, MyId)> _taskCompletionSource;
+
+            public TestActivity(TaskCompletionSource<(TestActivity, MyId)> taskCompletionSource, MyId myId)
+            {
+                _taskCompletionSource = taskCompletionSource;
+                _myId = myId;
+            }
+
+            public async Task<ExecutionResult> Execute(ExecuteContext<TestArguments> context)
+            {
+                if (context.Arguments.Value == null)
+                    throw new ArgumentNullException(nameof(context.Arguments.Value));
+
+                _taskCompletionSource.SetResult((this, _myId));
+
+                return context.CompletedWithVariables<TestLog>(new {OriginalValue = context.Arguments.Value}, new
+                {
+                    Value = "Hello, World!",
+                    NullValue = (string)null
+                });
+            }
+
+            public async Task<CompensationResult> Compensate(CompensateContext<TestLog> context)
+            {
+                Console.WriteLine("TestActivity: Compensate original value: {0}", context.Log.OriginalValue);
+
+                return context.Compensated();
+            }
         }
 
 

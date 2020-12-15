@@ -2,23 +2,21 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Filters
 {
     using System;
     using Automatonymous;
-    using GreenPipes.Specifications;
     using Saga;
     using SagaConfigurators;
     using ScopeProviders;
-    using Scoping.Filters;
 
 
     public class ScopedSagaConsumePipeSpecificationObserver :
         ISagaConfigurationObserver
     {
         readonly Type _filterType;
-        readonly IServiceProvider _serviceProvider;
+        readonly IServiceProvider _provider;
 
-        public ScopedSagaConsumePipeSpecificationObserver(Type filterType, IServiceProvider serviceProvider)
+        public ScopedSagaConsumePipeSpecificationObserver(Type filterType, IServiceProvider provider)
         {
             _filterType = filterType;
-            _serviceProvider = serviceProvider;
+            _provider = provider;
         }
 
         public void SagaConfigured<TSaga>(ISagaConfigurator<TSaga> configurator)
@@ -35,16 +33,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Filters
             where TSaga : class, ISaga
             where TMessage : class
         {
-            var scopeProviderType = typeof(DependencyInjectionConsumeFilterContextScopeProvider<,,>)
-                .MakeGenericType(_filterType.MakeGenericType(typeof(TMessage)), typeof(SagaConsumeContext<TSaga, TMessage>), typeof(TMessage));
-
-            var scopeProvider = (IFilterContextScopeProvider<SagaConsumeContext<TSaga, TMessage>>)Activator.CreateInstance(scopeProviderType,
-                _serviceProvider);
-
-            var filter = new ScopedFilter<SagaConsumeContext<TSaga, TMessage>>(scopeProvider);
-            var specification = new FilterPipeSpecification<SagaConsumeContext<TSaga, TMessage>>(filter);
-
-            configurator.AddPipeSpecification(specification);
+            configurator.AddScopedFilter<SagaConsumeContext<TSaga, TMessage>, ConsumeContext<TMessage>, TMessage>(_filterType, _provider);
         }
     }
 }

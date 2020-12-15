@@ -3,21 +3,19 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Filters
     using System;
     using ConsumeConfigurators;
     using Courier;
-    using GreenPipes;
     using ScopeProviders;
-    using Scoping.Filters;
 
 
     public class ScopedCompensateActivityPipeSpecificationObserver :
         IActivityConfigurationObserver
     {
         readonly Type _filterType;
-        readonly IServiceProvider _serviceProvider;
+        readonly IServiceProvider _provider;
 
-        public ScopedCompensateActivityPipeSpecificationObserver(Type filterType, IServiceProvider serviceProvider)
+        public ScopedCompensateActivityPipeSpecificationObserver(Type filterType, IServiceProvider provider)
         {
             _filterType = filterType;
-            _serviceProvider = serviceProvider;
+            _provider = provider;
         }
 
         public void ActivityConfigured<TActivity, TArguments>(IExecuteActivityConfigurator<TActivity, TArguments> configurator, Uri compensateAddress)
@@ -36,13 +34,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Filters
             where TActivity : class, ICompensateActivity<TLog>
             where TLog : class
         {
-            var scopeProviderType =
-                typeof(DependencyInjectionFilterContextScopeProvider<,>).MakeGenericType(_filterType.MakeGenericType(typeof(TLog)),
-                    typeof(CompensateContext<TLog>));
-            var scopeProvider = (IFilterContextScopeProvider<CompensateContext<TLog>>)Activator.CreateInstance(scopeProviderType, _serviceProvider);
-            var filter = new ScopedFilter<CompensateContext<TLog>>(scopeProvider);
-
-            configurator.Log(a => a.UseFilter(filter));
+            configurator.AddScopedFilter<CompensateActivityContext<TActivity, TLog>, CompensateContext<TLog>, TLog>(_filterType, _provider);
         }
     }
 }

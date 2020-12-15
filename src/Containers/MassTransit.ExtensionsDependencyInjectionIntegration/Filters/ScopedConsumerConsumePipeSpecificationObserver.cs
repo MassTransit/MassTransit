@@ -2,21 +2,19 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Filters
 {
     using System;
     using ConsumeConfigurators;
-    using GreenPipes.Specifications;
     using ScopeProviders;
-    using Scoping.Filters;
 
 
     public class ScopedConsumerConsumePipeSpecificationObserver :
         IConsumerConfigurationObserver
     {
         readonly Type _filterType;
-        readonly IServiceProvider _serviceProvider;
+        readonly IServiceProvider _provider;
 
-        public ScopedConsumerConsumePipeSpecificationObserver(Type filterType, IServiceProvider serviceProvider)
+        public ScopedConsumerConsumePipeSpecificationObserver(Type filterType, IServiceProvider provider)
         {
             _filterType = filterType;
-            _serviceProvider = serviceProvider;
+            _provider = provider;
         }
 
         public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
@@ -28,16 +26,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Filters
             where TConsumer : class
             where TMessage : class
         {
-            var scopeProviderType = typeof(DependencyInjectionConsumeFilterContextScopeProvider<,,>)
-                .MakeGenericType(_filterType.MakeGenericType(typeof(TMessage)), typeof(ConsumerConsumeContext<TConsumer, TMessage>), typeof(TMessage));
-
-            var scopeProvider = (IFilterContextScopeProvider<ConsumerConsumeContext<TConsumer, TMessage>>)Activator.CreateInstance(scopeProviderType,
-                _serviceProvider);
-
-            var filter = new ScopedFilter<ConsumerConsumeContext<TConsumer, TMessage>>(scopeProvider);
-            var specification = new FilterPipeSpecification<ConsumerConsumeContext<TConsumer, TMessage>>(filter);
-
-            configurator.AddPipeSpecification(specification);
+            configurator.AddScopedFilter<ConsumerConsumeContext<TConsumer, TMessage>, ConsumeContext<TMessage>, TMessage>(_filterType, _provider);
         }
     }
 }

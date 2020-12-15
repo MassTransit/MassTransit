@@ -1,33 +1,26 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.Filters
 {
     using System;
-    using GreenPipes;
     using PublishPipeSpecifications;
     using ScopeProviders;
-    using Scoping.Filters;
 
 
     public class ScopedPublishPipeSpecificationObserver :
         IPublishPipeSpecificationObserver
     {
         readonly Type _filterType;
-        readonly IServiceProvider _serviceProvider;
+        readonly IServiceProvider _provider;
 
-        public ScopedPublishPipeSpecificationObserver(Type filterType, IServiceProvider serviceProvider)
+        public ScopedPublishPipeSpecificationObserver(Type filterType, IServiceProvider provider)
         {
             _filterType = filterType;
-            _serviceProvider = serviceProvider;
+            _provider = provider;
         }
 
         public void MessageSpecificationCreated<T>(IMessagePublishPipeSpecification<T> specification)
             where T : class
         {
-            var scopeProviderType =
-                typeof(DependencyInjectionFilterContextScopeProvider<,>).MakeGenericType(_filterType.MakeGenericType(typeof(T)), typeof(PublishContext<T>));
-            var scopeProvider = (IFilterContextScopeProvider<PublishContext<T>>)Activator.CreateInstance(scopeProviderType, _serviceProvider);
-            var filter = new ScopedFilter<PublishContext<T>>(scopeProvider);
-
-            specification.UseFilter(filter);
+            specification.AddScopedFilter<PublishContext<T>, T>(_filterType, _provider);
         }
     }
 }
