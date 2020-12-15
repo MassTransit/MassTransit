@@ -173,12 +173,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             {
                 LogContext.Current = _context.LogContext;
 
-                if (IsStopping && _receiveSettings.NoAck == false)
-                {
-                    await WaitAndAbandonMessage(deliveryTag).ConfigureAwait(false);
-                    return;
-                }
-
                 var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, bodyBytes, redelivered, properties,
                     _context, _receiveSettings, _model, _model.ConnectionContext);
 
@@ -232,21 +226,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
 
             return TaskUtil.Completed;
-        }
-
-        async Task WaitAndAbandonMessage(ulong deliveryTag)
-        {
-            try
-            {
-                await _deliveryComplete.Task.ConfigureAwait(false);
-
-                await _model.BasicNack(deliveryTag, false, true).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                LogContext.Error?.Log(exception, "Message NACK faulted during shutdown: {InputAddress} - {ConsumerTag}", _context.InputAddress,
-                    _consumerTag);
-            }
         }
 
         protected override async Task StopAgent(StopContext context)

@@ -71,7 +71,16 @@ namespace MassTransit.Transports
                     await _observers.ReceiveFault(context, ex).ConfigureAwait(false);
 
                 if (receiveLock != null)
-                    await receiveLock.Faulted(ex).ConfigureAwait(false);
+                {
+                    try
+                    {
+                        await receiveLock.Faulted(ex).ConfigureAwait(false);
+                    }
+                    catch (Exception releaseLockException)
+                    {
+                        throw new AggregateException("ReceiveLock.Faulted threw an exception", releaseLockException, ex);
+                    }
+                }
 
                 throw;
             }

@@ -1,6 +1,7 @@
 namespace MassTransit.RabbitMqTransport.Pipeline
 {
     using System;
+    using System.Threading.Channels;
     using System.Threading.Tasks;
     using Context;
     using Transports;
@@ -19,9 +20,16 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             _deliveryTag = deliveryTag;
         }
 
-        public Task Complete()
+        public async Task Complete()
         {
-            return _model.BasicAck(_deliveryTag, false);
+            try
+            {
+                await _model.BasicAck(_deliveryTag, false).ConfigureAwait(false);
+            }
+            catch (ChannelClosedException exception)
+            {
+                throw new TransportUnavailableException("Message ACK failed: {DeliveryTag}", exception);
+            }
         }
 
         public async Task Faulted(Exception exception)
