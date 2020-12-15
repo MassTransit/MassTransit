@@ -37,7 +37,10 @@ namespace MassTransit.Internals.Extensions
             }
 
         #pragma warning disable 4014
-            HandleSupervisorTask();
+            // ReSharper disable once MethodSupportsCancellation
+            HandleSupervisorTask().ContinueWith(_ =>
+            {
+            });
         #pragma warning restore 4014
 
             return await asyncContext.Context.ConfigureAwait(false);
