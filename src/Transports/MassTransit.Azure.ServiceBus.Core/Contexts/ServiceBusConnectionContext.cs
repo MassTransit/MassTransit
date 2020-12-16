@@ -199,13 +199,18 @@
             try
             {
                 await DeleteSubscriptionAsync(description.TopicPath, description.SubscriptionName).ConfigureAwait(false);
+
+                LogContext.Debug?.Log("Subscription Deleted: {Subscription} ({Topic} -> {ForwardTo})", description.SubscriptionName, description.TopicPath,
+                    description.ForwardTo);
             }
             catch (MessagingEntityNotFoundException)
             {
             }
-
-            LogContext.Debug?.Log("Subscription Deleted: {Subscription} ({Topic} -> {ForwardTo})", description.SubscriptionName, description.TopicPath,
-                description.ForwardTo);
+            catch (Exception ex)
+            {
+                LogContext.Error?.Log(ex, "Subscription Delete Faulted: {Subscription} ({Topic} -> {ForwardTo})", description.SubscriptionName,
+                    description.TopicPath, description.ForwardTo);
+            }
         }
 
         public async ValueTask DisposeAsync()
@@ -214,9 +219,9 @@
 
             TransportLogMessages.DisconnectHost(address);
 
-            await _managementClient.CloseAsync().ConfigureAwait(false);
-
             await _connection.CloseAsync().ConfigureAwait(false);
+
+            await _managementClient.CloseAsync().ConfigureAwait(false);
 
             TransportLogMessages.DisconnectedHost(address);
         }

@@ -9,6 +9,7 @@
     using GreenPipes;
     using Topology;
     using Topology.Entities;
+    using Util;
 
 
     public class ConfigureTopologyFilter<TSettings> :
@@ -18,7 +19,6 @@
     {
         readonly BrokerTopology _brokerTopology;
         readonly bool _removeSubscriptions;
-
         readonly TSettings _settings;
         CancellationToken _cancellationToken;
 
@@ -61,8 +61,15 @@
 
                 if (_removeSubscriptions)
                 {
-                    _cancellationToken.Register(async () =>
+                    var logContext = LogContext.Current;
+                    if (logContext == null)
+                        throw new InvalidOperationException("The LogContext must be available");
+
+                    // ReSharper disable once MethodSupportsCancellation
+                    _cancellationToken.Register(() => TaskUtil.Await(async () =>
                     {
+                        LogContext.SetCurrentIfNull(logContext);
+
                         try
                         {
                             await RemoveSubscriptions(context.ConnectionContext).ConfigureAwait(false);
@@ -71,7 +78,7 @@
                         {
                             LogContext.Warning?.Log(ex, "Failed to remove one or more subscriptions from the endpoint.");
                         }
-                    });
+                    }));
                 }
             }, () => new Context()).ConfigureAwait(false);
         }
