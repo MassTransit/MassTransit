@@ -6,7 +6,12 @@ namespace MassTransit.Riders
 
     public interface IRider
     {
-        Task Start(CancellationToken cancellationToken = default);
+        void Connect(IHost host);
+    }
+
+
+    public interface RiderHandle
+    {
         Task Stop(CancellationToken cancellationToken = default);
     }
 }

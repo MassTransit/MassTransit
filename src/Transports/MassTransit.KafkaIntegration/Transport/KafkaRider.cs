@@ -3,28 +3,23 @@ namespace MassTransit.KafkaIntegration.Transport
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Confluent.Kafka;
-    using Pipeline.Observables;
     using Riders;
-    using Util;
 
 
     public class KafkaRider :
         BaseRider,
         IKafkaRider
     {
-        readonly IKafkaReceiveEndpoint[] _endpoints;
+        readonly IDictionary<string, IReceiveEndpointControl> _endpoints;
         readonly Uri _hostAddress;
         readonly Dictionary<Uri, IKafkaProducerFactory> _producerFactories;
 
-        public KafkaRider(Uri hostAddress, IEnumerable<IKafkaReceiveEndpoint> endpoints, IEnumerable<IKafkaProducerFactory> producerFactories,
-            RiderObservable observers)
-            : base("confluent.kafka", observers)
+        public KafkaRider(Uri hostAddress, IDictionary<string, IReceiveEndpointControl> endpoints, IEnumerable<IKafkaProducerFactory> producerFactories)
+            : base("confluent.kafka")
         {
             _hostAddress = hostAddress;
-            _endpoints = endpoints?.ToArray() ?? Array.Empty<IKafkaReceiveEndpoint>();
+            _endpoints = endpoints ?? new Dictionary<string, IReceiveEndpointControl>();
             _producerFactories = producerFactories.ToDictionary(x => x.TopicAddress);
         }
 
@@ -53,21 +48,10 @@ namespace MassTransit.KafkaIntegration.Transport
             throw new ConfigurationException($"Producer for topic: {topicAddress} is not configured for ${typeof(Message<TKey, TValue>).Name} message");
         }
 
-        protected override Task StartRider(CancellationToken cancellationToken)
+        protected override void AddReceiveEndpoint(IHost host)
         {
-            if (!_endpoints.Any())
-                return TaskUtil.Completed;
-
-            return Task.WhenAll(_endpoints.Select(endpoint => endpoint.Start(cancellationToken)));
-        }
-
-        protected override async Task StopRider(CancellationToken cancellationToken)
-        {
-            if (_endpoints.Any())
-                await Task.WhenAll(_endpoints.Select(endpoint => endpoint.Stop())).ConfigureAwait(false);
-
-            foreach (var factory in _producerFactories.Values)
-                factory.Dispose();
+            foreach (KeyValuePair<string, IReceiveEndpointControl> endpoint in _endpoints)
+                host.AddReceiveEndpoint(endpoint.Key, endpoint.Value);
         }
     }
 }

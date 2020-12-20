@@ -5,6 +5,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using Configurators;
     using Definition;
     using GreenPipes;
+    using GreenPipes.Agents;
     using Integration;
     using MassTransit.Configuration;
     using MassTransit.Configurators;
@@ -48,6 +49,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
         }
 
         public IConnectionContextSupervisor ConnectionContextSupervisor => _connectionContext.Supervisor;
+
+        public override IAgent Agent => ConnectionContextSupervisor;
 
         public override Uri HostAddress => _hostSettings.HostAddress;
 

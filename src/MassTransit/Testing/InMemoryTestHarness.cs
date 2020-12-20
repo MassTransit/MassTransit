@@ -82,7 +82,6 @@
 
                 ConfigureInMemoryReceiveEndpoint(e);
             });
-
             return configurator.Build(_busConfiguration, _specifications ?? Enumerable.Empty<ISpecification>());
         }
     }

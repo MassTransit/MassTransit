@@ -20,26 +20,28 @@ namespace MassTransit.KafkaIntegration.Specifications
         readonly ConsumerConfig _consumerConfig;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly IHeadersDeserializer _headersDeserializer;
+        readonly string _topicName;
 
         public KafkaConsumerSpecification(ConsumerConfig consumerConfig, string topicName, IHeadersDeserializer headersDeserializer,
             Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
         {
             _consumerConfig = consumerConfig;
-            Name = topicName;
+            _topicName = topicName;
             _endpointObservers = new ReceiveEndpointObservable();
             _headersDeserializer = headersDeserializer;
             _configure = configure;
+            QueueName = $"{KafkaTopicAddress.PathPrefix}/{_topicName}";
         }
 
-        public string Name { get; }
+        public string QueueName { get; }
 
-        public IKafkaReceiveEndpoint CreateReceiveEndpoint(IBusInstance busInstance)
+        public IReceiveEndpointControl CreateReceiveEndpoint(IBusInstance busInstance)
         {
-            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration($"{KafkaTopicAddress.PathPrefix}/{Name}");
+            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(QueueName);
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
             var configurator =
-                new KafkaTopicReceiveEndpointConfiguration<TKey, TValue>(_consumerConfig, Name, busInstance, endpointConfiguration, _headersDeserializer);
+                new KafkaTopicReceiveEndpointConfiguration<TKey, TValue>(_consumerConfig, _topicName, busInstance, endpointConfiguration, _headersDeserializer);
             _configure?.Invoke(configurator);
 
             var result = BusConfigurationResult.CompileResults(configurator.Validate());
@@ -56,7 +58,7 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (string.IsNullOrEmpty(Name))
+            if (string.IsNullOrEmpty(_topicName))
                 yield return this.Failure("Topic", "should not be empty");
 
             if (string.IsNullOrEmpty(_consumerConfig.GroupId))

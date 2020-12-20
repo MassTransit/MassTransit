@@ -18,7 +18,7 @@ namespace MassTransit.EventHubIntegration
         readonly IEventHubProducerSharedContext _producerSharedContext;
 
         public EventHubRider(IEnumerable<IEventHubReceiveEndpoint> endpoints, IEventHubProducerSharedContext producerSharedContext, RiderObservable observers)
-            : base("azure.event-hub", observers)
+            : base("azure.event-hub")
         {
             _endpoints = endpoints;
             _producerSharedContext = producerSharedContext;
@@ -28,23 +28,28 @@ namespace MassTransit.EventHubIntegration
         {
             return new EventHubProducerProvider(_producerSharedContext, consumeContext);
         }
+        //
+        // protected override Task StartRider(CancellationToken cancellationToken)
+        // {
+        //     if (_endpoints == null || !_endpoints.Any())
+        //         return TaskUtil.Completed;
+        //
+        //     return Task.WhenAll(_endpoints.Select(endpoint => endpoint.Connect(cancellationToken)));
+        // }
+        //
+        // protected override async Task StopRider(CancellationToken cancellationToken)
+        // {
+        //     await _producerSharedContext.DisposeAsync().ConfigureAwait(false);
+        //
+        //     if (_endpoints == null || !_endpoints.Any())
+        //         return;
+        //
+        //     await Task.WhenAll(_endpoints.Select(endpoint => endpoint.Disconnect(cancellationToken))).ConfigureAwait(false);
+        // }
 
-        protected override Task StartRider(CancellationToken cancellationToken)
+        protected override void AddReceiveEndpoint(IHost cancellationToken)
         {
-            if (_endpoints == null || !_endpoints.Any())
-                return TaskUtil.Completed;
-
-            return Task.WhenAll(_endpoints.Select(endpoint => endpoint.Connect(cancellationToken)));
-        }
-
-        protected override async Task StopRider(CancellationToken cancellationToken)
-        {
-            await _producerSharedContext.DisposeAsync().ConfigureAwait(false);
-
-            if (_endpoints == null || !_endpoints.Any())
-                return;
-
-            await Task.WhenAll(_endpoints.Select(endpoint => endpoint.Disconnect(cancellationToken))).ConfigureAwait(false);
+            throw new System.NotImplementedException();
         }
     }
 }

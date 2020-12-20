@@ -4,6 +4,7 @@
     using Configurators;
     using Definition;
     using GreenPipes;
+    using GreenPipes.Agents;
     using MassTransit.Configuration;
     using MassTransit.Configurators;
     using MassTransit.Topology;
@@ -43,6 +44,8 @@
 
             _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }
+
+        public override IAgent Agent => ConnectionContextSupervisor;
 
         public override Uri HostAddress => _hostSettings.ServiceUri;
 

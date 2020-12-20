@@ -31,9 +31,9 @@ namespace MassTransit.Registration
 
         public TBus BusInstance { get; }
 
-        public ConnectHandle ConnectRider(IRider rider)
+        public void ConnectRider(IRider rider)
         {
-            return _instance.ConnectRider(rider);
+            _instance.ConnectRider(rider);
         }
     }
 }

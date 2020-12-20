@@ -1,104 +1,162 @@
 ﻿namespace MassTransit.KafkaIntegration.Transport
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Context;
     using Contexts;
-    using GreenPipes;
-    using Metadata;
-    using Pipeline;
-    using Serializers;
+    using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Transports;
-    using Transports.Metrics;
+    using Util;
 
 
     public class KafkaMessageReceiver<TKey, TValue> :
+        Agent,
         IKafkaMessageReceiver<TKey, TValue>
         where TValue : class
     {
         readonly ReceiveEndpointContext _context;
+        readonly IKafkaConsumerContext<TKey, TValue> _consumerContext;
         readonly IReceivePipeDispatcher _dispatcher;
-        readonly IHeadersDeserializer _headersDeserializer;
-        readonly IConsumerLockContext<TKey, TValue> _lockContext;
+        readonly TaskCompletionSource<bool> _deliveryComplete;
+        readonly IConsumerLockContext<TKey, TValue> _consumerLockContext;
+        readonly CancellationTokenSource _cancellationTokenSource;
+        readonly IConsumer<TKey, TValue> _consumer;
 
-        public KafkaMessageReceiver(ReceiveEndpointContext context, IConsumerLockContext<TKey, TValue> lockContext, IHeadersDeserializer headersDeserializer)
+        public KafkaMessageReceiver(ReceiveEndpointContext context, IKafkaConsumerContext<TKey, TValue> consumerContext)
         {
             _context = context;
-            _lockContext = lockContext;
-            _headersDeserializer = headersDeserializer;
+            _consumerContext = consumerContext;
             _dispatcher = context.CreateReceivePipeDispatcher();
+            _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopping);
+
+            ConsumerBuilder<TKey, TValue> consumerBuilder = consumerContext.CreateConsumerBuilder()
+                .SetLogHandler((c, message) => context.LogContext.Info?.Log(message.Message))
+                .SetStatisticsHandler((c, value) => context.LogContext.Debug?.Log(value))
+                .SetErrorHandler((c, e) =>
+                {
+                    if (_cancellationTokenSource.Token.IsCancellationRequested)
+                        return;
+                    HandleKafkaError(e);
+                });
+
+            _consumerLockContext = new ConsumerLockContext<TKey, TValue>(consumerBuilder, context.LogContext,
+                _consumerContext.ReceiveSettings.CheckpointInterval, _consumerContext.ReceiveSettings.CheckpointMessageCount);
+
+            _deliveryComplete = TaskUtil.GetTask<bool>();
+
+            _consumer = consumerBuilder.Build();
+            _dispatcher = context.CreateReceivePipeDispatcher();
+            _dispatcher.ZeroActivity += HandleDeliveryComplete;
+
+            Task.Run(Consume);
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        async Task Consume()
         {
-            var scope = context.CreateScope("receiver");
-            scope.Add("keyType", TypeMetadataCache<TKey>.ShortName);
-            scope.Add("valueType", TypeMetadataCache<TValue>.ShortName);
+            var prefetchCount = Math.Max(1000, _consumerContext.ReceiveSettings.CheckpointMessageCount / 10);
+            var executor = new ChannelExecutor(prefetchCount, _consumerContext.ReceiveSettings.ConcurrencyLimit);
+
+            _consumer.Subscribe(_consumerContext.ReceiveSettings.Topic);
+
+            SetReady();
+
+            try
+            {
+                while (!IsStopping)
+                {
+                    ConsumeResult<TKey, TValue> consumeResult = _consumer.Consume(_cancellationTokenSource.Token);
+                    await executor.Push(() => Handle(consumeResult), Stopping);
+                }
+            }
+            catch (OperationCanceledException exception) when (exception.CancellationToken == Stopping)
+            {
+            }
+            catch (Exception exception)
+            {
+                LogContext.Error?.Log(exception, "Consume Loop faulted");
+            }
+            finally
+            {
+                _consumer.Unsubscribe();
+                _consumer.Dispose();
+                await executor.DisposeAsync().ConfigureAwait(false);
+            }
+
+            SetCompleted(TaskUtil.Completed);
         }
 
-        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
+        async Task Handle(ConsumeResult<TKey, TValue> result)
         {
-            return _context.ConnectReceiveObserver(observer);
-        }
+            if (IsStopping)
+                return;
 
-        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
-        {
-            return _context.ConnectPublishObserver(observer);
-        }
-
-        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
-        {
-            return _context.ConnectSendObserver(observer);
-        }
-
-        public async Task Handle(ConsumeResult<TKey, TValue> result, CancellationToken cancellationToken)
-        {
-            var context = new ConsumeResultReceiveContext<TKey, TValue>(result, _context, _lockContext, _headersDeserializer);
-
-            CancellationTokenRegistration registration;
-            if (cancellationToken.CanBeCanceled)
-                registration = cancellationToken.Register(context.Cancel);
+            var context = new ConsumeResultReceiveContext<TKey, TValue>(result, _context, _consumerLockContext, _consumerContext.HeadersDeserializer);
 
             try
             {
                 await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
             }
+            catch (Exception exception)
+            {
+                context.LogTransportFaulted(exception);
+            }
             finally
             {
-                registration.Dispose();
                 context.Dispose();
             }
         }
 
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+        void HandleKafkaError(Error error)
         {
-            return _context.ReceivePipe.ConnectConsumeMessageObserver(observer);
+            var activeDispatchCount = _dispatcher.ActiveDispatchCount;
+            LogContext.Error?.Log("Consumer error ({Code}): {Reason} on {Topic}", error.Code, error.Reason, _consumerContext.ReceiveSettings.Topic);
+            if (activeDispatchCount == 0 || error.IsLocalError)
+            {
+                _cancellationTokenSource.Cancel();
+                _deliveryComplete.TrySetResult(true);
+                SetCompleted(TaskUtil.Faulted<bool>(new KafkaException(error)));
+            }
         }
 
-        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
+        async Task HandleDeliveryComplete()
         {
-            return _context.ReceivePipe.ConnectConsumeObserver(observer);
+            if (IsStopping)
+            {
+                LogContext.Debug?.Log("Consumer shutdown completed: {InputAddress}", _context.InputAddress);
+
+                _deliveryComplete.TrySetResult(true);
+            }
         }
 
-        public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
+        protected override Task StopAgent(StopContext context)
         {
-            return _context.ConnectReceiveTransportObserver(observer);
+            LogContext.Debug?.Log("Stopping consumer: {InputAddress}", _context.InputAddress);
+
+            SetCompleted(ActiveAndActualAgentsCompleted(context));
+
+            return base.StopAgent(context);
         }
 
-        public int ActiveDispatchCount => _dispatcher.ActiveDispatchCount;
-        public long DispatchCount => _dispatcher.DispatchCount;
-        public int MaxConcurrentDispatchCount => _dispatcher.MaxConcurrentDispatchCount;
-
-        public event ZeroActiveDispatchHandler ZeroActivity
+        async Task ActiveAndActualAgentsCompleted(StopContext context)
         {
-            add => _dispatcher.ZeroActivity += value;
-            remove => _dispatcher.ZeroActivity -= value;
+            if (_dispatcher.ActiveDispatchCount > 0)
+            {
+                try
+                {
+                    await _deliveryComplete.Task.OrCanceled(context.CancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
+                }
+            }
         }
 
-        public DeliveryMetrics GetMetrics()
-        {
-            return _dispatcher.GetMetrics();
-        }
+        public long DeliveryCount => _dispatcher.DispatchCount;
+
+        public int ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
     }
 }
