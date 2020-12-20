@@ -1,11 +1,12 @@
 namespace MassTransit.EventHubIntegration
 {
     using System;
+    using System.Threading.Tasks;
 
 
     public static class EventHubProducerExtensions
     {
-        public static IEventHubProducer GetProducer(this IEventHubProducerProvider producerProvider, string eventHubName)
+        public static Task<IEventHubProducer> GetProducer(this IEventHubProducerProvider producerProvider, string eventHubName)
         {
             if (producerProvider == null)
                 throw new ArgumentNullException(nameof(producerProvider));

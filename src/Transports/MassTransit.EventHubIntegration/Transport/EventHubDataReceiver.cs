@@ -1,46 +1,89 @@
 ﻿namespace MassTransit.EventHubIntegration
 {
-    using System.Threading;
+    using System;
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs.Processor;
     using Context;
     using Contexts;
-    using GreenPipes;
-    using Pipeline;
+    using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Transports;
-    using Transports.Metrics;
+    using Util;
 
 
     public class EventHubDataReceiver :
+        Agent,
         IEventHubDataReceiver
     {
         readonly ReceiveEndpointContext _context;
-        readonly IProcessorLockContext _lockContext;
+        readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
+        readonly ChannelExecutor _executor;
+        readonly ProcessorContext _processorContext;
 
-        public EventHubDataReceiver(ReceiveEndpointContext context, IProcessorLockContext lockContext)
+        public EventHubDataReceiver(ReceiveEndpointContext context, ProcessorContext processorContext)
         {
             _context = context;
-            _lockContext = lockContext;
+            _processorContext = processorContext;
             _dispatcher = context.CreateReceivePipeDispatcher();
+
+            _deliveryComplete = TaskUtil.GetTask<bool>();
+
+            _dispatcher = context.CreateReceivePipeDispatcher();
+            _dispatcher.ZeroActivity += HandleDeliveryComplete;
+
+            var prefetchCount = Math.Max(1000, processorContext.ReceiveSettings.CheckpointMessageCount / 10);
+            _executor = new ChannelExecutor(prefetchCount, processorContext.ReceiveSettings.ConcurrencyLimit);
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public long DeliveryCount => _dispatcher.DispatchCount;
+
+        public int ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
+
+        public async Task Start()
         {
-            var scope = context.CreateScope("receiver");
-            scope.Add("type", "event-data");
+            _processorContext.ProcessEvent += HandleMessage;
+            _processorContext.ProcessError += HandleError;
+
+            await _processorContext.StartProcessingAsync(Stopping).ConfigureAwait(false);
+
+            SetReady();
         }
 
-        public async Task Handle(ProcessEventArgs eventArgs, CancellationToken cancellationToken)
+        async Task HandleMessage(ProcessEventArgs eventArgs)
+        {
+            LogContext.SetCurrentIfNull(_context.LogContext);
+
+            try
+            {
+                await _executor.Push(() => Handle(eventArgs), Stopping).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException e) when (e.CancellationToken == Stopping)
+            {
+            }
+        }
+
+        async Task HandleError(ProcessErrorEventArgs eventArgs)
+        {
+            LogContext.SetCurrentIfNull(_context.LogContext);
+
+            var activeDispatchCount = _dispatcher.ActiveDispatchCount;
+            if (activeDispatchCount == 0)
+            {
+                LogContext.Debug?.Log("Receiver shutdown completed: {InputAddress}, PartitionId: {PartitionId}", _context.InputAddress, eventArgs.PartitionId);
+
+                _deliveryComplete.TrySetResult(true);
+
+                SetCompleted(TaskUtil.Faulted<bool>(eventArgs.Exception));
+            }
+        }
+
+        async Task Handle(ProcessEventArgs eventArgs)
         {
             if (!eventArgs.HasEvent)
                 return;
 
-            var context = new EventDataReceiveContext(eventArgs, _context, _lockContext);
-
-            CancellationTokenRegistration registration;
-            if (cancellationToken.CanBeCanceled)
-                registration = cancellationToken.Register(context.Cancel);
+            var context = new EventDataReceiveContext(eventArgs, _context, _processorContext);
 
             try
             {
@@ -48,54 +91,52 @@
             }
             finally
             {
-                registration.Dispose();
                 context.Dispose();
             }
         }
 
-        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
+        async Task HandleDeliveryComplete()
         {
-            return _context.ConnectReceiveObserver(observer);
+            if (IsStopping)
+            {
+                LogContext.Debug?.Log("Consumer shutdown completed: {InputAddress}", _context.InputAddress);
+
+                _deliveryComplete.TrySetResult(true);
+            }
         }
 
-        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        protected override async Task StopAgent(StopContext context)
         {
-            return _context.ConnectPublishObserver(observer);
+            if (IsStopped)
+                return;
+
+            await _processorContext.StopProcessingAsync().ConfigureAwait(false);
+
+            _processorContext.ProcessEvent -= HandleMessage;
+            _processorContext.ProcessError -= HandleError;
+
+            await _executor.DisposeAsync().ConfigureAwait(false);
+
+            LogContext.Debug?.Log("Stopping consumer: {InputAddress}", _context.InputAddress);
+
+            SetCompleted(ActiveAndActualAgentsCompleted(context));
+
+            await base.StopAgent(context).ConfigureAwait(false);
         }
 
-        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        async Task ActiveAndActualAgentsCompleted(StopContext context)
         {
-            return _context.ConnectSendObserver(observer);
-        }
-
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
-        {
-            return _context.ReceivePipe.ConnectConsumeMessageObserver(observer);
-        }
-
-        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
-        {
-            return _context.ReceivePipe.ConnectConsumeObserver(observer);
-        }
-
-        public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
-        {
-            return _context.ConnectReceiveTransportObserver(observer);
-        }
-
-        public int ActiveDispatchCount => _dispatcher.ActiveDispatchCount;
-        public long DispatchCount => _dispatcher.DispatchCount;
-        public int MaxConcurrentDispatchCount => _dispatcher.MaxConcurrentDispatchCount;
-
-        public event ZeroActiveDispatchHandler ZeroActivity
-        {
-            add => _dispatcher.ZeroActivity += value;
-            remove => _dispatcher.ZeroActivity -= value;
-        }
-
-        public DeliveryMetrics GetMetrics()
-        {
-            return _dispatcher.GetMetrics();
+            if (_dispatcher.ActiveDispatchCount > 0)
+            {
+                try
+                {
+                    await _deliveryComplete.Task.OrCanceled(context.CancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
+                }
+            }
         }
     }
 }

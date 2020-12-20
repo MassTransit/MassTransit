@@ -4,6 +4,7 @@ namespace MassTransit
     using System.Threading;
     using GreenPipes;
     using Pipeline;
+    using Riders;
     using Topology;
     using Transports;
 
@@ -25,5 +26,9 @@ namespace MassTransit
         HostHandle Start(CancellationToken cancellationToken);
 
         void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint);
+
+        IRider GetRider(string name);
+
+        void AddRider(string name, IRiderControl riderControl);
     }
 }

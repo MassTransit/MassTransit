@@ -3,6 +3,7 @@
     using System;
     using Definition;
     using GreenPipes;
+    using GreenPipes.Agents;
     using MassTransit.Configuration;
     using MassTransit.Configurators;
     using MassTransit.Topology;
@@ -19,6 +20,7 @@
         readonly InMemoryHostTopology _hostTopology;
         readonly Recycle<IInMemoryTransportProvider> _transportProvider;
         Uri _hostAddress;
+        IAgent _hostAgent;
 
         public InMemoryHostConfiguration(IInMemoryBusConfiguration busConfiguration, Uri baseAddress, IInMemoryTopologyConfiguration topologyConfiguration)
             : base(busConfiguration)
@@ -50,7 +52,7 @@
 
         public void ApplyEndpointDefinition(IInMemoryReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
-            int? concurrencyLimit = definition.PrefetchCount;
+            var concurrencyLimit = definition.PrefetchCount;
 
             if (definition.ConcurrentMessageLimit.HasValue)
                 concurrencyLimit = definition.ConcurrentMessageLimit;

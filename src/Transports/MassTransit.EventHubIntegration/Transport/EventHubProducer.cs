@@ -19,15 +19,11 @@ namespace MassTransit.EventHubIntegration
     public class EventHubProducer :
         IEventHubProducer
     {
-        readonly ConsumeContext _consumeContext;
-        readonly IEventHubProducerContext _context;
-        readonly EventHubEndpointAddress _topicAddress;
+        readonly EventHubSendTransportContext _context;
 
-        public EventHubProducer(EventHubEndpointAddress topicAddress, IEventHubProducerContext context, ConsumeContext consumeContext = null)
+        public EventHubProducer(EventHubSendTransportContext context)
         {
-            _topicAddress = topicAddress;
             _context = context;
-            _consumeContext = consumeContext;
         }
 
         public Task Produce<T>(T message, CancellationToken cancellationToken = default)
@@ -42,161 +38,18 @@ namespace MassTransit.EventHubIntegration
             return Produce(messages, Pipe.Empty<EventHubSendContext<T>>(), cancellationToken);
         }
 
-        public async Task Produce<T>(T message, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken)
+        public Task Produce<T>(T message, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
-            LogContext.SetCurrentIfNull(_context.LogContext);
-
-            var context = new EventHubMessageSendContext<T>(message, cancellationToken) {Serializer = _context.Serializer};
-
-            if (_consumeContext != null)
-                context.TransferConsumeContextHeaders(_consumeContext);
-
-            context.DestinationAddress = _topicAddress;
-
-            await _context.Send(context).ConfigureAwait(false);
-
-            if (pipe.IsNotEmpty())
-                await pipe.Send(context).ConfigureAwait(false);
-
-            context.SourceAddress ??= _context.HostAddress;
-            context.ConversationId ??= NewId.NextGuid();
-
-            var options = new SendEventOptions
-            {
-                PartitionId = context.PartitionId,
-                PartitionKey = context.PartitionKey
-            };
-
-            StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context,
-                (nameof(context.PartitionId), options.PartitionId), (nameof(context.PartitionKey), options.PartitionKey));
-            try
-            {
-                if (_context.SendObservers.Count > 0)
-                    await _context.SendObservers.PreSend(context).ConfigureAwait(false);
-
-                var eventData = new EventData(context.Body);
-
-                eventData.Properties.Set(context.Headers);
-
-                await _context.Produce(new[] {eventData}, options, context.CancellationToken).ConfigureAwait(false);
-
-                context.LogSent();
-                activity.AddSendContextHeadersPostSend(context);
-
-                if (_context.SendObservers.Count > 0)
-                    await _context.SendObservers.PostSend(context).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                context.LogFaulted(exception);
-
-                if (_context.SendObservers.Count > 0)
-                    await _context.SendObservers.SendFault(context, exception).ConfigureAwait(false);
-
-                throw;
-            }
-            finally
-            {
-                activity?.Stop();
-            }
+            var sendPipe = new SendPipe<T>(message, _context, pipe, cancellationToken);
+            return _context.ProducerContextSupervisor.Send(sendPipe, cancellationToken);
         }
 
-        public async Task Produce<T>(IEnumerable<T> messages, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken = default)
+        public Task Produce<T>(IEnumerable<T> messages, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            if (messages == null)
-                throw new ArgumentNullException(nameof(messages));
-
-            LogContext.SetCurrentIfNull(_context.LogContext);
-
-            EventHubMessageSendContext<T>[] contexts = messages
-                .Select(x => new EventHubMessageSendContext<T>(x, cancellationToken) {Serializer = _context.Serializer})
-                .ToArray();
-
-            if (contexts.Length == 0)
-                return;
-
-            NewId[] ids = NewId.Next(contexts.Length);
-
-            async Task Send(EventHubMessageSendContext<T> c, int idx)
-            {
-                if (_consumeContext != null)
-                    c.TransferConsumeContextHeaders(_consumeContext);
-
-                c.DestinationAddress = _topicAddress;
-
-                await _context.Send(c).ConfigureAwait(false);
-
-                if (pipe.IsNotEmpty())
-                    await pipe.Send(c).ConfigureAwait(false);
-
-                c.SourceAddress ??= _context.HostAddress;
-                c.ConversationId ??= ids[idx].ToGuid();
-            }
-
-            await Task.WhenAll(contexts.Select(Send)).ConfigureAwait(false);
-
-            EventHubMessageSendContext<T> context = contexts[0];
-            var options = new CreateBatchOptions
-            {
-                PartitionId = context.PartitionId,
-                PartitionKey = context.PartitionKey
-            };
-
-            StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context,
-                (nameof(EventHubMessageSendContext<T>.PartitionId), options.PartitionId),
-                (nameof(EventHubMessageSendContext<T>.PartitionKey), options.PartitionKey));
-            try
-            {
-                var eventDataBatch = await _context.CreateBatch(options, context.CancellationToken).ConfigureAwait(false);
-
-                if (_context.SendObservers.Count > 0)
-                    await Task.WhenAll(contexts.Select(c => _context.SendObservers.PreSend(c))).ConfigureAwait(false);
-
-                async Task FlushAsync(EventDataBatch batch)
-                {
-                    await _context.Produce(batch, context.CancellationToken).ConfigureAwait(false);
-                    batch.Dispose();
-                }
-
-                for (var i = 0; i < contexts.Length; i++)
-                {
-                    EventHubMessageSendContext<T> c = contexts[i];
-
-                    var eventData = new EventData(c.Body);
-
-                    eventData.Properties.Set(c.Headers);
-
-                    while (!eventDataBatch.TryAdd(eventData) && eventDataBatch.Count > 0)
-                    {
-                        await FlushAsync(eventDataBatch);
-                        eventDataBatch = await _context.CreateBatch(options, context.CancellationToken).ConfigureAwait(false);
-                    }
-                }
-
-                if (eventDataBatch.Count > 0)
-                    await FlushAsync(eventDataBatch);
-
-                context.LogSent();
-                activity.AddSendContextHeadersPostSend(context);
-
-                if (_context.SendObservers.Count > 0)
-                    await Task.WhenAll(contexts.Select(c => _context.SendObservers.PostSend(c))).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                context.LogFaulted(exception);
-
-                if (_context.SendObservers.Count > 0)
-                    await Task.WhenAll(contexts.Select(c => _context.SendObservers.SendFault(c, exception))).ConfigureAwait(false);
-
-                throw;
-            }
-            finally
-            {
-                activity?.Stop();
-            }
+            var sendPipe = new BathSendPipe<T>(messages, _context, pipe, cancellationToken);
+            return _context.ProducerContextSupervisor.Send(sendPipe, cancellationToken);
         }
 
         public Task Produce<T>(object values, CancellationToken cancellationToken = default)
@@ -247,7 +100,205 @@ namespace MassTransit.EventHubIntegration
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _context.SendObservers.Connect(observer);
+            return _context.ConnectSendObserver(observer);
+        }
+
+
+        class SendPipe<T> :
+            IPipe<ProducerContext>
+            where T : class
+        {
+            readonly CancellationToken _cancellationToken;
+            readonly EventHubSendTransportContext _context;
+            readonly T _message;
+            readonly IPipe<EventHubSendContext<T>> _pipe;
+
+            public SendPipe(T message, EventHubSendTransportContext context, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken)
+            {
+                _message = message;
+                _context = context;
+                _pipe = pipe;
+                _cancellationToken = cancellationToken;
+            }
+
+            public async Task Send(ProducerContext context)
+            {
+                LogContext.SetCurrentIfNull(_context.LogContext);
+
+                var sendContext = new EventHubMessageSendContext<T>(_message, _cancellationToken)
+                {
+                    Serializer = context.Serializer,
+                    DestinationAddress = _context.EndpointAddress
+                };
+
+                await _context.SendPipe.Send(sendContext).ConfigureAwait(false);
+
+                if (_pipe.IsNotEmpty())
+                    await _pipe.Send(sendContext).ConfigureAwait(false);
+
+                sendContext.SourceAddress ??= _context.HostAddress;
+                sendContext.ConversationId ??= NewId.NextGuid();
+
+                var options = new SendEventOptions
+                {
+                    PartitionId = sendContext.PartitionId,
+                    PartitionKey = sendContext.PartitionKey
+                };
+
+                StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(sendContext,
+                    (nameof(sendContext.PartitionId), options.PartitionId), (nameof(sendContext.PartitionKey), options.PartitionKey));
+                try
+                {
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PreSend(sendContext).ConfigureAwait(false);
+
+                    var eventData = new EventData(sendContext.Body);
+
+                    eventData.Properties.Set(sendContext.Headers);
+
+                    await context.Produce(new[] {eventData}, options, sendContext.CancellationToken).ConfigureAwait(false);
+
+                    sendContext.LogSent();
+                    activity.AddSendContextHeadersPostSend(sendContext);
+
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PostSend(sendContext).ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    sendContext.LogFaulted(exception);
+
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.SendFault(sendContext, exception).ConfigureAwait(false);
+
+                    throw;
+                }
+                finally
+                {
+                    activity?.Stop();
+                }
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+        }
+
+
+        class BathSendPipe<T> :
+            IPipe<ProducerContext>
+            where T : class
+        {
+            readonly CancellationToken _cancellationToken;
+            readonly EventHubSendTransportContext _context;
+            readonly IEnumerable<T> _messages;
+            readonly IPipe<EventHubSendContext<T>> _pipe;
+
+            public BathSendPipe(IEnumerable<T> messages, EventHubSendTransportContext context, IPipe<EventHubSendContext<T>> pipe,
+                CancellationToken cancellationToken)
+            {
+                _messages = messages;
+                _context = context;
+                _pipe = pipe;
+                _cancellationToken = cancellationToken;
+            }
+
+            public async Task Send(ProducerContext context)
+            {
+                if (_messages == null)
+                    throw new ArgumentNullException(nameof(_messages));
+
+                LogContext.SetCurrentIfNull(_context.LogContext);
+
+                EventHubMessageSendContext<T>[] contexts = _messages
+                    .Select(x => new EventHubMessageSendContext<T>(x, _cancellationToken) {Serializer = context.Serializer})
+                    .ToArray();
+
+                if (contexts.Length == 0)
+                    return;
+
+                NewId[] ids = NewId.Next(contexts.Length);
+
+                async Task SendInner(EventHubMessageSendContext<T> c, int idx)
+                {
+                    c.DestinationAddress = _context.EndpointAddress;
+
+                    await _context.SendPipe.Send(c).ConfigureAwait(false);
+
+                    if (_pipe.IsNotEmpty())
+                        await _pipe.Send(c).ConfigureAwait(false);
+
+                    c.SourceAddress ??= _context.HostAddress;
+                    c.ConversationId ??= ids[idx].ToGuid();
+                }
+
+                await Task.WhenAll(contexts.Select(SendInner)).ConfigureAwait(false);
+
+                EventHubMessageSendContext<T> sendContext = contexts[0];
+                var options = new CreateBatchOptions
+                {
+                    PartitionId = sendContext.PartitionId,
+                    PartitionKey = sendContext.PartitionKey
+                };
+
+                StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(sendContext,
+                    (nameof(EventHubMessageSendContext<T>.PartitionId), options.PartitionId),
+                    (nameof(EventHubMessageSendContext<T>.PartitionKey), options.PartitionKey));
+                try
+                {
+                    var eventDataBatch = await context.CreateBatch(options, context.CancellationToken).ConfigureAwait(false);
+
+                    if (_context.SendObservers.Count > 0)
+                        await Task.WhenAll(contexts.Select(c => _context.SendObservers.PreSend(c))).ConfigureAwait(false);
+
+                    async Task FlushAsync(EventDataBatch batch)
+                    {
+                        await context.Produce(batch, context.CancellationToken).ConfigureAwait(false);
+                        batch.Dispose();
+                    }
+
+                    for (var i = 0; i < contexts.Length; i++)
+                    {
+                        EventHubMessageSendContext<T> c = contexts[i];
+
+                        var eventData = new EventData(c.Body);
+
+                        eventData.Properties.Set(c.Headers);
+
+                        while (!eventDataBatch.TryAdd(eventData) && eventDataBatch.Count > 0)
+                        {
+                            await FlushAsync(eventDataBatch);
+                            eventDataBatch = await context.CreateBatch(options, context.CancellationToken).ConfigureAwait(false);
+                        }
+                    }
+
+                    if (eventDataBatch.Count > 0)
+                        await FlushAsync(eventDataBatch);
+
+                    sendContext.LogSent();
+                    activity.AddSendContextHeadersPostSend(sendContext);
+
+                    if (_context.SendObservers.Count > 0)
+                        await Task.WhenAll(contexts.Select(c => _context.SendObservers.PostSend(c))).ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    sendContext.LogFaulted(exception);
+
+                    if (_context.SendObservers.Count > 0)
+                        await Task.WhenAll(contexts.Select(c => _context.SendObservers.SendFault(c, exception))).ConfigureAwait(false);
+
+                    throw;
+                }
+                finally
+                {
+                    activity?.Stop();
+                }
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
         }
     }
 }

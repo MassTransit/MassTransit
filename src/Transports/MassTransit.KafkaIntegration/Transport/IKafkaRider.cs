@@ -5,7 +5,7 @@ namespace MassTransit.KafkaIntegration.Transport
 
 
     public interface IKafkaRider :
-        IRider
+        IRiderControl
     {
         ITopicProducer<TKey, TValue> GetProducer<TKey, TValue>(Uri address, ConsumeContext consumeContext = default)
             where TValue : class;

@@ -5,46 +5,95 @@ namespace MassTransit.EventHubIntegration
     using System.Threading;
     using System.Threading.Tasks;
     using Contexts;
-    using Pipeline.Observables;
+    using GreenPipes;
+    using GreenPipes.Agents;
     using Riders;
-    using Util;
+    using Transports;
 
 
     public class EventHubRider :
-        BaseRider,
         IEventHubRider
     {
-        readonly IEnumerable<IEventHubReceiveEndpoint> _endpoints;
-        readonly IEventHubProducerSharedContext _producerSharedContext;
+        readonly IReceiveEndpointCollection _endpoints;
+        readonly IEventHubHostConfiguration _hostConfiguration;
+        readonly IEventHubProducerProvider _producerProvider;
 
-        public EventHubRider(IEnumerable<IEventHubReceiveEndpoint> endpoints, IEventHubProducerSharedContext producerSharedContext, RiderObservable observers)
-            : base("azure.event-hub", observers)
+        public EventHubRider(IEventHubHostConfiguration hostConfiguration, IReceiveEndpointCollection endpoints, IEventHubProducerProvider producerProvider)
         {
+            _hostConfiguration = hostConfiguration;
             _endpoints = endpoints;
-            _producerSharedContext = producerSharedContext;
+            _producerProvider = producerProvider;
         }
 
         public IEventHubProducerProvider GetProducerProvider(ConsumeContext consumeContext = default)
         {
-            return new EventHubProducerProvider(_producerSharedContext, consumeContext);
+            if (consumeContext == null)
+                return _producerProvider;
+            return new ConsumeContextEventHubProducerProvider(_producerProvider, consumeContext);
         }
 
-        protected override Task StartRider(CancellationToken cancellationToken)
+        public RiderHandle Start(CancellationToken cancellationToken = default)
         {
-            if (_endpoints == null || !_endpoints.Any())
-                return TaskUtil.Completed;
-
-            return Task.WhenAll(_endpoints.Select(endpoint => endpoint.Connect(cancellationToken)));
+            HostReceiveEndpointHandle[] endpointsHandle = _endpoints.StartEndpoints(cancellationToken);
+            IAgent agent = new RiderAgent(_hostConfiguration.ConnectionContextSupervisor, _endpoints);
+            return new Handle(endpointsHandle, agent);
         }
 
-        protected override async Task StopRider(CancellationToken cancellationToken)
+
+        class RiderAgent :
+            Agent
         {
-            await _producerSharedContext.DisposeAsync().ConfigureAwait(false);
+            readonly IReceiveEndpointCollection _endpoints;
+            readonly IConnectionContextSupervisor _supervisor;
 
-            if (_endpoints == null || !_endpoints.Any())
-                return;
+            public RiderAgent(IConnectionContextSupervisor supervisor, IReceiveEndpointCollection endpoints)
+            {
+                _supervisor = supervisor;
+                _endpoints = endpoints;
 
-            await Task.WhenAll(_endpoints.Select(endpoint => endpoint.Disconnect(cancellationToken))).ConfigureAwait(false);
+                SetReady(_supervisor.Ready);
+                SetCompleted(_supervisor.Completed);
+            }
+
+            protected override async Task StopAgent(StopContext context)
+            {
+                await _endpoints.Stop(context.CancellationToken).ConfigureAwait(false);
+                await _supervisor.Stop(context).ConfigureAwait(false);
+                await base.StopAgent(context).ConfigureAwait(false);
+            }
+        }
+
+
+        class Handle :
+            RiderHandle
+        {
+            readonly IAgent _agent;
+            readonly HostReceiveEndpointHandle[] _endpoints;
+
+            public Handle(HostReceiveEndpointHandle[] endpoints, IAgent agent)
+            {
+                _endpoints = endpoints;
+                _agent = agent;
+            }
+
+            public Task<bool> Started => ReadyOrNot(_endpoints.Select(x => x.Ready));
+
+            public Task StopAsync(CancellationToken cancellationToken)
+            {
+                return _agent.Stop("EvenHub stopped", cancellationToken);
+            }
+
+            async Task<bool> ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> endpoints)
+            {
+                Task<ReceiveEndpointReady>[] readyTasks = endpoints as Task<ReceiveEndpointReady>[] ?? endpoints.ToArray();
+                foreach (Task<ReceiveEndpointReady> ready in readyTasks)
+                    await ready.ConfigureAwait(false);
+
+                await _agent.Ready.ConfigureAwait(false);
+
+                await Task.WhenAll(readyTasks).ConfigureAwait(false);
+                return true;
+            }
         }
     }
 }

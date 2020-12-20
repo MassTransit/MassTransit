@@ -2,7 +2,6 @@ namespace MassTransit.KafkaIntegration.Specifications
 {
     using GreenPipes;
     using MassTransit.Registration;
-    using Transport;
     using Transports;
 
 
@@ -10,13 +9,13 @@ namespace MassTransit.KafkaIntegration.Specifications
         IReceiveEndpointObserverConnector,
         ISpecification
     {
-        string Name { get; }
+        string EndpointName { get; }
 
         /// <summary>
         /// Create the receive endpoint, using the busInstance hostConfiguration
         /// </summary>
         /// <param name="busInstance"></param>
         /// <returns></returns>
-        IKafkaReceiveEndpoint CreateReceiveEndpoint(IBusInstance busInstance);
+        IReceiveEndpointControl CreateReceiveEndpoint(IBusInstance busInstance);
     }
 }

@@ -1,6 +1,5 @@
 namespace MassTransit.EventHubIntegration.Specifications
 {
-    using Contexts;
     using GreenPipes;
     using MassTransit.Registration;
 
@@ -8,6 +7,6 @@ namespace MassTransit.EventHubIntegration.Specifications
     public interface IEventHubProducerSpecification :
         ISpecification
     {
-        IEventHubProducerSharedContext CreateContext(IBusInstance busInstance);
+        IEventHubProducerProvider CreateProducerProvider(IBusInstance busInstance);
     }
 }

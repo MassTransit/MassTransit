@@ -41,9 +41,6 @@ namespace MassTransit.Registration
 
             context.UseHealthCheck(configurator);
 
-            var riders = new RiderConnectable();
-            configurator.ConnectBusObserver(new RiderBusObserver(riders));
-
             configure?.Invoke(context, configurator);
 
             specifications ??= Enumerable.Empty<IBusInstanceSpecification>();
@@ -63,7 +60,7 @@ namespace MassTransit.Registration
 
                 TaskUtil.Await(() => _hostConfiguration.BusConfiguration.BusObservers.PostCreate(bus));
 
-                var instance = new TransportBusInstance(bus, host, _hostConfiguration, riders);
+                var instance = new TransportBusInstance(bus, host, _hostConfiguration);
 
                 foreach (var specification in busInstanceSpecifications)
                     specification.Configure(instance);

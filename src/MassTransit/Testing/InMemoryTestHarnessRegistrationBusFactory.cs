@@ -18,10 +18,10 @@ namespace MassTransit.Testing
         public IBusInstance CreateBus(IBusRegistrationContext context, IEnumerable<IBusInstanceSpecification> specifications = null)
         {
             var inMemoryTestHarness = new InMemoryTestHarness(_virtualHost, specifications);
-            var riders = new RiderConnectable();
+            //var riders = new RiderConnectable();
             inMemoryTestHarness.OnConfigureInMemoryBus += configurator => configurator.ConfigureEndpoints(context);
-            inMemoryTestHarness.OnConfigureBus += configurator => configurator.ConnectBusObserver(new RiderBusObserver(riders));
-            return new InMemoryTestHarnessBusInstance(inMemoryTestHarness, riders);
+            //inMemoryTestHarness.OnConfigureBus += configurator => configurator.ConnectBusObserver(new RiderBusObserver(riders));
+            return new InMemoryTestHarnessBusInstance(inMemoryTestHarness);
         }
     }
 }

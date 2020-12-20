@@ -6,66 +6,57 @@ namespace MassTransit.EventHubIntegration.Configurators
     using Azure.Messaging.EventHubs.Processor;
     using Azure.Storage.Blobs;
     using Configuration;
-    using Context;
     using Contexts;
+    using Filters;
+    using GreenPipes;
+    using GreenPipes.Configurators;
     using MassTransit.Registration;
-    using Riders;
+    using Transports;
 
 
     public class EventHubReceiveEndpointConfigurator :
         ReceiverConfiguration,
-        IEventHubReceiveEndpointConfigurator
+        IEventHubReceiveEndpointConfigurator,
+        ReceiveSettings
     {
         readonly IBusInstance _busInstance;
-        readonly string _consumerGroup;
         readonly IReceiveEndpointConfiguration _endpointConfiguration;
-        readonly string _eventHubName;
-        readonly IHostSettings _hostSettings;
-        readonly IStorageSettings _storageSettings;
-        TimeSpan _checkpointInterval;
-        ushort _checkpointMessageCount;
-        int _concurrencyLimit;
+        readonly IEventHubHostConfiguration _hostConfiguration;
+        readonly PipeConfigurator<ProcessorContext> _processorConfigurator;
         Action<EventProcessorClientOptions> _configureOptions;
         string _containerName;
         Func<PartitionClosingEventArgs, Task> _partitionClosingHandler;
         Func<PartitionInitializingEventArgs, Task> _partitionInitializingHandler;
 
-        public EventHubReceiveEndpointConfigurator(string eventHubName, string consumerGroup, IHostSettings hostSettings, IStorageSettings storageSettings,
+        public EventHubReceiveEndpointConfigurator(IEventHubHostConfiguration hostConfiguration, string eventHubName, string consumerGroup,
             IBusInstance busInstance,
             IReceiveEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)
         {
-            _eventHubName = eventHubName;
-            _consumerGroup = consumerGroup;
-            _hostSettings = hostSettings;
-            _storageSettings = storageSettings;
+            EventHubName = eventHubName;
+            ConsumerGroup = consumerGroup;
+            _hostConfiguration = hostConfiguration;
             _busInstance = busInstance;
             _endpointConfiguration = endpointConfiguration;
 
             CheckpointInterval = TimeSpan.FromMinutes(1);
             CheckpointMessageCount = 5000;
             ConcurrencyLimit = 1;
+
+            _processorConfigurator = new PipeConfigurator<ProcessorContext>();
         }
 
         public string ContainerName
         {
+            get => _containerName;
             set => _containerName = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public TimeSpan CheckpointInterval
-        {
-            set => _checkpointInterval = value;
-        }
+        public TimeSpan CheckpointInterval { get; set; }
 
-        public ushort CheckpointMessageCount
-        {
-            set => _checkpointMessageCount = value;
-        }
+        public ushort CheckpointMessageCount { get; set; }
 
-        public int ConcurrencyLimit
-        {
-            set => _concurrencyLimit = value;
-        }
+        public int ConcurrencyLimit { get; set; }
 
         public Action<EventProcessorClientOptions> ConfigureOptions
         {
@@ -86,11 +77,16 @@ namespace MassTransit.EventHubIntegration.Configurators
             _partitionInitializingHandler = handler ?? throw new ArgumentNullException(nameof(handler));
         }
 
-        public IEventHubReceiveEndpoint Build()
+        public string ConsumerGroup { get; }
+
+        public string EventHubName { get; }
+
+        public IReceiveEndpointControl Build()
         {
-            ReceiveEndpointContext CreateContext()
+            IEventHubReceiveEndpointContext CreateContext()
             {
-                var builder = new RiderReceiveEndpointBuilder(_busInstance, _endpointConfiguration);
+                var builder = new EventHubReceiveEndpointBuilder(_hostConfiguration, _busInstance, _endpointConfiguration, this, CreateBlobClient,
+                    CreateEventProcessorClient, _partitionClosingHandler, _partitionInitializingHandler);
 
                 foreach (var specification in Specifications)
                     specification.Configure(builder);
@@ -99,42 +95,44 @@ namespace MassTransit.EventHubIntegration.Configurators
             }
 
             var context = CreateContext();
-            var blobClient = CreateBlobClient();
-            var processor = CreateEventProcessorClient(blobClient);
 
-            var lockContext = new ProcessorLockContext(processor, context.LogContext, _checkpointInterval, _checkpointMessageCount,
-                _partitionInitializingHandler, _partitionClosingHandler);
-            var transport = new EventHubDataReceiver(context, lockContext);
+            _processorConfigurator.UseFilter(new EvenHubBlobContainerCreatorFilter());
+            _processorConfigurator.UseFilter(new EventHubConsumerFilter(context));
 
-            return new EventHubReceiveEndpoint(processor, Math.Max(1000, _checkpointMessageCount / 10), _concurrencyLimit, blobClient, transport, context);
+            IPipe<ProcessorContext> processorPipe = _processorConfigurator.Build();
+
+            var transport = new ReceiveTransport<ProcessorContext>(_busInstance.HostConfiguration, context, () => context.ContextSupervisor,
+                processorPipe);
+
+            return new ReceiveEndpoint(transport, context);
         }
 
-        BlobContainerClient CreateBlobClient()
+        BlobContainerClient CreateBlobClient(IStorageSettings storageSettings)
         {
             var blobClientOptions = new BlobClientOptions();
-            _storageSettings.Configure?.Invoke(blobClientOptions);
+            storageSettings.Configure?.Invoke(blobClientOptions);
 
-            var containerName = _containerName ?? _eventHubName;
-            if (!string.IsNullOrWhiteSpace(_storageSettings.ConnectionString))
-                return new BlobContainerClient(_storageSettings.ConnectionString, containerName, blobClientOptions);
+            var containerName = _containerName ?? EventHubName;
+            if (!string.IsNullOrWhiteSpace(storageSettings.ConnectionString))
+                return new BlobContainerClient(storageSettings.ConnectionString, containerName, blobClientOptions);
 
-            var uri = new Uri(_storageSettings.ContainerUri, containerName);
-            if (_storageSettings.TokenCredential != null)
-                return new BlobContainerClient(uri, _storageSettings.TokenCredential, blobClientOptions);
+            var uri = new Uri(storageSettings.ContainerUri, containerName);
+            if (storageSettings.TokenCredential != null)
+                return new BlobContainerClient(uri, storageSettings.TokenCredential, blobClientOptions);
 
-            return _storageSettings.SharedKeyCredential != null
-                ? new BlobContainerClient(uri, _storageSettings.SharedKeyCredential, blobClientOptions)
-                : new BlobContainerClient(_storageSettings.ContainerUri, blobClientOptions);
+            return storageSettings.SharedKeyCredential != null
+                ? new BlobContainerClient(uri, storageSettings.SharedKeyCredential, blobClientOptions)
+                : new BlobContainerClient(storageSettings.ContainerUri, blobClientOptions);
         }
 
-        EventProcessorClient CreateEventProcessorClient(BlobContainerClient blobClient)
+        EventProcessorClient CreateEventProcessorClient(IHostSettings hostSettings, BlobContainerClient blobClient)
         {
             var options = new EventProcessorClientOptions();
             _configureOptions?.Invoke(options);
 
-            var client = !string.IsNullOrWhiteSpace(_hostSettings.ConnectionString)
-                ? new EventProcessorClient(blobClient, _consumerGroup, _hostSettings.ConnectionString, _eventHubName, options)
-                : new EventProcessorClient(blobClient, _consumerGroup, _hostSettings.FullyQualifiedNamespace, _eventHubName, _hostSettings.TokenCredential,
+            var client = !string.IsNullOrWhiteSpace(hostSettings.ConnectionString)
+                ? new EventProcessorClient(blobClient, ConsumerGroup, hostSettings.ConnectionString, EventHubName, options)
+                : new EventProcessorClient(blobClient, ConsumerGroup, hostSettings.FullyQualifiedNamespace, EventHubName, hostSettings.TokenCredential,
                     options);
 
             return client;

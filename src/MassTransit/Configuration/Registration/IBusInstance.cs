@@ -5,8 +5,7 @@ namespace MassTransit.Registration
     using Riders;
 
 
-    public interface IBusInstance :
-        IRiderConnector
+    public interface IBusInstance
     {
         Type InstanceType { get; }
 
@@ -14,6 +13,9 @@ namespace MassTransit.Registration
         IBusControl BusControl { get; }
 
         IHostConfiguration HostConfiguration { get; }
+
+        void Connect<TRider>(IRiderControl riderControl)
+            where TRider : IRider;
 
         TRider GetRider<TRider>()
             where TRider : IRider;

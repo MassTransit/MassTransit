@@ -120,11 +120,6 @@
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
         }
 
-        public ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(SendSettings settings)
-        {
-            return _connectionContext.Supervisor.CreateSendEndpointContextSupervisor(settings);
-        }
-
         public void ApplyEndpointDefinition(IServiceBusReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
             configurator.ConfigureConsumeTopology = definition.ConfigureConsumeTopology;
@@ -226,6 +221,11 @@
                 endpointConfiguration.Build(host);
 
             return host;
+        }
+
+        public ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(SendSettings settings)
+        {
+            return _connectionContext.Supervisor.CreateSendEndpointContextSupervisor(settings);
         }
 
         IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings,
