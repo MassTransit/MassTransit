@@ -17,13 +17,11 @@
         IKafkaMessageReceiver<TKey, TValue>
         where TValue : class
     {
-        readonly ReceiveEndpointContext _context;
-        readonly IKafkaConsumerContext<TKey, TValue> _consumerContext;
-        readonly IReceivePipeDispatcher _dispatcher;
-        readonly TaskCompletionSource<bool> _deliveryComplete;
-        readonly IConsumerLockContext<TKey, TValue> _consumerLockContext;
         readonly CancellationTokenSource _cancellationTokenSource;
-        readonly IConsumer<TKey, TValue> _consumer;
+        readonly IKafkaConsumerContext<TKey, TValue> _consumerContext;
+        readonly ReceiveEndpointContext _context;
+        readonly TaskCompletionSource<bool> _deliveryComplete;
+        readonly IReceivePipeDispatcher _dispatcher;
 
         public KafkaMessageReceiver(ReceiveEndpointContext context, IKafkaConsumerContext<TKey, TValue> consumerContext)
         {
@@ -31,41 +29,34 @@
             _consumerContext = consumerContext;
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopping);
 
-            ConsumerBuilder<TKey, TValue> consumerBuilder = consumerContext.CreateConsumerBuilder()
-                .SetLogHandler((c, message) => context.LogContext.Info?.Log(message.Message))
-                .SetStatisticsHandler((c, value) => context.LogContext.Debug?.Log(value))
-                .SetErrorHandler((c, e) =>
-                {
-                    if (_cancellationTokenSource.Token.IsCancellationRequested)
-                        return;
-                    HandleKafkaError(e);
-                });
-
-            _consumerLockContext = new ConsumerLockContext<TKey, TValue>(consumerBuilder, context.LogContext, _consumerContext);
+            _consumerContext.ErrorHandler += HandleKafkaError;
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
 
-            _consumer = consumerBuilder.Build();
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
             Task.Run(Consume);
         }
 
+        public long DeliveryCount => _dispatcher.DispatchCount;
+
+        public int ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
+
         async Task Consume()
         {
             var prefetchCount = Math.Max(1000, _consumerContext.ReceiveSettings.CheckpointMessageCount / 10);
             var executor = new ChannelExecutor(prefetchCount, _consumerContext.ReceiveSettings.ConcurrencyLimit);
 
-            _consumer.Subscribe(_consumerContext.ReceiveSettings.Topic);
+            await _consumerContext.Subscribe().ConfigureAwait(false);
 
             SetReady();
 
             try
             {
-                while (!IsStopping)
+                while (!_cancellationTokenSource.IsCancellationRequested)
                 {
-                    ConsumeResult<TKey, TValue> consumeResult = _consumer.Consume(_cancellationTokenSource.Token);
+                    ConsumeResult<TKey, TValue> consumeResult = await _consumerContext.Consume(_cancellationTokenSource.Token).ConfigureAwait(false);
                     await executor.Push(() => Handle(consumeResult), Stopping).ConfigureAwait(false);
                 }
             }
@@ -80,8 +71,6 @@
             finally
             {
                 await executor.DisposeAsync().ConfigureAwait(false);
-                _consumer.Close();
-                _consumer.Dispose();
             }
 
             SetCompleted(TaskUtil.Completed);
@@ -92,7 +81,7 @@
             if (IsStopping)
                 return;
 
-            var context = new ConsumeResultReceiveContext<TKey, TValue>(result, _context, _consumerLockContext, _consumerContext.HeadersDeserializer);
+            var context = new ConsumeResultReceiveContext<TKey, TValue>(result, _context, _consumerContext, _consumerContext.HeadersDeserializer);
 
             try
             {
@@ -108,8 +97,10 @@
             }
         }
 
-        void HandleKafkaError(Error error)
+        void HandleKafkaError(IConsumer<TKey, TValue> consumer, Error error)
         {
+            if (_cancellationTokenSource.Token.IsCancellationRequested)
+                return;
             var activeDispatchCount = _dispatcher.ActiveDispatchCount;
             LogContext.Error?.Log("Consumer error ({Code}): {Reason} on {Topic}", error.Code, error.Reason, _consumerContext.ReceiveSettings.Topic);
             if (activeDispatchCount == 0 || error.IsLocalError)
@@ -130,13 +121,17 @@
             }
         }
 
-        protected override Task StopAgent(StopContext context)
+        protected override async Task StopAgent(StopContext context)
         {
+            await _consumerContext.Close().ConfigureAwait(false);
+
+            _consumerContext.ErrorHandler -= HandleKafkaError;
+
             LogContext.Debug?.Log("Stopping consumer: {InputAddress}", _context.InputAddress);
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
-            return base.StopAgent(context);
+            await base.StopAgent(context);
         }
 
         async Task ActiveAndActualAgentsCompleted(StopContext context)
@@ -153,9 +148,5 @@
                 }
             }
         }
-
-        public long DeliveryCount => _dispatcher.DispatchCount;
-
-        public int ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
     }
 }

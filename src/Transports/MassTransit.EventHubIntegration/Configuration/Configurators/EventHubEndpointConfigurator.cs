@@ -87,10 +87,7 @@ namespace MassTransit.EventHubIntegration.Configurators
         {
             IEventHubReceiveEndpointContext CreateContext()
             {
-                var blobContainerClient = CreateBlobClient();
-                var eventHubClient = CreateEventProcessorClient(blobContainerClient);
-
-                var builder = new EventHubReceiveEndpointBuilder(_busInstance, _endpointConfiguration, this, blobContainerClient, eventHubClient,
+                var builder = new EventHubReceiveEndpointBuilder(_busInstance, _endpointConfiguration, this, CreateBlobClient, CreateEventProcessorClient,
                     _partitionClosingHandler, _partitionInitializingHandler);
 
                 foreach (var specification in Specifications)

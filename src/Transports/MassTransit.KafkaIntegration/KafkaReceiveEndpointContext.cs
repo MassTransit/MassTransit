@@ -18,8 +18,8 @@ namespace MassTransit.KafkaIntegration
         where TValue : class
     {
         readonly IBusInstance _busInstance;
-        readonly ReceiveSettings _settings;
         readonly Recycle<IKafkaConsumerContextSupervisor<TKey, TValue>> _consumerContext;
+        readonly ReceiveSettings _settings;
 
         public KafkaReceiveEndpointContext(IBusInstance busInstance, IReceiveEndpointConfiguration endpointConfiguration,
             ReceiveSettings receiveSettings, IHeadersDeserializer headersDeserializer,
@@ -30,7 +30,7 @@ namespace MassTransit.KafkaIntegration
             _settings = receiveSettings;
 
             _consumerContext = new Recycle<IKafkaConsumerContextSupervisor<TKey, TValue>>(() =>
-                new KafkaConsumerContextSupervisor<TKey, TValue>(_busInstance.HostConfiguration.Agent, _settings, headersDeserializer,
+                new KafkaConsumerContextSupervisor<TKey, TValue>(_busInstance.HostConfiguration.Agent, _settings, LogContext, headersDeserializer,
                     consumerBuilderFactory));
         }
 
@@ -44,6 +44,13 @@ namespace MassTransit.KafkaIntegration
         public override Exception ConvertException(Exception exception, string message)
         {
             return exception;
+        }
+
+        public override void Probe(ProbeContext context)
+        {
+            context.Add("type", "confluent.kafka");
+            context.Add("topic", _settings.Topic);
+            context.Set(_settings);
         }
 
         protected override ISendTransportProvider CreateSendTransportProvider()
@@ -64,13 +71,6 @@ namespace MassTransit.KafkaIntegration
         protected override ISendEndpointProvider CreateSendEndpointProvider()
         {
             return _busInstance.Bus;
-        }
-
-        public override void Probe(ProbeContext context)
-        {
-            context.Add("type", "confluent.kafka");
-            context.Add("topic", _settings.Topic);
-            context.Set(_settings);
         }
     }
 }

@@ -3,9 +3,7 @@ namespace MassTransit.EventHubIntegration.Contexts
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
-    using Azure.Storage.Blobs;
     using GreenPipes;
 
 
@@ -24,22 +22,38 @@ namespace MassTransit.EventHubIntegration.Contexts
 
         public override CancellationToken CancellationToken { get; }
 
-        public event Func<PartitionInitializingEventArgs, Task> PartitionInitializing
+        public event Func<ProcessEventArgs, Task> ProcessEvent
         {
-            add => _context.PartitionInitializing += value;
-            remove => _context.PartitionInitializing -= value;
+            add => _context.ProcessEvent += value;
+            remove => _context.ProcessEvent -= value;
         }
 
-        public event Func<PartitionClosingEventArgs, Task> PartitionClosing
+        public event Func<ProcessErrorEventArgs, Task> ProcessError
         {
-            add => _context.PartitionClosing += value;
-            remove => _context.PartitionClosing -= value;
+            add => _context.ProcessError += value;
+            remove => _context.ProcessError -= value;
         }
-
-        public BlobContainerClient BlobContainerClient => _context.BlobContainerClient;
-
-        public EventProcessorClient EventProcessorClient => _context.EventProcessorClient;
 
         public ReceiveSettings ReceiveSettings => _context.ReceiveSettings;
+
+        public Task<bool> CreateBlobIfNotExistsAsync(CancellationToken cancellationToken = default)
+        {
+            return _context.CreateBlobIfNotExistsAsync(cancellationToken);
+        }
+
+        public Task StartProcessingAsync(CancellationToken cancellationToken = default)
+        {
+            return _context.StartProcessingAsync(cancellationToken);
+        }
+
+        public Task StopProcessingAsync(CancellationToken cancellationToken = default)
+        {
+            return _context.StopProcessingAsync(cancellationToken);
+        }
+
+        public Task Complete(ProcessEventArgs eventArgs)
+        {
+            return _context.Complete(eventArgs);
+        }
     }
 }

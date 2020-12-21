@@ -22,7 +22,7 @@ namespace MassTransit.EventHubIntegration.Filters
         {
             var inputAddress = _context.InputAddress;
 
-            var receiver = new EventHubDataReceiver(_context, context);
+            IEventHubDataReceiver receiver = new EventHubDataReceiver(_context, context);
 
             await receiver.Start().ConfigureAwait(false);
 

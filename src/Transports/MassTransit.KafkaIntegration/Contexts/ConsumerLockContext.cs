@@ -6,7 +6,6 @@ namespace MassTransit.KafkaIntegration.Contexts
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Context;
-    using Transport;
     using Util;
 
 
@@ -19,14 +18,11 @@ namespace MassTransit.KafkaIntegration.Contexts
         readonly ushort _maxCount;
         readonly TimeSpan _timeout;
 
-        public ConsumerLockContext(ConsumerBuilder<TKey, TValue> builder, ILogContext logContext, IKafkaConsumerContext<TKey, TValue> context)
+        public ConsumerLockContext(ILogContext logContext, ReceiveSettings receiveSettings)
         {
             _logContext = logContext;
-            _timeout = context.ReceiveSettings.CheckpointInterval;
-            _maxCount = context.ReceiveSettings.CheckpointMessageCount;
-
-            builder.SetPartitionsAssignedHandler(OnAssigned);
-            builder.SetPartitionsRevokedHandler(OnUnAssigned);
+            _timeout = receiveSettings.CheckpointInterval;
+            _maxCount = receiveSettings.CheckpointMessageCount;
         }
 
         public Task Complete(ConsumeResult<TKey, TValue> result)
@@ -39,7 +35,7 @@ namespace MassTransit.KafkaIntegration.Contexts
             return TaskUtil.Completed;
         }
 
-        void OnAssigned(IConsumer<TKey, TValue> consumer, IEnumerable<TopicPartition> partitions)
+        public void OnAssigned(IConsumer<TKey, TValue> consumer, IEnumerable<TopicPartition> partitions)
         {
             LogContext.SetCurrentIfNull(_logContext);
 
@@ -50,7 +46,7 @@ namespace MassTransit.KafkaIntegration.Contexts
             }
         }
 
-        void OnUnAssigned(IConsumer<TKey, TValue> consumer, IEnumerable<TopicPartitionOffset> partitions)
+        public void OnUnAssigned(IConsumer<TKey, TValue> consumer, IEnumerable<TopicPartitionOffset> partitions)
         {
             LogContext.SetCurrentIfNull(_logContext);
 

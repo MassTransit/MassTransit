@@ -23,7 +23,7 @@ namespace MassTransit.KafkaIntegration.Filters
         {
             var inputAddress = _context.InputAddress;
 
-            var receiver = new KafkaMessageReceiver<TKey, TValue>(_context, context);
+            IKafkaMessageReceiver<TKey, TValue> receiver = new KafkaMessageReceiver<TKey, TValue>(_context, context);
 
             await receiver.Ready.ConfigureAwait(false);
 

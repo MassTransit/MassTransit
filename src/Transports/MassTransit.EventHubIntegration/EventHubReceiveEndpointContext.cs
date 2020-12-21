@@ -21,14 +21,16 @@ namespace MassTransit.EventHubIntegration
         readonly Recycle<IEventHubProcessorContextSupervisor> _contextSupervisor;
 
         public EventHubReceiveEndpointContext(IBusInstance busInstance, IReceiveEndpointConfiguration endpointConfiguration,
-            ReceiveSettings receiveSettings, BlobContainerClient blobContainerClient, EventProcessorClient client,
+            ReceiveSettings receiveSettings, Func<BlobContainerClient> blobContainerClientFactory,
+            Func<BlobContainerClient, EventProcessorClient> clientFactory,
             Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
             Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler)
             : base(busInstance.HostConfiguration, endpointConfiguration)
         {
             _busInstance = busInstance;
             _contextSupervisor = new Recycle<IEventHubProcessorContextSupervisor>(() =>
-                new EventHubProcessorContextSupervisor(busInstance.HostConfiguration.Agent, receiveSettings, blobContainerClient, client,
+                new EventHubProcessorContextSupervisor(busInstance.HostConfiguration.Agent, LogContext, receiveSettings, blobContainerClientFactory,
+                    clientFactory,
                     partitionClosingHandler, partitionInitializingHandler));
         }
 
@@ -41,6 +43,8 @@ namespace MassTransit.EventHubIntegration
         {
             return exception;
         }
+
+        public IEventHubProcessorContextSupervisor ContextSupervisor => _contextSupervisor.Supervisor;
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
@@ -61,7 +65,5 @@ namespace MassTransit.EventHubIntegration
         {
             return _busInstance.Bus;
         }
-
-        public IEventHubProcessorContextSupervisor ContextSupervisor => _contextSupervisor.Supervisor;
     }
 }

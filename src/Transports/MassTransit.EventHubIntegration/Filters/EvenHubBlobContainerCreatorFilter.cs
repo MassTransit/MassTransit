@@ -1,9 +1,6 @@
 namespace MassTransit.EventHubIntegration.Filters
 {
     using System.Threading.Tasks;
-    using Azure;
-    using Azure.Storage.Blobs;
-    using Context;
     using Contexts;
     using GreenPipes;
 
@@ -17,15 +14,7 @@ namespace MassTransit.EventHubIntegration.Filters
         {
             if (!_hasBeenCreated)
             {
-                try
-                {
-                    await context.BlobContainerClient.CreateIfNotExistsAsync(cancellationToken: context.CancellationToken).ConfigureAwait(false);
-                    _hasBeenCreated = true;
-                }
-                catch (RequestFailedException exception)
-                {
-                    LogContext.Warning?.Log(exception, "Azure Blob Container does not exist: {Address}", context.BlobContainerClient.Uri);
-                }
+                _hasBeenCreated = await context.CreateBlobIfNotExistsAsync(context.CancellationToken).ConfigureAwait(false);
             }
 
             await next.Send(context).ConfigureAwait(false);

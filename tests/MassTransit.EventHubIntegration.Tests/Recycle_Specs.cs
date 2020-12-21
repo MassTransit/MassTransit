@@ -16,8 +16,9 @@ namespace MassTransit.EventHubIntegration.Tests
     {
         public Recycled_Specs()
         {
-            TestTimeout = TimeSpan.FromMinutes(2);
+            TestTimeout = TimeSpan.FromMinutes(5);
         }
+
         [Test]
         public async Task Should_produce()
         {
@@ -73,7 +74,11 @@ namespace MassTransit.EventHubIntegration.Tests
                         var conversationId = NewId.NextGuid();
                         var initiatorId = NewId.NextGuid();
                         var messageId = NewId.NextGuid();
-                        await producer.Produce<EventHubMessage>(new {Text = "text"}, Pipe.Execute<SendContext>(context =>
+                        await producer.Produce<EventHubMessage>(new
+                            {
+                                Text = "text",
+                                Index = i
+                            }, Pipe.Execute<SendContext>(context =>
                             {
                                 context.CorrelationId = correlationId;
                                 context.MessageId = messageId;

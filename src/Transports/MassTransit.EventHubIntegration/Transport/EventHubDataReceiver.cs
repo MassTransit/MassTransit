@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
     using Context;
     using Contexts;
@@ -17,30 +16,38 @@
         IEventHubDataReceiver
     {
         readonly ReceiveEndpointContext _context;
-        readonly IProcessorLockContext _lockContext;
-        readonly IReceivePipeDispatcher _dispatcher;
-        readonly EventProcessorClient _client;
         readonly TaskCompletionSource<bool> _deliveryComplete;
+        readonly IReceivePipeDispatcher _dispatcher;
         readonly ChannelExecutor _executor;
+        readonly IEventHubProcessorContext _processorContext;
 
         public EventHubDataReceiver(ReceiveEndpointContext context, IEventHubProcessorContext processorContext)
         {
             _context = context;
+            _processorContext = processorContext;
             _dispatcher = context.CreateReceivePipeDispatcher();
-
-            _client = processorContext.EventProcessorClient;
-            _lockContext = new ProcessorLockContext(context.LogContext, processorContext);
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
 
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-            _client.ProcessEventAsync += HandleMessage;
-            _client.ProcessErrorAsync += HandleError;
-
             var prefetchCount = Math.Max(1000, processorContext.ReceiveSettings.CheckpointMessageCount / 10);
             _executor = new ChannelExecutor(prefetchCount, processorContext.ReceiveSettings.ConcurrencyLimit);
+        }
+
+        public long DeliveryCount => _dispatcher.DispatchCount;
+
+        public int ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
+
+        public async Task Start()
+        {
+            _processorContext.ProcessEvent += HandleMessage;
+            _processorContext.ProcessError += HandleError;
+
+            await _processorContext.StartProcessingAsync(Stopping).ConfigureAwait(false);
+
+            SetReady();
         }
 
         async Task HandleMessage(ProcessEventArgs eventArgs)
@@ -76,7 +83,7 @@
             if (!eventArgs.HasEvent)
                 return;
 
-            var context = new EventDataReceiveContext(eventArgs, _context, _lockContext);
+            var context = new EventDataReceiveContext(eventArgs, _context, _processorContext);
 
             try
             {
@@ -100,9 +107,12 @@
 
         protected override async Task StopAgent(StopContext context)
         {
-            await _client.StopProcessingAsync().ConfigureAwait(false);
+            await _processorContext.StopProcessingAsync().ConfigureAwait(false);
 
             await _executor.DisposeAsync().ConfigureAwait(false);
+
+            _processorContext.ProcessEvent -= HandleMessage;
+            _processorContext.ProcessError -= HandleError;
 
             LogContext.Debug?.Log("Stopping consumer: {InputAddress}", _context.InputAddress);
 
@@ -124,17 +134,6 @@
                     LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
                 }
             }
-        }
-
-        public long DeliveryCount => _dispatcher.DispatchCount;
-
-        public int ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
-
-        public async Task Start()
-        {
-            await _client.StartProcessingAsync(Stopping).ConfigureAwait(false);
-
-            SetReady();
         }
     }
 }

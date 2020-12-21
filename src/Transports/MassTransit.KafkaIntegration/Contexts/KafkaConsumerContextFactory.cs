@@ -4,6 +4,7 @@ namespace MassTransit.KafkaIntegration.Contexts
     using System.Threading;
     using System.Threading.Tasks;
     using Confluent.Kafka;
+    using Context;
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
@@ -15,14 +16,16 @@ namespace MassTransit.KafkaIntegration.Contexts
         IPipeContextFactory<IKafkaConsumerContext<TKey, TValue>>
         where TValue : class
     {
-        readonly ReceiveSettings _receiveSettings;
-        readonly IHeadersDeserializer _headersDeserializer;
         readonly Func<ConsumerBuilder<TKey, TValue>> _consumerBuilderFactory;
+        readonly IHeadersDeserializer _headersDeserializer;
+        readonly ILogContext _logContext;
+        readonly ReceiveSettings _receiveSettings;
 
-        public KafkaConsumerContextFactory(ReceiveSettings receiveSettings, IHeadersDeserializer headersDeserializer,
+        public KafkaConsumerContextFactory(ReceiveSettings receiveSettings, ILogContext logContext, IHeadersDeserializer headersDeserializer,
             Func<ConsumerBuilder<TKey, TValue>> consumerBuilderFactory)
         {
             _receiveSettings = receiveSettings;
+            _logContext = logContext;
             _headersDeserializer = headersDeserializer;
             _consumerBuilderFactory = consumerBuilderFactory;
         }
@@ -54,7 +57,8 @@ namespace MassTransit.KafkaIntegration.Contexts
             if (supervisor.Stopping.IsCancellationRequested)
                 throw new OperationCanceledException($"The connection is stopping and cannot be used: {_receiveSettings.Topic}");
 
-            return new KafkaConsumerContext<TKey, TValue>(_receiveSettings, _headersDeserializer, _consumerBuilderFactory, supervisor.Stopping);
+            return new KafkaConsumerContext<TKey, TValue>(_logContext, _receiveSettings, _headersDeserializer, _consumerBuilderFactory(),
+                supervisor.Stopping);
         }
     }
 }

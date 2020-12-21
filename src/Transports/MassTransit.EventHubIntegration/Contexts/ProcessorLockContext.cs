@@ -13,19 +13,14 @@ namespace MassTransit.EventHubIntegration.Contexts
     {
         readonly SingleThreadedDictionary<string, PartitionCheckpointData> _data = new SingleThreadedDictionary<string, PartitionCheckpointData>();
         readonly ILogContext _logContext;
-        readonly IEventHubProcessorContext _processorContext;
         readonly ushort _maxCount;
         readonly TimeSpan _timeout;
 
-        public ProcessorLockContext(ILogContext logContext, IEventHubProcessorContext processorContext)
+        public ProcessorLockContext(ILogContext logContext, ReceiveSettings receiveSettings)
         {
             _logContext = logContext;
-            _processorContext = processorContext;
-            _timeout = processorContext.ReceiveSettings.CheckpointInterval;
-            _maxCount = processorContext.ReceiveSettings.CheckpointMessageCount;
-
-            _processorContext.PartitionInitializing += OnPartitionInitializing;
-            _processorContext.PartitionClosing += OnPartitionClosing;
+            _timeout = receiveSettings.CheckpointInterval;
+            _maxCount = receiveSettings.CheckpointMessageCount;
         }
 
         public Task Complete(ProcessEventArgs eventArgs)
@@ -37,7 +32,7 @@ namespace MassTransit.EventHubIntegration.Contexts
                 : TaskUtil.Completed;
         }
 
-        async Task OnPartitionInitializing(PartitionInitializingEventArgs eventArgs)
+        public async Task OnPartitionInitializing(PartitionInitializingEventArgs eventArgs)
         {
             LogContext.SetCurrentIfNull(_logContext);
 
@@ -45,15 +40,12 @@ namespace MassTransit.EventHubIntegration.Contexts
             LogContext.Info?.Log("Partition: {PartitionId} was initialized", eventArgs.PartitionId);
         }
 
-        async Task OnPartitionClosing(PartitionClosingEventArgs eventArgs)
+        public async Task OnPartitionClosing(PartitionClosingEventArgs eventArgs)
         {
             LogContext.SetCurrentIfNull(_logContext);
 
             if (_data.TryRemove(eventArgs.PartitionId, out var data))
                 await data.Close(eventArgs).ConfigureAwait(false);
-
-            _processorContext.PartitionInitializing -= OnPartitionInitializing;
-            _processorContext.PartitionClosing -= OnPartitionClosing;
         }
 
 
