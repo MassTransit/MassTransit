@@ -26,7 +26,7 @@ namespace MassTransit.KafkaIntegration.Specifications
         public void Configure(IBusInstance busInstance)
         {
             Dictionary<string, IReceiveEndpointControl> endpoints = _consumers
-                .ToDictionary(x => x.QueueName, x => x.CreateReceiveEndpoint(busInstance));
+                .ToDictionary(x => x.EndpointName, x => x.CreateReceiveEndpoint(busInstance));
 
             IKafkaProducerFactory[] producers = _producers
                 .Select(x => x.CreateProducerFactory(busInstance))
@@ -37,7 +37,7 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public IEnumerable<ValidationResult> Validate()
         {
-            foreach (KeyValuePair<string, IKafkaConsumerSpecification[]> kv in _consumers.GroupBy(x => x.QueueName).ToDictionary(x => x.Key, x => x.ToArray()))
+            foreach (KeyValuePair<string, IKafkaConsumerSpecification[]> kv in _consumers.GroupBy(x => x.EndpointName).ToDictionary(x => x.Key, x => x.ToArray()))
             {
                 if (kv.Value.Length > 1)
                     yield return this.Failure($"Topic: {kv.Key} was added more than once.");

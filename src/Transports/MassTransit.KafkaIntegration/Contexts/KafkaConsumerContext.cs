@@ -1,10 +1,11 @@
-namespace MassTransit.KafkaIntegration.Transport
+namespace MassTransit.KafkaIntegration.Contexts
 {
     using System;
     using System.Threading;
     using Confluent.Kafka;
     using GreenPipes;
     using Serializers;
+    using Transport;
 
 
     public class KafkaConsumerContext<TKey, TValue> :

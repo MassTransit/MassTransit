@@ -1,28 +1,30 @@
-namespace MassTransit.KafkaIntegration.Transport
+namespace MassTransit.EventHubIntegration.Filters
 {
     using System.Threading.Tasks;
     using Context;
+    using Contexts;
     using Events;
     using GreenPipes;
     using Transports.Metrics;
 
 
-    public class KafkaConsumerFilter<TKey, TValue> :
-        IFilter<IKafkaConsumerContext<TKey, TValue>>
-        where TValue : class
+    public class EventHubConsumerFilter :
+        IFilter<IEventHubProcessorContext>
     {
         readonly ReceiveEndpointContext _context;
 
-        public KafkaConsumerFilter(ReceiveEndpointContext context)
+        public EventHubConsumerFilter(ReceiveEndpointContext context)
         {
             _context = context;
         }
 
-        public async Task Send(IKafkaConsumerContext<TKey, TValue> context, IPipe<IKafkaConsumerContext<TKey, TValue>> next)
+        public async Task Send(IEventHubProcessorContext context, IPipe<IEventHubProcessorContext> next)
         {
             var inputAddress = _context.InputAddress;
 
-            var receiver = new KafkaMessageReceiver<TKey, TValue>(_context, context);
+            var receiver = new EventHubDataReceiver(_context, context);
+
+            await receiver.Start().ConfigureAwait(false);
 
             await receiver.Ready.ConfigureAwait(false);
 
@@ -51,6 +53,7 @@ namespace MassTransit.KafkaIntegration.Transport
 
         public void Probe(ProbeContext context)
         {
+            throw new System.NotImplementedException();
         }
     }
 }

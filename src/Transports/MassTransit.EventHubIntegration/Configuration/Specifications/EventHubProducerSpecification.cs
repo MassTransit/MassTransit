@@ -3,13 +3,13 @@ namespace MassTransit.EventHubIntegration.Specifications
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs.Producer;
     using Configuration;
     using Context;
     using Contexts;
     using GreenPipes;
+    using GreenPipes.Agents;
     using MassTransit.Registration;
     using Pipeline;
     using Pipeline.Observables;
@@ -73,6 +73,7 @@ namespace MassTransit.EventHubIntegration.Specifications
 
 
         class EventHubProducerSharedContext :
+            Agent,
             IEventHubProducerSharedContext
         {
             readonly IBusInstance _busInstance;
@@ -80,10 +81,12 @@ namespace MassTransit.EventHubIntegration.Specifications
             readonly IHostSettings _hostSettings;
             readonly EventHubProducerClientOptions _options;
             readonly ISerializationConfiguration _serializationConfiguration;
+            readonly Supervisor _transportSupervisor;
 
             public EventHubProducerSharedContext(IBusInstance busInstance, SendObservable sendObservers, ISendPipe sendPipe,
                 ISerializationConfiguration serializationConfiguration, IHostSettings hostSettings, EventHubProducerClientOptions options)
             {
+                _transportSupervisor = new Supervisor();
                 SendObservers = sendObservers;
                 SendPipe = sendPipe;
                 _busInstance = busInstance;
@@ -91,15 +94,14 @@ namespace MassTransit.EventHubIntegration.Specifications
                 _hostSettings = hostSettings;
                 _options = options;
                 _clients = new ConcurrentDictionary<string, EventHubProducerClient>();
+
+                busInstance.HostConfiguration.Agent.Completed.ContinueWith(_ => this.Stop(), TaskContinuationOptions.ExecuteSynchronously);
             }
 
-            public async ValueTask DisposeAsync()
+            protected override async Task StopAgent(StopContext context)
             {
-                if (_clients.IsEmpty)
-                    return;
-
-                await Task.WhenAll(_clients.Values.Select(x => x.DisposeAsync().AsTask())).ConfigureAwait(false);
-                _clients.Clear();
+                await _transportSupervisor.Stop(context).ConfigureAwait(false);
+                await base.StopAgent(context).ConfigureAwait(false);
             }
 
             public Uri HostAddress => _busInstance.HostConfiguration.HostAddress;
@@ -119,7 +121,26 @@ namespace MassTransit.EventHubIntegration.Specifications
                     ? new EventHubProducerClient(_hostSettings.ConnectionString, eventHubName, _options)
                     : new EventHubProducerClient(_hostSettings.FullyQualifiedNamespace, eventHubName, _hostSettings.TokenCredential, _options);
 
+                _transportSupervisor.Add(new EventHubProducerClientAgent(client));
                 return client;
+            }
+
+
+            class EventHubProducerClientAgent:
+                Agent
+            {
+                readonly EventHubProducerClient _client;
+
+                public EventHubProducerClientAgent(EventHubProducerClient client)
+                {
+                    _client = client;
+                }
+
+                protected override async Task StopAgent(StopContext context)
+                {
+                    await _client.DisposeAsync().ConfigureAwait(false);
+                    await base.StopAgent(context).ConfigureAwait(false);
+                }
             }
         }
     }

@@ -17,24 +17,21 @@ namespace MassTransit.EventHubIntegration.Contexts
         readonly ushort _maxCount;
         readonly TimeSpan _timeout;
 
-        public ProcessorLockContext(EventProcessorClient client, ILogContext logContext, TimeSpan timeout, ushort maxCount,
-            Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler, Func<PartitionClosingEventArgs, Task> partitionClosingHandler)
+        public ProcessorLockContext(EventProcessorClient client, ILogContext logContext, IEventHubProcessorContext processorContext)
         {
             _logContext = logContext;
-            _timeout = timeout;
-            _maxCount = maxCount;
+            _timeout = processorContext.ReceiveSettings.CheckpointInterval;
+            _maxCount = processorContext.ReceiveSettings.CheckpointMessageCount;
 
             client.PartitionInitializingAsync += async e =>
             {
                 await OnPartitionInitializing(e).ConfigureAwait(false);
-                if (partitionInitializingHandler != null)
-                    await partitionInitializingHandler(e).ConfigureAwait(false);
+                await processorContext.InitializePartition(e).ConfigureAwait(false);
             };
             client.PartitionClosingAsync += async e =>
             {
                 await OnPartitionClosing(e).ConfigureAwait(false);
-                if (partitionClosingHandler != null)
-                    await partitionClosingHandler(e).ConfigureAwait(false);
+                await processorContext.ClosePartition(e).ConfigureAwait(false);
             };
         }
 

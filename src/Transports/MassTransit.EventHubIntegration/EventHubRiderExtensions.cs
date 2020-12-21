@@ -9,9 +9,9 @@ namespace MassTransit.EventHubIntegration
     public static class EventHubRiderExtensions
     {
         public static void ConnectEventHub(this IBusInstance busInstance, RiderObservable observers, IEventHubProducerSharedContext sharedContext,
-            IEnumerable<IEventHubReceiveEndpoint> endpoints)
+            IDictionary<string, IReceiveEndpointControl> endpoints)
         {
-            var rider = new EventHubRider(endpoints, sharedContext, observers);
+            var rider = new EventHubRider(endpoints, sharedContext);
             busInstance.ConnectRider(rider);
         }
     }

@@ -31,7 +31,7 @@ namespace MassTransit.KafkaIntegration
             _consumerBuilderFactory = consumerBuilderFactory;
         }
 
-        public KafkaReceiveEndpointContext<TKey, TValue> CreateReceiveEndpointContext()
+        public IKafkaReceiveEndpointContext<TKey, TValue> CreateReceiveEndpointContext()
         {
             var context = new KafkaReceiveEndpointContext<TKey, TValue>(_busInstance, _configuration, _receiveSettings, _headersDeserializer,
                 _consumerBuilderFactory);

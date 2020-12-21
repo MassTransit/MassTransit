@@ -9,7 +9,7 @@ namespace MassTransit.KafkaIntegration.Specifications
         IReceiveEndpointObserverConnector,
         ISpecification
     {
-        string QueueName { get; }
+        string EndpointName { get; }
 
         /// <summary>
         /// Create the receive endpoint, using the busInstance hostConfiguration

@@ -4,7 +4,7 @@ namespace MassTransit.KafkaIntegration.Transport
 
 
     public class KafkaProducerFactory<TKey, TValue> :
-        IKafkaProducerFactory
+        IKafkaProducerFactory<TKey, TValue>
         where TValue : class
     {
         readonly IKafkaProducerContext<TKey, TValue> _context;
@@ -17,11 +17,6 @@ namespace MassTransit.KafkaIntegration.Transport
         }
 
         public Uri TopicAddress => _topicAddress;
-
-        public void Dispose()
-        {
-            _context.Dispose();
-        }
 
         public ITopicProducer<TKey, TValue> CreateProducer(ConsumeContext consumeContext = null)
         {

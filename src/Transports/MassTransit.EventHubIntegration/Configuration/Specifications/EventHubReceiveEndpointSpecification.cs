@@ -13,24 +13,26 @@ namespace MassTransit.EventHubIntegration.Specifications
         IEventHubReceiveEndpointSpecification
     {
         readonly Action<IEventHubReceiveEndpointConfigurator> _configure;
+        readonly string _eventHubName;
         readonly string _consumerGroup;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly IHostSettings _hostSettings;
         readonly IStorageSettings _storageSettings;
 
-        public EventHubReceiveEndpointSpecification(string eventHubName, string consumerGroup, IHostSettings hostSettings, IStorageSettings storageSettings,
+        public EventHubReceiveEndpointSpecification(string eventHubName, string consumerGroup, IHostSettings hostSettings, StorageSettings storageSettings,
             Action<IEventHubReceiveEndpointConfigurator> configure)
         {
+            _eventHubName = eventHubName;
             _consumerGroup = consumerGroup;
             _hostSettings = hostSettings;
             _storageSettings = storageSettings;
             _configure = configure;
-            Name = eventHubName;
+            EndpointName = $"{EventHubEndpointAddress.PathPrefix}/{_eventHubName}";
 
             _endpointObservers = new ReceiveEndpointObservable();
         }
 
-        public string Name { get; }
+        public string EndpointName { get; }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
@@ -39,7 +41,7 @@ namespace MassTransit.EventHubIntegration.Specifications
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (string.IsNullOrWhiteSpace(Name))
+            if (string.IsNullOrWhiteSpace(_eventHubName))
                 yield return this.Failure("EventHubName", "should not be empty");
 
             if (string.IsNullOrWhiteSpace(_consumerGroup))
@@ -54,13 +56,13 @@ namespace MassTransit.EventHubIntegration.Specifications
                 yield return this.Failure("StorageSettings", "is invalid");
         }
 
-        public IEventHubReceiveEndpoint Create(IBusInstance busInstance)
+        public IReceiveEndpointControl CreateReceiveEndpoint(IBusInstance busInstance)
         {
-            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration($"{EventHubEndpointAddress.PathPrefix}/{Name}");
+            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
             var configurator =
-                new EventHubReceiveEndpointConfigurator(Name, _consumerGroup, _hostSettings, _storageSettings, busInstance, endpointConfiguration);
+                new EventHubReceiveEndpointConfigurator(_eventHubName, _consumerGroup, _hostSettings, _storageSettings, busInstance, endpointConfiguration);
             _configure?.Invoke(configurator);
 
             var result = BusConfigurationResult.CompileResults(configurator.Validate());

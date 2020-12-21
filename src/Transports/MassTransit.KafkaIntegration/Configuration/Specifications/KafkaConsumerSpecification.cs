@@ -30,14 +30,14 @@ namespace MassTransit.KafkaIntegration.Specifications
             _endpointObservers = new ReceiveEndpointObservable();
             _headersDeserializer = headersDeserializer;
             _configure = configure;
-            QueueName = $"{KafkaTopicAddress.PathPrefix}/{_topicName}";
+            EndpointName = $"{KafkaTopicAddress.PathPrefix}/{_topicName}";
         }
 
-        public string QueueName { get; }
+        public string EndpointName { get; }
 
         public IReceiveEndpointControl CreateReceiveEndpoint(IBusInstance busInstance)
         {
-            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(QueueName);
+            var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
             var configurator =

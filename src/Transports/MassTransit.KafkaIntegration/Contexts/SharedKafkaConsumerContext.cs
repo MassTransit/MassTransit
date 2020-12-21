@@ -1,9 +1,10 @@
-namespace MassTransit.KafkaIntegration.Transport
+namespace MassTransit.KafkaIntegration.Contexts
 {
     using System.Threading;
     using Confluent.Kafka;
     using GreenPipes;
     using Serializers;
+    using Transport;
 
 
     public class SharedKafkaConsumerContext<TKey, TValue> :

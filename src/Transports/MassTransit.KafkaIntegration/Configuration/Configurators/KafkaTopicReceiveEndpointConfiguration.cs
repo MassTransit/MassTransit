@@ -4,6 +4,7 @@ namespace MassTransit.KafkaIntegration.Configurators
     using System.Collections.Generic;
     using Configuration;
     using Confluent.Kafka;
+    using Filters;
     using GreenPipes;
     using GreenPipes.Configurators;
     using MassTransit.Registration;

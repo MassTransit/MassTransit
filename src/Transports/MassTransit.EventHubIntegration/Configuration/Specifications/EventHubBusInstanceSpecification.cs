@@ -24,7 +24,7 @@ namespace MassTransit.EventHubIntegration.Specifications
 
         public IEnumerable<ValidationResult> Validate()
         {
-            foreach (KeyValuePair<string, IEventHubReceiveEndpointSpecification[]> kv in _specifications.GroupBy(x => x.Name)
+            foreach (KeyValuePair<string, IEventHubReceiveEndpointSpecification[]> kv in _specifications.GroupBy(x => x.EndpointName)
                 .ToDictionary(x => x.Key, x => x.ToArray()))
             {
                 if (kv.Value.Length > 1)
@@ -40,9 +40,8 @@ namespace MassTransit.EventHubIntegration.Specifications
 
         public void Configure(IBusInstance busInstance)
         {
-            IEventHubReceiveEndpoint[] endpoints = _specifications
-                .Select(x => x.Create(busInstance))
-                .ToArray();
+            IDictionary<string, IReceiveEndpointControl> endpoints = _specifications
+                .ToDictionary(x => x.EndpointName, x => x.CreateReceiveEndpoint(busInstance));
             var sharedContext = _producerSpecification.CreateContext(busInstance);
             busInstance.ConnectEventHub(_observer, sharedContext, endpoints);
         }

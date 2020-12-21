@@ -8,6 +8,7 @@ namespace MassTransit.KafkaIntegration.Specifications
     using Confluent.Kafka;
     using Context;
     using GreenPipes;
+    using GreenPipes.Agents;
     using MassTransit.Registration;
     using Pipeline;
     using Pipeline.Observables;
@@ -190,6 +191,7 @@ namespace MassTransit.KafkaIntegration.Specifications
 
 
         class KafkaProducerContext :
+            Agent,
             IKafkaProducerContext<TKey, TValue>
         {
             readonly IHostConfiguration _hostConfiguration;
@@ -204,6 +206,8 @@ namespace MassTransit.KafkaIntegration.Specifications
                 _sendPipe = sendConfiguration.CreatePipe();
                 SendObservers = sendObservers;
                 HeadersSerializer = headersSerializer;
+
+                hostConfiguration.Agent.Completed.ContinueWith(_ => this.Stop(), TaskContinuationOptions.ExecuteSynchronously);
             }
 
             public Uri HostAddress => _hostConfiguration.HostAddress;
@@ -217,11 +221,12 @@ namespace MassTransit.KafkaIntegration.Specifications
                 return _producer.ProduceAsync(partition, message, cancellationToken);
             }
 
-            public void Dispose()
+            protected override Task StopAgent(StopContext context)
             {
                 var timeout = TimeSpan.FromSeconds(30);
                 _producer.Flush(timeout);
                 _producer.Dispose();
+                return base.StopAgent(context);
             }
 
             public Task Send<T>(SendContext<T> context)

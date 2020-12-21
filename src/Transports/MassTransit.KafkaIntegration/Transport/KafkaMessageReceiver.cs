@@ -29,7 +29,6 @@
         {
             _context = context;
             _consumerContext = consumerContext;
-            _dispatcher = context.CreateReceivePipeDispatcher();
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(Stopping);
 
             ConsumerBuilder<TKey, TValue> consumerBuilder = consumerContext.CreateConsumerBuilder()

@@ -7,8 +7,7 @@ namespace MassTransit.EventHubIntegration.Contexts
     using Pipeline.Observables;
 
 
-    public interface IEventHubProducerSharedContext :
-        IAsyncDisposable
+    public interface IEventHubProducerSharedContext
     {
         Uri HostAddress { get; }
         ILogContext LogContext { get; }

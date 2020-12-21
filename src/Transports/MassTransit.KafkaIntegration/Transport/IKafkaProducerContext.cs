@@ -11,8 +11,7 @@ namespace MassTransit.KafkaIntegration.Transport
 
 
     public interface IKafkaProducerContext<TKey, TValue> :
-        ISendPipe,
-        IDisposable
+        ISendPipe
         where TValue : class
     {
         Uri HostAddress { get; }
