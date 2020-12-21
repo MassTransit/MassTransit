@@ -223,7 +223,7 @@ namespace MassTransit.KafkaIntegration
         /// </summary>
         /// <param name="servers"></param>
         /// <param name="configure"></param>
-        void Host(IEnumerable<string> servers, Action<IKafkaHostConfigurator> configure = null);
+        void Host(IReadOnlyList<string> servers, Action<IKafkaHostConfigurator> configure = null);
 
         /// <summary>
         /// Configure API versions

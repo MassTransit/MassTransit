@@ -7,7 +7,6 @@ namespace MassTransit.KafkaIntegration.Configurators
     using GreenPipes;
     using MassTransit.Registration;
     using Pipeline.Observables;
-    using Riders;
     using Serializers;
     using Specifications;
 
@@ -17,7 +16,6 @@ namespace MassTransit.KafkaIntegration.Configurators
     {
         readonly ClientConfig _clientConfig;
         readonly ReceiveEndpointObservable _endpointObservers;
-        readonly RiderObservable _observers;
         readonly List<IKafkaProducerSpecification> _producers;
         readonly SendObservable _sendObservers;
         readonly List<IKafkaConsumerSpecification> _topics;
@@ -31,7 +29,6 @@ namespace MassTransit.KafkaIntegration.Configurators
             _clientConfig = clientConfig;
             _topics = new List<IKafkaConsumerSpecification>();
             _producers = new List<IKafkaProducerSpecification>();
-            _observers = new RiderObservable();
             _endpointObservers = new ReceiveEndpointObservable();
             _sendObservers = new SendObservable();
 
@@ -39,7 +36,7 @@ namespace MassTransit.KafkaIntegration.Configurators
             SetHeadersSerializer(DictionaryHeadersSerialize.Serializer);
         }
 
-        public void Host(IEnumerable<string> servers, Action<IKafkaHostConfigurator> configure)
+        public void Host(IReadOnlyList<string> servers, Action<IKafkaHostConfigurator> configure)
         {
             if (servers == null || !servers.Any())
                 throw new ArgumentException(nameof(servers));
@@ -251,11 +248,6 @@ namespace MassTransit.KafkaIntegration.Configurators
             set => _clientConfig.ClientRack = value;
         }
 
-        public ConnectHandle ConnectRiderObserver(IRiderObserver observer)
-        {
-            return _observers.Connect(observer);
-        }
-
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
             return _endpointObservers.Connect(observer);
@@ -273,7 +265,7 @@ namespace MassTransit.KafkaIntegration.Configurators
 
         public IBusInstanceSpecification Build()
         {
-            return new KafkaBusInstanceSpecification(_topics, _producers, _observers);
+            return new KafkaBusInstanceSpecification(_topics, _producers);
         }
     }
 }

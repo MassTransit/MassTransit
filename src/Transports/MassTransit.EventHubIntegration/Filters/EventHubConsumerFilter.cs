@@ -53,7 +53,6 @@ namespace MassTransit.EventHubIntegration.Filters
 
         public void Probe(ProbeContext context)
         {
-            throw new System.NotImplementedException();
         }
     }
 }

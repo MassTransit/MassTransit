@@ -1,24 +1,22 @@
 namespace MassTransit.EventHubIntegration.Contexts
 {
-    using System.Threading;
+    using System;
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
+    using Azure.Storage.Blobs;
     using GreenPipes;
 
 
     public interface IEventHubProcessorContext :
         PipeContext
     {
-        IHostSettings HostSettings { get; }
-        IStorageSettings StorageSettings { get; }
+        event Func<PartitionInitializingEventArgs, Task> PartitionInitializing;
+        event Func<PartitionClosingEventArgs, Task> PartitionClosing;
+
+        BlobContainerClient BlobContainerClient { get; }
+        EventProcessorClient EventProcessorClient { get; }
+
         ReceiveSettings ReceiveSettings { get; }
-
-        Task InitializePartition(PartitionInitializingEventArgs eventArgs);
-        Task ClosePartition(PartitionClosingEventArgs eventArgs);
-
-        Task<bool> TryCreateContainerIfNotExists(CancellationToken cancellationToken);
-
-        EventProcessorClient CreateClient();
     }
 }

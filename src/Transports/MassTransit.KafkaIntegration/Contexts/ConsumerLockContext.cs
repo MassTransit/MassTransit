@@ -6,6 +6,7 @@ namespace MassTransit.KafkaIntegration.Contexts
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Context;
+    using Transport;
     using Util;
 
 
@@ -18,11 +19,11 @@ namespace MassTransit.KafkaIntegration.Contexts
         readonly ushort _maxCount;
         readonly TimeSpan _timeout;
 
-        public ConsumerLockContext(ConsumerBuilder<TKey, TValue> builder, ILogContext logContext, TimeSpan timeout, ushort maxCount)
+        public ConsumerLockContext(ConsumerBuilder<TKey, TValue> builder, ILogContext logContext, IKafkaConsumerContext<TKey, TValue> context)
         {
             _logContext = logContext;
-            _timeout = timeout;
-            _maxCount = maxCount;
+            _timeout = context.ReceiveSettings.CheckpointInterval;
+            _maxCount = context.ReceiveSettings.CheckpointMessageCount;
 
             builder.SetPartitionsAssignedHandler(OnAssigned);
             builder.SetPartitionsRevokedHandler(OnUnAssigned);

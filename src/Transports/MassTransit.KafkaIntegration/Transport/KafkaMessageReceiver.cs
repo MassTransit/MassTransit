@@ -41,8 +41,7 @@
                     HandleKafkaError(e);
                 });
 
-            _consumerLockContext = new ConsumerLockContext<TKey, TValue>(consumerBuilder, context.LogContext,
-                _consumerContext.ReceiveSettings.CheckpointInterval, _consumerContext.ReceiveSettings.CheckpointMessageCount);
+            _consumerLockContext = new ConsumerLockContext<TKey, TValue>(consumerBuilder, context.LogContext, _consumerContext);
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
 
@@ -67,10 +66,11 @@
                 while (!IsStopping)
                 {
                     ConsumeResult<TKey, TValue> consumeResult = _consumer.Consume(_cancellationTokenSource.Token);
-                    await executor.Push(() => Handle(consumeResult), Stopping);
+                    await executor.Push(() => Handle(consumeResult), Stopping).ConfigureAwait(false);
                 }
             }
-            catch (OperationCanceledException exception) when (exception.CancellationToken == Stopping)
+            catch (OperationCanceledException exception) when (exception.CancellationToken == Stopping
+                || exception.CancellationToken == _cancellationTokenSource.Token)
             {
             }
             catch (Exception exception)
@@ -79,9 +79,9 @@
             }
             finally
             {
-                _consumer.Unsubscribe();
-                _consumer.Dispose();
                 await executor.DisposeAsync().ConfigureAwait(false);
+                _consumer.Close();
+                _consumer.Dispose();
             }
 
             SetCompleted(TaskUtil.Completed);

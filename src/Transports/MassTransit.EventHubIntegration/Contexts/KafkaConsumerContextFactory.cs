@@ -5,6 +5,7 @@ namespace MassTransit.EventHubIntegration.Contexts
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
+    using Azure.Storage.Blobs;
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
@@ -14,22 +15,20 @@ namespace MassTransit.EventHubIntegration.Contexts
         IPipeContextFactory<IEventHubProcessorContext>
     {
         readonly ReceiveSettings _receiveSettings;
-        readonly Action<EventProcessorClientOptions> _configureOptions;
+        readonly BlobContainerClient _blobContainerClient;
+        readonly EventProcessorClient _client;
         readonly Func<PartitionClosingEventArgs, Task> _partitionClosingHandler;
         readonly Func<PartitionInitializingEventArgs, Task> _partitionInitializingHandler;
-        readonly IStorageSettings _storageSettings;
-        readonly IHostSettings _hostSettings;
 
-        public EventHubProcessorContextFactory(IHostSettings hostSettings, IStorageSettings storageSettings, ReceiveSettings receiveSettings,
-            Action<EventProcessorClientOptions> configureOptions, Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
+        public EventHubProcessorContextFactory(ReceiveSettings receiveSettings, BlobContainerClient blobContainerClient, EventProcessorClient client,
+            Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
             Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler)
         {
             _receiveSettings = receiveSettings;
-            _configureOptions = configureOptions;
+            _blobContainerClient = blobContainerClient;
+            _client = client;
             _partitionClosingHandler = partitionClosingHandler;
             _partitionInitializingHandler = partitionInitializingHandler;
-            _storageSettings = storageSettings;
-            _hostSettings = hostSettings;
         }
 
         public IActivePipeContextAgent<IEventHubProcessorContext> CreateActiveContext(ISupervisor supervisor,
@@ -51,8 +50,22 @@ namespace MassTransit.EventHubIntegration.Contexts
             if (supervisor.Stopping.IsCancellationRequested)
                 throw new OperationCanceledException($"The connection is stopping and cannot be used: {_receiveSettings.EventHubName}");
 
-            return new EventHubProcessorContext(_hostSettings, _storageSettings, _receiveSettings, _configureOptions, _partitionClosingHandler,
-                _partitionInitializingHandler, supervisor.Stopping);
+            var context = new EventHubProcessorContext(_receiveSettings, _blobContainerClient, _client,
+                supervisor.Stopping);
+
+            context.PartitionInitializing += async args =>
+            {
+                if (_partitionInitializingHandler != null)
+                    await _partitionInitializingHandler(args).ConfigureAwait(false);
+            };
+
+            context.PartitionClosing += async args =>
+            {
+                if (_partitionClosingHandler != null)
+                    await _partitionClosingHandler(args).ConfigureAwait(false);
+            };
+
+            return context;
         }
 
         IPipeContextAgent<IEventHubProcessorContext> IPipeContextFactory<IEventHubProcessorContext>.CreateContext(ISupervisor supervisor)

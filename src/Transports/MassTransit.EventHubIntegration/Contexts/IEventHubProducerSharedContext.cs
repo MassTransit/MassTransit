@@ -3,11 +3,13 @@ namespace MassTransit.EventHubIntegration.Contexts
     using System;
     using Azure.Messaging.EventHubs.Producer;
     using Context;
+    using GreenPipes.Agents;
     using Pipeline;
     using Pipeline.Observables;
 
 
-    public interface IEventHubProducerSharedContext
+    public interface IEventHubProducerSharedContext:
+        IAgent
     {
         Uri HostAddress { get; }
         ILogContext LogContext { get; }

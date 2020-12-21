@@ -16,33 +16,30 @@ namespace MassTransit.EventHubIntegration
     {
         readonly IBusInstance _busInstance;
         readonly IReceiveEndpointConfiguration _configuration;
-        readonly IHostSettings _hostSettings;
-        readonly IStorageSettings _storageSettings;
         readonly ReceiveSettings _receiveSettings;
-        readonly Action<EventProcessorClientOptions> _configureOptions;
+        readonly BlobContainerClient _blobContainerClient;
+        readonly EventProcessorClient _client;
         readonly Func<PartitionClosingEventArgs, Task> _partitionClosingHandler;
         readonly Func<PartitionInitializingEventArgs, Task> _partitionInitializingHandler;
-        readonly Func<BlobContainerClient, EventHubConsumerClient> _clientFactory;
 
-        public EventHubReceiveEndpointBuilder(IBusInstance busInstance, IReceiveEndpointConfiguration configuration,
-            IHostSettings hostSettings, IStorageSettings storageSettings, ReceiveSettings receiveSettings,
-            Action<EventProcessorClientOptions> configureOptions, Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
+        public EventHubReceiveEndpointBuilder(IBusInstance busInstance, IReceiveEndpointConfiguration configuration, ReceiveSettings receiveSettings,
+            BlobContainerClient blobContainerClient, EventProcessorClient client,
+            Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
             Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler)
             : base(configuration)
         {
             _busInstance = busInstance;
             _configuration = configuration;
-            _hostSettings = hostSettings;
-            _storageSettings = storageSettings;
             _receiveSettings = receiveSettings;
-            _configureOptions = configureOptions;
+            _blobContainerClient = blobContainerClient;
+            _client = client;
             _partitionClosingHandler = partitionClosingHandler;
             _partitionInitializingHandler = partitionInitializingHandler;
         }
 
         public IEventHubReceiveEndpointContext CreateReceiveEndpointContext()
         {
-            var context = new EventHubReceiveEndpointContext(_busInstance, _configuration, _hostSettings, _storageSettings, _receiveSettings, _configureOptions,
+            var context = new EventHubReceiveEndpointContext(_busInstance, _configuration, _receiveSettings, _blobContainerClient, _client,
                 _partitionClosingHandler, _partitionInitializingHandler);
 
             context.GetOrAddPayload(() => _busInstance.HostConfiguration.HostTopology);

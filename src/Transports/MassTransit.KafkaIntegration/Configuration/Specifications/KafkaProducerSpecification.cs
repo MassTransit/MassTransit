@@ -2,15 +2,10 @@ namespace MassTransit.KafkaIntegration.Specifications
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Configuration;
     using Confluent.Kafka;
-    using Context;
     using GreenPipes;
-    using GreenPipes.Agents;
     using MassTransit.Registration;
-    using Pipeline;
     using Pipeline.Observables;
     using Serializers;
     using Transport;
@@ -63,7 +58,7 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public TimeSpan? RetryBackoff
         {
-            set => _producerConfig.RetryBackoffMs = Convert.ToInt32(value?.TotalMilliseconds);
+            set => _producerConfig.RetryBackoffMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
         }
 
         public int? MessageSendMaxRetries
@@ -73,7 +68,7 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public TimeSpan? Linger
         {
-            set => _producerConfig.LingerMs = Convert.ToInt32(value?.TotalMilliseconds);
+            set => _producerConfig.LingerMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
         }
 
         public int? QueueBufferingMaxKbytes
@@ -98,7 +93,7 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public TimeSpan? TransactionTimeout
         {
-            set => _producerConfig.TransactionTimeoutMs = Convert.ToInt32(value?.TotalMilliseconds);
+            set => _producerConfig.TransactionTimeoutMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
         }
 
         public string TransactionalId
@@ -113,12 +108,12 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public TimeSpan? MessageTimeout
         {
-            set => _producerConfig.MessageTimeoutMs = Convert.ToInt32(value?.TotalMilliseconds);
+            set => _producerConfig.MessageTimeoutMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
         }
 
         public TimeSpan? RequestTimeout
         {
-            set => _producerConfig.RequestTimeoutMs = Convert.ToInt32(value?.TotalMilliseconds);
+            set => _producerConfig.RequestTimeoutMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
         }
 
         public string DeliveryReportFields
@@ -167,10 +162,8 @@ namespace MassTransit.KafkaIntegration.Specifications
             if (_valueSerializer != null)
                 producerBuilder.SetValueSerializer(_valueSerializer);
 
-            var context = new KafkaProducerContext(producerBuilder.Build(), busInstance.HostConfiguration, sendConfiguration, _sendObservers,
+            return new KafkaProducerFactory<TKey, TValue>(_topicName, producerBuilder, busInstance.HostConfiguration, sendConfiguration, _sendObservers,
                 _headersSerializer);
-
-            return new KafkaProducerFactory<TKey, TValue>(new KafkaTopicAddress(busInstance.HostConfiguration.HostAddress, _topicName), context);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -187,58 +180,6 @@ namespace MassTransit.KafkaIntegration.Specifications
         public void ConfigureSend(Action<ISendPipeConfigurator> callback)
         {
             _configureSend = callback ?? throw new ArgumentNullException(nameof(callback));
-        }
-
-
-        class KafkaProducerContext :
-            Agent,
-            IKafkaProducerContext<TKey, TValue>
-        {
-            readonly IHostConfiguration _hostConfiguration;
-            readonly IProducer<TKey, TValue> _producer;
-            readonly ISendPipe _sendPipe;
-
-            public KafkaProducerContext(IProducer<TKey, TValue> producer, IHostConfiguration hostConfiguration, ISendPipeConfiguration sendConfiguration,
-                SendObservable sendObservers, IHeadersSerializer headersSerializer)
-            {
-                _producer = producer;
-                _hostConfiguration = hostConfiguration;
-                _sendPipe = sendConfiguration.CreatePipe();
-                SendObservers = sendObservers;
-                HeadersSerializer = headersSerializer;
-
-                hostConfiguration.Agent.Completed.ContinueWith(_ => this.Stop(), TaskContinuationOptions.ExecuteSynchronously);
-            }
-
-            public Uri HostAddress => _hostConfiguration.HostAddress;
-            public ILogContext LogContext => _hostConfiguration.SendLogContext;
-            public SendObservable SendObservers { get; }
-
-            public IHeadersSerializer HeadersSerializer { get; }
-
-            public Task Produce(TopicPartition partition, Message<TKey, TValue> message, CancellationToken cancellationToken)
-            {
-                return _producer.ProduceAsync(partition, message, cancellationToken);
-            }
-
-            protected override Task StopAgent(StopContext context)
-            {
-                var timeout = TimeSpan.FromSeconds(30);
-                _producer.Flush(timeout);
-                _producer.Dispose();
-                return base.StopAgent(context);
-            }
-
-            public Task Send<T>(SendContext<T> context)
-                where T : class
-            {
-                return _sendPipe.Send(context);
-            }
-
-            public void Probe(ProbeContext context)
-            {
-                _sendPipe.Probe(context);
-            }
         }
     }
 }

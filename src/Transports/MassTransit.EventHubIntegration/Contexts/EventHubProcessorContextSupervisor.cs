@@ -4,6 +4,7 @@ namespace MassTransit.EventHubIntegration.Contexts
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
+    using Azure.Storage.Blobs;
     using GreenPipes.Agents;
     using Transports;
 
@@ -12,13 +13,11 @@ namespace MassTransit.EventHubIntegration.Contexts
         TransportPipeContextSupervisor<IEventHubProcessorContext>,
         IEventHubProcessorContextSupervisor
     {
-        public EventHubProcessorContextSupervisor(IAgent supervisor, IHostSettings hostSettings, IStorageSettings storageSettings,
-            ReceiveSettings receiveSettings,
-            Action<EventProcessorClientOptions> configureOptions, Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
+        public EventHubProcessorContextSupervisor(IAgent supervisor, ReceiveSettings receiveSettings, BlobContainerClient blobContainerClient,
+            EventProcessorClient client, Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
             Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler)
             : base(supervisor,
-                new EventHubProcessorContextFactory(hostSettings, storageSettings, receiveSettings, configureOptions, partitionClosingHandler,
-                    partitionInitializingHandler))
+                new EventHubProcessorContextFactory(receiveSettings, blobContainerClient, client, partitionClosingHandler, partitionInitializingHandler))
         {
         }
     }

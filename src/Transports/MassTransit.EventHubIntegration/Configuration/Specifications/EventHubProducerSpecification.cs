@@ -100,6 +100,7 @@ namespace MassTransit.EventHubIntegration.Specifications
 
             protected override async Task StopAgent(StopContext context)
             {
+                _clients.Clear();
                 await _transportSupervisor.Stop(context).ConfigureAwait(false);
                 await base.StopAgent(context).ConfigureAwait(false);
             }
@@ -112,21 +113,20 @@ namespace MassTransit.EventHubIntegration.Specifications
 
             public EventHubProducerClient CreateEventHubClient(string eventHubName)
             {
+                EventHubProducerClient CreateClient(string name)
+                {
+                    var client = !string.IsNullOrWhiteSpace(_hostSettings.ConnectionString)
+                        ? new EventHubProducerClient(_hostSettings.ConnectionString, name, _options)
+                        : new EventHubProducerClient(_hostSettings.FullyQualifiedNamespace, name, _hostSettings.TokenCredential, _options);
+                    _transportSupervisor.Add(new EventHubProducerClientAgent(client));
+                    return client;
+                }
+
                 return _clients.GetOrAdd(eventHubName, CreateClient);
             }
 
-            EventHubProducerClient CreateClient(string eventHubName)
-            {
-                var client = !string.IsNullOrWhiteSpace(_hostSettings.ConnectionString)
-                    ? new EventHubProducerClient(_hostSettings.ConnectionString, eventHubName, _options)
-                    : new EventHubProducerClient(_hostSettings.FullyQualifiedNamespace, eventHubName, _hostSettings.TokenCredential, _options);
 
-                _transportSupervisor.Add(new EventHubProducerClientAgent(client));
-                return client;
-            }
-
-
-            class EventHubProducerClientAgent:
+            class EventHubProducerClientAgent :
                 Agent
             {
                 readonly EventHubProducerClient _client;

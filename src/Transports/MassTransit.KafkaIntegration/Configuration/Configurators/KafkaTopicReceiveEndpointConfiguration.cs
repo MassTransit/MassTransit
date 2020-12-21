@@ -73,12 +73,12 @@ namespace MassTransit.KafkaIntegration.Configurators
 
         public TimeSpan? SessionTimeout
         {
-            set => _consumerConfig.SessionTimeoutMs = value?.Milliseconds;
+            set => _consumerConfig.SessionTimeoutMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
         }
 
         public TimeSpan? HeartbeatInterval
         {
-            set => _consumerConfig.HeartbeatIntervalMs = value?.Milliseconds;
+            set => _consumerConfig.HeartbeatIntervalMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
         }
 
         public string GroupProtocolType
@@ -88,12 +88,12 @@ namespace MassTransit.KafkaIntegration.Configurators
 
         public TimeSpan? CoordinatorQueryInterval
         {
-            set => _consumerConfig.CoordinatorQueryIntervalMs = value?.Milliseconds;
+            set => _consumerConfig.CoordinatorQueryIntervalMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
         }
 
         public TimeSpan? MaxPollInterval
         {
-            set => _consumerConfig.MaxPollIntervalMs = value?.Milliseconds;
+            set => _consumerConfig.MaxPollIntervalMs = value == null ? (int?)null : Convert.ToInt32(value.Value.TotalMilliseconds);
         }
 
         public bool? EnableAutoOffsetStore

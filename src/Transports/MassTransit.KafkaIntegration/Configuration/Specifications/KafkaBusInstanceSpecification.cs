@@ -4,23 +4,19 @@ namespace MassTransit.KafkaIntegration.Specifications
     using System.Linq;
     using GreenPipes;
     using MassTransit.Registration;
-    using Pipeline.Observables;
     using Transport;
 
 
     public class KafkaBusInstanceSpecification :
         IBusInstanceSpecification
     {
-        readonly RiderObservable _observers;
         readonly IEnumerable<IKafkaProducerSpecification> _producers;
         readonly IEnumerable<IKafkaConsumerSpecification> _consumers;
 
-        public KafkaBusInstanceSpecification(IEnumerable<IKafkaConsumerSpecification> consumers, IEnumerable<IKafkaProducerSpecification> producers,
-            RiderObservable observers)
+        public KafkaBusInstanceSpecification(IEnumerable<IKafkaConsumerSpecification> consumers, IEnumerable<IKafkaProducerSpecification> producers)
         {
             _consumers = consumers;
             _producers = producers;
-            _observers = observers;
         }
 
         public void Configure(IBusInstance busInstance)
@@ -37,7 +33,8 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public IEnumerable<ValidationResult> Validate()
         {
-            foreach (KeyValuePair<string, IKafkaConsumerSpecification[]> kv in _consumers.GroupBy(x => x.EndpointName).ToDictionary(x => x.Key, x => x.ToArray()))
+            foreach (KeyValuePair<string, IKafkaConsumerSpecification[]> kv in _consumers.GroupBy(x => x.EndpointName)
+                .ToDictionary(x => x.Key, x => x.ToArray()))
             {
                 if (kv.Value.Length > 1)
                     yield return this.Failure($"Topic: {kv.Key} was added more than once.");

@@ -28,9 +28,8 @@
             _context = context;
             _dispatcher = context.CreateReceivePipeDispatcher();
 
-            _client = processorContext.CreateClient();
-
-            _lockContext = new ProcessorLockContext(_client, context.LogContext, processorContext);
+            _client = processorContext.EventProcessorClient;
+            _lockContext = new ProcessorLockContext(context.LogContext, processorContext);
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
 
@@ -44,22 +43,20 @@
             _executor = new ChannelExecutor(prefetchCount, processorContext.ReceiveSettings.ConcurrencyLimit);
         }
 
-        Task HandleMessage(ProcessEventArgs eventArgs)
+        async Task HandleMessage(ProcessEventArgs eventArgs)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
             try
             {
-                return _executor.Push(() => Handle(eventArgs), Stopping);
+                await _executor.Push(() => Handle(eventArgs), Stopping).ConfigureAwait(false);
             }
             catch (OperationCanceledException e) when (e.CancellationToken == Stopping)
             {
             }
-
-            return TaskUtil.Completed;
         }
 
-        Task HandleError(ProcessErrorEventArgs eventArgs)
+        async Task HandleError(ProcessErrorEventArgs eventArgs)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
@@ -72,8 +69,6 @@
 
                 SetCompleted(TaskUtil.Faulted<bool>(eventArgs.Exception));
             }
-
-            return TaskUtil.Completed;
         }
 
         async Task Handle(ProcessEventArgs eventArgs)
@@ -105,7 +100,7 @@
 
         protected override async Task StopAgent(StopContext context)
         {
-            await _client.StopProcessingAsync(context.CancellationToken).ConfigureAwait(false);
+            await _client.StopProcessingAsync().ConfigureAwait(false);
 
             await _executor.DisposeAsync().ConfigureAwait(false);
 

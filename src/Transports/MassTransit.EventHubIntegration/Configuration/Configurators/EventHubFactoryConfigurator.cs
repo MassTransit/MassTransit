@@ -18,7 +18,6 @@ namespace MassTransit.EventHubIntegration.Configurators
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly List<IEventHubReceiveEndpointSpecification> _endpoints;
         readonly HostSettings _hostSettings;
-        readonly RiderObservable _observers;
         readonly EventHubProducerSpecification _producerSpecification;
         readonly StorageSettings _storageSettings;
         bool _isHostSettingsConfigured;
@@ -26,17 +25,11 @@ namespace MassTransit.EventHubIntegration.Configurators
 
         public EventHubFactoryConfigurator()
         {
-            _observers = new RiderObservable();
             _endpointObservers = new ReceiveEndpointObservable();
             _endpoints = new List<IEventHubReceiveEndpointSpecification>();
             _hostSettings = new HostSettings();
             _storageSettings = new StorageSettings();
             _producerSpecification = new EventHubProducerSpecification(_hostSettings);
-        }
-
-        public ConnectHandle ConnectRiderObserver(IRiderObserver observer)
-        {
-            return _observers.Connect(observer);
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
@@ -147,7 +140,7 @@ namespace MassTransit.EventHubIntegration.Configurators
 
         public IBusInstanceSpecification Build()
         {
-            return new EventHubBusInstanceSpecification(_endpoints, _producerSpecification, _observers);
+            return new EventHubBusInstanceSpecification(_endpoints, _producerSpecification);
         }
 
         void ThrowIfHostIsAlreadyConfigured()

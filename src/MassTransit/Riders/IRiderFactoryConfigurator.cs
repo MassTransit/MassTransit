@@ -4,7 +4,6 @@ namespace MassTransit.Riders
 
 
     public interface IRiderFactoryConfigurator :
-        IRiderObserverConnector,
         IReceiveEndpointObserverConnector
     {
     }

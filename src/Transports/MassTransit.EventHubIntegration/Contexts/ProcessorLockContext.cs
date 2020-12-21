@@ -3,7 +3,6 @@ namespace MassTransit.EventHubIntegration.Contexts
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
     using Context;
     using Util;
@@ -14,25 +13,19 @@ namespace MassTransit.EventHubIntegration.Contexts
     {
         readonly SingleThreadedDictionary<string, PartitionCheckpointData> _data = new SingleThreadedDictionary<string, PartitionCheckpointData>();
         readonly ILogContext _logContext;
+        readonly IEventHubProcessorContext _processorContext;
         readonly ushort _maxCount;
         readonly TimeSpan _timeout;
 
-        public ProcessorLockContext(EventProcessorClient client, ILogContext logContext, IEventHubProcessorContext processorContext)
+        public ProcessorLockContext(ILogContext logContext, IEventHubProcessorContext processorContext)
         {
             _logContext = logContext;
+            _processorContext = processorContext;
             _timeout = processorContext.ReceiveSettings.CheckpointInterval;
             _maxCount = processorContext.ReceiveSettings.CheckpointMessageCount;
 
-            client.PartitionInitializingAsync += async e =>
-            {
-                await OnPartitionInitializing(e).ConfigureAwait(false);
-                await processorContext.InitializePartition(e).ConfigureAwait(false);
-            };
-            client.PartitionClosingAsync += async e =>
-            {
-                await OnPartitionClosing(e).ConfigureAwait(false);
-                await processorContext.ClosePartition(e).ConfigureAwait(false);
-            };
+            _processorContext.PartitionInitializing += OnPartitionInitializing;
+            _processorContext.PartitionClosing += OnPartitionClosing;
         }
 
         public Task Complete(ProcessEventArgs eventArgs)
@@ -44,20 +37,23 @@ namespace MassTransit.EventHubIntegration.Contexts
                 : TaskUtil.Completed;
         }
 
-        Task OnPartitionInitializing(PartitionInitializingEventArgs eventArgs)
+        async Task OnPartitionInitializing(PartitionInitializingEventArgs eventArgs)
         {
             LogContext.SetCurrentIfNull(_logContext);
 
             _data.TryAdd(eventArgs.PartitionId, _ => new PartitionCheckpointData(_timeout, _maxCount));
             LogContext.Info?.Log("Partition: {PartitionId} was initialized", eventArgs.PartitionId);
-            return TaskUtil.Completed;
         }
 
-        Task OnPartitionClosing(PartitionClosingEventArgs eventArgs)
+        async Task OnPartitionClosing(PartitionClosingEventArgs eventArgs)
         {
             LogContext.SetCurrentIfNull(_logContext);
 
-            return _data.TryRemove(eventArgs.PartitionId, out var data) ? data.Close(eventArgs) : TaskUtil.Completed;
+            if (_data.TryRemove(eventArgs.PartitionId, out var data))
+                await data.Close(eventArgs).ConfigureAwait(false);
+
+            _processorContext.PartitionInitializing -= OnPartitionInitializing;
+            _processorContext.PartitionClosing -= OnPartitionClosing;
         }
 
 

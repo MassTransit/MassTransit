@@ -4,22 +4,19 @@ namespace MassTransit.EventHubIntegration.Specifications
     using System.Linq;
     using GreenPipes;
     using MassTransit.Registration;
-    using Pipeline.Observables;
 
 
     public class EventHubBusInstanceSpecification :
         IBusInstanceSpecification
     {
-        readonly RiderObservable _observer;
         readonly IEventHubProducerSpecification _producerSpecification;
         readonly IEnumerable<IEventHubReceiveEndpointSpecification> _specifications;
 
         public EventHubBusInstanceSpecification(IEnumerable<IEventHubReceiveEndpointSpecification> specifications,
-            IEventHubProducerSpecification producerSpecification, RiderObservable observer)
+            IEventHubProducerSpecification producerSpecification)
         {
             _specifications = specifications;
             _producerSpecification = producerSpecification;
-            _observer = observer;
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -42,8 +39,7 @@ namespace MassTransit.EventHubIntegration.Specifications
         {
             IDictionary<string, IReceiveEndpointControl> endpoints = _specifications
                 .ToDictionary(x => x.EndpointName, x => x.CreateReceiveEndpoint(busInstance));
-            var sharedContext = _producerSpecification.CreateContext(busInstance);
-            busInstance.ConnectEventHub(_observer, sharedContext, endpoints);
+            busInstance.ConnectEventHub(() => _producerSpecification.CreateContext(busInstance), endpoints);
         }
     }
 }

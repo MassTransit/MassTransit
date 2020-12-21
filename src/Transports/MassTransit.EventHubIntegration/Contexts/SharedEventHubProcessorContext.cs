@@ -1,9 +1,11 @@
 namespace MassTransit.EventHubIntegration.Contexts
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
+    using Azure.Storage.Blobs;
     using GreenPipes;
 
 
@@ -22,30 +24,22 @@ namespace MassTransit.EventHubIntegration.Contexts
 
         public override CancellationToken CancellationToken { get; }
 
-        public IHostSettings HostSettings => _context.HostSettings;
+        public event Func<PartitionInitializingEventArgs, Task> PartitionInitializing
+        {
+            add => _context.PartitionInitializing += value;
+            remove => _context.PartitionInitializing -= value;
+        }
 
-        public IStorageSettings StorageSettings => _context.StorageSettings;
+        public event Func<PartitionClosingEventArgs, Task> PartitionClosing
+        {
+            add => _context.PartitionClosing += value;
+            remove => _context.PartitionClosing -= value;
+        }
+
+        public BlobContainerClient BlobContainerClient => _context.BlobContainerClient;
+
+        public EventProcessorClient EventProcessorClient => _context.EventProcessorClient;
 
         public ReceiveSettings ReceiveSettings => _context.ReceiveSettings;
-
-        public Task InitializePartition(PartitionInitializingEventArgs eventArgs)
-        {
-            return _context.InitializePartition(eventArgs);
-        }
-
-        public Task ClosePartition(PartitionClosingEventArgs eventArgs)
-        {
-            return _context.ClosePartition(eventArgs);
-        }
-
-        public Task<bool> TryCreateContainerIfNotExists(CancellationToken cancellationToken)
-        {
-            return _context.TryCreateContainerIfNotExists(cancellationToken);
-        }
-
-        public EventProcessorClient CreateClient()
-        {
-            return _context.CreateClient();
-        }
     }
 }

@@ -4,6 +4,7 @@ namespace MassTransit.EventHubIntegration
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
+    using Azure.Storage.Blobs;
     using Configuration;
     using Context;
     using Contexts;
@@ -20,14 +21,14 @@ namespace MassTransit.EventHubIntegration
         readonly Recycle<IEventHubProcessorContextSupervisor> _contextSupervisor;
 
         public EventHubReceiveEndpointContext(IBusInstance busInstance, IReceiveEndpointConfiguration endpointConfiguration,
-            IHostSettings hostSettings, IStorageSettings storageSettings, ReceiveSettings receiveSettings,
-            Action<EventProcessorClientOptions> configureOptions, Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
+            ReceiveSettings receiveSettings, BlobContainerClient blobContainerClient, EventProcessorClient client,
+            Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
             Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler)
             : base(busInstance.HostConfiguration, endpointConfiguration)
         {
             _busInstance = busInstance;
             _contextSupervisor = new Recycle<IEventHubProcessorContextSupervisor>(() =>
-                new EventHubProcessorContextSupervisor(busInstance.HostConfiguration.Agent, hostSettings, storageSettings, receiveSettings, configureOptions,
+                new EventHubProcessorContextSupervisor(busInstance.HostConfiguration.Agent, receiveSettings, blobContainerClient, client,
                     partitionClosingHandler, partitionInitializingHandler));
         }
 
