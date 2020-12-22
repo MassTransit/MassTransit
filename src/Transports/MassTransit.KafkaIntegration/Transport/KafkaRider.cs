@@ -4,11 +4,9 @@ namespace MassTransit.KafkaIntegration.Transport
     using System.Collections.Generic;
     using System.Linq;
     using Confluent.Kafka;
-    using Riders;
 
 
     public class KafkaRider :
-        BaseRider,
         IKafkaRider
     {
         readonly IDictionary<string, IReceiveEndpointControl> _endpoints;
@@ -16,7 +14,6 @@ namespace MassTransit.KafkaIntegration.Transport
         readonly Dictionary<Uri, IKafkaProducerFactory> _producerFactories;
 
         public KafkaRider(Uri hostAddress, IDictionary<string, IReceiveEndpointControl> endpoints, IEnumerable<IKafkaProducerFactory> producerFactories)
-            : base("confluent.kafka")
         {
             _hostAddress = hostAddress;
             _endpoints = endpoints ?? new Dictionary<string, IReceiveEndpointControl>();
@@ -36,6 +33,11 @@ namespace MassTransit.KafkaIntegration.Transport
             return factory.CreateProducer(consumeContext);
         }
 
+        public void Connect(IHost host)
+        {
+            host.AddReceiveEndpoint(_endpoints);
+        }
+
         IKafkaProducerFactory<TKey, TValue> GetProducerFactory<TKey, TValue>(Uri topicAddress)
             where TValue : class
         {
@@ -46,12 +48,6 @@ namespace MassTransit.KafkaIntegration.Transport
                 return producerFactory;
 
             throw new ConfigurationException($"Producer for topic: {topicAddress} is not configured for ${typeof(Message<TKey, TValue>).Name} message");
-        }
-
-        protected override void AddReceiveEndpoint(IHost host)
-        {
-            foreach (KeyValuePair<string, IReceiveEndpointControl> endpoint in _endpoints)
-                host.AddReceiveEndpoint(endpoint.Key, endpoint.Value);
         }
     }
 }

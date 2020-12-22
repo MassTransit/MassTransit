@@ -1,7 +1,10 @@
 namespace MassTransit.Riders
 {
+    using GreenPipes;
+
+
     public interface IRiderConnector
     {
-        void ConnectRider(IRider rider);
+        ConnectHandle Connect(IRider rider);
     }
 }

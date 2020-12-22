@@ -1,26 +1,22 @@
 namespace MassTransit.Registration
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using Configuration;
+    using GreenPipes;
     using Riders;
 
 
     public class TransportBusInstance :
         IBusInstance
     {
-        readonly List<IRider> _riders;
+        readonly RiderConnectable _riderConnectable;
 
         public TransportBusInstance(IBusControl busControl, IHost host, IHostConfiguration hostConfiguration)
         {
             BusControl = busControl;
-            Host = host;
             HostConfiguration = hostConfiguration;
-            _riders = new List<IRider>();
+            _riderConnectable = new RiderConnectable(host);
         }
-
-        public IHost Host { get; }
 
         public Type InstanceType => typeof(IBus);
         public IBus Bus => BusControl;
@@ -31,16 +27,12 @@ namespace MassTransit.Registration
         public TRider GetRider<TRider>()
             where TRider : IRider
         {
-            var rider = _riders.OfType<TRider>().FirstOrDefault();
-            if (rider == null)
-                throw new ConfigurationException($"Rider: {typeof(TRider).Name} is not registered.");
-            return rider;
+            return _riderConnectable.Get<TRider>();
         }
 
-        public void ConnectRider(IRider rider)
+        public ConnectHandle Connect(IRider rider)
         {
-            _riders.Add(rider);
-            rider.Connect(Host);
+            return _riderConnectable.Connect(rider);
         }
     }
 }

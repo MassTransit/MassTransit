@@ -54,7 +54,7 @@ namespace MassTransit.Registration
                 throw new ConfigurationException(RiderExceptionMessage);
             }
 
-            public void ConnectRider(IRider rider)
+            public ConnectHandle Connect(IRider rider)
             {
                 throw new ConfigurationException(RiderExceptionMessage);
             }

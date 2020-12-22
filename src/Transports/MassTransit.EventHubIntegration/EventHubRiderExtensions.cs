@@ -12,7 +12,7 @@ namespace MassTransit.EventHubIntegration
             IDictionary<string, IReceiveEndpointControl> endpoints)
         {
             var rider = new EventHubRider(endpoints, sharedContext);
-            busInstance.ConnectRider(rider);
+            busInstance.Connect(rider);
         }
     }
 }

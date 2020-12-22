@@ -1,7 +1,6 @@
 namespace MassTransit.KafkaIntegration
 {
     using System.Collections.Generic;
-    using GreenPipes;
     using MassTransit.Registration;
     using Transport;
 
@@ -14,7 +13,7 @@ namespace MassTransit.KafkaIntegration
         {
             var rider = new KafkaRider(busInstance.HostConfiguration.HostAddress, endpoints, producers);
 
-            busInstance.ConnectRider(rider);
+            busInstance.Connect(rider);
         }
     }
 }

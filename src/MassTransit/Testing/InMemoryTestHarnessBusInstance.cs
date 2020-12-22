@@ -1,8 +1,6 @@
 namespace MassTransit.Testing
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using Configuration;
     using GreenPipes;
     using Registration;
@@ -12,20 +10,12 @@ namespace MassTransit.Testing
     public class InMemoryTestHarnessBusInstance :
         IBusInstance
     {
-        readonly List<IRider> _riders;
-
         public InMemoryTestHarnessBusInstance(InMemoryTestHarness testHarness)
         {
-            _riders = new List<IRider>();
             Harness = testHarness;
         }
 
         public InMemoryTestHarness Harness { get; }
-
-        public void ConnectRider(IRider rider)
-        {
-            _riders.Add(rider);
-        }
 
         public Type InstanceType => typeof(InMemoryTestHarness);
         public IBus Bus => Harness.Bus;
@@ -35,7 +25,12 @@ namespace MassTransit.Testing
         public TRider GetRider<TRider>()
             where TRider : IRider
         {
-            return _riders.OfType<TRider>().FirstOrDefault();
+            throw new NotSupportedException();
+        }
+
+        public ConnectHandle Connect(IRider rider)
+        {
+            throw new NotSupportedException();
         }
     }
 }
