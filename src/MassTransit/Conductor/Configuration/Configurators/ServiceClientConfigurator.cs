@@ -18,6 +18,11 @@ namespace MassTransit.Conductor.Configurators
             return Options.Options(configure);
         }
 
+        T IOptionsSet.Options<T>(T options, Action<T> configure)
+        {
+            return Options.Options(options, configure);
+        }
+
         bool IOptionsSet.TryGetOptions<T>(out T options)
         {
             return Options.TryGetOptions(out options);

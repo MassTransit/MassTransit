@@ -25,7 +25,7 @@ namespace MassTransit.JobService.Configuration
         {
             if (typeof(T).HasInterface(typeof(IJobConsumer<>)))
             {
-                configurator.Options<JobServiceOptions>(options => options.Set(_jobServiceOptions));
+                configurator.Options(_jobServiceOptions);
 
                 if (_endpointConfigured)
                     return;

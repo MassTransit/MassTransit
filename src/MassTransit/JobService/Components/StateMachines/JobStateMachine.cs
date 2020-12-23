@@ -11,11 +11,11 @@ namespace MassTransit.JobService.Components.StateMachines
     public sealed class JobStateMachine :
         MassTransitStateMachine<JobSaga>
     {
+        readonly JobServiceOptions _options;
+
         public JobStateMachine(JobServiceOptions options)
         {
-            JobTypeSagaEndpointAddress = options.JobTypeSagaEndpointAddress;
-            JobSagaEndpointAddress = options.JobSagaEndpointAddress;
-            JobAttemptSagaEndpointAddress = options.JobAttemptSagaEndpointAddress;
+            _options = options;
 
             Event(() => JobSubmitted, x => x.CorrelateById(m => m.Message.JobId));
 
@@ -153,19 +153,20 @@ namespace MassTransit.JobService.Components.StateMachines
                 When(AttemptCanceled)
                     .PublishJobCanceled());
 
-            WhenEnter(Completed, x => x.SendJobSlotReleased(options.JobTypeSagaEndpointAddress));
-            WhenEnter(Canceled, x => x.SendJobSlotReleased(options.JobTypeSagaEndpointAddress));
-            WhenEnter(Faulted, x => x.SendJobSlotReleased(options.JobTypeSagaEndpointAddress));
-            WhenEnter(WaitingToRetry, x => x.SendJobSlotReleased(options.JobTypeSagaEndpointAddress));
+            WhenEnter(Completed, x => x.SendJobSlotReleased(this));
+            WhenEnter(Canceled, x => x.SendJobSlotReleased(this));
+            WhenEnter(Faulted, x => x.SendJobSlotReleased(this));
+            WhenEnter(WaitingToRetry, x => x.SendJobSlotReleased(this));
 
             SetCompletedWhenFinalized();
         }
 
-        public Uri JobTypeSagaEndpointAddress { get; }
-        public Uri JobSagaEndpointAddress { get; }
-        public Uri JobAttemptSagaEndpointAddress { get; }
+        public Uri JobTypeSagaEndpointAddress => _options.JobTypeSagaEndpointAddress;
+        public Uri JobSagaEndpointAddress => _options.JobSagaEndpointAddress;
+        public Uri JobAttemptSagaEndpointAddress => _options.JobAttemptSagaEndpointAddress;
 
         // ReSharper disable UnassignedGetOnlyAutoProperty
+        // ReSharper disable MemberCanBePrivate.Global
         public State Submitted { get; }
         public State WaitingToStart { get; }
         public State WaitingToRetry { get; }
@@ -217,26 +218,28 @@ namespace MassTransit.JobService.Components.StateMachines
             JobStateMachine machine)
             where T : class
         {
-            return binder.SendAsync(machine.JobTypeSagaEndpointAddress, context => context.Init<AllocateJobSlot>(new
-                {
-                    JobId = context.Instance.CorrelationId,
-                    context.Instance.JobTypeId,
-                    context.Instance.JobTimeout
-                }), context => context.ResponseAddress = machine.JobSagaEndpointAddress)
+            return binder.SendAsync(context => machine.JobTypeSagaEndpointAddress,
+                    context => context.Init<AllocateJobSlot>(new
+                    {
+                        JobId = context.Instance.CorrelationId,
+                        context.Instance.JobTypeId,
+                        context.Instance.JobTimeout
+                    }), context => context.ResponseAddress = machine.JobSagaEndpointAddress)
                 .TransitionTo(machine.AllocatingJobSlot);
         }
 
         public static EventActivityBinder<JobSaga, JobSlotAllocated> RequestStartJob(this EventActivityBinder<JobSaga, JobSlotAllocated> binder,
             JobStateMachine machine)
         {
-            return binder.SendAsync(machine.JobAttemptSagaEndpointAddress, context => context.Init<StartJobAttempt>(new
-                {
-                    JobId = context.Instance.CorrelationId,
-                    context.Instance.AttemptId,
-                    context.Instance.ServiceAddress,
-                    context.Instance.RetryAttempt,
-                    context.Instance.Job
-                }), context => context.ResponseAddress = machine.JobSagaEndpointAddress)
+            return binder.SendAsync(context => machine.JobAttemptSagaEndpointAddress,
+                    context => context.Init<StartJobAttempt>(new
+                    {
+                        JobId = context.Instance.CorrelationId,
+                        context.Instance.AttemptId,
+                        context.Instance.ServiceAddress,
+                        context.Instance.RetryAttempt,
+                        context.Instance.Job
+                    }), context => context.ResponseAddress = machine.JobSagaEndpointAddress)
                 .TransitionTo(machine.StartingJobAttempt);
         }
 
@@ -247,13 +250,14 @@ namespace MassTransit.JobService.Components.StateMachines
                 .TransitionTo(machine.WaitingForSlot);
         }
 
-        public static EventActivityBinder<JobSaga> SendJobSlotReleased(this EventActivityBinder<JobSaga> binder, Uri destinationAddress)
+        public static EventActivityBinder<JobSaga> SendJobSlotReleased(this EventActivityBinder<JobSaga> binder, JobStateMachine machine)
         {
-            return binder.SendAsync(destinationAddress, context => context.Init<JobSlotReleased>(new
-            {
-                JobId = context.Instance.CorrelationId,
-                context.Instance.JobTypeId
-            }));
+            return binder.SendAsync(context => machine.JobTypeSagaEndpointAddress,
+                context => context.Init<JobSlotReleased>(new
+                {
+                    JobId = context.Instance.CorrelationId,
+                    context.Instance.JobTypeId
+                }));
         }
 
         public static EventActivityBinder<JobSaga, JobAttemptStarted> PublishJobStarted(this EventActivityBinder<JobSaga, JobAttemptStarted> binder)

@@ -45,6 +45,28 @@ namespace MassTransit.Configuration
         }
 
         /// <summary>
+        /// Configure the options, adding the option type if it is not present
+        /// </summary>
+        /// <param name="options"></param>
+        /// <param name="configure"></param>
+        /// <typeparam name="T">The option type</typeparam>
+        /// <returns></returns>
+        public T Options<T>(T options, Action<T> configure = null)
+            where T : IOptions, new()
+        {
+            if (_options.TryGetValue(typeof(T), out var existingOptions))
+            {
+                if (!ReferenceEquals(existingOptions, options))
+                    throw new ArgumentException($"The options type was already configured: {TypeMetadataCache<T>.ShortName}");
+            }
+            else
+                _options.Add(typeof(T), options);
+
+            configure?.Invoke(options);
+            return options;
+        }
+
+        /// <summary>
         /// Return the options, if present
         /// </summary>
         /// <param name="options"></param>

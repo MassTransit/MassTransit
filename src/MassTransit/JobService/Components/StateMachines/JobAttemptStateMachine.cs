@@ -12,11 +12,11 @@ namespace MassTransit.JobService.Components.StateMachines
     public sealed class JobAttemptStateMachine :
         MassTransitStateMachine<JobAttemptSaga>
     {
+        readonly JobServiceOptions _options;
+
         public JobAttemptStateMachine(JobServiceOptions options)
         {
-            JobTypeSagaEndpointAddress = options.JobTypeSagaEndpointAddress;
-            JobSagaEndpointAddress = options.JobSagaEndpointAddress;
-            JobAttemptSagaEndpointAddress = options.JobAttemptSagaEndpointAddress;
+            _options = options;
 
             SuspectJobRetryCount = options.SuspectJobRetryCount;
             SuspectJobRetryDelay = options.SuspectJobRetryDelay ?? options.SlotWaitTime;
@@ -137,10 +137,11 @@ namespace MassTransit.JobService.Components.StateMachines
 
         public int SuspectJobRetryCount { get; }
         public TimeSpan SuspectJobRetryDelay { get; }
-        public Uri JobTypeSagaEndpointAddress { get; }
-        public Uri JobSagaEndpointAddress { get; }
-        public Uri JobAttemptSagaEndpointAddress { get; } // ReSharper disable UnassignedGetOnlyAutoProperty
 
+        public Uri JobSagaEndpointAddress => _options.JobSagaEndpointAddress;
+        public Uri JobAttemptSagaEndpointAddress => _options.JobAttemptSagaEndpointAddress;
+
+        // ReSharper disable UnassignedGetOnlyAutoProperty
         // ReSharper disable MemberCanBePrivate.Global
         public State Starting { get; }
         public State Running { get; }
@@ -197,7 +198,7 @@ namespace MassTransit.JobService.Components.StateMachines
         public static EventActivityBinder<JobAttemptSaga, Fault<StartJob>> SendJobAttemptFaulted(
             this EventActivityBinder<JobAttemptSaga, Fault<StartJob>> binder, JobAttemptStateMachine machine)
         {
-            return binder.SendAsync(machine.JobSagaEndpointAddress, context => context.Init<JobAttemptFaulted>(new
+            return binder.SendAsync(context => machine.JobSagaEndpointAddress, context => context.Init<JobAttemptFaulted>(new
             {
                 context.Instance.JobId,
                 AttemptId = context.Instance.CorrelationId,
@@ -211,7 +212,7 @@ namespace MassTransit.JobService.Components.StateMachines
             JobAttemptStateMachine machine)
             where T : class
         {
-            return binder.SendAsync(machine.JobSagaEndpointAddress, context => context.Init<JobAttemptFaulted>(new
+            return binder.SendAsync(context => machine.JobSagaEndpointAddress, context => context.Init<JobAttemptFaulted>(new
             {
                 context.Instance.JobId,
                 AttemptId = context.Instance.CorrelationId,

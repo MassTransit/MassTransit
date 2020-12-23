@@ -65,9 +65,7 @@ namespace MassTransit
             JobServiceOptions options)
             where T : IReceiveEndpointConfigurator
         {
-            var jobServiceConfigurator = new JobServiceConfigurator<T>(configurator);
-
-            jobServiceConfigurator.ApplyJobServiceOptions(options);
+            var jobServiceConfigurator = new JobServiceConfigurator<T>(configurator, options);
 
             jobServiceConfigurator.ConfigureJobServiceEndpoints();
 
@@ -84,13 +82,14 @@ namespace MassTransit
         /// <typeparam name="T">The transport receive endpoint configurator type</typeparam>
         /// <param name="configurator">The Conductor service instance</param>
         /// <param name="options"></param>
+        /// <param name="configure"></param>
         internal static IServiceInstanceConfigurator<T> ConfigureJobService<T>(this IServiceInstanceConfigurator<T> configurator,
-            JobServiceOptions options)
+            JobServiceOptions options, Action<IJobServiceConfigurator> configure = default)
             where T : IReceiveEndpointConfigurator
         {
-            var jobServiceConfigurator = new JobServiceConfigurator<T>(configurator);
+            var jobServiceConfigurator = new JobServiceConfigurator<T>(configurator, options);
 
-            jobServiceConfigurator.ApplyJobServiceOptions(options);
+            configure?.Invoke(jobServiceConfigurator);
 
             return configurator;
         }

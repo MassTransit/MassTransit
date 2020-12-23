@@ -140,6 +140,12 @@ namespace MassTransit.Conductor.Configurators
             return _options.Options(configure);
         }
 
+        public T Options<T>(T options, Action<T> configure = null)
+            where T : IOptions, new()
+        {
+            return _options.Options(options, configure);
+        }
+
         public bool TryGetOptions<T>(out T options)
             where T : IOptions
         {

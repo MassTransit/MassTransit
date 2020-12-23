@@ -56,17 +56,17 @@ namespace MassTransit.JobService
         /// <summary>
         /// The endpoint for the JobAttemptStateMachine
         /// </summary>
-        public Uri JobSagaEndpointAddress { get; private set; }
+        public Uri JobSagaEndpointAddress { get; set; }
 
         /// <summary>
         /// The endpoint for the JobAttemptStateMachine
         /// </summary>
-        public Uri JobTypeSagaEndpointAddress { get; private set; }
+        public Uri JobTypeSagaEndpointAddress { get; set; }
 
         /// <summary>
         /// The endpoint for the JobAttemptStateMachine
         /// </summary>
-        public Uri JobAttemptSagaEndpointAddress { get; private set; }
+        public Uri JobAttemptSagaEndpointAddress { get; set; }
 
         /// <summary>
         /// The job service for the endpoint
@@ -127,23 +127,6 @@ namespace MassTransit.JobService
                 yield return this.Failure(nameof(JobStateSagaEndpointName), "must not be null or empty");
             if (string.IsNullOrWhiteSpace(JobAttemptSagaEndpointName))
                 yield return this.Failure(nameof(JobAttemptSagaEndpointName), "must not be null or empty");
-        }
-
-        public void Set(JobServiceOptions options)
-        {
-            JobService = options.JobService;
-            SlotRequestTimeout = options.SlotRequestTimeout;
-            SlotWaitTime = options.SlotWaitTime;
-            StartJobTimeout = options.StartJobTimeout;
-            StatusCheckInterval = options.StatusCheckInterval;
-
-            JobSagaEndpointAddress = options.JobSagaEndpointAddress;
-            JobAttemptSagaEndpointAddress = options.JobAttemptSagaEndpointAddress;
-            JobTypeSagaEndpointAddress = options.JobTypeSagaEndpointAddress;
-
-            _jobAttemptSagaEndpointName = options._jobAttemptSagaEndpointName;
-            _jobSagaEndpointName = options._jobSagaEndpointName;
-            _jobTypeSagaEndpointName = options._jobTypeSagaEndpointName;
         }
     }
 }
