@@ -34,7 +34,7 @@ namespace MassTransit
         {
             public void Register(IContainerRegistrar registrar)
             {
-                registrar.RegisterSingleInstance(provider => provider.GetRequiredService<IBus>().CreateAmazonSqsMessageScheduler());
+                registrar.Register(provider => provider.GetRequiredService<IBus>().CreateAmazonSqsMessageScheduler());
             }
         }
     }

@@ -165,7 +165,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         public void Register<T>(Func<IConfigurationServiceProvider, T> factoryMethod)
             where T : class
         {
-            _container.Register(() => factoryMethod(new SimpleInjectorConfigurationServiceProvider(_container)));
+            _container.Register(() => factoryMethod(new SimpleInjectorConfigurationServiceProvider(_container)), Lifestyle.Scoped);
         }
 
         public void RegisterSingleInstance<T>(Func<IConfigurationServiceProvider, T> factoryMethod)

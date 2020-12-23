@@ -40,7 +40,7 @@ namespace MassTransit
         {
             public void Register(IContainerRegistrar registrar)
             {
-                registrar.RegisterSingleInstance(provider => provider.GetRequiredService<IBus>().CreateRabbitMqMessageScheduler());
+                registrar.Register(provider => provider.GetRequiredService<IBus>().CreateRabbitMqMessageScheduler());
             }
         }
     }

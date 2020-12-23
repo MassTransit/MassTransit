@@ -77,7 +77,7 @@
 
             public void Register(IContainerRegistrar registrar)
             {
-                registrar.RegisterSingleInstance(provider => provider.GetRequiredService<IBus>().CreateMessageScheduler(_schedulerEndpointAddress));
+                registrar.Register(provider => provider.GetRequiredService<IBus>().CreateMessageScheduler(_schedulerEndpointAddress));
             }
         }
 
