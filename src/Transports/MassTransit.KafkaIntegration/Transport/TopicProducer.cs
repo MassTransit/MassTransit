@@ -18,13 +18,13 @@ namespace MassTransit.KafkaIntegration.Transport
         where TValue : class
     {
         readonly ConsumeContext _consumeContext;
-        readonly IKafkaProducerContext<TKey, TValue> _context;
-        readonly KafkaTopicAddress _topicAddress;
+        readonly KafkaSendTransportContext _context;
+        readonly IProducerContextSupervisor<TKey, TValue> _supervisor;
 
-        public TopicProducer(KafkaTopicAddress topicAddress, IKafkaProducerContext<TKey, TValue> context, ConsumeContext consumeContext = null)
+        public TopicProducer(KafkaSendTransportContext context, IProducerContextSupervisor<TKey, TValue> supervisor, ConsumeContext consumeContext = null)
         {
-            _topicAddress = topicAddress;
             _context = context;
+            _supervisor = supervisor;
             _consumeContext = consumeContext;
         }
 
@@ -33,66 +33,11 @@ namespace MassTransit.KafkaIntegration.Transport
             return Produce(key, value, Pipe.Empty<KafkaSendContext<TKey, TValue>>(), cancellationToken);
         }
 
-        public async Task Produce(TKey key, TValue value, IPipe<KafkaSendContext<TKey, TValue>> pipe, CancellationToken cancellationToken)
+        public Task Produce(TKey key, TValue value, IPipe<KafkaSendContext<TKey, TValue>> pipe, CancellationToken cancellationToken)
         {
-            LogContext.SetCurrentIfNull(_context.LogContext);
+            var sendPipe = new SendPipe(_context, key, value, pipe, cancellationToken, _consumeContext);
 
-            var context = new KafkaMessageSendContext<TKey, TValue>(key, value, cancellationToken);
-
-            if (_consumeContext != null)
-                context.TransferConsumeContextHeaders(_consumeContext);
-
-            context.DestinationAddress = _topicAddress;
-
-            await _context.Send(context).ConfigureAwait(false);
-
-            if (pipe.IsNotEmpty())
-                await pipe.Send(context).ConfigureAwait(false);
-
-            context.SourceAddress ??= _context.HostAddress;
-            context.ConversationId ??= NewId.NextGuid();
-
-            StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context,
-                (nameof(context.Partition), context.Partition.ToString()));
-            try
-            {
-                if (_context.SendObservers.Count > 0)
-                    await _context.SendObservers.PreSend(context).ConfigureAwait(false);
-
-                var message = new Message<TKey, TValue>
-                {
-                    Key = context.Key,
-                    Value = context.Message
-                };
-
-                if (context.SentTime.HasValue)
-                    message.Timestamp = new Timestamp(context.SentTime.Value);
-
-                message.Headers = _context.HeadersSerializer.Serialize(context);
-
-                var topic = new TopicPartition(_topicAddress.Topic, context.Partition);
-
-                await _context.Produce(topic, message, context.CancellationToken).ConfigureAwait(false);
-
-                context.LogSent();
-                activity.AddSendContextHeadersPostSend(context);
-
-                if (_context.SendObservers.Count > 0)
-                    await _context.SendObservers.PostSend(context).ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                context.LogFaulted(exception);
-
-                if (_context.SendObservers.Count > 0)
-                    await _context.SendObservers.SendFault(context, exception).ConfigureAwait(false);
-
-                throw;
-            }
-            finally
-            {
-                activity?.Stop();
-            }
+            return _supervisor.Send(sendPipe, cancellationToken);
         }
 
         public Task Produce(TKey key, object values, CancellationToken cancellationToken = default)
@@ -118,7 +63,96 @@ namespace MassTransit.KafkaIntegration.Transport
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
-            return _context.SendObservers.Connect(observer);
+            return _context.ConnectSendObserver(observer);
+        }
+
+
+        class SendPipe :
+            IPipe<ProducerContext<TKey, TValue>>
+        {
+            readonly CancellationToken _cancellationToken;
+            readonly ConsumeContext _consumeContext;
+            readonly KafkaSendTransportContext _context;
+            readonly TKey _key;
+            readonly IPipe<KafkaSendContext<TKey, TValue>> _pipe;
+            readonly TValue _value;
+
+            public SendPipe(KafkaSendTransportContext context, TKey key, TValue value,
+                IPipe<KafkaSendContext<TKey, TValue>> pipe, CancellationToken cancellationToken, ConsumeContext consumeContext = null)
+            {
+                _context = context;
+                _key = key;
+                _value = value;
+                _pipe = pipe;
+                _cancellationToken = cancellationToken;
+                _consumeContext = consumeContext;
+            }
+
+            public async Task Send(ProducerContext<TKey, TValue> context)
+            {
+                LogContext.SetCurrentIfNull(_context.LogContext);
+
+                var sendContext = new KafkaMessageSendContext<TKey, TValue>(_key, _value, _cancellationToken);
+
+                if (_consumeContext != null)
+                    sendContext.TransferConsumeContextHeaders(_consumeContext);
+
+                sendContext.DestinationAddress = _context.TopicAddress;
+
+                await _context.SendPipe.Send(sendContext).ConfigureAwait(false);
+
+                if (_pipe.IsNotEmpty())
+                    await _pipe.Send(sendContext).ConfigureAwait(false);
+
+                sendContext.SourceAddress ??= _context.HostAddress;
+                sendContext.ConversationId ??= NewId.NextGuid();
+
+                StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(sendContext,
+                    (nameof(sendContext.Partition), sendContext.Partition.ToString()));
+                try
+                {
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PreSend(sendContext).ConfigureAwait(false);
+
+                    var message = new Message<TKey, TValue>
+                    {
+                        Key = sendContext.Key,
+                        Value = sendContext.Message
+                    };
+
+                    if (sendContext.SentTime.HasValue)
+                        message.Timestamp = new Timestamp(sendContext.SentTime.Value);
+
+                    message.Headers = context.HeadersSerializer.Serialize(sendContext);
+
+                    var topic = new TopicPartition(_context.TopicAddress.Topic, sendContext.Partition);
+
+                    await context.Produce(topic, message, context.CancellationToken).ConfigureAwait(false);
+
+                    sendContext.LogSent();
+                    activity.AddSendContextHeadersPostSend(sendContext);
+
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.PostSend(sendContext).ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    sendContext.LogFaulted(exception);
+
+                    if (_context.SendObservers.Count > 0)
+                        await _context.SendObservers.SendFault(sendContext, exception).ConfigureAwait(false);
+
+                    throw;
+                }
+                finally
+                {
+                    activity?.Stop();
+                }
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
         }
     }
 }

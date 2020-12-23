@@ -4,6 +4,7 @@ namespace MassTransit.EventHubIntegration.Contexts
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs.Processor;
+    using Configuration;
     using Context;
     using Util;
 
@@ -12,20 +13,20 @@ namespace MassTransit.EventHubIntegration.Contexts
         IProcessorLockContext
     {
         readonly SingleThreadedDictionary<string, PartitionCheckpointData> _data = new SingleThreadedDictionary<string, PartitionCheckpointData>();
-        readonly ILogContext _logContext;
+        readonly IHostConfiguration _hostConfiguration;
         readonly ushort _maxCount;
         readonly TimeSpan _timeout;
 
-        public ProcessorLockContext(ILogContext logContext, ReceiveSettings receiveSettings)
+        public ProcessorLockContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings)
         {
-            _logContext = logContext;
+            _hostConfiguration = hostConfiguration;
             _timeout = receiveSettings.CheckpointInterval;
             _maxCount = receiveSettings.CheckpointMessageCount;
         }
 
         public Task Complete(ProcessEventArgs eventArgs)
         {
-            LogContext.SetCurrentIfNull(_logContext);
+            LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
             return _data.TryGetValue(eventArgs.Partition.PartitionId, out var data)
                 ? data.TryCheckpointAsync(eventArgs)
@@ -34,7 +35,7 @@ namespace MassTransit.EventHubIntegration.Contexts
 
         public async Task OnPartitionInitializing(PartitionInitializingEventArgs eventArgs)
         {
-            LogContext.SetCurrentIfNull(_logContext);
+            LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
             _data.TryAdd(eventArgs.PartitionId, _ => new PartitionCheckpointData(_timeout, _maxCount));
             LogContext.Info?.Log("Partition: {PartitionId} was initialized", eventArgs.PartitionId);
@@ -42,7 +43,7 @@ namespace MassTransit.EventHubIntegration.Contexts
 
         public async Task OnPartitionClosing(PartitionClosingEventArgs eventArgs)
         {
-            LogContext.SetCurrentIfNull(_logContext);
+            LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
             if (_data.TryRemove(eventArgs.PartitionId, out var data))
                 await data.Close(eventArgs).ConfigureAwait(false);

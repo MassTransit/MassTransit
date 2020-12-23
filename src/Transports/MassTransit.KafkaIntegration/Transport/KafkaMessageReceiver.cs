@@ -18,12 +18,12 @@
         where TValue : class
     {
         readonly CancellationTokenSource _cancellationTokenSource;
-        readonly IKafkaConsumerContext<TKey, TValue> _consumerContext;
+        readonly ConsumerContext<TKey, TValue> _consumerContext;
         readonly ReceiveEndpointContext _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
 
-        public KafkaMessageReceiver(ReceiveEndpointContext context, IKafkaConsumerContext<TKey, TValue> consumerContext)
+        public KafkaMessageReceiver(ReceiveEndpointContext context, ConsumerContext<TKey, TValue> consumerContext)
         {
             _context = context;
             _consumerContext = consumerContext;

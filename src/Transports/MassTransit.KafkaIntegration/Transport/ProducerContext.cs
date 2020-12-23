@@ -4,20 +4,15 @@ namespace MassTransit.KafkaIntegration.Transport
     using System.Threading;
     using System.Threading.Tasks;
     using Confluent.Kafka;
-    using Context;
-    using Pipeline;
-    using Pipeline.Observables;
+    using GreenPipes;
     using Serializers;
 
 
-    public interface IKafkaProducerContext<TKey, TValue> :
-        ISendPipe
+    public interface ProducerContext<TKey, TValue> :
+        PipeContext,
+        IDisposable
         where TValue : class
     {
-        Uri HostAddress { get; }
-        ILogContext LogContext { get; }
-        SendObservable SendObservers { get; }
-
         IHeadersSerializer HeadersSerializer { get; }
 
         Task Produce(TopicPartition partition, Message<TKey, TValue> message, CancellationToken cancellationToken);

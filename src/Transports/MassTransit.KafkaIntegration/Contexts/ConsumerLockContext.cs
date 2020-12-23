@@ -4,6 +4,7 @@ namespace MassTransit.KafkaIntegration.Contexts
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading.Tasks;
+    using Configuration;
     using Confluent.Kafka;
     using Context;
     using Util;
@@ -14,20 +15,20 @@ namespace MassTransit.KafkaIntegration.Contexts
         where TValue : class
     {
         readonly SingleThreadedDictionary<Partition, PartitionCheckpointData> _data = new SingleThreadedDictionary<Partition, PartitionCheckpointData>();
-        readonly ILogContext _logContext;
+        readonly IHostConfiguration _hostConfiguration;
         readonly ushort _maxCount;
         readonly TimeSpan _timeout;
 
-        public ConsumerLockContext(ILogContext logContext, ReceiveSettings receiveSettings)
+        public ConsumerLockContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings)
         {
-            _logContext = logContext;
+            _hostConfiguration = hostConfiguration;
             _timeout = receiveSettings.CheckpointInterval;
             _maxCount = receiveSettings.CheckpointMessageCount;
         }
 
         public Task Complete(ConsumeResult<TKey, TValue> result)
         {
-            LogContext.SetCurrentIfNull(_logContext);
+            LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
             if (_data.TryGetValue(result.Partition, out var data))
                 data.TryCheckpoint(result);
@@ -37,7 +38,7 @@ namespace MassTransit.KafkaIntegration.Contexts
 
         public void OnAssigned(IConsumer<TKey, TValue> consumer, IEnumerable<TopicPartition> partitions)
         {
-            LogContext.SetCurrentIfNull(_logContext);
+            LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
             foreach (var partition in partitions)
             {
@@ -48,7 +49,7 @@ namespace MassTransit.KafkaIntegration.Contexts
 
         public void OnUnAssigned(IConsumer<TKey, TValue> consumer, IEnumerable<TopicPartitionOffset> partitions)
         {
-            LogContext.SetCurrentIfNull(_logContext);
+            LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
             foreach (var partition in partitions)
             {

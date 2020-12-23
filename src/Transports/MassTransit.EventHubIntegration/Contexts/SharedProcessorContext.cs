@@ -7,13 +7,13 @@ namespace MassTransit.EventHubIntegration.Contexts
     using GreenPipes;
 
 
-    public class SharedEventHubProcessorContext :
+    public class SharedProcessorContext :
         ProxyPipeContext,
-        IEventHubProcessorContext
+        ProcessorContext
     {
-        readonly IEventHubProcessorContext _context;
+        readonly ProcessorContext _context;
 
-        public SharedEventHubProcessorContext(IEventHubProcessorContext context, CancellationToken cancellationToken)
+        public SharedProcessorContext(ProcessorContext context, CancellationToken cancellationToken)
             : base(context)
         {
             _context = context;

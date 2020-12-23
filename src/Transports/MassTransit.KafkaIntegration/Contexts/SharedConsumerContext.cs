@@ -9,14 +9,14 @@ namespace MassTransit.KafkaIntegration.Contexts
     using Transport;
 
 
-    public class SharedKafkaConsumerContext<TKey, TValue> :
+    public class SharedConsumerContext<TKey, TValue> :
         ProxyPipeContext,
-        IKafkaConsumerContext<TKey, TValue>
+        ConsumerContext<TKey, TValue>
         where TValue : class
     {
-        readonly IKafkaConsumerContext<TKey, TValue> _context;
+        readonly ConsumerContext<TKey, TValue> _context;
 
-        public SharedKafkaConsumerContext(IKafkaConsumerContext<TKey, TValue> context, CancellationToken cancellationToken)
+        public SharedConsumerContext(ConsumerContext<TKey, TValue> context, CancellationToken cancellationToken)
             : base(context)
         {
             _context = context;

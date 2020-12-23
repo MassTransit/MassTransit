@@ -7,6 +7,6 @@ namespace MassTransit.EventHubIntegration
     public interface IEventHubReceiveEndpointContext :
         ReceiveEndpointContext
     {
-        IEventHubProcessorContextSupervisor ContextSupervisor { get; }
+        IProcessorContextSupervisor ContextSupervisor { get; }
     }
 }

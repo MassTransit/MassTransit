@@ -4,10 +4,10 @@ namespace MassTransit.KafkaIntegration
     using Contexts;
 
 
-    public interface IKafkaReceiveEndpointContext<TKey, TValue>:
+    public interface IKafkaReceiveEndpointContext<TKey, TValue> :
         ReceiveEndpointContext
         where TValue : class
     {
-        IKafkaConsumerContextSupervisor<TKey, TValue> ConsumerContextSupervisor { get; }
+        IConsumerContextSupervisor<TKey, TValue> ConsumerContextSupervisor { get; }
     }
 }

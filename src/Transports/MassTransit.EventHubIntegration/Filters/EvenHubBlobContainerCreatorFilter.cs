@@ -6,16 +6,14 @@ namespace MassTransit.EventHubIntegration.Filters
 
 
     public class EvenHubBlobContainerCreatorFilter :
-        IFilter<IEventHubProcessorContext>
+        IFilter<ProcessorContext>
     {
         bool _hasBeenCreated;
 
-        public async Task Send(IEventHubProcessorContext context, IPipe<IEventHubProcessorContext> next)
+        public async Task Send(ProcessorContext context, IPipe<ProcessorContext> next)
         {
             if (!_hasBeenCreated)
-            {
                 _hasBeenCreated = await context.CreateBlobIfNotExistsAsync(context.CancellationToken).ConfigureAwait(false);
-            }
 
             await next.Send(context).ConfigureAwait(false);
         }

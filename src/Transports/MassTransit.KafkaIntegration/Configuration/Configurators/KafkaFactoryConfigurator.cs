@@ -4,17 +4,22 @@ namespace MassTransit.KafkaIntegration.Configurators
     using System.Collections.Generic;
     using System.Linq;
     using Confluent.Kafka;
+    using Contexts;
     using GreenPipes;
     using MassTransit.Registration;
     using Pipeline.Observables;
     using Serializers;
     using Specifications;
+    using Transport;
+    using Util;
 
 
     public class KafkaFactoryConfigurator :
-        IKafkaFactoryConfigurator
+        IKafkaFactoryConfigurator,
+        IKafkaHostConfiguration
     {
         readonly ClientConfig _clientConfig;
+        readonly Recycle<IClientContextSupervisor> _clientSupervisor;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly List<IKafkaProducerSpecification> _producers;
         readonly SendObservable _sendObservers;
@@ -34,6 +39,8 @@ namespace MassTransit.KafkaIntegration.Configurators
 
             SetHeadersDeserializer(DictionaryHeadersSerialize.Deserializer);
             SetHeadersSerializer(DictionaryHeadersSerialize.Serializer);
+
+            _clientSupervisor = new Recycle<IClientContextSupervisor>(() => new ClientContextSupervisor(_clientConfig));
         }
 
         public void Host(IReadOnlyList<string> servers, Action<IKafkaHostConfigurator> configure)
@@ -83,7 +90,7 @@ namespace MassTransit.KafkaIntegration.Configurators
             consumerConfig.AutoCommitIntervalMs = null;
             consumerConfig.EnableAutoCommit = false;
 
-            var topic = new KafkaConsumerSpecification<TKey, TValue>(consumerConfig, topicName, _headersDeserializer, configure);
+            var topic = new KafkaConsumerSpecification<TKey, TValue>(this, consumerConfig, topicName, _headersDeserializer, configure);
             topic.ConnectReceiveEndpointObserver(_endpointObservers);
             _topics.Add(topic);
         }
@@ -103,7 +110,7 @@ namespace MassTransit.KafkaIntegration.Configurators
             if (producerConfig == null)
                 throw new ArgumentNullException(nameof(producerConfig));
 
-            var configurator = new KafkaProducerSpecification<TKey, TValue>(producerConfig, topicName, _headersSerializer);
+            var configurator = new KafkaProducerSpecification<TKey, TValue>(this, producerConfig, topicName, _headersSerializer);
             configure?.Invoke(configurator);
 
             configurator.ConnectSendObserver(_sendObservers);
@@ -263,9 +270,39 @@ namespace MassTransit.KafkaIntegration.Configurators
             _configureSend = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
+        public IClientContextSupervisor ClientContextSupervisor => _clientSupervisor.Supervisor;
+
+        public IKafkaRider Build(IBusInstance busInstance)
+        {
+            Dictionary<string, IReceiveEndpointControl> endpoints = _topics
+                .ToDictionary(x => x.EndpointName, x => x.CreateReceiveEndpoint(busInstance));
+
+            IKafkaProducerFactory[] producers = _producers
+                .Select(x => x.CreateProducerFactory(busInstance))
+                .ToArray();
+
+            return new KafkaRider(this, busInstance.HostConfiguration.HostAddress, endpoints, producers);
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            foreach (KeyValuePair<string, IKafkaConsumerSpecification[]> kv in _topics.GroupBy(x => x.EndpointName)
+                .ToDictionary(x => x.Key, x => x.ToArray()))
+            {
+                if (kv.Value.Length > 1)
+                    yield return this.Failure($"Topic: {kv.Key} was added more than once.");
+
+                foreach (var result in kv.Value.SelectMany(x => x.Validate()))
+                    yield return result;
+            }
+
+            foreach (var result in _producers.SelectMany(x => x.Validate()))
+                yield return result;
+        }
+
         public IBusInstanceSpecification Build()
         {
-            return new KafkaBusInstanceSpecification(_topics, _producers);
+            return new KafkaBusInstanceSpecification(this);
         }
     }
 }

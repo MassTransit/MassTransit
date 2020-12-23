@@ -19,9 +19,9 @@
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly ChannelExecutor _executor;
-        readonly IEventHubProcessorContext _processorContext;
+        readonly ProcessorContext _processorContext;
 
-        public EventHubDataReceiver(ReceiveEndpointContext context, IEventHubProcessorContext processorContext)
+        public EventHubDataReceiver(ReceiveEndpointContext context, ProcessorContext processorContext)
         {
             _context = context;
             _processorContext = processorContext;

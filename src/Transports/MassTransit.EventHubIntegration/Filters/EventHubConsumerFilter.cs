@@ -9,7 +9,7 @@ namespace MassTransit.EventHubIntegration.Filters
 
 
     public class EventHubConsumerFilter :
-        IFilter<IEventHubProcessorContext>
+        IFilter<ProcessorContext>
     {
         readonly ReceiveEndpointContext _context;
 
@@ -18,7 +18,7 @@ namespace MassTransit.EventHubIntegration.Filters
             _context = context;
         }
 
-        public async Task Send(IEventHubProcessorContext context, IPipe<IEventHubProcessorContext> next)
+        public async Task Send(ProcessorContext context, IPipe<ProcessorContext> next)
         {
             var inputAddress = _context.InputAddress;
 
@@ -28,7 +28,7 @@ namespace MassTransit.EventHubIntegration.Filters
 
             await receiver.Ready.ConfigureAwait(false);
 
-            _context.AddAgent(receiver);
+            _context.AddConsumeAgent(receiver);
 
             LogContext.Debug?.Log("Receiver Ready: {InputAddress}", _context.InputAddress);
 

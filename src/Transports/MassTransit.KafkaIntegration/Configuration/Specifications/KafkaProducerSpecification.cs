@@ -4,11 +4,13 @@ namespace MassTransit.KafkaIntegration.Specifications
     using System.Collections.Generic;
     using Configuration;
     using Confluent.Kafka;
+    using Contexts;
     using GreenPipes;
     using MassTransit.Registration;
     using Pipeline.Observables;
     using Serializers;
     using Transport;
+    using Util;
 
 
     public class KafkaProducerSpecification<TKey, TValue> :
@@ -16,6 +18,7 @@ namespace MassTransit.KafkaIntegration.Specifications
         IKafkaProducerConfigurator<TKey, TValue>
         where TValue : class
     {
+        readonly IKafkaHostConfiguration _hostConfiguration;
         readonly ProducerConfig _producerConfig;
         readonly SendObservable _sendObservers;
         readonly string _topicName;
@@ -24,8 +27,10 @@ namespace MassTransit.KafkaIntegration.Specifications
         ISerializer<TKey> _keySerializer;
         ISerializer<TValue> _valueSerializer;
 
-        public KafkaProducerSpecification(ProducerConfig producerConfig, string topicName, IHeadersSerializer headersSerializer)
+        public KafkaProducerSpecification(IKafkaHostConfiguration hostConfiguration, ProducerConfig producerConfig, string topicName,
+            IHeadersSerializer headersSerializer)
         {
+            _hostConfiguration = hostConfiguration;
             _producerConfig = producerConfig;
             _topicName = topicName;
             _headersSerializer = headersSerializer;
@@ -148,22 +153,29 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public IKafkaProducerFactory CreateProducerFactory(IBusInstance busInstance)
         {
-            var logContext = busInstance.HostConfiguration.SendLogContext;
-
             var sendConfiguration = new SendPipeConfiguration(busInstance.HostConfiguration.HostTopology.SendTopology);
             _configureSend?.Invoke(sendConfiguration.Configurator);
 
-            ProducerBuilder<TKey, TValue> producerBuilder = new ProducerBuilder<TKey, TValue>(_producerConfig)
-                .SetErrorHandler((c, error) => logContext?.Error?.Log("Consumer error ({code}): {reason} on {topic}", error.Code, error.Reason, _topicName))
-                .SetLogHandler((c, message) => logContext?.Info?.Log(message.Message));
+            ProducerBuilder<TKey, TValue> CreateProducerBuilder()
+            {
+                ProducerBuilder<TKey, TValue> producerBuilder = new ProducerBuilder<TKey, TValue>(_producerConfig)
+                    .SetErrorHandler((c, error) =>
+                        busInstance.HostConfiguration.SendLogContext?.Error?.Log("Consumer error ({code}): {reason} on {topic}", error.Code, error.Reason,
+                            _topicName))
+                    .SetLogHandler((c, message) => busInstance.HostConfiguration.SendLogContext?.Debug?.Log(message.Message));
 
-            if (_keySerializer != null)
-                producerBuilder.SetKeySerializer(_keySerializer);
-            if (_valueSerializer != null)
-                producerBuilder.SetValueSerializer(_valueSerializer);
+                if (_keySerializer != null)
+                    producerBuilder.SetKeySerializer(_keySerializer);
+                if (_valueSerializer != null)
+                    producerBuilder.SetValueSerializer(_valueSerializer);
+                return producerBuilder;
+            }
 
-            return new KafkaProducerFactory<TKey, TValue>(_topicName, producerBuilder, busInstance.HostConfiguration, sendConfiguration, _sendObservers,
-                _headersSerializer);
+            var sendPipe = sendConfiguration.CreatePipe();
+
+            return new RecycledKafkaProducerFactory(() =>
+                new ProducerContextSupervisor<TKey, TValue>(_topicName, sendPipe, _sendObservers, _hostConfiguration.ClientContextSupervisor,
+                    busInstance.HostConfiguration, _headersSerializer, CreateProducerBuilder));
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -180,6 +192,27 @@ namespace MassTransit.KafkaIntegration.Specifications
         public void ConfigureSend(Action<ISendPipeConfigurator> callback)
         {
             _configureSend = callback ?? throw new ArgumentNullException(nameof(callback));
+        }
+
+
+        class RecycledKafkaProducerFactory :
+            IKafkaProducerFactory<TKey, TValue>
+        {
+            readonly Recycle<IProducerContextSupervisor<TKey, TValue>> _producerSupervisor;
+
+            public RecycledKafkaProducerFactory(Func<IProducerContextSupervisor<TKey, TValue>> producerSupervisorFactory)
+            {
+                _producerSupervisor = new Recycle<IProducerContextSupervisor<TKey, TValue>>(producerSupervisorFactory);
+            }
+
+            IProducerContextSupervisor<TKey, TValue> Supervisor => _producerSupervisor.Supervisor;
+
+            public ITopicProducer<TKey, TValue> CreateProducer(ConsumeContext consumeContext = null)
+            {
+                return Supervisor.CreateProducer(consumeContext);
+            }
+
+            public Uri TopicAddress => Supervisor.TopicAddress;
         }
     }
 }

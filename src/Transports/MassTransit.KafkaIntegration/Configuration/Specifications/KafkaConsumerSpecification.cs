@@ -20,11 +20,14 @@ namespace MassTransit.KafkaIntegration.Specifications
         readonly ConsumerConfig _consumerConfig;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly IHeadersDeserializer _headersDeserializer;
+        readonly IKafkaHostConfiguration _hostConfiguration;
         readonly string _topicName;
 
-        public KafkaConsumerSpecification(ConsumerConfig consumerConfig, string topicName, IHeadersDeserializer headersDeserializer,
+        public KafkaConsumerSpecification(IKafkaHostConfiguration hostConfiguration, ConsumerConfig consumerConfig, string topicName,
+            IHeadersDeserializer headersDeserializer,
             Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
         {
+            _hostConfiguration = hostConfiguration;
             _consumerConfig = consumerConfig;
             _topicName = topicName;
             _endpointObservers = new ReceiveEndpointObservable();
@@ -41,7 +44,8 @@ namespace MassTransit.KafkaIntegration.Specifications
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
             var configurator =
-                new KafkaTopicReceiveEndpointConfiguration<TKey, TValue>(_consumerConfig, _topicName, busInstance, endpointConfiguration, _headersDeserializer);
+                new KafkaTopicReceiveEndpointConfiguration<TKey, TValue>(_hostConfiguration, _consumerConfig, _topicName, busInstance, endpointConfiguration,
+                    _headersDeserializer);
             _configure?.Invoke(configurator);
 
             var result = BusConfigurationResult.CompileResults(configurator.Validate());

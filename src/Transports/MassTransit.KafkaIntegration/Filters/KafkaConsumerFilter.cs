@@ -9,7 +9,7 @@ namespace MassTransit.KafkaIntegration.Filters
 
 
     public class KafkaConsumerFilter<TKey, TValue> :
-        IFilter<IKafkaConsumerContext<TKey, TValue>>
+        IFilter<ConsumerContext<TKey, TValue>>
         where TValue : class
     {
         readonly ReceiveEndpointContext _context;
@@ -19,7 +19,7 @@ namespace MassTransit.KafkaIntegration.Filters
             _context = context;
         }
 
-        public async Task Send(IKafkaConsumerContext<TKey, TValue> context, IPipe<IKafkaConsumerContext<TKey, TValue>> next)
+        public async Task Send(ConsumerContext<TKey, TValue> context, IPipe<ConsumerContext<TKey, TValue>> next)
         {
             var inputAddress = _context.InputAddress;
 
@@ -27,7 +27,7 @@ namespace MassTransit.KafkaIntegration.Filters
 
             await receiver.Ready.ConfigureAwait(false);
 
-            _context.AddAgent(receiver);
+            _context.AddConsumeAgent(receiver);
 
             LogContext.Debug?.Log("Receiver Ready: {InputAddress}", _context.InputAddress);
 

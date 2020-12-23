@@ -4,8 +4,8 @@ namespace MassTransit.KafkaIntegration.Contexts
     using Transports;
 
 
-    public interface IKafkaConsumerContextSupervisor<TKey, TValue> :
-        ITransportSupervisor<IKafkaConsumerContext<TKey, TValue>>
+    public interface IConsumerContextSupervisor<TKey, TValue> :
+        ITransportSupervisor<ConsumerContext<TKey, TValue>>
         where TValue : class
     {
     }

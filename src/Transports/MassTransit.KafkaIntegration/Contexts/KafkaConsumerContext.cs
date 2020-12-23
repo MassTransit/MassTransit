@@ -3,8 +3,8 @@ namespace MassTransit.KafkaIntegration.Contexts
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Confluent.Kafka;
-    using Context;
     using GreenPipes;
     using Serializers;
     using Transport;
@@ -13,18 +13,18 @@ namespace MassTransit.KafkaIntegration.Contexts
 
     public class KafkaConsumerContext<TKey, TValue> :
         BasePipeContext,
-        IKafkaConsumerContext<TKey, TValue>
+        ConsumerContext<TKey, TValue>
         where TValue : class
     {
         readonly IConsumer<TKey, TValue> _consumer;
         readonly ChannelExecutor _executor;
         readonly IConsumerLockContext<TKey, TValue> _lockContext;
 
-        public KafkaConsumerContext(ILogContext logContext, ReceiveSettings receiveSettings, IHeadersDeserializer headersDeserializer,
+        public KafkaConsumerContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings, IHeadersDeserializer headersDeserializer,
             ConsumerBuilder<TKey, TValue> consumerBuilder, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
-            var lockContext = new ConsumerLockContext<TKey, TValue>(logContext, receiveSettings);
+            var lockContext = new ConsumerLockContext<TKey, TValue>(hostConfiguration, receiveSettings);
 
             _consumer = consumerBuilder
                 .SetPartitionsAssignedHandler(lockContext.OnAssigned)

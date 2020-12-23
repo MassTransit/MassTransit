@@ -13,15 +13,18 @@ namespace MassTransit.EventHubIntegration.Specifications
         IEventHubReceiveEndpointSpecification
     {
         readonly Action<IEventHubReceiveEndpointConfigurator> _configure;
-        readonly string _eventHubName;
         readonly string _consumerGroup;
         readonly ReceiveEndpointObservable _endpointObservers;
+        readonly string _eventHubName;
+        readonly IEventHubHostConfiguration _hostConfiguration;
         readonly IHostSettings _hostSettings;
         readonly IStorageSettings _storageSettings;
 
-        public EventHubReceiveEndpointSpecification(string eventHubName, string consumerGroup, IHostSettings hostSettings, StorageSettings storageSettings,
+        public EventHubReceiveEndpointSpecification(IEventHubHostConfiguration hostConfiguration, string eventHubName, string consumerGroup,
+            IHostSettings hostSettings, IStorageSettings storageSettings,
             Action<IEventHubReceiveEndpointConfigurator> configure)
         {
+            _hostConfiguration = hostConfiguration;
             _eventHubName = eventHubName;
             _consumerGroup = consumerGroup;
             _hostSettings = hostSettings;
@@ -61,8 +64,7 @@ namespace MassTransit.EventHubIntegration.Specifications
             var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
-            var configurator =
-                new EventHubReceiveEndpointConfigurator(_eventHubName, _consumerGroup, _hostSettings, _storageSettings, busInstance, endpointConfiguration);
+            var configurator = new EventHubReceiveEndpointConfigurator(_hostConfiguration, _eventHubName, _consumerGroup, busInstance, endpointConfiguration);
             _configure?.Invoke(configurator);
 
             var result = BusConfigurationResult.CompileResults(configurator.Validate());

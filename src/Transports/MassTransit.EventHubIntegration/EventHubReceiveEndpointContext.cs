@@ -18,25 +18,25 @@ namespace MassTransit.EventHubIntegration
         IEventHubReceiveEndpointContext
     {
         readonly IBusInstance _busInstance;
-        readonly Recycle<IEventHubProcessorContextSupervisor> _contextSupervisor;
+        readonly Recycle<IProcessorContextSupervisor> _contextSupervisor;
 
-        public EventHubReceiveEndpointContext(IBusInstance busInstance, IReceiveEndpointConfiguration endpointConfiguration,
-            ReceiveSettings receiveSettings, Func<BlobContainerClient> blobContainerClientFactory,
-            Func<BlobContainerClient, EventProcessorClient> clientFactory,
+        public EventHubReceiveEndpointContext(IEventHubHostConfiguration hostConfiguration, IBusInstance busInstance,
+            IReceiveEndpointConfiguration endpointConfiguration,
+            ReceiveSettings receiveSettings, Func<IStorageSettings, BlobContainerClient> blobContainerClientFactory,
+            Func<IHostSettings, BlobContainerClient, EventProcessorClient> clientFactory,
             Func<PartitionClosingEventArgs, Task> partitionClosingHandler,
             Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler)
             : base(busInstance.HostConfiguration, endpointConfiguration)
         {
             _busInstance = busInstance;
-            _contextSupervisor = new Recycle<IEventHubProcessorContextSupervisor>(() =>
-                new EventHubProcessorContextSupervisor(busInstance.HostConfiguration.Agent, LogContext, receiveSettings, blobContainerClientFactory,
-                    clientFactory,
-                    partitionClosingHandler, partitionInitializingHandler));
+            _contextSupervisor = new Recycle<IProcessorContextSupervisor>(() =>
+                new ProcessorContextSupervisor(hostConfiguration.ConnectionContextSupervisor, busInstance.HostConfiguration, receiveSettings,
+                    blobContainerClientFactory, clientFactory, partitionClosingHandler, partitionInitializingHandler));
         }
 
-        public override void AddAgent(IAgent agent)
+        public override void AddConsumeAgent(IAgent agent)
         {
-            _contextSupervisor.Supervisor.AddAgent(agent);
+            _contextSupervisor.Supervisor.AddConsumeAgent(agent);
         }
 
         public override Exception ConvertException(Exception exception, string message)
@@ -44,7 +44,7 @@ namespace MassTransit.EventHubIntegration
             return exception;
         }
 
-        public IEventHubProcessorContextSupervisor ContextSupervisor => _contextSupervisor.Supervisor;
+        public IProcessorContextSupervisor ContextSupervisor => _contextSupervisor.Supervisor;
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {

@@ -4,7 +4,6 @@ namespace MassTransit.KafkaIntegration
     using Builders;
     using Configuration;
     using Confluent.Kafka;
-    using Context;
     using MassTransit.Registration;
     using Serializers;
 
@@ -15,26 +14,28 @@ namespace MassTransit.KafkaIntegration
     {
         readonly IBusInstance _busInstance;
         readonly IReceiveEndpointConfiguration _configuration;
-        readonly ReceiveSettings _receiveSettings;
         readonly Func<ConsumerBuilder<TKey, TValue>> _consumerBuilderFactory;
         readonly IHeadersDeserializer _headersDeserializer;
+        readonly IKafkaHostConfiguration _hostConfiguration;
+        readonly ReceiveSettings _receiveSettings;
 
         public KafkaReceiveEndpointBuilder(IBusInstance busInstance, IReceiveEndpointConfiguration configuration,
-            IHeadersDeserializer headersDeserializer, ReceiveSettings receiveSettings,
+            IKafkaHostConfiguration hostConfiguration, ReceiveSettings receiveSettings, IHeadersDeserializer headersDeserializer,
             Func<ConsumerBuilder<TKey, TValue>> consumerBuilderFactory)
             : base(configuration)
         {
             _busInstance = busInstance;
             _configuration = configuration;
-            _headersDeserializer = headersDeserializer;
+            _hostConfiguration = hostConfiguration;
             _receiveSettings = receiveSettings;
+            _headersDeserializer = headersDeserializer;
             _consumerBuilderFactory = consumerBuilderFactory;
         }
 
         public IKafkaReceiveEndpointContext<TKey, TValue> CreateReceiveEndpointContext()
         {
-            var context = new KafkaReceiveEndpointContext<TKey, TValue>(_busInstance, _configuration, _receiveSettings, _headersDeserializer,
-                _consumerBuilderFactory);
+            var context = new KafkaReceiveEndpointContext<TKey, TValue>(_busInstance, _configuration, _hostConfiguration, _receiveSettings,
+                _headersDeserializer, _consumerBuilderFactory);
 
             context.GetOrAddPayload(() => _busInstance.HostConfiguration.HostTopology);
             context.AddOrUpdatePayload(() => _receiveSettings, _ => _receiveSettings);

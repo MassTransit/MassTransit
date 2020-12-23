@@ -2,19 +2,23 @@ namespace MassTransit.EventHubIntegration.Configurators
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Azure.Core;
     using Azure.Storage;
     using Azure.Storage.Blobs;
+    using Contexts;
     using GreenPipes;
     using MassTransit.Registration;
     using Pipeline.Observables;
-    using Riders;
     using Specifications;
+    using Util;
 
 
     public class EventHubFactoryConfigurator :
-        IEventHubFactoryConfigurator
+        IEventHubFactoryConfigurator,
+        IEventHubHostConfiguration
     {
+        readonly Recycle<IConnectionContextSupervisor> _connectionContextSupervisor;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly List<IEventHubReceiveEndpointSpecification> _endpoints;
         readonly HostSettings _hostSettings;
@@ -29,7 +33,9 @@ namespace MassTransit.EventHubIntegration.Configurators
             _endpoints = new List<IEventHubReceiveEndpointSpecification>();
             _hostSettings = new HostSettings();
             _storageSettings = new StorageSettings();
-            _producerSpecification = new EventHubProducerSpecification(_hostSettings);
+            _producerSpecification = new EventHubProducerSpecification(this, _hostSettings);
+            _connectionContextSupervisor = new Recycle<IConnectionContextSupervisor>(() =>
+                new ConnectionContextSupervisor(_hostSettings, _storageSettings, _producerSpecification.ConfigureOptions));
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
@@ -117,7 +123,7 @@ namespace MassTransit.EventHubIntegration.Configurators
             if (string.IsNullOrWhiteSpace(consumerGroup))
                 throw new ArgumentException(nameof(consumerGroup));
 
-            var specification = new EventHubReceiveEndpointSpecification(eventHubName, consumerGroup, _hostSettings, _storageSettings, configure);
+            var specification = new EventHubReceiveEndpointSpecification(this, eventHubName, consumerGroup, _hostSettings, _storageSettings, configure);
             specification.ConnectReceiveEndpointObserver(_endpointObservers);
 
             _endpoints.Add(specification);
@@ -138,9 +144,35 @@ namespace MassTransit.EventHubIntegration.Configurators
             _producerSpecification.ConfigureSend(callback);
         }
 
+        public IConnectionContextSupervisor ConnectionContextSupervisor => _connectionContextSupervisor.Supervisor;
+
+        public IEventHubRider Build(IBusInstance busInstance)
+        {
+            IDictionary<string, IReceiveEndpointControl> endpoints = _endpoints
+                .ToDictionary(x => x.EndpointName, x => x.CreateReceiveEndpoint(busInstance));
+
+            return new EventHubRider(this, endpoints, _producerSpecification.CreateProducerProviderFactory(busInstance));
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            foreach (KeyValuePair<string, IEventHubReceiveEndpointSpecification[]> kv in _endpoints.GroupBy(x => x.EndpointName)
+                .ToDictionary(x => x.Key, x => x.ToArray()))
+            {
+                if (kv.Value.Length > 1)
+                    yield return this.Failure($"EventHub: {kv.Key} was added more than once.");
+
+                foreach (var result in kv.Value.SelectMany(x => x.Validate()))
+                    yield return result;
+            }
+
+            foreach (var result in _producerSpecification.Validate())
+                yield return result;
+        }
+
         public IBusInstanceSpecification Build()
         {
-            return new EventHubBusInstanceSpecification(_endpoints, _producerSpecification);
+            return new EventHubBusInstanceSpecification(this);
         }
 
         void ThrowIfHostIsAlreadyConfigured()

@@ -9,7 +9,7 @@ namespace MassTransit.KafkaIntegration.Transport
     using Serializers;
 
 
-    public interface IKafkaConsumerContext<TKey, TValue> :
+    public interface ConsumerContext<TKey, TValue> :
         PipeContext,
         IConsumerLockContext<TKey, TValue>,
         IAsyncDisposable

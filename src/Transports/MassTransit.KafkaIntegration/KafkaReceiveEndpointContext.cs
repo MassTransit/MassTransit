@@ -18,32 +18,34 @@ namespace MassTransit.KafkaIntegration
         where TValue : class
     {
         readonly IBusInstance _busInstance;
-        readonly Recycle<IKafkaConsumerContextSupervisor<TKey, TValue>> _consumerContext;
+        readonly Recycle<IConsumerContextSupervisor<TKey, TValue>> _consumerContext;
         readonly ReceiveSettings _settings;
 
         public KafkaReceiveEndpointContext(IBusInstance busInstance, IReceiveEndpointConfiguration endpointConfiguration,
-            ReceiveSettings receiveSettings, IHeadersDeserializer headersDeserializer,
+            IKafkaHostConfiguration hostConfiguration,
+            ReceiveSettings receiveSettings,
+            IHeadersDeserializer headersDeserializer,
             Func<ConsumerBuilder<TKey, TValue>> consumerBuilderFactory)
             : base(busInstance.HostConfiguration, endpointConfiguration)
         {
             _busInstance = busInstance;
             _settings = receiveSettings;
 
-            _consumerContext = new Recycle<IKafkaConsumerContextSupervisor<TKey, TValue>>(() =>
-                new KafkaConsumerContextSupervisor<TKey, TValue>(_busInstance.HostConfiguration.Agent, _settings, LogContext, headersDeserializer,
-                    consumerBuilderFactory));
+            _consumerContext = new Recycle<IConsumerContextSupervisor<TKey, TValue>>(() =>
+                new ConsumerContextSupervisor<TKey, TValue>(hostConfiguration.ClientContextSupervisor, _settings, busInstance.HostConfiguration,
+                    headersDeserializer, consumerBuilderFactory));
         }
 
-        public IKafkaConsumerContextSupervisor<TKey, TValue> ConsumerContextSupervisor => _consumerContext.Supervisor;
-
-        public override void AddAgent(IAgent agent)
-        {
-            _consumerContext.Supervisor.AddAgent(agent);
-        }
+        public IConsumerContextSupervisor<TKey, TValue> ConsumerContextSupervisor => _consumerContext.Supervisor;
 
         public override Exception ConvertException(Exception exception, string message)
         {
             return exception;
+        }
+
+        public override void AddConsumeAgent(IAgent agent)
+        {
+            _consumerContext.Supervisor.AddConsumeAgent(agent);
         }
 
         public override void Probe(ProbeContext context)

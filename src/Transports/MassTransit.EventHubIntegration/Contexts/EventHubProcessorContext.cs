@@ -7,19 +7,20 @@ namespace MassTransit.EventHubIntegration.Contexts
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Processor;
     using Azure.Storage.Blobs;
+    using Configuration;
     using Context;
     using GreenPipes;
 
 
     public class EventHubProcessorContext :
         BasePipeContext,
-        IEventHubProcessorContext
+        ProcessorContext
     {
         readonly BlobContainerClient _blobContainerClient;
         readonly EventProcessorClient _client;
         readonly IProcessorLockContext _lockContext;
 
-        public EventHubProcessorContext(ILogContext logContext, ReceiveSettings receiveSettings, BlobContainerClient blobContainerClient,
+        public EventHubProcessorContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings, BlobContainerClient blobContainerClient,
             EventProcessorClient client, Func<PartitionInitializingEventArgs, Task> partitionInitializingHandler,
             Func<PartitionClosingEventArgs, Task> partitionClosingHandler, CancellationToken cancellationToken)
             : base(cancellationToken)
@@ -27,7 +28,7 @@ namespace MassTransit.EventHubIntegration.Contexts
             _blobContainerClient = blobContainerClient;
             _client = client;
 
-            var lockContext = new ProcessorLockContext(logContext, receiveSettings);
+            var lockContext = new ProcessorLockContext(hostConfiguration, receiveSettings);
             _client.PartitionInitializingAsync += async args =>
             {
                 await lockContext.OnPartitionInitializing(args).ConfigureAwait(false);

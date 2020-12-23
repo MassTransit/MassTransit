@@ -7,7 +7,7 @@ namespace MassTransit.EventHubIntegration.Contexts
     using GreenPipes;
 
 
-    public interface IEventHubProcessorContext :
+    public interface ProcessorContext :
         PipeContext,
         IProcessorLockContext
     {

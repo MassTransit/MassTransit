@@ -11,10 +11,13 @@ namespace MassTransit.KafkaIntegration.Transport
     {
         readonly IDictionary<string, IReceiveEndpointControl> _endpoints;
         readonly Uri _hostAddress;
+        readonly IKafkaHostConfiguration _hostConfiguration;
         readonly Dictionary<Uri, IKafkaProducerFactory> _producerFactories;
 
-        public KafkaRider(Uri hostAddress, IDictionary<string, IReceiveEndpointControl> endpoints, IEnumerable<IKafkaProducerFactory> producerFactories)
+        public KafkaRider(IKafkaHostConfiguration hostConfiguration, Uri hostAddress, IDictionary<string, IReceiveEndpointControl> endpoints,
+            IEnumerable<IKafkaProducerFactory> producerFactories)
         {
+            _hostConfiguration = hostConfiguration;
             _hostAddress = hostAddress;
             _endpoints = endpoints ?? new Dictionary<string, IReceiveEndpointControl>();
             _producerFactories = producerFactories.ToDictionary(x => x.TopicAddress);
@@ -36,6 +39,7 @@ namespace MassTransit.KafkaIntegration.Transport
         public void Connect(IHost host)
         {
             host.AddReceiveEndpoint(_endpoints);
+            //TODO: HOST Add Agent _supervisor
         }
 
         IKafkaProducerFactory<TKey, TValue> GetProducerFactory<TKey, TValue>(Uri topicAddress)
