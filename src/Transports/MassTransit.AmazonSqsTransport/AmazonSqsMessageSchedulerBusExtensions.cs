@@ -3,6 +3,7 @@ namespace MassTransit
     using AmazonSqsTransport.Scheduling;
     using Registration;
     using Scheduling;
+    using Topology;
 
 
     public static class AmazonSqsMessageSchedulerBusExtensions
@@ -20,6 +21,19 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Create a message scheduler that uses the built-in AmazonSQS message delay to schedule messages.
+        /// NOTE that this should only be used to schedule messages outside of a message consumer. Consumers should
+        /// use the ScheduleSend extensions on ConsumeContext.
+        /// </summary>
+        /// <param name="sendEndpointProvider"></param>
+        /// <param name="busTopology"></param>
+        /// <returns></returns>
+        public static IMessageScheduler CreateAmazonSqsMessageScheduler(this ISendEndpointProvider sendEndpointProvider, IBusTopology busTopology)
+        {
+            return new MessageScheduler(new DelayedMessageScheduleMessageProvider(sendEndpointProvider), busTopology);
+        }
+
+        /// <summary>
         /// Add a <see cref="IMessageScheduler" /> to the container that uses the SQS message delay to schedule messages.
         /// </summary>
         /// <param name="configurator"></param>
@@ -34,7 +48,12 @@ namespace MassTransit
         {
             public void Register(IContainerRegistrar registrar)
             {
-                registrar.Register(provider => provider.GetRequiredService<IBus>().CreateAmazonSqsMessageScheduler());
+                registrar.Register(provider =>
+                {
+                    var bus = provider.GetRequiredService<IBus>();
+                    var sendEndpointProvider = provider.GetRequiredService<ISendEndpointProvider>();
+                    return sendEndpointProvider.CreateAmazonSqsMessageScheduler(bus.Topology);
+                });
             }
         }
     }

@@ -3,6 +3,7 @@ namespace MassTransit
     using Azure.ServiceBus.Core.Scheduling;
     using Registration;
     using Scheduling;
+    using Topology;
 
 
     public static class ServiceBusMessageSchedulerBusExtensions
@@ -21,6 +22,20 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Create a message scheduler that uses the Azure Service Bus ScheduleEnqueueTimeUtc property to
+        /// schedule messages.
+        /// NOTE that this should only be used to schedule messages outside of a message consumer. Consumers should
+        /// use the ScheduleSend extensions on ConsumeContext.
+        /// </summary>
+        /// <param name="sendEndpointProvider"></param>
+        /// <param name="busTopology"></param>
+        /// <returns></returns>
+        public static IMessageScheduler CreateServiceBusMessageScheduler(this ISendEndpointProvider sendEndpointProvider, IBusTopology busTopology)
+        {
+            return new MessageScheduler(new ServiceBusScheduleMessageProvider(sendEndpointProvider), busTopology);
+        }
+
+        /// <summary>
         /// Add a <see cref="IMessageScheduler" /> to the container that uses the Azure message enqueue time to schedule messages.
         /// </summary>
         /// <param name="configurator"></param>
@@ -35,7 +50,12 @@ namespace MassTransit
         {
             public void Register(IContainerRegistrar registrar)
             {
-                registrar.Register(provider => provider.GetRequiredService<IBus>().CreateServiceBusMessageScheduler());
+                registrar.Register(provider =>
+                {
+                    var bus = provider.GetRequiredService<IBus>();
+                    var sendEndpointProvider = provider.GetRequiredService<ISendEndpointProvider>();
+                    return sendEndpointProvider.CreateServiceBusMessageScheduler(bus.Topology);
+                });
             }
         }
     }
