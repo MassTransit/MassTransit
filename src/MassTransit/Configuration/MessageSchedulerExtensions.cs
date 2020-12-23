@@ -77,7 +77,12 @@
 
             public void Register(IContainerRegistrar registrar)
             {
-                registrar.Register(provider => provider.GetRequiredService<IBus>().CreateMessageScheduler(_schedulerEndpointAddress));
+                registrar.Register(provider =>
+                {
+                    var bus = provider.GetRequiredService<IBus>();
+                    var sendEndpointProvider = provider.GetRequiredService<ISendEndpointProvider>();
+                    return sendEndpointProvider.CreateMessageScheduler(bus.Topology, _schedulerEndpointAddress);
+                });
             }
         }
 
@@ -87,7 +92,12 @@
         {
             public void Register(IContainerRegistrar registrar)
             {
-                registrar.RegisterSingleInstance(provider => provider.GetRequiredService<IBus>().CreateMessageScheduler());
+                registrar.Register(provider =>
+                {
+                    var bus = provider.GetRequiredService<IBus>();
+                    var publishEndpoint = provider.GetRequiredService<IPublishEndpoint>();
+                    return publishEndpoint.CreateMessageScheduler(bus.Topology);
+                });
             }
         }
     }

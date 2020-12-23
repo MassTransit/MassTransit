@@ -5,6 +5,7 @@ namespace MassTransit
     using RabbitMqTransport.Topology;
     using Registration;
     using Scheduling;
+    using Topology;
 
 
     public static class RabbitMqMessageSchedulerExtensions
@@ -25,6 +26,20 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Create a message scheduler that uses the RabbitMQ Delayed Exchange plug-in to schedule messages.
+        /// NOTE that this should only be used to schedule messages outside of a message consumer. Consumers should
+        /// use the ScheduleSend extensions on ConsumeContext.
+        /// </summary>
+        /// <returns></returns>
+        public static IMessageScheduler CreateRabbitMqMessageScheduler(this ISendEndpointProvider sendEndpointProvider, IBusTopology busTopology)
+        {
+            if (busTopology is IRabbitMqHostTopology topology)
+                return new MessageScheduler(new DelayedExchangeScheduleMessageProvider(sendEndpointProvider, topology), topology);
+
+            throw new ArgumentException("A RabbitMQ bus is required to use the RabbitMQ message scheduler");
+        }
+
+        /// <summary>
         /// Add a <see cref="IMessageScheduler" /> to the container that uses RabbitMq delayed exchange plug-in to
         /// schedule messages.
         /// </summary>
@@ -40,7 +55,12 @@ namespace MassTransit
         {
             public void Register(IContainerRegistrar registrar)
             {
-                registrar.Register(provider => provider.GetRequiredService<IBus>().CreateRabbitMqMessageScheduler());
+                registrar.Register(provider =>
+                {
+                    var bus = provider.GetRequiredService<IBus>();
+                    var sendEndpointProvider = provider.GetRequiredService<ISendEndpointProvider>();
+                    return sendEndpointProvider.CreateRabbitMqMessageScheduler(bus.Topology);
+                });
             }
         }
     }
