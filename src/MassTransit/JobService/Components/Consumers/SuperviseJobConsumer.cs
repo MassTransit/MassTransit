@@ -6,10 +6,9 @@ namespace MassTransit.JobService.Components.Consumers
     using MassTransit.Contracts.JobService;
 
 
-    public class SuperviseJobConsumer<TJob> :
+    public class SuperviseJobConsumer :
         IConsumer<CancelJob>,
         IConsumer<GetJobAttemptStatus>
-        where TJob : class
     {
         readonly IJobService _jobService;
 

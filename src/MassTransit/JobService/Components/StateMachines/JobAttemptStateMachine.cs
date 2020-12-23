@@ -3,6 +3,7 @@ namespace MassTransit.JobService.Components.StateMachines
     using System;
     using Automatonymous;
     using Automatonymous.Binders;
+    using Context;
     using Contracts.JobService;
     using Events;
     using GreenPipes;
@@ -177,11 +178,13 @@ namespace MassTransit.JobService.Components.StateMachines
         public static EventActivityBinder<JobAttemptSaga, JobStatusCheckRequested> SendCheckJobStatus(this EventActivityBinder<JobAttemptSaga,
             JobStatusCheckRequested> binder, JobAttemptStateMachine machine)
         {
-            return binder.SendAsync(context => context.Instance.ServiceAddress, context => context.Init<GetJobAttemptStatus>(new
-            {
-                context.Instance.JobId,
-                AttemptId = context.Instance.CorrelationId
-            }), context => context.ResponseAddress = machine.JobAttemptSagaEndpointAddress);
+            return binder.SendAsync(context => context.Instance.InstanceAddress ?? context.Instance.ServiceAddress,
+                    context => context.Init<GetJobAttemptStatus>(new
+                    {
+                        context.Instance.JobId,
+                        AttemptId = context.Instance.CorrelationId
+                    }), context => context.ResponseAddress = machine.JobAttemptSagaEndpointAddress)
+                .Catch<Exception>(ex => ex.Then(context => LogContext.Error?.Log(context.Exception, "Failed sending GetJobAttemptStatus")));
         }
 
         public static EventActivityBinder<JobAttemptSaga, T> ScheduleJobStatusCheck<T>(this EventActivityBinder<JobAttemptSaga, T> binder,

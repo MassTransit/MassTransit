@@ -18,14 +18,14 @@ namespace MassTransit.JobService.Configuration
     {
         readonly IConsumerSpecification<SubmitJobConsumer<TJob>> _submitJobSpecification;
         readonly IConsumerSpecification<StartJobConsumer<TJob>> _startJobSpecification;
-        readonly IConsumerSpecification<SuperviseJobConsumer<TJob>> _superviseJobSpecification;
+        readonly IConsumerSpecification<SuperviseJobConsumer> _superviseJobSpecification;
         readonly ConsumerMessageSpecification<TConsumer, TJob> _consumerSpecification;
 
         public JobConsumerMessageSpecification()
         {
             _submitJobSpecification = ConsumerConnectorCache<SubmitJobConsumer<TJob>>.Connector.CreateConsumerSpecification<SubmitJobConsumer<TJob>>();
             _startJobSpecification = ConsumerConnectorCache<StartJobConsumer<TJob>>.Connector.CreateConsumerSpecification<StartJobConsumer<TJob>>();
-            _superviseJobSpecification = ConsumerConnectorCache<SuperviseJobConsumer<TJob>>.Connector.CreateConsumerSpecification<SuperviseJobConsumer<TJob>>();
+            _superviseJobSpecification = ConsumerConnectorCache<SuperviseJobConsumer>.Connector.CreateConsumerSpecification<SuperviseJobConsumer>();
 
             _consumerSpecification = new ConsumerMessageSpecification<TConsumer, TJob>();
         }
@@ -34,7 +34,7 @@ namespace MassTransit.JobService.Configuration
 
         public IConsumerSpecification<StartJobConsumer<TJob>> StartJobSpecification => _startJobSpecification;
 
-        public IConsumerSpecification<SuperviseJobConsumer<TJob>> SuperviseJobSpecification => _superviseJobSpecification;
+        public IConsumerSpecification<SuperviseJobConsumer> SuperviseJobSpecification => _superviseJobSpecification;
 
         public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer, TJob>> specification)
         {

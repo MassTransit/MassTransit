@@ -3,10 +3,11 @@ namespace MassTransit.JobService.Configuration
     using System;
     using System.Collections.Generic;
     using Components;
+    using Components.Consumers;
     using Components.StateMachines;
     using Conductor;
+    using Contracts.JobService;
     using GreenPipes;
-    using MassTransit.Contracts.JobService;
     using Saga;
 
 
@@ -24,6 +25,7 @@ namespace MassTransit.JobService.Configuration
         IReceiveEndpointConfigurator _jobSagaEndpointConfigurator;
         ISagaRepository<JobTypeSaga> _jobTypeRepository;
         IReceiveEndpointConfigurator _jobTypeSagaEndpointConfigurator;
+        bool _superviseJobConsumerConfigured;
 
         public JobServiceConfigurator(IServiceInstanceConfigurator<TReceiveEndpointConfigurator> instanceConfigurator)
         {
@@ -51,6 +53,8 @@ namespace MassTransit.JobService.Configuration
                     cfg.AddDependency(_jobSagaEndpointConfigurator);
                 if (_jobAttemptSagaEndpointConfigurator != null)
                     cfg.AddDependency(_jobAttemptSagaEndpointConfigurator);
+
+                ConfigureSuperviseJobConsumer();
             }));
         }
 
@@ -237,6 +241,16 @@ namespace MassTransit.JobService.Configuration
             });
 
             _endpointsConfigured = true;
+        }
+
+        public void ConfigureSuperviseJobConsumer()
+        {
+            if (_superviseJobConsumerConfigured)
+                return;
+
+            _instanceConfigurator.InstanceEndpointConfigurator.Consumer(() => new SuperviseJobConsumer(_options.JobService));
+
+            _superviseJobConsumerConfigured = true;
         }
     }
 }

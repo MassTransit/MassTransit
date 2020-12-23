@@ -26,7 +26,7 @@ namespace MassTransit.JobService.Pipeline
         {
             _submitJobConsumerConnector = ConsumerConnectorCache<SubmitJobConsumer<TJob>>.Connector;
             _startJobConsumerConnector = ConsumerConnectorCache<StartJobConsumer<TJob>>.Connector;
-            _superviseJobConsumerConnector = ConsumerConnectorCache<SuperviseJobConsumer<TJob>>.Connector;
+            _superviseJobConsumerConnector = ConsumerConnectorCache<SuperviseJobConsumer>.Connector;
         }
 
         public Type MessageType => typeof(TJob);
@@ -99,10 +99,10 @@ namespace MassTransit.JobService.Pipeline
             return _startJobConsumerConnector.ConnectConsumer(consumePipe, consumerFactory, specification);
         }
 
-        ConnectHandle ConnectSuperviseJobConsumer(IConsumePipeConnector consumePipe, IConsumerSpecification<SuperviseJobConsumer<TJob>> specification,
+        ConnectHandle ConnectSuperviseJobConsumer(IConsumePipeConnector consumePipe, IConsumerSpecification<SuperviseJobConsumer> specification,
             IJobService jobService)
         {
-            var consumerFactory = new DelegateConsumerFactory<SuperviseJobConsumer<TJob>>(() => new SuperviseJobConsumer<TJob>(jobService));
+            var consumerFactory = new DelegateConsumerFactory<SuperviseJobConsumer>(() => new SuperviseJobConsumer(jobService));
 
             return _superviseJobConsumerConnector.ConnectConsumer(consumePipe, consumerFactory, specification);
         }

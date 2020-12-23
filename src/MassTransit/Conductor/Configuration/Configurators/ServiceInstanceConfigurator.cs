@@ -41,6 +41,8 @@ namespace MassTransit.Conductor.Configurators
 
         public IReceiveConfigurator<TEndpointConfigurator> BusConfigurator => _configurator;
 
+        public TEndpointConfigurator InstanceEndpointConfigurator => _instanceEndpointConfigurator;
+
         public void AddSpecification(ISpecification specification)
         {
             if (_instanceEndpointConfigurator != null)

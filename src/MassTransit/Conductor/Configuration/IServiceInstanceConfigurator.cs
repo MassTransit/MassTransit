@@ -21,6 +21,7 @@ namespace MassTransit.Conductor
         Uri InstanceAddress { get; }
 
         IReceiveConfigurator<TEndpointConfigurator> BusConfigurator { get; }
+        TEndpointConfigurator InstanceEndpointConfigurator { get; }
 
         /// <summary>
         /// Add a specification for validation
