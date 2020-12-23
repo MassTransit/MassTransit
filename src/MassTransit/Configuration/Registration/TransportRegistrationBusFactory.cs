@@ -32,6 +32,10 @@ namespace MassTransit.Registration
             var loggerFactory = context.GetService<ILoggerFactory>();
             if (loggerFactory != null)
                 LogContext.ConfigureCurrentLogContext(loggerFactory);
+            else if (LogContext.Current == null)
+                LogContext.ConfigureCurrentLogContext();
+
+            _hostConfiguration.LogContext = LogContext.Current;
 
             IEnumerable<IBusInstanceSpecification> busInstanceSpecifications = specifications as IBusInstanceSpecification[] ?? specifications.ToArray();
 

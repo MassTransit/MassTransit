@@ -36,6 +36,9 @@ namespace MassTransit
 
             Topology = host.Topology;
 
+            if (LogContext.Current == null)
+                throw new ConfigurationException("The LogContext was not set.");
+
             _logContext = LogContext.Current;
 
             _publishEndpoint = new PublishEndpoint(_receiveEndpoint);
@@ -43,6 +46,8 @@ namespace MassTransit
 
         ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             var handle = _consumePipe.ConnectConsumePipe(pipe);
 
             if (_busHandle != null && !_receiveEndpoint.Started.IsCompletedSuccessfully())
@@ -53,6 +58,8 @@ namespace MassTransit
 
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             var handle = _consumePipe.ConnectRequestPipe(requestId, pipe);
 
             if (_busHandle != null && !_receiveEndpoint.Started.IsCompletedSuccessfully())
@@ -63,51 +70,71 @@ namespace MassTransit
 
         Task IPublishEndpoint.Publish<T>(T message, CancellationToken cancellationToken)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _publishEndpoint.Publish(message, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, CancellationToken cancellationToken)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _publishEndpoint.Publish(message, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _publishEndpoint.Publish(message, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, Type messageType, CancellationToken cancellationToken)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _publishEndpoint.Publish(message, messageType, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _publishEndpoint.Publish(message, messageType, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, CancellationToken cancellationToken)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _publishEndpoint.Publish<T>(values, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _publishEndpoint.Publish(values, publishPipe, cancellationToken);
         }
 
         Task IPublishEndpoint.Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken);
         }
 
@@ -219,53 +246,73 @@ namespace MassTransit
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _host.ConnectConsumeObserver(observer);
         }
 
         ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _host.ConnectConsumeMessageObserver(observer);
         }
 
         public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _host.ConnectReceiveObserver(observer);
         }
 
         ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _host.ConnectReceiveEndpointObserver(observer);
         }
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _host.ConnectPublishObserver(observer);
         }
 
         public Task<ISendEndpoint> GetPublishSendEndpoint<T>()
             where T : class
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _receiveEndpoint.GetPublishSendEndpoint<T>();
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _host.ConnectSendObserver(observer);
         }
 
         ConnectHandle IEndpointConfigurationObserverConnector.ConnectEndpointConfigurationObserver(IEndpointConfigurationObserver observer)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _host.ConnectEndpointConfigurationObserver(observer);
         }
 
         HostReceiveEndpointHandle IReceiveConnector.ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _host.ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
         HostReceiveEndpointHandle IReceiveConnector.ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
+            LogContext.SetCurrentIfNull(_logContext);
+
             return _host.ConnectReceiveEndpoint(queueName, configureEndpoint);
         }
 
@@ -308,7 +355,7 @@ namespace MassTransit
 
                 try
                 {
-                    Uri hostAddress = _hostHandle.Ready.IsCompletedSuccessfully()
+                    var hostAddress = _hostHandle.Ready.IsCompletedSuccessfully()
                         ? _hostHandle.Ready.GetAwaiter().GetResult().HostAddress
                         : default;
 

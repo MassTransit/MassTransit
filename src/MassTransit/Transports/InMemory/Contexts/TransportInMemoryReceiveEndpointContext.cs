@@ -22,7 +22,7 @@
             _configuration = configuration;
         }
 
-        public override void AddAgent(IAgent agent)
+        public override void AddConsumeAgent(IAgent agent)
         {
             throw new NotSupportedException();
         }

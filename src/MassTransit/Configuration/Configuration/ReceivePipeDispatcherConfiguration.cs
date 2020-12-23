@@ -3,9 +3,7 @@ namespace MassTransit.Configuration
     using System;
     using Builders;
     using Configurators;
-    using Context;
     using GreenPipes;
-    using Logging;
     using Transports;
 
 
@@ -14,10 +12,12 @@ namespace MassTransit.Configuration
         IReceiveEndpointConfigurator
     {
         readonly IReceiveEndpointConfiguration _endpointConfiguration;
+        readonly IHostConfiguration _hostConfiguration;
 
         public ReceivePipeDispatcherConfiguration(IHostConfiguration hostConfiguration, IReceiveEndpointConfiguration endpointConfiguration)
-            : base(hostConfiguration, endpointConfiguration)
+            : base(endpointConfiguration)
         {
+            _hostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;
         }
 
@@ -37,9 +37,7 @@ namespace MassTransit.Configuration
                 foreach (var specification in Specifications)
                     specification.Configure(builder);
 
-                var logContext = LogContext.Current.CreateLogContext(LogCategoryName.Transport.Receive);
-
-                return new ReceivePipeDispatcher(_endpointConfiguration.CreateReceivePipe(), _endpointConfiguration.ReceiveObservers, logContext);
+                return new ReceivePipeDispatcher(_endpointConfiguration.CreateReceivePipe(), _endpointConfiguration.ReceiveObservers, _hostConfiguration);
             }
             catch (Exception ex)
             {

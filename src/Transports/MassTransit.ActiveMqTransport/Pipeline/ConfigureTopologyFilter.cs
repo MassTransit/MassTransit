@@ -94,15 +94,11 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
         Task Delete(SessionContext context, Topic topic)
         {
-            LogContext.Debug?.Log("Delete Topic {Topic}", topic);
-
             return context.DeleteTopic(topic.EntityName);
         }
 
         Task Delete(SessionContext context, Queue queue)
         {
-            LogContext.Debug?.Log("Delete Queue {Queue}", queue);
-
             return context.DeleteQueue(queue.EntityName);
         }
 

@@ -82,10 +82,7 @@ namespace MassTransit.Transports
                 return _handle;
             }
 
-            if (LogContext.Current == null)
-                throw new ConfigurationException("No valid LogContext was configured.");
-
-            _hostConfiguration.LogContext = LogContext.Current;
+            LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
 
             LogContext.Debug?.Log("Starting host: {HostAddress}", _hostConfiguration.HostAddress);
 

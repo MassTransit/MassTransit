@@ -26,12 +26,15 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             _batchSender = new SendBatcher(client, url, cancellationToken);
             _batchDeleter = new DeleteBatcher(client, url, cancellationToken);
+
+            SubscriptionArns = new List<string>();
         }
 
         public string EntityName { get; }
         public string Url { get; }
         public string Arn { get; }
         public IDictionary<string, string> Attributes { get; }
+        public IList<string> SubscriptionArns { get; }
 
         public async ValueTask DisposeAsync()
         {

@@ -34,9 +34,9 @@
 
         public ISessionContextSupervisor SessionContextSupervisor => _sessionContext.Supervisor;
 
-        public override void AddAgent(IAgent agent)
+        public override void AddConsumeAgent(IAgent agent)
         {
-            _sessionContext.Supervisor.AddAgent(agent);
+            _sessionContext.Supervisor.AddConsumeAgent(agent);
         }
 
         public override Exception ConvertException(Exception exception, string message)
@@ -61,12 +61,12 @@
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return _hostConfiguration.CreateSendTransportProvider(SessionContextSupervisor);
+            return SessionContextSupervisor;
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return _hostConfiguration.CreatePublishTransportProvider(SessionContextSupervisor);
+            return SessionContextSupervisor;
         }
     }
 }

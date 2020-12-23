@@ -28,16 +28,16 @@
             _settings = settings;
             BrokerTopology = brokerTopology;
 
-            _clientContext = new Recycle<IClientContextSupervisor>(() => new ClientContextSupervisor(hostConfiguration.ConnectionContextSupervisor));
+            _clientContext = new Recycle<IClientContextSupervisor>(() => hostConfiguration.ConnectionContextSupervisor.CreateClientContextSupervisor());
         }
 
         public IClientContextSupervisor ClientContextSupervisor => _clientContext.Supervisor;
 
         public BrokerTopology BrokerTopology { get; }
 
-        public override void AddAgent(IAgent agent)
+        public override void AddConsumeAgent(IAgent agent)
         {
-            _clientContext.Supervisor.AddAgent(agent);
+            _clientContext.Supervisor.AddConsumeAgent(agent);
         }
 
         public override Exception ConvertException(Exception exception, string message)
@@ -64,12 +64,12 @@
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return _hostConfiguration.ConnectionContextSupervisor;
+            return ClientContextSupervisor;
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return _hostConfiguration.ConnectionContextSupervisor;
+            return ClientContextSupervisor;
         }
     }
 }

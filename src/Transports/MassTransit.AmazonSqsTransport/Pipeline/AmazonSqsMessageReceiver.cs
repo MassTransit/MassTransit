@@ -92,6 +92,8 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             if (IsStopping)
                 return;
 
+
+
             var redelivered = message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1;
 
             var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
@@ -150,8 +152,6 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         {
             if (IsStopping)
             {
-                LogContext.Debug?.Log("Consumer shutdown completed: {InputAddress}", _context.InputAddress);
-
                 _deliveryComplete.TrySetResult(true);
             }
 

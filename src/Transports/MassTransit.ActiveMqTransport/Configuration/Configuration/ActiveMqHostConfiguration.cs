@@ -146,16 +146,6 @@
             return CreateReceiveEndpointConfiguration(queueName, configure);
         }
 
-        public ISendTransportProvider CreateSendTransportProvider(ISessionContextSupervisor supervisor)
-        {
-            return new ActiveMqSendTransportProvider(ConnectionContextSupervisor, supervisor);
-        }
-
-        public IPublishTransportProvider CreatePublishTransportProvider(ISessionContextSupervisor supervisor)
-        {
-            return new ActiveMqPublishTransportProvider(ConnectionContextSupervisor, supervisor);
-        }
-
         public override IHost Build()
         {
             var host = new ActiveMqHost(this, _hostTopology);

@@ -52,6 +52,9 @@ namespace MassTransit.Transports
         public static readonly LogMessage<string> DeleteQueue = LogContext.Define<string>(LogLevel.Debug,
             "Delete queue: {Queue}");
 
+        public static readonly LogMessage<string, string> DeleteSubscription = LogContext.Define<string, string>(LogLevel.Debug,
+            "Delete subscription: {Queue} {Subscription}");
+
         public static readonly LogMessage<string> DeleteTopic = LogContext.Define<string>(LogLevel.Debug,
             "Delete topic: {Topic}");
     }

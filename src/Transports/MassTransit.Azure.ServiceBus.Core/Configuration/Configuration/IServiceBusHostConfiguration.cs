@@ -5,7 +5,6 @@
     using Pipeline;
     using Settings;
     using Topology;
-    using Transport;
 
 
     public interface IServiceBusHostConfiguration :
@@ -19,8 +18,6 @@
         IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
         new IServiceBusHostTopology HostTopology { get; }
-
-        ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(SendSettings settings);
 
         /// <summary>
         /// Apply the endpoint definition to the receive endpoint configurator

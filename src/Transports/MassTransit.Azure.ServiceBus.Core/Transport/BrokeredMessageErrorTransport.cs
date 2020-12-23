@@ -11,8 +11,8 @@
         BrokeredMessageMoveTransport,
         IErrorTransport
     {
-        public BrokeredMessageErrorTransport(ISendEndpointContextSupervisor supervisor)
-            : base(supervisor)
+        public BrokeredMessageErrorTransport(IConnectionContextSupervisor supervisor, SendSettings settings)
+            : base(supervisor, settings)
         {
         }
 

@@ -12,7 +12,6 @@
     using Topology.Builders;
     using Topology.Settings;
     using Transports;
-    using Util;
 
 
     public class ConnectionContextSupervisor :
@@ -29,16 +28,25 @@
             _topologyConfiguration = topologyConfiguration;
         }
 
+        public IClientContextSupervisor CreateClientContextSupervisor()
+        {
+            var clientContextSupervisor = new ClientContextSupervisor(this);
+
+            AddConsumeAgent(clientContextSupervisor);
+
+            return clientContextSupervisor;
+        }
+
         public Uri NormalizeAddress(Uri address)
         {
             return new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, address);
         }
 
-        Task<ISendTransport> ISendTransportProvider.GetSendTransport(Uri address)
+        public Task<ISendTransport> CreateSendTransport(IClientContextSupervisor supervisor, Uri address)
         {
-            var endpointAddress = new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, address);
-
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
+
+            var endpointAddress = new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, address);
 
             TransportLogMessages.CreateSendTransport(endpointAddress);
 
@@ -48,11 +56,11 @@
 
                 IPipe<ClientContext> configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology()).ToPipe();
 
-                var transportContext = new SendTransportContext(_hostConfiguration, configureTopology, settings.EntityName,
-                    _hostConfiguration.SendLogContext, _hostConfiguration.Settings.AllowTransportHeader);
+                var transportContext = new SendTransportContext(_hostConfiguration, supervisor, configureTopology, settings.EntityName);
 
                 var transport = new QueueSendTransport(transportContext);
-                AddAgent(transport);
+
+                supervisor.AddSendAgent(transport);
 
                 return Task.FromResult<ISendTransport>(transport);
             }
@@ -68,17 +76,16 @@
 
                 IPipe<ClientContext> configureTopology = new ConfigureTopologyFilter<PublishSettings>(settings, builder.BuildBrokerTopology()).ToPipe();
 
-                var transportContext = new SendTransportContext(_hostConfiguration, configureTopology, settings.EntityName,
-                    _hostConfiguration.SendLogContext, _hostConfiguration.Settings.AllowTransportHeader);
+                var transportContext = new SendTransportContext(_hostConfiguration, supervisor, configureTopology, settings.EntityName);
 
                 var transport = new TopicSendTransport(transportContext);
-                AddAgent(transport);
+                supervisor.AddSendAgent(transport);
 
                 return Task.FromResult<ISendTransport>(transport);
             }
         }
 
-        public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
+        public Task<ISendTransport> CreatePublishTransport<T>(IClientContextSupervisor supervisor)
             where T : class
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
@@ -89,11 +96,10 @@
 
             IPipe<ClientContext> configureTopology = new ConfigureTopologyFilter<PublishSettings>(settings, publishTopology.GetBrokerTopology()).ToPipe();
 
-            var transportContext = new SendTransportContext(_hostConfiguration, configureTopology, settings.EntityName,
-                _hostConfiguration.SendLogContext, _hostConfiguration.Settings.AllowTransportHeader);
+            var transportContext = new SendTransportContext(_hostConfiguration, supervisor, configureTopology, settings.EntityName);
 
             var transport = new TopicSendTransport(transportContext);
-            AddAgent(transport);
+            supervisor.AddSendAgent(transport);
 
             return Task.FromResult<ISendTransport>(transport);
         }
@@ -103,27 +109,24 @@
             BaseSendTransportContext,
             SqsSendTransportContext
         {
-            readonly Recycle<IClientContextSupervisor> _clientContext;
-
-            public SendTransportContext(IAmazonSqsHostConfiguration hostConfiguration, IPipe<ClientContext> configureTopologyPipe, string entityName,
-                ILogContext logContext, AllowTransportHeader allowTransportHeader)
-                : base(logContext)
+            public SendTransportContext(IAmazonSqsHostConfiguration hostConfiguration, IClientContextSupervisor clientContextSupervisor,
+                IPipe<ClientContext> configureTopologyPipe, string entityName)
+                : base(hostConfiguration)
             {
+                ClientContextSupervisor = clientContextSupervisor;
+
                 ConfigureTopologyPipe = configureTopologyPipe;
                 EntityName = entityName;
 
-                SqsSetHeaderAdapter = new TransportSetHeaderAdapter<MessageAttributeValue>(new SqsHeaderValueConverter(allowTransportHeader),
-                    TransportHeaderOptions.IncludeFaultMessage);
+                SqsSetHeaderAdapter = new TransportSetHeaderAdapter<MessageAttributeValue>(
+                    new SqsHeaderValueConverter(hostConfiguration.Settings.AllowTransportHeader), TransportHeaderOptions.IncludeFaultMessage);
                 SnsSetHeaderAdapter = new TransportSetHeaderAdapter<Amazon.SimpleNotificationService.Model.MessageAttributeValue>(
-                    new SnsHeaderValueConverter(allowTransportHeader), TransportHeaderOptions.IncludeFaultMessage);
-
-                _clientContext = new Recycle<IClientContextSupervisor>(() => new ClientContextSupervisor(hostConfiguration.ConnectionContextSupervisor));
+                    new SnsHeaderValueConverter(hostConfiguration.Settings.AllowTransportHeader), TransportHeaderOptions.IncludeFaultMessage);
             }
 
             public IPipe<ClientContext> ConfigureTopologyPipe { get; }
             public string EntityName { get; }
-            public IClientContextSupervisor ClientContextSupervisor => _clientContext.Supervisor;
-
+            public IClientContextSupervisor ClientContextSupervisor { get; }
             public ITransportSetHeaderAdapter<MessageAttributeValue> SqsSetHeaderAdapter { get; }
             public ITransportSetHeaderAdapter<Amazon.SimpleNotificationService.Model.MessageAttributeValue> SnsSetHeaderAdapter { get; }
         }

@@ -33,9 +33,9 @@
 
         public Task<ISendTransport> CreateSendTransport(IModelContextSupervisor modelContextSupervisor, Uri address)
         {
-            var endpointAddress = new RabbitMqEndpointAddress(_hostConfiguration.HostAddress, address);
-
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
+
+            var endpointAddress = new RabbitMqEndpointAddress(_hostConfiguration.HostAddress, address);
 
             TransportLogMessages.CreateSendTransport(endpointAddress);
 
@@ -70,11 +70,11 @@
 
         Task<ISendTransport> CreateSendTransport(IModelContextSupervisor modelContextSupervisor, IPipe<ModelContext> pipe, string exchangeName)
         {
-            var sendTransportContext = new SendTransportContext(modelContextSupervisor, pipe, exchangeName, _hostConfiguration.SendLogContext);
+            var sendTransportContext = new SendTransportContext(_hostConfiguration, modelContextSupervisor, pipe, exchangeName);
 
             var transport = new RabbitMqSendTransport(sendTransportContext);
 
-            AddAgent(transport);
+            AddSendAgent(transport);
 
             return Task.FromResult<ISendTransport>(transport);
         }
@@ -84,9 +84,9 @@
             BaseSendTransportContext,
             RabbitMqSendTransportContext
         {
-            public SendTransportContext(IModelContextSupervisor modelContextSupervisor, IPipe<ModelContext> configureTopologyPipe, string exchange,
-                ILogContext logContext)
-                : base(logContext)
+            public SendTransportContext(IRabbitMqHostConfiguration hostConfiguration, IModelContextSupervisor modelContextSupervisor,
+                IPipe<ModelContext> configureTopologyPipe, string exchange)
+                : base(hostConfiguration)
             {
                 ModelContextSupervisor = modelContextSupervisor;
                 ConfigureTopologyPipe = configureTopologyPipe;

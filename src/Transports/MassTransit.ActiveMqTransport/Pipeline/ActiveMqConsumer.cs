@@ -64,12 +64,6 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             {
                 LogContext.Current = _context.LogContext;
 
-                if (IsStopping)
-                {
-                    await WaitAndAbandonMessage().ConfigureAwait(false);
-                    return;
-                }
-
                 var context = new ActiveMqReceiveContext(message, _context, _receiveSettings, _session, _session.ConnectionContext);
 
                 try
@@ -95,22 +89,8 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             return TaskUtil.Completed;
         }
 
-        async Task WaitAndAbandonMessage()
-        {
-            try
-            {
-                await _deliveryComplete.Task.ConfigureAwait(false);
-            }
-            catch (Exception exception)
-            {
-                LogContext.Error?.Log(exception, "DeliveryComplete faulted during shutdown: {InputAddress}", _context.InputAddress);
-            }
-        }
-
         protected override async Task StopAgent(StopContext context)
         {
-            LogContext.Debug?.Log("Consumer stopping: {InputAddress}", _context.InputAddress);
-
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
             await Completed.ConfigureAwait(false);

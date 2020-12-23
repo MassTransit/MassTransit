@@ -50,9 +50,9 @@
             BrokerTopology.Probe(context);
         }
 
-        public override void AddAgent(IAgent agent)
+        public override void AddConsumeAgent(IAgent agent)
         {
-            _clientContext.Supervisor.AddAgent(agent);
+            _clientContext.Supervisor.AddConsumeAgent(agent);
         }
 
         public override Exception ConvertException(Exception exception, string message)

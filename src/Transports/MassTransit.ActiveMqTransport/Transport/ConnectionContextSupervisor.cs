@@ -33,9 +33,9 @@
 
         public Task<ISendTransport> CreateSendTransport(ISessionContextSupervisor sessionContextSupervisor, Uri address)
         {
-            var endpointAddress = new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, address);
-
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
+
+            var endpointAddress = new ActiveMqEndpointAddress(_hostConfiguration.HostAddress, address);
 
             TransportLogMessages.CreateSendTransport(endpointAddress);
 
@@ -61,14 +61,16 @@
             return CreateSendTransport(sessionContextSupervisor, configureTopology, settings.EntityName, DestinationType.Topic);
         }
 
-        public Task<ISendTransport> CreateSendTransport(ISessionContextSupervisor supervisor, IPipe<SessionContext> pipe, string entityName,
+        Task<ISendTransport> CreateSendTransport(ISessionContextSupervisor supervisor, IPipe<SessionContext> pipe, string entityName,
             DestinationType destinationType)
         {
-            var sendTransportContext = new SendTransportContext(supervisor, pipe, entityName, destinationType, _hostConfiguration.SendLogContext);
+            var scopeSupervisor = new SessionContextSupervisor(supervisor);
+
+            var sendTransportContext = new SendTransportContext(_hostConfiguration, scopeSupervisor, pipe, entityName, destinationType);
 
             var transport = new ActiveMqSendTransport(sendTransportContext);
 
-            AddAgent(transport);
+            AddSendAgent(transport);
 
             return Task.FromResult<ISendTransport>(transport);
         }
@@ -78,9 +80,9 @@
             BaseSendTransportContext,
             ActiveMqSendTransportContext
         {
-            public SendTransportContext(ISessionContextSupervisor sessionContextSupervisor, IPipe<SessionContext> configureTopologyPipe, string
-                entityName, DestinationType destinationType, ILogContext logContext)
-                : base(logContext)
+            public SendTransportContext(IActiveMqHostConfiguration hostConfiguration, ISessionContextSupervisor sessionContextSupervisor,
+                IPipe<SessionContext> configureTopologyPipe, string entityName, DestinationType destinationType)
+                : base(hostConfiguration)
             {
                 SessionContextSupervisor = sessionContextSupervisor;
                 ConfigureTopologyPipe = configureTopologyPipe;

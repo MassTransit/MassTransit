@@ -62,7 +62,7 @@ namespace MassTransit.Context
 
         public static void SetCurrentIfNull(ILogContext context)
         {
-            Current ??= context;
+            Current ??= context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public static LogMessage<T1> Define<T1>(LogLevel logLevel, string formatString)

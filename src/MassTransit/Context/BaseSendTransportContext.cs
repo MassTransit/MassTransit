@@ -1,5 +1,6 @@
 namespace MassTransit.Context
 {
+    using Configuration;
     using GreenPipes;
     using Pipeline.Observables;
 
@@ -8,14 +9,17 @@ namespace MassTransit.Context
         BasePipeContext,
         SendTransportContext
     {
-        protected BaseSendTransportContext(ILogContext logContext)
+        readonly IHostConfiguration _hostConfiguration;
+
+        protected BaseSendTransportContext(IHostConfiguration hostConfiguration)
         {
-            LogContext = logContext;
+            _hostConfiguration = hostConfiguration;
 
             SendObservers = new SendObservable();
         }
 
-        public ILogContext LogContext { get; }
+        public ILogContext LogContext => _hostConfiguration.SendLogContext;
+
         public SendObservable SendObservers { get; }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

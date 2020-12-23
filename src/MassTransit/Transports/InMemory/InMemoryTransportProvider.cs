@@ -44,7 +44,7 @@ namespace MassTransit.Transports.InMemory
 
             var exchange = _messageFabric.Value.GetExchange(endpointAddress.Name);
 
-            var context = new ExchangeInMemorySendTransportContext(exchange, _hostConfiguration.SendLogContext);
+            var context = new ExchangeInMemorySendTransportContext(_hostConfiguration, exchange);
 
             return new InMemorySendTransport(context);
         }

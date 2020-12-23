@@ -43,8 +43,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Builders
 
         IClientContextSupervisor ClientContextFactory()
         {
-            return new ClientContextSupervisor(_hostConfiguration.ConnectionContextSupervisor,
-                new SubscriptionClientContextFactory(_hostConfiguration.ConnectionContextSupervisor, _configuration.Settings));
+            return _hostConfiguration.ConnectionContextSupervisor
+                .CreateClientContextSupervisor(supervisor => new SubscriptionClientContextFactory(supervisor, _configuration.Settings));
         }
     }
 }

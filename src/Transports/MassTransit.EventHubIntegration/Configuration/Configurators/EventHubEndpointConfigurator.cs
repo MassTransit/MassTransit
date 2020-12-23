@@ -33,7 +33,7 @@ namespace MassTransit.EventHubIntegration.Configurators
         public EventHubReceiveEndpointConfigurator(string eventHubName, string consumerGroup, IHostSettings hostSettings, IStorageSettings storageSettings,
             IBusInstance busInstance,
             IReceiveEndpointConfiguration endpointConfiguration)
-            : base(busInstance.HostConfiguration, endpointConfiguration)
+            : base(endpointConfiguration)
         {
             _eventHubName = eventHubName;
             _consumerGroup = consumerGroup;

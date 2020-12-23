@@ -42,6 +42,8 @@
             if (IsStopped)
                 throw new TransportUnavailableException($"The RabbitMQ send transport is stopped: {_context.Exchange}");
 
+            LogContext.SetCurrentIfNull(_context.LogContext);
+
             var sendPipe = new SendPipe<T>(_context, message, pipe, cancellationToken);
 
             return _context.ModelContextSupervisor.Send(sendPipe, cancellationToken);
@@ -80,8 +82,6 @@
 
             public async Task Send(ModelContext modelContext)
             {
-                LogContext.SetCurrentIfNull(_context.LogContext);
-
                 await _context.ConfigureTopologyPipe.Send(modelContext).ConfigureAwait(false);
 
                 var properties = modelContext.Model.CreateBasicProperties();

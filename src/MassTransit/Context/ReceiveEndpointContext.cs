@@ -72,6 +72,6 @@
         /// Add an agent, which should be stopped during shutdown
         /// </summary>
         /// <param name="agent"></param>
-        void AddAgent(IAgent agent);
+        void AddConsumeAgent(IAgent agent);
     }
 }

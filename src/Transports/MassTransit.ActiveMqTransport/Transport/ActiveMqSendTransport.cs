@@ -14,7 +14,7 @@
 
 
     public class ActiveMqSendTransport :
-        Supervisor,
+        Agent,
         ISendTransport,
         IAsyncDisposable
     {
@@ -23,8 +23,6 @@
         public ActiveMqSendTransport(ActiveMqSendTransportContext context)
         {
             _context = context;
-
-            Add(context.SessionContextSupervisor);
         }
 
         public async ValueTask DisposeAsync()
@@ -45,13 +43,6 @@
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _context.ConnectSendObserver(observer);
-        }
-
-        protected override Task StopSupervisor(StopSupervisorContext context)
-        {
-            LogContext.Debug?.Log("Stopping send transport: {EntityName}", _context.EntityName);
-
-            return base.StopSupervisor(context);
         }
 
 

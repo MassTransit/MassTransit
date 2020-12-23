@@ -220,8 +220,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             if (IsStopping)
             {
-                LogContext.Debug?.Log("Consumer shutdown completed: {InputAddress}", _context.InputAddress);
-
                 _deliveryComplete.TrySetResult(true);
             }
 

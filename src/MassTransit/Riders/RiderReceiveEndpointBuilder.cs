@@ -47,7 +47,7 @@ namespace MassTransit.Riders
                 return _busInstance.Bus;
             }
 
-            public override void AddAgent(IAgent agent)
+            public override void AddConsumeAgent(IAgent agent)
             {
                 throw new NotSupportedException();
             }

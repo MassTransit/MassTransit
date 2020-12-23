@@ -10,12 +10,14 @@ namespace MassTransit.Transports
         ITransportSupervisor<T>
         where T : class, PipeContext
     {
-        readonly ISupervisor _transportSupervisor;
+        readonly ISupervisor _consumeSupervisor;
+        readonly ISupervisor _sendSupervisor;
 
         protected TransportPipeContextSupervisor(IAgent supervisor, IPipeContextFactory<T> factory)
             : base(factory)
         {
-            _transportSupervisor = new Supervisor();
+            _consumeSupervisor = new Supervisor();
+            _sendSupervisor = new Supervisor();
 
             supervisor.Completed.ContinueWith(_ => this.Stop(), TaskContinuationOptions.ExecuteSynchronously);
         }
@@ -23,7 +25,8 @@ namespace MassTransit.Transports
         protected TransportPipeContextSupervisor(IPipeContextFactory<T> factory)
             : base(factory)
         {
-            _transportSupervisor = new Supervisor();
+            _consumeSupervisor = new Supervisor();
+            _sendSupervisor = new Supervisor();
         }
 
         public void Probe(ProbeContext context)
@@ -32,15 +35,23 @@ namespace MassTransit.Transports
                 context.Add("connected", true);
         }
 
-        public void AddAgent<TAgent>(TAgent agent)
+        public void AddSendAgent<TAgent>(TAgent agent)
             where TAgent : IAgent
         {
-            _transportSupervisor.Add(agent);
+            _sendSupervisor.Add(agent);
+        }
+
+        public void AddConsumeAgent<TAgent>(TAgent agent)
+            where TAgent : IAgent
+        {
+            _consumeSupervisor.Add(agent);
         }
 
         protected override async Task StopSupervisor(StopSupervisorContext context)
         {
-            await _transportSupervisor.Stop(context).ConfigureAwait(false);
+            await _consumeSupervisor.Stop(context).ConfigureAwait(false);
+
+            await _sendSupervisor.Stop(context).ConfigureAwait(false);
 
             await base.StopSupervisor(context).ConfigureAwait(false);
         }

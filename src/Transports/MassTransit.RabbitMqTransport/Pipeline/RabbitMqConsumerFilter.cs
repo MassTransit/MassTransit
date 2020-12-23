@@ -39,7 +39,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             await consumer.Ready.ConfigureAwait(false);
 
-            _context.AddAgent(consumer);
+            _context.AddConsumeAgent(consumer);
 
             await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(_context.InputAddress)).ConfigureAwait(false);
 

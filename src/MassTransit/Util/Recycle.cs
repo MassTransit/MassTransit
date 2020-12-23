@@ -12,7 +12,7 @@ namespace MassTransit.Util
     public class Recycle<T>
         where T : class, IAgent
     {
-        T _supervisor;
+        Lazy<T> _supervisor;
 
         public Recycle(Func<T> supervisorFactory)
         {
@@ -22,14 +22,19 @@ namespace MassTransit.Util
             {
                 registration.Dispose();
 
-                Volatile.Write(ref _supervisor, supervisorFactory());
+                Volatile.Write(ref _supervisor, new Lazy<T>(() =>
+                {
+                    var supervisor = supervisorFactory();
 
-                registration = _supervisor.Stopping.Register(() => RecycleSupervisor());
+                    registration = supervisor.Stopping.Register(() => RecycleSupervisor());
+
+                    return supervisor;
+                }));
             }
 
             RecycleSupervisor();
         }
 
-        public T Supervisor => Volatile.Read(ref _supervisor);
+        public T Supervisor => Volatile.Read(ref _supervisor).Value;
     }
 }

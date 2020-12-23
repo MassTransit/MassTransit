@@ -77,14 +77,14 @@
         {
             var settings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings.SubscriptionConfigurator, _hostConfiguration.HostAddress);
 
-            return new BrokeredMessageErrorTransport(_hostConfiguration.CreateSendEndpointContextSupervisor(settings));
+            return new BrokeredMessageErrorTransport(_hostConfiguration.ConnectionContextSupervisor, settings);
         }
 
         protected override IDeadLetterTransport CreateDeadLetterTransport()
         {
             var settings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings.SubscriptionConfigurator, _hostConfiguration.HostAddress);
 
-            return new BrokeredMessageDeadLetterTransport(_hostConfiguration.CreateSendEndpointContextSupervisor(settings));
+            return new BrokeredMessageDeadLetterTransport(_hostConfiguration.ConnectionContextSupervisor, settings);
         }
     }
 }

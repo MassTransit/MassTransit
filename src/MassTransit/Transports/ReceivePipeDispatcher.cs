@@ -3,6 +3,7 @@ namespace MassTransit.Transports
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Context;
     using GreenPipes;
     using Logging;
@@ -14,7 +15,7 @@ namespace MassTransit.Transports
     public class ReceivePipeDispatcher :
         IReceivePipeDispatcher
     {
-        readonly ILogContext _logContext;
+        readonly IHostConfiguration _hostConfiguration;
         readonly ReceiveObservable _observers;
         readonly IReceivePipe _receivePipe;
 
@@ -22,11 +23,11 @@ namespace MassTransit.Transports
         long _dispatchCount;
         int _maxConcurrentDispatchCount;
 
-        public ReceivePipeDispatcher(IReceivePipe receivePipe, ReceiveObservable observers, ILogContext logContext)
+        public ReceivePipeDispatcher(IReceivePipe receivePipe, ReceiveObservable observers, IHostConfiguration hostConfiguration)
         {
             _receivePipe = receivePipe;
             _observers = observers;
-            _logContext = logContext;
+            _hostConfiguration = hostConfiguration;
         }
 
         public int ActiveDispatchCount => _activeDispatchCount;
@@ -42,7 +43,7 @@ namespace MassTransit.Transports
 
         public async Task Dispatch(ReceiveContext context, ReceiveLockContext receiveLock = default)
         {
-            LogContext.Current = _logContext;
+            LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
             var active = StartDispatch();
 

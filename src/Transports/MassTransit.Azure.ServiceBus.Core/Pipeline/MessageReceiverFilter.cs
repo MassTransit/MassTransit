@@ -42,7 +42,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
             await receiver.Ready.ConfigureAwait(false);
 
-            _context.AddAgent(receiver);
+            _context.AddConsumeAgent(receiver);
 
             LogContext.Debug?.Log("Receiver Ready: {InputAddress}", _context.InputAddress);
 

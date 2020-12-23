@@ -8,13 +8,15 @@ namespace MassTransit.RabbitMqTransport.Integration
         IModelContextSupervisor
     {
         public ModelContextSupervisor(IConnectionContextSupervisor connectionContextSupervisor)
-            : base(connectionContextSupervisor, new ModelContextFactory(connectionContextSupervisor))
+            : base(new ModelContextFactory(connectionContextSupervisor))
         {
+            connectionContextSupervisor.AddConsumeAgent(this);
         }
 
         public ModelContextSupervisor(IModelContextSupervisor modelContextSupervisor)
-            : base(modelContextSupervisor, new ScopeModelContextFactory(modelContextSupervisor))
+            : base(new ScopeModelContextFactory(modelContextSupervisor))
         {
+            modelContextSupervisor.AddSendAgent(this);
         }
     }
 }

@@ -86,6 +86,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             response.EnsureSuccessfulResponse();
 
+            queueInfo.SubscriptionArns.Add(response.SubscriptionArn);
+
             var sqsQueueArn = queueInfo.Arn;
             var topicArnPattern = topicInfo.Arn.Substring(0, topicInfo.Arn.LastIndexOf(':') + 1) + "*";
 
@@ -132,6 +134,13 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             var queueInfo = await _queueCache.Get(queue, _cancellationToken).ConfigureAwait(false);
 
             TransportLogMessages.DeleteQueue(queueInfo.Url);
+
+            foreach (var subscriptionArn in queueInfo.SubscriptionArns)
+            {
+                TransportLogMessages.DeleteSubscription(queueInfo.Url, subscriptionArn);
+
+                await DeleteQueueSubscription(subscriptionArn).ConfigureAwait(false);
+            }
 
             var response = await _amazonSqs.DeleteQueueAsync(queueInfo.Url, CancellationToken.None).ConfigureAwait(false);
 
@@ -196,6 +205,15 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             response.EnsureSuccessfulResponse();
 
             return response.Messages;
+        }
+
+        async Task DeleteQueueSubscription(string subscriptionArn)
+        {
+            var unsubscribeRequest = new UnsubscribeRequest {SubscriptionArn = subscriptionArn};
+
+            var response = await _amazonSns.UnsubscribeAsync(unsubscribeRequest, _cancellationToken).ConfigureAwait(false);
+
+            response.EnsureSuccessfulResponse();
         }
 
         static bool QueueHasTopicPermission(Policy policy, string topicArnPattern, string sqsQueueArn)

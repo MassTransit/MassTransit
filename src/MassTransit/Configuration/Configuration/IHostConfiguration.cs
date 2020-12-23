@@ -25,6 +25,7 @@
         bool DeployTopologyOnly { get; set; }
 
         ILogContext LogContext { get; set; }
+        ILogContext ReceiveLogContext { get; }
         ILogContext SendLogContext { get; }
 
         IHostTopology HostTopology { get; }

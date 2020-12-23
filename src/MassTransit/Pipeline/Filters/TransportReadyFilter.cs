@@ -24,7 +24,7 @@
             var agent = new Agent();
             agent.SetReady();
 
-            _context.AddAgent(agent);
+            _context.AddConsumeAgent(agent);
 
             await next.Send(context).ConfigureAwait(false);
 

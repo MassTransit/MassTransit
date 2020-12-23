@@ -69,8 +69,8 @@
 
         IClientContextSupervisor ClientContextFactory()
         {
-            return new ClientContextSupervisor(_hostConfiguration.ConnectionContextSupervisor,
-                new QueueClientContextFactory(_hostConfiguration.ConnectionContextSupervisor, _configuration.Settings));
+            return _hostConfiguration.ConnectionContextSupervisor
+                .CreateClientContextSupervisor(supervisor => new QueueClientContextFactory(supervisor, _configuration.Settings));
         }
     }
 }

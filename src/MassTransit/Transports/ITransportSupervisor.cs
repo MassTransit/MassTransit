@@ -8,7 +8,10 @@ namespace MassTransit.Transports
         ISupervisor<T>
         where T : class, PipeContext
     {
-        void AddAgent<TAgent>(TAgent agent)
+        void AddSendAgent<TAgent>(TAgent agent)
+            where TAgent : IAgent;
+
+        void AddConsumeAgent<TAgent>(TAgent agent)
             where TAgent : IAgent;
     }
 }

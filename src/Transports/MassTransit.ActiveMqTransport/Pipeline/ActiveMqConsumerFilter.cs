@@ -82,7 +82,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             foreach (var consumer in actualConsumers)
                 supervisor.Add(consumer);
 
-            _context.AddAgent(supervisor);
+            _context.AddConsumeAgent(supervisor);
 
             void HandleException(Exception exception)
             {
@@ -93,7 +93,8 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             supervisor.SetReady();
 
-            supervisor.Completed.ContinueWith(task => context.ConnectionContext.Connection.ExceptionListener -= HandleException);
+            supervisor.Completed.ContinueWith(task => context.ConnectionContext.Connection.ExceptionListener -= HandleException,
+                TaskContinuationOptions.ExecuteSynchronously);
 
             return supervisor;
         }

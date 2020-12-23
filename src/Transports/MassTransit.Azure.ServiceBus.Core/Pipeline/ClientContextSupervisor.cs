@@ -8,8 +8,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
         TransportPipeContextSupervisor<ClientContext>,
         IClientContextSupervisor
     {
-        public ClientContextSupervisor(IConnectionContextSupervisor supervisor, IPipeContextFactory<ClientContext> contextFactory)
-            : base(supervisor, contextFactory)
+        public ClientContextSupervisor(IPipeContextFactory<ClientContext> contextFactory)
+            : base(contextFactory)
         {
         }
     }

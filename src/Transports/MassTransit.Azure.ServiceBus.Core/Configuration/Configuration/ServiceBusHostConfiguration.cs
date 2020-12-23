@@ -41,7 +41,7 @@
             _hostSettings = new HostSettings();
             _hostTopology = new ServiceBusHostTopology(this, _topologyConfiguration);
 
-            _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ServiceBusConnectionContextSupervisor(this, topologyConfiguration));
+            _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }
 
         public override Uri HostAddress => _hostSettings.ServiceUri;

@@ -11,8 +11,8 @@
         BrokeredMessageMoveTransport,
         IDeadLetterTransport
     {
-        public BrokeredMessageDeadLetterTransport(ISendEndpointContextSupervisor supervisor)
-            : base(supervisor)
+        public BrokeredMessageDeadLetterTransport(IConnectionContextSupervisor supervisor, SendSettings settings)
+            : base(supervisor, settings)
         {
         }
 

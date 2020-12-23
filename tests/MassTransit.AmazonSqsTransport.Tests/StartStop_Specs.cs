@@ -51,6 +51,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
             await bus.StartAsync(TestCancellationToken);
             try
             {
+                await Task.Delay(1000);
+
                 await bus.CreateRequestClient<PingMessage>().GetResponse<PongMessage>(new PingMessage());
             }
             finally

@@ -6,28 +6,36 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     using Context;
     using Contexts;
     using GreenPipes;
+    using GreenPipes.Agents;
     using Topology;
     using Transport;
     using Transports;
 
 
-    public class ServiceBusConnectionContextSupervisor :
+    public class ConnectionContextSupervisor :
         TransportPipeContextSupervisor<ConnectionContext>,
         IConnectionContextSupervisor
     {
         readonly IServiceBusHostConfiguration _hostConfiguration;
         readonly IServiceBusTopologyConfiguration _topologyConfiguration;
 
-        public ServiceBusConnectionContextSupervisor(IServiceBusHostConfiguration hostConfiguration, IServiceBusTopologyConfiguration topologyConfiguration)
+        public ConnectionContextSupervisor(IServiceBusHostConfiguration hostConfiguration, IServiceBusTopologyConfiguration topologyConfiguration)
             : base(new ConnectionContextFactory(hostConfiguration))
         {
             _hostConfiguration = hostConfiguration;
             _topologyConfiguration = topologyConfiguration;
         }
 
+        public Uri NormalizeAddress(Uri address)
+        {
+            return new ServiceBusEndpointAddress(_hostConfiguration.HostAddress, address);
+        }
+
         public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
             where T : class
         {
+            LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
+
             IServiceBusMessagePublishTopologyConfigurator<T> publishTopology = _topologyConfiguration.Publish.GetMessageTopology<T>();
 
             var settings = publishTopology.GetSendSettings();
@@ -39,6 +47,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
         public Task<ISendTransport> GetSendTransport(Uri address)
         {
+            LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
+
             var endpointAddress = new ServiceBusEndpointAddress(_hostConfiguration.HostAddress, address);
 
             var settings = _topologyConfiguration.Send.GetSendSettings(endpointAddress);
@@ -48,35 +58,41 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
             return Task.FromResult(transport);
         }
 
-        public Uri NormalizeAddress(Uri address)
-        {
-            return new ServiceBusEndpointAddress(_hostConfiguration.HostAddress, address);
-        }
-
-        ISendTransport CreateSendTransport(Uri address, SendSettings settings)
+        public IClientContextSupervisor CreateClientContextSupervisor(Func<IConnectionContextSupervisor, IPipeContextFactory<ClientContext>> factory)
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
 
-            TransportLogMessages.CreateSendTransport(address);
+            var clientContextSupervisor = new ClientContextSupervisor(factory(this));
 
-            var endpointContextSupervisor = CreateSendEndpointContextSupervisor(settings);
+            AddConsumeAgent(clientContextSupervisor);
 
-            var transportContext = new SendTransportContext(address, endpointContextSupervisor, _hostConfiguration.SendLogContext);
-
-            return new ServiceBusSendTransport(transportContext);
+            return clientContextSupervisor;
         }
 
         public ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(SendSettings settings)
         {
+            LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
+
             var configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology(), false, Stopping);
 
             var contextFactory = new SendEndpointContextFactory(this, configureTopology.ToPipe<SendEndpointContext>(), settings);
 
             var contextSupervisor = new SendEndpointContextSupervisor(contextFactory);
 
-            AddAgent(contextSupervisor);
+            AddSendAgent(contextSupervisor);
 
             return contextSupervisor;
+        }
+
+        ISendTransport CreateSendTransport(Uri address, SendSettings settings)
+        {
+            TransportLogMessages.CreateSendTransport(address);
+
+            var endpointContextSupervisor = CreateSendEndpointContextSupervisor(settings);
+
+            var transportContext = new SendTransportContext(_hostConfiguration, address, endpointContextSupervisor);
+
+            return new ServiceBusSendTransport(transportContext);
         }
 
 
@@ -84,8 +100,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
             BaseSendTransportContext,
             ServiceBusSendTransportContext
         {
-            public SendTransportContext(Uri address, ISendEndpointContextSupervisor source, ILogContext logContext)
-                : base(logContext)
+            public SendTransportContext(IServiceBusHostConfiguration hostConfiguration, Uri address, ISendEndpointContextSupervisor source)
+                : base(hostConfiguration)
             {
                 Address = address;
                 Supervisor = source;

@@ -42,8 +42,5 @@
         /// <returns></returns>
         IActiveMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(QueueReceiveSettings settings,
             IActiveMqEndpointConfiguration endpointConfiguration, Action<IActiveMqReceiveEndpointConfigurator> configure = null);
-
-        ISendTransportProvider CreateSendTransportProvider(ISessionContextSupervisor supervisor);
-        IPublishTransportProvider CreatePublishTransportProvider(ISessionContextSupervisor supervisor);
     }
 }

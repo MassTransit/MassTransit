@@ -14,7 +14,7 @@
 
 
     public class QueueSendTransport :
-        Supervisor,
+        Agent,
         ISendTransport
     {
         readonly SqsSendTransportContext _context;
@@ -22,8 +22,6 @@
         public QueueSendTransport(SqsSendTransportContext context)
         {
             _context = context;
-
-            Add(context.ClientContextSupervisor);
         }
 
         Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -39,13 +37,6 @@
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _context.ConnectSendObserver(observer);
-        }
-
-        protected override Task StopSupervisor(StopSupervisorContext context)
-        {
-            LogContext.Debug?.Log("Stopping send transport: {EntityName}", _context.EntityName);
-
-            return base.StopSupervisor(context);
         }
 
 

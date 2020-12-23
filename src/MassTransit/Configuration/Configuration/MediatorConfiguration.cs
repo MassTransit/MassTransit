@@ -1,5 +1,6 @@
 namespace MassTransit.Configuration
 {
+    using Context;
     using GreenPipes;
 
 
@@ -13,6 +14,13 @@ namespace MassTransit.Configuration
             : base(hostConfiguration, endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
+
+            if (_hostConfiguration.LogContext == null)
+            {
+                LogContext.ConfigureCurrentLogContext();
+
+                _hostConfiguration.LogContext = LogContext.Current;
+            }
         }
 
         public ConnectHandle ConnectConsumeObserver(IConsumeObserver observer)

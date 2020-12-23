@@ -183,7 +183,7 @@ namespace MassTransit.Util
             {
                 if (_cancellationToken.IsCancellationRequested)
                 {
-                    _completion.TrySetCanceled();
+                    _completion.TrySetCanceled(_cancellationToken);
                     return;
                 }
 
@@ -195,7 +195,7 @@ namespace MassTransit.Util
                 }
                 catch (OperationCanceledException exception) when (exception.CancellationToken == _cancellationToken)
                 {
-                    _completion.TrySetCanceled();
+                    _completion.TrySetCanceled(exception.CancellationToken);
                 }
                 catch (Exception exception)
                 {
@@ -228,7 +228,7 @@ namespace MassTransit.Util
             {
                 if (_cancellationToken.IsCancellationRequested)
                 {
-                    _completion.TrySetCanceled();
+                    _completion.TrySetCanceled(_cancellationToken);
 
                     return Task.CompletedTask;
                 }
@@ -241,7 +241,7 @@ namespace MassTransit.Util
                 }
                 catch (OperationCanceledException exception) when (exception.CancellationToken == _cancellationToken)
                 {
-                    _completion.TrySetCanceled();
+                    _completion.TrySetCanceled(exception.CancellationToken);
                 }
                 catch (Exception exception)
                 {

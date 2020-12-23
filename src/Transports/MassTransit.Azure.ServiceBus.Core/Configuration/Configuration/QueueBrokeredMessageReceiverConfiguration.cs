@@ -15,7 +15,7 @@
 
         public QueueBrokeredMessageReceiverConfiguration(IServiceBusHostConfiguration hostConfiguration,
             IServiceBusReceiveEndpointConfiguration endpointConfiguration)
-            : base(hostConfiguration, endpointConfiguration)
+            : base(endpointConfiguration)
         {
             _hostConfiguration = hostConfiguration;
             _endpointConfiguration = endpointConfiguration;

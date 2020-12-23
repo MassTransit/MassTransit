@@ -7,7 +7,6 @@
     using NUnit.Framework;
 
 
-    [TestFixture]
     public class TwoScopeAzureServiceBusTestFixture :
         AzureServiceBusTestFixture
     {

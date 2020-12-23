@@ -3,7 +3,6 @@ namespace MassTransit.Configuration
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Context;
     using GreenPipes;
     using Transports;
 
@@ -15,16 +14,12 @@ namespace MassTransit.Configuration
         readonly IReceiveEndpointConfiguration _configuration;
         protected readonly IList<IReceiveEndpointSpecification> Specifications;
 
-        protected ReceiverConfiguration(IHostConfiguration hostConfiguration, IReceiveEndpointConfiguration endpointConfiguration)
+        protected ReceiverConfiguration(IReceiveEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)
         {
             _configuration = endpointConfiguration;
 
             Specifications = new List<IReceiveEndpointSpecification>();
-
-            LogContext.Current ??= hostConfiguration.LogContext;
-            if (LogContext.Current == null)
-                LogContext.ConfigureCurrentLogContext();
 
             this.ThrowOnSkippedMessages();
             this.RethrowFaultedMessages();

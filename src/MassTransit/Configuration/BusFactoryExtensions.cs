@@ -5,6 +5,7 @@
     using System.Linq;
     using Configuration;
     using Configurators;
+    using Context;
     using GreenPipes;
     using Util;
 
@@ -24,6 +25,11 @@
 
         static IBusControl Build(IBusFactory factory, IBusConfiguration busConfiguration, IEnumerable<ValidationResult> validationResult)
         {
+            if (LogContext.Current == null)
+                LogContext.ConfigureCurrentLogContext();
+
+            busConfiguration.HostConfiguration.LogContext = LogContext.Current;
+
             var result = BusConfigurationResult.CompileResults(validationResult);
 
             try
