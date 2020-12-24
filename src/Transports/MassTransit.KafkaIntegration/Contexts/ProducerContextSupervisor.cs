@@ -35,16 +35,14 @@ namespace MassTransit.KafkaIntegration.Contexts
             clientContextSupervisor.AddSendAgent(this);
         }
 
-        public Uri TopicAddress => _topicAddress;
-
-        public ITopicProducer<TKey, TValue> CreateProducer(ConsumeContext consumeContext = null)
+        public ITopicProducer<TKey, TValue> CreateProducer()
         {
             var context = new KafkaTransportContext(_sendPipe, _hostConfiguration, _topicAddress);
 
             if (_sendObservers.Count > 0)
                 context.ConnectSendObserver(_sendObservers);
 
-            return new TopicProducer<TKey, TValue>(context, this, consumeContext);
+            return new TopicProducer<TKey, TValue>(context, this);
         }
 
 

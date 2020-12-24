@@ -117,6 +117,8 @@ namespace MassTransit.KafkaIntegration.Tests
                         serviceScope.Dispose();
 
                         await busControl.StopAsync(TestCancellationToken);
+
+                        await Task.Delay(100, TestCancellationToken);
                     }
                 }
             }

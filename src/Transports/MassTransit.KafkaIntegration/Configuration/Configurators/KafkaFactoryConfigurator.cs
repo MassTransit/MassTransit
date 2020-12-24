@@ -17,7 +17,8 @@ namespace MassTransit.KafkaIntegration.Configurators
 
     public class KafkaFactoryConfigurator :
         IKafkaFactoryConfigurator,
-        IKafkaHostConfiguration
+        IKafkaHostConfiguration,
+        IConsumerSpecificationCreator
     {
         readonly ClientConfig _clientConfig;
         readonly Recycle<IClientContextSupervisor> _clientSupervisor;
@@ -41,7 +42,32 @@ namespace MassTransit.KafkaIntegration.Configurators
             SetHeadersDeserializer(DictionaryHeadersSerialize.Deserializer);
             SetHeadersSerializer(DictionaryHeadersSerialize.Serializer);
 
-            _clientSupervisor = new Recycle<IClientContextSupervisor>(() => new ClientContextSupervisor(_clientConfig));
+            _clientSupervisor = new Recycle<IClientContextSupervisor>(() => new ClientContextSupervisor(_clientConfig, _producers));
+        }
+
+        public IKafkaConsumerSpecification CreateSpecification<TKey, TValue>(string topicName, string groupId,
+            Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
+            where TValue : class
+        {
+            if (string.IsNullOrEmpty(groupId))
+                throw new ArgumentException(groupId);
+
+            return CreateSpecification(topicName, new ConsumerConfig {GroupId = groupId}, configure);
+        }
+
+        public IKafkaConsumerSpecification CreateSpecification<TKey, TValue>(string topicName, ConsumerConfig consumerConfig,
+            Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
+            where TValue : class
+        {
+            if (consumerConfig == null)
+                throw new ArgumentNullException(nameof(consumerConfig));
+
+            consumerConfig.AutoCommitIntervalMs = null;
+            consumerConfig.EnableAutoCommit = false;
+
+            var specification = new KafkaConsumerSpecification<TKey, TValue>(this, consumerConfig, topicName, _headersDeserializer, configure);
+            specification.ConnectReceiveEndpointObserver(_endpointObservers);
+            return specification;
         }
 
         public void Host(IReadOnlyList<string> servers, Action<IKafkaHostConfigurator> configure)
@@ -75,25 +101,16 @@ namespace MassTransit.KafkaIntegration.Configurators
         public void TopicEndpoint<TKey, TValue>(string topicName, string groupId, Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
             where TValue : class
         {
-            if (string.IsNullOrEmpty(groupId))
-                throw new ArgumentException(groupId);
-
-            TopicEndpoint(topicName, new ConsumerConfig {GroupId = groupId}, configure);
+            var specification = CreateSpecification(topicName, groupId, configure);
+            _topics.Add(specification);
         }
 
         public void TopicEndpoint<TKey, TValue>(string topicName, ConsumerConfig consumerConfig,
             Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
             where TValue : class
         {
-            if (consumerConfig == null)
-                throw new ArgumentNullException(nameof(consumerConfig));
-
-            consumerConfig.AutoCommitIntervalMs = null;
-            consumerConfig.EnableAutoCommit = false;
-
-            var topic = new KafkaConsumerSpecification<TKey, TValue>(this, consumerConfig, topicName, _headersDeserializer, configure);
-            topic.ConnectReceiveEndpointObserver(_endpointObservers);
-            _topics.Add(topic);
+            var specification = CreateSpecification(topicName, consumerConfig, configure);
+            _topics.Add(specification);
         }
 
         void IKafkaFactoryConfigurator.TopicProducer<TKey, TValue>(string topicName, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
@@ -281,11 +298,10 @@ namespace MassTransit.KafkaIntegration.Configurators
             foreach (var topic in _topics)
                 endpoints.Add(topic.EndpointName, topic.CreateReceiveEndpoint(busInstance));
 
-            IKafkaProducerFactory[] producers = _producers
-                .Select(x => x.CreateProducerFactory(busInstance))
-                .ToArray();
+            var topicEndpointConnector = new TopicEndpointConnector(endpoints, busInstance, this);
+            var topicProducerProvider = new TopicProducerProvider(busInstance, this);
 
-            return new KafkaRider(this, busInstance.HostConfiguration.HostAddress, endpoints, producers);
+            return new KafkaRider(this, endpoints, topicProducerProvider, topicEndpointConnector);
         }
 
         public IEnumerable<ValidationResult> Validate()

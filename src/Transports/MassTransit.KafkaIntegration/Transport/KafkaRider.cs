@@ -11,23 +11,24 @@ namespace MassTransit.KafkaIntegration.Transport
     using GreenPipes.Agents;
     using Riders;
     using Transports;
+    using Util;
 
 
     public class KafkaRider :
         IKafkaRider
     {
         readonly IReceiveEndpointCollection _endpoints;
-        readonly Uri _hostAddress;
         readonly IKafkaHostConfiguration _hostConfiguration;
-        readonly Dictionary<Uri, IKafkaProducerFactory> _producerFactories;
+        readonly ITopicProducerProvider _producerProvider;
+        readonly ITopicEndpointConnector _topicEndpointConnector;
 
-        public KafkaRider(IKafkaHostConfiguration hostConfiguration, Uri hostAddress, IReceiveEndpointCollection endpoints,
-            IEnumerable<IKafkaProducerFactory> producerFactories)
+        public KafkaRider(IKafkaHostConfiguration hostConfiguration, IReceiveEndpointCollection endpoints, ITopicProducerProvider producerProvider,
+            ITopicEndpointConnector topicEndpointConnector)
         {
             _hostConfiguration = hostConfiguration;
-            _hostAddress = hostAddress;
             _endpoints = endpoints;
-            _producerFactories = producerFactories.ToDictionary(x => x.TopicAddress);
+            _producerProvider = producerProvider;
+            _topicEndpointConnector = topicEndpointConnector;
         }
 
         public ITopicProducer<TKey, TValue> GetProducer<TKey, TValue>(Uri address, ConsumeContext consumeContext)
@@ -36,30 +37,32 @@ namespace MassTransit.KafkaIntegration.Transport
             if (address == null)
                 throw new ArgumentNullException(nameof(address));
 
-            var topicAddress = new KafkaTopicAddress(_hostAddress, address);
+            var provider = consumeContext == null
+                ? _producerProvider
+                : new ConsumeContextTopicProducerProvider(_producerProvider, consumeContext);
+            return provider.GetProducer<TKey, TValue>(address);
+        }
 
-            IKafkaProducerFactory<TKey, TValue> factory = GetProducerFactory<TKey, TValue>(topicAddress);
+        public HostReceiveEndpointHandle ConnectTopicEndpoint<TKey, TValue>(string topicName, string groupId,
+            Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
+            where TValue : class
+        {
+            return _topicEndpointConnector.ConnectTopicEndpoint(topicName, groupId, configure);
+        }
 
-            return factory.CreateProducer(consumeContext);
+        public HostReceiveEndpointHandle ConnectTopicEndpoint<TKey, TValue>(string topicName, ConsumerConfig consumerConfig,
+            Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
+            where TValue : class
+        {
+            return _topicEndpointConnector.ConnectTopicEndpoint(topicName, consumerConfig, configure);
         }
 
         public RiderHandle Start(CancellationToken cancellationToken = default)
         {
             HostReceiveEndpointHandle[] endpointsHandle = _endpoints.StartEndpoints(cancellationToken);
-            IAgent agent = new RiderAgent(_hostConfiguration.ClientContextSupervisor, _endpoints);
+            var ready = endpointsHandle.Length == 0 ? TaskUtil.Completed : _hostConfiguration.ClientContextSupervisor.Ready;
+            IAgent agent = new RiderAgent(_hostConfiguration.ClientContextSupervisor, _endpoints, ready);
             return new Handle(endpointsHandle, agent);
-        }
-
-        IKafkaProducerFactory<TKey, TValue> GetProducerFactory<TKey, TValue>(Uri topicAddress)
-            where TValue : class
-        {
-            if (!_producerFactories.TryGetValue(topicAddress, out var factory))
-                throw new ConfigurationException($"Producer for topic: {topicAddress} is not configured.");
-
-            if (factory is IKafkaProducerFactory<TKey, TValue> producerFactory)
-                return producerFactory;
-
-            throw new ConfigurationException($"Producer for topic: {topicAddress} is not configured for ${typeof(Message<TKey, TValue>).Name} message");
         }
 
 
@@ -69,12 +72,12 @@ namespace MassTransit.KafkaIntegration.Transport
             readonly IReceiveEndpointCollection _endpoints;
             readonly IClientContextSupervisor _supervisor;
 
-            public RiderAgent(IClientContextSupervisor supervisor, IReceiveEndpointCollection endpoints)
+            public RiderAgent(IClientContextSupervisor supervisor, IReceiveEndpointCollection endpoints, Task ready)
             {
                 _supervisor = supervisor;
                 _endpoints = endpoints;
 
-                SetReady(_supervisor.Ready);
+                SetReady(ready);
                 SetCompleted(_supervisor.Completed);
             }
 

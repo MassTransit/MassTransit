@@ -1,11 +1,7 @@
 namespace MassTransit.KafkaIntegration.Transport
 {
-    using System;
-
-
     public interface IKafkaProducerFactory
     {
-        Uri TopicAddress { get; }
     }
 
 
@@ -13,6 +9,6 @@ namespace MassTransit.KafkaIntegration.Transport
         IKafkaProducerFactory
         where TValue : class
     {
-        ITopicProducer<TKey, TValue> CreateProducer(ConsumeContext consumeContext = null);
+        ITopicProducer<TKey, TValue> CreateProducer();
     }
 }

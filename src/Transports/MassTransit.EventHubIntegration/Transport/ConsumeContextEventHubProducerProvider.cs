@@ -119,6 +119,9 @@ namespace MassTransit.EventHubIntegration
             {
                 if (_consumeContext != null)
                     context.TransferConsumeContextHeaders(_consumeContext);
+
+                if (_pipe.IsNotEmpty())
+                    await _pipe.Send(context).ConfigureAwait(false);
             }
 
             public void Probe(ProbeContext context)
