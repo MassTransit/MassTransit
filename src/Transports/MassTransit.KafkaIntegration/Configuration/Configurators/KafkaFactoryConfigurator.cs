@@ -78,7 +78,7 @@ namespace MassTransit.KafkaIntegration.Configurators
             if (string.IsNullOrEmpty(groupId))
                 throw new ArgumentException(groupId);
 
-            TopicEndpoint(topicName, new ConsumerConfig(_clientConfig) {GroupId = groupId}, configure);
+            TopicEndpoint(topicName, new ConsumerConfig {GroupId = groupId}, configure);
         }
 
         public void TopicEndpoint<TKey, TValue>(string topicName, ConsumerConfig consumerConfig,
@@ -99,7 +99,7 @@ namespace MassTransit.KafkaIntegration.Configurators
         void IKafkaFactoryConfigurator.TopicProducer<TKey, TValue>(string topicName, Action<IKafkaProducerConfigurator<TKey, TValue>> configure)
             where TValue : class
         {
-            this.TopicProducer(topicName, new ProducerConfig(_clientConfig), configure);
+            this.TopicProducer(topicName, new ProducerConfig(), configure);
         }
 
         void IKafkaFactoryConfigurator.TopicProducer<TKey, TValue>(string topicName, ProducerConfig producerConfig,
@@ -271,6 +271,8 @@ namespace MassTransit.KafkaIntegration.Configurators
             _configureSend = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
+        public IReadOnlyDictionary<string, string> Configuration => _clientConfig.ToDictionary(x => x.Key, x => x.Value);
+
         public IClientContextSupervisor ClientContextSupervisor => _clientSupervisor.Supervisor;
 
         public IKafkaRider Build(IBusInstance busInstance)
@@ -288,6 +290,9 @@ namespace MassTransit.KafkaIntegration.Configurators
 
         public IEnumerable<ValidationResult> Validate()
         {
+            if (string.IsNullOrEmpty(_clientConfig.BootstrapServers))
+                yield return this.Failure("BootstrapServers", "should not be empty. Please use cfg.Host() to configure it");
+
             foreach (KeyValuePair<string, IKafkaConsumerSpecification[]> kv in _topics.GroupBy(x => x.EndpointName)
                 .ToDictionary(x => x.Key, x => x.ToArray()))
             {

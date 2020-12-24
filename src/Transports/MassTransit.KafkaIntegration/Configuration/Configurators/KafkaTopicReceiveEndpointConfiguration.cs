@@ -168,9 +168,11 @@ namespace MassTransit.KafkaIntegration.Configurators
 
         public IReceiveEndpointControl Build()
         {
+            var consumerConfig = _hostConfiguration.GetConsumerConfig(_consumerConfig);
+
             ConsumerBuilder<TKey, TValue> CreateConsumerBuilder()
             {
-                ConsumerBuilder<TKey, TValue> consumerBuilder = new ConsumerBuilder<TKey, TValue>(_consumerConfig)
+                ConsumerBuilder<TKey, TValue> consumerBuilder = new ConsumerBuilder<TKey, TValue>(consumerConfig)
                     .SetValueDeserializer(_valueDeserializer)
                     .SetLogHandler((c, message) => _busInstance.HostConfiguration.ReceiveLogContext?.Debug?.Log(message.Message));
 
