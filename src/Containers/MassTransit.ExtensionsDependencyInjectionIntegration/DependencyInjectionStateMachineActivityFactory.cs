@@ -16,10 +16,10 @@
             where T : class
         {
             if (context.TryGetPayload(out IServiceScope serviceScope))
-                return serviceScope.ServiceProvider.GetService<T>() ?? ActivatorUtilities.CreateInstance<T>(serviceScope.ServiceProvider);
+                return ActivatorUtilities.GetServiceOrCreateInstance<T>(serviceScope.ServiceProvider);
 
             if (context.TryGetPayload(out IServiceProvider serviceProvider))
-                return serviceProvider.GetService<T>() ?? ActivatorUtilities.CreateInstance<T>(serviceProvider);
+                return ActivatorUtilities.GetServiceOrCreateInstance<T>(serviceProvider);
 
             throw new PayloadNotFoundException($"IServiceProvider or IServiceScope was not found to get service: {TypeCache<T>.ShortName}");
         }

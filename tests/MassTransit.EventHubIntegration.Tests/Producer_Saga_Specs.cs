@@ -2,15 +2,16 @@ namespace MassTransit.EventHubIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
+    using Automatonymous;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
+    using TestFramework.Sagas;
 
 
-    public class Producer_Specs :
+    public class Saga_Producer_Specs :
         InMemoryTestFixture
     {
         [Test]
@@ -25,6 +26,9 @@ namespace MassTransit.EventHubIntegration.Tests
 
             services.AddMassTransit(x =>
             {
+                x.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
+                    .InMemoryRepository();
+
                 x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
                 x.AddRider(rider =>
                 {
@@ -51,44 +55,22 @@ namespace MassTransit.EventHubIntegration.Tests
 
             var serviceScope = provider.CreateScope();
 
-            var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
-            var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+            var publishEndpoint = serviceScope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
 
             try
             {
                 var correlationId = NewId.NextGuid();
-                var conversationId = NewId.NextGuid();
-                var initiatorId = NewId.NextGuid();
-                var messageId = NewId.NextGuid();
-                await producer.Produce<EventHubMessage>(new {Text = "text"}, Pipe.Execute<SendContext>(context =>
-                    {
-                        context.CorrelationId = correlationId;
-                        context.MessageId = messageId;
-                        context.InitiatorId = initiatorId;
-                        context.ConversationId = conversationId;
-                        context.Headers.Set("Special", new
-                        {
-                            Key = "Hello",
-                            Value = "World"
-                        });
-                    }),
-                    TestCancellationToken);
+
+                await publishEndpoint.Publish(new StartTest
+                {
+                    CorrelationId = correlationId,
+                    TestKey = "ABC123"
+                }, TestCancellationToken);
 
                 ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
 
-                Assert.AreEqual("text", result.Message.Text);
-                Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
-                Assert.That(result.DestinationAddress,
-                    Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
-                Assert.That(result.MessageId, Is.EqualTo(messageId));
-                Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
-                Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
-                Assert.That(result.ConversationId, Is.EqualTo(conversationId));
-
-                var headerType = result.Headers.Get<HeaderType>("Special");
-                Assert.That(headerType, Is.Not.Null);
-                Assert.That(headerType.Key, Is.EqualTo("Hello"));
-                Assert.That(headerType.Value, Is.EqualTo("World"));
+                Assert.AreEqual("Key: ABC123", result.Message.Text);
+                Assert.AreEqual(correlationId, result.InitiatorId);
             }
             finally
             {
@@ -118,16 +100,40 @@ namespace MassTransit.EventHubIntegration.Tests
         }
 
 
-        public interface HeaderType
-        {
-            string Key { get; }
-            string Value { get; }
-        }
-
-
         public interface EventHubMessage
         {
             string Text { get; }
+        }
+
+
+        public class TestInstance :
+            SagaStateMachineInstance
+        {
+            public State CurrentState { get; set; }
+            public string Key { get; set; }
+            public Guid CorrelationId { get; set; }
+        }
+
+
+        public class TestStateMachineSaga :
+            MassTransitStateMachine<TestInstance>
+        {
+            public TestStateMachineSaga()
+            {
+                InstanceState(x => x.CurrentState);
+
+                Initially(
+                    When(Started)
+                        .Then(context => context.Instance.Key = context.Data.TestKey)
+                        .Produce(x => Configuration.EventHubName, x => x.Init<EventHubMessage>(new {Text = $"Key: {x.Data.TestKey}"}))
+                        .TransitionTo(Active));
+
+                SetCompletedWhenFinalized();
+            }
+
+            public State Active { get; private set; }
+
+            public Event<StartTest> Started { get; private set; }
         }
     }
 }

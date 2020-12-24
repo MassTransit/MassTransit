@@ -1,44 +1,43 @@
-namespace MassTransit.EventHubIntegration.Tests
+namespace MassTransit.KafkaIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Confluent.Kafka;
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
+    using Transport;
 
 
-    public class Producer_Specs :
+    public class TopicConnector_Specs :
         InMemoryTestFixture
     {
+        const string Topic = "endpoint-connector";
+
         [Test]
         public async Task Should_produce()
         {
-            TaskCompletionSource<ConsumeContext<EventHubMessage>> taskCompletionSource = GetTask<ConsumeContext<EventHubMessage>>();
+            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
             var services = new ServiceCollection();
             services.AddSingleton(taskCompletionSource);
 
             services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
             services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+            services.AddScoped<KafkaMessageConsumer>();
 
             services.AddMassTransit(x =>
             {
                 x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
                 x.AddRider(rider =>
                 {
-                    rider.AddConsumer<EventHubMessageConsumer>();
+                    rider.AddProducer<KafkaMessage>(Topic);
 
-                    rider.UsingEventHub((context, k) =>
+                    rider.UsingKafka((context, k) =>
                     {
-                        k.Host(Configuration.EventHubNamespace);
-                        k.Storage(Configuration.StorageAccount);
-
-                        k.ReceiveEndpoint(Configuration.EventHubName, c =>
-                        {
-                            c.ConfigureConsumer<EventHubMessageConsumer>(context);
-                        });
+                        k.Host("localhost:9092");
                     });
                 });
             });
@@ -49,10 +48,11 @@ namespace MassTransit.EventHubIntegration.Tests
 
             await busControl.StartAsync(TestCancellationToken);
 
+            var kafka = provider.GetRequiredService<IKafkaRider>();
+
             var serviceScope = provider.CreateScope();
 
-            var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
-            var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+            var producer = serviceScope.ServiceProvider.GetRequiredService<ITopicProducer<KafkaMessage>>();
 
             try
             {
@@ -60,7 +60,8 @@ namespace MassTransit.EventHubIntegration.Tests
                 var conversationId = NewId.NextGuid();
                 var initiatorId = NewId.NextGuid();
                 var messageId = NewId.NextGuid();
-                await producer.Produce<EventHubMessage>(new {Text = "text"}, Pipe.Execute<SendContext>(context =>
+
+                await producer.Produce(new {Text = "text"}, Pipe.Execute<SendContext>(context =>
                     {
                         context.CorrelationId = correlationId;
                         context.MessageId = messageId;
@@ -74,12 +75,19 @@ namespace MassTransit.EventHubIntegration.Tests
                     }),
                     TestCancellationToken);
 
-                ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
+                var connected = kafka.ConnectTopicEndpoint<KafkaMessage>(Topic, nameof(TopicConnector_Specs), c =>
+                {
+                    c.AutoOffsetReset = AutoOffsetReset.Earliest;
+                    c.Consumer<KafkaMessageConsumer>(provider);
+                });
+
+                await connected.Ready;
+
+                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
 
                 Assert.AreEqual("text", result.Message.Text);
                 Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
-                Assert.That(result.DestinationAddress,
-                    Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
+                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
                 Assert.That(result.MessageId, Is.EqualTo(messageId));
                 Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
                 Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
@@ -101,17 +109,17 @@ namespace MassTransit.EventHubIntegration.Tests
         }
 
 
-        class EventHubMessageConsumer :
-            IConsumer<EventHubMessage>
+        class KafkaMessageConsumer :
+            IConsumer<KafkaMessage>
         {
-            readonly TaskCompletionSource<ConsumeContext<EventHubMessage>> _taskCompletionSource;
+            readonly TaskCompletionSource<ConsumeContext<KafkaMessage>> _taskCompletionSource;
 
-            public EventHubMessageConsumer(TaskCompletionSource<ConsumeContext<EventHubMessage>> taskCompletionSource)
+            public KafkaMessageConsumer(TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource)
             {
                 _taskCompletionSource = taskCompletionSource;
             }
 
-            public async Task Consume(ConsumeContext<EventHubMessage> context)
+            public async Task Consume(ConsumeContext<KafkaMessage> context)
             {
                 _taskCompletionSource.TrySetResult(context);
             }
@@ -125,7 +133,7 @@ namespace MassTransit.EventHubIntegration.Tests
         }
 
 
-        public interface EventHubMessage
+        public interface KafkaMessage
         {
             string Text { get; }
         }

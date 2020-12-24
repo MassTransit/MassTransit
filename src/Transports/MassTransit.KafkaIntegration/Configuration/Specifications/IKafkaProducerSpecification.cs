@@ -8,6 +8,7 @@ namespace MassTransit.KafkaIntegration.Specifications
     public interface IKafkaProducerSpecification :
         ISpecification
     {
+        string TopicName { get; }
         IKafkaProducerFactory CreateProducerFactory(IBusInstance busInstance);
     }
 }

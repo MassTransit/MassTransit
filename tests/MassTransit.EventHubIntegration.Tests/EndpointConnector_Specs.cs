@@ -10,7 +10,7 @@ namespace MassTransit.EventHubIntegration.Tests
     using TestFramework;
 
 
-    public class Producer_Specs :
+    public class EndpointConnector_Specs :
         InMemoryTestFixture
     {
         [Test]
@@ -22,23 +22,17 @@ namespace MassTransit.EventHubIntegration.Tests
 
             services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
             services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+            services.AddScoped<EventHubMessageConsumer>();
 
             services.AddMassTransit(x =>
             {
                 x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
                 x.AddRider(rider =>
                 {
-                    rider.AddConsumer<EventHubMessageConsumer>();
-
                     rider.UsingEventHub((context, k) =>
                     {
                         k.Host(Configuration.EventHubNamespace);
                         k.Storage(Configuration.StorageAccount);
-
-                        k.ReceiveEndpoint(Configuration.EventHubName, c =>
-                        {
-                            c.ConfigureConsumer<EventHubMessageConsumer>(context);
-                        });
                     });
                 });
             });
@@ -51,6 +45,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
             var serviceScope = provider.CreateScope();
 
+            var eventHubRider = provider.GetRequiredService<IEventHubRider>();
             var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
             var producer = await producerProvider.GetProducer(Configuration.EventHubName);
 
@@ -74,6 +69,12 @@ namespace MassTransit.EventHubIntegration.Tests
                     }),
                     TestCancellationToken);
 
+                var connected = eventHubRider.ConnectEventHubEndpoint(Configuration.EventHubName, c =>
+                {
+                    c.Consumer<EventHubMessageConsumer>(provider);
+                });
+
+                await connected.Ready;
                 ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
 
                 Assert.AreEqual("text", result.Message.Text);

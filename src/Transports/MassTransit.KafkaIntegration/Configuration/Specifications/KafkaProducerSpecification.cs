@@ -10,7 +10,6 @@ namespace MassTransit.KafkaIntegration.Specifications
     using Pipeline.Observables;
     using Serializers;
     using Transport;
-    using Util;
 
 
     public class KafkaProducerSpecification<TKey, TValue> :
@@ -21,7 +20,6 @@ namespace MassTransit.KafkaIntegration.Specifications
         readonly IKafkaHostConfiguration _hostConfiguration;
         readonly ProducerConfig _producerConfig;
         readonly SendObservable _sendObservers;
-        readonly string _topicName;
         Action<ISendPipeConfigurator> _configureSend;
         IHeadersSerializer _headersSerializer;
         ISerializer<TKey> _keySerializer;
@@ -32,7 +30,7 @@ namespace MassTransit.KafkaIntegration.Specifications
         {
             _hostConfiguration = hostConfiguration;
             _producerConfig = producerConfig;
-            _topicName = topicName;
+            TopicName = topicName;
             _headersSerializer = headersSerializer;
             _sendObservers = new SendObservable();
 
@@ -151,6 +149,8 @@ namespace MassTransit.KafkaIntegration.Specifications
             _headersSerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
         }
 
+        public string TopicName { get; }
+
         public IKafkaProducerFactory CreateProducerFactory(IBusInstance busInstance)
         {
             var producerConfig = _hostConfiguration.GetProducerConfig(_producerConfig);
@@ -162,7 +162,7 @@ namespace MassTransit.KafkaIntegration.Specifications
                 ProducerBuilder<TKey, TValue> producerBuilder = new ProducerBuilder<TKey, TValue>(producerConfig)
                     .SetErrorHandler((c, error) =>
                         busInstance.HostConfiguration.SendLogContext?.Error?.Log("Consumer error ({code}): {reason} on {topic}", error.Code, error.Reason,
-                            _topicName))
+                            TopicName))
                     .SetLogHandler((c, message) => busInstance.HostConfiguration.SendLogContext?.Debug?.Log(message.Message));
 
                 if (_keySerializer != null)
@@ -174,14 +174,13 @@ namespace MassTransit.KafkaIntegration.Specifications
 
             var sendPipe = sendConfiguration.CreatePipe();
 
-            return new RecycledKafkaProducerFactory(() =>
-                new ProducerContextSupervisor<TKey, TValue>(_topicName, sendPipe, _sendObservers, _hostConfiguration.ClientContextSupervisor,
-                    busInstance.HostConfiguration, _headersSerializer, CreateProducerBuilder));
+            return new ProducerContextSupervisor<TKey, TValue>(TopicName, sendPipe, _sendObservers, _hostConfiguration.ClientContextSupervisor,
+                busInstance.HostConfiguration, _headersSerializer, CreateProducerBuilder);
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (string.IsNullOrEmpty(_topicName))
+            if (string.IsNullOrEmpty(TopicName))
                 yield return this.Failure("Topic", "should not be empty");
         }
 
@@ -193,27 +192,6 @@ namespace MassTransit.KafkaIntegration.Specifications
         public void ConfigureSend(Action<ISendPipeConfigurator> callback)
         {
             _configureSend = callback ?? throw new ArgumentNullException(nameof(callback));
-        }
-
-
-        class RecycledKafkaProducerFactory :
-            IKafkaProducerFactory<TKey, TValue>
-        {
-            readonly Recycle<IProducerContextSupervisor<TKey, TValue>> _producerSupervisor;
-
-            public RecycledKafkaProducerFactory(Func<IProducerContextSupervisor<TKey, TValue>> producerSupervisorFactory)
-            {
-                _producerSupervisor = new Recycle<IProducerContextSupervisor<TKey, TValue>>(producerSupervisorFactory);
-            }
-
-            IProducerContextSupervisor<TKey, TValue> Supervisor => _producerSupervisor.Supervisor;
-
-            public ITopicProducer<TKey, TValue> CreateProducer(ConsumeContext consumeContext = null)
-            {
-                return Supervisor.CreateProducer(consumeContext);
-            }
-
-            public Uri TopicAddress => Supervisor.TopicAddress;
         }
     }
 }

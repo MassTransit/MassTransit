@@ -1,5 +1,6 @@
 namespace MassTransit.EventHubIntegration
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
@@ -9,20 +10,24 @@ namespace MassTransit.EventHubIntegration
     using GreenPipes.Agents;
     using Riders;
     using Transports;
+    using Util;
 
 
     public class EventHubRider :
         IEventHubRider
     {
+        readonly IEvenHubEndpointConnector _endpointConnector;
         readonly IReceiveEndpointCollection _endpoints;
         readonly IEventHubHostConfiguration _hostConfiguration;
         readonly IEventHubProducerProvider _producerProvider;
 
-        public EventHubRider(IEventHubHostConfiguration hostConfiguration, IReceiveEndpointCollection endpoints, IEventHubProducerProvider producerProvider)
+        public EventHubRider(IEventHubHostConfiguration hostConfiguration, IReceiveEndpointCollection endpoints, IEventHubProducerProvider producerProvider,
+            IEvenHubEndpointConnector endpointConnector)
         {
             _hostConfiguration = hostConfiguration;
             _endpoints = endpoints;
             _producerProvider = producerProvider;
+            _endpointConnector = endpointConnector;
         }
 
         public IEventHubProducerProvider GetProducerProvider(ConsumeContext consumeContext = default)
@@ -32,10 +37,17 @@ namespace MassTransit.EventHubIntegration
                 : new ConsumeContextEventHubProducerProvider(_producerProvider, consumeContext);
         }
 
+        public HostReceiveEndpointHandle ConnectEventHubEndpoint(string eventHubName, string consumerGroup,
+            Action<IEventHubReceiveEndpointConfigurator> configure)
+        {
+            return _endpointConnector.ConnectEventHubEndpoint(eventHubName, consumerGroup, configure);
+        }
+
         public RiderHandle Start(CancellationToken cancellationToken = default)
         {
             HostReceiveEndpointHandle[] endpointsHandle = _endpoints.StartEndpoints(cancellationToken);
-            IAgent agent = new RiderAgent(_hostConfiguration.ConnectionContextSupervisor, _endpoints);
+            var ready = endpointsHandle.Length == 0 ? TaskUtil.Completed : _hostConfiguration.ConnectionContextSupervisor.Ready;
+            IAgent agent = new RiderAgent(_hostConfiguration.ConnectionContextSupervisor, _endpoints, ready);
             return new Handle(endpointsHandle, agent);
         }
 
@@ -46,12 +58,12 @@ namespace MassTransit.EventHubIntegration
             readonly IReceiveEndpointCollection _endpoints;
             readonly IConnectionContextSupervisor _supervisor;
 
-            public RiderAgent(IConnectionContextSupervisor supervisor, IReceiveEndpointCollection endpoints)
+            public RiderAgent(IConnectionContextSupervisor supervisor, IReceiveEndpointCollection endpoints, Task ready)
             {
                 _supervisor = supervisor;
                 _endpoints = endpoints;
 
-                SetReady(_supervisor.Ready);
+                SetReady(ready);
                 SetCompleted(_supervisor.Completed);
             }
 
