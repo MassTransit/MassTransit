@@ -1,7 +1,7 @@
 namespace MassTransit.Transports
 {
     using System.Threading.Tasks;
-    using GreenPipes.Caching;
+    using Internals.Caching;
 
 
     /// <summary>
@@ -10,19 +10,19 @@ namespace MassTransit.Transports
     public class SendEndpointCache<TKey> :
         ISendEndpointCache<TKey>
     {
-        readonly IIndex<TKey, CachedSendEndpoint<TKey>> _index;
+        readonly ICache<TKey, CachedSendEndpoint<TKey>, ITimeToLiveCacheValue<CachedSendEndpoint<TKey>>> _cache;
 
         public SendEndpointCache()
         {
-            var cacheSettings = new CacheSettings(SendEndpointCacheDefaults.Capacity, SendEndpointCacheDefaults.MinAge, SendEndpointCacheDefaults.MaxAge);
+            var options = new CacheOptions {Capacity = SendEndpointCacheDefaults.Capacity};
+            var policy = new TimeToLiveCachePolicy<CachedSendEndpoint<TKey>>(SendEndpointCacheDefaults.MaxAge);
 
-            var cache = new GreenCache<CachedSendEndpoint<TKey>>(cacheSettings);
-            _index = cache.AddIndex("key", x => x.Key);
+            _cache = new MassTransitCache<TKey, CachedSendEndpoint<TKey>, ITimeToLiveCacheValue<CachedSendEndpoint<TKey>>>(policy, options);
         }
 
         public async Task<ISendEndpoint> GetSendEndpoint(TKey key, SendEndpointFactory<TKey> factory)
         {
-            CachedSendEndpoint<TKey> sendEndpoint = await _index.Get(key, x => GetSendEndpointFromFactory(x, factory)).ConfigureAwait(false);
+            CachedSendEndpoint<TKey> sendEndpoint = await _cache.GetOrAdd(key, x => GetSendEndpointFromFactory(x, factory)).ConfigureAwait(false);
 
             return sendEndpoint;
         }

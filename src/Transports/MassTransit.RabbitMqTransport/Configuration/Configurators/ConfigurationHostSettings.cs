@@ -4,7 +4,6 @@ namespace MassTransit.RabbitMqTransport.Configurators
     using System.Net.Security;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
-    using MassTransit.Configuration;
     using Metadata;
     using RabbitMQ.Client;
 
@@ -12,8 +11,6 @@ namespace MassTransit.RabbitMqTransport.Configurators
     class ConfigurationHostSettings :
         RabbitMqHostSettings
     {
-        static readonly bool _batchPublishEnabled = !AppContext.TryGetSwitch(AppContextSwitches.RabbitMqBatchPublish, out var isEnabled) || !isEnabled;
-
         readonly ConfigurationBatchSettings _batchSettings;
         readonly Lazy<Uri> _hostAddress;
 
@@ -76,10 +73,10 @@ namespace MassTransit.RabbitMqTransport.Configurators
         {
             public ConfigurationBatchSettings()
             {
-                Enabled = _batchPublishEnabled;
+                Enabled = true;
                 MessageLimit = 100;
                 SizeLimit = 64 * 1024;
-                Timeout = TimeSpan.FromMilliseconds(4);
+                Timeout = TimeSpan.FromMilliseconds(1);
             }
 
             public bool Enabled { get; set; }

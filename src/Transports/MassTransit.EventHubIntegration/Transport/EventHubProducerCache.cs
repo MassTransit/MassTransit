@@ -2,26 +2,26 @@ namespace MassTransit.EventHubIntegration
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes.Caching;
+    using Internals.Caching;
+    using Transports;
 
 
     public class EventHubProducerCache<TKey> :
         IEventHubProducerCache<TKey>
     {
-        readonly IIndex<TKey, CachedEventHubProducer<TKey>> _index;
+        readonly ICache<TKey, CachedEventHubProducer<TKey>, ITimeToLiveCacheValue<CachedEventHubProducer<TKey>>> _cache;
 
         public EventHubProducerCache()
         {
-            var cacheSettings = new CacheSettings(1000, TimeSpan.FromSeconds(10), TimeSpan.FromHours(24));
-            var cache = new GreenCache<CachedEventHubProducer<TKey>>(cacheSettings);
-            _index = cache.AddIndex("key", x => x.Key);
+            var options = new CacheOptions {Capacity = SendEndpointCacheDefaults.Capacity};
+            var policy = new TimeToLiveCachePolicy<CachedEventHubProducer<TKey>>(SendEndpointCacheDefaults.MaxAge);
+
+            _cache = new MassTransitCache<TKey, CachedEventHubProducer<TKey>, ITimeToLiveCacheValue<CachedEventHubProducer<TKey>>>(policy, options);
         }
 
         public async Task<IEventHubProducer> GetProducer(TKey key, Func<TKey, Task<IEventHubProducer>> factory)
         {
-            CachedEventHubProducer<TKey> producer = await _index.Get(key, x => GetProducerFromFactory(x, factory)).ConfigureAwait(false);
-
-            return producer;
+            return await _cache.GetOrAdd(key, x => GetProducerFromFactory(x, factory)).ConfigureAwait(false);
         }
 
         static async Task<CachedEventHubProducer<TKey>> GetProducerFromFactory(TKey address, Func<TKey, Task<IEventHubProducer>> factory)

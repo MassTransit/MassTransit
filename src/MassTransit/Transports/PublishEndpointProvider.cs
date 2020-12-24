@@ -34,7 +34,7 @@ namespace MassTransit.Transports
 
             _sendPipe = new PipeAdapter(publishPipe);
 
-            _cache = SendEndpointCacheFactory.Create<Type>();
+            _cache = new SendEndpointCache<Type>();
         }
 
         public Task<ISendEndpoint> GetPublishSendEndpoint<T>()

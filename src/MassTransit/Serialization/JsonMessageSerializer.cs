@@ -6,7 +6,6 @@ namespace MassTransit.Serialization
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading;
-    using Configuration;
     using JsonConverters;
     using Metadata;
     using Newtonsoft.Json;
@@ -44,26 +43,13 @@ namespace MassTransit.Serialization
 
             var namingStrategy = new CamelCaseNamingStrategy();
 
-            DefaultContractResolver deserializerContractResolver;
-            if (AppContext.TryGetSwitch(AppContextSwitches.CaseSensitiveDictionaryDeserializer, out var isEnabled) && isEnabled)
-            {
-                deserializerContractResolver = new JsonContractResolver(
-                    ByteArrayConverter,
-                    ListJsonConverter,
-                    InterfaceProxyConverter,
-                    MessageDataJsonConverter,
-                    StringDecimalConverter) {NamingStrategy = namingStrategy};
-            }
-            else
-            {
-                deserializerContractResolver = new JsonContractResolver(
-                    ByteArrayConverter,
-                    ListJsonConverter,
-                    CaseInsensitiveDictionaryJsonConverter,
-                    InterfaceProxyConverter,
-                    MessageDataJsonConverter,
-                    StringDecimalConverter) {NamingStrategy = namingStrategy};
-            }
+            DefaultContractResolver deserializerContractResolver = new JsonContractResolver(
+                ByteArrayConverter,
+                ListJsonConverter,
+                CaseInsensitiveDictionaryJsonConverter,
+                InterfaceProxyConverter,
+                MessageDataJsonConverter,
+                StringDecimalConverter) {NamingStrategy = namingStrategy};
 
             DefaultContractResolver serializerContractResolver =
                 new JsonContractResolver(ByteArrayConverter, MessageDataJsonConverter, StringDecimalConverter) {NamingStrategy = namingStrategy};

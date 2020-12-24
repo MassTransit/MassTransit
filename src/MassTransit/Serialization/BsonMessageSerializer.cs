@@ -4,7 +4,6 @@
     using System.Globalization;
     using System.IO;
     using System.Net.Mime;
-    using Configuration;
     using JsonConverters;
     using Metadata;
     using Newtonsoft.Json;
@@ -41,24 +40,12 @@
 
             var namingStrategy = new CamelCaseNamingStrategy();
 
-            DefaultContractResolver deserializerContractResolver;
-            if (AppContext.TryGetSwitch(AppContextSwitches.CaseSensitiveDictionaryDeserializer, out var isEnabled) && isEnabled)
-            {
-                deserializerContractResolver = new JsonContractResolver(
-                    ListJsonConverter,
-                    InterfaceProxyConverter,
-                    IsoDateTimeConverter,
-                    MessageDataJsonConverter) {NamingStrategy = namingStrategy};
-            }
-            else
-            {
-                deserializerContractResolver = new JsonContractResolver(
-                    ListJsonConverter,
-                    CaseInsensitiveDictionaryJsonConverter,
-                    InterfaceProxyConverter,
-                    IsoDateTimeConverter,
-                    MessageDataJsonConverter) {NamingStrategy = namingStrategy};
-            }
+            DefaultContractResolver deserializerContractResolver = new JsonContractResolver(
+                ListJsonConverter,
+                CaseInsensitiveDictionaryJsonConverter,
+                InterfaceProxyConverter,
+                IsoDateTimeConverter,
+                MessageDataJsonConverter) {NamingStrategy = namingStrategy};
 
             IContractResolver serializerContractResolver =
                 new JsonContractResolver(IsoDateTimeConverter, MessageDataJsonConverter) {NamingStrategy = namingStrategy};
