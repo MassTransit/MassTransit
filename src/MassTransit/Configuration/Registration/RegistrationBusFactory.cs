@@ -4,7 +4,6 @@ namespace MassTransit.Registration
     using System.Collections.Generic;
     using Configuration;
     using Context;
-    using GreenPipes;
     using Microsoft.Extensions.Logging;
     using Riders;
 
@@ -48,13 +47,14 @@ namespace MassTransit.Registration
 
             public IHostConfiguration HostConfiguration => default;
 
-            public TRider GetRider<TRider>()
+            public void Connect<TRider>(IRiderControl riderControl)
                 where TRider : IRider
             {
                 throw new ConfigurationException(RiderExceptionMessage);
             }
 
-            public ConnectHandle Connect(IRider rider)
+            public TRider GetRider<TRider>()
+                where TRider : IRider
             {
                 throw new ConfigurationException(RiderExceptionMessage);
             }

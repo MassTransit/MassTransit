@@ -154,7 +154,6 @@ namespace MassTransit.EventHubIntegration.Tests
 
 
         public interface BusPing
-        {
-        }
+        {}
     }
 }

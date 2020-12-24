@@ -11,6 +11,7 @@ namespace MassTransit.KafkaIntegration.Configurators
     using Serializers;
     using Specifications;
     using Transport;
+    using Transports;
     using Util;
 
 
@@ -274,8 +275,9 @@ namespace MassTransit.KafkaIntegration.Configurators
 
         public IKafkaRider Build(IBusInstance busInstance)
         {
-            Dictionary<string, IReceiveEndpointControl> endpoints = _topics
-                .ToDictionary(x => x.EndpointName, x => x.CreateReceiveEndpoint(busInstance));
+            var endpoints = new ReceiveEndpointCollection();
+            foreach (var topic in _topics)
+                endpoints.Add(topic.EndpointName, topic.CreateReceiveEndpoint(busInstance));
 
             IKafkaProducerFactory[] producers = _producers
                 .Select(x => x.CreateProducerFactory(busInstance))

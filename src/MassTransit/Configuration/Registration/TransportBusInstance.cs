@@ -2,7 +2,6 @@ namespace MassTransit.Registration
 {
     using System;
     using Configuration;
-    using GreenPipes;
     using Riders;
 
 
@@ -24,15 +23,16 @@ namespace MassTransit.Registration
 
         public IHostConfiguration HostConfiguration { get; }
 
+        public void Connect<TRider>(IRiderControl riderControl)
+            where TRider : IRider
+        {
+            _riderConnectable.Add<TRider>(riderControl);
+        }
+
         public TRider GetRider<TRider>()
             where TRider : IRider
         {
             return _riderConnectable.Get<TRider>();
-        }
-
-        public ConnectHandle Connect(IRider rider)
-        {
-            return _riderConnectable.Connect(rider);
         }
     }
 }

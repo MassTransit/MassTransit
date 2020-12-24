@@ -1,7 +1,6 @@
 namespace MassTransit.EventHubIntegration.Specifications
 {
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit.Registration;
 
@@ -24,11 +23,7 @@ namespace MassTransit.EventHubIntegration.Specifications
         public void Configure(IBusInstance busInstance)
         {
             var rider = _hostConfiguration.Build(busInstance);
-            //TODO: remove this
-            busInstance.HostConfiguration.Agent.Completed.ContinueWith(x => _hostConfiguration.ConnectionContextSupervisor.Stop(),
-                TaskContinuationOptions.ExecuteSynchronously);
-
-            busInstance.Connect(rider);
+            busInstance.Connect<IEventHubRider>(rider);
         }
     }
 }

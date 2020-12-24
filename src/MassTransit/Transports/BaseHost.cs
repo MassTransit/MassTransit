@@ -9,6 +9,7 @@ namespace MassTransit.Transports
     using GreenPipes;
     using GreenPipes.Agents;
     using Pipeline;
+    using Riders;
     using Topology;
 
 
@@ -16,6 +17,7 @@ namespace MassTransit.Transports
         IHost
     {
         readonly IHostConfiguration _hostConfiguration;
+        readonly IRiderCollection _riderCollection;
         HostHandle _handle;
 
         protected BaseHost(IHostConfiguration hostConfiguration, IHostTopology hostTopology)
@@ -24,6 +26,7 @@ namespace MassTransit.Transports
             Topology = hostTopology;
 
             ReceiveEndpoints = new ReceiveEndpointCollection();
+            _riderCollection = new RiderCollection();
         }
 
         protected IReceiveEndpointCollection ReceiveEndpoints { get; }
@@ -88,7 +91,9 @@ namespace MassTransit.Transports
 
             HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints(cancellationToken);
 
-            _handle = new StartHostHandle(this, handles, GetAgentHandles());
+            HostRiderHandle[] riders = _riderCollection.StartRiders(cancellationToken);
+
+            _handle = new StartHostHandle(this, handles, riders, GetAgentHandles());
 
             return _handle;
         }
@@ -96,6 +101,11 @@ namespace MassTransit.Transports
         public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
         {
             ReceiveEndpoints.Add(endpointName, receiveEndpoint);
+        }
+
+        public void AddRider(string name, IRiderControl riderControl)
+        {
+            _riderCollection.Add(name, riderControl);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -110,6 +120,8 @@ namespace MassTransit.Transports
         public async Task Stop(CancellationToken cancellationToken)
         {
             LogContext.Current = _hostConfiguration.LogContext;
+
+            await _riderCollection.Stop(cancellationToken).ConfigureAwait(false);
 
             await ReceiveEndpoints.Stop(cancellationToken).ConfigureAwait(false);
 

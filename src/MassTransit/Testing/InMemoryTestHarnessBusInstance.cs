@@ -2,7 +2,6 @@ namespace MassTransit.Testing
 {
     using System;
     using Configuration;
-    using GreenPipes;
     using Registration;
     using Riders;
 
@@ -22,13 +21,14 @@ namespace MassTransit.Testing
         public IBusControl BusControl => Harness.BusControl;
         public IHostConfiguration HostConfiguration => Harness.HostConfiguration;
 
-        public TRider GetRider<TRider>()
+        public void Connect<TRider>(IRiderControl riderControl)
             where TRider : IRider
         {
             throw new NotSupportedException();
         }
 
-        public ConnectHandle Connect(IRider rider)
+        public TRider GetRider<TRider>()
+            where TRider : IRider
         {
             throw new NotSupportedException();
         }

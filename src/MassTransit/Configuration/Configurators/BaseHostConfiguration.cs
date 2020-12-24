@@ -7,7 +7,6 @@ namespace MassTransit.Configurators
     using Context;
     using EndpointConfigurators;
     using GreenPipes;
-    using GreenPipes.Agents;
     using Logging;
     using Pipeline.Observables;
     using Topology;
@@ -44,8 +43,6 @@ namespace MassTransit.Configurators
         protected IEndpointConfigurationObserver Observers => _endpointObservable;
 
         protected IEnumerable<TConfiguration> Endpoints => _endpoints;
-
-        public abstract IAgent Agent { get; }
 
         public IBusConfiguration BusConfiguration { get; }
 

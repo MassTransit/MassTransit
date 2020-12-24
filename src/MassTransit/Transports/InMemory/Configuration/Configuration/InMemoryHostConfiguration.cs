@@ -35,8 +35,6 @@
             _transportProvider = new Recycle<IInMemoryTransportProvider>(() => new InMemoryTransportProvider(this, topologyConfiguration));
         }
 
-        public override IAgent Agent => _transportProvider.Supervisor;
-
         public override Uri HostAddress => _hostAddress;
         public override IHostTopology HostTopology => _hostTopology;
         public override IRetryPolicy ReceiveTransportRetryPolicy => Retry.None;
@@ -54,7 +52,7 @@
 
         public void ApplyEndpointDefinition(IInMemoryReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
-            int? concurrencyLimit = definition.PrefetchCount;
+            var concurrencyLimit = definition.PrefetchCount;
 
             if (definition.ConcurrentMessageLimit.HasValue)
                 concurrencyLimit = definition.ConcurrentMessageLimit;

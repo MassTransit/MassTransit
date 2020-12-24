@@ -1,9 +1,9 @@
 namespace MassTransit.KafkaIntegration.Specifications
 {
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using GreenPipes;
     using MassTransit.Registration;
+    using Transport;
 
 
     public class KafkaBusInstanceSpecification :
@@ -19,10 +19,7 @@ namespace MassTransit.KafkaIntegration.Specifications
         public void Configure(IBusInstance busInstance)
         {
             var rider = _hostConfiguration.Build(busInstance);
-            //TODO: REMOVE THIS
-            busInstance.HostConfiguration.Agent.Completed.ContinueWith(_ => _hostConfiguration.ClientContextSupervisor.Stop(),
-                TaskContinuationOptions.ExecuteSynchronously);
-            busInstance.Connect(rider);
+            busInstance.Connect<IKafkaRider>(rider);
         }
 
         public IEnumerable<ValidationResult> Validate()

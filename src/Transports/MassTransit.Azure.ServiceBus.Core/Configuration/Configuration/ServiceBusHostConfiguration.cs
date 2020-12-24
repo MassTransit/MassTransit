@@ -4,7 +4,6 @@
     using Configurators;
     using Definition;
     using GreenPipes;
-    using GreenPipes.Agents;
     using MassTransit.Configuration;
     using MassTransit.Configurators;
     using MassTransit.Topology;
@@ -44,8 +43,6 @@
 
             _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }
-
-        public override IAgent Agent => ConnectionContextSupervisor;
 
         public override Uri HostAddress => _hostSettings.ServiceUri;
 
@@ -121,11 +118,6 @@
         public override void ReceiveEndpoint(string queueName, Action<IServiceBusReceiveEndpointConfigurator> configureEndpoint)
         {
             CreateReceiveEndpointConfiguration(queueName, configureEndpoint);
-        }
-
-        public ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(SendSettings settings)
-        {
-            return _connectionContext.Supervisor.CreateSendEndpointContextSupervisor(settings);
         }
 
         public void ApplyEndpointDefinition(IServiceBusReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
@@ -229,6 +221,11 @@
                 endpointConfiguration.Build(host);
 
             return host;
+        }
+
+        public ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(SendSettings settings)
+        {
+            return _connectionContext.Supervisor.CreateSendEndpointContextSupervisor(settings);
         }
 
         IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings,

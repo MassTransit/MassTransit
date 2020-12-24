@@ -107,12 +107,15 @@
 
         protected override async Task StopAgent(StopContext context)
         {
-            await _processorContext.StopProcessingAsync().ConfigureAwait(false);
+            if (IsStopped)
+                return;
 
-            await _executor.DisposeAsync().ConfigureAwait(false);
+            await _processorContext.StopProcessingAsync().ConfigureAwait(false);
 
             _processorContext.ProcessEvent -= HandleMessage;
             _processorContext.ProcessError -= HandleError;
+
+            await _executor.DisposeAsync().ConfigureAwait(false);
 
             LogContext.Debug?.Log("Stopping consumer: {InputAddress}", _context.InputAddress);
 

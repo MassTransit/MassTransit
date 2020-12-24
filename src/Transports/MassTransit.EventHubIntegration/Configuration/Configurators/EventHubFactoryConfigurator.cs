@@ -11,6 +11,7 @@ namespace MassTransit.EventHubIntegration.Configurators
     using MassTransit.Registration;
     using Pipeline.Observables;
     using Specifications;
+    using Transports;
     using Util;
 
 
@@ -148,8 +149,9 @@ namespace MassTransit.EventHubIntegration.Configurators
 
         public IEventHubRider Build(IBusInstance busInstance)
         {
-            IDictionary<string, IReceiveEndpointControl> endpoints = _endpoints
-                .ToDictionary(x => x.EndpointName, x => x.CreateReceiveEndpoint(busInstance));
+            var endpoints = new ReceiveEndpointCollection();
+            foreach (var endpoint in _endpoints)
+                endpoints.Add(endpoint.EndpointName, endpoint.CreateReceiveEndpoint(busInstance));
 
             return new EventHubRider(this, endpoints, _producerSpecification.CreateProducerProviderFactory(busInstance));
         }

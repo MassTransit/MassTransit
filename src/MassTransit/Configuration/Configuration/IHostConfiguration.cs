@@ -4,7 +4,6 @@
     using Context;
     using EndpointConfigurators;
     using GreenPipes;
-    using GreenPipes.Agents;
     using Topology;
 
 
@@ -16,8 +15,6 @@
         ISendObserverConnector,
         ISpecification
     {
-        IAgent Agent { get; }
-
         IBusConfiguration BusConfiguration { get; }
 
         Uri HostAddress { get; }

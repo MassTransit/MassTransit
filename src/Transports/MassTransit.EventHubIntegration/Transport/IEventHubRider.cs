@@ -4,7 +4,7 @@ namespace MassTransit.EventHubIntegration
 
 
     public interface IEventHubRider :
-        IRider
+        IRiderControl
     {
         IEventHubProducerProvider GetProducerProvider(ConsumeContext consumeContext = default);
     }

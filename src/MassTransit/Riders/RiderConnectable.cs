@@ -1,61 +1,56 @@
 namespace MassTransit.Riders
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using GreenPipes;
-    using GreenPipes.Util;
+    using Metadata;
 
 
     public class RiderConnectable
     {
-        readonly Connectable<IRider> _connectable;
         readonly IHost _host;
-        readonly List<IRider> _riders;
+        readonly object _mutateLock = new object();
+        readonly Dictionary<string, IRider> _riders;
 
         public RiderConnectable(IHost host)
         {
             _host = host;
-            _connectable = new Connectable<IRider>();
-            _riders = new List<IRider>();
+            _riders = new Dictionary<string, IRider>();
         }
 
-        public ConnectHandle Connect(IRider rider)
+        public void Add<TRider>(IRiderControl riderControl)
+            where TRider : IRider
         {
-            rider.Connect(_host);
-            _riders.Add(rider);
-            return new RiderConnectHandle(_connectable.Connect(rider), () => _riders.Remove(rider));
+            var name = GetRiderName<TRider>();
+            lock (_mutateLock)
+            {
+                if (_riders.ContainsKey(name))
+                    throw new ConfigurationException($"A rider with the same key was already added: {name}");
+
+                _riders.Add(name, riderControl);
+                _host.AddRider(name, riderControl);
+            }
         }
 
-        public T Get<T>()
-            where T : IRider
+        public TRider Get<TRider>()
+            where TRider : IRider
         {
-            return _riders.OfType<T>().FirstOrDefault();
+            var name = GetRiderName<TRider>();
+
+            lock (_mutateLock)
+            {
+                if (!_riders.TryGetValue(name, out var r))
+                    throw new ConfigurationException($"A rider with the key was not found: {name}");
+
+                if (r is TRider rider)
+                    return rider;
+
+                throw new ConfigurationException($"A rider with the key is not compatible: {name}");
+            }
         }
 
-
-        class RiderConnectHandle :
-            ConnectHandle
+        static string GetRiderName<TRider>()
+            where TRider : IRider
         {
-            readonly ConnectHandle _handle;
-            readonly Action _onDisconnect;
-
-            public RiderConnectHandle(ConnectHandle handle, Action onDisconnect)
-            {
-                _handle = handle;
-                _onDisconnect = onDisconnect;
-            }
-
-            public void Dispose()
-            {
-                _handle.Disconnect();
-            }
-
-            public void Disconnect()
-            {
-                _handle.Disconnect();
-                _onDisconnect();
-            }
+            return TypeMetadataCache.GetShortName(typeof(TRider));
         }
     }
 }
