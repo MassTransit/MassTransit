@@ -40,7 +40,7 @@ namespace MassTransit.Registration
 
         static string GetRiderName<TRider>()
         {
-            return TypeMetadataCache.GetShortName(typeof(TRider));
+            return TypeMetadataCache<TRider>.ShortName;
         }
     }
 }

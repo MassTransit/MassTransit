@@ -10,7 +10,7 @@ namespace MassTransit.KafkaIntegration.Registration
         IKafkaProducerRegistrationConfigurator<TKey, TValue>
         where TValue : class
     {
-        readonly List<Action<IKafkaProducerConfigurator<TKey, TValue>>> _configurations = new List<Action<IKafkaProducerConfigurator<TKey, TValue>>>();
+        readonly List<Action<IKafkaProducerConfigurator<TKey, TValue>>> _configurations;
         readonly ProducerConfig _producerConfig;
         readonly string _topic;
         ISerializer<TKey> _keySerializer;
@@ -20,6 +20,8 @@ namespace MassTransit.KafkaIntegration.Registration
         {
             _topic = topic;
             _producerConfig = producerConfig;
+
+            _configurations = new List<Action<IKafkaProducerConfigurator<TKey, TValue>>>();
         }
 
         public void Register(IKafkaFactoryConfigurator configurator)

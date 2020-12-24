@@ -99,14 +99,14 @@ namespace MassTransit.KafkaIntegration.Transport
                 _agent = agent;
             }
 
-            public Task<bool> Started => ReadyOrNot(_endpoints.Select(x => x.Ready));
+            public Task Ready => ReadyOrNot(_endpoints.Select(x => x.Ready));
 
             public Task StopAsync(CancellationToken cancellationToken)
             {
                 return _agent.Stop("Kafka stopped", cancellationToken);
             }
 
-            async Task<bool> ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> endpoints)
+            async Task ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> endpoints)
             {
                 Task<ReceiveEndpointReady>[] readyTasks = endpoints as Task<ReceiveEndpointReady>[] ?? endpoints.ToArray();
                 foreach (Task<ReceiveEndpointReady> ready in readyTasks)
@@ -115,7 +115,6 @@ namespace MassTransit.KafkaIntegration.Transport
                 await _agent.Ready.ConfigureAwait(false);
 
                 await Task.WhenAll(readyTasks).ConfigureAwait(false);
-                return true;
             }
         }
     }

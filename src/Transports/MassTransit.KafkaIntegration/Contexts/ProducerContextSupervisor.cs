@@ -31,6 +31,7 @@ namespace MassTransit.KafkaIntegration.Contexts
             _hostConfiguration = hostConfiguration;
             _topicAddress = new KafkaTopicAddress(hostConfiguration.HostAddress, topicName);
             _sendPipe = sendPipe;
+
             clientContextSupervisor.AddSendAgent(this);
         }
 

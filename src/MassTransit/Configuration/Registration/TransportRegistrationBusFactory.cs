@@ -8,7 +8,6 @@ namespace MassTransit.Registration
     using Context;
     using GreenPipes;
     using Microsoft.Extensions.Logging;
-    using Riders;
     using Util;
 
 

@@ -107,9 +107,6 @@
 
         protected override async Task StopAgent(StopContext context)
         {
-            if (IsStopped)
-                return;
-
             await _processorContext.StopProcessingAsync().ConfigureAwait(false);
 
             _processorContext.ProcessEvent -= HandleMessage;

@@ -123,9 +123,6 @@
 
         protected override async Task StopAgent(StopContext context)
         {
-            if (IsStopped)
-                return;
-
             await _consumerContext.Close().ConfigureAwait(false);
 
             _consumerContext.ErrorHandler -= HandleKafkaError;

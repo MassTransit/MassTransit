@@ -6,7 +6,7 @@ namespace MassTransit.Riders
 
     public interface RiderHandle
     {
-        Task<bool> Started { get; }
+        Task Ready { get; }
         Task StopAsync(CancellationToken cancellationToken);
     }
 }

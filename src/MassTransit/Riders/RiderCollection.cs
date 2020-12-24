@@ -6,7 +6,6 @@ namespace MassTransit.Riders
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes.Agents;
-    using GreenPipes.Internals.Extensions;
 
 
     public class RiderCollection :
@@ -90,11 +89,9 @@ namespace MassTransit.Riders
             {
                 static async Task<RiderReady> Ready(RiderHandle r, string n)
                 {
-                    var result = r.Started.IsCompletedSuccessfully()
-                        ? r.Started.Result
-                        : await r.Started.ConfigureAwait(false);
+                    await r.Ready.ConfigureAwait(false);
 
-                    return new ReadyEvent(n, result);
+                    return new ReadyEvent(n);
                 }
 
                 var riderHandle = rider.Start(cancellationToken);
@@ -187,14 +184,12 @@ namespace MassTransit.Riders
         class ReadyEvent :
             RiderReady
         {
-            public ReadyEvent(string name, bool isStarted)
+            public ReadyEvent(string name)
             {
                 Name = name;
-                IsStarted = isStarted;
             }
 
             public string Name { get; }
-            public bool IsStarted { get; }
         }
     }
 }
