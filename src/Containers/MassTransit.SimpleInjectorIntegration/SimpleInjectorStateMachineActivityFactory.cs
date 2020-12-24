@@ -10,20 +10,12 @@
     {
         public static readonly IStateMachineActivityFactory Instance = new SimpleInjectorStateMachineActivityFactory();
 
-        public Activity<TInstance, TData> GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
-            where TActivity : class, Activity<TInstance, TData>
+        public T GetService<T>(PipeContext context)
+            where T : class
         {
             var container = context.GetPayload<Scope>();
 
-            return (TActivity)container.GetInstance(typeof(TActivity));
-        }
-
-        public Activity<TInstance> GetActivity<TActivity, TInstance>(BehaviorContext<TInstance> context)
-            where TActivity : class, Activity<TInstance>
-        {
-            var container = context.GetPayload<Scope>();
-
-            return (TActivity)container.GetInstance(typeof(TActivity));
+            return container.GetInstance<T>();
         }
     }
 }

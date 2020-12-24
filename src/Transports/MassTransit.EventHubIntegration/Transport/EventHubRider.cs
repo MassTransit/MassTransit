@@ -27,9 +27,9 @@ namespace MassTransit.EventHubIntegration
 
         public IEventHubProducerProvider GetProducerProvider(ConsumeContext consumeContext = default)
         {
-            if (consumeContext == null)
-                return _producerProvider;
-            return new ConsumeContextEventHubProducerProvider(_producerProvider, consumeContext);
+            return consumeContext == null
+                ? _producerProvider
+                : new ConsumeContextEventHubProducerProvider(_producerProvider, consumeContext);
         }
 
         public RiderHandle Start(CancellationToken cancellationToken = default)

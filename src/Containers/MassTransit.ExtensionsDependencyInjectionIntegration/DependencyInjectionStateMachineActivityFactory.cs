@@ -3,7 +3,7 @@
     using System;
     using Automatonymous;
     using GreenPipes;
-    using Metadata;
+    using GreenPipes.Internals.Extensions;
     using Microsoft.Extensions.DependencyInjection;
 
 
@@ -12,25 +12,16 @@
     {
         public static readonly IStateMachineActivityFactory Instance = new DependencyInjectionStateMachineActivityFactory();
 
-        Activity<TInstance, TData> IStateMachineActivityFactory.GetActivity<TActivity, TInstance, TData>(BehaviorContext<TInstance, TData> context)
-        {
-            return GetActivity<TActivity>(context);
-        }
-
-        Activity<TInstance> IStateMachineActivityFactory.GetActivity<TActivity, TInstance>(BehaviorContext<TInstance> context)
-        {
-            return GetActivity<TActivity>(context);
-        }
-
-        static TActivity GetActivity<TActivity>(PipeContext context)
+        public T GetService<T>(PipeContext context)
+            where T : class
         {
             if (context.TryGetPayload(out IServiceScope serviceScope))
-                return serviceScope.ServiceProvider.GetService<TActivity>() ?? ActivatorUtilities.CreateInstance<TActivity>(serviceScope.ServiceProvider);
+                return serviceScope.ServiceProvider.GetService<T>() ?? ActivatorUtilities.CreateInstance<T>(serviceScope.ServiceProvider);
 
             if (context.TryGetPayload(out IServiceProvider serviceProvider))
-                return serviceProvider.GetService<TActivity>() ?? ActivatorUtilities.CreateInstance<TActivity>(serviceProvider);
+                return serviceProvider.GetService<T>() ?? ActivatorUtilities.CreateInstance<T>(serviceProvider);
 
-            throw new PayloadNotFoundException($"IServiceProvider or IServiceScope was not found to create activity: {TypeMetadataCache<TActivity>.ShortName}");
+            throw new PayloadNotFoundException($"IServiceProvider or IServiceScope was not found to get service: {TypeCache<T>.ShortName}");
         }
     }
 }

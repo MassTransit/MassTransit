@@ -84,7 +84,7 @@ namespace Automatonymous
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new PublishActivity<TInstance, TMessage>(x => message, contextCallback));
+            return source.Add(new FaultedPublishActivity<TInstance, TException, TMessage>(x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TException> PublishAsync<TInstance, TException, TMessage>(
@@ -94,7 +94,7 @@ namespace Automatonymous
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new PublishActivity<TInstance, TMessage>(x => message, contextCallback));
+            return source.Add(new FaultedPublishActivity<TInstance, TException, TMessage>(x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TException> Publish<TInstance, TException, TMessage>(
@@ -127,7 +127,7 @@ namespace Automatonymous
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new PublishActivity<TInstance, TData, TMessage>(x => message, contextCallback));
+            return source.Add(new FaultedPublishActivity<TInstance, TData, TException, TMessage>(x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> PublishAsync<TInstance, TData, TException, TMessage>(
@@ -138,7 +138,7 @@ namespace Automatonymous
             where TMessage : class
             where TException : Exception
         {
-            return source.Add(new PublishActivity<TInstance, TData, TMessage>(x => message, contextCallback));
+            return source.Add(new FaultedPublishActivity<TInstance, TData, TException, TMessage>(x => message, contextCallback));
         }
 
         public static ExceptionActivityBinder<TInstance, TData, TException> Publish<TInstance, TData, TException, TMessage>(

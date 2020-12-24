@@ -2,6 +2,7 @@ namespace MassTransit.KafkaIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Automatonymous;
     using Confluent.Kafka;
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,7 @@ namespace MassTransit.KafkaIntegration.Tests
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
+    using TestFramework.Sagas;
 
 
     public class Producer_Specs :
@@ -103,6 +105,77 @@ namespace MassTransit.KafkaIntegration.Tests
             }
         }
 
+        [Test]
+        public async Task Should_produce_from_state_machine()
+        {
+            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
+            var services = new ServiceCollection();
+            services.AddSingleton(taskCompletionSource);
+
+            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            services.AddMassTransit(x =>
+            {
+                x.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
+                    .InMemoryRepository();
+
+                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+
+                x.AddRider(rider =>
+                {
+                    rider.AddConsumer<KafkaMessageConsumer>();
+
+                    rider.AddProducer<KafkaMessage>(Topic);
+
+                    rider.UsingKafka((context, k) =>
+                    {
+                        k.Host("localhost:9092");
+
+                        k.TopicEndpoint<KafkaMessage>(Topic, nameof(Producer_Specs), c =>
+                        {
+                            c.AutoOffsetReset = AutoOffsetReset.Earliest;
+                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                        });
+                    });
+                });
+            });
+
+            var provider = services.BuildServiceProvider(true);
+
+            var busControl = provider.GetRequiredService<IBusControl>();
+
+            await busControl.StartAsync(TestCancellationToken);
+
+            var serviceScope = provider.CreateScope();
+
+            var publishEndpoint = serviceScope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
+
+            try
+            {
+                var correlationId = NewId.NextGuid();
+
+                await publishEndpoint.Publish(new StartTest
+                {
+                    CorrelationId = correlationId,
+                    TestKey = "ABC"
+                }, TestCancellationToken);
+
+                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
+
+                Assert.AreEqual("text", result.Message.Text);
+                Assert.AreEqual(correlationId, result.InitiatorId);
+            }
+            finally
+            {
+                serviceScope.Dispose();
+
+                await busControl.StopAsync(TestCancellationToken);
+
+                await provider.DisposeAsync();
+            }
+        }
+
 
         class KafkaMessageConsumer :
             IConsumer<KafkaMessage>
@@ -131,6 +204,37 @@ namespace MassTransit.KafkaIntegration.Tests
         public interface KafkaMessage
         {
             string Text { get; }
+        }
+
+
+        public class TestInstance :
+            SagaStateMachineInstance
+        {
+            public State CurrentState { get; set; }
+            public string Key { get; set; }
+            public Guid CorrelationId { get; set; }
+        }
+
+
+        public class TestStateMachineSaga :
+            MassTransitStateMachine<TestInstance>
+        {
+            public TestStateMachineSaga()
+            {
+                InstanceState(x => x.CurrentState);
+
+                Initially(
+                    When(Started)
+                        .Then(context => context.Instance.Key = context.Data.TestKey)
+                        .Produce(x => x.Init<KafkaMessage>(new {Text = "text"}))
+                        .TransitionTo(Active));
+
+                SetCompletedWhenFinalized();
+            }
+
+            public State Active { get; private set; }
+
+            public Event<StartTest> Started { get; private set; }
         }
     }
 }
