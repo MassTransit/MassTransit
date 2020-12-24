@@ -67,9 +67,6 @@ namespace MassTransit.KafkaIntegration.Specifications
 
             if (string.IsNullOrEmpty(_consumerConfig.GroupId))
                 yield return this.Failure("GroupId", "should not be empty");
-
-            if (string.IsNullOrEmpty(_consumerConfig.BootstrapServers))
-                yield return this.Failure("BootstrapServers", "should not be empty. Please use cfg.Host() to configure it");
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)

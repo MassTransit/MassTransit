@@ -153,12 +153,13 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public IKafkaProducerFactory CreateProducerFactory(IBusInstance busInstance)
         {
+            var producerConfig = _hostConfiguration.GetProducerConfig(_producerConfig);
             var sendConfiguration = new SendPipeConfiguration(busInstance.HostConfiguration.HostTopology.SendTopology);
             _configureSend?.Invoke(sendConfiguration.Configurator);
 
             ProducerBuilder<TKey, TValue> CreateProducerBuilder()
             {
-                ProducerBuilder<TKey, TValue> producerBuilder = new ProducerBuilder<TKey, TValue>(_producerConfig)
+                ProducerBuilder<TKey, TValue> producerBuilder = new ProducerBuilder<TKey, TValue>(producerConfig)
                     .SetErrorHandler((c, error) =>
                         busInstance.HostConfiguration.SendLogContext?.Error?.Log("Consumer error ({code}): {reason} on {topic}", error.Code, error.Reason,
                             _topicName))
@@ -180,8 +181,8 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (string.IsNullOrEmpty(_producerConfig.BootstrapServers))
-                yield return this.Failure("BootstrapServers", "should not be empty. Please use cfg.Host() to configure it");
+            if (string.IsNullOrEmpty(_topicName))
+                yield return this.Failure("Topic", "should not be empty");
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
