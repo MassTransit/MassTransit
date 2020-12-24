@@ -23,6 +23,23 @@ namespace MassTransit.Riders
             _handles = new Dictionary<string, Handle>(StringComparer.OrdinalIgnoreCase);
         }
 
+        public IRider Get(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException($"The {nameof(name)} must not be null or empty", nameof(name));
+
+            lock (_mutateLock)
+            {
+                if (!_riders.ContainsKey(name))
+                    throw new ConfigurationException($"A rider with the key was not found: {name}");
+
+                if (!_handles.TryGetValue(name, out var handle))
+                    throw new ConfigurationException($"A rider has not yet been started: {name}");
+
+                return handle.Rider;
+            }
+        }
+
         public void Add(string name, IRiderControl rider)
         {
             if (rider == null)

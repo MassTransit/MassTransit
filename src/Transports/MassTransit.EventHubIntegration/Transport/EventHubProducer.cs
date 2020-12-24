@@ -19,13 +19,11 @@ namespace MassTransit.EventHubIntegration
     public class EventHubProducer :
         IEventHubProducer
     {
-        readonly ConsumeContext _consumeContext;
         readonly EventHubSendTransportContext _context;
 
-        public EventHubProducer(EventHubSendTransportContext context, ConsumeContext consumeContext = null)
+        public EventHubProducer(EventHubSendTransportContext context)
         {
             _context = context;
-            _consumeContext = consumeContext;
         }
 
         public Task Produce<T>(T message, CancellationToken cancellationToken = default)
@@ -43,14 +41,14 @@ namespace MassTransit.EventHubIntegration
         public Task Produce<T>(T message, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
-            var sendPipe = new SendPipe<T>(message, _context, pipe, cancellationToken, _consumeContext);
+            var sendPipe = new SendPipe<T>(message, _context, pipe, cancellationToken);
             return _context.ProducerContextSupervisor.Send(sendPipe, cancellationToken);
         }
 
         public Task Produce<T>(IEnumerable<T> messages, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            var sendPipe = new BathSendPipe<T>(messages, _context, pipe, cancellationToken, _consumeContext);
+            var sendPipe = new BathSendPipe<T>(messages, _context, pipe, cancellationToken);
             return _context.ProducerContextSupervisor.Send(sendPipe, cancellationToken);
         }
 
@@ -111,31 +109,27 @@ namespace MassTransit.EventHubIntegration
             where T : class
         {
             readonly CancellationToken _cancellationToken;
-            readonly ConsumeContext _consumeContext;
             readonly EventHubSendTransportContext _context;
             readonly T _message;
             readonly IPipe<EventHubSendContext<T>> _pipe;
 
-            public SendPipe(T message, EventHubSendTransportContext context, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken,
-                ConsumeContext consumeContext)
+            public SendPipe(T message, EventHubSendTransportContext context, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken)
             {
                 _message = message;
                 _context = context;
                 _pipe = pipe;
                 _cancellationToken = cancellationToken;
-                _consumeContext = consumeContext;
             }
 
             public async Task Send(ProducerContext context)
             {
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
-                var sendContext = new EventHubMessageSendContext<T>(_message, _cancellationToken) {Serializer = context.Serializer};
-
-                if (_consumeContext != null)
-                    sendContext.TransferConsumeContextHeaders(_consumeContext);
-
-                sendContext.DestinationAddress = _context.EndpointAddress;
+                var sendContext = new EventHubMessageSendContext<T>(_message, _cancellationToken)
+                {
+                    Serializer = context.Serializer,
+                    DestinationAddress = _context.EndpointAddress
+                };
 
                 await _context.SendPipe.Send(sendContext).ConfigureAwait(false);
 
@@ -196,19 +190,17 @@ namespace MassTransit.EventHubIntegration
             where T : class
         {
             readonly CancellationToken _cancellationToken;
-            readonly ConsumeContext _consumeContext;
             readonly EventHubSendTransportContext _context;
             readonly IEnumerable<T> _messages;
             readonly IPipe<EventHubSendContext<T>> _pipe;
 
             public BathSendPipe(IEnumerable<T> messages, EventHubSendTransportContext context, IPipe<EventHubSendContext<T>> pipe,
-                CancellationToken cancellationToken, ConsumeContext consumeContext)
+                CancellationToken cancellationToken)
             {
                 _messages = messages;
                 _context = context;
                 _pipe = pipe;
                 _cancellationToken = cancellationToken;
-                _consumeContext = consumeContext;
             }
 
             public async Task Send(ProducerContext context)
@@ -229,9 +221,6 @@ namespace MassTransit.EventHubIntegration
 
                 async Task SendInner(EventHubMessageSendContext<T> c, int idx)
                 {
-                    if (_consumeContext != null)
-                        c.TransferConsumeContextHeaders(_consumeContext);
-
                     c.DestinationAddress = _context.EndpointAddress;
 
                     await _context.SendPipe.Send(c).ConfigureAwait(false);

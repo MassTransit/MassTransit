@@ -57,7 +57,7 @@ namespace MassTransit.EventHubIntegration.Tests
             var serviceScope = provider.CreateScope();
 
             var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
-            var producer = producerProvider.GetProducer(Configuration.EventHubName);
+            var producer = await producerProvider.GetProducer(Configuration.EventHubName);
 
             try
             {

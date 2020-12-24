@@ -27,6 +27,8 @@ namespace MassTransit
 
         void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint);
 
+        IRider GetRider(string name);
+
         void AddRider(string name, IRiderControl riderControl);
     }
 }

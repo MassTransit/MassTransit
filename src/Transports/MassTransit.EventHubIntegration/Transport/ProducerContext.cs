@@ -1,5 +1,6 @@
 namespace MassTransit.EventHubIntegration
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -9,7 +10,8 @@ namespace MassTransit.EventHubIntegration
 
 
     public interface ProducerContext :
-        PipeContext
+        PipeContext,
+        IAsyncDisposable
     {
         IMessageSerializer Serializer { get; }
 

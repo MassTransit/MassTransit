@@ -1,6 +1,7 @@
 namespace MassTransit.EventHubIntegration
 {
     using System;
+    using System.Threading.Tasks;
     using Configuration;
     using Context;
     using Contexts;
@@ -14,32 +15,30 @@ namespace MassTransit.EventHubIntegration
         IEventHubProducerProvider
     {
         readonly IBusInstance _busInstance;
-        readonly ConsumeContext _consumeContext;
         readonly IEventHubHostConfiguration _hostConfiguration;
         readonly IMessageSerializer _messageSerializer;
         readonly SendObservable _sendObservable;
         readonly ISendPipe _sendPipe;
 
         public EventHubProducerProvider(IEventHubHostConfiguration hostConfiguration, IBusInstance busInstance, ISendPipe sendPipe,
-            SendObservable sendObservable, IMessageSerializer messageSerializer,
-            ConsumeContext consumeContext)
+            SendObservable sendObservable, IMessageSerializer messageSerializer)
         {
             _hostConfiguration = hostConfiguration;
             _busInstance = busInstance;
             _sendPipe = sendPipe;
             _sendObservable = sendObservable;
             _messageSerializer = messageSerializer;
-            _consumeContext = consumeContext;
         }
 
-        public IEventHubProducer GetProducer(Uri address)
+        public Task<IEventHubProducer> GetProducer(Uri address)
         {
             var context = new EventHubTransportContext(_hostConfiguration, _sendPipe, _busInstance.HostConfiguration, address, _messageSerializer);
 
             if (_sendObservable.Count > 0)
                 context.ConnectSendObserver(_sendObservable);
 
-            return new EventHubProducer(context, _consumeContext);
+            IEventHubProducer eventHubProducer = new EventHubProducer(context);
+            return Task.FromResult(eventHubProducer);
         }
 
 

@@ -103,6 +103,11 @@ namespace MassTransit.Transports
             ReceiveEndpoints.Add(endpointName, receiveEndpoint);
         }
 
+        public IRider GetRider(string name)
+        {
+            return _riderCollection.Get(name);
+        }
+
         public void AddRider(string name, IRiderControl riderControl)
         {
             _riderCollection.Add(name, riderControl);

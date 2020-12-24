@@ -56,13 +56,13 @@ namespace MassTransit.EventHubIntegration.Specifications
                 yield return this.Failure("HostSettings", "is invalid");
         }
 
-        public IEvenHubProducerProviderFactory CreateProducerProviderFactory(IBusInstance busInstance)
+        public IEventHubProducerProvider CreateProducerProvider(IBusInstance busInstance)
         {
             var sendConfiguration = new SendPipeConfiguration(busInstance.HostConfiguration.HostTopology.SendTopology);
             _configureSend?.Invoke(sendConfiguration.Configurator);
             var sendPipe = sendConfiguration.CreatePipe();
 
-            return new EvenHubProducerProviderFactory(_hostConfiguration, busInstance, sendPipe, _sendObservers, _serializationConfiguration.Serializer);
+            return new EventHubProducerProvider(_hostConfiguration, busInstance, sendPipe, _sendObservers, _serializationConfiguration.Serializer);
         }
     }
 }

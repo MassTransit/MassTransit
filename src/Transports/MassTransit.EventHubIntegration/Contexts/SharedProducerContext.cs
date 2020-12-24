@@ -39,5 +39,10 @@ namespace MassTransit.EventHubIntegration.Contexts
         {
             return _context.CreateBatch(options, cancellationToken);
         }
+
+        public ValueTask DisposeAsync()
+        {
+            return _context.DisposeAsync();
+        }
     }
 }

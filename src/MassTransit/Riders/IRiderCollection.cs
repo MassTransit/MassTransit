@@ -7,6 +7,8 @@ namespace MassTransit.Riders
     public interface IRiderCollection :
         IAgent
     {
+        IRider Get(string name);
+
         void Add(string name, IRiderControl rider);
 
         HostRiderHandle[] StartRiders(CancellationToken cancellationToken = default);

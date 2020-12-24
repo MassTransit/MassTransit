@@ -153,7 +153,8 @@ namespace MassTransit.EventHubIntegration.Configurators
             foreach (var endpoint in _endpoints)
                 endpoints.Add(endpoint.EndpointName, endpoint.CreateReceiveEndpoint(busInstance));
 
-            return new EventHubRider(this, endpoints, _producerSpecification.CreateProducerProviderFactory(busInstance));
+            var producerProvider = _producerSpecification.CreateProducerProvider(busInstance);
+            return new EventHubRider(this, endpoints, new CachedEventHubProducerProvider(producerProvider));
         }
 
         public IEnumerable<ValidationResult> Validate()

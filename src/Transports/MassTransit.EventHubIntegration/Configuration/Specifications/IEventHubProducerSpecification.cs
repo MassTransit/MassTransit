@@ -7,6 +7,6 @@ namespace MassTransit.EventHubIntegration.Specifications
     public interface IEventHubProducerSpecification :
         ISpecification
     {
-        IEvenHubProducerProviderFactory CreateProducerProviderFactory(IBusInstance busInstance);
+        IEventHubProducerProvider CreateProducerProvider(IBusInstance busInstance);
     }
 }

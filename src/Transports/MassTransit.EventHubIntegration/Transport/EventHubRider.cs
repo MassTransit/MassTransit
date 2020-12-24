@@ -16,19 +16,20 @@ namespace MassTransit.EventHubIntegration
     {
         readonly IReceiveEndpointCollection _endpoints;
         readonly IEventHubHostConfiguration _hostConfiguration;
-        readonly IEvenHubProducerProviderFactory _producerProviderFactory;
+        readonly IEventHubProducerProvider _producerProvider;
 
-        public EventHubRider(IEventHubHostConfiguration hostConfiguration, IReceiveEndpointCollection endpoints,
-            IEvenHubProducerProviderFactory producerProviderFactory)
+        public EventHubRider(IEventHubHostConfiguration hostConfiguration, IReceiveEndpointCollection endpoints, IEventHubProducerProvider producerProvider)
         {
             _hostConfiguration = hostConfiguration;
             _endpoints = endpoints;
-            _producerProviderFactory = producerProviderFactory;
+            _producerProvider = producerProvider;
         }
 
         public IEventHubProducerProvider GetProducerProvider(ConsumeContext consumeContext = default)
         {
-            return _producerProviderFactory.GetProducerProvider(consumeContext);
+            if (consumeContext == null)
+                return _producerProvider;
+            return new ConsumeContextEventHubProducerProvider(_producerProvider, consumeContext);
         }
 
         public RiderHandle Start(CancellationToken cancellationToken = default)

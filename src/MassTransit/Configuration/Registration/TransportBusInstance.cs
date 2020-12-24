@@ -2,19 +2,20 @@ namespace MassTransit.Registration
 {
     using System;
     using Configuration;
+    using Metadata;
     using Riders;
 
 
     public class TransportBusInstance :
         IBusInstance
     {
-        readonly RiderConnectable _riderConnectable;
+        readonly IHost _host;
 
         public TransportBusInstance(IBusControl busControl, IHost host, IHostConfiguration hostConfiguration)
         {
+            _host = host;
             BusControl = busControl;
             HostConfiguration = hostConfiguration;
-            _riderConnectable = new RiderConnectable(host);
         }
 
         public Type InstanceType => typeof(IBus);
@@ -26,13 +27,20 @@ namespace MassTransit.Registration
         public void Connect<TRider>(IRiderControl riderControl)
             where TRider : IRider
         {
-            _riderConnectable.Add<TRider>(riderControl);
+            var name = GetRiderName<TRider>();
+            _host.AddRider(name, riderControl);
         }
 
         public TRider GetRider<TRider>()
             where TRider : IRider
         {
-            return _riderConnectable.Get<TRider>();
+            var name = GetRiderName<TRider>();
+            return (TRider)_host.GetRider(name);
+        }
+
+        static string GetRiderName<TRider>()
+        {
+            return TypeMetadataCache.GetShortName(typeof(TRider));
         }
     }
 }

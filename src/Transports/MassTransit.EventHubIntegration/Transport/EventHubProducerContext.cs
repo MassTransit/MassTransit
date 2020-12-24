@@ -38,5 +38,10 @@ namespace MassTransit.EventHubIntegration
         {
             return _producerClient.CreateBatchAsync(options, cancellationToken);
         }
+
+        public ValueTask DisposeAsync()
+        {
+            return _producerClient.DisposeAsync();
+        }
     }
 }

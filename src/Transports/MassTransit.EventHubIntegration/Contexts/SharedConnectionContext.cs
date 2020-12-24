@@ -1,7 +1,6 @@
 namespace MassTransit.EventHubIntegration.Contexts
 {
     using System.Threading;
-    using System.Threading.Tasks;
     using Azure.Messaging.EventHubs.Producer;
     using GreenPipes;
 
@@ -28,11 +27,6 @@ namespace MassTransit.EventHubIntegration.Contexts
         public EventHubProducerClient CreateEventHubClient(string eventHubName)
         {
             return _context.CreateEventHubClient(eventHubName);
-        }
-
-        public ValueTask DisposeAsync()
-        {
-            return _context.DisposeAsync();
         }
     }
 }
