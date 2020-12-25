@@ -33,11 +33,12 @@
             LogContext.Debug?.Log("Pong was scheduled");
 
             await faulted;
-            await Task.Delay(1000);
+
+            await InMemoryTestHarness.Consumed.Any<CancelScheduledMessage>();
 
             await AdvanceTime(TimeSpan.FromSeconds(20));
 
-            Assert.That(async () => await _pongReceived.Task.OrTimeout(s: 5), Throws.TypeOf<TimeoutException>());
+            Assert.That(async () => await _pongReceived.Task.OrTimeout(s: 3), Throws.TypeOf<TimeoutException>());
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

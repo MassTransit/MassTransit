@@ -62,7 +62,7 @@ namespace MassTransit.Tests.Caching
 
             await _newCache.Get(key);
 
-            Assert.That(timer.Elapsed, Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)));
+            Assert.That(timer.Elapsed + TimeSpan.FromSeconds(0.1), Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)));
 
             Assert.That(item.Value, Is.EqualTo("First"));
         }

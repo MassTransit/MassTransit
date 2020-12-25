@@ -409,6 +409,11 @@
     public class Receiving_and_grouping_messages :
         InMemoryTestFixture
     {
+        public Receiving_and_grouping_messages()
+        {
+            TestInactivityTimeout = TimeSpan.FromSeconds(3);
+        }
+
         [Test]
         public async Task Should_receive_one_batch_per_group()
         {
@@ -454,6 +459,11 @@
     public class Receiving_and_grouping_messages_by_ref_type :
         InMemoryTestFixture
     {
+        public Receiving_and_grouping_messages_by_ref_type()
+        {
+            TestInactivityTimeout = TimeSpan.FromSeconds(3);
+        }
+
         [Test]
         public async Task Should_receive_one_batch_per_group()
         {

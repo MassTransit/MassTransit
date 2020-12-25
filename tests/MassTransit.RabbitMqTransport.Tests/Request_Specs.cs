@@ -40,7 +40,7 @@
         [OneTimeSetUp]
         public void Setup()
         {
-            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TimeSpan.FromSeconds(8));
+            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -86,7 +86,7 @@
         [OneTimeSetUp]
         public void Setup()
         {
-            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TimeSpan.FromSeconds(8));
+            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -125,7 +125,7 @@
         [OneTimeSetUp]
         public void Setup()
         {
-            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, RequestTimeout.After(s: 8));
+            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
 
             _response = _requestClient.GetResponse<PongMessage>(new PingMessage());
         }
@@ -156,7 +156,7 @@
         [OneTimeSetUp]
         public void Setup()
         {
-            _requestClient = Bus.CreateRequestClient<PingMessage>(new Uri("exchange:input_queue"), RequestTimeout.After(s: 8));
+            _requestClient = Bus.CreateRequestClient<PingMessage>(new Uri("exchange:input_queue"), TestTimeout);
 
             _response = _requestClient.GetResponse<PongMessage>(new PingMessage());
         }
@@ -200,7 +200,7 @@
         {
             _clientFactory = await Bus.CreateReplyToClientFactory();
 
-            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, RequestTimeout.After(s: 8));
+            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
 
             _response = _requestClient.GetResponse<PongMessage>(new PingMessage());
         }
@@ -269,9 +269,9 @@
         [OneTimeSetUp]
         public async Task Setup()
         {
-            _clientFactory = await Bus.ConnectClientFactory(RequestTimeout.After(s: 8));
+            _clientFactory = await Bus.ConnectClientFactory(TestTimeout);
 
-            _requestClient = _clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, RequestTimeout.After(s: 8));
+            _requestClient = _clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
 
             _response = _requestClient.GetResponse<PongMessage>(new PingMessage());
         }
@@ -326,7 +326,7 @@
         [OneTimeSetUp]
         public void Setup()
         {
-            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TimeSpan.FromSeconds(8));
+            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -351,7 +351,7 @@
         [OneTimeSetUp]
         public void Setup()
         {
-            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TimeSpan.FromSeconds(8));
+            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TimeSpan.FromSeconds(4));
         }
     }
 
@@ -372,7 +372,7 @@
         [OneTimeSetUp]
         public void Setup()
         {
-            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TimeSpan.FromSeconds(8));
+            _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -401,7 +401,7 @@
         {
             _clientFactory = await Bus.CreateReplyToClientFactory();
 
-            _requestClient = _clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, TimeSpan.FromSeconds(8));
+            _requestClient = _clientFactory.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
         }
 
         [OneTimeTearDown]
