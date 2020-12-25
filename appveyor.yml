@@ -18,7 +18,7 @@ skip_commits:
 
 image:
   - Visual Studio 2019
-  - Ubuntu1804
+  - Ubuntu
 
 services:
   - mongodb
