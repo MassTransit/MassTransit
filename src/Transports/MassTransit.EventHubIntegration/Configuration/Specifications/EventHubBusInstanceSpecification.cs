@@ -8,10 +8,12 @@ namespace MassTransit.EventHubIntegration.Specifications
     public class EventHubBusInstanceSpecification :
         IBusInstanceSpecification
     {
+        readonly IRiderRegistrationContext _context;
         readonly IEventHubHostConfiguration _hostConfiguration;
 
-        public EventHubBusInstanceSpecification(IEventHubHostConfiguration hostConfiguration)
+        public EventHubBusInstanceSpecification(IRiderRegistrationContext context, IEventHubHostConfiguration hostConfiguration)
         {
+            _context = context;
             _hostConfiguration = hostConfiguration;
         }
 
@@ -22,7 +24,7 @@ namespace MassTransit.EventHubIntegration.Specifications
 
         public void Configure(IBusInstance busInstance)
         {
-            var rider = _hostConfiguration.Build(busInstance);
+            var rider = _hostConfiguration.Build(_context, busInstance);
             busInstance.Connect<IEventHubRider>(rider);
         }
     }

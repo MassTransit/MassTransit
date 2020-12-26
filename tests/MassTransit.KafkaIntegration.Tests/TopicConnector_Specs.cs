@@ -26,7 +26,6 @@ namespace MassTransit.KafkaIntegration.Tests
 
             services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
             services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
-            services.AddScoped<KafkaMessageConsumer>();
 
             services.AddMassTransit(x =>
             {
@@ -34,6 +33,8 @@ namespace MassTransit.KafkaIntegration.Tests
                 x.AddRider(rider =>
                 {
                     rider.AddProducer<KafkaMessage>(Topic);
+
+                    rider.AddConsumer<KafkaMessageConsumer>();
 
                     rider.UsingKafka((context, k) =>
                     {
@@ -75,10 +76,10 @@ namespace MassTransit.KafkaIntegration.Tests
                     }),
                     TestCancellationToken);
 
-                var connected = kafka.ConnectTopicEndpoint<KafkaMessage>(Topic, nameof(TopicConnector_Specs), c =>
+                var connected = kafka.ConnectTopicEndpoint<KafkaMessage>(Topic, nameof(TopicConnector_Specs), (context, configurator) =>
                 {
-                    c.AutoOffsetReset = AutoOffsetReset.Earliest;
-                    c.Consumer<KafkaMessageConsumer>(provider);
+                    configurator.AutoOffsetReset = AutoOffsetReset.Earliest;
+                    configurator.ConfigureConsumer<KafkaMessageConsumer>(context);
                 });
 
                 await connected.Ready;

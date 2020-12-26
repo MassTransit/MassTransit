@@ -96,7 +96,7 @@ namespace MassTransit.EventHubIntegration.Configurators
 
             var context = CreateContext();
 
-            _processorConfigurator.UseFilter(new EvenHubBlobContainerCreatorFilter());
+            _processorConfigurator.UseFilter(new EventHubBlobContainerCreatorFilter());
             _processorConfigurator.UseFilter(new EventHubConsumerFilter(context));
 
             IPipe<ProcessorContext> processorPipe = _processorConfigurator.Build();

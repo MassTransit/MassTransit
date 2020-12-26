@@ -5,7 +5,7 @@ namespace MassTransit.EventHubIntegration.Filters
     using GreenPipes;
 
 
-    public class EvenHubBlobContainerCreatorFilter :
+    public class EventHubBlobContainerCreatorFilter :
         IFilter<ProcessorContext>
     {
         bool _hasBeenCreated;

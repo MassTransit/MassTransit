@@ -1,9 +1,12 @@
 namespace MassTransit.KafkaIntegration
 {
+    using System;
     using System.Collections.Generic;
+    using Confluent.Kafka;
     using Contexts;
     using GreenPipes;
     using MassTransit.Registration;
+    using Specifications;
     using Transport;
 
 
@@ -14,6 +17,14 @@ namespace MassTransit.KafkaIntegration
 
         IClientContextSupervisor ClientContextSupervisor { get; }
 
-        IKafkaRider Build(IBusInstance busInstance);
+        IKafkaConsumerSpecification CreateSpecification<TKey, TValue>(string topicName, string groupId,
+            Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
+            where TValue : class;
+
+        IKafkaConsumerSpecification CreateSpecification<TKey, TValue>(string topicName, ConsumerConfig consumerConfig,
+            Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
+            where TValue : class;
+
+        IKafkaRider Build(IRiderRegistrationContext context, IBusInstance busInstance);
     }
 }

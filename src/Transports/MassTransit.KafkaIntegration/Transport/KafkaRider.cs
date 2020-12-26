@@ -9,6 +9,7 @@ namespace MassTransit.KafkaIntegration.Transport
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using MassTransit.Registration;
     using Riders;
     using Transports;
     using Util;
@@ -17,18 +18,20 @@ namespace MassTransit.KafkaIntegration.Transport
     public class KafkaRider :
         IKafkaRider
     {
+        readonly IBusInstance _busInstance;
         readonly IReceiveEndpointCollection _endpoints;
         readonly IKafkaHostConfiguration _hostConfiguration;
         readonly ITopicProducerProvider _producerProvider;
-        readonly ITopicEndpointConnector _topicEndpointConnector;
+        readonly IRiderRegistrationContext _registrationContext;
 
-        public KafkaRider(IKafkaHostConfiguration hostConfiguration, IReceiveEndpointCollection endpoints, ITopicProducerProvider producerProvider,
-            ITopicEndpointConnector topicEndpointConnector)
+        public KafkaRider(IKafkaHostConfiguration hostConfiguration, IBusInstance busInstance, IReceiveEndpointCollection endpoints,
+            ITopicProducerProvider producerProvider, IRiderRegistrationContext registrationContext)
         {
             _hostConfiguration = hostConfiguration;
+            _busInstance = busInstance;
             _endpoints = endpoints;
             _producerProvider = producerProvider;
-            _topicEndpointConnector = topicEndpointConnector;
+            _registrationContext = registrationContext;
         }
 
         public ITopicProducer<TKey, TValue> GetProducer<TKey, TValue>(Uri address, ConsumeContext consumeContext)
@@ -40,28 +43,46 @@ namespace MassTransit.KafkaIntegration.Transport
             var provider = consumeContext == null
                 ? _producerProvider
                 : new ConsumeContextTopicProducerProvider(_producerProvider, consumeContext);
+
             return provider.GetProducer<TKey, TValue>(address);
         }
 
         public HostReceiveEndpointHandle ConnectTopicEndpoint<TKey, TValue>(string topicName, string groupId,
-            Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
+            Action<IRiderRegistrationContext, IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
             where TValue : class
         {
-            return _topicEndpointConnector.ConnectTopicEndpoint(topicName, groupId, configure);
+            var specification = _hostConfiguration.CreateSpecification<TKey, TValue>(topicName, groupId, configurator =>
+            {
+                configure?.Invoke(_registrationContext, configurator);
+            });
+
+            _endpoints.Add(specification.EndpointName, specification.CreateReceiveEndpoint(_busInstance));
+
+            return _endpoints.Start(specification.EndpointName);
         }
 
         public HostReceiveEndpointHandle ConnectTopicEndpoint<TKey, TValue>(string topicName, ConsumerConfig consumerConfig,
-            Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
+            Action<IRiderRegistrationContext, IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
             where TValue : class
         {
-            return _topicEndpointConnector.ConnectTopicEndpoint(topicName, consumerConfig, configure);
+            var specification = _hostConfiguration.CreateSpecification<TKey, TValue>(topicName, consumerConfig, configurator =>
+            {
+                configure?.Invoke(_registrationContext, configurator);
+            });
+
+            _endpoints.Add(specification.EndpointName, specification.CreateReceiveEndpoint(_busInstance));
+
+            return _endpoints.Start(specification.EndpointName);
         }
 
         public RiderHandle Start(CancellationToken cancellationToken = default)
         {
             HostReceiveEndpointHandle[] endpointsHandle = _endpoints.StartEndpoints(cancellationToken);
+
             var ready = endpointsHandle.Length == 0 ? TaskUtil.Completed : _hostConfiguration.ClientContextSupervisor.Ready;
-            IAgent agent = new RiderAgent(_hostConfiguration.ClientContextSupervisor, _endpoints, ready);
+
+            var agent = new RiderAgent(_hostConfiguration.ClientContextSupervisor, _endpoints, ready);
+
             return new Handle(endpointsHandle, agent);
         }
 

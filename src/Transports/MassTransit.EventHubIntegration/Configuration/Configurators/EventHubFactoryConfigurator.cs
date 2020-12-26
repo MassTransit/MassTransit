@@ -17,8 +17,7 @@ namespace MassTransit.EventHubIntegration.Configurators
 
     public class EventHubFactoryConfigurator :
         IEventHubFactoryConfigurator,
-        IEventHubHostConfiguration,
-        IEventHubEndpointSpecificationCreator
+        IEventHubHostConfiguration
     {
         readonly Recycle<IConnectionContextSupervisor> _connectionContextSupervisor;
         readonly ReceiveEndpointObservable _endpointObservers;
@@ -38,19 +37,6 @@ namespace MassTransit.EventHubIntegration.Configurators
             _producerSpecification = new EventHubProducerSpecification(this, _hostSettings);
             _connectionContextSupervisor = new Recycle<IConnectionContextSupervisor>(() =>
                 new ConnectionContextSupervisor(_hostSettings, _storageSettings, _producerSpecification.ConfigureOptions));
-        }
-
-        public IEventHubReceiveEndpointSpecification CreateSpecification(string eventHubName, string consumerGroup,
-            Action<IEventHubReceiveEndpointConfigurator> configure)
-        {
-            if (string.IsNullOrWhiteSpace(eventHubName))
-                throw new ArgumentException(nameof(eventHubName));
-            if (string.IsNullOrWhiteSpace(consumerGroup))
-                throw new ArgumentException(nameof(consumerGroup));
-
-            var specification = new EventHubReceiveEndpointSpecification(this, eventHubName, consumerGroup, _hostSettings, _storageSettings, configure);
-            specification.ConnectReceiveEndpointObserver(_endpointObservers);
-            return specification;
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
@@ -152,18 +138,30 @@ namespace MassTransit.EventHubIntegration.Configurators
             _producerSpecification.ConfigureSend(callback);
         }
 
+        public IEventHubReceiveEndpointSpecification CreateSpecification(string eventHubName, string consumerGroup,
+            Action<IEventHubReceiveEndpointConfigurator> configure)
+        {
+            if (string.IsNullOrWhiteSpace(eventHubName))
+                throw new ArgumentException(nameof(eventHubName));
+            if (string.IsNullOrWhiteSpace(consumerGroup))
+                throw new ArgumentException(nameof(consumerGroup));
+
+            var specification = new EventHubReceiveEndpointSpecification(this, eventHubName, consumerGroup, _hostSettings, _storageSettings, configure);
+            specification.ConnectReceiveEndpointObserver(_endpointObservers);
+            return specification;
+        }
+
         public IConnectionContextSupervisor ConnectionContextSupervisor => _connectionContextSupervisor.Supervisor;
 
-        public IEventHubRider Build(IBusInstance busInstance)
+        public IEventHubRider Build(IRiderRegistrationContext context, IBusInstance busInstance)
         {
             var endpoints = new ReceiveEndpointCollection();
             foreach (var endpoint in _endpoints)
                 endpoints.Add(endpoint.EndpointName, endpoint.CreateReceiveEndpoint(busInstance));
 
             var producerProvider = _producerSpecification.CreateProducerProvider(busInstance);
-            var endpointConnector = new EvenHubEndpointConnector(busInstance, endpoints, this);
 
-            return new EventHubRider(this, endpoints, new CachedEventHubProducerProvider(producerProvider), endpointConnector);
+            return new EventHubRider(this, busInstance, endpoints, new CachedEventHubProducerProvider(producerProvider), context);
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -182,9 +180,9 @@ namespace MassTransit.EventHubIntegration.Configurators
                 yield return result;
         }
 
-        public IBusInstanceSpecification Build()
+        public IBusInstanceSpecification Build(IRiderRegistrationContext context)
         {
-            return new EventHubBusInstanceSpecification(this);
+            return new EventHubBusInstanceSpecification(context, this);
         }
 
         void ThrowIfHostIsAlreadyConfigured()

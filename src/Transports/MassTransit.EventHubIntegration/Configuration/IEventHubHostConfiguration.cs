@@ -1,8 +1,10 @@
 namespace MassTransit.EventHubIntegration
 {
+    using System;
     using Contexts;
     using GreenPipes;
     using MassTransit.Registration;
+    using Specifications;
 
 
     public interface IEventHubHostConfiguration :
@@ -10,6 +12,9 @@ namespace MassTransit.EventHubIntegration
     {
         IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
-        IEventHubRider Build(IBusInstance busInstance);
+        IEventHubReceiveEndpointSpecification CreateSpecification(string eventHubName, string consumerGroup,
+            Action<IEventHubReceiveEndpointConfigurator> configure);
+
+        IEventHubRider Build(IRiderRegistrationContext context, IBusInstance busInstance);
     }
 }

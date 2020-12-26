@@ -36,7 +36,7 @@ namespace MassTransit.KafkaIntegration.Registration
             foreach (var registration in context.GetRegistrations<IKafkaProducerRegistration>())
                 registration.Register(configurator);
 
-            return configurator.Build();
+            return configurator.Build(context);
         }
     }
 }

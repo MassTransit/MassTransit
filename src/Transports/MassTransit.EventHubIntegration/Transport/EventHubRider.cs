@@ -8,6 +8,7 @@ namespace MassTransit.EventHubIntegration
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using MassTransit.Registration;
     using Riders;
     using Transports;
     using Util;
@@ -16,18 +17,21 @@ namespace MassTransit.EventHubIntegration
     public class EventHubRider :
         IEventHubRider
     {
-        readonly IEvenHubEndpointConnector _endpointConnector;
+        readonly IBusInstance _busInstance;
         readonly IReceiveEndpointCollection _endpoints;
         readonly IEventHubHostConfiguration _hostConfiguration;
         readonly IEventHubProducerProvider _producerProvider;
+        readonly IRiderRegistrationContext _registrationContext;
 
-        public EventHubRider(IEventHubHostConfiguration hostConfiguration, IReceiveEndpointCollection endpoints, IEventHubProducerProvider producerProvider,
-            IEvenHubEndpointConnector endpointConnector)
+        public EventHubRider(IEventHubHostConfiguration hostConfiguration, IBusInstance busInstance, IReceiveEndpointCollection endpoints,
+            IEventHubProducerProvider producerProvider,
+            IRiderRegistrationContext registrationContext)
         {
             _hostConfiguration = hostConfiguration;
+            _busInstance = busInstance;
             _endpoints = endpoints;
             _producerProvider = producerProvider;
-            _endpointConnector = endpointConnector;
+            _registrationContext = registrationContext;
         }
 
         public IEventHubProducerProvider GetProducerProvider(ConsumeContext consumeContext = default)
@@ -38,16 +42,26 @@ namespace MassTransit.EventHubIntegration
         }
 
         public HostReceiveEndpointHandle ConnectEventHubEndpoint(string eventHubName, string consumerGroup,
-            Action<IEventHubReceiveEndpointConfigurator> configure)
+            Action<IRiderRegistrationContext, IEventHubReceiveEndpointConfigurator> configure)
         {
-            return _endpointConnector.ConnectEventHubEndpoint(eventHubName, consumerGroup, configure);
+            var specification = _hostConfiguration.CreateSpecification(eventHubName, consumerGroup, configurator =>
+            {
+                configure?.Invoke(_registrationContext, configurator);
+            });
+
+            _endpoints.Add(specification.EndpointName, specification.CreateReceiveEndpoint(_busInstance));
+
+            return _endpoints.Start(specification.EndpointName);
         }
 
         public RiderHandle Start(CancellationToken cancellationToken = default)
         {
             HostReceiveEndpointHandle[] endpointsHandle = _endpoints.StartEndpoints(cancellationToken);
+
             var ready = endpointsHandle.Length == 0 ? TaskUtil.Completed : _hostConfiguration.ConnectionContextSupervisor.Ready;
-            IAgent agent = new RiderAgent(_hostConfiguration.ConnectionContextSupervisor, _endpoints, ready);
+
+            var agent = new RiderAgent(_hostConfiguration.ConnectionContextSupervisor, _endpoints, ready);
+
             return new Handle(endpointsHandle, agent);
         }
 
