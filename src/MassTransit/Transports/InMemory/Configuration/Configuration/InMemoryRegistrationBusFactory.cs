@@ -7,7 +7,7 @@ namespace MassTransit.Transports.InMemory.Configuration
 
 
     public class InMemoryRegistrationBusFactory :
-        TransportRegistrationBusFactory
+        TransportRegistrationBusFactory<IInMemoryReceiveEndpointConfigurator>
     {
         readonly InMemoryBusConfiguration _busConfiguration;
         readonly Action<IBusRegistrationContext, IInMemoryBusFactoryConfigurator> _configure;

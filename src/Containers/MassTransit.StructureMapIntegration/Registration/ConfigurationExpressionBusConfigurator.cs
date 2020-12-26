@@ -77,6 +77,8 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Use(context => busFactory.CreateBus(context.GetInstance<IBusRegistrationContext>(), null))
                 .Singleton();
 
+            _expression.Forward<IBusInstance, IReceiveEndpointConnector>();
+
             _expression.For<IBusControl>()
                 .Use(context => context.GetInstance<IBusInstance>().BusControl)
                 .Singleton();

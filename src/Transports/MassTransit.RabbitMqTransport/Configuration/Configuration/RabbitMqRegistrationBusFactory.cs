@@ -7,7 +7,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
 
     public class RabbitMqRegistrationBusFactory :
-        TransportRegistrationBusFactory
+        TransportRegistrationBusFactory<IRabbitMqReceiveEndpointConfigurator>
     {
         readonly RabbitMqBusConfiguration _busConfiguration;
         readonly Action<IBusRegistrationContext, IRabbitMqBusFactoryConfigurator> _configure;

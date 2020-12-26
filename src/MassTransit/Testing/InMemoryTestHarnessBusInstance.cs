@@ -9,8 +9,11 @@ namespace MassTransit.Testing
     public class InMemoryTestHarnessBusInstance :
         IBusInstance
     {
-        public InMemoryTestHarnessBusInstance(InMemoryTestHarness testHarness)
+        readonly IBusRegistrationContext _busRegistrationContext;
+
+        public InMemoryTestHarnessBusInstance(InMemoryTestHarness testHarness, IBusRegistrationContext busRegistrationContext)
         {
+            _busRegistrationContext = busRegistrationContext;
             Harness = testHarness;
         }
 
@@ -31,6 +34,24 @@ namespace MassTransit.Testing
             where TRider : IRider
         {
             throw new NotSupportedException();
+        }
+
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IBusRegistrationContext, IReceiveEndpointConfigurator> configure = null)
+        {
+            return BusControl.ConnectReceiveEndpoint(definition, endpointNameFormatter, configurator =>
+            {
+                configure?.Invoke(_busRegistrationContext, configurator);
+            });
+        }
+
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName,
+            Action<IBusRegistrationContext, IReceiveEndpointConfigurator> configure = null)
+        {
+            return BusControl.ConnectReceiveEndpoint(queueName, configurator =>
+            {
+                configure?.Invoke(_busRegistrationContext, configurator);
+            });
         }
     }
 }

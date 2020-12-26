@@ -84,6 +84,7 @@ namespace MassTransit.WindsorIntegration.Registration
 
             Container.Register(
                 Component.For<IBusInstance>()
+                    .Forward<IReceiveEndpointConnector>()
                     .UsingFactoryMethod(kernel => busFactory.CreateBus(kernel.Resolve<IBusRegistrationContext>()))
                     .LifestyleSingleton(),
                 Component.For<IBusControl>()

@@ -164,6 +164,31 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
 
     [TestFixture]
+    public class Autofac_Consumer_Connect :
+        Common_Consumer_Connect
+    {
+        readonly IContainer _container;
+
+        public Autofac_Consumer_Connect()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterInstance(MessageCompletion);
+            builder.AddMassTransit(ConfigureRegistration);
+
+            _container = builder.Build();
+        }
+
+        [OneTimeTearDown]
+        public async Task Close_container()
+        {
+            await _container.DisposeAsync();
+        }
+
+        protected override IReceiveEndpointConnector Connector => _container.Resolve<IReceiveEndpointConnector>();
+    }
+
+
+    [TestFixture]
     public class Autofac_Consumer_FilterOrder :
         Common_Consumer_FilterOrder
     {

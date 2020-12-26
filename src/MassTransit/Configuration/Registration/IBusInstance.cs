@@ -5,7 +5,8 @@ namespace MassTransit.Registration
     using Riders;
 
 
-    public interface IBusInstance
+    public interface IBusInstance :
+        IReceiveEndpointConnector
     {
         Type InstanceType { get; }
 

@@ -450,6 +450,41 @@
     }
 
 
+    public abstract class Common_Consumer_Connect :
+        InMemoryTestFixture
+    {
+        protected readonly TaskCompletionSource<ConsumeContext<EasyMessage>> MessageCompletion;
+
+        protected Common_Consumer_Connect()
+        {
+            MessageCompletion = GetTask<ConsumeContext<EasyMessage>>();
+        }
+
+        protected abstract IReceiveEndpointConnector Connector { get; }
+
+        [Test]
+        public async Task Should_consume_on_connected_receive_endpoint()
+        {
+            var handle = Connector.ConnectReceiveEndpoint("easy_consumer", (context, cfg) =>
+            {
+                cfg.ConfigureConsumer<EasyConsumer>(context);
+            });
+
+            await handle.Ready;
+
+            await Bus.Publish(new EasyMessage {CorrelationId = NewId.NextGuid()});
+
+            await MessageCompletion.Task;
+        }
+
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<EasyConsumer>();
+            configurator.AddBus(provider => BusControl);
+        }
+    }
+
+
     public abstract class Common_Consumer_FilterOrder :
         InMemoryTestFixture
     {
@@ -498,29 +533,6 @@
         {
             configurator.AddConsumer<EasyConsumer>();
             configurator.AddBus(provider => BusControl);
-        }
-
-
-        public class EasyMessage
-        {
-            public Guid CorrelationId { get; set; }
-        }
-
-
-        protected class EasyConsumer :
-            IConsumer<EasyMessage>
-        {
-            readonly TaskCompletionSource<ConsumeContext<EasyMessage>> _received;
-
-            public EasyConsumer(TaskCompletionSource<ConsumeContext<EasyMessage>> received)
-            {
-                _received = received;
-            }
-
-            public async Task Consume(ConsumeContext<EasyMessage> context)
-            {
-                _received.TrySetResult(context);
-            }
         }
 
 
@@ -659,29 +671,6 @@
         }
 
 
-        public class EasyMessage
-        {
-            public Guid CorrelationId { get; set; }
-        }
-
-
-        class EasyConsumer :
-            IConsumer<EasyMessage>
-        {
-            readonly TaskCompletionSource<ConsumeContext<EasyMessage>> _received;
-
-            public EasyConsumer(TaskCompletionSource<ConsumeContext<EasyMessage>> received)
-            {
-                _received = received;
-            }
-
-            public async Task Consume(ConsumeContext<EasyMessage> context)
-            {
-                _received.TrySetResult(context);
-            }
-        }
-
-
         class ConsumerFilter<TConsumer> :
             IFilter<ConsumerConsumeContext<TConsumer>>
             where TConsumer : class, IConsumer
@@ -734,6 +723,29 @@
             public void Probe(ProbeContext context)
             {
             }
+        }
+    }
+
+
+    public class EasyMessage
+    {
+        public Guid CorrelationId { get; set; }
+    }
+
+
+    public class EasyConsumer :
+        IConsumer<EasyMessage>
+    {
+        readonly TaskCompletionSource<ConsumeContext<EasyMessage>> _received;
+
+        public EasyConsumer(TaskCompletionSource<ConsumeContext<EasyMessage>> received)
+        {
+            _received = received;
+        }
+
+        public async Task Consume(ConsumeContext<EasyMessage> context)
+        {
+            _received.TrySetResult(context);
         }
     }
 }

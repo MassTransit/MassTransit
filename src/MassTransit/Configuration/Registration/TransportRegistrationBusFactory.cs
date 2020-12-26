@@ -11,8 +11,9 @@ namespace MassTransit.Registration
     using Util;
 
 
-    public abstract class TransportRegistrationBusFactory :
+    public abstract class TransportRegistrationBusFactory<TEndpointConfigurator> :
         IRegistrationBusFactory
+        where TEndpointConfigurator : class, IReceiveEndpointConfigurator
     {
         readonly IHostConfiguration _hostConfiguration;
 
@@ -53,13 +54,13 @@ namespace MassTransit.Registration
             {
                 var busReceiveEndpointConfiguration = configurator.CreateBusEndpointConfiguration(x => x.ConfigureConsumeTopology = false);
 
-                var host = _hostConfiguration.Build();
+                var host = _hostConfiguration.Build() as IHost<TEndpointConfigurator>;
 
                 var bus = new MassTransitBus(host, _hostConfiguration.BusConfiguration.BusObservers, busReceiveEndpointConfiguration);
 
                 TaskUtil.Await(() => _hostConfiguration.BusConfiguration.BusObservers.PostCreate(bus));
 
-                var instance = new TransportBusInstance(bus, host, _hostConfiguration);
+                var instance = new TransportBusInstance<TEndpointConfigurator>(bus, host, _hostConfiguration, context);
 
                 foreach (var specification in busInstanceSpecifications)
                     specification.Configure(instance);

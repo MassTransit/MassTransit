@@ -4,8 +4,7 @@
 
 
     public interface IRabbitMqHost :
-        IHost,
-        IReceiveConnector<IRabbitMqReceiveEndpointConfigurator>
+        IHost<IRabbitMqReceiveEndpointConfigurator>
     {
         new IRabbitMqHostTopology Topology { get; }
     }

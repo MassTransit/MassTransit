@@ -7,7 +7,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
 
 
     public class ServiceBusRegistrationBusFactory :
-        TransportRegistrationBusFactory
+        TransportRegistrationBusFactory<IServiceBusReceiveEndpointConfigurator>
     {
         readonly ServiceBusBusConfiguration _busConfiguration;
         readonly Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator> _configure;

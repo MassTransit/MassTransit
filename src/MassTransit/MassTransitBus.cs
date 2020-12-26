@@ -304,15 +304,11 @@ namespace MassTransit
         HostReceiveEndpointHandle IReceiveConnector.ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            LogContext.SetCurrentIfNull(_logContext);
-
             return _host.ConnectReceiveEndpoint(definition, endpointNameFormatter, configureEndpoint);
         }
 
         HostReceiveEndpointHandle IReceiveConnector.ConnectReceiveEndpoint(string queueName, Action<IReceiveEndpointConfigurator> configureEndpoint)
         {
-            LogContext.SetCurrentIfNull(_logContext);
-
             return _host.ConnectReceiveEndpoint(queueName, configureEndpoint);
         }
 

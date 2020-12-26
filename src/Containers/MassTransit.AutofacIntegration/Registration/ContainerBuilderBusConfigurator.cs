@@ -104,6 +104,7 @@ namespace MassTransit.AutofacIntegration.Registration
 
             Builder.Register(context => CreateBus(busFactory, context))
                 .As<IBusInstance>()
+                .As<IReceiveEndpointConnector>()
                 .SingleInstance();
 
             Builder.Register(context => context.Resolve<IBusInstance>().BusControl)

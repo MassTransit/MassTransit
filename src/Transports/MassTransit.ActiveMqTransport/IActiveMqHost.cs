@@ -4,8 +4,7 @@
 
 
     public interface IActiveMqHost :
-        IHost,
-        IReceiveConnector<IActiveMqReceiveEndpointConfigurator>
+        IHost<IActiveMqReceiveEndpointConfigurator>
     {
         new IActiveMqHostTopology Topology { get; }
     }

@@ -4,8 +4,7 @@
 
 
     public interface IAmazonSqsHost :
-        IHost,
-        IReceiveConnector<IAmazonSqsReceiveEndpointConfigurator>
+        IHost<IAmazonSqsReceiveEndpointConfigurator>
     {
         new IAmazonSqsHostTopology Topology { get; }
     }

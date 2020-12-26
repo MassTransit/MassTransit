@@ -7,7 +7,7 @@ namespace MassTransit.AmazonSqsTransport.Configuration
 
 
     public class AmazonSqsRegistrationBusFactory :
-        TransportRegistrationBusFactory
+        TransportRegistrationBusFactory<IAmazonSqsReceiveEndpointConfigurator>
     {
         readonly AmazonSqsBusConfiguration _busConfiguration;
         readonly Action<IBusRegistrationContext, IAmazonSqsBusFactoryConfigurator> _configure;

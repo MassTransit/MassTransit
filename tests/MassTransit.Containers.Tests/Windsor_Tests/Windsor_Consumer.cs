@@ -1,5 +1,6 @@
 namespace MassTransit.Containers.Tests.Windsor_Tests
 {
+    using System.Threading.Tasks;
     using Castle.MicroKernel.Registration;
     using Castle.Windsor;
     using Common_Tests;
@@ -108,5 +109,32 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
         }
 
         protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
+    public class Windsor_Consumer_Connect :
+        Common_Consumer_Connect
+    {
+        readonly IWindsorContainer _container;
+
+        public Windsor_Consumer_Connect()
+        {
+            var container = new WindsorContainer();
+            container.AddMassTransit(ConfigureRegistration);
+
+            container.Register(Component.For<TaskCompletionSource<ConsumeContext<EasyMessage>>>().Instance(MessageCompletion)
+            );
+
+            _container = container;
+        }
+
+        [OneTimeTearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override IReceiveEndpointConnector Connector => _container.Resolve<IReceiveEndpointConnector>();
     }
 }

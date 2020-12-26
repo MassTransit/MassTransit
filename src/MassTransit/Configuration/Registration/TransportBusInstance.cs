@@ -2,18 +2,24 @@ namespace MassTransit.Registration
 {
     using System;
     using Configuration;
-    using Metadata;
+    using GreenPipes.Internals.Extensions;
     using Riders;
 
 
-    public class TransportBusInstance :
-        IBusInstance
+    public class TransportBusInstance<TEndpointConfigurator> :
+        IBusInstance,
+        IReceiveEndpointConnector<TEndpointConfigurator>
+        where TEndpointConfigurator : class, IReceiveEndpointConfigurator
     {
-        readonly IHost _host;
+        readonly IBusRegistrationContext _busRegistrationContext;
+        readonly IHost<TEndpointConfigurator> _host;
 
-        public TransportBusInstance(IBusControl busControl, IHost host, IHostConfiguration hostConfiguration)
+        public TransportBusInstance(IBusControl busControl, IHost<TEndpointConfigurator> host, IHostConfiguration hostConfiguration, IBusRegistrationContext
+            busRegistrationContext)
         {
             _host = host;
+            _busRegistrationContext = busRegistrationContext;
+
             BusControl = busControl;
             HostConfiguration = hostConfiguration;
         }
@@ -38,9 +44,44 @@ namespace MassTransit.Registration
             return (TRider)_host.GetRider(name);
         }
 
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IBusRegistrationContext, IReceiveEndpointConfigurator> configure = null)
+        {
+            return _host.ConnectReceiveEndpoint(definition, endpointNameFormatter, configurator =>
+            {
+                configure?.Invoke(_busRegistrationContext, configurator);
+            });
+        }
+
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName,
+            Action<IBusRegistrationContext, IReceiveEndpointConfigurator> configure = null)
+        {
+            return _host.ConnectReceiveEndpoint(queueName, configurator =>
+            {
+                configure?.Invoke(_busRegistrationContext, configurator);
+            });
+        }
+
         static string GetRiderName<TRider>()
         {
-            return TypeMetadataCache<TRider>.ShortName;
+            return TypeCache<TRider>.ShortName;
+        }
+
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IBusRegistrationContext, TEndpointConfigurator> configure = null)
+        {
+            return _host.ConnectReceiveEndpoint(definition, endpointNameFormatter, configurator =>
+            {
+                configure?.Invoke(_busRegistrationContext, configurator);
+            });
+        }
+
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName, Action<IBusRegistrationContext, TEndpointConfigurator> configure = null)
+        {
+            return _host.ConnectReceiveEndpoint(queueName, configurator =>
+            {
+                configure?.Invoke(_busRegistrationContext, configurator);
+            });
         }
     }
 }

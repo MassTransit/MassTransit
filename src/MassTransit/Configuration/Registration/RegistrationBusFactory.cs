@@ -26,7 +26,7 @@ namespace MassTransit.Registration
 
             var busControl = _configure(context);
 
-            return new DefaultBusInstance(busControl);
+            return new DefaultBusInstance(busControl, context);
         }
 
 
@@ -36,8 +36,11 @@ namespace MassTransit.Registration
             const string RiderExceptionMessage =
                 "Riders could be only used with Microsoft DI or Autofac using 'SetBusFactory' method (UsingTransport extensions).";
 
-            public DefaultBusInstance(IBusControl busControl)
+            readonly IBusRegistrationContext _busRegistrationContext;
+
+            public DefaultBusInstance(IBusControl busControl, IBusRegistrationContext busRegistrationContext)
             {
+                _busRegistrationContext = busRegistrationContext;
                 BusControl = busControl;
             }
 
@@ -57,6 +60,24 @@ namespace MassTransit.Registration
                 where TRider : IRider
             {
                 throw new ConfigurationException(RiderExceptionMessage);
+            }
+
+            public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+                Action<IBusRegistrationContext, IReceiveEndpointConfigurator> configure = null)
+            {
+                return BusControl.ConnectReceiveEndpoint(definition, endpointNameFormatter, configurator =>
+                {
+                    configure?.Invoke(_busRegistrationContext, configurator);
+                });
+            }
+
+            public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName,
+                Action<IBusRegistrationContext, IReceiveEndpointConfigurator> configure = null)
+            {
+                return BusControl.ConnectReceiveEndpoint(queueName, configurator =>
+                {
+                    configure?.Invoke(_busRegistrationContext, configurator);
+                });
             }
         }
     }

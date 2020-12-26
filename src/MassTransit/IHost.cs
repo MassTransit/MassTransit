@@ -31,4 +31,12 @@ namespace MassTransit
 
         void AddRider(string name, IRiderControl riderControl);
     }
+
+
+    public interface IHost<out TEndpointConfigurator> :
+        IHost,
+        IReceiveConnector<TEndpointConfigurator>
+        where TEndpointConfigurator : IReceiveEndpointConfigurator
+    {
+    }
 }

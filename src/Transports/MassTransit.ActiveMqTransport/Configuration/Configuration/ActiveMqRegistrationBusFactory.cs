@@ -7,7 +7,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
 
 
     public class ActiveMqRegistrationBusFactory :
-        TransportRegistrationBusFactory
+        TransportRegistrationBusFactory<IActiveMqReceiveEndpointConfigurator>
     {
         readonly ActiveMqBusConfiguration _busConfiguration;
         readonly Action<IBusRegistrationContext, IActiveMqBusFactoryConfigurator> _configure;

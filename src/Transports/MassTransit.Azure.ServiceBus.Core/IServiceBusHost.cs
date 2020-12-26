@@ -8,8 +8,7 @@ namespace MassTransit.Azure.ServiceBus.Core
     /// An Azure ServiceBus Host, which caches the messaging factory and namespace manager
     /// </summary>
     public interface IServiceBusHost :
-        IHost,
-        IReceiveConnector<IServiceBusReceiveEndpointConfigurator>
+        IHost<IServiceBusReceiveEndpointConfigurator>
     {
         new IServiceBusHostTopology Topology { get; }
 

@@ -133,6 +133,24 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 
 
     [TestFixture]
+    public class DependencyInjection_Consumer_Connect :
+        Common_Consumer_Connect
+    {
+        readonly IServiceProvider _provider;
+
+        public DependencyInjection_Consumer_Connect()
+        {
+            _provider = new ServiceCollection()
+                .AddSingleton(MessageCompletion)
+                .AddMassTransit(ConfigureRegistration)
+                .BuildServiceProvider();
+        }
+
+        protected override IReceiveEndpointConnector Connector => _provider.GetRequiredService<IReceiveEndpointConnector>();
+    }
+
+
+    [TestFixture]
     public class DependencyInjection_Consumer_FilterOrder :
         Common_Consumer_FilterOrder
     {

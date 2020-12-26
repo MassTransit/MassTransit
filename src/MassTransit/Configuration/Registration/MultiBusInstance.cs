@@ -35,5 +35,17 @@ namespace MassTransit.Registration
         }
 
         public TBus BusInstance { get; }
+
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
+            Action<IBusRegistrationContext, IReceiveEndpointConfigurator> configure = null)
+        {
+            return _instance.ConnectReceiveEndpoint(definition, endpointNameFormatter, configure);
+        }
+
+        public HostReceiveEndpointHandle ConnectReceiveEndpoint(string queueName,
+            Action<IBusRegistrationContext, IReceiveEndpointConfigurator> configure = null)
+        {
+            return _instance.ConnectReceiveEndpoint(queueName, configure);
+        }
     }
 }
