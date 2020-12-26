@@ -154,14 +154,14 @@ namespace MassTransit.EventHubIntegration.Configurators
 
         public IConnectionContextSupervisor ConnectionContextSupervisor => _connectionContextSupervisor.Supervisor;
 
-        public IEventHubRider Build(IBusInstance busInstance)
+        public IEventHubRider Build(IRiderRegistrationContext context, IBusInstance busInstance)
         {
             var endpoints = new ReceiveEndpointCollection();
             foreach (var endpoint in _endpoints)
                 endpoints.Add(endpoint.EndpointName, endpoint.CreateReceiveEndpoint(busInstance));
 
             var producerProvider = _producerSpecification.CreateProducerProvider(busInstance);
-            var endpointConnector = new EvenHubEndpointConnector(busInstance, endpoints, this);
+            var endpointConnector = new EvenHubEndpointConnector(context, busInstance, endpoints, this);
 
             return new EventHubRider(this, endpoints, new CachedEventHubProducerProvider(producerProvider), endpointConnector);
         }
@@ -182,9 +182,9 @@ namespace MassTransit.EventHubIntegration.Configurators
                 yield return result;
         }
 
-        public IBusInstanceSpecification Build()
+        public IBusInstanceSpecification Build(IRiderRegistrationContext context)
         {
-            return new EventHubBusInstanceSpecification(this);
+            return new EventHubBusInstanceSpecification(context, this);
         }
 
         void ThrowIfHostIsAlreadyConfigured()

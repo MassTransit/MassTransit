@@ -9,16 +9,18 @@ namespace MassTransit.KafkaIntegration.Specifications
     public class KafkaBusInstanceSpecification :
         IBusInstanceSpecification
     {
+        readonly IRiderRegistrationContext _context;
         readonly IKafkaHostConfiguration _hostConfiguration;
 
-        public KafkaBusInstanceSpecification(IKafkaHostConfiguration hostConfiguration)
+        public KafkaBusInstanceSpecification(IRiderRegistrationContext context, IKafkaHostConfiguration hostConfiguration)
         {
+            _context = context;
             _hostConfiguration = hostConfiguration;
         }
 
         public void Configure(IBusInstance busInstance)
         {
-            var rider = _hostConfiguration.Build(busInstance);
+            var rider = _hostConfiguration.Build(_context, busInstance);
             busInstance.Connect<IKafkaRider>(rider);
         }
 

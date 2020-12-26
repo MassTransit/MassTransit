@@ -10,6 +10,6 @@ namespace MassTransit.EventHubIntegration
     {
         IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
-        IEventHubRider Build(IBusInstance busInstance);
+        IEventHubRider Build(IRiderRegistrationContext context, IBusInstance busInstance);
     }
 }

@@ -1,11 +1,12 @@
 namespace MassTransit.EventHubIntegration
 {
     using System;
+    using MassTransit.Registration;
 
 
     public interface IEvenHubEndpointConnector
     {
         HostReceiveEndpointHandle ConnectEventHubEndpoint(string eventHubName, string consumerGroup,
-            Action<IEventHubReceiveEndpointConfigurator> configure);
+            Action<IRiderRegistrationContext, IEventHubReceiveEndpointConfigurator> configure);
     }
 }

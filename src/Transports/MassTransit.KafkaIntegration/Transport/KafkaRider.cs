@@ -9,6 +9,7 @@ namespace MassTransit.KafkaIntegration.Transport
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using MassTransit.Registration;
     using Riders;
     using Transports;
     using Util;
@@ -44,14 +45,14 @@ namespace MassTransit.KafkaIntegration.Transport
         }
 
         public HostReceiveEndpointHandle ConnectTopicEndpoint<TKey, TValue>(string topicName, string groupId,
-            Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
+            Action<IRiderRegistrationContext, IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
             where TValue : class
         {
             return _topicEndpointConnector.ConnectTopicEndpoint(topicName, groupId, configure);
         }
 
         public HostReceiveEndpointHandle ConnectTopicEndpoint<TKey, TValue>(string topicName, ConsumerConfig consumerConfig,
-            Action<IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
+            Action<IRiderRegistrationContext, IKafkaTopicReceiveEndpointConfigurator<TKey, TValue>> configure)
             where TValue : class
         {
             return _topicEndpointConnector.ConnectTopicEndpoint(topicName, consumerConfig, configure);

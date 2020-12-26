@@ -8,6 +8,7 @@ namespace MassTransit.EventHubIntegration
     using Contexts;
     using GreenPipes;
     using GreenPipes.Agents;
+    using MassTransit.Registration;
     using Riders;
     using Transports;
     using Util;
@@ -38,7 +39,7 @@ namespace MassTransit.EventHubIntegration
         }
 
         public HostReceiveEndpointHandle ConnectEventHubEndpoint(string eventHubName, string consumerGroup,
-            Action<IEventHubReceiveEndpointConfigurator> configure)
+            Action<IRiderRegistrationContext, IEventHubReceiveEndpointConfigurator> configure)
         {
             return _endpointConnector.ConnectEventHubEndpoint(eventHubName, consumerGroup, configure);
         }

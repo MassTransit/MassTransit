@@ -22,13 +22,14 @@ namespace MassTransit.EventHubIntegration.Tests
 
             services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
             services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
-            services.AddScoped<EventHubMessageConsumer>();
 
             services.AddMassTransit(x =>
             {
                 x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
                 x.AddRider(rider =>
                 {
+                    rider.AddConsumer<EventHubMessageConsumer>();
+
                     rider.UsingEventHub((context, k) =>
                     {
                         k.Host(Configuration.EventHubNamespace);
@@ -69,9 +70,9 @@ namespace MassTransit.EventHubIntegration.Tests
                     }),
                     TestCancellationToken);
 
-                var connected = eventHubRider.ConnectEventHubEndpoint(Configuration.EventHubName, c =>
+                var connected = eventHubRider.ConnectEventHubEndpoint(Configuration.EventHubName, (context, configurator) =>
                 {
-                    c.Consumer<EventHubMessageConsumer>(provider);
+                    configurator.ConfigureConsumer<EventHubMessageConsumer>(context);
                 });
 
                 await connected.Ready;

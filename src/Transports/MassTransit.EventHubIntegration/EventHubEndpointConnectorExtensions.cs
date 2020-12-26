@@ -2,6 +2,7 @@ namespace MassTransit.EventHubIntegration
 {
     using System;
     using Azure.Messaging.EventHubs.Consumer;
+    using MassTransit.Registration;
 
 
     public static class EventHubEndpointConnectorExtensions
@@ -13,7 +14,7 @@ namespace MassTransit.EventHubIntegration
         /// <param name="eventHubName">Event Hub name</param>
         /// <param name="configure"></param>
         public static HostReceiveEndpointHandle ConnectEventHubEndpoint(this IEvenHubEndpointConnector connector, string eventHubName,
-            Action<IEventHubReceiveEndpointConfigurator> configure)
+            Action<IRiderRegistrationContext, IEventHubReceiveEndpointConfigurator> configure)
         {
             return connector.ConnectEventHubEndpoint(eventHubName, EventHubConsumerClient.DefaultConsumerGroupName, configure);
         }

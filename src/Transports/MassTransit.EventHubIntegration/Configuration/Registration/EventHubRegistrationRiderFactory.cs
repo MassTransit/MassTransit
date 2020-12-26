@@ -23,7 +23,7 @@ namespace MassTransit.EventHubIntegration.Registration
 
             _configure?.Invoke(context, configurator);
 
-            return configurator.Build();
+            return configurator.Build(context);
         }
     }
 }

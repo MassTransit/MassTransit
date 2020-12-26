@@ -62,11 +62,6 @@ namespace MassTransit.Registration
             });
         }
 
-        static string GetRiderName<TRider>()
-        {
-            return TypeCache<TRider>.ShortName;
-        }
-
         public HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IBusRegistrationContext, TEndpointConfigurator> configure = null)
         {
@@ -82,6 +77,12 @@ namespace MassTransit.Registration
             {
                 configure?.Invoke(_busRegistrationContext, configurator);
             });
+        }
+
+        static string GetRiderName<TRider>()
+            where TRider : IRider
+        {
+            return TypeCache<TRider>.ShortName;
         }
     }
 }

@@ -14,6 +14,6 @@ namespace MassTransit.KafkaIntegration
 
         IClientContextSupervisor ClientContextSupervisor { get; }
 
-        IKafkaRider Build(IBusInstance busInstance);
+        IKafkaRider Build(IRiderRegistrationContext context, IBusInstance busInstance);
     }
 }

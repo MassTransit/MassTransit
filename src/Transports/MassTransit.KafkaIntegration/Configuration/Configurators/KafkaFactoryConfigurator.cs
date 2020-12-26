@@ -292,13 +292,13 @@ namespace MassTransit.KafkaIntegration.Configurators
 
         public IClientContextSupervisor ClientContextSupervisor => _clientSupervisor.Supervisor;
 
-        public IKafkaRider Build(IBusInstance busInstance)
+        public IKafkaRider Build(IRiderRegistrationContext context, IBusInstance busInstance)
         {
             var endpoints = new ReceiveEndpointCollection();
             foreach (var topic in _topics)
                 endpoints.Add(topic.EndpointName, topic.CreateReceiveEndpoint(busInstance));
 
-            var topicEndpointConnector = new TopicEndpointConnector(endpoints, busInstance, this);
+            var topicEndpointConnector = new TopicEndpointConnector(context, endpoints, busInstance, this);
             var topicProducerProvider = new TopicProducerProvider(busInstance, this);
 
             return new KafkaRider(this, endpoints, topicProducerProvider, topicEndpointConnector);
@@ -323,9 +323,9 @@ namespace MassTransit.KafkaIntegration.Configurators
                 yield return result;
         }
 
-        public IBusInstanceSpecification Build()
+        public IBusInstanceSpecification Build(IRiderRegistrationContext context)
         {
-            return new KafkaBusInstanceSpecification(this);
+            return new KafkaBusInstanceSpecification(context, this);
         }
     }
 }
