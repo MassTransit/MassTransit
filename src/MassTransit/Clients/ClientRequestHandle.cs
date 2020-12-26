@@ -235,8 +235,7 @@
 
                 _readyToSend.TrySetException(exception);
 
-                _sendContext.TrySetException(exception);
-                _cancellationTokenSource.Cancel();
+                var wasSet = _sendContext.TrySetException(exception);
 
                 _message.TrySetException(exception);
 
@@ -245,6 +244,9 @@
                     handle.TrySetException(exception);
                     handle.Disconnect();
                 }
+
+                if (wasSet)
+                    _cancellationTokenSource.Cancel();
             }
 
             Task.Factory.StartNew(HandleFail, CancellationToken.None, TaskCreationOptions.None, _taskScheduler);
@@ -256,16 +258,19 @@
 
             DisposeTimer();
 
-            _readyToSend.TrySetCanceled();
-
-            _sendContext.TrySetCanceled();
             _cancellationTokenSource.Cancel();
+
+            var cancellationToken = _cancellationToken.IsCancellationRequested ? _cancellationToken : _cancellationTokenSource.Token;
+
+            _readyToSend.TrySetCanceled(cancellationToken);
+
+            _sendContext.TrySetCanceled(cancellationToken);
 
             _message.TrySetCanceled();
 
             foreach (var handle in _responseHandlers.Values)
             {
-                handle.TrySetCanceled();
+                handle.TrySetCanceled(cancellationToken);
                 handle.Disconnect();
             }
         }

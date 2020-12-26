@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Clients
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
 
@@ -18,6 +19,6 @@
     {
         void TrySetException(Exception exception);
 
-        void TrySetCanceled();
+        void TrySetCanceled(CancellationToken cancellationToken);
     }
 }
