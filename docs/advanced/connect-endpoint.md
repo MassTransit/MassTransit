@@ -23,3 +23,11 @@ Connected endpoints will be stopped when the bus is stopped. If the endpoint nee
 ```csharp
 await handle.StopAsync();
 ```
+
+### Container Integration
+
+When using `AddMassTransit` with your dependency injection container of choice, receive endpoints can be connected using the `IReceiveEndpointConnector` interface. When using this interface, consumers which were added during configuration can be configured on the receive endpoint.
+
+To connect a receive endpoint and configure a consumer:
+
+<<< @/docs/code/containers/MicrosoftConnect.cs

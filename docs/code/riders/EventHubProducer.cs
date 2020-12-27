@@ -43,7 +43,7 @@ namespace EventHubProducer
             var serviceScope = provider.CreateScope();
 
             var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
-            var producer = producerProvider.GetProducer("some-event-hub");
+            var producer = await producerProvider.GetProducer("some-event-hub");
 
             await producer.Produce<EventHubMessage>(new { Text = "Hello, Computer." });
         }
