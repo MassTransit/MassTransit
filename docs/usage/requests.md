@@ -239,20 +239,41 @@ public class CheckOrderStatusConsumer :
 The client can now wait for multiple response types (in this case, two) by using a little tuple magic.
 
 ```csharp
-var (statusResponse,notFoundResponse) = await client.GetResponse<OrderStatusResult, OrderNotFound>(new { OrderId = id});
+var response = await client.GetResponse<OrderStatusResult, OrderNotFound>(new { OrderId = id});
 
-// both tuple values are Task<Response<T>>, need to find out which one completed
-if(statusResponse.IsCompletedSuccessfully)
+if (response.Is(out Response<OrderStatusResult> responseA))
 {
-    var orderStatus = await statusResponse;
-    // do something
+    // do something with the order
 }
-else
+else if (response.Is(out Response<OrderNotFound> responseB))
 {
-    var notFound = await notFoundResponse;
-    // do something else
+    // the order was not found
 }
-
 ```
 
 This cleans up the processing, an eliminates the need to catch a `RequestFaultException`.
+
+It's also possible to use some of the switch expressions via deconstruction, but this requires the response variable to be explicitly specified as `Response`.
+
+```cs
+Response response = await client.GetResponse<OrderStatusResult, OrderNotFound>(new { OrderId = id});
+
+// Using a regular switch statement
+switch (response)
+{
+    case (_, OrderStatusResult a) responseA:
+        // order found
+        break;
+    case (_, OrderNotFound b) responseB:
+        // order not found
+        break;
+}
+
+// Or using a switch expression
+var accepted = response switch
+{
+    (_, OrderStatusResult a) => true,
+    (_, OrderNotFound b) => false,
+    _ => throw new InvalidOperationException()
+};
+```
