@@ -16,6 +16,6 @@ namespace MassTransit.KafkaIntegration.Specifications
         /// </summary>
         /// <param name="busInstance"></param>
         /// <returns></returns>
-        IReceiveEndpointControl CreateReceiveEndpoint(IBusInstance busInstance);
+        ReceiveEndpoint CreateReceiveEndpoint(IBusInstance busInstance);
     }
 }

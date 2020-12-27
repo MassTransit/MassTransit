@@ -9,7 +9,7 @@ namespace MassTransit.KafkaIntegration.Specifications
     using MassTransit.Registration;
     using Pipeline.Observables;
     using Serializers;
-    using Transport;
+    using Transports;
 
 
     public class KafkaConsumerSpecification<TKey, TValue> :
@@ -38,7 +38,7 @@ namespace MassTransit.KafkaIntegration.Specifications
 
         public string EndpointName { get; }
 
-        public IReceiveEndpointControl CreateReceiveEndpoint(IBusInstance busInstance)
+        public ReceiveEndpoint CreateReceiveEndpoint(IBusInstance busInstance)
         {
             var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
@@ -56,7 +56,7 @@ namespace MassTransit.KafkaIntegration.Specifications
             }
             catch (Exception ex)
             {
-                throw new ConfigurationException(result, $"An exception occurred creating the {nameof(IKafkaReceiveEndpoint)}", ex);
+                throw new ConfigurationException(result, "An exception occurred creating the Kafka receive endpoint", ex);
             }
         }
 

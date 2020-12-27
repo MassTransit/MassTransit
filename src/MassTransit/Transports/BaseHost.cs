@@ -98,7 +98,7 @@ namespace MassTransit.Transports
             return _handle;
         }
 
-        public void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint)
+        public void AddReceiveEndpoint(string endpointName, ReceiveEndpoint receiveEndpoint)
         {
             ReceiveEndpoints.Add(endpointName, receiveEndpoint);
         }

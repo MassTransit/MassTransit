@@ -30,7 +30,7 @@ namespace MassTransit.Monitoring.Health
             return new HealthResult(BusHealthStatus.Healthy, description, null, data);
         }
 
-        public static HealthResult Degraded(string description = null, Exception exception = null, IReadOnlyDictionary<string, object> data = null)
+        public static HealthResult Degraded(string description = null, IReadOnlyDictionary<string, object> data = null)
         {
             return new HealthResult(BusHealthStatus.Degraded, description, null, data);
         }

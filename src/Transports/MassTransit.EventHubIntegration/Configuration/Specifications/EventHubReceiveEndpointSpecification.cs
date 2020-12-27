@@ -7,6 +7,7 @@ namespace MassTransit.EventHubIntegration.Specifications
     using MassTransit.Configurators;
     using MassTransit.Registration;
     using Pipeline.Observables;
+    using Transports;
 
 
     public class EventHubReceiveEndpointSpecification :
@@ -59,7 +60,7 @@ namespace MassTransit.EventHubIntegration.Specifications
                 yield return this.Failure("StorageSettings", "is invalid");
         }
 
-        public IReceiveEndpointControl CreateReceiveEndpoint(IBusInstance busInstance)
+        public ReceiveEndpoint CreateReceiveEndpoint(IBusInstance busInstance)
         {
             var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
@@ -75,7 +76,7 @@ namespace MassTransit.EventHubIntegration.Specifications
             }
             catch (Exception ex)
             {
-                throw new ConfigurationException(result, "An exception occurred creating the EventDataReceiver", ex);
+                throw new ConfigurationException(result, "An exception occurred creating the EventHub receive endpoint", ex);
             }
         }
     }

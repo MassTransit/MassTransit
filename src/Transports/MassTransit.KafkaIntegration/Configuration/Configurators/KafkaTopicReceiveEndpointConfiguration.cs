@@ -166,7 +166,7 @@ namespace MassTransit.KafkaIntegration.Configurators
                 yield return result;
         }
 
-        public IReceiveEndpointControl Build()
+        public ReceiveEndpoint Build()
         {
             var consumerConfig = _hostConfiguration.GetConsumerConfig(_consumerConfig);
 

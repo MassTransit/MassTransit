@@ -25,7 +25,7 @@ namespace MassTransit
 
         HostHandle Start(CancellationToken cancellationToken);
 
-        void AddReceiveEndpoint(string endpointName, IReceiveEndpointControl receiveEndpoint);
+        void AddReceiveEndpoint(string endpointName, ReceiveEndpoint receiveEndpoint);
 
         IRider GetRider(string name);
 

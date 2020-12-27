@@ -81,7 +81,7 @@ namespace MassTransit.EventHubIntegration.Configurators
 
         public string EventHubName { get; }
 
-        public IReceiveEndpointControl Build()
+        public ReceiveEndpoint Build()
         {
             IEventHubReceiveEndpointContext CreateContext()
             {

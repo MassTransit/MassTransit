@@ -2,6 +2,7 @@ namespace MassTransit
 {
     using System.Threading.Tasks;
     using GreenPipes;
+    using Monitoring.Health;
     using Pipeline;
     using Transports;
 
@@ -18,6 +19,7 @@ namespace MassTransit
         IReceiveEndpointObserverConnector,
         IConsumeObserverConnector,
         IConsumeMessageObserverConnector,
+        IEndpointHealth,
         IProbeSite
     {
         Task<ReceiveEndpointReady> Started { get; }

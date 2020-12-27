@@ -3,11 +3,12 @@ namespace MassTransit.Transports
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Automatonymous;
     using Context;
     using Events;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
-    using Pipeline;
+    using Monitoring.Health;
     using Util;
 
 
@@ -17,7 +18,7 @@ namespace MassTransit.Transports
     /// filters on the receive context.
     /// </summary>
     public class ReceiveEndpoint :
-        IReceiveEndpointControl
+        IReceiveEndpoint
     {
         readonly ReceiveEndpointContext _context;
         readonly TaskCompletionSource<ReceiveEndpointReady> _started;
@@ -33,6 +34,16 @@ namespace MassTransit.Transports
             transport.ConnectReceiveTransportObserver(new Observer(this, context.EndpointObservers));
         }
 
+        public State CurrentState { get; set; }
+
+        public HostReceiveEndpointHandle EndpointHandle { get; set; }
+
+        public string Message { get; set; }
+
+        public HealthResult HealthResult { get; set; }
+
+        public Uri InputAddress { get; set; }
+
         public Task<ReceiveEndpointReady> Started => _started.Task;
 
         public ReceiveEndpointHandle Start(CancellationToken cancellationToken)
@@ -42,49 +53,52 @@ namespace MassTransit.Transports
             return new Handle(this, transportHandle, _context);
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             _transport.Probe(context);
 
             _context.ReceivePipe.Probe(context);
         }
 
-        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
+        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
             return _context.ConnectReceiveObserver(observer);
         }
 
-        ConnectHandle IReceiveEndpointObserverConnector.ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {
             return _context.ConnectReceiveEndpointObserver(observer);
         }
 
-        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
+        public ConnectHandle ConnectConsumeObserver(IConsumeObserver observer)
         {
             return _context.ReceivePipe.ConnectConsumeObserver(observer);
         }
 
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+        public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+            where T : class
         {
             return _context.ReceivePipe.ConnectConsumeMessageObserver(observer);
         }
 
-        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+            where T : class
         {
             return _context.ReceivePipe.ConnectConsumePipe(pipe);
         }
 
-        ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+        public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
+            where T : class
         {
             return _context.ReceivePipe.ConnectRequestPipe(requestId, pipe);
         }
 
-        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
             return _context.ConnectPublishObserver(observer);
         }
 
-        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _context.ConnectSendObserver(observer);
         }
@@ -98,6 +112,11 @@ namespace MassTransit.Transports
             where T : class
         {
             return _context.PublishEndpointProvider.GetPublishSendEndpoint<T>();
+        }
+
+        public HealthResult CheckHealth()
+        {
+            return HealthResult;
         }
 
 

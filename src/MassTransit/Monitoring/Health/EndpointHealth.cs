@@ -15,35 +15,44 @@ namespace MassTransit.Monitoring.Health
         IEndpointConfigurationObserver,
         IEndpointHealth
     {
-        readonly ConcurrentDictionary<Uri, EndpointStatus> _endpoints;
+        readonly ConcurrentDictionary<Uri, Endpoint> _endpoints;
 
         public EndpointHealth()
         {
-            _endpoints = new ConcurrentDictionary<Uri, EndpointStatus>();
+            _endpoints = new ConcurrentDictionary<Uri, Endpoint>();
         }
 
         public void EndpointConfigured<T>(T configurator)
             where T : IReceiveEndpointConfigurator
         {
-            GetEndpoint(configurator.InputAddress);
+            _endpoints.GetOrAdd(configurator.InputAddress, address => new Endpoint());
         }
 
         public HealthResult CheckHealth()
         {
-            EndpointStatus[] faulted = _endpoints.Values.Where(x => !x.Ready).ToArray();
-            Dictionary<string, object> data = _endpoints.ToDictionary(x => x.Key.ToString(), x => x.Value.GetData());
+            var results = _endpoints.Select(x => new
+            {
+                InputAddress = x.Key,
+                Result = x.Value.ReceiveEndpoint?.CheckHealth() ?? HealthResult.Unhealthy("not ready")
+            }).ToArray();
+
+            var unhealthy = results.Where(x => x.Result.Status == BusHealthStatus.Unhealthy).ToArray();
+            var degraded = results.Where(x => x.Result.Status == BusHealthStatus.Degraded).ToArray();
+
+            var unhappy = unhealthy.Union(degraded).ToArray();
+
+            var names = unhappy.Select(x => x.InputAddress.GetLastPart()).ToArray();
+
+            Dictionary<string, object> data = results.ToDictionary(x => x.InputAddress.ToString(), x => (object)x.Result);
 
             HealthResult healthCheckResult;
-            if (faulted.Length == _endpoints.Values.Count)
+            if (unhealthy.Any() || unhappy.Length == results.Length)
             {
-                healthCheckResult = HealthResult.Unhealthy($"Unhealthy Endpoints: {string.Join(",", faulted.Select(x => x.InputAddress.GetLastPart()))}",
-                    faulted.Select(x => x.LastException).FirstOrDefault(e => e != null), data);
+                healthCheckResult = HealthResult.Unhealthy($"Unhealthy Endpoints: {string.Join(",", names)}",
+                    unhappy.Select(x => x.Result.Exception).FirstOrDefault(e => e != null), data);
             }
-            else if (faulted.Any())
-            {
-                healthCheckResult = HealthResult.Degraded($"Unhealthy Endpoints: {string.Join(",", faulted.Select(x => x.InputAddress.GetLastPart()))}",
-                    faulted.Select(x => x.LastException).FirstOrDefault(e => e != null), data);
-            }
+            else if (degraded.Any())
+                healthCheckResult = HealthResult.Degraded($"Degraded Endpoints: {string.Join(",", names)}", data);
             else
                 healthCheckResult = HealthResult.Healthy("Endpoints are healthy", data);
 
@@ -52,85 +61,43 @@ namespace MassTransit.Monitoring.Health
 
         public Task Ready(ReceiveEndpointReady ready)
         {
-            GetEndpoint(ready.InputAddress).OnReady(ready);
+            GetEndpoint(ready);
 
             return TaskUtil.Completed;
         }
 
         public Task Stopping(ReceiveEndpointStopping stopping)
         {
-            GetEndpoint(stopping.InputAddress).OnStopping();
+            GetEndpoint(stopping);
 
             return TaskUtil.Completed;
         }
 
         public Task Completed(ReceiveEndpointCompleted completed)
         {
-            GetEndpoint(completed.InputAddress).OnCompleted(completed);
+            GetEndpoint(completed);
 
             return TaskUtil.Completed;
         }
 
         public Task Faulted(ReceiveEndpointFaulted faulted)
         {
-            GetEndpoint(faulted.InputAddress).OnFaulted(faulted);
+            GetEndpoint(faulted);
 
             return TaskUtil.Completed;
         }
 
-        EndpointStatus GetEndpoint(Uri inputAddress)
+        void GetEndpoint(ReceiveEndpointEvent endpointEvent)
         {
-            return _endpoints.GetOrAdd(inputAddress, address => new EndpointStatus(address));
+            var endpoint = _endpoints.GetOrAdd(endpointEvent.InputAddress, address => new Endpoint());
+
+            endpoint.ReceiveEndpoint ??= endpointEvent.ReceiveEndpoint;
         }
 
 
-        class EndpointStatus
+        class Endpoint
         {
-            public EndpointStatus(Uri inputAddress)
-            {
-                InputAddress = inputAddress;
-            }
-
-            public Uri InputAddress { get; }
-            public bool Ready { get; set; }
-            public string Message { get; set; } = "not started";
-            public Exception LastException { get; set; }
-
-            public void OnReady(ReceiveEndpointReady ready)
-            {
-                Ready = true;
-                Message = ready.IsStarted ? "ready" : "ready (not started)";
-            }
-
-            public void OnStopping()
-            {
-                Ready = true;
-                Message = "stopping";
-            }
-
-            public void OnCompleted(ReceiveEndpointCompleted completed)
-            {
-                Ready = false;
-                Message = $"stopped (delivered {completed.DeliveryCount} messages)";
-            }
-
-            public void OnFaulted(ReceiveEndpointFaulted faulted)
-            {
-                Ready = false;
-                LastException = faulted.Exception;
-                Message = $"faulted ({faulted.Exception.Message})";
-            }
-
-            public object GetData()
-            {
-                if (LastException == null)
-                    return new {Message};
-                return new
-                {
-                    Message,
-                    LastException
-                };
-            }
+            public IReceiveEndpoint ReceiveEndpoint { get; set; }
         }
     }
 }
