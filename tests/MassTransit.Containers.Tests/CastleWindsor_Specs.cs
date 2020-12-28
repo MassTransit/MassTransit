@@ -135,5 +135,50 @@
             void CompleteFirst();
             void CompleteSecond();
         }
+
+
+        [TestFixture]
+        public class WindsorConsumersFromContainer
+        {
+            readonly IWindsorContainer _container;
+
+            public WindsorConsumersFromContainer()
+            {
+                var container = new WindsorContainer();
+
+                container.Register(
+                    Component.For<SimpleConsumer>()
+                        .LifestyleScoped());
+
+                container.AddMassTransit(x =>
+                {
+                    x.AddConsumersFromContainer(container);
+
+                    x.UsingInMemory();
+                });
+
+                container.Register(Component.For<ISimpleConsumerDependency>().ImplementedBy<SimpleConsumerDependency>().LifestyleScoped(),
+                    Component.For<AnotherMessageConsumer>().ImplementedBy<AnotherMessageConsumerImpl>().LifestyleScoped()
+                );
+
+                _container = container;
+            }
+
+            [Test]
+            public async Task Should_start_the_bus()
+            {
+                var busControl = _container.Kernel.Resolve<IBusControl>();
+
+                await busControl.StartAsync();
+
+                await busControl.StopAsync();
+            }
+
+            [OneTimeTearDown]
+            public void Close_container()
+            {
+                _container.Dispose();
+            }
+        }
     }
 }

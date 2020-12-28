@@ -37,13 +37,13 @@ namespace MassTransit.Registration
 
             _hostConfiguration.LogContext = LogContext.Current;
 
-            IEnumerable<IBusInstanceSpecification> busInstanceSpecifications = specifications as IBusInstanceSpecification[] ?? specifications.ToArray();
-
             context.UseHealthCheck(configurator);
 
             configure?.Invoke(context, configurator);
 
             specifications ??= Enumerable.Empty<IBusInstanceSpecification>();
+
+            IEnumerable<IBusInstanceSpecification> busInstanceSpecifications = specifications as IBusInstanceSpecification[] ?? specifications.ToArray();
 
             IEnumerable<ValidationResult> validationResult = configurator.Validate()
                 .Concat(busInstanceSpecifications.SelectMany(x => x.Validate()));
