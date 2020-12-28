@@ -44,8 +44,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
             _context.AddConsumeAgent(receiver);
 
-            LogContext.Debug?.Log("Receiver Ready: {InputAddress}", _context.InputAddress);
-
             await _transportObserver.Ready(new ReceiveTransportReadyEvent(context.InputAddress)).ConfigureAwait(false);
 
             try

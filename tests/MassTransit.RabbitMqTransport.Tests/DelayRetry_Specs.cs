@@ -341,6 +341,8 @@
                 if (_timer == null)
                     _timer = Stopwatch.StartNew();
 
+                await Task.Delay(200);
+
                 if (_count++ < 2)
                 {
                     Console.WriteLine("{0} now is not a good time", DateTime.UtcNow);

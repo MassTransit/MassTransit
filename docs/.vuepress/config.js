@@ -48,7 +48,8 @@ module.exports = {
               '/releases/v7.0.4',
               '/releases/v7.0.6',
               '/releases/v7.0.7',
-              '/releases/v7.1.0'
+              '/releases/v7.1.0',
+              '/releases/v7.1.1'
             ]
           }
         ]
@@ -163,6 +164,7 @@ module.exports = {
                 collapsable: true,
                 children: [
                   '/advanced/middleware/receive',
+                  '/advanced/middleware/killswitch',
                   '/advanced/middleware/circuit-breaker',
                   '/advanced/middleware/rate-limiter',
                   '/advanced/middleware/transactions',

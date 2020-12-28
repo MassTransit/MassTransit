@@ -13,15 +13,6 @@ namespace MassTransit.Transports
         readonly ISupervisor _consumeSupervisor;
         readonly ISupervisor _sendSupervisor;
 
-        protected TransportPipeContextSupervisor(IAgent supervisor, IPipeContextFactory<T> factory)
-            : base(factory)
-        {
-            _consumeSupervisor = new Supervisor();
-            _sendSupervisor = new Supervisor();
-
-            supervisor.Completed.ContinueWith(_ => this.Stop(), TaskContinuationOptions.ExecuteSynchronously);
-        }
-
         protected TransportPipeContextSupervisor(IPipeContextFactory<T> factory)
             : base(factory)
         {

@@ -128,8 +128,15 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             LogContext.Debug?.Log("Consumer Cancel Ok: {InputAddress} - {ConsumerTag}", _context.InputAddress, consumerTag);
 
-            _deliveryComplete.TrySetResult(true);
-            SetCompleted(TaskUtil.Completed);
+            if (_dispatcher.ActiveDispatchCount == 0)
+            {
+                _deliveryComplete.TrySetResult(true);
+                SetCompleted(TaskUtil.Completed);
+            }
+            else
+            {
+                SetCompleted(_deliveryComplete.Task);
+            }
         }
 
         /// <summary>
@@ -148,8 +155,15 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(new[] {consumerTag}));
 
-            _deliveryComplete.TrySetResult(true);
-            SetCompleted(TaskUtil.Completed);
+            if (_dispatcher.ActiveDispatchCount == 0)
+            {
+                _deliveryComplete.TrySetResult(true);
+                SetCompleted(TaskUtil.Completed);
+            }
+            else
+            {
+                SetCompleted(_deliveryComplete.Task);
+            }
         }
 
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)
@@ -160,8 +174,15 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 "Consumer Model Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}, {ReplyCode}-{ReplyText}",
                 _context.InputAddress, _consumerTag, _dispatcher.MaxConcurrentDispatchCount, reason.ReplyCode, reason.ReplyText);
 
-            _deliveryComplete.TrySetResult(false);
-            SetCompleted(TaskUtil.Completed);
+            if (_dispatcher.ActiveDispatchCount == 0)
+            {
+                _deliveryComplete.TrySetResult(false);
+                SetCompleted(TaskUtil.Completed);
+            }
+            else
+            {
+                SetCompleted(_deliveryComplete.Task);
+            }
         }
 
         public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
@@ -230,7 +251,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             LogContext.Debug?.Log("Stopping Consumer: {InputAddress} - {ConsumerTag}", _context.InputAddress, _consumerTag);
 
-            await WaitForDeliveryCompleteAndCancel(context).ConfigureAwait(false);
+            await CancelAndWaitForDeliveryComplete(context).ConfigureAwait(false);
 
             try
             {
@@ -245,8 +266,17 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
         }
 
-        async Task WaitForDeliveryCompleteAndCancel(StopContext context)
+        async Task CancelAndWaitForDeliveryComplete(StopContext context)
         {
+            try
+            {
+                await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                LogContext.Warning?.Log(exception, "BasicCancel faulted: {InputAddress} - {ConsumerTag}", _context.InputAddress, _consumerTag);
+            }
+
             if (_dispatcher.ActiveDispatchCount > 0)
             {
                 try
@@ -258,16 +288,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress} - {ConsumerTag}",
                         _context.InputAddress, _consumerTag);
                 }
-            }
-
-            try
-            {
-                await _model.BasicCancel(_consumerTag).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            {
-                LogContext.Warning?.Log("Stop canceled waiting for consumer cancellation: {InputAddress} - {ConsumerTag}", _context.InputAddress,
-                    _consumerTag);
             }
         }
     }

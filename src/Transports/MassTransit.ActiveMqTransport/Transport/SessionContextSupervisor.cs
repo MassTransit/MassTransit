@@ -13,7 +13,7 @@ namespace MassTransit.ActiveMqTransport.Transport
         readonly ISessionContextSupervisor _supervisor;
 
         public SessionContextSupervisor(IConnectionContextSupervisor supervisor)
-            : base(supervisor, new SessionContextFactory(supervisor))
+            : base(new SessionContextFactory(supervisor))
         {
             _connectionContextSupervisor = supervisor;
         }

@@ -16,8 +16,8 @@ namespace MassTransit.RabbitMqTransport
         public static readonly LogMessage<Exchange> DeclareExchange = LogContext.Define<Exchange>(LogLevel.Debug,
             "Declare exchange: {Exchange}");
 
-        public static readonly LogMessage<Queue> DeclareQueue = LogContext.Define<Queue>(LogLevel.Debug,
-            "Declare queue: {Queue}");
+        public static readonly LogMessage<Queue, uint, uint> DeclareQueue = LogContext.Define<Queue, uint, uint>(LogLevel.Debug,
+            "Declare queue: {Queue}, consumer-count: {ConsumerCount} message-count: {MessageCount}");
 
         public static readonly LogMessage<ushort> PrefetchCount = LogContext.Define<ushort>(LogLevel.Debug,
             "Set Prefetch Count: {PrefetchCount}");

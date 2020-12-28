@@ -8,7 +8,6 @@
     using Automatonymous;
     using GreenPipes;
     using GreenPipes.Agents;
-    using GreenPipes.Internals.Extensions;
     using Pipeline.Observables;
     using Util;
 
@@ -110,7 +109,7 @@
             lock (_mutateLock)
                 endpoints = _endpoints.Values.Where(x => _machine.IsStarted(x)).ToArray();
 
-            await Task.WhenAll(endpoints.Select(x => x.EndpointHandle.StopAsync(false, context.CancellationToken))).ConfigureAwait(false);
+            await Task.WhenAll(endpoints.Select(x => x.Stop(context.CancellationToken))).ConfigureAwait(false);
 
             await base.StopAgent(context).ConfigureAwait(false);
         }
@@ -119,16 +118,19 @@
         {
             try
             {
-                var endpointReadyObserver = new StartEndpointReadyObserver(endpoint, cancellationToken);
-
                 var observerHandle = endpoint.ConnectReceiveEndpointObserver(_receiveEndpointObservers);
 
-                var endpointHandle = endpoint.Start(cancellationToken);
+                void RemoveEndpoint()
+                {
+                    observerHandle.Disconnect();
+                    Remove(endpointName);
+                }
 
-                HostReceiveEndpointHandle handle = new Handle(endpointHandle, endpoint, endpointReadyObserver.Ready, () => Remove(endpointName),
-                    observerHandle);
+                var handle = new Handle(endpoint, RemoveEndpoint);
 
-                TaskUtil.Await(() => _machine.RaiseEvent(endpoint, x => x.ReceiveEndpointStarted, handle, cancellationToken), cancellationToken);
+                handle.Start(cancellationToken);
+
+                TaskUtil.Await(() => _machine.RaiseEvent(endpoint, _machine.ReceiveEndpointStarted, cancellationToken), cancellationToken);
 
                 return handle;
             }
@@ -155,120 +157,33 @@
             HostReceiveEndpointHandle
         {
             readonly ReceiveEndpoint _endpoint;
-            readonly ReceiveEndpointHandle _endpointHandle;
-            readonly ConnectHandle[] _handles;
             readonly Action _remove;
-            bool _stopped;
 
-            public Handle(ReceiveEndpointHandle endpointHandle, ReceiveEndpoint endpoint, Task<ReceiveEndpointReady> ready, Action remove,
-                params ConnectHandle[] handles)
+            ReceiveEndpointHandle _endpointHandle;
+
+            public Handle(ReceiveEndpoint endpoint, Action remove)
             {
                 _endpoint = endpoint;
-                _endpointHandle = endpointHandle;
                 _remove = remove;
-                _handles = handles;
-
-                Ready = ready;
             }
 
             public IReceiveEndpoint ReceiveEndpoint => _endpoint;
-            public Task<ReceiveEndpointReady> Ready { get; }
 
-            public Task StopAsync(CancellationToken cancellationToken)
+            Task<ReceiveEndpointReady> HostReceiveEndpointHandle.Ready => _endpointHandle.Ready;
+
+            public async Task StopAsync(CancellationToken cancellationToken)
             {
-                return StopAsync(true, cancellationToken);
+                await _endpoint.Stop(cancellationToken).ConfigureAwait(false);
+
+                _remove();
             }
 
-            public async Task StopAsync(bool removeEndpoint, CancellationToken cancellationToken)
+            public void Start(CancellationToken cancellationToken)
             {
-                if (_stopped)
+                if (_endpointHandle != null)
                     return;
 
-                await _endpointHandle.Stop(cancellationToken).ConfigureAwait(false);
-
-                foreach (var handle in _handles)
-                    handle.Disconnect();
-
-                if (removeEndpoint)
-                    _remove();
-
-                _stopped = true;
-            }
-        }
-
-
-        class StartEndpointReadyObserver :
-            IReceiveEndpointObserver
-        {
-            readonly CancellationToken _cancellationToken;
-            readonly ConnectHandle _handle;
-            readonly TaskCompletionSource<ReceiveEndpointReady> _ready;
-            ReceiveEndpointFaulted _faulted;
-            CancellationTokenRegistration _registration;
-
-            public StartEndpointReadyObserver(IReceiveEndpointObserverConnector endpoint, CancellationToken cancellationToken)
-            {
-                _cancellationToken = cancellationToken;
-                _ready = TaskUtil.GetTask<ReceiveEndpointReady>();
-
-                if (cancellationToken.CanBeCanceled)
-                {
-                    _registration = cancellationToken.Register(() =>
-                    {
-                        if (_faulted != null)
-                        {
-                            _handle?.Disconnect();
-                            _ready.TrySetExceptionOnThreadPool(_faulted.Exception);
-                        }
-
-                        _registration.Dispose();
-                    });
-                }
-
-                _handle = endpoint.ConnectReceiveEndpointObserver(this);
-            }
-
-            public Task<ReceiveEndpointReady> Ready => _ready.Task;
-
-            Task IReceiveEndpointObserver.Ready(ReceiveEndpointReady ready)
-            {
-                _handle.Disconnect();
-                _registration.Dispose();
-
-                return _ready.TrySetResultOnThreadPool(ready);
-            }
-
-            public Task Stopping(ReceiveEndpointStopping stopping)
-            {
-                return TaskUtil.Completed;
-            }
-
-            Task IReceiveEndpointObserver.Completed(ReceiveEndpointCompleted completed)
-            {
-                return TaskUtil.Completed;
-            }
-
-            Task IReceiveEndpointObserver.Faulted(ReceiveEndpointFaulted faulted)
-            {
-                _faulted = faulted;
-
-                if (_cancellationToken.IsCancellationRequested || IsUnrecoverable(faulted.Exception))
-                {
-                    _handle.Disconnect();
-
-                    return _ready.TrySetExceptionOnThreadPool(faulted.Exception);
-                }
-
-                return TaskUtil.Completed;
-            }
-
-            static bool IsUnrecoverable(Exception exception)
-            {
-                return exception switch
-                {
-                    ConnectionException connectionException => !connectionException.IsTransient,
-                    _ => false
-                };
+                _endpointHandle = _endpoint.Start(cancellationToken);
             }
         }
     }

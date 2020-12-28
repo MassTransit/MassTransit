@@ -5,30 +5,23 @@
 
 
     /// <summary>
-    /// Returned when a receive endpoint is added to a host
+    /// Returned when a receive endpoint is connected
     /// </summary>
     public interface HostReceiveEndpointHandle
     {
         IReceiveEndpoint ReceiveEndpoint { get; }
 
         /// <summary>
-        /// A task which can be awaited to know when the receive endpoint is ready
+        /// Completed when the endpoint has successfully started and is ready to consume messages.
         /// </summary>
         Task<ReceiveEndpointReady> Ready { get; }
 
         /// <summary>
-        /// Stop the receive endpoint.
+        /// Stop the receive endpoint and remove it from the host. Once removed, the endpoint
+        /// cannot be restarted using the <see cref="ReceiveEndpoint"/> property directly.
         /// </summary>
         /// <param name="cancellationToken">Cancel the stop operation in progress</param>
-        /// <returns>An awaitable task that is completed once everything is stopped</returns>
+        /// <returns>Completed once the receive endpoint has stopped and been removed from the host</returns>
         Task StopAsync(CancellationToken cancellationToken = default);
-
-        /// <summary>
-        /// Stop the receive endpoint.
-        /// </summary>
-        /// <param name="removeEndpoint">If true, the endpoint is removed from the bus</param>
-        /// <param name="cancellationToken">Cancel the stop operation in progress</param>
-        /// <returns>An awaitable task that is completed once everything is stopped</returns>
-        Task StopAsync(bool removeEndpoint, CancellationToken cancellationToken = default);
     }
 }

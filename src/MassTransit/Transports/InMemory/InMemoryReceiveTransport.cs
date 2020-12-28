@@ -125,8 +125,6 @@ namespace MassTransit.Transports.InMemory
                 {
                     _consumerHandle = _queue.ConnectConsumer(this);
 
-                    LogContext.Debug?.Log("Receiver Ready: {InputAddress}", _context.InputAddress);
-
                     await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(_context.InputAddress));
 
                     SetReady();

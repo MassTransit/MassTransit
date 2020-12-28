@@ -30,8 +30,6 @@ namespace MassTransit.EventHubIntegration.Filters
 
             _context.AddConsumeAgent(receiver);
 
-            LogContext.Debug?.Log("Receiver Ready: {InputAddress}", _context.InputAddress);
-
             await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(inputAddress)).ConfigureAwait(false);
 
             try

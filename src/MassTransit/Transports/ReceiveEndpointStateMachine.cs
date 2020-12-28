@@ -2,6 +2,7 @@ namespace MassTransit.Transports
 {
     using Automatonymous;
     using Automatonymous.Binders;
+    using Context;
     using Monitoring.Health;
 
 
@@ -20,6 +21,7 @@ namespace MassTransit.Transports
                         x.Instance.InputAddress = x.Data.InputAddress;
                     })
                     .SetHealthy()
+                    .Then(x => LogContext.Debug?.Log("Endpoint Ready: {InputAddress}", x.Instance.InputAddress))
                     .TransitionTo(Ready));
 
             During(Ready, Ignore(ReceiveEndpointReady));
@@ -33,6 +35,7 @@ namespace MassTransit.Transports
                         x.Instance.InputAddress = x.Data.InputAddress;
                     })
                     .SetUnHealthy()
+                    .Then(x => LogContext.Debug?.Log("Endpoint Faulted: {InputAddress}", x.Instance.InputAddress))
                     .TransitionTo(Faulted)
             );
 
@@ -43,6 +46,7 @@ namespace MassTransit.Transports
                 When(ReceiveEndpointCompleted)
                     .Then(x => x.Instance.Message = $"stopped (delivered {x.Data.DeliveryCount} messages)")
                     .SetDegraded()
+                    .Then(x => LogContext.Debug?.Log("Endpoint Completed: {InputAddress}", x.Instance.InputAddress))
                     .TransitionTo(Completed)
             );
 
@@ -53,21 +57,21 @@ namespace MassTransit.Transports
                 When(ReceiveEndpointStarted)
                     .Then(x =>
                     {
-                        x.Instance.EndpointHandle = x.Data;
                         x.Instance.Message = "starting";
                     })
                     .TransitionTo(Started)
             );
 
             During(Ready,
-                When(ReceiveEndpointStarted)
-                    .Then(x => x.Instance.EndpointHandle = x.Data));
+                Ignore(ReceiveEndpointStarted));
 
             During(Started, Ignore(ReceiveEndpointStarted));
 
             DuringAny(
                 When(ReceiveEndpointStopping)
-                    .Then(x => x.Instance.Message = "stopping"));
+                    .Then(x => x.Instance.Message = "stopping")
+                    .Then(x => LogContext.Debug?.Log("Endpoint Stopping: {InputAddress}", x.Instance.InputAddress))
+            );
         }
 
         public State Started { get; }
@@ -75,7 +79,7 @@ namespace MassTransit.Transports
         public State Completed { get; }
         public State Faulted { get; }
 
-        public Event<HostReceiveEndpointHandle> ReceiveEndpointStarted { get; }
+        public Event ReceiveEndpointStarted { get; }
 
         public Event<ReceiveEndpointReady> ReceiveEndpointReady { get; }
         public Event<ReceiveEndpointStopping> ReceiveEndpointStopping { get; }

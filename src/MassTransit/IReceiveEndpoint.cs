@@ -1,5 +1,7 @@
 namespace MassTransit
 {
+    using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
     using Monitoring.Health;
@@ -22,6 +24,22 @@ namespace MassTransit
         IEndpointHealth,
         IProbeSite
     {
+        Uri InputAddress { get; }
+
         Task<ReceiveEndpointReady> Started { get; }
+
+        /// <summary>
+        /// Start the receive endpoint
+        /// </summary>
+        /// <param name="cancellationToken">Cancel the stop operation in progress</param>
+        /// <returns>An awaitable task that is completed once everything is stopped</returns>
+        ReceiveEndpointHandle Start(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Stop the receive endpoint.
+        /// </summary>
+        /// <param name="cancellationToken">Cancel the stop operation in progress</param>
+        /// <returns>An awaitable task that is completed once everything is stopped</returns>
+        Task Stop(CancellationToken cancellationToken = default);
     }
 }

@@ -67,7 +67,7 @@ namespace MassTransit.Containers.Tests
 
                 using var stop = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-                await endpointHandle.StopAsync(false, stop.Token);
+                await endpointHandle.ReceiveEndpoint.Stop(stop.Token);
 
                 await WaitForHealthStatus(healthChecks, HealthStatus.Degraded);
             }
@@ -189,7 +189,7 @@ namespace MassTransit.Containers.Tests
             }
             while (result.Status != expectedStatus);
 
-            if(result.Status != expectedStatus)
+            if (result.Status != expectedStatus)
             {
                 await TestContext.Out.WriteLineAsync(FormatHealthCheck(result));
             }
