@@ -32,7 +32,7 @@
             {
                 var handle = _consumers.Connect(consumer);
 
-                _consumer.TrySetResultOnThreadPool(consumer);
+                _consumer.TrySetResult(consumer);
 
                 return new ConsumerHandle(this, handle);
             }

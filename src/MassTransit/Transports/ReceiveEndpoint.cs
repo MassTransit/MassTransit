@@ -7,7 +7,6 @@ namespace MassTransit.Transports
     using Context;
     using Events;
     using GreenPipes;
-    using GreenPipes.Internals.Extensions;
     using Monitoring.Health;
     using Util;
 
@@ -160,7 +159,7 @@ namespace MassTransit.Transports
             {
                 var endpointReadyEvent = new ReceiveEndpointReadyEvent(ready.InputAddress, _endpoint, ready.IsStarted);
                 if (ready.IsStarted)
-                    _endpoint._started.TrySetResultOnThreadPool(endpointReadyEvent);
+                    _endpoint._started.TrySetResult(endpointReadyEvent);
 
                 return _observer.Ready(endpointReadyEvent);
             }
@@ -198,7 +197,7 @@ namespace MassTransit.Transports
                         if (_faulted != null)
                         {
                             _handle?.Disconnect();
-                            _ready.TrySetExceptionOnThreadPool(_faulted.Exception);
+                            _ready.TrySetException(_faulted.Exception);
                         }
 
                         _registration.Dispose();
@@ -215,7 +214,9 @@ namespace MassTransit.Transports
                 _handle.Disconnect();
                 _registration.Dispose();
 
-                return _ready.TrySetResultOnThreadPool(ready);
+                _ready.TrySetResult(ready);
+
+                return TaskUtil.Completed;
             }
 
             public Task Stopping(ReceiveEndpointStopping stopping)
@@ -237,7 +238,7 @@ namespace MassTransit.Transports
                     _handle.Disconnect();
                     _registration.Dispose();
 
-                    return _ready.TrySetExceptionOnThreadPool(faulted.Exception);
+                    _ready.TrySetException(faulted.Exception);
                 }
 
                 return TaskUtil.Completed;

@@ -9,6 +9,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using TestFramework;
 
 
+    [Category("Flakey")]
     [TestFixture]
     public class KillSwitch_Specs :
         RabbitMqTestFixture
@@ -18,7 +19,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             Assert.That(await _busHealth.WaitForHealthStatus(BusHealthStatus.Healthy, TimeSpan.FromSeconds(10)), Is.EqualTo(BusHealthStatus.Healthy));
 
-            await Task.WhenAll(Enumerable.Range(0, 20).Select(x => Bus.Publish(new BadMessage())));
+            await Task.WhenAll(Enumerable.Range(0, 11).Select(x => Bus.Publish(new BadMessage())));
 
             Assert.That(await _busHealth.WaitForHealthStatus(BusHealthStatus.Degraded, TimeSpan.FromSeconds(15)), Is.EqualTo(BusHealthStatus.Degraded));
 
@@ -26,7 +27,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             await Task.WhenAll(Enumerable.Range(0, 20).Select(x => Bus.Publish(new GoodMessage())));
 
-            Assert.That(await RabbitMqTestHarness.Consumed.SelectAsync<BadMessage>().Take(20).Count(), Is.EqualTo(20));
+            Assert.That(await RabbitMqTestHarness.Consumed.SelectAsync<BadMessage>().Take(11).Count(), Is.EqualTo(11));
 
             Assert.That(await RabbitMqTestHarness.Consumed.SelectAsync<GoodMessage>().Take(20).Count(), Is.EqualTo(20));
         }
@@ -39,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             configurator.UseKillSwitch(options => options
                 .SetActivationThreshold(10)
-                .SetTripThreshold(10)
+                .SetTripThreshold(0.1)
                 .SetRestartTimeout(s: 1));
 
             configurator.ConnectBusObserver(_busHealth);
@@ -49,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             configurator.PurgeOnStartup = false;
-            configurator.PrefetchCount = 20;
+            configurator.PrefetchCount = 1;
 
             configurator.Consumer<BadConsumer>();
         }

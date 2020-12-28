@@ -2,7 +2,6 @@ namespace MassTransit.Transports
 {
     using System.Threading.Tasks;
     using GreenPipes;
-    using GreenPipes.Internals.Extensions;
     using Util;
 
 
@@ -10,8 +9,8 @@ namespace MassTransit.Transports
         IReceiveEndpointDependency,
         IReceiveEndpointObserver
     {
-        readonly TaskCompletionSource<ReceiveEndpointReady> _ready;
         readonly ConnectHandle _handle;
+        readonly TaskCompletionSource<ReceiveEndpointReady> _ready;
 
         public ReceiveEndpointDependency(IReceiveEndpointObserverConnector connector)
         {
@@ -26,7 +25,9 @@ namespace MassTransit.Transports
         {
             _handle.Disconnect();
 
-            return _ready.TrySetResultOnThreadPool(ready);
+            _ready.TrySetResult(ready);
+
+            return TaskUtil.Completed;
         }
 
         Task IReceiveEndpointObserver.Stopping(ReceiveEndpointStopping stopping)
@@ -43,7 +44,9 @@ namespace MassTransit.Transports
         {
             _handle.Disconnect();
 
-            return _ready.TrySetExceptionOnThreadPool(faulted.Exception);
+            _ready.TrySetException(faulted.Exception);
+
+            return TaskUtil.Completed;
         }
     }
 }
