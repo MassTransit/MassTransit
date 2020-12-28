@@ -39,7 +39,7 @@ namespace MassTransit.Transports
 
         public string Message { get; set; }
 
-        public HealthResult HealthResult { get; set; }
+        public EndpointHealthResult HealthResult { get; set; }
 
         public Uri InputAddress { get; set; }
 
@@ -138,7 +138,7 @@ namespace MassTransit.Transports
             return _context.PublishEndpointProvider.GetPublishSendEndpoint<T>();
         }
 
-        public HealthResult CheckHealth()
+        public EndpointHealthResult CheckHealth()
         {
             return HealthResult;
         }

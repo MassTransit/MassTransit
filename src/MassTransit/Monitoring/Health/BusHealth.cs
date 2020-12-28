@@ -2,6 +2,7 @@ namespace MassTransit.Monitoring.Health
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using EndpointConfigurators;
     using Util;
@@ -33,15 +34,15 @@ namespace MassTransit.Monitoring.Health
 
         public HealthResult CheckHealth()
         {
-            var endpointHealthResult = _endpointHealth.CheckHealth();
+            (var status, var description, IReadOnlyDictionary<string, EndpointHealthResult> results) = _endpointHealth.CheckHealth();
 
-            var data = new Dictionary<string, object> {["Endpoints"] = endpointHealthResult.Data};
+            var exception = results.Where(x => x.Value.Exception != null).Select(x => x.Value.Exception).FirstOrDefault();
 
-            return _healthy && endpointHealthResult.Status == BusHealthStatus.Healthy
-                ? HealthResult.Healthy("Ready", data)
-                : _healthy && endpointHealthResult.Status == BusHealthStatus.Degraded
-                    ? HealthResult.Degraded(endpointHealthResult.Description, data: data)
-                    : HealthResult.Unhealthy($"Not ready: {_failureMessage}", data: data);
+            return _healthy && status == BusHealthStatus.Healthy
+                ? HealthResult.Healthy("Ready", results)
+                : _healthy && status == BusHealthStatus.Degraded
+                    ? HealthResult.Degraded(description, exception, results)
+                    : HealthResult.Unhealthy($"Not ready: {_failureMessage}", exception, results);
         }
 
         Task IBusObserver.CreateFaulted(Exception exception)

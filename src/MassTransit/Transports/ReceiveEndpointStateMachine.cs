@@ -98,20 +98,20 @@ namespace MassTransit.Transports
         public static EventActivityBinder<ReceiveEndpoint, T> SetHealthy<T>(this EventActivityBinder<ReceiveEndpoint, T> binder)
             where T : class
         {
-            return binder.Then(context => context.Instance.HealthResult = HealthResult.Healthy(context.Instance.Message));
+            return binder.Then(context => context.Instance.HealthResult = EndpointHealthResult.Healthy(context.Instance, context.Instance.Message));
         }
 
         public static EventActivityBinder<ReceiveEndpoint, T> SetDegraded<T>(this EventActivityBinder<ReceiveEndpoint, T> binder)
             where T : class
         {
-            return binder.Then(context => context.Instance.HealthResult = HealthResult.Degraded(context.Instance.Message));
+            return binder.Then(context => context.Instance.HealthResult = EndpointHealthResult.Degraded(context.Instance, context.Instance.Message));
         }
 
         public static EventActivityBinder<ReceiveEndpoint, ReceiveEndpointFaulted> SetUnHealthy(this EventActivityBinder<ReceiveEndpoint,
             ReceiveEndpointFaulted> binder)
         {
             return binder.Then(context =>
-                context.Instance.HealthResult = HealthResult.Unhealthy(context.Instance.Message, context.Data.Exception));
+                context.Instance.HealthResult = EndpointHealthResult.Unhealthy(context.Instance, context.Instance.Message, context.Data.Exception));
         }
     }
 }

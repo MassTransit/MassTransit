@@ -6,18 +6,15 @@ namespace MassTransit.Monitoring.Health
 
     public readonly struct HealthResult
     {
-        static readonly IReadOnlyDictionary<string, object> _emptyReadOnlyDictionary = new Dictionary<string, object>();
-
-        HealthResult(BusHealthStatus status, string description = null, Exception exception = null,
-            IReadOnlyDictionary<string, object> data = null)
+        HealthResult(BusHealthStatus status, string description, Exception exception, IReadOnlyDictionary<string, EndpointHealthResult> endpoints)
         {
             Status = status;
             Description = description;
             Exception = exception;
-            Data = data ?? _emptyReadOnlyDictionary;
+            Endpoints = endpoints;
         }
 
-        public readonly IReadOnlyDictionary<string, object> Data;
+        public readonly IReadOnlyDictionary<string, EndpointHealthResult> Endpoints;
 
         public readonly string Description;
 
@@ -25,19 +22,19 @@ namespace MassTransit.Monitoring.Health
 
         public readonly BusHealthStatus Status;
 
-        public static HealthResult Healthy(string description = null, IReadOnlyDictionary<string, object> data = null)
+        public static HealthResult Healthy(string description, IReadOnlyDictionary<string, EndpointHealthResult> endpoints)
         {
-            return new HealthResult(BusHealthStatus.Healthy, description, null, data);
+            return new HealthResult(BusHealthStatus.Healthy, description, null, endpoints);
         }
 
-        public static HealthResult Degraded(string description = null, IReadOnlyDictionary<string, object> data = null)
+        public static HealthResult Degraded(string description, Exception exception, IReadOnlyDictionary<string, EndpointHealthResult> endpoints)
         {
-            return new HealthResult(BusHealthStatus.Degraded, description, null, data);
+            return new HealthResult(BusHealthStatus.Degraded, description, exception, endpoints);
         }
 
-        public static HealthResult Unhealthy(string description = null, Exception exception = null, IReadOnlyDictionary<string, object> data = null)
+        public static HealthResult Unhealthy(string description, Exception exception, IReadOnlyDictionary<string, EndpointHealthResult> endpoints)
         {
-            return new HealthResult(BusHealthStatus.Unhealthy, description, exception, data);
+            return new HealthResult(BusHealthStatus.Unhealthy, description, exception, endpoints);
         }
     }
 }

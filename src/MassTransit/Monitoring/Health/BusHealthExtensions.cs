@@ -8,7 +8,7 @@ namespace MassTransit.Monitoring.Health
     {
         public static async Task<BusHealthStatus> WaitForHealthStatus(this IBusHealth healthChecks, BusHealthStatus expectedStatus, TimeSpan timeout)
         {
-            DateTime expiresAt = DateTime.UtcNow + timeout;
+            var expiresAt = DateTime.UtcNow + timeout;
 
             var result = healthChecks.CheckHealth();
             while (result.Status != expectedStatus)
