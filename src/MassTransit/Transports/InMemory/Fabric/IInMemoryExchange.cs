@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.Transports.InMemory.Fabric
 {
+    using System.Threading;
     using System.Threading.Tasks;
 
 
@@ -8,6 +9,6 @@
         IMessageSource<InMemoryTransportMessage>
     {
         string Name { get; }
-        Task Send(InMemoryTransportMessage message);
+        Task Send(InMemoryTransportMessage message, CancellationToken cancellationToken);
     }
 }

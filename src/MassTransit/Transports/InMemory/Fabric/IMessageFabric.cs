@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Transports.InMemory.Fabric
 {
     using System;
-    using System.Threading.Tasks;
     using GreenPipes;
 
 
@@ -9,9 +8,6 @@
         IProbeSite,
         IAsyncDisposable
     {
-        int ConcurrencyLimit { set; }
-        Task Send(string exchangeName, InMemoryTransportMessage message);
-
         void ExchangeDeclare(string name);
         void QueueDeclare(string name, int concurrencyLimit);
         void ExchangeBind(string source, string destination);

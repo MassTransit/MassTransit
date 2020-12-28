@@ -74,10 +74,10 @@ namespace MassTransit.Transports.InMemory
             ReceiveTransportHandle,
             IInMemoryQueueConsumer
         {
+            readonly ConnectHandle _consumerHandle;
             readonly InMemoryReceiveEndpointContext _context;
-            readonly IReceivePipeDispatcher _dispatcher;
             readonly IInMemoryQueue _queue;
-            ConnectHandle _consumerHandle;
+            readonly IReceivePipeDispatcher _dispatcher;
 
             public ReceiveTransportAgent(InMemoryReceiveEndpointContext context, IInMemoryQueue queue)
             {
@@ -86,6 +86,7 @@ namespace MassTransit.Transports.InMemory
 
                 _dispatcher = context.CreateReceivePipeDispatcher();
 
+                _consumerHandle = queue.ConnectConsumer(this);
 
                 Task.Run(() => Startup());
             }
@@ -114,17 +115,15 @@ namespace MassTransit.Transports.InMemory
                 }
             }
 
-            Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
+            async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
-                return this.Stop("Stop Receive Transport", cancellationToken);
+                await this.Stop("Stop Receive Transport", cancellationToken).ConfigureAwait(false);
             }
 
             async Task Startup()
             {
                 try
                 {
-                    _consumerHandle = _queue.ConnectConsumer(this);
-
                     await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(_context.InputAddress));
 
                     SetReady();
@@ -140,8 +139,6 @@ namespace MassTransit.Transports.InMemory
             {
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
-                _consumerHandle.Disconnect();
-
                 var metrics = _dispatcher.GetMetrics();
                 var completed = new ReceiveTransportCompletedEvent(_context.InputAddress, metrics);
 
@@ -149,6 +146,8 @@ namespace MassTransit.Transports.InMemory
 
                 LogContext.Debug?.Log("Consumer completed {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent",
                     _context.InputAddress, metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
+
+                _consumerHandle.Disconnect();
 
                 await base.StopAgent(context).ConfigureAwait(false);
             }

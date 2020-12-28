@@ -44,7 +44,7 @@ namespace MassTransit.Transports.InMemory
 
                 var transportMessage = new InMemoryTransportMessage(messageId, context.Body, context.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
 
-                await _context.Exchange.Send(transportMessage).ConfigureAwait(false);
+                await _context.Exchange.Send(transportMessage, cancellationToken).ConfigureAwait(false);
 
                 context.LogSent();
                 activity.AddSendContextHeadersPostSend(context);

@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Transports.InMemory.Fabric
 {
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
 
 
@@ -37,9 +38,10 @@
 
         public IEnumerable<IMessageSink<InMemoryTransportMessage>> Sinks => _sinks;
 
-        public Task Send(InMemoryTransportMessage message)
+        public Task Send(InMemoryTransportMessage message, CancellationToken cancellationToken)
         {
-            var deliveryContext = new InMemoryDeliveryContext(message);
+            var deliveryContext = new InMemoryDeliveryContext(message, cancellationToken);
+
             return Deliver(deliveryContext);
         }
 

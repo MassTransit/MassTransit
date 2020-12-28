@@ -2,6 +2,7 @@ namespace MassTransit.Transports.InMemory
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
     using Fabric;
 
@@ -31,7 +32,7 @@ namespace MassTransit.Transports.InMemory
 
             preSend(transportMessage, transportMessage.Headers);
 
-            await _exchange.Send(transportMessage).ConfigureAwait(false);
+            await _exchange.Send(transportMessage, CancellationToken.None).ConfigureAwait(false);
         }
 
         static Guid GetMessageId(ReceiveContext context)

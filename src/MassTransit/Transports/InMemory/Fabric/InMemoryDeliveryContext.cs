@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Transports.InMemory.Fabric
 {
     using System.Collections.Generic;
+    using System.Threading;
 
 
     public class InMemoryDeliveryContext :
@@ -8,12 +9,17 @@
     {
         readonly HashSet<IMessageSink<InMemoryTransportMessage>> _delivered;
 
-        public InMemoryDeliveryContext(InMemoryTransportMessage message)
+        public InMemoryDeliveryContext(InMemoryTransportMessage message, CancellationToken cancellationToken)
         {
-            Package = message;
+            Message = message;
+            CancellationToken = cancellationToken;
 
             _delivered = new HashSet<IMessageSink<InMemoryTransportMessage>>();
         }
+
+        public CancellationToken CancellationToken { get; }
+
+        public InMemoryTransportMessage Message { get; }
 
         public bool WasAlreadyDelivered(IMessageSink<InMemoryTransportMessage> sink)
         {
@@ -24,7 +30,5 @@
         {
             _delivered.Add(sink);
         }
-
-        public InMemoryTransportMessage Package { get; }
     }
 }

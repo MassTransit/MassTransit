@@ -1,15 +1,20 @@
 namespace MassTransit.Transports.InMemory.Fabric
 {
+    using System.Threading;
+
+
     public interface DeliveryContext<T>
         where T : class
     {
+        CancellationToken CancellationToken { get; }
+
         /// <summary>
         /// The package being delivered
         /// </summary>
-        T Package { get; }
+        T Message { get; }
 
         /// <summary>
-        /// Should this delivery occur, or has is already been delievered
+        /// Should this delivery occur, or has is already been delivered
         /// </summary>
         /// <param name="sink"></param>
         /// <returns></returns>

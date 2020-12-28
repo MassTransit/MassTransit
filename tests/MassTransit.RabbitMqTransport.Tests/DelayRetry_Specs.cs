@@ -311,7 +311,7 @@
     }
 
 
-    [Category("SlowAF")]
+    [Category("Flakey")]
     [TestFixture]
     public class Explicitly_deferring_a_message_instead_of_throwing :
         RabbitMqTestFixture

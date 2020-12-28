@@ -1,9 +1,9 @@
 ﻿namespace MassTransit.Transports.InMemory.Fabric
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using GreenPipes.Util;
     using Util;
 
@@ -32,9 +32,9 @@
             {
                 var handle = _consumers.Connect(consumer);
 
-                _consumer.SetResult(consumer);
+                _consumer.TrySetResultOnThreadPool(consumer);
 
-                return handle;
+                return new ConsumerHandle(this, handle);
             }
             catch (Exception exception)
             {
@@ -46,7 +46,7 @@
         {
             return context.WasAlreadyDelivered(this)
                 ? Task.FromResult(false)
-                : _executor.Push(() => DispatchMessage(context.Package));
+                : _executor.Push(() => DispatchMessage(context), context.CancellationToken);
         }
 
         public ValueTask DisposeAsync()
@@ -54,13 +54,13 @@
             return _executor.DisposeAsync();
         }
 
-        async Task DispatchMessage(InMemoryTransportMessage message)
+        async Task DispatchMessage(DeliveryContext<InMemoryTransportMessage> context)
         {
-            await _consumer.Task.ConfigureAwait(false);
+            await _consumer.Task.OrCanceled(context.CancellationToken).ConfigureAwait(false);
 
             try
             {
-                await _consumers.ForEachAsync(x => x.Consume(message, CancellationToken.None)).ConfigureAwait(false);
+                await _consumers.ForEachAsync(x => x.Consume(context.Message, context.CancellationToken)).ConfigureAwait(false);
             }
             // ReSharper disable once EmptyGeneralCatchClause
             catch
@@ -71,6 +71,30 @@
         public override string ToString()
         {
             return $"Queue({_name})";
+        }
+
+
+        class ConsumerHandle :
+            ConnectHandle
+        {
+            readonly ConnectHandle _handle;
+            readonly InMemoryQueue _queue;
+
+            public ConsumerHandle(InMemoryQueue queue, ConnectHandle handle)
+            {
+                _queue = queue;
+                _handle = handle;
+            }
+
+            public void Dispose()
+            {
+                _handle.Dispose();
+            }
+
+            public void Disconnect()
+            {
+                _handle.Disconnect();
+            }
         }
     }
 }

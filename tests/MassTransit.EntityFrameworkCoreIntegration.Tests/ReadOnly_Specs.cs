@@ -90,7 +90,6 @@
             {
                 _machine = new ReadOnlyStateMachine();
 
-                configurator.ConcurrencyLimit = 1;
                 configurator.StateMachineSaga(_machine, CreateSagaRepository());
             }
 

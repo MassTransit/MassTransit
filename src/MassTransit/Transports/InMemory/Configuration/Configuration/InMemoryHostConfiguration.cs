@@ -28,7 +28,7 @@
             _hostAddress = baseAddress ?? new Uri("loopback://localhost/");
             _hostTopology = new InMemoryHostTopology(this, topologyConfiguration);
 
-            TransportConcurrencyLimit = Environment.ProcessorCount;
+            TransportConcurrencyLimit = Math.Min(Environment.ProcessorCount, 4);
 
             _transportProvider = new Recycle<IInMemoryTransportProvider>(() => new InMemoryTransportProvider(this, topologyConfiguration));
         }

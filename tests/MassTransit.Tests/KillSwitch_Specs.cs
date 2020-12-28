@@ -1,4 +1,4 @@
-namespace MassTransit.RabbitMqTransport.Tests
+namespace MassTransit.Tests
 {
     using System;
     using System.Linq;
@@ -11,7 +11,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
     [TestFixture]
     public class KillSwitch_Specs :
-        RabbitMqTestFixture
+        InMemoryTestFixture
     {
         [Test]
         public async Task Should_be_degraded_after_too_many_exceptions()
@@ -26,14 +26,14 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             await Task.WhenAll(Enumerable.Range(0, 20).Select(x => Bus.Publish(new GoodMessage())));
 
-            Assert.That(await RabbitMqTestHarness.Consumed.SelectAsync<BadMessage>().Take(20).Count(), Is.EqualTo(20));
+            Assert.That(await InMemoryTestHarness.Consumed.SelectAsync<BadMessage>().Take(20).Count(), Is.EqualTo(20));
 
-            Assert.That(await RabbitMqTestHarness.Consumed.SelectAsync<GoodMessage>().Take(20).Count(), Is.EqualTo(20));
+            Assert.That(await InMemoryTestHarness.Consumed.SelectAsync<GoodMessage>().Take(20).Count(), Is.EqualTo(20));
         }
 
         BusHealth _busHealth;
 
-        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             _busHealth = new BusHealth();
 
@@ -46,11 +46,9 @@ namespace MassTransit.RabbitMqTransport.Tests
             configurator.ConnectEndpointConfigurationObserver(_busHealth);
         }
 
-        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.PurgeOnStartup = false;
-            configurator.PrefetchCount = 20;
-
+            configurator.ConcurrencyLimit = 20;
             configurator.Consumer<BadConsumer>();
         }
 

@@ -11,9 +11,9 @@
     public class MessageFabric :
         IMessageFabric
     {
+        readonly int _concurrencyLimit;
         readonly ConcurrentDictionary<string, IInMemoryExchange> _exchanges;
         readonly ConcurrentDictionary<string, IInMemoryQueue> _queues;
-        int _concurrencyLimit;
 
         public MessageFabric(int concurrencyLimit)
         {
@@ -21,14 +21,6 @@
 
             _exchanges = new ConcurrentDictionary<string, IInMemoryExchange>(StringComparer.OrdinalIgnoreCase);
             _queues = new ConcurrentDictionary<string, IInMemoryQueue>(StringComparer.OrdinalIgnoreCase);
-        }
-
-        public Task Send(string exchangeName, InMemoryTransportMessage message)
-        {
-            var exchange = new InMemoryExchange(exchangeName);
-
-            var deliveryContext = new InMemoryDeliveryContext(message);
-            return exchange.Deliver(deliveryContext);
         }
 
         public void ExchangeDeclare(string name)
@@ -76,11 +68,6 @@
             return _exchanges.GetOrAdd(name, x => new InMemoryExchange(x));
         }
 
-        public int ConcurrencyLimit
-        {
-            set => _concurrencyLimit = value;
-        }
-
         public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("messageFabric");
@@ -97,6 +84,12 @@
                 var exchangeScope = scope.CreateScope("queue");
                 exchangeScope.Add("name", exchange.Key);
             }
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            foreach (var queue in _queues.Values)
+                await queue.DisposeAsync().ConfigureAwait(false);
         }
 
         void ValidateBinding(IMessageSink<InMemoryTransportMessage> destination, IInMemoryExchange sourceExchange)
@@ -119,14 +112,6 @@
             catch (CyclicGraphException exception)
             {
                 throw new InvalidOperationException("The exchange binding would create a cycle in the messaging fabric.", exception);
-            }
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            foreach (var queue in _queues.Values)
-            {
-                await queue.DisposeAsync().ConfigureAwait(false);
             }
         }
     }
