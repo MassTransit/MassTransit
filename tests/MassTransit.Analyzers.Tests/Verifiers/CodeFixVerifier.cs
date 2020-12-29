@@ -46,7 +46,7 @@ namespace MassTransit.Analyzers.Tests
         /// </param>
         protected void VerifyCSharpFix(string oldSource, string newSource, int? codeFixIndex = null, bool allowNewCompilerDiagnostics = false)
         {
-            VerifyFix(LanguageNames.CSharp, GetCSharpDiagnosticAnalyzer(), GetCSharpCodeFixProvider(), oldSource, newSource, codeFixIndex,
+            VerifyFix(LanguageNames.CSharp, GetCSharpDiagnosticAnalyzer(), GetCSharpCodeFixProvider(), oldSource, newSource.Replace("\r\n", "\n"), codeFixIndex,
                 allowNewCompilerDiagnostics);
         }
 

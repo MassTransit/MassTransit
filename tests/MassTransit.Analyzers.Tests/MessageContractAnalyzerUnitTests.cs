@@ -2056,6 +2056,65 @@ namespace ConsoleApplication1
             VerifyCSharpDiagnostic(test, expected);
         }
 
+        [Test]
+        public void WhenRecursiveTypesAreStructurallyCompatibleAndMissingPropertyInNestedType_ShouldHaveDiagnosticAndCodeFix()
+        {
+            var test = Usings + RecursiveContracts + @"
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static async Task Main()
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+
+            await bus.Publish<Foo>(new
+            {
+            });
+        }
+    }
+}
+";
+            var expected = new DiagnosticResult
+            {
+                Id = "MCA0003",
+                Message =
+                    "Anonymous type is missing properties that are in the message contract 'Foo'. The following properties are missing: Children, Bar.",
+                Severity = DiagnosticSeverity.Info,
+                Locations =
+                    new[] { new DiagnosticResultLocation("Test0.cs", 29, 36) }
+            };
+
+            VerifyCSharpDiagnostic(test, expected);
+
+            var fixtest = Usings + RecursiveContracts + @"
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static async Task Main()
+        {
+            var bus = Bus.Factory.CreateUsingInMemory(cfg => { });
+
+            await bus.Publish<Foo>(new
+            {
+
+                Children = new[] {
+                    new
+                    {
+                        Children = Array.Empty<Foo>(),
+                        Bar = new { }
+                    }
+                },
+                Bar = new { }
+            });
+        }
+    }
+}
+";
+            VerifyCSharpFix(test, fixtest);
+        }
+
         readonly string Usings = @"
 using System;
 using System.Collections.Generic;
@@ -2115,6 +2174,21 @@ namespace ConsoleApplication1
     {
         public Guid Id { get; init; }
         public string CustomerId { get; init; }
+    }
+}
+";
+
+        readonly string RecursiveContracts = @"namespace ConsoleApplication1
+{
+    public interface Foo
+    {
+        IList<Foo> Children { get; }
+        Bar Bar { get; }
+    }
+
+    public interface Bar
+    {
+        
     }
 }
 ";
