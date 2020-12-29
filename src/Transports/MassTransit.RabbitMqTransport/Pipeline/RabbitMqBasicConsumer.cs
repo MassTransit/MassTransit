@@ -197,7 +197,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 var context = new RabbitMqReceiveContext(exchange, routingKey, _consumerTag, deliveryTag, bodyBytes, redelivered, properties,
                     _context, _receiveSettings, _model, _model.ConnectionContext);
 
-                if (!_pending.TryAdd(deliveryTag, context))
+                var added = _pending.TryAdd(deliveryTag, context);
+                if (!added && deliveryTag != 1) // DIRECT REPLY-TO fixed value
                     LogContext.Warning?.Log("Duplicate BasicDeliver: {DeliveryTag}", deliveryTag);
 
                 var receiveLock = _receiveSettings.NoAck ? default : new RabbitMqReceiveLockContext(_model, deliveryTag);
@@ -212,7 +213,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 }
                 finally
                 {
-                    _pending.TryRemove(deliveryTag, out _);
+                    if (added)
+                        _pending.TryRemove(deliveryTag, out _);
+
                     context.Dispose();
                 }
             });
