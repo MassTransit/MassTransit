@@ -73,7 +73,7 @@ namespace MassTransit.RabbitMqTransport.Transport
                 _hostConfiguration.Settings.Port,
                 _hostConfiguration.Settings.VirtualHost,
                 _hostConfiguration.Settings.Username,
-                Password = new string('*', _hostConfiguration.Settings.Password.Length),
+                Password = new string('*', _hostConfiguration.Settings.Password?.Length ?? 0),
                 _hostConfiguration.Settings.Heartbeat,
                 _hostConfiguration.Settings.Ssl
             });
