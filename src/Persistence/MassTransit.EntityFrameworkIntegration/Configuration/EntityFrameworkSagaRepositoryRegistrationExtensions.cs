@@ -30,5 +30,16 @@ namespace MassTransit
 
             return configurator;
         }
+
+        /// <summary>
+        /// Use the EntityFramework saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void SetEntityFrameworkSagaRepositoryProvider(this IRegistrationConfigurator configurator,
+            Action<IEntityFrameworkSagaRepositoryConfigurator> configure)
+        {
+            configurator.SetSagaRepositoryProvider(new EntityFrameworkSagaRepositoryRegistrationProvider(configure));
+        }
     }
 }

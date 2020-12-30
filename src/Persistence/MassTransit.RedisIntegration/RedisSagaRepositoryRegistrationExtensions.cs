@@ -55,5 +55,32 @@ namespace MassTransit
 
             return configurator;
         }
+
+        /// <summary>
+        /// Use the Redis saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void SetRedisSagaRepositoryProvider(this IRegistrationConfigurator configurator, Action<IRedisSagaRepositoryConfigurator> configure)
+        {
+            configurator.SetSagaRepositoryProvider(new RedisSagaRepositoryRegistrationProvider(configure));
+        }
+
+        /// <summary>
+        /// Use the Redis saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configuration">The Redis configuration string</param>
+        /// <param name="configure"></param>
+        public static void SetRedisSagaRepositoryProvider(this IRegistrationConfigurator configurator, string configuration,
+            Action<IRedisSagaRepositoryConfigurator> configure)
+        {
+            configurator.SetSagaRepositoryProvider(new RedisSagaRepositoryRegistrationProvider(r =>
+            {
+                r.DatabaseConfiguration(configuration);
+
+                configure?.Invoke(r);
+            }));
+        }
     }
 }

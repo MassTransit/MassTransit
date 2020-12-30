@@ -30,5 +30,16 @@ namespace MassTransit
 
             return configurator;
         }
+
+        /// <summary>
+        /// Use the Azure Table saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void SetAzureTableSagaRepositoryProvider(this IRegistrationConfigurator configurator,
+            Action<IAzureTableSagaRepositoryConfigurator> configure)
+        {
+            configurator.SetSagaRepositoryProvider(new AzureTableSagaRepositoryRegistrationProvider(configure));
+        }
     }
 }

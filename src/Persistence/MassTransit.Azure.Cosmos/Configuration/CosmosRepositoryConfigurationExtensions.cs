@@ -1,9 +1,10 @@
-namespace MassTransit.Azure.Cosmos
+namespace MassTransit
 {
     using System;
-    using Configuration;
+    using Azure.Cosmos;
+    using Azure.Cosmos.Configuration;
     using Configurators;
-    using MassTransit.Saga;
+    using Saga;
 
 
     public static class CosmosRepositoryConfigurationExtensions
@@ -56,6 +57,35 @@ namespace MassTransit.Azure.Cosmos
             configurator.Repository(x => repositoryConfigurator.Register(x));
 
             return configurator;
+        }
+
+        /// <summary>
+        /// Use the Cosmos saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="accountEndpoint">The endpointUri of the database</param>
+        /// <param name="key">The authentication key of the database</param>
+        /// <param name="configure"></param>
+        public static void SetCosmosSagaRepositoryProvider(this IRegistrationConfigurator configurator, string accountEndpoint, string key,
+            Action<ICosmosSagaRepositoryConfigurator> configure)
+        {
+            configurator.SetSagaRepositoryProvider(new CosmosSagaRepositoryRegistrationProvider(x =>
+            {
+                x.EndpointUri = accountEndpoint;
+                x.Key = key;
+
+                configure?.Invoke(x);
+            }));
+        }
+
+        /// <summary>
+        /// Use the Cosmos saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void SetCosmosSagaRepositoryProvider(this IRegistrationConfigurator configurator, Action<ICosmosSagaRepositoryConfigurator> configure)
+        {
+            configurator.SetSagaRepositoryProvider(new CosmosSagaRepositoryRegistrationProvider(configure));
         }
     }
 }

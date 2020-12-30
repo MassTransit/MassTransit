@@ -4,9 +4,15 @@ namespace MassTransit.DapperIntegration
     using Saga;
 
 
-    public interface IDapperSagaRepositoryConfigurator<TSaga>
-        where TSaga : class, ISaga
+    public interface IDapperSagaRepositoryConfigurator
     {
         IsolationLevel IsolationLevel { set; }
+    }
+
+
+    public interface IDapperSagaRepositoryConfigurator<TSaga> :
+        IDapperSagaRepositoryConfigurator
+        where TSaga : class, ISaga
+    {
     }
 }

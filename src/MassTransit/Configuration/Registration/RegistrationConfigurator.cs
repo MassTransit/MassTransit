@@ -26,6 +26,7 @@ namespace MassTransit.Registration
         readonly RegistrationCache<IExecuteActivityRegistration> _executeActivities;
         readonly RegistrationCache<ISagaRegistration> _sagas;
         bool _configured;
+        ISagaRepositoryRegistrationProvider _sagaRepositoryRegistrationProvider;
 
         protected RegistrationConfigurator(IContainerRegistrar registrar = null)
         {
@@ -36,6 +37,8 @@ namespace MassTransit.Registration
             _executeActivities = new RegistrationCache<IExecuteActivityRegistration>();
             _activities = new RegistrationCache<IActivityRegistration>();
             _endpoints = new RegistrationCache<IEndpointRegistration>();
+
+            _sagaRepositoryRegistrationProvider = new SagaRepositoryRegistrationProvider();
         }
 
         protected IRegistrationCache<IActivityRegistration> Activities => _activities;
@@ -132,10 +135,7 @@ namespace MassTransit.Registration
             if (sagaType.HasInterface<SagaStateMachineInstance>())
                 throw new ArgumentException($"State machine sagas must be registered using AddSagaStateMachine: {TypeMetadataCache.GetShortName(sagaType)}");
 
-            _sagas.GetOrAdd(sagaType, type => SagaRegistrationCache.CreateRegistration(type, Registrar));
-
-            if (sagaDefinitionType != null)
-                SagaDefinitionRegistrationCache.Register(sagaDefinitionType, Registrar);
+            SagaRegistrationCache.AddSaga(this, _sagaRepositoryRegistrationProvider, sagaType, sagaDefinitionType);
         }
 
         public ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(Action<ISagaConfigurator<T>> configure = null)
@@ -168,7 +168,7 @@ namespace MassTransit.Registration
 
         public void AddSagaStateMachine(Type sagaType, Type sagaDefinitionType)
         {
-            SagaStateMachineRegistrationCache.AddSagaStateMachine(this, sagaType, sagaDefinitionType);
+            SagaStateMachineRegistrationCache.AddSagaStateMachine(this, sagaType, _sagaRepositoryRegistrationProvider, sagaDefinitionType);
         }
 
         public IExecuteActivityRegistrationConfigurator<TActivity, TArguments> AddExecuteActivity<TActivity, TArguments>(
@@ -314,6 +314,14 @@ namespace MassTransit.Registration
             where T : class, ISaga
         {
             return new SagaRegistrationConfigurator<T>(this, Registrar);
+        }
+
+        public void SetSagaRepositoryProvider(ISagaRepositoryRegistrationProvider provider)
+        {
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
+
+            _sagaRepositoryRegistrationProvider = provider;
         }
 
         protected IRegistration CreateRegistration(IConfigurationServiceProvider provider)

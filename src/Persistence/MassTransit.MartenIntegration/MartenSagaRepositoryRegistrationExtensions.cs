@@ -76,5 +76,41 @@ namespace MassTransit
 
             return configurator;
         }
+
+        /// <summary>
+        /// Use the Marten saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="connectionString"></param>
+        public static void SetMartenSagaRepositoryProvider(this IRegistrationConfigurator configurator, string connectionString)
+        {
+            configurator.SetSagaRepositoryProvider(new MartenSagaRepositoryRegistrationProvider(connectionString, x =>
+            {
+            }));
+        }
+
+        /// <summary>
+        /// Use the Marten saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="connectionString"></param>
+        /// <param name="configureOptions"></param>
+        public static void SetMartenSagaRepositoryProvider(this IRegistrationConfigurator configurator, string connectionString,
+            Action<StoreOptions> configureOptions)
+        {
+            configurator.SetSagaRepositoryProvider(new MartenSagaRepositoryRegistrationProvider(connectionString, configureOptions));
+        }
+
+        /// <summary>
+        /// Use the Marten saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="connectionFactory"></param>
+        /// <param name="configureOptions"></param>
+        public static void SetMartenSagaRepositoryProvider(this IRegistrationConfigurator configurator, Func<NpgsqlConnection> connectionFactory,
+            Action<StoreOptions> configureOptions)
+        {
+            configurator.SetSagaRepositoryProvider(new MartenSagaRepositoryRegistrationProvider(connectionFactory, configureOptions));
+        }
     }
 }

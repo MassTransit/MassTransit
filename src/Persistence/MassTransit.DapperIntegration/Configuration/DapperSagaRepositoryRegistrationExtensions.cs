@@ -1,8 +1,9 @@
-namespace MassTransit.DapperIntegration
+namespace MassTransit
 {
     using System;
     using Configurators;
-    using MassTransit.Configurators;
+    using DapperIntegration;
+    using DapperIntegration.Configurators;
     using Saga;
 
 
@@ -29,6 +30,18 @@ namespace MassTransit.DapperIntegration
             configurator.Repository(x => repositoryConfigurator.Register(x));
 
             return configurator;
+        }
+
+        /// <summary>
+        /// Use the Dapper saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="connectionString"></param>
+        /// <param name="configure"></param>
+        public static void SetDapperSagaRepositoryProvider(this IRegistrationConfigurator configurator, string connectionString,
+            Action<IDapperSagaRepositoryConfigurator> configure)
+        {
+            configurator.SetSagaRepositoryProvider(new DapperSagaRepositoryRegistrationProvider(connectionString, configure));
         }
     }
 }

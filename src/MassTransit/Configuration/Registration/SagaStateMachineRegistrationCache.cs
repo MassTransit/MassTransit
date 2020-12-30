@@ -14,9 +14,10 @@ namespace MassTransit.Registration
             Cached.Instance.GetOrAdd(stateMachineType).Register(registrar);
         }
 
-        public static void AddSagaStateMachine(IRegistrationConfigurator configurator, Type stateMachineType, Type sagaDefinitionType = null)
+        public static void AddSagaStateMachine(IRegistrationConfigurator configurator, Type stateMachineType, ISagaRepositoryRegistrationProvider provider,
+            Type sagaDefinitionType = null)
         {
-            Cached.Instance.GetOrAdd(stateMachineType).AddSaga(configurator, sagaDefinitionType);
+            Cached.Instance.GetOrAdd(stateMachineType).AddSaga(configurator, provider, sagaDefinitionType);
         }
 
         static CachedRegistration Factory(Type type)
@@ -39,7 +40,7 @@ namespace MassTransit.Registration
         interface CachedRegistration
         {
             void Register(IContainerRegistrar registrar);
-            void AddSaga(IRegistrationConfigurator registry, Type sagaDefinitionType);
+            void AddSaga(IRegistrationConfigurator registry, ISagaRepositoryRegistrationProvider provider, Type sagaDefinitionType);
         }
 
 
@@ -55,9 +56,11 @@ namespace MassTransit.Registration
                 SagaRegistrationCache.DoNotRegister(typeof(TInstance));
             }
 
-            public void AddSaga(IRegistrationConfigurator registry, Type sagaDefinitionType)
+            public void AddSaga(IRegistrationConfigurator registry, ISagaRepositoryRegistrationProvider provider, Type sagaDefinitionType)
             {
-                registry.AddSagaStateMachine<TStateMachine, TInstance>(sagaDefinitionType);
+                var configurator = registry.AddSagaStateMachine<TStateMachine, TInstance>(sagaDefinitionType);
+
+                provider?.Configure(configurator);
             }
         }
     }

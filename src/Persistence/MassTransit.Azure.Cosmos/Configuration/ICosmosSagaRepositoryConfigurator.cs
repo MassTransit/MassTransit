@@ -1,6 +1,7 @@
 namespace MassTransit.Azure.Cosmos
 {
     using System;
+    using MassTransit.Saga;
     using Microsoft.Azure.Cosmos;
     using Registration;
     using Saga.CollectionIdFormatters;
@@ -46,6 +47,7 @@ namespace MassTransit.Azure.Cosmos
 
     public interface ICosmosSagaRepositoryConfigurator<TSaga> :
         ICosmosSagaRepositoryConfigurator
+        where TSaga : class, ISaga
     {
     }
 }

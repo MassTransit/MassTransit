@@ -69,5 +69,49 @@ namespace MassTransit
                 configure?.Invoke(cfg);
             });
         }
+
+        /// <summary>
+        /// Use the MongoDB saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void SetMongoDbSagaRepositoryProvider(this IRegistrationConfigurator configurator, Action<IMongoDbSagaRepositoryConfigurator> configure)
+        {
+            configurator.SetSagaRepositoryProvider(new MongoDbSagaRepositoryRegistrationProvider(configure));
+        }
+
+        /// <summary>
+        /// Use the MongoDB saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="connectionString">The connection string for the MongoDB database</param>
+        /// <param name="configure"></param>
+        public static void SetMongoDbSagaRepositoryProvider(this IRegistrationConfigurator configurator, string connectionString,
+            Action<IMongoDbSagaRepositoryConfigurator> configure)
+        {
+            configurator.SetSagaRepositoryProvider(new MongoDbSagaRepositoryRegistrationProvider(r =>
+            {
+                r.Connection = connectionString;
+
+                configure?.Invoke(r);
+            }));
+        }
+
+        /// <summary>
+        /// Use the MongoDB saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="database">A ready to use MongoDB database</param>
+        /// <param name="configure"></param>
+        public static void SetMongoDbSagaRepositoryProvider(this IRegistrationConfigurator configurator, IMongoDatabase database,
+            Action<IMongoDbSagaRepositoryConfigurator> configure)
+        {
+            configurator.SetSagaRepositoryProvider(new MongoDbSagaRepositoryRegistrationProvider(r =>
+            {
+                r.Database(database);
+
+                configure?.Invoke(r);
+            }));
+        }
     }
 }

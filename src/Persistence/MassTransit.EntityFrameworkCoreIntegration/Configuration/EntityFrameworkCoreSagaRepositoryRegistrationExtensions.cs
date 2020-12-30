@@ -76,6 +76,17 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Use the EntityFramework saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void SetEntityFrameworkSagaRepositoryProvider(this IRegistrationConfigurator configurator,
+            Action<IEntityFrameworkSagaRepositoryConfigurator> configure)
+        {
+            configurator.SetSagaRepositoryProvider(new EntityFrameworkSagaRepositoryRegistrationProvider(configure));
+        }
+
+        /// <summary>
         /// Configure the repository for use with SQL Server
         /// </summary>
         /// <param name="configurator"></param>
@@ -90,6 +101,19 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure the repository for use with SQL Server
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IEntityFrameworkSagaRepositoryConfigurator UseSqlServer(this IEntityFrameworkSagaRepositoryConfigurator configurator)
+        {
+            configurator.LockStatementProvider = new SqlServerLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
         /// Configure the repository for use with Postgres
         /// </summary>
         /// <param name="configurator"></param>
@@ -97,6 +121,19 @@ namespace MassTransit
         /// <returns></returns>
         public static IEntityFrameworkSagaRepositoryConfigurator<T> UsePostgres<T>(this IEntityFrameworkSagaRepositoryConfigurator<T> configurator)
             where T : class, ISaga
+        {
+            configurator.LockStatementProvider = new PostgresLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the repository for use with Postgres
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IEntityFrameworkSagaRepositoryConfigurator UsePostgres(this IEntityFrameworkSagaRepositoryConfigurator configurator)
         {
             configurator.LockStatementProvider = new PostgresLockStatementProvider();
 

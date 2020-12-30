@@ -236,5 +236,12 @@ namespace MassTransit
         /// <returns></returns>
         ISagaRegistrationConfigurator<T> AddSagaRepository<T>()
             where T : class, ISaga;
+
+        /// <summary>
+        /// Specify a saga repository provider, that will be called when a saga is configured by type
+        /// (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="provider"></param>
+        void SetSagaRepositoryProvider(ISagaRepositoryRegistrationProvider provider);
     }
 }

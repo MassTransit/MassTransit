@@ -13,18 +13,15 @@ namespace MassTransit.DapperIntegration.Configurators
         where TSaga : class, ISaga
     {
         readonly string _connectionString;
-        IsolationLevel _isolationLevel;
 
         public DapperSagaRepositoryConfigurator(string connectionString, IsolationLevel isolationLevel = IsolationLevel.Serializable)
         {
             _connectionString = connectionString;
-            _isolationLevel = isolationLevel;
+
+            IsolationLevel = isolationLevel;
         }
 
-        IsolationLevel IDapperSagaRepositoryConfigurator<TSaga>.IsolationLevel
-        {
-            set => _isolationLevel = value;
-        }
+        public IsolationLevel IsolationLevel { get; set; }
 
         public IEnumerable<ValidationResult> Validate()
         {
@@ -35,7 +32,7 @@ namespace MassTransit.DapperIntegration.Configurators
         public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)
             where T : class, ISaga
         {
-            configurator.RegisterSingleInstance(new DapperOptions<T>(_connectionString, _isolationLevel));
+            configurator.RegisterSingleInstance(new DapperOptions<T>(_connectionString, IsolationLevel));
             configurator.RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>,
                 DapperSagaRepositoryContextFactory<T>>();
         }

@@ -21,5 +21,14 @@ namespace MassTransit
 
             return configurator;
         }
+
+        /// <summary>
+        /// Use the NHibernate saga repository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void SetNHibernateSagaRepositoryProvider(this IRegistrationConfigurator configurator)
+        {
+            configurator.SetSagaRepositoryProvider(new NHibernateSagaRepositoryRegistrationProvider());
+        }
     }
 }

@@ -27,5 +27,14 @@ namespace MassTransit
             registrar.RegisterSingleInstance(new IndexedSagaDictionary<T>());
             registrar.RegisterSagaRepository<T, IndexedSagaDictionary<T>, InMemorySagaConsumeContextFactory<T>, InMemorySagaRepositoryContextFactory<T>>();
         }
+
+        /// <summary>
+        /// Use the InMemorySagaRepository for sagas configured by type (without a specific generic call to AddSaga/AddSagaStateMachine)
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void SetInMemorySagaRepositoryProvider(this IRegistrationConfigurator configurator)
+        {
+            configurator.SetSagaRepositoryProvider(new InMemorySagaRepositoryRegistrationProvider());
+        }
     }
 }

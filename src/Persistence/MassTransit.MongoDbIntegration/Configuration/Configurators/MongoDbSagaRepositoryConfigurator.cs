@@ -7,7 +7,6 @@ namespace MassTransit.MongoDbIntegration.Configurators
     using MongoDB.Bson.Serialization;
     using MongoDB.Driver;
     using Registration;
-    using Saga;
     using Saga.CollectionNameFormatters;
     using Saga.Context;
 

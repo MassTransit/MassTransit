@@ -11,9 +11,10 @@ namespace MassTransit.Registration
             Cached.Instance.GetOrAdd(sagaType).Register(registrar);
         }
 
-        public static ISagaRegistration CreateRegistration(Type sagaType, IContainerRegistrar registrar)
+        public static void AddSaga(IRegistrationConfigurator configurator, ISagaRepositoryRegistrationProvider provider, Type sagaType,
+            Type sagaDefinitionType = null)
         {
-            return Cached.Instance.GetOrAdd(sagaType).CreateRegistration(registrar);
+            Cached.Instance.GetOrAdd(sagaType).AddSaga(configurator, provider, sagaDefinitionType);
         }
 
         /// <summary>
@@ -41,7 +42,8 @@ namespace MassTransit.Registration
         interface CachedRegistration
         {
             void Register(IContainerRegistrar registrar);
-            ISagaRegistration CreateRegistration(IContainerRegistrar registrar);
+            void AddSaga(IRegistrationConfigurator registry, ISagaRepositoryRegistrationProvider provider, Type sagaDefinitionType);
+
             void DoNotRegister();
         }
 
@@ -51,22 +53,20 @@ namespace MassTransit.Registration
             where T : class, ISaga
         {
             bool _doNotRegister;
-            IContainerRegistrar _registrar;
 
             public void Register(IContainerRegistrar registrar)
             {
-                _registrar = registrar;
                 if (_doNotRegister)
                     return;
 
-                _registrar.RegisterSaga<T>();
+                registrar.RegisterSaga<T>();
             }
 
-            public ISagaRegistration CreateRegistration(IContainerRegistrar registrar)
+            public void AddSaga(IRegistrationConfigurator registry, ISagaRepositoryRegistrationProvider provider, Type sagaDefinitionType)
             {
-                Register(registrar);
+                ISagaRegistrationConfigurator<T> configurator = registry.AddSaga<T>(sagaDefinitionType);
 
-                return new SagaRegistration<T>();
+                provider?.Configure(configurator);
             }
 
             public void DoNotRegister()
