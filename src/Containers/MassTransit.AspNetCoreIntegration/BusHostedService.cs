@@ -10,25 +10,27 @@ namespace MassTransit.AspNetCoreIntegration
         IHostedService
     {
         readonly IBusControl _bus;
+        readonly bool _waitUntilStarted;
         Task<BusHandle> _startTask;
 
-        public BusHostedService(IBusControl bus)
+        public BusHostedService(IBusControl bus, bool waitUntilStarted)
         {
             _bus = bus;
+            _waitUntilStarted = waitUntilStarted;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _startTask = _bus.StartAsync(cancellationToken);
 
-            return _startTask.IsCompleted
+            return _startTask.IsCompleted || _waitUntilStarted
                 ? _startTask
                 : TaskUtil.Completed;
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
+        public Task StopAsync(CancellationToken cancellationToken)
         {
-            await _bus.StopAsync(cancellationToken).ConfigureAwait(false);
+            return _bus.StopAsync(cancellationToken);
         }
     }
 }

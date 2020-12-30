@@ -11,18 +11,20 @@ namespace MassTransit.AspNetCoreIntegration
         IHostedService
     {
         readonly IBusDepot _depot;
+        readonly bool _waitUntilStarted;
         Task _startTask;
 
-        public MassTransitHostedService(IBusDepot depot)
+        public MassTransitHostedService(IBusDepot depot, bool waitUntilStarted)
         {
             _depot = depot;
+            _waitUntilStarted = waitUntilStarted;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _startTask = _depot.Start(cancellationToken);
 
-            return _startTask.IsCompleted
+            return _startTask.IsCompleted || _waitUntilStarted
                 ? _startTask
                 : TaskUtil.Completed;
         }

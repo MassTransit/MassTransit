@@ -21,7 +21,7 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
         public void Configure(HealthCheckServiceOptions options)
         {
             foreach (var busHealth in _busHealths)
-                options.Registrations.Add(new HealthCheckRegistration(busHealth.Name, new BusHealthCheck(busHealth), Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy, _tags));
+                options.Registrations.Add(new HealthCheckRegistration(busHealth.Name, new BusHealthCheck(busHealth), HealthStatus.Unhealthy, _tags));
         }
     }
 }
