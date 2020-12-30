@@ -190,9 +190,7 @@ namespace MassTransit.Containers.Tests
             while (result.Status != expectedStatus);
 
             if (result.Status != expectedStatus)
-            {
                 await TestContext.Out.WriteLineAsync(FormatHealthCheck(result));
-            }
 
             Assert.That(result.Status, Is.EqualTo(expectedStatus));
         }

@@ -26,8 +26,7 @@ namespace MassTransit.Monitoring.Health
             return result.Status;
         }
 
-        public static Task<BusHealthStatus[]> WaitForHealthStatuses(this IEnumerable<IBusHealth> healthChecks, BusHealthStatus expectedStatus,
-            TimeSpan timeout)
+        public static Task<BusHealthStatus[]> WaitForHealthStatus(this IEnumerable<IBusHealth> healthChecks, BusHealthStatus expectedStatus, TimeSpan timeout)
         {
             return Task.WhenAll(healthChecks.Select(healthCheck => WaitForHealthStatus(healthCheck, expectedStatus, timeout)));
         }

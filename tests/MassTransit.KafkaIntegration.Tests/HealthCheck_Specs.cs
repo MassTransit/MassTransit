@@ -79,8 +79,6 @@ namespace MassTransit.KafkaIntegration.Tests
                 await TestContext.Out.WriteLineAsync(FormatHealthCheck(result));
 
             Assert.That(result.Status, Is.EqualTo(expectedStatus));
-
-            await TestContext.Out.WriteLineAsync(FormatHealthCheck(result));
         }
 
         static string FormatHealthCheck(HealthReport result)
