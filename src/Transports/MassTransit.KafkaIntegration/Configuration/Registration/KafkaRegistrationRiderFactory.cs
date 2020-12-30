@@ -8,7 +8,7 @@ namespace MassTransit.KafkaIntegration.Registration
 
 
     public class KafkaRegistrationRiderFactory :
-        RegistrationRiderFactory<IKafkaRider>
+        IRegistrationRiderFactory<IKafkaRider>
     {
         readonly ClientConfig _clientConfig;
         readonly Action<IRiderRegistrationContext, IKafkaFactoryConfigurator> _configure;
@@ -25,11 +25,9 @@ namespace MassTransit.KafkaIntegration.Registration
             _configure = configure;
         }
 
-        public override IBusInstanceSpecification CreateRider(IRiderRegistrationContext context)
+        public IBusInstanceSpecification CreateRider(IRiderRegistrationContext context)
         {
             var configurator = new KafkaFactoryConfigurator(_clientConfig ?? context.GetService<ClientConfig>() ?? new ClientConfig());
-
-            ConfigureRider(configurator, context);
 
             _configure?.Invoke(context, configurator);
 

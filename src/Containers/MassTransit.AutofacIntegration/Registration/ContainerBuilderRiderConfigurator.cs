@@ -4,7 +4,6 @@ namespace MassTransit.AutofacIntegration.Registration
     using System.Collections.Generic;
     using Autofac;
     using MassTransit.Registration;
-    using Monitoring.Health;
     using Riders;
 
 
@@ -42,8 +41,7 @@ namespace MassTransit.AutofacIntegration.Registration
             IRiderRegistrationContext CreateRegistrationContext(IComponentContext context)
             {
                 var registration = CreateRegistration(context.Resolve<IConfigurationServiceProvider>());
-                var busHealth = context.Resolve<BusHealth>();
-                return new RiderRegistrationContext(registration, busHealth, _registrations);
+                return new RiderRegistrationContext(registration, _registrations);
             }
 
             var registrationKey = typeof(TRider).Name;

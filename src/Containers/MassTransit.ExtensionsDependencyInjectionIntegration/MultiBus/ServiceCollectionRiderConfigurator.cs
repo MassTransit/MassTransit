@@ -4,7 +4,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
     using System.Collections.Generic;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
-    using Monitoring.Health;
     using Registration;
 
 
@@ -28,8 +27,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             IRiderRegistrationContext CreateRegistrationContext(IServiceProvider provider)
             {
                 var registration = CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>());
-                var busHealth = provider.GetRequiredService<Bind<TBus, BusHealth>>();
-                return new RiderRegistrationContext(registration, busHealth.Value, Registrations);
+                return new RiderRegistrationContext(registration, Registrations);
             }
 
             Collection.AddSingleton(provider => Bind<TBus, TRider>.Create(CreateRegistrationContext(provider)));

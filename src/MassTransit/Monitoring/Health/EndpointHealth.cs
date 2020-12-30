@@ -14,43 +14,44 @@ namespace MassTransit.Monitoring.Health
         IReceiveEndpointObserver,
         IEndpointConfigurationObserver
     {
-        readonly ConcurrentDictionary<Uri, Endpoint> _endpoints;
+        readonly ConcurrentDictionary<Uri, IEndpointHealth> _endpoints;
 
         public EndpointHealth()
         {
-            _endpoints = new ConcurrentDictionary<Uri, Endpoint>();
+            _endpoints = new ConcurrentDictionary<Uri, IEndpointHealth>();
         }
 
         public void EndpointConfigured<T>(T configurator)
             where T : IReceiveEndpointConfigurator
         {
-            _endpoints.GetOrAdd(configurator.InputAddress, address => new Endpoint());
+            configurator.ConnectReceiveEndpointObserver(this);
+            _endpoints.TryAdd(configurator.InputAddress, UnHealthEndpointHealth.Instance);
         }
 
         public Task Ready(ReceiveEndpointReady ready)
         {
-            GetEndpoint(ready);
+            UpdateEndpoint(ready);
 
             return TaskUtil.Completed;
         }
 
         public Task Stopping(ReceiveEndpointStopping stopping)
         {
-            GetEndpoint(stopping);
+            UpdateEndpoint(stopping);
 
             return TaskUtil.Completed;
         }
 
         public Task Completed(ReceiveEndpointCompleted completed)
         {
-            GetEndpoint(completed);
+            UpdateEndpoint(completed);
 
             return TaskUtil.Completed;
         }
 
         public Task Faulted(ReceiveEndpointFaulted faulted)
         {
-            GetEndpoint(faulted);
+            UpdateEndpoint(faulted);
 
             return TaskUtil.Completed;
         }
@@ -60,7 +61,7 @@ namespace MassTransit.Monitoring.Health
             var results = _endpoints.Select(x => new
             {
                 InputAddress = x.Key,
-                Result = x.Value.ReceiveEndpoint?.CheckHealth() ?? EndpointHealthResult.Unhealthy(null, "not ready", null)
+                Result = x.Value.CheckHealth()
             }).ToArray();
 
             var unhealthy = results.Where(x => x.Result.Status == BusHealthStatus.Unhealthy).ToArray();
@@ -81,17 +82,28 @@ namespace MassTransit.Monitoring.Health
             return (BusHealthStatus.Healthy, "Endpoints are healthy", data);
         }
 
-        void GetEndpoint(ReceiveEndpointEvent endpointEvent)
+        void UpdateEndpoint(ReceiveEndpointEvent endpointEvent)
         {
-            var endpoint = _endpoints.GetOrAdd(endpointEvent.InputAddress, address => new Endpoint());
-
-            endpoint.ReceiveEndpoint ??= endpointEvent.ReceiveEndpoint;
+            _endpoints.AddOrUpdate(endpointEvent.InputAddress, endpointEvent.ReceiveEndpoint, (address, _) => endpointEvent.ReceiveEndpoint);
         }
 
 
-        class Endpoint
+        class UnHealthEndpointHealth :
+            IEndpointHealth
         {
-            public IReceiveEndpoint ReceiveEndpoint { get; set; }
+            readonly EndpointHealthResult _result;
+
+            UnHealthEndpointHealth()
+            {
+                _result = EndpointHealthResult.Unhealthy(null, "not ready", null);
+            }
+
+            public static IEndpointHealth Instance { get; } = new UnHealthEndpointHealth();
+
+            public EndpointHealthResult CheckHealth()
+            {
+                return _result;
+            }
         }
     }
 }

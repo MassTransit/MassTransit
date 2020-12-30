@@ -11,7 +11,6 @@ namespace MassTransit.Monitoring.Health
     public class BusHealth :
         IBusObserver,
         IEndpointConfigurationObserver,
-        IReceiveEndpointObserver,
         IBusHealth
     {
         readonly EndpointHealth _endpointHealth;
@@ -52,8 +51,6 @@ namespace MassTransit.Monitoring.Health
 
         Task IBusObserver.PostCreate(IBus bus)
         {
-            bus.ConnectReceiveEndpointObserver(this);
-
             return TaskUtil.Completed;
         }
 
@@ -90,26 +87,6 @@ namespace MassTransit.Monitoring.Health
         void IEndpointConfigurationObserver.EndpointConfigured<T>(T configurator)
         {
             _endpointHealth.EndpointConfigured(configurator);
-        }
-
-        public Task Ready(ReceiveEndpointReady ready)
-        {
-            return _endpointHealth.Ready(ready);
-        }
-
-        public Task Stopping(ReceiveEndpointStopping stopping)
-        {
-            return _endpointHealth.Stopping(stopping);
-        }
-
-        public Task Completed(ReceiveEndpointCompleted completed)
-        {
-            return _endpointHealth.Completed(completed);
-        }
-
-        public Task Faulted(ReceiveEndpointFaulted faulted)
-        {
-            return _endpointHealth.Faulted(faulted);
         }
 
         Task Failure(string message)

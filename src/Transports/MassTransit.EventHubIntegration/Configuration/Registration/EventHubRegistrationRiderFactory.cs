@@ -6,7 +6,7 @@ namespace MassTransit.EventHubIntegration.Registration
 
 
     public class EventHubRegistrationRiderFactory :
-        RegistrationRiderFactory<IEventHubRider>
+        IRegistrationRiderFactory<IEventHubRider>
     {
         readonly Action<IRiderRegistrationContext, IEventHubFactoryConfigurator> _configure;
 
@@ -15,11 +15,9 @@ namespace MassTransit.EventHubIntegration.Registration
             _configure = configure;
         }
 
-        public override IBusInstanceSpecification CreateRider(IRiderRegistrationContext context)
+        public IBusInstanceSpecification CreateRider(IRiderRegistrationContext context)
         {
             var configurator = new EventHubFactoryConfigurator();
-
-            ConfigureRider(configurator, context);
 
             _configure?.Invoke(context, configurator);
 

@@ -39,8 +39,6 @@ namespace MassTransit.KafkaIntegration.Tests
                         k.TopicEndpoint<Null, Ignore>("test", nameof(HealthCheck_Specs), c =>
                         {
                         });
-
-                        k.UseHealthCheck(context);
                     });
                 });
             });
@@ -78,16 +76,14 @@ namespace MassTransit.KafkaIntegration.Tests
             while (result.Status != expectedStatus);
 
             if (result.Status != expectedStatus)
-            {
                 await TestContext.Out.WriteLineAsync(FormatHealthCheck(result));
-            }
 
             Assert.That(result.Status, Is.EqualTo(expectedStatus));
 
             await TestContext.Out.WriteLineAsync(FormatHealthCheck(result));
         }
 
-        public string FormatHealthCheck(HealthReport result)
+        static string FormatHealthCheck(HealthReport result)
         {
             var json = new JObject(
                 new JProperty("status", result.Status.ToString()),
