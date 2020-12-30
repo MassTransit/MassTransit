@@ -119,5 +119,5 @@ The following recommendations should be considered _best practices_ for building
   - Messages from the queue will be load balanced across all instances (the _competing consumer_ pattern)
 - If a consumer exception is thrown, the faulted message will be moved to an error queue, which is named with the \_error suffix.
 - The number of concurrently processed messages can be up to the _PrefetchCount_, depending upon the number of cores available.
-- For temporary receive endpoints, set _AutoDelete = true_ and _Durable = false_
+- For temporary receive endpoints that should be deleted when the bus is stopped, use _TemporaryEndpointDefinition_ as the receive endpoint definition.
 - To configure _PrefetchCount_ higher than the desired concurrent message count, add _UseConcurrencyLimit(n)_ to the configuration. _This must be added before any consumers are configured._ Depending upon your consumer duration, higher values may greatly improve overall message throughput.
