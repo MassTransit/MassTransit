@@ -58,7 +58,7 @@ Bus.Factory.CreateUsingAzureServiceBus(cfg =>
 {
     cfg.Send<UpdateUserStatus>(x =>
     {
-        x.UsePartitionKeyFormatter(context => context.Message.UserId);
+        x.UseSessionIdFormatter(context => context.Message.UserId);
     });
 });
 ```
