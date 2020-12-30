@@ -64,6 +64,12 @@ If using the default or delegate consumer factory and the consumer supports eith
 When using a container, it is responsible for consumer disposal when the scope is disposed.
 :::
 
+### Temporary Consumers
+
+Some consumers only need to receive messages while connected, and any messages published while disconnected should be discarded. This is achieved by using a TemporaryEndpointDefinition as the endpoint definition.
+
+<<< @/docs/code/usage/UsageConsumerTemporaryEndpoint.cs
+
 ### Connect Consumers
 
 Once a bus has been configured, the receive endpoints have been created and cannot be modified. However, the bus creates a temporary, auto-delete endpoint for itself. Consumers can be connected to the bus endpoint using any of the `Connect` methods. The bus endpoint is designed to receive responses (via the request client, see the [requests](/usage/requests) section) and **messages sent directly to the bus endpoint**.
