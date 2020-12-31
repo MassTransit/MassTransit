@@ -4,6 +4,9 @@ namespace MassTransit
     using Azure.ServiceBus.Core;
     using ExtensionsDependencyInjectionIntegration;
     using Microsoft.ApplicationInsights.DependencyCollector;
+    using Microsoft.Azure.ServiceBus;
+    using Microsoft.Azure.ServiceBus.Primitives;
+    using Microsoft.Azure.Services.AppAuthentication;
     using Microsoft.Azure.WebJobs.ServiceBus;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Options;
@@ -41,7 +44,11 @@ namespace MassTransit
 
                         options.Value.MessageHandlerOptions.AutoComplete = true;
 
-                        cfg.Host(options.Value.ConnectionString);
+                        cfg.Host(options.Value.ConnectionString, h =>
+                        {
+                            if (IsMissingCredentials(options.Value.ConnectionString))
+                                h.TokenProvider = new ManagedIdentityTokenProvider(new AzureServiceTokenProvider());
+                        });
                         cfg.UseServiceBusMessageScheduler();
 
                         configureBus?.Invoke(context, cfg);
@@ -49,6 +56,13 @@ namespace MassTransit
                 });
 
             return services;
+        }
+
+        static bool IsMissingCredentials(string connectionString)
+        {
+            var builder = new ServiceBusConnectionStringBuilder(connectionString);
+
+            return string.IsNullOrWhiteSpace(builder.SasKeyName) && string.IsNullOrWhiteSpace(builder.SasKey) && string.IsNullOrWhiteSpace(builder.SasToken);
         }
 
         static void ConfigureApplicationInsights(IServiceCollection services)
