@@ -19,7 +19,7 @@ namespace MassTransit.Metadata
             FrameworkVersion = Environment.Version.ToString();
             OperatingSystemVersion = Environment.OSVersion.ToString();
             var entryAssembly = System.Reflection.Assembly.GetEntryAssembly() ?? System.Reflection.Assembly.GetCallingAssembly();
-            var currentProcess = Process.GetCurrentProcess();
+            using var currentProcess = Process.GetCurrentProcess();
             MachineName = Environment.MachineName;
             MassTransitVersion = typeof(IBus).GetTypeInfo().Assembly.GetName().Version.ToString();
 
