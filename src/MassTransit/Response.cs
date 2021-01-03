@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using GreenPipes.Internals.Extensions;
+    using Serialization;
 
 
     /// <summary>
@@ -57,7 +58,7 @@
             _response1 = response1.IsCompletedSuccessfully() ? response1.GetAwaiter().GetResult() : default;
             _response2 = response2.IsCompletedSuccessfully() ? response2.GetAwaiter().GetResult() : default;
 
-            _response = (Response)_response1 ?? _response2 ?? throw new ArgumentException("At least one of the responses must be completed", nameof(response1));
+            _response = (Response)_response1 ?? _response2;
         }
 
         public bool Is(out Response<T1> result)
@@ -104,33 +105,33 @@
             return new Response<T1, T2>(source.response1, source.response2);
         }
 
-        public Guid? MessageId => _response.MessageId;
+        public Guid? MessageId => _response?.MessageId;
 
-        public Guid? RequestId => _response.RequestId;
+        public Guid? RequestId => _response?.RequestId;
 
-        public Guid? CorrelationId => _response.CorrelationId;
+        public Guid? CorrelationId => _response?.CorrelationId;
 
-        public Guid? ConversationId => _response.ConversationId;
+        public Guid? ConversationId => _response?.ConversationId;
 
-        public Guid? InitiatorId => _response.InitiatorId;
+        public Guid? InitiatorId => _response?.InitiatorId;
 
-        public DateTime? ExpirationTime => _response.ExpirationTime;
+        public DateTime? ExpirationTime => _response?.ExpirationTime;
 
-        public Uri SourceAddress => _response.SourceAddress;
+        public Uri SourceAddress => _response?.SourceAddress;
 
-        public Uri DestinationAddress => _response.DestinationAddress;
+        public Uri DestinationAddress => _response?.DestinationAddress;
 
-        public Uri ResponseAddress => _response.ResponseAddress;
+        public Uri ResponseAddress => _response?.ResponseAddress;
 
-        public Uri FaultAddress => _response.FaultAddress;
+        public Uri FaultAddress => _response?.FaultAddress;
 
-        public DateTime? SentTime => _response.SentTime;
+        public DateTime? SentTime => _response?.SentTime;
 
-        public Headers Headers => _response.Headers;
+        public Headers Headers => _response.Headers ?? NoMessageHeaders.Instance;
 
-        public HostInfo Host => _response.Host;
+        public HostInfo Host => _response?.Host;
 
-        public object Message => _response.Message;
+        public object Message => _response?.Message;
     }
 
 
@@ -165,8 +166,7 @@
             _response2 = response2.IsCompletedSuccessfully() ? response2.GetAwaiter().GetResult() : default;
             _response3 = response3.IsCompletedSuccessfully() ? response3.GetAwaiter().GetResult() : default;
 
-            _response = _response1 ?? (Response)_response2 ?? _response3 ?? throw new ArgumentException("At least one of the responses must be completed",
-                nameof(response1));
+            _response = _response1 ?? (Response)_response2 ?? _response3;
         }
 
         public bool Is(out Response<T1> result)
@@ -227,32 +227,32 @@
             return new Response<T1, T2, T3>(source.response1, source.response2, source.response3);
         }
 
-        public Guid? MessageId => _response.MessageId;
+        public Guid? MessageId => _response?.MessageId;
 
-        public Guid? RequestId => _response.RequestId;
+        public Guid? RequestId => _response?.RequestId;
 
-        public Guid? CorrelationId => _response.CorrelationId;
+        public Guid? CorrelationId => _response?.CorrelationId;
 
-        public Guid? ConversationId => _response.ConversationId;
+        public Guid? ConversationId => _response?.ConversationId;
 
-        public Guid? InitiatorId => _response.InitiatorId;
+        public Guid? InitiatorId => _response?.InitiatorId;
 
-        public DateTime? ExpirationTime => _response.ExpirationTime;
+        public DateTime? ExpirationTime => _response?.ExpirationTime;
 
-        public Uri SourceAddress => _response.SourceAddress;
+        public Uri SourceAddress => _response?.SourceAddress;
 
-        public Uri DestinationAddress => _response.DestinationAddress;
+        public Uri DestinationAddress => _response?.DestinationAddress;
 
-        public Uri ResponseAddress => _response.ResponseAddress;
+        public Uri ResponseAddress => _response?.ResponseAddress;
 
-        public Uri FaultAddress => _response.FaultAddress;
+        public Uri FaultAddress => _response?.FaultAddress;
 
-        public DateTime? SentTime => _response.SentTime;
+        public DateTime? SentTime => _response?.SentTime;
 
-        public Headers Headers => _response.Headers;
+        public Headers Headers => _response.Headers ?? NoMessageHeaders.Instance;
 
-        public HostInfo Host => _response.Host;
+        public HostInfo Host => _response?.Host;
 
-        public object Message => _response.Message;
+        public object Message => _response?.Message;
     }
 }
