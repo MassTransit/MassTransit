@@ -91,11 +91,11 @@ namespace Automatonymous.Activities
         {
             ConsumeEventContext<TInstance, TData> consumeContext = context.CreateConsumeContext();
 
-            InitializeContext<RequestCompleted<TData>> initializeContext = await MessageInitializerCache<RequestCompleted<TData>>.Initialize(new
+            InitializeContext<RequestCompleted<TResponse>> initializeContext = await MessageInitializerCache<RequestCompleted<TResponse>>.Initialize(new
             {
                 context.Instance.CorrelationId,
                 InVar.Timestamp,
-                PayloadType = TypeMetadataCache<TData>.MessageTypeNames,
+                PayloadType = TypeMetadataCache<TResponse>.MessageTypeNames,
                 Payload = _messageFactory(consumeContext)
             }).ConfigureAwait(false);
 

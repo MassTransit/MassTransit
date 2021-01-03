@@ -33,6 +33,16 @@ namespace MassTransit.HangfireIntegration.Tests
             Console.WriteLine("Link: {0}, Short Link: {1}", response.Message.Link, response.Message.ShortLink);
         }
 
+        [Test]
+        public async Task Should_complete_the_request_subsequently()
+        {
+            IRequestClient<CreateShortLink> client = Bus.CreateRequestClient<CreateShortLink>(RequestTimeout.After(s: 30));
+
+            Response<ShortLinkCreated> response = await client.GetResponse<ShortLinkCreated>(new {Link = new Uri("http://www.microsoft.com")});
+
+            Console.WriteLine("Link: {0}, Short Link: {1}", response.Message.Link, response.Message.ShortLink);
+        }
+
         RequestStateMachine _machine;
         CreateLinkStateMachine _createLinkStateMachine;
 
