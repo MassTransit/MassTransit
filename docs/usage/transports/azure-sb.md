@@ -13,6 +13,42 @@ Additional host properties include:
 | TokenProvider         | Use a specific token provider, such as a managed identity token provider, to access the namespace
 | TransportType         | Change the transport type from the default (AMQP) to use WebSockets
 
+The following example shows how to configure Azure Service Bus using an Azure Managed Identity:
+
+```csharp
+namespace ServiceBusConsoleListener
+{
+    using System;
+    using System.Threading.Tasks;
+    using MassTransit;
+    using MassTransit.Azure.ServiceBus.Core.Configurators;
+    using Microsoft.Azure.ServiceBus.Primitives;
+    using Microsoft.Extensions.DependencyInjection;
+
+    public class Program
+    {
+        public static async Task Main()
+        {
+            var services = new ServiceCollection();
+            services.AddMassTransit(x =>
+            {
+                x.UsingAzureServiceBus((context, cfg) =>
+                {
+                    var settings = new HostSettings
+                    {
+                        ServiceUri = new Uri("sb://your-service-bus-namespace.servicebus.windows.net"/),
+                        TokenProvider = TokenProvider.CreateManagedIdentityTokenProvider()
+                    };
+                    cfg.Host(settings);
+                });
+            });
+        }
+    }
+}
+
+```
+
+During local development, in the case of Visual Studio, you can configure the account to use under Options -> Azure Service Authentication. Note that your Azure Active Directory user needs explicit access to the resource and have the 'Azure Service Bus Data Owner' role assigned.
 
 Azure Service Bus queues includes an extensive set a properties that can be configured. All of these are optional, MassTransit uses sensible defaults, but the control is there when needed.
 
