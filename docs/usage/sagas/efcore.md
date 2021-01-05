@@ -139,43 +139,16 @@ The [Job Consumers](https://github.com/MassTransit/Sample-JobConsumers) sample i
 
 #### Multiple DbContext
 
-Multiple `DbContext` can be registered in the container which can then be used to configure sagas that are mapped by the `DbContext` and injected into other components. Calling the ```AddDbContext``` extension method will register a scoped ```DbContext``` by default. For simple scenarios where there is a single ```DbContext``` this will work. However, in scenarios where there is at least one other ```DbContext``` the dotnet command that generates Entity Framework migrations will not work as shown below.
-
-```cs
-services.AddDbContext<JobServiceSagaDbContext>(builder =>
-    builder.UseNpgsql(Configuration.GetConnectionString("JobService"), m =>
-    {
-        m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
-        m.MigrationsHistoryTable($"__{nameof(JobServiceSagaDbContext)}");
-    }));
-
-services.AddDbContext<OrdersDbContext>(builder =>
-    builder.UseNpgsql(host.Configuration.GetConnectionString("OrdersConnection")));
-```
-
-To resolve this issue, you'll need to perform the following steps:
-
+Multiple `DbContext` can be registered in the container which can then be used to configure sagas that are mapped by the `DbContext` and injected into other components. Calling the ```AddDbContext``` extension method will register a scoped ```DbContext``` by default. For simple scenarios where there is a single ```DbContext``` this will work. However, in scenarios where there is at least one other ```DbContext``` the dotnet command that generates Entity Framework migrations will not work. To resolve this issue, you'll need to perform the following steps:
 1. Make sure that all ```DbContext``` has a constructor that takes ```DbContextOptions<TOptions>``` instead of ```DbContextOptions```.
-2. Register each ```DbContext``` with ```ServiceLifetime.Singleton``` as shown below.
 
-```cs
-services.AddDbContext<JobServiceSagaDbContext>(builder =>
-    builder.UseNpgsql(Configuration.GetConnectionString("JobService"), m =>
-    {
-        m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
-        m.MigrationsHistoryTable($"__{nameof(JobServiceSagaDbContext)}");
-    }), ServiceLifetime.Singleton);
-
-services.AddDbContext<OrdersDbContext>(builder =>
-    builder.UseNpgsql(host.Configuration.GetConnectionString("OrdersConnection")),
-    ServiceLifetime.Singleton);
-```
-3. Run the Entity Framework Core command to create your migrations as shown below.
+2. Run the Entity Framework Core command to create your migrations as shown below.
 
 ```cs
 dotnet ef migrations add InitialCreate -c JobServiceSagaDbContext
 ```
-4. Run the Entity Framework Core command to sync with the database as shown below.
+
+3. Run the Entity Framework Core command to sync with the database as shown below.
  
  ```cs
  dotnet ef database update -c JobServiceSagaDbContext
