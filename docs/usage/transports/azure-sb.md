@@ -13,7 +13,7 @@ Additional host properties include:
 | TokenProvider         | Use a specific token provider, such as a managed identity token provider, to access the namespace
 | TransportType         | Change the transport type from the default (AMQP) to use WebSockets
 
-The following example show how to configure Azure Service Bus using an Azure Managed Identity:
+The following example shows how to configure Azure Service Bus using an Azure Managed Identity:
 
 ```csharp
 namespace ServiceBusConsoleListener
@@ -36,7 +36,7 @@ namespace ServiceBusConsoleListener
                 {
                     var settings = new HostSettings
                     {
-                        ServiceUri = new Uri("sb://your-service-bus-service-bus-namespace.servicebus.windows.net"/),
+                        ServiceUri = new Uri("sb://your-service-bus-namespace.servicebus.windows.net"/),
                         TokenProvider = TokenProvider.CreateManagedIdentityTokenProvider()
                     };
                     cfg.Host(settings);
