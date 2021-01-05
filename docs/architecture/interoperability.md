@@ -55,6 +55,17 @@ The *MessageType* entries should be URNs, which are convertible to .NET types. M
 urn:message:Namespace:TypeName
 ```
 
+Examples include:
+
+```text
+urn:message:MyProject.Messages:UpdateAccount
+urn:message:MyProject.Messages.Events:AccountUpdated
+urn:message:MyProject:ChangeAccount
+urn:message:MyProject.AccountService:MyService+AccountUpdatedEvent
+```
+
+The last one is a nested class, as indicated by the '+' symbol.
+
 The *Host* is an internal data type, but is a set of strings that define the host that produced the message.
 
 ```csharp
@@ -67,17 +78,6 @@ string FrameworkVersion
 string MassTransitVersion
 string OperatingSystemVersion
 ```
-
-Examples include:
-
-```text
-urn:message:MyProject.Messages:UpdateAccount
-urn:message:MyProject.Messages.Events:AccountUpdated
-urn:message:MyProject:ChangeAccount
-urn:message:MyProject.AccountService:MyService+AccountUpdatedEvent
-```
-
-The last one is a nested class, as indicated by the '+' symbol.
 
 #### Example message
 
