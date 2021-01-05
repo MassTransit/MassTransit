@@ -36,7 +36,7 @@ namespace ServiceBusConsoleListener
                 {
                     var settings = new HostSettings
                     {
-                        ServiceUri = new Uri("service-bus-service-uri"),
+                        ServiceUri = new Uri("sb://your-service-bus-service-bus-namespace.servicebus.windows.net"/),
                         TokenProvider = TokenProvider.CreateManagedIdentityTokenProvider()
                     };
                     cfg.Host(settings);
