@@ -6,8 +6,6 @@
     public interface IServiceBusSubscriptionEndpointConfiguration :
         IServiceBusEntityEndpointConfiguration
     {
-        IServiceBusSubscriptionEndpointConfigurator Configurator { get; }
-
         SubscriptionSettings Settings { get; }
     }
 }

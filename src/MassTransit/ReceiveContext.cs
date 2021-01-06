@@ -69,8 +69,7 @@
         IPublishTopology PublishTopology { get; }
 
         /// <summary>
-        /// If true, faults should be published when no <see cref="ConsumeContext.ResponseAddress"/> or
-        /// <see cref="ConsumeContext.FaultAddress"/> are present.
+        /// If true (the default), faults should be published when no ResponseAddress or FaultAddress are present.
         /// </summary>
         bool PublishFaults { get; }
 

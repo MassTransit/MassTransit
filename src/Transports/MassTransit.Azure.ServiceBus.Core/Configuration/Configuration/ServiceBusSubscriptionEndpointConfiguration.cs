@@ -19,6 +19,7 @@
     {
         readonly IServiceBusEndpointConfiguration _endpointConfiguration;
         readonly IServiceBusHostConfiguration _hostConfiguration;
+        readonly Lazy<Uri> _inputAddress;
         readonly SubscriptionEndpointSettings _settings;
 
         public ServiceBusSubscriptionEndpointConfiguration(IServiceBusHostConfiguration hostConfiguration,
@@ -30,18 +31,16 @@
             _settings = settings;
 
             HostAddress = hostConfiguration.HostAddress;
-            InputAddress = settings.GetInputAddress(hostConfiguration.HostAddress, settings.Path);
+            _inputAddress = new Lazy<Uri>(FormatInputAddress);
         }
 
-        IServiceBusSubscriptionEndpointConfigurator IServiceBusSubscriptionEndpointConfiguration.Configurator => this;
-
-        IServiceBusTopologyConfiguration IServiceBusEndpointConfiguration.Topology => _endpointConfiguration.Topology;
+        public SubscriptionSettings Settings => _settings;
 
         public override Uri HostAddress { get; }
 
-        public override Uri InputAddress { get; }
+        public override Uri InputAddress => _inputAddress.Value;
 
-        public SubscriptionSettings Settings => _settings;
+        IServiceBusTopologyConfiguration IServiceBusEndpointConfiguration.Topology => _endpointConfiguration.Topology;
 
         public override IEnumerable<ValidationResult> Validate()
         {
@@ -71,6 +70,11 @@
         public RuleDescription Rule
         {
             set => _settings.Rule = value;
+        }
+
+        Uri FormatInputAddress()
+        {
+            return _settings.GetInputAddress(_hostConfiguration.HostAddress, _settings.Path);
         }
 
         protected override IErrorTransport CreateErrorTransport()

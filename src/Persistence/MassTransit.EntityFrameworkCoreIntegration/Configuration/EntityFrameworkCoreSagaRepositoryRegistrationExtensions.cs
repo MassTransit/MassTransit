@@ -104,7 +104,6 @@ namespace MassTransit
         /// Configure the repository for use with SQL Server
         /// </summary>
         /// <param name="configurator"></param>
-        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static IEntityFrameworkSagaRepositoryConfigurator UseSqlServer(this IEntityFrameworkSagaRepositoryConfigurator configurator)
         {
@@ -131,7 +130,6 @@ namespace MassTransit
         /// Configure the repository for use with Postgres
         /// </summary>
         /// <param name="configurator"></param>
-        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
         public static IEntityFrameworkSagaRepositoryConfigurator UsePostgres(this IEntityFrameworkSagaRepositoryConfigurator configurator)
         {
