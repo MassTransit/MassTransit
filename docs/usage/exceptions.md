@@ -268,7 +268,7 @@ Beyond that built-in customization, the individual filters can be added/configur
 ```cs
 cfg.ReceiveEndpoint("input-queue", ec =>
 {
-    ec..ConfigureError(x =>
+    ec.ConfigureError(x =>
     {
         x.UseFilter(new GenerateFaultFilter());
         x.UseFilter(new ErrorTransportFilter());
