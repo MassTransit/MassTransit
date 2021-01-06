@@ -58,6 +58,9 @@ namespace MassTransit.Context
 
         public bool IsDelivered { get; private set; }
         public bool IsFaulted { get; private set; }
+
+        public bool PublishFaults => _receiveEndpointContext.PublishFaults;
+
         public ISendEndpointProvider SendEndpointProvider => _sendEndpointProvider.Value;
         public IPublishEndpointProvider PublishEndpointProvider => _publishEndpointProvider.Value;
         public IPublishTopology PublishTopology => _receiveEndpointContext.Publish;

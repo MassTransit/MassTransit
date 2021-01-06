@@ -49,11 +49,14 @@ namespace MassTransit.Pipeline.Filters
                 requestId = context.TransportHeaders.Get("RequestId", default(Guid?));
             }
 
-            ReceiveFault fault = new ReceiveFaultEvent(HostMetadataCache.Host, context.Exception, context.ContentType?.MediaType, messageId, messageTypes);
+            if (context.PublishFaults || consumeContext?.FaultAddress != null || consumeContext?.ResponseAddress != null)
+            {
+                ReceiveFault fault = new ReceiveFaultEvent(HostMetadataCache.Host, context.Exception, context.ContentType?.MediaType, messageId, messageTypes);
 
-            var faultEndpoint = await context.GetReceiveFaultEndpoint(consumeContext, requestId).ConfigureAwait(false);
+                var faultEndpoint = await context.GetReceiveFaultEndpoint(consumeContext, requestId).ConfigureAwait(false);
 
-            await faultEndpoint.Send(fault).ConfigureAwait(false);
+                await faultEndpoint.Send(fault).ConfigureAwait(false);
+            }
         }
     }
 }

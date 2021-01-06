@@ -24,6 +24,7 @@
             : base(endpointConfiguration)
         {
             ConfigureConsumeTopology = true;
+            PublishFaults = true;
 
             _consumePipe = new Lazy<IConsumePipe>(() => Consume.Specification.BuildConsumePipe());
             _specifications = new List<IReceiveEndpointSpecification>();
@@ -45,6 +46,7 @@
         public ReceiveTransportObservable TransportObservers { get; }
 
         public bool ConfigureConsumeTopology { get; set; }
+        public bool PublishFaults { get; set; }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
         {

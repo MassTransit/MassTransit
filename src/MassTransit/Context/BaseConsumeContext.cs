@@ -244,13 +244,17 @@ namespace MassTransit.Context
         protected virtual async Task GenerateFault<T>(ConsumeContext<T> context, Exception exception)
             where T : class
         {
-            Fault<T> fault = new FaultEvent<T>(context.Message, context.MessageId, HostMetadataCache.Host, exception, context.SupportedMessageTypes.ToArray());
+            if (context.ReceiveContext.PublishFaults || context.FaultAddress != null || context.ResponseAddress != null)
+            {
+                Fault<T> fault = new FaultEvent<T>(context.Message, context.MessageId, HostMetadataCache.Host, exception,
+                    context.SupportedMessageTypes.ToArray());
 
-            var faultPipe = new FaultPipe<T>(context);
+                var faultPipe = new FaultPipe<T>(context);
 
-            var faultEndpoint = await this.GetFaultEndpoint<T>().ConfigureAwait(false);
+                var faultEndpoint = await this.GetFaultEndpoint<T>().ConfigureAwait(false);
 
-            await faultEndpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
+                await faultEndpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
+            }
         }
 
         Task ConsumeTask(Task task)

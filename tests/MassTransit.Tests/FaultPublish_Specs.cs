@@ -55,6 +55,49 @@
         }
     }
 
+    [TestFixture]
+    public class A_faulting_consumer_when_fault_publishing_is_disable :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_publish_a_single_fault_when_retried()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            _consumer.Faults.Select().Count().ShouldBe(0);
+        }
+
+        PingConsumer _consumer;
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.PublishFaults = false;
+
+            _consumer = new PingConsumer(TimeSpan.FromSeconds(5), InMemoryTestHarness.InactivityToken);
+
+            configurator.UseRetry(r => r.Immediate(5));
+            _consumer.Configure(configurator);
+        }
+
+
+        class PingConsumer :
+            MultiTestConsumer
+        {
+            readonly ReceivedMessageList<Fault<PingMessage>> _faults;
+            readonly ReceivedMessageList<PingMessage> _messages;
+
+            public PingConsumer(TimeSpan timeout, CancellationToken testCompleted)
+                : base(timeout, testCompleted)
+            {
+                _messages = Fault<PingMessage>();
+                _faults = Consume<Fault<PingMessage>>();
+            }
+
+            public IReceivedMessageList<PingMessage> Messages => _messages;
+            public IReceivedMessageList<Fault<PingMessage>> Faults => _faults;
+        }
+    }
+
 
     [TestFixture]
     public class A_fault_event :

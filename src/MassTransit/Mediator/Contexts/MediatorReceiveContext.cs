@@ -60,6 +60,8 @@ namespace MassTransit.Mediator.Contexts
         public bool IsDelivered { get; internal set; }
         public bool IsFaulted { get; private set; }
 
+        public bool PublishFaults => false;
+
         public Stream GetBodyStream()
         {
             throw new NotImplementedByDesignException("The mediator should not be serializing messages");

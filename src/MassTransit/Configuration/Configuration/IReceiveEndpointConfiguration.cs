@@ -19,6 +19,8 @@
 
         bool ConfigureConsumeTopology { get; }
 
+        bool PublishFaults { get; }
+
         ReceiveEndpointObservable EndpointObservers { get; }
         ReceiveObservable ReceiveObservers { get; }
         ReceiveTransportObservable TransportObservers { get; }

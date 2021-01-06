@@ -43,6 +43,8 @@
             return _context.AddOrUpdatePayload(addFactory, updateFactory);
         }
 
+        public bool PublishFaults => _context.PublishFaults;
+
         public Stream GetBodyStream()
         {
             return _context.GetBodyStream();

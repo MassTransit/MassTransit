@@ -26,6 +26,12 @@ namespace MassTransit
         /// </summary>
         bool ConfigureConsumeTopology { set; }
 
+        /// <summary>
+        /// If true (the default), faults should be published when no <see cref="ConsumeContext.ResponseAddress"/> or
+        /// <see cref="ConsumeContext.FaultAddress"/> are present.
+        /// </summary>
+        bool PublishFaults { set; }
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddEndpointSpecification(IReceiveEndpointSpecification configurator);
 

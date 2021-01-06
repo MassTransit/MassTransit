@@ -32,6 +32,11 @@ namespace MassTransit.Configuration
             set { }
         }
 
+        public bool PublishFaults
+        {
+            set { }
+        }
+
         public void AddDependency(IReceiveEndpointObserverConnector connector)
         {
         }

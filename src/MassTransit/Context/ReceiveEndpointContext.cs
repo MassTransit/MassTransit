@@ -53,6 +53,12 @@
         Task Dependencies { get; }
 
         /// <summary>
+        /// If true, faults should be published when no <see cref="ConsumeContext.ResponseAddress"/> or
+        /// <see cref="ConsumeContext.FaultAddress"/> are present.
+        /// </summary>
+        bool PublishFaults { get; }
+
+        /// <summary>
         /// Convert an unknown exception to a <see cref="ConnectionException"/>, so that it can be used by
         /// the transport retry policy.
         /// </summary>

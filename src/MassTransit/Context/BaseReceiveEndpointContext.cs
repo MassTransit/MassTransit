@@ -40,6 +40,7 @@
 
             InputAddress = configuration.InputAddress;
             HostAddress = configuration.HostAddress;
+            PublishFaults = configuration.PublishFaults;
 
             _publishTopology = configuration.Topology.Publish;
 
@@ -107,6 +108,8 @@
         public Uri InputAddress { get; }
 
         public Task Dependencies { get; }
+
+        public bool PublishFaults { get; }
 
         ILogContext ReceiveEndpointContext.LogContext => _hostConfiguration.ReceiveLogContext;
 
