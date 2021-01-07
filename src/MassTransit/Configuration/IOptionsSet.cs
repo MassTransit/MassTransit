@@ -23,7 +23,7 @@ namespace MassTransit
         /// <typeparam name="T">The option type</typeparam>
         /// <returns></returns>
         T Options<T>(T options, Action<T> configure = null)
-            where T : IOptions, new();
+            where T : IOptions;
 
         /// <summary>
         /// Return the options, if present

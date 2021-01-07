@@ -4,7 +4,7 @@ namespace MassTransit.KafkaIntegration.Transport
     using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
-    using Pipeline;
+    using MassTransit.Pipeline;
 
 
     public class ConsumeContextTopicProducerProvider :

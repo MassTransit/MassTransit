@@ -1,4 +1,4 @@
-namespace MassTransit.KafkaIntegration.Filters
+namespace MassTransit.KafkaIntegration.Pipeline
 {
     using System.Threading.Tasks;
     using Context;

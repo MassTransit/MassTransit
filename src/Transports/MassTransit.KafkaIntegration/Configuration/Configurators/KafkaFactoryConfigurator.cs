@@ -6,8 +6,8 @@ namespace MassTransit.KafkaIntegration.Configurators
     using Confluent.Kafka;
     using Contexts;
     using GreenPipes;
+    using MassTransit.Pipeline.Observables;
     using MassTransit.Registration;
-    using Pipeline.Observables;
     using Serializers;
     using Specifications;
     using Transport;

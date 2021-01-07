@@ -81,7 +81,7 @@
         }
 
         public T Options<T>(T options, Action<T> configure = null)
-            where T : IOptions, new()
+            where T : IOptions
         {
             return _specification.Options(options, configure);
         }
