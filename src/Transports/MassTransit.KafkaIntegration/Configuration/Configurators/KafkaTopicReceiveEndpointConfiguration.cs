@@ -4,10 +4,10 @@ namespace MassTransit.KafkaIntegration.Configurators
     using System.Collections.Generic;
     using Configuration;
     using Confluent.Kafka;
-    using Filters;
     using GreenPipes;
     using GreenPipes.Configurators;
     using MassTransit.Registration;
+    using Pipeline;
     using Serializers;
     using Transport;
     using Transports;
@@ -24,6 +24,7 @@ namespace MassTransit.KafkaIntegration.Configurators
         readonly PipeConfigurator<ConsumerContext<TKey, TValue>> _consumerConfigurator;
         readonly IReceiveEndpointConfiguration _endpointConfiguration;
         readonly IKafkaHostConfiguration _hostConfiguration;
+        readonly IOptionsSet _options;
         IHeadersDeserializer _headersDeserializer;
         IDeserializer<TKey> _keyDeserializer;
         Action<IConsumer<TKey, TValue>, CommittedOffsets> _offsetsCommittedHandler;
@@ -37,6 +38,7 @@ namespace MassTransit.KafkaIntegration.Configurators
             _busInstance = busInstance;
             _endpointConfiguration = endpointConfiguration;
             _consumerConfig = consumerConfig;
+            _options = new OptionsSet();
             Topic = topic;
 
             SetValueDeserializer(new MassTransitJsonDeserializer<TValue>());
@@ -141,6 +143,16 @@ namespace MassTransit.KafkaIntegration.Configurators
             _headersDeserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
         }
 
+        public void CreateIfMissing(Action<KafkaTopicOptions> configure)
+        {
+            if (_options.TryGetOptions<KafkaTopicOptions>(out _))
+                throw new InvalidOperationException("Topic options has been already configured.");
+
+            var options = new KafkaTopicOptions(Topic);
+            configure?.Invoke(options);
+            _options.Options(options);
+        }
+
         public void SetOffsetsCommittedHandler(Action<IConsumer<TKey, TValue>, CommittedOffsets> offsetsCommittedHandler)
         {
             if (_offsetsCommittedHandler != null)
@@ -161,6 +173,10 @@ namespace MassTransit.KafkaIntegration.Configurators
         {
             if (_headersDeserializer == null)
                 yield return this.Failure("HeadersDeserializer", "should not be null");
+
+            if (_options.TryGetOptions(out KafkaTopicOptions options))
+                foreach (var result in options.Validate())
+                    yield return result;
 
             foreach (var result in base.Validate())
                 yield return result;
@@ -195,6 +211,9 @@ namespace MassTransit.KafkaIntegration.Configurators
             }
 
             IKafkaReceiveEndpointContext<TKey, TValue> context = CreateContext();
+
+            if (_options.TryGetOptions(out KafkaTopicOptions options))
+                _consumerConfigurator.UseFilter(new ConfigureTopologyFilter<TKey, TValue>(_hostConfiguration.Configuration, options));
 
             _consumerConfigurator.UseFilter(new KafkaConsumerFilter<TKey, TValue>(context));
 

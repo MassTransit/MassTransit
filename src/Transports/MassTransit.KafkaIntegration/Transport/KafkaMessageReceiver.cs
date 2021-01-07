@@ -8,6 +8,7 @@
     using Contexts;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Logging;
     using Transports;
     using Util;
 
@@ -102,7 +103,8 @@
             if (_cancellationTokenSource.Token.IsCancellationRequested)
                 return;
             var activeDispatchCount = _dispatcher.ActiveDispatchCount;
-            LogContext.Error?.Log("Consumer error ({Code}): {Reason} on {Topic}", error.Code, error.Reason, _consumerContext.ReceiveSettings.Topic);
+            EnabledLogger? logger = error.IsFatal ? LogContext.Critical : LogContext.Error;
+            logger?.Log("Consumer error ({Code}): {Reason} on {Topic}", error.Code, error.Reason, _consumerContext.ReceiveSettings.Topic);
             if (activeDispatchCount == 0 || error.IsLocalError)
             {
                 _cancellationTokenSource.Cancel();

@@ -4,8 +4,8 @@ namespace MassTransit.KafkaIntegration.Contexts
     using Configuration;
     using Confluent.Kafka;
     using Context;
-    using Pipeline;
-    using Pipeline.Observables;
+    using MassTransit.Pipeline;
+    using MassTransit.Pipeline.Observables;
     using Serializers;
     using Transport;
     using Transports;

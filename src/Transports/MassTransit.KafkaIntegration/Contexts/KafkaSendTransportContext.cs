@@ -2,7 +2,7 @@ namespace MassTransit.KafkaIntegration.Contexts
 {
     using System;
     using Context;
-    using Pipeline;
+    using MassTransit.Pipeline;
 
 
     public interface KafkaSendTransportContext :

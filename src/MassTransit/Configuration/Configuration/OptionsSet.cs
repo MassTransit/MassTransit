@@ -52,7 +52,7 @@ namespace MassTransit.Configuration
         /// <typeparam name="T">The option type</typeparam>
         /// <returns></returns>
         public T Options<T>(T options, Action<T> configure = null)
-            where T : IOptions, new()
+            where T : IOptions
         {
             if (_options.TryGetValue(typeof(T), out var existingOptions))
             {
