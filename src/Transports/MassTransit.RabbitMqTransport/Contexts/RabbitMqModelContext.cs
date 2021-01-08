@@ -132,11 +132,16 @@
 
         Task ModelContext.BasicAck(ulong deliveryTag, bool multiple)
         {
-            return _executor.Run(() => _model.BasicAck(deliveryTag, multiple), CancellationToken);
+            return _model.IsClosed
+                ? TaskUtil.Faulted<bool>(new InvalidOperationException($"The channel was closed: {_model.CloseReason} {_model.ChannelNumber}"))
+                : _executor.Run(() => _model.BasicAck(deliveryTag, multiple), CancellationToken);
         }
 
         async Task ModelContext.BasicNack(ulong deliveryTag, bool multiple, bool requeue)
         {
+            if (_model.IsClosed)
+                return;
+
             try
             {
                 await _executor.Run(() => _model.BasicNack(deliveryTag, multiple, requeue), CancellationToken).ConfigureAwait(false);

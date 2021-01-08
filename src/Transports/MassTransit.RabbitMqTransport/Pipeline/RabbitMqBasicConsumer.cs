@@ -134,9 +134,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 SetCompleted(TaskUtil.Completed);
             }
             else
-            {
                 SetCompleted(_deliveryComplete.Task);
-            }
         }
 
         /// <summary>
@@ -150,8 +148,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             LogContext.Debug?.Log("Consumer Canceled: {InputAddress} - {ConsumerTag}", _context.InputAddress, consumerTag);
 
-            foreach (var context in _pending.Values)
-                context.Cancel();
+            CancelPendingConsumers();
 
             ConsumerCancelled?.Invoke(this, new ConsumerEventArgs(new[] {consumerTag}));
 
@@ -161,9 +158,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 SetCompleted(TaskUtil.Completed);
             }
             else
-            {
                 SetCompleted(_deliveryComplete.Task);
-            }
         }
 
         public void HandleModelShutdown(object model, ShutdownEventArgs reason)
@@ -174,21 +169,16 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                 "Consumer Model Shutdown: {InputAddress} - {ConsumerTag}, Concurrent Peak: {MaxConcurrentDeliveryCount}, {ReplyCode}-{ReplyText}",
                 _context.InputAddress, _consumerTag, _dispatcher.MaxConcurrentDispatchCount, reason.ReplyCode, reason.ReplyText);
 
-            if (_dispatcher.ActiveDispatchCount == 0)
-            {
-                _deliveryComplete.TrySetResult(false);
-                SetCompleted(TaskUtil.Completed);
-            }
-            else
-            {
-                SetCompleted(_deliveryComplete.Task);
-            }
+            CancelPendingConsumers();
+
+            _deliveryComplete.TrySetResult(false);
+            SetCompleted(TaskUtil.Completed);
         }
 
         public void HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange, string routingKey,
             IBasicProperties properties, ReadOnlyMemory<byte> body)
         {
-            byte[] bodyBytes = body.ToArray();
+            var bodyBytes = body.ToArray();
 
             Task.Run(async () =>
             {
@@ -233,6 +223,12 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         int DeliveryMetrics.ConcurrentDeliveryCount => _dispatcher.MaxConcurrentDispatchCount;
 
+        void CancelPendingConsumers()
+        {
+            foreach (var context in _pending.Values)
+                context.Cancel();
+        }
+
         Task OnConsumerCancelled(object obj, ConsumerEventArgs args)
         {
             _onConsumerCancelled?.Invoke(obj, args);
@@ -243,9 +239,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         Task HandleDeliveryComplete()
         {
             if (IsStopping)
-            {
                 _deliveryComplete.TrySetResult(true);
-            }
 
             return TaskUtil.Completed;
         }
