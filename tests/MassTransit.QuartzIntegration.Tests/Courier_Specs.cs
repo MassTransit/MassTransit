@@ -41,6 +41,7 @@ namespace MassTransit.QuartzIntegration.Tests
             var testActivity = GetActivityContext<TestActivity>();
             var faultActivity = GetActivityContext<FirstFaultyActivity>();
 
+            Task<ConsumeContext<RoutingSlipActivityFaulted>> activityFaulted = ConnectPublishHandler<RoutingSlipActivityFaulted>();
             Task<ConsumeContext<RoutingSlipCompleted>> completed = ConnectPublishHandler<RoutingSlipCompleted>();
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
@@ -50,6 +51,8 @@ namespace MassTransit.QuartzIntegration.Tests
             await Bus.Execute(builder.Build());
 
             await completed;
+
+            Assert.IsFalse(activityFaulted.IsCompleted);
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

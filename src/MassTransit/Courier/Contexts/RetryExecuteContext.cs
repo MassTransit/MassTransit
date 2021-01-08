@@ -3,6 +3,7 @@ namespace MassTransit.Courier.Contexts
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using Results;
     using Util;
 
 
@@ -19,6 +20,8 @@ namespace MassTransit.Courier.Contexts
         {
             _retryPolicy = retryPolicy;
             _context = context;
+
+            context.Result = new RetryExecutionResult();
 
             if (retryContext != null)
             {
