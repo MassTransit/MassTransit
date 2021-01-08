@@ -49,14 +49,16 @@
         protected Task ExceptionHandler(ExceptionReceivedEventArgs args)
         {
             var activeDispatchCount = _messageReceiver.ActiveDispatchCount;
-            var requiresRecycle = true;
 
-            if (args.Exception is MessageLockLostException)
-                requiresRecycle = false;
-            else if (args.Exception is ServiceBusException sbException)
-                requiresRecycle = !sbException.IsTransient;
+            var requiresRecycle = args.Exception switch
+            {
+                MessageLockLostException _ => false,
+                MessageTimeToLiveExpiredException _ => false,
+                ServiceBusException {IsTransient: true} => false,
+                _ => true
+            };
 
-            if (args.Exception is ServiceBusCommunicationException communicationException && communicationException.IsTransient)
+            if (args.Exception is ServiceBusCommunicationException {IsTransient: true})
             {
                 LogContext.Debug?.Log(args.Exception,
                     "Exception on Receiver {InputAddress} during {Action} ActiveDispatchCount({activeDispatch}) ErrorRequiresRecycle({requiresRecycle})",
