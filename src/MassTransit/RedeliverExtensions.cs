@@ -9,7 +9,7 @@
     {
         /// <summary>
         /// Redeliver uses the message scheduler to deliver the message to the queue at a future
-        /// time. The delivery count is incremented. Moreover, if you give custom callback action, it perform before sending message to queueu.
+        /// time. The delivery count is incremented. Moreover, if you give custom callback action, it perform before sending message to queue.
         /// A message scheduler must be configured on the bus for redelivery to be enabled.
         /// </summary>
         /// <typeparam name="T">The message type</typeparam>
