@@ -27,7 +27,7 @@
 
         Task<HostReady> HostHandle.Ready
         {
-            get { return ReadyOrNot(_handles.Select(x => x.Ready), _riderHandles.Select(x => x.Ready)); }
+            get { return ReadyOrNot(_handles.Select(x => x.Ready).ToArray(), _riderHandles.Select(x => x.Ready).ToArray()); }
         }
 
         Task HostHandle.Stop(CancellationToken cancellationToken)
@@ -35,7 +35,7 @@
             return _host.Stop(cancellationToken);
         }
 
-        async Task<HostReady> ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> endpoints, IEnumerable<Task<RiderReady>> riders)
+        async Task<HostReady> ReadyOrNot(Task<ReceiveEndpointReady>[] endpoints, Task<RiderReady>[] riders)
         {
             ReceiveEndpointReady[] endpointsReady = await EndpointsReady(endpoints).ConfigureAwait(false);
 
@@ -47,22 +47,20 @@
             return new HostReadyEvent(_host.Address, endpointsReady, ridersReady);
         }
 
-        static async Task<ReceiveEndpointReady[]> EndpointsReady(IEnumerable<Task<ReceiveEndpointReady>> endpoints)
+        static async Task<ReceiveEndpointReady[]> EndpointsReady(Task<ReceiveEndpointReady>[] endpoints)
         {
-            Task<ReceiveEndpointReady>[] readyTasks = endpoints as Task<ReceiveEndpointReady>[] ?? endpoints.ToArray();
-            foreach (Task<ReceiveEndpointReady> ready in readyTasks)
+            foreach (Task<ReceiveEndpointReady> ready in endpoints)
                 await ready.ConfigureAwait(false);
 
-            return await Task.WhenAll(readyTasks).ConfigureAwait(false);
+            return await Task.WhenAll(endpoints).ConfigureAwait(false);
         }
 
-        static async Task<RiderReady[]> RidersReady(IEnumerable<Task<RiderReady>> riders)
+        static async Task<RiderReady[]> RidersReady(Task<RiderReady>[] riders)
         {
-            Task<RiderReady>[] readyTasks = riders as Task<RiderReady>[] ?? riders.ToArray();
-            foreach (Task<RiderReady> ready in readyTasks)
+            foreach (Task<RiderReady> ready in riders)
                 await ready.ConfigureAwait(false);
 
-            return await Task.WhenAll(readyTasks).ConfigureAwait(false);
+            return await Task.WhenAll(riders).ConfigureAwait(false);
         }
     }
 }

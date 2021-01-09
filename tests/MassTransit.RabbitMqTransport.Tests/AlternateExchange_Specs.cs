@@ -39,6 +39,8 @@
 
         protected override void OnCleanupVirtualHost(IModel model)
         {
+            base.OnCleanupVirtualHost(model);
+
             model.ExchangeDelete(AlternateExchangeName);
             model.QueueDelete(AlternateExchangeName);
 

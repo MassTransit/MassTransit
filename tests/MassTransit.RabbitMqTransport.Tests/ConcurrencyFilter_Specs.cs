@@ -31,7 +31,7 @@
         }
 
         Consumer _consumer;
-        static readonly int _messageCount = 100;
+        static readonly int _messageCount = 50;
         static TaskCompletionSource<bool> _complete;
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)

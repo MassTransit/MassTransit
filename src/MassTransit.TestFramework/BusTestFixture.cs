@@ -7,6 +7,7 @@ namespace MassTransit.TestFramework
     using Context;
     using Logging;
     using Testing;
+    using Util;
 
 
     /// <summary>
@@ -78,10 +79,12 @@ namespace MassTransit.TestFramework
             where T : class
         {
             Task<ConsumeContext<T>> result = null;
-            Bus.ConnectReceiveEndpoint(context =>
+            var handle = Bus.ConnectReceiveEndpoint(context =>
             {
                 result = Handled<T>(context);
             });
+
+            TaskUtil.Await(() => handle.Ready);
 
             return result;
         }
@@ -90,10 +93,12 @@ namespace MassTransit.TestFramework
             where T : class
         {
             Task<ConsumeContext<T>> result = null;
-            Bus.ConnectReceiveEndpoint(context =>
+            var handle = Bus.ConnectReceiveEndpoint(context =>
             {
                 result = Handled(context, filter);
             });
+
+            TaskUtil.Await(() => handle.Ready);
 
             return result;
         }

@@ -336,9 +336,11 @@ namespace MassTransit
                 _busObserver = busObserver;
                 _logContext = logContext;
                 _hostHandle = hostHandle;
+
+                Ready = ReadyOrNot(hostHandle.Ready);
             }
 
-            public Task<BusReady> Ready => ReadyOrNot(_hostHandle.Ready);
+            public Task<BusReady> Ready { get; }
 
             public async Task StopAsync(CancellationToken cancellationToken)
             {

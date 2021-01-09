@@ -57,6 +57,8 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void OnCleanupVirtualHost(IModel model)
         {
+            base.OnCleanupVirtualHost(model);
+
             var eventExchangeName = RabbitMqBusFactory.MessageTopology.EntityNameFormatter.FormatEntityName<IEvent>();
             model.ExchangeDelete(eventExchangeName);
 

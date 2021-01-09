@@ -1,13 +1,22 @@
 ﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Net.Http;
+    using System.Text;
     using System.Threading.Tasks;
+    using Context;
     using MassTransit.Testing;
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Linq;
     using NUnit.Framework;
     using RabbitMQ.Client;
     using RabbitMqTransport.Testing;
     using TestFramework;
     using Transports;
+    using Util;
 
 
     public class RabbitMqTestFixture :
@@ -63,15 +72,19 @@
         }
 
         [OneTimeSetUp]
-        public Task SetupInMemoryTestFixture()
+        public async Task SetupRabbitMqTestFixture()
         {
-            return RabbitMqTestHarness.Start();
+            await RabbitMqTestHarness.Start();
+
+            await Task.Delay(10);
         }
 
         [OneTimeTearDown]
-        public Task TearDownInMemoryTestFixture()
+        public async Task TearDownRabbitMqTestFixture()
         {
-            return RabbitMqTestHarness.Stop();
+            await RabbitMqTestHarness.Stop();
+
+            LogContext.Debug?.Log("Test Fixture Complete");
         }
 
         protected virtual void ConfigureRabbitMqHost(IRabbitMqHostConfigurator configurator)
@@ -88,6 +101,49 @@
 
         protected virtual void OnCleanupVirtualHost(IModel model)
         {
+            bool cleanVirtualHostEntirely = !bool.TryParse(Environment.GetEnvironmentVariable("CI"), out var isBuildServer) || !isBuildServer;
+            if (cleanVirtualHostEntirely)
+            {
+                var exchanges = TaskUtil.Await(() => GetVirtualHostEntities("exchanges"));
+                foreach (var exchange in exchanges)
+                {
+                    model.ExchangeDelete(exchange);
+                }
+
+                var queues = TaskUtil.Await(() => GetVirtualHostEntities("queues"));
+                foreach (var queue in queues)
+                {
+                    model.QueueDelete(queue);
+                }
+            }
+        }
+
+        async Task<IList<string>> GetVirtualHostEntities(string element)
+        {
+            try
+            {
+                using var client = new HttpClient();
+                var byteArray = Encoding.ASCII.GetBytes($"{RabbitMqTestHarness.Username}:{RabbitMqTestHarness.Password}");
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+
+                var requestUri = new UriBuilder("http", HostAddress.Host, 15672, $"api/{element}/{HostAddress.AbsolutePath.Trim('/')}").Uri;
+                using var response = await client.GetStreamAsync(requestUri);
+                using var reader = new StreamReader(response);
+                using var jsonReader = new JsonTextReader(reader);
+
+                var token = await JToken.ReadFromAsync(jsonReader);
+
+                IEnumerable<string> entities = from elements in token.Children()
+                    select elements["name"].ToString();
+
+                return entities.Where(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith("amq.")).ToList();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
+
+            return new List<string>();
         }
     }
 }

@@ -16,7 +16,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_stop_after_limit_exceeded()
         {
-            Guid pingId = NewId.NextGuid();
+            var pingId = NewId.NextGuid();
             _attempts[pingId] = 0;
 
             Task<ConsumeContext<Fault<PingMessage>>> handler =
@@ -41,6 +41,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         public When_specifying_retry_limit()
         {
+            TestInactivityTimeout = TimeSpan.FromSeconds(3);
             _limit = 2;
             _attempts = new Dictionary<Guid, int>();
         }
@@ -81,7 +82,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_stop_after_limit_exceeded()
         {
-            Guid pingId = NewId.NextGuid();
+            var pingId = NewId.NextGuid();
             _attempts[pingId] = 0;
 
             Task<ConsumeContext<Fault<PingMessage>>> handler =
@@ -105,6 +106,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         public When_specifying_redelivery_limit()
         {
+            TestInactivityTimeout = TimeSpan.FromSeconds(3);
             _limit = 3;
             _attempts = new Dictionary<Guid, int>();
         }
@@ -132,7 +134,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_stop_after_limit_exceeded()
         {
-            Guid pingId = NewId.NextGuid();
+            var pingId = NewId.NextGuid();
             _attempts[pingId] = 0;
 
             Task<ConsumeContext<Fault<PingMessage>>> handler =
@@ -156,6 +158,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         public When_specifying_redelivery_limit_with_message_ttl()
         {
+            TestInactivityTimeout = TimeSpan.FromSeconds(3);
             _limit = 3;
             _attempts = new Dictionary<Guid, int>();
         }

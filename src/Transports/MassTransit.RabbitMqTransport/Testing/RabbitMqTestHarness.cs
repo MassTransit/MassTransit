@@ -37,6 +37,7 @@
 
         public string Username { get; set; }
         public string Password { get; set; }
+        public bool CleanVirtualHost { get; set; } = true;
         public override string InputQueueName { get; }
         public string NodeHostName { get; set; }
         public IMessageNameFormatter NameFormatter { get; }
@@ -108,7 +109,8 @@
                 });
             });
 
-            CleanUpVirtualHost();
+            if (CleanVirtualHost)
+                CleanUpVirtualHost();
 
             return busControl;
         }

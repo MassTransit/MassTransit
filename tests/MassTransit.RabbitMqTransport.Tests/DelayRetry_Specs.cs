@@ -146,7 +146,6 @@
     public class Using_delayed_exchange_redelivery_with_a_consumer :
         RabbitMqTestFixture
     {
-        [Retry(3)]
         [Test]
         public async Task Should_retry_each_message_type()
         {
@@ -225,15 +224,6 @@
             ConsumeContext<Fault<PingMessage>> pingFaultContext = await pingFault;
 
             Assert.That(Consumer.PingCount, Is.EqualTo(6));
-        }
-
-        [Test]
-        [Explicit]
-        public async Task Show_me_the_pipeline()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
         }
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
@@ -320,16 +310,18 @@
         [Test]
         public async Task Should_properly_defer_the_message_delivery()
         {
-            await InputQueueSendEndpoint.Send(new PingMessage());
+            await Bus.Publish(new PingMessage());
 
-            ConsumeContext<PingMessage> context = await _received.Task;
+            var timer = Stopwatch.StartNew();
 
-            Assert.GreaterOrEqual(_receivedTimeSpan, TimeSpan.FromSeconds(1));
+            await _received.Task;
+
+            timer.Stop();
+
+            Assert.That(timer.Elapsed, Is.GreaterThan(TimeSpan.FromSeconds(2)));
         }
 
         TaskCompletionSource<ConsumeContext<PingMessage>> _received;
-        TimeSpan _receivedTimeSpan;
-        Stopwatch _timer;
         int _count;
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -340,25 +332,12 @@
 
             configurator.Handler<PingMessage>(async context =>
             {
-                if (_timer == null)
-                    _timer = Stopwatch.StartNew();
-
-                await Task.Delay(200);
-
                 if (_count++ < 2)
                 {
-                    Console.WriteLine("{0} now is not a good time", DateTime.UtcNow);
-
                     await context.Defer(TimeSpan.FromMilliseconds(2000));
                     return;
                 }
 
-                _timer.Stop();
-
-                Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow, context.Headers.Get("MT-Redelivery-Count", default(int?)));
-
-                // okay, ready.
-                _receivedTimeSpan = _timer.Elapsed;
                 _received.TrySetResult(context);
             });
         }
@@ -366,23 +345,20 @@
 
 
     [TestFixture]
-    public class execute_callback_function_during_defer :
+    public class Execute_callback_function_during_defer :
         RabbitMqTestFixture
     {
         [Test]
         public async Task Should_execute_callback_during_defer_the_message_delivery()
         {
-            await InputQueueSendEndpoint.Send(new PingMessage());
+            await Bus.Publish(new PingMessage());
 
-            ConsumeContext<PingMessage> context = await _received.Task;
+            await _received.Task;
 
-            Assert.GreaterOrEqual(_receivedTimeSpan, TimeSpan.FromSeconds(1));
             Assert.IsTrue(_hit);
         }
 
         TaskCompletionSource<ConsumeContext<PingMessage>> _received;
-        TimeSpan _receivedTimeSpan;
-        Stopwatch _timer;
         int _count;
         bool _hit;
 
@@ -394,13 +370,8 @@
 
             configurator.Handler<PingMessage>(async context =>
             {
-                if (_timer == null)
-                    _timer = Stopwatch.StartNew();
-
                 if (_count++ < 2)
                 {
-                    Console.WriteLine("{0} now is not a good time", DateTime.UtcNow);
-
                     await context.Defer(TimeSpan.FromMilliseconds(1000), (consumeContext, sendContext) =>
                     {
                         _hit = true;
@@ -409,12 +380,6 @@
                     return;
                 }
 
-                _timer.Stop();
-
-                Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow, context.Headers.Get("MT-Redelivery-Count", default(int?)));
-
-                // okay, ready.
-                _receivedTimeSpan = _timer.Elapsed;
                 _received.TrySetResult(context);
             });
         }

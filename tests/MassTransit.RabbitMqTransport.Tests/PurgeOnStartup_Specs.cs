@@ -56,6 +56,8 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void OnCleanupVirtualHost(IModel model)
         {
+            base.OnCleanupVirtualHost(model);
+
             model.ExchangeDelete(QueueName);
             model.QueueDelete(QueueName);
         }

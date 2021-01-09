@@ -16,6 +16,8 @@
         {
             protected override void OnCleanupVirtualHost(IModel model)
             {
+                base.OnCleanupVirtualHost(model);
+
                 model.ExchangeDelete(NameFormatter.GetMessageName(typeof(A)).ToString());
                 model.ExchangeDelete(NameFormatter.GetMessageName(typeof(B)).ToString());
             }
