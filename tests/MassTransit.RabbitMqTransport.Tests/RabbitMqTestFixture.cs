@@ -74,17 +74,13 @@
         [OneTimeSetUp]
         public async Task SetupRabbitMqTestFixture()
         {
-            await RabbitMqTestHarness.Start();
-
-            await Task.Delay(10);
+            await RabbitMqTestHarness.Start().ConfigureAwait(false);
         }
 
         [OneTimeTearDown]
         public async Task TearDownRabbitMqTestFixture()
         {
-            await RabbitMqTestHarness.Stop();
-
-            LogContext.Debug?.Log("Test Fixture Complete");
+            await RabbitMqTestHarness.Stop().ConfigureAwait(false);
         }
 
         protected virtual void ConfigureRabbitMqHost(IRabbitMqHostConfigurator configurator)

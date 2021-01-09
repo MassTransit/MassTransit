@@ -8,7 +8,6 @@ namespace MassTransit.Transports
     using Events;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Policies;
 
 
     public class ReceiveTransport<TContext> :
@@ -111,35 +110,80 @@ namespace MassTransit.Transports
 
             async Task Run()
             {
-                while (!IsStopping)
+                var stoppingContext = new TransportStoppingContext(Stopping);
+
+                RetryPolicyContext<TransportStoppingContext> policyContext = _retryPolicy.CreatePolicyContext(stoppingContext);
+
+                try
                 {
-                    await _retryPolicy.Retry(async () =>
+                    while (!IsStopping)
                     {
+                        RetryContext<TransportStoppingContext> retryContext = null;
                         try
                         {
-                            _supervisor = _supervisorFactory();
+                            if (retryContext != null)
+                            {
+                                LogContext.Warning?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay,
+                                    retryContext.Exception.Message);
 
-                            await _context.OnTransportStartup(_supervisor, Stopping).ConfigureAwait(false);
+                                if (retryContext.Delay.HasValue)
+                                    await Task.Delay(retryContext.Delay.Value, Stopping).ConfigureAwait(false);
+                            }
 
-                            if (IsStopping)
-                                return;
-
-                            await _supervisor.Send(_transportPipe, Stopped).ConfigureAwait(false);
+                            if (!IsStopping)
+                                await RunTransport().ConfigureAwait(false);
                         }
-                        catch (ConnectionException exception)
+                        catch (OperationCanceledException)
                         {
-                            await NotifyFaulted(exception).ConfigureAwait(false);
                             throw;
-                        }
-                        catch (OperationCanceledException exception)
-                        {
-                            throw await NotifyFaulted(exception, "ReceiveTransport canceled: ").ConfigureAwait(false);
                         }
                         catch (Exception exception)
                         {
-                            throw await NotifyFaulted(exception, "ReceiveTransport faulted: ").ConfigureAwait(false);
+                            if (retryContext != null)
+                            {
+                                retryContext = retryContext.CanRetry(exception, out RetryContext<TransportStoppingContext> nextRetryContext)
+                                    ? nextRetryContext
+                                    : null;
+                            }
+
+                            if (retryContext == null && !policyContext.CanRetry(exception, out retryContext))
+                                break;
                         }
-                    }, Stopping).ConfigureAwait(false);
+                    }
+                }
+                catch (Exception exception)
+                {
+                    LogContext.Debug?.Log(exception, "ReceiveTransport Run Exception: {InputAddress}", _context.InputAddress);
+                }
+                finally
+                {
+                    policyContext.Dispose();
+                }
+            }
+
+            async Task RunTransport()
+            {
+                try
+                {
+                    _supervisor = _supervisorFactory();
+
+                    await _context.OnTransportStartup(_supervisor, Stopping).ConfigureAwait(false);
+
+                    if (!IsStopping)
+                        await _supervisor.Send(_transportPipe, Stopped).ConfigureAwait(false);
+                }
+                catch (ConnectionException exception)
+                {
+                    await NotifyFaulted(exception).ConfigureAwait(false);
+                    throw;
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception exception)
+                {
+                    throw await NotifyFaulted(exception, "ReceiveTransport faulted: ").ConfigureAwait(false);
                 }
             }
 
@@ -157,6 +201,17 @@ namespace MassTransit.Transports
                 LogContext.Error?.Log(exception, "Connection Failed: {InputAddress}", _context.InputAddress);
 
                 return _context.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_context.InputAddress, exception));
+            }
+
+
+            class TransportStoppingContext :
+                BasePipeContext,
+                PipeContext
+            {
+                public TransportStoppingContext(CancellationToken cancellationToken)
+                    : base(cancellationToken)
+                {
+                }
             }
         }
     }

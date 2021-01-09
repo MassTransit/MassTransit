@@ -31,6 +31,8 @@ namespace MassTransit.Policies
                 try
                 {
                     await Attempt(inlinePipeContext, retryContext, retryMethod).ConfigureAwait(false);
+
+                    return;
                 }
                 catch (OperationCanceledException ex) when (ex.CancellationToken == cancellationToken)
                 {
@@ -91,7 +93,11 @@ namespace MassTransit.Policies
                         await Task.Delay(retryContext.Delay.Value, context.CancellationToken).ConfigureAwait(false);
 
                     if (!context.CancellationToken.IsCancellationRequested)
+                    {
                         await retryMethod().ConfigureAwait(false);
+
+                        return;
+                    }
                 }
                 catch (OperationCanceledException exception) when (exception.CancellationToken == context.CancellationToken)
                 {
