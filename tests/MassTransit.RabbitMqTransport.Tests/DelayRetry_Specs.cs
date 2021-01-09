@@ -146,6 +146,7 @@
     public class Using_delayed_exchange_redelivery_with_a_consumer :
         RabbitMqTestFixture
     {
+        [Category("Flakey")]
         [Test]
         public async Task Should_retry_each_message_type()
         {

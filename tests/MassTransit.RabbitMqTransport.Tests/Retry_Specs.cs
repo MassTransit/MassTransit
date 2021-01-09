@@ -154,6 +154,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class When_specifying_redelivery_limit_with_message_ttl :
         RabbitMqTestFixture
     {
+        [Category("Flakey")]
         [Test]
         public async Task Should_stop_after_limit_exceeded()
         {
