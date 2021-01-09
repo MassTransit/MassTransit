@@ -387,6 +387,7 @@
         RabbitMqTestFixture
     {
         [Test]
+        [Retry(3)]
         public void Should_receive_the_exception()
         {
             Assert.That(async () => await _requestClient.GetResponse<PongMessage>(new PingMessage()), Throws.TypeOf<RequestFaultException>());

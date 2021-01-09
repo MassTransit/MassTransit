@@ -1,10 +1,9 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.Testing;
-    using MassTransit.Testing.Indicators;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -17,34 +16,33 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_stop_after_limit_exceeded()
         {
-            await Bus.Publish(new PingMessage());
+            Guid pingId = NewId.NextGuid();
+            _attempts[pingId] = 0;
 
-            ConsumeContext<Fault<PingMessage>> handled = await _handled;
+            Task<ConsumeContext<Fault<PingMessage>>> handler =
+                ConnectPublishHandler<Fault<PingMessage>>(context => context.Message.Message.CorrelationId == pingId);
+
+            await Bus.Publish(new PingMessage(pingId));
+
+            ConsumeContext<Fault<PingMessage>> handled = await handler;
 
             Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.GreaterThan(0));
 
-            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
+            await InactivityTask.ContinueWith(task =>
+            {
+            });
 
-            Assert.LessOrEqual(_attempts, _limit + 1);
+            Assert.LessOrEqual(_attempts[pingId], _limit + 1);
         }
 
         readonly int _limit;
-        int _attempts;
-        IBusActivityMonitor _activityMonitor;
-        Task<ConsumeContext<Fault<PingMessage>>> _handled;
+
+        readonly IDictionary<Guid, int> _attempts;
 
         public When_specifying_retry_limit()
         {
             _limit = 2;
-            _attempts = 0;
-        }
-
-        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
-        {
-            configurator.ReceiveEndpoint(e =>
-            {
-                _handled = Handled<Fault<PingMessage>>(e);
-            });
+            _attempts = new Dictionary<Guid, int>();
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -52,29 +50,25 @@ namespace MassTransit.RabbitMqTransport.Tests
             var sec2 = TimeSpan.FromSeconds(2);
             configurator.UseRetry(x => x.Exponential(_limit, sec2, sec2, sec2));
 
-            configurator.Consumer(() => new Consumer(ref _attempts));
+            configurator.Consumer(() => new RetryLimitConsumer(_attempts));
+        }
+    }
+
+
+    class RetryLimitConsumer :
+        IConsumer<PingMessage>
+    {
+        readonly IDictionary<Guid, int> _attempts;
+
+        public RetryLimitConsumer(IDictionary<Guid, int> attempts)
+        {
+            _attempts = attempts;
         }
 
-        protected override void ConnectObservers(IBus bus)
+        public Task Consume(ConsumeContext<PingMessage> context)
         {
-            base.ConnectObservers(bus);
-
-            _activityMonitor = bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(500));
-        }
-
-
-        class Consumer :
-            IConsumer<PingMessage>
-        {
-            public Consumer(ref int attempts)
-            {
-                ++attempts;
-            }
-
-            public Task Consume(ConsumeContext<PingMessage> context)
-            {
-                throw new IntentionalTestException();
-            }
+            _attempts[context.Message.CorrelationId]++;
+            throw new IntentionalTestException();
         }
     }
 
@@ -83,39 +77,41 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class When_specifying_redelivery_limit :
         RabbitMqTestFixture
     {
+        [Category("Flakey")]
         [Test]
         public async Task Should_stop_after_limit_exceeded()
         {
-            await Bus.Publish(new PingMessage());
+            Guid pingId = NewId.NextGuid();
+            _attempts[pingId] = 0;
 
-            ConsumeContext<Fault<PingMessage>> handled = await _handled;
+            Task<ConsumeContext<Fault<PingMessage>>> handler =
+                ConnectPublishHandler<Fault<PingMessage>>(context => context.Message.Message.CorrelationId == pingId);
+
+            await Bus.Publish(new PingMessage(pingId));
+
+            ConsumeContext<Fault<PingMessage>> handled = await handler;
 
             Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.GreaterThan(0));
 
-            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
+            await InactivityTask.ContinueWith(task =>
+            {
+            });
 
-            Assert.LessOrEqual(_attempts, _limit + 1);
+            Assert.LessOrEqual(_attempts[pingId], _limit + 1);
         }
 
         readonly int _limit;
-        int _attempts;
-        IBusActivityMonitor _activityMonitor;
-        Task<ConsumeContext<Fault<PingMessage>>> _handled;
+        readonly IDictionary<Guid, int> _attempts;
 
         public When_specifying_redelivery_limit()
         {
             _limit = 3;
-            _attempts = 0;
+            _attempts = new Dictionary<Guid, int>();
         }
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             configurator.UseDelayedExchangeMessageScheduler();
-
-            configurator.ReceiveEndpoint(e =>
-            {
-                _handled = Handled<Fault<PingMessage>>(e);
-            });
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -123,29 +119,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             var two = TimeSpan.FromSeconds(2);
             configurator.UseScheduledRedelivery(x => x.Intervals(two, two, two));
 
-            configurator.Consumer(() => new Consumer(ref _attempts));
-        }
-
-        protected override void ConnectObservers(IBus bus)
-        {
-            base.ConnectObservers(bus);
-
-            _activityMonitor = bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(500));
-        }
-
-
-        class Consumer :
-            IConsumer<PingMessage>
-        {
-            public Consumer(ref int attempts)
-            {
-                ++attempts;
-            }
-
-            public Task Consume(ConsumeContext<PingMessage> context)
-            {
-                throw new IntentionalTestException();
-            }
+            configurator.Consumer(() => new RetryLimitConsumer(_attempts));
         }
     }
 
@@ -154,39 +128,41 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class When_specifying_redelivery_limit_with_message_ttl :
         RabbitMqTestFixture
     {
+        [Category("Flakey")]
         [Test]
         public async Task Should_stop_after_limit_exceeded()
         {
-            await Bus.Publish(new PingMessage(), x => x.TimeToLive = TimeSpan.FromSeconds(2));
+            Guid pingId = NewId.NextGuid();
+            _attempts[pingId] = 0;
 
-            ConsumeContext<Fault<PingMessage>> handled = await _handled;
+            Task<ConsumeContext<Fault<PingMessage>>> handler =
+                ConnectPublishHandler<Fault<PingMessage>>(context => context.Message.Message.CorrelationId == pingId);
+
+            await Bus.Publish(new PingMessage(pingId), x => x.TimeToLive = TimeSpan.FromSeconds(2));
+
+            ConsumeContext<Fault<PingMessage>> handled = await handler;
 
             Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.GreaterThan(0));
 
-            await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
+            await InactivityTask.ContinueWith(task =>
+            {
+            });
 
-            Assert.LessOrEqual(_attempts, _limit + 1);
+            Assert.LessOrEqual(_attempts[pingId], _limit + 1);
         }
 
         readonly int _limit;
-        int _attempts;
-        IBusActivityMonitor _activityMonitor;
-        Task<ConsumeContext<Fault<PingMessage>>> _handled;
+        readonly IDictionary<Guid, int> _attempts;
 
         public When_specifying_redelivery_limit_with_message_ttl()
         {
             _limit = 3;
-            _attempts = 0;
+            _attempts = new Dictionary<Guid, int>();
         }
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
             configurator.UseDelayedExchangeMessageScheduler();
-
-            configurator.ReceiveEndpoint(e =>
-            {
-                _handled = Handled<Fault<PingMessage>>(e);
-            });
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -194,29 +170,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             var two = TimeSpan.FromSeconds(2);
             configurator.UseScheduledRedelivery(x => x.Intervals(two, two, two));
 
-            configurator.Consumer(() => new Consumer(ref _attempts));
-        }
-
-        protected override void ConnectObservers(IBus bus)
-        {
-            base.ConnectObservers(bus);
-
-            _activityMonitor = bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(500));
-        }
-
-
-        class Consumer :
-            IConsumer<PingMessage>
-        {
-            public Consumer(ref int attempts)
-            {
-                ++attempts;
-            }
-
-            public Task Consume(ConsumeContext<PingMessage> context)
-            {
-                throw new IntentionalTestException();
-            }
+            configurator.Consumer(() => new RetryLimitConsumer(_attempts));
         }
     }
 }

@@ -78,7 +78,7 @@ namespace MassTransit.TestFramework
             where T : class
         {
             Task<ConsumeContext<T>> result = null;
-            Bus.ConnectReceiveEndpoint(NewId.NextGuid().ToString(), context =>
+            Bus.ConnectReceiveEndpoint(context =>
             {
                 result = Handled<T>(context);
             });
@@ -90,7 +90,7 @@ namespace MassTransit.TestFramework
             where T : class
         {
             Task<ConsumeContext<T>> result = null;
-            Bus.ConnectReceiveEndpoint(NewId.NextGuid().ToString(), context =>
+            Bus.ConnectReceiveEndpoint(context =>
             {
                 result = Handled(context, filter);
             });

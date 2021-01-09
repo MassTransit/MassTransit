@@ -237,7 +237,7 @@
         [OneTimeSetUp]
         public async Task Setup()
         {
-            _limit = 100;
+            _limit = 10;
 
             var testActivity = GetActivityContext<TestActivity>();
             var secondActivity = GetActivityContext<SecondTestActivity>();
