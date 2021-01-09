@@ -47,23 +47,23 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
         async Task ConfigureTopology(ModelContext context)
         {
-            await Task.WhenAll(_brokerTopology.Exchanges.Select(exchange => Declare(context, exchange))).ConfigureAwait(false);
-
-            await Task.WhenAll(_brokerTopology.ExchangeBindings.Select(binding => Bind(context, binding))).ConfigureAwait(false);
-
             await Task.WhenAll(_brokerTopology.Queues.Select(queue => Declare(context, queue))).ConfigureAwait(false);
 
+            await Task.WhenAll(_brokerTopology.Exchanges.Select(exchange => Declare(context, exchange))).ConfigureAwait(false);
+
             await Task.WhenAll(_brokerTopology.QueueBindings.Select(binding => Bind(context, binding))).ConfigureAwait(false);
+
+            await Task.WhenAll(_brokerTopology.ExchangeBindings.Select(binding => Bind(context, binding))).ConfigureAwait(false);
         }
 
-        Task Declare(ModelContext context, Exchange exchange)
+        static Task Declare(ModelContext context, Exchange exchange)
         {
             RabbitMqLogMessages.DeclareExchange(exchange);
 
             return context.ExchangeDeclare(exchange.ExchangeName, exchange.ExchangeType, exchange.Durable, exchange.AutoDelete, exchange.ExchangeArguments);
         }
 
-        async Task Declare(ModelContext context, Queue queue)
+        static async Task Declare(ModelContext context, Queue queue)
         {
             try
             {
@@ -71,6 +71,9 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     .ConfigureAwait(false);
 
                 RabbitMqLogMessages.DeclareQueue(queue, ok.ConsumerCount, ok.MessageCount);
+
+                await Task.Yield();
+                await Task.Delay(10).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -80,18 +83,25 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             }
         }
 
-        Task Bind(ModelContext context, ExchangeToExchangeBinding binding)
+        static async Task Bind(ModelContext context, ExchangeToExchangeBinding binding)
         {
             RabbitMqLogMessages.BindToExchange(binding);
 
-            return context.ExchangeBind(binding.Destination.ExchangeName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments);
+            await context.ExchangeBind(binding.Destination.ExchangeName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments)
+                .ConfigureAwait(false);
+
+            await Task.Yield();
+            await Task.Delay(10).ConfigureAwait(false);
         }
 
-        Task Bind(ModelContext context, ExchangeToQueueBinding binding)
+        static async Task Bind(ModelContext context, ExchangeToQueueBinding binding)
         {
             RabbitMqLogMessages.BindToQueue(binding);
 
-            return context.QueueBind(binding.Destination.QueueName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments);
+            await context.QueueBind(binding.Destination.QueueName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments).ConfigureAwait(false);
+
+            await Task.Yield();
+            await Task.Delay(10).ConfigureAwait(false);
         }
 
 
