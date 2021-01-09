@@ -75,7 +75,7 @@
         }
 
         [Test]
-        [Category("Flakey")]
+        [Category("Flaky")]
         public async Task Should_publish_after_db_create_outbox_bus()
         {
             var message = new InitiateSimpleSaga();

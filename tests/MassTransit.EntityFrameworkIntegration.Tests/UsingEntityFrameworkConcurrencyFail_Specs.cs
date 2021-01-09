@@ -13,7 +13,7 @@
 
     [TestFixture]
     [Category("EntityFramework")]
-    [Category("Flakey")]
+    [Category("Flaky")]
     public class When_using_EntityFrameworkConcurrencyFail :
         InMemoryTestFixture
     {

@@ -9,7 +9,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using TestFramework;
 
 
-    [Category("Flakey")]
+    [Category("Flaky")]
     [TestFixture]
     public class KillSwitch_Specs :
         RabbitMqTestFixture

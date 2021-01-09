@@ -2,7 +2,7 @@ public class Tests
 {
     public Dictionary<string,string> Criteria { get; private set; }
 
-    public string SharedFilter { get; } = "Category!=Flakey";
+    public string SharedFilter { get; } = "Category!=Flaky";
 
     public static Tests GetTests(BuildParameters parameters)
     {
@@ -31,8 +31,8 @@ public class Tests
             {
                 testsToRun.Clear();
                 testsToRun["MassTransit.MongoDbIntegration.Tests"] = null;
-                testsToRun["MassTransit.EntityFrameworkCoreIntegration.Tests"] = "Category!=Flakey&Category!=Integration";
-                testsToRun["MassTransit.EntityFrameworkIntegration.Tests"] = "Category!=Flakey&Category!=Integration";
+                testsToRun["MassTransit.EntityFrameworkCoreIntegration.Tests"] = "Category!=Flaky&Category!=Integration";
+                testsToRun["MassTransit.EntityFrameworkIntegration.Tests"] = "Category!=Flaky&Category!=Integration";
                 testsToRun["MassTransit.MartenIntegration.Tests"] = null;
                 testsToRun["MassTransit.Azure.Cosmos.Tests"] = null;
             }
