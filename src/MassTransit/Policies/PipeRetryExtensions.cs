@@ -92,8 +92,6 @@ namespace MassTransit.Policies
 
                     if (!context.CancellationToken.IsCancellationRequested)
                         await retryMethod().ConfigureAwait(false);
-
-                    return;
                 }
                 catch (OperationCanceledException exception) when (exception.CancellationToken == context.CancellationToken)
                 {
