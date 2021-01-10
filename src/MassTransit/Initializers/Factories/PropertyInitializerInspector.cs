@@ -2,6 +2,7 @@
 {
     using System.Reflection;
     using Conventions;
+    using Internals.Reflection;
 
 
     public class PropertyInitializerInspector<TMessage, TInput, TProperty> :
@@ -19,6 +20,9 @@
         public bool Apply(IMessageInitializerBuilder<TMessage, TInput> builder, IInitializerConvention convention)
         {
             if (builder.IsInputPropertyUsed(_propertyInfo.Name))
+                return false;
+
+            if (!WritePropertyCache<TMessage>.CanWrite(_propertyInfo.Name))
                 return false;
 
             if (convention.TryGetPropertyInitializer<TMessage, TInput, TProperty>(_propertyInfo, out IPropertyInitializer<TMessage, TInput> initializer))

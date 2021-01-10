@@ -36,6 +36,14 @@
             _properties = new Dictionary<string, IWriteProperty<T>>(StringComparer.OrdinalIgnoreCase);
         }
 
+        bool IWritePropertyCache<T>.CanWrite(string name)
+        {
+            if (_propertyIndex.TryGetValue(name, out var propertyInfo))
+                return propertyInfo.CanWrite;
+
+            throw new ArgumentException($"{TypeMetadataCache<T>.ShortName} does not contain the property: {name}", nameof(name));
+        }
+
         IWriteProperty<T, TProperty> IWritePropertyCache<T>.GetProperty<TProperty>(string name)
         {
             return GetWriteProperty<TProperty>(name);
@@ -82,6 +90,11 @@
         public static IWriteProperty<T, TProperty> GetProperty<TProperty>(PropertyInfo propertyInfo)
         {
             return Cached.PropertyCache.Value.GetProperty<TProperty>(propertyInfo);
+        }
+
+        public static bool CanWrite(string name)
+        {
+            return Cached.PropertyCache.Value.CanWrite(name);
         }
 
 
