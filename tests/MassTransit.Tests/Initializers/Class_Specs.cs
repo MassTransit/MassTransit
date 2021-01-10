@@ -52,6 +52,52 @@ namespace MassTransit.Tests.Initializers
             Assert.That(context.Message.Address.City, Is.EqualTo("Dallas"));
         }
 
+        [Test]
+        public async Task Should_initialize_interface_with_readonly_property()
+        {
+            var model1 = new {ReadWrite = "Some Property Value"};
+
+            await MessageInitializerCache<IReadWriteReadOnly>.Initialize(model1);
+        }
+
+        [Test]
+        public async Task Should_initialize_object_with_readonly_property()
+        {
+            var model1 = new {ReadWrite = "Some Property Value"};
+
+            await MessageInitializerCache<ReadWriteReadOnly>.Initialize(model1);
+        }
+
+        [Test]
+        public async Task Should_initialize_interface_with_readonly_property_from_subclass()
+        {
+            var model2 = new ReadWriteReadOnly {ReadWrite = "Some Property Value"};
+
+            await MessageInitializerCache<IReadWriteReadOnly>.Initialize(model2);
+        }
+
+        [Test]
+        public async Task Should_initialize_object_with_readonly_property_from_subclass()
+        {
+            var model2 = new ReadWriteReadOnly {ReadWrite = "Some Property Value"};
+
+            await MessageInitializerCache<ReadWriteReadOnly>.Initialize(model2);
+        }
+
+
+        public class ReadWriteReadOnly : IReadWriteReadOnly
+        {
+            public string ReadWrite { get; set; }
+            public string ReadOnly => ReadWrite;
+        }
+
+
+        public interface IReadWriteReadOnly
+        {
+            string ReadWrite { get; set; }
+            string ReadOnly => ReadWrite;
+        }
+
 
         public interface Report
         {
