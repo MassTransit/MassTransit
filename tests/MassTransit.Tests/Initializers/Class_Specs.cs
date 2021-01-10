@@ -55,20 +55,32 @@ namespace MassTransit.Tests.Initializers
         [Test]
         public async Task Should_initialize_with_readonly_properties()
         {
-            var model = new ReadWriteReadOnly {ReadWrite = "Some Property Value"};
+            var model1 = new {ReadWrite = "Some Property Value"};
 
-            InitializeContext<ReadWriteReadOnly> context = await MessageInitializerCache<ReadWriteReadOnly>.Initialize(model);
+            var model2 = new ReadWriteReadOnly {ReadWrite = "Some Property Value"};
 
-            Assert.That(context.Message, Is.Not.Null);
+            InitializeContext<IReadWriteReadOnly> model1_working1 = await MessageInitializerCache<IReadWriteReadOnly>.Initialize(model1);
+
+            InitializeContext<ReadWriteReadOnly> model1_working2 = await MessageInitializerCache<ReadWriteReadOnly>.Initialize(model1);
+
+            InitializeContext<IReadWriteReadOnly> model2_working3 = await MessageInitializerCache<IReadWriteReadOnly>.Initialize(model2);
+
+            InitializeContext<ReadWriteReadOnly> model2_broken1 = await MessageInitializerCache<ReadWriteReadOnly>.Initialize(model2);
         }
 
-
-        public class ReadWriteReadOnly
+        public class ReadWriteReadOnly : IReadWriteReadOnly
         {
             public string ReadWrite { get; set; }
-
             public string ReadOnly => ReadWrite;
         }
+
+
+        public interface IReadWriteReadOnly
+        {
+            string ReadWrite { get; set; }
+            string ReadOnly => ReadWrite;
+        }
+
 
         public interface Report
         {
