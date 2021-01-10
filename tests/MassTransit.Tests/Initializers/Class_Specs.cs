@@ -52,6 +52,23 @@ namespace MassTransit.Tests.Initializers
             Assert.That(context.Message.Address.City, Is.EqualTo("Dallas"));
         }
 
+        [Test]
+        public async Task Should_initialize_with_readonly_properties()
+        {
+            var model = new ReadWriteReadOnly {ReadWrite = "Some Property Value"};
+
+            InitializeContext<ReadWriteReadOnly> context = await MessageInitializerCache<ReadWriteReadOnly>.Initialize(model);
+
+            Assert.That(context.Message, Is.Not.Null);
+        }
+
+
+        public class ReadWriteReadOnly
+        {
+            public string ReadWrite { get; set; }
+
+            public string ReadOnly => ReadWrite;
+        }
 
         public interface Report
         {
