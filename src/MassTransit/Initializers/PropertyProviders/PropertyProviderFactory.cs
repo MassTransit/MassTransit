@@ -2,6 +2,7 @@ namespace MassTransit.Initializers.PropertyProviders
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Reflection;
     using System.Threading.Tasks;
     using Internals.Extensions;
@@ -359,11 +360,20 @@ namespace MassTransit.Initializers.PropertyProviders
 
             public bool TryGetConverter<T, TProperty>(out IPropertyConverter<T, TProperty> converter)
             {
-                if (typeof(TValue) == typeof(string) || typeof(TValue) == typeof(byte[]))
+                if (typeof(TValue) == typeof(string) || typeof(TValue) == typeof(byte[]) || typeof(Stream).IsAssignableFrom(typeof(TValue)))
                 {
                     if (typeof(T).ClosesType(typeof(MessageData<>), out Type[] types) && types[0] == typeof(string))
                     {
                         if (typeof(TProperty) == typeof(string) || typeof(TProperty) == typeof(MessageData<string>))
+                        {
+                            converter = new MessageDataPropertyConverter() as IPropertyConverter<T, TProperty>;
+                            return converter != null;
+                        }
+                    }
+
+                    if (typeof(T).ClosesType(typeof(MessageData<>), out types) && typeof(Stream).IsAssignableFrom(types[0]))
+                    {
+                        if (typeof(Stream).IsAssignableFrom(typeof(TProperty)) || typeof(TProperty) == typeof(MessageData<Stream>))
                         {
                             converter = new MessageDataPropertyConverter() as IPropertyConverter<T, TProperty>;
                             return converter != null;

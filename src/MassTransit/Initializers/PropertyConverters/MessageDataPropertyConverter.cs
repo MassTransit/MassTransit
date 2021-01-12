@@ -1,5 +1,6 @@
 namespace MassTransit.Initializers.PropertyConverters
 {
+    using System.IO;
     using System.Text;
     using System.Threading.Tasks;
     using MessageData.Values;
@@ -10,9 +11,11 @@ namespace MassTransit.Initializers.PropertyConverters
         IPropertyConverter<MessageData<byte[]>, MessageData<byte[]>>,
         IPropertyConverter<MessageData<byte[]>, MessageData<string>>,
         IPropertyConverter<MessageData<string>, MessageData<string>>,
+        IPropertyConverter<MessageData<Stream>, MessageData<Stream>>,
         IPropertyConverter<MessageData<string>, string>,
         IPropertyConverter<MessageData<byte[]>, string>,
-        IPropertyConverter<MessageData<byte[]>, byte[]>
+        IPropertyConverter<MessageData<byte[]>, byte[]>,
+        IPropertyConverter<MessageData<Stream>, Stream>
     {
         public Task<MessageData<byte[]>> Convert<T>(InitializeContext<T> context, byte[] input)
             where T : class
@@ -72,6 +75,23 @@ namespace MassTransit.Initializers.PropertyConverters
                 return TaskUtil.Default<MessageData<string>>();
 
             return Task.FromResult<MessageData<string>>(new PutMessageData<string>(input));
+        }
+
+        public Task<MessageData<Stream>> Convert<T>(InitializeContext<T> context, Stream input)
+            where T : class
+        {
+            if (input == null)
+                return TaskUtil.Default<MessageData<Stream>>();
+
+            return Task.FromResult<MessageData<Stream>>(new PutMessageData<Stream>(input));
+        }
+
+        public Task<MessageData<Stream>> Convert<T>(InitializeContext<T> context, MessageData<Stream> input)
+            where T : class
+        {
+            return input != null
+                ? Task.FromResult(input)
+                : TaskUtil.Default<MessageData<Stream>>();
         }
     }
 }
