@@ -1,8 +1,10 @@
 ﻿namespace MassTransit.MessageData.Values
 {
     using System;
+    using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
+    using PropertyProviders;
 
 
     /// <summary>
@@ -36,9 +38,22 @@
 
         async Task<T> GetValue()
         {
-            using var valueStream = await _repository.Get(Address, _cancellationToken).ConfigureAwait(false);
+            // To prevent the stream message data convertor from having to copy the stream, the stream
+            // is not disposed if the converter is a StreamMessageDataConverter
 
-            return await _converter.Convert(valueStream, _cancellationToken).ConfigureAwait(false);
+            Stream valueStream = null;
+            try
+            {
+                valueStream = await _repository.Get(Address, _cancellationToken).ConfigureAwait(false);
+                return await _converter.Convert(valueStream, _cancellationToken).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (_converter.GetType() != typeof(StreamMessageDataConverter))
+                {
+                    valueStream?.Dispose();
+                }
+            }
         }
     }
 }
