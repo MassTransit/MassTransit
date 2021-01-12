@@ -1,6 +1,7 @@
 namespace MassTransit.Analyzers.Helpers
 {
     using System;
+    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.CodeAnalysis;
@@ -170,6 +171,10 @@ namespace MassTransit.Analyzers.Helpers
                     }
 
                     if (messageDataType.SpecialType == SpecialType.System_String && sourceSymbol.SpecialType == SpecialType.System_String)
+                        return true;
+
+                    INamedTypeSymbol streamType = _semanticModel.Compilation.GetTypeByMetadataName(typeof(Stream).FullName);
+                    if (SymbolEqualityComparer.Default.Equals(messageDataType, streamType) && sourceSymbol.ImplementsType(streamType))
                         return true;
 
                     return false;
