@@ -55,6 +55,12 @@
             return new StoredMessageData<byte[]>(address, bytes);
         }
 
+        public static Task<MessageData<Stream>> PutStream(this IMessageDataRepository repository, Stream stream,
+            CancellationToken cancellationToken = default)
+        {
+            return PutStream(repository, stream, default, cancellationToken);
+        }
+
         public static async Task<MessageData<string>> PutString(this IMessageDataRepository repository, string value, TimeSpan timeToLive,
             CancellationToken cancellationToken = default)
         {
@@ -97,6 +103,19 @@
                 return new BytesInlineMessageData(bytes, address);
 
             return new StoredMessageData<byte[]>(address, bytes);
+        }
+
+        public static async Task<MessageData<Stream>> PutStream(this IMessageDataRepository repository, Stream stream, TimeSpan timeToLive,
+            CancellationToken cancellationToken = default)
+        {
+            if (repository == null)
+                throw new ArgumentNullException(nameof(repository));
+            if (stream == null)
+                return EmptyMessageData<Stream>.Instance;
+
+            var address = await repository.Put(stream, timeToLive, cancellationToken).ConfigureAwait(false);
+
+            return new StoredMessageData<Stream>(address, stream);
         }
 
         public static async Task<MessageData<string>> GetString(this IMessageDataRepository repository, Uri address,

@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Serialization.JsonConverters
 {
     using System;
+    using System.IO;
     using Internals.Extensions;
     using MessageData;
     using MessageData.Values;
@@ -31,7 +32,7 @@
             if (objectType.ClosesType(typeof(MessageData<>), out Type[] dataTypes))
             {
                 var elementType = dataTypes[0];
-                if (elementType == typeof(string) || elementType == typeof(byte[]))
+                if (elementType == typeof(string) || elementType == typeof(byte[]) || elementType == typeof(Stream))
                     return (IConverter)Activator.CreateInstance(typeof(CachedConverter<>).MakeGenericType(elementType));
 
                 throw new MessageDataException("The message data type is not supported: " + TypeMetadataCache.GetShortName(elementType));

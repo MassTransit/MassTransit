@@ -1,6 +1,7 @@
 namespace MassTransit.MessageData.PropertyProviders
 {
     using System;
+    using System.IO;
     using System.Threading.Tasks;
     using GreenPipes;
     using Initializers;
@@ -84,6 +85,15 @@ namespace MassTransit.MessageData.PropertyProviders
                     MessageData<byte[]> messageData = timeToLive.HasValue
                         ? await _repository.PutBytes(bytesValue, timeToLive.Value, context.CancellationToken).ConfigureAwait(false)
                         : await _repository.PutBytes(bytesValue, context.CancellationToken).ConfigureAwait(false);
+
+                    return (MessageData<TValue>)messageData;
+                }
+
+                if (value is Stream streamValue)
+                {
+                    MessageData<Stream> messageData = timeToLive.HasValue
+                        ? await _repository.PutStream(streamValue, timeToLive.Value, context.CancellationToken).ConfigureAwait(false)
+                        : await _repository.PutStream(streamValue, default, context.CancellationToken).ConfigureAwait(false);
 
                     return (MessageData<TValue>)messageData;
                 }

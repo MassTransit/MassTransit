@@ -20,6 +20,23 @@
             InMemoryTestFixture
         {
             [Test]
+            public async Task Should_be_able_to_write_stream_too()
+            {
+                var data = new byte[10000];
+                await using MemoryStream ms = new MemoryStream(data);
+
+                var message = new MessageWithStreamImpl {Stream = await _repository.PutStream(ms)};
+
+                await InputQueueSendEndpoint.Send(message);
+
+                await _receivedStream;
+
+                await using MemoryStream receivedMemoryStream = new MemoryStream();
+                await _receivedStreamData.CopyToAsync(receivedMemoryStream);
+                receivedMemoryStream.ToArray().ShouldBe(data);
+            }
+
+            [Test]
             public async Task Should_be_able_to_write_bytes_too()
             {
                 var data = new byte[10000];
@@ -50,8 +67,10 @@
             IMessageDataRepository _repository;
             Task<ConsumeContext<MessageWithBigData>> _received;
             Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
+            Task<ConsumeContext<MessageWithStream>> _receivedStream;
             string _receivedBody;
             byte[] _receivedBytesArray;
+            Stream _receivedStreamData;
 
             protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
@@ -77,6 +96,11 @@
                 {
                     _receivedBytesArray = await context.Message.Bytes.Value;
                 });
+
+                _receivedStream = Handler<MessageWithStream>(configurator, async context =>
+                {
+                    _receivedStreamData = await context.Message.Stream.Value;
+                });
             }
         }
 
@@ -85,6 +109,23 @@
         public class Sending_a_large_message_through_the_file_system_encrypted :
             InMemoryTestFixture
         {
+            [Test]
+            public async Task Should_be_able_to_write_stream_too()
+            {
+                var data = new byte[10000];
+                await using MemoryStream ms = new MemoryStream(data);
+
+                var message = new MessageWithStreamImpl {Stream = await _repository.PutStream(ms)};
+
+                await InputQueueSendEndpoint.Send(message);
+
+                await _receivedStream;
+
+                await using MemoryStream receivedMemoryStream = new MemoryStream();
+                await _receivedStreamData.CopyToAsync(receivedMemoryStream);
+                receivedMemoryStream.ToArray().ShouldBe(data);
+            }
+
             [Test]
             public async Task Should_be_able_to_write_bytes_too()
             {
@@ -116,8 +157,10 @@
             IMessageDataRepository _repository;
             Task<ConsumeContext<MessageWithBigData>> _received;
             Task<ConsumeContext<MessageWithByteArray>> _receivedBytes;
+            Task<ConsumeContext<MessageWithStream>> _receivedStream;
             string _receivedBody;
             byte[] _receivedBytesArray;
+            Stream _receivedStreamData;
 
             protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
             {
@@ -146,6 +189,11 @@
                 _receivedBytes = Handler<MessageWithByteArray>(configurator, async context =>
                 {
                     _receivedBytesArray = await context.Message.Bytes.Value;
+                });
+
+                _receivedStream = Handler<MessageWithStream>(configurator, async context =>
+                {
+                    _receivedStreamData = await context.Message.Stream.Value;
                 });
             }
         }
@@ -337,6 +385,58 @@
             }
         }
 
+        [TestFixture]
+        public class Receiving_a_large_message_with_data_stream :
+            InMemoryTestFixture
+        {
+            [Test]
+            public async Task Should_load_the_data_from_the_repository()
+            {
+                var nextGuid = NewId.NextGuid();
+                var data = nextGuid.ToString();
+                Uri dataAddress;
+
+                await using (var stream = new MemoryStream(nextGuid.ToByteArray(), false))
+                {
+                    dataAddress = await _messageDataRepository.Put(stream);
+                }
+
+                await using MemoryStream ms = new MemoryStream(nextGuid.ToByteArray());
+
+                var message = new MessageWithStreamImpl {Stream = new StoredMessageData<Stream>(dataAddress, ms)};
+
+                await InputQueueSendEndpoint.Send(message);
+
+                await _received;
+
+                await using MemoryStream memoryStreamForReceivedStream = new MemoryStream();
+                await _receivedStream.CopyToAsync(memoryStreamForReceivedStream);
+
+                NewId newId = new NewId(memoryStreamForReceivedStream.ToArray());
+                newId.ToString().ShouldBe(data);
+            }
+
+            IMessageDataRepository _messageDataRepository;
+
+            Task<ConsumeContext<MessageWithStream>> _received;
+            Stream _receivedStream;
+
+            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+            {
+                _messageDataRepository = new InMemoryMessageDataRepository();
+
+                configurator.UseMessageData(_messageDataRepository);
+            }
+
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
+                _received = Handler<MessageWithStream>(configurator, async context =>
+                {
+                    _receivedStream = await context.Message.Stream.Value;
+                });
+            }
+        }
+
 
         [TestFixture]
         public class A_message_with_no_message_data :
@@ -421,6 +521,16 @@
             IDictionary<string, IHaveNoMessageDataEither> ChildIndex { get; }
         }
 
+        public interface MessageWithStream
+        {
+            MessageData<Stream> Stream { get; }
+        }
+
+
+        class MessageWithStreamImpl : MessageWithStream
+        {
+            public MessageData<Stream> Stream { get; set; }
+        }
 
         public interface MessageWithByteArray
         {
