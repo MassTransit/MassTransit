@@ -1,6 +1,7 @@
 namespace MassTransit.Tests.MessageData
 {
     using System;
+    using System.IO;
     using System.Text;
     using System.Threading.Tasks;
     using MassTransit.MessageData;
@@ -26,7 +27,7 @@ namespace MassTransit.Tests.MessageData
                 InVar.CorrelationId,
                 ByteData = byteData,
                 StringValue = stringValue,
-                ByteValue = Encoding.UTF8.GetBytes(byteValue)
+                ByteValue = Encoding.UTF8.GetBytes(byteValue),
             }), Throws.TypeOf<RequestFaultException>());
         }
 
@@ -40,13 +41,17 @@ namespace MassTransit.Tests.MessageData
             const string stringValue = "This string is soo incredibly huge.";
             const string byteValue = "Such a byte value, a really great byte value.";
 
+            byte[] streamBytes = new byte[1000];
+            await using MemoryStream ms = new MemoryStream(streamBytes);
+
             Response<DocumentProcessed> response = await client.GetResponse<DocumentProcessed>(new
             {
                 InVar.CorrelationId,
                 StringData = stringData,
                 ByteData = byteData,
                 StringValue = stringValue,
-                ByteValue = Encoding.UTF8.GetBytes(byteValue)
+                ByteValue = Encoding.UTF8.GetBytes(byteValue),
+                StreamData = ms
             });
 
             Assert.That(response.Message.StringData, Is.Not.Null);
@@ -67,6 +72,14 @@ namespace MassTransit.Tests.MessageData
             bytes = await response.Message.ByteData.Value;
             Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo(byteData));
 
+            Assert.That(response.Message.StreamData, Is.Not.Null);
+            Assert.That(response.Message.StreamData.HasValue, Is.True);
+            Assert.That(response.Message.StreamData.Address, Is.EqualTo(_streamDataAddress), "Should use the existing message data address");
+            await using MemoryStream receivedStream = new MemoryStream();
+            var stream = await response.Message.StreamData.Value;
+            await stream.CopyToAsync(receivedStream);
+            Assert.That(receivedStream.ToArray(), Is.EqualTo(streamBytes));
+
             Assert.That(response.Message.StringValue, Is.Not.Null);
             Assert.That(response.Message.StringValue.HasValue, Is.True);
             text = await response.Message.StringValue.Value;
@@ -86,6 +99,7 @@ namespace MassTransit.Tests.MessageData
         readonly IMessageDataRepository _repository = new InMemoryMessageDataRepository();
         Uri _stringDataAddress;
         Uri _byteDataAddress;
+        Uri _streamDataAddress;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -105,6 +119,7 @@ namespace MassTransit.Tests.MessageData
 
                 _stringDataAddress = context.Message.StringData.Address;
                 _byteDataAddress = context.Message.ByteData.Address;
+                _streamDataAddress = context.Message.StreamData.Address;
 
                 await context.RespondAsync<DocumentProcessed>(new
                 {
@@ -114,7 +129,8 @@ namespace MassTransit.Tests.MessageData
                     context.Message.ByteData,
                     context.Message.StringValue,
                     StringByteValue = context.Message.StringValue,
-                    context.Message.ByteValue
+                    context.Message.ByteValue,
+                    context.Message.StreamData
                 });
             });
         }
@@ -127,6 +143,7 @@ namespace MassTransit.Tests.MessageData
             MessageData<byte[]> ByteData { get; }
             string StringValue { get; }
             byte[] ByteValue { get; }
+            MessageData<Stream> StreamData { get; }
         }
 
 
@@ -139,6 +156,7 @@ namespace MassTransit.Tests.MessageData
             MessageData<string> StringValue { get; }
             MessageData<byte[]> StringByteValue { get; }
             MessageData<byte[]> ByteValue { get; }
+            MessageData<Stream> StreamData { get; }
         }
     }
 }
