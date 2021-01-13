@@ -25,7 +25,7 @@ namespace ConsoleEventPublisher
             await busControl.StartAsync(source.Token);
             try
             {
-                do
+                while (true)
                 {
                     string value = await Task.Run(() =>
                     {
@@ -42,7 +42,6 @@ namespace ConsoleEventPublisher
                         Value = value
                     });
                 }
-                while (true);
             }
             finally
             {
