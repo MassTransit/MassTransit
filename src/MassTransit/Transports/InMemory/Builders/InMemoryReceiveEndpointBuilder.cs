@@ -21,9 +21,12 @@ namespace MassTransit.Transports.InMemory.Builders
 
         public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
         {
-            _configuration.Topology.Consume
-                .GetMessageTopology<T>()
-                .Bind();
+            if (_configuration.ConfigureConsumeTopology)
+            {
+                _configuration.Topology.Consume
+                    .GetMessageTopology<T>()
+                    .Bind();
+            }
 
             return base.ConnectConsumePipe(pipe);
         }
