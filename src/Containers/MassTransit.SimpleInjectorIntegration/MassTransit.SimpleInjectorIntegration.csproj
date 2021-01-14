@@ -14,7 +14,7 @@
 
   <ItemGroup>
         <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-        <PackageReference Include="SimpleInjector" Version="5.2.0" />
+        <PackageReference Include="SimpleInjector" Version="5.2.1" />
         <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

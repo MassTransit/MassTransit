@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Automatonymous" Version="5.1.0" />
+    <PackageReference Include="Automatonymous" Version="5.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
     <PackageReference Include="NewId" Version="3.0.3" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
