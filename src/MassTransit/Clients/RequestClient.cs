@@ -156,7 +156,9 @@
             Task<Response<T1>> result1 = handle.GetResponse<T1>(false);
             Task<Response<T2>> result2 = handle.GetResponse<T2>();
 
-            await Task.WhenAny(result1, result2).ConfigureAwait(false);
+            var task = await Task.WhenAny(result1, result2).ConfigureAwait(false);
+
+            await task.ConfigureAwait(false);
 
             return new Response<T1, T2>(result1, result2);
         }
@@ -173,7 +175,9 @@
             Task<Response<T2>> result2 = handle.GetResponse<T2>(false);
             Task<Response<T3>> result3 = handle.GetResponse<T3>();
 
-            await Task.WhenAny(result1, result2, result3).ConfigureAwait(false);
+            var task = await Task.WhenAny(result1, result2, result3).ConfigureAwait(false);
+
+            await task.ConfigureAwait(false);
 
             return new Response<T1, T2, T3>(result1, result2, result3);
         }

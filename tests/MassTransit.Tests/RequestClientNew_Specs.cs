@@ -145,12 +145,11 @@
         {
             IRequestClient<RegisterMember> client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
 
-            (Task<Response<MemberRegistered>> registered, Task<Response<ExistingMemberFound>> existing) =
-                await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember());
+            Response<MemberRegistered, ExistingMemberFound> response = await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember());
 
-            await registered;
+            Assert.That(response.Is(out Response<MemberRegistered> _), Is.True, "Should have been registered");
 
-            Assert.That(async () => await existing, Throws.TypeOf<TaskCanceledException>());
+            Assert.That(response.Is(out Response<ExistingMemberFound> _), Is.False, "Should not have been an existing member");
         }
 
         [Test]
@@ -158,22 +157,41 @@
         {
             IRequestClient<RegisterMember> client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
 
-            (Task<Response<MemberRegistered>> registered, Task<Response<ExistingMemberFound>> existing) =
+            Response<MemberRegistered, ExistingMemberFound> response =
                 await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember {MemberId = "Johnny5"});
 
-            await existing;
+            Assert.That(response.Is(out Response<MemberRegistered> _), Is.False, "Should not have been registered");
 
-            Assert.That(async () => await registered, Throws.TypeOf<TaskCanceledException>());
+            Assert.That(response.Is(out Response<ExistingMemberFound> _), Is.True, "Should have been an existing member");
+        }
+
+        [Test]
+        public async Task Should_fault_at_the_request_if_the_consumer_faults_with_two_response_types()
+        {
+            IRequestClient<RegisterMember> client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
+
+            Assert.That(async () => await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember {MemberId = "Logan5"}),
+                Throws.TypeOf<RequestFaultException>());
+        }
+
+        [Test]
+        public async Task Should_fault_at_the_request_if_the_consumer_faults_with_one_response_type()
+        {
+            IRequestClient<RegisterMember> client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
+
+            Assert.That(async () => await client.GetResponse<MemberRegistered>(new RegisterMember {MemberId = "Logan5"}),
+                Throws.TypeOf<RequestFaultException>());
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             Handler<RegisterMember>(configurator, context =>
             {
+                if (context.Message.MemberId == "Logan5")
+                    throw new IntentionalTestException("Logon Ran");
+
                 if (context.Message.MemberId == "Johnny5")
-                {
                     return context.RespondAsync<ExistingMemberFound>(new {context.Message.MemberId});
-                }
 
                 return context.RespondAsync<MemberRegistered>(new {context.Message.MemberId});
             });
@@ -455,7 +473,7 @@
 
             public async Task Consume(ConsumeContext<A> context)
             {
-                var client = context.CreateRequestClient<B>(_bus, context.ReceiveContext.InputAddress);
+                IRequestClient<B> client = context.CreateRequestClient<B>(_bus, context.ReceiveContext.InputAddress);
 
                 await client.GetResponse<C>(new B());
 
@@ -494,5 +512,3 @@
         }
     }
 }
-
-
