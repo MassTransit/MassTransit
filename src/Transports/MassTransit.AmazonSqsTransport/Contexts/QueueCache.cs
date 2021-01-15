@@ -16,7 +16,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     public class QueueCache :
         IAsyncDisposable
     {
-        static readonly List<string> AllAttributes = new List<string>{ QueueAttributeName.All };
+        static readonly List<string> AllAttributes = new List<string> {QueueAttributeName.All};
 
         readonly ICache<QueueInfo> _cache;
         readonly CancellationToken _cancellationToken;

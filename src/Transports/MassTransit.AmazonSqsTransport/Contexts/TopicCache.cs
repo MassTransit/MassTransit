@@ -42,7 +42,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 {
                     return CreateMissingTopic(topic);
                 }
-                catch (InvalidParameterException e) when(e.Message.Contains("Topic already exists"))
+                catch (InvalidParameterException e) when (e.Message.Contains("Topic already exists"))
                 {
                     return GetExistingTopic(topic.EntityName);
                 }
