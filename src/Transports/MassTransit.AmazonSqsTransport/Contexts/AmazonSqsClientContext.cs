@@ -38,7 +38,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             _cancellationToken = cancellationToken;
 
             _queueCache = new QueueCache(amazonSqs, cancellationToken);
-            _topicCache = new TopicCache(amazonSns);
+            _topicCache = new TopicCache(amazonSns, cancellationToken);
         }
 
         public async ValueTask DisposeAsync()
@@ -57,18 +57,18 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         public Task<TopicInfo> CreateTopic(Topology.Entities.Topic topic)
         {
-            return _topicCache.Get(topic, _cancellationToken);
+            return _topicCache.Get(topic);
         }
 
         public Task<QueueInfo> CreateQueue(Queue queue)
         {
-            return _queueCache.Get(queue, _cancellationToken);
+            return _queueCache.Get(queue);
         }
 
         async Task ClientContext.CreateQueueSubscription(Topology.Entities.Topic topic, Queue queue)
         {
-            var topicInfo = await _topicCache.Get(topic, _cancellationToken).ConfigureAwait(false);
-            var queueInfo = await _queueCache.Get(queue, _cancellationToken).ConfigureAwait(false);
+            var topicInfo = await _topicCache.Get(topic).ConfigureAwait(false);
+            var queueInfo = await _queueCache.Get(queue).ConfigureAwait(false);
 
             Dictionary<string, string> subscriptionAttributes = topic.TopicSubscriptionAttributes.Select(x => (x.Key, x.Value.ToString()))
                 .Concat(queue.QueueSubscriptionAttributes.Select(x => (x.Key, x.Value.ToString())))
@@ -118,7 +118,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         async Task ClientContext.DeleteTopic(Topology.Entities.Topic topic)
         {
-            var topicInfo = await _topicCache.Get(topic, _cancellationToken).ConfigureAwait(false);
+            var topicInfo = await _topicCache.Get(topic).ConfigureAwait(false);
 
             TransportLogMessages.DeleteTopic(topicInfo.Arn);
 
@@ -131,7 +131,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         async Task ClientContext.DeleteQueue(Queue queue)
         {
-            var queueInfo = await _queueCache.Get(queue, _cancellationToken).ConfigureAwait(false);
+            var queueInfo = await _queueCache.Get(queue).ConfigureAwait(false);
 
             TransportLogMessages.DeleteQueue(queueInfo.Url);
 

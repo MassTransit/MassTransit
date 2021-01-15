@@ -16,6 +16,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     public class QueueCache :
         IAsyncDisposable
     {
+        static readonly List<string> AllAttributes = new List<string>{ QueueAttributeName.All };
+
         readonly ICache<QueueInfo> _cache;
         readonly CancellationToken _cancellationToken;
         readonly IAmazonSQS _client;
@@ -48,7 +50,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             _cache.Clear();
         }
 
-        public Task<QueueInfo> Get(Queue queue, CancellationToken cancellationToken)
+        public Task<QueueInfo> Get(Queue queue)
         {
             lock (_durableQueues)
             {
@@ -56,7 +58,17 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                     return Task.FromResult(queueInfo);
             }
 
-            return _nameIndex.Get(queue.EntityName, key => CreateMissingQueue(queue, cancellationToken));
+            return _nameIndex.Get(queue.EntityName, key =>
+            {
+                try
+                {
+                    return CreateMissingQueue(queue);
+                }
+                catch (QueueNameExistsException)
+                {
+                    return GetExistingQueue(queue.EntityName);
+                }
+            });
         }
 
         public Task<QueueInfo> GetByName(string entityName)
@@ -67,7 +79,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                     return Task.FromResult(queueInfo);
             }
 
-            return _nameIndex.Get(entityName);
+            return _nameIndex.Get(entityName, queueName => GetExistingQueue(queueName));
         }
 
         public void RemoveByName(string entityName)
@@ -78,7 +90,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             _nameIndex.Remove(entityName);
         }
 
-        async Task<QueueInfo> CreateMissingQueue(Queue queue, CancellationToken cancellationToken)
+        async Task<QueueInfo> CreateMissingQueue(Queue queue)
         {
             Dictionary<string, string> attributes = queue.QueueAttributes.ToDictionary(x => x.Key, x => x.Value.ToString());
 
@@ -95,15 +107,15 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 Tags = queue.QueueTags.ToDictionary(x => x.Key, x => x.Value)
             };
 
-            var response = await _client.CreateQueueAsync(request, cancellationToken).ConfigureAwait(false);
+            var createResponse = await _client.CreateQueueAsync(request, _cancellationToken).ConfigureAwait(false);
 
-            response.EnsureSuccessfulResponse();
+            createResponse.EnsureSuccessfulResponse();
 
-            var queueUrl = response.QueueUrl;
+            var attributesResponse = await _client.GetQueueAttributesAsync(createResponse.QueueUrl, AllAttributes, _cancellationToken).ConfigureAwait(false);
 
-            Dictionary<string, string> queueAttributes = await _client.GetAttributesAsync(queueUrl).ConfigureAwait(false);
+            attributesResponse.EnsureSuccessfulResponse();
 
-            var missingQueue = new QueueInfo(queue.EntityName, queueUrl, queueAttributes, _client, _cancellationToken);
+            var missingQueue = new QueueInfo(queue.EntityName, createResponse.QueueUrl, attributesResponse.Attributes, _client, _cancellationToken);
 
             if (queue.Durable && queue.AutoDelete == false)
             {
@@ -112,6 +124,19 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             }
 
             return missingQueue;
+        }
+
+        async Task<QueueInfo> GetExistingQueue(string queueName)
+        {
+            var urlResponse = await _client.GetQueueUrlAsync(queueName, _cancellationToken).ConfigureAwait(false);
+
+            urlResponse.EnsureSuccessfulResponse();
+
+            var attributesResponse = await _client.GetQueueAttributesAsync(urlResponse.QueueUrl, AllAttributes, _cancellationToken).ConfigureAwait(false);
+
+            attributesResponse.EnsureSuccessfulResponse();
+
+            return new QueueInfo(queueName, urlResponse.QueueUrl, attributesResponse.Attributes, _client, _cancellationToken);
         }
     }
 }
