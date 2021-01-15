@@ -52,6 +52,58 @@ namespace MassTransit.RabbitMqTransport.Tests
             }
         }
 
+        [Test]
+        public async Task Should_start_stop_and_start_with_publish_only()
+        {
+            var bus = MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
+            {
+                x.Host("localhost", "test");
+
+                ConfigureBusDiagnostics(x);
+
+                x.ReceiveEndpoint("input_queue", e =>
+                {
+                    e.PurgeOnStartup = true;
+
+                    e.Handler<PingMessage>(async context =>
+                    {
+                        if (context.ResponseAddress != null)
+                            await context.RespondAsync(new PongMessage());
+                    });
+                });
+            });
+
+            await bus.StartAsync(TestCancellationToken);
+            try
+            {
+                await bus.Publish(new PingMessage());
+            }
+            finally
+            {
+                await bus.StopAsync(TestCancellationToken);
+            }
+
+            await bus.StartAsync(TestCancellationToken);
+            try
+            {
+                await bus.Publish(new PingMessage());
+            }
+            finally
+            {
+                await bus.StopAsync(TestCancellationToken);
+            }
+
+            await bus.StartAsync(TestCancellationToken);
+            try
+            {
+                await bus.Publish(new PingMessage());
+            }
+            finally
+            {
+                await bus.StopAsync(TestCancellationToken);
+            }
+        }
+
         public StartStop_Specs()
             : base(new InMemoryTestHarness())
         {

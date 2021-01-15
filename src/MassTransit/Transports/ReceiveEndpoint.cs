@@ -64,16 +64,16 @@ namespace MassTransit.Transports
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            if (_handle == null)
-                return;
+            if (_handle != null)
+            {
+                await _context.EndpointObservers.Stopping(new ReceiveEndpointStoppingEvent(_context.InputAddress, this)).ConfigureAwait(false);
 
-            await _context.EndpointObservers.Stopping(new ReceiveEndpointStoppingEvent(_context.InputAddress, this)).ConfigureAwait(false);
+                await _handle.TransportHandle.Stop(cancellationToken).ConfigureAwait(false);
 
-            await _handle.TransportHandle.Stop(cancellationToken).ConfigureAwait(false);
+                _handle = null;
+            }
 
             _context.Reset();
-
-            _handle = null;
         }
 
         public void Probe(ProbeContext context)
