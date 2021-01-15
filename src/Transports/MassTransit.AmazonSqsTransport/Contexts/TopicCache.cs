@@ -6,26 +6,29 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService;
     using Amazon.SimpleNotificationService.Model;
+    using Exceptions;
     using GreenPipes.Caching;
 
 
     public class TopicCache
     {
         readonly ICache<TopicInfo> _cache;
+        readonly CancellationToken _cancellationToken;
         readonly IAmazonSimpleNotificationService _client;
         readonly IDictionary<string, TopicInfo> _durableTopics;
         readonly IIndex<string, TopicInfo> _nameIndex;
 
-        public TopicCache(IAmazonSimpleNotificationService client)
+        public TopicCache(IAmazonSimpleNotificationService client, CancellationToken cancellationToken)
         {
             _client = client;
+            _cancellationToken = cancellationToken;
             _cache = new GreenCache<TopicInfo>(ClientContextCacheDefaults.GetCacheSettings());
             _nameIndex = _cache.AddIndex("entityName", x => x.EntityName);
 
             _durableTopics = new Dictionary<string, TopicInfo>();
         }
 
-        public Task<TopicInfo> Get(Topology.Entities.Topic topic, CancellationToken cancellationToken)
+        public Task<TopicInfo> Get(Topology.Entities.Topic topic)
         {
             lock (_durableTopics)
             {
@@ -33,7 +36,17 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                     return Task.FromResult(queueInfo);
             }
 
-            return _nameIndex.Get(topic.EntityName, key => CreateMissingTopic(topic, cancellationToken));
+            return _nameIndex.Get(topic.EntityName, key =>
+            {
+                try
+                {
+                    return CreateMissingTopic(topic);
+                }
+                catch (InvalidParameterException e) when(e.Message.Contains("Topic already exists"))
+                {
+                    return GetExistingTopic(topic.EntityName);
+                }
+            });
         }
 
         public Task<TopicInfo> GetByName(string entityName)
@@ -44,7 +57,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                     return Task.FromResult(queueInfo);
             }
 
-            return _nameIndex.Get(entityName);
+            return _nameIndex.Get(entityName, key => GetExistingTopic(key));
         }
 
         public void RemoveByName(string entityName)
@@ -55,7 +68,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             _nameIndex.Remove(entityName);
         }
 
-        async Task<TopicInfo> CreateMissingTopic(Topology.Entities.Topic topic, CancellationToken cancellationToken)
+        async Task<TopicInfo> CreateMissingTopic(Topology.Entities.Topic topic)
         {
             Dictionary<string, string> attributes = topic.TopicAttributes.ToDictionary(x => x.Key, x => x.Value.ToString());
 
@@ -69,17 +82,15 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 }).ToList()
             };
 
-            var response = await _client.CreateTopicAsync(request, cancellationToken).ConfigureAwait(false);
+            var createResponse = await _client.CreateTopicAsync(request, _cancellationToken).ConfigureAwait(false);
 
-            response.EnsureSuccessfulResponse();
+            createResponse.EnsureSuccessfulResponse();
 
-            var topicArn = response.TopicArn;
-
-            var attributesResponse = await _client.GetTopicAttributesAsync(topicArn, cancellationToken).ConfigureAwait(false);
+            var attributesResponse = await _client.GetTopicAttributesAsync(createResponse.TopicArn, _cancellationToken).ConfigureAwait(false);
 
             attributesResponse.EnsureSuccessfulResponse();
 
-            var missingTopic = new TopicInfo(topic.EntityName, topicArn, attributesResponse.Attributes);
+            var missingTopic = new TopicInfo(topic.EntityName, createResponse.TopicArn, attributesResponse.Attributes);
 
             if (topic.Durable && topic.AutoDelete == false)
             {
@@ -88,6 +99,20 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             }
 
             return missingTopic;
+        }
+
+        async Task<TopicInfo> GetExistingTopic(string topicName)
+        {
+            var topic = await _client.FindTopicAsync(topicName).ConfigureAwait(false);
+
+            if (topic == null)
+                throw new AmazonSqsTransportException($"Topic {topicName} not found.");
+
+            var attributesResponse = await _client.GetTopicAttributesAsync(topic.TopicArn, _cancellationToken).ConfigureAwait(false);
+
+            attributesResponse.EnsureSuccessfulResponse();
+
+            return new TopicInfo(topicName, topic.TopicArn, attributesResponse.Attributes);
         }
 
         public void Clear()
