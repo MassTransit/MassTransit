@@ -39,12 +39,23 @@ namespace MassTransit
         /// <param name="assemblies">The assemblies to scan for consumers</param>
         public static void AddConsumers(this IRegistrationConfigurator configurator, params Assembly[] assemblies)
         {
+            AddConsumers(configurator, null, assemblies);
+        }
+
+        /// <summary>
+        /// Adds all consumers that match the given filter in the specified assemblies
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="filter"></param>
+        /// <param name="assemblies">The assemblies to scan for consumers</param>
+        public static void AddConsumers(this IRegistrationConfigurator configurator, Func<Type, bool> filter, params Assembly[] assemblies)
+        {
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             var types = AssemblyTypeCache.FindTypes(assemblies, TypeMetadataCache.IsConsumerOrDefinition).GetAwaiter().GetResult();
 
-            AddConsumers(configurator, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
+            AddConsumers(configurator, filter, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
 
         /// <summary>
@@ -96,12 +107,26 @@ namespace MassTransit
         /// <param name="types">The state machine types to add</param>
         public static void AddConsumers(this IRegistrationConfigurator configurator, params Type[] types)
         {
+            AddConsumers(configurator, null, types);
+        }
+
+        /// <summary>
+        /// Adds the specified consumer types which match the given filter
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="filter"></param>
+        /// <param name="types">The consumer types to add</param>
+        public static void AddConsumers(this IRegistrationConfigurator configurator, Func<Type, bool> filter, params Type[] types)
+        {
+            filter ??= t => true;
+
             IEnumerable<Type> consumerTypes = types.Where(TypeMetadataCache.HasConsumerInterfaces);
             IEnumerable<Type> consumerDefinitionTypes = types.Where(x => x.HasInterface(typeof(IConsumerDefinition<>)));
 
             var consumers = from c in consumerTypes
                 join d in consumerDefinitionTypes on c equals d.GetClosingArgument(typeof(IConsumerDefinition<>)) into dc
                 from d in dc.DefaultIfEmpty()
+                where filter(c)
                 select new
                 {
                     ConsumerType = c,
