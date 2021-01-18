@@ -8,7 +8,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Mappings
     public interface ISagaClassMap
     {
         Type SagaType { get; }
-        void Configure(ModelBuilder modelBuilder);
+        void Configure(ModelBuilder model);
     }
 
 

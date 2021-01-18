@@ -12,20 +12,30 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Mappings
     {
         public Type SagaType => typeof(TSaga);
 
-        public virtual void Configure(ModelBuilder modelBuilder)
+        public virtual void Configure(ModelBuilder model)
         {
-            EntityTypeBuilder<TSaga> entityTypeBuilder = modelBuilder.Entity<TSaga>();
+            EntityTypeBuilder<TSaga> entity = model.Entity<TSaga>();
 
-            entityTypeBuilder.HasKey(p => p.CorrelationId);
+            var key = entity.HasKey(p => p.CorrelationId);
 
-            entityTypeBuilder.Property(p => p.CorrelationId)
+            entity.Property(p => p.CorrelationId)
                 .ValueGeneratedNever();
 
-            Configure(entityTypeBuilder, modelBuilder);
+            Configure(entity, model);
         }
 
         protected virtual void Configure(EntityTypeBuilder<TSaga> entity, ModelBuilder model)
         {
+        }
+
+        /// <summary>
+        /// Override to configure the primary CorrelationId key, to add things like clustering
+        /// </summary>
+        /// <param name="keyBuilder"></param>
+        /// <returns></returns>
+        protected virtual KeyBuilder ConfigureCorrelationIdKey(KeyBuilder keyBuilder)
+        {
+            return keyBuilder;
         }
     }
 }
