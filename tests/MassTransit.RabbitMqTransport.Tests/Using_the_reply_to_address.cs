@@ -19,11 +19,6 @@ namespace MassTransit.RabbitMqTransport.Tests
             Response<PongMessage> response = await client.GetResponse<PongMessage>(new PingMessage());
         }
 
-        [OneTimeSetUp]
-        public void Setup()
-        {
-        }
-
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             configurator.Handler<PingMessage>(x =>

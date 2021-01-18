@@ -114,6 +114,15 @@
         [Test]
         public async Task Should_support_date_time()
         {
+            await InputQueueSendEndpoint.Send(new PingMessage(), x =>
+            {
+                _now = DateTime.UtcNow;
+                x.Headers.Set("Now", _now);
+
+                _later = DateTimeOffset.Now;
+                x.Headers.Set("Later", _later);
+            });
+
             ConsumeContext<PingMessage> context = await _handled;
 
             Assert.AreEqual(_now, context.Headers.Get("Now", default(DateTime?)));
@@ -124,19 +133,6 @@
         Task<ConsumeContext<PingMessage>> _handled;
         DateTime _now;
         DateTimeOffset _later;
-
-        [OneTimeSetUp]
-        public void Setup()
-        {
-            InputQueueSendEndpoint.Send(new PingMessage(), context =>
-            {
-                _now = DateTime.UtcNow;
-                context.Headers.Set("Now", _now);
-
-                _later = DateTimeOffset.Now;
-                context.Headers.Set("Later", _later);
-            });
-        }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {

@@ -351,7 +351,7 @@
         [Test]
         public async Task Should_execute_callback_during_defer_the_message_delivery()
         {
-            await Bus.Publish(new PingMessage());
+            await InputQueueSendEndpoint.Send(new PingMessage());
 
             await _received.Task;
 

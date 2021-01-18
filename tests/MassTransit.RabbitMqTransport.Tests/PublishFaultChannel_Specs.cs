@@ -14,6 +14,18 @@
         RabbitMqTestFixture
     {
         [Test]
+        [Order(0)]
+        public async Task Setup()
+        {
+            _pingMessage = new PingMessage();
+            _pingMessage2 = new PingMessage();
+            await InputQueueSendEndpoint.Send(_pingMessage, Pipe.Execute<SendContext<PingMessage>>(context =>
+            {
+                context.CorrelationId = _correlationId;
+            }));
+        }
+
+        [Test]
         public async Task Should_have_the_original_source_address()
         {
             ConsumeContext<PingMessage> context = await _errorHandler;
@@ -36,17 +48,6 @@
         PingMessage _pingMessage;
         PingMessage _pingMessage2;
         Task<ConsumeContext<PingMessage>> _errorHandler2;
-
-        [OneTimeSetUp]
-        public async Task Setup()
-        {
-            _pingMessage = new PingMessage();
-            _pingMessage2 = new PingMessage();
-            await InputQueueSendEndpoint.Send(_pingMessage, Pipe.Execute<SendContext<PingMessage>>(context =>
-            {
-                context.CorrelationId = _correlationId;
-            }));
-        }
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {

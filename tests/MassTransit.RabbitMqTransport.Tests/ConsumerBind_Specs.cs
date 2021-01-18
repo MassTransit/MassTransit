@@ -29,6 +29,14 @@
             ConsumerBindingTestFixture
         {
             [Test]
+            [Order(0)]
+            public async Task Setup()
+            {
+                await InputQueueSendEndpoint.Send(new A());
+                await InputQueueSendEndpoint.Send(new B());
+            }
+
+            [Test]
             public async Task Should_receive_the_message_a()
             {
                 await _testConsumer.A.Task;
@@ -41,13 +49,6 @@
             }
 
             TestConsumer _testConsumer;
-
-            [OneTimeSetUp]
-            public async Task Setup()
-            {
-                await InputQueueSendEndpoint.Send(new A());
-                await InputQueueSendEndpoint.Send(new B());
-            }
 
             protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {
