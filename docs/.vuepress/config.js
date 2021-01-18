@@ -49,7 +49,8 @@ module.exports = {
               '/releases/v7.0.6',
               '/releases/v7.0.7',
               '/releases/v7.1.0',
-              '/releases/v7.1.1'
+              '/releases/v7.1.1',
+              '/releases/v7.1.3'
             ]
           }
         ]
