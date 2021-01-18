@@ -184,8 +184,8 @@ namespace MassTransit.RabbitMqTransport
         {
             var name = $"{Name}_delay";
 
-            return new RabbitMqEndpointAddress(Scheme, Host, Port, VirtualHost, name, DelayedMessageExchangeType, Durable, AutoDelete, BindToQueue,
-                QueueName, ExchangeType, BindExchanges, AlternateExchange);
+            return new RabbitMqEndpointAddress(Scheme, Host, Port, VirtualHost, name, DelayedMessageExchangeType, Durable, AutoDelete, false,
+                default, ExchangeType, BindExchanges, AlternateExchange);
         }
 
         static void ParseLeft(Uri address, out string scheme, out string host, out int? port, out string virtualHost)
