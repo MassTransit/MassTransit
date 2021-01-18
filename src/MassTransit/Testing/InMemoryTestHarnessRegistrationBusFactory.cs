@@ -1,6 +1,8 @@
 namespace MassTransit.Testing
 {
     using System.Collections.Generic;
+    using Context;
+    using Microsoft.Extensions.Logging;
     using Registration;
 
 
@@ -18,7 +20,14 @@ namespace MassTransit.Testing
         {
             var inMemoryTestHarness = new InMemoryTestHarness(_virtualHost, specifications);
 
-            inMemoryTestHarness.OnConfigureInMemoryBus += configurator => configurator.ConfigureEndpoints(context);
+            inMemoryTestHarness.OnConfigureInMemoryBus += configurator =>
+            {
+                var loggerFactory = context.GetService<ILoggerFactory>();
+                if (loggerFactory != null)
+                    LogContext.ConfigureCurrentLogContext(loggerFactory);
+
+                configurator.ConfigureEndpoints(context);
+            };
 
             return new InMemoryTestHarnessBusInstance(inMemoryTestHarness, context);
         }
