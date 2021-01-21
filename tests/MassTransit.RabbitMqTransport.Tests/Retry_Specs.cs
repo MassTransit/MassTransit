@@ -107,7 +107,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         public When_specifying_redelivery_limit()
         {
             TestInactivityTimeout = TimeSpan.FromSeconds(3);
-            _limit = 3;
+            _limit = 1;
             _attempts = new Dictionary<Guid, int>();
         }
 
@@ -118,8 +118,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            var two = TimeSpan.FromSeconds(2);
-            configurator.UseScheduledRedelivery(x => x.Intervals(two, two, two));
+            configurator.UseScheduledRedelivery(x => x.Interval(_limit, TimeSpan.FromSeconds(1)));
 
             configurator.Consumer(() => new RetryLimitConsumer(_attempts));
         }
@@ -159,7 +158,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         public When_specifying_redelivery_limit_with_message_ttl()
         {
             TestInactivityTimeout = TimeSpan.FromSeconds(3);
-            _limit = 3;
+            _limit = 1;
             _attempts = new Dictionary<Guid, int>();
         }
 
@@ -170,8 +169,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            var two = TimeSpan.FromSeconds(2);
-            configurator.UseScheduledRedelivery(x => x.Intervals(two, two, two));
+            configurator.UseScheduledRedelivery(x => x.Interval(_limit, TimeSpan.FromSeconds(1)));
 
             configurator.Consumer(() => new RetryLimitConsumer(_attempts));
         }

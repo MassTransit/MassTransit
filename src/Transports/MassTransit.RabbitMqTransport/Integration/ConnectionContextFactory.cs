@@ -10,7 +10,6 @@
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Policies;
     using RabbitMQ.Client;
     using RabbitMQ.Client.Exceptions;
     using Transports;
@@ -66,68 +65,65 @@
 
         async Task<ConnectionContext> CreateConnection(ISupervisor supervisor)
         {
-            return await _hostConfiguration.ReceiveTransportRetryPolicy.Retry(async () =>
+            var description = _hostConfiguration.Settings.ToDescription();
+
+            if (supervisor.Stopping.IsCancellationRequested)
+                throw new OperationCanceledException($"The connection is stopping and cannot be used: {description}");
+
+            IConnection connection = null;
+            try
             {
-                var description = _hostConfiguration.Settings.ToDescription();
+                TransportLogMessages.ConnectHost(description);
 
-                if (supervisor.Stopping.IsCancellationRequested)
-                    throw new OperationCanceledException($"The connection is stopping and cannot be used: {description}");
-
-                IConnection connection = null;
-                try
+                if (_hostConfiguration.Settings.EndpointResolver != null)
                 {
-                    TransportLogMessages.ConnectHost(description);
-
-                    if (_hostConfiguration.Settings.EndpointResolver != null)
-                    {
-                        connection = _connectionFactory.Value.CreateConnection(_hostConfiguration.Settings.EndpointResolver,
-                            _hostConfiguration.Settings.ClientProvidedName);
-                    }
-                    else
-                    {
-                        var hostNames = new List<string>(1) {_hostConfiguration.Settings.Host};
-
-                        connection = _connectionFactory.Value.CreateConnection(hostNames, _hostConfiguration.Settings.ClientProvidedName);
-                    }
-
-                    LogContext.Debug?.Log("Connected: {Host} (address: {RemoteAddress}, local: {LocalAddress})", description, connection.Endpoint,
-                        connection.LocalPort);
-
-                    var connectionContext = new RabbitMqConnectionContext(connection, _hostConfiguration, supervisor.Stopped);
-
-                    connectionContext.GetOrAddPayload(() => _hostConfiguration.Settings);
-
-                    return (ConnectionContext)connectionContext;
+                    connection = _connectionFactory.Value.CreateConnection(_hostConfiguration.Settings.EndpointResolver,
+                        _hostConfiguration.Settings.ClientProvidedName);
                 }
-                catch (ConnectFailureException ex)
+                else
                 {
-                    connection?.Dispose();
+                    var hostNames = new List<string>(1) {_hostConfiguration.Settings.Host};
 
-                    throw new RabbitMqConnectionException("Connect failed: " + description, ex);
+                    connection = _connectionFactory.Value.CreateConnection(hostNames, _hostConfiguration.Settings.ClientProvidedName);
                 }
-                catch (BrokerUnreachableException ex)
-                {
-                    connection?.Dispose();
 
-                    throw new RabbitMqConnectionException("Broker unreachable: " + description, ex);
-                }
-                catch (OperationInterruptedException ex)
-                {
-                    connection?.Dispose();
+                LogContext.Debug?.Log("Connected: {Host} (address: {RemoteAddress}, local: {LocalAddress})", description, connection.Endpoint,
+                    connection.LocalPort);
 
-                    throw new RabbitMqConnectionException("Operation interrupted: " + description, ex);
-                }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    connection?.Dispose();
+                var connectionContext = new RabbitMqConnectionContext(connection, _hostConfiguration, supervisor.Stopped);
 
-                    throw new RabbitMqConnectionException("Create Connection Faulted: " + description, ex);
-                }
-            }, supervisor.Stopping).ConfigureAwait(false);
+                connectionContext.GetOrAddPayload(() => _hostConfiguration.Settings);
+
+                return connectionContext;
+            }
+            catch (ConnectFailureException ex)
+            {
+                connection?.Dispose();
+
+                throw new RabbitMqConnectionException("Connect failed: " + description, ex);
+            }
+            catch (BrokerUnreachableException ex)
+            {
+                connection?.Dispose();
+
+                throw new RabbitMqConnectionException("Broker unreachable: " + description, ex);
+            }
+            catch (OperationInterruptedException ex)
+            {
+                connection?.Dispose();
+
+                throw new RabbitMqConnectionException("Operation interrupted: " + description, ex);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                connection?.Dispose();
+
+                throw new RabbitMqConnectionException("Create Connection Faulted: " + description, ex);
+            }
         }
     }
 }

@@ -5,6 +5,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using GreenPipes.Internals.Extensions;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
@@ -42,7 +43,7 @@
                 BusHandle handle;
                 using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10)))
                 {
-                    handle = await busControl.StartAsync(timeout.Token);
+                    handle = await busControl.StartAsync(timeout.Token).OrCanceled(TestCancellationToken);
                 }
 
                 await handle.StopAsync(CancellationToken.None);

@@ -10,7 +10,6 @@
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Policies;
     using Transports;
 
 
@@ -62,41 +61,38 @@
         {
             var description = _configuration.Settings.ToDescription();
 
-            return await _configuration.ReceiveTransportRetryPolicy.Retry(async () =>
+            if (supervisor.Stopping.IsCancellationRequested)
+                throw new OperationCanceledException($"The connection is stopping and cannot be used: {description}");
+
+            IConnection connection = null;
+            try
             {
-                if (supervisor.Stopping.IsCancellationRequested)
-                    throw new OperationCanceledException($"The connection is stopping and cannot be used: {description}");
+                TransportLogMessages.ConnectHost(description);
 
-                IConnection connection = null;
-                try
-                {
-                    TransportLogMessages.ConnectHost(description);
+                connection = _configuration.Settings.CreateConnection();
 
-                    connection = _configuration.Settings.CreateConnection();
+                connection.Start();
 
-                    connection.Start();
+                LogContext.Debug?.Log("Connected: {Host} (client-id: {ClientId}, version: {Version})", description,
+                    connection.ClientId, connection.MetaData.NMSVersion);
 
-                    LogContext.Debug?.Log("Connected: {Host} (client-id: {ClientId}, version: {Version})", description,
-                        connection.ClientId, connection.MetaData.NMSVersion);
-
-                    return new ActiveMqConnectionContext(connection, _configuration, supervisor.Stopped);
-                }
-                catch (OperationCanceledException)
-                {
-                    connection?.Dispose();
-                    throw;
-                }
-                catch (NMSConnectionException ex)
-                {
-                    connection?.Dispose();
-                    throw new ActiveMqConnectionException("Connection exception: " + description, ex);
-                }
-                catch (Exception ex)
-                {
-                    connection?.Dispose();
-                    throw new ActiveMqConnectionException("Create Connection Faulted: " + description, ex);
-                }
-            }, supervisor.Stopping).ConfigureAwait(false);
+                return new ActiveMqConnectionContext(connection, _configuration, supervisor.Stopped);
+            }
+            catch (OperationCanceledException)
+            {
+                connection?.Dispose();
+                throw;
+            }
+            catch (NMSConnectionException ex)
+            {
+                connection?.Dispose();
+                throw new ActiveMqConnectionException("Connection exception: " + description, ex);
+            }
+            catch (Exception ex)
+            {
+                connection?.Dispose();
+                throw new ActiveMqConnectionException("Create Connection Faulted: " + description, ex);
+            }
         }
     }
 }

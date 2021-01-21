@@ -173,6 +173,14 @@
         RabbitMqTestFixture
     {
         [Test]
+        [Order(0)]
+        public void Get_response()
+        {
+            _response = _requestClient.GetResponse<PongMessage>(new PingMessage());
+        }
+
+        [Test]
+        [Order(2)]
         public async Task Should_have_the_conversation_id()
         {
             ConsumeContext<PingMessage> ping = await _ping;
@@ -182,6 +190,7 @@
         }
 
         [Test]
+        [Order(1)]
         public async Task Should_receive_the_response()
         {
             Response<PongMessage> message = await _response;
@@ -201,8 +210,6 @@
             _clientFactory = await Bus.CreateReplyToClientFactory();
 
             _requestClient = Bus.CreateRequestClient<PingMessage>(InputQueueAddress, TestTimeout);
-
-            _response = _requestClient.GetResponse<PongMessage>(new PingMessage());
         }
 
         [OneTimeTearDown]

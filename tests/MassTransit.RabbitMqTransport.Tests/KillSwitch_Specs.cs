@@ -25,9 +25,11 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Assert.That(await _busHealth.WaitForHealthStatus(BusHealthStatus.Healthy, TimeSpan.FromSeconds(10)), Is.EqualTo(BusHealthStatus.Healthy));
 
+            Assert.That(await RabbitMqTestHarness.Consumed.SelectAsync<BadMessage>().Take(11).Count(), Is.EqualTo(11));
+
             await Task.WhenAll(Enumerable.Range(0, 20).Select(x => Bus.Publish(new GoodMessage())));
 
-            Assert.That(await RabbitMqTestHarness.Consumed.SelectAsync<BadMessage>().Take(11).Count(), Is.EqualTo(11));
+            await Task.Delay(1000);
 
             Assert.That(await RabbitMqTestHarness.Consumed.SelectAsync<GoodMessage>().Take(20).Count(), Is.EqualTo(20));
         }

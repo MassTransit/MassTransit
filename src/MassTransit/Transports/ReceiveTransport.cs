@@ -116,9 +116,10 @@ namespace MassTransit.Transports
 
                 try
                 {
+                    RetryContext<TransportStoppingContext> retryContext = null;
+
                     while (!IsStopping)
                     {
-                        RetryContext<TransportStoppingContext> retryContext = null;
                         try
                         {
                             if (retryContext != null)
@@ -133,8 +134,11 @@ namespace MassTransit.Transports
                             if (!IsStopping)
                                 await RunTransport().ConfigureAwait(false);
                         }
-                        catch (OperationCanceledException)
+                        catch (OperationCanceledException exception)
                         {
+                            if(retryContext == null)
+                                await NotifyFaulted(exception).ConfigureAwait(false);
+
                             throw;
                         }
                         catch (Exception exception)
