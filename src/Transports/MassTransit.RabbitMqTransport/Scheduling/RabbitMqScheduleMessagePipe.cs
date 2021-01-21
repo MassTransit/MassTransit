@@ -34,8 +34,10 @@ namespace MassTransit.RabbitMqTransport.Scheduling
                 ? _scheduledTime - DateTime.Now
                 : _scheduledTime - DateTime.UtcNow).TotalMilliseconds);
 
-            if (delay > 0)
-                rabbitSendContext.SetTransportHeader("x-delay", (long)delay);
+            if (delay <= 0)
+                delay = 1;
+
+            rabbitSendContext.SetTransportHeader("x-delay", (long)delay);
 
             return base.Send(context);
         }

@@ -370,9 +370,9 @@
 
             configurator.Handler<PingMessage>(async context =>
             {
-                if (_count++ < 2)
+                if (_count++ == 0)
                 {
-                    await context.Defer(TimeSpan.FromMilliseconds(1000), (consumeContext, sendContext) =>
+                    await context.Defer(TimeSpan.FromMilliseconds(100), (consumeContext, sendContext) =>
                     {
                         _hit = true;
                     });
