@@ -318,7 +318,7 @@
 
             timer.Stop();
 
-            Assert.That(timer.Elapsed, Is.GreaterThan(TimeSpan.FromSeconds(2)));
+            Assert.That(timer.Elapsed, Is.GreaterThan(TimeSpan.FromSeconds(0.5)));
         }
 
         TaskCompletionSource<ConsumeContext<PingMessage>> _received;
@@ -332,9 +332,9 @@
 
             configurator.Handler<PingMessage>(async context =>
             {
-                if (_count++ < 2)
+                if (_count++ == 0)
                 {
-                    await context.Defer(TimeSpan.FromMilliseconds(2000));
+                    await context.Defer(TimeSpan.FromMilliseconds(1000));
                     return;
                 }
 

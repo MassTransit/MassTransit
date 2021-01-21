@@ -35,14 +35,13 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [OneTimeSetUp]
-        public void A_message_is_published()
+        public async Task A_message_is_published()
         {
-            Bus.Publish(new A
-                {
-                    StringA = "ValueA",
-                    StringB = "ValueB"
-                })
-                .Wait(TestCancellationToken);
+            await Bus.Publish(new A
+            {
+                StringA = "ValueA",
+                StringB = "ValueB"
+            });
         }
 
 

@@ -134,7 +134,6 @@
         RabbitMqActivityTestFixture
     {
         [Test]
-        [Order(1)]
         public async Task Setup()
         {
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
@@ -155,12 +154,7 @@
             _routingSlip = builder.Build();
 
             await Bus.Execute(_routingSlip);
-        }
 
-        [Test]
-        [Order(2)]
-        public async Task Should_receive_the_routing_slip_completed_event()
-        {
             var completed = (await _completed).Message;
 
             Assert.AreEqual(_routingSlip.TrackingNumber, completed.TrackingNumber);
@@ -187,12 +181,12 @@
     }
 
 
+    [Category("Flaky")]
     [TestFixture]
     public class Executing_many_activities_in_a_row :
         RabbitMqActivityTestFixture
     {
         [Test]
-        [Order(0)]
         public async Task Setup()
         {
             _limit = 10;
@@ -213,11 +207,7 @@
 
                 _sentRoutingSlips.Add(routingSlip.TrackingNumber);
             }
-        }
 
-        [Test]
-        public async Task Should_receive_the_routing_slip_completed_event()
-        {
             var completed = await _allDone.Task;
         }
 
@@ -257,6 +247,7 @@
     }
 
 
+    [Category("Flaky")]
     [TestFixture]
     public class Executing_many_activities_in_a_row_with_a_fault_one :
         RabbitMqActivityTestFixture
@@ -264,6 +255,24 @@
         [Test]
         public async Task Should_receive_the_routing_slip_completed_event()
         {
+            _limit = 1;
+
+            var testActivity = GetActivityContext<TestActivity>();
+            var secondActivity = GetActivityContext<SecondTestActivity>();
+
+            for (var i = 0; i < _limit; i++)
+            {
+                var builder = new RoutingSlipBuilder(Guid.NewGuid());
+                builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
+                builder.AddActivity(secondActivity.Name, secondActivity.ExecuteUri);
+
+                var routingSlip = builder.Build();
+
+                await Bus.Execute(routingSlip);
+
+                _sentRoutingSlips.Add(routingSlip.TrackingNumber);
+            }
+
             var completed = await _allDone.Task;
         }
 
@@ -298,28 +307,6 @@
                 if (count == _limit)
                     _allDone.TrySetResult(count);
             });
-        }
-
-        [OneTimeSetUp]
-        public async Task Setup()
-        {
-            _limit = 1;
-
-            var testActivity = GetActivityContext<TestActivity>();
-            var secondActivity = GetActivityContext<SecondTestActivity>();
-
-            for (var i = 0; i < _limit; i++)
-            {
-                var builder = new RoutingSlipBuilder(Guid.NewGuid());
-                builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
-                builder.AddActivity(secondActivity.Name, secondActivity.ExecuteUri);
-
-                var routingSlip = builder.Build();
-
-                await Bus.Execute(routingSlip);
-
-                _sentRoutingSlips.Add(routingSlip.TrackingNumber);
-            }
         }
     }
 }

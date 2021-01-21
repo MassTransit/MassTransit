@@ -198,6 +198,8 @@ namespace MassTransit
 
                 _busHandle = busHandle;
 
+                LogContext.Debug?.Log("Bus started: {HostAddress}", _host.Address);
+
                 return _busHandle;
             }
             catch (Exception ex)

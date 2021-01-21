@@ -5,6 +5,8 @@ namespace MassTransit.Internals.Caching
 
     public class CacheOptions
     {
+        int _capacity;
+
         public CacheOptions()
         {
             ConcurrencyLevel = Environment.ProcessorCount;
@@ -12,6 +14,11 @@ namespace MassTransit.Internals.Caching
         }
 
         public int ConcurrencyLevel { get; set; }
-        public int Capacity { get; set; }
+
+        public int Capacity
+        {
+            get => _capacity;
+            set => _capacity = Math.Max(8, value);
+        }
     }
 }
