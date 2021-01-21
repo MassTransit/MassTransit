@@ -2,6 +2,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 {
     namespace ConductorTests
     {
+        using System.Collections.Generic;
         using System.Threading.Tasks;
         using Contracts;
         using Definition;
@@ -61,6 +62,11 @@ namespace MassTransit.ActiveMqTransport.Tests
                 Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
 
                 Assert.That(response.Message.Target, Is.EqualTo("Bogey"));
+            }
+
+            protected override void ConfigureActiveMqHost(IActiveMqHostConfigurator configurator)
+            {
+                configurator.TransportOptions(new Dictionary<string, string> {{"nms.useCompression", "true"}});
             }
 
             protected override void ConfigureActiveMqBus(IActiveMqBusFactoryConfigurator configurator)
