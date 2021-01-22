@@ -219,10 +219,7 @@
                     .CancelRequestTimeout(request)
                     .ClearRequest(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request)
-                    .ClearRequest(request),
-                When(request.TimeoutExpired, request.EventFilter)
-                    .ClearRequest(request));
+                    .CancelRequestTimeout(request));
         }
 
         /// <summary>
@@ -288,10 +285,7 @@
                     .CancelRequestTimeout(request)
                     .ClearRequest(request),
                 When(request.Faulted)
-                    .CancelRequestTimeout(request)
-                    .ClearRequest(request),
-                When(request.TimeoutExpired, request.EventFilter)
-                    .ClearRequest(request));
+                    .CancelRequestTimeout(request));
         }
 
         /// <summary>
