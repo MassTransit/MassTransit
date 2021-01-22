@@ -12,7 +12,7 @@ The message producer and consumer must both have access to the message data repo
 
 ## Usage
 
-To use message data, add a `MessageData<T>` property to a message. Properties can be anywhere in the message, nested within message properties, or in collections such as arrays, lists, or dictionaries.
+To use message data, add a `MessageData<T>` property to a message. Properties can be anywhere in the message, nested within message properties, or in collections such as arrays, lists, or dictionaries. The generic argument `T` must be `string`, `byte[]`, or `Stream`.
 
 ```cs
 public interface IndexDocumentContent
@@ -55,7 +55,7 @@ public async Task Consume(ConsumeContext<IndexDocumentContent> context)
 }
 ```
 
-To initialize a message contract with one or more `MessageData<T>` properties, the `byte[]` or `string` value can be specified and the data will be stored to the repository by the initializer. If the message has the _TimeToLive_ header property specified, that same value will be used for the message data in the repository. 
+To initialize a message contract with one or more `MessageData<T>` properties, the `byte[]`, `string`, or `Stream` value can be specified and the data will be stored to the repository by the initializer. If the message has the _TimeToLive_ header property specified, that same value will be used for the message data in the repository. 
 
 ```cs
 Guid documentId = NewId.NextGuid();
@@ -68,7 +68,7 @@ await endpoint.Send<IndexDocumentContent>(new
 });
 ```
 
-If using a message class, or not using a message initializer, the data must be stored to the repository explictly.
+If using a message class, or not using a message initializer, the data must be stored to the repository explicitly.
 
 ```cs
 class IndexDocumentContentMessage :

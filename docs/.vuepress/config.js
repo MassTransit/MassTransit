@@ -249,6 +249,7 @@ module.exports = {
         children: [
           '/articles/mediator',
           '/articles/outbox',
+          '/articles/durable-futures',
           '/articles/net5'
         ]
       },

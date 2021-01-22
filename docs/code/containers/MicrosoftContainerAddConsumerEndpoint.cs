@@ -29,7 +29,11 @@ namespace MicrosoftContainerAddConsumerEndpoint
                         // only use if needed, a sensible default is provided, and a reasonable
                         // value is automatically calculated based upon ConcurrentMessageLimit if 
                         // the transport supports it.
-                        e.PrefetchCount = 16;                        
+                        e.PrefetchCount = 16;
+
+                        // set if each service instance should have its own endpoint for the consumer
+                        // so that messages fan out to each instance.
+                        e.InstanceId = "something-unique";
                     });
 
                 x.UsingRabbitMq((context, cfg) => cfg.ConfigureEndpoints(context));

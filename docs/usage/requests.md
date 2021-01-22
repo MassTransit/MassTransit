@@ -57,7 +57,7 @@ public class CheckOrderStatusConsumer :
 }
 ```
 
-The response will be sent back to the requestor. In case the exception is thrown, MassTransit will create a `Fault<CheckOrderStatus>` message and send it back to the requestor. The requestor address is available in the consume context of the request message as `context.ResponseAddress`.
+The response will be sent back to the requester. In case the exception is thrown, MassTransit will create a `Fault<CheckOrderStatus>` message and send it back to the requester. The requester address is available in the consume context of the request message as `context.ResponseAddress`.
 
 ## Request Client
 

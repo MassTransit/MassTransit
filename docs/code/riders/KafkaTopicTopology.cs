@@ -1,4 +1,4 @@
-namespace KafkaConsumer
+namespace KafkaTopicTopology
 {
     using System;
     using System.Threading;
@@ -28,7 +28,6 @@ namespace KafkaConsumer
                         {
                             e.CreateIfMissing(t =>
                             {
-                                t.IsTemporary = true; //remove topic on shutdown
                                 t.NumPartitions = 2; //number of partitions
                                 t.ReplicationFactor = 1; //number of replicas
                             });

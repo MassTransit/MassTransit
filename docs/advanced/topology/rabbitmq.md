@@ -8,17 +8,7 @@ When a message is published, MassTransit sends it to an exchange that is named b
 
 To configure the properties used when an exchange is created, the publish topology can be configured during bus creation:
 
-```csharp
-Bus.Factory.CreateUsingRabbitMQ(cfg =>
-{
-    cfg.Publish<OrderSubmitted>(x =>
-    {
-        x.Durable = false; // default: true
-        x.AutoDelete = true; // default: false
-        x.ExchangeType = "fanout"; // default
-    });
-});
-```
+<<< @/docs/code/topology/TopologyRabbitMqPublish.cs
 
 ### Exchange Layout
 
