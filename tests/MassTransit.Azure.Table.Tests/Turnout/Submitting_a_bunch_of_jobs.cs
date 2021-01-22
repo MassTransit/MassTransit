@@ -13,7 +13,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
 
 
     [TestFixture]
-    [Category("SlowAF")]
+    [Category("Flaky")]
     public class Submitting_a_bunch_of_jobs :
         AzureTableInMemoryTestFixture
     {

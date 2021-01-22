@@ -13,6 +13,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Using_the_delayed_exchange :
         RabbitMqTestFixture
     {
@@ -63,6 +64,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Delaying_a_message_retry_with_policy :
         RabbitMqTestFixture
     {
@@ -103,6 +105,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Retrying_a_message_retry_with_policy :
         RabbitMqTestFixture
     {
@@ -143,6 +146,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Using_delayed_exchange_redelivery_with_a_consumer :
         RabbitMqTestFixture
     {
@@ -207,6 +211,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Using_delayed_exchange_redelivery_with_a_consumer_and_retry :
         RabbitMqTestFixture
     {
@@ -263,6 +268,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Delaying_a_message_retry_with_policy_but_no_retries :
         RabbitMqTestFixture
     {
@@ -302,8 +308,8 @@
     }
 
 
-    [Category("Flaky")]
     [TestFixture]
+    [Category("Flaky")]
     public class Explicitly_deferring_a_message_instead_of_throwing :
         RabbitMqTestFixture
     {
@@ -345,6 +351,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Execute_callback_function_during_defer :
         RabbitMqTestFixture
     {

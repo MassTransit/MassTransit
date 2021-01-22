@@ -7,6 +7,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Using_a_consumer_concurrency_limit :
         RabbitMqTestFixture
     {

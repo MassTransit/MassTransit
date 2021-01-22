@@ -26,6 +26,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Submitting_a_job_to_turnout :
         RabbitMqTestFixture
     {
@@ -110,7 +111,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
 
 
     [TestFixture]
-    [Category("SlowAF")]
+    [Category("Flaky")]
     public class Submitting_a_job_to_turnout_with_status_checks :
         RabbitMqTestFixture
     {

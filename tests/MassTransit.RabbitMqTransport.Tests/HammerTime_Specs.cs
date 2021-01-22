@@ -11,7 +11,6 @@
 
     [TestFixture]
     [Explicit]
-    [Category("SlowAF")]
     public class Pounding_the_crap_out_of_the_send_endpoint :
         RabbitMqTestFixture
     {

@@ -136,7 +136,7 @@ namespace MassTransit.Transports
                         }
                         catch (OperationCanceledException exception)
                         {
-                            if(retryContext == null)
+                            if (retryContext == null)
                                 await NotifyFaulted(exception).ConfigureAwait(false);
 
                             throw;
@@ -152,6 +152,18 @@ namespace MassTransit.Transports
 
                             if (retryContext == null && !policyContext.CanRetry(exception, out retryContext))
                                 break;
+                        }
+
+                        if (IsStopping)
+                            break;
+
+                        try
+                        {
+                            await Task.Delay(TimeSpan.FromSeconds(1), Stopping).ConfigureAwait(false);
+                        }
+                        catch
+                        {
+                            // just a little breather before reconnecting the receive transport
                         }
                     }
                 }

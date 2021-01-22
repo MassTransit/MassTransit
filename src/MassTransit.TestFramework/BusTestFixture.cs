@@ -41,10 +41,10 @@ namespace MassTransit.TestFramework
 
         public static void ConfigureBusDiagnostics(IBusFactoryConfigurator configurator)
         {
-            LogContext.ConfigureCurrentLogContext(LoggerFactory);
-
             if (_enableDiagnostics)
             {
+                LogContext.ConfigureCurrentLogContext(LoggerFactory);
+
                 if (Interlocked.CompareExchange(ref _subscribedObserver, 1, 0) == 0)
                     DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
             }

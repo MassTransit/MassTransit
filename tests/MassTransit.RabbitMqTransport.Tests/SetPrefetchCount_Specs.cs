@@ -12,6 +12,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Using_a_concurrency_limit_on_a_receive_endpoint :
         RabbitMqTestFixture
     {
@@ -30,8 +31,6 @@
         }
 
         [Test]
-        [Explicit]
-        [Category("SlowAF")]
         public async Task Should_allow_reconfiguration_of_prefetch_count()
         {
             IRequestClient<SetPrefetchCount> client = Bus.CreateRequestClient<SetPrefetchCount>(TestTimeout);

@@ -15,7 +15,6 @@ namespace MassTransit.ActiveMqTransport.Tests
     {
         [Test]
         [Explicit]
-        [Category("SlowAF")]
         public async Task Should_fault_nicely()
         {
             await Bus.Publish(new ReconnectMessage {Value = "Before"});

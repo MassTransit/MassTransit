@@ -199,7 +199,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
 
     [TestFixture]
-    [Category("SlowAF")]
+    [Category("Flaky")]
     public class Submitting_a_bunch_of_jobs :
         QuartzInMemoryTestFixture
     {
@@ -334,7 +334,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
 
     [TestFixture]
-    [Category("SlowAF")]
+    [Category("Flaky")]
     public class Submitting_a_job_to_turnout_with_status_checks :
         QuartzInMemoryTestFixture
     {

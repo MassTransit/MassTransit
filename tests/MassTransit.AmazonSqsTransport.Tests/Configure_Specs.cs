@@ -201,7 +201,7 @@
         }
 
         [Test]
-        [Category("SlowAF")]
+        [Category("Flaky")]
         public async Task Should_connect_with_accessKey_and_secretKey()
         {
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
@@ -224,7 +224,7 @@
         }
 
         [Test]
-        [Category("SlowAF")]
+        [Category("Flaky")]
         public async Task Should_connect_with_credentials()
         {
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
@@ -247,7 +247,7 @@
         }
 
         [Test]
-        [Category("SlowAF")]
+        [Category("Flaky")]
         public async Task Should_create_queue_with_multiple_subscriptions()
         {
             Type[] messageTypes = new[]
@@ -333,7 +333,7 @@
         }
 
         [Test]
-        [Category("SlowAF")]
+        [Category("Flaky")]
         public async Task Should_do_a_bunch_of_requests_and_responses()
         {
             var bus = Bus.Factory.CreateUsingAmazonSqs(sbc =>
@@ -368,7 +368,7 @@
         }
 
         [Test]
-        [Category("SlowAF")]
+        [Category("Flaky")]
         public async Task Should_succeed_and_connect_when_properly_configured()
         {
             var received = new TaskCompletionSource<bool>();

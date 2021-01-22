@@ -177,7 +177,6 @@ namespace MassTransit.Tests.Serialization
 
         [Test]
         [Explicit]
-        [Category("SlowAF")]
         public void Serialization_speed()
         {
             //warm it up

@@ -224,7 +224,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         }
 
         [Test]
-        [Category("SlowAF")]
+        [Category("Flaky")]
         public async Task Should_do_a_bunch_of_requests_and_responses()
         {
             var bus = Bus.Factory.CreateUsingActiveMq(sbc =>
@@ -250,7 +250,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         }
 
         [Test]
-        [Category("SlowAF")]
+        [Category("Flaky")]
         public async Task Should_succeed_and_connect_when_properly_configured()
         {
             TaskCompletionSource<bool> received = TaskUtil.GetTask<bool>();

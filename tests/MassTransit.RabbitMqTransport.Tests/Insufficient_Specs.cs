@@ -10,7 +10,6 @@
     {
         [Test]
         [Explicit]
-        [Category("SlowAF")]
         public async Task Should_cleanup_when_permissions_are_lame()
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>

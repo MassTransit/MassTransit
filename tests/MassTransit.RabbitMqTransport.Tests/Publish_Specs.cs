@@ -132,7 +132,6 @@
 
 
         [TestFixture]
-        [Category("SlowAF")]
         [Explicit]
         public class WhenAMessageIsPublishedToTheEndpointSuccessfully :
             RabbitMqTestFixture
@@ -168,7 +167,6 @@
 
 
         [TestFixture]
-        [Category("SlowAF")]
         [Explicit]
         public class WhenAMessageIsPublishedToTheEndpointFaulting :
             RabbitMqTestFixture
