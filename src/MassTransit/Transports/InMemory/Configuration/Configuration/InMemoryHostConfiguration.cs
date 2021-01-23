@@ -35,7 +35,19 @@
 
         public override Uri HostAddress => _hostAddress;
         public override IHostTopology HostTopology => _hostTopology;
-        public override IRetryPolicy ReceiveTransportRetryPolicy => Retry.None;
+
+        public override IRetryPolicy ReceiveTransportRetryPolicy
+        {
+            get
+            {
+                return Retry.CreatePolicy(x =>
+                {
+                    x.Handle<ConnectionException>();
+
+                    x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+                });
+            }
+        }
 
         public Uri BaseAddress
         {

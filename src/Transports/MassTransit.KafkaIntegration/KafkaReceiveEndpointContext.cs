@@ -5,6 +5,7 @@ namespace MassTransit.KafkaIntegration
     using Confluent.Kafka;
     using Context;
     using Contexts;
+    using Exceptions;
     using GreenPipes;
     using GreenPipes.Agents;
     using MassTransit.Registration;
@@ -40,7 +41,7 @@ namespace MassTransit.KafkaIntegration
 
         public override Exception ConvertException(Exception exception, string message)
         {
-            return exception;
+            return new KafkaConnectionException(message + _settings.Topic, exception);
         }
 
         public override void AddConsumeAgent(IAgent agent)

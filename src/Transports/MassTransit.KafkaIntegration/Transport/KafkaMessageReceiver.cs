@@ -133,7 +133,7 @@
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
-            await base.StopAgent(context);
+            await Completed.ConfigureAwait(false);
         }
 
         async Task ActiveAndActualAgentsCompleted(StopContext context)

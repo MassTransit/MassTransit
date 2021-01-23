@@ -8,6 +8,7 @@ namespace MassTransit.EventHubIntegration
     using Configuration;
     using Context;
     using Contexts;
+    using Exceptions;
     using GreenPipes.Agents;
     using MassTransit.Registration;
     using Util;
@@ -41,7 +42,7 @@ namespace MassTransit.EventHubIntegration
 
         public override Exception ConvertException(Exception exception, string message)
         {
-            return exception;
+            return new EventHubConnectionException(message, exception);
         }
 
         public IProcessorContextSupervisor ContextSupervisor => _contextSupervisor.Supervisor;
