@@ -99,30 +99,41 @@ namespace MassTransit.KafkaIntegration.Tests
         }
 
         [Test]
-        public async Task Should_delete_on_stop()
+        public async Task Should_bypass_if_created()
         {
             var services = new ServiceCollection();
 
-            const string topicName = "delete-topic";
+            const ushort partitionCount = 2;
+            const short replicaCount = BrokersCount;
+            const string topicName = "do-not-create-topic";
+            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
 
             services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
             services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+            services.AddSingleton(taskCompletionSource);
 
             services.AddMassTransit(x =>
             {
                 x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
                 x.AddRider(rider =>
                 {
+                    rider.AddConsumer<KafkaMessageConsumer>();
+
+                    rider.AddProducer<KafkaMessage>(topicName);
+
                     rider.UsingKafka((context, k) =>
                     {
                         k.Host(Host);
 
                         k.TopicEndpoint<KafkaMessage>(topicName, nameof(ConfigureTopology_Specs), c =>
                         {
+                            c.AutoOffsetReset = AutoOffsetReset.Earliest;
+                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
+
                             c.CreateIfMissing(t =>
                             {
-                                t.NumPartitions = 2;
-                                t.ReplicationFactor = BrokersCount;
+                                t.NumPartitions = partitionCount;
+                                t.ReplicationFactor = replicaCount;
                             });
                         });
                     });
@@ -135,38 +146,36 @@ namespace MassTransit.KafkaIntegration.Tests
 
             var config = new AdminClientConfig {BootstrapServers = Host};
             var client = new AdminClientBuilder(config).Build();
+            var specification = new TopicSpecification
+            {
+                Name = topicName,
+                NumPartitions = partitionCount,
+                ReplicationFactor = replicaCount
+            };
+            await client.CreateTopicsAsync(new[] {specification});
 
             await busControl.StartAsync(TestCancellationToken);
 
+            var serviceScope = provider.CreateScope();
+
+            var producer = serviceScope.ServiceProvider.GetRequiredService<ITopicProducer<KafkaMessage>>();
+
             try
             {
-                await Task.Delay(1000);
+                await producer.Produce(new {Text = "text"}, TestCancellationToken);
 
-                await busControl.StopAsync(TestCancellationToken);
+                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
 
-                await Task.Delay(2000);
-
-                var meta = client.GetMetadata(topicName, TimeSpan.FromSeconds(10));
-
-                Assert.AreEqual(1, meta.Topics.Count);
-
-                foreach (var topic in meta.Topics)
-                {
-                    Assert.AreEqual(0, topic.Partitions.Count);
-
-                    foreach (var partition in topic.Partitions)
-                    {
-                        Assert.AreEqual(0, partition.Replicas.Length);
-                    }
-                }
+                Assert.NotNull(result);
             }
             finally
             {
+                await busControl.StopAsync(TestCancellationToken);
+
                 await provider.DisposeAsync();
 
                 try
                 {
-                    //for some reason get metadata creates topic again, so we need to remove it
                     await client.DeleteTopicsAsync(new[] {topicName});
                 }
                 catch (DeleteTopicsException)
@@ -177,6 +186,23 @@ namespace MassTransit.KafkaIntegration.Tests
                 {
                     client.Dispose();
                 }
+            }
+        }
+
+
+        class KafkaMessageConsumer :
+            IConsumer<KafkaMessage>
+        {
+            readonly TaskCompletionSource<ConsumeContext<KafkaMessage>> _taskCompletionSource;
+
+            public KafkaMessageConsumer(TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public async Task Consume(ConsumeContext<KafkaMessage> context)
+            {
+                _taskCompletionSource.TrySetResult(context);
             }
         }
 
