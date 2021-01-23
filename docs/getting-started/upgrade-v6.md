@@ -17,7 +17,7 @@ MassTransit is now built for .NET Standard 2.0 only. The packages should be comp
 Configuring MassTransit using a container has been streamlined. Refer to the [configuration](/usage/configuration) section for details. A brief summary:
 
 -   The `.Host` methods are now void. The _IHost_ interfaces are no longer accessible (or needed).
--   `AddBus` has been superseded by `UsingRabbitMQ` (and other transport-specific extension methods)
+-   `AddBus` has been superseded by `UsingRabbitMq` (and other transport-specific extension methods)
 
 ### Sagas
 
