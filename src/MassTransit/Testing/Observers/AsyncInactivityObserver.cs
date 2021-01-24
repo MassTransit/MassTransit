@@ -5,7 +5,6 @@ namespace MassTransit.Testing.Observers
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes.Internals.Extensions;
     using Util;
 
 
@@ -20,7 +19,12 @@ namespace MassTransit.Testing.Observers
         public AsyncInactivityObserver(TimeSpan timeout, CancellationToken cancellationToken)
         {
             _inactivityTaskSource = TaskUtil.GetTask();
-            _inactivityTask = new Lazy<Task>(() => _inactivityTaskSource.Task.OrTimeout(timeout, cancellationToken));
+            _inactivityTask = new Lazy<Task>(() =>
+            {
+                SetupTimeout(timeout, cancellationToken);
+
+                return _inactivityTaskSource.Task;
+            });
 
             _sources = new HashSet<IInactivityObservationSource>();
             _inactivityTokenSource = new CancellationTokenSource();
@@ -44,6 +48,19 @@ namespace MassTransit.Testing.Observers
             }
 
             return Task.CompletedTask;
+        }
+
+        async void SetupTimeout(TimeSpan timeout, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await Task.Delay(timeout, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception)
+            {
+            }
+
+            _inactivityTaskSource.TrySetResult(true);
         }
     }
 }

@@ -6,7 +6,7 @@
 
 
     [TestFixture]
-    [Category("Flaky")]
+    [Explicit]
     public class PublishFaultObserver_Specs :
         RabbitMqTestFixture
     {

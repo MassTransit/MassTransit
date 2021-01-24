@@ -14,6 +14,7 @@
         using GreenPipes;
         using MassTransit.Testing;
         using NUnit.Framework;
+        using RabbitMQ.Client;
         using Serialization;
         using Shouldly;
         using TestFramework;
@@ -210,6 +211,12 @@
                     throw new IntentionalTestException();
                 });
             }
+
+            protected override void OnCleanupVirtualHost(IModel model)
+            {
+                model.ExchangeDelete("handle-fault");
+                model.QueueDelete("handle-fault");
+            }
         }
 
 
@@ -298,6 +305,12 @@
                     x.ConsumerPriority = 10;
                 });
             }
+
+            protected override void OnCleanupVirtualHost(IModel model)
+            {
+                model.ExchangeDelete("ack_queue");
+                model.QueueDelete("ack_queue");
+            }
         }
 
 
@@ -373,6 +386,8 @@
 
             protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
             {
+                configurator.ConfigureConsumeTopology = false;
+
                 base.ConfigureRabbitMqReceiveEndpoint(configurator);
 
                 configurator.UseConcurrencyLimit(1);
@@ -442,30 +457,17 @@
         [Test]
         public async Task Should_have_correlation_id()
         {
+            await InputQueueSendEndpoint.Send<IProxyMe>(new
+            {
+                IntValue,
+                StringValue,
+                CorrelationId = _correlationId
+            });
+
             ConsumeContext<IProxyMe> message = await _handler;
 
             message.Message.CorrelationId.ShouldBe(_correlationId);
-        }
-
-        [Test]
-        public async Task Should_have_integer_value()
-        {
-            ConsumeContext<IProxyMe> message = await _handler;
-
             message.Message.IntValue.ShouldBe(IntValue);
-        }
-
-        [Test]
-        public async Task Should_have_received_message()
-        {
-            await _handler;
-        }
-
-        [Test]
-        public async Task Should_have_string_value()
-        {
-            ConsumeContext<IProxyMe> message = await _handler;
-
             message.Message.StringValue.ShouldBe(StringValue);
         }
 
@@ -474,19 +476,10 @@
         readonly Guid _correlationId = Guid.NewGuid();
         Task<ConsumeContext<IProxyMe>> _handler;
 
-        [OneTimeSetUp]
-        public async Task Setup()
-        {
-            await InputQueueSendEndpoint.Send<IProxyMe>(new
-            {
-                IntValue,
-                StringValue,
-                CorrelationId = _correlationId
-            });
-        }
-
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             _handler = Handled<IProxyMe>(configurator);
         }
 

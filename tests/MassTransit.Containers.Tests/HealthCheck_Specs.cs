@@ -11,7 +11,6 @@ namespace MassTransit.Containers.Tests
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Logging.Abstractions;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using NUnit.Framework;
@@ -27,18 +26,17 @@ namespace MassTransit.Containers.Tests
         {
             var collection = new ServiceCollection();
 
-            collection.AddSingleton<ILoggerFactory, NullLoggerFactory>();
+            collection.AddSingleton<ILoggerFactory>(_ => LoggerFactory);
             collection.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             collection.AddMassTransit(configurator =>
                 {
-                    configurator.AddBus(p => MassTransit.Bus.Factory.CreateUsingInMemory(cfg =>
+                    configurator.UsingInMemory((context, cfg) =>
                     {
-                        cfg.UseHealthCheck(p);
                         cfg.ReceiveEndpoint("input-queue", e =>
                         {
                             e.UseMessageRetry(r => r.Immediate(5));
                         });
-                    }));
+                    });
                 })
                 .AddMassTransitHostedService();
 
@@ -84,18 +82,17 @@ namespace MassTransit.Containers.Tests
         {
             var collection = new ServiceCollection();
 
-            collection.AddSingleton<ILoggerFactory, NullLoggerFactory>();
+            collection.AddSingleton<ILoggerFactory>(_ => LoggerFactory);
             collection.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             collection.AddMassTransit(configurator =>
                 {
-                    configurator.AddBus(p => MassTransit.Bus.Factory.CreateUsingInMemory(cfg =>
+                    configurator.UsingInMemory((context, cfg) =>
                     {
-                        cfg.UseHealthCheck(p);
                         cfg.ReceiveEndpoint("input-queue", e =>
                         {
                             e.UseMessageRetry(r => r.Immediate(5));
                         });
-                    }));
+                    });
                 })
                 .AddMassTransitHostedService();
 
@@ -139,18 +136,17 @@ namespace MassTransit.Containers.Tests
         {
             var collection = new ServiceCollection();
 
-            collection.AddSingleton<ILoggerFactory, NullLoggerFactory>();
+            collection.AddSingleton<ILoggerFactory>(_ => LoggerFactory);
             collection.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             collection.AddMassTransit(configurator =>
                 {
-                    configurator.AddBus(p => MassTransit.Bus.Factory.CreateUsingInMemory(cfg =>
+                    configurator.UsingInMemory((context, cfg) =>
                     {
-                        cfg.UseHealthCheck(p);
                         cfg.ReceiveEndpoint("input-queue", e =>
                         {
                             e.UseMessageRetry(r => r.Immediate(5));
                         });
-                    }));
+                    });
                 })
                 .AddMassTransitHostedService();
 

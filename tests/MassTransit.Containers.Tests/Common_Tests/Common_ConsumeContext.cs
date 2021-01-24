@@ -90,14 +90,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
         }
 
-        [Test]
-        public void Display_the_pipeline()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
-        }
-
         protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<DependentConsumer>();
@@ -153,15 +145,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             await fault;
 
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
-        }
-
-        [Test]
-        [Explicit]
-        public void Display_the_pipeline()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
         }
 
         protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
@@ -229,15 +212,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             await fault;
 
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
-        }
-
-        [Test]
-        [Explicit]
-        public void Display_the_pipeline()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
         }
 
         protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)

@@ -20,14 +20,10 @@
         [Test]
         public async Task Should_fault_nicely()
         {
-            var loggerFactory = new TestOutputLoggerFactory(true);
-
-            LogContext.ConfigureCurrentLogContext(loggerFactory);
-
-            DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
-
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
+                BusTestFixture.ConfigureBusDiagnostics(x);
+
                 x.Host(new Uri("rabbitmq://unknownhost:32787"), h =>
                 {
                     h.Username("whocares");
@@ -55,6 +51,8 @@
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
+                BusTestFixture.ConfigureBusDiagnostics(x);
+
                 x.Host(new Uri("rabbitmq://localhost/"), h =>
                 {
                     h.Username("guest");
@@ -124,6 +122,7 @@
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
+                BusTestFixture.ConfigureBusDiagnostics(x);
             });
 
             var handle = await busControl.StartAsync(new CancellationTokenSource(5000).Token);
@@ -141,13 +140,7 @@
         [Explicit]
         public async Task Should_startup_and_shut_down_cleanly()
         {
-            var loggerFactory = new TestOutputLoggerFactory(true);
-
-            LogContext.ConfigureCurrentLogContext(loggerFactory);
-
-            DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
-
-            var busControl = Bus.Factory.CreateUsingRabbitMq();
+            var busControl = Bus.Factory.CreateUsingRabbitMq(x => BusTestFixture.ConfigureBusDiagnostics(x));
 
             BusHandle handle;
             using (var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
@@ -171,6 +164,8 @@
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
+                BusTestFixture.ConfigureBusDiagnostics(x);
+
                 x.Host(new Uri("rabbitmq://localhost/"), h =>
                 {
                 });
@@ -204,6 +199,8 @@
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
+                BusTestFixture.ConfigureBusDiagnostics(x);
+
                 x.Host(new Uri("rabbitmq://localhost/"), h =>
                 {
                 });

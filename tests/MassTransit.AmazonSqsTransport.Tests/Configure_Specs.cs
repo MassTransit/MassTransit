@@ -2,18 +2,16 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
-    using Context;
     using GreenPipes.Internals.Extensions;
     using MassTransit.Testing;
     using NUnit.Framework;
-    using TestFramework.Logging;
+    using TestFramework;
     using TestFramework.Messages;
     using Testing;
     using Util;
@@ -206,6 +204,8 @@
         {
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
             {
+                BusTestFixture.ConfigureBusDiagnostics(cfg);
+
                 cfg.Host("ap-southeast-2", h =>
                 {
                     h.AccessKey(AwsAccessKey);
@@ -229,6 +229,8 @@
         {
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
             {
+                BusTestFixture.ConfigureBusDiagnostics(cfg);
+
                 cfg.Host("ap-southeast-2", h =>
                 {
                     var credentials = new BasicAWSCredentials(AwsAccessKey, AwsSecretKey);
@@ -250,7 +252,7 @@
         [Category("Flaky")]
         public async Task Should_create_queue_with_multiple_subscriptions()
         {
-            Type[] messageTypes = new[]
+            Type[] messageTypes =
             {
                 typeof(Message0),
                 typeof(Message1),
@@ -281,6 +283,8 @@
 
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
             {
+                BusTestFixture.ConfigureBusDiagnostics(cfg);
+
                 cfg.Host("ap-southeast-2", h =>
                 {
                     h.AccessKey(AwsAccessKey);
@@ -338,6 +342,8 @@
         {
             var bus = Bus.Factory.CreateUsingAmazonSqs(sbc =>
             {
+                BusTestFixture.ConfigureBusDiagnostics(sbc);
+
                 sbc.Host("us-east-2", h =>
                 {
                     h.AccessKey(AwsAccessKey);
@@ -375,6 +381,8 @@
 
             var busControl = Bus.Factory.CreateUsingAmazonSqs(cfg =>
             {
+                BusTestFixture.ConfigureBusDiagnostics(cfg);
+
                 cfg.Host("us-east-2", h =>
                 {
                     h.AccessKey(AwsAccessKey);
@@ -415,18 +423,6 @@
 
         const string AwsAccessKey = "{YOUR AWS ACCESS KEY}";
         const string AwsSecretKey = "{YOUR AWS SECRET KEY}";
-        static int _subscribedObserver;
-
-        [OneTimeSetUp]
-        public void Setup()
-        {
-            var loggerFactory = new TestOutputLoggerFactory(true);
-
-            LogContext.ConfigureCurrentLogContext(loggerFactory);
-
-            if (Interlocked.CompareExchange(ref _subscribedObserver, 1, 0) == 0)
-                DiagnosticListener.AllListeners.Subscribe(new DiagnosticListenerObserver());
-        }
 
 
         public class Message0

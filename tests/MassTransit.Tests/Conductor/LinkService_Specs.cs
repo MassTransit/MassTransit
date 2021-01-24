@@ -26,8 +26,6 @@ namespace MassTransit.Tests.Conductor
             ConsumeContext<Up<DeployPayload>> result = await _upHandled;
 
             Assert.That(result.Message.Service.ServiceAddress.AbsolutePath.Trim('/'), Is.EqualTo(_serviceEndpointName));
-
-            Console.WriteLine(Bus.GetProbeResult().ToJsonString());
         }
 
         [Test]

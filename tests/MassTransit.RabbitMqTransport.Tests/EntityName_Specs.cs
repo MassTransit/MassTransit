@@ -8,6 +8,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_an_entity_name_is_specified_on_the_message_type :
         RabbitMqTestFixture
     {
@@ -48,6 +49,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_an_entity_name_is_specified_on_the_message_by_attribute :
         RabbitMqTestFixture
     {
@@ -81,6 +83,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_an_entity_name_is_specified_on_the_message_by_attribute_and_a_fault_occurs :
         RabbitMqTestFixture
     {

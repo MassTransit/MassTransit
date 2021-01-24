@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using GreenPipes;
     using NUnit.Framework;
+    using RabbitMQ.Client;
     using TestFramework.Messages;
 
 
@@ -85,5 +86,12 @@
                 });
             });
         }
+
+        protected override void OnCleanupVirtualHost(IModel model)
+        {
+            model.ExchangeDelete("input_queue_express");
+            model.QueueDelete("input_queue_express");
+        }
+
     }
 }

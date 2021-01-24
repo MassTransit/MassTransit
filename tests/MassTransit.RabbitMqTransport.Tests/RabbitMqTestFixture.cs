@@ -5,9 +5,9 @@
     using System.IO;
     using System.Linq;
     using System.Net.Http;
+    using System.Net.Http.Headers;
     using System.Text;
     using System.Threading.Tasks;
-    using Context;
     using MassTransit.Testing;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -41,7 +41,7 @@
             RabbitMqTestHarness.OnConfigureRabbitMqHost += ConfigureRabbitMqHost;
             RabbitMqTestHarness.OnConfigureRabbitMqBus += ConfigureRabbitMqBus;
             RabbitMqTestHarness.OnConfigureRabbitMqReceiveEndpoint += ConfigureRabbitMqReceiveEndpoint;
-            RabbitMqTestHarness.OnCleanupVirtualHost += OnCleanupVirtualHost;
+            RabbitMqTestHarness.OnCleanupVirtualHost += CleanupVirtualHost;
         }
 
         protected RabbitMqTestHarness RabbitMqTestHarness { get; }
@@ -95,23 +95,25 @@
         {
         }
 
-        protected virtual void OnCleanupVirtualHost(IModel model)
+        void CleanupVirtualHost(IModel model)
         {
-            bool cleanVirtualHostEntirely = !bool.TryParse(Environment.GetEnvironmentVariable("CI"), out var isBuildServer) || !isBuildServer;
+            var cleanVirtualHostEntirely = !bool.TryParse(Environment.GetEnvironmentVariable("CI"), out var isBuildServer) || !isBuildServer;
             if (cleanVirtualHostEntirely)
             {
-                var exchanges = TaskUtil.Await(() => GetVirtualHostEntities("exchanges"));
+                IList<string> exchanges = TaskUtil.Await(() => GetVirtualHostEntities("exchanges"));
                 foreach (var exchange in exchanges)
-                {
                     model.ExchangeDelete(exchange);
-                }
 
-                var queues = TaskUtil.Await(() => GetVirtualHostEntities("queues"));
+                IList<string> queues = TaskUtil.Await(() => GetVirtualHostEntities("queues"));
                 foreach (var queue in queues)
-                {
                     model.QueueDelete(queue);
-                }
             }
+
+            OnCleanupVirtualHost(model);
+        }
+
+        protected virtual void OnCleanupVirtualHost(IModel model)
+        {
         }
 
         async Task<IList<string>> GetVirtualHostEntities(string element)
@@ -120,7 +122,7 @@
             {
                 using var client = new HttpClient();
                 var byteArray = Encoding.ASCII.GetBytes($"{RabbitMqTestHarness.Username}:{RabbitMqTestHarness.Password}");
-                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
 
                 var requestUri = new UriBuilder("http", HostAddress.Host, 15672, $"api/{element}/{HostAddress.AbsolutePath.Trim('/')}").Uri;
                 using var response = await client.GetStreamAsync(requestUri);

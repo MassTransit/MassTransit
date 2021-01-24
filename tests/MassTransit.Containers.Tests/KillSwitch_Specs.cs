@@ -12,7 +12,6 @@ namespace MassTransit.Containers.Tests
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
-    using TestFramework.Logging;
     using Testing;
 
 
@@ -25,7 +24,7 @@ namespace MassTransit.Containers.Tests
         {
             var services = new ServiceCollection();
 
-            services.AddSingleton<ILoggerFactory>(p => new TestOutputLoggerFactory(true));
+            services.AddSingleton<ILoggerFactory>(_ => LoggerFactory);
             services.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             services.AddMassTransit(x =>
                 {
@@ -47,7 +46,7 @@ namespace MassTransit.Containers.Tests
 
             var healthChecks = provider.GetService<HealthCheckService>();
 
-            var hostedServices = provider.GetRequiredService<IEnumerable<IHostedService>>().ToArray();
+            IHostedService[] hostedServices = provider.GetRequiredService<IEnumerable<IHostedService>>().ToArray();
 
             await healthChecks.WaitForHealthStatus(HealthStatus.Unhealthy);
 

@@ -5,9 +5,11 @@
     using GreenPipes;
     using GreenPipes.Util;
     using NUnit.Framework;
+    using RabbitMQ.Client;
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Using_scheduled_redelivery_for_a_specific_message_type :
         RabbitMqTestFixture
     {
@@ -42,6 +44,12 @@
                     m.UseInMemoryOutbox();
                 });
             });
+        }
+
+        protected override void OnCleanupVirtualHost(IModel model)
+        {
+            model.ExchangeDelete("input-fault");
+            model.QueueDelete("input-fault");
         }
 
 
@@ -81,6 +89,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Using_scheduled_redelivery_for_a_specific_message_type_with_send :
         RabbitMqTestFixture
     {
@@ -115,6 +124,12 @@
                     m.UseInMemoryOutbox();
                 });
             });
+        }
+
+        protected override void OnCleanupVirtualHost(IModel model)
+        {
+            model.ExchangeDelete("input-fault");
+            model.QueueDelete("input-fault");
         }
 
 
@@ -154,6 +169,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Using_scheduled_redelivery_for_all_message_types :
         RabbitMqTestFixture
     {
@@ -184,6 +200,12 @@
             configurator.UseInMemoryOutbox();
 
             configurator.Consumer<TestHandler>();
+        }
+
+        protected override void OnCleanupVirtualHost(IModel model)
+        {
+            model.ExchangeDelete("input-fault");
+            model.QueueDelete("input-fault");
         }
 
 

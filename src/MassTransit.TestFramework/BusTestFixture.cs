@@ -23,7 +23,7 @@ namespace MassTransit.TestFramework
 
         static BusTestFixture()
         {
-            LoggerFactory = new TestOutputLoggerFactory(true);
+            LoggerFactory = new TestOutputLoggerFactory(_enableLog);
         }
 
         protected BusTestFixture(BusTestHarness harness)
@@ -39,6 +39,8 @@ namespace MassTransit.TestFramework
 
         protected IBus Bus => BusTestHarness.Bus;
         protected IBusControl BusControl => BusTestHarness.BusControl;
+
+        public static bool IsLogEnabled => _enableLog;
 
         public static void ConfigureBusDiagnostics(IBusFactoryConfigurator configurator)
         {

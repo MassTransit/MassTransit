@@ -156,15 +156,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
         protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
-        [Explicit]
-        public void Display_the_pipeline()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
-        }
-
-        [Test]
         public async Task Should_use_scope()
         {
             await InputQueueSendEndpoint.Send<SimpleMessageInterface>(new {Name = "test"});

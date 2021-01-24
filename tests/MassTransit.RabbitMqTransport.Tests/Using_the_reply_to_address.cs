@@ -21,10 +21,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            configurator.Handler<PingMessage>(x =>
-            {
-                return x.RespondAsync<PongMessage>(x.Message);
-            });
+            configurator.Handler<PingMessage>(x => x.RespondAsync<PongMessage>(x.Message));
         }
     }
 }

@@ -28,9 +28,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.GreaterThan(0));
 
-            await InactivityTask.ContinueWith(task =>
-            {
-            });
+            await InactivityTask;
 
             Assert.LessOrEqual(_attempts[pingId], _limit + 1);
         }
@@ -48,8 +46,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
-            var sec2 = TimeSpan.FromSeconds(2);
-            configurator.UseRetry(x => x.Exponential(_limit, sec2, sec2, sec2));
+            configurator.UseRetry(x => x.Interval(_limit, 200));
 
             configurator.Consumer(() => new RetryLimitConsumer(_attempts));
         }
@@ -94,9 +91,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.GreaterThan(0));
 
-            await InactivityTask.ContinueWith(task =>
-            {
-            });
+            await InactivityTask;
 
             Assert.LessOrEqual(_attempts[pingId], _limit + 1);
         }
@@ -145,9 +140,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             Assert.That(handled.Headers.Get<int>(MessageHeaders.FaultRetryCount), Is.GreaterThan(0));
 
-            await InactivityTask.ContinueWith(task =>
-            {
-            });
+            await InactivityTask;
 
             Assert.LessOrEqual(_attempts[pingId], _limit + 1);
         }

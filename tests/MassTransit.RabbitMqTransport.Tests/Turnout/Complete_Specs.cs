@@ -5,8 +5,10 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
     using Conductor;
     using Definition;
     using JobService;
+    using JobService.Components.StateMachines;
     using MassTransit.Contracts.JobService;
     using NUnit.Framework;
+    using RabbitMQ.Client;
 
 
     public interface CrunchTheNumbers
@@ -111,7 +113,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
 
 
     [TestFixture]
-    [Category("Flaky")]
+    [Explicit]
     public class Submitting_a_job_to_turnout_with_status_checks :
         RabbitMqTestFixture
     {

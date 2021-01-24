@@ -65,11 +65,12 @@
 
 
     [TestFixture]
+    [Explicit]
     public class Sending_a_request_to_a_missing_service_that_times_out :
         InMemoryTestFixture
     {
         [Test]
-        public async Task Should_timeout()
+        public async Task Should_timeout_without_exceptions()
         {
             List<object> unhandledExceptions = new List<object>();
             List<Exception> unobservedTaskExceptions = new List<Exception>();

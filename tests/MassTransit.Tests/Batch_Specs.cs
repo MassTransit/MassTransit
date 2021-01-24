@@ -383,9 +383,7 @@
             await InputQueueSendEndpoint.Send(new PingMessage());
             await InputQueueSendEndpoint.Send(new PingMessage());
 
-            await InactivityTask.ContinueWith(t =>
-            {
-            });
+            await InactivityTask;
 
             Assert.That(_individualFaults, Is.EqualTo(2));
             Assert.That(_batchFaults, Is.EqualTo(0));
@@ -427,9 +425,7 @@
             await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(ctx => ctx.CorrelationId = correlation2));
             await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(ctx => ctx.CorrelationId = correlation2));
 
-            await InactivityTask.ContinueWith(t =>
-            {
-            });
+            await InactivityTask;
 
             var count = await BusTestHarness.Consumed.SelectAsync<PingMessage>().Take(6).Count();
 
@@ -477,9 +473,7 @@
             await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(ctx => ctx.CorrelationId = correlation2));
             await InputQueueSendEndpoint.Send(new PingMessage(), Pipe.Execute<SendContext>(ctx => ctx.CorrelationId = correlation2));
 
-            await InactivityTask.ContinueWith(t =>
-            {
-            });
+            await InactivityTask;
 
             var count = await BusTestHarness.Consumed.SelectAsync<PingMessage>().Take(6).Count();
 

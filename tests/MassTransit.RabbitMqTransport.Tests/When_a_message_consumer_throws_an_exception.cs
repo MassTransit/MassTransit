@@ -31,6 +31,11 @@
             fault.Message.Message.StringA.ShouldBe("ValueA");
         }
 
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.AutoStart = true;
+        }
+
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _received = GetTask<A>();

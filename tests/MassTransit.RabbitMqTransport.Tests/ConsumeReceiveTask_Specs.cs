@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
+    using RabbitMQ.Client;
     using TestFramework;
 
 
@@ -39,6 +40,12 @@
             {
                 _faulted = Handled<Fault<MyMessage>>(x);
             });
+        }
+
+        protected override void OnCleanupVirtualHost(IModel model)
+        {
+            model.ExchangeDelete("input-queue-fault");
+            model.QueueDelete("input-queue-fault");
         }
 
 

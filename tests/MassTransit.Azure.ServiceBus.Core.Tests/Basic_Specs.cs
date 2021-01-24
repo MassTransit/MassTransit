@@ -1,10 +1,7 @@
 namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
-    using System;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
-    using TestFramework;
     using TestFramework.Messages;
 
 
@@ -12,15 +9,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     public class Sending_a_message_to_a_basic_endpoint :
         AzureServiceBusTestFixture
     {
-        [Test]
-        [Explicit]
-        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
-        }
-
         [Test]
         public async Task Should_succeed()
         {

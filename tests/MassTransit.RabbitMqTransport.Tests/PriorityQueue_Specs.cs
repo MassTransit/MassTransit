@@ -38,8 +38,6 @@
 
         protected override void OnCleanupVirtualHost(IModel model)
         {
-            base.OnCleanupVirtualHost(model);
-
             model.ExchangeDelete("priority_input_queue");
             model.QueueDelete("priority_input_queue");
         }

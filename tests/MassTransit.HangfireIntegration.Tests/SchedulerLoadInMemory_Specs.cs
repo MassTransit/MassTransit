@@ -9,6 +9,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_processing_a_lot_of_saga_instances :
         HangfireInMemoryTestFixture
     {
