@@ -6,12 +6,12 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using TestFramework;
 
 
-    public abstract class RequestClient_Context :
+    public abstract class Common_RequestClient_Context :
         InMemoryTestFixture
     {
         Guid _correlationId;
 
-        public RequestClient_Context()
+        public Common_RequestClient_Context()
         {
             SubsequentQueueName = "subsequent_queue";
             SubsequentQueueAddress = new Uri(BaseAddress, SubsequentQueueName);
@@ -51,6 +51,17 @@ namespace MassTransit.Containers.Tests.Common_Tests
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.ConfigureConsumer<InitialConsumer>(Registration);
+        }
+
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<InitialConsumer>();
+            configurator.AddConsumer<SubsequentConsumer>();
+
+            configurator.AddBus(context => BusControl);
+
+            configurator.AddRequestClient<InitialRequest>(InputQueueAddress);
+            configurator.AddRequestClient(typeof(SubsequentRequest), SubsequentQueueAddress);
         }
 
 
