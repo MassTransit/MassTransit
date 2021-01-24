@@ -78,7 +78,8 @@ Task("Test")
             NoBuild = true,
             Configuration = data.Configuration,
             DiagnosticOutput = true,
-            Filter = data.Tests.Criteria[filename]
+            Filter = data.Tests.Criteria[filename],
+            Verbosity = DotNetCoreVerbosity.Normal
         };
 
         if(settings.Filter == null)
