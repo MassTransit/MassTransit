@@ -13,6 +13,7 @@
         BusTestFixture
     {
         [Test]
+        [Category("Flaky")]
         public async Task Should_complete_running_consumers_nicely()
         {
             TaskCompletionSource<PingMessage> consumerStarted = GetTask<PingMessage>();
@@ -27,8 +28,6 @@
 
                 x.ReceiveEndpoint("input_queue", e =>
                 {
-                    e.PurgeOnStartup = true;
-
                     e.Handler<PingMessage>(async context =>
                     {
                         await Console.Out.WriteLineAsync("Starting handler");
@@ -78,6 +77,7 @@
         }
 
         [Test]
+        [Category("Flaky")]
         public async Task Should_complete_with_nothing_running()
         {
             var bus = MassTransit.Bus.Factory.CreateUsingRabbitMq(x =>
@@ -90,8 +90,6 @@
 
                 x.ReceiveEndpoint("input_queue", e =>
                 {
-                    e.PurgeOnStartup = true;
-
                     e.Handler<PingMessage>(async context =>
                     {
                         await Console.Out.WriteLineAsync("Starting handler");
