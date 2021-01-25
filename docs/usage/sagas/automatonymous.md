@@ -929,10 +929,24 @@ public class OrderStateMachine :
 A request can be sent from a state machine using the _Request_ method. Defining a request includes specifying an instance property to store the _RequestId_ so that response event(s) can be correlated to the instance, as well as specifying a default request timeout.
 
 ::: tip NOTE
-The bus must be configured to include a message scheduler to use the request activities. See the [scheduling](/advanced/scheduling/) section to learn how to setup a message scheduler.
+When a _Timeout_ is configured other than `Timespan.Zero`, the bus must be configured to include a message scheduler to use request activities. See the [scheduling](/advanced/scheduling/) section to learn how to setup a message scheduler.
+
+By default the Timeout is configured for 30 seconds.
 :::
 
 To declare a request, add a `Request` property and configure it using the `Request` method.
+
+#### Configuration
+
+##### Request id
+
+The request can be configured to update the state machine instance with a request id. This value will be used to correlate the request by. When no request id is configured the `CorrelationId` will be used to correlate the request events.
+
+The request id is cleared when the request is completed.
+
+##### Timeout
+
+When a request is made a second event _TimeoutExpired_ gets scheduled, unless the Timeout is set to `Timespan.Zero`.
 
 ```cs
 public interface ProcessOrder
@@ -961,11 +975,13 @@ public class OrderStateMachine :
 {
     public OrderStateMachine(OrderStateMachineSettings settings)
     {
-        Request(() => ProcessOrder, x => x.ProcessOrderRequestId, r =>
-        {
-            r.ServiceAddress = settings.ProcessOrderServiceAddress;
-            r.Timeout = settings.RequestTimeout;
-        });
+        Request(
+            () => ProcessOrder,
+            r => {
+                r.ServiceAddress = settings.ProcessOrderServiceAddress;
+                r.Timeout = settings.RequestTimeout;
+            },
+            x => x.ProcessOrderRequestId);
     }
 
     public Request<OrderState, ProcessOrder, OrderProcessed> ProcessOrder { get; private set; }
@@ -1001,7 +1017,7 @@ public class OrderStateMachine :
 }
 ```
 
-The _Request_ includes three events: _Completed, _Faulted_, and _TimeoutExpired_. These events can be consumed during any state, however, the _Request_ includes a _Pending_ state which can be used to avoid declaring a separate pending state. 
+The _Request_ includes three events: _Completed, _Faulted_, and _TimeoutExpired_. These events can be consumed during any state, however, the _Request_ includes a _Pending_ state which can be used to avoid declaring a separate pending state.
 
 ::: tip NOTE
 The request timeout is scheduled using the message scheduler, and the scheduled message is canceled when a response or fault is received. Not all message schedulers support cancellation, so it may be necessary to _Ignore_ the `TimeoutExpired` event in subsequent states.
