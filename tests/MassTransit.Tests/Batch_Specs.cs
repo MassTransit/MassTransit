@@ -372,11 +372,6 @@
     public class Processing_another_failing_batch_consumer :
         InMemoryTestFixture
     {
-        public Processing_another_failing_batch_consumer()
-        {
-            TestInactivityTimeout = TimeSpan.FromSeconds(3);
-        }
-
         [Test]
         public async Task Should_fault_once_per_message()
         {
@@ -407,11 +402,6 @@
     public class Receiving_and_grouping_messages :
         InMemoryTestFixture
     {
-        public Receiving_and_grouping_messages()
-        {
-            TestInactivityTimeout = TimeSpan.FromSeconds(3);
-        }
-
         [Test]
         public async Task Should_receive_one_batch_per_group()
         {
@@ -455,11 +445,6 @@
     public class Receiving_and_grouping_messages_by_ref_type :
         InMemoryTestFixture
     {
-        public Receiving_and_grouping_messages_by_ref_type()
-        {
-            TestInactivityTimeout = TimeSpan.FromSeconds(3);
-        }
-
         [Test]
         public async Task Should_receive_one_batch_per_group()
         {

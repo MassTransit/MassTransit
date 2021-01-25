@@ -5,6 +5,7 @@
     using Events;
     using GreenPipes;
     using MassTransit;
+    using MassTransit.Context;
     using MassTransit.Metadata;
     using MassTransit.Util;
 
@@ -23,13 +24,18 @@
 
         protected async Task SendRequest(BehaviorContext<TInstance> context, ConsumeContext consumeContext, TRequest requestMessage, Uri serviceAddress)
         {
-            var pipe = new SendRequestPipe(_request, consumeContext.ReceiveContext.InputAddress);
+            Guid requestId = _request.GenerateRequestId(context.Instance);
 
-            var endpoint = await consumeContext.GetSendEndpoint(serviceAddress).ConfigureAwait(false);
+            var pipe = new SendRequestPipe(_request, consumeContext.ReceiveContext.InputAddress, requestId);
+
+            var endpoint = serviceAddress == null
+                ? new ConsumeSendEndpoint(await consumeContext.ReceiveContext.PublishEndpointProvider.GetPublishSendEndpoint<TRequest>().ConfigureAwait
+                    (false), consumeContext, default)
+                : await consumeContext.GetSendEndpoint(serviceAddress).ConfigureAwait(false);
 
             await endpoint.Send(requestMessage, pipe).ConfigureAwait(false);
 
-            _request.SetRequestId(context.Instance, pipe.RequestId);
+            _request.SetRequestId(context.Instance, requestId);
 
             if (_request.Settings.Timeout > TimeSpan.Zero)
             {
@@ -63,12 +69,12 @@
             readonly Request<TInstance, TRequest, TResponse> _request;
             readonly Uri _responseAddress;
 
-            public SendRequestPipe(Request<TInstance, TRequest, TResponse> request, Uri responseAddress)
+            public SendRequestPipe(Request<TInstance, TRequest, TResponse> request, Uri responseAddress, Guid requestId)
             {
                 _request = request;
                 _responseAddress = responseAddress;
 
-                RequestId = NewId.NextGuid();
+                RequestId = requestId;
             }
 
             public Guid RequestId { get; }

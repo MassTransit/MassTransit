@@ -13,11 +13,6 @@ namespace MassTransit.QuartzIntegration.Tests
     public class Using_scheduled_redelivery :
         QuartzInMemoryTestFixture
     {
-        public Using_scheduled_redelivery()
-        {
-            TestInactivityTimeout = TimeSpan.FromSeconds(4);
-        }
-
         [Test]
         public async Task Should_use_the_correct_intervals_for_each_redelivery()
         {

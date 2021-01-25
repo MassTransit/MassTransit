@@ -39,7 +39,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         public When_specifying_retry_limit()
         {
-            TestInactivityTimeout = TimeSpan.FromSeconds(3);
             _limit = 2;
             _attempts = new Dictionary<Guid, int>();
         }
@@ -101,7 +100,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         public When_specifying_redelivery_limit()
         {
-            TestInactivityTimeout = TimeSpan.FromSeconds(3);
             _limit = 1;
             _attempts = new Dictionary<Guid, int>();
         }
@@ -150,7 +148,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         public When_specifying_redelivery_limit_with_message_ttl()
         {
-            TestInactivityTimeout = TimeSpan.FromSeconds(3);
             _limit = 1;
             _attempts = new Dictionary<Guid, int>();
         }

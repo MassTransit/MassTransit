@@ -231,11 +231,6 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     public class Submitting_a_job_to_turnout_that_is_abandoned :
         QuartzInMemoryTestFixture
     {
-        public Submitting_a_job_to_turnout_that_is_abandoned()
-        {
-            InMemoryTestHarness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
-        }
-
         [Test]
         [Order(1)]
         public async Task Should_get_the_job_accepted()
@@ -350,11 +345,6 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     public class Submitting_a_job_to_turnout_that_is_abandoned_and_retried :
         QuartzInMemoryTestFixture
     {
-        public Submitting_a_job_to_turnout_that_is_abandoned_and_retried()
-        {
-            InMemoryTestHarness.TestInactivityTimeout = TimeSpan.FromSeconds(5);
-        }
-
         [Test]
         [Order(1)]
         public async Task Should_get_the_job_accepted()

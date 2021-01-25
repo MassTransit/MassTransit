@@ -62,6 +62,13 @@
         Guid? GetRequestId(TInstance instance);
 
         /// <summary>
+        /// Generate a requestId, using either the CorrelationId of the saga, or a NewId
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        Guid GenerateRequestId(TInstance instance);
+
+        /// <summary>
         /// Set the headers on the outgoing request <see cref="SendContext{TRequest}"/>
         /// </summary>
         /// <param name="context"></param>

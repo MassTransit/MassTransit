@@ -19,7 +19,7 @@
         protected AsyncTestHarness()
         {
             TestTimeout = Debugger.IsAttached ? TimeSpan.FromMinutes(50) : TimeSpan.FromSeconds(30);
-            TestInactivityTimeout = TimeSpan.FromSeconds(1);
+            TestInactivityTimeout = TimeSpan.FromSeconds(6);
 
             _inactivityObserver = new Lazy<AsyncInactivityObserver>(() => new AsyncInactivityObserver(TestInactivityTimeout, TestCancellationToken));
         }

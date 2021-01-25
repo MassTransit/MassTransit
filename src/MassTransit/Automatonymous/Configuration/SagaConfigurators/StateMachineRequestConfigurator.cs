@@ -21,9 +21,6 @@ namespace Automatonymous.SagaConfigurators
                 if (ServiceAddress == null && EndpointConvention.TryGetDestinationAddress<TRequest>(out var serviceAddress))
                     ServiceAddress = serviceAddress;
 
-                if (ServiceAddress == null)
-                    throw new AutomatonymousException("The ServiceAddress was not specified.");
-
                 return this;
             }
         }
