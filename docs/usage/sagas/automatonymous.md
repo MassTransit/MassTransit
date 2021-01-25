@@ -926,11 +926,21 @@ public class OrderStateMachine :
 
 ### Request
 
-A request can be sent from a state machine using the _Request_ method. Defining a request includes specifying an instance property to store the _RequestId_ so that response event(s) can be correlated to the instance, as well as specifying a default request timeout.
+A request can be sent by a state machine using the _Request_ method, which specifies the request type and the response type. Additional request settings may be specified, including the _ServiceAddress_ and the _Timeout_. 
+
+If the _ServiceAddress_ is specified, it should be the endpoint address of the service that will respond to the request. If not specified, the request will be published.
+
+The default _Timeout_ is thirty seconds but any value greater than or equal to `TimeSpan.Zero` can be specified. When a request is sent with a timeout greater than zero, a _TimeoutExpired_ message is scheduled. Specifying `TimeSpan.Zero` will not schedule a timeout message and the request will never time out.
 
 ::: tip NOTE
-The bus must be configured to include a message scheduler to use the request activities. See the [scheduling](/advanced/scheduling/) section to learn how to setup a message scheduler.
+When a _Timeout_ greater than `Timespan.Zero` is configured, a message scheduler must be configured. See the [scheduling](/advanced/scheduling/) section for details on configuring a message scheduler.
 :::
+
+When defining a `Request`, an instance property _should_ be specified to store the _RequestId_ which is used to correlate responses to the state machine instance. While the request is pending, the _RequestId_ is stored in the property. When the request has completed the property is cleared. If the request times out or faults, the _RequestId_ is retained to allow for later correlation if requests are ultimately completed (such as moving requests from the *_error* queue back into the service queue).
+
+A recent enhancement making this property optional, instead using the instance's `CorrelationId` for the request message `RequestId`. This can simplify response correlation, and also avoids the need of a supplemental index on the saga repository. However, reusing the `CorrelationId` for the request might cause issues in highly complex systems. So consider this when choosing which method to use.
+
+#### Configuration
 
 To declare a request, add a `Request` property and configure it using the `Request` method.
 
@@ -961,11 +971,13 @@ public class OrderStateMachine :
 {
     public OrderStateMachine(OrderStateMachineSettings settings)
     {
-        Request(() => ProcessOrder, x => x.ProcessOrderRequestId, r =>
-        {
-            r.ServiceAddress = settings.ProcessOrderServiceAddress;
-            r.Timeout = settings.RequestTimeout;
-        });
+        Request(
+            () => ProcessOrder,
+            r => {
+                r.ServiceAddress = settings.ProcessOrderServiceAddress;
+                r.Timeout = settings.RequestTimeout;
+            },
+            x => x.ProcessOrderRequestId);
     }
 
     public Request<OrderState, ProcessOrder, OrderProcessed> ProcessOrder { get; private set; }
@@ -1001,7 +1013,7 @@ public class OrderStateMachine :
 }
 ```
 
-The _Request_ includes three events: _Completed, _Faulted_, and _TimeoutExpired_. These events can be consumed during any state, however, the _Request_ includes a _Pending_ state which can be used to avoid declaring a separate pending state. 
+The _Request_ includes three events: _Completed, _Faulted_, and _TimeoutExpired_. These events can be consumed during any state, however, the _Request_ includes a _Pending_ state which can be used to avoid declaring a separate pending state.
 
 ::: tip NOTE
 The request timeout is scheduled using the message scheduler, and the scheduled message is canceled when a response or fault is received. Not all message schedulers support cancellation, so it may be necessary to _Ignore_ the `TimeoutExpired` event in subsequent states.
