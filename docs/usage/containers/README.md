@@ -95,6 +95,10 @@ For the _SubmitOrderConsumer_, the endpoint names would be:
 
 All of the included formatters trim the _Consumer_, _Saga_, or _Activity_ suffix from the end of the class name. If the consumer name is generic, the generic parameter type is used instead of the generic type.
 
+::: tip Video
+Learn about the default conventions as well as how to tailor the naming style to meet your requirements in [this short video](https://youtu.be/bsUlQ93j2MY).
+:::
+
 The endpoint name formatter can be set as shown below.
 
 <<< @/docs/code/containers/MicrosoftContainerFormatter.cs
