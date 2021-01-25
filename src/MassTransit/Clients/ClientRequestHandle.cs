@@ -70,9 +70,7 @@
 
             _send = SendRequest();
 
-        #pragma warning disable 4014
             HandleFault();
-        #pragma warning restore 4014
         }
 
         async Task IPipe<SendContext<TRequest>>.Send(SendContext<TRequest> context)
@@ -198,16 +196,18 @@
             return handle.Task;
         }
 
-        async Task HandleFault()
+        void HandleFault()
         {
-            try
-            {
-                await Response<Fault<TRequest>>(FaultHandler).ConfigureAwait(false);
-            }
-            catch
-            {
-                // need to observe the exception, if it is faulted
-            }
+            if (_cancellationToken.IsCancellationRequested)
+                return;
+
+            Task MessageHandler(ConsumeContext<Fault<TRequest>> context) => FaultHandler(context);
+
+            var connectHandle = _context.ConnectRequestHandler(_requestId, MessageHandler, new PipeConfigurator<ConsumeContext<Fault<TRequest>>>());
+
+            var handle = new FaultHandlerConnectHandle(connectHandle);
+
+            _responseHandlers.Add(typeof(Fault<TRequest>), handle);
         }
 
         Task FaultHandler(ConsumeContext<Fault<TRequest>> context)
