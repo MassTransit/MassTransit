@@ -7,8 +7,8 @@ namespace MassTransit.Transports
     using Context;
     using Events;
     using GreenPipes;
+    using GreenPipes.Util;
     using Monitoring.Health;
-    using Util;
 
 
     /// <summary>
@@ -21,6 +21,7 @@ namespace MassTransit.Transports
     {
         readonly ReceiveEndpointContext _context;
         readonly TaskCompletionSource<ReceiveEndpointReady> _started;
+        readonly StartObserver _startObserver;
         readonly IReceiveTransport _transport;
         EndpointHandle _handle;
 
@@ -29,7 +30,11 @@ namespace MassTransit.Transports
             _context = context;
             _transport = transport;
 
-            _started = TaskUtil.GetTask<ReceiveEndpointReady>();
+            _started = Util.TaskUtil.GetTask<ReceiveEndpointReady>();
+
+            _startObserver = new StartObserver();
+
+            ConnectReceiveEndpointObserver(_startObserver);
 
             transport.ConnectReceiveTransportObserver(new Observer(this, context.EndpointObservers));
         }
@@ -51,11 +56,9 @@ namespace MassTransit.Transports
             if (_handle != null)
                 throw new InvalidOperationException($"The receive endpoint was already started: {InputAddress}");
 
-            var endpointReadyObserver = new StartEndpointReadyObserver(this, cancellationToken);
+            _handle = new EndpointHandle(this, _transport, _startObserver, cancellationToken);
 
-            var transportHandle = _transport.Start();
-
-            _handle = new EndpointHandle(this, transportHandle, endpointReadyObserver);
+            _handle.Start();
 
             return _handle;
         }
@@ -176,19 +179,61 @@ namespace MassTransit.Transports
         }
 
 
-        class StartEndpointReadyObserver :
+        class StartObserver :
             IReceiveEndpointObserver
         {
+            readonly Connectable<EndpointHandle> _handles;
+
+            public StartObserver()
+            {
+                _handles = new Connectable<EndpointHandle>();
+            }
+
+            Task IReceiveEndpointObserver.Ready(ReceiveEndpointReady ready)
+            {
+                return _handles.ForEachAsync(x => x.SetReady(ready));
+            }
+
+            public Task Stopping(ReceiveEndpointStopping stopping)
+            {
+                return Util.TaskUtil.Completed;
+            }
+
+            Task IReceiveEndpointObserver.Completed(ReceiveEndpointCompleted completed)
+            {
+                return Util.TaskUtil.Completed;
+            }
+
+            Task IReceiveEndpointObserver.Faulted(ReceiveEndpointFaulted faulted)
+            {
+                return _handles.ForEachAsync(x => x.SetFaulted(faulted));
+            }
+
+            public ConnectHandle ConnectEndpointHandle(EndpointHandle handle)
+            {
+                return _handles.Connect(handle);
+            }
+        }
+
+
+        class EndpointHandle :
+            ReceiveEndpointHandle
+        {
             readonly CancellationToken _cancellationToken;
+            readonly ReceiveEndpoint _endpoint;
             readonly ConnectHandle _handle;
             readonly TaskCompletionSource<ReceiveEndpointReady> _ready;
+            readonly IReceiveTransport _transport;
             ReceiveEndpointFaulted _faulted;
             CancellationTokenRegistration _registration;
 
-            public StartEndpointReadyObserver(IReceiveEndpointObserverConnector endpoint, CancellationToken cancellationToken)
+            public EndpointHandle(ReceiveEndpoint endpoint, IReceiveTransport transport, StartObserver startObserver, CancellationToken cancellationToken)
             {
+                _endpoint = endpoint;
+                _transport = transport;
+
                 _cancellationToken = cancellationToken;
-                _ready = TaskUtil.GetTask<ReceiveEndpointReady>();
+                _ready = Util.TaskUtil.GetTask<ReceiveEndpointReady>();
 
                 if (cancellationToken.CanBeCanceled)
                 {
@@ -204,32 +249,34 @@ namespace MassTransit.Transports
                     });
                 }
 
-                _handle = endpoint.ConnectReceiveEndpointObserver(this);
+                _handle = startObserver.ConnectEndpointHandle(this);
             }
+
+            public ReceiveTransportHandle TransportHandle { get; private set; }
 
             public Task<ReceiveEndpointReady> Ready => _ready.Task;
 
-            Task IReceiveEndpointObserver.Ready(ReceiveEndpointReady ready)
+            Task ReceiveEndpointHandle.Stop(CancellationToken cancellationToken)
+            {
+                return _endpoint.Stop(cancellationToken);
+            }
+
+            public void Start()
+            {
+                TransportHandle = _transport.Start();
+            }
+
+            public Task SetReady(ReceiveEndpointReady ready)
             {
                 _handle.Disconnect();
                 _registration.Dispose();
 
                 _ready.TrySetResult(ready);
 
-                return TaskUtil.Completed;
+                return Util.TaskUtil.Completed;
             }
 
-            public Task Stopping(ReceiveEndpointStopping stopping)
-            {
-                return TaskUtil.Completed;
-            }
-
-            Task IReceiveEndpointObserver.Completed(ReceiveEndpointCompleted completed)
-            {
-                return TaskUtil.Completed;
-            }
-
-            Task IReceiveEndpointObserver.Faulted(ReceiveEndpointFaulted faulted)
+            public Task SetFaulted(ReceiveEndpointFaulted faulted)
             {
                 _faulted = faulted;
 
@@ -241,7 +288,7 @@ namespace MassTransit.Transports
                     _ready.TrySetException(faulted.Exception);
                 }
 
-                return TaskUtil.Completed;
+                return Util.TaskUtil.Completed;
             }
 
             static bool IsUnrecoverable(Exception exception)
@@ -251,31 +298,6 @@ namespace MassTransit.Transports
                     ConnectionException connectionException => !connectionException.IsTransient,
                     _ => false
                 };
-            }
-        }
-
-
-        class EndpointHandle :
-            ReceiveEndpointHandle
-        {
-            readonly ReceiveEndpoint _endpoint;
-            readonly StartEndpointReadyObserver _observer;
-
-            public EndpointHandle(ReceiveEndpoint endpoint, ReceiveTransportHandle transportHandle, StartEndpointReadyObserver observer)
-            {
-                _endpoint = endpoint;
-                _observer = observer;
-
-                TransportHandle = transportHandle;
-            }
-
-            public ReceiveTransportHandle TransportHandle { get; }
-
-            public Task<ReceiveEndpointReady> Ready => _observer.Ready;
-
-            Task ReceiveEndpointHandle.Stop(CancellationToken cancellationToken)
-            {
-                return _endpoint.Stop(cancellationToken);
             }
         }
     }
