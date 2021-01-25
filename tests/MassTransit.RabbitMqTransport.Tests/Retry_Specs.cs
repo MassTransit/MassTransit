@@ -10,6 +10,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_specifying_retry_limit :
         RabbitMqTestFixture
     {
@@ -71,10 +72,10 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_specifying_redelivery_limit :
         RabbitMqTestFixture
     {
-        [Category("Flaky")]
         [Test]
         public async Task Should_stop_after_limit_exceeded()
         {
@@ -119,10 +120,10 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_specifying_redelivery_limit_with_message_ttl :
         RabbitMqTestFixture
     {
-        [Category("Flaky")]
         [Test]
         public async Task Should_stop_after_limit_exceeded()
         {
