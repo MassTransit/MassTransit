@@ -58,15 +58,15 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                     return Task.FromResult(queueInfo);
             }
 
-            return _nameIndex.Get(queue.EntityName, key =>
+            return _nameIndex.Get(queue.EntityName, async key =>
             {
                 try
                 {
-                    return CreateMissingQueue(queue);
+                    return await CreateMissingQueue(queue);
                 }
                 catch (QueueNameExistsException)
                 {
-                    return GetExistingQueue(queue.EntityName);
+                    return await GetExistingQueue(queue.EntityName);
                 }
             });
         }

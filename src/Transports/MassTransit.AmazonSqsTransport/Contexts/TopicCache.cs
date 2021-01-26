@@ -36,15 +36,15 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                     return Task.FromResult(queueInfo);
             }
 
-            return _nameIndex.Get(topic.EntityName, key =>
+            return _nameIndex.Get(topic.EntityName, async key =>
             {
                 try
                 {
-                    return CreateMissingTopic(topic);
+                    return await CreateMissingTopic(topic);
                 }
                 catch (InvalidParameterException e) when (e.Message.Contains("Topic already exists"))
                 {
-                    return GetExistingTopic(topic.EntityName);
+                    return await GetExistingTopic(topic.EntityName);
                 }
             });
         }
