@@ -161,6 +161,11 @@ namespace MassTransit.Transports
                         }
                     }
                 }
+                catch (OperationCanceledException exception)
+                {
+                    if (exception.CancellationToken != Stopping)
+                        LogContext.Debug?.Log(exception, "ReceiveTransport Operation Cancelled: {InputAddress}", _context.InputAddress);
+                }
                 catch (Exception exception)
                 {
                     LogContext.Debug?.Log(exception, "ReceiveTransport Run Exception: {InputAddress}", _context.InputAddress);

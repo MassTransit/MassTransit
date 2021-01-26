@@ -88,7 +88,7 @@ namespace MassTransit.Transports
 
         public bool IsStarted(ReceiveEndpoint instance)
         {
-            return Started.Equals(instance.CurrentState) || Ready.Equals(instance.CurrentState);
+            return Started.Equals(instance.CurrentState) || Ready.Equals(instance.CurrentState) || Faulted.Equals(instance.CurrentState);
         }
     }
 
