@@ -93,7 +93,7 @@ namespace MassTransit.Transports
 
             HostRiderHandle[] riders = _riderCollection.StartRiders(cancellationToken);
 
-            _handle = new StartHostHandle(this, handles, riders, GetAgentHandles());
+            _handle = new StartHostHandle(this, handles, riders);
 
             return _handle;
         }

@@ -4,6 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
+    using Context;
     using Contexts;
     using Exceptions;
     using GreenPipes;
@@ -67,6 +68,7 @@
                 }
                 catch (Exception ex)
                 {
+                    LogContext.Warning?.Log(ex, "Connection Failed: {InputAddress}", _hostConfiguration.HostAddress);
                     throw new AmazonSqsConnectionException("Connect failed: " + _hostConfiguration.Settings, ex);
                 }
             }, supervisor.Stopping).ConfigureAwait(false);

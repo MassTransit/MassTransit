@@ -4,24 +4,21 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Events;
-    using GreenPipes.Agents;
     using Riders;
 
 
     public class StartHostHandle :
         HostHandle
     {
-        readonly IAgent[] _agents;
         readonly HostReceiveEndpointHandle[] _handles;
         readonly BaseHost _host;
         readonly HostRiderHandle[] _riderHandles;
 
-        public StartHostHandle(BaseHost host, HostReceiveEndpointHandle[] handles, HostRiderHandle[] riderHandles, params IAgent[] agents)
+        public StartHostHandle(BaseHost host, HostReceiveEndpointHandle[] handles, HostRiderHandle[] riderHandles)
         {
             _host = host;
             _handles = handles;
             _riderHandles = riderHandles;
-            _agents = agents;
         }
 
         Task<HostReady> HostHandle.Ready
@@ -39,9 +36,6 @@
             ReceiveEndpointReady[] endpointsReady = await EndpointsReady(endpoints).ConfigureAwait(false);
 
             RiderReady[] ridersReady = await RidersReady(riders).ConfigureAwait(false);
-
-            foreach (var agent in _agents)
-                await agent.Ready.ConfigureAwait(false);
 
             return new HostReadyEvent(_host.Address, endpointsReady, ridersReady);
         }

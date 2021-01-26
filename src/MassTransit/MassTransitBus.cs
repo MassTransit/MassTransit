@@ -208,7 +208,7 @@ namespace MassTransit
                 {
                     if (busHandle != null)
                     {
-                        LogContext.Debug?.Log("Bus start faulted, stopping host");
+                        LogContext.Debug?.Log(ex, "Bus start faulted, stopping host");
 
                         await busHandle.StopAsync(cancellationToken).ConfigureAwait(false);
                     }

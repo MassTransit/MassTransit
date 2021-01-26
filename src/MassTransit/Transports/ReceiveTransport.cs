@@ -122,14 +122,8 @@ namespace MassTransit.Transports
                     {
                         try
                         {
-                            if (retryContext != null)
-                            {
-                                LogContext.Warning?.Log(retryContext.Exception, "Retrying {Delay}: {Message}", retryContext.Delay,
-                                    retryContext.Exception.Message);
-
-                                if (retryContext.Delay.HasValue)
-                                    await Task.Delay(retryContext.Delay.Value, Stopping).ConfigureAwait(false);
-                            }
+                            if (retryContext?.Delay != null)
+                                await Task.Delay(retryContext.Delay.Value, Stopping).ConfigureAwait(false);
 
                             if (!IsStopping)
                                 await RunTransport().ConfigureAwait(false);
@@ -214,8 +208,6 @@ namespace MassTransit.Transports
 
             Task NotifyFaulted(Exception exception)
             {
-                LogContext.Error?.Log(exception, "Connection Failed: {InputAddress}", _context.InputAddress);
-
                 return _context.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_context.InputAddress, exception));
             }
 

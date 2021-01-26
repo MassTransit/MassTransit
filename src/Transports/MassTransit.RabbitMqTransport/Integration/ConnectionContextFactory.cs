@@ -100,17 +100,23 @@
             {
                 connection?.Dispose();
 
+                LogContext.Warning?.Log(ex, "Connection Failed: {InputAddress}", _hostConfiguration.HostAddress);
+
                 throw new RabbitMqConnectionException("Connect failed: " + description, ex);
             }
             catch (BrokerUnreachableException ex)
             {
                 connection?.Dispose();
 
+                LogContext.Warning?.Log(ex, "Connection Failed: {InputAddress}", _hostConfiguration.HostAddress);
+
                 throw new RabbitMqConnectionException("Broker unreachable: " + description, ex);
             }
             catch (OperationInterruptedException ex)
             {
                 connection?.Dispose();
+
+                LogContext.Warning?.Log(ex, "Connection Failed: {InputAddress}", _hostConfiguration.HostAddress);
 
                 throw new RabbitMqConnectionException("Operation interrupted: " + description, ex);
             }
@@ -121,6 +127,8 @@
             catch (Exception ex)
             {
                 connection?.Dispose();
+
+                LogContext.Warning?.Log(ex, "Connection Failed: {InputAddress}", _hostConfiguration.HostAddress);
 
                 throw new RabbitMqConnectionException("Create Connection Faulted: " + description, ex);
             }
