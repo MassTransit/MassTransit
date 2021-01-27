@@ -19,6 +19,10 @@ public class SubmitOrderConsumer :
 
 When a message is delivered to the consumer, the consumer throws an exception. With a default bus configuration, the exception is caught by middleware in the transport (the `ErrorTransportFilter` to be exact), and the message is moved to an *_error* queue (prefixed by the receive endpoint queue name). The exception details are stored as headers with the message for analysis and to assist in troubleshooting the exception.
 
+::: tip Video
+Learn about the error queue in [this short video](https://youtu.be/3TMKUu7c4lc).
+:::
+
 > In addition to moving the message to an error queue, MassTransit also produces a `Fault<T>` event. See below for more details on _faults_.
 
 ## Retry
@@ -73,6 +77,10 @@ In this example, the <i>UseMessageRetry</i> is at the receive endpoint level. Ad
 MassTransit retry filters execute in memory and maintain a _lock_ on the message. As such, they should only be used to handle short, transient error conditions. Setting a retry interval of an hour would fall into the category of _bad things_. To retry messages after longer waits, look at the next section on redelivering messages.
 
 ## Retry Configuration
+
+::: tip Video
+Learn how to configure message retry in [this short video](https://youtu.be/pKxf6Ii-3ow).
+:::
 
 When configuring message retry, there are several retry policies available, including:
 
