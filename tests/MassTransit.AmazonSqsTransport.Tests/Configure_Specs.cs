@@ -206,10 +206,12 @@
             {
                 BusTestFixture.ConfigureBusDiagnostics(cfg);
 
-                cfg.Host("ap-southeast-2", h =>
+                cfg.Host(new Uri("amazonsqs://localhost:4566"), h =>
                 {
-                    h.AccessKey(AwsAccessKey);
-                    h.SecretKey(AwsSecretKey);
+                    h.AccessKey("admin");
+                    h.SecretKey("admin");
+                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
+                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
                 });
             });
 
@@ -231,10 +233,12 @@
             {
                 BusTestFixture.ConfigureBusDiagnostics(cfg);
 
-                cfg.Host("ap-southeast-2", h =>
+                cfg.Host(new Uri("amazonsqs://localhost:4566"), h =>
                 {
-                    var credentials = new BasicAWSCredentials(AwsAccessKey, AwsSecretKey);
-                    h.Credentials(credentials);
+                    h.AccessKey("admin");
+                    h.SecretKey("admin");
+                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
+                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
                 });
             });
 
@@ -285,10 +289,12 @@
             {
                 BusTestFixture.ConfigureBusDiagnostics(cfg);
 
-                cfg.Host("ap-southeast-2", h =>
+                cfg.Host(new Uri("amazonsqs://localhost:4566"), h =>
                 {
-                    h.AccessKey(AwsAccessKey);
-                    h.SecretKey(AwsSecretKey);
+                    h.AccessKey("admin");
+                    h.SecretKey("admin");
+                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
+                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
                 });
 
                 Func<object, Task> receiveTask = t =>
@@ -344,10 +350,12 @@
             {
                 BusTestFixture.ConfigureBusDiagnostics(sbc);
 
-                sbc.Host("us-east-2", h =>
+                sbc.Host(new Uri("amazonsqs://localhost:4566"), h =>
                 {
-                    h.AccessKey(AwsAccessKey);
-                    h.SecretKey(AwsSecretKey);
+                    h.AccessKey("admin");
+                    h.SecretKey("admin");
+                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
+                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
                 });
 
                 sbc.ReceiveEndpoint("test", e =>
@@ -383,10 +391,12 @@
             {
                 BusTestFixture.ConfigureBusDiagnostics(cfg);
 
-                cfg.Host("us-east-2", h =>
+                cfg.Host(new Uri("amazonsqs://localhost:4566"), h =>
                 {
-                    h.AccessKey(AwsAccessKey);
-                    h.SecretKey(AwsSecretKey);
+                    h.AccessKey("admin");
+                    h.SecretKey("admin");
+                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
+                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
                 });
 
                 cfg.ReceiveEndpoint("input-queue", x =>
