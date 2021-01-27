@@ -4,8 +4,6 @@ namespace MassTransit.ActiveMqTransport.Configurators
     using System.Collections.Generic;
     using System.Linq;
     using Apache.NMS;
-    using Apache.NMS.ActiveMQ;
-    using Transport;
 
 
     public class ConfigurationHostSettings :
@@ -59,12 +57,7 @@ namespace MassTransit.ActiveMqTransport.Configurators
         {
             var factory = new NMSConnectionFactory(BrokerAddress);
 
-            var connectionFactory = factory.ConnectionFactory;
-
-            if (connectionFactory is ConnectionFactory nms)
-                nms.CompressionPolicy = new ZlibCompressionPolicy();
-
-            return connectionFactory.CreateConnection(Username, Password);
+            return factory.ConnectionFactory.CreateConnection(Username, Password);
         }
 
         Uri FormatHostAddress()
