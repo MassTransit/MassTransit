@@ -55,6 +55,10 @@ namespace MassTransit.EventHubIntegration.Contexts
 
         public async Task<bool> CreateBlobIfNotExistsAsync(CancellationToken cancellationToken = default)
         {
+            Response<bool> exists = await _blobContainerClient.ExistsAsync(cancellationToken).ConfigureAwait(false);
+            if (exists.Value)
+                return true;
+
             try
             {
                 await _blobContainerClient.CreateIfNotExistsAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
