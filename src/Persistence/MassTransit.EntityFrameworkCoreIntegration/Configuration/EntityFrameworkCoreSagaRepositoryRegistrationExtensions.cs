@@ -139,6 +139,32 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Configure the repository for use with MySQL
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IEntityFrameworkSagaRepositoryConfigurator<T> UseMySql<T>(this IEntityFrameworkSagaRepositoryConfigurator<T> configurator)
+            where T : class, ISaga
+        {
+            configurator.LockStatementProvider = new MySqlLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
+        /// Configure the repository for use with MySQL
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <returns></returns>
+        public static IEntityFrameworkSagaRepositoryConfigurator UseMySql(this IEntityFrameworkSagaRepositoryConfigurator configurator)
+        {
+            configurator.LockStatementProvider = new MySqlLockStatementProvider();
+
+            return configurator;
+        }
+
+        /// <summary>
         /// Create EntityFramework saga repository
         /// </summary>
         /// <param name="registrationConfigurator"></param>
