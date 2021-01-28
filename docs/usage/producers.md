@@ -8,6 +8,10 @@ When a message is sent, it is delivered to a specific endpoint using a _Destinat
 
 ## Send
 
+::: tip Video
+Learn about `Send` in [this short video](https://youtu.be/t6FsmqZsdJk).
+:::
+
 To send a message, the _DestinationAddress_ is used to deliver the message to an endpoint — such as a queue. One of the `Send` method overloads on the `ISendEndpoint` interface is called, which will then send the message to the transport. An `ISendEndpoint` is obtained from one of the following objects:
 
 1. The `ConsumeContext` of the message being consumed
@@ -142,6 +146,10 @@ The `EndpointConvention.Map<T>` method is static, so it can be called from every
 It is better to configure send conventions before you start the bus.
 
 ## Publish
+
+::: tip Video
+Learn about `Publish` in [this short video](https://youtu.be/-MAEZq5G7lk).
+:::
 
 Messages are published similarly to how messages are sent, but in this case, a single `IPublishEndpoint` is used. The same rules for endpoints apply, the closest instance of the publish endpoint should be used. So the `ConsumeContext` for consumers, and `IBus` for applications that are published outside of a consumer context.
 
