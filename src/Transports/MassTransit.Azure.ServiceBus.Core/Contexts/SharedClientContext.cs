@@ -50,5 +50,10 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         {
             return _context.CloseAsync();
         }
+
+        public Task NotifyFaulted(Exception exception, string entityPath)
+        {
+            return _context.NotifyFaulted(exception, entityPath);
+        }
     }
 }

@@ -1,15 +1,12 @@
 ﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
-    using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using GreenPipes.Internals.Extensions;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
-    using TestFramework.Logging;
 
 
     [TestFixture]
@@ -82,7 +79,9 @@
         {
             var busControl = Bus.Factory.CreateUsingRabbitMq(x =>
             {
-                x.Host(new Uri("rabbitmq://localhost/"), h =>
+                BusTestFixture.ConfigureBusDiagnostics(x);
+
+                x.ReceiveEndpoint("input-queue", e =>
                 {
                 });
             });
@@ -94,21 +93,7 @@
 
                 await handle.Ready;
 
-                for (var i = 0; i < 30; i++)
-                {
-                    try
-                    {
-                        await Task.Delay(1000);
-
-                        //                        await busControl.Publish(new TestMessage());
-
-                        Console.WriteLine("Published: {0}", i);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Publish {0} faulted: {1}", i, ex.Message);
-                    }
-                }
+                await Task.Delay(30000);
             }
             finally
             {

@@ -38,7 +38,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
             return supervisor.AddActiveContext(context, CreateSharedContext(context.Context, cancellationToken));
         }
 
-        protected abstract ClientContext CreateClientContext(ConnectionContext connectionContext, Uri inputAddress);
+        protected abstract ClientContext CreateClientContext(ConnectionContext connectionContext, Uri inputAddress, IAgent agent);
 
         void CreateClientContext(IAsyncPipeContextAgent<ClientContext> asyncContext, CancellationToken cancellationToken)
         {
@@ -46,7 +46,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
             {
                 var inputAddress = _settings.GetInputAddress(connectionContext.Endpoint, _settings.Path);
 
-                return Task.FromResult(CreateClientContext(connectionContext, inputAddress));
+                return Task.FromResult(CreateClientContext(connectionContext, inputAddress, asyncContext));
             }
 
             _supervisor.CreateAgent(asyncContext, Create, cancellationToken);

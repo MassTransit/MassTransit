@@ -2,6 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 {
     using System;
     using Contexts;
+    using GreenPipes.Agents;
     using Transport;
 
 
@@ -16,12 +17,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
             _settings = settings;
         }
 
-        protected override ClientContext CreateClientContext(ConnectionContext connectionContext, Uri inputAddress)
+        protected override ClientContext CreateClientContext(ConnectionContext connectionContext, Uri inputAddress, IAgent agent)
         {
             var queueClient = connectionContext.CreateQueueClient(_settings.Path);
             queueClient.PrefetchCount = _settings.PrefetchCount;
 
-            return new QueueClientContext(connectionContext, queueClient, inputAddress, _settings);
+            return new QueueClientContext(connectionContext, queueClient, inputAddress, _settings, agent);
         }
     }
 }

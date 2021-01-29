@@ -5,6 +5,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
+    using GreenPipes.Agents;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Core;
     using Transport;
@@ -15,15 +16,17 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         ClientContext,
         IAsyncDisposable
     {
+        readonly IAgent _agent;
         readonly IQueueClient _queueClient;
         readonly ClientSettings _settings;
         bool _unregisterMessageHandler;
         bool _unregisterSessionHandler;
 
-        public QueueClientContext(ConnectionContext connectionContext, IQueueClient queueClient, Uri inputAddress, ClientSettings settings)
+        public QueueClientContext(ConnectionContext connectionContext, IQueueClient queueClient, Uri inputAddress, ClientSettings settings, IAgent agent)
         {
             _queueClient = queueClient;
             _settings = settings;
+            _agent = agent;
             ConnectionContext = connectionContext;
             InputAddress = inputAddress;
         }
@@ -83,6 +86,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             {
                 LogContext.Warning?.Log(exception, "Close client faulted: {InputAddress}", InputAddress);
             }
+        }
+
+        public Task NotifyFaulted(Exception exception, string entityPath)
+        {
+            return _agent.Stop($"Unrecoverable exception on {entityPath}");
         }
 
         public async ValueTask DisposeAsync()

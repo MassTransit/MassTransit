@@ -2,6 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 {
     using System;
     using Contexts;
+    using GreenPipes.Agents;
     using Transport;
 
 
@@ -16,14 +17,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
             _settings = settings;
         }
 
-        protected override ClientContext CreateClientContext(ConnectionContext connectionContext, Uri inputAddress)
+        protected override ClientContext CreateClientContext(ConnectionContext connectionContext, Uri inputAddress, IAgent agent)
         {
             var subscriptionClient = connectionContext.CreateSubscriptionClient(_settings.TopicDescription.Path,
                 _settings.SubscriptionDescription.SubscriptionName);
 
             subscriptionClient.PrefetchCount = _settings.PrefetchCount;
 
-            return new SubscriptionClientContext(connectionContext, subscriptionClient, inputAddress, _settings);
+            return new SubscriptionClientContext(connectionContext, subscriptionClient, inputAddress, _settings, agent);
         }
     }
 }

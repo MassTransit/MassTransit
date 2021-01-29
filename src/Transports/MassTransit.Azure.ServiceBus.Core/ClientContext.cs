@@ -53,5 +53,13 @@ namespace MassTransit.Azure.ServiceBus.Core
         /// </summary>
         /// <returns></returns>
         Task CloseAsync();
+
+        /// <summary>
+        /// Notify that an exception has occurred on the client which is not transient and requires a recycle
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <param name="entityPath"></param>
+        /// <returns></returns>
+        Task NotifyFaulted(Exception exception, string entityPath);
     }
 }

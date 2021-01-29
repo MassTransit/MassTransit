@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using Context;
     using Contexts;
+    using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
     using Logging;
@@ -21,6 +22,7 @@
         readonly ClientContext _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IBrokeredMessageReceiver _messageReceiver;
+        bool _stopped;
 
         public Receiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
         {
@@ -46,10 +48,8 @@
             return TaskUtil.Completed;
         }
 
-        protected Task ExceptionHandler(ExceptionReceivedEventArgs args)
+        protected async Task ExceptionHandler(ExceptionReceivedEventArgs args)
         {
-            var activeDispatchCount = _messageReceiver.ActiveDispatchCount;
-
             var requiresRecycle = args.Exception switch
             {
                 MessageLockLostException _ => false,
@@ -62,7 +62,7 @@
             {
                 LogContext.Debug?.Log(args.Exception,
                     "Exception on Receiver {InputAddress} during {Action} ActiveDispatchCount({activeDispatch}) ErrorRequiresRecycle({requiresRecycle})",
-                    _context.InputAddress, args.ExceptionReceivedContext.Action, activeDispatchCount, requiresRecycle);
+                    _context.InputAddress, args.ExceptionReceivedContext.Action, _messageReceiver.ActiveDispatchCount, requiresRecycle);
             }
             else if (!(args.Exception is OperationCanceledException))
             {
@@ -70,19 +70,31 @@
 
                 logger?.Log(args.Exception,
                     "Exception on Receiver {InputAddress} during {Action} ActiveDispatchCount({activeDispatch}) ErrorRequiresRecycle({requiresRecycle})",
-                    _context.InputAddress, args.ExceptionReceivedContext.Action, activeDispatchCount, requiresRecycle);
+                    _context.InputAddress, args.ExceptionReceivedContext.Action, _messageReceiver.ActiveDispatchCount, requiresRecycle);
             }
 
-            if (activeDispatchCount == 0 && requiresRecycle)
+            if (requiresRecycle)
             {
-                LogContext.Debug?.Log("Receiver shutdown completed: {InputAddress}", _context.InputAddress);
+                if (_deliveryComplete.Task.IsCompleted)
+                    requiresRecycle = false;
+                else
+                    _deliveryComplete.TrySetResult(false);
 
-                _deliveryComplete.TrySetResult(true);
+                if (requiresRecycle)
+                {
+                    lock (_context)
+                    {
+                        if (_stopped)
+                            return;
 
-                SetCompleted(TaskUtil.Faulted<bool>(args.Exception));
+                        _stopped = true;
+                    }
+
+                    await _context.NotifyFaulted(args.Exception, args.ExceptionReceivedContext.EntityPath).ConfigureAwait(false);
+
+                    await this.Stop($"Receiver Exception: {args.Exception.Message}").ConfigureAwait(false);
+                }
             }
-
-            return Task.CompletedTask;
         }
 
         async Task HandleDeliveryComplete()
@@ -100,6 +112,8 @@
             await Completed.ConfigureAwait(false);
 
             await _context.CloseAsync().ConfigureAwait(false);
+
+            LogContext.Debug?.Log("Receiver stopped: {InputAddress}", _context.InputAddress);
         }
 
         async Task ActiveAndActualAgentsCompleted(StopContext context)
