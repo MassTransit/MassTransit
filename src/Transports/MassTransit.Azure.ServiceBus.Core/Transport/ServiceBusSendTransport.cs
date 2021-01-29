@@ -6,6 +6,7 @@
     using Context;
     using Contexts;
     using GreenPipes;
+    using GreenPipes.Agents;
     using Logging;
     using MassTransit.Scheduling;
     using Microsoft.Azure.ServiceBus;
@@ -17,6 +18,7 @@
     /// May be sensible to create a IBatchSendTransport that allows multiple messages to be sent as a single batch (perhaps using Tx support?)
     /// </summary>
     public class ServiceBusSendTransport :
+        Agent,
         ISendTransport
     {
         readonly ServiceBusSendTransportContext _context;
@@ -36,6 +38,13 @@
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _context.ConnectSendObserver(observer);
+        }
+
+        protected override Task StopAgent(StopContext context)
+        {
+            LogContext.Debug?.Log("Stopping send transport: {Address}", _context.Address);
+
+            return base.StopAgent(context);
         }
 
 

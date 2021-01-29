@@ -1,4 +1,4 @@
-﻿namespace MassTransit.AmazonSqsTransport.Transport
+namespace MassTransit.AmazonSqsTransport.Transport
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -9,14 +9,14 @@
     using Internals.Extensions;
 
 
-    public class ClientContextFactory :
+    public class ScopeClientContextFactory :
         IPipeContextFactory<ClientContext>
     {
-        readonly IConnectionContextSupervisor _connectionContextSupervisor;
+        readonly IClientContextSupervisor _supervisor;
 
-        public ClientContextFactory(IConnectionContextSupervisor connectionContextSupervisor)
+        public ScopeClientContextFactory(IClientContextSupervisor supervisor)
         {
-            _connectionContextSupervisor = connectionContextSupervisor;
+            _supervisor = supervisor;
         }
 
         IPipeContextAgent<ClientContext> IPipeContextFactory<ClientContext>.CreateContext(ISupervisor supervisor)
@@ -31,24 +31,24 @@
         IActivePipeContextAgent<ClientContext> IPipeContextFactory<ClientContext>.CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<ClientContext> context, CancellationToken cancellationToken)
         {
-            return supervisor.AddActiveContext(context, CreateSharedClientContext(context.Context, cancellationToken));
+            return supervisor.AddActiveContext(context, CreateSharedModel(context.Context, cancellationToken));
         }
 
-        static async Task<ClientContext> CreateSharedClientContext(Task<ClientContext> context, CancellationToken cancellationToken)
+        static async Task<ClientContext> CreateSharedModel(Task<ClientContext> context, CancellationToken cancellationToken)
         {
             return context.IsCompletedSuccessfully()
-                ? new ScopeClientContext(context.Result, cancellationToken)
-                : new ScopeClientContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
+                ? new SharedClientContext(context.Result, cancellationToken)
+                : new SharedClientContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
 
         void CreateClientContext(IAsyncPipeContextAgent<ClientContext> asyncContext, CancellationToken cancellationToken)
         {
-            static Task<ClientContext> Create(ConnectionContext connectionContext, CancellationToken createCancellationToken)
+            static Task<ClientContext> Create(ClientContext context, CancellationToken createCancellationToken)
             {
-                return Task.FromResult(connectionContext.CreateClientContext(createCancellationToken));
+                return Task.FromResult<ClientContext>(new SharedClientContext(context, createCancellationToken));
             }
 
-            _connectionContextSupervisor.CreateAgent(asyncContext, Create, cancellationToken);
+            _supervisor.CreateAgent(asyncContext, Create, cancellationToken);
         }
     }
 }

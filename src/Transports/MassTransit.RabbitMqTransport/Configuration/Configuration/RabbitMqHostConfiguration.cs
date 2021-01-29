@@ -140,16 +140,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
             return configuration;
         }
 
-        public ISendTransportProvider CreateSendTransportProvider(IModelContextSupervisor modelContextSupervisor)
-        {
-            return new RabbitMqSendTransportProvider(ConnectionContextSupervisor, modelContextSupervisor);
-        }
-
-        public IPublishTransportProvider CreatePublishTransportProvider(IModelContextSupervisor modelContextSupervisor)
-        {
-            return new RabbitMqPublishTransportProvider(ConnectionContextSupervisor, modelContextSupervisor);
-        }
-
         public override void ReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IRabbitMqReceiveEndpointConfigurator> configureEndpoint = null)
         {

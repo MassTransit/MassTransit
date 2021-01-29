@@ -80,10 +80,5 @@
         {
             return _context.ReceiveMessages(queueName, messageLimit, waitTime, cancellationToken);
         }
-
-        public ValueTask DisposeAsync()
-        {
-            return default;
-        }
     }
 }

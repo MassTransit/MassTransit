@@ -36,8 +36,5 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(RabbitMqReceiveSettings settings,
             IRabbitMqEndpointConfiguration endpointConfiguration, Action<IRabbitMqReceiveEndpointConfigurator> configure = null);
-
-        ISendTransportProvider CreateSendTransportProvider(IModelContextSupervisor modelContextSupervisor);
-        IPublishTransportProvider CreatePublishTransportProvider(IModelContextSupervisor modelContextSupervisor);
     }
 }

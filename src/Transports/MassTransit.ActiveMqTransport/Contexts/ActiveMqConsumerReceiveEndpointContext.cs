@@ -61,12 +61,12 @@
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return SessionContextSupervisor;
+            return new ActiveMqSendTransportProvider(_hostConfiguration.ConnectionContextSupervisor, SessionContextSupervisor);
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return SessionContextSupervisor;
+            return new ActiveMqPublishTransportProvider(_hostConfiguration.ConnectionContextSupervisor, SessionContextSupervisor);
         }
     }
 }

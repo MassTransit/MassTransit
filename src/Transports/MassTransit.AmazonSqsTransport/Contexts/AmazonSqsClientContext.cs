@@ -19,7 +19,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
     public class AmazonSqsClientContext :
         ScopePipeContext,
-        ClientContext
+        ClientContext,
+        IAsyncDisposable
     {
         readonly IAmazonSimpleNotificationService _amazonSns;
         readonly IAmazonSQS _amazonSqs;
@@ -39,16 +40,6 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
             _queueCache = new QueueCache(amazonSqs, cancellationToken);
             _topicCache = new TopicCache(amazonSns, cancellationToken);
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            await _queueCache.DisposeAsync().ConfigureAwait(false);
-
-            _topicCache.Clear();
-
-            _amazonSqs?.Dispose();
-            _amazonSns?.Dispose();
         }
 
         CancellationToken PipeContext.CancellationToken => _cancellationToken;
@@ -205,6 +196,16 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             response.EnsureSuccessfulResponse();
 
             return response.Messages;
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            await _queueCache.DisposeAsync().ConfigureAwait(false);
+
+            _topicCache.Clear();
+
+            _amazonSqs?.Dispose();
+            _amazonSns?.Dispose();
         }
 
         async Task DeleteQueueSubscription(string subscriptionArn)

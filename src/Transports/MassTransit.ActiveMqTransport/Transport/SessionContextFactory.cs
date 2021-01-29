@@ -38,8 +38,8 @@
         static async Task<SessionContext> CreateSharedSession(Task<SessionContext> context, CancellationToken cancellationToken)
         {
             return context.IsCompletedSuccessfully()
-                ? new SharedSessionContext(context.Result, cancellationToken)
-                : new SharedSessionContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
+                ? new ScopeSessionContext(context.Result, cancellationToken)
+                : new ScopeSessionContext(await context.OrCanceled(cancellationToken).ConfigureAwait(false), cancellationToken);
         }
 
         void CreateSession(IAsyncPipeContextAgent<SessionContext> asyncContext, CancellationToken cancellationToken)

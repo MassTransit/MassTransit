@@ -92,7 +92,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
             var transportContext = new SendTransportContext(_hostConfiguration, address, endpointContextSupervisor);
 
-            return new ServiceBusSendTransport(transportContext);
+            var transport = new ServiceBusSendTransport(transportContext);
+
+            endpointContextSupervisor.Add(transport);
+
+            return transport;
         }
 
 

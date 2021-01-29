@@ -8,13 +8,11 @@ namespace MassTransit.AmazonSqsTransport.Transport
     public interface IConnectionContextSupervisor :
         ITransportSupervisor<ConnectionContext>
     {
-        IClientContextSupervisor CreateClientContextSupervisor();
-
         Uri NormalizeAddress(Uri address);
 
-        Task<ISendTransport> CreateSendTransport(IClientContextSupervisor supervisor, Uri address);
+        Task<ISendTransport> CreateSendTransport(IClientContextSupervisor clientContextSupervisor, Uri address);
 
-        Task<ISendTransport> CreatePublishTransport<T>(IClientContextSupervisor supervisor)
+        Task<ISendTransport> CreatePublishTransport<T>(IClientContextSupervisor clientContextSupervisor)
             where T : class;
     }
 }

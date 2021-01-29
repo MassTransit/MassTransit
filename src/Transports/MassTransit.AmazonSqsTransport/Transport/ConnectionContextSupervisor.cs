@@ -7,6 +7,7 @@
     using Context;
     using Contexts;
     using GreenPipes;
+    using GreenPipes.Agents;
     using Pipeline;
     using Topology;
     using Topology.Builders;
@@ -28,21 +29,12 @@
             _topologyConfiguration = topologyConfiguration;
         }
 
-        public IClientContextSupervisor CreateClientContextSupervisor()
-        {
-            var clientContextSupervisor = new ClientContextSupervisor(this);
-
-            AddConsumeAgent(clientContextSupervisor);
-
-            return clientContextSupervisor;
-        }
-
         public Uri NormalizeAddress(Uri address)
         {
             return new AmazonSqsEndpointAddress(_hostConfiguration.HostAddress, address);
         }
 
-        public Task<ISendTransport> CreateSendTransport(IClientContextSupervisor supervisor, Uri address)
+        public Task<ISendTransport> CreateSendTransport(IClientContextSupervisor clientContextSupervisor, Uri address)
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
 
@@ -54,15 +46,9 @@
             {
                 var settings = _topologyConfiguration.Send.GetSendSettings(endpointAddress);
 
-                IPipe<ClientContext> configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, settings.GetBrokerTopology()).ToPipe();
+                IPipe<ClientContext> configureTopology = new ConfigureTopologyFilter<EntitySettings>(settings, settings.GetBrokerTopology()).ToPipe();
 
-                var transportContext = new SendTransportContext(_hostConfiguration, supervisor, configureTopology, settings.EntityName);
-
-                var transport = new QueueSendTransport(transportContext);
-
-                supervisor.AddSendAgent(transport);
-
-                return Task.FromResult<ISendTransport>(transport);
+                return CreateTransport(clientContextSupervisor, configureTopology, settings.EntityName, x => new QueueSendTransport(x));
             }
             else
             {
@@ -74,18 +60,13 @@
 
                 builder.Topic ??= topicHandle;
 
-                IPipe<ClientContext> configureTopology = new ConfigureTopologyFilter<PublishSettings>(settings, builder.BuildBrokerTopology()).ToPipe();
+                IPipe<ClientContext> configureTopology = new ConfigureTopologyFilter<EntitySettings>(settings, builder.BuildBrokerTopology()).ToPipe();
 
-                var transportContext = new SendTransportContext(_hostConfiguration, supervisor, configureTopology, settings.EntityName);
-
-                var transport = new TopicSendTransport(transportContext);
-                supervisor.AddSendAgent(transport);
-
-                return Task.FromResult<ISendTransport>(transport);
+                return CreateTransport(clientContextSupervisor, configureTopology, settings.EntityName, x => new TopicSendTransport(x));
             }
         }
 
-        public Task<ISendTransport> CreatePublishTransport<T>(IClientContextSupervisor supervisor)
+        public Task<ISendTransport> CreatePublishTransport<T>(IClientContextSupervisor clientContextSupervisor)
             where T : class
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
@@ -94,12 +75,22 @@
 
             var settings = publishTopology.GetPublishSettings(_hostConfiguration.HostAddress);
 
-            IPipe<ClientContext> configureTopology = new ConfigureTopologyFilter<PublishSettings>(settings, publishTopology.GetBrokerTopology()).ToPipe();
+            IPipe<ClientContext> configureTopology = new ConfigureTopologyFilter<EntitySettings>(settings, publishTopology.GetBrokerTopology()).ToPipe();
 
-            var transportContext = new SendTransportContext(_hostConfiguration, supervisor, configureTopology, settings.EntityName);
+            return CreateTransport(clientContextSupervisor, configureTopology, settings.EntityName, x => new TopicSendTransport(x));
+        }
 
-            var transport = new TopicSendTransport(transportContext);
-            supervisor.AddSendAgent(transport);
+        Task<ISendTransport> CreateTransport<T>(IClientContextSupervisor clientContextSupervisor, IPipe<ClientContext> configureTopology, string entityName,
+            Func<SqsSendTransportContext, T> factory)
+            where T : Supervisor, ISendTransport
+        {
+            var supervisor = new ClientContextSupervisor(clientContextSupervisor);
+
+            var transportContext = new SendTransportContext(_hostConfiguration, supervisor, configureTopology, entityName);
+
+            var transport = factory(transportContext);
+
+            clientContextSupervisor.AddSendAgent(transport);
 
             return Task.FromResult<ISendTransport>(transport);
         }

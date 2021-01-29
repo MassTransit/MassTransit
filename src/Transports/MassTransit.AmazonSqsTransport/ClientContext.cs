@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.AmazonSqsTransport
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
@@ -12,8 +11,7 @@
 
 
     public interface ClientContext :
-        PipeContext,
-        IAsyncDisposable
+        PipeContext
     {
         ConnectionContext ConnectionContext { get; }
 

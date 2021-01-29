@@ -8,6 +8,7 @@
     using Integration;
     using Topology;
     using Topology.Builders;
+    using Transport;
     using Util;
 
 
@@ -59,12 +60,12 @@
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return _hostConfiguration.CreateSendTransportProvider(ModelContextSupervisor);
+            return new RabbitMqSendTransportProvider(_hostConfiguration.ConnectionContextSupervisor, ModelContextSupervisor);
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return _hostConfiguration.CreatePublishTransportProvider(ModelContextSupervisor);
+            return new RabbitMqPublishTransportProvider(_hostConfiguration.ConnectionContextSupervisor, ModelContextSupervisor);
         }
     }
 }

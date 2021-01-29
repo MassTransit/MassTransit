@@ -61,16 +61,16 @@
             return CreateSendTransport(sessionContextSupervisor, configureTopology, settings.EntityName, DestinationType.Topic);
         }
 
-        Task<ISendTransport> CreateSendTransport(ISessionContextSupervisor supervisor, IPipe<SessionContext> pipe, string entityName,
+        Task<ISendTransport> CreateSendTransport(ISessionContextSupervisor sessionContextSupervisor, IPipe<SessionContext> pipe, string entityName,
             DestinationType destinationType)
         {
-            var scopeSupervisor = new SessionContextSupervisor(supervisor);
+            var supervisor = new SessionContextSupervisor(sessionContextSupervisor);
 
-            var sendTransportContext = new SendTransportContext(_hostConfiguration, scopeSupervisor, pipe, entityName, destinationType);
+            var sendTransportContext = new SendTransportContext(_hostConfiguration, supervisor, pipe, entityName, destinationType);
 
             var transport = new ActiveMqSendTransport(sendTransportContext);
 
-            AddSendAgent(transport);
+            sessionContextSupervisor.AddSendAgent(transport);
 
             return Task.FromResult<ISendTransport>(transport);
         }

@@ -7,9 +7,7 @@ namespace MassTransit.ActiveMqTransport.Transport
     /// Creates and caches a session on the connection
     /// </summary>
     public interface ISessionContextSupervisor :
-        ITransportSupervisor<SessionContext>,
-        ISendTransportProvider,
-        IPublishTransportProvider
+        ITransportSupervisor<SessionContext>
     {
     }
 }

@@ -1,7 +1,5 @@
 namespace MassTransit.AmazonSqsTransport.Transport
 {
-    using System;
-    using System.Threading.Tasks;
     using Transports;
 
 
@@ -9,28 +7,16 @@ namespace MassTransit.AmazonSqsTransport.Transport
         TransportPipeContextSupervisor<ClientContext>,
         IClientContextSupervisor
     {
-        readonly IConnectionContextSupervisor _connectionContextSupervisor;
-
-        public ClientContextSupervisor(IConnectionContextSupervisor supervisor)
-            : base(new ClientContextFactory(supervisor))
+        public ClientContextSupervisor(IConnectionContextSupervisor connectionContextSupervisor)
+            : base(new ClientContextFactory(connectionContextSupervisor))
         {
-            _connectionContextSupervisor = supervisor;
+            connectionContextSupervisor.AddConsumeAgent(this);
         }
 
-        public Uri NormalizeAddress(Uri address)
+        public ClientContextSupervisor(IClientContextSupervisor clientContextSupervisor)
+            : base(new ScopeClientContextFactory(clientContextSupervisor))
         {
-            return _connectionContextSupervisor.NormalizeAddress(address);
-        }
-
-        public Task<ISendTransport> GetSendTransport(Uri address)
-        {
-            return _connectionContextSupervisor.CreateSendTransport(this, address);
-        }
-
-        public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
-            where T : class
-        {
-            return _connectionContextSupervisor.CreatePublishTransport<T>(this);
+            clientContextSupervisor.AddSendAgent(this);
         }
     }
 }

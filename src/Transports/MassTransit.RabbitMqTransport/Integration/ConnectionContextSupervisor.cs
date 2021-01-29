@@ -45,9 +45,7 @@
 
             IPipe<ModelContext> configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
 
-            var supervisor = new ModelContextSupervisor(modelContextSupervisor);
-
-            return CreateSendTransport(supervisor, configureTopology, settings.ExchangeName);
+            return CreateSendTransport(modelContextSupervisor, configureTopology, settings.ExchangeName);
         }
 
         public Task<ISendTransport> CreatePublishTransport<T>(IModelContextSupervisor modelContextSupervisor)
@@ -57,24 +55,24 @@
 
             IRabbitMqMessagePublishTopology<T> publishTopology = _topologyConfiguration.Publish.GetMessageTopology<T>();
 
-            var sendSettings = publishTopology.GetSendSettings(_hostConfiguration.HostAddress);
+            var settings = publishTopology.GetSendSettings(_hostConfiguration.HostAddress);
 
             var brokerTopology = publishTopology.GetBrokerTopology();
 
-            var supervisor = new ModelContextSupervisor(modelContextSupervisor);
+            IPipe<ModelContext> configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
 
-            IPipe<ModelContext> configureTopology = new ConfigureTopologyFilter<SendSettings>(sendSettings, brokerTopology).ToPipe();
-
-            return CreateSendTransport(supervisor, configureTopology, publishTopology.Exchange.ExchangeName);
+            return CreateSendTransport(modelContextSupervisor, configureTopology, publishTopology.Exchange.ExchangeName);
         }
 
         Task<ISendTransport> CreateSendTransport(IModelContextSupervisor modelContextSupervisor, IPipe<ModelContext> pipe, string exchangeName)
         {
-            var sendTransportContext = new SendTransportContext(_hostConfiguration, modelContextSupervisor, pipe, exchangeName);
+            var supervisor = new ModelContextSupervisor(modelContextSupervisor);
+
+            var sendTransportContext = new SendTransportContext(_hostConfiguration, supervisor, pipe, exchangeName);
 
             var transport = new RabbitMqSendTransport(sendTransportContext);
 
-            AddSendAgent(transport);
+            modelContextSupervisor.AddSendAgent(transport);
 
             return Task.FromResult<ISendTransport>(transport);
         }

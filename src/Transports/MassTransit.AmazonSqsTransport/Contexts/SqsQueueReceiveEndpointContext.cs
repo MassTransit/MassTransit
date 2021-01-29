@@ -28,12 +28,12 @@
             _settings = settings;
             BrokerTopology = brokerTopology;
 
-            _clientContext = new Recycle<IClientContextSupervisor>(() => hostConfiguration.ConnectionContextSupervisor.CreateClientContextSupervisor());
+            _clientContext = new Recycle<IClientContextSupervisor>(() => new ClientContextSupervisor(_hostConfiguration.ConnectionContextSupervisor));
         }
 
-        public IClientContextSupervisor ClientContextSupervisor => _clientContext.Supervisor;
-
         public BrokerTopology BrokerTopology { get; }
+
+        public IClientContextSupervisor ClientContextSupervisor => _clientContext.Supervisor;
 
         public override void AddConsumeAgent(IAgent agent)
         {
@@ -64,12 +64,12 @@
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return ClientContextSupervisor;
+            return new AmazonSqsSendTransportProvider(_hostConfiguration.ConnectionContextSupervisor, ClientContextSupervisor);
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return ClientContextSupervisor;
+            return new AmazonSqsPublishTransportProvider(_hostConfiguration.ConnectionContextSupervisor, ClientContextSupervisor);
         }
     }
 }

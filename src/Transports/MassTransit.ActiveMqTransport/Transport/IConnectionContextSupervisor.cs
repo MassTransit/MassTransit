@@ -2,7 +2,6 @@ namespace MassTransit.ActiveMqTransport.Transport
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes.Agents;
     using Transports;
 
 
@@ -10,7 +9,7 @@ namespace MassTransit.ActiveMqTransport.Transport
     /// Attaches a connection context to the value (shared, of course)
     /// </summary>
     public interface IConnectionContextSupervisor :
-        ISupervisor<ConnectionContext>
+        ITransportSupervisor<ConnectionContext>
     {
         Uri NormalizeAddress(Uri address);
 
