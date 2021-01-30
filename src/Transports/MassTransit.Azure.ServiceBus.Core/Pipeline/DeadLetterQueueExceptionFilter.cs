@@ -5,7 +5,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
 
     /// <summary>
-    /// Moves a faulted message to the dead-letter queue, rather than the _skipped queue
+    /// Moves a faulted message to the dead-letter queue, rather than the _error queue
     /// </summary>
     public class DeadLetterQueueExceptionFilter :
         IFilter<ExceptionReceiveContext>
