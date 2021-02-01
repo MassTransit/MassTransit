@@ -104,7 +104,7 @@ The functions [host.json](https://docs.microsoft.com/en-us/azure/azure-functions
 }
 ```
 
-This settings for _prefetchCount_, _maxConcurrentCalls_, and _maxAutoRenewDuration_ are the most important – these wild directly affect the performance of an Azure Function.
+This settings for _prefetchCount_, _maxConcurrentCalls_, and _maxAutoRenewDuration_ are the most important – these will directly affect the performance of an Azure Function.
 
 The function should include a Startup class, which is called on startup by the Azure Functions framework. The example below configures MassTransit, registers the consumers for use, and adds a scoped type for an Azure function class.
 
