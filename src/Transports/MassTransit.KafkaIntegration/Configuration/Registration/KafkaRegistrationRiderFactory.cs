@@ -32,7 +32,7 @@ namespace MassTransit.KafkaIntegration.Registration
             _configure?.Invoke(context, configurator);
 
             foreach (var registration in context.GetRegistrations<IKafkaProducerRegistration>())
-                registration.Register(configurator);
+                registration.Register(configurator, context);
 
             return configurator.Build(context);
         }
