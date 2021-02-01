@@ -1,0 +1,9 @@
+{
+  "namespace": "UnitTests",
+  "type": "record",
+  "doc": "A simple Kafka message",
+  "name": "KafkaMessage",
+  "fields": [
+    { "name": "Test", "type": "string" }
+  ]
+}
