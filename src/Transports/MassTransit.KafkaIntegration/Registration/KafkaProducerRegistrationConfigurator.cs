@@ -1,58 +1,32 @@
 namespace MassTransit.KafkaIntegration.Registration
 {
     using System;
-    using System.Collections.Generic;
     using Confluent.Kafka;
+    using MassTransit.Registration;
 
 
     public class KafkaProducerRegistrationConfigurator<TKey, TValue> :
-        IKafkaProducerRegistration,
-        IKafkaProducerRegistrationConfigurator<TKey, TValue>
+        IKafkaProducerRegistration
         where TValue : class
     {
-        readonly List<Action<IKafkaProducerConfigurator<TKey, TValue>>> _configurations;
+        readonly Action<IRiderRegistrationContext, IKafkaProducerConfigurator<TKey, TValue>> _configure;
         readonly ProducerConfig _producerConfig;
         readonly string _topic;
-        ISerializer<TKey> _keySerializer;
-        ISerializer<TValue> _valueSerializer;
 
-        public KafkaProducerRegistrationConfigurator(string topic, ProducerConfig producerConfig = null)
+        public KafkaProducerRegistrationConfigurator(string topic, Action<IRiderRegistrationContext, IKafkaProducerConfigurator<TKey, TValue>> configure,
+            ProducerConfig producerConfig = null)
         {
             _topic = topic;
             _producerConfig = producerConfig;
-
-            _configurations = new List<Action<IKafkaProducerConfigurator<TKey, TValue>>>();
+            _configure = configure;
         }
 
-        public void Register(IKafkaFactoryConfigurator configurator)
+        public void Register(IKafkaFactoryConfigurator configurator, IRiderRegistrationContext context)
         {
-            if (_keySerializer != null)
-                _configurations.Add(x => x.SetKeySerializer(_keySerializer));
-            if (_valueSerializer != null)
-                _configurations.Add(x => x.SetValueSerializer(_valueSerializer));
-
             if (_producerConfig != null)
-                configurator.TopicProducer<TKey, TValue>(_topic, _producerConfig, c => _configurations.ForEach(x => x(c)));
+                configurator.TopicProducer<TKey, TValue>(_topic, _producerConfig, c => _configure?.Invoke(context, c));
             else
-                configurator.TopicProducer<TKey, TValue>(_topic, c => _configurations.ForEach(x => x(c)));
-        }
-
-        public IKafkaProducerRegistrationConfigurator<TKey, TValue> SetKeySerializer(ISerializer<TKey> serializer)
-        {
-            _keySerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
-            return this;
-        }
-
-        public IKafkaProducerRegistrationConfigurator<TKey, TValue> SetValueSerializer(ISerializer<TValue> serializer)
-        {
-            _valueSerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
-            return this;
-        }
-
-        public IKafkaProducerRegistrationConfigurator<TKey, TValue> Configure(Action<IKafkaProducerConfigurator> configure)
-        {
-            _configurations.Add(configure ?? throw new ArgumentNullException(nameof(configure)));
-            return this;
+                configurator.TopicProducer<TKey, TValue>(_topic, c => _configure?.Invoke(context, c));
         }
     }
 }

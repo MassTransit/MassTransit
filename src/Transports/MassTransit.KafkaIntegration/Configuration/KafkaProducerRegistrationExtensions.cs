@@ -16,11 +16,13 @@ namespace MassTransit.KafkaIntegration
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="topicName">The topic name</param>
+        /// <param name="configure"></param>
         /// <typeparam name="T">The message type</typeparam>
-        public static IKafkaProducerRegistrationConfigurator<Ignore, T> AddProducer<T>(this IRiderRegistrationConfigurator configurator, string topicName)
+        public static void AddProducer<T>(this IRiderRegistrationConfigurator configurator, string topicName,
+            Action<IRiderRegistrationContext, IKafkaProducerConfigurator<Ignore, T>> configure = null)
             where T : class
         {
-            return configurator.AddProducer<Ignore, T>(topicName, _ => default);
+            configurator.AddProducer(topicName, _ => default, configure);
         }
 
         /// <summary>
@@ -30,12 +32,14 @@ namespace MassTransit.KafkaIntegration
         /// <param name="configurator"></param>
         /// <param name="topicName">The topic name</param>
         /// <param name="producerConfig"></param>
+        /// <param name="configure"></param>
         /// <typeparam name="T">The message type</typeparam>
-        public static IKafkaProducerRegistrationConfigurator<Ignore, T> AddProducer<T>(this IRiderRegistrationConfigurator configurator, string topicName,
-            ProducerConfig producerConfig)
+        public static void AddProducer<T>(this IRiderRegistrationConfigurator configurator, string topicName,
+            ProducerConfig producerConfig,
+            Action<IRiderRegistrationContext, IKafkaProducerConfigurator<Ignore, T>> configure = null)
             where T : class
         {
-            return configurator.AddProducer<Ignore, T>(topicName, producerConfig, _ => default);
+            configurator.AddProducer(topicName, producerConfig, _ => default, configure);
         }
 
         /// <summary>
@@ -44,18 +48,19 @@ namespace MassTransit.KafkaIntegration
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="topicName">The topic name</param>
+        /// <param name="configure"></param>
         /// <typeparam name="T">The message type</typeparam>
         /// <typeparam name="TKey">The key type</typeparam>
-        public static IKafkaProducerRegistrationConfigurator<TKey, T> AddProducer<TKey, T>(this IRiderRegistrationConfigurator configurator, string topicName)
+        public static void AddProducer<TKey, T>(this IRiderRegistrationConfigurator configurator, string topicName,
+            Action<IRiderRegistrationContext, IKafkaProducerConfigurator<TKey, T>> configure = null)
             where T : class
         {
             if (string.IsNullOrWhiteSpace(topicName))
                 throw new ArgumentException(nameof(topicName));
 
-            var registration = new KafkaProducerRegistrationConfigurator<TKey, T>(topicName);
+            var registration = new KafkaProducerRegistrationConfigurator<TKey, T>(topicName, configure);
             configurator.Registrar.Register(provider => GetProducer<TKey, T>(topicName, provider));
             configurator.AddRegistration(registration);
-            return registration;
         }
 
         /// <summary>
@@ -65,10 +70,12 @@ namespace MassTransit.KafkaIntegration
         /// <param name="configurator"></param>
         /// <param name="topicName">The topic name</param>
         /// <param name="producerConfig"></param>
+        /// <param name="configure"></param>
         /// <typeparam name="T">The message type</typeparam>
         /// <typeparam name="TKey">The key type</typeparam>
-        public static IKafkaProducerRegistrationConfigurator<TKey, T> AddProducer<TKey, T>(this IRiderRegistrationConfigurator configurator, string topicName,
-            ProducerConfig producerConfig)
+        public static void AddProducer<TKey, T>(this IRiderRegistrationConfigurator configurator, string topicName,
+            ProducerConfig producerConfig,
+            Action<IRiderRegistrationContext, IKafkaProducerConfigurator<TKey, T>> configure = null)
             where T : class
         {
             if (string.IsNullOrWhiteSpace(topicName))
@@ -76,10 +83,9 @@ namespace MassTransit.KafkaIntegration
             if (producerConfig == null)
                 throw new ArgumentNullException(nameof(producerConfig));
 
-            var registration = new KafkaProducerRegistrationConfigurator<TKey, T>(topicName, producerConfig);
+            var registration = new KafkaProducerRegistrationConfigurator<TKey, T>(topicName, configure, producerConfig);
             configurator.Registrar.Register(provider => GetProducer<TKey, T>(topicName, provider));
             configurator.AddRegistration(registration);
-            return registration;
         }
 
         /// <summary>
@@ -89,17 +95,17 @@ namespace MassTransit.KafkaIntegration
         /// <param name="configurator"></param>
         /// <param name="topicName">The topic name</param>
         /// <param name="keyResolver">Key resolver</param>
+        /// <param name="configure"></param>
         /// <typeparam name="T">The message type</typeparam>
         /// <typeparam name="TKey">The key type</typeparam>
-        public static IKafkaProducerRegistrationConfigurator<TKey, T> AddProducer<TKey, T>(this IRiderRegistrationConfigurator configurator, string topicName,
-            KafkaKeyResolver<TKey, T> keyResolver)
+        public static void AddProducer<TKey, T>(this IRiderRegistrationConfigurator configurator, string topicName,
+            KafkaKeyResolver<TKey, T> keyResolver,
+            Action<IRiderRegistrationContext, IKafkaProducerConfigurator<TKey, T>> configure = null)
             where T : class
         {
-            IKafkaProducerRegistrationConfigurator<TKey, T> registration = configurator.AddProducer<TKey, T>(topicName);
+            configurator.AddProducer(topicName, configure);
             configurator.Registrar.Register<ITopicProducer<T>>(provider =>
                 new KeyedTopicProducer<TKey, T>(provider.GetRequiredService<ITopicProducer<TKey, T>>(), keyResolver));
-
-            return registration;
         }
 
         /// <summary>
@@ -110,17 +116,17 @@ namespace MassTransit.KafkaIntegration
         /// <param name="topicName">The topic name</param>
         /// <param name="producerConfig"></param>
         /// <param name="keyResolver">Key resolver</param>
+        /// <param name="configure"></param>
         /// <typeparam name="T">The message type</typeparam>
         /// <typeparam name="TKey">The key type</typeparam>
-        public static IKafkaProducerRegistrationConfigurator<TKey, T> AddProducer<TKey, T>(this IRiderRegistrationConfigurator configurator, string topicName,
-            ProducerConfig producerConfig, KafkaKeyResolver<TKey, T> keyResolver)
+        public static void AddProducer<TKey, T>(this IRiderRegistrationConfigurator configurator, string topicName,
+            ProducerConfig producerConfig, KafkaKeyResolver<TKey, T> keyResolver,
+            Action<IRiderRegistrationContext, IKafkaProducerConfigurator<TKey, T>> configure = null)
             where T : class
         {
-            IKafkaProducerRegistrationConfigurator<TKey, T> registration = configurator.AddProducer<TKey, T>(topicName, producerConfig);
+            configurator.AddProducer(topicName, producerConfig, configure);
             configurator.Registrar.Register<ITopicProducer<T>>(provider =>
                 new KeyedTopicProducer<TKey, T>(provider.GetRequiredService<ITopicProducer<TKey, T>>(), keyResolver));
-
-            return registration;
         }
 
         static ITopicProducer<TKey, T> GetProducer<TKey, T>(string topicName, IConfigurationServiceProvider provider)
