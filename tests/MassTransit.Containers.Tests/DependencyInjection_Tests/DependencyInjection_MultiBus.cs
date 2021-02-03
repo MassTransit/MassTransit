@@ -5,7 +5,6 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
     using Common_Tests;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
-    using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using MultiBus;
@@ -19,8 +18,16 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
         readonly IServiceProvider _provider;
 
         protected override IBusOne One => _provider.GetRequiredService<IBusOne>();
-        protected override HealthCheckService HealthCheckService => _provider.GetRequiredService<HealthCheckService>();
         protected override IEnumerable<IHostedService> HostedServices => _provider.GetServices<IHostedService>();
+
+        protected override IRequestClient<T> GetRequestClient<T>()
+        {
+            var scope = _provider.CreateScope();
+
+            return scope.ServiceProvider.GetRequiredService<IRequestClient<T>>();
+        }
+
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
 
         public DependencyInjection_MultiBus()
         {
@@ -29,13 +36,20 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
             services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
             services.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
 
+            services.AddMassTransit(x =>
+            {
+                ConfigureRegistration(x);
+
+                x.AddBus(provider => BusControl);
+            });
+
             services.AddSingleton(Task1);
             services.AddSingleton(Task2);
 
             services.AddMassTransit<IBusOne, BusOne>(ConfigureOne);
             services.AddMassTransit<IBusTwo>(ConfigureTwo);
 
-            services.AddMassTransitHostedService();
+            services.AddMassTransitHostedService(true);
 
             _provider = services.BuildServiceProvider(true);
         }
