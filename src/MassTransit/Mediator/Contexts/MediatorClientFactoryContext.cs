@@ -28,6 +28,12 @@ namespace MassTransit.Mediator.Contexts
             return _connector.ConnectConsumePipe(pipe);
         }
 
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe, ConnectPipeOptions options)
+            where T : class
+        {
+            return _connector.ConnectConsumePipe(pipe, options);
+        }
+
         public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
             where T : class
         {

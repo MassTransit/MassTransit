@@ -2,6 +2,7 @@
 {
     using System;
     using GreenPipes;
+    using Pipeline;
 
 
     public class ReceiveEndpointClientFactoryContext :
@@ -21,6 +22,12 @@
             where T : class
         {
             return _receiveEndpoint.ConnectConsumePipe(pipe);
+        }
+
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe, ConnectPipeOptions options)
+            where T : class
+        {
+            return _receiveEndpoint.ConnectConsumePipe(pipe, options);
         }
 
         public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)

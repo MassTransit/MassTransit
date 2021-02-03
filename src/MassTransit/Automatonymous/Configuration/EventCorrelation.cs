@@ -13,6 +13,8 @@
         /// The data type for the event
         /// </summary>
         Type DataType { get; }
+
+        bool ConfigureConsumeTopology { get; }
     }
 
 

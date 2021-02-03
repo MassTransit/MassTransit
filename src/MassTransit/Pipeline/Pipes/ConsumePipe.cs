@@ -51,7 +51,8 @@ namespace MassTransit.Pipeline.Pipes
             return _dynamicFilter.ConnectObserver(new ConsumeObserverAdapter<TMessage>(observer));
         }
 
-        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+            where T : class
         {
             var handle = _dynamicFilter.ConnectPipe(BuildMessagePipe(pipe));
 
@@ -59,6 +60,12 @@ namespace MassTransit.Pipeline.Pipes
                 _connected.TrySetResult(true);
 
             return handle;
+        }
+
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe, ConnectPipeOptions options)
+            where T : class
+        {
+            return ConnectConsumePipe(pipe);
         }
 
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)

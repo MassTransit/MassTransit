@@ -4,6 +4,7 @@ namespace MassTransit.Transports.InMemory.Builders
     using Contexts;
     using GreenPipes;
     using MassTransit.Builders;
+    using Pipeline;
 
 
     public class InMemoryReceiveEndpointBuilder :
@@ -19,16 +20,16 @@ namespace MassTransit.Transports.InMemory.Builders
             _configuration = configuration;
         }
 
-        public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+        public override ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe, ConnectPipeOptions options)
         {
-            if (_configuration.ConfigureConsumeTopology)
+            if (_configuration.ConfigureConsumeTopology && options.HasFlag(ConnectPipeOptions.ConfigureConsumeTopology))
             {
                 _configuration.Topology.Consume
                     .GetMessageTopology<T>()
                     .Bind();
             }
 
-            return base.ConnectConsumePipe(pipe);
+            return base.ConnectConsumePipe(pipe, options);
         }
 
         public InMemoryReceiveEndpointContext CreateReceiveEndpointContext()

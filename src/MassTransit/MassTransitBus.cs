@@ -56,6 +56,18 @@ namespace MassTransit
             return handle;
         }
 
+        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe, ConnectPipeOptions options)
+        {
+            LogContext.SetCurrentIfNull(_logContext);
+
+            var handle = _consumePipe.ConnectConsumePipe(pipe, options);
+
+            if (_busHandle != null && !_receiveEndpoint.Started.IsCompletedSuccessfully())
+                TaskUtil.Await(_receiveEndpoint.Started);
+
+            return handle;
+        }
+
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
             LogContext.SetCurrentIfNull(_logContext);

@@ -18,6 +18,8 @@ namespace MassTransit.Saga.Connectors
             _consumeFilter = consumeFilter;
         }
 
+        protected virtual bool ConfigureConsumeTopology { get; } = true;
+
         public Type MessageType => typeof(TMessage);
 
         public ISagaMessageSpecification<TSaga> CreateSagaMessageSpecification()
@@ -36,8 +38,12 @@ namespace MassTransit.Saga.Connectors
                 ConfigureMessagePipe(x, repository, consumerPipe);
             });
 
-            return consumePipe.ConnectConsumePipe(messagePipe);
+            return ConfigureConsumeTopology
+                ? consumePipe.ConnectConsumePipe(messagePipe)
+                : consumePipe.ConnectConsumePipe(messagePipe, NotConfigureConsumeTopology);
         }
+
+        const ConnectPipeOptions NotConfigureConsumeTopology = ConnectPipeOptions.All & ~ConnectPipeOptions.ConfigureConsumeTopology;
 
         /// <summary>
         /// Configure the message pipe that is prior to the saga repository

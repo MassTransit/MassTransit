@@ -24,6 +24,11 @@
         bool ReadOnly { set; }
 
         /// <summary>
+        /// If set to false, the event type will not be configured as part of the broker topology
+        /// </summary>
+        bool ConfigureConsumeTopology { set; }
+
+        /// <summary>
         /// Correlate to the saga instance by CorrelationId, using the id from the event data
         /// </summary>
         /// <param name="selector">Returns the CorrelationId from the event data</param>

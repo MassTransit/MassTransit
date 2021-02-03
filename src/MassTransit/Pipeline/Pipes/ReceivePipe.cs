@@ -44,6 +44,11 @@
             return _consumePipe.ConnectConsumePipe(pipe);
         }
 
+        ConnectHandle IConsumePipeConnector.ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe, ConnectPipeOptions options)
+        {
+            return _consumePipe.ConnectConsumePipe(pipe, options);
+        }
+
         ConnectHandle IRequestPipeConnector.ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
         {
             return _consumePipe.ConnectRequestPipe(requestId, pipe);

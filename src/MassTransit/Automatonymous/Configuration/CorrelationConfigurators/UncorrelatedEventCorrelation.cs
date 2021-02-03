@@ -17,15 +17,17 @@
             Event = @event;
         }
 
-        public SagaFilterFactory<TInstance, TData> FilterFactory { get; } = null;
+        public SagaFilterFactory<TInstance, TData> FilterFactory => null;
 
         public Event<TData> Event { get; }
 
         Type EventCorrelation.DataType => typeof(TData);
 
-        IFilter<ConsumeContext<TData>> EventCorrelation<TInstance, TData>.MessageFilter { get; } = null;
+        public bool ConfigureConsumeTopology => false;
 
-        ISagaPolicy<TInstance, TData> EventCorrelation<TInstance, TData>.Policy { get; } = null;
+        public IFilter<ConsumeContext<TData>> MessageFilter => null;
+
+        public ISagaPolicy<TInstance, TData> Policy => null;
 
         public IEnumerable<ValidationResult> Validate()
         {

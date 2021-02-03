@@ -3,6 +3,7 @@ namespace MassTransit.Scoping
     using System;
     using Clients;
     using GreenPipes;
+    using Pipeline;
 
 
     public class ScopedClientFactoryContext<TScope> :
@@ -22,6 +23,12 @@ namespace MassTransit.Scoping
             where T : class
         {
             return _clientFactory.Context.ConnectConsumePipe(pipe);
+        }
+
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe, ConnectPipeOptions options)
+            where T : class
+        {
+            return _clientFactory.Context.ConnectConsumePipe(pipe, options);
         }
 
         public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)

@@ -9,6 +9,7 @@ namespace MassTransit.Transports
     using GreenPipes;
     using GreenPipes.Util;
     using Monitoring.Health;
+    using Pipeline;
 
 
     /// <summary>
@@ -111,6 +112,12 @@ namespace MassTransit.Transports
             where T : class
         {
             return _context.ReceivePipe.ConnectConsumePipe(pipe);
+        }
+
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe, ConnectPipeOptions options)
+            where T : class
+        {
+            return _context.ReceivePipe.ConnectConsumePipe(pipe, options);
         }
 
         public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)

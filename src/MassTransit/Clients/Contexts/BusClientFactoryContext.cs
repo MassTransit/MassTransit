@@ -2,6 +2,7 @@
 {
     using System;
     using GreenPipes;
+    using Pipeline;
 
 
     public class BusClientFactoryContext :
@@ -20,6 +21,12 @@
             where T : class
         {
             return _bus.ConnectConsumePipe(pipe);
+        }
+
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe, ConnectPipeOptions options)
+            where T : class
+        {
+            return _bus.ConnectConsumePipe(pipe, options);
         }
 
         public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)

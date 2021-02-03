@@ -1,14 +1,17 @@
-﻿using GreenPipes;
-using MassTransit.EndpointConfigurators;
-using MassTransit.Topology;
-using MassTransit.Transports;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace MassTransit.Transactions
+﻿namespace MassTransit.Transactions
 {
-    public abstract class BaseTransactionalBus : IBus
+    using System;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using EndpointConfigurators;
+    using GreenPipes;
+    using Pipeline;
+    using Topology;
+    using Transports;
+
+
+    public abstract class BaseTransactionalBus :
+        IBus
     {
         readonly IBus _bus;
         readonly IPublishEndpoint _publishEndpoint;
@@ -21,8 +24,6 @@ namespace MassTransit.Transactions
             _publishEndpointProvider = new TransactionalBusPublishEndpointProvider(this, bus);
             _publishEndpoint = new PublishEndpoint(_publishEndpointProvider);
         }
-
-        public abstract Task Add(Func<Task> action);
 
         public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
@@ -117,6 +118,12 @@ namespace MassTransit.Transactions
             return _bus.ConnectConsumePipe(pipe);
         }
 
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe, ConnectPipeOptions options)
+            where T : class
+        {
+            return _bus.ConnectConsumePipe(pipe, options);
+        }
+
         public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
             where T : class
         {
@@ -167,5 +174,7 @@ namespace MassTransit.Transactions
 
         public Uri Address => _bus.Address;
         public IBusTopology Topology => _bus.Topology;
+
+        public abstract Task Add(Func<Task> action);
     }
 }

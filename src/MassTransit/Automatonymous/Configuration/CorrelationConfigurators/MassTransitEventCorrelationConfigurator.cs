@@ -27,7 +27,10 @@
         {
             _event = @event;
             _machine = machine;
+
             InsertOnInitial = false;
+            ReadOnly = false;
+            ConfigureConsumeTopology = true;
 
             _sagaFactory = new DefaultSagaFactory<TInstance, TData>();
 
@@ -42,12 +45,14 @@
         public EventCorrelation Build()
         {
             return new MassTransitEventCorrelation<TInstance, TData>(_machine, _event, _sagaFilterFactory, _messageFilter, _missingPipe, _sagaFactory,
-                InsertOnInitial, ReadOnly);
+                InsertOnInitial, ReadOnly, ConfigureConsumeTopology);
         }
 
         public bool InsertOnInitial { get; set; }
 
         public bool ReadOnly { get; set; }
+
+        public bool ConfigureConsumeTopology { get; set; }
 
         public IEventCorrelationConfigurator<TInstance, TData> CorrelateById(Func<ConsumeContext<TData>, Guid> selector)
         {

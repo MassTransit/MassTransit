@@ -109,6 +109,12 @@ namespace MassTransit.Transports
             return _receivePipe.ConnectConsumePipe(pipe);
         }
 
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe, ConnectPipeOptions options)
+            where T : class
+        {
+            return _receivePipe.ConnectConsumePipe(pipe, options);
+        }
+
         public ConnectHandle ConnectRequestPipe<T>(Guid requestId, IPipe<ConsumeContext<T>> pipe)
             where T : class
         {

@@ -2,6 +2,7 @@ namespace MassTransit.Builders
 {
     using Configuration;
     using GreenPipes;
+    using Pipeline;
 
 
     public class ReceiveEndpointBuilder :
@@ -14,7 +15,13 @@ namespace MassTransit.Builders
             _configuration = configuration;
         }
 
-        public virtual ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+        public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
+            where T : class
+        {
+            return ConnectConsumePipe(pipe, ConnectPipeOptions.ConfigureConsumeTopology);
+        }
+
+        public virtual ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe, ConnectPipeOptions options)
             where T : class
         {
             return _configuration.ConsumePipe.ConnectConsumePipe(pipe);
