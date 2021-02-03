@@ -29,6 +29,27 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 
 
     [TestFixture]
+    public class DependencyInjection_RequestClient_Generic
+        : Common_RequestClient_Generic
+    {
+        readonly IServiceProvider _provider;
+
+        public DependencyInjection_RequestClient_Generic()
+        {
+            var collection = new ServiceCollection();
+            collection.AddMassTransit(ConfigureRegistration);
+            collection.AddGenericRequestClient();
+
+            _provider = collection.BuildServiceProvider(true);
+        }
+
+        protected override IRequestClient<InitialRequest> RequestClient => _provider.CreateRequestClient<InitialRequest>();
+
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class DependencyInjection_RequestClient_Outbox
         : Common_RequestClient_Outbox
     {
