@@ -7,6 +7,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using Newtonsoft.Json;
     using NUnit.Framework;
     using Serialization;
+    using TestFramework.Messages;
 
 
     [TestFixture]
@@ -117,6 +118,86 @@ namespace MassTransit.RabbitMqTransport.Tests
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _handled = Handled<Command>(configurator);
+        }
+
+
+        public interface Command
+        {
+            Guid CommandId { get; }
+            string ItemNumber { get; }
+        }
+
+
+        public class BagOfCrap
+        {
+            public Guid CommandId { get; set; }
+            public string ItemNumber { get; set; }
+        }
+    }
+
+
+    [TestFixture]
+    public class Sending_and_consuming_raw_json_with_headers_and_producing :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_not_forward_transport_headers_from_raw_json()
+        {
+            var message = new BagOfCrap
+            {
+                CommandId = NewId.NextGuid(),
+                ItemNumber = "27"
+            };
+
+            const string headerName = "Random-Header";
+            const string headerValue = "SomeValue";
+
+            await InputQueueSendEndpoint.Send(message, x =>
+            {
+                x.Headers.Set(headerName, headerValue);
+                x.Serializer = new RawJsonMessageSerializer();
+            });
+
+            ConsumeContext<Command> commandContext = await _handler;
+
+            Assert.That(commandContext.ReceiveContext.ContentType, Is.EqualTo(RawJsonMessageSerializer.RawJsonContentType),
+                $"unexpected content-type {commandContext.ReceiveContext.ContentType}");
+
+            ConsumeContext<PingMessage> context = await _handled;
+
+            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(JsonMessageSerializer.JsonContentType),
+                $"unexpected content-type {context.ReceiveContext.ContentType}");
+
+            Assert.That(context.Message.CorrelationId, Is.EqualTo(message.CommandId));
+
+            Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(default));
+        }
+
+        Task<ConsumeContext<PingMessage>> _handled;
+        Task<ConsumeContext<Command>> _handler;
+
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.ReceiveEndpoint("second-queue", e =>
+            {
+                _handled = Handled<PingMessage>(e);
+            });
+        }
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            configurator.AddMessageDeserializer(RawJsonMessageSerializer.RawJsonContentType,
+                () => new RawJsonMessageDeserializer(RawJsonMessageSerializer.Deserializer));
+
+            var handler = GetTask<ConsumeContext<Command>>();
+            _handler = handler.Task;
+
+            Handler<Command>(configurator, async context =>
+            {
+                await context.Publish(new PingMessage(context.Message.CommandId));
+
+                handler.SetResult(context);
+            });
         }
 
 

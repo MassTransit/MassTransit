@@ -52,7 +52,7 @@ namespace MassTransit.Serialization
 
         public override DateTime? SentTime => default;
 
-        public override Headers Headers => ReceiveContext.TransportHeaders;
+        public override Headers Headers => new RawJsonHeaders(ReceiveContext.TransportHeaders);
 
         public override HostInfo Host => default;
         public override IEnumerable<string> SupportedMessageTypes => Enumerable.Empty<string>();
