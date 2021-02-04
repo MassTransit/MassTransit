@@ -64,6 +64,10 @@
                     "Exception on Receiver {InputAddress} during {Action} ActiveDispatchCount({activeDispatch}) ErrorRequiresRecycle({requiresRecycle})",
                     _context.InputAddress, args.ExceptionReceivedContext.Action, _messageReceiver.ActiveDispatchCount, requiresRecycle);
             }
+            else if (args.Exception is ObjectDisposedException {ObjectName: "$cbs"})
+            {
+                // don't log this one
+            }
             else if (!(args.Exception is OperationCanceledException))
             {
                 EnabledLogger? logger = requiresRecycle ? LogContext.Error : LogContext.Warning;
