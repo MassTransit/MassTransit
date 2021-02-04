@@ -1,6 +1,7 @@
 ﻿namespace MassTransit
 {
     using System;
+    using System.Collections.Specialized;
     using System.Threading.Tasks;
     using GreenPipes;
     using Quartz;
@@ -9,6 +10,7 @@
     using QuartzIntegration;
     using QuartzIntegration.Configuration;
     using Scheduling;
+    using Util;
 
 
     public static class QuartzIntegrationExtensions
@@ -30,7 +32,7 @@
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
+            var schedulerFactory = new StdSchedulerFactory(GetDefaultConfiguration());
 
             return configurator.UseInMemoryScheduler(schedulerFactory, queueName);
         }
@@ -48,7 +50,7 @@
 
         public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, out Task<IScheduler> schedulerTask, string queueName = "quartz")
         {
-            ISchedulerFactory schedulerFactory = new StdSchedulerFactory();
+            var schedulerFactory = new StdSchedulerFactory(GetDefaultConfiguration());
 
             return UseInMemoryScheduler(configurator, schedulerFactory, out schedulerTask, queueName);
         }
@@ -68,6 +70,17 @@
                 options.QueueName = queueName;
                 options.JobFactory = jobFactory;
             });
+        }
+
+        static NameValueCollection GetDefaultConfiguration()
+        {
+            var configuration = new NameValueCollection
+            {
+                {"quartz.scheduler.instanceName", $"MassTransit-{NewId.Next().ToString(FormatUtil.Formatter)}"},
+                {"quartz.threadPool.maxConcurrency", Environment.ProcessorCount.ToString("F0")}
+            };
+
+            return configuration;
         }
 
         public static Uri UseInMemoryScheduler(this IBusFactoryConfigurator configurator, Action<InMemorySchedulerOptions> configure)
