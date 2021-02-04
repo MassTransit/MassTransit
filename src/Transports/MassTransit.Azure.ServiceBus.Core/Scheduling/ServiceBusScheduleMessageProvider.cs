@@ -23,9 +23,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Scheduling
             CancellationToken cancellationToken)
             where T : class
         {
-            var scheduleMessagePipe = new ServiceBusScheduleMessagePipe<T>(scheduledTime, pipe);
-
             var payload = await message.ConfigureAwait(false);
+
+            var scheduleMessagePipe = new ServiceBusScheduleSendPipe<T>(pipe, scheduledTime);
 
             var tokenId = ScheduleTokenIdCache<T>.GetTokenId(payload);
 

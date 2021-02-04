@@ -22,9 +22,9 @@ namespace MassTransit.AmazonSqsTransport.Scheduling
             CancellationToken cancellationToken)
             where T : class
         {
-            var scheduleMessagePipe = new AmazonSqsScheduleMessagePipe<T>(scheduledTime, pipe);
-
             var payload = await message.ConfigureAwait(false);
+
+            var scheduleMessagePipe = new AmazonSqsScheduleSendPipe<T>(pipe, scheduledTime);
 
             var schedulerEndpoint = await _sendEndpointProvider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 

@@ -1,4 +1,4 @@
-namespace MassTransit.AmazonSqsTransport.Scheduling
+﻿namespace MassTransit.ActiveMqTransport.Scheduling
 {
     using System;
     using System.Threading.Tasks;
@@ -12,13 +12,13 @@ namespace MassTransit.AmazonSqsTransport.Scheduling
     /// any developer-specified pipes.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class AmazonSqsScheduleMessagePipe<T> :
-        ScheduleMessageContextPipe<T>
+    public class ActiveMqScheduleSendPipe<T> :
+        ScheduleSendPipe<T>
         where T : class
     {
         readonly DateTime _scheduledTime;
 
-        public AmazonSqsScheduleMessagePipe(DateTime scheduledTime, IPipe<SendContext<T>> pipe)
+        public ActiveMqScheduleSendPipe(IPipe<SendContext<T>> pipe, DateTime scheduledTime)
             : base(pipe)
         {
             _scheduledTime = scheduledTime;
@@ -28,14 +28,12 @@ namespace MassTransit.AmazonSqsTransport.Scheduling
         {
             ScheduledMessageId = ScheduleTokenIdCache<T>.GetTokenId(context.Message, context.MessageId);
 
-            var sqsSendContext = context.GetPayload<AmazonSqsSendContext>();
-
-            var delay = Math.Max(0, (_scheduledTime.Kind == DateTimeKind.Local
+            var delay = Math.Max(0, (long)(_scheduledTime.Kind == DateTimeKind.Local
                 ? _scheduledTime - DateTime.Now
-                : _scheduledTime - DateTime.UtcNow).TotalSeconds);
+                : _scheduledTime - DateTime.UtcNow).TotalMilliseconds);
 
             if (delay > 0)
-                sqsSendContext.DelaySeconds = (int)delay;
+                context.Headers.Set("AMQ_SCHEDULED_DELAY", delay);
 
             return base.Send(context);
         }

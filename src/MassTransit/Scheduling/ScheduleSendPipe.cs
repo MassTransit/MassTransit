@@ -1,23 +1,21 @@
-namespace MassTransit.Scheduling
+﻿namespace MassTransit.Scheduling
 {
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
 
 
-    public class ScheduleMessageContextPipe<T> :
-        IPipe<SendContext<ScheduleMessage>>
+    public class ScheduleSendPipe<T> :
+        IPipe<SendContext<T>>
         where T : class
     {
-        readonly T _payload;
         readonly IPipe<SendContext<T>> _pipe;
         SendContext _context;
 
         Guid? _scheduledMessageId;
 
-        public ScheduleMessageContextPipe(T payload, IPipe<SendContext<T>> pipe)
+        protected ScheduleSendPipe(IPipe<SendContext<T>> pipe)
         {
-            _payload = payload;
             _pipe = pipe;
         }
 
@@ -27,23 +25,19 @@ namespace MassTransit.Scheduling
             set => _scheduledMessageId = value;
         }
 
-        public async Task Send(SendContext<ScheduleMessage> context)
+        void IProbeSite.Probe(ProbeContext context)
+        {
+            _pipe?.Probe(context);
+        }
+
+        public virtual async Task Send(SendContext<T> context)
         {
             _context = context;
 
             _context.ScheduledMessageId = _scheduledMessageId;
 
             if (_pipe.IsNotEmpty())
-            {
-                SendContext<T> proxy = context.CreateProxy(_payload);
-
-                await _pipe.Send(proxy).ConfigureAwait(false);
-            }
-        }
-
-        void IProbeSite.Probe(ProbeContext context)
-        {
-            _pipe?.Probe(context);
+                await _pipe.Send(context).ConfigureAwait(false);
         }
     }
 }

@@ -25,9 +25,9 @@ namespace MassTransit.RabbitMqTransport.Scheduling
             CancellationToken cancellationToken)
             where T : class
         {
-            var scheduleMessagePipe = new RabbitMqScheduleMessagePipe<T>(scheduledTime, pipe);
-
             var payload = await message.ConfigureAwait(false);
+
+            var scheduleMessagePipe = new RabbitMqScheduleSendPipe<T>(pipe, scheduledTime);
 
             var schedulerEndpoint = await GetSchedulerEndpoint(destinationAddress).ConfigureAwait(false);
 

@@ -1,4 +1,4 @@
-﻿namespace MassTransit.ActiveMqTransport.Scheduling
+namespace MassTransit.RabbitMqTransport.Scheduling
 {
     using System;
     using System.Threading.Tasks;
@@ -12,13 +12,13 @@
     /// any developer-specified pipes.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class ActiveMqScheduleMessagePipe<T> :
-        ScheduleMessageContextPipe<T>
+    public class RabbitMqScheduleSendPipe<T> :
+        ScheduleSendPipe<T>
         where T : class
     {
         readonly DateTime _scheduledTime;
 
-        public ActiveMqScheduleMessagePipe(DateTime scheduledTime, IPipe<SendContext<T>> pipe)
+        public RabbitMqScheduleSendPipe(IPipe<SendContext<T>> pipe, DateTime scheduledTime)
             : base(pipe)
         {
             _scheduledTime = scheduledTime;
@@ -28,12 +28,16 @@
         {
             ScheduledMessageId = ScheduleTokenIdCache<T>.GetTokenId(context.Message, context.MessageId);
 
-            var delay = Math.Max(0, (long)(_scheduledTime.Kind == DateTimeKind.Local
+            var rabbitSendContext = context.GetPayload<RabbitMqSendContext>();
+
+            var delay = Math.Max(0, (_scheduledTime.Kind == DateTimeKind.Local
                 ? _scheduledTime - DateTime.Now
                 : _scheduledTime - DateTime.UtcNow).TotalMilliseconds);
 
-            if (delay > 0)
-                context.Headers.Set("AMQ_SCHEDULED_DELAY", delay);
+            if (delay <= 0)
+                delay = 1;
+
+            rabbitSendContext.SetTransportHeader("x-delay", (long)delay);
 
             return base.Send(context);
         }

@@ -13,9 +13,9 @@ namespace MassTransit.Scheduling
         async Task<ScheduledMessage<T>> IScheduleMessageProvider.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, Task<T> message,
             IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
-            var scheduleMessagePipe = new ScheduleMessageContextPipe<T>(pipe);
-
             var payload = await message.ConfigureAwait(false);
+
+            var scheduleMessagePipe = new ScheduleMessageContextPipe<T>(payload, pipe);
 
             var tokenId = ScheduleTokenIdCache<T>.GetTokenId(payload);
 
@@ -40,8 +40,7 @@ namespace MassTransit.Scheduling
             return CancelScheduledSend(tokenId, destinationAddress);
         }
 
-        protected abstract Task ScheduleSend<T>(ScheduleMessage<T> message, IPipe<SendContext<ScheduleMessage<T>>> pipe, CancellationToken cancellationToken)
-            where T : class;
+        protected abstract Task ScheduleSend(ScheduleMessage message, IPipe<SendContext<ScheduleMessage>> pipe, CancellationToken cancellationToken);
 
         protected abstract Task CancelScheduledSend(Guid tokenId, Uri destinationAddress);
     }

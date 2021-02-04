@@ -22,9 +22,9 @@ namespace MassTransit.ActiveMqTransport.Scheduling
             CancellationToken cancellationToken)
             where T : class
         {
-            var scheduleMessagePipe = new ActiveMqScheduleMessagePipe<T>(scheduledTime, pipe);
-
             var payload = await message.ConfigureAwait(false);
+
+            var scheduleMessagePipe = new ActiveMqScheduleSendPipe<T>(pipe, scheduledTime);
 
             var endpoint = await _sendEndpointProvider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 

@@ -16,8 +16,7 @@ namespace MassTransit.Scheduling
             _publishEndpoint = publishEndpoint;
         }
 
-        protected override Task ScheduleSend<T>(ScheduleMessage<T> message, IPipe<SendContext<ScheduleMessage<T>>> pipe,
-            CancellationToken cancellationToken)
+        protected override Task ScheduleSend(ScheduleMessage message, IPipe<SendContext<ScheduleMessage>> pipe, CancellationToken cancellationToken)
         {
             return _publishEndpoint.Publish(message, pipe, cancellationToken);
         }
