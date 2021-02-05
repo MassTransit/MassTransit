@@ -2,6 +2,7 @@ namespace MassTransit.Registration
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using ConsumeConfigurators;
     using Metadata;
     using Saga;
@@ -55,7 +56,7 @@ namespace MassTransit.Registration
 
         public void ConfigureConsumers(IReceiveEndpointConfigurator configurator)
         {
-            foreach (var consumer in Consumers.Values)
+            foreach (var consumer in Consumers.Values.Where(x => !WasConfigured(x.ConsumerType)))
             {
                 consumer.Configure(configurator, this);
 
@@ -87,7 +88,7 @@ namespace MassTransit.Registration
 
         public void ConfigureSagas(IReceiveEndpointConfigurator configurator)
         {
-            foreach (var saga in Sagas.Values)
+            foreach (var saga in Sagas.Values.Where(x => !WasConfigured(x.SagaType)))
             {
                 saga.Configure(configurator, this);
 
