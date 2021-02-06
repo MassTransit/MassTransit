@@ -4,8 +4,8 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.ServiceBus.Core;
     using Azure.ServiceBus.Core.Configuration;
-    using Azure.ServiceBus.Core.Settings;
     using Azure.ServiceBus.Core.Topology.Configurators;
     using Azure.ServiceBus.Core.Transport;
     using Microsoft.Azure.ServiceBus;
@@ -144,9 +144,12 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             return _receivers.GetOrAdd(subscriptionPath, name =>
             {
                 var topicConfigurator = new TopicConfigurator(topicPath, false);
-                var settings = new SubscriptionEndpointSettings(topicConfigurator.GetTopicDescription(), subscriptionName);
 
-                var endpointConfiguration = _hostConfiguration.CreateSubscriptionEndpointConfiguration(settings);
+                static void NoConfigure(IServiceBusSubscriptionEndpointConfigurator _)
+                {
+                }
+
+                var endpointConfiguration = _hostConfiguration.CreateSubscriptionEndpointConfiguration(subscriptionName, topicConfigurator.Path, NoConfigure);
 
                 var configurator = new SubscriptionBrokeredMessageReceiverConfiguration(_hostConfiguration, endpointConfiguration);
 

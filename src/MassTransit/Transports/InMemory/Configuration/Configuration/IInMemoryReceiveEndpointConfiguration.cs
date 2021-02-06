@@ -9,8 +9,6 @@
     {
         IInMemoryReceiveEndpointConfigurator Configurator { get; }
 
-        int ConcurrencyLimit { get; }
-
         void Build(IHost host);
     }
 }

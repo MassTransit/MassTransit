@@ -5,6 +5,7 @@ namespace MassTransit.RabbitMqTransport
     using System.Globalization;
     using System.Net.Security;
     using System.Security.Cryptography.X509Certificates;
+    using Configuration;
     using Configurators;
     using Metadata;
     using RabbitMQ.Client;
@@ -19,13 +20,17 @@ namespace MassTransit.RabbitMqTransport
             var hostAddress = new RabbitMqHostAddress(address);
             var endpointAddress = new RabbitMqEndpointAddress(hostAddress, address);
 
-            ReceiveSettings settings = new RabbitMqReceiveSettings(endpointAddress.Name, endpointAddress.ExchangeType, endpointAddress.Durable,
-                endpointAddress.AutoDelete)
+            var topologyConfiguration = new RabbitMqTopologyConfiguration(RabbitMqBusFactory.MessageTopology);
+            var endpointConfiguration = new RabbitMqEndpointConfiguration(topologyConfiguration);
+            var settings = new RabbitMqReceiveSettings(endpointConfiguration, endpointAddress.Name, endpointAddress.ExchangeType,
+                endpointAddress.Durable, endpointAddress.AutoDelete)
             {
                 QueueName = endpointAddress.Name,
-                PrefetchCount = hostAddress.Prefetch ?? (ushort)(Environment.ProcessorCount * 2),
                 Exclusive = endpointAddress.AutoDelete && !endpointAddress.Durable
             };
+
+            if (hostAddress.Prefetch.HasValue)
+                settings.PrefetchCount = hostAddress.Prefetch.Value;
 
             if (hostAddress.TimeToLive.HasValue)
                 settings.QueueArguments.Add(Headers.XMessageTTL, hostAddress.TimeToLive.Value.ToString("F0", CultureInfo.InvariantCulture));

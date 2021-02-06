@@ -2,6 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 {
     using System;
     using System.Collections.Generic;
+    using Configuration;
     using Microsoft.Azure.ServiceBus.Management;
     using Topology;
     using Topology.Configurators;
@@ -14,8 +15,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
     {
         readonly QueueConfigurator _queueConfigurator;
 
-        public ReceiveEndpointSettings(string queueName, QueueConfigurator queueConfigurator)
-            : base(queueConfigurator)
+        public ReceiveEndpointSettings(IServiceBusEndpointConfiguration endpointConfiguration, string queueName, QueueConfigurator queueConfigurator)
+            : base(endpointConfiguration, queueConfigurator)
         {
             _queueConfigurator = queueConfigurator;
 

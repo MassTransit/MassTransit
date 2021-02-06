@@ -117,8 +117,9 @@
         public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IAmazonSqsReceiveEndpointConfigurator> configure)
         {
-            var settings = new QueueReceiveSettings(queueName, true, false);
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
+
+            var settings = new QueueReceiveSettings(endpointConfiguration, queueName, true, false);
 
             return CreateReceiveEndpointConfiguration(settings, endpointConfiguration, configure);
         }

@@ -158,9 +158,10 @@
         public IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IServiceBusReceiveEndpointConfigurator> configure)
         {
-            var settings = new ReceiveEndpointSettings(queueName, new QueueConfigurator(queueName));
-
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
+
+            var settings = new ReceiveEndpointSettings(endpointConfiguration, queueName, new QueueConfigurator(queueName));
+
 
             return CreateReceiveEndpointConfiguration(settings, endpointConfiguration, configure);
         }
@@ -187,22 +188,19 @@
         public void SubscriptionEndpoint<T>(string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
             where T : class
         {
-            var settings = new SubscriptionEndpointSettings(_busConfiguration.Topology.Publish.GetMessageTopology<T>().TopicDescription, subscriptionName);
+            var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
+            var settings = new SubscriptionEndpointSettings(endpointConfiguration, _busConfiguration.Topology.Publish.GetMessageTopology<T>().TopicDescription,
+                subscriptionName);
 
-            CreateSubscriptionEndpointConfiguration(settings, configure);
+            CreateSubscriptionEndpointConfiguration(settings, endpointConfiguration, configure);
         }
 
         public void SubscriptionEndpoint(string subscriptionName, string topicPath, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
-            var settings = new SubscriptionEndpointSettings(topicPath, subscriptionName);
+            var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
+            var settings = new SubscriptionEndpointSettings(endpointConfiguration, topicPath, subscriptionName);
 
-            CreateSubscriptionEndpointConfiguration(settings, configure);
-        }
-
-        public IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings,
-            Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
-        {
-            return CreateSubscriptionEndpointConfiguration(settings, _busConfiguration.CreateEndpointConfiguration(), configure);
+            CreateSubscriptionEndpointConfiguration(settings, endpointConfiguration, configure);
         }
 
         public override IHostTopology HostTopology => _hostTopology;
@@ -223,7 +221,27 @@
             return host;
         }
 
-        IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings,
+        public IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration<T>(string subscriptionName,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure)
+            where T : class
+        {
+            var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
+            var settings = new SubscriptionEndpointSettings(endpointConfiguration, _busConfiguration.Topology.Publish.GetMessageTopology<T>().TopicDescription,
+                subscriptionName);
+
+            return CreateSubscriptionEndpointConfiguration(settings, endpointConfiguration, configure);
+        }
+
+        public IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(string subscriptionName, string topicPath,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure)
+        {
+            var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
+            var settings = new SubscriptionEndpointSettings(endpointConfiguration, topicPath, subscriptionName);
+
+            return CreateSubscriptionEndpointConfiguration(settings, endpointConfiguration, configure);
+        }
+
+        public IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings,
             IServiceBusEndpointConfiguration endpointConfiguration, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
             if (settings == null)

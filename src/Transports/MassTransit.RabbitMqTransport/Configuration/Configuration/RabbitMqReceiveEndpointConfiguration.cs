@@ -160,11 +160,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
             set => _settings.ExclusiveConsumer = value;
         }
 
-        public ushort PrefetchCount
-        {
-            set => _settings.PrefetchCount = value;
-        }
-
         public bool Lazy
         {
             set => _settings.Lazy = value;

@@ -18,9 +18,6 @@
         public static TimeSpan MessageWaitTimeout => TimeSpan.FromSeconds(10);
         public static TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
-        public static int MaxConcurrentCalls => Math.Max(Environment.ProcessorCount, 8);
-        public static int PrefetchCount => Math.Max(MaxConcurrentCalls, 32);
-
         public static QueueDescription CreateQueueDescription(string queueName)
         {
             return new QueueDescription(queueName)

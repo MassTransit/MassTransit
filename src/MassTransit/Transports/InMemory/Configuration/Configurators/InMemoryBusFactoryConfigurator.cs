@@ -82,7 +82,7 @@ namespace MassTransit.Transports.InMemory.Configurators
 
         public int TransportConcurrencyLimit
         {
-            set => _hostConfiguration.TransportConcurrencyLimit = value;
+            set => ConcurrentMessageLimit = value;
         }
     }
 }

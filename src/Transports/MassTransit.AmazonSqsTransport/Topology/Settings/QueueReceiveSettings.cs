@@ -1,6 +1,7 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Settings
 {
     using System;
+    using Configuration;
     using Configurators;
 
 
@@ -8,14 +9,17 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
         QueueSubscriptionConfigurator,
         ReceiveSettings
     {
-        public QueueReceiveSettings(string queueName, bool durable, bool autoDelete)
+        readonly IAmazonSqsEndpointConfiguration _configuration;
+
+        public QueueReceiveSettings(IAmazonSqsEndpointConfiguration configuration, string queueName, bool durable, bool autoDelete)
             : base(queueName, durable, autoDelete)
         {
-            PrefetchCount = Math.Min(Environment.ProcessorCount * 2, 10);
+            _configuration = configuration;
+
             WaitTimeSeconds = 1;
         }
 
-        public int PrefetchCount { get; set; }
+        public int PrefetchCount => _configuration.Transport.PrefetchCount;
 
         public int WaitTimeSeconds { get; set; }
 

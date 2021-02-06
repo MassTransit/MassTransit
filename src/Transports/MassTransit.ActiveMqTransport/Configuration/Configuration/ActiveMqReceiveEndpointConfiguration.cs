@@ -87,11 +87,6 @@
                 yield return result.WithParentKey(queueName);
         }
 
-        public ushort PrefetchCount
-        {
-            set => _settings.PrefetchCount = value;
-        }
-
         public bool Durable
         {
             set

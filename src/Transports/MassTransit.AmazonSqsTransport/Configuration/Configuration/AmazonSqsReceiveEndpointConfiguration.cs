@@ -115,11 +115,6 @@
             }
         }
 
-        public ushort PrefetchCount
-        {
-            set => _settings.PrefetchCount = value;
-        }
-
         public ushort WaitTimeSeconds
         {
             set => _settings.WaitTimeSeconds = value;

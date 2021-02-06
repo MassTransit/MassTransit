@@ -115,8 +115,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            var settings = new RabbitMqReceiveSettings(queueName, _busConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false);
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
+            var settings = new RabbitMqReceiveSettings(endpointConfiguration, queueName,
+                _busConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false);
 
             return CreateReceiveEndpointConfiguration(settings, endpointConfiguration, configure);
         }

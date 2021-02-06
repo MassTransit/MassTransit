@@ -27,7 +27,7 @@
 
             var queueName = busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
             var exchangeType = busConfiguration.BusEndpointConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType;
-            _settings = new RabbitMqReceiveSettings(queueName, exchangeType, false, true);
+            _settings = new RabbitMqReceiveSettings(busConfiguration.BusEndpointConfiguration, queueName, exchangeType, false, true);
 
             _settings.AutoDeleteAfter(TimeSpan.FromMinutes(1));
         }
@@ -44,11 +44,6 @@
 
             if (string.IsNullOrWhiteSpace(_settings.QueueName))
                 yield return this.Failure("Bus", "The bus queue name must not be null or empty");
-        }
-
-        public ushort PrefetchCount
-        {
-            set => _settings.PrefetchCount = value;
         }
 
         public bool Durable

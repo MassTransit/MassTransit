@@ -38,10 +38,10 @@ namespace MassTransit.EventHubIntegration.Configurators
             _hostConfiguration = hostConfiguration;
             _busInstance = busInstance;
             _endpointConfiguration = endpointConfiguration;
+            ConcurrencyLimit = 1;
 
             CheckpointInterval = TimeSpan.FromMinutes(1);
             CheckpointMessageCount = 5000;
-            ConcurrencyLimit = 1;
 
             _processorConfigurator = new PipeConfigurator<ProcessorContext>();
         }
@@ -56,7 +56,11 @@ namespace MassTransit.EventHubIntegration.Configurators
 
         public ushort CheckpointMessageCount { get; set; }
 
-        public int ConcurrencyLimit { get; set; }
+        public int ConcurrencyLimit
+        {
+            get => _endpointConfiguration.Transport.GetConcurrentMessageLimit();
+            set => ConcurrentMessageLimit = value;
+        }
 
         public Action<EventProcessorClientOptions> ConfigureOptions
         {

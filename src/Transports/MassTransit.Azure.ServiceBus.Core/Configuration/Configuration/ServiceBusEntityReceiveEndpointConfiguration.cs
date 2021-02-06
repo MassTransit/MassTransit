@@ -38,12 +38,7 @@
 
         public int MaxConcurrentCalls
         {
-            set => _settings.MaxConcurrentCalls = value;
-        }
-
-        public int PrefetchCount
-        {
-            set => _settings.PrefetchCount = value;
+            set => ConcurrentMessageLimit = value;
         }
 
         public TimeSpan AutoDeleteOnIdle

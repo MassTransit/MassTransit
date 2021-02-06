@@ -36,6 +36,17 @@ namespace MassTransit
         bool DeployTopologyOnly { set; }
 
         /// <summary>
+        /// Specify the number of messages to prefetch from the message broker
+        /// </summary>
+        /// <value>The limit</value>
+        int PrefetchCount { set; }
+
+        /// <summary>
+        /// Specify the number of concurrent messages that can be consumed (separate from prefetch count)
+        /// </summary>
+        int? ConcurrentMessageLimit { set; }
+
+        /// <summary>
         /// Configure the message topology for the message type (global across all bus instances of the same transport type)
         /// </summary>
         /// <param name="configureTopology"></param>

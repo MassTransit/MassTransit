@@ -33,7 +33,7 @@
             endpointConfiguration, Action<IServiceBusReceiveEndpointConfigurator> configure = null);
 
         IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings,
-            Action<IServiceBusSubscriptionEndpointConfigurator> configure = null);
+            IServiceBusEndpointConfiguration endpointConfiguration, Action<IServiceBusSubscriptionEndpointConfigurator> configure = null);
 
         void SubscriptionEndpoint<T>(string subscriptionName, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
             where T : class;
@@ -45,5 +45,12 @@
         void SetNamespaceSeparatorToUnderscore();
 
         void SetNamespaceSeparatorTo(string separator);
+
+        IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration<T>(string subscriptionName,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure)
+            where T : class;
+
+        IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(string subscriptionName, string topicPath,
+            Action<IServiceBusSubscriptionEndpointConfigurator> configure);
     }
 }
