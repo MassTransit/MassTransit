@@ -3,6 +3,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Conductor;
     using Context;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +28,11 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             {
                 var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
                 var busHealth = serviceProvider.GetRequiredService<BusHealth>();
-                return new BusRegistrationContext(provider, busHealth, Endpoints, Consumers, Sagas, ExecuteActivities, Activities);
+
+                // needs to be built/resolved, prior to registration context
+                _ = serviceProvider.GetService<IServiceDirectory>();
+
+                return new BusRegistrationContext(provider, busHealth, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
             }
 
             collection.AddSingleton(provider =>

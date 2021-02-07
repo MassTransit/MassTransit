@@ -8,6 +8,7 @@ namespace MassTransit.Registration
     using Context;
     using Courier;
     using Definition;
+    using Futures;
     using Internals.Extensions;
     using Metadata;
     using Microsoft.Extensions.Logging;
@@ -24,6 +25,7 @@ namespace MassTransit.Registration
         readonly RegistrationCache<IConsumerRegistration> _consumers;
         readonly RegistrationCache<IEndpointRegistration> _endpoints;
         readonly RegistrationCache<IExecuteActivityRegistration> _executeActivities;
+        readonly RegistrationCache<IFutureRegistration> _futures;
         readonly RegistrationCache<ISagaRegistration> _sagas;
         bool _configured;
         ISagaRepositoryRegistrationProvider _sagaRepositoryRegistrationProvider;
@@ -36,6 +38,7 @@ namespace MassTransit.Registration
             _sagas = new RegistrationCache<ISagaRegistration>();
             _executeActivities = new RegistrationCache<IExecuteActivityRegistration>();
             _activities = new RegistrationCache<IActivityRegistration>();
+            _futures = new RegistrationCache<IFutureRegistration>();
             _endpoints = new RegistrationCache<IEndpointRegistration>();
 
             _sagaRepositoryRegistrationProvider = new SagaRepositoryRegistrationProvider();
@@ -46,6 +49,7 @@ namespace MassTransit.Registration
         protected IRegistrationCache<IEndpointRegistration> Endpoints => _endpoints;
         protected IRegistrationCache<IExecuteActivityRegistration> ExecuteActivities => _executeActivities;
         protected IRegistrationCache<ISagaRegistration> Sagas => _sagas;
+        protected IRegistrationCache<IFutureRegistration> Futures => _futures;
 
         public IContainerRegistrar Registrar { get; }
 
@@ -248,6 +252,29 @@ namespace MassTransit.Registration
                 type => ActivityRegistrationCache.CreateRegistration(type, activityDefinitionType, Registrar));
         }
 
+        public IFutureRegistrationConfigurator<TFuture> AddFuture<TFuture>(Type futureDefinitionType)
+            where TFuture : MassTransitStateMachine<FutureState>
+        {
+            IFutureRegistration ValueFactory(Type type)
+            {
+                FutureRegistrationCache.Register(typeof(TFuture), Registrar);
+
+                return new FutureRegistration<TFuture>();
+            }
+
+            _futures.GetOrAdd(typeof(TFuture), ValueFactory);
+
+            if (futureDefinitionType != null)
+                FutureDefinitionRegistrationCache.Register(futureDefinitionType, Registrar);
+
+            return new FutureRegistrationConfigurator<TFuture>(this);
+        }
+
+        public void AddFuture(Type futureType, Type futureDefinitionType)
+        {
+            FutureRegistrationCache.AddFuture(this, futureType, futureDefinitionType);
+        }
+
         public void AddEndpoint(Type definitionType)
         {
             _endpoints.GetOrAdd(definitionType, type => EndpointRegistrationCache.CreateRegistration(definitionType, Registrar));
@@ -326,7 +353,7 @@ namespace MassTransit.Registration
 
         protected IRegistration CreateRegistration(IConfigurationServiceProvider provider)
         {
-            return new Registration(provider, Consumers, Sagas, ExecuteActivities, Activities);
+            return new Registration(provider, Consumers, Sagas, ExecuteActivities, Activities, Futures);
         }
 
         protected void ThrowIfAlreadyConfigured(string methodName)

@@ -84,5 +84,16 @@ namespace MassTransit.Registration
         {
             _registration.ConfigureActivityCompensate(activityType, compensateEndpointConfigurator);
         }
+
+        public void ConfigureFuture(Type futureType, IReceiveEndpointConfigurator configurator)
+        {
+            _registration.ConfigureFuture(futureType, configurator);
+        }
+
+        public void ConfigureFuture<T>(IReceiveEndpointConfigurator configurator)
+            where T : class, ISaga
+        {
+            _registration.ConfigureFuture<T>(configurator);
+        }
     }
 }

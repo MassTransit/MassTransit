@@ -30,7 +30,7 @@ namespace MassTransit.AutofacIntegration.Registration
             {
                 var provider = context.Resolve<IConfigurationServiceProvider>();
                 var busHealth = context.Resolve<BusHealth>();
-                return new BusRegistrationContext(provider, busHealth, Endpoints, Consumers, Sagas, ExecuteActivities, Activities);
+                return new BusRegistrationContext(provider, busHealth, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
             }
 
             Builder = builder;

@@ -9,9 +9,11 @@
     using Automatonymous;
     using Courier;
     using Definition;
+    using Futures;
     using GreenPipes.Internals.Extensions;
     using Internals.Extensions;
     using JobService;
+    using Registration;
     using Saga;
 
 
@@ -115,6 +117,19 @@
                 || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(ICompensateActivity<>))
                 || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(IActivityDefinition<,,>))
                 || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(IExecuteActivityDefinition<,>)));
+        }
+
+        /// <summary>
+        /// Returns true if the type is a future or future definition
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsFutureOrDefinition(Type type)
+        {
+            Type[] interfaces = type.GetTypeInfo().GetInterfaces();
+
+            return interfaces.Any(t => Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(SagaStateMachine<FutureState>))
+                || Internals.Extensions.InterfaceExtensions.HasInterface(t, typeof(IFutureDefinition<>)));
         }
 
         public static bool HasSagaInterfaces(Type type)

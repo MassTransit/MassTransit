@@ -26,7 +26,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             {
                 var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
                 var busHealth = serviceProvider.GetRequiredService<Bind<TBus, BusHealth>>();
-                return new BusRegistrationContext(provider, busHealth.Value, Endpoints, Consumers, Sagas, ExecuteActivities, Activities);
+                return new BusRegistrationContext(provider, busHealth.Value, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
             }
 
             collection.AddScoped(provider => Bind<TBus>.Create(GetSendEndpointProvider(provider)));

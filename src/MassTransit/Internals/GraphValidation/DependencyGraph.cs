@@ -42,6 +42,13 @@ namespace MassTransit.Internals.GraphValidation
             return sort.Result.Select(x => x.Value);
         }
 
+        public IEnumerable<T> GetItemsInOrder(T source)
+        {
+            var sort = new TopologicalSort<T, DependencyGraphNode<T>>(_adjacencyList, source);
+
+            return sort.Result.Select(x => x.Value);
+        }
+
         public void EnsureGraphIsAcyclic()
         {
             var tarjan = new Tarjan<T, DependencyGraphNode<T>>(_adjacencyList);

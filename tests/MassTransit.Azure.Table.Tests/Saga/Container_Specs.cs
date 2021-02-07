@@ -1,16 +1,16 @@
 namespace MassTransit.Azure.Table.Tests.Saga
 {
+    using System;
+    using System.Threading.Tasks;
+    using Automatonymous;
+    using GreenPipes;
+    using Microsoft.Extensions.DependencyInjection;
+    using NUnit.Framework;
+    using TestFramework.Sagas;
+
+
     namespace ContainerTests
     {
-        using System;
-        using System.Threading.Tasks;
-        using Automatonymous;
-        using GreenPipes;
-        using Microsoft.Extensions.DependencyInjection;
-        using NUnit.Framework;
-        using TestFramework.Sagas;
-
-
         public class Using_optimistic_concurrency :
             AzureTableInMemoryTestFixture
         {

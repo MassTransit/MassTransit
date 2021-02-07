@@ -14,6 +14,7 @@
     <ProjectReference Include="..\..\src\MassTransit\MassTransit.csproj" />
     <ProjectReference Include="..\..\src\Persistence\MassTransit.Azure.Table\MassTransit.Azure.Table.csproj" />
     <ProjectReference Include="..\..\src\Scheduling\MassTransit.QuartzIntegration\MassTransit.QuartzIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.TestComponents\MassTransit.TestComponents.csproj" />
   </ItemGroup>
 
 </Project>

@@ -4,6 +4,7 @@ namespace MassTransit.Registration
     using Automatonymous;
     using Courier;
     using Definition;
+    using MassTransit.Futures;
     using Saga;
 
 
@@ -58,6 +59,13 @@ namespace MassTransit.Registration
         void RegisterEndpointDefinition<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings = null)
             where TDefinition : class, IEndpointDefinition<T>
             where T : class;
+
+        void RegisterFuture<TFuture>()
+            where TFuture : MassTransitStateMachine<FutureState>;
+
+        void RegisterFutureDefinition<TDefinition, TFuture>()
+            where TDefinition : class, IFutureDefinition<TFuture>
+            where TFuture : MassTransitStateMachine<FutureState>;
 
         void RegisterRequestClient<T>(RequestTimeout timeout = default)
             where T : class;

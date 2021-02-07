@@ -5,6 +5,7 @@ namespace MassTransit.StructureMapIntegration.Registration
     using Clients;
     using Courier;
     using Definition;
+    using Futures;
     using MassTransit.Registration;
     using Mediator;
     using Saga;
@@ -121,6 +122,20 @@ namespace MassTransit.StructureMapIntegration.Registration
 
             if (settings != null)
                 _expression.ForSingletonOf<IEndpointSettings<IEndpointDefinition<T>>>().Use(settings);
+        }
+
+        public void RegisterFuture<TFuture>()
+            where TFuture : MassTransitStateMachine<FutureState>
+        {
+            _expression.For<TFuture>().Singleton();
+        }
+
+        public void RegisterFutureDefinition<TDefinition, TFuture>()
+            where TDefinition : class, IFutureDefinition<TFuture>
+            where TFuture : MassTransitStateMachine<FutureState>
+        {
+            _expression.For<IFutureDefinition<TFuture>>()
+                .Use<TDefinition>();
         }
 
         public void RegisterRequestClient<T>(RequestTimeout timeout = default)

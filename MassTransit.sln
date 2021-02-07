@@ -33,12 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Containers.Test
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".solution", ".solution", "{2C8A15FA-A445-4916-AAC2-3BE53AA247A7}"
 	ProjectSection(SolutionItems) = preProject
-		appveyor.yml = appveyor.yml
-		build.cake = build.cake
-		build.ps1 = build.ps1
-		build.sh = build.sh
 		Directory.Build.props = Directory.Build.props
-		docs.yml = docs.yml
 		README.md = README.md
 		signing.props = signing.props
 	EndProjectSection
@@ -144,6 +139,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.GrpcTransport", "src\Transports\MassTransit.GrpcTransport\MassTransit.GrpcTransport.csproj", "{AF56509B-0B95-4ACE-9CFC-F9A79756C357}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.GrpcTransport.Tests", "tests\MassTransit.GrpcTransport.Tests\MassTransit.GrpcTransport.Tests.csproj", "{082488F6-6322-462A-85D7-9E893A67B8CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.TestComponents", "tests\MassTransit.TestComponents\MassTransit.TestComponents.csproj", "{27DF8220-6885-4E08-89CB-EE56582702D8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -772,6 +769,18 @@ Global
 		{082488F6-6322-462A-85D7-9E893A67B8CD}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
 		{082488F6-6322-462A-85D7-9E893A67B8CD}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
 		{082488F6-6322-462A-85D7-9E893A67B8CD}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
+		{27DF8220-6885-4E08-89CB-EE56582702D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27DF8220-6885-4E08-89CB-EE56582702D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27DF8220-6885-4E08-89CB-EE56582702D8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{27DF8220-6885-4E08-89CB-EE56582702D8}.Debug|x86.Build.0 = Debug|Any CPU
+		{27DF8220-6885-4E08-89CB-EE56582702D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27DF8220-6885-4E08-89CB-EE56582702D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27DF8220-6885-4E08-89CB-EE56582702D8}.Release|x86.ActiveCfg = Release|Any CPU
+		{27DF8220-6885-4E08-89CB-EE56582702D8}.Release|x86.Build.0 = Release|Any CPU
+		{27DF8220-6885-4E08-89CB-EE56582702D8}.ReleaseUnsigned|Any CPU.ActiveCfg = Debug|Any CPU
+		{27DF8220-6885-4E08-89CB-EE56582702D8}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
+		{27DF8220-6885-4E08-89CB-EE56582702D8}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
+		{27DF8220-6885-4E08-89CB-EE56582702D8}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

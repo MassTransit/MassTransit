@@ -168,13 +168,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 EndpointName = "ping-queue";
 
                 ConcurrentMessageLimit = 1;
-
-                Request<PingMessage>(x =>
-                {
-                    x.PartitionBy(m => m.CorrelationId);
-
-                    x.Responds<PongMessage>();
-                });
             }
 
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,

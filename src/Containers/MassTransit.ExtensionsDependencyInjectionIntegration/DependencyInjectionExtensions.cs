@@ -91,9 +91,11 @@ namespace MassTransit
         /// client that is not explicitly registered using AddRequestClient.
         /// </summary>
         /// <param name="collection"></param>
-        public static void AddGenericRequestClient(this IServiceCollection collection)
+        public static IServiceCollection AddGenericRequestClient(this IServiceCollection collection)
         {
             collection.AddScoped(typeof(IRequestClient<>), typeof(GenericRequestClient<>));
+
+            return collection;
         }
 
 

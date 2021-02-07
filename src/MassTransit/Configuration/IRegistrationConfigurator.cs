@@ -6,6 +6,7 @@ namespace MassTransit
     using ConsumeConfigurators;
     using Courier;
     using Definition;
+    using Futures;
     using Registration;
     using Saga;
 
@@ -243,5 +244,20 @@ namespace MassTransit
         /// </summary>
         /// <param name="provider"></param>
         void SetSagaRepositoryProvider(ISagaRepositoryRegistrationProvider provider);
+
+        /// <summary>
+        /// Adds a future registration, along with an optional definition
+        /// </summary>
+        /// <param name="futureDefinitionType">The future definition type</param>
+        /// <typeparam name="TFuture"></typeparam>
+        IFutureRegistrationConfigurator<TFuture> AddFuture<TFuture>(Type futureDefinitionType = null)
+            where TFuture : MassTransitStateMachine<FutureState>;
+
+        /// <summary>
+        /// Adds a future registration, along with an optional definition
+        /// </summary>
+        /// <param name="futureType"></param>
+        /// <param name="futureDefinitionType">The future definition type</param>
+        void AddFuture(Type futureType, Type futureDefinitionType = null);
     }
 }

@@ -87,5 +87,20 @@ namespace MassTransit
         /// <param name="activityType"></param>
         /// <param name="compensateEndpointConfigurator">The configurator for the compensate activity endpoint</param>
         void ConfigureActivityCompensate(Type activityType, IReceiveEndpointConfigurator compensateEndpointConfigurator);
+
+        /// <summary>
+        /// Configure a future on the receive endpoint
+        /// </summary>
+        /// <param name="futureType">The saga type</param>
+        /// <param name="configurator"></param>
+        void ConfigureFuture(Type futureType, IReceiveEndpointConfigurator configurator);
+
+        /// <summary>
+        /// Configure a future on the receive endpoint, with an optional configuration action
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <typeparam name="T">The saga type</typeparam>
+        void ConfigureFuture<T>(IReceiveEndpointConfigurator configurator)
+            where T : class, ISaga;
     }
 }

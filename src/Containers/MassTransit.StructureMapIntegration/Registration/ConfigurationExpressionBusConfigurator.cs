@@ -116,7 +116,7 @@ namespace MassTransit.StructureMapIntegration.Registration
         {
             var provider = context.GetInstance<IConfigurationServiceProvider>();
             var busHealth = context.GetInstance<BusHealth>();
-            return new BusRegistrationContext(provider, busHealth, Endpoints, Consumers, Sagas, ExecuteActivities, Activities);
+            return new BusRegistrationContext(provider, busHealth, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
         }
     }
 }

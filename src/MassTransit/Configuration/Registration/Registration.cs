@@ -17,17 +17,19 @@ namespace MassTransit.Registration
         protected readonly IRegistrationCache<IActivityRegistration> Activities;
         protected readonly IRegistrationCache<IConsumerRegistration> Consumers;
         protected readonly IRegistrationCache<IExecuteActivityRegistration> ExecuteActivities;
+        protected readonly IRegistrationCache<IFutureRegistration> Futures;
         protected readonly IRegistrationCache<ISagaRegistration> Sagas;
 
         public Registration(IConfigurationServiceProvider configurationServiceProvider, IRegistrationCache<IConsumerRegistration> consumers,
             IRegistrationCache<ISagaRegistration> sagas, IRegistrationCache<IExecuteActivityRegistration> executeActivities,
-            IRegistrationCache<IActivityRegistration> activities)
+            IRegistrationCache<IActivityRegistration> activities, IRegistrationCache<IFutureRegistration> futures)
         {
             _configurationServiceProvider = configurationServiceProvider;
             Consumers = consumers;
             Sagas = sagas;
             ExecuteActivities = executeActivities;
             Activities = activities;
+            Futures = futures;
 
             _configuredTypes = new HashSet<Type>();
         }
@@ -135,6 +137,27 @@ namespace MassTransit.Registration
             activity.ConfigureCompensate(compensateEndpointConfigurator, this);
 
             _configuredTypes.Add(activityType);
+        }
+
+        public void ConfigureFuture(Type futureType, IReceiveEndpointConfigurator configurator)
+        {
+            if (!Futures.TryGetValue(futureType, out var future))
+                throw new ArgumentException($"The future type was not found: {TypeMetadataCache.GetShortName(futureType)}", nameof(futureType));
+
+            future.Configure(configurator, this);
+
+            _configuredTypes.Add(futureType);
+        }
+
+        public void ConfigureFuture<T>(IReceiveEndpointConfigurator configurator)
+            where T : class, ISaga
+        {
+            if (!Futures.TryGetValue(typeof(T), out var future))
+                throw new ArgumentException($"The future type was not found: {TypeMetadataCache.GetShortName(typeof(T))}", nameof(T));
+
+            future.Configure(configurator, this);
+
+            _configuredTypes.Add(typeof(T));
         }
 
         public object GetService(Type serviceType)

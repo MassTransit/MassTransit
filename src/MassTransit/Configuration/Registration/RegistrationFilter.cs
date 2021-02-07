@@ -33,5 +33,10 @@ namespace MassTransit.Registration
         {
             return _filter.Matches(registration.ActivityType);
         }
+
+        public bool Matches(IFutureRegistration registration)
+        {
+            return _filter.Matches(registration.FutureType);
+        }
     }
 }

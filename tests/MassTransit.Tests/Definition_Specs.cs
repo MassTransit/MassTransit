@@ -71,17 +71,6 @@ namespace MassTransit.Tests
         {
             public SubmitOrderConsumerDefinition()
             {
-                Request<SubmitOrder>(x =>
-                {
-                    x.PartitionBy(m => m.CustomerId);
-
-                    x.Facet(m => m.CustomerId);
-
-                    x.Responds<OrderAccepted>();
-                    x.Responds<OrderRejected>();
-                    x.Publishes<OrderReceived>();
-                    x.Sends<ProcessOrder>();
-                });
             }
         }
     }

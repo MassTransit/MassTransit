@@ -19,6 +19,7 @@
     <ProjectReference Include="..\..\src\Containers\MassTransit.StructureMapIntegration\MassTransit.StructureMapIntegration.csproj" />
     <ProjectReference Include="..\..\src\Containers\MassTransit.WindsorIntegration\MassTransit.WindsorIntegration.csproj" />
     <ProjectReference Include="..\..\src\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
+    <ProjectReference Include="..\MassTransit.TestComponents\MassTransit.TestComponents.csproj" />
   </ItemGroup>
 
 </Project>

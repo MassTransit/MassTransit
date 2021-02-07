@@ -4,10 +4,10 @@ namespace MassTransit.Azure.Table.Configurators
     using System.Collections.Generic;
     using Contexts;
     using GreenPipes;
-    using MassTransit.Azure.Table.Saga;
     using MassTransit.Saga;
     using Microsoft.Azure.Cosmos.Table;
     using Registration;
+    using Saga;
 
 
     public class AzureTableSagaRepositoryConfigurator<TSaga> :
@@ -16,7 +16,9 @@ namespace MassTransit.Azure.Table.Configurators
         where TSaga : class, ISaga
     {
         Func<IConfigurationServiceProvider, CloudTable> _connectionFactory;
-        Func<IConfigurationServiceProvider, ISagaKeyFormatter<TSaga>> _formatterFactory = provider => new ConstPartitionSagaKeyFormatter<TSaga>(typeof(TSaga).Name);
+
+        Func<IConfigurationServiceProvider, ISagaKeyFormatter<TSaga>> _formatterFactory = provider =>
+            new ConstPartitionSagaKeyFormatter<TSaga>(typeof(TSaga).Name);
 
         /// <summary>
         /// Supply factory for retrieving the Cloud Table.
@@ -25,6 +27,15 @@ namespace MassTransit.Azure.Table.Configurators
         public void ConnectionFactory(Func<CloudTable> connectionFactory)
         {
             _connectionFactory = provider => connectionFactory();
+        }
+
+        /// <summary>
+        /// Supply factory for retrieving the Cloud Table.
+        /// </summary>
+        /// <param name="connectionFactory"></param>
+        public void ConnectionFactory(Func<IConfigurationServiceProvider, CloudTable> connectionFactory)
+        {
+            _connectionFactory = connectionFactory;
         }
 
         /// <summary>

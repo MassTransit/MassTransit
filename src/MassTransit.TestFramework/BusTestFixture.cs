@@ -18,7 +18,7 @@ namespace MassTransit.TestFramework
         static int _subscribedObserver;
         static readonly bool _enableLog = !bool.TryParse(Environment.GetEnvironmentVariable("CI"), out var isBuildServer) || !isBuildServer;
         static readonly bool _enableDiagnostics = bool.TryParse(Environment.GetEnvironmentVariable("DIAG"), out var enable) && enable;
-        protected static readonly TestOutputLoggerFactory LoggerFactory;
+        public static readonly TestOutputLoggerFactory LoggerFactory;
 
         static BusTestFixture()
         {

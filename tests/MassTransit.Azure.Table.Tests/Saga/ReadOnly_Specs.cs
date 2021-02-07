@@ -5,13 +5,11 @@
     using Automatonymous;
     using MassTransit.Saga;
     using NUnit.Framework;
+    using Table.Saga;
 
 
     namespace ReadOnlyTests
     {
-        using Table.Saga;
-
-
         [TestFixture]
         [Category("Integration")]
         public class When_a_readonly_event_is_consumed :

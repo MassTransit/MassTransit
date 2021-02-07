@@ -6,6 +6,7 @@ namespace MassTransit.AutofacIntegration.Registration
     using Clients;
     using Courier;
     using Definition;
+    using Futures;
     using MassTransit.Registration;
     using Mediator;
     using Saga;
@@ -124,6 +125,22 @@ namespace MassTransit.AutofacIntegration.Registration
 
             if (settings != null)
                 _builder.RegisterInstance(settings);
+        }
+
+        public void RegisterFuture<TFuture>()
+            where TFuture : MassTransitStateMachine<FutureState>
+        {
+            _builder.RegisterType<TFuture>()
+                .AsSelf()
+                .SingleInstance();
+        }
+
+        public void RegisterFutureDefinition<TDefinition, TFuture>()
+            where TDefinition : class, IFutureDefinition<TFuture>
+            where TFuture : MassTransitStateMachine<FutureState>
+        {
+            _builder.RegisterType<TDefinition>()
+                .As<IFutureDefinition<TFuture>>();
         }
 
         public void RegisterRequestClient<T>(RequestTimeout timeout = default)

@@ -74,26 +74,6 @@ namespace MassTransit.Definition
         }
 
         /// <summary>
-        /// Define a message handled by the consumer
-        /// </summary>
-        /// <param name="configure"></param>
-        /// <typeparam name="T">The message type</typeparam>
-        protected void Message<T>(Action<IConsumerMessageDefinitionConfigurator<TConsumer, T>> configure = null)
-            where T : class
-        {
-        }
-
-        /// <summary>
-        /// Define the request message handled by the consumer
-        /// </summary>
-        /// <param name="configure"></param>
-        /// <typeparam name="T">The message type</typeparam>
-        protected void Request<T>(Action<IConsumerRequestDefinitionConfigurator<TConsumer, T>> configure = null)
-            where T : class
-        {
-        }
-
-        /// <summary>
         /// Called when the consumer is being configured on the endpoint. Configuration only applies to this consumer, and does not apply to
         /// the endpoint.
         /// </summary>
