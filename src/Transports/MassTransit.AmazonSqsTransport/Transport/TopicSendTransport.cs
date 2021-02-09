@@ -87,6 +87,12 @@
                     _context.SnsSetHeaderAdapter.Set(request.MessageAttributes, "Content-Type", sendContext.ContentType.MediaType);
                     _context.SnsSetHeaderAdapter.Set(request.MessageAttributes, nameof(sendContext.CorrelationId), sendContext.CorrelationId);
 
+                    if (!string.IsNullOrEmpty(sendContext.DeduplicationId))
+                        request.MessageDeduplicationId = sendContext.DeduplicationId;
+
+                    if (!string.IsNullOrEmpty(sendContext.GroupId))
+                        request.MessageGroupId = sendContext.GroupId;
+
                     await context.Publish(request, sendContext.CancellationToken).ConfigureAwait(false);
 
                     sendContext.LogSent();
