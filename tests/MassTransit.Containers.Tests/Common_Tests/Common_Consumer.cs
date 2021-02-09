@@ -48,6 +48,42 @@
     }
 
 
+    public abstract class Common_Consumer_Retry :
+        InMemoryTestFixture
+    {
+        protected abstract IBusRegistrationContext Registration { get; }
+
+        [Test]
+        public async Task Should_only_produce_one_fault()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            Assert.That(await InMemoryTestHarness.Published.SelectAsync<Fault<PingMessage>>().Count(), Is.EqualTo(1));
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.ConfigureConsumer<PingConsumer>(Registration);
+        }
+
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<PingConsumer>();
+            configurator.AddBus(provider => BusControl);
+        }
+
+
+        class PingConsumer :
+            IConsumer<PingMessage>
+        {
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                throw new IntentionalTestException();
+            }
+        }
+    }
+
+
     public abstract class Common_Consume_Filter :
         InMemoryTestFixture
     {

@@ -11,7 +11,7 @@
     public class ConsumeContextScope :
         ConsumeContextProxy
     {
-        readonly PipeContext _context;
+        readonly ConsumeContext _context;
         IPayloadCache _payloadCache;
 
         public ConsumeContextScope(ConsumeContext context)
@@ -93,6 +93,16 @@
             }
 
             return PayloadCache.AddOrUpdatePayload(addFactory, updateFactory);
+        }
+
+        public override Task NotifyConsumed<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
+        {
+            return _context.NotifyConsumed(context, duration, consumerType);
+        }
+
+        public override Task NotifyFaulted<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
+        {
+            return _context.NotifyFaulted(context, duration, consumerType, exception);
         }
     }
 

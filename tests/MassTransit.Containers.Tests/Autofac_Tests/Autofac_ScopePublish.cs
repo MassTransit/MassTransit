@@ -158,4 +158,41 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
         protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
     }
+
+    [TestFixture]
+    public class Autofac_Publish_Filter_Fault_New :
+        Common_Publish_Filter_Fault
+    {
+        readonly IContainer _container;
+
+        public Autofac_Publish_Filter_Fault_New()
+        {
+            var builder = new ContainerBuilder();
+            builder.RegisterInstance(TaskCompletionSource);
+
+            builder.AddMassTransit(ConfigureRegistration);
+
+            _container = builder.Build();
+        }
+
+        [OneTimeTearDown]
+        public async Task Close_container()
+        {
+            await _container.DisposeAsync();
+        }
+
+        protected override void ConfigureFilter(IPublishPipelineConfigurator configurator)
+        {
+            AutofacFilterExtensions.UsePublishFilter(configurator, typeof(ScopedFilter<>), Registration);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseMessageLifetimeScope(_container);
+
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
+        }
+
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
+    }
 }

@@ -10,6 +10,7 @@ namespace MassTransit.Context
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
     using Metadata;
+    using Pipeline.Filters.Outbox;
     using Transports;
 
 
@@ -251,7 +252,9 @@ namespace MassTransit.Context
 
                 var faultPipe = new FaultPipe<T>(context);
 
-                var faultEndpoint = await this.GetFaultEndpoint<T>().ConfigureAwait(false);
+                var faultEndpoint = context.ReceiveContext is InMemoryOutboxReceiveContext
+                    ? await this.GetFaultEndpoint<T>().ConfigureAwait(false)
+                    : await context.GetFaultEndpoint<T>().ConfigureAwait(false);
 
                 await faultEndpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
             }

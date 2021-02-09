@@ -45,6 +45,33 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
 
     [TestFixture]
+    public class Autofac_Consumer_Retry :
+        Common_Consumer_Retry
+    {
+        readonly IContainer _container;
+
+        public Autofac_Consumer_Retry()
+        {
+            var builder = new ContainerBuilder();
+            builder.AddMassTransit(ConfigureRegistration);
+
+            _container = builder.Build();
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseMessageRetry(r => r.Immediate(5));
+            configurator.UseMessageLifetimeScope(_container);
+            configurator.UseInMemoryOutbox();
+
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
+        }
+
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class Autofac_Consumer_Endpoint :
         Common_Consumer_Endpoint
     {

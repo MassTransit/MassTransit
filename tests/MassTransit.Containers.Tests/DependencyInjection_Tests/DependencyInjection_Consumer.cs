@@ -35,6 +35,33 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 
 
     [TestFixture]
+    public class DependencyInjection_Consumer_Retry :
+        Common_Consumer_Retry
+    {
+        readonly IServiceProvider _provider;
+
+        public DependencyInjection_Consumer_Retry()
+        {
+            var collection = new ServiceCollection();
+            collection.AddMassTransit(ConfigureRegistration);
+
+            _provider = collection.BuildServiceProvider(true);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseMessageRetry(r => r.Immediate(5));
+            configurator.UseMessageScope(_provider);
+            configurator.UseInMemoryOutbox();
+
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
+        }
+
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class DependencyInjection_Consumer_Endpoint :
         Common_Consumer_Endpoint
     {
