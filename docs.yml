@@ -7,6 +7,9 @@ only_commits:
     - docs/**/*
     - docs.yml
     - package.json
+skip_tags: true
+image:
+  - Visual Studio 2019
 skip_branch_with_pr: true
 environment:
   access_token:
