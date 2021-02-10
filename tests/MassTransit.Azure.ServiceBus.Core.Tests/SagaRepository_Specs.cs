@@ -113,7 +113,7 @@
             public Using_a_message_session_as_a_saga_repository()
                 : base("saga_input_queue_session")
             {
-                _repository = new MessageSessionSagaRepository<JobState>();
+                _repository = MessageSessionSagaRepository.Create<JobState>();
             }
 
             [OneTimeSetUp]

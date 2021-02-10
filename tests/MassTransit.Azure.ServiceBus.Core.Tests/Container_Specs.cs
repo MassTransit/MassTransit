@@ -1,4 +1,4 @@
-namespace MassTransit.Azure.Cosmos.Tests
+namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     namespace ContainerTests
     {
@@ -8,22 +8,12 @@ namespace MassTransit.Azure.Cosmos.Tests
         using GreenPipes;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
-        using TestFramework;
         using TestFramework.Sagas;
 
 
         public class Using_the_container_integration :
-            InMemoryTestFixture
+            AzureServiceBusTestFixture
         {
-            readonly IServiceProvider _provider;
-
-            public Using_the_container_integration()
-            {
-                _provider = new ServiceCollection()
-                    .AddMassTransit(ConfigureRegistration)
-                    .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
-            }
-
             [Test]
             public async Task Should_work_as_expected()
             {
@@ -36,6 +26,9 @@ namespace MassTransit.Azure.Cosmos.Tests
                 {
                     CorrelationId = correlationId,
                     TestKey = "Unique"
+                }, x =>
+                {
+                    x.SetSessionId(correlationId.ToString());
                 });
 
                 await started;
@@ -44,28 +37,37 @@ namespace MassTransit.Azure.Cosmos.Tests
                 {
                     TestId = correlationId,
                     TestKey = "Unique"
+                }, x =>
+                {
+                    x.SetSessionId(correlationId.ToString());
                 });
 
                 await updated;
             }
 
+            readonly IServiceProvider _provider;
+
+            public Using_the_container_integration()
+                : base("saga_input_queue_session")
+            {
+                _provider = new ServiceCollection()
+                    .AddMassTransit(ConfigureRegistration)
+                    .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
+            }
+
             protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
             {
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
-                    .CosmosRepository(r =>
-                    {
-                        r.EndpointUri = Configuration.EndpointUri;
-                        r.Key = Configuration.Key;
-
-                        r.DatabaseId = "sagaTest";
-                        r.CollectionId = "TestInstance";
-                    });
+                    .MessageSessionRepository();
 
                 configurator.AddBus(provider => BusControl);
             }
 
-            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
             {
+                configurator.RequiresSession = true;
+                configurator.EnablePartitioning = true;
+
                 configurator.UseInMemoryOutbox();
                 configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IBusRegistrationContext>());
             }

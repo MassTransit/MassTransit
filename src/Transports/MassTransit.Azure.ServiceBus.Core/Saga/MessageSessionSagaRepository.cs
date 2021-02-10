@@ -13,11 +13,26 @@
     using Serialization;
 
 
+    public static class MessageSessionSagaRepository
+    {
+        public static ISagaRepository<T> Create<T>()
+            where T : class, ISaga
+        {
+            var consumeContextFactory = new SagaConsumeContextFactory<MessageSessionContext, T>();
+
+            var repositoryFactory = new MessageSessionSagaRepositoryContextFactory<T>(consumeContextFactory);
+
+            return new SagaRepository<T>(repositoryFactory);
+        }
+    }
+
+
     /// <summary>
     /// A saga repository that uses the message session in Azure Service Bus to store the state
     /// of the saga.
     /// </summary>
     /// <typeparam name="TSaga">The saga state type</typeparam>
+    [Obsolete("This should not be used directly, use MessageSessionSagaRepository.Create<T>() to create a saga repository, or use the container integration")]
     public class MessageSessionSagaRepository<TSaga> :
         ISagaRepository<TSaga>
         where TSaga : class, ISaga
@@ -103,7 +118,7 @@
 
         async Task<TSaga> ReadSagaState(MessageSessionContext context)
         {
-            byte[] state = await context.GetStateAsync().ConfigureAwait(false);
+            var state = await context.GetStateAsync().ConfigureAwait(false);
             if (state == null)
                 return default;
 
