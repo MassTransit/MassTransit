@@ -14,8 +14,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.JobService
         {
             entity.Property(x => x.CurrentState);
 
-            entity.Ignore(x => x.Version);
-
             entity.Property(x => x.ActiveJobCount);
             entity.Property(x => x.ConcurrentJobLimit);
 

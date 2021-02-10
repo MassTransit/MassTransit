@@ -9,7 +9,7 @@
 
 
     public class TransportInMemoryReceiveEndpointContext :
-        BaseReceiveEndpointContext,
+        BaseReceiveEndpointOutboxTransportContext,
         InMemoryReceiveEndpointContext
     {
         readonly IInMemoryReceiveEndpointConfiguration _configuration;

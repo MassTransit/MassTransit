@@ -13,8 +13,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.JobService
         {
             entity.Property(x => x.CurrentState);
 
-            entity.Ignore(x => x.Version);
-
             entity.Property(x => x.JobId);
             entity.Property(x => x.RetryAttempt);
 

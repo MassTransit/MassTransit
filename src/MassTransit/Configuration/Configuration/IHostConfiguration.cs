@@ -24,6 +24,11 @@
         /// </summary>
         bool DeployTopologyOnly { get; set; }
 
+        /// <summary>
+        /// If true, all send and publish will go through the outbox (relational db)
+        /// </summary>
+        bool UseOutbox { set; get; }
+
         ILogContext LogContext { get; set; }
         ILogContext ReceiveLogContext { get; }
         ILogContext SendLogContext { get; }
