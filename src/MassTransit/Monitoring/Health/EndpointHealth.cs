@@ -39,6 +39,9 @@ namespace MassTransit.Monitoring.Health
         {
             UpdateEndpoint(stopping);
 
+            if (stopping.Removed)
+                _endpoints.TryRemove(stopping.InputAddress, out var endpoint);
+
             return TaskUtil.Completed;
         }
 

@@ -173,7 +173,7 @@
 
             public async Task StopAsync(CancellationToken cancellationToken)
             {
-                await _endpoint.Stop(cancellationToken).ConfigureAwait(false);
+                await _endpoint.Stop(true, cancellationToken).ConfigureAwait(false);
 
                 _remove();
             }

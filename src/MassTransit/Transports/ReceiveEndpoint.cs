@@ -64,13 +64,18 @@ namespace MassTransit.Transports
             return _handle;
         }
 
-        public async Task Stop(CancellationToken cancellationToken)
+        public Task Stop(CancellationToken cancellationToken)
+        {
+            return Stop(false, cancellationToken);
+        }
+
+        public async Task Stop(bool removed, CancellationToken cancellationToken)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
             if (_handle != null)
             {
-                await _context.EndpointObservers.Stopping(new ReceiveEndpointStoppingEvent(_context.InputAddress, this)).ConfigureAwait(false);
+                await _context.EndpointObservers.Stopping(new ReceiveEndpointStoppingEvent(_context.InputAddress, this, removed)).ConfigureAwait(false);
 
                 await _handle.TransportHandle.Stop(cancellationToken).ConfigureAwait(false);
 
