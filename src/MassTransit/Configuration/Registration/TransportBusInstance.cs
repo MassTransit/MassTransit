@@ -67,6 +67,8 @@ namespace MassTransit.Registration
         {
             return _host.ConnectReceiveEndpoint(definition, endpointNameFormatter, configurator =>
             {
+                _busRegistrationContext.GetConfigureReceiveEndpoints().Configure(definition.GetEndpointName(endpointNameFormatter), configurator);
+
                 configure?.Invoke(_busRegistrationContext, configurator);
             });
         }
@@ -75,6 +77,8 @@ namespace MassTransit.Registration
         {
             return _host.ConnectReceiveEndpoint(queueName, configurator =>
             {
+                _busRegistrationContext.GetConfigureReceiveEndpoints().Configure(queueName, configurator);
+
                 configure?.Invoke(_busRegistrationContext, configurator);
             });
         }

@@ -46,6 +46,38 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 
 
     [TestFixture]
+    public class SimpleInjector_Consumer_ConfigureEndpoint :
+        Common_Consumer_ConfigureEndpoint
+    {
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
+        [OneTimeTearDown]
+        public async Task Close_container()
+        {
+            await _container.DisposeAsync();
+        }
+
+        readonly Container _container;
+
+        public SimpleInjector_Consumer_ConfigureEndpoint()
+        {
+            _container = new Container();
+            _container.SetMassTransitContainerOptions();
+
+            _container.AddMassTransit(ConfigureRegistration);
+
+            _container.Collection.Register<IConfigureReceiveEndpoint>(typeof(DoNotPublishFaults));
+        }
+
+        protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class SimpleInjector_Consumer_Endpoint :
         Common_Consumer_Endpoint
     {

@@ -62,6 +62,25 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 
 
     [TestFixture]
+    public class DependencyInjection_Consumer_ConfigureEndpoint :
+        Common_Consumer_ConfigureEndpoint
+    {
+        readonly IServiceProvider _provider;
+
+        public DependencyInjection_Consumer_ConfigureEndpoint()
+        {
+            var collection = new ServiceCollection();
+            collection.AddMassTransit(ConfigureRegistration);
+            collection.AddTransient<IConfigureReceiveEndpoint, DoNotPublishFaults>();
+
+            _provider = collection.BuildServiceProvider(true);
+        }
+
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class DependencyInjection_Consumer_Endpoint :
         Common_Consumer_Endpoint
     {
