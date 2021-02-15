@@ -88,6 +88,16 @@
         public const string MessageId = "MessageId";
 
         /// <summary>
+        /// The requestId, which is not typically a transport header, but might be
+        /// </summary>
+        public const string CorrelationId = "CorrelationId";
+
+        /// <summary>
+        /// The requestId, which is not typically a transport header, but might be
+        /// </summary>
+        public const string RequestId = "RequestId";
+
+        /// <summary>
         /// The Transport message ID, which is a string, because we can't assume anything
         /// </summary>
         public const string TransportMessageId = "TransportMessageId";

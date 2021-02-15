@@ -60,6 +60,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 using var model = connection.CreateModel();
 
                 var properties = model.CreateBasicProperties();
+                properties.SetHeader(MessageHeaders.MessageId, "Whiskey-Tango-Foxtrot 3-5-9er");
 
                 model.BasicPublish(RabbitMqTestHarness.InputQueueName, "", false, properties, body);
             }

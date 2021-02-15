@@ -18,9 +18,9 @@ namespace MassTransit.Transports.InMemory
 
         protected async Task Move(ReceiveContext context, Action<InMemoryTransportMessage, IDictionary<string, object>> preSend)
         {
-            var messageId = GetMessageId(context);
+            var messageId = context.GetMessageId(NewId.NextGuid());
 
-            byte[] body = context.GetBody();
+            var body = context.GetBody();
 
             var messageType = "Unknown";
             if (context.TryGetPayload(out InMemoryTransportMessage receivedMessage))
@@ -33,13 +33,6 @@ namespace MassTransit.Transports.InMemory
             preSend(transportMessage, transportMessage.Headers);
 
             await _exchange.Send(transportMessage, CancellationToken.None).ConfigureAwait(false);
-        }
-
-        static Guid GetMessageId(ReceiveContext context)
-        {
-            return context.TransportHeaders.TryGetHeader(MessageHeaders.MessageId, out var messageIdValue)
-                ? new Guid(messageIdValue.ToString())
-                : NewId.NextGuid();
         }
     }
 }

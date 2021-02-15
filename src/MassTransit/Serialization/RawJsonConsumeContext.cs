@@ -25,9 +25,9 @@ namespace MassTransit.Serialization
             _deserializer = deserializer;
             _messageTypes = new Dictionary<Type, ConsumeContext>();
 
-            MessageId = receiveContext.TransportHeaders.Get<Guid>(nameof(MessageContext.MessageId));
-            CorrelationId = receiveContext.TransportHeaders.Get<Guid>(nameof(MessageContext.CorrelationId));
-            RequestId = receiveContext.TransportHeaders.Get<Guid>(nameof(MessageContext.RequestId));
+            MessageId = receiveContext.GetMessageId();
+            CorrelationId = receiveContext.GetCorrelationId();
+            RequestId = receiveContext.GetRequestId();
         }
 
         public override Guid? MessageId { get; }
