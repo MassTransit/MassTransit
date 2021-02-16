@@ -126,6 +126,8 @@ namespace MassTransit.Transports
         {
             LogContext.Current = _hostConfiguration.LogContext;
 
+            LogContext.Debug?.Log("Stopping host: {HostAddress}", Address);
+
             await _riderCollection.Stop(cancellationToken).ConfigureAwait(false);
 
             await ReceiveEndpoints.Stop(cancellationToken).ConfigureAwait(false);

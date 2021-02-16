@@ -367,12 +367,6 @@ namespace MassTransit
 
                 try
                 {
-                    var hostAddress = _hostHandle.Ready.IsCompletedSuccessfully()
-                        ? _hostHandle.Ready.GetAwaiter().GetResult().HostAddress
-                        : new Uri(_bus.Address.GetLeftPart(UriPartial.Authority));
-
-                    LogContext.Debug?.Log("Stopping host: {HostAddress}", hostAddress);
-
                     await _hostHandle.Stop(cancellationToken).ConfigureAwait(false);
 
                     await _busObserver.PostStop(_bus).ConfigureAwait(false);
