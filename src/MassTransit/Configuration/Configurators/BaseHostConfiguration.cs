@@ -21,10 +21,10 @@ namespace MassTransit.Configurators
     {
         readonly ConsumeObservable _consumeObservers;
         readonly EndpointConfigurationObservable _endpointObservable;
-        readonly IList<TConfiguration> _endpoints;
         readonly PublishObservable _publishObservers;
         readonly ReceiveObservable _receiveObservers;
         readonly SendObservable _sendObservers;
+        IList<TConfiguration> _endpoints;
         ILogContext _logContext;
 
         protected BaseHostConfiguration(IBusConfiguration busConfiguration)
@@ -41,8 +41,6 @@ namespace MassTransit.Configurators
         }
 
         protected IEndpointConfigurationObserver Observers => _endpointObservable;
-
-        protected IEnumerable<TConfiguration> Endpoints => _endpoints;
 
         public IBusConfiguration BusConfiguration { get; }
 
@@ -82,7 +80,7 @@ namespace MassTransit.Configurators
 
         public virtual IEnumerable<ValidationResult> Validate()
         {
-            return _endpoints.SelectMany(x => x.Validate());
+            return _endpoints?.SelectMany(x => x.Validate()) ?? Enumerable.Empty<ValidationResult>();
         }
 
         public abstract IHostTopology HostTopology { get; }
@@ -130,9 +128,18 @@ namespace MassTransit.Configurators
 
         public abstract void ReceiveEndpoint(string queueName, Action<TConfigurator> configureEndpoint);
 
+        protected IEnumerable<TConfiguration> GetConfiguredEndpoints()
+        {
+            IList<TConfiguration> endpoints = _endpoints;
+
+            _endpoints = null;
+
+            return endpoints;
+        }
+
         protected void Add(TConfiguration configuration)
         {
-            _endpoints.Add(configuration);
+            _endpoints?.Add(configuration);
         }
     }
 }

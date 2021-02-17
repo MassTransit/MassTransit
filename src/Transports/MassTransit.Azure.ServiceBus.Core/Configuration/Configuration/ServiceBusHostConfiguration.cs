@@ -217,15 +217,10 @@
         {
             var host = new ServiceBusHost(this, _hostTopology);
 
-            foreach (var endpointConfiguration in Endpoints)
+            foreach (var endpointConfiguration in GetConfiguredEndpoints())
                 endpointConfiguration.Build(host);
 
             return host;
-        }
-
-        public ISendEndpointContextSupervisor CreateSendEndpointContextSupervisor(SendSettings settings)
-        {
-            return _connectionContext.Supervisor.CreateSendEndpointContextSupervisor(settings);
         }
 
         IServiceBusSubscriptionEndpointConfiguration CreateSubscriptionEndpointConfiguration(SubscriptionEndpointSettings settings,

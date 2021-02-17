@@ -185,7 +185,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             var host = new RabbitMqHost(this, _hostTopology);
 
-            foreach (var endpointConfiguration in Endpoints)
+            foreach (var endpointConfiguration in GetConfiguredEndpoints())
                 endpointConfiguration.Build(host);
 
             return host;

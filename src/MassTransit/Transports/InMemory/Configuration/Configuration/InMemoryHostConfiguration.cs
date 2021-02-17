@@ -126,7 +126,7 @@
         {
             var host = new InMemoryHost(this, _hostTopology);
 
-            foreach (var endpointConfiguration in Endpoints)
+            foreach (var endpointConfiguration in GetConfiguredEndpoints())
                 endpointConfiguration.Build(host);
 
             return host;
