@@ -60,7 +60,7 @@ namespace MassTransit.Registration
 
                 TaskUtil.Await(() => _hostConfiguration.BusConfiguration.BusObservers.PostCreate(bus));
 
-                var instance = new TransportBusInstance<TEndpointConfigurator>(bus, host, _hostConfiguration, context);
+                IBusInstance instance = CreateBusInstance(bus, host, _hostConfiguration, context);
 
                 foreach (var specification in busInstanceSpecifications)
                     specification.Configure(instance);
@@ -73,6 +73,12 @@ namespace MassTransit.Registration
 
                 throw new ConfigurationException(result, "An exception occurred during bus creation", ex);
             }
+        }
+
+        protected virtual IBusInstance CreateBusInstance(IBusControl bus, IHost<TEndpointConfigurator> host, IHostConfiguration hostConfiguration,
+            IBusRegistrationContext context)
+        {
+            return new TransportBusInstance<TEndpointConfigurator>(bus, host, hostConfiguration, context);
         }
     }
 }

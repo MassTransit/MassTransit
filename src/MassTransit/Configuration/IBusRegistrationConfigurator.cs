@@ -10,6 +10,8 @@ namespace MassTransit
     public interface IBusRegistrationConfigurator :
         IRegistrationConfigurator
     {
+        IContainerRegistrar Registrar { get; }
+
         /// <summary>
         /// This method is being deprecated. Use the transport-specific UsingRabbitMq, UsingActiveMq, etc. methods instead.
         /// </summary>
