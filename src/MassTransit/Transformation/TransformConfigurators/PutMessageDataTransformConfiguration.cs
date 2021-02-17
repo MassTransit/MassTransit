@@ -26,7 +26,7 @@ namespace MassTransit.Transformation.TransformConfigurators
 
         public void Apply(ITransformConfigurator<TInput> configurator)
         {
-            if (TypeMetadataCache<TInput>.IsValidMessageType && typeof(TInput).GetTypeInfo().IsInterface)
+            if (TypeMetadataCache<TInput>.IsValidMessageType)
             {
                 var inputPropertyProvider = new InputPropertyProvider<TInput, MessageData<TValue>>(_property);
 
