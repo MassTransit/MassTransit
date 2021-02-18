@@ -20,3 +20,14 @@ Any topic can be subscribed to a receive endpoint, as shown below. The topic att
 
 <<< @/docs/code/transports/AmazonSqsReceiveEndpoint.cs
 
+Required AWS permissions:
+* _sqs:GetQueueAttributes_
+* _sqs:SetQueueAttributes_
+* _sqs:ReceiveMessage_
+* _sqs:CreateQueue_
+* _sqs:DeleteMessage_
+* _sqs:SendMessage_
+* _sns:GetTopicAttributes_
+* _sns:CreateTopic_
+* _sns:Publish_
+* _sns:Subscribe_
