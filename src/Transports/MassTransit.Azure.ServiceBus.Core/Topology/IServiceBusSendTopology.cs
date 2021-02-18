@@ -1,6 +1,5 @@
 namespace MassTransit.Azure.ServiceBus.Core.Topology
 {
-    using System;
     using MassTransit.Topology;
     using Transport;
 
@@ -15,8 +14,5 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology
 
         SendSettings GetErrorSettings(IQueueConfigurator configurator);
         SendSettings GetDeadLetterSettings(IQueueConfigurator configurator);
-
-        SendSettings GetErrorSettings(ISubscriptionConfigurator configurator, Uri hostAddress);
-        SendSettings GetDeadLetterSettings(ISubscriptionConfigurator configurator, Uri hostAddress);
     }
 }

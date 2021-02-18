@@ -135,12 +135,6 @@
             {
                 var messageReceiver = new BrokeredMessageReceiver(receiveEndpointContext);
 
-                var errorTransport = CreateErrorTransport();
-                var deadLetterTransport = CreateDeadLetterTransport();
-
-                receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
-                receiveEndpointContext.GetOrAddPayload(() => errorTransport);
-
                 ClientPipeConfigurator.UseFilter(_settings.RequiresSession
                     ? new MessageSessionReceiverFilter(messageReceiver, receiveEndpointContext)
                     : new MessageReceiverFilter(messageReceiver, receiveEndpointContext));
@@ -159,8 +153,5 @@
 
             ReceiveEndpoint = receiveEndpoint;
         }
-
-        protected abstract IErrorTransport CreateErrorTransport();
-        protected abstract IDeadLetterTransport CreateDeadLetterTransport();
     }
 }
