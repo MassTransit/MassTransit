@@ -2,14 +2,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 {
     using System;
     using Context;
-    using Pipeline;
+    using GreenPipes;
 
 
     public interface ServiceBusSendTransportContext :
-        SendTransportContext
+        SendTransportContext,
+        IPipeContextSource<SendEndpointContext>
     {
         Uri Address { get; }
-
-        ISendEndpointContextSupervisor Supervisor { get; }
     }
 }

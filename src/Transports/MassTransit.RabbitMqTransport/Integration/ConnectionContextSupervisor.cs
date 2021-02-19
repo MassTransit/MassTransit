@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
     using Context;
@@ -82,10 +83,13 @@
             BaseSendTransportContext,
             RabbitMqSendTransportContext
         {
+            readonly IRabbitMqHostConfiguration _hostConfiguration;
+
             public SendTransportContext(IRabbitMqHostConfiguration hostConfiguration, IModelContextSupervisor modelContextSupervisor,
                 IPipe<ModelContext> configureTopologyPipe, string exchange)
                 : base(hostConfiguration)
             {
+                _hostConfiguration = hostConfiguration;
                 ModelContextSupervisor = modelContextSupervisor;
                 ConfigureTopologyPipe = configureTopologyPipe;
                 Exchange = exchange;
@@ -94,6 +98,15 @@
             public IPipe<ModelContext> ConfigureTopologyPipe { get; }
             public string Exchange { get; }
             public IModelContextSupervisor ModelContextSupervisor { get; }
+
+            public Task Send(IPipe<ModelContext> pipe, CancellationToken cancellationToken)
+            {
+                return _hostConfiguration.Retry(() => ModelContextSupervisor.Send(pipe, cancellationToken), ModelContextSupervisor);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
         }
     }
 }

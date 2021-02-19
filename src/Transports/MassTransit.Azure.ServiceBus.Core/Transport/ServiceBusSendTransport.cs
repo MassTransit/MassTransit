@@ -32,7 +32,7 @@
         {
             var sendPipe = new SendPipe<T>(_context, message, pipe, cancellationToken);
 
-            return _context.Supervisor.Send(sendPipe, cancellationToken);
+            return _context.Send(sendPipe, cancellationToken);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

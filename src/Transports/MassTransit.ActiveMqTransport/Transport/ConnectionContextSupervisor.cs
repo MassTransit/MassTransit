@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.ActiveMqTransport.Transport
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Apache.NMS;
     using Configuration;
@@ -80,10 +81,13 @@
             BaseSendTransportContext,
             ActiveMqSendTransportContext
         {
+            readonly IActiveMqHostConfiguration _hostConfiguration;
+
             public SendTransportContext(IActiveMqHostConfiguration hostConfiguration, ISessionContextSupervisor sessionContextSupervisor,
                 IPipe<SessionContext> configureTopologyPipe, string entityName, DestinationType destinationType)
                 : base(hostConfiguration)
             {
+                _hostConfiguration = hostConfiguration;
                 SessionContextSupervisor = sessionContextSupervisor;
                 ConfigureTopologyPipe = configureTopologyPipe;
                 EntityName = entityName;
@@ -94,6 +98,15 @@
             public string EntityName { get; }
             public DestinationType DestinationType { get; }
             public ISessionContextSupervisor SessionContextSupervisor { get; }
+
+            public Task Send(IPipe<SessionContext> pipe, CancellationToken cancellationToken)
+            {
+                return _hostConfiguration.Retry(() => SessionContextSupervisor.Send(pipe, cancellationToken), SessionContextSupervisor);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
         }
     }
 }

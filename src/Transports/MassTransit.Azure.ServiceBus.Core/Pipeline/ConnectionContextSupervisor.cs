@@ -1,6 +1,7 @@
 namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
     using Context;
@@ -104,15 +105,27 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
             BaseSendTransportContext,
             ServiceBusSendTransportContext
         {
-            public SendTransportContext(IServiceBusHostConfiguration hostConfiguration, Uri address, ISendEndpointContextSupervisor source)
+            readonly IServiceBusHostConfiguration _hostConfiguration;
+            readonly ISendEndpointContextSupervisor _supervisor;
+
+            public SendTransportContext(IServiceBusHostConfiguration hostConfiguration, Uri address, ISendEndpointContextSupervisor supervisor)
                 : base(hostConfiguration)
             {
+                _hostConfiguration = hostConfiguration;
                 Address = address;
-                Supervisor = source;
+                _supervisor = supervisor;
             }
 
             public Uri Address { get; }
-            public ISendEndpointContextSupervisor Supervisor { get; }
+
+            public Task Send(IPipe<SendEndpointContext> pipe, CancellationToken cancellationToken)
+            {
+                return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), _supervisor);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
         }
     }
 }
