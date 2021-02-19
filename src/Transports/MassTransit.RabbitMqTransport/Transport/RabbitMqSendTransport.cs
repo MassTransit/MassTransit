@@ -56,7 +56,7 @@
 
         protected override Task StopSupervisor(StopSupervisorContext context)
         {
-            LogContext.Debug?.Log("Stopping send transport: {Exchange}", _context.Exchange);
+            TransportLogMessages.StoppingSendTransport(_context.Exchange);
 
             return base.StopSupervisor(context);
         }

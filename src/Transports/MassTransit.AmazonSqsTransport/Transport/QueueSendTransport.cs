@@ -43,7 +43,7 @@
 
         protected override Task StopSupervisor(StopSupervisorContext context)
         {
-            LogContext.Debug?.Log("Stopping send transport: {Queue}", _context.EntityName);
+            TransportLogMessages.StoppingSendTransport(_context.EntityName);
 
             return base.StopSupervisor(context);
         }

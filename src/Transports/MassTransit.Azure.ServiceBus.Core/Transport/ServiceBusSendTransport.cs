@@ -42,7 +42,7 @@
 
         protected override Task StopAgent(StopContext context)
         {
-            LogContext.Debug?.Log("Stopping send transport: {Address}", _context.Address);
+            TransportLogMessages.StoppingSendTransport(_context.Address.ToString());
 
             return base.StopAgent(context);
         }

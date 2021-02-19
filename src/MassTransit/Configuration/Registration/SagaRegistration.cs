@@ -50,7 +50,7 @@ namespace MassTransit.Registration
             foreach (Action<ISagaConfigurator<TSaga>> action in _configureActions)
                 action(sagaConfigurator);
 
-            LogContext.Debug?.Log("Configured endpoint {Endpoint}, Saga: {SagaType}", configurator.InputAddress.GetLastPart(),
+            LogContext.Info?.Log("Configured endpoint {Endpoint}, Saga: {SagaType}", configurator.InputAddress.GetLastPart(),
                 TypeMetadataCache<TSaga>.ShortName);
 
             configurator.AddEndpointSpecification(sagaConfigurator);

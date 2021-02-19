@@ -52,7 +52,7 @@ namespace MassTransit.Registration
             foreach (Action<IConsumerConfigurator<TConsumer>> action in _configureActions)
                 action(consumerConfigurator);
 
-            LogContext.Debug?.Log("Configured endpoint {Endpoint}, Consumer: {ConsumerType}", configurator.InputAddress.GetLastPart(),
+            LogContext.Info?.Log("Configured endpoint {Endpoint}, Consumer: {ConsumerType}", configurator.InputAddress.GetLastPart(),
                 TypeMetadataCache<TConsumer>.ShortName);
 
             configurator.AddEndpointSpecification(consumerConfigurator);

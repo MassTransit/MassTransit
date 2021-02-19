@@ -47,7 +47,7 @@ namespace MassTransit.Registration
             foreach (Action<IExecuteActivityConfigurator<TActivity, TArguments>> action in _configureActions)
                 action(specification);
 
-            LogContext.Debug?.Log("Configured endpoint {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
+            LogContext.Info?.Log("Configured endpoint {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
                 TypeMetadataCache<TActivity>.ShortName);
 
             configurator.AddEndpointSpecification(specification);

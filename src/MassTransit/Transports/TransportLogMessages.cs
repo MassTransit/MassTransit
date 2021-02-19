@@ -7,16 +7,16 @@ namespace MassTransit.Transports
 
     public static class TransportLogMessages
     {
-        public static readonly LogMessage<string> ConnectHost = LogContext.Define<string>(LogLevel.Information,
+        public static readonly LogMessage<string> ConnectHost = LogContext.Define<string>(LogLevel.Debug,
             "Connect: {Host}");
 
-        public static readonly LogMessage<string> ConnectedHost = LogContext.Define<string>(LogLevel.Information,
+        public static readonly LogMessage<string> ConnectedHost = LogContext.Define<string>(LogLevel.Debug,
             "Connected: {Host}");
 
-        public static readonly LogMessage<string> DisconnectHost = LogContext.Define<string>(LogLevel.Information,
+        public static readonly LogMessage<string> DisconnectHost = LogContext.Define<string>(LogLevel.Debug,
             "Disconnect: {Host}");
 
-        public static readonly LogMessage<string> DisconnectedHost = LogContext.Define<string>(LogLevel.Information,
+        public static readonly LogMessage<string> DisconnectedHost = LogContext.Define<string>(LogLevel.Debug,
             "Disconnected: {Host}");
 
         public static readonly LogMessage<string> StoppingSendTransport = LogContext.Define<string>(LogLevel.Debug,
