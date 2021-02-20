@@ -6,6 +6,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Using_the_reply_to_address :
         RabbitMqTestFixture
     {
