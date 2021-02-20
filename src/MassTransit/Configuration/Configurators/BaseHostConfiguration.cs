@@ -128,6 +128,26 @@ namespace MassTransit.Configurators
 
         public abstract void ReceiveEndpoint(string queueName, Action<TConfigurator> configureEndpoint);
 
+        protected void ApplyEndpointDefinition(IReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
+        {
+            configurator.ConfigureConsumeTopology = definition.ConfigureConsumeTopology;
+
+            configurator.ConcurrentMessageLimit = definition.ConcurrentMessageLimit;
+
+            if (definition.PrefetchCount.HasValue)
+                configurator.PrefetchCount = (ushort)definition.PrefetchCount.Value;
+            else if (definition.ConcurrentMessageLimit.HasValue)
+            {
+                var concurrentMessageLimit = definition.ConcurrentMessageLimit.Value;
+
+                var calculatedPrefetchCount = concurrentMessageLimit * 12 / 10;
+
+                configurator.PrefetchCount = (ushort)calculatedPrefetchCount;
+            }
+
+            definition.Configure(configurator);
+        }
+
         protected IEnumerable<TConfiguration> GetConfiguredEndpoints()
         {
             IList<TConfiguration> endpoints = _endpoints;

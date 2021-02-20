@@ -44,7 +44,7 @@ namespace MassTransit.Definition
         void IExecuteActivityDefinition<TActivity, TArguments>.Configure(IReceiveEndpointConfigurator endpointConfigurator,
             IExecuteActivityConfigurator<TActivity, TArguments> executeActivityConfigurator)
         {
-            ConfigureConcurrencyLimit(executeActivityConfigurator.RoutingSlip);
+            ConfigureConcurrencyLimit(endpointConfigurator, executeActivityConfigurator.RoutingSlip);
 
             ConfigureExecuteActivity(endpointConfigurator, executeActivityConfigurator);
         }
@@ -72,9 +72,9 @@ namespace MassTransit.Definition
             ExecuteEndpointDefinition = new ExecuteActivityEndpointDefinition<TActivity, TArguments>(configurator.Settings);
         }
 
-        protected void ConfigureConcurrencyLimit(Action<Action<IRoutingSlipConfigurator>> callback)
+        protected void ConfigureConcurrencyLimit(IReceiveEndpointConfigurator endpointConfigurator, Action<Action<IRoutingSlipConfigurator>> callback)
         {
-            if (_concurrentMessageLimit.HasValue)
+            if (_concurrentMessageLimit.HasValue && endpointConfigurator.ConcurrentMessageLimit > _concurrentMessageLimit)
                 callback(x => x.UseConcurrentMessageLimit(_concurrentMessageLimit.Value));
         }
 

@@ -20,6 +20,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
         }
 
         public int PrefetchCount => _configuration.Transport.PrefetchCount;
+        public int ConcurrentMessageLimit => _configuration.Transport.GetConcurrentMessageLimit();
 
         public int WaitTimeSeconds { get; set; }
 

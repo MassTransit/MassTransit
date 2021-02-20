@@ -45,7 +45,7 @@ namespace MassTransit.Definition
 
         void IConsumerDefinition<TConsumer>.Configure(IReceiveEndpointConfigurator endpointConfigurator, IConsumerConfigurator<TConsumer> consumerConfigurator)
         {
-            if (_concurrentMessageLimit.HasValue)
+            if (_concurrentMessageLimit.HasValue && endpointConfigurator.ConcurrentMessageLimit > _concurrentMessageLimit)
                 consumerConfigurator.UseConcurrentMessageLimit(_concurrentMessageLimit.Value);
 
             ConfigureConsumer(endpointConfigurator, consumerConfigurator);

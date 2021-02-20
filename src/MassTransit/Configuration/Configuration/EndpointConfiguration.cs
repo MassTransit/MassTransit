@@ -58,11 +58,13 @@
 
         public int? ConcurrentMessageLimit
         {
+            get => Transport.ConcurrentMessageLimit;
             set => Transport.Configurator.ConcurrentMessageLimit = value;
         }
 
         public int PrefetchCount
         {
+            get => Transport.PrefetchCount;
             set => Transport.Configurator.PrefetchCount = value;
         }
 

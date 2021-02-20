@@ -122,37 +122,13 @@
 
         public void ApplyEndpointDefinition(IServiceBusReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
-            configurator.ConfigureConsumeTopology = definition.ConfigureConsumeTopology;
-
             if (definition.IsTemporary)
             {
                 configurator.AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle;
                 configurator.RemoveSubscriptions = true;
             }
 
-            if (definition.PrefetchCount.HasValue)
-                configurator.PrefetchCount = (ushort)definition.PrefetchCount.Value;
-
-            if (definition.ConcurrentMessageLimit.HasValue)
-            {
-                var concurrentMessageLimit = definition.ConcurrentMessageLimit.Value;
-
-                // if there is a prefetchCount, and it is greater than the concurrent message limit, we need a filter
-                if (!definition.PrefetchCount.HasValue || definition.PrefetchCount.Value > concurrentMessageLimit)
-                {
-                    configurator.MaxConcurrentCalls = concurrentMessageLimit;
-
-                    // we should determine a good value to use based upon the concurrent message limit
-                    if (definition.PrefetchCount.HasValue == false)
-                    {
-                        var calculatedPrefetchCount = concurrentMessageLimit * 12 / 10;
-
-                        configurator.PrefetchCount = (ushort)calculatedPrefetchCount;
-                    }
-                }
-            }
-
-            definition.Configure(configurator);
+            base.ApplyEndpointDefinition(configurator, definition);
         }
 
         public IServiceBusReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,

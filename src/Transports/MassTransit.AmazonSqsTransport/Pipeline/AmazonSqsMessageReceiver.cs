@@ -54,8 +54,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
         async Task Consume()
         {
-            // TODO add ConcurrencyLimit for receive settings
-            var executor = new ChannelExecutor(_receiveSettings.PrefetchCount, _receiveSettings.PrefetchCount);
+            var executor = new ChannelExecutor(_receiveSettings.PrefetchCount, _receiveSettings.ConcurrentMessageLimit);
 
             SetReady();
 
@@ -91,7 +90,6 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         {
             if (IsStopping)
                 return;
-
 
 
             var redelivered = message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1;

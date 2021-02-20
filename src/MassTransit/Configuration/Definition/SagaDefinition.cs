@@ -46,7 +46,7 @@ namespace MassTransit.Definition
 
         void ISagaDefinition<TSaga>.Configure(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<TSaga> sagaConfigurator)
         {
-            if (_concurrentMessageLimit.HasValue)
+            if (_concurrentMessageLimit.HasValue && endpointConfigurator.ConcurrentMessageLimit > _concurrentMessageLimit)
                 sagaConfigurator.UseConcurrentMessageLimit(_concurrentMessageLimit.Value);
 
             ConfigureSaga(endpointConfigurator, sagaConfigurator);

@@ -15,7 +15,7 @@
         /// <returns></returns>
         public static Task<IClientFactory> CreateReplyToClientFactory(this IReceiveConnector connector, RequestTimeout timeout = default)
         {
-            var endpointDefinition = new ReplyToEndpointDefinition(1000);
+            var endpointDefinition = new ReplyToEndpointDefinition(default, 1000);
 
             var receiveEndpointHandle = connector.ConnectReceiveEndpoint(endpointDefinition, KebabCaseEndpointNameFormatter.Instance);
 

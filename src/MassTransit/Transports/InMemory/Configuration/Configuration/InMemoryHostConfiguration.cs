@@ -62,15 +62,7 @@
 
         public void ApplyEndpointDefinition(IInMemoryReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
-            var concurrencyLimit = definition.PrefetchCount;
-
-            if (definition.ConcurrentMessageLimit.HasValue)
-                concurrencyLimit = definition.ConcurrentMessageLimit;
-
-            if (concurrencyLimit.HasValue)
-                configurator.ConcurrencyLimit = concurrencyLimit.Value;
-
-            definition.Configure(configurator);
+            base.ApplyEndpointDefinition(configurator, definition);
         }
 
         public IInMemoryReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,

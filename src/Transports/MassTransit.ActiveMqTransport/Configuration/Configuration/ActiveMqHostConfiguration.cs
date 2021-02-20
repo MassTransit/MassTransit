@@ -61,44 +61,21 @@
 
         public void ApplyEndpointDefinition(IActiveMqReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
-            configurator.ConfigureConsumeTopology = definition.ConfigureConsumeTopology;
             if (definition.IsTemporary)
             {
                 configurator.AutoDelete = true;
                 configurator.Durable = false;
             }
 
-            if (definition.PrefetchCount.HasValue)
-                configurator.PrefetchCount = (ushort)definition.PrefetchCount.Value;
-
-            if (definition.ConcurrentMessageLimit.HasValue)
-            {
-                var concurrentMessageLimit = definition.ConcurrentMessageLimit.Value;
-
-                // if there is a prefetchCount, and it is greater than the concurrent message limit, we need a filter
-                if (!definition.PrefetchCount.HasValue || definition.PrefetchCount.Value > concurrentMessageLimit)
-                {
-                    configurator.UseConcurrencyLimit(concurrentMessageLimit);
-
-                    // we should determine a good value to use based upon the concurrent message limit
-                    if (definition.PrefetchCount.HasValue == false)
-                    {
-                        var calculatedPrefetchCount = concurrentMessageLimit * 12 / 10;
-
-                        configurator.PrefetchCount = (ushort)calculatedPrefetchCount;
-                    }
-                }
-            }
-
-            definition.Configure(configurator);
+            base.ApplyEndpointDefinition(configurator, definition);
         }
 
         public IActiveMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IActiveMqReceiveEndpointConfigurator> configure)
         {
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
-            var settings = new QueueReceiveSettings(endpointConfiguration, queueName, true, false);
 
+            var settings = new QueueReceiveSettings(endpointConfiguration, queueName, true, false);
             return CreateReceiveEndpointConfiguration(settings, endpointConfiguration, configure);
         }
 
@@ -109,15 +86,10 @@
                 throw new ArgumentNullException(nameof(settings));
             if (endpointConfiguration == null)
                 throw new ArgumentNullException(nameof(endpointConfiguration));
-
             var configuration = new ActiveMqReceiveEndpointConfiguration(this, settings, endpointConfiguration);
-
             configure?.Invoke(configuration);
-
             Observers.EndpointConfigured(configuration);
-
             Add(configuration);
-
             return configuration;
         }
 

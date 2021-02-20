@@ -44,7 +44,8 @@
                 Type = "Azure Service Bus",
                 _settings.Path,
                 _settings.PrefetchCount,
-                _settings.MaxConcurrentCalls
+                _settings.MaxConcurrentCalls,
+                ConcurrentMessageLimit
             });
 
             BrokerTopology.Probe(context);
