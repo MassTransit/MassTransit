@@ -52,8 +52,12 @@ namespace MassTransit.Registration
             foreach (Action<IConsumerConfigurator<TConsumer>> action in _configureActions)
                 action(consumerConfigurator);
 
-            LogContext.Info?.Log("Configured endpoint {Endpoint}, Consumer: {ConsumerType}", configurator.InputAddress.GetLastPart(),
-                TypeMetadataCache<TConsumer>.ShortName);
+            var endpointName = configurator.InputAddress.GetLastPart();
+
+            foreach (var configureReceiveEndpoint in consumerConfigurator.SelectOptions<IConfigureReceiveEndpoint>())
+                configureReceiveEndpoint.Configure(endpointName, configurator);
+
+            LogContext.Info?.Log("Configured endpoint {Endpoint}, Consumer: {ConsumerType}", endpointName, TypeMetadataCache<TConsumer>.ShortName);
 
             configurator.AddEndpointSpecification(consumerConfigurator);
         }

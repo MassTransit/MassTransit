@@ -88,5 +88,20 @@ namespace MassTransit.Configuration
             options = default;
             return false;
         }
+
+        /// <summary>
+        /// Enumerate the options which are assignable to the specified type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public IEnumerable<T> SelectOptions<T>()
+            where T : class
+        {
+            foreach (var value in _options.Values)
+            {
+                if (value is T requested)
+                    yield return requested;
+            }
+        }
     }
 }

@@ -47,7 +47,12 @@ namespace MassTransit.Configuration
 
         public IEnumerable<ValidationResult> Validate()
         {
-            yield break;
+            if (PrefetchCount < ConcurrentMessageLimit)
+                yield return this.Warning("ConcurrentMessageLimit", "Should be <= PrefetchCount");
+            if (ConcurrentMessageLimit <= 0)
+                yield return this.Failure("ConcurrentMessageLimit", "Must be > 0");
+            if (PrefetchCount <= 0)
+                yield return this.Failure("PrefetchCount", "Must be > 0");
         }
 
 
@@ -57,12 +62,11 @@ namespace MassTransit.Configuration
             public DefaultTransportConfiguration()
             {
                 PrefetchCount = Math.Max(Environment.ProcessorCount * 2, 16);
-                ConcurrentMessageLimit = default;
             }
 
             public ITransportConfigurator Configurator => throw new InvalidOperationException("The default transport configuration cannot be configured");
             public int PrefetchCount { get; }
-            public int? ConcurrentMessageLimit { get; }
+            public int? ConcurrentMessageLimit => default;
 
             public int GetConcurrentMessageLimit()
             {

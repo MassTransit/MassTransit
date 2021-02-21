@@ -66,6 +66,12 @@
             return _specification.TryGetOptions(out options);
         }
 
+        public IEnumerable<T> SelectOptions<T>()
+            where T : class
+        {
+            return _specification.SelectOptions<T>();
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             return _consumerFactory.Validate().Concat(_specification.Validate());

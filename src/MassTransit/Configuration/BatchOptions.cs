@@ -10,7 +10,8 @@ namespace MassTransit
     /// the size and time limits for each batch.
     /// </summary>
     public class BatchOptions :
-        IOptions
+        IOptions,
+        IConfigureReceiveEndpoint
     {
         public BatchOptions()
         {
@@ -99,6 +100,16 @@ namespace MassTransit
             GroupKeyProvider = new GroupKeyProvider<T, TProperty>(provider);
 
             return this;
+        }
+
+        public void Configure(string name, IReceiveEndpointConfigurator configurator)
+        {
+            int messageCapacity = ConcurrencyLimit * MessageLimit;
+
+            configurator.PrefetchCount = Math.Max(messageCapacity, configurator.PrefetchCount);
+
+            if (configurator.ConcurrentMessageLimit < messageCapacity)
+                configurator.ConcurrentMessageLimit = messageCapacity;
         }
     }
 }

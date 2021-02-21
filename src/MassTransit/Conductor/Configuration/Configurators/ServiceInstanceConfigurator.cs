@@ -152,6 +152,12 @@ namespace MassTransit.Conductor.Configurators
             return _options.TryGetOptions(out options);
         }
 
+        public IEnumerable<T> SelectOptions<T>()
+            where T : class
+        {
+            return _options.SelectOptions<T>();
+        }
+
         void ConfigureServiceEndpoint(TEndpointConfigurator endpointConfigurator, TEndpointConfigurator controlEndpointConfigurator,
             Action<TEndpointConfigurator> configureEndpoint)
         {
