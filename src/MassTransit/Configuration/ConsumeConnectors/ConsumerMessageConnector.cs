@@ -1,10 +1,12 @@
 namespace MassTransit.ConsumeConnectors
 {
     using System;
+    using System.Reflection;
     using ConsumerSpecifications;
     using GreenPipes;
     using Pipeline;
     using Pipeline.Filters;
+    using Topology;
 
 
     public class ConsumerMessageConnector<TConsumer, TMessage> :
@@ -12,12 +14,19 @@ namespace MassTransit.ConsumeConnectors
         where TConsumer : class
         where TMessage : class
     {
+        const ConnectPipeOptions NotConfigureConsumeTopology = ConnectPipeOptions.All & ~ConnectPipeOptions.ConfigureConsumeTopology;
         readonly IFilter<ConsumerConsumeContext<TConsumer, TMessage>> _consumeFilter;
 
         public ConsumerMessageConnector(IFilter<ConsumerConsumeContext<TConsumer, TMessage>> consumeFilter)
         {
             _consumeFilter = consumeFilter;
+
+            var attribute = typeof(TMessage).GetCustomAttribute<ConfigureConsumeTopologyAttribute>();
+            if (attribute != null)
+                ConfigureConsumeTopology = attribute.ConfigureConsumeTopology;
         }
+
+        bool ConfigureConsumeTopology { get; } = true;
 
         public Type MessageType => typeof(TMessage);
 
@@ -38,7 +47,9 @@ namespace MassTransit.ConsumeConnectors
                 x.UseFilter(new ConsumerMessageFilter<TConsumer, TMessage>(consumerFactory, consumerPipe));
             });
 
-            return consumePipe.ConnectConsumePipe(messagePipe);
+            return ConfigureConsumeTopology
+                ? consumePipe.ConnectConsumePipe(messagePipe)
+                : consumePipe.ConnectConsumePipe(messagePipe, NotConfigureConsumeTopology);
         }
     }
 }

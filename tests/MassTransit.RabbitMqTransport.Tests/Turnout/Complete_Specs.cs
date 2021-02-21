@@ -5,10 +5,8 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
     using Conductor;
     using Definition;
     using JobService;
-    using JobService.Components.StateMachines;
     using MassTransit.Contracts.JobService;
     using NUnit.Framework;
-    using RabbitMQ.Client;
 
 
     public interface CrunchTheNumbers

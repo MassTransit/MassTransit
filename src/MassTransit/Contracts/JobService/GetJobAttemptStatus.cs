@@ -1,8 +1,10 @@
 namespace MassTransit.Contracts.JobService
 {
     using System;
+    using Topology;
 
 
+    [ConfigureConsumeTopology(false)]
     public interface GetJobAttemptStatus
     {
         /// <summary>

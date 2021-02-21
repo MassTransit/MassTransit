@@ -21,20 +21,36 @@ namespace MassTransit.JobService.Components.StateMachines
             SuspectJobRetryCount = options.SuspectJobRetryCount;
             SuspectJobRetryDelay = options.SuspectJobRetryDelay ?? options.SlotWaitTime;
 
-            Event(() => StartJobAttempt, x => x.CorrelateById(context => context.Message.AttemptId));
-            Event(() => StartJobFaulted, x => x.CorrelateById(context => context.Message.Message.AttemptId));
+            Event(() => StartJobAttempt, x =>
+            {
+                x.CorrelateById(context => context.Message.AttemptId);
+                x.ConfigureConsumeTopology = false;
+            });
+            Event(() => StartJobFaulted, x =>
+            {
+                x.CorrelateById(context => context.Message.Message.AttemptId);
+                x.ConfigureConsumeTopology = false;
+            });
 
             Event(() => AttemptCanceled, x => x.CorrelateById(context => context.Message.AttemptId));
             Event(() => AttemptCompleted, x => x.CorrelateById(context => context.Message.AttemptId));
             Event(() => AttemptFaulted, x => x.CorrelateById(context => context.Message.AttemptId));
             Event(() => AttemptStarted, x => x.CorrelateById(context => context.Message.AttemptId));
 
-            Event(() => AttemptStatus, x => x.CorrelateById(context => context.Message.AttemptId));
+            Event(() => AttemptStatus, x =>
+            {
+                x.CorrelateById(context => context.Message.AttemptId);
+                x.ConfigureConsumeTopology = false;
+            });
 
             Schedule(() => StatusCheckRequested, instance => instance.StatusCheckTokenId, x =>
             {
                 x.Delay = options.StatusCheckInterval;
-                x.Received = r => r.CorrelateById(context => context.Message.AttemptId);
+                x.Received = r =>
+                {
+                    r.CorrelateById(context => context.Message.AttemptId);
+                    r.ConfigureConsumeTopology = false;
+                };
             });
 
             InstanceState(x => x.CurrentState, Starting, Running, Faulted, CheckingStatus, Suspect);
@@ -47,7 +63,7 @@ namespace MassTransit.JobService.Components.StateMachines
                         context.Instance.RetryAttempt = context.Data.RetryAttempt;
                         context.Instance.ServiceAddress ??= context.Data.ServiceAddress;
                     })
-                    .SendStartJob()
+                    .SendStartJob(this)
                     .RespondAsync(context => context.Init<JobAttemptCreated>(context.Data))
                     .TransitionTo(Starting));
 
@@ -165,7 +181,8 @@ namespace MassTransit.JobService.Components.StateMachines
 
     static class JobAttemptStateMachineBehaviorExtensions
     {
-        public static EventActivityBinder<JobAttemptSaga, StartJobAttempt> SendStartJob(this EventActivityBinder<JobAttemptSaga, StartJobAttempt> binder)
+        public static EventActivityBinder<JobAttemptSaga, StartJobAttempt> SendStartJob(this EventActivityBinder<JobAttemptSaga, StartJobAttempt> binder,
+            JobAttemptStateMachine machine)
         {
             return binder.SendAsync(context => context.Instance.ServiceAddress, context => context.Init<StartJob>(new
             {
@@ -173,7 +190,7 @@ namespace MassTransit.JobService.Components.StateMachines
                 context.Data.AttemptId,
                 context.Data.RetryAttempt,
                 context.Data.Job
-            }));
+            }), context => context.ResponseAddress = machine.JobAttemptSagaEndpointAddress);
         }
 
         public static EventActivityBinder<JobAttemptSaga, JobStatusCheckRequested> SendCheckJobStatus(this EventActivityBinder<JobAttemptSaga,

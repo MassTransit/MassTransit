@@ -19,12 +19,32 @@ namespace MassTransit.JobService.Components.StateMachines
 
             Event(() => JobSubmitted, x => x.CorrelateById(m => m.Message.JobId));
 
-            Event(() => JobSlotAllocated, x => x.CorrelateById(m => m.Message.JobId));
-            Event(() => JobSlotUnavailable, x => x.CorrelateById(m => m.Message.JobId));
-            Event(() => AllocateJobSlotFaulted, x => x.CorrelateById(m => m.Message.Message.JobId));
+            Event(() => JobSlotAllocated, x =>
+            {
+                x.CorrelateById(m => m.Message.JobId);
+                x.ConfigureConsumeTopology = false;
+            });
+            Event(() => JobSlotUnavailable, x =>
+            {
+                x.CorrelateById(m => m.Message.JobId);
+                x.ConfigureConsumeTopology = false;
+            });
+            Event(() => AllocateJobSlotFaulted, x =>
+            {
+                x.CorrelateById(m => m.Message.Message.JobId);
+                x.ConfigureConsumeTopology = false;
+            });
 
-            Event(() => JobAttemptCreated, x => x.CorrelateById(m => m.Message.JobId));
-            Event(() => StartJobAttemptFaulted, x => x.CorrelateById(m => m.Message.Message.JobId));
+            Event(() => JobAttemptCreated, x =>
+            {
+                x.CorrelateById(m => m.Message.JobId);
+                x.ConfigureConsumeTopology = false;
+            });
+            Event(() => StartJobAttemptFaulted, x =>
+            {
+                x.CorrelateById(m => m.Message.Message.JobId);
+                x.ConfigureConsumeTopology = false;
+            });
 
             Event(() => AttemptCanceled, x => x.CorrelateById(m => m.Message.JobId));
             Event(() => AttemptCompleted, x => x.CorrelateById(m => m.Message.JobId));
@@ -36,12 +56,20 @@ namespace MassTransit.JobService.Components.StateMachines
             Schedule(() => JobSlotWaitElapsed, instance => instance.JobSlotWaitToken, x =>
             {
                 x.Delay = options.SlotWaitTime;
-                x.Received = r => r.CorrelateById(context => context.Message.JobId);
+                x.Received = r =>
+                {
+                    r.CorrelateById(context => context.Message.JobId);
+                    r.ConfigureConsumeTopology = false;
+                };
             });
 
             Schedule(() => JobRetryDelayElapsed, instance => instance.JobRetryDelayToken, x =>
             {
-                x.Received = r => r.CorrelateById(context => context.Message.JobId);
+                x.Received = r =>
+                {
+                    r.CorrelateById(context => context.Message.JobId);
+                    r.ConfigureConsumeTopology = false;
+                };
             });
 
             InstanceState(x => x.CurrentState, Submitted, WaitingToStart, WaitingForSlot, Started, Completed, Faulted, Canceled, StartingJobAttempt,
