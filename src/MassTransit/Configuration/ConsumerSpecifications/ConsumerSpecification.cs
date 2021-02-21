@@ -62,7 +62,15 @@ namespace MassTransit.ConsumerSpecifications
                 return true;
             });
 
-            return _messageTypes.Values.SelectMany(x => x.Validate());
+            foreach (var result in _messageTypes.Values.SelectMany(x => x.Validate()))
+            {
+                yield return result;
+            }
+
+            foreach (var result in ValidateOptions())
+            {
+                yield return result;
+            }
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TConsumer>> specification)

@@ -2,6 +2,8 @@ namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using GreenPipes;
     using Metadata;
 
 
@@ -102,6 +104,16 @@ namespace MassTransit.Configuration
                 if (value is T requested)
                     yield return requested;
             }
+        }
+
+        /// <summary>
+        /// Enumerate the options which are assignable to the specified type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        protected IEnumerable<ValidationResult> ValidateOptions()
+        {
+            return SelectOptions<ISpecification>().SelectMany(specification => specification.Validate());
         }
     }
 }

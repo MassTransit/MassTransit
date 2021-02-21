@@ -1,6 +1,7 @@
 namespace MassTransit.JobService
 {
     using System;
+    using System.Collections.Generic;
     using GreenPipes;
     using GreenPipes.Configurators;
     using GreenPipes.Observers;
@@ -13,7 +14,8 @@ namespace MassTransit.JobService
     /// </summary>
     /// <typeparam name="TJob">The Job Type</typeparam>
     public class JobOptions<TJob> :
-        IOptions
+        IOptions,
+        ISpecification
         where TJob : class
     {
         public JobOptions()
@@ -35,6 +37,14 @@ namespace MassTransit.JobService
         public int ConcurrentJobLimit { get; set; }
 
         public IRetryPolicy RetryPolicy { get; private set; }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (ConcurrentJobLimit <= 0)
+                yield return this.Failure("JobOptions", "ConcurrentJobLimit", "Must be > 0");
+            if (JobTimeout <= TimeSpan.Zero)
+                yield return this.Failure("JobOptions", "JobTimeout", "Must be > TimeSpan.Zero");
+        }
 
         public JobOptions<TJob> SetJobTimeout(TimeSpan timeout)
         {
