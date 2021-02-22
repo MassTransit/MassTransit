@@ -10,7 +10,8 @@
     public interface ISagaConfigurator<TSaga> :
         IPipeConfigurator<SagaConsumeContext<TSaga>>,
         ISagaConfigurationObserverConnector,
-        IConsumeConfigurator
+        IConsumeConfigurator,
+        IOptionsSet
         where TSaga : class, ISaga
     {
         /// <summary>

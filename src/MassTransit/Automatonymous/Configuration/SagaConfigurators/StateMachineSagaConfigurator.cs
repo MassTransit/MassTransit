@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using GreenPipes;
     using MassTransit;
+    using MassTransit.Configuration;
     using MassTransit.Saga;
     using MassTransit.SagaConfigurators;
     using StateMachineConnectors;
@@ -69,6 +70,30 @@
         public ConnectHandle ConnectSagaConfigurationObserver(ISagaConfigurationObserver observer)
         {
             return _specification.ConnectSagaConfigurationObserver(observer);
+        }
+
+        public T Options<T>(Action<T> configure)
+            where T : IOptions, new()
+        {
+            return _specification.Options(configure);
+        }
+
+        public T Options<T>(T options, Action<T> configure)
+            where T : IOptions
+        {
+            return _specification.Options(options, configure);
+        }
+
+        public bool TryGetOptions<T>(out T options)
+            where T : IOptions
+        {
+            return _specification.TryGetOptions(out options);
+        }
+
+        public IEnumerable<T> SelectOptions<T>()
+            where T : class
+        {
+            return _specification.SelectOptions<T>();
         }
     }
 }

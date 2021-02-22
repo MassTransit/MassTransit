@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Configuration;
     using GreenPipes;
     using Metadata;
     using Saga;
@@ -10,6 +11,7 @@
 
 
     public class SagaSpecification<TSaga> :
+        OptionsSet,
         ISagaSpecification<TSaga>
         where TSaga : class, ISaga
     {
@@ -64,7 +66,11 @@
                 return true;
             });
 
-            return _messageTypes.Values.SelectMany(x => x.Validate());
+            foreach (var result in _messageTypes.Values.SelectMany(x => x.Validate()))
+                yield return result;
+
+            foreach (var result in ValidateOptions())
+                yield return result;
         }
 
         public void AddPipeSpecification(IPipeSpecification<SagaConsumeContext<TSaga>> specification)
