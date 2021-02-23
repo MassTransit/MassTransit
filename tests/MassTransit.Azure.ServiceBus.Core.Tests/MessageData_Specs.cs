@@ -2,7 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Azure.Storage.Blobs;
+    using global::Azure.Storage.Blobs;
     using NUnit.Framework;
     using Storage;
     using Storage.MessageData;
