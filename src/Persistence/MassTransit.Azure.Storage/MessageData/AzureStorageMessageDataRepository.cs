@@ -1,33 +1,28 @@
 namespace MassTransit.Azure.Storage.MessageData
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
     using MassTransit.MessageData;
-    using Microsoft.Azure.Storage;
-    using Microsoft.Azure.Storage.Auth;
-    using Microsoft.Azure.Storage.Blob;
+    using global::Azure;
+    using global::Azure.Storage.Blobs;
+    using global::Azure.Storage.Blobs.Models;
     using Util;
-
 
     public class AzureStorageMessageDataRepository :
         IMessageDataRepository,
         IBusObserver
     {
-        readonly Uri _containerUri;
-        readonly StorageCredentials _credentials;
+        private readonly BlobContainerClient _container;
         readonly IBlobNameGenerator _nameGenerator;
 
-        public AzureStorageMessageDataRepository(Uri storageEndpoint, string containerName, StorageCredentials credentials, IBlobNameGenerator nameGenerator)
+        public AzureStorageMessageDataRepository(BlobServiceClient blobServiceClient, string containerName, IBlobNameGenerator nameGenerator)
         {
-            _credentials = credentials;
+            _container = blobServiceClient.GetBlobContainerClient(containerName);
             _nameGenerator = nameGenerator;
-
-            var containerUriBase = $"{storageEndpoint}".TrimEnd('/');
-
-            _containerUri = new Uri($"{containerUriBase}/{containerName}");
         }
 
         public Task PostCreate(IBus bus)
@@ -42,18 +37,16 @@ namespace MassTransit.Azure.Storage.MessageData
 
         public async Task PreStart(IBus bus)
         {
-            var container = new CloudBlobContainer(_containerUri, _credentials);
-
-            var containerExists = await container.ExistsAsync().ConfigureAwait(false);
+            var containerExists = await _container.ExistsAsync().ConfigureAwait(false);
             if (!containerExists)
             {
                 try
                 {
-                    await container.CreateIfNotExistsAsync().ConfigureAwait(false);
+                    await _container.CreateIfNotExistsAsync().ConfigureAwait(false);
                 }
-                catch (StorageException exception)
+                catch (RequestFailedException exception)
                 {
-                    LogContext.Warning?.Log(exception, "Azure Storage Container does not exist: {Address}", _containerUri);
+                    LogContext.Warning?.Log(exception, "Azure Storage Container does not exist: {Address}", _container.Uri);
                 }
             }
         }
@@ -85,33 +78,33 @@ namespace MassTransit.Azure.Storage.MessageData
 
         public async Task<Stream> Get(Uri address, CancellationToken cancellationToken = default)
         {
-            var blob = new CloudBlockBlob(address, _credentials);
+            var blobName = new BlobUriBuilder(address).BlobName;
+            var blob = _container.GetBlobClient(blobName);
             try
             {
-                return await blob.OpenReadAsync(cancellationToken).ConfigureAwait(false);
+                return await blob.OpenReadAsync(new BlobOpenReadOptions(false), cancellationToken).ConfigureAwait(false);
             }
-            catch (StorageException exception)
+            catch (RequestFailedException exception)
             {
-                throw new MessageDataException($"MessageData content not found: {blob.Container.Name}/{blob.Name}", exception);
+                throw new MessageDataException($"MessageData content not found: {blob.BlobContainerName}/{blob.Name}", exception);
             }
         }
 
         public async Task<Uri> Put(Stream stream, TimeSpan? timeToLive = default, CancellationToken cancellationToken = default)
         {
             var blobName = _nameGenerator.GenerateBlobName();
-            var blobAddress = new Uri($"{_containerUri}/{blobName}");
-            var blob = new CloudBlockBlob(blobAddress, _credentials);
+            var blob = _container.GetBlobClient(blobName);
 
-            SetBlobExpiration(blob, timeToLive);
+            await blob.UploadAsync(stream, cancellationToken).ConfigureAwait(false);
 
-            await blob.UploadFromStreamAsync(stream, cancellationToken).ConfigureAwait(false);
+            await SetBlobExpiration(blob, timeToLive).ConfigureAwait(false);
 
             LogContext.Debug?.Log("MessageData:Put {Blob} {Address}", blob.Name, blob.Uri);
 
             return blob.Uri;
         }
 
-        static void SetBlobExpiration(CloudBlockBlob blob, TimeSpan? timeToLive)
+        static async Task SetBlobExpiration(BlobClient blob, TimeSpan? timeToLive)
         {
             if (timeToLive.HasValue)
             {
@@ -121,7 +114,8 @@ namespace MassTransit.Azure.Storage.MessageData
                 if (expirationDate <= utcNow)
                     expirationDate = utcNow + TimeSpan.FromMinutes(1);
 
-                blob.Metadata["ValidUntilUtc"] = expirationDate.ToString("O");
+                var metadata = new Dictionary<string, string> { { "ValidUntilUtc", expirationDate.ToString("O") } };
+                await blob.SetMetadataAsync(metadata).ConfigureAwait(false);
             }
         }
     }
