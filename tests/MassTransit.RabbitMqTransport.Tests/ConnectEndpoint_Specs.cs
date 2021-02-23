@@ -28,6 +28,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                 using RequestHandle<PingMessage> requestHandle = clientFactory.CreateRequest(new PingMessage());
 
                 await requestHandle.GetResponse<PongMessage>();
+
+                await handle.StopAsync(TestCancellationToken);
             }
 
             for (int i = 0; i < 10; i++)
@@ -41,6 +43,8 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 TestContext.WriteLine("Endpoint: {0}, Status: {1}", healthEndpoint.Key, healthEndpoint.Value.Description);
             }
+
+            Assert.That(health.Status, Is.EqualTo(BusHealthStatus.Healthy));
         }
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
