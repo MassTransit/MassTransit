@@ -11,6 +11,7 @@ namespace MassTransit.Azure.Storage.MessageData
     using global::Azure.Identity;
     using global::Azure.Storage;
     using global::Azure.Storage.Blobs;
+    using global::Azure.Storage.Blobs.Models;
     using Util;
 
 
