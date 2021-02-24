@@ -8,9 +8,11 @@ namespace MassTransit.Azure.Storage.MessageData
     using Context;
     using MassTransit.MessageData;
     using global::Azure;
+    using global::Azure.Identity;
+    using global::Azure.Storage;
     using global::Azure.Storage.Blobs;
-    using global::Azure.Storage.Blobs.Models;
     using Util;
+
 
     public class AzureStorageMessageDataRepository :
         IMessageDataRepository,
@@ -18,6 +20,31 @@ namespace MassTransit.Azure.Storage.MessageData
     {
         private readonly BlobContainerClient _container;
         readonly IBlobNameGenerator _nameGenerator;
+
+        public AzureStorageMessageDataRepository(string connectionString, string containerName)
+            : this(new BlobServiceClient(connectionString), containerName)
+        {
+        }
+
+        public AzureStorageMessageDataRepository(Uri serviceUri, string containerName, string accountName, string accountKey)
+            : this(new BlobServiceClient(serviceUri, new StorageSharedKeyCredential(accountName, accountKey)), containerName)
+        {
+        }
+
+        public AzureStorageMessageDataRepository(Uri serviceUri, string containerName, string signature)
+            : this(new BlobServiceClient(serviceUri, new AzureSasCredential(signature)), containerName)
+        {
+        }
+
+        public AzureStorageMessageDataRepository(Uri serviceUri, string containerName, string tenantId, string clientId, string clientSecret)
+            : this(new BlobServiceClient(serviceUri, new ClientSecretCredential(tenantId, clientId, clientSecret)), containerName)
+        {
+        }
+
+        public AzureStorageMessageDataRepository(BlobServiceClient blobServiceClient, string containerName)
+            : this(blobServiceClient, containerName, new NewIdBlobNameGenerator())
+        {
+        }
 
         public AzureStorageMessageDataRepository(BlobServiceClient blobServiceClient, string containerName, IBlobNameGenerator nameGenerator)
         {
