@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Contexts
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -144,14 +145,31 @@
 
                 if (rule != null)
                 {
-                    var ruleDescription = await GetRuleAsync(description.TopicPath, description.SubscriptionName, rule.Name)
-                        .ConfigureAwait(false);
+                    var ruleDescription = await GetRuleAsync(description.TopicPath, description.SubscriptionName, rule.Name).ConfigureAwait(false);
                     if (rule.Name == ruleDescription.Name && (rule.Filter != ruleDescription.Filter || rule.Action != ruleDescription.Action))
                     {
                         LogContext.Debug?.Log("Updating subscription Rule: {Rule} ({DescriptionFilter} -> {Filter})", rule.Name,
                             ruleDescription.Filter.ToString(), rule.Filter.ToString());
 
                         await UpdateRuleAsync(description.TopicPath, description.SubscriptionName, rule).ConfigureAwait(false);
+                    }
+                }
+                else if (filter != null)
+                {
+                    IList<RuleDescription> rules = await GetRulesAsync(description.TopicPath, description.SubscriptionName).ConfigureAwait(false);
+                    if (rules.Count == 1)
+                    {
+                        var existingRule = rules[0];
+
+                        if (Guid.TryParse(existingRule.Name, out _) && existingRule.Filter != filter)
+                        {
+                            LogContext.Debug?.Log("Updating subscription filter: {Rule} ({DescriptionFilter} -> {Filter})", existingRule.Name,
+                                existingRule.Filter.ToString(), filter.ToString());
+
+                            existingRule.Filter = filter;
+
+                            await UpdateRuleAsync(description.TopicPath, description.SubscriptionName, existingRule).ConfigureAwait(false);
+                        }
                     }
                 }
 
@@ -274,6 +292,11 @@
         Task<RuleDescription> GetRuleAsync(string topicPath, string subscriptionName, string ruleName)
         {
             return RunOperation(() => _managementClient.GetRuleAsync(topicPath, subscriptionName, ruleName));
+        }
+
+        Task<IList<RuleDescription>> GetRulesAsync(string topicPath, string subscriptionName)
+        {
+            return RunOperation(() => _managementClient.GetRulesAsync(topicPath, subscriptionName));
         }
 
         Task<RuleDescription> UpdateRuleAsync(string topicPath, string subscriptionName, RuleDescription ruleDescription)

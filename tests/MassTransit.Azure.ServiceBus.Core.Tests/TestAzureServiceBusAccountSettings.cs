@@ -7,23 +7,18 @@
     public class TestAzureServiceBusAccountSettings :
         ServiceBusTokenProviderSettings
     {
-        static readonly string KeyName = Configuration.KeyName;
-        static readonly string SharedAccessKey = Configuration.SharedAccessKey;
-        readonly TokenScope _tokenScope;
-        readonly TimeSpan _tokenTimeToLive;
-
         public TestAzureServiceBusAccountSettings()
         {
-            _tokenTimeToLive = TimeSpan.FromDays(1);
-            _tokenScope = TokenScope.Namespace;
+            TokenTimeToLive = TimeSpan.FromDays(1);
+            TokenScope = TokenScope.Namespace;
         }
 
-        string ServiceBusTokenProviderSettings.KeyName => KeyName;
+        public string KeyName => Configuration.KeyName;
 
-        string ServiceBusTokenProviderSettings.SharedAccessKey => SharedAccessKey;
+        public string SharedAccessKey => Configuration.SharedAccessKey;
 
-        TimeSpan ServiceBusTokenProviderSettings.TokenTimeToLive => _tokenTimeToLive;
+        public TimeSpan TokenTimeToLive { get; }
 
-        TokenScope ServiceBusTokenProviderSettings.TokenScope => _tokenScope;
+        public TokenScope TokenScope { get; }
     }
 }
