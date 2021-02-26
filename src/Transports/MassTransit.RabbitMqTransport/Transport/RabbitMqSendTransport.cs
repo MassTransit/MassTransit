@@ -105,7 +105,7 @@
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
-                    byte[] body = context.Body;
+                    var body = context.Body;
 
                     if (context.TryGetPayload(out PublishContext publishContext))
                         context.Mandatory = context.Mandatory || publishContext.Mandatory;

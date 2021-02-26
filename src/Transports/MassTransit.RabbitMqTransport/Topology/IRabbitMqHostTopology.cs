@@ -4,7 +4,7 @@ namespace MassTransit.RabbitMqTransport.Topology
     using MassTransit.Topology;
 
 
-public interface IRabbitMqHostTopology :
+    public interface IRabbitMqHostTopology :
         IHostTopology
     {
         new IRabbitMqPublishTopology PublishTopology { get; }
