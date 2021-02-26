@@ -132,6 +132,7 @@ module.exports = {
             ]
           },
           ['/usage/testing', 'Testing'],
+          ['/usage/logging', 'Logging'],
           {
             title: 'Advanced',
             collapsable: true,
