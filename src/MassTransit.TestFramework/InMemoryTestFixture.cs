@@ -3,6 +3,7 @@ namespace MassTransit.TestFramework
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
+    using NUnit.Framework.Internal;
     using Testing;
     using Util;
 
@@ -10,6 +11,8 @@ namespace MassTransit.TestFramework
     public class InMemoryTestFixture :
         BusTestFixture
     {
+        TestExecutionContext _fixtureContext;
+
         public InMemoryTestFixture()
             : this(new InMemoryTestHarness())
         {
@@ -76,6 +79,10 @@ namespace MassTransit.TestFramework
         [OneTimeSetUp]
         public Task SetupInMemoryTestFixture()
         {
+            _fixtureContext = TestExecutionContext.CurrentContext;
+
+            LoggerFactory.Current = _fixtureContext;
+
             return InMemoryTestHarness.Start();
         }
 
@@ -87,6 +94,8 @@ namespace MassTransit.TestFramework
         [OneTimeTearDown]
         public async Task TearDownInMemoryTestFixture()
         {
+            LoggerFactory.Current = _fixtureContext;
+
             await InMemoryTestHarness.Stop().ConfigureAwait(false);
 
             InMemoryTestHarness.Dispose();

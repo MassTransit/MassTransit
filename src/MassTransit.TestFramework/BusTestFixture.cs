@@ -47,6 +47,8 @@ namespace MassTransit.TestFramework
             if (_enableLog)
                 LogContext.ConfigureCurrentLogContext(LoggerFactory);
 
+            LoggerFactory.Current = default;
+
             if (_enableDiagnostics)
             {
                 if (Interlocked.CompareExchange(ref _subscribedObserver, 1, 0) == 0)
