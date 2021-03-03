@@ -17,7 +17,7 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_receive_the_message_batch()
         {
-            Task<ConsumeContext<BatchResult>> finished = ConnectPublishHandler<BatchResult>();
+            Task<ConsumeContext<BatchResult>> finished = await ConnectPublishHandler<BatchResult>();
 
             await InputQueueSendEndpoint.Send(new BatchItem());
             await InputQueueSendEndpoint.Send(new BatchItem());
@@ -55,7 +55,7 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_receive_the_message_batch()
         {
-            Task<ConsumeContext<BatchResult>> finished = ConnectPublishHandler<BatchResult>();
+            Task<ConsumeContext<BatchResult>> finished = await ConnectPublishHandler<BatchResult>();
 
             await InputQueueSendEndpoint.Send(new BatchItem());
             await InputQueueSendEndpoint.Send(new BatchItem());
@@ -104,7 +104,7 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_receive_the_message_batch()
         {
-            Task<ConsumeContext<BatchResult>> finished = ConnectPublishHandler<BatchResult>();
+            Task<ConsumeContext<BatchResult>> finished = await ConnectPublishHandler<BatchResult>();
 
             await Bus.Publish(new BatchItem());
             await Bus.Publish(new BatchItem());

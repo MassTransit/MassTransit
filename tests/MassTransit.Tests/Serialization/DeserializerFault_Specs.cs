@@ -16,7 +16,7 @@ namespace MassTransit.Tests.Serialization
         [Test]
         public async Task Should_fault()
         {
-            Task<ConsumeContext<ReceiveFault>> receiveFault = ConnectPublishHandler<ReceiveFault>();
+            Task<ConsumeContext<ReceiveFault>> receiveFault = await ConnectPublishHandler<ReceiveFault>();
 
             await InputQueueSendEndpoint.Send<SubmitOrder>(new { }, context => ApplyStaticMessageToContext(context, Fail));
 

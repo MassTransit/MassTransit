@@ -37,8 +37,8 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
             [Explicit]
             public async Task Should_work_as_expected()
             {
-                Task<ConsumeContext<TestStarted>> started = ConnectPublishHandler<TestStarted>();
-                Task<ConsumeContext<TestUpdated>> updated = ConnectPublishHandler<TestUpdated>();
+                Task<ConsumeContext<TestStarted>> started = await ConnectPublishHandler<TestStarted>();
+                Task<ConsumeContext<TestUpdated>> updated = await ConnectPublishHandler<TestUpdated>();
 
                 var correlationId = NewId.NextGuid();
                 var testKey = NewId.NextGuid().ToString();
@@ -102,8 +102,8 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
             [Explicit]
             public async Task Should_work_as_expected()
             {
-                Task<ConsumeContext<TestStarted>> started = ConnectPublishHandler<TestStarted>();
-                Task<ConsumeContext<TestUpdated>> updated = ConnectPublishHandler<TestUpdated>();
+                Task<ConsumeContext<TestStarted>> started = await ConnectPublishHandler<TestStarted>();
+                Task<ConsumeContext<TestUpdated>> updated = await ConnectPublishHandler<TestUpdated>();
 
                 var correlationId = NewId.NextGuid();
                 var testKey = NewId.NextGuid().ToString();

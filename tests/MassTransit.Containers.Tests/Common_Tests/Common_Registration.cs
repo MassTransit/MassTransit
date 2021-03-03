@@ -15,7 +15,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_come_from_the_default_address()
         {
-            Task<ConsumeContext<PlainEvent>> handled = ConnectPublishHandler<PlainEvent>();
+            Task<ConsumeContext<PlainEvent>> handled = await ConnectPublishHandler<PlainEvent>();
 
             await Bus.Publish(new PlainCommand());
 
@@ -28,7 +28,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_come_from_the_definition_address()
         {
-            Task<ConsumeContext<ByDefinitionEvent>> handled = ConnectPublishHandler<ByDefinitionEvent>();
+            Task<ConsumeContext<ByDefinitionEvent>> handled = await ConnectPublishHandler<ByDefinitionEvent>();
 
             await Bus.Publish(new ByDefinitionCommand());
 
@@ -41,7 +41,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_come_from_the_endpoint_address()
         {
-            Task<ConsumeContext<ByEndpointEvent>> handled = ConnectPublishHandler<ByEndpointEvent>();
+            Task<ConsumeContext<ByEndpointEvent>> handled = await ConnectPublishHandler<ByEndpointEvent>();
 
             await Bus.Publish(new ByEndpointCommand());
 
@@ -54,7 +54,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_come_from_the_endpoint_override_address()
         {
-            Task<ConsumeContext<ByEndpointDefinitionEvent>> handled = ConnectPublishHandler<ByEndpointDefinitionEvent>();
+            Task<ConsumeContext<ByEndpointDefinitionEvent>> handled = await ConnectPublishHandler<ByEndpointDefinitionEvent>();
 
             await Bus.Publish(new ByEndpointDefinitionCommand());
 
@@ -67,7 +67,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_come_from_the_endpoint_name()
         {
-            Task<ConsumeContext<ByEndpointNameEvent>> handled = ConnectPublishHandler<ByEndpointNameEvent>();
+            Task<ConsumeContext<ByEndpointNameEvent>> handled = await ConnectPublishHandler<ByEndpointNameEvent>();
 
             await Bus.Publish(new ByEndpointNameCommand());
 
@@ -80,7 +80,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_come_from_the_override_name()
         {
-            Task<ConsumeContext<ByEndpointOverrideEvent>> handled = ConnectPublishHandler<ByEndpointOverrideEvent>();
+            Task<ConsumeContext<ByEndpointOverrideEvent>> handled = await ConnectPublishHandler<ByEndpointOverrideEvent>();
 
             await Bus.Publish(new ByEndpointOverrideCommand());
 

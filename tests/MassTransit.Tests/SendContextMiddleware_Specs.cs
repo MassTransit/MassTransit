@@ -23,7 +23,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_have_the_consume_context_available()
         {
-            Task<ConsumeContext<C>> handler = ConnectPublishHandler<C>();
+            Task<ConsumeContext<C>> handler = await ConnectPublishHandler<C>();
 
             EndpointConvention.Map<B>(InputQueueAddress);
 

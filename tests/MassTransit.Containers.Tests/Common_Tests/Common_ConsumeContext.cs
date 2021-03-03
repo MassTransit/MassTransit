@@ -67,7 +67,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_provide_the_outbox()
         {
-            Task<ConsumeContext<Fault<PingMessage>>> fault = ConnectPublishHandler<Fault<PingMessage>>();
+            Task<ConsumeContext<Fault<PingMessage>>> fault = await ConnectPublishHandler<Fault<PingMessage>>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -121,7 +121,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_provide_the_outbox()
         {
-            Task<ConsumeContext<Fault<PingMessage>>> fault = ConnectPublishHandler<Fault<PingMessage>>();
+            Task<ConsumeContext<Fault<PingMessage>>> fault = await ConnectPublishHandler<Fault<PingMessage>>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
             await InputQueueSendEndpoint.Send(new PingMessage());
@@ -188,7 +188,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_provide_the_outbox()
         {
-            Task<ConsumeContext<Fault<PingMessage>>> fault = ConnectPublishHandler<Fault<PingMessage>>();
+            Task<ConsumeContext<Fault<PingMessage>>> fault = await ConnectPublishHandler<Fault<PingMessage>>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
             await InputQueueSendEndpoint.Send(new PingMessage());
@@ -253,7 +253,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_provide_the_outbox_to_the_consumer()
         {
-            Task<ConsumeContext<Fault<PingMessage>>> fault = ConnectPublishHandler<Fault<PingMessage>>();
+            Task<ConsumeContext<Fault<PingMessage>>> fault = await ConnectPublishHandler<Fault<PingMessage>>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
 

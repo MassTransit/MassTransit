@@ -7,7 +7,6 @@ namespace MassTransit.TestFramework
     using Context;
     using Logging;
     using Testing;
-    using Util;
 
 
     /// <summary>
@@ -81,7 +80,7 @@ namespace MassTransit.TestFramework
             return BusTestHarness.SubscribeHandler(filter);
         }
 
-        protected Task<ConsumeContext<T>> ConnectPublishHandler<T>()
+        protected async Task<Task<ConsumeContext<T>>> ConnectPublishHandler<T>()
             where T : class
         {
             Task<ConsumeContext<T>> result = null;
@@ -90,12 +89,12 @@ namespace MassTransit.TestFramework
                 result = Handled<T>(context);
             });
 
-            TaskUtil.Await(() => handle.Ready);
+            await handle.Ready;
 
             return result;
         }
 
-        protected Task<ConsumeContext<T>> ConnectPublishHandler<T>(Func<ConsumeContext<T>, bool> filter)
+        protected async Task<Task<ConsumeContext<T>>> ConnectPublishHandler<T>(Func<ConsumeContext<T>, bool> filter)
             where T : class
         {
             Task<ConsumeContext<T>> result = null;
@@ -104,7 +103,7 @@ namespace MassTransit.TestFramework
                 result = Handled(context, filter);
             });
 
-            TaskUtil.Await(() => handle.Ready);
+            await handle.Ready;
 
             return result;
         }

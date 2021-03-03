@@ -12,6 +12,7 @@
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using NUnit.Framework;
+    using NUnit.Framework.Internal;
     using RabbitMQ.Client;
     using RabbitMqTransport.Testing;
     using TestFramework;
@@ -22,6 +23,8 @@
     public class RabbitMqTestFixture :
         BusTestFixture
     {
+        TestExecutionContext _fixtureContext;
+
         public RabbitMqTestFixture(Uri logicalHostAddress = null, string inputQueueName = null)
             : this(new RabbitMqTestHarness(inputQueueName), logicalHostAddress)
         {
@@ -74,13 +77,21 @@
         [OneTimeSetUp]
         public async Task SetupRabbitMqTestFixture()
         {
+            _fixtureContext = TestExecutionContext.CurrentContext;
+
+            LoggerFactory.Current = _fixtureContext;
+
             await RabbitMqTestHarness.Start().ConfigureAwait(false);
         }
 
         [OneTimeTearDown]
         public async Task TearDownRabbitMqTestFixture()
         {
+            LoggerFactory.Current = _fixtureContext;
+
             await RabbitMqTestHarness.Stop().ConfigureAwait(false);
+
+            RabbitMqTestHarness.Dispose();
         }
 
         protected virtual void ConfigureRabbitMqHost(IRabbitMqHostConfigurator configurator)

@@ -21,7 +21,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _attempts[pingId] = 0;
 
             Task<ConsumeContext<Fault<PingMessage>>> handler =
-                ConnectPublishHandler<Fault<PingMessage>>(context => context.Message.Message.CorrelationId == pingId);
+                await ConnectPublishHandler<Fault<PingMessage>>(context => context.Message.Message.CorrelationId == pingId);
 
             await Bus.Publish(new PingMessage(pingId));
 
@@ -83,7 +83,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _attempts[pingId] = 0;
 
             Task<ConsumeContext<Fault<PingMessage>>> handler =
-                ConnectPublishHandler<Fault<PingMessage>>(context => context.Message.Message.CorrelationId == pingId);
+                await ConnectPublishHandler<Fault<PingMessage>>(context => context.Message.Message.CorrelationId == pingId);
 
             await Bus.Publish(new PingMessage(pingId));
 
@@ -131,7 +131,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             _attempts[pingId] = 0;
 
             Task<ConsumeContext<Fault<PingMessage>>> handler =
-                ConnectPublishHandler<Fault<PingMessage>>(context => context.Message.Message.CorrelationId == pingId);
+                await ConnectPublishHandler<Fault<PingMessage>>(context => context.Message.Message.CorrelationId == pingId);
 
             await Bus.Publish(new PingMessage(pingId), x => x.TimeToLive = TimeSpan.FromSeconds(2));
 

@@ -91,7 +91,7 @@
         [Test]
         public async Task Should_have_the_message_property()
         {
-            Task<ConsumeContext<IA>> unmodified = ConnectPublishHandler<IA>();
+            Task<ConsumeContext<IA>> unmodified = await ConnectPublishHandler<IA>();
 
             await Bus.Publish(new A {First = "Hello"});
 
@@ -148,7 +148,7 @@
         [Test]
         public async Task Should_have_the_message_property()
         {
-            Task<ConsumeContext<IA>> unmodified = ConnectPublishHandler<IA>();
+            Task<ConsumeContext<IA>> unmodified = await ConnectPublishHandler<IA>();
 
             await Bus.Publish(new A {First = "Hello"});
 

@@ -51,7 +51,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_transfer_message_headers()
         {
-            Task<ConsumeContext<OrderSubmitted>> orderSubmitted = ConnectPublishHandler<OrderSubmitted>();
+            Task<ConsumeContext<OrderSubmitted>> orderSubmitted = await ConnectPublishHandler<OrderSubmitted>();
 
             await Mediator.Send<SubmitOrder>(new
             {

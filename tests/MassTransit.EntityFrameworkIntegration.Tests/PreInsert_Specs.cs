@@ -115,7 +115,7 @@
             [Test]
             public async Task Should_receive_the_published_message()
             {
-                Task<ConsumeContext<StartupComplete>> messageReceived = ConnectPublishHandler<StartupComplete>();
+                Task<ConsumeContext<StartupComplete>> messageReceived = await ConnectPublishHandler<StartupComplete>();
 
                 var message = new Start("Joe");
 
@@ -194,7 +194,7 @@
             [Explicit]
             public async Task Should_receive_the_published_message()
             {
-                Task<ConsumeContext<StartupComplete>> messageReceived = ConnectPublishHandler<StartupComplete>();
+                Task<ConsumeContext<StartupComplete>> messageReceived = await ConnectPublishHandler<StartupComplete>();
 
                 var sagaId = NewId.NextGuid();
 

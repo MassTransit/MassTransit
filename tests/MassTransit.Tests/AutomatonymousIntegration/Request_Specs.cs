@@ -18,7 +18,7 @@
             [Test]
             public async Task Should_handle_the_response()
             {
-                Task<ConsumeContext<MemberRegistered>> handler = ConnectPublishHandler<MemberRegistered>();
+                Task<ConsumeContext<MemberRegistered>> handler = await ConnectPublishHandler<MemberRegistered>();
 
                 var memberId = NewId.NextGuid();
 

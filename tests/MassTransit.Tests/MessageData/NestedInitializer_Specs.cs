@@ -17,8 +17,8 @@ namespace MassTransit.Tests.MessageData
             var firstBody = new byte[10000];
             var secondBody = new byte[10000];
 
-            Task<ConsumeContext<ReceiveFault>> receiveFault = ConnectPublishHandler<ReceiveFault>();
-            Task<ConsumeContext<Fault<Documents>>> fault = ConnectPublishHandler<Fault<Documents>>();
+            Task<ConsumeContext<ReceiveFault>> receiveFault = await ConnectPublishHandler<ReceiveFault>();
+            Task<ConsumeContext<Fault<Documents>>> fault = await ConnectPublishHandler<Fault<Documents>>();
 
             await InputQueueSendEndpoint.Send<Documents>(new
             {

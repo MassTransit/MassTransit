@@ -16,16 +16,16 @@ namespace MassTransit.Tests.Saga
         [Test]
         public async Task Should_reach_the_saga()
         {
-            Task<ConsumeContext<CreateCompleted>> createCompleted = ConnectPublishHandler<CreateCompleted>();
-            Task<ConsumeContext<FinallyCompleted>> finallyCompleted = ConnectPublishHandler<FinallyCompleted>();
+            Task<ConsumeContext<CreateCompleted>> createCompleted = await ConnectPublishHandler<CreateCompleted>();
+            Task<ConsumeContext<FinallyCompleted>> finallyCompleted = await ConnectPublishHandler<FinallyCompleted>();
 
             var values = new { InVar.CorrelationId };
             await InputQueueSendEndpoint.Send<Create>(values);
             ConsumeContext<CreateCompleted> createContext = await createCompleted;
             ConsumeContext<FinallyCompleted> finallyContext = await finallyCompleted;
 
-            createCompleted = ConnectPublishHandler<CreateCompleted>();
-            finallyCompleted = ConnectPublishHandler<FinallyCompleted>();
+            createCompleted = await ConnectPublishHandler<CreateCompleted>();
+            finallyCompleted = await ConnectPublishHandler<FinallyCompleted>();
 
             values = new { InVar.CorrelationId };
             await InputQueueSendEndpoint.Send<Create>(values);
@@ -119,8 +119,8 @@ namespace MassTransit.Tests.Saga
         [Test]
         public async Task Should_reach_the_saga()
         {
-            Task<ConsumeContext<CreateCompleted>> createCompleted = ConnectPublishHandler<CreateCompleted>();
-            Task<ConsumeContext<DestroyCompleted>> destroyCompleted = ConnectPublishHandler<DestroyCompleted>();
+            Task<ConsumeContext<CreateCompleted>> createCompleted = await ConnectPublishHandler<CreateCompleted>();
+            Task<ConsumeContext<DestroyCompleted>> destroyCompleted = await ConnectPublishHandler<DestroyCompleted>();
 
             var values = new {InVar.CorrelationId};
             await InputQueueSendEndpoint.Send<Create>(values);
