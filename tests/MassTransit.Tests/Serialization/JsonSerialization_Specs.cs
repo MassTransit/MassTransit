@@ -159,7 +159,6 @@ namespace MassTransit.Tests.Serialization
             var result = JsonConvert.DeserializeObject<Envelope>(body,
                 new JsonSerializerSettings
                 {
-                    Converters = new List<JsonConverter>(new JsonConverter[] {new ListJsonConverter()}),
                     NullValueHandling = NullValueHandling.Ignore,
                     DefaultValueHandling = DefaultValueHandling.Ignore,
                     MissingMemberHandling = MissingMemberHandling.Ignore,

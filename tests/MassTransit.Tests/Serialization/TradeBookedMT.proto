@@ -1,0 +1,33 @@
+﻿syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+
+package MassTransit.Tests.Serialization;
+
+message TradeBookedMT {
+	string trade_id = 1;
+	string exchange_order_id = 2;
+	string system = 3;
+	string counterparty = 4;
+	string portfolio_id = 5;
+	double volume = 7;
+	string instrument_id = 8;
+	double price = 9;
+	string currency = 10;
+	google.protobuf.Timestamp timestamp = 11;
+	map<string, string> additional_data = 12;
+	string system_trade_id = 13;
+	string unique_trade_id = 14;
+	string desk = 15;
+	string exchange_trade_id = 16;
+	bool market_trade = 17;
+	string algo_id = 18;
+	string strategy = 19;
+	string owner = 20;
+	string clearer_account = 21;
+	string depot = 22;
+	string safekeeping = 23;
+	bool deleted = 24;
+	string funding_currency = 25;
+}

@@ -32,6 +32,7 @@
                 ObjectCreationHandling = source.ObjectCreationHandling,
                 ConstructorHandling = source.ConstructorHandling,
                 ContractResolver = source.ContractResolver,
+                TypeNameHandling = source.TypeNameHandling,
                 DateParseHandling = source.DateParseHandling,
                 Converters = new List<JsonConverter>(source.Converters)
             };
@@ -53,6 +54,7 @@
                 ObjectCreationHandling = source.ObjectCreationHandling,
                 ConstructorHandling = source.ConstructorHandling,
                 ContractResolver = source.ContractResolver,
+                TypeNameHandling = source.TypeNameHandling,
                 DateParseHandling = source.DateParseHandling,
                 Converters = new List<JsonConverter>(source.Converters)
             };
