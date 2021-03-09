@@ -95,5 +95,7 @@ namespace Automatonymous.Contexts
 
         Event<TData> EventContext<TInstance, TData>.Event => _context.Event;
         TData EventContext<TInstance, TData>.Data => _context.Data;
+
+        public ConsumeEventContext<TInstance> InstanceContext => this;
     }
 }
