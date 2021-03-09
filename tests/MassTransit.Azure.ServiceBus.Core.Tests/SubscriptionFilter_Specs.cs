@@ -12,6 +12,50 @@
 
 
     [TestFixture]
+    public class Using_a_subscription_filter_on_int :
+        AzureServiceBusTestFixture
+    {
+        Task<ConsumeContext<ClientUpdated>> _handled;
+
+        [Test]
+        public async Task Should_only_match_integers()
+        {
+            await Bus.Publish<ClientUpdated>(new {Value = "Invalid"}, x => x.Headers.Set("ClientId", 69));
+            await Bus.Publish<ClientUpdated>(new {Value = "Valid"}, x => x.Headers.Set("ClientId", 27));
+
+            ConsumeContext<ClientUpdated> handled = await _handled;
+
+            Assert.That(handled.Message.Value, Is.EqualTo("Valid"));
+        }
+
+        protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
+        {
+        }
+
+        protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
+        {
+            configurator.SubscriptionEndpoint<ClientUpdated>("client-update-27", x =>
+            {
+                x.PrefetchCount = 1;
+
+                x.Rule = new RuleDescription("Only27", new SqlFilter("ClientId = 27"));
+
+                _handled = Handled<ClientUpdated>(x);
+            });
+        }
+    }
+
+
+    namespace TopologyTestTypes
+    {
+        public interface ClientUpdated
+        {
+            string Value { get; }
+        }
+    }
+
+
+    [TestFixture]
     public class Specifying_a_subscription_filter :
         AsyncTestFixture
     {

@@ -21,6 +21,8 @@
         Agent,
         ISendTransport
     {
+        static readonly ITransportSetHeaderAdapter<object> _adapter = new DictionaryTransportSetHeaderAdapter(new SimpleHeaderValueConverter());
+
         readonly ServiceBusSendTransportContext _context;
 
         public ServiceBusSendTransport(ServiceBusSendTransportContext context)
@@ -188,7 +190,7 @@
             {
                 var brokeredMessage = new Message(context.Body) {ContentType = context.ContentType.MediaType};
 
-                brokeredMessage.UserProperties.Set(context.Headers);
+                _adapter.Set(brokeredMessage.UserProperties, context.Headers);
 
                 if (context.TimeToLive.HasValue)
                     brokeredMessage.TimeToLive = context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1);

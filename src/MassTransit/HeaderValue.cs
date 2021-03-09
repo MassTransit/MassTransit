@@ -17,30 +17,19 @@ namespace MassTransit
 
         public bool IsStringValue(out HeaderValue<string> result)
         {
-            if (this is HeaderValue<string> resultValue)
+            switch (this)
             {
-                result = resultValue;
-                return true;
-            }
-
-            switch (Value)
-            {
-                case null:
-                    result = default;
-                    return false;
-                case string stringValue:
-                    result = new HeaderValue<string>(Key, stringValue);
-                    return true;
-                case bool boolValue when boolValue:
-                    result = new HeaderValue<string>(Key, bool.TrueString);
-                    return true;
-                case IFormattable formatValue when formatValue.GetType().IsValueType:
-                    result = new HeaderValue<string>(Key, formatValue.ToString());
+                case HeaderValue<string> resultValue:
+                    result = resultValue;
                     return true;
                 default:
-                    result = default;
-                    return false;
+                    return HeaderValue.IsValueStringValue(Key, Value, out result);
             }
+        }
+
+        public bool IsSimpleValue(out HeaderValue result)
+        {
+            return HeaderValue.IsValueSimpleValue(Key, Value, out result);
         }
     }
 
@@ -64,19 +53,37 @@ namespace MassTransit
 
         public bool IsStringValue(out HeaderValue<string> result)
         {
-            switch (Value)
+            return IsValueStringValue(Key, Value, out result);
+        }
+
+        public bool IsSimpleValue(out HeaderValue result)
+        {
+            return IsValueSimpleValue(Key, Value, out result);
+        }
+
+        public static implicit operator HeaderValue(HeaderValue<string> headerValue)
+        {
+            return new HeaderValue(headerValue.Key, headerValue.Value);
+        }
+
+        internal static bool IsValueStringValue(string key, object value, out HeaderValue<string> result)
+        {
+            switch (value)
             {
                 case null:
                     result = default;
                     return false;
                 case string stringValue:
-                    result = new HeaderValue<string>(Key, stringValue);
+                    result = new HeaderValue<string>(key, stringValue);
                     return true;
                 case bool boolValue when boolValue:
-                    result = new HeaderValue<string>(Key, bool.TrueString);
+                    result = new HeaderValue<string>(key, bool.TrueString);
+                    return true;
+                case Uri uri:
+                    result = new HeaderValue<string>(key, uri.ToString());
                     return true;
                 case IFormattable formatValue when formatValue.GetType().IsValueType:
-                    result = new HeaderValue<string>(Key, formatValue.ToString());
+                    result = new HeaderValue<string>(key, formatValue.ToString());
                     return true;
                 default:
                     result = default;
@@ -84,9 +91,29 @@ namespace MassTransit
             }
         }
 
-        public static implicit operator HeaderValue(HeaderValue<string> headerValue)
+        internal static bool IsValueSimpleValue(string key, object value, out HeaderValue result)
         {
-            return new HeaderValue(headerValue.Key, headerValue.Value);
+            switch (value)
+            {
+                case null:
+                    result = default;
+                    return false;
+                case string stringValue:
+                    result = new HeaderValue<string>(key, stringValue);
+                    return true;
+                case bool boolValue when boolValue:
+                    result = new HeaderValue(key, true);
+                    return true;
+                case Uri uri:
+                    result = new HeaderValue<string>(key, uri.ToString());
+                    return true;
+                case IFormattable formatValue when formatValue.GetType().IsValueType:
+                    result = new HeaderValue(key, value);
+                    return true;
+                default:
+                    result = default;
+                    return false;
+            }
         }
     }
 }
