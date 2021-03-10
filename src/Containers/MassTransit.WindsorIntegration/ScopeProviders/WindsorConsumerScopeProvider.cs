@@ -36,15 +36,17 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 return new ExistingConsumerScopeContext(context);
             }
 
-            var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
+            var scope = _kernel.CreateNewOrUseExistingMessageScope();
             try
             {
-                var proxy = new ConsumeContextScope(context, _kernel);
+                var scopeContext = new ConsumeContextScope(context, _kernel);
+
+                _kernel.UpdateScope(scopeContext);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
-                    scopeAction(proxy);
+                    scopeAction(scopeContext);
 
-                return new CreatedConsumerScopeContext<IDisposable>(scope, proxy);
+                return new CreatedConsumerScopeContext<IDisposable>(scope, scopeContext);
             }
             catch
             {
@@ -70,14 +72,18 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext, ReleaseComponent);
             }
 
-            var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
+            var scope = _kernel.CreateNewOrUseExistingMessageScope();
             try
             {
+                var scopeContext = new ConsumeContextScope<T>(context, _kernel);
+
+                _kernel.UpdateScope(scopeContext);
+
                 var consumer = _kernel.Resolve<TConsumer>();
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer, _kernel);
+                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(scopeContext, consumer);
 
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(consumerContext);

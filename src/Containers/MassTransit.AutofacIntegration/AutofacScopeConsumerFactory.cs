@@ -57,7 +57,7 @@ namespace MassTransit.AutofacIntegration
                 builder.ConfigureScope(context);
                 _configureScope?.Invoke(builder, context);
             });
-            ConsumerConsumeContext<TConsumer, TMessage> consumerContext = consumerScope.GetConsumerScope<TConsumer, TMessage>(context);
+            ConsumerConsumeContext<TConsumer, TMessage> consumerContext = consumerScope.GetConsumerScope<TConsumer, TMessage>();
 
             await next.Send(consumerContext).ConfigureAwait(false);
         }

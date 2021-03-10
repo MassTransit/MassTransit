@@ -2,6 +2,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 {
     using System;
     using Courier;
+    using Courier.Contexts;
     using GreenPipes;
     using Metadata;
     using Microsoft.Extensions.DependencyInjection;
@@ -42,15 +43,15 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             var serviceScope = serviceProvider.CreateScope();
             try
             {
-                serviceScope.UpdateScope(context);
+                ExecuteContext<TArguments> scopeContext = new ExecuteContextScope<TArguments>(context, serviceScope, serviceScope.ServiceProvider);
+
+                serviceScope.UpdateScope(scopeContext);
 
                 var activity = serviceScope.ServiceProvider.GetService<TActivity>();
                 if (activity == null)
                     throw new ConsumerException($"Unable to resolve activity type '{TypeMetadataCache<TActivity>.ShortName}'.");
 
-                ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
-
-                activityContext.UpdatePayload(serviceScope);
+                ExecuteActivityContext<TActivity, TArguments> activityContext = scopeContext.CreateActivityContext(activity);
 
                 return new CreatedExecuteActivityScopeContext<IServiceScope, TActivity, TArguments>(serviceScope, activityContext);
             }

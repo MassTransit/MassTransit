@@ -39,11 +39,11 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             var serviceScope = serviceProvider.CreateScope();
             try
             {
-                serviceScope.UpdateScope(context);
+                var scopeContext = new ConsumeContextScope(context, serviceScope, serviceScope.ServiceProvider);
 
-                var consumeContext = new ConsumeContextScope(context, serviceScope, serviceScope.ServiceProvider);
+                serviceScope.UpdateScope(scopeContext);
 
-                return new CreatedConsumerScopeContext<IServiceScope>(serviceScope, consumeContext);
+                return new CreatedConsumerScopeContext<IServiceScope>(serviceScope, scopeContext);
             }
             catch
             {
@@ -74,13 +74,15 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             var serviceScope = serviceProvider.CreateScope();
             try
             {
-                serviceScope.UpdateScope(context);
+                var scopeContext = new ConsumeContextScope<T>(context, serviceScope, serviceScope.ServiceProvider);
+
+                serviceScope.UpdateScope(scopeContext);
 
                 var consumer = serviceScope.ServiceProvider.GetService<TConsumer>();
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer, serviceScope, serviceScope.ServiceProvider);
+                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(scopeContext, consumer);
 
                 return new CreatedConsumerScopeContext<IServiceScope, TConsumer, T>(serviceScope, consumerContext);
             }

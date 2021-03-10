@@ -26,16 +26,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             var consumeContext = await ConsumeContext;
 
-            Assert.That(consumeContext.TryGetPayload(out MessageConsumeContext<PingMessage> messageConsumeContext),
-                "Is MessageConsumeContext");
+            Assert.That(consumeContext.TryGetPayload(out MessageConsumeContext<PingMessage> _), "Is MessageConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(publishEndpoint, Is.TypeOf<MessageConsumeContext<PingMessage>>());
-            Assert.That(sendEndpointProvider, Is.TypeOf<MessageConsumeContext<PingMessage>>());
             Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(messageConsumeContext, sendEndpointProvider), "ReferenceEquals(messageConsumeContext, sendEndpointProvider)");
+            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(messageConsumeContext, sendEndpointProvider)");
         }
 
         protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
@@ -73,17 +70,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             var consumeContext = await ConsumeContext;
 
-            Assert.That(
-                consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<PingMessage> outboxConsumeContext),
-                "Is ConsumerConsumeContext");
+            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<PingMessage> _), "Is ConsumerConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(publishEndpoint, Is.TypeOf<InMemoryOutboxConsumeContext<PingMessage>>());
-            Assert.That(sendEndpointProvider, Is.TypeOf<InMemoryOutboxConsumeContext<PingMessage>>());
             Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(outboxConsumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
 
             await fault;
 
@@ -130,17 +123,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             var consumeContext = await ConsumeContext;
 
-            Assert.That(
-                consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<Batch<PingMessage>> outboxConsumeContext),
-                "Is ConsumerConsumeContext");
+            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<Batch<PingMessage>> _), "Is ConsumerConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(publishEndpoint, Is.TypeOf<InMemoryOutboxConsumeContext<Batch<PingMessage>>>());
-            Assert.That(sendEndpointProvider, Is.TypeOf<InMemoryOutboxConsumeContext<Batch<PingMessage>>>());
             Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(outboxConsumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
 
             await fault;
 
@@ -197,17 +186,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             var consumeContext = await ConsumeContext;
 
-            Assert.That(
-                consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<Batch<PingMessage>> outboxConsumeContext),
-                "Is ConsumerConsumeContext");
+            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<Batch<PingMessage>> _), "Is ConsumerConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(publishEndpoint, Is.TypeOf<InMemoryOutboxConsumeContext<Batch<PingMessage>>>());
-            Assert.That(sendEndpointProvider, Is.TypeOf<InMemoryOutboxConsumeContext<Batch<PingMessage>>>());
             Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(outboxConsumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
 
             await fault;
 
@@ -259,17 +244,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             var consumeContext = await ConsumeContext;
 
-            Assert.That(
-                consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<PingMessage> outboxConsumeContext),
-                "Is ConsumerConsumeContext");
+            Assert.That(consumeContext.TryGetPayload(out InMemoryOutboxConsumeContext<PingMessage> _), "Is ConsumerConsumeContext");
 
             var publishEndpoint = await PublishEndpoint;
             var sendEndpointProvider = await SendEndpointProvider;
 
-            Assert.That(publishEndpoint, Is.TypeOf<InMemoryOutboxConsumeContext<PingMessage>>());
-            Assert.That(sendEndpointProvider, Is.TypeOf<InMemoryOutboxConsumeContext<PingMessage>>());
             Assert.That(ReferenceEquals(publishEndpoint, sendEndpointProvider), "ReferenceEquals(publishEndpoint, sendEndpointProvider)");
-            Assert.That(ReferenceEquals(outboxConsumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
+            Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(outboxConsumeContext, sendEndpointProvider)");
 
             await fault;
 
@@ -347,13 +328,15 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             readonly TaskCompletionSource<ConsumeContext> _consumeContextTask;
             readonly IPublishEndpoint _publishEndpoint;
+            readonly ConsumeContext _consumeContext;
 
-            public FlyingSoloConsumer(IPublishEndpoint publishEndpoint, ISendEndpointProvider sendEndpointProvider,
+            public FlyingSoloConsumer(IPublishEndpoint publishEndpoint, ISendEndpointProvider sendEndpointProvider, ConsumeContext consumeContext,
                 TaskCompletionSource<ConsumeContext> consumeContextTask,
                 TaskCompletionSource<IPublishEndpoint> publishEndpointTask,
                 TaskCompletionSource<ISendEndpointProvider> sendEndpointProviderTask)
             {
                 _publishEndpoint = publishEndpoint;
+                _consumeContext = consumeContext;
                 _consumeContextTask = consumeContextTask;
                 publishEndpointTask.TrySetResult(publishEndpoint);
                 sendEndpointProviderTask.TrySetResult(sendEndpointProvider);
@@ -361,9 +344,9 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             public async Task Consume(ConsumeContext<PingMessage> context)
             {
-                _consumeContextTask.TrySetResult(context);
-
                 await _publishEndpoint.Publish<ServiceDidIt>(new { });
+
+                _consumeContextTask.TrySetResult(_consumeContext);
 
                 throw new IntentionalTestException();
             }

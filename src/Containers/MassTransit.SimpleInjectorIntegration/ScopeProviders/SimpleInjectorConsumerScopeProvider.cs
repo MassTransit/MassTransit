@@ -36,11 +36,11 @@
             var scope = AsyncScopedLifestyle.BeginScope(_container);
             try
             {
-                scope.UpdateScope(context);
+                var scopeContext = new ConsumeContextScope(context, scope, scope.Container);
 
-                var proxy = new ConsumeContextScope(context, scope, scope.Container);
+                scope.UpdateScope(scopeContext);
 
-                return new CreatedConsumerScopeContext<Scope>(scope, proxy);
+                return new CreatedConsumerScopeContext<Scope>(scope, scopeContext);
             }
             catch
             {
@@ -70,13 +70,15 @@
             var scope = AsyncScopedLifestyle.BeginScope(_container);
             try
             {
-                scope.UpdateScope(context);
+                var scopeContext = new ConsumeContextScope<T>(context, scope, scope.Container);
+
+                scope.UpdateScope(scopeContext);
 
                 var consumer = scope.Container.GetInstance<TConsumer>();
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 
-                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer, scope, scope.Container);
+                var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(scopeContext, consumer);
 
                 return new CreatedConsumerScopeContext<Scope, TConsumer, T>(scope, consumerContext);
             }

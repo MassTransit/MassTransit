@@ -3,6 +3,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
     using System;
     using Castle.MicroKernel;
     using Courier;
+    using Courier.Contexts;
     using GreenPipes;
     using Scoping;
     using Scoping.CourierContexts;
@@ -33,13 +34,16 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 return new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext, ReleaseComponent);
             }
 
-            var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
+            var scope = _kernel.CreateNewOrUseExistingMessageScope();
             try
             {
+                ExecuteContext<TArguments> scopeContext = new ExecuteContextScope<TArguments>(context, _kernel);
+
+                _kernel.UpdateScope(scopeContext);
+
                 var activity = _kernel.Resolve<TActivity>(new Arguments().AddTyped(context.Arguments));
 
-                ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
-                activityContext.UpdatePayload(_kernel);
+                ExecuteActivityContext<TActivity, TArguments> activityContext = scopeContext.CreateActivityContext(activity);
 
                 return new CreatedExecuteActivityScopeContext<IDisposable, TActivity, TArguments>(scope, activityContext, ReleaseComponent);
             }
