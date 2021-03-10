@@ -39,6 +39,7 @@ module.exports = {
         collapsable: false,
         children: [
           '/getting-started/live-coding',
+          '/getting-started/morning-commute',
           '/getting-started/upgrade-v6',
           {
             title: 'Release Notes',
