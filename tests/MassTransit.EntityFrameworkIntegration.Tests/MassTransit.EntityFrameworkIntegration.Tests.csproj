@@ -9,8 +9,8 @@
   <ItemGroup>
     <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.11" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
-    <PackageReference Include="NUnit" Version="3.13.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.1" />
+    <PackageReference Include="NUnit" Version="3.13.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
     <PackageReference Include="Shouldly" Version="4.0.1" />
     <ProjectReference Include="..\..\src\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />

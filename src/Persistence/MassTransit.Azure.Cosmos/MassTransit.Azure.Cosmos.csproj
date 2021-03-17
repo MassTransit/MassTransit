@@ -15,7 +15,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
-    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.16.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.17.0" />
   </ItemGroup>
 
 </Project>
