@@ -1,8 +1,10 @@
 # Getting Started
 
-Getting started with MassTransit is fast and easy. This quick start guide uses RabbitMQ with .NET Core. RabbitMQ must be installed, instructions for installing RabbitMQ are included [below](#install-rabbitmq).
+Getting started with MassTransit is fast and easy. This quick start guide uses RabbitMQ with .NET 5. RabbitMQ must be installed, instructions for installing RabbitMQ are included [below](#install-rabbitmq). 
 
 > The [.NET 5 SDK](https://dotnet.microsoft.com/download) should be installed before continuing.
+
+> The source for this sample is available [on GitHub](https://github.com/MassTransit/Sample-GettingStarted).
 
 To create a service using MassTransit, create a worker via the Command Prompt.
 
