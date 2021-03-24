@@ -82,6 +82,8 @@
             LoggerFactory.Current = _fixtureContext;
 
             await RabbitMqTestHarness.Start().ConfigureAwait(false);
+
+            await Task.Delay(200);
         }
 
         [OneTimeTearDown]
