@@ -252,9 +252,11 @@ namespace MassTransit.Context
 
                 var faultPipe = new FaultPipe<T>(context);
 
-                var faultEndpoint = context.ReceiveContext is InMemoryOutboxReceiveContext
-                    ? await this.GetFaultEndpoint<T>().ConfigureAwait(false)
-                    : await context.GetFaultEndpoint<T>().ConfigureAwait(false);
+                ConsumeContext faultContext = context;
+                while (faultContext.TryGetPayload<InMemoryOutboxConsumeContext>(out var outboxConsumeContext))
+                    faultContext = outboxConsumeContext.CapturedContext;
+
+                var faultEndpoint = await faultContext.GetFaultEndpoint<T>().ConfigureAwait(false);
 
                 await faultEndpoint.Send(fault, faultPipe, CancellationToken).ConfigureAwait(false);
             }

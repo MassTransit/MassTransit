@@ -35,6 +35,8 @@ namespace MassTransit.Context
             }
         }
 
+        public ConsumeContext CapturedContext => _context;
+
         public Task ClearToSend => _clearToSend.Task;
 
         public void Add(Func<Task> method)
