@@ -2,22 +2,22 @@
 
 Getting started with MassTransit is fast and easy. This quick start guide uses RabbitMQ with .NET Core. RabbitMQ must be installed, instructions for installing RabbitMQ are included [below](#install-rabbitmq).
 
-> The [.NET Core SDK](https://dotnet.microsoft.com/download) should be installed before continuing.
+> The [.NET 5 SDK](https://dotnet.microsoft.com/download) should be installed before continuing.
 
-To create a service using MassTransit, create a console application via the Command Prompt.
+To create a service using MassTransit, create a worker via the Command Prompt.
 
 ```bash
 $ mkdir GettingStarted
-$ dotnet new console -o GettingStarted
+$ dotnet new worker -n GettingStarted
 ```
 
-## With In-Memory Bus
+## Using the InMemory Transport
 
 Add MassTransit package to the console application:
 
 ```bash
 $ cd GettingStarted
-$ dotnet add package MassTransit
+$ dotnet add package MassTransit.AspNetCore
 ```
 
 At this point, the project should compile, but there is more work to be done. You can verify the project builds by executing:
@@ -26,98 +26,197 @@ At this point, the project should compile, but there is more work to be done. Yo
 $ dotnet run
 ```
 
+You should see something similar to the output below (press Control+C to exit).
+
+```
+Building...
+info: GettingStarted.Worker[0]
+      Worker running at: 03/24/2021 11:38:29 -05:00
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/chris/Garbage/start/GettingStarted
+info: GettingStarted.Worker[0]
+      Worker running at: 03/24/2021 11:38:30 -05:00
+```
+
 ### Edit Program.cs
 
 ```csharp
-public class Message
-{ 
-    public string Text { get; set; }
-}
+using MassTransit;
+```
 
-public class Program
-{
-    public static async Task Main()
-    {
-        var bus = Bus.Factory.CreateUsingInMemory(sbc =>
+```csharp {5-14}
+public static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .ConfigureServices((hostContext, services) =>
         {
-            sbc.ReceiveEndpoint("test_queue", ep =>
+            services.AddMassTransit(x =>
             {
-                ep.Handler<Message>(context =>
+                x.AddConsumer<MessageConsumer>();
+
+                x.UsingInMemory((context,cfg) =>
                 {
-                    return Console.Out.WriteLineAsync($"Received: {context.Message.Text}");
+                    cfg.ConfigureEndpoints(context);
                 });
             });
+            services.AddMassTransitHostedService(true);
+            
+            services.AddHostedService<Worker>();
         });
+```
 
-        await bus.StartAsync(); // This is important!
+### Add a Consumer
 
-        await bus.Publish(new Message{Text = "Hi"});
-        
-        Console.WriteLine("Press any key to exit");
-        await Task.Run(() => Console.ReadKey());
-        
-        await bus.StopAsync();
+Create a new class file `MessageConsumer.cs` in the project:
+
+```csharp
+using System.Threading.Tasks;
+using MassTransit;
+using Microsoft.Extensions.Logging;
+
+namespace GettingStarted
+{
+    public class Message
+    {
+        public string Text { get; set; }
+    }
+
+    public class MessageConsumer :
+        IConsumer<Message>
+    {
+        readonly ILogger<MessageConsumer> _logger;
+
+        public MessageConsumer(ILogger<MessageConsumer> logger)
+        {
+            _logger = logger;
+        }
+
+        public Task Consume(ConsumeContext<Message> context)
+        {
+            _logger.LogInformation("Received Text: {Text}", context.Message.Text);
+
+            return Task.CompletedTask;
+        }
     }
 }
 ```
 
-Save the file, and execute _`dotnet run`_, and you should see the message *Received: Hi* displayed. If you see anything else, something went wrong. Verify your installed packages and your .NET Core setup. All the things that could possibly go wrong you should fix.
+### Update the Worker
+
+```csharp
+public class Worker : BackgroundService
+{
+    readonly IBus _bus;
+
+    public Worker(IBus bus)
+    {
+        _bus = bus;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            await _bus.Publish(new Message {Text = $"The time is {DateTimeOffset.Now}"});
+
+            await Task.Delay(1000, stoppingToken);
+        }
+    }
+}
+```
+
+### Run the project
+
+```bash
+$ dotnet run
+```
+
+The output should have changed to show the message consumer generating the output (again, press Control+C to exit).
+
+``` {2-5,12-15}
+Building...
+info: MassTransit[0]
+      Configured endpoint Message, Consumer: GettingStarted.MessageConsumer
+info: MassTransit[0]
+      Bus started: loopback://localhost/
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/chris/Garbage/start/GettingStarted
+info: GettingStarted.MessageConsumer[0]
+      Received Text: The time is 3/24/2021 12:02:01 PM -05:00
+info: GettingStarted.MessageConsumer[0]
+      Received Text: The time is 3/24/2021 12:02:02 PM -05:00
+```
+
+At this point, the consumer is configured on the bus and messages are published to the consumer.
 
 ## With RabbitMQ
 
-Add RabbitMQ for MassTransit package to the console application:
+::: tip
+See the [Install RabbitMQ](#install-rabbitmq) section below if you need to install RabbitMQ before continuing.
+:::
+
+Add RabbitMQ for MassTransit package to the console application.
 
 ```bash
-$ cd GettingStarted
 $ dotnet add package MassTransit.RabbitMQ
 ```
 
-If you've skipped the in-memory version, don't worry, the MassTransit package will be added as well.
-
-If you have any errors at this point, you might want to get them resolved.
-
 ### Edit Program.cs
 
-> You can view a working project on [GitHub](https://github.com/MassTransit/Sample-ConsoleService). There are other [samples](/learn/samples) available as well.
+Change `UsingInMemory` to `UsingRabbitMq`.
 
-To get started, a bare bones *Program.cs* is shown below.
-
-```csharp
-public class Message
-{ 
-    public string Text { get; set; }
-}
-
-public class Program
-{
-    public static async Task Main()
-    {
-        var bus = Bus.Factory.CreateUsingRabbitMq(sbc =>
+```csharp {9}
+public static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .ConfigureServices((hostContext, services) =>
         {
-            sbc.Host("rabbitmq://localhost");
-
-            sbc.ReceiveEndpoint("test_queue", ep =>
+            services.AddMassTransit(x =>
             {
-                ep.Handler<Message>(context =>
+                x.AddConsumer<MessageConsumer>();
+
+                x.UsingRabbitMq((context,cfg) =>
                 {
-                    return Console.Out.WriteLineAsync($"Received: {context.Message.Text}");
+                    cfg.ConfigureEndpoints(context);
                 });
             });
+            services.AddMassTransitHostedService();
+
+            services.AddHostedService<Worker>();
         });
-
-        await bus.StartAsync(); // This is important!
-
-        await bus.Publish(new Message{Text = "Hi"});
-        
-        Console.WriteLine("Press any key to exit");
-        await Task.Run(() => Console.ReadKey());
-        
-        await bus.StopAsync();
-    }
-}
 ```
 
-Save the file, and execute _dotnet run_, and you should see the message *Received: Hi* displayed. If you see anything else, something went wrong. Verify your RabbitMQ installation and your .NET Core setup, basically all the things that could possibly go wrong you should fix.
+### Run the project
+
+```bash
+$ dotnet run
+```
+
+The output should have changed to show the message consumer generating the output (again, press Control+C to exit). Notice that the bus address now starts with `rabbitmq`.
+
+``` {11}
+Building...
+info: MassTransit[0]
+      Configured endpoint Message, Consumer: GettingStarted.MessageConsumer
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/chris/Garbage/start/GettingStarted
+info: MassTransit[0]
+      Bus started: rabbitmq://localhost/
+info: GettingStarted.MessageConsumer[0]
+      Received Text: The time is 3/24/2021 12:11:10 PM -05:00
+```
+
+At this point, the service is connecting to RabbbitMQ on `localhost`, and publishing messages which are received by the consumer.
 
 ### Install RabbitMQ
 
@@ -150,20 +249,17 @@ If you are using a Mac, RabbitMQ can be installed using [Homebrew](https://brew.
 
 If we are going to create a messaging system, we need to create a message. `Message` is a .NET class that will represent our message. Notice that it's just a Plain Old CLR Object (or POCO).
 
-Next up, we need a program to run our code. Here we have a standard issue command line `Main` method. To setup the bus we start with the static class `Bus` and work off of the `Factory` extension point. From there we call the `CreateUsingRabbitMQ` method to setup a RabbitMQ bus instance. This method takes a lambda whose first and only argument is a class that will let you configure every aspect of the bus.
+Next up, the `AddMassTransit` extension is used to configure the bus in the container. The `UsingInMemory` (and `UsingRabbitMq`) method specifies the transport to use for the bus. Each transport has its own `UsingXxx` method.
 
-One of your first decisions is going to be "What transport do I want to run on?" Here we have chosen RabbitMQ (`Bus.Factory.CreateUsingRabbitMQ()`) because its the defacto transport choice for MassTransit.
+The consumer is added, using `AddConsumer`. This adds the consumer to the container as scoped.
 
-After that we need to configure the RabbitMQ host settings `sbc.Host()`. The first argument sets the machine name and the virtual directory to connect to. After that you have a lambda that you can use to tweak any of the other settings that you want. Since no additional configuration is specified, the default username and password (guest/guest) is being used.
+The `ConfigureEndpoints` method is used to automatically configure the receive endpoints on the bus. In this case, a single receive endpoint will be created for the `MessageConsumer`.
 
-Now that we have a host to listen on, we can configure some receiving endpoints `sbc.ReceiveEndpoint`. We specifiy the queue we want to listen on and a lambda to register each handler that we want to use.
-
-Lastly, in the configuration, we have the `Handler<Message>` method which subscribes a handler for the message type `Message` and takes an `async` lambda (oh yeah baby TPL) that is given a context class to process. Here we access the message by traversing `context.Message` and then writing to the console the text of the message.
-
-And now we have a bus instance that is fully configured and can start processing messages. We can grab the `busControl` that we created and call `StartAsync` on it to get everything rolling. We again `await` on the result and now we can go.
+The `AddMassTransitHostedService(true)` adds a hosted service for MassTransit that is responsible for starting and stopping the bus. This is required, as the bus will not operate propertly if it is not started and stopped.
 
 ::: warning IMPORTANT
-You *must* start the bus, otherwise you will get issues with sending and receiving messages. There is no "send-only" bus with MassTransit.
+This hosted service should be configured _prior_ to any other hosted services that may use the bus.
 :::
 
-We can call the `Publish` method on the `busControl` and we should see our console write the output.
+Lastly, the `Worker` is updated to publish a message every second to the bus, which is subsequently consumed by the consumer.
+
