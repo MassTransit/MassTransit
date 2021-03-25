@@ -8,18 +8,6 @@ Unless the application type requires a dependency injection container, the examp
 
 The configuration examples all use the `EventContracts.ValueEntered` message type. The message type is only included in the first example's source code.
 
-## Console App
-
-> Uses [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/)
-
-A console application, such as an application created using `dotnet new console`, has a `Main` entry point in the `Program.cs` class by default. In this example, MassTransit is configured to connect to RabbitMQ (which should be accessible on _localhost_) and publish messages. As each value is entered, the value is published as a `ValueEntered` message. No consumers are configured in this example.
-
-<<< @/docs/code/configuration/ConsoleAppPublisher.cs
-
-Another console application can be created to consume the published events. In this application, the receive endpoint is configured with a consumer that consumes the `ValueEntered` event. The message contract from the example above, in the same namespace, should be copied to this program as well (it isn't shown below).
-
-<<< @/docs/code/configuration/ConsoleAppListener.cs
-
 ## ASP.NET Core
 
 > Uses [MassTransit.AspNetCore](https://nuget.org/packages/MassTransit.AspNetCore/), [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/) 
@@ -56,6 +44,18 @@ The example sets the kebab-case endpoint name formatter, which will create a rec
 To configure health checks, which MassTransit will produce when using the _MassTransitHostedService_, add the health checks to the container and map the readiness and liveness endpoints. The following example also separates the readiness from the liveness health check.
 
 <<< @/docs/code/configuration/AspNetCorePublisherHealthCheck.cs
+
+## Console App
+
+> Uses [MassTransit.RabbitMQ](https://nuget.org/packages/MassTransit.RabbitMQ/)
+
+A console application, such as an application created using `dotnet new console`, has a `Main` entry point in the `Program.cs` class by default. In this example, MassTransit is configured to connect to RabbitMQ (which should be accessible on _localhost_) and publish messages. As each value is entered, the value is published as a `ValueEntered` message. No consumers are configured in this example.
+
+<<< @/docs/code/configuration/ConsoleAppPublisher.cs
+
+Another console application can be created to consume the published events. In this application, the receive endpoint is configured with a consumer that consumes the `ValueEntered` event. The message contract from the example above, in the same namespace, should be copied to this program as well (it isn't shown below).
+
+<<< @/docs/code/configuration/ConsoleAppListener.cs
 
 ## Topshelf Service
 
