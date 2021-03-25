@@ -973,11 +973,11 @@ public class OrderStateMachine :
     {
         Request(
             () => ProcessOrder,
+            x => x.ProcessOrderRequestId, // Optional
             r => {
                 r.ServiceAddress = settings.ProcessOrderServiceAddress;
                 r.Timeout = settings.RequestTimeout;
-            },
-            x => x.ProcessOrderRequestId);
+            });
     }
 
     public Request<OrderState, ProcessOrder, OrderProcessed> ProcessOrder { get; private set; }
