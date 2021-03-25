@@ -1,10 +1,12 @@
 ﻿namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Definition;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
+    using MassTransit.Context;
     using NUnit.Framework;
     using Scenarios;
     using Shouldly;
@@ -196,6 +198,41 @@
 
             public void Probe(ProbeContext context)
             {
+            }
+        }
+
+        protected class ContextCancellingScopeFilter<T> :
+            IFilter<ConsumeContext<T>>
+            where T : class
+        {
+            readonly MyId _myId;
+            readonly TaskCompletionSource<MyId> _taskCompletionSource;
+
+            public ContextCancellingScopeFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId)
+            {
+                _taskCompletionSource = taskCompletionSource;
+                _myId = myId;
+            }
+
+            public Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
+            {
+                _taskCompletionSource.TrySetResult(_myId);
+                return next.Send(new CancelledContext(context));
+            }
+
+            public void Probe(ProbeContext context) { }
+
+            public class CancelledContext : ConsumeContextProxy<T>
+            {
+                public override CancellationToken CancellationToken { get; }
+                public CancelledContext(ConsumeContext<T> context) : base(context)
+                {
+                    using (var cts = new CancellationTokenSource())
+                    {
+                        cts.Cancel();
+                        CancellationToken = cts.Token;
+                    }
+                }
             }
         }
     }

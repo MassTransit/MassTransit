@@ -147,6 +147,41 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
         protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
     }
 
+    [TestFixture]
+    public class DependencyInjection_Consume_FilterContext :
+        Common_Consume_Filter
+    {
+        readonly IServiceProvider _provider;
+        readonly MyId _id;
+
+        public DependencyInjection_Consume_FilterContext()
+        {
+            _id = new MyId(Guid.NewGuid());
+            var services = new ServiceCollection();
+            services.AddScoped(_ => _id);
+            services.AddSingleton(TaskCompletionSource);
+            services.AddMassTransit(ConfigureRegistration);
+            _provider = services.BuildServiceProvider(true);
+        }
+
+        protected override void ConfigureFilter(IConsumePipeConfigurator configurator)
+        {
+            DependencyInjectionFilterExtensions.UseConsumeFilter(configurator, typeof(ContextCancellingScopeFilter<>), Registration);
+        }
+
+        protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();
+
+        [Test]
+        public async Task Can_replace_the_context_passed_to_the_consumer()
+        {
+            await InputQueueSendEndpoint.Send<SimpleMessageInterface>(new {Name = "test"});
+
+            var consumer = await SimplerConsumer.LastConsumer;
+            var context = await consumer.LastContext;
+            Assert.True(context.CancellationToken.IsCancellationRequested);
+        }
+    }
+
 
     [TestFixture]
     public class DependencyInjection_Consume_FilterScope :

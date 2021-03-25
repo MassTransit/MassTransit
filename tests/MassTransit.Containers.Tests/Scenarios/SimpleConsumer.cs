@@ -43,21 +43,25 @@ namespace MassTransit.Containers.Tests.Scenarios
         static readonly TaskCompletionSource<SimplerConsumer> _consumerCreated = TaskUtil.GetTask<SimplerConsumer>();
 
         readonly TaskCompletionSource<SimpleMessageInterface> _received;
+        readonly TaskCompletionSource<ConsumeContext<SimpleMessageInterface>> _receivedConsumeContext;
 
         public SimplerConsumer()
         {
             _received = TaskUtil.GetTask<SimpleMessageInterface>();
+            _receivedConsumeContext = TaskUtil.GetTask<ConsumeContext<SimpleMessageInterface>>();
 
             _consumerCreated.TrySetResult(this);
         }
 
         public Task<SimpleMessageInterface> Last => _received.Task;
+        public Task<ConsumeContext<SimpleMessageInterface>> LastContext => _receivedConsumeContext.Task;
 
         public static Task<SimplerConsumer> LastConsumer => _consumerCreated.Task;
 
         public async Task Consume(ConsumeContext<SimpleMessageInterface> message)
         {
             _received.TrySetResult(message.Message);
+            _receivedConsumeContext.TrySetResult(message);
         }
     }
 }
