@@ -8,6 +8,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_a_message_consumer_throws_an_exception :
         RabbitMqTestFixture
     {

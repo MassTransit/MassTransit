@@ -17,7 +17,6 @@
     using RabbitMqTransport.Testing;
     using TestFramework;
     using Transports;
-    using Util;
 
 
     public class RabbitMqTestFixture :
@@ -44,7 +43,7 @@
             RabbitMqTestHarness.OnConfigureRabbitMqHost += ConfigureRabbitMqHost;
             RabbitMqTestHarness.OnConfigureRabbitMqBus += ConfigureRabbitMqBus;
             RabbitMqTestHarness.OnConfigureRabbitMqReceiveEndpoint += ConfigureRabbitMqReceiveEndpoint;
-            RabbitMqTestHarness.OnCleanupVirtualHost += CleanupVirtualHost;
+            RabbitMqTestHarness.OnCleanupVirtualHost += OnCleanupVirtualHost;
         }
 
         protected RabbitMqTestHarness RabbitMqTestHarness { get; }
@@ -77,6 +76,8 @@
         [OneTimeSetUp]
         public async Task SetupRabbitMqTestFixture()
         {
+            await CleanupVirtualHost().ConfigureAwait(false);
+
             _fixtureContext = TestExecutionContext.CurrentContext;
 
             LoggerFactory.Current = _fixtureContext;
@@ -108,21 +109,41 @@
         {
         }
 
-        void CleanupVirtualHost(IModel model)
+        async Task CleanupVirtualHost()
         {
-            var cleanVirtualHostEntirely = !bool.TryParse(Environment.GetEnvironmentVariable("CI"), out var isBuildServer) || !isBuildServer;
-            if (cleanVirtualHostEntirely)
+            try
             {
-                IList<string> exchanges = TaskUtil.Await(() => GetVirtualHostEntities("exchanges"));
-                foreach (var exchange in exchanges)
-                    model.ExchangeDelete(exchange);
+                var cleanVirtualHostEntirely = !bool.TryParse(Environment.GetEnvironmentVariable("CI"), out var isBuildServer) || !isBuildServer;
+                if (cleanVirtualHostEntirely)
+                {
+                    var settings = GetHostSettings();
 
-                IList<string> queues = TaskUtil.Await(() => GetVirtualHostEntities("queues"));
-                foreach (var queue in queues)
-                    model.QueueDelete(queue);
+                    var connectionFactory = settings.GetConnectionFactory();
+
+                    using var connection = settings.EndpointResolver != null
+                        ? connectionFactory.CreateConnection(settings.EndpointResolver, settings.Host)
+                        : connectionFactory.CreateConnection();
+
+                    using var model = connection.CreateModel();
+                    model.ConfirmSelect();
+
+                    IList<string> exchanges = await GetVirtualHostEntities("exchanges").ConfigureAwait(false);
+                    foreach (var exchange in exchanges)
+                        model.ExchangeDelete(exchange);
+
+                    IList<string> queues = await GetVirtualHostEntities("queues").ConfigureAwait(false);
+                    foreach (var queue in queues)
+                        model.QueueDelete(queue);
+
+                    model.Close();
+
+                    RabbitMqTestHarness.CleanVirtualHost = false;
+                }
             }
-
-            OnCleanupVirtualHost(model);
+            catch (Exception exception)
+            {
+                await TestContext.Error.WriteLineAsync(exception.Message);
+            }
         }
 
         protected virtual void OnCleanupVirtualHost(IModel model)
@@ -138,7 +159,7 @@
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
 
                 var requestUri = new UriBuilder("http", HostAddress.Host, 15672, $"api/{element}/{HostAddress.AbsolutePath.Trim('/')}").Uri;
-                using var response = await client.GetStreamAsync(requestUri);
+                await using var response = await client.GetStreamAsync(requestUri);
                 using var reader = new StreamReader(response);
                 using var jsonReader = new JsonTextReader(reader);
 

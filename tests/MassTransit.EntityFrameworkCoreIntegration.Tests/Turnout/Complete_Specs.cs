@@ -134,6 +134,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
 
     [TestFixture(typeof(SqlServerTestDbParameters))]
     [TestFixture(typeof(PostgresTestDbParameters))]
+    [Category("Flaky")]
     public class Submitting_a_job_to_turnout_via_container<T> :
         QuartzEntityFrameworkTestFixture<T, JobServiceSagaDbContext>
         where T : ITestDbParameters, new()
