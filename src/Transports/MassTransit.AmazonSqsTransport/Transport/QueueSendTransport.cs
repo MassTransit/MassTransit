@@ -72,7 +72,7 @@
 
                 await _context.ConfigureTopologyPipe.Send(context).ConfigureAwait(false);
 
-                var sendContext = new TransportAmazonSqsSendContext<T>(_message, _cancellationToken);
+                var sendContext = new AmazonSqsMessageSendContext<T>(_message, _cancellationToken);
 
                 await _pipe.Send(sendContext).ConfigureAwait(false);
 
@@ -95,8 +95,9 @@
                     if (!string.IsNullOrEmpty(sendContext.GroupId))
                         message.MessageGroupId = sendContext.GroupId;
 
-                    if (sendContext.DelaySeconds.HasValue)
-                        message.DelaySeconds = sendContext.DelaySeconds.Value;
+                    var delay = sendContext.Delay?.TotalSeconds;
+                    if (delay > 0)
+                        message.DelaySeconds = (int)delay.Value;
 
                     await context.SendMessage(_context.EntityName, message, sendContext.CancellationToken).ConfigureAwait(false);
 

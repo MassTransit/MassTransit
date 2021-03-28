@@ -33,6 +33,8 @@
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             _count = 0;
 
             _received = GetTask<ConsumeContext<PingMessage>>();
@@ -85,6 +87,8 @@
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             _count = 0;
 
             configurator.Handler<PingMessage>(context =>
@@ -120,6 +124,8 @@
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             _count = 0;
 
             configurator.Handler<PingMessage>(context =>
@@ -139,18 +145,18 @@
         [Test]
         public async Task Should_retry_each_message_type()
         {
-            var pingMessage = new PingMessage();
+            var pingMessage = new OneMessage {CorrelationId = NewId.NextGuid()};
 
-            Task<ConsumeContext<Fault<PingMessage>>> pingFault =
-                SubscribeHandler<Fault<PingMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
-            Task<ConsumeContext<Fault<PongMessage>>> pongFault =
-                SubscribeHandler<Fault<PongMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<OneMessage>>> pingFault =
+                SubscribeHandler<Fault<OneMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
+            Task<ConsumeContext<Fault<TwoMessage>>> pongFault =
+                SubscribeHandler<Fault<TwoMessage>>(x => x.Message.Message.CorrelationId == pingMessage.CorrelationId);
 
             await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
-            await InputQueueSendEndpoint.Send(new PongMessage(pingMessage.CorrelationId), x => x.FaultAddress = Bus.Address);
+            await InputQueueSendEndpoint.Send(new TwoMessage {CorrelationId = pingMessage.CorrelationId}, x => x.FaultAddress = Bus.Address);
 
-            ConsumeContext<Fault<PingMessage>> pingFaultContext = await pingFault;
-            ConsumeContext<Fault<PongMessage>> pongFaultContext = await pongFault;
+            ConsumeContext<Fault<OneMessage>> pingFaultContext = await pingFault;
+            ConsumeContext<Fault<TwoMessage>> pongFaultContext = await pongFault;
 
             Assert.That(_consumer.PingCount, Is.EqualTo(3));
             Assert.That(_consumer.PongCount, Is.EqualTo(3));
@@ -160,6 +166,8 @@
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             configurator.UseDelayedRedelivery(r => r.Intervals(100, 200));
 
             _consumer = new Consumer();
@@ -168,25 +176,37 @@
 
 
         class Consumer :
-            IConsumer<PingMessage>,
-            IConsumer<PongMessage>
+            IConsumer<OneMessage>,
+            IConsumer<TwoMessage>
         {
             public int PingCount;
             public int PongCount;
 
-            public Task Consume(ConsumeContext<PingMessage> context)
+            public Task Consume(ConsumeContext<OneMessage> context)
             {
                 Interlocked.Increment(ref PingCount);
 
                 throw new IntentionalTestException();
             }
 
-            public Task Consume(ConsumeContext<PongMessage> context)
+            public Task Consume(ConsumeContext<TwoMessage> context)
             {
                 Interlocked.Increment(ref PongCount);
 
                 throw new IntentionalTestException();
             }
+        }
+
+
+        public class OneMessage
+        {
+            public Guid CorrelationId { get; set; }
+        }
+
+
+        public class TwoMessage
+        {
+            public Guid CorrelationId { get; set; }
         }
     }
 
@@ -222,6 +242,8 @@
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             configurator.UseDelayedRedelivery(r => r.Intervals(100));
             configurator.UseMessageRetry(x => x.Immediate(2));
 
@@ -274,6 +296,8 @@
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             _count = 0;
 
             configurator.Handler<PingMessage>(context =>
@@ -307,6 +331,8 @@
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             _count = 0;
 
             _received = GetTask<ConsumeContext<PingMessage>>();
@@ -359,6 +385,8 @@
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             _count = 0;
 
             _received = GetTask<ConsumeContext<PingMessage>>();

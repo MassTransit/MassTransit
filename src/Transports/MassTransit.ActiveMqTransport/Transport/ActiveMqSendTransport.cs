@@ -111,6 +111,10 @@
                     if (context.Priority.HasValue)
                         transportMessage.NMSPriority = context.Priority.Value;
 
+                    var delay = context.Delay?.TotalMilliseconds;
+                    if (delay > 0)
+                        transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
+
                     transportMessage.Content = context.Body;
 
                     var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);

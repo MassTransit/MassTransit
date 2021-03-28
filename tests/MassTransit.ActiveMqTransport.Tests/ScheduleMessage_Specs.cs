@@ -5,7 +5,7 @@
     using System.Threading.Tasks;
     using MassTransit.Scheduling;
     using NUnit.Framework;
-    using Scheduling;
+    using Transports.Scheduling;
 
 
     public class ScheduleMessage_Specs :
@@ -162,7 +162,7 @@
         [Test]
         public async Task Should_get_both_messages()
         {
-            var scheduler = new MessageScheduler(new ActiveMqScheduleMessageProvider(Bus), Bus.Topology);
+            var scheduler = new MessageScheduler(new DelayedScheduleMessageProvider(Bus), Bus.Topology);
 
             await scheduler.ScheduleSend(InputQueueAddress, TimeSpan.FromSeconds(3), new FirstMessage());
 

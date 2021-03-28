@@ -7,7 +7,6 @@
     using System.Threading.Tasks;
     using GreenPipes;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
 
 
     public class SerializedMessageContextAdapter :
@@ -61,7 +60,7 @@
 
             if (!string.IsNullOrWhiteSpace(_message.PayloadMessageHeadersAsJson))
             {
-                var headers = JObject.Parse(_message.PayloadMessageHeadersAsJson).ToObject<Dictionary<string, object>>();
+                IDictionary<string, object> headers = ToHeaderDictionary(_message.PayloadMessageHeadersAsJson);
 
                 if (string.Compare(_message.ContentType, JsonMessageSerializer.JsonContentType.MediaType, StringComparison.OrdinalIgnoreCase) == 0)
                     bodySerializer.UpdateJsonHeaders(headers);
@@ -91,9 +90,14 @@
             if (string.IsNullOrEmpty(_message.HeadersAsJson))
                 return;
 
-            var headers = JsonConvert.DeserializeObject<IDictionary<string, object>>(_message.HeadersAsJson);
+            IDictionary<string, object> headers = ToHeaderDictionary(_message.HeadersAsJson);
             foreach (KeyValuePair<string, object> header in headers)
                 context.Headers.Set(header.Key, header.Value);
+        }
+
+        static IDictionary<string, object> ToHeaderDictionary(string json)
+        {
+            return JsonConvert.DeserializeObject<IDictionary<string, object>>(json, JsonMessageSerializer.DeserializerSettings);
         }
 
         static Uri ToUri(string s)
@@ -101,7 +105,14 @@
             if (string.IsNullOrEmpty(s))
                 return null;
 
-            return new Uri(s);
+            try
+            {
+                return new Uri(s);
+            }
+            catch (FormatException)
+            {
+                return null;
+            }
         }
     }
 }

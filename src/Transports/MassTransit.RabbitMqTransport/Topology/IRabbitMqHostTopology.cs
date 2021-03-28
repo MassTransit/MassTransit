@@ -32,12 +32,5 @@ namespace MassTransit.RabbitMqTransport.Topology
         /// <param name="configure">Callback to configure exchange settings</param>
         /// <returns></returns>
         Uri GetDestinationAddress(Type messageType, Action<IExchangeConfigurator> configure = null);
-
-        /// <summary>
-        /// Returns the address for the delayed exchanged associated with the specified <paramref name="address" />
-        /// </summary>
-        /// <param name="address"></param>
-        /// <returns></returns>
-        Uri GetDelayedExchangeDestinationAddress(Uri address);
     }
 }

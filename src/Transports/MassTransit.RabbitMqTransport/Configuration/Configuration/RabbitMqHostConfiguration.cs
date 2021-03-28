@@ -39,10 +39,9 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 Password = "guest"
             };
 
-            var exchangeTypeSelector = topologyConfiguration.Publish.ExchangeTypeSelector;
             var messageNameFormatter = new RabbitMqMessageNameFormatter();
 
-            _hostTopology = new RabbitMqHostTopology(this, exchangeTypeSelector, messageNameFormatter, _hostSettings.HostAddress, topologyConfiguration);
+            _hostTopology = new RabbitMqHostTopology(this, messageNameFormatter, _hostSettings.HostAddress, topologyConfiguration);
 
             _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }

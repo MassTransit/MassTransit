@@ -13,15 +13,13 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
         IRabbitMqHostTopology
     {
         readonly IRabbitMqTopologyConfiguration _configuration;
-        readonly IExchangeTypeSelector _exchangeTypeSelector;
         readonly Uri _hostAddress;
         readonly IMessageNameFormatter _messageNameFormatter;
 
-        public RabbitMqHostTopology(IRabbitMqHostConfiguration hostConfiguration, IExchangeTypeSelector exchangeTypeSelector,
-            IMessageNameFormatter messageNameFormatter, Uri hostAddress, IRabbitMqTopologyConfiguration configuration)
+        public RabbitMqHostTopology(IRabbitMqHostConfiguration hostConfiguration, IMessageNameFormatter messageNameFormatter, Uri hostAddress,
+            IRabbitMqTopologyConfiguration configuration)
             : base(hostConfiguration, configuration)
         {
-            _exchangeTypeSelector = exchangeTypeSelector;
             _messageNameFormatter = messageNameFormatter;
             _hostAddress = hostAddress;
             _configuration = configuration;
@@ -60,19 +58,6 @@ namespace MassTransit.RabbitMqTransport.Topology.Topologies
             var settings = new RabbitMqSendSettings(address);
 
             configure?.Invoke(settings);
-
-            return settings.GetSendAddress(_hostAddress);
-        }
-
-        public Uri GetDelayedExchangeDestinationAddress(Uri address)
-        {
-            var endpointAddress = new RabbitMqEndpointAddress(_hostAddress, address);
-
-            var delayedExchangeAddress = endpointAddress.GetDelayAddress();
-
-            var settings = new RabbitMqSendSettings(delayedExchangeAddress);
-
-            settings.BindToExchange(endpointAddress.Name);
 
             return settings.GetSendAddress(_hostAddress);
         }

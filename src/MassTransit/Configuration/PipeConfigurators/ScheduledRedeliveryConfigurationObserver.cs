@@ -71,7 +71,7 @@
         protected virtual void AddRedeliveryPipeSpecification<TMessage>(IConsumePipeConfigurator configurator)
             where TMessage : class
         {
-            var redeliverySpecification = new ScheduleMessageRedeliveryPipeSpecification<TMessage>();
+            var redeliverySpecification = new ScheduledRedeliveryPipeSpecification<TMessage>();
 
             configurator.AddPipeSpecification(redeliverySpecification);
         }

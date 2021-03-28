@@ -45,13 +45,22 @@
         public Task Deliver(DeliveryContext<InMemoryTransportMessage> context)
         {
             return context.WasAlreadyDelivered(this)
-                ? Task.FromResult(false)
-                : _executor.Push(() => DispatchMessage(context), context.CancellationToken);
+                ? Task.CompletedTask
+                : context.Message.Delay > TimeSpan.Zero
+                    ? DeliverWithDelay(context)
+                    : _executor.Push(() => DispatchMessage(context), context.CancellationToken);
         }
 
         public ValueTask DisposeAsync()
         {
             return _executor.DisposeAsync();
+        }
+
+        async Task DeliverWithDelay(DeliveryContext<InMemoryTransportMessage> context)
+        {
+            await Task.Delay(context.Message.Delay.Value, context.CancellationToken).ConfigureAwait(false);
+
+            await _executor.Push(() => DispatchMessage(context), context.CancellationToken).ConfigureAwait(false);
         }
 
         async Task DispatchMessage(DeliveryContext<InMemoryTransportMessage> context)

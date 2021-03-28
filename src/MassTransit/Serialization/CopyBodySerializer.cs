@@ -22,10 +22,9 @@
 
         void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
         {
-            using (var bodyStream = _context.GetBodyStream())
-            {
-                bodyStream.CopyTo(stream);
-            }
+            using var bodyStream = _context.GetBodyStream();
+
+            bodyStream.CopyTo(stream);
         }
     }
 }

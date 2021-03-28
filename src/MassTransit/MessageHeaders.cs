@@ -48,11 +48,6 @@
         public const string ForwarderAddress = "MT-Forwarder-Address";
 
         /// <summary>
-        /// The address where the message was originally delivered before being rescheduled
-        /// </summary>
-        public const string DeliveredAddress = "MT-Scheduling-DeliveredAddress";
-
-        /// <summary>
         /// The tokenId for the message that was registered with the scheduler
         /// </summary>
         public const string SchedulingTokenId = "MT-Scheduling-TokenId";
