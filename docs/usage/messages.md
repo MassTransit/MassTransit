@@ -71,7 +71,7 @@ MassTransit encapsulates every sent or published message in a message envelope (
 | CorrelationId     |User   | Assigned by the application, or automatically by convention, and should uniquely identify the operation, event, etc.|
 | RequestId         |Request| Assigned by the request client, and automatically copied by the _Respond_ methods to correlate responses to the original request.|
 | InitiatorId       |Auto   | Assigned when publishing or sending from a consumer, saga, or activity to the value of the _CorrelationId_ on the consumed message.|
-| ConversationId    |Auto   | Assigned when the first message sent or published and no consumed message is available, ensuring that a set of messages within the same conversation have the save identifier.|
+| ConversationId    |Auto   | Assigned when the first message is sent or published and no consumed message is available, ensuring that a set of messages within the same conversation have the same identifier.|
 | SourceAddress     |Auto   | Where the message originated (may be a temporary address for messages published or sent from `IBus`).|
 | DestinationAddress|Auto   | Where the message was sent |
 | ResponseAddress   |Request| Where responses to the request should be sent. If not present, responses are _published_.|
