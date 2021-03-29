@@ -1,5 +1,8 @@
 ﻿namespace MassTransit
 {
+    using Serialization;
+
+
     public static class MessageHeaders
     {
         /// <summary>
@@ -78,19 +81,49 @@
         public const string InitiatingConversationId = "MT-InitiatingConversationId";
 
         /// <summary>
-        /// The messageId, which is typically only in a transport header
+        /// MessageId - <see cref="MessageEnvelope"/>
         /// </summary>
         public const string MessageId = "MessageId";
 
         /// <summary>
-        /// The requestId, which is not typically a transport header, but might be
+        /// CorrelationId - <see cref="MessageEnvelope"/>
         /// </summary>
         public const string CorrelationId = "CorrelationId";
 
         /// <summary>
-        /// The requestId, which is not typically a transport header, but might be
+        /// ConversationId - <see cref="MessageEnvelope"/>
+        /// </summary>
+        public const string ConversationId = "ConversationId";
+
+        /// <summary>
+        /// RequestId - <see cref="MessageEnvelope"/>
         /// </summary>
         public const string RequestId = "RequestId";
+
+        /// <summary>
+        /// InitiatorId - <see cref="MessageEnvelope"/>
+        /// </summary>
+        public const string InitiatorId = "MT-InitiatorId";
+
+        /// <summary>
+        /// SourceAddress - <see cref="MessageEnvelope"/>
+        /// </summary>
+        public const string SourceAddress = "MT-Source-Address";
+
+        /// <summary>
+        /// ResponseAddress - <see cref="MessageEnvelope"/>
+        /// </summary>
+        public const string ResponseAddress = "MT-Response-Address";
+
+        /// <summary>
+        /// FaultAddress - <see cref="MessageEnvelope"/>
+        /// </summary>
+        public const string FaultAddress = "MT-Fault-Address";
+
+        /// <summary>
+        /// MessageType - <see cref="MessageEnvelope"/>
+        /// </summary>
+        public const string MessageType = "MT-MessageType";
 
         /// <summary>
         /// The Transport message ID, which is a string, because we can't assume anything
@@ -105,6 +138,7 @@
 
         public static class Host
         {
+            public const string Info = "MT-Host-Info";
             public const string MachineName = "MT-Host-MachineName";
             public const string ProcessName = "MT-Host-ProcessName";
             public const string ProcessId = "MT-Host-ProcessId";

@@ -6,6 +6,7 @@ namespace MassTransit.Serialization
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading;
+    using Metadata;
     using Newtonsoft.Json;
 
 
@@ -19,12 +20,19 @@ namespace MassTransit.Serialization
         static readonly Lazy<Encoding> _encoding;
         static readonly Lazy<JsonSerializer> _serializer;
 
+        readonly RawJsonSerializerOptions _options;
+
         static RawJsonMessageSerializer()
         {
             _encoding = new Lazy<Encoding>(() => new UTF8Encoding(false, true), LazyThreadSafetyMode.PublicationOnly);
 
             _deserializer = new Lazy<JsonSerializer>(() => JsonSerializer.Create(JsonMessageSerializer.DeserializerSettings));
             _serializer = new Lazy<JsonSerializer>(() => JsonSerializer.Create(JsonMessageSerializer.SerializerSettings));
+        }
+
+        public RawJsonMessageSerializer(RawJsonSerializerOptions options = RawJsonSerializerOptions.Default)
+        {
+            _options = options;
         }
 
         public static JsonSerializer Deserializer => _deserializer.Value;
@@ -37,6 +45,9 @@ namespace MassTransit.Serialization
             try
             {
                 context.ContentType = RawJsonContentType;
+
+                if (_options.HasFlag(RawJsonSerializerOptions.AddTransportHeaders))
+                    SetRawJsonMessageHeaders<T>(context);
 
                 using var writer = new StreamWriter(stream, _encoding.Value, 1024, true);
                 using var jsonWriter = new JsonTextWriter(writer) {Formatting = Formatting.Indented};
@@ -57,5 +68,35 @@ namespace MassTransit.Serialization
         }
 
         public ContentType ContentType => RawJsonContentType;
+
+        static void SetRawJsonMessageHeaders<T>(SendContext context)
+            where T : class
+        {
+            if (context.MessageId.HasValue)
+                context.Headers.Set(MessageHeaders.MessageId, context.MessageId.Value.ToString());
+
+            if (context.CorrelationId.HasValue)
+                context.Headers.Set(MessageHeaders.CorrelationId, context.CorrelationId.Value.ToString());
+
+            if (context.ConversationId.HasValue)
+                context.Headers.Set(MessageHeaders.ConversationId, context.ConversationId.Value.ToString());
+
+            context.Headers.Set(MessageHeaders.MessageType, string.Join(";", TypeMetadataCache<T>.MessageTypeNames));
+
+            if (context.ResponseAddress != null)
+                context.Headers.Set(MessageHeaders.ResponseAddress, context.ResponseAddress);
+
+            if (context.FaultAddress != null)
+                context.Headers.Set(MessageHeaders.FaultAddress, context.FaultAddress);
+
+            if (context.InitiatorId.HasValue)
+                context.Headers.Set(MessageHeaders.InitiatorId, context.InitiatorId.Value.ToString());
+
+            if (context.SourceAddress != null)
+                context.Headers.Set(MessageHeaders.SourceAddress, context.SourceAddress);
+
+            context.Headers.Set(MessageHeaders.ContentType, ContentTypeHeaderValue);
+            context.Headers.Set(MessageHeaders.Host.Info, JsonConvert.SerializeObject(HostMetadataCache.Host, Formatting.None));
+        }
     }
 }

@@ -82,12 +82,12 @@
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(sendContext).ConfigureAwait(false);
 
-                    var message = new SendMessageBatchRequestEntry("", Encoding.UTF8.GetString(sendContext.Body));
+                    var message = new SendMessageBatchRequestEntry("", Encoding.UTF8.GetString(sendContext.Body)) {Id = sendContext.MessageId.ToString()};
 
                     _context.SqsSetHeaderAdapter.Set(message.MessageAttributes, sendContext.Headers);
 
                     _context.SqsSetHeaderAdapter.Set(message.MessageAttributes, "Content-Type", sendContext.ContentType.MediaType);
-                    _context.SqsSetHeaderAdapter.Set(message.MessageAttributes, nameof(sendContext.CorrelationId), sendContext.CorrelationId);
+                    _context.SqsSetHeaderAdapter.Set(message.MessageAttributes, MessageHeaders.CorrelationId, sendContext.CorrelationId);
 
                     if (!string.IsNullOrEmpty(sendContext.DeduplicationId))
                         message.MessageDeduplicationId = sendContext.DeduplicationId;

@@ -1,89 +1,36 @@
-namespace MassTransit.RabbitMqTransport.Tests
+namespace MassTransit.AmazonSqsTransport.Tests
 {
-    using System;
     using System.Linq;
-    using System.Text;
     using System.Threading.Tasks;
-    using Initializers;
-    using Newtonsoft.Json;
     using NUnit.Framework;
+    using RawMessages;
     using Serialization;
     using TestFramework.Messages;
 
 
-    [TestFixture]
-    public class Sending_raw_json_with_no_content_type :
-        RabbitMqTestFixture
+    namespace RawMessages
     {
-        [Test]
-        public async Task Should_deserialize()
+        using System;
+
+
+        public interface Command
         {
-            var contract = await MessageInitializerCache<RawContract>.InitializeMessage(new
-            {
-                Name = "Frank",
-                Value = 27,
-                InVar.Timestamp
-            });
-
-            var jsonText = JsonConvert.SerializeObject(contract, JsonMessageSerializer.SerializerSettings);
-            byte[] body = Encoding.UTF8.GetBytes(jsonText);
-
-            SendRawMessage(body);
-
-            ConsumeContext<RawContract> received = await _receivedA;
-
-            Assert.AreEqual(contract.Name, received.Message.Name);
-            Assert.AreEqual(contract.Value, received.Message.Value);
-            Assert.AreEqual(contract.Timestamp, received.Message.Timestamp);
-        }
-
-        Task<ConsumeContext<RawContract>> _receivedA;
-
-        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
-        {
-            configurator.ClearMessageDeserializers();
-            configurator.UseRawJsonSerializer();
-
-            _receivedA = Handled<RawContract>(configurator);
-        }
-
-        void SendRawMessage(byte[] body)
-        {
-            try
-            {
-                var settings = GetHostSettings();
-                var connectionFactory = settings.GetConnectionFactory();
-
-                using var connection = settings.EndpointResolver != null
-                    ? connectionFactory.CreateConnection(settings.EndpointResolver, settings.Host)
-                    : connectionFactory.CreateConnection();
-
-                using var model = connection.CreateModel();
-
-                var properties = model.CreateBasicProperties();
-                properties.SetHeader(MessageHeaders.MessageId, "Whiskey-Tango-Foxtrot 3-5-9er");
-
-                model.BasicPublish(RabbitMqTestHarness.InputQueueName, "", false, properties, body);
-            }
-            catch (Exception exception)
-            {
-                Console.WriteLine(exception);
-            }
+            Guid CommandId { get; }
+            string ItemNumber { get; }
         }
 
 
-        public interface RawContract
+        public class BagOfCrap
         {
-            string Name { get; }
-            int Value { get; }
-            DateTime Timestamp { get; }
+            public Guid CommandId { get; set; }
+            public string ItemNumber { get; set; }
         }
     }
 
 
     [TestFixture]
     public class Sending_and_consuming_raw_json_with_headers :
-        RabbitMqTestFixture
+        AmazonSqsTestFixture
     {
         [Test]
         public async Task Should_return_the_header_value_from_the_transport()
@@ -114,41 +61,26 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.IsTrue(context.CorrelationId.HasValue);
             Assert.IsTrue(context.SentTime.HasValue);
             Assert.IsNotNull(context.DestinationAddress);
-            Assert.IsNotNull(context.Host);
             Assert.That(context.SupportedMessageTypes.Count(), Is.EqualTo(1));
         }
 
         Task<ConsumeContext<Command>> _handled;
 
-        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        protected override void ConfigureAmazonSqsBus(IAmazonSqsBusFactoryConfigurator configurator)
         {
             configurator.UseRawJsonSerializer();
         }
 
-        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {
             _handled = Handled<Command>(configurator);
-        }
-
-
-        public interface Command
-        {
-            Guid CommandId { get; }
-            string ItemNumber { get; }
-        }
-
-
-        public class BagOfCrap
-        {
-            public Guid CommandId { get; set; }
-            public string ItemNumber { get; set; }
         }
     }
 
 
     [TestFixture]
     public class Sending_and_consuming_raw_json_with_headers_and_producing :
-        RabbitMqTestFixture
+        AmazonSqsTestFixture
     {
         [Test]
         public async Task Should_not_forward_transport_headers_from_raw_json()
@@ -186,7 +118,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         Task<ConsumeContext<PingMessage>> _handled;
         Task<ConsumeContext<Command>> _handler;
 
-        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        protected override void ConfigureAmazonSqsBus(IAmazonSqsBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("second-queue", e =>
             {
@@ -194,12 +126,12 @@ namespace MassTransit.RabbitMqTransport.Tests
             });
         }
 
-        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {
             configurator.AddMessageDeserializer(RawJsonMessageSerializer.RawJsonContentType,
                 () => new RawJsonMessageDeserializer(RawJsonMessageSerializer.Deserializer));
 
-            var handler = GetTask<ConsumeContext<Command>>();
+            TaskCompletionSource<ConsumeContext<Command>> handler = GetTask<ConsumeContext<Command>>();
             _handler = handler.Task;
 
             Handler<Command>(configurator, async context =>
@@ -209,19 +141,71 @@ namespace MassTransit.RabbitMqTransport.Tests
                 handler.SetResult(context);
             });
         }
+    }
 
 
-        public interface Command
+    [TestFixture]
+    public class Sending_and_consuming_raw_json_with_headers_and_producing_with_copy_enabled :
+        AmazonSqsTestFixture
+    {
+        [Test]
+        public async Task Should_not_forward_transport_headers_from_raw_json()
         {
-            Guid CommandId { get; }
-            string ItemNumber { get; }
+            var message = new BagOfCrap
+            {
+                CommandId = NewId.NextGuid(),
+                ItemNumber = "27"
+            };
+
+            const string headerName = "Random-Header";
+            const string headerValue = "SomeValue";
+
+            await InputQueueSendEndpoint.Send(message, x =>
+            {
+                x.Headers.Set(headerName, headerValue);
+                x.Serializer = new RawJsonMessageSerializer();
+            });
+
+            ConsumeContext<Command> commandContext = await _handler;
+
+            Assert.That(commandContext.ReceiveContext.ContentType, Is.EqualTo(RawJsonMessageSerializer.RawJsonContentType),
+                $"unexpected content-type {commandContext.ReceiveContext.ContentType}");
+
+            ConsumeContext<PingMessage> context = await _handled;
+
+            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(JsonMessageSerializer.JsonContentType),
+                $"unexpected content-type {context.ReceiveContext.ContentType}");
+
+            Assert.That(context.Message.CorrelationId, Is.EqualTo(message.CommandId));
+
+            Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(headerValue));
         }
 
+        Task<ConsumeContext<PingMessage>> _handled;
+        Task<ConsumeContext<Command>> _handler;
 
-        public class BagOfCrap
+        protected override void ConfigureAmazonSqsBus(IAmazonSqsBusFactoryConfigurator configurator)
         {
-            public Guid CommandId { get; set; }
-            public string ItemNumber { get; set; }
+            configurator.ReceiveEndpoint("second-queue", e =>
+            {
+                _handled = Handled<PingMessage>(e);
+            });
+        }
+
+        protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
+        {
+            configurator.AddMessageDeserializer(RawJsonMessageSerializer.RawJsonContentType,
+                () => new RawJsonMessageDeserializer(RawJsonMessageSerializer.Deserializer, RawJsonSerializerOptions.All));
+
+            TaskCompletionSource<ConsumeContext<Command>> handler = GetTask<ConsumeContext<Command>>();
+            _handler = handler.Task;
+
+            Handler<Command>(configurator, async context =>
+            {
+                await context.Publish(new PingMessage(context.Message.CommandId));
+
+                handler.SetResult(context);
+            });
         }
     }
 }

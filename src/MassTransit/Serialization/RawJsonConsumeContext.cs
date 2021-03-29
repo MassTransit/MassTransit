@@ -14,48 +14,54 @@ namespace MassTransit.Serialization
         DeserializerConsumeContext
     {
         readonly JsonSerializer _deserializer;
+        readonly RawJsonHeaderAdapter _headerAdapter;
         readonly JToken _messageToken;
         readonly IDictionary<Type, ConsumeContext> _messageTypes;
+        readonly RawJsonSerializerOptions _options;
+        readonly string[] _supportedTypes;
 
-        public RawJsonConsumeContext(JsonSerializer deserializer, ReceiveContext receiveContext, JToken messageToken)
+        public RawJsonConsumeContext(JsonSerializer deserializer, ReceiveContext receiveContext, JToken messageToken, RawJsonSerializerOptions options)
             : base(receiveContext)
         {
             _messageToken = messageToken ?? new JObject();
 
             _deserializer = deserializer;
+            _options = options;
+
             _messageTypes = new Dictionary<Type, ConsumeContext>();
 
-            MessageId = receiveContext.GetMessageId();
-            CorrelationId = receiveContext.GetCorrelationId();
-            RequestId = receiveContext.GetRequestId();
+            _headerAdapter = new RawJsonHeaderAdapter(receiveContext, options);
+
+            _supportedTypes = _headerAdapter.SupportedMessageTypes;
         }
 
-        public override Guid? MessageId { get; }
+        public override Guid? MessageId => _headerAdapter.MessageId;
 
-        public override Guid? RequestId { get; }
+        public override Guid? RequestId => _headerAdapter.RequestId;
 
-        public override Guid? CorrelationId { get; }
+        public override Guid? CorrelationId => _headerAdapter.CorrelationId;
 
-        public override Guid? ConversationId { get; } = default;
+        public override Guid? ConversationId => _headerAdapter.ConversationId;
 
-        public override Guid? InitiatorId { get; } = default;
+        public override Guid? InitiatorId => _headerAdapter.InitiatorId;
 
-        public override DateTime? ExpirationTime => default;
+        public override DateTime? ExpirationTime => _headerAdapter.ExpirationTime;
 
-        public override Uri SourceAddress { get; } = default;
+        public override Uri SourceAddress => _headerAdapter.SourceAddress;
 
-        public override Uri DestinationAddress { get; } = default;
+        public override Uri DestinationAddress => _headerAdapter.DestinationAddress;
 
-        public override Uri ResponseAddress { get; } = default;
+        public override Uri ResponseAddress => _headerAdapter.ResponseAddress;
 
-        public override Uri FaultAddress { get; } = default;
+        public override Uri FaultAddress => _headerAdapter.FaultAddress;
 
-        public override DateTime? SentTime => default;
+        public override DateTime? SentTime => _headerAdapter.SentTime;
 
-        public override Headers Headers => new RawJsonHeaders(ReceiveContext.TransportHeaders);
+        public override Headers Headers => _headerAdapter.Headers;
 
-        public override HostInfo Host => default;
-        public override IEnumerable<string> SupportedMessageTypes => Enumerable.Empty<string>();
+        public override HostInfo Host => _headerAdapter.Host;
+
+        public override IEnumerable<string> SupportedMessageTypes => _supportedTypes;
 
         public override bool HasMessageType(Type messageType)
         {
@@ -84,26 +90,35 @@ namespace MassTransit.Serialization
                     return true;
                 }
 
-                try
-                {
-                    object obj;
-                    var deserializeType = typeof(T);
-                    if (deserializeType.GetTypeInfo().IsInterface && TypeMetadataCache<T>.IsValidMessageType)
-                        deserializeType = TypeMetadataCache<T>.ImplementationType;
+                var typeUrn = MessageUrn.ForTypeString<T>();
 
-                    using (var jsonReader = _messageToken.CreateReader())
+                if (_options.HasFlag(RawJsonSerializerOptions.AnyMessageType)
+                    || _supportedTypes.Length == 0
+                    || _supportedTypes.Any(x => typeUrn.Equals(x, StringComparison.OrdinalIgnoreCase)))
+                {
+                    try
                     {
-                        obj = _deserializer.Deserialize(jsonReader, deserializeType);
-                    }
+                        object obj;
+                        var deserializeType = typeof(T);
+                        if (deserializeType.GetTypeInfo().IsInterface && TypeMetadataCache<T>.IsValidMessageType)
+                            deserializeType = TypeMetadataCache<T>.ImplementationType;
 
-                    _messageTypes[typeof(T)] = message = new MessageConsumeContext<T>(this, (T)obj);
-                    return true;
+                        using (var jsonReader = _messageToken.CreateReader())
+                        {
+                            obj = _deserializer.Deserialize(jsonReader, deserializeType);
+                        }
+
+                        _messageTypes[typeof(T)] = message = new MessageConsumeContext<T>(this, (T)obj);
+                        return true;
+                    }
+                    catch (Exception exception)
+                    {
+                        LogContext.Warning?.Log(exception, "Failed to deserialize message type: {MessageType}", TypeMetadataCache<T>.ShortName);
+                    }
                 }
-                catch (Exception)
-                {
-                    _messageTypes[typeof(T)] = message = null;
-                    return false;
-                }
+
+                _messageTypes[typeof(T)] = message = null;
+                return false;
             }
         }
     }
