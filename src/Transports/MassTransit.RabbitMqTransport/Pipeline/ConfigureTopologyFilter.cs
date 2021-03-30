@@ -71,6 +71,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     .ConfigureAwait(false);
 
                 RabbitMqLogMessages.DeclareQueue(queue, ok.ConsumerCount, ok.MessageCount);
+
+                await Task.Delay(10).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -86,6 +88,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             await context.ExchangeBind(binding.Destination.ExchangeName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments)
                 .ConfigureAwait(false);
+
+            await Task.Delay(10).ConfigureAwait(false);
         }
 
         static async Task Bind(ModelContext context, ExchangeToQueueBinding binding)
@@ -93,6 +97,8 @@ namespace MassTransit.RabbitMqTransport.Pipeline
             RabbitMqLogMessages.BindToQueue(binding);
 
             await context.QueueBind(binding.Destination.QueueName, binding.Source.ExchangeName, binding.RoutingKey, binding.Arguments).ConfigureAwait(false);
+
+            await Task.Delay(10).ConfigureAwait(false);
         }
 
 

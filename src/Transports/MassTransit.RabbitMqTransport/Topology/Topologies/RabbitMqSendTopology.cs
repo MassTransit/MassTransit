@@ -34,7 +34,7 @@
             return new RabbitMqSendSettings(address);
         }
 
-        public ErrorSettings GetErrorSettings(EntitySettings settings)
+        public ErrorSettings GetErrorSettings(ReceiveSettings settings)
         {
             var errorSettings = new RabbitMqErrorSettings(settings, settings.ExchangeName + "_error");
 
@@ -43,7 +43,7 @@
             return errorSettings;
         }
 
-        public DeadLetterSettings GetDeadLetterSettings(EntitySettings settings)
+        public DeadLetterSettings GetDeadLetterSettings(ReceiveSettings settings)
         {
             var deadLetterSetting = new RabbitMqDeadLetterSettings(settings, settings.ExchangeName + "_skipped");
 
