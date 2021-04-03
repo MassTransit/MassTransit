@@ -1,6 +1,7 @@
 namespace MassTransit.Conductor
 {
     using System;
+    using System.Collections.Generic;
     using Configuration;
     using JobService;
     using MassTransit.Definition;
@@ -12,11 +13,15 @@ namespace MassTransit.Conductor
         public ServiceInstanceOptions()
         {
             EndpointNameFormatter = DefaultEndpointNameFormatter.Instance;
+            _instanceAttributes = new Dictionary<string, string>();
         }
 
         public bool InstanceEndpointEnabled { get; private set; }
         public bool InstanceServiceEndpointEnabled { get; private set; }
         public IEndpointNameFormatter EndpointNameFormatter { get; private set; }
+        public IReadOnlyDictionary<string, string> InstanceAttributes { get => _instanceAttributes; }
+
+        private readonly Dictionary<string, string> _instanceAttributes;
 
         /// <summary>
         /// Create a single instance-specific control endpoint. By default, each service endpoint has
@@ -57,6 +62,16 @@ namespace MassTransit.Conductor
         public ServiceInstanceOptions SetEndpointNameFormatter(IEndpointNameFormatter endpointNameFormatter)
         {
             EndpointNameFormatter = endpointNameFormatter;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Add an instance attribute which can be used for routing using a ServiceDistributionStrategy.
+        /// </summary>
+        public ServiceInstanceOptions AddInstanceAttribute(string key, string value)
+        {
+            _instanceAttributes.Add(key, value);
 
             return this;
         }

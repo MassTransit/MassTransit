@@ -37,7 +37,7 @@ namespace MassTransit
         {
             IServiceInstanceTransportConfigurator<TEndpointConfigurator> transportConfigurator = Cached<TEndpointConfigurator>.Instance;
 
-            var instance = new ServiceInstance();
+            var instance = new ServiceInstance(options.InstanceAttributes);
 
             if (options.InstanceEndpointEnabled)
             {

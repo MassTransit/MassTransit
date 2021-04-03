@@ -1,6 +1,7 @@
 namespace MassTransit.Conductor.Server
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Context;
     using Contexts;
@@ -73,7 +74,7 @@ namespace MassTransit.Conductor.Server
             var serviceInfo = new ServiceEndpointServiceInfo(_serviceAddress.Value);
             _serviceInfo.TrySetResult(serviceInfo);
 
-            var instanceInfo = new ServiceEndpointInstanceInfo(_instance.InstanceId, Started);
+            var instanceInfo = new ServiceEndpointInstanceInfo(_instance.InstanceId, _instance.InstanceAttributes, Started);
             _instanceInfo.TrySetResult(instanceInfo);
 
             try
@@ -161,13 +162,16 @@ namespace MassTransit.Conductor.Server
         class ServiceEndpointInstanceInfo :
             InstanceInfo
         {
-            public ServiceEndpointInstanceInfo(Guid instanceId, DateTime? started)
+            public ServiceEndpointInstanceInfo(Guid instanceId, IReadOnlyDictionary<string, string> instanceAttributes, DateTime? started)
             {
                 InstanceId = instanceId;
+                InstanceAttributes = instanceAttributes;
                 Started = started;
             }
 
             public Guid InstanceId { get; }
+
+            public IReadOnlyDictionary<string, string> InstanceAttributes { get; }
 
             public DateTime? Started { get; }
         }

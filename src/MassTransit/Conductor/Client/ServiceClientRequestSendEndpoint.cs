@@ -36,7 +36,7 @@ namespace MassTransit.Conductor.Client
                 : await _messageClient.OrCanceled(cancellationToken).ConfigureAwait(false);
 
             IRequestSendEndpoint<TMessage> sendEndpoint = await messageClient
-                .GetServiceSendEndpoint(_clientFactoryContext, default, _consumeContext, cancellationToken)
+                .GetServiceSendEndpoint(_clientFactoryContext, values, _consumeContext, cancellationToken)
                 .ConfigureAwait(false);
 
             // TODO need to add ServiceInstanceContext at some point...

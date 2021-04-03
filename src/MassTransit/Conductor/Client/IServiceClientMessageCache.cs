@@ -1,9 +1,11 @@
 namespace MassTransit.Conductor.Client
 {
     using System;
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using Clients;
+    using Contexts;
 
 
     /// <summary>
@@ -15,6 +17,9 @@ namespace MassTransit.Conductor.Client
         where TMessage : class
     {
         Task<IRequestSendEndpoint<TMessage>> GetServiceSendEndpoint(ClientFactoryContext clientFactoryContext, TMessage message,
+            ConsumeContext consumeContext = default, CancellationToken cancellationToken = default);
+
+        Task<IRequestSendEndpoint<TMessage>> GetServiceSendEndpoint(ClientFactoryContext clientFactoryContext, object values,
             ConsumeContext consumeContext = default, CancellationToken cancellationToken = default);
     }
 

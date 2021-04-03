@@ -1,6 +1,7 @@
 namespace MassTransit.Conductor.Client
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
@@ -10,9 +11,7 @@ namespace MassTransit.Conductor.Client
     using Contracts.Conductor;
     using Distribution;
     using GreenPipes.Caching;
-    using GreenPipes.Internals.Extensions;
     using Metadata;
-    using Util;
 
 
     public class ServiceClientMessageCache<TMessage> :
@@ -22,20 +21,26 @@ namespace MassTransit.Conductor.Client
         where TMessage : class
     {
         readonly IClientFactory _clientFactory;
-        readonly IDistributionStrategy<ServiceInstanceContext> _distribution;
+        readonly IDistributionStrategy<ServiceInstanceContext, TMessage> _distribution;
         readonly IServiceInstanceCache _instanceCache;
-        readonly TaskCompletionSource<Uri> _serviceAddress;
 
-        public ServiceClientMessageCache(IClientFactory clientFactory, Guid clientId, IServiceInstanceCache instanceCache)
+        public ServiceClientMessageCache(IClientFactory clientFactory, Guid clientId, IServiceInstanceCache instanceCache, IDistributionStrategy<ServiceInstanceContext, TMessage> distributionStrategy = default)
         {
             _clientFactory = clientFactory;
             _instanceCache = instanceCache;
 
             ClientId = clientId;
 
-            _serviceAddress = TaskUtil.GetTask<Uri>();
+            if (distributionStrategy == default)
+            {
+                //_distribution = new ConsistentHashDistributionStrategy<ServiceInstanceContext>(new Murmur3AUnsafeHashGenerator(), GetHashKey);
+                _distribution = new RoundRobinDistributionStrategy();
+            }
+            else
+            {
+                _distribution = distributionStrategy;
+            }
 
-            _distribution = new ConsistentHashDistributionStrategy<ServiceInstanceContext>(new Murmur3AUnsafeHashGenerator(), GetHashKey);
             _distribution.Init(Enumerable.Empty<ServiceInstanceContext>());
 
             instanceCache.Connect(this);
@@ -63,11 +68,9 @@ namespace MassTransit.Conductor.Client
 
             LogContext.Debug?.Log("Up: {ServiceAddress} {InstanceId}", serviceAddress, instanceId);
 
-            var instanceContext = await _instanceCache.GetOrAdd(instanceId, instance).ConfigureAwait(false);
+            var instanceContext = await _instanceCache.GetOrAdd(instanceId, serviceAddress, instance).ConfigureAwait(false);
 
             _distribution.Add(instanceContext);
-
-            _serviceAddress.TrySetResult(serviceAddress);
         }
 
         public Guid ClientId { get; }
@@ -90,24 +93,36 @@ namespace MassTransit.Conductor.Client
         public async Task<IRequestSendEndpoint<TMessage>> GetServiceSendEndpoint(ClientFactoryContext clientFactoryContext, TMessage message,
             ConsumeContext consumeContext = default, CancellationToken cancellationToken = default)
         {
-            // TODO use the message to generate the hash key
+            var instanceContext = await _distribution.GetNode(message);
+            if (instanceContext == null)
+            {
+                await Link(cancellationToken).ConfigureAwait(false);
 
-            // var correlationId = NewId.NextGuid();
-            //
-            // var endpointInfo = _distribution.GetNode(correlationId.ToByteArray());
-            // if (endpointInfo == null)
-            // {
-            //     await Link(cancellationToken).ConfigureAwait(false);
-            //
-            //     endpointInfo = _distribution.GetNode(correlationId.ToByteArray());
-            // }
+                instanceContext = await _distribution.GetNode(message);
+            }
 
-            var endpointAddress = _serviceAddress.Task.IsCompletedSuccessfully()
-                ? _serviceAddress.Task.Result
-                : await _serviceAddress.Task.ConfigureAwait(false);
+            if (instanceContext == null)
+            {
+                throw new MassTransitException("No nodes available");
+            }
 
             // TODO may want to switch this up so that it includes the InstanceContext is a specific node selected
-            return clientFactoryContext.GetRequestEndpoint<TMessage>(endpointAddress, consumeContext);
+            return clientFactoryContext.GetRequestEndpoint<TMessage>(instanceContext.Endpoint, consumeContext);
+        }
+
+        public async Task<IRequestSendEndpoint<TMessage>> GetServiceSendEndpoint(ClientFactoryContext clientFactoryContext, object values,
+            ConsumeContext consumeContext = default, CancellationToken cancellationToken = default)
+        {
+            // TODO implement proper distrbution here too instead of this workarond
+            var instanceContext = (await _distribution.GetAvailableNodes()).FirstOrDefault();
+
+            if (instanceContext == null)
+            {
+                throw new MassTransitException("No nodes available");
+            }
+
+            // TODO may want to switch this up so that it includes the InstanceContext is a specific node selected
+            return clientFactoryContext.GetRequestEndpoint<TMessage>(instanceContext.Endpoint, consumeContext);
         }
 
         static byte[] GetHashKey(ServiceInstanceContext context)
@@ -127,13 +142,11 @@ namespace MassTransit.Conductor.Client
 
             var instance = response.Message.Instance;
 
-            var instanceContext = await _instanceCache.GetOrAdd(instance.InstanceId, instance).ConfigureAwait(false);
+            var instanceContext = await _instanceCache.GetOrAdd(instance.InstanceId, serviceAddress, instance).ConfigureAwait(false);
 
             _distribution.Add(instanceContext);
 
             LogContext.Debug?.Log("Linked: {ClientId} {MessageType} {ServiceAddress}", ClientId, TypeMetadataCache<TMessage>.ShortName, serviceAddress);
-
-            _serviceAddress.TrySetResult(serviceAddress);
         }
 
 

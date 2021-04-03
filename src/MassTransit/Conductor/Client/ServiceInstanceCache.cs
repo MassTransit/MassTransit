@@ -1,6 +1,7 @@
 namespace MassTransit.Conductor.Client
 {
     using System;
+    using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using System.Threading.Tasks;
     using Contexts;
@@ -21,9 +22,9 @@ namespace MassTransit.Conductor.Client
             _index = _cache.AddIndex("clientId", x => x.InstanceId);
         }
 
-        public Task<ServiceInstanceContext> GetOrAdd(Guid instanceId, InstanceInfo instance)
+        public Task<ServiceInstanceContext> GetOrAdd(Guid instanceId, Uri instanceServiceEndpoint, InstanceInfo instance)
         {
-            return _index.Get(instanceId, id => CreateInstance(instanceId, instance));
+            return _index.Get(instanceId, id => CreateInstance(instanceId, instanceServiceEndpoint, instance));
         }
 
         public void Remove(Guid instanceId)
@@ -36,9 +37,9 @@ namespace MassTransit.Conductor.Client
             return _cache.Connect(observer);
         }
 
-        static Task<ServiceInstanceContext> CreateInstance(Guid instanceId, InstanceInfo instance)
+        static Task<ServiceInstanceContext> CreateInstance(Guid instanceId, Uri instanceServiceEndpoint, InstanceInfo instance)
         {
-            var context = new InstanceContext(instanceId) {Started = instance?.Started};
+            var context = new InstanceContext(instanceId, instanceServiceEndpoint) {Started = instance?.Started};
 
             return Task.FromResult<ServiceInstanceContext>(context);
         }
@@ -49,16 +50,21 @@ namespace MassTransit.Conductor.Client
             ServiceInstanceContext,
             INotifyValueUsed
         {
-            public InstanceContext(Guid instanceId)
+            public InstanceContext(Guid instanceId, Uri endpoint)
             {
                 InstanceId = instanceId;
+                Endpoint = endpoint;
             }
 
             public event Action Used;
 
             public Guid InstanceId { get; }
 
+            public Uri Endpoint { get; set; }
+
             public DateTime? Started { get; set; }
+
+            public IReadOnlyDictionary<string, string> InstanceAttributes => throw new NotImplementedException();
 
             public void NotifySent<T>(SendContext<T> context)
                 where T : class

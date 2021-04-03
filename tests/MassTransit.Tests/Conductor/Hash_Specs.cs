@@ -3,6 +3,7 @@ namespace MassTransit.Tests.Conductor
     using System;
     using System.Linq;
     using System.Text;
+    using System.Threading.Tasks;
     using Contracts.Conductor;
     using MassTransit.Conductor.Distribution;
     using NUnit.Framework;
@@ -12,7 +13,7 @@ namespace MassTransit.Tests.Conductor
     public class An_empty_hash
     {
         [Test]
-        public void Should_initialize_with_the_same_results()
+        public async Task Should_initialize_with_the_same_results()
         {
             InstanceInfo nodeA = new Node {InstanceId = NewId.NextGuid()};
             InstanceInfo nodeB = new Node {InstanceId = NewId.NextGuid()};
@@ -41,18 +42,18 @@ namespace MassTransit.Tests.Conductor
 
             byte[] key = NewId.NextGuid().ToByteArray();
 
-            var resultA = serverA.GetNode(key);
-            var resultB = serverB.GetNode(key);
-            var resultC = serverC.GetNode(key);
+            var resultA = await serverA.GetNode(key);
+            var resultB = await serverB.GetNode(key);
+            var resultC = await serverC.GetNode(key);
 
             Assert.That(resultA.InstanceId, Is.EqualTo(resultB.InstanceId));
             Assert.That(resultA.InstanceId, Is.EqualTo(resultC.InstanceId));
 
             key = Guid.NewGuid().ToByteArray();
 
-            resultA = serverA.GetNode(key);
-            resultB = serverB.GetNode(key);
-            resultC = serverC.GetNode(key);
+            resultA = await serverA.GetNode(key);
+            resultB = await serverB.GetNode(key);
+            resultC = await serverC.GetNode(key);
 
             Assert.That(resultA.InstanceId, Is.EqualTo(resultB.InstanceId));
             Assert.That(resultA.InstanceId, Is.EqualTo(resultC.InstanceId));

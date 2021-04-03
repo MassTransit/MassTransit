@@ -4,10 +4,10 @@ namespace MassTransit.Conductor.Distribution
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
-
+    using System.Threading.Tasks;
 
     public class ConsistentHashDistributionStrategy<T> :
-        IDistributionStrategy<T>
+        IDistributionStrategy<T, object>
         where T : class
     {
         const byte DefaultReplicationCount = 160;
@@ -93,9 +93,14 @@ namespace MassTransit.Conductor.Distribution
             }
         }
 
-        public T GetNode(byte[] data)
+        public virtual Task<T> GetNode(object message)
         {
-            return GetNode((int)_hashGenerator.Hash(data));
+            throw new NotImplementedException();
+
+            // TODO use the message to generate the hash key
+            // var correlationId = NewId.NextGuid();
+
+            // return Task.FromResult(GetNode((int)_hashGenerator.Hash(correlationId.ToByteArray())));
         }
 
         Lazy<int[]> RebuildKeyCache()
@@ -158,6 +163,11 @@ namespace MassTransit.Conductor.Distribution
                 throw new Exception("Something went seriously wrong here");
 
             return end;
+        }
+
+        public virtual Task<IEnumerable<T>> GetAvailableNodes()
+        {
+            return Task.FromResult<IEnumerable<T>>(_circle.Values);
         }
     }
 }

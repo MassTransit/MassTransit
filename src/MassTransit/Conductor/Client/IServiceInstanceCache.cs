@@ -10,7 +10,7 @@ namespace MassTransit.Conductor.Client
     public interface IServiceInstanceCache :
         IConnectCacheValueObserver<ServiceInstanceContext>
     {
-        Task<ServiceInstanceContext> GetOrAdd(Guid instanceId, InstanceInfo instance = default);
+        Task<ServiceInstanceContext> GetOrAdd(Guid instanceId, Uri instanceServiceEndpoint, InstanceInfo instance = default);
 
         void Remove(Guid instanceId);
     }

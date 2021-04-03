@@ -1,13 +1,15 @@
 ﻿namespace MassTransit.Conductor
 {
     using System.Collections.Generic;
+    using System.Threading.Tasks;
 
 
     /// <summary>
     /// A distribution strategy is used to distribute messages across a set of nodes
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IDistributionStrategy<T>
+    /// <typeparam name="TSelector"></typeparam>
+    public interface IDistributionStrategy<T, in TSelector>
     {
         /// <summary>
         /// Adds a range of nodes to the distribution pool
@@ -28,10 +30,15 @@
         void Remove(T node);
 
         /// <summary>
-        /// Returns the node for the given data block
+        /// Returns the node for the given selector
         /// </summary>
-        /// <param name="data">The data block used to select the node</param>
-        /// <returns>The element for the specified data block</returns>
-        T GetNode(byte[] data);
+        /// <param name="data">The data used to select the node</param>
+        /// <returns>The element for the specified selector</returns>
+        Task<T> GetNode(TSelector data);
+
+        /// <summary>
+        /// Returns all nodes that are available and ready to recieve jobs
+        /// </summary>
+        Task<IEnumerable<T>> GetAvailableNodes();
     }
 }
