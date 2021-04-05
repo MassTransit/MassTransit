@@ -35,10 +35,10 @@ namespace MassTransit.EventHubIntegration.Contexts
         IActivePipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<ConnectionContext> context, CancellationToken cancellationToken)
         {
-            return supervisor.AddActiveContext(context, CreateSharedIKafkaConnectionContext(context.Context, cancellationToken));
+            return supervisor.AddActiveContext(context, CreateSharedConnectionContext(context.Context, cancellationToken));
         }
 
-        static async Task<ConnectionContext> CreateSharedIKafkaConnectionContext(Task<ConnectionContext> context, CancellationToken cancellationToken)
+        static async Task<ConnectionContext> CreateSharedConnectionContext(Task<ConnectionContext> context, CancellationToken cancellationToken)
         {
             return context.IsCompletedSuccessfully()
                 ? new SharedConnectionContext(context.Result, cancellationToken)
