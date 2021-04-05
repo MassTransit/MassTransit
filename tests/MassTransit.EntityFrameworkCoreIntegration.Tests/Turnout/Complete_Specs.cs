@@ -191,7 +191,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
                 {
                     x.AddConsumer<CrunchTheNumbersConsumer>();
 
-                    x.AddServiceClient();
                     x.AddRequestClient<SubmitJob<CrunchTheNumbers>>();
 
                     x.AddSagaRepository<JobSaga>()
