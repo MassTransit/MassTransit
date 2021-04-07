@@ -83,6 +83,9 @@
 
         public override IEnumerable<ValidationResult> Validate()
         {
+            if (_settings.PrefetchCount <= 0)
+                yield return this.Failure("PrefetchCount", "must be >= 1");
+
             var queueName = $"{_settings.EntityName}";
 
             if (!AmazonSqsEntityNameValidator.Validator.IsValidEntityName(_settings.EntityName))
