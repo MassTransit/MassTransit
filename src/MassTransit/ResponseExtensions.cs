@@ -30,11 +30,14 @@ namespace MassTransit
         public static bool IsResponseAccepted<T>(this ConsumeContext context, bool defaultIfHeaderNotFound = true)
             where T : class
         {
-            string[] acceptTypes = context.Headers.Get(MessageHeaders.Request.Accept, default(string[]));
+            if (context.ResponseAddress == null)
+                return false;
+
+            var acceptTypes = context.Headers.Get(MessageHeaders.Request.Accept, default(string[]));
             if (acceptTypes == null || acceptTypes.Length <= 0)
                 return defaultIfHeaderNotFound;
 
-            string[] matchingTypeNames = TypeMetadataCache<T>.MessageTypeNames;
+            var matchingTypeNames = TypeMetadataCache<T>.MessageTypeNames;
 
             return acceptTypes.Any(accept => matchingTypeNames.Any(x => x.Equals(accept, StringComparison.OrdinalIgnoreCase)));
         }
