@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Messaging.EventHubs.Processor" Version="5.3.1" />
+    <PackageReference Include="Azure.Messaging.EventHubs.Processor" Version="5.4.0" />
   </ItemGroup>
 
   <ItemGroup>
