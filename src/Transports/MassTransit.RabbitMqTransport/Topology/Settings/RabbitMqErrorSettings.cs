@@ -18,7 +18,7 @@
                 SetExchangeArgument(argument.Key, argument.Value);
 
             foreach (KeyValuePair<string, object> argument in source.QueueArguments)
-                SetExchangeArgument(argument.Key, argument.Value);
+                SetQueueArgument(argument.Key, argument.Value);
         }
 
         public BrokerTopology GetBrokerTopology()
