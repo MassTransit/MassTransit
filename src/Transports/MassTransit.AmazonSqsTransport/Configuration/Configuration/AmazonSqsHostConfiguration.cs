@@ -39,6 +39,13 @@
 
             _hostTopology = new AmazonSqsHostTopology(this, messageNameFormatter, topologyConfiguration);
 
+            ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Handle<AmazonSqsTransportException>();
+
+                x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+            });
+
             _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }
 
@@ -66,18 +73,7 @@
 
         public override IHostTopology HostTopology => _hostTopology;
 
-        public override IRetryPolicy ReceiveTransportRetryPolicy
-        {
-            get
-            {
-                return Retry.CreatePolicy(x =>
-                {
-                    x.Handle<AmazonSqsTransportException>();
-
-                    x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
-                });
-            }
-        }
+        public override IRetryPolicy ReceiveTransportRetryPolicy { get; }
 
         public void ApplyEndpointDefinition(IAmazonSqsReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
