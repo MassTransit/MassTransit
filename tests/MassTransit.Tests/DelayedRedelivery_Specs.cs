@@ -20,9 +20,9 @@ namespace MassTransit.Tests
 
             await Task.WhenAll(_received.Select(x => x.Task));
 
-            Assert.That(_timestamps[1] - _timestamps[0], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1)));
-            Assert.That(_timestamps[2] - _timestamps[1], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2)));
-            Assert.That(_timestamps[3] - _timestamps[2], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(3)));
+            Assert.That(_timestamps[1] - _timestamps[0], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(0.9)));
+            Assert.That(_timestamps[2] - _timestamps[1], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(1.9)));
+            Assert.That(_timestamps[3] - _timestamps[2], Is.GreaterThanOrEqualTo(TimeSpan.FromSeconds(2.9)));
 
             TestContext.Out.WriteLine("Interval: {0}", _timestamps[1] - _timestamps[0]);
             TestContext.Out.WriteLine("Interval: {0}", _timestamps[2] - _timestamps[1]);

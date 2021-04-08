@@ -1,0 +1,128 @@
+name: MassTransit
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: true
+on:
+  push:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'MassTransit.sln'
+      - 'Directory.Build.props'
+      - '**/build.yml'
+  pull_request:
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'MassTransit.sln'
+      - 'Directory.Build.props'
+      - '**/build.yml'
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo
+        ports:
+        - '27017-27019:27017-27019'
+      redis:
+        image: redis
+        ports:
+          - '6379:6379'
+        options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2017-latest
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: "Password12!"
+        ports:
+          - 1433:1433
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: "Password12!"
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      rabbitmq:
+        image: masstransit/rabbitmq:latest
+        ports:
+          - "5672:5672"
+          - "15672:15672" 
+        options: --health-cmd "rabbitmqctl node_health_check" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+  
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+    
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+    
+      - name: Restore NuGet packages
+        run: dotnet restore
+        working-directory: ./
+
+      - name: Build
+        run: dotnet build -c Release --no-restore
+        working-directory: ./
+   
+      - name: Test
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.Tests
+   
+      - name: Test Containers
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.Containers.Tests
+   
+      - name: Test Analyzers
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.Analyzers.Tests
+   
+      - name: Test Quartz
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.QuartzIntegration.Tests
+ 
+      - name: Test Hangfire
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.HangfireIntegration.Tests
+ 
+      - name: Test SignalR
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.SignalR.Tests
+  
+      - name: Test RabbitMQ
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.RabbitMqTransport.Tests
+   
+      - name: Test Redis
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.RedisIntegration.Tests
+
+      - name: Test MongoDB
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.MongoDbIntegration.Tests
+   
+      - name: Test Marten
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.MartenIntegration.Tests
+   
+      - name: Test EntityFrameworkCore
+        run: dotnet test -c Release --no-build --filter "Category!=Flaky&Category!=Integration"
+        working-directory: tests/MassTransit.EntityFrameworkCoreIntegration.Tests
+
+      - name: Test EntityFramework
+        run: dotnet test -c Release --no-build --filter "Category!=Flaky&Category!=Integration"
+        working-directory: tests/MassTransit.EntityFrameworkIntegration.Tests
+   
+      - name: Test NHibernate
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.NHibernateIntegration.Tests
+ 

@@ -7,6 +7,7 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_clustering_nodes_into_a_logical_broker :
         RabbitMqTestFixture
     {
