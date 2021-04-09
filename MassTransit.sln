@@ -137,9 +137,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EventHubIntegra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EventHubIntegration.Tests", "tests\MassTransit.EventHubIntegration.Tests\MassTransit.EventHubIntegration.Tests.csproj", "{24CC1B47-AE01-4871-A939-2BF6EB789860}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Azure.Table", "src\Persistence\MassTransit.Azure.Table\MassTransit.Azure.Table.csproj", "{338E2B7E-4301-4547-9172-4415F739C029}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Azure.Table", "src\Persistence\MassTransit.Azure.Table\MassTransit.Azure.Table.csproj", "{338E2B7E-4301-4547-9172-4415F739C029}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Azure.Table.Tests", "tests\MassTransit.Azure.Table.Tests\MassTransit.Azure.Table.Tests.csproj", "{17E04A9B-5DB5-4857-99CD-E9AF22DA00E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Azure.Table.Tests", "tests\MassTransit.Azure.Table.Tests\MassTransit.Azure.Table.Tests.csproj", "{17E04A9B-5DB5-4857-99CD-E9AF22DA00E4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.EventStoreDbIntegration", "src\Transports\MassTransit.EventStoreDbIntegration\MassTransit.EventStoreDbIntegration.csproj", "{34E600C2-C689-43EC-9B32-58CEA83D4A04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.EventStoreDbIntegration.Tests", "tests\MassTransit.EventStoreDbIntegration.Tests\MassTransit.EventStoreDbIntegration.Tests.csproj", "{797978AB-F7D6-4CAD-989B-D5F793DC485F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -744,6 +748,30 @@ Global
 		{17E04A9B-5DB5-4857-99CD-E9AF22DA00E4}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
 		{17E04A9B-5DB5-4857-99CD-E9AF22DA00E4}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
 		{17E04A9B-5DB5-4857-99CD-E9AF22DA00E4}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
+		{34E600C2-C689-43EC-9B32-58CEA83D4A04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34E600C2-C689-43EC-9B32-58CEA83D4A04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34E600C2-C689-43EC-9B32-58CEA83D4A04}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{34E600C2-C689-43EC-9B32-58CEA83D4A04}.Debug|x86.Build.0 = Debug|Any CPU
+		{34E600C2-C689-43EC-9B32-58CEA83D4A04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34E600C2-C689-43EC-9B32-58CEA83D4A04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34E600C2-C689-43EC-9B32-58CEA83D4A04}.Release|x86.ActiveCfg = Release|Any CPU
+		{34E600C2-C689-43EC-9B32-58CEA83D4A04}.Release|x86.Build.0 = Release|Any CPU
+		{34E600C2-C689-43EC-9B32-58CEA83D4A04}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{34E600C2-C689-43EC-9B32-58CEA83D4A04}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{34E600C2-C689-43EC-9B32-58CEA83D4A04}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{34E600C2-C689-43EC-9B32-58CEA83D4A04}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
+		{797978AB-F7D6-4CAD-989B-D5F793DC485F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{797978AB-F7D6-4CAD-989B-D5F793DC485F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{797978AB-F7D6-4CAD-989B-D5F793DC485F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{797978AB-F7D6-4CAD-989B-D5F793DC485F}.Debug|x86.Build.0 = Debug|Any CPU
+		{797978AB-F7D6-4CAD-989B-D5F793DC485F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{797978AB-F7D6-4CAD-989B-D5F793DC485F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{797978AB-F7D6-4CAD-989B-D5F793DC485F}.Release|x86.ActiveCfg = Release|Any CPU
+		{797978AB-F7D6-4CAD-989B-D5F793DC485F}.Release|x86.Build.0 = Release|Any CPU
+		{797978AB-F7D6-4CAD-989B-D5F793DC485F}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{797978AB-F7D6-4CAD-989B-D5F793DC485F}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{797978AB-F7D6-4CAD-989B-D5F793DC485F}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{797978AB-F7D6-4CAD-989B-D5F793DC485F}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -801,6 +829,8 @@ Global
 		{24CC1B47-AE01-4871-A939-2BF6EB789860} = {F4CD08DB-40C0-4476-A135-DB8E0BCB79F8}
 		{338E2B7E-4301-4547-9172-4415F739C029} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{17E04A9B-5DB5-4857-99CD-E9AF22DA00E4} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
+		{34E600C2-C689-43EC-9B32-58CEA83D4A04} = {F4CD08DB-40C0-4476-A135-DB8E0BCB79F8}
+		{797978AB-F7D6-4CAD-989B-D5F793DC485F} = {F4CD08DB-40C0-4476-A135-DB8E0BCB79F8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43D3A7D5-0945-435E-8D03-1E631E5CDBA8}
