@@ -28,7 +28,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         readonly RabbitMqReceiveEndpointContext _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
-        readonly ChannelExecutor _executor;
         readonly ModelContext _model;
         readonly ConcurrentDictionary<ulong, RabbitMqReceiveContext> _pending;
         readonly ReceiveSettings _receiveSettings;
@@ -53,8 +52,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
 
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
-
-            _executor = new ChannelExecutor(context.PrefetchCount, context.ConcurrentMessageLimit ?? context.PrefetchCount);
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
 
@@ -183,7 +180,7 @@ namespace MassTransit.RabbitMqTransport.Pipeline
         {
             var bodyBytes = body.ToArray();
 
-            _executor.PushWithWait(async () =>
+            Task.Run(async () =>
             {
                 LogContext.Current = _context.LogContext;
 
@@ -263,10 +260,6 @@ namespace MassTransit.RabbitMqTransport.Pipeline
                     pendingContext.Cancel();
 
                 throw;
-            }
-            finally
-            {
-                await _executor.DisposeAsync().ConfigureAwait(false);
             }
         }
 
