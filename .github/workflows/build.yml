@@ -1,5 +1,6 @@
 name: MassTransit
 env:
+  MASSTRANSIT_VERSION: 7.1.8
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: true
 on:
@@ -20,18 +21,207 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-linux:
+  compile:
+    name: Compile and Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Restore NuGet packages
+        run: dotnet restore
+        working-directory: ./
+
+      - name: Build
+        run: dotnet build -c Release --no-restore
+        working-directory: ./
+
+      - name: Test
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.Tests
+
+      - name: Test Analyzers
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.Analyzers.Tests
+
+  test-containers:
+    name: Container Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      # - name: Test Containers
+      #   uses: zyborg/dotnet-tests-report@v1
+      #   with:
+      #     project_path: tests/MassTransit.Containers.Tests
+      #     report_name: container_tests
+      #     report_title: Container Tests
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Test Containers
+        run: dotnet test -c Release --filter Category!=Flaky
+        working-directory: tests/MassTransit.Containers.Tests
+  test-activemq:
+    name: "Transports: ActiveMQ"
     runs-on: ubuntu-latest
     services:
-      mongo:
-        image: mongo
+      activemq:
+        image: masstransit/activemq:latest
         ports:
-        - '27017-27019:27017-27019'
-      redis:
-        image: redis
+          - "61616:61616"
+          - "8161:8161"
+        #options: --health-cmd "rabbitmqctl node_health_check" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test ActiveMQ
+        run: dotnet test -c Release --filter Category!=Flaky
+        working-directory: tests/MassTransit.ActiveMqTransport.Tests
+  test-azure-service-bus:
+    name: "Transports: Azure Service Bus"
+    if: false # too flaky at this point
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test Azure Service Bus
+        env:
+          MT_ASB_KEYVALUE: ${{ secrets.AZURE_SERVICEBUS }}
+          MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
+        run: dotnet test -c Release --filter Category!=Flaky
+        working-directory: tests/MassTransit.Azure.ServiceBus.Core.Tests
+  test-rabbitmq:
+    name: "Transports: RabbitMQ"
+    runs-on: ubuntu-latest
+    services:
+      rabbitmq:
+        image: masstransit/rabbitmq:latest
         ports:
-          - '6379:6379'
-        options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+          - "5672:5672"
+          - "15672:15672"
+        options: --health-cmd "rabbitmqctl node_health_check" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test RabbitMQ
+        run: dotnet test -c Release --filter Category!=Flaky
+        working-directory: tests/MassTransit.RabbitMqTransport.Tests
+  test-sqs:
+    name: "Transports: SQS"
+    runs-on: ubuntu-latest
+    services:
+      localstack:
+        image: localstack/localstack
+        ports:
+          - "4566:4566"
+          - "4571:4571"
+          - "8080:8080"
+        options: --health-cmd "curl --fail http://localhost:4566/health || exit 1" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test SQS
+        run: dotnet test -c Release --filter Category!=Flaky
+        working-directory: tests/MassTransit.AmazonSqsTransport.Tests
+  test-azure-table:
+    name: "Storage: Azure Table"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test Azure Table
+        env:
+          MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
+        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
+        working-directory: tests/MassTransit.Azure.Table.Tests
+  test-cosmosdb:
+    name: "Storage: CosmosDB"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test CosmosDB
+        env:
+          MT_COSMOS_ENDPOINT: ${{ secrets.AZURE_COSMOSENDPOINT }}
+          MT_COSMOS_KEY: ${{ secrets.AZURE_COSMOSKEY }}
+        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
+        working-directory: tests/MassTransit.Azure.Cosmos.Tests
+  test-dapper:
+    name: "Storage: Dapper"
+    runs-on: ubuntu-latest
+    services:
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2017-latest
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: "Password12!"
+        ports:
+          - 1433:1433
+    env:
+      # otherwise the client barks
+      DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: false
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test Dapper
+        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
+        working-directory: tests/MassTransit.DapperIntegration.Tests
+  test-entity-framework:
+    name: "Storage: EntityFramework"
+    runs-on: ubuntu-latest
+    services:
       mssql:
         image: mcr.microsoft.com/mssql/server:2017-latest
         env:
@@ -46,83 +236,522 @@ jobs:
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
-      rabbitmq:
-        image: masstransit/rabbitmq:latest
-        ports:
-          - "5672:5672"
-          - "15672:15672" 
-        options: --health-cmd "rabbitmqctl node_health_check" --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      # otherwise the client barks
+      DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: false
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-  
-      - name: Install .NET Core SDK
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '5.0.x'
-    
+
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
-    
-      - name: Restore NuGet packages
-        run: dotnet restore
-        working-directory: ./
 
-      - name: Build
-        run: dotnet build -c Release --no-restore
-        working-directory: ./
-   
-      - name: Test
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.Tests
-   
-      - name: Test Containers
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.Containers.Tests
-   
-      - name: Test Analyzers
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.Analyzers.Tests
-   
-      - name: Test Quartz
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.QuartzIntegration.Tests
- 
-      - name: Test Hangfire
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.HangfireIntegration.Tests
- 
-      - name: Test SignalR
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.SignalR.Tests
-  
-      - name: Test RabbitMQ
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.RabbitMqTransport.Tests
-   
-      - name: Test Redis
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.RedisIntegration.Tests
-
-      - name: Test MongoDB
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.MongoDbIntegration.Tests
-   
-      - name: Test Marten
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
-        working-directory: tests/MassTransit.MartenIntegration.Tests
-   
       - name: Test EntityFrameworkCore
-        run: dotnet test -c Release --no-build --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.EntityFrameworkCoreIntegration.Tests
 
       - name: Test EntityFramework
-        run: dotnet test -c Release --no-build --filter "Category!=Flaky&Category!=Integration"
+        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.EntityFrameworkIntegration.Tests
-   
+  test-marten:
+    name: "Storage: Marten"
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: "Password12!"
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test Marten
+        run: dotnet test -c Release --filter Category!=Flaky
+        working-directory: tests/MassTransit.MartenIntegration.Tests
+  test-mongo:
+    name: "Storage: MongoDB"
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo
+        ports:
+        - '27017-27019:27017-27019'
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test MongoDB
+        run: dotnet test -c Release --filter Category!=Flaky
+        working-directory: tests/MassTransit.MongoDbIntegration.Tests
+  test-nhibernate:
+    name: "Storage: NHibernate"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
       - name: Test NHibernate
-        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        run: dotnet test -c Release --filter Category!=Flaky
         working-directory: tests/MassTransit.NHibernateIntegration.Tests
- 
+  test-redis:
+    name: "Storage: Redis"
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        ports:
+          - '6379:6379'
+        options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test Redis
+        run: dotnet test -c Release --filter Category!=Flaky
+        working-directory: tests/MassTransit.RedisIntegration.Tests
+  test-hangfire:
+    name: "Scheduler: Hangfire"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test Hangfire
+        run: dotnet test -c Release --filter Category!=Flaky
+        working-directory: tests/MassTransit.HangfireIntegration.Tests
+  test-quartz:
+    name: "Scheduler: Quartz"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test Quartz
+        run: dotnet test -c Release --filter Category!=Flaky
+        working-directory: tests/MassTransit.QuartzIntegration.Tests
+  test-eventhub:
+    name: "Rider: EventHub"
+    runs-on: ubuntu-latest
+    if: false # turned off for flakey
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test EventHub
+        run: dotnet test -c Release --filter Category!=Flaky
+        env:
+          MT_EH_NAMESPACE: ${{ secrets.AZURE_EVENTHUB }}
+          MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
+        working-directory: tests/MassTransit.EventHubIntegration.Tests
+  test-kafka:
+    name: "Rider: Kafka"
+    runs-on: ubuntu-latest
+    if: false # turned off for flakey
+    services:
+      zookeeper:
+        image: confluentinc/cp-zookeeper:6.0.1
+        ports:
+          - "2181:2181"
+        env:
+          ZOOKEEPER_CLIENT_PORT: 2181
+          ZOOKEEPER_TICK_TIME: 2000
+      broker:
+        image: confluentinc/cp-kafka:6.0.1
+        ports:
+          - "29092:29092"
+          - "9092:9092"
+          - "9101:9101"
+        env:
+          KAFKA_BROKER_ID: 1
+          KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+          KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+          KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+          KAFKA_JMX_PORT: 9101
+          KAFKA_JMX_HOSTNAME: localhost
+          ALLOW_PLAINTEXT_LISTENER: "yes"
+      schema-registry:
+        image: confluentinc/cp-schema-registry:6.0.1
+        ports:
+          - "8081:8081"
+        env:
+          SCHEMA_REGISTRY_HOST_NAME: schema-registry
+          SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker:29092'
+          SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test Kafka
+        run: dotnet test -c Release --filter Category!=Flaky
+        working-directory: tests/MassTransit.KafkaIntegration.Tests
+
+  test-signalr:
+    name: SignalR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test SignalR
+        run: dotnet test -c Release --filter Category!=Flaky
+        working-directory: tests/MassTransit.SignalR.Tests
+  calc-version:
+    name: Calculate Version
+    runs-on: ubuntu-latest
+    needs:
+      - compile
+      - test-containers
+      - test-activemq
+      # - test-azure-service-bus
+      - test-rabbitmq
+      - test-sqs
+      - test-azure-table
+      - test-cosmosdb
+      - test-dapper
+      - test-entity-framework
+      - test-marten
+      - test-mongo
+      - test-nhibernate
+      - test-redis
+      - test-hangfire
+      - test-quartz
+      # - test-eventhub
+      # - test-kafka
+      - test-signalr
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - id: v
+        run: |
+          if [ "${{ github.ref }}" = 'refs/heads/master' ]; then
+            echo "::set-output version=${MASSTRANSIT_VERSION}"
+          else
+            echo "::set-output version=${MASSTRANSIT_VERSION}-develop.${{ github.run_number }}"
+          fi
+
+  publish:
+    name: Publish NuGets
+    runs-on: ubuntu-latest
+    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') && github.repository == 'MassTransit/MassTransit' && success()
+    needs:
+      - calc-version
+    steps:
+      - name: Publish MassTransit
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/MassTransit.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.Analyzers
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/MassTransit.Analyzers.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.Interop.NServiceBus
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/MassTransit.Interop.NServiceBus.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.PrometheusIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/MassTransit.PrometheusIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.SignalR
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/MassTransit.SignalR.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.TestFramework
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/MassTransit.TestFramework.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.AspNetCoreIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/MassTransit.AspNetCoreIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.AutofacIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Containers/MassTransit.AutofacIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.ExtensionsDependencyInjectionIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Containers/MassTransit.ExtensionsDependencyInjectionIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.SimpleInjectorIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Containers/MassTransit.SimpleInjectorIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.StructureMapIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Containers/MassTransit.StructureMapIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.WindsorIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Containers/MassTransit.WindsorIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.Azure.Cosmos
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Persistence/MassTransit.Azure.Cosmos.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.Azure.Storage
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Persistence/MassTransit.Azure.Storage.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.Azure.Table
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Persistence/MassTransit.Azure.Table.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.Azure.Cosmos
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Persistence/MassTransit.Azure.Cosmos.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.DapperIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Persistence/MassTransit.DapperIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.EntityFrameworkCoreIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Persistence/MassTransit.EntityFrameworkCoreIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.EntityFrameworkIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Persistence/MassTransit.EntityFrameworkIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.MartenIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Persistence/MassTransit.MartenIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.MongoDbIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Persistence/MassTransit.MongoDbIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.NHibernateIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Persistence/MassTransit.NHibernateIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.RedisIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Persistence/MassTransit.RedisIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.HangfireIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Scheduling/MassTransit.HangfireIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.QuartzIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Scheduling/MassTransit.QuartzIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.ActiveMqTransport
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Transports/MassTransit.ActiveMqTransport.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.AmazonSqsTransport
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Transports/MassTransit.AmazonSqsTransport.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.Azure.ServiceBus.Core
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Transports/MassTransit.Azure.ServiceBus.Core.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.EventHubIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Transports/MassTransit.EventHubIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.KafkaIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Transports/MassTransit.KafkaIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.RabbitMqTransport
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Transports/MassTransit.RabbitMqTransport.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.WebJobs.EventHubsIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Transports/MassTransit.WebJobs.EventHubsIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Publish MassTransit.WebJobs.ServiceBusIntegration
+        uses: brandedoutcast/publish-nuget@v2.5.2
+        with:
+          PROJECT_FILE_PATH: src/Transports/MassTransit.WebJobs.ServiceBusIntegration.csproj
+          VERSION_STATIC: ${{ needs.calc-version.outputs.version }}
+          TAG_COMMIT: false
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+

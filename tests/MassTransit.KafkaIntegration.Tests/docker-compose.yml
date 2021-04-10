@@ -32,6 +32,13 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_JMX_PORT: 9101
       KAFKA_JMX_HOSTNAME: localhost
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    healthcheck:
+      test:
+        ["CMD", "kafka-topics.sh", "--list", "--zookeeper", "zookeeper:2181"]
+      interval: 30s
+      timeout: 10s
+      retries: 4
 
   schema-registry:
     image: confluentinc/cp-schema-registry:6.0.1
