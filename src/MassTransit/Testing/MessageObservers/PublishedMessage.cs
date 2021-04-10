@@ -1,6 +1,7 @@
 namespace MassTransit.Testing.MessageObservers
 {
     using System;
+    using GreenPipes.Internals.Extensions;
 
 
     public class PublishedMessage<T> :
@@ -13,15 +14,19 @@ namespace MassTransit.Testing.MessageObservers
         {
             _context = context;
             Exception = exception;
+
+            StartTime = context.SentTime ?? DateTime.UtcNow;
+            ElapsedTime = DateTime.UtcNow - StartTime;
         }
 
         Guid? IAsyncListElement.ElementId => _context.MessageId;
-
         SendContext IPublishedMessage.Context => _context;
+        public DateTime StartTime { get; }
+        public TimeSpan ElapsedTime { get; }
         public Exception Exception { get; }
         public Type MessageType => typeof(T);
+        public string ShortTypeName => TypeCache<T>.ShortName;
         object IPublishedMessage.MessageObject => _context.Message;
-
         PublishContext<T> IPublishedMessage<T>.Context => _context;
     }
 }
