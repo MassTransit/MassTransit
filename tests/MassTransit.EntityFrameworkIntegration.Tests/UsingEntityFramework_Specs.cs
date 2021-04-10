@@ -104,7 +104,7 @@
         public When_using_EntityFramework()
         {
             _sagaDbContextFactory = new DelegateSagaDbContextFactory<ShoppingChore>(
-                () => new ShoppingChoreSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+                () => new ShoppingChoreSagaDbContext(LocalDbConnectionStringProvider.GetLocalDbConnectionString()));
 
             _repository = new Lazy<ISagaRepository<ShoppingChore>>(() => EntityFrameworkSagaRepository<ShoppingChore>.CreatePessimistic(_sagaDbContextFactory));
         }

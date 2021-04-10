@@ -1,4 +1,4 @@
-namespace MassTransit.MartenIntegration.Tests
+namespace MassTransit.DapperIntegration.Tests
 {
     namespace ContainerTests
     {
@@ -7,8 +7,6 @@ namespace MassTransit.MartenIntegration.Tests
         using Automatonymous;
         using Dapper;
         using Dapper.Contrib.Extensions;
-        using DapperIntegration;
-        using DapperIntegration.Tests;
         using GreenPipes;
         using Microsoft.Data.SqlClient;
         using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +31,7 @@ namespace MassTransit.MartenIntegration.Tests
             }
 
             [Test]
+            [Category("Flaky")]
             public async Task Should_work_as_expected()
             {
                 Task<ConsumeContext<TestStarted>> started = await ConnectPublishHandler<TestStarted>();

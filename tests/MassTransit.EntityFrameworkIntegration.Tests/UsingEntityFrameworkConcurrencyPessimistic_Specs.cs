@@ -129,7 +129,7 @@
         public When_using_EntityFrameworkConcurrencyPessimistic()
         {
             _sagaDbContextFactory = new DelegateSagaDbContextFactory<ChoirStatePessimistic>(() =>
-                new ChoirStatePessimisticSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+                new ChoirStatePessimisticSagaDbContext(LocalDbConnectionStringProvider.GetLocalDbConnectionString()));
             _repository = new Lazy<ISagaRepository<ChoirStatePessimistic>>(() =>
                 EntityFrameworkSagaRepository<ChoirStatePessimistic>.CreatePessimistic(_sagaDbContextFactory));
         }
