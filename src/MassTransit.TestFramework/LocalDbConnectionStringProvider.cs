@@ -1,6 +1,7 @@
-﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests
+namespace MassTransit.TestFramework
 {
-    using System;
+     using System;
+    using System.Collections.Generic;
     using Microsoft.Data.SqlClient;
 
 
@@ -13,6 +14,7 @@
         static readonly string[] _possibleLocalDbConnectionStrings =
         {
             @"Server=tcp:localhost;Persist Security Info=False;User ID=sa;Password=Password12!;Encrypt=False;TrustServerCertificate=True;", // the linux mssql 2017 installed on appveyor
+            @"Server=tcp:mssql;Persist Security Info=False;User ID=sa;Password=Password12!;Encrypt=False;TrustServerCertificate=True;", // the linux mssql 2017 installed on gha
             @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;", // the localdb installed with VS 2015
             @"Data Source=(LocalDb)\ProjectsV12;Integrated Security=True;", // the localdb with VS 2013
             @"Data Source=(LocalDb)\v11.0;Integrated Security=True;" // the older version of localdb
@@ -29,6 +31,7 @@
             if (!string.IsNullOrWhiteSpace(_connectionString))
                 return _connectionString + "Initial Catalog=" + initialCatalog;
 
+            var exceptions = new List<Exception>();
             lock (_lockConnectionString)
             {
                 if (!string.IsNullOrWhiteSpace(_connectionString))
@@ -48,17 +51,19 @@
                             break;
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         // Swallow
+                        exceptions.Add(ex);
                     }
                 }
 
                 // If we looped through all possible localdb connection strings and didn't find one, we fail.
                 if (string.IsNullOrWhiteSpace(_connectionString))
                 {
-                    throw new InvalidOperationException(
-                        "Couldn't connect to any of the LocalDB Databases. You might have a version installed that is not in the list. Please check the list and modify as necessary");
+                    exceptions.Insert(0, new InvalidOperationException(
+                        "Couldn't connect to any of the LocalDB Databases. You might have a version installed that is not in the list. Please check the list and modify as necessary"));
+                    throw new AggregateException(exceptions);
                 }
             }
 

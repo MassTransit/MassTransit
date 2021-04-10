@@ -3,6 +3,7 @@
     using System;
     using System.Reflection;
     using Microsoft.EntityFrameworkCore;
+    using TestFramework;
 
 
     public class SqlServerResiliencyTestDbParameters :

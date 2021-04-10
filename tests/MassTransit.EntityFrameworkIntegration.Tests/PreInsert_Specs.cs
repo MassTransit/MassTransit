@@ -139,7 +139,7 @@
             public When_pre_inserting_the_state_machine_instance_using_ef()
             {
                 ISagaDbContextFactory<Instance> sagaDbContextFactory = new DelegateSagaDbContextFactory<Instance>(
-                    () => new InstanceSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+                    () => new InstanceSagaDbContext(LocalDbConnectionStringProvider.GetLocalDbConnectionString()));
 
                 _repository = EntityFrameworkSagaRepository<Instance>.CreatePessimistic(sagaDbContextFactory);
             }
@@ -228,7 +228,7 @@
             public When_pre_inserting_in_an_invalid_state_using_ef()
             {
                 var sagaDbContextFactory =
-                    new DelegateSagaDbContextFactory<Instance>(() => new InstanceSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+                    new DelegateSagaDbContextFactory<Instance>(() => new InstanceSagaDbContext(LocalDbConnectionStringProvider.GetLocalDbConnectionString()));
 
                 _repository = EntityFrameworkSagaRepository<Instance>.CreatePessimistic(sagaDbContextFactory);
             }

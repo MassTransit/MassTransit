@@ -101,6 +101,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Publishing_an_encrypted_message_to_an_endpoint :
         AzureServiceBusTestFixture
     {

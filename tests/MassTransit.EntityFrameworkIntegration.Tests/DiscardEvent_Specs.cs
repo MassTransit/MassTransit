@@ -84,7 +84,7 @@
             });
 
             _sagaDbContextFactory = new DelegateSagaDbContextFactory<SimpleState>(() =>
-                new SimpleStateSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+                new SimpleStateSagaDbContext(LocalDbConnectionStringProvider.GetLocalDbConnectionString()));
 
             _simpleStateRepository = new Lazy<ISagaRepository<SimpleState>>(() =>
                 EntityFrameworkSagaRepository<SimpleState>.CreatePessimistic(_sagaDbContextFactory));
