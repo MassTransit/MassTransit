@@ -71,35 +71,35 @@ install:
       Start-Process -FilePath .\startCosmosDb.cmd
       .\waitforport.ps1 -port 8081 -maxAttempts 4
 
-deploy:
-- provider: NuGet
-  name: PrePrerelease
-  symbol_server: https://www.nuget.org
-  artifact: NuGet, Symbols
-  api_key:
-    secure: rkQJpJebuP2jux5eZQLIiNSXs0NZmbC9s372eNosloj77PkdBQbLgMUYpzjn5lLE
-  on:
-    branch: vnext
-- provider: NuGet
-  name: Prerelease
-  symbol_server: https://www.nuget.org
-  artifact: NuGet, Symbols
-  api_key:
-    secure: rkQJpJebuP2jux5eZQLIiNSXs0NZmbC9s372eNosloj77PkdBQbLgMUYpzjn5lLE
-  on:
-    branch: develop
-- provider: NuGet
-  name: Release
-  symbol_server: https://www.nuget.org
-  artifact: NuGet, Symbols
-  api_key:
-    secure: rkQJpJebuP2jux5eZQLIiNSXs0NZmbC9s372eNosloj77PkdBQbLgMUYpzjn5lLE
-  on:
-    branch: master
+# deploy:
+# - provider: NuGet
+#   name: PrePrerelease
+#   symbol_server: https://www.nuget.org
+#   artifact: NuGet, Symbols
+#   api_key:
+#     secure: rkQJpJebuP2jux5eZQLIiNSXs0NZmbC9s372eNosloj77PkdBQbLgMUYpzjn5lLE
+#   on:
+#     branch: vnext
+# - provider: NuGet
+#   name: Prerelease
+#   symbol_server: https://www.nuget.org
+#   artifact: NuGet, Symbols
+#   api_key:
+#     secure: rkQJpJebuP2jux5eZQLIiNSXs0NZmbC9s372eNosloj77PkdBQbLgMUYpzjn5lLE
+#   on:
+#     branch: develop
+# - provider: NuGet
+#   name: Release
+#   symbol_server: https://www.nuget.org
+#   artifact: NuGet, Symbols
+#   api_key:
+#     secure: rkQJpJebuP2jux5eZQLIiNSXs0NZmbC9s372eNosloj77PkdBQbLgMUYpzjn5lLE
+#   on:
+#     branch: master
 
-notifications:
-- provider: Webhook
-  url: https://webhooks.gitter.im/e/27919bcbf1f770b0befd
-  on_build_success: true
-  on_build_failure: true
-  on_build_status_changed: true
+# notifications:
+# - provider: Webhook
+#   url: https://webhooks.gitter.im/e/27919bcbf1f770b0befd
+#   on_build_success: true
+#   on_build_failure: true
+#   on_build_status_changed: true
