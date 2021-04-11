@@ -18,7 +18,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         readonly EventRecord _eventRecord;
         readonly IProcessorLockContext _lockContext;
         readonly bool _isAllStream;
-        readonly IMetadataDeserializer _metadataDeserializer;
+        readonly IHeadersDeserializer _metadataDeserializer;
         byte[] _body;
         byte[] _metadata;
 
@@ -27,7 +27,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
             ReceiveEndpointContext receiveEndpointContext,
             IProcessorLockContext lockContext,
             bool isAllStream,
-            IMetadataDeserializer metadataDeserializer)
+            IHeadersDeserializer metadataDeserializer)
             : base(false, receiveEndpointContext)
         {
             _resolvedEvent = resolvedEvent;

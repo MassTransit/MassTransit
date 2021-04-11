@@ -11,13 +11,13 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         IPipeContextFactory<ProducerContext>
     {
         readonly IConnectionContextSupervisor _contextSupervisor;
-        readonly StreamCategory _streamCategory;
+        readonly string _streamName;
         readonly IMessageSerializer _messageSerializer;
 
-        public ProducerContextFactory(IConnectionContextSupervisor contextSupervisor, StreamCategory streamCategory, IMessageSerializer messageSerializer)
+        public ProducerContextFactory(IConnectionContextSupervisor contextSupervisor, string streamName, IMessageSerializer messageSerializer)
         {
             _contextSupervisor = contextSupervisor;
-            _streamCategory = streamCategory;
+            _streamName = streamName;
             _messageSerializer = messageSerializer;
         }
 

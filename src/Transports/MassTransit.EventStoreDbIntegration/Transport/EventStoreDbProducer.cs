@@ -46,9 +46,8 @@ namespace MassTransit.EventStoreDbIntegration
         public Task Produce<T>(IEnumerable<T> messages, IPipe<EventStoreDbSendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            //var sendPipe = new BatchSendPipe<T>(messages, _context, pipe, cancellationToken);
-            //return _context.ProducerContextSupervisor.Send(sendPipe, cancellationToken);
-            throw new NotImplementedException();
+            var sendPipe = new BatchSendPipe<T>(messages, _context, pipe, cancellationToken);
+            return _context.ProducerContextSupervisor.Send(sendPipe, cancellationToken);
         }
 
         public Task Produce<T>(object values, CancellationToken cancellationToken = default)
@@ -142,11 +141,16 @@ namespace MassTransit.EventStoreDbIntegration
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(sendContext).ConfigureAwait(false);
 
-                    //var eventData = new EventData(sendContext.Body);
+                    sendContext.Headers.Set("ClrType", typeof(T).FullName);
 
-                    //eventData.Properties.Set(sendContext.Headers);
+                    var eventData = new EventData(
+                        Uuid.FromGuid(sendContext.MessageId.Value),
+                        typeof(T).Name,
+                        sendContext.Body,
+                        context.HeadersSerializer.Serialize(sendContext),
+                        sendContext.ContentType.ToString());
 
-                    //await context.Produce(new[] { eventData }, options, sendContext.CancellationToken).ConfigureAwait(false);
+                    await context.Produce(sendContext.StreamName, new[] { eventData }, sendContext.CancellationToken).ConfigureAwait(false);
 
                     sendContext.LogSent();
                     activity.AddSendContextHeadersPostSend(sendContext);
@@ -160,6 +164,111 @@ namespace MassTransit.EventStoreDbIntegration
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.SendFault(sendContext, exception).ConfigureAwait(false);
+
+                    throw;
+                }
+                finally
+                {
+                    activity?.Stop();
+                }
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
+        }
+
+
+        class BatchSendPipe<T> :
+            IPipe<ProducerContext>
+            where T : class
+        {
+            readonly CancellationToken _cancellationToken;
+            readonly EventStoreDbSendTransportContext _context;
+            readonly IEnumerable<T> _messages;
+            readonly IPipe<EventStoreDbSendContext<T>> _pipe;
+
+            public BatchSendPipe(IEnumerable<T> messages, EventStoreDbSendTransportContext context, IPipe<EventStoreDbSendContext<T>> pipe,
+                CancellationToken cancellationToken)
+            {
+                _messages = messages;
+                _context = context;
+                _pipe = pipe;
+                _cancellationToken = cancellationToken;
+            }
+
+            public async Task Send(ProducerContext context)
+            {
+                if (_messages == null)
+                    throw new ArgumentNullException(nameof(_messages));
+
+                LogContext.SetCurrentIfNull(_context.LogContext);
+
+                EventStoreDbMessageSendContext<T>[] contexts = _messages
+                    .Select(x => new EventStoreDbMessageSendContext<T>(x, _cancellationToken)
+                    {
+                        Serializer = context.Serializer,
+                        DestinationAddress = _context.EndpointAddress
+                    })
+                    .ToArray();
+
+                if (contexts.Length == 0)
+                    return;
+
+                NewId[] ids = NewId.Next(contexts.Length);
+
+                async Task SendInner(EventStoreDbMessageSendContext<T> c, int idx)
+                {
+                    await _context.SendPipe.Send(c).ConfigureAwait(false);
+
+                    if (_pipe.IsNotEmpty())
+                        await _pipe.Send(c).ConfigureAwait(false);
+
+                    c.SourceAddress ??= _context.HostAddress;
+                    c.ConversationId ??= ids[idx].ToGuid();
+                }
+
+                await Task.WhenAll(contexts.Select(SendInner)).ConfigureAwait(false);
+
+                var sendContext = contexts[0];
+
+                StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(sendContext);
+                try
+                {
+                    if (_context.SendObservers.Count > 0)
+                        await Task.WhenAll(contexts.Select(c => _context.SendObservers.PreSend(c))).ConfigureAwait(false);
+
+                    var contentType = sendContext.ContentType.ToString();
+                    var eventType = typeof(T);
+                    var eventDataBatch = new List<EventData>();
+
+                    for (int i = 0; i < contexts.Length; i++)
+                    {
+                        var currSendContext = contexts[i];
+                        currSendContext.Headers.Set("ClrType", eventType.FullName);
+
+                        eventDataBatch.Add(new EventData(
+                            Uuid.FromGuid(currSendContext.MessageId.Value),
+                            eventType.Name,
+                            currSendContext.Body,
+                            context.HeadersSerializer.Serialize(currSendContext),
+                            contentType));
+                    }
+
+                    await context.Produce(sendContext.StreamName, eventDataBatch, sendContext.CancellationToken).ConfigureAwait(false);
+
+                    sendContext.LogSent();
+                    activity.AddSendContextHeadersPostSend(sendContext);
+
+                    if (_context.SendObservers.Count > 0)
+                        await Task.WhenAll(contexts.Select(c => _context.SendObservers.PostSend(c))).ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    sendContext.LogFaulted(exception);
+
+                    if (_context.SendObservers.Count > 0)
+                        await Task.WhenAll(contexts.Select(c => _context.SendObservers.SendFault(c, exception))).ConfigureAwait(false);
 
                     throw;
                 }

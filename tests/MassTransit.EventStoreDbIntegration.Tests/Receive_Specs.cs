@@ -44,7 +44,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                         //esdb.UseExistingClient();
                         //esdb.UseEventStoreDBCheckpointStore();
 
-                        esdb.ReceiveEndpoint(StreamCategory.AllStream, "MassTransit Test Subscription", c =>
+                        esdb.StreamEndpoint(StreamCategory.AllStream, "MassTransit Test Subscription", c =>
                         {
                             c.ConfigureConsumer<EventStoreDbMessageConsumer>(context);
                         });

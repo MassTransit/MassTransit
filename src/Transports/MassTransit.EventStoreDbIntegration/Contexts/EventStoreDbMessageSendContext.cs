@@ -8,12 +8,12 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         EventStoreDbSendContext<T>
         where T : class
     {
-        public EventStoreDbMessageSendContext(T message, CancellationToken cancellationToken)
+        public EventStoreDbMessageSendContext(string streamName, T message, CancellationToken cancellationToken)
             : base(message, cancellationToken)
         {
-
+            StreamName = streamName;
         }
 
-        public StreamName StreamName { get; set; }
+        public string StreamName { get; set; }
     }
 }

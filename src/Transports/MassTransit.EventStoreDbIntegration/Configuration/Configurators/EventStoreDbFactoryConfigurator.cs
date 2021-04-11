@@ -84,7 +84,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _hostSettings.DefaultCredentials = null;
         }
 
-        public void ReceiveEndpoint(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbReceiveEndpointConfigurator> configure)
+        public void StreamEndpoint(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbReceiveEndpointConfigurator> configure)
         {
             var specification = CreateSpecification(streamCategory, subscriptionName, configure);
             _endpoints.Add(specification);

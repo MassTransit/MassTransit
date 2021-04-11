@@ -37,7 +37,7 @@ namespace MassTransit.EventStoreDbIntegration
         /// <param name="streamCategory">The stream category to subscribe to.</param>
         /// <param name="subscriptionName">Subscription name.</param>
         /// <param name="configure"></param>
-        void ReceiveEndpoint(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbReceiveEndpointConfigurator> configure);
+        void StreamEndpoint(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbReceiveEndpointConfigurator> configure);
 
         /// <summary>
         /// Sets the outbound message serializer

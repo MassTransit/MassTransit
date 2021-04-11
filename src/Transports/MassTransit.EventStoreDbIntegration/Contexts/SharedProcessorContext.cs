@@ -35,7 +35,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         public ReceiveSettings ReceiveSettings => _context.ReceiveSettings;
         public ICheckpointStore CheckpointStore => _context.CheckpointStore;
-        public IMetadataDeserializer MetadataDeserializer => _context.MetadataDeserializer;
+        public IHeadersDeserializer MetadataDeserializer => _context.MetadataDeserializer;
 
         public Task StartProcessingAsync(CancellationToken cancellationToken = default)
         {

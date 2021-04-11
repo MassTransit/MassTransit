@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EventStore.Client;
 using GreenPipes;
+using MassTransit.EventStoreDbIntegration.Serializers;
 
 namespace MassTransit.EventStoreDbIntegration
 {
@@ -22,17 +23,11 @@ namespace MassTransit.EventStoreDbIntegration
         }
 
         public IMessageSerializer Serializer { get; }
+        public IHeadersSerializer HeadersSerializer { get; }
 
-        public Task Produce(StreamName streamName, IEnumerable<EventData> eventData, CancellationToken cancellationToken)
+        public Task Produce(string streamName, IEnumerable<EventData> eventData, CancellationToken cancellationToken)
         {
             return _producerClient.AppendToStreamAsync(streamName, StreamState.Any, eventData, null, null, cancellationToken);
-        }
-
-        public Task Produce(StreamName streamName, long version, IEnumerable<EventData> eventData, CancellationToken cancellationToken)
-        {
-            return version == -1
-                ? _producerClient.AppendToStreamAsync(streamName, StreamState.NoStream, eventData, null, null, cancellationToken)
-                : _producerClient.AppendToStreamAsync(streamName, Convert.ToUInt64(version), eventData, null, null, cancellationToken);
         }
 
         public ValueTask DisposeAsync()

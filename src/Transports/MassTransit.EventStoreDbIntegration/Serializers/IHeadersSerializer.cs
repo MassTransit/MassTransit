@@ -1,6 +1,6 @@
 ﻿namespace MassTransit.EventStoreDbIntegration.Serializers
 {
-    public interface IMetadataSerializer
+    public interface IHeadersSerializer
     {
         byte[] Serialize(SendContext context);
     }

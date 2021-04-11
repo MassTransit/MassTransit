@@ -18,7 +18,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         StreamSubscription _streamSubscription;
 
         public EventStoreDbProcessorContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings, EventStoreClient client,
-            ICheckpointStore checkpointStore, IMetadataDeserializer metadataDeserializer, CancellationToken cancellationToken)
+            ICheckpointStore checkpointStore, IHeadersDeserializer metadataDeserializer, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
             _client = client;
@@ -35,7 +35,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         public ReceiveSettings ReceiveSettings { get; }
         public ICheckpointStore CheckpointStore { get; }
-        public IMetadataDeserializer MetadataDeserializer { get; }
+        public IHeadersDeserializer MetadataDeserializer { get; }
 
         public async Task StartProcessingAsync(CancellationToken cancellationToken = default)
         {

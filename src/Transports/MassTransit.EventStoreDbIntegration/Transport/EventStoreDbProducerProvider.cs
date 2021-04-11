@@ -36,8 +36,8 @@ namespace MassTransit.EventStoreDbIntegration
             if (_sendObservable.Count > 0)
                 context.ConnectSendObserver(_sendObservable);
 
-            IEventStoreDbProducer esdbProducer = new EventStoreDbProducer(context);
-            return Task.FromResult(esdbProducer);
+            IEventStoreDbProducer producer = new EventStoreDbProducer(context);
+            return Task.FromResult(producer);
         }
 
 
@@ -56,7 +56,7 @@ namespace MassTransit.EventStoreDbIntegration
                 EndpointAddress = new EventStoreDbEndpointAddress(HostAddress, endpointAddress);
                 _producerContextSupervisor =
                     new Recycle<IProducerContextSupervisor>(() =>
-                        new ProducerContextSupervisor(hostConfiguration.ConnectionContextSupervisor, EndpointAddress.StreamCategory, messageSerializer));
+                        new ProducerContextSupervisor(hostConfiguration.ConnectionContextSupervisor, EndpointAddress.StreamName, messageSerializer));
             }
 
             public Uri HostAddress { get; }

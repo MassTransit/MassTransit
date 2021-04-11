@@ -3,8 +3,8 @@ using MassTransit.Context;
 
 namespace MassTransit.EventStoreDbIntegration.Serializers
 {
-    public interface IMetadataDeserializer
+    public interface IHeadersDeserializer
     {
-        IHeaderProvider Deserialize(ReadOnlyMemory<byte> headers);
+        IHeaderProvider Deserialize(byte[] headers);
     }
 }

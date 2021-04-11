@@ -3,7 +3,7 @@
     public interface EventStoreDbSendContext :
         SendContext
     {
-        StreamName StreamName { get; set; }
+        string StreamName { get; set; }
     }
 
     public interface EventStoreDbSendContext<out T> :

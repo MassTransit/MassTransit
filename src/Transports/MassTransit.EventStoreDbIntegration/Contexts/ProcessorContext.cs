@@ -13,7 +13,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
     {
         ReceiveSettings ReceiveSettings { get; }
         ICheckpointStore CheckpointStore { get; }
-        IMetadataDeserializer MetadataDeserializer { get; }
+        IHeadersDeserializer MetadataDeserializer { get; }
 
         event Func<StreamSubscription, ResolvedEvent, CancellationToken, Task> ProcessEvent;
         event Action<StreamSubscription, SubscriptionDroppedReason, Exception> ProcessSubscriptionDropped;

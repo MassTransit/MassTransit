@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EventStore.Client;
 using GreenPipes;
+using MassTransit.EventStoreDbIntegration.Serializers;
 
 namespace MassTransit.EventStoreDbIntegration
 {
@@ -12,8 +13,8 @@ namespace MassTransit.EventStoreDbIntegration
         IAsyncDisposable
     {
         IMessageSerializer Serializer { get; }
+        IHeadersSerializer HeadersSerializer { get; }
 
         Task Produce(StreamName streamName, IEnumerable<EventData> eventData, CancellationToken cancellationToken);
-        Task Produce(StreamName streamName, long version, IEnumerable<EventData> eventData, CancellationToken cancellationToken);
     }
 }
