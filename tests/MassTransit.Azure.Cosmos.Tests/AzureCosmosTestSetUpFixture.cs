@@ -6,7 +6,7 @@
 
 
     [SetUpFixture]
-    public class ContextSetup
+    public class AzureCosmosTestSetUpFixture
     {
         [OneTimeSetUp]
         public async Task Before_any()

@@ -15,7 +15,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
 
     [SetUpFixture]
-    public class AzureServiceBusTests
+    public class KafkaIntegrationTestSetUpFixture
     {
         [OneTimeSetUp]
         public async Task Before_any()

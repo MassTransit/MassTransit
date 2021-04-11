@@ -15,7 +15,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
 
     [SetUpFixture]
-    public class RabbitMqTests
+    public class RabbitMqTestSetUpFixture
     {
         [OneTimeSetUp]
         public async Task Before_any()

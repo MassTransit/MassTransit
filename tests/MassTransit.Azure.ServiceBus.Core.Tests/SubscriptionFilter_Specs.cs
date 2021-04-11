@@ -67,7 +67,8 @@
 
             var managementClient = Configuration.GetManagementClient();
 
-            await managementClient.DeleteTopicAsync(topicName);
+            if (await managementClient.TopicExistsAsync(topicName))
+                await managementClient.DeleteTopicAsync(topicName);
 
             ServiceBusTokenProviderSettings settings = new TestAzureServiceBusAccountSettings();
 

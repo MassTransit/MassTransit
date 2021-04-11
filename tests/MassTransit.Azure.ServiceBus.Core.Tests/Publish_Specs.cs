@@ -106,15 +106,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         AzureServiceBusTestFixture
     {
         [Test]
-        [Explicit]
-        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
-        }
-
-        [Test]
         public async Task Should_succeed()
         {
             await Bus.Publish(new PingMessage());
@@ -180,6 +171,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
 
     [TestFixture]
+    [Explicit]
     public class Publishing_a_message_to_an_remove_subscriptions_endpoint :
         AsyncTestFixture
     {
@@ -218,7 +210,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
                     e.Handler<PingMessage>(async context =>
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(120));
+                        await Task.Delay(TimeSpan.FromSeconds(1));
 
                         handled.TrySetResult(context.Message);
                     });
