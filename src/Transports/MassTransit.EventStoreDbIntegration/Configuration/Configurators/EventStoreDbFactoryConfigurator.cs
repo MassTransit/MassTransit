@@ -17,7 +17,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         IEventStoreDbFactoryConfigurator,
         IEventStoreDbHostConfiguration
     {
-        readonly Recycle<IConnectionContextSupervisor> _connectionContextSupervisor;
+        readonly Recycle<IClientContextSupervisor> _connectionContextSupervisor;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly List<IEventStoreDbReceiveEndpointSpecification> _endpoints;
         readonly HostSettings _hostSettings;
@@ -30,8 +30,8 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _endpoints = new List<IEventStoreDbReceiveEndpointSpecification>();
             _hostSettings = new HostSettings();
             _producerSpecification = new EventStoreDbProducerSpecification(this, _hostSettings);
-            _connectionContextSupervisor = new Recycle<IConnectionContextSupervisor>(() =>
-                new ConnectionContextSupervisor(_hostSettings));
+            _connectionContextSupervisor = new Recycle<IClientContextSupervisor>(() =>
+                new ClientContextSupervisor(_hostSettings));
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
@@ -118,7 +118,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             return specification;
         }
 
-        public IConnectionContextSupervisor ConnectionContextSupervisor => _connectionContextSupervisor.Supervisor;
+        public IClientContextSupervisor ConnectionContextSupervisor => _connectionContextSupervisor.Supervisor;
 
         public IEventStoreDbRider Build(IRiderRegistrationContext context, IBusInstance busInstance)
         {

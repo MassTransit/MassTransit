@@ -12,7 +12,7 @@ namespace MassTransit.EventStoreDbIntegration
             if (string.IsNullOrWhiteSpace(streamName))
                 throw new ArgumentNullException(nameof(streamName));
 
-            return producerProvider.GetProducer(new Uri($"queue:{streamName}"));
+            return producerProvider.GetProducer(new Uri($"stream:{streamName}"));
         }
     }
 }

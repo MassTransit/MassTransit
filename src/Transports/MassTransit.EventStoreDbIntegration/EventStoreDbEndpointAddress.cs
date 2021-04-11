@@ -25,6 +25,7 @@ namespace MassTransit.EventStoreDbIntegration
             switch (scheme)
             {
                 case "queue":
+                case "stream":
                 case "topic":
                     ParseLeft(hostAddress, out Scheme, out Host, out Port);
                     StreamName = address.AbsolutePath;

@@ -12,13 +12,13 @@ namespace MassTransit.EventStoreDbIntegration
         BasePipeContext,
         ProducerContext
     {
-        readonly EventStoreClient _producerClient;
+        readonly EventStoreClient _client;
 
-        public EventStoreDbProducerContext(EventStoreClient producerClient, IMessageSerializer messageSerializer,
+        public EventStoreDbProducerContext(EventStoreClient client, IMessageSerializer messageSerializer,
             CancellationToken cancellationToken)
             : base(cancellationToken)
         {
-            _producerClient = producerClient;
+            _client = client;
             Serializer = messageSerializer;
         }
 
@@ -27,7 +27,7 @@ namespace MassTransit.EventStoreDbIntegration
 
         public Task Produce(string streamName, IEnumerable<EventData> eventData, CancellationToken cancellationToken)
         {
-            return _producerClient.AppendToStreamAsync(streamName, StreamState.Any, eventData, null, null, cancellationToken);
+            return _client.AppendToStreamAsync(streamName, StreamState.Any, eventData, null, null, cancellationToken);
         }
 
         public ValueTask DisposeAsync()

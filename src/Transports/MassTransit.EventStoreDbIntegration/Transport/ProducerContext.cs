@@ -15,6 +15,6 @@ namespace MassTransit.EventStoreDbIntegration
         IMessageSerializer Serializer { get; }
         IHeadersSerializer HeadersSerializer { get; }
 
-        Task Produce(StreamName streamName, IEnumerable<EventData> eventData, CancellationToken cancellationToken);
+        Task Produce(string streamName, IEnumerable<EventData> eventData, CancellationToken cancellationToken);
     }
 }

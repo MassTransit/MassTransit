@@ -121,7 +121,7 @@ namespace MassTransit.EventStoreDbIntegration
             {
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
-                var sendContext = new EventStoreDbMessageSendContext<T>(_message, _cancellationToken)
+                var sendContext = new EventStoreDbMessageSendContext<T>(_context.EndpointAddress.StreamName, _message, _cancellationToken)
                 {
                     Serializer = context.Serializer,
                     DestinationAddress = _context.EndpointAddress
@@ -205,7 +205,7 @@ namespace MassTransit.EventStoreDbIntegration
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
                 EventStoreDbMessageSendContext<T>[] contexts = _messages
-                    .Select(x => new EventStoreDbMessageSendContext<T>(x, _cancellationToken)
+                    .Select(x => new EventStoreDbMessageSendContext<T>(_context.EndpointAddress.StreamName, x, _cancellationToken)
                     {
                         Serializer = context.Serializer,
                         DestinationAddress = _context.EndpointAddress

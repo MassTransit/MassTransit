@@ -4,11 +4,11 @@ using GreenPipes;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
-    public class EventStoreDbConnectionContext :
+    public class EventStoreDbClientContext :
         BasePipeContext,
-        ConnectionContext
+        ClientContext
     {
-        public EventStoreDbConnectionContext(IHostSettings hostSettings, CancellationToken cancellationToken)
+        public EventStoreDbClientContext(IHostSettings hostSettings, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
             HostSettings = hostSettings;

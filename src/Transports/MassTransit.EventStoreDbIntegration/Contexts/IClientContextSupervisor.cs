@@ -2,8 +2,8 @@
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
-    public interface IConnectionContextSupervisor :
-        ITransportSupervisor<ConnectionContext>
+    public interface IClientContextSupervisor :
+        ITransportSupervisor<ClientContext>
     {
     }
 }
