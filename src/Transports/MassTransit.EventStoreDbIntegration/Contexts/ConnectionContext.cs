@@ -6,8 +6,6 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
     public interface ConnectionContext
         : PipeContext
     {
-        IHostSettings HostSettings { get; }
-
         EventStoreClient CreateEventStoreDbClient();
     }
 }

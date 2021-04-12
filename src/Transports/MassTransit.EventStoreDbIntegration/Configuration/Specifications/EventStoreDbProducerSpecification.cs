@@ -16,8 +16,6 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
         readonly IHostSettings _hostSettings;
         readonly SendObservable _sendObservers;
         readonly ISerializationConfiguration _serializationConfiguration;
-        Action<SubscriptionFilterOptions> _filterOptions;
-        Action<UserCredentials> _userCredentials;
         Action<ISendPipeConfigurator> _configureSend;
 
         public EventStoreDbProducerSpecification(IEventStoreDbHostConfiguration hostConfiguration, IHostSettings hostSettings)
@@ -38,18 +36,6 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
             _configureSend = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
-        public Action<SubscriptionFilterOptions> FilterOptions
-        {
-            set => _filterOptions = value ?? throw new ArgumentNullException(nameof(value));
-            get => _filterOptions;
-        }
-
-        public Action<UserCredentials> UserCredentials
-        {
-            set => _userCredentials = value ?? throw new ArgumentNullException(nameof(value));
-            get => _userCredentials;
-        }
-
         public void SetMessageSerializer(SerializerFactory serializerFactory)
         {
             _serializationConfiguration.SetSerializer(serializerFactory);
@@ -57,8 +43,8 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if ((!_hostSettings.UseExistingClient && string.IsNullOrWhiteSpace(_hostSettings.ConnectionString))
-                || string.IsNullOrWhiteSpace(_hostSettings.ConnectionName))
+            if (!_hostSettings.UseExistingClient
+                && (string.IsNullOrWhiteSpace(_hostSettings.ConnectionString) || string.IsNullOrWhiteSpace(_hostSettings.ConnectionName)))
                 yield return this.Failure("HostSettings", "is invalid");
         }
 

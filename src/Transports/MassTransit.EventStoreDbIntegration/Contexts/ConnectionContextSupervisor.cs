@@ -1,3 +1,4 @@
+using MassTransit.Registration;
 using MassTransit.Transports;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
@@ -6,8 +7,8 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         TransportPipeContextSupervisor<ConnectionContext>,
         IConnectionContextSupervisor
     {
-        public ConnectionContextSupervisor(IHostSettings hostSettings)
-            : base(new ConnectionContextFactory(hostSettings))
+        public ConnectionContextSupervisor(IConfigurationServiceProvider provider)
+            : base(new ConnectionContextFactory(provider))
         {
         }
     }

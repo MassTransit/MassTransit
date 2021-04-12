@@ -29,12 +29,17 @@ namespace MassTransit.EventStoreDbIntegration
         void Host(string connectionString, string connectionName, UserCredentials defaultCredentials);
 
         /// <summary>
-        /// Subscribe to an EventStoreDB stream.
+        /// Use an existing EventStoreClient that has been registered outside of MassTransit.
+        /// </summary>
+        void UseExistingClient();
+
+        /// <summary>
+        /// Subscribe to an EventStoreDB stream using a catch-up subscription.
         /// </summary>
         /// <param name="streamCategory">The stream category to subscribe to.</param>
         /// <param name="subscriptionName">Subscription name.</param>
         /// <param name="configure"></param>
-        void ReceiveEndpoint(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbReceiveEndpointConfigurator> configure);
+        void CatchupSubscription(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbCatchupSubscriptionConfigurator> configure);
 
         /// <summary>
         /// Sets the outbound message serializer

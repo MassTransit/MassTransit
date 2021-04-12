@@ -3,8 +3,7 @@
 namespace MassTransit.EventStoreDbIntegration
 {
     public interface IEventStoreDbRider :
-        IRiderControl,
-        IEventStoreDbEndpointConnector
+        IRiderControl
     {
         IEventStoreDbProducerProvider GetProducerProvider(ConsumeContext consumeContext = default);
     }

@@ -3,7 +3,7 @@ using EventStore.Client;
 
 namespace MassTransit.EventStoreDbIntegration
 {
-    public interface IEventStoreDbReceiveEndpointConfigurator :
+    public interface IEventStoreDbCatchupSubscriptionConfigurator :
         IReceiveEndpointConfigurator
     {
         /// <summary>

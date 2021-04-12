@@ -1,6 +1,7 @@
 using System.Threading;
 using EventStore.Client;
 using GreenPipes;
+using MassTransit.Registration;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
@@ -8,23 +9,17 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         BasePipeContext,
         ConnectionContext
     {
-        public EventStoreDbConnectionContext(IHostSettings hostSettings, CancellationToken cancellationToken)
+        readonly IConfigurationServiceProvider _provider;
+
+        public EventStoreDbConnectionContext(IConfigurationServiceProvider provider, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
-            HostSettings = hostSettings;
+            _provider = provider;
         }
-
-        public IHostSettings HostSettings { get; }
 
         public EventStoreClient CreateEventStoreDbClient()
         {
-            var settings = EventStoreClientSettings.Create(HostSettings.ConnectionString);
-            settings.ConnectionName = $"{HostSettings.ConnectionName}";
-
-            if (HostSettings.DefaultCredentials != null)
-                settings.DefaultCredentials = HostSettings.DefaultCredentials;
-
-            return new EventStoreClient(settings);
+            return _provider.GetRequiredService<EventStoreClient>();
         }
     }
 }

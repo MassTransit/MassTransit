@@ -20,8 +20,6 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         public override CancellationToken CancellationToken { get; }
 
-        public IHostSettings HostSettings => _context.HostSettings;
-
         public EventStoreClient CreateEventStoreDbClient() => _context.CreateEventStoreDbClient();
     }
 }

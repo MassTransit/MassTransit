@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using EventStore.Client;
 using GreenPipes;
 using MassTransit.EventStoreDbIntegration.Contexts;
-using MassTransit.EventStoreDbIntegration.Serializers;
 using MassTransit.EventStoreDbIntegration.Specifications;
 using MassTransit.Pipeline.Observables;
 using MassTransit.Registration;
-using MassTransit.SendPipeSpecifications;
 using MassTransit.Transports;
 using MassTransit.Util;
 
@@ -17,21 +16,21 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         IEventStoreDbFactoryConfigurator,
         IEventStoreDbHostConfiguration
     {
-        readonly Recycle<IConnectionContextSupervisor> _connectionContextSupervisor;
+        readonly IContainerRegistrar _containerRegistrar;       
         readonly ReceiveEndpointObservable _endpointObservers;
-        readonly List<IEventStoreDbReceiveEndpointSpecification> _endpoints;
+        readonly List<IEventStoreDbCatchupSubscriptionSpecification> _endpoints;
         readonly HostSettings _hostSettings;
         readonly EventStoreDbProducerSpecification _producerSpecification;
+        Recycle<IConnectionContextSupervisor> _connectionContextSupervisor;
         bool _isHostSettingsConfigured = false;
 
-        public EventStoreDbFactoryConfigurator()
+        public EventStoreDbFactoryConfigurator(IContainerRegistrar containerRegistrar)
         {
+            _containerRegistrar = containerRegistrar;
             _endpointObservers = new ReceiveEndpointObservable();
-            _endpoints = new List<IEventStoreDbReceiveEndpointSpecification>();
+            _endpoints = new List<IEventStoreDbCatchupSubscriptionSpecification>();
             _hostSettings = new HostSettings();
             _producerSpecification = new EventStoreDbProducerSpecification(this, _hostSettings);
-            _connectionContextSupervisor = new Recycle<IConnectionContextSupervisor>(() =>
-                new ConnectionContextSupervisor(_hostSettings));
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
@@ -52,6 +51,14 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _hostSettings.ConnectionString = connectionString;
             _hostSettings.ConnectionName = connectionName;
             _hostSettings.DefaultCredentials = null;
+
+            _containerRegistrar.RegisterSingleInstance(provider =>
+            {
+                var settings = EventStoreClientSettings.Create(connectionString);
+                settings.ConnectionName = connectionName;
+
+                return new EventStoreClient(settings);
+            });
         }
 
         public void Host(string connectionString, string connectionName, UserCredentials userCredentials)
@@ -70,11 +77,25 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _hostSettings.ConnectionString = connectionString;
             _hostSettings.ConnectionName = connectionName;
             _hostSettings.DefaultCredentials = userCredentials;
+
+            _containerRegistrar.RegisterSingleInstance(provider =>
+            {
+                var settings = EventStoreClientSettings.Create(connectionString);
+                settings.ConnectionName = connectionName;
+                settings.DefaultCredentials = userCredentials;
+
+                return new EventStoreClient(settings);
+            });
         }
 
-        public void ReceiveEndpoint(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbReceiveEndpointConfigurator> configure)
+        public void UseExistingClient()
         {
-            var specification = CreateSpecification(streamCategory, subscriptionName, configure);
+            _hostSettings.UseExistingClient = true;
+        }
+
+        public void CatchupSubscription(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbCatchupSubscriptionConfigurator> configure)
+        {
+            var specification = CreateCatchupSpecification(streamCategory, subscriptionName, configure);
             _endpoints.Add(specification);
         }
 
@@ -93,15 +114,15 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _producerSpecification.ConfigureSend(callback);
         }
 
-        public IEventStoreDbReceiveEndpointSpecification CreateSpecification(StreamCategory streamCategory, string subscriptionName,
-            Action<IEventStoreDbReceiveEndpointConfigurator> configure)
+        public IEventStoreDbCatchupSubscriptionSpecification CreateCatchupSpecification(StreamCategory streamCategory, string subscriptionName,
+            Action<IEventStoreDbCatchupSubscriptionConfigurator> configure)
         {
-            if (streamCategory == null || string.IsNullOrWhiteSpace(streamCategory))
-                throw new ArgumentException(nameof(streamCategory));
+            if (streamCategory == null)
+                throw new ArgumentNullException(nameof(streamCategory));
             if (string.IsNullOrWhiteSpace(subscriptionName))
                 throw new ArgumentException(nameof(subscriptionName));
 
-            var specification = new EventStoreDbReceiveEndpointSpecification(this, streamCategory, subscriptionName, _hostSettings, configure);
+            var specification = new EventStoreDbCatchupSubscriptionSpecification(this, streamCategory, subscriptionName, _hostSettings, configure);
             specification.ConnectReceiveEndpointObserver(_endpointObservers);
             return specification;
         }
@@ -110,6 +131,8 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
         public IEventStoreDbRider Build(IRiderRegistrationContext context, IBusInstance busInstance)
         {
+            _connectionContextSupervisor = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(context));
+
             var endpoints = new ReceiveEndpointCollection();
             foreach (var endpoint in _endpoints)
                 endpoints.Add(endpoint.EndpointName, endpoint.CreateReceiveEndpoint(busInstance));
@@ -121,7 +144,18 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
         public IEnumerable<ValidationResult> Validate()
         {
-            throw new NotImplementedException();
+            foreach (KeyValuePair<string, IEventStoreDbCatchupSubscriptionSpecification[]> kv in _endpoints.GroupBy(x => x.EndpointName)
+                .ToDictionary(x => x.Key, x => x.ToArray()))
+            {
+                if (kv.Value.Length > 1)
+                    yield return this.Failure($"EventStoreDB: {kv.Key} was added more than once.");
+
+                foreach (var result in kv.Value.SelectMany(x => x.Validate()))
+                    yield return result;
+            }
+
+            foreach (var result in _producerSpecification.Validate())
+                yield return result;
         }
 
         public IBusInstanceSpecification Build(IRiderRegistrationContext context)

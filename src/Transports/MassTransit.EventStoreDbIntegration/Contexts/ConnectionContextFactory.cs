@@ -3,17 +3,18 @@ using System.Threading.Tasks;
 using GreenPipes;
 using GreenPipes.Agents;
 using GreenPipes.Internals.Extensions;
+using MassTransit.Registration;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
     public class ConnectionContextFactory :
         IPipeContextFactory<ConnectionContext>
     {
-        readonly IHostSettings _hostSettings;
+        readonly IConfigurationServiceProvider _provider;
 
-        public ConnectionContextFactory(IHostSettings hostSettings)
+        public ConnectionContextFactory(IConfigurationServiceProvider provider)
         {
-            _hostSettings = hostSettings;
+            _provider = provider;
         }
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
@@ -40,7 +41,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         ConnectionContext CreateConnectionContext(ISupervisor supervisor)
         {
-            return new EventStoreDbConnectionContext(_hostSettings, supervisor.Stopped);
+            return new EventStoreDbConnectionContext(_provider, supervisor.Stopped);
         }
     }
 }

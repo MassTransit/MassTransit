@@ -41,19 +41,6 @@ namespace MassTransit.EventStoreDbIntegration
                 : new ConsumeContextEventStoreDbProducerProvider(_producerProvider, consumeContext);
         }
 
-        public HostReceiveEndpointHandle ConnectEventStoreDbEndpoint(StreamCategory streamCategory, string subscriptionName,
-            Action<IRiderRegistrationContext, IEventStoreDbReceiveEndpointConfigurator> configure)
-        {
-            var specification = _hostConfiguration.CreateSpecification(streamCategory, subscriptionName, configurator =>
-            {
-                configure?.Invoke(_registrationContext, configurator);
-            });
-
-            _endpoints.Add(specification.EndpointName, specification.CreateReceiveEndpoint(_busInstance));
-
-            return _endpoints.Start(specification.EndpointName);
-        }
-
         public RiderHandle Start(CancellationToken cancellationToken = default)
         {
             HostReceiveEndpointHandle[] endpointsHandle = _endpoints.StartEndpoints(cancellationToken);

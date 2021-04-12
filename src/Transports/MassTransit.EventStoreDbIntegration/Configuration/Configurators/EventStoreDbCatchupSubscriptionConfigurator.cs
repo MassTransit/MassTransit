@@ -10,9 +10,9 @@ using MassTransit.Transports;
 
 namespace MassTransit.EventStoreDbIntegration.Configurators
 {
-    public class EventStoreDbReceiveEndpointConfigurator :
+    public class EventStoreDbCatchupSubscriptionConfigurator :
         ReceiverConfiguration,
-        IEventStoreDbReceiveEndpointConfigurator,
+        IEventStoreDbCatchupSubscriptionConfigurator,
         ReceiveSettings
     {
         readonly IBusInstance _busInstance;
@@ -23,8 +23,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         Action<UserCredentials> _userCredentials;
         CheckpointStoreFactory _checkpointStoreFactory;
 
-
-        public EventStoreDbReceiveEndpointConfigurator(IEventStoreDbHostConfiguration hostConfiguration, StreamCategory streamCategory, string subscriptionName,
+        public EventStoreDbCatchupSubscriptionConfigurator(IEventStoreDbHostConfiguration hostConfiguration, StreamCategory streamCategory, string subscriptionName,
             IBusInstance busInstance,
             IReceiveEndpointConfiguration endpointConfiguration)
             : base(endpointConfiguration)

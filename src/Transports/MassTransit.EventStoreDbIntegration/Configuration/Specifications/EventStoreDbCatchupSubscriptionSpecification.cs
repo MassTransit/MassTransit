@@ -9,19 +9,19 @@ using MassTransit.Transports;
 
 namespace MassTransit.EventStoreDbIntegration.Specifications
 {
-    public class EventStoreDbReceiveEndpointSpecification :
-        IEventStoreDbReceiveEndpointSpecification
+    public class EventStoreDbCatchupSubscriptionSpecification :
+        IEventStoreDbCatchupSubscriptionSpecification
     {
-        readonly Action<IEventStoreDbReceiveEndpointConfigurator> _configure;
+        readonly Action<IEventStoreDbCatchupSubscriptionConfigurator> _configure;
         readonly string _subscriptionName;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly StreamCategory _streamCategory;
         readonly IEventStoreDbHostConfiguration _hostConfiguration;
         readonly IHostSettings _hostSettings;
 
-        public EventStoreDbReceiveEndpointSpecification(IEventStoreDbHostConfiguration hostConfiguration, StreamCategory streamCategory, string subscriptionName,
-            IHostSettings hostSettings,
-            Action<IEventStoreDbReceiveEndpointConfigurator> configure)
+        public EventStoreDbCatchupSubscriptionSpecification(IEventStoreDbHostConfiguration hostConfiguration, StreamCategory streamCategory,
+            string subscriptionName, IHostSettings hostSettings,
+            Action<IEventStoreDbCatchupSubscriptionConfigurator> configure)
         {
             _hostConfiguration = hostConfiguration;
             _streamCategory = streamCategory;
@@ -48,7 +48,7 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
             if (string.IsNullOrWhiteSpace(_subscriptionName))
                 yield return this.Failure("SubscriptionName", "should not be empty");
 
-            if (!_hostSettings.UseExistingClient && string.IsNullOrWhiteSpace(_hostSettings.ConnectionString)
+            if (string.IsNullOrWhiteSpace(_hostSettings.ConnectionString)
                 && string.IsNullOrWhiteSpace(_hostSettings.ConnectionName))
                 yield return this.Failure("HostSettings", "is invalid");
         }
@@ -58,7 +58,7 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
             var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
-            var configurator = new EventStoreDbReceiveEndpointConfigurator(_hostConfiguration, _streamCategory, _subscriptionName, busInstance, endpointConfiguration);
+            var configurator = new EventStoreDbCatchupSubscriptionConfigurator(_hostConfiguration, _streamCategory, _subscriptionName, busInstance, endpointConfiguration);
             _configure?.Invoke(configurator);
 
             var result = BusConfigurationResult.CompileResults(configurator.Validate());
