@@ -6,6 +6,7 @@ using GreenPipes;
 using GreenPipes.Agents;
 using GreenPipes.Internals.Extensions;
 using MassTransit.Configuration;
+using MassTransit.EventStoreDbIntegration.Serializers;
 using MassTransit.Internals.Extensions;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
@@ -13,19 +14,18 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
     public class ProcessorContextFactory :
         IPipeContextFactory<ProcessorContext>
     {
-        //readonly Func<ICheckpointStore> _checkpointStoreFactory;
-        readonly Func<IHostSettings, ICheckpointStore, EventStoreClient> _clientFactory;
         readonly IConnectionContextSupervisor _contextSupervisor;
+        readonly IHeadersDeserializer _headersDeserializer;
         readonly IHostConfiguration _hostConfiguration;
         readonly ReceiveSettings _receiveSettings;
 
         public ProcessorContextFactory(IConnectionContextSupervisor contextSupervisor, IHostConfiguration hostConfiguration,
-            ReceiveSettings receiveSettings, Func<IHostSettings, ICheckpointStore, EventStoreClient> clientFactory)
+            ReceiveSettings receiveSettings, IHeadersDeserializer headersDeserializer)
         {
             _contextSupervisor = contextSupervisor;
             _hostConfiguration = hostConfiguration;
             _receiveSettings = receiveSettings;
-            _clientFactory = clientFactory;
+            _headersDeserializer = headersDeserializer;
         }
 
         public IActivePipeContextAgent<ProcessorContext> CreateActiveContext(ISupervisor supervisor,
@@ -56,11 +56,11 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         {
             Task<ProcessorContext> Create(ConnectionContext connectionContext, CancellationToken createCancellationToken)
             {
-                //var client = _clientFactory(connectionContext.HostSettings, blobContainerClient);
-                //ProcessorContext context = new EventStoreDbProcessorContext(_hostConfiguration, _receiveSettings, checkpointStore,
-                //    client, _partitionInitializingHandler, _partitionClosingHandler, createCancellationToken);
-                //return Task.FromResult(context);
-                throw new NotImplementedException();
+                //TODO: Handler checkpoint store instead of null
+                var client = connectionContext.CreateEventStoreDbClient();
+                ProcessorContext context = new EventStoreDbProcessorContext(_hostConfiguration, _receiveSettings, client, null,
+                    _headersDeserializer, createCancellationToken);
+                return Task.FromResult(context);
             }
 
             _contextSupervisor.CreateAgent(asyncContext, Create, cancellationToken);

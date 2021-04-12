@@ -1,4 +1,5 @@
 ﻿using MassTransit.Configuration;
+using MassTransit.EventStoreDbIntegration.Serializers;
 using MassTransit.Transports;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
@@ -7,9 +8,9 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         TransportPipeContextSupervisor<ProcessorContext>,
         IProcessorContextSupervisor
     {
-
-        public ProcessorContextSupervisor(IConnectionContextSupervisor supervisor, IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings)
-            : base(new ProcessorContextFactory(supervisor, hostConfiguration, receiveSettings, null))
+        public ProcessorContextSupervisor(IConnectionContextSupervisor supervisor, IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings,
+            IHeadersDeserializer headersDeserializer)
+            : base(new ProcessorContextFactory(supervisor, hostConfiguration, receiveSettings, headersDeserializer))
         {
             supervisor.AddConsumeAgent(this);
         }

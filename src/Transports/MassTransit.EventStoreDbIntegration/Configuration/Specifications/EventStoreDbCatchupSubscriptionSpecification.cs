@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using GreenPipes;
 using MassTransit.Configurators;
 using MassTransit.EventStoreDbIntegration.Configurators;
+using MassTransit.EventStoreDbIntegration.Serializers;
 using MassTransit.Pipeline.Observables;
 using MassTransit.Registration;
 using MassTransit.Transports;
@@ -12,21 +13,23 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
     public class EventStoreDbCatchupSubscriptionSpecification :
         IEventStoreDbCatchupSubscriptionSpecification
     {
-        readonly Action<IEventStoreDbCatchupSubscriptionConfigurator> _configure;
-        readonly string _subscriptionName;
-        readonly ReceiveEndpointObservable _endpointObservers;
-        readonly StreamCategory _streamCategory;
+        readonly Action<IEventStoreDbCatchupSubscriptionConfigurator> _configure;      
+        readonly ReceiveEndpointObservable _endpointObservers;      
+        readonly IHeadersDeserializer _headersDeserializer;
         readonly IEventStoreDbHostConfiguration _hostConfiguration;
         readonly IHostSettings _hostSettings;
+        readonly StreamCategory _streamCategory;
+        readonly string _subscriptionName;
 
         public EventStoreDbCatchupSubscriptionSpecification(IEventStoreDbHostConfiguration hostConfiguration, StreamCategory streamCategory,
-            string subscriptionName, IHostSettings hostSettings,
+            string subscriptionName, IHostSettings hostSettings, IHeadersDeserializer headersDeserializer,
             Action<IEventStoreDbCatchupSubscriptionConfigurator> configure)
         {
             _hostConfiguration = hostConfiguration;
             _streamCategory = streamCategory;
             _subscriptionName = subscriptionName;
             _hostSettings = hostSettings;
+            _headersDeserializer = headersDeserializer;
             _configure = configure;
             EndpointName = $"{EventStoreDbEndpointAddress.PathPrefix}/{_streamCategory}/{_subscriptionName}";
 
@@ -58,7 +61,8 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
             var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
-            var configurator = new EventStoreDbCatchupSubscriptionConfigurator(_hostConfiguration, _streamCategory, _subscriptionName, busInstance, endpointConfiguration);
+            var configurator = new EventStoreDbCatchupSubscriptionConfigurator(_hostConfiguration, _streamCategory, _subscriptionName, busInstance, endpointConfiguration,
+                _headersDeserializer);
             _configure?.Invoke(configurator);
 
             var result = BusConfigurationResult.CompileResults(configurator.Validate());

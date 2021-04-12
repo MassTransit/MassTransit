@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using EventStore.Client;
 using GreenPipes;
 using GreenPipes.Configurators;
 using MassTransit.Configuration;
 using MassTransit.EventStoreDbIntegration.Contexts;
 using MassTransit.EventStoreDbIntegration.Filters;
+using MassTransit.EventStoreDbIntegration.Serializers;
 using MassTransit.Registration;
 using MassTransit.Transports;
 
@@ -19,13 +21,13 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         readonly IReceiveEndpointConfiguration _endpointConfiguration;
         readonly IEventStoreDbHostConfiguration _hostConfiguration;
         readonly PipeConfigurator<ProcessorContext> _processorConfigurator;
+        IHeadersDeserializer _headersDeserializer;
         Action<SubscriptionFilterOptions> _filterOptions;
         Action<UserCredentials> _userCredentials;
         CheckpointStoreFactory _checkpointStoreFactory;
 
         public EventStoreDbCatchupSubscriptionConfigurator(IEventStoreDbHostConfiguration hostConfiguration, StreamCategory streamCategory, string subscriptionName,
-            IBusInstance busInstance,
-            IReceiveEndpointConfiguration endpointConfiguration)
+            IBusInstance busInstance, IReceiveEndpointConfiguration endpointConfiguration, IHeadersDeserializer headersDeserializer)
             : base(endpointConfiguration)
         {
             StreamCategory = streamCategory;
@@ -34,11 +36,18 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _busInstance = busInstance;
             _endpointConfiguration = endpointConfiguration;
 
+            SetHeadersDeserializer(headersDeserializer);
+
             CheckpointInterval = TimeSpan.FromMinutes(1);
             CheckpointMessageCount = 5000;
             ConcurrencyLimit = 1;
 
             _processorConfigurator = new PipeConfigurator<ProcessorContext>();
+        }
+
+        public void SetHeadersDeserializer(IHeadersDeserializer deserializer)
+        {
+            _headersDeserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
         }
 
         public TimeSpan CheckpointInterval { get; set; }
@@ -66,11 +75,20 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _checkpointStoreFactory = checkpointStoreFactory ?? throw new ArgumentNullException(nameof(checkpointStoreFactory));
         }
 
+        public override IEnumerable<ValidationResult> Validate()
+        {
+            if (_headersDeserializer == null)
+                yield return this.Failure("HeadersDeserializer", "should not be null");
+
+            foreach (var result in base.Validate())
+                yield return result;
+        }
+
         public ReceiveEndpoint Build()
         {
             IEventStoreDbReceiveEndpointContext CreateContext()
             {
-                var builder = new EventStoreDbReceiveEndpointBuilder(_hostConfiguration, _busInstance, _endpointConfiguration, this);
+                var builder = new EventStoreDbReceiveEndpointBuilder(_hostConfiguration, _busInstance, _endpointConfiguration, this, _headersDeserializer);
 
                 foreach (var specification in Specifications)
                     specification.Configure(builder);

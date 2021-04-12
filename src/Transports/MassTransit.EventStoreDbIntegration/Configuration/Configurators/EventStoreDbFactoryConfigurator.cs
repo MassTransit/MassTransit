@@ -4,6 +4,7 @@ using System.Linq;
 using EventStore.Client;
 using GreenPipes;
 using MassTransit.EventStoreDbIntegration.Contexts;
+using MassTransit.EventStoreDbIntegration.Serializers;
 using MassTransit.EventStoreDbIntegration.Specifications;
 using MassTransit.Pipeline.Observables;
 using MassTransit.Registration;
@@ -22,6 +23,8 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         readonly HostSettings _hostSettings;
         readonly EventStoreDbProducerSpecification _producerSpecification;
         Recycle<IConnectionContextSupervisor> _connectionContextSupervisor;
+        IHeadersDeserializer _headersDeserializer;
+        IHeadersSerializer _headersSerializer;
         bool _isHostSettingsConfigured = false;
 
         public EventStoreDbFactoryConfigurator(IContainerRegistrar containerRegistrar)
@@ -31,6 +34,9 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _endpoints = new List<IEventStoreDbCatchupSubscriptionSpecification>();
             _hostSettings = new HostSettings();
             _producerSpecification = new EventStoreDbProducerSpecification(this, _hostSettings);
+
+            SetHeadersDeserializer(DictionaryHeadersSerialize.Deserializer);
+            SetHeadersSerializer(DictionaryHeadersSerialize.Serializer);
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
@@ -99,6 +105,16 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _endpoints.Add(specification);
         }
 
+        public void SetHeadersDeserializer(IHeadersDeserializer deserializer)
+        {
+            _headersDeserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
+        }
+
+        public void SetHeadersSerializer(IHeadersSerializer serializer)
+        {
+            _headersSerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
+        }
+
         public void SetMessageSerializer(SerializerFactory serializerFactory)
         {
             _producerSpecification.SetMessageSerializer(serializerFactory);
@@ -122,7 +138,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             if (string.IsNullOrWhiteSpace(subscriptionName))
                 throw new ArgumentException(nameof(subscriptionName));
 
-            var specification = new EventStoreDbCatchupSubscriptionSpecification(this, streamCategory, subscriptionName, _hostSettings, configure);
+            var specification = new EventStoreDbCatchupSubscriptionSpecification(this, streamCategory, subscriptionName, _hostSettings, _headersDeserializer, configure);
             specification.ConnectReceiveEndpointObserver(_endpointObservers);
             return specification;
         }

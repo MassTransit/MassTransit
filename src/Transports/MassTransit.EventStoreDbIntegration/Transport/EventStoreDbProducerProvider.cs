@@ -56,7 +56,7 @@ namespace MassTransit.EventStoreDbIntegration
                 EndpointAddress = new EventStoreDbEndpointAddress(HostAddress, endpointAddress);
                 _producerContextSupervisor =
                     new Recycle<IProducerContextSupervisor>(() =>
-                        new ProducerContextSupervisor(hostConfiguration.ConnectionContextSupervisor, EndpointAddress.StreamName, messageSerializer));
+                        new ProducerContextSupervisor(hostConfiguration.ConnectionContextSupervisor, messageSerializer));
             }
 
             public Uri HostAddress { get; }

@@ -6,8 +6,8 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         TransportPipeContextSupervisor<ProducerContext>,
         IProducerContextSupervisor
     {
-        public ProducerContextSupervisor(IConnectionContextSupervisor contextSupervisor, string streamName, IMessageSerializer messageSerializer)
-            : base(new ProducerContextFactory(contextSupervisor, streamName, messageSerializer))
+        public ProducerContextSupervisor(IConnectionContextSupervisor contextSupervisor, IMessageSerializer messageSerializer)
+            : base(new ProducerContextFactory(contextSupervisor, messageSerializer))
         {
             contextSupervisor.AddSendAgent(this);
         }
