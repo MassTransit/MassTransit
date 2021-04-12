@@ -38,6 +38,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
                 });
             });
 
+            await Task.Delay(3000);
+
             await bus.StartAsync(TestCancellationToken);
             try
             {

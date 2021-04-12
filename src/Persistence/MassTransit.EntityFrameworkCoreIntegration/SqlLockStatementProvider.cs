@@ -44,6 +44,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             if (TableNames.TryGetValue(type, out var result) && _enableSchemaCaching)
                 return result;
 
+        #pragma warning disable EF1001
             var entityType = dependencies.Model.FindEntityType(type);
 
             var schema = entityType.GetSchema();

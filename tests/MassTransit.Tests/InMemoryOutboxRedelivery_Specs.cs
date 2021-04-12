@@ -1,4 +1,4 @@
-﻿namespace MassTransit.InMemoryTransport.Tests
+﻿namespace MassTransit.Tests
 {
     using System;
     using System.Threading.Tasks;

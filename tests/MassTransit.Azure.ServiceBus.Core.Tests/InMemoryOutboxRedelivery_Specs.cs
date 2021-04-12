@@ -1,9 +1,8 @@
-﻿namespace MassTransit.ServiceBusTransport.Tests
+﻿namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Azure.ServiceBus.Core;
-    using Azure.ServiceBus.Core.Tests;
+    using Core;
     using GreenPipes;
     using GreenPipes.Util;
     using NUnit.Framework;
