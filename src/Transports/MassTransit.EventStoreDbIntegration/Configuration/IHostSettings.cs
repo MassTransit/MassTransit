@@ -1,13 +1,9 @@
-﻿using System;
-using EventStore.Client;
-using MassTransit.Registration;
+﻿using EventStore.Client;
 
 namespace MassTransit.EventStoreDbIntegration
 {
     public interface IHostSettings
     {
-        bool UseExistingClient => ExistingClientFactory != null;
-        Func<IConfigurationServiceProvider, EventStoreClient> ExistingClientFactory { get; }
         string ConnectionString { get; }
         string ConnectionName { get; }
         UserCredentials DefaultCredentials { get; }

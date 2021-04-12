@@ -70,9 +70,9 @@ namespace MassTransit.EventStoreDbIntegration
             Agent
         {
             readonly IReceiveEndpointCollection _endpoints;
-            readonly IClientContextSupervisor _supervisor;
+            readonly IConnectionContextSupervisor _supervisor;
 
-            public RiderAgent(IClientContextSupervisor supervisor, IReceiveEndpointCollection endpoints, Task ready)
+            public RiderAgent(IConnectionContextSupervisor supervisor, IReceiveEndpointCollection endpoints, Task ready)
             {
                 _supervisor = supervisor;
                 _endpoints = endpoints;

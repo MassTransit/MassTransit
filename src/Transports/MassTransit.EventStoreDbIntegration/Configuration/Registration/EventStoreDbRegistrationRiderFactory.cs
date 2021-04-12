@@ -7,7 +7,6 @@ namespace MassTransit.EventStoreDbIntegration.Registration
     public class EventStoreDbRegistrationRiderFactory :
         IRegistrationRiderFactory<IEventStoreDbRider>
     {
-
         readonly Action<IRiderRegistrationContext, IEventStoreDbFactoryConfigurator> _configure;
 
         public EventStoreDbRegistrationRiderFactory(Action<IRiderRegistrationContext, IEventStoreDbFactoryConfigurator> configure) =>

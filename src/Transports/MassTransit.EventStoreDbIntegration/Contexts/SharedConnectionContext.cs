@@ -4,14 +4,14 @@ using GreenPipes;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
-    public class SharedClientContext :
+    public class SharedConnectionContext :
         ProxyPipeContext,
-        ClientContext
+        ConnectionContext
     {
 
-        readonly ClientContext _context;
+        readonly ConnectionContext _context;
 
-        public SharedClientContext(ClientContext context, CancellationToken cancellationToken)
+        public SharedConnectionContext(ConnectionContext context, CancellationToken cancellationToken)
             : base(context)
         {
             _context = context;

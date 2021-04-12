@@ -9,7 +9,7 @@ namespace MassTransit.EventStoreDbIntegration
     public interface IEventStoreDbHostConfiguration :
         ISpecification
     {
-        IClientContextSupervisor ConnectionContextSupervisor { get; }
+        IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
         IEventStoreDbReceiveEndpointSpecification CreateSpecification(StreamCategory streamCategory, string subscriptionName,
             Action<IEventStoreDbReceiveEndpointConfigurator> configure);

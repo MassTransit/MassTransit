@@ -17,7 +17,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         IEventStoreDbFactoryConfigurator,
         IEventStoreDbHostConfiguration
     {
-        readonly Recycle<IClientContextSupervisor> _connectionContextSupervisor;
+        readonly Recycle<IConnectionContextSupervisor> _connectionContextSupervisor;
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly List<IEventStoreDbReceiveEndpointSpecification> _endpoints;
         readonly HostSettings _hostSettings;
@@ -30,8 +30,8 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _endpoints = new List<IEventStoreDbReceiveEndpointSpecification>();
             _hostSettings = new HostSettings();
             _producerSpecification = new EventStoreDbProducerSpecification(this, _hostSettings);
-            _connectionContextSupervisor = new Recycle<IClientContextSupervisor>(() =>
-                new ClientContextSupervisor(_hostSettings));
+            _connectionContextSupervisor = new Recycle<IConnectionContextSupervisor>(() =>
+                new ConnectionContextSupervisor(_hostSettings));
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
@@ -49,7 +49,6 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
             ThrowIfHostIsAlreadyConfigured();
 
-            _hostSettings.ExistingClientFactory = null;
             _hostSettings.ConnectionString = connectionString;
             _hostSettings.ConnectionName = connectionName;
             _hostSettings.DefaultCredentials = null;
@@ -73,18 +72,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _hostSettings.DefaultCredentials = userCredentials;
         }
 
-        public void UseExistingClient(EventStoreClientFactory eventStoreClientFactory)
-        {
-            ThrowIfHostIsAlreadyConfigured();
-
-            _hostSettings.ExistingClientFactory = (provider) => provider.GetRequiredService<EventStoreClient>();
-            //_hostSettings.ExistingClientFactory = eventStoreClientFactory;
-            _hostSettings.ConnectionString = null;
-            _hostSettings.ConnectionName = null;
-            _hostSettings.DefaultCredentials = null;
-        }
-
-        public void StreamEndpoint(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbReceiveEndpointConfigurator> configure)
+        public void ReceiveEndpoint(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbReceiveEndpointConfigurator> configure)
         {
             var specification = CreateSpecification(streamCategory, subscriptionName, configure);
             _endpoints.Add(specification);
@@ -118,7 +106,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             return specification;
         }
 
-        public IClientContextSupervisor ConnectionContextSupervisor => _connectionContextSupervisor.Supervisor;
+        public IConnectionContextSupervisor ConnectionContextSupervisor => _connectionContextSupervisor.Supervisor;
 
         public IEventStoreDbRider Build(IRiderRegistrationContext context, IBusInstance busInstance)
         {

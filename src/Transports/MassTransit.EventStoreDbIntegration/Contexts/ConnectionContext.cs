@@ -3,7 +3,7 @@ using GreenPipes;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
-    public interface ClientContext
+    public interface ConnectionContext
         : PipeContext
     {
         IHostSettings HostSettings { get; }

@@ -8,7 +8,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         IProcessorContextSupervisor
     {
 
-        public ProcessorContextSupervisor(IClientContextSupervisor supervisor, IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings)
+        public ProcessorContextSupervisor(IConnectionContextSupervisor supervisor, IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings)
             : base(new ProcessorContextFactory(supervisor, hostConfiguration, receiveSettings, null))
         {
             supervisor.AddConsumeAgent(this);

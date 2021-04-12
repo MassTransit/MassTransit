@@ -15,11 +15,11 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
     {
         //readonly Func<ICheckpointStore> _checkpointStoreFactory;
         readonly Func<IHostSettings, ICheckpointStore, EventStoreClient> _clientFactory;
-        readonly IClientContextSupervisor _contextSupervisor;
+        readonly IConnectionContextSupervisor _contextSupervisor;
         readonly IHostConfiguration _hostConfiguration;
         readonly ReceiveSettings _receiveSettings;
 
-        public ProcessorContextFactory(IClientContextSupervisor contextSupervisor, IHostConfiguration hostConfiguration,
+        public ProcessorContextFactory(IConnectionContextSupervisor contextSupervisor, IHostConfiguration hostConfiguration,
             ReceiveSettings receiveSettings, Func<IHostSettings, ICheckpointStore, EventStoreClient> clientFactory)
         {
             _contextSupervisor = contextSupervisor;
@@ -54,7 +54,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         void CreateProcessor(IAsyncPipeContextAgent<ProcessorContext> asyncContext, CancellationToken cancellationToken)
         {
-            Task<ProcessorContext> Create(ClientContext connectionContext, CancellationToken createCancellationToken)
+            Task<ProcessorContext> Create(ConnectionContext connectionContext, CancellationToken createCancellationToken)
             {
                 //var client = _clientFactory(connectionContext.HostSettings, blobContainerClient);
                 //ProcessorContext context = new EventStoreDbProcessorContext(_hostConfiguration, _receiveSettings, checkpointStore,

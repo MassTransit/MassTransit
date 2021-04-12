@@ -10,11 +10,11 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
     public class ProducerContextFactory :
         IPipeContextFactory<ProducerContext>
     {
-        readonly IClientContextSupervisor _contextSupervisor;
+        readonly IConnectionContextSupervisor _contextSupervisor;
         readonly string _streamName;
         readonly IMessageSerializer _messageSerializer;
 
-        public ProducerContextFactory(IClientContextSupervisor contextSupervisor, string streamName, IMessageSerializer messageSerializer)
+        public ProducerContextFactory(IConnectionContextSupervisor contextSupervisor, string streamName, IMessageSerializer messageSerializer)
         {
             _contextSupervisor = contextSupervisor;
             _streamName = streamName;
@@ -46,7 +46,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         void CreateProcessor(IAsyncPipeContextAgent<ProducerContext> asyncContext, CancellationToken cancellationToken)
         {
-            Task<ProducerContext> Create(ClientContext connectionContext, CancellationToken createCancellationToken)
+            Task<ProducerContext> Create(ConnectionContext connectionContext, CancellationToken createCancellationToken)
             {
                 var client = connectionContext.CreateEventStoreDbClient();
                 ProducerContext context = new EventStoreDbProducerContext(client, _messageSerializer, cancellationToken);
