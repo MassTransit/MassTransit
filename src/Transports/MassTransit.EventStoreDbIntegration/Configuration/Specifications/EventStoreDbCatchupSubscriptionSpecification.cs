@@ -51,8 +51,8 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
             if (string.IsNullOrWhiteSpace(_subscriptionName))
                 yield return this.Failure("SubscriptionName", "should not be empty");
 
-            if (string.IsNullOrWhiteSpace(_hostSettings.ConnectionString)
-                && string.IsNullOrWhiteSpace(_hostSettings.ConnectionName))
+            if (!_hostSettings.UseExistingClient
+                && (string.IsNullOrWhiteSpace(_hostSettings.ConnectionString) || string.IsNullOrWhiteSpace(_hostSettings.ConnectionName)))
                 yield return this.Failure("HostSettings", "is invalid");
         }
 
