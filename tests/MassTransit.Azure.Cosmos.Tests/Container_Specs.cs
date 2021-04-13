@@ -5,6 +5,7 @@ namespace MassTransit.Azure.Cosmos.Tests
         using System;
         using System.Threading.Tasks;
         using Automatonymous;
+        using Cosmos.Configuration;
         using GreenPipes;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
@@ -59,6 +60,67 @@ namespace MassTransit.Azure.Cosmos.Tests
 
                         r.DatabaseId = "sagaTest";
                         r.CollectionId = "TestInstance";
+                    });
+
+                configurator.AddBus(provider => BusControl);
+            }
+
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
+                configurator.UseInMemoryOutbox();
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IBusRegistrationContext>());
+            }
+        }
+
+
+        public class Using_the_container_integration_with_client_factory :
+            InMemoryTestFixture
+        {
+            readonly string _clientName;
+            readonly IServiceProvider _provider;
+
+            public Using_the_container_integration_with_client_factory()
+            {
+                _clientName = Guid.NewGuid().ToString();
+                _provider = new ServiceCollection()
+                    .AddSingleton<ICosmosClientFactory>(provider => new StaticCosmosClientFactory(Configuration.EndpointUri, Configuration.Key))
+                    .AddMassTransit(ConfigureRegistration)
+                    .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
+            }
+
+            [Test]
+            public async Task Should_work_as_expected()
+            {
+                Task<ConsumeContext<TestStarted>> started = await ConnectPublishHandler<TestStarted>();
+                Task<ConsumeContext<TestUpdated>> updated = await ConnectPublishHandler<TestUpdated>();
+
+                var correlationId = NewId.NextGuid();
+
+                await InputQueueSendEndpoint.Send(new StartTest
+                {
+                    CorrelationId = correlationId,
+                    TestKey = "Unique"
+                });
+
+                await started;
+
+                await InputQueueSendEndpoint.Send(new UpdateTest
+                {
+                    TestId = correlationId,
+                    TestKey = "Unique"
+                });
+
+                await updated;
+            }
+
+            protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+            {
+                configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
+                    .CosmosRepository(r =>
+                    {
+                        r.DatabaseId = "sagaTest";
+                        r.CollectionId = "TestInstance";
+                        r.UseClientFactory(_clientName);
                     });
 
                 configurator.AddBus(provider => BusControl);

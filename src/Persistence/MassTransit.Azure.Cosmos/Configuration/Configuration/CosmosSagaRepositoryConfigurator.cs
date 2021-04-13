@@ -24,6 +24,7 @@ namespace MassTransit.Azure.Cosmos.Configuration
         Func<IConfigurationServiceProvider, ICollectionIdFormatter> _collectionIdFormatter;
         Action<ItemRequestOptions> _itemRequestOptions;
         Action<QueryRequestOptions> _queryRequestOptions;
+        string _clientName;
 
         public CosmosSagaRepositoryConfigurator()
         {
@@ -88,17 +89,47 @@ namespace MassTransit.Azure.Cosmos.Configuration
         {
             DatabaseContext<TSaga> DatabaseContextFactory(IConfigurationServiceProvider provider)
             {
-                var client = new CosmosClient(EndpointUri, Key, new CosmosClientOptions {Serializer = new CosmosJsonDotNetSerializer(_serializerSettings)});
+                bool providerProvidedClient = true;
+                CosmosClient client;
+
+                if (!string.IsNullOrWhiteSpace(_clientName))
+                {
+                    var clientFactory = provider.GetRequiredService<ICosmosClientFactory>();
+                    client = clientFactory.GetCosmosClient(_clientName, _serializerSettings);
+                }
+                else
+                {
+                    providerProvidedClient = false;
+
+                    CosmosClientOptions clientOptions = null;
+                    if (_serializerSettings != null)
+                    {
+                        clientOptions = new CosmosClientOptions { Serializer = new CosmosJsonDotNetSerializer(_serializerSettings) };
+                    }
+
+                    client = new CosmosClient(EndpointUri, Key, clientOptions);
+                }
+
                 var collectionIdFormatter = _collectionIdFormatter(provider);
                 var container = client.GetContainer(DatabaseId, collectionIdFormatter.Saga<TSaga>());
 
-                return new CosmosDatabaseContext<TSaga>(client, container, _itemRequestOptions, _queryRequestOptions);
+                // The provider owns the instance of the client, so the lifetime should be controlled by the provider,
+                // not this class.
+                return new CosmosDatabaseContext<TSaga>(providerProvidedClient ? null : client, container, _itemRequestOptions, _queryRequestOptions);
             }
 
             configurator.RegisterSingleInstance(DatabaseContextFactory);
 
             configurator.RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>,
                 CosmosSagaRepositoryContextFactory<TSaga>>();
+        }
+
+        public void UseClientFactory(string clientName)
+        {
+            if (string.IsNullOrWhiteSpace(clientName))
+                throw new ArgumentException(nameof(clientName));
+
+            _clientName = clientName;
         }
 
         static JsonSerializerSettings GetSerializerSettingsIfNeeded()
