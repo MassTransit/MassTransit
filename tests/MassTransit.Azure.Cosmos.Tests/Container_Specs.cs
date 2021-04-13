@@ -6,6 +6,8 @@ namespace MassTransit.Azure.Cosmos.Tests
         using System.Threading.Tasks;
         using Automatonymous;
         using GreenPipes;
+        using MassTransit.Azure.Cosmos.Configuration;
+        using Microsoft.Azure.Cosmos;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
         using TestFramework;
@@ -57,6 +59,78 @@ namespace MassTransit.Azure.Cosmos.Tests
                         r.EndpointUri = Configuration.EndpointUri;
                         r.Key = Configuration.Key;
 
+                        r.DatabaseId = "sagaTest";
+                        r.CollectionId = "TestInstance";
+                    });
+
+                configurator.AddBus(provider => BusControl);
+            }
+
+            protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+            {
+                configurator.UseInMemoryOutbox();
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IBusRegistrationContext>());
+            }
+        }
+
+
+        public class Using_the_container_integration_with_client_factory :
+            InMemoryTestFixture
+        {
+            readonly IServiceProvider _provider;
+            readonly string _clientName;
+
+            public Using_the_container_integration_with_client_factory()
+            {
+                _clientName = Guid.NewGuid().ToString();
+                _provider = new ServiceCollection()
+                    .AddSingleton(new CosmosClientFactory((clientName, serializerSettings) =>
+                    {
+                        if (clientName != _clientName)
+                        {
+                            throw new ArgumentException("The client name is unexpected.", nameof(clientName));
+                        }
+
+                        return new CosmosClient(
+                            Configuration.EndpointUri,
+                            Configuration.Key,
+                            new CosmosClientOptions { Serializer = new CosmosJsonDotNetSerializer(serializerSettings) });
+                    }))
+                    .AddMassTransit(ConfigureRegistration)
+                    .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
+            }
+
+            [Test]
+            public async Task Should_work_as_expected()
+            {
+                Task<ConsumeContext<TestStarted>> started = await ConnectPublishHandler<TestStarted>();
+                Task<ConsumeContext<TestUpdated>> updated = await ConnectPublishHandler<TestUpdated>();
+
+                var correlationId = NewId.NextGuid();
+
+                await InputQueueSendEndpoint.Send(new StartTest
+                {
+                    CorrelationId = correlationId,
+                    TestKey = "Unique"
+                });
+
+                await started;
+
+                await InputQueueSendEndpoint.Send(new UpdateTest
+                {
+                    TestId = correlationId,
+                    TestKey = "Unique"
+                });
+
+                await updated;
+            }
+
+            protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+            {
+                configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
+                    .CosmosRepository(r =>
+                    {
+                        r.CosmosClientName = _clientName;
                         r.DatabaseId = "sagaTest";
                         r.CollectionId = "TestInstance";
                     });

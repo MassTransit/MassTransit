@@ -16,6 +16,8 @@ namespace MassTransit.Azure.Cosmos
 
         string CollectionId { set; }
 
+        string CosmosClientName { set; }
+
         /// <summary>
         /// Configure the ConnectionString to use the Cosmos Emulator
         /// </summary>
