@@ -14,14 +14,6 @@ namespace MassTransit.Azure.Cosmos.Configuration
     using Saga.CollectionIdFormatters;
     using Saga.Context;
 
-    /// <summary>
-    /// A factory used to get instances of a <see cref="CosmosClient"/>
-    /// </summary>
-    /// <param name="cosmosClientName">The name of the client</param>
-    /// <param name="serializerSettings">Serializer settings for the client</param>
-    /// <returns>A <see cref="CosmosClient"/> used to interact with Cosmos DB</returns>
-    public delegate CosmosClient CosmosClientFactory(string cosmosClientName, JsonSerializerSettings serializerSettings);
-
     public class CosmosSagaRepositoryConfigurator<TSaga> :
         ICosmosSagaRepositoryConfigurator<TSaga>,
         ISpecification
@@ -31,6 +23,7 @@ namespace MassTransit.Azure.Cosmos.Configuration
         Func<IConfigurationServiceProvider, ICollectionIdFormatter> _collectionIdFormatter;
         Action<ItemRequestOptions> _itemRequestOptions;
         Action<QueryRequestOptions> _queryRequestOptions;
+        string _cosmosClientName;
 
         public CosmosSagaRepositoryConfigurator()
         {
@@ -69,8 +62,6 @@ namespace MassTransit.Azure.Cosmos.Configuration
             }
         }
 
-        public string CosmosClientName { get; set; }
-
         public string EndpointUri { get; set; }
         public string Key { get; set; }
 
@@ -97,13 +88,13 @@ namespace MassTransit.Azure.Cosmos.Configuration
         {
             DatabaseContext<TSaga> DatabaseContextFactory(IConfigurationServiceProvider provider)
             {
-                var clientFactory = provider.GetService<CosmosClientFactory>();
+                bool providerProvidedClient = true;
                 CosmosClient client;
 
-                bool providerProvidedClient = true;
-                if (clientFactory != null)
+                if (!string.IsNullOrWhiteSpace(_cosmosClientName))
                 {
-                    client = clientFactory(CosmosClientName, _serializerSettings);
+                    var clientFactory = provider.GetRequiredService<ICosmosClientFactory>();
+                    client = clientFactory.GetCosmosClient(_cosmosClientName, _serializerSettings);
                 }
                 else
                 {
@@ -130,6 +121,14 @@ namespace MassTransit.Azure.Cosmos.Configuration
 
             configurator.RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>,
                 CosmosSagaRepositoryContextFactory<TSaga>>();
+        }
+
+        public void UseClientFactory(string clientName)
+        {
+            if (string.IsNullOrWhiteSpace(clientName))
+                throw new ArgumentException(nameof(clientName));
+
+            _cosmosClientName = clientName;
         }
 
         static JsonSerializerSettings GetSerializerSettingsIfNeeded()

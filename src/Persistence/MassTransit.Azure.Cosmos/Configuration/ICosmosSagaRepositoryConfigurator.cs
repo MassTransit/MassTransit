@@ -16,8 +16,6 @@ namespace MassTransit.Azure.Cosmos
 
         string CollectionId { set; }
 
-        string CosmosClientName { set; }
-
         /// <summary>
         /// Configure the ConnectionString to use the Cosmos Emulator
         /// </summary>
@@ -44,6 +42,17 @@ namespace MassTransit.Azure.Cosmos
         /// Configure the QueryRequestOptions
         /// </summary>
         void ConfigureQueryRequestOptions(Action<QueryRequestOptions> cfg);
+
+        /// <summary>
+        /// Triggers the creation of <see cref="CosmosClient"/>s through the <see cref="ICosmosClientFactory"/>. When
+        /// the client factory is used, the Endpoint and Key will be ignored and the creation of the clients will only
+        /// be done using the factory.
+        /// </summary>
+        /// <remarks>
+        /// An instance of <see cref="ICosmosClientFactory"/> must be added to the dependency injection container.
+        /// </remarks>
+        /// <param name="clientName">The name of the <see cref="CosmosClient"/> that will be used</param>
+        void UseClientFactory(string clientName);
     }
 
 

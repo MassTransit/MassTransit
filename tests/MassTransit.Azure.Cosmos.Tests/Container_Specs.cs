@@ -84,18 +84,10 @@ namespace MassTransit.Azure.Cosmos.Tests
             {
                 _clientName = Guid.NewGuid().ToString();
                 _provider = new ServiceCollection()
-                    .AddSingleton(new CosmosClientFactory((clientName, serializerSettings) =>
+                    .AddSingleton<ICosmosClientFactory>(provider =>
                     {
-                        if (clientName != _clientName)
-                        {
-                            throw new ArgumentException("The client name is unexpected.", nameof(clientName));
-                        }
-
-                        return new CosmosClient(
-                            Configuration.EndpointUri,
-                            Configuration.Key,
-                            new CosmosClientOptions { Serializer = new CosmosJsonDotNetSerializer(serializerSettings) });
-                    }))
+                        return new StaticCosmosClientFactory(Configuration.EndpointUri, Configuration.Key);
+                    })
                     .AddMassTransit(ConfigureRegistration)
                     .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
             }
@@ -130,9 +122,9 @@ namespace MassTransit.Azure.Cosmos.Tests
                 configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                     .CosmosRepository(r =>
                     {
-                        r.CosmosClientName = _clientName;
                         r.DatabaseId = "sagaTest";
                         r.CollectionId = "TestInstance";
+                        r.UseClientFactory(_clientName);
                     });
 
                 configurator.AddBus(provider => BusControl);
