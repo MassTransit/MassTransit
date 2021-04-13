@@ -14,6 +14,7 @@ namespace MassTransit.Azure.Cosmos.Configuration
     using Saga.CollectionIdFormatters;
     using Saga.Context;
 
+
     public class CosmosSagaRepositoryConfigurator<TSaga> :
         ICosmosSagaRepositoryConfigurator<TSaga>,
         ISpecification
