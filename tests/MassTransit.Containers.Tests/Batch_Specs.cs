@@ -19,8 +19,7 @@ namespace MassTransit.Containers.Tests
         {
             Task<ConsumeContext<BatchResult>> finished = await ConnectPublishHandler<BatchResult>();
 
-            await InputQueueSendEndpoint.Send(new BatchItem());
-            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.SendBatch(new[] {new BatchItem(), new BatchItem()});
 
             ConsumeContext<BatchResult> finishedContext = await finished;
 
@@ -57,12 +56,10 @@ namespace MassTransit.Containers.Tests
         {
             Task<ConsumeContext<BatchResult>> finished = await ConnectPublishHandler<BatchResult>();
 
-            await InputQueueSendEndpoint.Send(new BatchItem());
-            await InputQueueSendEndpoint.Send(new BatchItem());
-            await InputQueueSendEndpoint.Send(new BatchItem());
-            await InputQueueSendEndpoint.Send(new BatchItem());
-            await InputQueueSendEndpoint.Send(new BatchItem());
-            await InputQueueSendEndpoint.Send(new BatchItem());
+            await InputQueueSendEndpoint.SendBatch(new[]
+            {
+                new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem()
+            });
 
             ConsumeContext<BatchResult> finishedContext = await finished;
 
@@ -106,12 +103,7 @@ namespace MassTransit.Containers.Tests
         {
             Task<ConsumeContext<BatchResult>> finished = await ConnectPublishHandler<BatchResult>();
 
-            await Bus.Publish(new BatchItem());
-            await Bus.Publish(new BatchItem());
-            await Bus.Publish(new BatchItem());
-            await Bus.Publish(new BatchItem());
-            await Bus.Publish(new BatchItem());
-            await Bus.Publish(new BatchItem());
+            await Bus.PublishBatch(new[] {new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem(), new BatchItem()});
 
             ConsumeContext<BatchResult> finishedContext = await finished;
 
