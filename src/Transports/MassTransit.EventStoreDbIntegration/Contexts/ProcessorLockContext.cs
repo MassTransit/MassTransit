@@ -67,7 +67,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
                 _current = null;
             }
 
-            public async Task<ulong?> GetCheckpoint() => _current ??= await _checkpointStore.GetCheckpoint().ConfigureAwait(false);
+            public async Task<ulong?> GetLastCheckpoint() => _current ??= await _checkpointStore.GetLastCheckpoint().ConfigureAwait(false);
 
             public async Task<bool> TryCheckpointAsync(ResolvedEvent resolvedEvent)
             {

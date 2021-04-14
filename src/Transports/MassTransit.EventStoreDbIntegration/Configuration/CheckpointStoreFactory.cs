@@ -2,5 +2,5 @@
 
 namespace MassTransit.EventStoreDbIntegration
 {
-    public delegate ICheckpointStore CheckpointStoreFactory(EventStoreClient client, StreamName streamName);
+    public delegate ICheckpointStore CheckpointStoreFactory(EventStoreClient client);
 }

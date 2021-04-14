@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using EventStore.Client;
 using MassTransit.Context;
+using MassTransit.EventStoreDbIntegration.Serializers;
 using MassTransit.Serialization;
 using MassTransit.TestFramework;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,7 +27,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
             services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
             _ = services.AddSingleton<EventStoreClient>((provider) => {
-                var settings = EventStoreClientSettings.Create("esdb://masstransit.eventstore.db:2113?tls=false");
+                var settings = EventStoreClientSettings.Create("esdb://localhost:2113?tls=false");
                 settings.ConnectionName = "MassTransit Test Connection";
 
                 return new EventStoreClient(settings);
@@ -43,8 +44,9 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                     {
                         esdb.UseExistingClient();
 
-                        esdb.CatchupSubscription(StreamCategory.AllStream, "MassTransit Test Subscription", c =>
+                        esdb.CatchupSubscription(StreamCategory.AllStream, "MassTransit_Test_Subscription", c =>
                         {
+                            c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint("masstransit_test"));
                             c.ConfigureConsumer<EventStoreDbMessageConsumer>(context);
                         });
                     });
@@ -66,18 +68,21 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                 var message = new EventStoreDbMessageClass("test message");
                 var context = new MessageSendContext<EventStoreDbMessage>(message);
 
-                var preparedMessage = message.SerializeEvent(Uuid.NewUuid(), new Dictionary<string, object>());
+                await using (var stream = new MemoryStream())
+                {
+                    serializer.Serialize(stream, context);
+                    stream.Flush();
 
-                await producer.AppendToStreamAsync("masstransit_test_stream", StreamState.Any, new List<EventData> { preparedMessage });
+                    var metadata = DictionaryHeadersSerialize.Serializer.Serialize(context);
 
-                //await using (var stream = new MemoryStream())
-                //{
-                //    serializer.Serialize(stream, context);
-                //    stream.Flush();
+                    var preparedMessage = new EventData(
+                        Uuid.FromGuid(context.MessageId.Value),
+                        message.GetType().Name,
+                        stream.ToArray(),
+                        metadata);
 
-                //    var eventData = new EventData(stream.ToArray());
-                //    await producer.SendAsync(new[] {eventData});
-                //}
+                    await producer.AppendToStreamAsync("masstransit_test_stream", StreamState.Any, new List<EventData> { preparedMessage });
+                }
 
                 ConsumeContext<EventStoreDbMessage> result = await taskCompletionSource.Task;
 
@@ -86,7 +91,6 @@ namespace MassTransit.EventStoreDbIntegration.Tests
             finally
             {
                 await busControl.StopAsync(TestCancellationToken);
-
                 await provider.DisposeAsync();
             }
         }

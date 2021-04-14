@@ -181,7 +181,8 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
         void ThrowIfHostIsAlreadyConfigured()
         {
-            if (_isHostSettingsConfigured) throw new ConfigurationException("Host settings may not be specified more than once.");
+            if (_isHostSettingsConfigured)
+                throw new ConfigurationException("Host settings may not be specified more than once.");
 
             _isHostSettingsConfigured = true;
         }

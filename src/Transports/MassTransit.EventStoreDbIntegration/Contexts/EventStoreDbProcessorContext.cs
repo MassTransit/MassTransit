@@ -39,7 +39,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         public async Task StartProcessingAsync(CancellationToken cancellationToken = default)
         {
-            var position = await CheckpointStore.GetCheckpoint().ConfigureAwait(false);
+            var position = await CheckpointStore.GetLastCheckpoint().ConfigureAwait(false);
 
             _streamSubscription = await _client.SubscribeToAllAsync(
                     GetAllStreamPosition(),
@@ -75,6 +75,9 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         async Task EventAppeared(StreamSubscription streamSubscription, ResolvedEvent resolvedEvent, CancellationToken cancellation)
         {
+            if (resolvedEvent.Event.EventType.StartsWith("$"))
+                return;
+
             if (ProcessEvent != null)
                 await ProcessEvent.Invoke(streamSubscription, resolvedEvent, cancellation);
         }

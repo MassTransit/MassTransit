@@ -9,8 +9,9 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         IProcessorContextSupervisor
     {
         public ProcessorContextSupervisor(IConnectionContextSupervisor supervisor, IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings,
-            IHeadersDeserializer headersDeserializer)
-            : base(new ProcessorContextFactory(supervisor, hostConfiguration, receiveSettings, headersDeserializer))
+            IHeadersDeserializer headersDeserializer,
+            CheckpointStoreFactory checkpointStoreFactory)
+            : base(new ProcessorContextFactory(supervisor, hostConfiguration, receiveSettings, headersDeserializer, checkpointStoreFactory))
         {
             supervisor.AddConsumeAgent(this);
         }

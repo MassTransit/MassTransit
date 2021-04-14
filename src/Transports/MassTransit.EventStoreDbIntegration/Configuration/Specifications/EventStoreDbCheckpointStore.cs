@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using EventStore.Client;
 
@@ -11,13 +12,13 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
         readonly EventStoreClient _client;
         readonly StreamName _streamName;
 
-        public EventStoreDbCheckpointStore(EventStoreClient client, StreamName streamName)
+        public EventStoreDbCheckpointStore(EventStoreClient client, StreamName checkpointStreamName)
         {
             _client = client;
-            _streamName = streamName;
+            _streamName = checkpointStreamName;
         }
 
-        public async Task<ulong?> GetCheckpoint()
+        public async Task<ulong?> GetLastCheckpoint(CancellationToken cancellationToken = default)
         {
             var result = _client.ReadStreamAsync(Direction.Backwards, _streamName, StreamPosition.End, 1);
 
@@ -42,7 +43,7 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
             }
         }
 
-        public Task StoreCheckpoint(ulong? checkpoint)
+        public Task StoreCheckpoint(ulong? checkpoint, CancellationToken cancellationToken = default)
         {
             var @event = new Checkpoint { Position = checkpoint };
             var preparedEvent = new EventData(Uuid.NewUuid(), "$checkpoint", JsonSerializer.SerializeToUtf8Bytes(@event));

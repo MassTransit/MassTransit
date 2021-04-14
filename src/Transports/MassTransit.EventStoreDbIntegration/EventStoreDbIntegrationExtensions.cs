@@ -1,4 +1,5 @@
 ﻿using System;
+using EventStore.Client;
 using MassTransit.EventStoreDbIntegration;
 using MassTransit.EventStoreDbIntegration.Registration;
 using MassTransit.Registration;

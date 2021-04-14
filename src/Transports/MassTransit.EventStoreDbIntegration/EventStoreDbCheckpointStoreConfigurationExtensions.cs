@@ -1,18 +1,21 @@
-﻿using System;
-using MassTransit.Serialization;
-using Newtonsoft.Json;
+﻿using MassTransit.EventStoreDbIntegration;
+using MassTransit.EventStoreDbIntegration.Specifications;
 
-namespace MassTransit.EventStoreDbIntegration
+namespace MassTransit
 {
     public static class EventStoreDbCheckpointStoreConfigurationExtensions
     {
         /// <summary>
-        /// Serialize messages using the JSON serializer
+        /// Use EventStoreDB to store checkpoints for this catch-up subscription.
         /// </summary>
         /// <param name="configurator"></param>
-        public static void UseEventStoreDBCheckpointStore(this IEventStoreDbCatchupSubscriptionConfigurator configurator)
+        /// <param name="checkpointStreamName">
+        /// The stream name to use for storing checkpoints. This must be unique.
+        /// </param>
+        public static void UseEventStoreDBCheckpointStore(this IEventStoreDbCatchupSubscriptionConfigurator configurator,
+            StreamName checkpointStreamName)
         {
-            //configurator.SetCheckpointStore(() => new EventStoreDbCheckpointStore(configurator.));
+            configurator.SetCheckpointStore((client) => new EventStoreDbCheckpointStore(client, checkpointStreamName));
         }
     }
 }

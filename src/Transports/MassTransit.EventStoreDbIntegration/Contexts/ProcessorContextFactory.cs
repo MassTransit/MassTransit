@@ -14,18 +14,21 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
     public class ProcessorContextFactory :
         IPipeContextFactory<ProcessorContext>
     {
+        readonly CheckpointStoreFactory _checkpointStoreFactory;
         readonly IConnectionContextSupervisor _contextSupervisor;
         readonly IHeadersDeserializer _headersDeserializer;
         readonly IHostConfiguration _hostConfiguration;
         readonly ReceiveSettings _receiveSettings;
 
         public ProcessorContextFactory(IConnectionContextSupervisor contextSupervisor, IHostConfiguration hostConfiguration,
-            ReceiveSettings receiveSettings, IHeadersDeserializer headersDeserializer)
+            ReceiveSettings receiveSettings, IHeadersDeserializer headersDeserializer,
+            CheckpointStoreFactory checkpointStoreFactory)
         {
             _contextSupervisor = contextSupervisor;
             _hostConfiguration = hostConfiguration;
             _receiveSettings = receiveSettings;
             _headersDeserializer = headersDeserializer;
+            _checkpointStoreFactory = checkpointStoreFactory;
         }
 
         public IActivePipeContextAgent<ProcessorContext> CreateActiveContext(ISupervisor supervisor,
@@ -56,9 +59,9 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         {
             Task<ProcessorContext> Create(ConnectionContext connectionContext, CancellationToken createCancellationToken)
             {
-                //TODO: Handler checkpoint store instead of null
                 var client = connectionContext.CreateEventStoreDbClient();
-                ProcessorContext context = new EventStoreDbProcessorContext(_hostConfiguration, _receiveSettings, client, null,
+                var checkpointStore = _checkpointStoreFactory(client);
+                ProcessorContext context = new EventStoreDbProcessorContext(_hostConfiguration, _receiveSettings, client, checkpointStore,
                     _headersDeserializer, createCancellationToken);
                 return Task.FromResult(context);
             }

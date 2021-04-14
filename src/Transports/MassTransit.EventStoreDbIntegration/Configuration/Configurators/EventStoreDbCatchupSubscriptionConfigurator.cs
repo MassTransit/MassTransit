@@ -25,6 +25,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         Action<SubscriptionFilterOptions> _filterOptions;
         Action<UserCredentials> _userCredentials;
         CheckpointStoreFactory _checkpointStoreFactory;
+        bool _isCheckpointStoreConfigured = false;
 
         public EventStoreDbCatchupSubscriptionConfigurator(IEventStoreDbHostConfiguration hostConfiguration, StreamCategory streamCategory, string subscriptionName,
             IBusInstance busInstance, IReceiveEndpointConfiguration endpointConfiguration, IHeadersDeserializer headersDeserializer)
@@ -58,7 +59,13 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
         public Action<SubscriptionFilterOptions> FilterOptions
         {
-            set => _filterOptions = value ?? throw new ArgumentNullException(nameof(value));
+            set
+            {
+                if (StreamCategory != StreamCategory.AllStream)
+                    throw new InvalidOperationException("A filter can only be applied to an '$all' stream subscription.");
+
+                _filterOptions = value ?? throw new ArgumentNullException(nameof(value));
+            }
         }
 
         public Action<UserCredentials> UserCredentials
@@ -72,6 +79,8 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
         public void SetCheckpointStore(CheckpointStoreFactory checkpointStoreFactory)
         {
+            ThrowIfCheckpointStoreIsAlreadyConfigured();
+
             _checkpointStoreFactory = checkpointStoreFactory ?? throw new ArgumentNullException(nameof(checkpointStoreFactory));
         }
 
@@ -79,6 +88,9 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         {
             if (_headersDeserializer == null)
                 yield return this.Failure("HeadersDeserializer", "should not be null");
+
+            if (_checkpointStoreFactory == null)
+                yield return this.Failure("CheckpointStoreFactory", "should not be null");
 
             foreach (var result in base.Validate())
                 yield return result;
@@ -88,7 +100,8 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         {
             IEventStoreDbReceiveEndpointContext CreateContext()
             {
-                var builder = new EventStoreDbReceiveEndpointBuilder(_hostConfiguration, _busInstance, _endpointConfiguration, this, _headersDeserializer);
+                var builder = new EventStoreDbReceiveEndpointBuilder(_hostConfiguration, _busInstance, _endpointConfiguration, this,
+                    _headersDeserializer, _checkpointStoreFactory);
 
                 foreach (var specification in Specifications)
                     specification.Configure(builder);
@@ -106,6 +119,14 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
                 processorPipe);
 
             return new ReceiveEndpoint(transport, context);
+        }
+
+        void ThrowIfCheckpointStoreIsAlreadyConfigured()
+        {
+            if (_isCheckpointStoreConfigured)
+                throw new ConfigurationException("CheckpointStore settings may not be specified more than once per catch-up subscription.");
+
+            _isCheckpointStoreConfigured = true;
         }
     }
 }

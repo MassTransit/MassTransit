@@ -1,11 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace MassTransit.EventStoreDbIntegration
 {
-
     public interface ICheckpointStore
     {
-        Task<ulong?> GetCheckpoint();
-        Task StoreCheckpoint(ulong? position);
+        Task<ulong?> GetLastCheckpoint(CancellationToken cancellationToken = default);
+        Task StoreCheckpoint(ulong? position, CancellationToken cancellationToken = default);
     }
 }

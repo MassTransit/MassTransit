@@ -6,6 +6,10 @@ namespace MassTransit.EventStoreDbIntegration
     public interface IEventStoreDbCatchupSubscriptionConfigurator :
         IReceiveEndpointConfigurator
     {
+        StreamCategory StreamCategory { get; }
+
+        string SubscriptionName { get; }
+
         /// <summary>
         /// Sets interval before checkpoint, low interval will decrease throughput (default: 1min).
         /// </summary>

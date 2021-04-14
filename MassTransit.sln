@@ -141,9 +141,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Azure.Table", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Azure.Table.Tests", "tests\MassTransit.Azure.Table.Tests\MassTransit.Azure.Table.Tests.csproj", "{17E04A9B-5DB5-4857-99CD-E9AF22DA00E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.EventStoreDbIntegration", "src\Transports\MassTransit.EventStoreDbIntegration\MassTransit.EventStoreDbIntegration.csproj", "{34E600C2-C689-43EC-9B32-58CEA83D4A04}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EventStoreDbIntegration", "src\Transports\MassTransit.EventStoreDbIntegration\MassTransit.EventStoreDbIntegration.csproj", "{34E600C2-C689-43EC-9B32-58CEA83D4A04}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.EventStoreDbIntegration.Tests", "tests\MassTransit.EventStoreDbIntegration.Tests\MassTransit.EventStoreDbIntegration.Tests.csproj", "{797978AB-F7D6-4CAD-989B-D5F793DC485F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EventStoreDbIntegration.Tests", "tests\MassTransit.EventStoreDbIntegration.Tests\MassTransit.EventStoreDbIntegration.Tests.csproj", "{797978AB-F7D6-4CAD-989B-D5F793DC485F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
