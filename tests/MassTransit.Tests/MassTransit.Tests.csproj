@@ -11,12 +11,12 @@
 
   <ItemGroup>
     <PackageReference Include="Appveyor.TestLogger" Version="2.0.0" />
-    <PackageReference Include="Google.Protobuf" Version="3.15.7" />
+    <PackageReference Include="Google.Protobuf" Version="3.15.8" />
     <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     <PackageReference Include="NUnit" Version="3.13.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="Shouldly" Version="4.0.1" />
+    <PackageReference Include="Shouldly" Version="4.0.3" />
     <ProjectReference Include="..\..\src\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\..\src\MassTransit\MassTransit.csproj" />
   </ItemGroup>
