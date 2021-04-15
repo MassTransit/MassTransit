@@ -16,8 +16,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
     public class EventStoreDbFactoryConfigurator :
         IEventStoreDbFactoryConfigurator,
         IEventStoreDbHostConfiguration
-    {
-        readonly IContainerRegistrar _containerRegistrar;       
+    {   
         readonly ReceiveEndpointObservable _endpointObservers;
         readonly List<IEventStoreDbCatchupSubscriptionSpecification> _endpoints;
         readonly HostSettings _hostSettings;
@@ -27,9 +26,8 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         IHeadersSerializer _headersSerializer;
         bool _isHostSettingsConfigured = false;
 
-        public EventStoreDbFactoryConfigurator(IContainerRegistrar containerRegistrar)
+        public EventStoreDbFactoryConfigurator()
         {
-            _containerRegistrar = containerRegistrar;
             _endpointObservers = new ReceiveEndpointObservable();
             _endpoints = new List<IEventStoreDbCatchupSubscriptionSpecification>();
             _hostSettings = new HostSettings();
@@ -57,14 +55,6 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _hostSettings.ConnectionString = connectionString;
             _hostSettings.ConnectionName = connectionName;
             _hostSettings.DefaultCredentials = null;
-
-            _containerRegistrar.RegisterSingleInstance(provider =>
-            {
-                var settings = EventStoreClientSettings.Create(connectionString);
-                settings.ConnectionName = connectionName;
-
-                return new EventStoreClient(settings);
-            });
         }
 
         public void Host(string connectionString, string connectionName, UserCredentials userCredentials)
@@ -83,15 +73,6 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _hostSettings.ConnectionString = connectionString;
             _hostSettings.ConnectionName = connectionName;
             _hostSettings.DefaultCredentials = userCredentials;
-
-            _containerRegistrar.RegisterSingleInstance(provider =>
-            {
-                var settings = EventStoreClientSettings.Create(connectionString);
-                settings.ConnectionName = connectionName;
-                settings.DefaultCredentials = userCredentials;
-
-                return new EventStoreClient(settings);
-            });
         }
 
         public void UseExistingClient()

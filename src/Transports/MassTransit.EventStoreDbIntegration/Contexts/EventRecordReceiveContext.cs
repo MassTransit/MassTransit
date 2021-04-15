@@ -37,7 +37,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
             _headersDeserializer = headersDeserializer;
         }
 
-        protected override IHeaderProvider HeaderProvider => _headersDeserializer.Deserialize(Metadata);
+        protected override IHeaderProvider HeaderProvider => _headersDeserializer.Deserialize(_resolvedEvent);
 
         public string EventStreamId => _eventRecord.EventStreamId;
         public string EventType => _eventRecord.EventType;

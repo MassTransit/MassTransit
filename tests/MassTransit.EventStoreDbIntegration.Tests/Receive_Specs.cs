@@ -26,7 +26,8 @@ namespace MassTransit.EventStoreDbIntegration.Tests
             services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
             services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
-            _ = services.AddSingleton<EventStoreClient>((provider) => {
+            _ = services.AddSingleton<EventStoreClient>((provider) =>
+            {
                 var settings = EventStoreClientSettings.Create("esdb://localhost:2113?tls=false");
                 settings.ConnectionName = "MassTransit Test Connection";
 

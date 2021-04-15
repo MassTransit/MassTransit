@@ -15,7 +15,7 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var factory = new EventStoreDbRegistrationRiderFactory(configurator.Registrar, configure);
+            var factory = new EventStoreDbRegistrationRiderFactory(configure);
             configurator.SetRiderFactory(factory);
 
             configurator.Registrar.Register(GetCurrentProducerProvider);

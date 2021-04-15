@@ -1,10 +1,11 @@
 ﻿using System;
+using EventStore.Client;
 using MassTransit.Context;
 
 namespace MassTransit.EventStoreDbIntegration.Serializers
 {
     public interface IHeadersDeserializer
     {
-        IHeaderProvider Deserialize(byte[] headers);
+        IHeaderProvider Deserialize(ResolvedEvent resolvedEvent);
     }
 }

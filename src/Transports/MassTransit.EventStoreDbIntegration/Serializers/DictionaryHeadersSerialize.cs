@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using EventStore.Client;
 using MassTransit.Context;
 using MassTransit.Transports;
 using Newtonsoft.Json;
@@ -13,6 +14,7 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
         const string CausationIdKey = "$causationId";
         const string InstanceIdKey = "InstanceId";
         const string ContentTypeKey = "Content-Type";
+        const string MassTransitJsonMediaType = "application/json";
         const string RawJsonMediaType = "application/json";
 
         static readonly Encoding _encoding;
@@ -33,10 +35,14 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
         class DictionaryHeadersDeserializer :
             IHeadersDeserializer
         {
-            public IHeaderProvider Deserialize(byte[] headers)
+            public IHeaderProvider Deserialize(ResolvedEvent resolvedEvent)
             {
-                var jsonData = _encoding.GetString(headers);
-                var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonData) ?? new Dictionary<string, object>();
+                var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(_encoding.GetString(resolvedEvent.Event.Metadata.ToArray()));
+
+                if (!dictionary.ContainsKey(ContentTypeKey) && resolvedEvent.Event.ContentType == RawJsonMediaType)
+                {
+                    dictionary.Add(ContentTypeKey, RawJsonMediaType);
+                }
 
                 if (dictionary.ContainsKey(CorrelationIdKey))
                 {
@@ -68,14 +74,13 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
             {
                 var dictionary = new Dictionary<string, object>();
 
+                dictionary.Add(ContentTypeKey, context.ContentType?.MediaType ?? MassTransitJsonMediaType);
+
                 if (context.ConversationId.HasValue)
                     dictionary.Add(CorrelationIdKey, context.ConversationId.Value);
 
                 if (context.InitiatorId.HasValue)
                     dictionary.Add(CausationIdKey, context.InitiatorId.Value);
-
-                if (context.ContentType != null)
-                    dictionary.Add(ContentTypeKey, context.ContentType.MediaType);
 
                 if (context.ContentType.MediaType.Equals(RawJsonMediaType))
                 {
