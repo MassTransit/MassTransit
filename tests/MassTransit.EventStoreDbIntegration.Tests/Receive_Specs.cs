@@ -16,6 +16,9 @@ namespace MassTransit.EventStoreDbIntegration.Tests
     public class Receive_Specs :
         InMemoryTestFixture
     {
+        const string SubscriptionName = "mt_receive_specs";
+        const string CheckpointId = "mt_receive_specs";
+
         [Test]
         public async Task Should_receive()
         {
@@ -29,7 +32,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
             _ = services.AddSingleton<EventStoreClient>((provider) =>
             {
                 var settings = EventStoreClientSettings.Create("esdb://localhost:2113?tls=false");
-                settings.ConnectionName = "MassTransit Test Connection";
+                settings.ConnectionName = "MassTransit Receive_Specs Connection";
 
                 return new EventStoreClient(settings);
             });
@@ -45,9 +48,9 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                     {
                         esdb.UseExistingClient();
 
-                        esdb.CatchupSubscription(StreamCategory.AllStream, "MassTransit_Test_Subscription", c =>
+                        esdb.CatchupSubscription(StreamCategory.AllStream, SubscriptionName, c =>
                         {
-                            c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint("masstransit_test"));
+                            c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint(CheckpointId));
                             c.ConfigureConsumer<EventStoreDbMessageConsumer>(context);
                         });
                     });
@@ -82,7 +85,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                         stream.ToArray(),
                         metadata);
 
-                    await producer.AppendToStreamAsync("masstransit_test_stream", StreamState.Any, new List<EventData> { preparedMessage });
+                    await producer.AppendToStreamAsync(StreamName.Custom("mt_receive_specs"), StreamState.Any, new List<EventData> { preparedMessage });
                 }
 
                 ConsumeContext<EventStoreDbMessage> result = await taskCompletionSource.Task;
