@@ -1,6 +1,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Metadata;
 
@@ -33,8 +34,8 @@ namespace MassTransit
             if (context.ResponseAddress == null)
                 return false;
 
-            var acceptTypes = context.Headers.Get(MessageHeaders.Request.Accept, default(string[]));
-            if (acceptTypes == null || acceptTypes.Length <= 0)
+            IList<string> acceptTypes = context.Headers.Get(MessageHeaders.Request.Accept, default(IList<string>));
+            if (acceptTypes == null || acceptTypes.Count <= 0)
                 return defaultIfHeaderNotFound;
 
             var matchingTypeNames = TypeMetadataCache<T>.MessageTypeNames;
