@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using GreenPipes;
 using GreenPipes.Agents;
 using GreenPipes.Internals.Extensions;
+using MassTransit.EventStoreDbIntegration.Serializers;
 using MassTransit.Internals.Extensions;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
@@ -11,11 +12,14 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         IPipeContextFactory<ProducerContext>
     {
         readonly IConnectionContextSupervisor _contextSupervisor;
+        readonly IHeadersSerializer _headersSerializer;
         readonly IMessageSerializer _messageSerializer;
 
-        public ProducerContextFactory(IConnectionContextSupervisor contextSupervisor, IMessageSerializer messageSerializer)
+        public ProducerContextFactory(IConnectionContextSupervisor contextSupervisor, IHeadersSerializer headersSerializer,
+            IMessageSerializer messageSerializer)
         {
             _contextSupervisor = contextSupervisor;
+            _headersSerializer = headersSerializer;
             _messageSerializer = messageSerializer;
         }
 
@@ -47,7 +51,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
             Task<ProducerContext> Create(ConnectionContext connectionContext, CancellationToken createCancellationToken)
             {
                 var client = connectionContext.CreateEventStoreDbClient();
-                ProducerContext context = new EventStoreDbProducerContext(client, _messageSerializer, cancellationToken);
+                ProducerContext context = new EventStoreDbProducerContext(client, _headersSerializer, _messageSerializer, cancellationToken);
                 return Task.FromResult(context);
             }
 

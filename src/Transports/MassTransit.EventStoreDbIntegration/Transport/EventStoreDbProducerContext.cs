@@ -14,17 +14,18 @@ namespace MassTransit.EventStoreDbIntegration
     {
         readonly EventStoreClient _client;
 
-        public EventStoreDbProducerContext(EventStoreClient client, IMessageSerializer messageSerializer,
-            CancellationToken cancellationToken)
+        public EventStoreDbProducerContext(EventStoreClient client, IHeadersSerializer headersSerializer,
+            IMessageSerializer messageSerializer, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
             _client = client;
+            HeadersSerializer = headersSerializer;
             Serializer = messageSerializer;
         }
 
-        public IMessageSerializer Serializer { get; }
         public IHeadersSerializer HeadersSerializer { get; }
-
+        public IMessageSerializer Serializer { get; }
+        
         public Task Produce(string streamName, IEnumerable<EventData> eventData, CancellationToken cancellationToken)
         {
             return _client.AppendToStreamAsync(streamName, StreamState.Any, eventData, null, null, cancellationToken);

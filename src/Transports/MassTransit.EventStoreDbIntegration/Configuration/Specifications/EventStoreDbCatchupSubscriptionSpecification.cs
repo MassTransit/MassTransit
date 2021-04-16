@@ -61,8 +61,8 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
             var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
-            var configurator = new EventStoreDbCatchupSubscriptionConfigurator(_hostConfiguration, _streamCategory, _subscriptionName, busInstance, endpointConfiguration,
-                _headersDeserializer);
+            var configurator = new EventStoreDbCatchupSubscriptionConfigurator(_hostConfiguration, _streamCategory, _subscriptionName, busInstance,
+                endpointConfiguration, _headersDeserializer);
             _configure?.Invoke(configurator);
 
             var result = BusConfigurationResult.CompileResults(configurator.Validate());

@@ -4,6 +4,7 @@
         SendContext
     {
         string StreamName { get; set; }
+        string EventStoreDBContentType { get; set; }
     }
 
     public interface EventStoreDbSendContext<out T> :

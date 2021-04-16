@@ -2,6 +2,6 @@
 {
     public interface IHeadersSerializer
     {
-        byte[] Serialize(SendContext context);
+        byte[] Serialize<T>(SendContext<T> context) where T : class;
     }
 }

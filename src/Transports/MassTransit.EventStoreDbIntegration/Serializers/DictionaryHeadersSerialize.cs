@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Net.Mime;
 using System.Text;
 using EventStore.Client;
 using MassTransit.Context;
+using MassTransit.Serialization;
 using MassTransit.Transports;
 using Newtonsoft.Json;
 
@@ -14,8 +16,7 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
         const string CausationIdKey = "$causationId";
         const string InstanceIdKey = "InstanceId";
         const string ContentTypeKey = "Content-Type";
-        const string MassTransitJsonMediaType = "application/json";
-        const string RawJsonMediaType = "application/json";
+        const string ClrTypeKey = "ClrType";
 
         static readonly Encoding _encoding;
         static readonly Lazy<IHeadersDeserializer> _deserializer;
@@ -39,11 +40,6 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
             {
                 var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(_encoding.GetString(resolvedEvent.Event.Metadata.ToArray()));
 
-                if (!dictionary.ContainsKey(ContentTypeKey) && resolvedEvent.Event.ContentType == RawJsonMediaType)
-                {
-                    dictionary.Add(ContentTypeKey, RawJsonMediaType);
-                }
-
                 if (dictionary.ContainsKey(CorrelationIdKey))
                 {
                     dictionary.Add(nameof(MessageContext.ConversationId), dictionary[CorrelationIdKey]);
@@ -54,6 +50,11 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
                 {
                     dictionary.Add(nameof(MessageContext.InitiatorId), dictionary[CausationIdKey]);
                     dictionary.Remove(CausationIdKey);
+                }
+
+                if (!dictionary.ContainsKey(ContentTypeKey) && resolvedEvent.Event.ContentType == MediaTypeNames.Application.Json)
+                {
+                    dictionary.Add(ContentTypeKey, MediaTypeNames.Application.Json);
                 }
 
                 if (dictionary.ContainsKey(InstanceIdKey))
@@ -70,11 +71,10 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
         class DictionaryHeadersSerializer :
             IHeadersSerializer
         {
-            public byte[] Serialize(SendContext context)
+            public byte[] Serialize<T>(SendContext<T> context)
+                where T : class
             {
                 var dictionary = new Dictionary<string, object>();
-
-                dictionary.Add(ContentTypeKey, context.ContentType?.MediaType ?? MassTransitJsonMediaType);
 
                 if (context.ConversationId.HasValue)
                     dictionary.Add(CorrelationIdKey, context.ConversationId.Value);
@@ -82,7 +82,12 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
                 if (context.InitiatorId.HasValue)
                     dictionary.Add(CausationIdKey, context.InitiatorId.Value);
 
-                if (context.ContentType.MediaType.Equals(RawJsonMediaType))
+                dictionary.Add(ContentTypeKey, context.ContentType?.MediaType ?? JsonMessageSerializer.ContentTypeHeaderValue);
+
+                dictionary.Add(ClrTypeKey, typeof(T).FullName);
+
+                //If UseRawJsonSerializer
+                if (context.ContentType.MediaType.Equals(MediaTypeNames.Application.Json))
                 {
                     if (context.RequestId.HasValue)
                         dictionary.Add(nameof(MessageContext.RequestId), context.RequestId.Value);
@@ -110,10 +115,10 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
 
                     if (context.SentTime.HasValue)
                         dictionary.Add(nameof(MessageContext.SentTime), context.SentTime.Value);
-                }
 
-                foreach (var headerValue in context.Headers)
-                    dictionary.Add(headerValue.Key, headerValue.Value);
+                    foreach (var headerValue in context.Headers)
+                        dictionary.Add(headerValue.Key, headerValue.Value);
+                }
 
                 return _encoding.GetBytes(JsonConvert.SerializeObject(dictionary));
             }

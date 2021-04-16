@@ -1,4 +1,5 @@
-﻿using MassTransit.Transports;
+﻿using MassTransit.EventStoreDbIntegration.Serializers;
+using MassTransit.Transports;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
@@ -6,8 +7,9 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         TransportPipeContextSupervisor<ProducerContext>,
         IProducerContextSupervisor
     {
-        public ProducerContextSupervisor(IConnectionContextSupervisor contextSupervisor, IMessageSerializer messageSerializer)
-            : base(new ProducerContextFactory(contextSupervisor, messageSerializer))
+        public ProducerContextSupervisor(IConnectionContextSupervisor contextSupervisor, IHeadersSerializer headersSerializer,
+            IMessageSerializer messageSerializer)
+            : base(new ProducerContextFactory(contextSupervisor, headersSerializer, messageSerializer))
         {
             contextSupervisor.AddSendAgent(this);
         }

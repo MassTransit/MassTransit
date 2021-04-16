@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using MassTransit;
+﻿using MassTransit.EventStoreDbIntegration.Serializers;
 
 namespace MassTransit.EventStoreDbIntegration
 {
@@ -9,6 +6,12 @@ namespace MassTransit.EventStoreDbIntegration
         ISendObserverConnector,
         ISendPipelineConfigurator
     {
+        /// <summary>
+        /// Set the serializer to use to serialize headers.
+        /// </summary>
+        /// <param name="serializer"></param>
+        void SetHeadersSerializer(IHeadersSerializer serializer);
+
         /// <summary>
         /// Sets the outbound message serializer
         /// </summary>

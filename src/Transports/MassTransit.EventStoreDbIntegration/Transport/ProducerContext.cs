@@ -12,8 +12,8 @@ namespace MassTransit.EventStoreDbIntegration
         PipeContext,
         IAsyncDisposable
     {
-        IMessageSerializer Serializer { get; }
         IHeadersSerializer HeadersSerializer { get; }
+        IMessageSerializer Serializer { get; }
 
         Task Produce(string streamName, IEnumerable<EventData> eventData, CancellationToken cancellationToken);
     }

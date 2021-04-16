@@ -123,6 +123,7 @@ namespace MassTransit.EventStoreDbIntegration
 
                 var sendContext = new EventStoreDbMessageSendContext<T>(_context.EndpointAddress.StreamName, _message, _cancellationToken)
                 {
+                    EventStoreDBContentType = context.Serializer.ContentType.MediaType,
                     Serializer = context.Serializer,
                     DestinationAddress = _context.EndpointAddress
                 };
@@ -141,14 +142,12 @@ namespace MassTransit.EventStoreDbIntegration
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(sendContext).ConfigureAwait(false);
 
-                    sendContext.Headers.Set("ClrType", typeof(T).FullName);
-
                     var eventData = new EventData(
                         Uuid.FromGuid(sendContext.MessageId.Value),
                         typeof(T).Name,
                         sendContext.Body,
                         context.HeadersSerializer.Serialize(sendContext),
-                        sendContext.ContentType.ToString());
+                        sendContext.EventStoreDBContentType);
 
                     await context.Produce(sendContext.StreamName, new[] { eventData }, sendContext.CancellationToken).ConfigureAwait(false);
 
@@ -207,6 +206,7 @@ namespace MassTransit.EventStoreDbIntegration
                 EventStoreDbMessageSendContext<T>[] contexts = _messages
                     .Select(x => new EventStoreDbMessageSendContext<T>(_context.EndpointAddress.StreamName, x, _cancellationToken)
                     {
+                        EventStoreDBContentType = context.Serializer.ContentType.MediaType,
                         Serializer = context.Serializer,
                         DestinationAddress = _context.EndpointAddress
                     })
@@ -238,21 +238,20 @@ namespace MassTransit.EventStoreDbIntegration
                     if (_context.SendObservers.Count > 0)
                         await Task.WhenAll(contexts.Select(c => _context.SendObservers.PreSend(c))).ConfigureAwait(false);
 
-                    var contentType = sendContext.ContentType.ToString();
-                    var eventType = typeof(T);
+                    var esdbContentType = sendContext.EventStoreDBContentType;
+                    var eventTypeName = typeof(T).Name;
                     var eventDataBatch = new List<EventData>();
 
                     for (int i = 0; i < contexts.Length; i++)
                     {
                         var currSendContext = contexts[i];
-                        currSendContext.Headers.Set("ClrType", eventType.FullName);
 
                         eventDataBatch.Add(new EventData(
                             Uuid.FromGuid(currSendContext.MessageId.Value),
-                            eventType.Name,
+                            eventTypeName,
                             currSendContext.Body,
                             context.HeadersSerializer.Serialize(currSendContext),
-                            contentType));
+                            esdbContentType));
                     }
 
                     await context.Produce(sendContext.StreamName, eventDataBatch, sendContext.CancellationToken).ConfigureAwait(false);

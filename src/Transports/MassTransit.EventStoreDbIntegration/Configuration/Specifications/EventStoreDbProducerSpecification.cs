@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EventStore.Client;
 using GreenPipes;
 using MassTransit.Configuration;
+using MassTransit.EventStoreDbIntegration.Serializers;
 using MassTransit.Pipeline.Observables;
 using MassTransit.Registration;
 
@@ -17,6 +18,7 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
         readonly SendObservable _sendObservers;
         readonly ISerializationConfiguration _serializationConfiguration;
         Action<ISendPipeConfigurator> _configureSend;
+        IHeadersSerializer _headersSerializer;
 
         public EventStoreDbProducerSpecification(IEventStoreDbHostConfiguration hostConfiguration, IHostSettings hostSettings)
         {
@@ -36,6 +38,11 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
             _configureSend = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
+        public void SetHeadersSerializer(IHeadersSerializer serializer)
+        {
+            _headersSerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
+        }
+
         public void SetMessageSerializer(SerializerFactory serializerFactory)
         {
             _serializationConfiguration.SetSerializer(serializerFactory);
@@ -46,6 +53,9 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
             if (!_hostSettings.UseExistingClient
                 && (string.IsNullOrWhiteSpace(_hostSettings.ConnectionString) || string.IsNullOrWhiteSpace(_hostSettings.ConnectionName)))
                 yield return this.Failure("HostSettings", "is invalid");
+
+            if (_headersSerializer == null)
+                yield return this.Failure("HeadersSerializer", "should not be null");
         }
 
         public IEventStoreDbProducerProvider CreateProducerProvider(IBusInstance busInstance)
@@ -54,7 +64,8 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
             _configureSend?.Invoke(sendConfiguration.Configurator);
             var sendPipe = sendConfiguration.CreatePipe();
 
-            return new EventStoreDbProducerProvider(_hostConfiguration, busInstance, sendPipe, _sendObservers, _serializationConfiguration.Serializer);
+            return new EventStoreDbProducerProvider(_hostConfiguration, busInstance, sendPipe, _sendObservers, _headersSerializer,
+                _serializationConfiguration.Serializer);
         }
     }
 }

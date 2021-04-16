@@ -89,7 +89,7 @@ namespace MassTransit.EventStoreDbIntegration
         {
             var context = new EventRecordReceiveContext(resolvedEvent, _context, _processorContext,
                 _processorContext.ReceiveSettings.StreamCategory.IsAllStream,
-                _processorContext.MetadataDeserializer);
+                _processorContext.HeadersDeserializer);
 
             try
             {

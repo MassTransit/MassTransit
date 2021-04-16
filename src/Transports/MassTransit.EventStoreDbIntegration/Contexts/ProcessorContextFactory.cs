@@ -61,8 +61,8 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
             {
                 var client = connectionContext.CreateEventStoreDbClient();
                 var checkpointStore = _checkpointStoreFactory(client);
-                ProcessorContext context = new EventStoreDbProcessorContext(_hostConfiguration, _receiveSettings, client, checkpointStore,
-                    _headersDeserializer, createCancellationToken);
+                ProcessorContext context = new EventStoreDbProcessorContext(_hostConfiguration, _receiveSettings, client, _headersDeserializer,
+                    checkpointStore, createCancellationToken);
                 return Task.FromResult(context);
             }
 

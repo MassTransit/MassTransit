@@ -23,7 +23,6 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         readonly EventStoreDbProducerSpecification _producerSpecification;
         Recycle<IConnectionContextSupervisor> _connectionContextSupervisor;
         IHeadersDeserializer _headersDeserializer;
-        IHeadersSerializer _headersSerializer;
         bool _isHostSettingsConfigured = false;
 
         public EventStoreDbFactoryConfigurator()
@@ -93,7 +92,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
         public void SetHeadersSerializer(IHeadersSerializer serializer)
         {
-            _headersSerializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
+            _producerSpecification.SetHeadersSerializer(serializer);
         }
 
         public void SetMessageSerializer(SerializerFactory serializerFactory)

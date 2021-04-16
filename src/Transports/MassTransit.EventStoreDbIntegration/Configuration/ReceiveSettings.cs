@@ -1,4 +1,5 @@
 ﻿using System;
+using MassTransit.EventStoreDbIntegration.Serializers;
 
 namespace MassTransit.EventStoreDbIntegration
 {
@@ -9,5 +10,6 @@ namespace MassTransit.EventStoreDbIntegration
         ushort CheckpointMessageCount { get; }
         TimeSpan CheckpointInterval { get; }        
         int ConcurrencyLimit { get; }
+        IHeadersDeserializer HeadersDeserializer { get; }
     }
 }
