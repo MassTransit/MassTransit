@@ -55,7 +55,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
 
                     rider.UsingEventStoreDB((context, esdb) =>
                     {
-                        esdb.UseExistingClient();
+                        //esdb.Host("esdb://localhost:2113?tls=false", "MassTransit Recycle_Specs Connection");
 
                         esdb.CatchupSubscription(StreamCategory.AllStream, SubscriptionName, c =>
                         {

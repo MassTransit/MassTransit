@@ -22,9 +22,9 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         public override CancellationToken CancellationToken { get; }
 
-        public IMessageSerializer Serializer => _context.Serializer;
         public IHeadersSerializer HeadersSerializer => _context.HeadersSerializer;
-
+        public IMessageSerializer Serializer => _context.Serializer;
+        
         public Task Produce(string streamName, IEnumerable<EventData> eventData, CancellationToken cancellationToken)
         {
             return _context.Produce(streamName, eventData, cancellationToken);

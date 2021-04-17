@@ -50,10 +50,6 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (!_hostSettings.UseExistingClient
-                && (string.IsNullOrWhiteSpace(_hostSettings.ConnectionString) || string.IsNullOrWhiteSpace(_hostSettings.ConnectionName)))
-                yield return this.Failure("HostSettings", "is invalid");
-
             if (_headersSerializer == null)
                 yield return this.Failure("HeadersSerializer", "should not be null");
         }

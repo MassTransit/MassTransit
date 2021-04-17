@@ -1,4 +1,5 @@
-using MassTransit.Registration;
+using System;
+using EventStore.Client;
 using MassTransit.Transports;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
@@ -7,8 +8,8 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         TransportPipeContextSupervisor<ConnectionContext>,
         IConnectionContextSupervisor
     {
-        public ConnectionContextSupervisor(IConfigurationServiceProvider provider)
-            : base(new ConnectionContextFactory(provider))
+        public ConnectionContextSupervisor(Func<EventStoreClient> esdbClientFactory)
+            : base(new ConnectionContextFactory(esdbClientFactory))
         {
         }
     }

@@ -21,17 +21,14 @@ namespace MassTransit.EventStoreDbIntegration
         readonly IReceiveEndpointCollection _endpoints;
         readonly IEventStoreDbHostConfiguration _hostConfiguration;
         readonly IEventStoreDbProducerProvider _producerProvider;
-        readonly IRiderRegistrationContext _registrationContext;
 
         public EventStoreDbRider(IEventStoreDbHostConfiguration hostConfiguration, IBusInstance busInstance, IReceiveEndpointCollection endpoints,
-            IEventStoreDbProducerProvider producerProvider,
-            IRiderRegistrationContext registrationContext)
+            IEventStoreDbProducerProvider producerProvider)
         {
             _hostConfiguration = hostConfiguration;
             _busInstance = busInstance;
             _endpoints = endpoints;
             _producerProvider = producerProvider;
-            _registrationContext = registrationContext;
         }
 
         public IEventStoreDbProducerProvider GetProducerProvider(ConsumeContext consumeContext = null)

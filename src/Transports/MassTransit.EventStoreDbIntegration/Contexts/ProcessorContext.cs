@@ -12,9 +12,9 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         IProcessorLockContext
     {
         ReceiveSettings ReceiveSettings { get; }
-        ICheckpointStore CheckpointStore { get; }
         IHeadersDeserializer HeadersDeserializer { get; }
-
+        ICheckpointStore CheckpointStore { get; }
+        
         event Func<StreamSubscription, ResolvedEvent, CancellationToken, Task> ProcessEvent;
         event Action<StreamSubscription, SubscriptionDroppedReason, Exception> ProcessSubscriptionDropped;
 

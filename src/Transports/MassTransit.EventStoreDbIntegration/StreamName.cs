@@ -4,18 +4,15 @@ namespace MassTransit.EventStoreDbIntegration
 {
     public sealed class StreamName
     {
-        public static StreamName ForCheckpoint(string checkpointId, string prefix = null)
-        {
-            return prefix == null
+        public static StreamName ForCheckpoint(string checkpointId, string prefix = null) =>
+            prefix == null
                 ? new StreamName($"checkpoint-{checkpointId}")
                 : new StreamName($"[{prefix}]checkpoint-{checkpointId}");
-        }
 
-        public static StreamName For<T>(string id) => new StreamName($"{typeof(T).Name}-{id}");
-        public static StreamName For<T>(Guid id) => new StreamName($"{typeof(T).Name}-{id:D}");
-        public static StreamName Custom(string streamName) => new StreamName(streamName);
-        public static StreamName Custom(StreamCategory streamCategory, string id) => new StreamName($"{streamCategory}-{id}");
-        public static StreamName Custom(StreamCategory streamCategory, Guid id) => new StreamName($"{streamCategory}-{id:D}");
+        public static StreamName Custom(string streamName, string prefix = null) =>
+            prefix == null
+                ? new StreamName(streamName)
+                : new StreamName($"[{prefix}]{streamName}");
 
         StreamName(string value)
         {

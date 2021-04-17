@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace MassTransit.EventStoreDbIntegration.Serializers
 {
-    public static class DictionaryHeadersSerialize
+    public static class DictionaryHeadersSerde
     {
         const string CorrelationIdKey = "$correlationId";
         const string CausationIdKey = "$causationId";
@@ -22,7 +22,7 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
         static readonly Lazy<IHeadersDeserializer> _deserializer;
         static readonly Lazy<IHeadersSerializer> _serializer;
 
-        static DictionaryHeadersSerialize()
+        static DictionaryHeadersSerde()
         {
             _encoding = new UTF8Encoding(false);
             _deserializer = new Lazy<IHeadersDeserializer>(() => new DictionaryHeadersDeserializer());

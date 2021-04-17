@@ -29,11 +29,6 @@ namespace MassTransit.EventStoreDbIntegration
         void Host(string connectionString, string connectionName, UserCredentials defaultCredentials);
 
         /// <summary>
-        /// Use an existing EventStoreClient that has been registered outside of MassTransit.
-        /// </summary>
-        void UseExistingClient();
-
-        /// <summary>
         /// Subscribe to an EventStoreDB stream using a catch-up subscription.
         /// </summary>
         /// <param name="streamCategory">The stream category to subscribe to.</param>

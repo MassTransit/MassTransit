@@ -1,7 +1,7 @@
+using System;
 using System.Threading;
 using EventStore.Client;
 using GreenPipes;
-using MassTransit.Registration;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
@@ -9,17 +9,17 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         BasePipeContext,
         ConnectionContext
     {
-        readonly IConfigurationServiceProvider _provider;
+        readonly Func<EventStoreClient> _esdbClientFactory;
 
-        public EventStoreDbConnectionContext(IConfigurationServiceProvider provider, CancellationToken cancellationToken)
+        public EventStoreDbConnectionContext(Func<EventStoreClient> esdbClientFactory, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
-            _provider = provider;
+            _esdbClientFactory = esdbClientFactory;
         }
 
         public EventStoreClient CreateEventStoreDbClient()
         {
-            return _provider.GetRequiredService<EventStoreClient>();
+            return _esdbClientFactory();
         }
     }
 }

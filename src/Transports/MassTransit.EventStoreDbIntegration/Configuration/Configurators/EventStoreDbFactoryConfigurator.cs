@@ -32,8 +32,8 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _hostSettings = new HostSettings();
             _producerSpecification = new EventStoreDbProducerSpecification(this, _hostSettings);
 
-            SetHeadersDeserializer(DictionaryHeadersSerialize.Deserializer);
-            SetHeadersSerializer(DictionaryHeadersSerialize.Serializer);
+            SetHeadersDeserializer(DictionaryHeadersSerde.Deserializer);
+            SetHeadersSerializer(DictionaryHeadersSerde.Serializer);
         }
 
         public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
@@ -72,11 +72,6 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _hostSettings.ConnectionString = connectionString;
             _hostSettings.ConnectionName = connectionName;
             _hostSettings.DefaultCredentials = userCredentials;
-        }
-
-        public void UseExistingClient()
-        {
-            _hostSettings.UseExistingClient = true;
         }
 
         public void CatchupSubscription(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbCatchupSubscriptionConfigurator> configure)
@@ -127,7 +122,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
         public IEventStoreDbRider Build(IRiderRegistrationContext context, IBusInstance busInstance)
         {
-            _connectionContextSupervisor = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(context));
+            _connectionContextSupervisor = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(CreateEventStoreClientFactory(context)));
 
             var endpoints = new ReceiveEndpointCollection();
             foreach (var endpoint in _endpoints)
@@ -135,7 +130,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
             var producerProvider = _producerSpecification.CreateProducerProvider(busInstance);
 
-            return new EventStoreDbRider(this, busInstance, endpoints, new CachedEventStoreDbProducerProvider(producerProvider), context);
+            return new EventStoreDbRider(this, busInstance, endpoints, new CachedEventStoreDbProducerProvider(producerProvider));
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -157,6 +152,29 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         public IBusInstanceSpecification Build(IRiderRegistrationContext context)
         {
             return new EventStoreDbBusInstanceSpecification(context, this);
+        }
+
+        Func<EventStoreClient> CreateEventStoreClientFactory(IRiderRegistrationContext context)
+        {
+            if (_isHostSettingsConfigured)
+            {
+                //Create a client for this rider instance with the provided settings.
+                var client = CreateEventStoreClient();
+                return () => client;
+            }
+            else
+            {
+                //Use a client that was registered outside of MassTransit, this is the preferred approach.
+                return () => context.GetRequiredService<EventStoreClient>();
+            }
+        }
+
+        EventStoreClient CreateEventStoreClient()
+        {
+            var settings = EventStoreClientSettings.Create(_hostSettings.ConnectionString);
+            settings.ConnectionName = _hostSettings.ConnectionName;
+
+            return new EventStoreClient(settings);
         }
 
         void ThrowIfHostIsAlreadyConfigured()

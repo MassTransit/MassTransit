@@ -8,7 +8,10 @@ namespace MassTransit.EventStoreDbIntegration
 
         public static readonly StreamCategory AllStream = new StreamCategory(AllStreamName);
 
-        public static StreamCategory FromString(string streamCategory) => new StreamCategory(streamCategory);
+        public static StreamCategory FromString(string streamCategory, string prefix = null) =>
+            prefix == null
+                ? new StreamCategory($"[{prefix}]{streamCategory}")
+                : new StreamCategory(streamCategory);
 
         StreamCategory(string streamCategory)
         {

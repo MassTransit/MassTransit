@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using EventStore.Client;
 using MassTransit.Configuration;
 using MassTransit.Context;
-using MassTransit.Util;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
@@ -30,6 +29,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         public async Task Complete(ResolvedEvent resolvedEvent)
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
+
             _ = await _data.TryCheckpointAsync(resolvedEvent).ConfigureAwait(false);
         }
 
@@ -67,7 +67,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
                 _current = null;
             }
 
-            public async Task<ulong?> GetLastCheckpoint() => _current ??= await _checkpointStore.GetLastCheckpoint().ConfigureAwait(false);
+            public async Task<ulong?> GetLastCheckpointAsync() => _current ??= await _checkpointStore.GetLastCheckpoint().ConfigureAwait(false);
 
             public async Task<bool> TryCheckpointAsync(ResolvedEvent resolvedEvent)
             {
@@ -92,7 +92,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
                 if (_processed < _maxCount && _timer.Elapsed < _timeout)
                     return false;
 
-                await CommitIfRequired().ConfigureAwait(false);
+                await CommitCheckpoint().ConfigureAwait(false);
                 Reset();
                 return true;
             }
@@ -101,7 +101,8 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
             {
                 try
                 {
-                    await CommitIfRequired().ConfigureAwait(false);
+                    if (_commitIsRequired)
+                        await CommitCheckpoint().ConfigureAwait(false);
                 }
                 finally
                 {
@@ -113,14 +114,12 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
                 }
             }
 
-            Task CommitIfRequired()
+            Task CommitCheckpoint()
             {
-                if (!_commitIsRequired)
-                    return TaskUtil.Completed;
-
                 LogContext.Debug?.Log(
-                    "Subscription: {StreamId} updating checkpoint with offset: {Offset}",
+                    "Subscription: {StreamCategory} updating checkpoint with offset: {Offset}",
                     _streamCategory, _current);
+
                 return _checkpointStore.StoreCheckpoint(_current);
             }
         }

@@ -1,20 +1,21 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using EventStore.Client;
 using GreenPipes;
 using GreenPipes.Agents;
 using GreenPipes.Internals.Extensions;
-using MassTransit.Registration;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
     public class ConnectionContextFactory :
         IPipeContextFactory<ConnectionContext>
     {
-        readonly IConfigurationServiceProvider _provider;
+        readonly Func<EventStoreClient> _esdbClientFactory;
 
-        public ConnectionContextFactory(IConfigurationServiceProvider provider)
+        public ConnectionContextFactory(Func<EventStoreClient> esdbClientFactory)
         {
-            _provider = provider;
+            _esdbClientFactory = esdbClientFactory;
         }
 
         IPipeContextAgent<ConnectionContext> IPipeContextFactory<ConnectionContext>.CreateContext(ISupervisor supervisor)
@@ -41,7 +42,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         ConnectionContext CreateConnectionContext(ISupervisor supervisor)
         {
-            return new EventStoreDbConnectionContext(_provider, supervisor.Stopped);
+            return new EventStoreDbConnectionContext(_esdbClientFactory, supervisor.Stopped);
         }
     }
 }

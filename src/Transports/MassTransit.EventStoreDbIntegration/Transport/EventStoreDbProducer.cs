@@ -123,7 +123,6 @@ namespace MassTransit.EventStoreDbIntegration
 
                 var sendContext = new EventStoreDbMessageSendContext<T>(_context.EndpointAddress.StreamName, _message, _cancellationToken)
                 {
-                    EventStoreDBContentType = context.Serializer.ContentType.MediaType,
                     Serializer = context.Serializer,
                     DestinationAddress = _context.EndpointAddress
                 };
@@ -206,7 +205,6 @@ namespace MassTransit.EventStoreDbIntegration
                 EventStoreDbMessageSendContext<T>[] contexts = _messages
                     .Select(x => new EventStoreDbMessageSendContext<T>(_context.EndpointAddress.StreamName, x, _cancellationToken)
                     {
-                        EventStoreDBContentType = context.Serializer.ContentType.MediaType,
                         Serializer = context.Serializer,
                         DestinationAddress = _context.EndpointAddress
                     })

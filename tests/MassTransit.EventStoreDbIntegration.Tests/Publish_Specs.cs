@@ -53,8 +53,6 @@ namespace MassTransit.EventStoreDbIntegration.Tests
 
                     rider.UsingEventStoreDB((context, esdb) =>
                     {
-                        esdb.UseExistingClient();
-
                         esdb.CatchupSubscription(StreamCategory.AllStream, SubscriptionName, c =>
                         {
                             c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint(CheckpointId));
@@ -88,7 +86,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                     serializer.Serialize(stream, context);
                     stream.Flush();
 
-                    var metadata = DictionaryHeadersSerialize.Serializer.Serialize(context);
+                    var metadata = DictionaryHeadersSerde.Serializer.Serialize(context);
 
                     var preparedMessage = new EventData(
                         Uuid.FromGuid(context.MessageId.Value),
