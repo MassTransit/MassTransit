@@ -46,8 +46,6 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _processorConfigurator = new PipeConfigurator<ProcessorContext>();
         }
 
-        
-
         public TimeSpan CheckpointInterval { get; set; }
 
         public ushort CheckpointMessageCount { get; set; }

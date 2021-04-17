@@ -10,6 +10,5 @@ namespace MassTransit.EventStoreDbIntegration
         ushort CheckpointMessageCount { get; }
         TimeSpan CheckpointInterval { get; }        
         int ConcurrencyLimit { get; }
-        IHeadersDeserializer HeadersDeserializer { get; }
     }
 }

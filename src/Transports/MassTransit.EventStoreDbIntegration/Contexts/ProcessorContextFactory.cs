@@ -1,7 +1,5 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using EventStore.Client;
 using GreenPipes;
 using GreenPipes.Agents;
 using GreenPipes.Internals.Extensions;
