@@ -8,7 +8,7 @@
     /// against objects with int-compare speed vs. .Equals() speed
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    class NodeTable<T>
+    public class NodeTable<T>
     {
         readonly IDictionary<T, int> _nodes;
         int _count;

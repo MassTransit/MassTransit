@@ -93,6 +93,21 @@ jobs:
       - name: Test ActiveMQ
         run: dotnet test -c Release --filter Category!=Flaky
         working-directory: tests/MassTransit.ActiveMqTransport.Tests
+  test-grpc:
+    name: "Transports: gRPC"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Test gRPC
+        run: dotnet test -c Release --filter Category!=Flaky
+        working-directory: tests/MassTransit.GrpcTransport.Tests
   test-azure-service-bus:
     name: "Transports: Azure Service Bus"
     if: false # too flaky at this point
@@ -159,6 +174,7 @@ jobs:
         working-directory: tests/MassTransit.AmazonSqsTransport.Tests
   test-azure-table:
     name: "Storage: Azure Table"
+    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') && github.repository == 'MassTransit/MassTransit'
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -177,6 +193,7 @@ jobs:
   test-cosmosdb:
     name: "Storage: CosmosDB"
     runs-on: ubuntu-latest
+    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') && github.repository == 'MassTransit/MassTransit'
     steps:
       - name: Check out code
         uses: actions/checkout@v2

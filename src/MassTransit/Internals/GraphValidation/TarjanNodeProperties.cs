@@ -1,6 +1,6 @@
 ﻿namespace MassTransit.Internals.GraphValidation
 {
-    interface ITarjanNodeProperties
+    public interface ITarjanNodeProperties
     {
         int Index { get; set; }
         int LowLink { get; set; }

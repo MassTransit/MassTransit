@@ -1,6 +1,6 @@
 ﻿namespace MassTransit.Internals.GraphValidation
 {
-    class Node<T>
+    public class Node<T>
     {
         readonly int _index;
         public readonly T Value;
