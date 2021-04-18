@@ -13,13 +13,13 @@ namespace MassTransit.EventStoreDbIntegration.Tests
     using TestFramework;
 
 
-    public class Recycled_Specs :
+    public class Recycle_Specs :
         InMemoryTestFixture
     {
-        const string SubscriptionName = "mt_recycle_specs";
-        const string CheckpointId = "mt_recycle_specs";
+        const string SubscriptionName = "mt_recycle_specs_test";
+        const string ProducerStreamName = "mt_recycle_specs";
 
-        public Recycled_Specs()
+        public Recycle_Specs()
         {
             TestTimeout = TimeSpan.FromMinutes(5);
         }
@@ -41,7 +41,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
             _ = services.AddSingleton<EventStoreClient>((provider) =>
             {
                 var settings = EventStoreClientSettings.Create("esdb://localhost:2113?tls=false");
-                settings.ConnectionName = "MassTransit Recycle_Specs Connection";
+                settings.ConnectionName = "MassTransit Test Connection";
 
                 return new EventStoreClient(settings);
             });
@@ -57,9 +57,9 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                     {
                         //esdb.Host("esdb://localhost:2113?tls=false", "MassTransit Recycle_Specs Connection");
 
-                        esdb.CatchupSubscription(StreamCategory.AllStream, SubscriptionName, c =>
+                        esdb.CatchupSubscription(StreamCategory.FromString(ProducerStreamName), SubscriptionName, c =>
                         {
-                            c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint(CheckpointId));
+                            c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint(SubscriptionName));
                             c.ConfigureConsumer<EventStoreDbMessageConsumer>(context);
                         });
                     });
@@ -79,7 +79,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                     var serviceScope = provider.CreateScope();
 
                     var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventStoreDbProducerProvider>();
-                    var producer = await producerProvider.GetProducer(SubscriptionName);
+                    var producer = await producerProvider.GetProducer(ProducerStreamName);
 
                     try
                     {
@@ -112,7 +112,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                         Assert.AreEqual("text", result.Message.Text);
                         Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
                         Assert.That(result.DestinationAddress,
-                            Is.EqualTo(new Uri($"loopback://localhost/{EventStoreDbEndpointAddress.PathPrefix}/{SubscriptionName}")));
+                            Is.EqualTo(new Uri($"loopback://localhost/{EventStoreDbEndpointAddress.PathPrefix}/{ProducerStreamName}")));
                         Assert.That(result.MessageId, Is.EqualTo(messageId));
                         Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
                         Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));

@@ -16,8 +16,8 @@ namespace MassTransit.EventStoreDbIntegration.Tests
     public class Receive_Specs :
         InMemoryTestFixture
     {
-        const string SubscriptionName = "mt_receive_specs";
-        const string CheckpointId = "mt_receive_specs";
+        const string SubscriptionName = "mt_receive_specs_test";
+        const string ProducerStreamName = "mt_receive_specs";
 
         [Test]
         public async Task Should_receive()
@@ -32,7 +32,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
             _ = services.AddSingleton<EventStoreClient>((provider) =>
             {
                 var settings = EventStoreClientSettings.Create("esdb://localhost:2113?tls=false");
-                settings.ConnectionName = "MassTransit Receive_Specs Connection";
+                settings.ConnectionName = "MassTransit Test Connection";
 
                 return new EventStoreClient(settings);
             });
@@ -46,9 +46,9 @@ namespace MassTransit.EventStoreDbIntegration.Tests
 
                     rider.UsingEventStoreDB((context, esdb) =>
                     {
-                        esdb.CatchupSubscription(StreamCategory.AllStream, SubscriptionName, c =>
+                        esdb.CatchupSubscription(StreamCategory.FromString(ProducerStreamName), SubscriptionName, c =>
                         {
-                            c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint(CheckpointId));
+                            c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint(SubscriptionName));
                             c.ConfigureConsumer<EventStoreDbMessageConsumer>(context);
                         });
                     });
@@ -83,7 +83,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                         stream.ToArray(),
                         metadata);
 
-                    await producer.AppendToStreamAsync(StreamName.Custom("mt_receive_specs"), StreamState.Any, new List<EventData> { preparedMessage });
+                    await producer.AppendToStreamAsync(StreamName.Custom(ProducerStreamName), StreamState.Any, new List<EventData> { preparedMessage });
                 }
 
                 ConsumeContext<EventStoreDbMessage> result = await taskCompletionSource.Task;

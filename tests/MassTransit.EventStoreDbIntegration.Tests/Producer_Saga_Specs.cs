@@ -1,26 +1,22 @@
 namespace MassTransit.EventStoreDbIntegration.Tests
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading;
     using System.Threading.Tasks;
+    using Automatonymous;
     using EventStore.Client;
-    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
-    using Util;
+    using TestFramework.Sagas;
 
 
-    public class BatchProducer_Specs :
+    public class Producer_Saga_Specs :
         InMemoryTestFixture
     {
-        const int Expected = 10;
-        const string SubscriptionName = "mt_batch_producer_specs_test";
-        const string ProducerStreamName = "mt_batch_producer_specs";
+        public const string SubscriptionName = "mt_producer_saga_specs_test";
+        public const string ProducerStreamName = "mt_producer_saga_specs";
 
         [Test]
         public async Task Should_produce()
@@ -40,18 +36,23 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                 return new EventStoreClient(settings);
             });
 
-            var consumer = new EventStoreDbMessageConsumer(taskCompletionSource, Expected);
             services.AddMassTransit(x =>
             {
+                x.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
+                    .InMemoryRepository();
+
                 x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
                 x.AddRider(rider =>
                 {
+                    rider.AddConsumer<EventStoreDbMessageConsumer>();
+
                     rider.UsingEventStoreDB((context, esdb) =>
                     {
                         esdb.CatchupSubscription(StreamCategory.FromString(ProducerStreamName), SubscriptionName, c =>
                         {
                             c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint(SubscriptionName));
-                            c.Consumer(() => consumer);
+
+                            c.ConfigureConsumer<EventStoreDbMessageConsumer>(context);
                         });
                     });
                 });
@@ -65,36 +66,22 @@ namespace MassTransit.EventStoreDbIntegration.Tests
 
             var serviceScope = provider.CreateScope();
 
-            var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventStoreDbProducerProvider>();
-            var producer = await producerProvider.GetProducer(ProducerStreamName);
+            var publishEndpoint = serviceScope.ServiceProvider.GetRequiredService<IPublishEndpoint>();
 
             try
             {
-                List<EventStoreDbMessageClass> messages = Enumerable.Range(0, Expected)
-                    .Select(x => new EventStoreDbMessageClass(x.ToString()))
-                    .ToList();
-
                 var correlationId = NewId.NextGuid();
-                var conversationId = NewId.NextGuid();
-                var initiatorId = NewId.NextGuid();
-                var messageId = NewId.NextGuid();
-                await producer.Produce<EventStoreDbMessage>(messages, Pipe.Execute<SendContext>(context =>
+
+                await publishEndpoint.Publish(new StartTest
                 {
-                    context.CorrelationId = correlationId;
-                    context.MessageId = messageId;
-                    context.InitiatorId = initiatorId;
-                    context.ConversationId = conversationId;
-                }), TestCancellationToken);
+                    CorrelationId = correlationId,
+                    TestKey = "ABC123"
+                }, TestCancellationToken);
 
                 ConsumeContext<EventStoreDbMessage> result = await taskCompletionSource.Task;
 
-                Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
-                Assert.That(result.DestinationAddress,
-                    Is.EqualTo(new Uri($"loopback://localhost/{EventStoreDbEndpointAddress.PathPrefix}/{ProducerStreamName}")));
-                Assert.That(result.MessageId, Is.EqualTo(messageId));
-                Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
-                Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
-                Assert.That(result.ConversationId, Is.EqualTo(conversationId));
+                Assert.AreEqual("Key: ABC123", result.Message.Text);
+                Assert.AreEqual(correlationId, result.InitiatorId);
             }
             finally
             {
@@ -110,26 +97,16 @@ namespace MassTransit.EventStoreDbIntegration.Tests
         class EventStoreDbMessageConsumer :
             IConsumer<EventStoreDbMessage>
         {
-            readonly int _expected;
             readonly TaskCompletionSource<ConsumeContext<EventStoreDbMessage>> _taskCompletionSource;
-            int _consumed;
 
-            public EventStoreDbMessageConsumer(TaskCompletionSource<ConsumeContext<EventStoreDbMessage>> taskCompletionSource, int expected)
+            public EventStoreDbMessageConsumer(TaskCompletionSource<ConsumeContext<EventStoreDbMessage>> taskCompletionSource)
             {
-                _consumed = 0;
                 _taskCompletionSource = taskCompletionSource;
-                _expected = expected;
             }
 
-            public Task Consume(ConsumeContext<EventStoreDbMessage> context)
+            public async Task Consume(ConsumeContext<EventStoreDbMessage> context)
             {
-                if (Interlocked.Increment(ref _consumed) == _expected)
-                {
-                    _taskCompletionSource.TrySetResult(context);
-                    Interlocked.Exchange(ref _consumed, 0);
-                }
-
-                return TaskUtil.Completed;
+                _taskCompletionSource.TrySetResult(context);
             }
         }
 
@@ -140,15 +117,35 @@ namespace MassTransit.EventStoreDbIntegration.Tests
         }
 
 
-        class EventStoreDbMessageClass :
-            EventStoreDbMessage
+        public class TestInstance :
+            SagaStateMachineInstance
         {
-            public EventStoreDbMessageClass(string text)
+            public State CurrentState { get; set; }
+            public string Key { get; set; }
+            public Guid CorrelationId { get; set; }
+        }
+
+
+        public class TestStateMachineSaga :
+            MassTransitStateMachine<TestInstance>
+        {
+            public TestStateMachineSaga()
             {
-                Text = text;
+                InstanceState(x => x.CurrentState);
+
+                Initially(
+                    When(Started)
+                        .Then(context => context.Instance.Key = context.Data.TestKey)
+                        .Produce(x => StreamName.Custom(Producer_Saga_Specs.ProducerStreamName),
+                                 x => x.Init<EventStoreDbMessage>(new {Text = $"Key: {x.Data.TestKey}"}))
+                        .TransitionTo(Active));
+
+                SetCompletedWhenFinalized();
             }
 
-            public string Text { get; }
+            public State Active { get; private set; }
+
+            public Event<StartTest> Started { get; private set; }
         }
     }
 }
