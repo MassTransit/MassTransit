@@ -7,7 +7,7 @@ using MassTransit.Transports.Metrics;
 
 namespace MassTransit.EventStoreDbIntegration.Filters
 {
-    public class EventStoreDbConsumerFilter :
+    public sealed class EventStoreDbConsumerFilter :
         IFilter<ProcessorContext>
     {
         readonly ReceiveEndpointContext _context;

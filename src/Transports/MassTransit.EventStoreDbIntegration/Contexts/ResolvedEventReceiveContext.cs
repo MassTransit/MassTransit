@@ -9,31 +9,28 @@ using MassTransit.Util;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
-    public sealed class EventRecordReceiveContext :
+    public sealed class ResolvedEventReceiveContext :
         BaseReceiveContext,
-        EventRecordContext,
+        ResolvedEventContext,
         ReceiveLockContext
     {
         readonly ResolvedEvent _resolvedEvent;
         readonly EventRecord _eventRecord;
         readonly IProcessorLockContext _lockContext;
-        readonly bool _isAllStream;
         readonly IHeadersDeserializer _headersDeserializer;
         byte[] _body;
         byte[] _metadata;
 
-        public EventRecordReceiveContext(
+        public ResolvedEventReceiveContext(
             ResolvedEvent resolvedEvent,
             ReceiveEndpointContext receiveEndpointContext,
             IProcessorLockContext lockContext,
-            bool isAllStream,
             IHeadersDeserializer headersDeserializer)
             : base(false, receiveEndpointContext)
         {
             _resolvedEvent = resolvedEvent;
             _eventRecord = resolvedEvent.Event;
             _lockContext = lockContext;
-            _isAllStream = isAllStream;
             _headersDeserializer = headersDeserializer;
         }
 
@@ -41,8 +38,8 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         public string EventStreamId => _eventRecord.EventStreamId;
         public string EventType => _eventRecord.EventType;
-        public ulong Offset => _isAllStream ? _resolvedEvent.OriginalPosition.Value.CommitPosition : EventNumber;
-        public ulong EventNumber => _eventRecord.EventNumber.ToUInt64();
+        public ulong Offset => _resolvedEvent.OriginalPosition.Value.CommitPosition;
+        public ulong EventNumber => _resolvedEvent.Event.EventNumber.ToUInt64();
         public DateTime TimeStamp => _eventRecord.Created;
         public byte[] Metadata => _metadata ??= _eventRecord.Metadata.ToArray();
 

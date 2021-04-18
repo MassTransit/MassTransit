@@ -11,7 +11,7 @@ using MassTransit.EventStoreDbIntegration.Contexts;
 
 namespace MassTransit.EventStoreDbIntegration
 {
-    public class EventStoreDbDataReceiver :
+    public sealed class EventStoreDbDataReceiver :
         Agent,
         IEventStoreDbDataReceiver
     {
@@ -87,9 +87,7 @@ namespace MassTransit.EventStoreDbIntegration
 
         async Task Handle(ResolvedEvent resolvedEvent)
         {
-            var context = new EventRecordReceiveContext(resolvedEvent, _context, _processorContext,
-                _processorContext.ReceiveSettings.StreamCategory.IsAllStream,
-                _processorContext.HeadersDeserializer);
+            var context = new ResolvedEventReceiveContext(resolvedEvent, _context, _processorContext, _processorContext.HeadersDeserializer);
 
             try
             {
