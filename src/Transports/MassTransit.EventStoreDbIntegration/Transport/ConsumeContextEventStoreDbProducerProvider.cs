@@ -59,6 +59,7 @@ namespace MassTransit.EventStoreDbIntegration
                 where T : class
             {
                 var sendPipeAdapter = new ConsumeSendPipeAdapter<T>(pipe, _consumeContext);
+
                 return _producer.Produce(message, sendPipeAdapter, cancellationToken);
             }
 
@@ -66,6 +67,7 @@ namespace MassTransit.EventStoreDbIntegration
                 where T : class
             {
                 var sendPipeAdapter = new ConsumeSendPipeAdapter<T>(pipe, _consumeContext);
+
                 return _producer.Produce(messages, sendPipeAdapter, cancellationToken);
             }
 
@@ -85,6 +87,7 @@ namespace MassTransit.EventStoreDbIntegration
                 where T : class
             {
                 var sendPipeAdapter = new ConsumeSendPipeAdapter<T>(pipe, _consumeContext);
+
                 return _producer.Produce(values, sendPipeAdapter, cancellationToken);
             }
 
@@ -92,6 +95,7 @@ namespace MassTransit.EventStoreDbIntegration
                 where T : class
             {
                 var sendPipeAdapter = new ConsumeSendPipeAdapter<T>(pipe, _consumeContext);
+
                 return _producer.Produce(values, sendPipeAdapter, cancellationToken);
             }
         }

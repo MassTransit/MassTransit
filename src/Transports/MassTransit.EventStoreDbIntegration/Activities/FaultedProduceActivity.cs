@@ -56,6 +56,7 @@ namespace MassTransit.EventStoreDbIntegration.Activities
         public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("publish-faulted");
+
             _pipe.Probe(scope);
         }
 

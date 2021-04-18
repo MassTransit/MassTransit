@@ -13,10 +13,6 @@ namespace MassTransit.EventStoreDbIntegration
         /// </summary>
         string EventType { get; }
         /// <summary>
-        /// The Content-Type of this event's data.
-        /// </summary>
-        //string ContentType { get; }
-        /// <summary>
         /// For an $all stream subscription, it is the position of this event within the transaction log. 
         /// Otherwise, it is the StreamPosition of this event in the stream to which it belongs.
         /// </summary>

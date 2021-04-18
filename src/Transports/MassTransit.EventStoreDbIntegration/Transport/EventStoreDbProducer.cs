@@ -40,6 +40,7 @@ namespace MassTransit.EventStoreDbIntegration
             where T : class
         {
             var sendPipe = new SendPipe<T>(message, _context, pipe, cancellationToken);
+
             return _context.ProducerContextSupervisor.Send(sendPipe, cancellationToken);
         }
 
@@ -47,6 +48,7 @@ namespace MassTransit.EventStoreDbIntegration
             where T : class
         {
             var sendPipe = new BatchSendPipe<T>(messages, _context, pipe, cancellationToken);
+
             return _context.ProducerContextSupervisor.Send(sendPipe, cancellationToken);
         }
 
@@ -244,12 +246,15 @@ namespace MassTransit.EventStoreDbIntegration
                     {
                         var currSendContext = contexts[i];
 
-                        eventDataBatch.Add(new EventData(
-                            Uuid.FromGuid(currSendContext.MessageId.Value),
-                            eventTypeName,
-                            currSendContext.Body,
-                            context.HeadersSerializer.Serialize(currSendContext),
-                            esdbContentType));
+                        eventDataBatch.Add(
+                            new EventData(
+                                Uuid.FromGuid(currSendContext.MessageId.Value),
+                                eventTypeName,
+                                currSendContext.Body,
+                                context.HeadersSerializer.Serialize(currSendContext),
+                                esdbContentType
+                                )
+                            );
                     }
 
                     await context.Produce(sendContext.StreamName, eventDataBatch, sendContext.CancellationToken).ConfigureAwait(false);

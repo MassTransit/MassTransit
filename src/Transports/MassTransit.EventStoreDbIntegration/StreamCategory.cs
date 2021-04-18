@@ -10,8 +10,8 @@ namespace MassTransit.EventStoreDbIntegration
 
         public static StreamCategory FromString(string streamCategory, string prefix = null) =>
             prefix == null
-                ? new StreamCategory($"[{prefix}]{streamCategory}")
-                : new StreamCategory(streamCategory);
+                ? new StreamCategory(streamCategory)
+                : new StreamCategory($"[{prefix}]{streamCategory}");
 
         StreamCategory(string streamCategory)
         {
