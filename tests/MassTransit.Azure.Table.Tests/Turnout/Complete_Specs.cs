@@ -25,6 +25,9 @@ namespace MassTransit.Azure.Table.Tests.Turnout
         }
     }
 
+
+    [TestFixture]
+    [Category("Flaky")]
     public class Submitting_a_job_to_turnout :
         AzureTableInMemoryTestFixture
     {

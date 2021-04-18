@@ -19,6 +19,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
     }
 
 
+    [Category("Flaky")]
     [TestFixture(typeof(SqlServerTestDbParameters))]
     [TestFixture(typeof(PostgresTestDbParameters))]
     public class Submitting_a_job_to_turnout_that_faults<T> :

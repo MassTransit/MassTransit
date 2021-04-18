@@ -10,6 +10,8 @@ namespace MassTransit.Azure.Table.Tests.Turnout
     using Tests;
 
 
+    [TestFixture]
+    [Category("Flaky")]
     public class Submitting_a_job_to_turnout_that_is_cancelled :
         AzureTableInMemoryTestFixture
     {
