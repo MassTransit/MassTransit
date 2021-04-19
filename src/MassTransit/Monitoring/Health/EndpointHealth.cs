@@ -21,11 +21,13 @@ namespace MassTransit.Monitoring.Health
             _endpoints = new ConcurrentDictionary<Uri, IEndpointHealth>();
         }
 
+        public bool BusHealthy { get; set; }
+
         public void EndpointConfigured<T>(T configurator)
             where T : IReceiveEndpointConfigurator
         {
             configurator.ConnectReceiveEndpointObserver(this);
-            _endpoints.TryAdd(configurator.InputAddress, UnHealthEndpointHealth.Instance);
+            _endpoints.TryAdd(configurator.InputAddress, BusHealthy ? ConnectingEndpointHealth.Instance : UnHealthEndpointHealth.Instance);
         }
 
         public Task Ready(ReceiveEndpointReady ready)
@@ -101,6 +103,25 @@ namespace MassTransit.Monitoring.Health
             }
 
             public static IEndpointHealth Instance { get; } = new UnHealthEndpointHealth();
+
+            public EndpointHealthResult CheckHealth()
+            {
+                return _result;
+            }
+        }
+
+
+        class ConnectingEndpointHealth :
+            IEndpointHealth
+        {
+            readonly EndpointHealthResult _result;
+
+            ConnectingEndpointHealth()
+            {
+                _result = EndpointHealthResult.Healthy(null, "starting");
+            }
+
+            public static IEndpointHealth Instance { get; } = new ConnectingEndpointHealth();
 
             public EndpointHealthResult CheckHealth()
             {
