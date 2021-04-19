@@ -2,11 +2,10 @@ namespace MongoDbSagaRegisterClassMap
 {
     using System;
     using MassTransit;
-    using MassTransit.MongoDbIntegration;
     using Microsoft.Extensions.DependencyInjection;
     using MongoDB.Bson.Serialization;
     using MongoDB.Bson.Serialization.Serializers;
-    using MongoDbSaga;
+    using PersistedSaga;
 
     class OrderStateClassMap :
         BsonClassMap<OrderState>

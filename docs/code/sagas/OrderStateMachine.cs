@@ -1,8 +1,5 @@
-namespace MongoDbSaga
+namespace PersistedSaga
 {
-    using System;
-    using MassTransit;
-    using MassTransit.Saga;
     using Automatonymous;
 
     public class OrderStateMachine :
