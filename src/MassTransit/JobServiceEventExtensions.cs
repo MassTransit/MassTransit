@@ -23,7 +23,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Returns the arguments from the JobCompleted event
+        /// Returns the job from the JobCompleted event
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
@@ -48,6 +48,20 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(source));
 
             return ObjectTypeDeserializer.Deserialize<T>(source.Result);
+        }
+
+        /// <summary>
+        /// Returns the job from the JobFaulted event
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        public static T GetJob<T>(this JobFaulted source)
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
+            return ObjectTypeDeserializer.Deserialize<T>(source.Job);
         }
     }
 }
