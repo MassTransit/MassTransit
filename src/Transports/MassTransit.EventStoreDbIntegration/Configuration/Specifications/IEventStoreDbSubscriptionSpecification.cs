@@ -4,7 +4,7 @@ using MassTransit.Transports;
 
 namespace MassTransit.EventStoreDbIntegration.Specifications
 {
-    public interface IEventStoreDbCatchupSubscriptionSpecification :
+    public interface IEventStoreDbSubscriptionSpecification :
         IReceiveEndpointObserverConnector,
         ISpecification
     {

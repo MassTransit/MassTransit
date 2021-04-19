@@ -38,7 +38,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         public string EventStreamId => _eventRecord.EventStreamId;
         public string EventType => _eventRecord.EventType;
-        public ulong Offset => _resolvedEvent.OriginalPosition.Value.CommitPosition;
+        public ulong CommitPosition => _resolvedEvent.Event.Position.CommitPosition;
         public ulong EventNumber => _resolvedEvent.Event.EventNumber.ToUInt64();
         public DateTime TimeStamp => _eventRecord.Created;
         public byte[] Metadata => _metadata ??= _eventRecord.Metadata.ToArray();

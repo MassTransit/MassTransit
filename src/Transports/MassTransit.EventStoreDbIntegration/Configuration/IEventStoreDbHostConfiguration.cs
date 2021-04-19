@@ -11,7 +11,7 @@ namespace MassTransit.EventStoreDbIntegration
     {
         IConnectionContextSupervisor ConnectionContextSupervisor { get; }
 
-        IEventStoreDbCatchupSubscriptionSpecification CreateCatchupSpecification(StreamCategory streamCategory, string subscriptionName,
+        IEventStoreDbSubscriptionSpecification CreateCatchupSubscriptionSpecification(StreamCategory streamCategory, string subscriptionName,
             Action<IEventStoreDbCatchupSubscriptionConfigurator> configure);
 
         IEventStoreDbRider Build(IRiderRegistrationContext context, IBusInstance busInstance);

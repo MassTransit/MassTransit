@@ -11,7 +11,7 @@ using MassTransit.Transports;
 namespace MassTransit.EventStoreDbIntegration.Specifications
 {
     public class EventStoreDbCatchupSubscriptionSpecification :
-        IEventStoreDbCatchupSubscriptionSpecification
+        IEventStoreDbSubscriptionSpecification
     {
         readonly Action<IEventStoreDbCatchupSubscriptionConfigurator> _configure;      
         readonly ReceiveEndpointObservable _endpointObservers;      

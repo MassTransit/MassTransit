@@ -18,7 +18,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         IEventStoreDbHostConfiguration
     {   
         readonly ReceiveEndpointObservable _endpointObservers;
-        readonly List<IEventStoreDbCatchupSubscriptionSpecification> _endpoints;
+        readonly List<IEventStoreDbSubscriptionSpecification> _endpoints;
         readonly HostSettings _hostSettings;
         readonly EventStoreDbProducerSpecification _producerSpecification;
         Recycle<IConnectionContextSupervisor> _connectionContextSupervisor;
@@ -28,7 +28,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         public EventStoreDbFactoryConfigurator()
         {
             _endpointObservers = new ReceiveEndpointObservable();
-            _endpoints = new List<IEventStoreDbCatchupSubscriptionSpecification>();
+            _endpoints = new List<IEventStoreDbSubscriptionSpecification>();
             _hostSettings = new HostSettings();
             _producerSpecification = new EventStoreDbProducerSpecification(this, _hostSettings);
 
@@ -76,7 +76,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
         public void CatchupSubscription(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbCatchupSubscriptionConfigurator> configure)
         {
-            var specification = CreateCatchupSpecification(streamCategory, subscriptionName, configure);
+            var specification = CreateCatchupSubscriptionSpecification(streamCategory, subscriptionName, configure);
             _endpoints.Add(specification);
         }
 
@@ -105,7 +105,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _producerSpecification.ConfigureSend(callback);
         }
 
-        public IEventStoreDbCatchupSubscriptionSpecification CreateCatchupSpecification(StreamCategory streamCategory, string subscriptionName,
+        public IEventStoreDbSubscriptionSpecification CreateCatchupSubscriptionSpecification(StreamCategory streamCategory, string subscriptionName,
             Action<IEventStoreDbCatchupSubscriptionConfigurator> configure)
         {
             if (streamCategory == null)
@@ -135,7 +135,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
         public IEnumerable<ValidationResult> Validate()
         {
-            foreach (KeyValuePair<string, IEventStoreDbCatchupSubscriptionSpecification[]> kv in _endpoints.GroupBy(x => x.EndpointName)
+            foreach (KeyValuePair<string, IEventStoreDbSubscriptionSpecification[]> kv in _endpoints.GroupBy(x => x.EndpointName)
                 .ToDictionary(x => x.Key, x => x.ToArray()))
             {
                 if (kv.Value.Length > 1)
