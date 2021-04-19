@@ -9,7 +9,6 @@ namespace MassTransit.Tests.Serialization
     using System.Text;
     using System.Xml.Linq;
     using MassTransit.Serialization;
-    using MassTransit.Serialization.JsonConverters;
     using Metadata;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
@@ -63,6 +62,9 @@ namespace MassTransit.Tests.Serialization
             _envelope.MessageType.Add(typeof(MessageA).ToMessageName());
             _envelope.MessageType.Add(typeof(MessageB).ToMessageName());
 
+            _envelope.Headers.Add("Simple", "Value");
+            _envelope.Host = new BusHostInfo(true);
+
             _serializer = JsonMessageSerializer.Serializer;
             _deserializer = JsonMessageSerializer.Deserializer;
 
@@ -84,12 +86,24 @@ namespace MassTransit.Tests.Serialization
         [Explicit]
         public void Show_me_the_message()
         {
-            Trace.WriteLine(_body);
-            Trace.WriteLine(_xml.ToString());
+            TestContext.Out.WriteLine(_body);
+            TestContext.Out.WriteLine(_xml.ToString());
         }
 
         [Test]
-        public void Should_be_able_to_ressurect_the_message()
+        public void Convert_using_json_deserializer()
+        {
+            using var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(_body), false);
+            using var reader = new StreamReader(memoryStream);
+            using var jsonReader = new JsonTextReader(reader);
+
+            var result = _deserializer.Deserialize<JsonMessageContext<TestMessage>>(jsonReader);
+
+            Assert.That(result.Message.Name, Is.EqualTo("Joe"));
+        }
+
+        [Test]
+        public void Should_be_able_to_resurrect_the_message()
         {
             Envelope result;
             using (var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(_body), false))
@@ -103,7 +117,7 @@ namespace MassTransit.Tests.Serialization
             result.MessageType[0].ShouldBe(typeof(TestMessage).ToMessageName());
             result.MessageType[1].ShouldBe(typeof(MessageA).ToMessageName());
             result.MessageType[2].ShouldBe(typeof(MessageB).ToMessageName());
-            result.Headers.Count.ShouldBe(0);
+            result.Headers.Count.ShouldBe(1);
         }
 
         [Test]
@@ -150,7 +164,7 @@ namespace MassTransit.Tests.Serialization
         }
 
         [Test]
-        public void Should_be_able_to_ressurect_the_message_from_xml()
+        public void Should_be_able_to_resurrect_the_message_from_xml()
         {
             var document = XDocument.Parse(_xml.ToString());
             Trace.WriteLine(_xml.ToString());
@@ -171,7 +185,7 @@ namespace MassTransit.Tests.Serialization
             result.MessageType[0].ShouldBe(typeof(TestMessage).ToMessageName());
             result.MessageType[1].ShouldBe(typeof(MessageA).ToMessageName());
             result.MessageType[2].ShouldBe(typeof(MessageB).ToMessageName());
-            result.Headers.Count.ShouldBe(0);
+            result.Headers.Count.ShouldBe(1);
         }
 
         [Test]
@@ -289,6 +303,7 @@ namespace MassTransit.Tests.Serialization
             public IDictionary<string, string> Headers { get; set; }
             public object Message { get; set; }
             public IList<string> MessageType { get; set; }
+            public BusHostInfo Host { get; set; }
         }
 
 
