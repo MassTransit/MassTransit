@@ -18,7 +18,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     {
         readonly IAsyncBusHandle _busHandle;
         readonly IServiceBusHostConfiguration _hostConfiguration;
-        readonly ConcurrentDictionary<string, IBrokeredMessageReceiver> _receivers;
+        readonly ConcurrentDictionary<string, Lazy<IBrokeredMessageReceiver>> _receivers;
         readonly IBusRegistrationContext _registration;
 
         public MessageReceiver(IBusRegistrationContext registration, IAsyncBusHandle busHandle, IBusInstance busInstance)
@@ -29,7 +29,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             _registration = registration;
             _busHandle = busHandle;
 
-            _receivers = new ConcurrentDictionary<string, IBrokeredMessageReceiver>();
+            _receivers = new ConcurrentDictionary<string, Lazy<IBrokeredMessageReceiver>>();
         }
 
         public Task Handle(string queueName, Message message, CancellationToken cancellationToken)
@@ -120,7 +120,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
-            return _receivers.GetOrAdd(queueName, name =>
+            return _receivers.GetOrAdd(queueName, name => new Lazy<IBrokeredMessageReceiver>(() =>
             {
                 var endpointConfiguration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
 
@@ -129,7 +129,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
                 configure(configurator);
 
                 return configurator.Build();
-            });
+            })).Value;
         }
 
         IBrokeredMessageReceiver CreateBrokeredMessageReceiver(string topicPath, string subscriptionName, Action<IReceiveEndpointConfigurator> configure)
@@ -141,7 +141,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
 
             var subscriptionPath = EntityNameHelper.FormatSubscriptionPath(topicPath, subscriptionName);
 
-            return _receivers.GetOrAdd(subscriptionPath, name =>
+            return _receivers.GetOrAdd(subscriptionPath, name => new Lazy<IBrokeredMessageReceiver>(() =>
             {
                 var topicConfigurator = new TopicConfigurator(topicPath, false);
 
@@ -156,7 +156,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
                 configure(configurator);
 
                 return configurator.Build();
-            });
+            })).Value;
         }
     }
 }
