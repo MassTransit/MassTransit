@@ -10,7 +10,7 @@
     /// </summary>
     /// <typeparam name="T">The type encapsulated in the node</typeparam>
     /// <typeparam name="TNode">The type of node contained in the list</typeparam>
-    class NodeList<T, TNode> :
+    public class NodeList<T, TNode> :
         IEnumerable<TNode>
         where TNode : Node<T>
     {

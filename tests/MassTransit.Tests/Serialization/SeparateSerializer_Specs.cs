@@ -15,7 +15,7 @@
         [Test]
         public async Task Should_handle_both_serializers()
         {
-            Task<ConsumeContext<PongMessage>> ponged = ConnectPublishHandler<PongMessage>();
+            Task<ConsumeContext<PongMessage>> ponged = await ConnectPublishHandler<PongMessage>();
 
             await Bus.Publish(new PingMessage());
 

@@ -23,5 +23,11 @@ namespace MassTransit
         /// </summary>
         /// <param name="callback"></param>
         void ConfigureError(Action<IPipeConfigurator<ExceptionReceiveContext>> callback);
+
+        /// <summary>
+        /// Configure the transport options
+        /// </summary>
+        /// <param name="callback"></param>
+        void ConfigureTransport(Action<ITransportConfigurator> callback);
     }
 }

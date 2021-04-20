@@ -51,7 +51,7 @@
             var queueName = _configuration.InputAddress.GetQueueOrExchangeName();
 
             builder.Queue = queueName;
-            builder.QueueDeclare(queueName, _configuration.ConcurrencyLimit);
+            builder.QueueDeclare(queueName, _configuration.Transport.GetConcurrentMessageLimit());
             builder.Exchange = queueName;
             builder.QueueBind(builder.Exchange, builder.Queue);
 

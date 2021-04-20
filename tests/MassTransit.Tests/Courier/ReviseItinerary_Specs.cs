@@ -24,15 +24,15 @@
             var reviseActivity = GetActivityContext<ReviseItineraryActivity>();
 
             Task<ConsumeContext<RoutingSlipCompleted>> completed =
-                ConnectPublishHandler<RoutingSlipCompleted>(context => context.Message.TrackingNumber == trackingNumber);
+                await ConnectPublishHandler<RoutingSlipCompleted>(context => context.Message.TrackingNumber == trackingNumber);
 
-            Task<ConsumeContext<RoutingSlipActivityCompleted>> testActivityCompleted = ConnectPublishHandler<RoutingSlipActivityCompleted>(
+            Task<ConsumeContext<RoutingSlipActivityCompleted>> testActivityCompleted = await ConnectPublishHandler<RoutingSlipActivityCompleted>(
                 context => context.Message.TrackingNumber == trackingNumber && context.Message.ActivityName.Equals(testActivity.Name));
 
-            Task<ConsumeContext<RoutingSlipActivityCompleted>> reviseActivityCompleted = ConnectPublishHandler<RoutingSlipActivityCompleted>(
+            Task<ConsumeContext<RoutingSlipActivityCompleted>> reviseActivityCompleted = await ConnectPublishHandler<RoutingSlipActivityCompleted>(
                 context => context.Message.TrackingNumber == trackingNumber && context.Message.ActivityName.Equals(reviseActivity.Name));
 
-            Task<ConsumeContext<RoutingSlipRevised>> revised = ConnectPublishHandler<RoutingSlipRevised>(
+            Task<ConsumeContext<RoutingSlipRevised>> revised = await ConnectPublishHandler<RoutingSlipRevised>(
                 context => context.Message.TrackingNumber == trackingNumber);
 
             var builder = new RoutingSlipBuilder(trackingNumber);
@@ -57,12 +57,12 @@
             var reviseActivity = GetActivityContext<ReviseItineraryActivity>();
 
             Task<ConsumeContext<RoutingSlipCompleted>> completed =
-                ConnectPublishHandler<RoutingSlipCompleted>(context => context.Message.TrackingNumber == trackingNumber);
+                await ConnectPublishHandler<RoutingSlipCompleted>(context => context.Message.TrackingNumber == trackingNumber);
 
-            Task<ConsumeContext<RoutingSlipActivityCompleted>> testActivityCompleted = ConnectPublishHandler<RoutingSlipActivityCompleted>(
+            Task<ConsumeContext<RoutingSlipActivityCompleted>> testActivityCompleted = await ConnectPublishHandler<RoutingSlipActivityCompleted>(
                 context => context.Message.TrackingNumber == trackingNumber && context.Message.ActivityName.Equals(testActivity.Name));
 
-            Task<ConsumeContext<RoutingSlipActivityCompleted>> reviseActivityCompleted = ConnectPublishHandler<RoutingSlipActivityCompleted>(
+            Task<ConsumeContext<RoutingSlipActivityCompleted>> reviseActivityCompleted = await ConnectPublishHandler<RoutingSlipActivityCompleted>(
                 context => context.Message.TrackingNumber == trackingNumber && context.Message.ActivityName.Equals(reviseActivity.Name));
 
             var builder = new RoutingSlipBuilder(trackingNumber);
@@ -86,15 +86,15 @@
             var reviseActivity = GetActivityContext<ReviseToEmptyItineraryActivity>();
 
             Task<ConsumeContext<RoutingSlipCompleted>> completed =
-                ConnectPublishHandler<RoutingSlipCompleted>(context => context.Message.TrackingNumber == trackingNumber);
+                await ConnectPublishHandler<RoutingSlipCompleted>(context => context.Message.TrackingNumber == trackingNumber);
 
-            Task<ConsumeContext<RoutingSlipActivityCompleted>> testActivityCompleted = ConnectPublishHandler<RoutingSlipActivityCompleted>(
+            Task<ConsumeContext<RoutingSlipActivityCompleted>> testActivityCompleted = await ConnectPublishHandler<RoutingSlipActivityCompleted>(
                 context => context.Message.TrackingNumber == trackingNumber && context.Message.ActivityName.Equals(testActivity.Name));
 
-            Task<ConsumeContext<RoutingSlipActivityCompleted>> reviseActivityCompleted = ConnectPublishHandler<RoutingSlipActivityCompleted>(
+            Task<ConsumeContext<RoutingSlipActivityCompleted>> reviseActivityCompleted = await ConnectPublishHandler<RoutingSlipActivityCompleted>(
                 context => context.Message.TrackingNumber == trackingNumber && context.Message.ActivityName.Equals(reviseActivity.Name));
 
-            Task<ConsumeContext<RoutingSlipRevised>> revised = ConnectPublishHandler<RoutingSlipRevised>(
+            Task<ConsumeContext<RoutingSlipRevised>> revised = await ConnectPublishHandler<RoutingSlipRevised>(
                 context => context.Message.TrackingNumber == trackingNumber);
 
             var builder = new RoutingSlipBuilder(trackingNumber);

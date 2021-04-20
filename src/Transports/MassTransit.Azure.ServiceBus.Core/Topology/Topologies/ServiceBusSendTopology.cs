@@ -59,46 +59,12 @@
             return errorSettings;
         }
 
-        public SendSettings GetErrorSettings(ISubscriptionConfigurator configurator, Uri hostAddress)
-        {
-            var description = configurator.GetSubscriptionDescription();
-
-            var errorEndpointAddress = new ServiceBusEndpointAddress(hostAddress, description.SubscriptionName + ErrorQueueSuffix);
-
-            var queueDescription = Defaults.CreateQueueDescription(errorEndpointAddress.Path);
-            queueDescription.DefaultMessageTimeToLive = description.DefaultMessageTimeToLive;
-            queueDescription.AutoDeleteOnIdle = description.AutoDeleteOnIdle;
-
-            var errorSettings = new QueueSendSettings(queueDescription);
-
-            ConfigureErrorSettings?.Invoke(errorSettings);
-
-            return errorSettings;
-        }
-
         public SendSettings GetDeadLetterSettings(IQueueConfigurator configurator)
         {
             var description = configurator.GetQueueDescription();
             description.Path += DeadLetterQueueSuffix;
 
             var deadLetterSetting = new QueueSendSettings(description);
-
-            ConfigureDeadLetterSettings?.Invoke(deadLetterSetting);
-
-            return deadLetterSetting;
-        }
-
-        public SendSettings GetDeadLetterSettings(ISubscriptionConfigurator configurator, Uri hostAddress)
-        {
-            var description = configurator.GetSubscriptionDescription();
-
-            var deadLetterEndpointAddress = new ServiceBusEndpointAddress(hostAddress, description.SubscriptionName + DeadLetterQueueSuffix);
-
-            var queueDescription = Defaults.CreateQueueDescription(deadLetterEndpointAddress.Path);
-            queueDescription.DefaultMessageTimeToLive = description.DefaultMessageTimeToLive;
-            queueDescription.AutoDeleteOnIdle = description.AutoDeleteOnIdle;
-
-            var deadLetterSetting = new QueueSendSettings(queueDescription);
 
             ConfigureDeadLetterSettings?.Invoke(deadLetterSetting);
 

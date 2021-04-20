@@ -16,8 +16,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_handle_the_first_event()
         {
-            Task<ConsumeContext<TestStarted>> started = ConnectPublishHandler<TestStarted>();
-            Task<ConsumeContext<TestUpdated>> updated = ConnectPublishHandler<TestUpdated>();
+            Task<ConsumeContext<TestStarted>> started = await ConnectPublishHandler<TestStarted>();
+            Task<ConsumeContext<TestUpdated>> updated = await ConnectPublishHandler<TestUpdated>();
 
             await InputQueueSendEndpoint.Send(new StartTest
             {

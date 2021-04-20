@@ -50,6 +50,12 @@ namespace MassTransit.Testing.Observers
             return Task.CompletedTask;
         }
 
+        public void ForceInactive()
+        {
+            _inactivityTaskSource.TrySetResult(true);
+            _inactivityTokenSource.Cancel();
+        }
+
         async void SetupTimeout(TimeSpan timeout, CancellationToken cancellationToken)
         {
             try

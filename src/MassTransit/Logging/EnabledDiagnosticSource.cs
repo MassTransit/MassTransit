@@ -84,7 +84,7 @@ namespace MassTransit.Logging
             activity.AddTag(DiagnosticHeaders.PeerAddress, context.InputAddress.AbsolutePath);
             activity.AddTag(DiagnosticHeaders.PeerService, "Receive");
 
-            if (context.TransportHeaders.TryGetHeader(nameof(MessageContext.MessageId), out var messageIdHeader) && messageIdHeader is string text)
+            if (context.TransportHeaders.TryGetHeader(MessageHeaders.MessageId, out var messageIdHeader) && messageIdHeader is string text)
                 activity.AddTag(DiagnosticHeaders.MessageId, text);
 
             activity.AddTag(DiagnosticHeaders.InputAddress, context.InputAddress.ToString());

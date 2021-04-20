@@ -8,7 +8,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
 
     public interface SqsSendTransportContext :
-        SendTransportContext
+        SendTransportContext,
+        IPipeContextSource<ClientContext>
     {
         IPipe<ClientContext> ConfigureTopologyPipe { get; }
 

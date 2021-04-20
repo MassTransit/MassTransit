@@ -9,7 +9,6 @@
     using Pipeline;
     using Settings;
     using Transport;
-    using Transports;
 
 
     public class ServiceBusSubscriptionEndpointConfiguration :
@@ -50,6 +49,9 @@
 
         public void Build(IHost host)
         {
+            this.ConfigureDeadLetterQueueDeadLetterTransport();
+            this.ConfigureDeadLetterQueueErrorTransport();
+
             var builder = new ServiceBusSubscriptionEndpointBuilder(_hostConfiguration, this);
 
             ApplySpecifications(builder);
@@ -75,20 +77,6 @@
         Uri FormatInputAddress()
         {
             return _settings.GetInputAddress(_hostConfiguration.HostAddress, _settings.Path);
-        }
-
-        protected override IErrorTransport CreateErrorTransport()
-        {
-            var settings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings.SubscriptionConfigurator, _hostConfiguration.HostAddress);
-
-            return new BrokeredMessageErrorTransport(_hostConfiguration.ConnectionContextSupervisor, settings);
-        }
-
-        protected override IDeadLetterTransport CreateDeadLetterTransport()
-        {
-            var settings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings.SubscriptionConfigurator, _hostConfiguration.HostAddress);
-
-            return new BrokeredMessageDeadLetterTransport(_hostConfiguration.ConnectionContextSupervisor, settings);
         }
     }
 }

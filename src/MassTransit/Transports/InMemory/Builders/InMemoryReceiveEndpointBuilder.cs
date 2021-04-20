@@ -34,20 +34,11 @@ namespace MassTransit.Transports.InMemory.Builders
 
         public InMemoryReceiveEndpointContext CreateReceiveEndpointContext()
         {
-            var builder = _hostConfiguration.TransportProvider.CreateConsumeTopologyBuilder();
-
-            var queueName = _configuration.InputAddress.GetQueueOrExchangeName();
-
-            builder.Queue = queueName;
-            builder.QueueDeclare(queueName, _configuration.ConcurrencyLimit);
-            builder.Exchange = queueName;
-            builder.QueueBind(builder.Exchange, builder.Queue);
-
-            _configuration.Topology.Consume.Apply(builder);
-
             var context = new TransportInMemoryReceiveEndpointContext(_hostConfiguration, _configuration);
 
             context.GetOrAddPayload(() => _hostConfiguration.HostTopology);
+
+            context.ConfigureTopology();
 
             return context;
         }

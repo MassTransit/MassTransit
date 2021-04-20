@@ -39,10 +39,17 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 Password = "guest"
             };
 
-            var exchangeTypeSelector = topologyConfiguration.Publish.ExchangeTypeSelector;
             var messageNameFormatter = new RabbitMqMessageNameFormatter();
 
-            _hostTopology = new RabbitMqHostTopology(this, exchangeTypeSelector, messageNameFormatter, _hostSettings.HostAddress, topologyConfiguration);
+            _hostTopology = new RabbitMqHostTopology(this, messageNameFormatter, _hostSettings.HostAddress, topologyConfiguration);
+
+            ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Handle<ConnectionException>();
+                x.Ignore<AuthenticationFailureException>();
+
+                x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+            });
 
             _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }
@@ -57,19 +64,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         IRabbitMqHostTopology IRabbitMqHostConfiguration.HostTopology => _hostTopology;
 
-        public override IRetryPolicy ReceiveTransportRetryPolicy
-        {
-            get
-            {
-                return Retry.CreatePolicy(x =>
-                {
-                    x.Handle<ConnectionException>();
-                    x.Ignore<AuthenticationFailureException>();
-
-                    x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
-                });
-            }
-        }
+        public override IRetryPolicy ReceiveTransportRetryPolicy { get; }
 
         public override IHostTopology HostTopology => _hostTopology;
 
@@ -87,36 +82,15 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 configurator.Durable = false;
             }
 
-            if (definition.PrefetchCount.HasValue)
-                configurator.PrefetchCount = (ushort)definition.PrefetchCount.Value;
-
-            if (definition.ConcurrentMessageLimit.HasValue)
-            {
-                var concurrentMessageLimit = definition.ConcurrentMessageLimit.Value;
-
-                // if there is a prefetchCount, and it is greater than the concurrent message limit, we need a filter
-                if (!definition.PrefetchCount.HasValue || definition.PrefetchCount.Value > concurrentMessageLimit)
-                {
-                    configurator.UseConcurrencyLimit(concurrentMessageLimit);
-
-                    // we should determine a good value to use based upon the concurrent message limit
-                    if (definition.PrefetchCount.HasValue == false)
-                    {
-                        var calculatedPrefetchCount = concurrentMessageLimit * 12 / 10;
-
-                        configurator.PrefetchCount = (ushort)calculatedPrefetchCount;
-                    }
-                }
-            }
-
-            definition.Configure(configurator);
+            base.ApplyEndpointDefinition(configurator, definition);
         }
 
         public IRabbitMqReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IRabbitMqReceiveEndpointConfigurator> configure)
         {
-            var settings = new RabbitMqReceiveSettings(queueName, _busConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false);
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
+            var settings = new RabbitMqReceiveSettings(endpointConfiguration, queueName,
+                _busConfiguration.Topology.Consume.ExchangeTypeSelector.DefaultExchangeType, true, false);
 
             return CreateReceiveEndpointConfiguration(settings, endpointConfiguration, configure);
         }
@@ -185,7 +159,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
         {
             var host = new RabbitMqHost(this, _hostTopology);
 
-            foreach (var endpointConfiguration in Endpoints)
+            foreach (var endpointConfiguration in GetConfiguredEndpoints())
                 endpointConfiguration.Build(host);
 
             return host;

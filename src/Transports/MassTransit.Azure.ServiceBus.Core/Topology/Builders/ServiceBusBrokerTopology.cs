@@ -30,32 +30,76 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
             foreach (var topic in Topics)
             {
                 var exchangeScope = context.CreateScope("topic");
-                exchangeScope.Set(topic.TopicDescription);
+                exchangeScope.Set(new
+                {
+                    topic.TopicDescription.Path,
+                    topic.TopicDescription.EnablePartitioning,
+                    topic.TopicDescription.SupportOrdering,
+                    topic.TopicDescription.EnableBatchedOperations,
+                    topic.TopicDescription.RequiresDuplicateDetection,
+                    topic.TopicDescription.AutoDeleteOnIdle,
+                    topic.TopicDescription.DefaultMessageTimeToLive,
+                    topic.TopicDescription.DuplicateDetectionHistoryTimeWindow,
+                    topic.TopicDescription.MaxSizeInMB
+                });
             }
 
             foreach (var queue in Queues)
             {
                 var exchangeScope = context.CreateScope("queue");
-                exchangeScope.Set(queue.QueueDescription);
+                exchangeScope.Set(new
+                {
+                    queue.QueueDescription.Path,
+                    queue.QueueDescription.EnablePartitioning,
+                    queue.QueueDescription.EnableBatchedOperations,
+                    queue.QueueDescription.ForwardTo,
+                    queue.QueueDescription.LockDuration,
+                    queue.QueueDescription.MaxDeliveryCount,
+                    queue.QueueDescription.RequiresSession,
+                    queue.QueueDescription.RequiresDuplicateDetection,
+                    queue.QueueDescription.AutoDeleteOnIdle,
+                    queue.QueueDescription.DefaultMessageTimeToLive,
+                    queue.QueueDescription.DuplicateDetectionHistoryTimeWindow,
+                    queue.QueueDescription.MaxSizeInMB,
+                    queue.QueueDescription.ForwardDeadLetteredMessagesTo,
+                    queue.QueueDescription.EnableDeadLetteringOnMessageExpiration
+                });
             }
 
             foreach (var subscription in Subscriptions)
             {
                 var subscriptionScope = context.CreateScope("subscription");
-                subscriptionScope.Set(subscription.SubscriptionDescription);
+                subscriptionScope.Set(GetSubscriptionValues(subscription));
             }
 
             foreach (var queueSubscription in QueueSubscriptions)
             {
                 var queueSubscriptionScope = context.CreateScope("queueSubscription");
-                queueSubscriptionScope.Set(queueSubscription.Subscription.SubscriptionDescription);
+                queueSubscriptionScope.Set(GetSubscriptionValues(queueSubscription.Subscription));
             }
 
             foreach (var topicSubscription in TopicSubscriptions)
             {
                 var topicSubscriptionScope = context.CreateScope("topicSubscription");
-                topicSubscriptionScope.Set(topicSubscription.Subscription.SubscriptionDescription);
+                topicSubscriptionScope.Set(GetSubscriptionValues(topicSubscription.Subscription));
             }
+        }
+
+        static object GetSubscriptionValues(Subscription subscription)
+        {
+            return new
+            {
+                subscription.SubscriptionDescription.SubscriptionName,
+                subscription.SubscriptionDescription.EnableBatchedOperations,
+                subscription.SubscriptionDescription.ForwardTo,
+                subscription.SubscriptionDescription.LockDuration,
+                subscription.SubscriptionDescription.MaxDeliveryCount,
+                subscription.SubscriptionDescription.RequiresSession,
+                subscription.SubscriptionDescription.AutoDeleteOnIdle,
+                subscription.SubscriptionDescription.DefaultMessageTimeToLive,
+                subscription.SubscriptionDescription.ForwardDeadLetteredMessagesTo,
+                subscription.SubscriptionDescription.EnableDeadLetteringOnMessageExpiration
+            };
         }
     }
 }

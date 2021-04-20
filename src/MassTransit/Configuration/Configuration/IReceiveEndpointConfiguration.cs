@@ -21,6 +21,10 @@
 
         bool PublishFaults { get; }
 
+        int PrefetchCount { get; }
+
+        int? ConcurrentMessageLimit { get; }
+
         ReceiveEndpointObservable EndpointObservers { get; }
         ReceiveObservable ReceiveObservers { get; }
         ReceiveTransportObservable TransportObservers { get; }

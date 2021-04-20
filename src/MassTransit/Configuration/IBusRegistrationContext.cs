@@ -35,5 +35,12 @@ namespace MassTransit
         void ConfigureEndpoints<T>(IReceiveConfigurator<T> configurator, IEndpointNameFormatter endpointNameFormatter,
             Action<IRegistrationFilterConfigurator> configureFilter)
             where T : IReceiveEndpointConfigurator;
+
+        /// <summary>
+        /// Returns the registered <see cref="IConfigureReceiveEndpoint"/> instances from the container. Used internally
+        /// to apply configuration to every receive endpoint. This method should normally not be called.
+        /// </summary>
+        /// <returns></returns>
+        IConfigureReceiveEndpoint GetConfigureReceiveEndpoints();
     }
 }

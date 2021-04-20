@@ -137,12 +137,12 @@ namespace MassTransit.Registration
             _configuredTypes.Add(activityType);
         }
 
-        object IServiceProvider.GetService(Type serviceType)
+        public object GetService(Type serviceType)
         {
             return _configurationServiceProvider.GetService(serviceType);
         }
 
-        T IConfigurationServiceProvider.GetRequiredService<T>()
+        public T GetRequiredService<T>()
             where T : class
         {
             return _configurationServiceProvider.GetRequiredService<T>();

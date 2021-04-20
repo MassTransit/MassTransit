@@ -1,6 +1,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
     using Configuration;
 
 
@@ -32,5 +33,13 @@ namespace MassTransit
         /// <typeparam name="T">The option type</typeparam>
         bool TryGetOptions<T>(out T options)
             where T : IOptions;
+
+        /// <summary>
+        /// Enumerate the options which are assignable to the specified type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        IEnumerable<T> SelectOptions<T>()
+            where T : class;
     }
 }

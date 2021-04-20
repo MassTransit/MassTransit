@@ -69,17 +69,21 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
             where T : class
         {
-            var settings = new SubscriptionEndpointSettings(Topology.Publish<T>().TopicDescription, subscriptionName);
+            LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
 
-            return ConnectSubscriptionEndpoint(settings, configure);
+            var endpointConfiguration = _hostConfiguration.CreateSubscriptionEndpointConfiguration<T>(subscriptionName, configure);
+
+            return ConnectSubscriptionEndpoint(endpointConfiguration);
         }
 
         public HostReceiveEndpointHandle ConnectSubscriptionEndpoint(string subscriptionName, string topicName,
             Action<IServiceBusSubscriptionEndpointConfigurator> configure = null)
         {
-            var settings = new SubscriptionEndpointSettings(topicName, subscriptionName);
+            LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
 
-            return ConnectSubscriptionEndpoint(settings, configure);
+            var endpointConfiguration = _hostConfiguration.CreateSubscriptionEndpointConfiguration(topicName, subscriptionName, configure);
+
+            return ConnectSubscriptionEndpoint(endpointConfiguration);
         }
 
         protected override void Probe(ProbeContext context)
@@ -94,14 +98,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             _hostConfiguration.ConnectionContextSupervisor.Probe(context);
         }
 
-        HostReceiveEndpointHandle ConnectSubscriptionEndpoint(SubscriptionEndpointSettings settings,
-            Action<IServiceBusSubscriptionEndpointConfigurator> configure)
+        HostReceiveEndpointHandle ConnectSubscriptionEndpoint(IServiceBusSubscriptionEndpointConfiguration configuration)
         {
-            LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
-
-            LogContext.Debug?.Log("Connect subscription endpoint: {Topic}/{SubscriptionName}", settings.Path, settings.Name);
-
-            var configuration = _hostConfiguration.CreateSubscriptionEndpointConfiguration(settings, configure);
+            LogContext.Debug?.Log("Connect subscription endpoint: {Topic}/{SubscriptionName}", configuration.Settings.Path, configuration.Settings.Name);
 
             BusConfigurationResult.CompileResults(configuration.Validate());
 

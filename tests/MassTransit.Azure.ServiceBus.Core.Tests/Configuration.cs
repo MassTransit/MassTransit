@@ -1,6 +1,8 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
+    using Configurators;
+    using Microsoft.Azure.ServiceBus.Management;
     using NUnit.Framework;
 
 
@@ -25,5 +27,29 @@
             TestContext.Parameters.Exists(nameof(StorageAccount))
                 ? TestContext.Parameters.Get(nameof(StorageAccount))
                 : Environment.GetEnvironmentVariable("MT_AZURE_STORAGE_ACCOUNT") ?? "";
+
+        public static ManagementClient GetManagementClient()
+        {
+            var hostAddress = AzureServiceBusEndpointUriCreator.Create(ServiceNamespace);
+            var accountSettings = new TestAzureServiceBusAccountSettings();
+            var keyName = accountSettings.KeyName;
+            var accessKey = accountSettings.SharedAccessKey;
+
+            var hostConfigurator = new ServiceBusHostConfigurator(hostAddress);
+
+            hostConfigurator.SharedAccessSignature(s =>
+            {
+                s.KeyName = keyName;
+                s.SharedAccessKey = accessKey;
+                s.TokenTimeToLive = accountSettings.TokenTimeToLive;
+                s.TokenScope = accountSettings.TokenScope;
+            });
+
+            var endpoint = new UriBuilder(hostAddress) {Path = ""}.Uri.ToString();
+
+            var managementClient = new ManagementClient(endpoint, hostConfigurator.Settings.TokenProvider);
+
+            return managementClient;
+        }
     }
 }

@@ -39,6 +39,13 @@
 
             _hostTopology = new AmazonSqsHostTopology(this, messageNameFormatter, topologyConfiguration);
 
+            ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Handle<AmazonSqsTransportException>();
+
+                x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+            });
+
             _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }
 
@@ -66,59 +73,25 @@
 
         public override IHostTopology HostTopology => _hostTopology;
 
-        public override IRetryPolicy ReceiveTransportRetryPolicy
-        {
-            get
-            {
-                return Retry.CreatePolicy(x =>
-                {
-                    x.Handle<AmazonSqsTransportException>();
-
-                    x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
-                });
-            }
-        }
+        public override IRetryPolicy ReceiveTransportRetryPolicy { get; }
 
         public void ApplyEndpointDefinition(IAmazonSqsReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
-            configurator.ConfigureConsumeTopology = definition.ConfigureConsumeTopology;
-
             if (definition.IsTemporary)
             {
                 configurator.AutoDelete = true;
                 configurator.Durable = false;
             }
 
-            if (definition.PrefetchCount.HasValue)
-                configurator.PrefetchCount = (ushort)definition.PrefetchCount.Value;
-
-            if (definition.ConcurrentMessageLimit.HasValue)
-            {
-                var concurrentMessageLimit = definition.ConcurrentMessageLimit.Value;
-
-                // if there is a prefetchCount, and it is greater than the concurrent message limit, we need a filter
-                if (!definition.PrefetchCount.HasValue || definition.PrefetchCount.Value > concurrentMessageLimit)
-                {
-                    configurator.UseConcurrencyLimit(concurrentMessageLimit);
-
-                    // we should determine a good value to use based upon the concurrent message limit
-                    if (definition.PrefetchCount.HasValue == false)
-                    {
-                        var calculatedPrefetchCount = concurrentMessageLimit * 12 / 10;
-
-                        configurator.PrefetchCount = (ushort)calculatedPrefetchCount;
-                    }
-                }
-            }
-
-            definition.Configure(configurator);
+            base.ApplyEndpointDefinition(configurator, definition);
         }
 
         public IAmazonSqsReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
             Action<IAmazonSqsReceiveEndpointConfigurator> configure)
         {
-            var settings = new QueueReceiveSettings(queueName, true, false);
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
+
+            var settings = new QueueReceiveSettings(endpointConfiguration, queueName, true, false);
 
             return CreateReceiveEndpointConfiguration(settings, endpointConfiguration, configure);
         }
@@ -171,7 +144,7 @@
         {
             var host = new AmazonSqsHost(this, _hostTopology);
 
-            foreach (var endpointConfiguration in Endpoints)
+            foreach (var endpointConfiguration in GetConfiguredEndpoints())
                 endpointConfiguration.Build(host);
 
             return host;

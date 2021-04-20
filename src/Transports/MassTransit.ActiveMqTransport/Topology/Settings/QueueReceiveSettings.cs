@@ -1,6 +1,7 @@
 namespace MassTransit.ActiveMqTransport.Topology.Settings
 {
     using System;
+    using Configuration;
     using Configurators;
 
 
@@ -8,13 +9,16 @@ namespace MassTransit.ActiveMqTransport.Topology.Settings
         QueueBindingConfigurator,
         ReceiveSettings
     {
-        public QueueReceiveSettings(string queueName, bool durable, bool autoDelete)
+        readonly IActiveMqEndpointConfiguration _configuration;
+
+        public QueueReceiveSettings(IActiveMqEndpointConfiguration configuration, string queueName, bool durable, bool autoDelete)
             : base(queueName, durable, autoDelete)
         {
-            PrefetchCount = (ushort)Math.Min(Environment.ProcessorCount * 2, 16);
+            _configuration = configuration;
         }
 
-        public ushort PrefetchCount { get; set; }
+        public int PrefetchCount => _configuration.Transport.PrefetchCount;
+        public int ConcurrentMessageLimit => _configuration.Transport.GetConcurrentMessageLimit();
 
         public Uri GetInputAddress(Uri hostAddress)
         {

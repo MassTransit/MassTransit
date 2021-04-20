@@ -2,6 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 {
     using System;
     using System.Collections.Generic;
+    using Configuration;
     using Topology;
     using Transport;
 
@@ -9,14 +10,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
     public abstract class BaseClientSettings :
         ClientSettings
     {
-        int _maxConcurrentCalls;
+        readonly IServiceBusEndpointConfiguration _configuration;
 
-        protected BaseClientSettings(IEndpointEntityConfigurator configurator)
+        protected BaseClientSettings(IServiceBusEndpointConfiguration configuration, IEndpointEntityConfigurator configurator)
         {
+            _configuration = configuration;
             Configurator = configurator;
 
-            PrefetchCount = Defaults.PrefetchCount;
-            MaxConcurrentCalls = Defaults.MaxConcurrentCalls;
             MaxAutoRenewDuration = Defaults.MaxAutoRenewDuration;
             MessageWaitTimeout = Defaults.MessageWaitTimeout;
 
@@ -27,19 +27,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 
         public bool UsingBasicTier { get; private set; }
 
-        public int MaxConcurrentCalls
-        {
-            get => _maxConcurrentCalls;
-            set
-            {
-                _maxConcurrentCalls = value;
+        public int MaxConcurrentCalls => Math.Max(_configuration.Transport.GetConcurrentMessageLimit(), 1);
+        public int PrefetchCount => _configuration.Transport.PrefetchCount;
 
-                if (PrefetchCount > 0 && _maxConcurrentCalls > PrefetchCount)
-                    PrefetchCount = _maxConcurrentCalls;
-            }
-        }
-
-        public int PrefetchCount { get; set; }
         public TimeSpan MaxAutoRenewDuration { get; set; }
         public TimeSpan MessageWaitTimeout { get; set; }
         public TimeSpan ShutdownTimeout { get; set; }

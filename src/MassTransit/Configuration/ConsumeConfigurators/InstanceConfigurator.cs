@@ -92,6 +92,12 @@
             return _specification.TryGetOptions(out options);
         }
 
+        public IEnumerable<T> SelectOptions<T>()
+            where T : class
+        {
+            return _specification.SelectOptions<T>();
+        }
+
         public void AddPipeSpecification(IPipeSpecification<ConsumerConsumeContext<TInstance>> specification)
         {
             _specification.AddPipeSpecification(specification);

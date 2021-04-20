@@ -163,7 +163,11 @@ namespace MassTransit.KafkaIntegration.Configurators
 
         public TimeSpan CheckpointInterval { set; get; }
 
-        public int ConcurrencyLimit { set; get; }
+        public int ConcurrencyLimit
+        {
+            get => _endpointConfiguration.Transport.GetConcurrentMessageLimit();
+            set => ConcurrentMessageLimit = value;
+        }
 
         public string Topic { get; }
 
@@ -175,8 +179,10 @@ namespace MassTransit.KafkaIntegration.Configurators
                 yield return this.Failure("HeadersDeserializer", "should not be null");
 
             if (_options.TryGetOptions(out KafkaTopicOptions options))
+            {
                 foreach (var result in options.Validate())
                     yield return result;
+            }
 
             foreach (var result in base.Validate())
                 yield return result;

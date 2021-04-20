@@ -25,7 +25,6 @@
         {
             _context = context;
             _processorContext = processorContext;
-            _dispatcher = context.CreateReceivePipeDispatcher();
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
 

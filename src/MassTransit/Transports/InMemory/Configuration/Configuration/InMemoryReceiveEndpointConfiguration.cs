@@ -30,8 +30,6 @@
 
         IInMemoryReceiveEndpointConfigurator IInMemoryReceiveEndpointConfiguration.Configurator => this;
 
-        public int ConcurrencyLimit { get; set; }
-
         IInMemoryTopologyConfiguration IInMemoryEndpointConfiguration.Topology => _endpointConfiguration.Topology;
 
         public override Uri HostAddress { get; }
@@ -53,6 +51,11 @@
             host.AddReceiveEndpoint(_queueName, receiveEndpoint);
 
             ReceiveEndpoint = receiveEndpoint;
+        }
+
+        public int ConcurrencyLimit
+        {
+            set => ConcurrentMessageLimit = value;
         }
     }
 }

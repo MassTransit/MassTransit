@@ -24,9 +24,13 @@ namespace Automatonymous.Schedules
         }
 
         string Schedule<TInstance>.Name => _name;
-        public TimeSpan Delay => _settings.Delay;
         public Event<TMessage> Received { get; set; }
         public Event<TMessage> AnyReceived { get; set; }
+
+        public TimeSpan GetDelay(ConsumeEventContext<TInstance> context)
+        {
+            return _settings.DelayProvider(context);
+        }
 
         public Guid? GetTokenId(TInstance instance)
         {

@@ -30,7 +30,7 @@ namespace MassTransit.Configuration
 
             AddDeserializer(JsonMessageSerializer.JsonContentType, () => new JsonMessageDeserializer(JsonMessageSerializer.Deserializer));
             AddDeserializer(BsonMessageSerializer.BsonContentType, () => new BsonMessageDeserializer(BsonMessageSerializer.Deserializer));
-            AddDeserializer(XmlMessageSerializer.XmlContentType, () => new XmlMessageDeserializer(JsonMessageSerializer.Deserializer));
+            AddDeserializer(XmlMessageSerializer.XmlContentType, () => new XmlMessageDeserializer(XmlJsonMessageSerializer.Deserializer));
         }
 
         SerializationConfiguration(SerializationConfiguration source)

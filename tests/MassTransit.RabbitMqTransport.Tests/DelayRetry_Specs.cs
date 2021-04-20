@@ -34,6 +34,8 @@
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             _count = 0;
 
             _received = GetTask<ConsumeContext<PingMessage>>();
@@ -92,6 +94,8 @@
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             _count = 0;
 
             configurator.Handler<PingMessage>(context =>
@@ -133,6 +137,8 @@
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             _count = 0;
 
             configurator.Handler<PingMessage>(context =>
@@ -179,6 +185,8 @@
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             configurator.UseDelayedRedelivery(r => r.Intervals(100, 200));
 
             _consumer = new Consumer();
@@ -238,6 +246,8 @@
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             configurator.UseDelayedRedelivery(r => r.Intervals(100));
             configurator.UseMessageRetry(x => x.Immediate(2));
 
@@ -296,6 +306,8 @@
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             _count = 0;
 
             configurator.Handler<PingMessage>(context =>
@@ -316,7 +328,8 @@
         [Test]
         public async Task Should_properly_defer_the_message_delivery()
         {
-            await Bus.Publish(new PingMessage());
+            var pingMessage = new PingMessage();
+            await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
 
             var timer = Stopwatch.StartNew();
 
@@ -332,6 +345,8 @@
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             _count = 0;
 
             _received = GetTask<ConsumeContext<PingMessage>>();
@@ -358,7 +373,8 @@
         [Test]
         public async Task Should_execute_callback_during_defer_the_message_delivery()
         {
-            await Bus.Publish(new PingMessage());
+            var pingMessage = new PingMessage();
+            await InputQueueSendEndpoint.Send(pingMessage, x => x.FaultAddress = Bus.Address);
 
             await _received.Task;
 
@@ -371,6 +387,8 @@
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
+            configurator.ConfigureConsumeTopology = false;
+
             _count = 0;
 
             _received = GetTask<ConsumeContext<PingMessage>>();

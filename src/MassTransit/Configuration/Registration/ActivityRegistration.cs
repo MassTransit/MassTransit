@@ -73,7 +73,7 @@ namespace MassTransit.Registration
             foreach (Action<ICompensateActivityConfigurator<TActivity, TLog>> action in _compensateActions)
                 action(specification);
 
-            LogContext.Debug?.Log("Configured endpoint {Endpoint}, Compensate Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
+            LogContext.Info?.Log("Configured endpoint {Endpoint}, Compensate Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
                 TypeMetadataCache<TActivity>.ShortName);
 
             configurator.AddEndpointSpecification(specification);
@@ -96,7 +96,7 @@ namespace MassTransit.Registration
             foreach (Action<IExecuteActivityConfigurator<TActivity, TArguments>> action in _executeActions)
                 action(specification);
 
-            LogContext.Debug?.Log("Configured endpoint {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
+            LogContext.Info?.Log("Configured endpoint {Endpoint}, Execute Activity: {ActivityType}", configurator.InputAddress.GetLastPart(),
                 TypeMetadataCache<TActivity>.ShortName);
 
             configurator.AddEndpointSpecification(specification);

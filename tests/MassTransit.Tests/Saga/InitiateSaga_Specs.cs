@@ -72,7 +72,7 @@ namespace MassTransit.Tests.Saga
         [Test]
         public async Task The_message_should_fault()
         {
-            Task<ConsumeContext<Fault<InitiateSimpleSaga>>> faulted = ConnectPublishHandler<Fault<InitiateSimpleSaga>>();
+            Task<ConsumeContext<Fault<InitiateSimpleSaga>>> faulted = await ConnectPublishHandler<Fault<InitiateSimpleSaga>>();
 
             var message = new InitiateSimpleSaga(_sagaId);
 

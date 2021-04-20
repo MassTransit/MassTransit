@@ -1,8 +1,10 @@
 namespace MassTransit
 {
     using System;
+    using System.Collections.Generic;
     using Configuration;
     using ConsumeConnectors;
+    using GreenPipes;
 
 
     /// <summary>
@@ -10,7 +12,9 @@ namespace MassTransit
     /// the size and time limits for each batch.
     /// </summary>
     public class BatchOptions :
-        IOptions
+        IOptions,
+        IConfigureReceiveEndpoint,
+        ISpecification
     {
         public BatchOptions()
         {
@@ -99,6 +103,26 @@ namespace MassTransit
             GroupKeyProvider = new GroupKeyProvider<T, TProperty>(provider);
 
             return this;
+        }
+
+        public void Configure(string name, IReceiveEndpointConfigurator configurator)
+        {
+            int messageCapacity = ConcurrencyLimit * MessageLimit;
+
+            configurator.PrefetchCount = Math.Max(messageCapacity, configurator.PrefetchCount);
+
+            if (configurator.ConcurrentMessageLimit < messageCapacity)
+                configurator.ConcurrentMessageLimit = messageCapacity;
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if(TimeLimit <= TimeSpan.Zero)
+                yield return this.Failure("Batch", "TimeLimit", "Must be > TimeSpan.Zero");
+            if(MessageLimit <= 0)
+                yield return this.Failure("Batch", "MessageLimit", "Must be > 0");
+            if(ConcurrencyLimit <= 0)
+                yield return this.Failure("Batch", "ConcurrencyLimit", "Must be > 0");
         }
     }
 }

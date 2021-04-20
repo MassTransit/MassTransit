@@ -36,7 +36,7 @@
             var message = new Start();
 
             Task<ConsumeContext<Fault<Start>>> faultReceived =
-                ConnectPublishHandler<Fault<Start>>(x => message.CorrelationId == x.Message.Message.CorrelationId);
+                await ConnectPublishHandler<Fault<Start>>(x => message.CorrelationId == x.Message.Message.CorrelationId);
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -51,7 +51,7 @@
             var message = new Initialize();
 
             Task<ConsumeContext<Fault<Start>>> faultReceived =
-                ConnectPublishHandler<Fault<Start>>(x => message.CorrelationId == x.Message.Message.CorrelationId);
+                await ConnectPublishHandler<Fault<Start>>(x => message.CorrelationId == x.Message.Message.CorrelationId);
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -74,7 +74,7 @@
             var message = new Stop();
 
             Task<ConsumeContext<Fault<Stop>>> faultReceived =
-                ConnectPublishHandler<Fault<Stop>>(x => message.CorrelationId == x.Message.Message.CorrelationId);
+                await ConnectPublishHandler<Fault<Stop>>(x => message.CorrelationId == x.Message.Message.CorrelationId);
 
             await InputQueueSendEndpoint.Send(message);
 

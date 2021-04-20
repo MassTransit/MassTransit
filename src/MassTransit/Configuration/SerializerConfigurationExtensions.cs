@@ -103,12 +103,38 @@ namespace MassTransit
         /// Serialize messages using the raw JSON message serializer
         /// </summary>
         /// <param name="configurator"></param>
+        /// <param name="options">If false, only supported messages types (read from the message headers) will be returned</param>
+        public static void UseRawJsonSerializer(this IBusFactoryConfigurator configurator, RawJsonSerializerOptions options)
+        {
+            configurator.SetMessageSerializer(() => new RawJsonMessageSerializer());
+
+            configurator.AddMessageDeserializer(RawJsonMessageSerializer.RawJsonContentType,
+                () => new RawJsonMessageDeserializer(RawJsonMessageSerializer.Deserializer, options));
+        }
+
+        /// <summary>
+        /// Serialize messages using the raw JSON message serializer
+        /// </summary>
+        /// <param name="configurator"></param>
         public static void UseRawJsonSerializer(this IReceiveEndpointConfigurator configurator)
         {
             configurator.SetMessageSerializer(() => new RawJsonMessageSerializer());
 
             configurator.AddMessageDeserializer(RawJsonMessageSerializer.RawJsonContentType,
                 () => new RawJsonMessageDeserializer(RawJsonMessageSerializer.Deserializer));
+        }
+
+        /// <summary>
+        /// Serialize messages using the raw JSON message serializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="options">If false, only supported messages types (read from the message headers) will be returned</param>
+        public static void UseRawJsonSerializer(this IReceiveEndpointConfigurator configurator, RawJsonSerializerOptions options)
+        {
+            configurator.SetMessageSerializer(() => new RawJsonMessageSerializer());
+
+            configurator.AddMessageDeserializer(RawJsonMessageSerializer.RawJsonContentType,
+                () => new RawJsonMessageDeserializer(RawJsonMessageSerializer.Deserializer, options));
         }
 
         public static void UseEncryptedSerializer(this IBusFactoryConfigurator configurator, ICryptoStreamProvider streamProvider)

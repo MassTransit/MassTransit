@@ -31,7 +31,7 @@
 
             var sendPipe = new SendPipe<T>(_context, message, pipe, cancellationToken);
 
-            return _context.ClientContextSupervisor.Send(sendPipe, cancellationToken);
+            return _context.Send(sendPipe, cancellationToken);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -41,7 +41,7 @@
 
         protected override Task StopSupervisor(StopSupervisorContext context)
         {
-            LogContext.Debug?.Log("Stopping send transport: {Topic}", _context.EntityName);
+            TransportLogMessages.StoppingSendTransport(_context.EntityName);
 
             return base.StopSupervisor(context);
         }
@@ -70,7 +70,7 @@
 
                 await _context.ConfigureTopologyPipe.Send(context).ConfigureAwait(false);
 
-                var sendContext = new TransportAmazonSqsSendContext<T>(_message, _cancellationToken);
+                var sendContext = new AmazonSqsMessageSendContext<T>(_message, _cancellationToken);
 
                 await _pipe.Send(sendContext).ConfigureAwait(false);
 

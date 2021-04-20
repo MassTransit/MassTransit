@@ -1,6 +1,7 @@
 namespace MassTransit.Conductor.Configurators
 {
     using System;
+    using System.Collections.Generic;
 
 
     public class ServiceClientConfigurator :
@@ -26,6 +27,12 @@ namespace MassTransit.Conductor.Configurators
         bool IOptionsSet.TryGetOptions<T>(out T options)
         {
             return Options.TryGetOptions(out options);
+        }
+
+        IEnumerable<T> IOptionsSet.SelectOptions<T>()
+            where T : class
+        {
+            return ((IOptionsSet)Options).SelectOptions<T>();
         }
     }
 }

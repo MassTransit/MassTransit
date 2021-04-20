@@ -72,7 +72,11 @@ namespace MassTransit.TestFramework
             remove => _harness.OnConfigureExecuteReceiveEndpoint -= value;
         }
 
-        public event Action<IReceiveEndpointConfigurator> OnConfigureCompensateReceiveEndpoint;
+        public event Action<IReceiveEndpointConfigurator> OnConfigureCompensateReceiveEndpoint
+        {
+            add { }
+            remove { }
+        }
 
         public Uri ExecuteUri => _harness.ExecuteAddress;
         public string Name => _harness.Name;

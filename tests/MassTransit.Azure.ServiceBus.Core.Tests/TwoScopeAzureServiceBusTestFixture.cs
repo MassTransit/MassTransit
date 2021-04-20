@@ -10,9 +10,14 @@
     public class TwoScopeAzureServiceBusTestFixture :
         AzureServiceBusTestFixture
     {
-        public TwoScopeAzureServiceBusTestFixture(string scope = default)
+        public TwoScopeAzureServiceBusTestFixture(string scope)
         {
-            _secondServiceUri = AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace, scope ?? "MassTransit.Tests.SecondService");
+            _secondServiceUri = AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace, scope);
+        }
+
+        public TwoScopeAzureServiceBusTestFixture()
+        {
+            _secondServiceUri = AzureServiceBusEndpointUriCreator.Create(Configuration.ServiceNamespace, "MassTransit.Tests.SecondService");
         }
 
         Uri _secondInputQueueAddress;

@@ -3,6 +3,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
     using System;
     using System.Collections.Generic;
     using Configurators;
+    using MassTransit.Configuration;
     using Registration;
 
 
@@ -31,6 +32,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
             var configurator = new ServiceBusBusFactoryConfigurator(_busConfiguration);
 
             return CreateBus(configurator, context, _configure, specifications);
+        }
+
+        protected override IBusInstance CreateBusInstance(IBusControl bus, IHost<IServiceBusReceiveEndpointConfigurator> host,
+            IHostConfiguration hostConfiguration, IBusRegistrationContext context)
+        {
+            return new ServiceBusInstance(bus, host, hostConfiguration, context);
         }
     }
 }

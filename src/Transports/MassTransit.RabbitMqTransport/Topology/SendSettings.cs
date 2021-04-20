@@ -12,7 +12,7 @@
         /// </summary>
         /// <param name="hostAddress"></param>
         /// <returns></returns>
-        Uri GetSendAddress(Uri hostAddress);
+        RabbitMqEndpointAddress GetSendAddress(Uri hostAddress);
 
         /// <summary>
         /// Return the BrokerTopology to apply at startup (to create exchange and queue if binding is specified)

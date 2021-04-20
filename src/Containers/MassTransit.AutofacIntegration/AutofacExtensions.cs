@@ -2,15 +2,20 @@
 {
     using System;
     using System.Linq.Expressions;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Autofac;
     using Autofac.Builder;
     using AutofacIntegration;
     using AutofacIntegration.Registration;
     using AutofacIntegration.ScopeProviders;
+    using Clients;
     using GreenPipes;
+    using GreenPipes.Internals.Extensions;
     using GreenPipes.Specifications;
-    using Internals.Extensions;
+    using Mediator;
     using Pipeline.Filters;
+    using Scoping;
 
 
     public static class AutofacExtensions
@@ -65,7 +70,7 @@
             if (propertyExpression == null)
                 throw new ArgumentNullException(nameof(propertyExpression));
 
-            var propertyInfo = propertyExpression.GetPropertyInfo();
+            var propertyInfo = Internals.Extensions.ExpressionExtensions.GetPropertyInfo(propertyExpression);
 
             return builder.RegisterType<MessageLifetimeScopeIdAccessor<TInput, T>>()
                 .As<ILifetimeScopeIdAccessor<TInput, T>>()
@@ -86,6 +91,115 @@
                 .As<ILifetimeScopeRegistry<string>>()
                 .WithParameter("tag", scopeTag)
                 .SingleInstance();
+        }
+
+        /// <summary>
+        /// Create a request client, using the specified service address, using the <see cref="IClientFactory" /> from the container.
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="timeout">The default timeout for requests</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IRequestClient<T> CreateRequestClient<T>(this ILifetimeScope scope, RequestTimeout timeout = default)
+            where T : class
+        {
+            return scope.Resolve<IClientFactory>().CreateRequestClient<T>(timeout);
+        }
+
+        /// <summary>
+        /// Create a request client, using the specified service address, using the <see cref="IClientFactory" /> from the container.
+        /// </summary>
+        /// <param name="scope"></param>
+        /// <param name="destinationAddress">The destination service address</param>
+        /// <param name="timeout">The default timeout for requests</param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static IRequestClient<T> CreateRequestClient<T>(this ILifetimeScope scope, Uri destinationAddress, RequestTimeout timeout = default)
+            where T : class
+        {
+            return scope.Resolve<IClientFactory>().CreateRequestClient<T>(destinationAddress, timeout);
+        }
+
+        /// <summary>
+        /// Registers a generic request client provider in the container, which will be used for any
+        /// client that is not explicitly registered using AddRequestClient.
+        /// </summary>
+        /// <param name="builder"></param>
+        public static void RegisterGenericRequestClient(this ContainerBuilder builder)
+        {
+            builder.RegisterGeneric(typeof(GenericRequestClient<>)).As(typeof(IRequestClient<>)).InstancePerLifetimeScope();
+        }
+
+
+        class GenericRequestClient<T> :
+            IRequestClient<T>
+            where T : class
+        {
+            readonly IRequestClient<T> _client;
+
+            public GenericRequestClient(ILifetimeScope scope)
+            {
+                var clientFactory = scope.ResolveOptional<IClientFactory>() ?? scope.ResolveOptional<IMediator>();
+                if (clientFactory == null)
+                    throw new MassTransitException($"Unable to resolve bus or mediator for request client: {TypeCache<T>.ShortName}");
+
+                _client = scope.TryResolve(out ConsumeContext consumeContext)
+                    ? clientFactory.CreateRequestClient<T>(consumeContext)
+                    : new ClientFactory(new ScopedClientFactoryContext<ILifetimeScope>(clientFactory, scope))
+                        .CreateRequestClient<T>(default);
+            }
+
+            RequestHandle<T> IRequestClient<T>.Create(T message, CancellationToken cancellationToken, RequestTimeout timeout)
+            {
+                return _client.Create(message, cancellationToken, timeout);
+            }
+
+            RequestHandle<T> IRequestClient<T>.Create(object values, CancellationToken cancellationToken, RequestTimeout timeout)
+            {
+                return _client.Create(values, cancellationToken, timeout);
+            }
+
+            Task<Response<T1>> IRequestClient<T>.GetResponse<T1>(T message, CancellationToken cancellationToken, RequestTimeout timeout)
+                where T1 : class
+            {
+                return _client.GetResponse<T1>(message, cancellationToken, timeout);
+            }
+
+            Task<Response<T1>> IRequestClient<T>.GetResponse<T1>(object values, CancellationToken cancellationToken, RequestTimeout timeout)
+                where T1 : class
+            {
+                return _client.GetResponse<T1>(values, cancellationToken, timeout);
+            }
+
+            Task<Response<T1, T2>> IRequestClient<T>.GetResponse<T1, T2>(T message, CancellationToken cancellationToken, RequestTimeout timeout)
+                where T1 : class
+                where T2 : class
+            {
+                return _client.GetResponse<T1, T2>(message, cancellationToken, timeout);
+            }
+
+            Task<Response<T1, T2>> IRequestClient<T>.GetResponse<T1, T2>(object values, CancellationToken cancellationToken, RequestTimeout timeout)
+                where T1 : class
+                where T2 : class
+            {
+                return _client.GetResponse<T1, T2>(values, cancellationToken, timeout);
+            }
+
+            Task<Response<T1, T2, T3>> IRequestClient<T>.GetResponse<T1, T2, T3>(T message, CancellationToken cancellationToken, RequestTimeout timeout)
+                where T1 : class
+                where T2 : class
+                where T3 : class
+            {
+                return _client.GetResponse<T1, T2, T3>(message, cancellationToken, timeout);
+            }
+
+            Task<Response<T1, T2, T3>> IRequestClient<T>.GetResponse<T1, T2, T3>(object values, CancellationToken cancellationToken, RequestTimeout timeout)
+                where T1 : class
+                where T2 : class
+                where T3 : class
+            {
+                return _client.GetResponse<T1, T2, T3>(values, cancellationToken, timeout);
+            }
         }
     }
 }

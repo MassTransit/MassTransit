@@ -74,7 +74,11 @@
 
         protected override ContentType GetContentType()
         {
-            return !string.IsNullOrWhiteSpace(_message.ContentType) ? new ContentType(_message.ContentType) : base.GetContentType();
+            ContentType contentType = default;
+            if (!string.IsNullOrWhiteSpace(_message.ContentType))
+                contentType = ConvertToContentType(_message.ContentType);
+
+            return contentType ?? base.GetContentType();
         }
     }
 }

@@ -2,8 +2,10 @@ namespace MassTransit.Contracts.JobService
 {
     using System;
     using System.Collections.Generic;
+    using Topology;
 
 
+    [ConfigureConsumeTopology(false)]
     public interface StartJob
     {
         /// <summary>

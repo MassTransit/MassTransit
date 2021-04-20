@@ -121,7 +121,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
 
         string GetVirtualHost(Uri address)
         {
-            string[] segments = address.AbsolutePath.Split(_pathSeparator, StringSplitOptions.RemoveEmptyEntries);
+            var segments = address.AbsolutePath.Split(_pathSeparator, StringSplitOptions.RemoveEmptyEntries);
 
             if (segments.Length == 0)
                 return "/";

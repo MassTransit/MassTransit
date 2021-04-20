@@ -26,6 +26,12 @@
         TimeSpan? QueueExpiration { set; }
 
         /// <summary>
+        /// Allows to have only one consumer at a time consuming from a queue
+        /// and to fail over to another registered consumer in case the active one is cancelled or dies
+        /// </summary>
+        bool SingleActiveConsumer { set; }
+
+        /// <summary>
         /// Set a queue argument passed to the broker on queue declaration
         /// </summary>
         /// <param name="key">The argument key</param>
@@ -44,5 +50,14 @@
         /// </summary>
         /// <param name="maxPriority"></param>
         void EnablePriority(byte maxPriority);
+
+        /// <summary>
+        /// Specify that the queue should be a quorum queue
+        /// </summary>
+        /// <param name="replicationFactor">
+        /// Optional, if specified must be greater than zero and less than the number of cluster nodes.
+        /// An odd value is recommended.
+        /// </param>
+        void SetQuorumQueue(int? replicationFactor = default);
     }
 }

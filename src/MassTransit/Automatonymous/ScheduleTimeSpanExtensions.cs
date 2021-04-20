@@ -16,7 +16,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeEventContext<TInstance> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context);
             }
 
             return source.Add(new ScheduleActivity<TInstance, TMessage>(x => message, schedule, TimeProvider, contextCallback));
@@ -29,7 +29,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeEventContext<TInstance> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context);
             }
 
             return source.Add(new ScheduleActivity<TInstance, TMessage>(x => message, schedule, TimeProvider, contextCallback));
@@ -71,7 +71,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeEventContext<TInstance> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context);
             }
 
             return source.Add(new ScheduleActivity<TInstance, TMessage>(messageFactory, schedule, TimeProvider, contextCallback));
@@ -85,7 +85,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeEventContext<TInstance> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context);
             }
 
             return source.Add(new ScheduleActivity<TInstance, TMessage>(messageFactory, schedule, TimeProvider, contextCallback));
@@ -127,7 +127,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeEventContext<TInstance, TData> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context.InstanceContext);
             }
 
             return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(x => message, schedule, TimeProvider, contextCallback));
@@ -141,7 +141,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeEventContext<TInstance, TData> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context.InstanceContext);
             }
 
             return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(x => message, schedule, TimeProvider, contextCallback));
@@ -186,7 +186,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeEventContext<TInstance, TData> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context.InstanceContext);
             }
 
             return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(messageFactory, schedule, TimeProvider, contextCallback));
@@ -202,7 +202,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeEventContext<TInstance, TData> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context.InstanceContext);
             }
 
             return source.Add(new ScheduleActivity<TInstance, TData, TMessage>(messageFactory, schedule, TimeProvider, contextCallback));
@@ -249,7 +249,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TException> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context);
             }
 
             return source.Add(new FaultedScheduleActivity<TInstance, TException, TMessage>(x => message, schedule, TimeProvider, contextCallback));
@@ -264,7 +264,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TException> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context);
             }
 
             return source.Add(new FaultedScheduleActivity<TInstance, TException, TMessage>(x => message, schedule, TimeProvider, contextCallback));
@@ -309,7 +309,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TException> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context);
             }
 
             return source.Add(new FaultedScheduleActivity<TInstance, TException, TMessage>(messageFactory, schedule, TimeProvider, contextCallback));
@@ -324,7 +324,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TException> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context);
             }
 
             return source.Add(new FaultedScheduleActivity<TInstance, TException, TMessage>(messageFactory, schedule, TimeProvider, contextCallback));
@@ -372,7 +372,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TData, TException> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context.InstanceContext);
             }
 
             return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(x => message, schedule, TimeProvider, contextCallback));
@@ -388,7 +388,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TData, TException> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context.InstanceContext);
             }
 
             return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(x => message, schedule, TimeProvider, contextCallback));
@@ -436,7 +436,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TData, TException> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context.InstanceContext);
             }
 
             return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(messageFactory, schedule, TimeProvider, contextCallback));
@@ -452,7 +452,7 @@ namespace Automatonymous
         {
             DateTime TimeProvider(ConsumeExceptionEventContext<TInstance, TData, TException> context)
             {
-                return DateTime.UtcNow + schedule.Delay;
+                return DateTime.UtcNow + schedule.GetDelay(context.InstanceContext);
             }
 
             return source.Add(new FaultedScheduleActivity<TInstance, TData, TException, TMessage>(messageFactory, schedule, TimeProvider, contextCallback));

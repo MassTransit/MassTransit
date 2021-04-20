@@ -30,24 +30,20 @@
 
             TransportConcurrencyLimit = Math.Min(Environment.ProcessorCount, 4);
 
+            ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Handle<ConnectionException>();
+
+                x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+            });
+
             _transportProvider = new Recycle<IInMemoryTransportProvider>(() => new InMemoryTransportProvider(this, topologyConfiguration));
         }
 
         public override Uri HostAddress => _hostAddress;
         public override IHostTopology HostTopology => _hostTopology;
 
-        public override IRetryPolicy ReceiveTransportRetryPolicy
-        {
-            get
-            {
-                return Retry.CreatePolicy(x =>
-                {
-                    x.Handle<ConnectionException>();
-
-                    x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
-                });
-            }
-        }
+        public override IRetryPolicy ReceiveTransportRetryPolicy { get; }
 
         public Uri BaseAddress
         {
@@ -62,15 +58,7 @@
 
         public void ApplyEndpointDefinition(IInMemoryReceiveEndpointConfigurator configurator, IEndpointDefinition definition)
         {
-            var concurrencyLimit = definition.PrefetchCount;
-
-            if (definition.ConcurrentMessageLimit.HasValue)
-                concurrencyLimit = definition.ConcurrentMessageLimit;
-
-            if (concurrencyLimit.HasValue)
-                configurator.ConcurrencyLimit = concurrencyLimit.Value;
-
-            definition.Configure(configurator);
+            base.ApplyEndpointDefinition(configurator, definition);
         }
 
         public IInMemoryReceiveEndpointConfiguration CreateReceiveEndpointConfiguration(string queueName,
@@ -126,7 +114,7 @@
         {
             var host = new InMemoryHost(this, _hostTopology);
 
-            foreach (var endpointConfiguration in Endpoints)
+            foreach (var endpointConfiguration in GetConfiguredEndpoints())
                 endpointConfiguration.Build(host);
 
             return host;

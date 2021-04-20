@@ -12,7 +12,9 @@
         /// <summary>
         /// The number of unacknowledged messages to allow to be processed concurrently
         /// </summary>
-        ushort PrefetchCount { get; }
+        int PrefetchCount { get; }
+
+        int ConcurrentMessageLimit { get; }
 
         string Selector { get; }
 

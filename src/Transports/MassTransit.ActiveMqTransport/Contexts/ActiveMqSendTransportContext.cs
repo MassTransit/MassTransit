@@ -7,7 +7,8 @@ namespace MassTransit.ActiveMqTransport.Contexts
 
 
     public interface ActiveMqSendTransportContext :
-        SendTransportContext
+        SendTransportContext,
+        IPipeContextSource<SessionContext>
     {
         IPipe<SessionContext> ConfigureTopologyPipe { get; }
 

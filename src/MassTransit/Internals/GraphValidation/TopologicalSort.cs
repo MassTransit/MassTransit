@@ -4,7 +4,7 @@
     using System.Linq;
 
 
-    class TopologicalSort<T, TNode>
+    public class TopologicalSort<T, TNode>
         where TNode : Node<T>, ITopologicalSortNodeProperties
     {
         readonly AdjacencyList<T, TNode> _list;

@@ -26,5 +26,7 @@ namespace MassTransit.Transports.InMemory.Fabric
         public int DeliveryCount { get; set; }
 
         public IDictionary<string, object> Headers { get; }
+
+        public TimeSpan? Delay { get; set; }
     }
 }

@@ -1,10 +1,8 @@
 namespace RedisSagaContainer
 {
-    using System;
     using MassTransit;
-    using MassTransit.MongoDbIntegration;
     using Microsoft.Extensions.DependencyInjection;
-    using MongoDbSaga;
+    using PersistedSaga;
 
     public class Program
     {

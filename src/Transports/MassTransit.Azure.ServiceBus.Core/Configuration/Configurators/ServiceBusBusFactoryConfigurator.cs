@@ -29,7 +29,7 @@
 
             _queueConfigurator = new QueueConfigurator(queueName) {AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle};
 
-            _settings = new ReceiveEndpointSettings(queueName, _queueConfigurator);
+            _settings = new ReceiveEndpointSettings(_busConfiguration.BusEndpointConfiguration, queueName, _queueConfigurator);
         }
 
         public IReceiveEndpointConfiguration CreateBusEndpointConfiguration(Action<IReceiveEndpointConfigurator> configure)
@@ -59,12 +59,7 @@
 
         public int MaxConcurrentCalls
         {
-            set => _settings.MaxConcurrentCalls = value;
-        }
-
-        public int PrefetchCount
-        {
-            set => _settings.PrefetchCount = value;
+            set => ConcurrentMessageLimit = value;
         }
 
         public void OverrideDefaultBusEndpointQueueName(string value)

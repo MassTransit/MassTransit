@@ -87,7 +87,7 @@ namespace MassTransit.Transports
 
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
 
-            LogContext.Debug?.Log("Starting host: {HostAddress}", _hostConfiguration.HostAddress);
+            LogContext.Debug?.Log("Starting bus: {HostAddress}", _hostConfiguration.HostAddress);
 
             HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints(cancellationToken);
 
@@ -126,12 +126,14 @@ namespace MassTransit.Transports
         {
             LogContext.Current = _hostConfiguration.LogContext;
 
+            LogContext.Debug?.Log("Stopping bus: {HostAddress}", Address);
+
             await _riderCollection.Stop(cancellationToken).ConfigureAwait(false);
 
             await ReceiveEndpoints.Stop(cancellationToken).ConfigureAwait(false);
 
             foreach (var agent in GetAgentHandles())
-                await agent.Stop("Host stopped", cancellationToken).ConfigureAwait(false);
+                await agent.Stop("Bus stopped", cancellationToken).ConfigureAwait(false);
 
             _handle = null;
         }

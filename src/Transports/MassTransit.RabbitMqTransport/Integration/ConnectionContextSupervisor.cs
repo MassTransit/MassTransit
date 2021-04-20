@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.RabbitMqTransport.Integration
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
     using Context;
@@ -8,6 +9,7 @@
     using GreenPipes;
     using Pipeline;
     using Topology;
+    using Topology.Settings;
     using Transport;
     using Transports;
 
@@ -45,7 +47,7 @@
 
             IPipe<ModelContext> configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
 
-            return CreateSendTransport(modelContextSupervisor, configureTopology, settings.ExchangeName);
+            return CreateSendTransport(modelContextSupervisor, configureTopology, settings.ExchangeName, endpointAddress);
         }
 
         public Task<ISendTransport> CreatePublishTransport<T>(IModelContextSupervisor modelContextSupervisor)
@@ -61,14 +63,25 @@
 
             IPipe<ModelContext> configureTopology = new ConfigureTopologyFilter<SendSettings>(settings, brokerTopology).ToPipe();
 
-            return CreateSendTransport(modelContextSupervisor, configureTopology, publishTopology.Exchange.ExchangeName);
+            var endpointAddress = settings.GetSendAddress(_hostConfiguration.HostAddress);
+
+            return CreateSendTransport(modelContextSupervisor, configureTopology, publishTopology.Exchange.ExchangeName, endpointAddress);
         }
 
-        Task<ISendTransport> CreateSendTransport(IModelContextSupervisor modelContextSupervisor, IPipe<ModelContext> pipe, string exchangeName)
+        Task<ISendTransport> CreateSendTransport(IModelContextSupervisor modelContextSupervisor, IPipe<ModelContext> pipe, string exchangeName,
+            RabbitMqEndpointAddress endpointAddress)
         {
             var supervisor = new ModelContextSupervisor(modelContextSupervisor);
 
-            var sendTransportContext = new SendTransportContext(_hostConfiguration, supervisor, pipe, exchangeName);
+            var delayedExchangeAddress = endpointAddress.GetDelayAddress();
+
+            var delaySettings = new RabbitMqDelaySettings(delayedExchangeAddress);
+
+            delaySettings.BindToExchange(exchangeName);
+
+            IPipe<ModelContext> delayPipe = new ConfigureTopologyFilter<DelaySettings>(delaySettings, delaySettings.GetBrokerTopology()).ToPipe();
+
+            var sendTransportContext = new SendTransportContext(_hostConfiguration, supervisor, pipe, exchangeName, delayPipe, delaySettings.ExchangeName);
 
             var transport = new RabbitMqSendTransport(sendTransportContext);
 
@@ -82,18 +95,36 @@
             BaseSendTransportContext,
             RabbitMqSendTransportContext
         {
+            readonly IRabbitMqHostConfiguration _hostConfiguration;
+
             public SendTransportContext(IRabbitMqHostConfiguration hostConfiguration, IModelContextSupervisor modelContextSupervisor,
-                IPipe<ModelContext> configureTopologyPipe, string exchange)
+                IPipe<ModelContext> configureTopologyPipe, string exchange,
+                IPipe<ModelContext> delayConfigureTopologyPipe, string delayExchange)
                 : base(hostConfiguration)
             {
+                _hostConfiguration = hostConfiguration;
                 ModelContextSupervisor = modelContextSupervisor;
                 ConfigureTopologyPipe = configureTopologyPipe;
                 Exchange = exchange;
+
+                DelayConfigureTopologyPipe = delayConfigureTopologyPipe;
+                DelayExchange = delayExchange;
             }
 
             public IPipe<ModelContext> ConfigureTopologyPipe { get; }
+            public IPipe<ModelContext> DelayConfigureTopologyPipe { get; }
+            public string DelayExchange { get; }
             public string Exchange { get; }
             public IModelContextSupervisor ModelContextSupervisor { get; }
+
+            public Task Send(IPipe<ModelContext> pipe, CancellationToken cancellationToken)
+            {
+                return _hostConfiguration.Retry(() => ModelContextSupervisor.Send(pipe, cancellationToken), ModelContextSupervisor);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
         }
     }
 }

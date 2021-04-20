@@ -48,9 +48,9 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
             {
                 var activity = lifetimeScope.Resolve<TActivity>(TypedParameter.From(context.Arguments));
 
-                ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
+                var executeContext = lifetimeScope.Resolve<ExecuteContext<TArguments>>();
 
-                activityContext.UpdatePayload(lifetimeScope);
+                ExecuteActivityContext<TActivity, TArguments> activityContext = executeContext.CreateActivityContext(activity);
 
                 return new CreatedExecuteActivityScopeContext<ILifetimeScope, TActivity, TArguments>(lifetimeScope, activityContext);
             }

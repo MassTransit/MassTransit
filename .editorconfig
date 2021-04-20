@@ -10,7 +10,7 @@ insert_final_newline=true
 indent_style=space
 indent_size=4
 
-[*.{config,xml,js,json,html,css,sql,csproj,props,yml}]
+[*.{config,xml,js,json,html,css,sql,csproj,props,yml,proto}]
 indent_size=2
 
 [*.md]

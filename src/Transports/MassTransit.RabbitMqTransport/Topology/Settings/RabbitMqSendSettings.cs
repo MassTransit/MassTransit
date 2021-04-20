@@ -41,7 +41,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
 
         public IDictionary<string, object> QueueArguments { get; }
 
-        public Uri GetSendAddress(Uri hostAddress)
+        public RabbitMqEndpointAddress GetSendAddress(Uri hostAddress)
         {
             return new RabbitMqEndpointAddress(hostAddress, ExchangeName, ExchangeType, Durable, AutoDelete, _bindToQueue, _queueName,
                 ExchangeArguments.ContainsKey("x-delayed-type") ? (string)ExchangeArguments["x-delayed-type"] : default,
@@ -126,6 +126,17 @@ namespace MassTransit.RabbitMqTransport.Topology.Settings
         public override string ToString()
         {
             return string.Join(", ", GetSettingStrings());
+        }
+    }
+
+
+    public class RabbitMqDelaySettings :
+        RabbitMqSendSettings,
+        DelaySettings
+    {
+        public RabbitMqDelaySettings(RabbitMqEndpointAddress address)
+            : base(address)
+        {
         }
     }
 }

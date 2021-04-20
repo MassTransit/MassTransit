@@ -16,10 +16,11 @@ Build Status
 
 Branch | Status
 --- | :---:
-master | [![master](https://ci.appveyor.com/api/projects/status/hox8dhh5eyy7jsf4/branch/master?svg=true)](https://ci.appveyor.com/project/phatboyg/masstransit/branch/master)
-develop | [![develop](https://ci.appveyor.com/api/projects/status/hox8dhh5eyy7jsf4/branch/develop?svg=true)](https://ci.appveyor.com/project/phatboyg/masstransit/branch/develop)
+master | [![master](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml/badge.svg?branch=master&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml)
+develop | [![develop](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml/badge.svg?branch=develop&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/build.yml)
+documentation | [![documentation](https://github.com/MassTransit/MassTransit/actions/workflows/docs.yml/badge.svg?branch=develop&event=push)](https://github.com/MassTransit/MassTransit/actions/workflows/docs.yml)
 
-MassTransit Nuget Packages
+MassTransit NuGet Packages
 ---------------------------
 
 | Package Name | .NET Standard | .NET Core App |
@@ -28,6 +29,7 @@ MassTransit Nuget Packages
 | [MassTransit][MassTransit.nuget] | 2.0 |
 | **Other** |
 | [MassTransit.Analyzers][Analyzers.nuget] | 2.0 |
+| [MassTransit.Templates][Templates.nuget] | 5.0 |
 | [MassTransit.SignalR][SignalR.nuget] | 2.0 |
 | [MassTransit.TestFramework][TestFramework.nuget] | 2.0 |
 | **Containers** |
@@ -74,33 +76,29 @@ Get help live at the MassTransit Discord server.
 **Pay attention**
 
 Please do not open an issue on GitHub, unless you have spotted an actual bug in MassTransit. 
-If you are unsure, ask on the mailing list, and if we confirm it's a bug, we'll ask you to create the issue. 
-Issues are not the place for questions, and they'll likely be closed.
+
+Use [GitHub Discussions](https://github.com/MassTransit/MassTransit/discussions) to ask questions, bring up ideas, or other general items. Issues are not the place for questions, and will either be converted to a discussion or closed.
 
 This policy is in place to avoid bugs being drowned out in a pile of sensible suggestions for future 
 enhancements and calls for help from people who forget to check back if they get it and so on.
 
 ## Building from Source
 
- 1. Install the latest [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet-core/3.1) SDK.
- 1. Clone the source down to your machine.<br/>
+ 1. Install the latest [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet-core/3.1) SDK
+ 1. Clone the source down to your machine<br/>
     ```bash
     git clone git://github.com/MassTransit/MassTransit.git
     ```
- 1. Run `build.ps1` or `build.sh`.
+ 1. Run `dotnet build`
 
 ## Contributing
 
- 1. Turn off `autocrlf`.
+ 1. Turn off `autocrlf`
     ```bash
     git config core.autocrlf false
     ```
  1. Hack!
- 1. Make a pull request.
-
-## Builds
-
-MassTransit is built on [AppVeyor](https://ci.appveyor.com/project/phatboyg/masstransit)
+ 1. Make a pull request
  
 # REQUIREMENTS
 * .NET Core SDK v3.1
@@ -110,6 +108,7 @@ Logo Design by _The Agile Badger_
 
 [MassTransit.nuget]: https://www.nuget.org/packages/MassTransit
 [Analyzers.nuget]: https://www.nuget.org/packages/MassTransit.Analyzers
+[Templates.nuget]: https://www.nuget.org/packages/MassTransit.Templates
 [SignalR.nuget]: https://www.nuget.org/packages/MassTransit.SignalR
 [TestFramework.nuget]: https://www.nuget.org/packages/MassTransit.TestFramework
 

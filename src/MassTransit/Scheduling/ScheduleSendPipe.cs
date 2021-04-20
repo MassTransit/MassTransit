@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
 
 
@@ -10,13 +11,15 @@
         where T : class
     {
         readonly IPipe<SendContext<T>> _pipe;
+        readonly DateTime _scheduledTime;
         SendContext _context;
 
         Guid? _scheduledMessageId;
 
-        protected ScheduleSendPipe(IPipe<SendContext<T>> pipe)
+        public ScheduleSendPipe(IPipe<SendContext<T>> pipe, DateTime scheduledTime)
         {
             _pipe = pipe;
+            _scheduledTime = scheduledTime;
         }
 
         public Guid? ScheduledMessageId
@@ -33,8 +36,17 @@
         public virtual async Task Send(SendContext<T> context)
         {
             _context = context;
-
             _context.ScheduledMessageId = _scheduledMessageId;
+
+            var delay = _scheduledTime.Kind == DateTimeKind.Local
+                ? _scheduledTime - DateTime.Now
+                : _scheduledTime - DateTime.UtcNow;
+
+            if (delay > TimeSpan.Zero)
+            {
+                var delaySendContext = context.GetPayload<DelaySendContext>();
+                delaySendContext.Delay = delay;
+            }
 
             if (_pipe.IsNotEmpty())
                 await _pipe.Send(context).ConfigureAwait(false);

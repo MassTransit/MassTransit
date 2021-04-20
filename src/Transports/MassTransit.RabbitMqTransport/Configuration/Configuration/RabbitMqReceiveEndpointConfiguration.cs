@@ -160,11 +160,6 @@ namespace MassTransit.RabbitMqTransport.Configuration
             set => _settings.ExclusiveConsumer = value;
         }
 
-        public ushort PrefetchCount
-        {
-            set => _settings.PrefetchCount = value;
-        }
-
         public bool Lazy
         {
             set => _settings.Lazy = value;
@@ -178,6 +173,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public TimeSpan? QueueExpiration
         {
             set => _settings.QueueExpiration = value;
+        }
+
+        public bool SingleActiveConsumer
+        {
+            set => _settings.SingleActiveConsumer = value;
         }
 
         public string DeadLetterExchange
@@ -208,6 +208,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
         public void EnablePriority(byte maxPriority)
         {
             _settings.EnablePriority(maxPriority);
+        }
+
+        public void SetQuorumQueue(int? replicationFactor = default)
+        {
+            _settings.SetQuorumQueue(replicationFactor);
         }
 
         public void ConnectManagementEndpoint(IReceiveEndpointConfigurator management)

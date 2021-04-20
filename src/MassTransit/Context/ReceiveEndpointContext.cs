@@ -57,6 +57,10 @@
         /// </summary>
         bool PublishFaults { get; }
 
+        int PrefetchCount { get; }
+
+        int? ConcurrentMessageLimit { get; }
+
         /// <summary>
         /// Convert an unknown exception to a <see cref="ConnectionException"/>, so that it can be used by
         /// the transport retry policy.

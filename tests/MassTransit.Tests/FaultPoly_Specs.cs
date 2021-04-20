@@ -44,7 +44,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_support_the_base_fault_type()
         {
-            Task<ConsumeContext<Fault<MemberUpdateCommand>>> handler = ConnectPublishHandler<Fault<MemberUpdateCommand>>();
+            Task<ConsumeContext<Fault<MemberUpdateCommand>>> handler = await ConnectPublishHandler<Fault<MemberUpdateCommand>>();
 
             await InputQueueSendEndpoint.Send<UpdateMemberAddress>(new
             {

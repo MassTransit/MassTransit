@@ -25,13 +25,13 @@
         /// </summary>
         /// <param name="settings"></param>
         /// <returns></returns>
-        ErrorSettings GetErrorSettings(EntitySettings settings);
+        ErrorSettings GetErrorSettings(ReceiveSettings settings);
 
         /// <summary>
         /// Return the dead letter settings for the queue
         /// </summary>
         /// <param name="settings"></param>
         /// <returns></returns>
-        DeadLetterSettings GetDeadLetterSettings(EntitySettings settings);
+        DeadLetterSettings GetDeadLetterSettings(ReceiveSettings settings);
     }
 }

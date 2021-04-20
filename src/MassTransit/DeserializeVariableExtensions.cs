@@ -16,7 +16,8 @@
         /// <returns></returns>
         public static bool TryGetValue<T>(this IDictionary<string, object> dictionary, string key, out T value)
         {
-            if (!dictionary.TryGetValue(key, out var obj))
+            object obj = null;
+            if (!dictionary?.TryGetValue(key, out obj) ?? false)
             {
                 value = default;
                 return false;
@@ -54,9 +55,9 @@
         /// <returns></returns>
         public static bool TryGetValueCamelCase(this IDictionary<string, object> dictionary, string key, out object value)
         {
-            if (char.IsUpper(key[0]))
+            if (dictionary != null && char.IsUpper(key[0]))
             {
-                char[] chars = key.ToCharArray();
+                var chars = key.ToCharArray();
                 chars[0] = char.ToLower(chars[0]);
 
                 key = new string(chars);

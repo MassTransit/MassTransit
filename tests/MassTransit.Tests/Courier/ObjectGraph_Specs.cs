@@ -24,8 +24,8 @@
             _stringValue = "Hello, World.";
             _decimalValue = 123.45m;
 
-            Task<ConsumeContext<RoutingSlipCompleted>> completed = ConnectPublishHandler<RoutingSlipCompleted>();
-            Task<ConsumeContext<RoutingSlipFaulted>> faulted = ConnectPublishHandler<RoutingSlipFaulted>();
+            Task<ConsumeContext<RoutingSlipCompleted>> completed = await ConnectPublishHandler<RoutingSlipCompleted>();
+            Task<ConsumeContext<RoutingSlipFaulted>> faulted = await ConnectPublishHandler<RoutingSlipFaulted>();
 
             var testActivity = GetActivityContext<ObjectGraphTestActivity>();
             var testActivity2 = GetActivityContext<TestActivity>();

@@ -52,6 +52,7 @@
         public override void Probe(ProbeContext context)
         {
             context.Add("type", "RabbitMQ");
+            context.Add("concurrentMessageLimit", ConcurrentMessageLimit);
             context.Set(_settings);
 
             var topologyScope = context.CreateScope("topology");

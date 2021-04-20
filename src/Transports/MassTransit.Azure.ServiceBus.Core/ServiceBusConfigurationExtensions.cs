@@ -3,6 +3,7 @@
     using System;
     using Azure.ServiceBus.Core;
     using Azure.ServiceBus.Core.Configuration;
+    using Registration;
 
 
     public static class ServiceBusConfigurationExtensions
@@ -27,6 +28,13 @@
             Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator> configure = null)
         {
             configurator.SetBusFactory(new ServiceBusRegistrationBusFactory(configure));
+
+            configurator.Registrar.RegisterSingleInstance(provider =>
+            {
+                var subscriptionEndpointConnector = provider.GetRequiredService<IBusInstance>() as ISubscriptionEndpointConnector;
+
+                return subscriptionEndpointConnector ?? throw new ConfigurationException("The default bus instance is not an Azure Service Bus Instance");
+            });
         }
     }
 }

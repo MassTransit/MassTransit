@@ -29,8 +29,14 @@ namespace MassTransit.Transports.InMemory
 
         public void Probe(ProbeContext context)
         {
-            var scope = context.CreateScope("inMemoryReceiveTransport");
-            scope.Set(new {Address = _context.InputAddress});
+            var scope = context.CreateScope("receiveTransport");
+            scope.Add("type", "InMemory");
+            scope.Set(new
+            {
+                Address = _context.InputAddress,
+                _context.PrefetchCount,
+                _context.ConcurrentMessageLimit
+            });
         }
 
         ReceiveTransportHandle IReceiveTransport.Start()

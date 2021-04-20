@@ -14,7 +14,7 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_configure_scope()
         {
-            Task<ConsumeContext<TestStarted>> started = ConnectPublishHandler<TestStarted>();
+            Task<ConsumeContext<TestStarted>> started = await ConnectPublishHandler<TestStarted>();
 
             await InputQueueSendEndpoint.Send(new StartTest
             {

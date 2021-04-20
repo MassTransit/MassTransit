@@ -17,10 +17,12 @@ namespace MassTransit.Testing
     {
         SendContext Context { get; }
 
+        DateTime StartTime { get; }
+        TimeSpan ElapsedTime { get; }
+
         Exception Exception { get; }
-
         Type MessageType { get; }
-
+        string ShortTypeName { get; }
         object MessageObject { get; }
     }
 }

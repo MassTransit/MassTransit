@@ -41,6 +41,8 @@
             InputAddress = configuration.InputAddress;
             HostAddress = configuration.HostAddress;
             PublishFaults = configuration.PublishFaults;
+            PrefetchCount = configuration.PrefetchCount;
+            ConcurrentMessageLimit = configuration.ConcurrentMessageLimit;
 
             _publishTopology = configuration.Topology.Publish;
 
@@ -110,6 +112,8 @@
         public Task Dependencies { get; }
 
         public bool PublishFaults { get; }
+        public int PrefetchCount { get; }
+        public int? ConcurrentMessageLimit { get; }
 
         ILogContext ReceiveEndpointContext.LogContext => _hostConfiguration.ReceiveLogContext;
 

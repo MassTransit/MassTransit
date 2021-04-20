@@ -20,7 +20,7 @@
         [Test]
         public async Task Should_cancel_the_message()
         {
-            Task<ConsumeContext<Fault<PingMessage>>> faulted = ConnectPublishHandler<Fault<PingMessage>>();
+            Task<ConsumeContext<Fault<PingMessage>>> faulted = await ConnectPublishHandler<Fault<PingMessage>>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -79,7 +79,7 @@
         [Test]
         public async Task Should_not_cancel_the_message()
         {
-            Task<ConsumeContext<Fault<PingMessage>>> faulted = ConnectPublishHandler<Fault<PingMessage>>();
+            Task<ConsumeContext<Fault<PingMessage>>> faulted = await ConnectPublishHandler<Fault<PingMessage>>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
 

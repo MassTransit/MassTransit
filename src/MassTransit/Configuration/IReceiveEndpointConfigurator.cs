@@ -31,6 +31,17 @@ namespace MassTransit
         /// </summary>
         bool PublishFaults { set; }
 
+        /// <summary>
+        /// Specify the number of messages to prefetch from the message broker
+        /// </summary>
+        /// <value>The limit</value>
+        int PrefetchCount { get; set; }
+
+        /// <summary>
+        /// Specify the number of concurrent messages that can be consumed (separate from prefetch count)
+        /// </summary>
+        int? ConcurrentMessageLimit { get; set; }
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddEndpointSpecification(IReceiveEndpointSpecification configurator);
 

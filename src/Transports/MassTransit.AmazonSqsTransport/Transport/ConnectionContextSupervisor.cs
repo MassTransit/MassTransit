@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.AmazonSqsTransport.Transport
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Amazon.SQS.Model;
     using Configuration;
@@ -100,10 +101,13 @@
             BaseSendTransportContext,
             SqsSendTransportContext
         {
+            readonly IAmazonSqsHostConfiguration _hostConfiguration;
+
             public SendTransportContext(IAmazonSqsHostConfiguration hostConfiguration, IClientContextSupervisor clientContextSupervisor,
                 IPipe<ClientContext> configureTopologyPipe, string entityName)
                 : base(hostConfiguration)
             {
+                _hostConfiguration = hostConfiguration;
                 ClientContextSupervisor = clientContextSupervisor;
 
                 ConfigureTopologyPipe = configureTopologyPipe;
@@ -120,6 +124,15 @@
             public IClientContextSupervisor ClientContextSupervisor { get; }
             public ITransportSetHeaderAdapter<MessageAttributeValue> SqsSetHeaderAdapter { get; }
             public ITransportSetHeaderAdapter<Amazon.SimpleNotificationService.Model.MessageAttributeValue> SnsSetHeaderAdapter { get; }
+
+            public Task Send(IPipe<ClientContext> pipe, CancellationToken cancellationToken)
+            {
+                return _hostConfiguration.Retry(() => ClientContextSupervisor.Send(pipe, cancellationToken), ClientContextSupervisor);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+            }
         }
     }
 }

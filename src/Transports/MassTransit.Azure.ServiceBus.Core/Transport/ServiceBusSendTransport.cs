@@ -21,6 +21,8 @@
         Agent,
         ISendTransport
     {
+        static readonly ITransportSetHeaderAdapter<object> _adapter = new DictionaryTransportSetHeaderAdapter(new SimpleHeaderValueConverter());
+
         readonly ServiceBusSendTransportContext _context;
 
         public ServiceBusSendTransport(ServiceBusSendTransportContext context)
@@ -32,7 +34,7 @@
         {
             var sendPipe = new SendPipe<T>(_context, message, pipe, cancellationToken);
 
-            return _context.Supervisor.Send(sendPipe, cancellationToken);
+            return _context.Send(sendPipe, cancellationToken);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -42,7 +44,7 @@
 
         protected override Task StopAgent(StopContext context)
         {
-            LogContext.Debug?.Log("Stopping send transport: {Address}", _context.Address);
+            TransportLogMessages.StoppingSendTransport(_context.Address.ToString());
 
             return base.StopAgent(context);
         }
@@ -188,7 +190,7 @@
             {
                 var brokeredMessage = new Message(context.Body) {ContentType = context.ContentType.MediaType};
 
-                brokeredMessage.UserProperties.Set(context.Headers);
+                _adapter.Set(brokeredMessage.UserProperties, context.Headers);
 
                 if (context.TimeToLive.HasValue)
                     brokeredMessage.TimeToLive = context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1);

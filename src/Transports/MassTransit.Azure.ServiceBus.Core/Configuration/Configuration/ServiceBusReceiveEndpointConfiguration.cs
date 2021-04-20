@@ -60,6 +60,12 @@
             ClientPipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology,
                 _settings.RemoveSubscriptions, _hostConfiguration.ConnectionContextSupervisor.Stopping));
 
+            var errorTransport = CreateErrorTransport();
+            var deadLetterTransport = CreateDeadLetterTransport();
+
+            receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
+            receiveEndpointContext.GetOrAddPayload(() => errorTransport);
+
             CreateReceiveEndpoint(host, receiveEndpointContext);
         }
 
@@ -122,14 +128,14 @@
             return _inputAddress.IsValueCreated || base.IsAlreadyConfigured();
         }
 
-        protected override IErrorTransport CreateErrorTransport()
+        IErrorTransport CreateErrorTransport()
         {
             var settings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings.QueueConfigurator);
 
             return new BrokeredMessageErrorTransport(_hostConfiguration.ConnectionContextSupervisor, settings);
         }
 
-        protected override IDeadLetterTransport CreateDeadLetterTransport()
+        IDeadLetterTransport CreateDeadLetterTransport()
         {
             var settings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings.QueueConfigurator);
 

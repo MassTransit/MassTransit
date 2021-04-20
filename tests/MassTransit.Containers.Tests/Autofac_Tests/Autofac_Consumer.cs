@@ -72,6 +72,26 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
 
     [TestFixture]
+    public class Autofac_Consumer_ConfigureEndpoint :
+        Common_Consumer_ConfigureEndpoint
+    {
+        readonly IContainer _container;
+
+        public Autofac_Consumer_ConfigureEndpoint()
+        {
+            var builder = new ContainerBuilder();
+            builder.AddMassTransit(ConfigureRegistration);
+
+            builder.RegisterType<DoNotPublishFaults>().As<IConfigureReceiveEndpoint>();
+
+            _container = builder.Build();
+        }
+
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class Autofac_Consumer_Endpoint :
         Common_Consumer_Endpoint
     {

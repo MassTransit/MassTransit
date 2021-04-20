@@ -17,7 +17,7 @@
         [Test]
         public async Task Should_be_able_to_observe_its_own_event_fault()
         {
-            Task<ConsumeContext<Fault<Start>>> faulted = ConnectPublishHandler<Fault<Start>>();
+            Task<ConsumeContext<Fault<Start>>> faulted = await ConnectPublishHandler<Fault<Start>>();
 
             var message = new Initialize();
             await InputQueueSendEndpoint.Send(message);

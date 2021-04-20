@@ -11,8 +11,8 @@ namespace MassTransit.Courier.Contexts
     {
         readonly CompensateContext<TLog> _context;
 
-        protected CompensateContextScope(CompensateContext<TLog> context)
-            : base(context)
+        public CompensateContextScope(CompensateContext<TLog> context, params object[] payloads)
+            : base(context, payloads)
         {
             _context = context;
         }

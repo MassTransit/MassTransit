@@ -21,11 +21,13 @@ namespace MassTransit.Monitoring.Health
             _endpoints = new ConcurrentDictionary<Uri, IEndpointHealth>();
         }
 
+        public bool BusHealthy { get; set; }
+
         public void EndpointConfigured<T>(T configurator)
             where T : IReceiveEndpointConfigurator
         {
             configurator.ConnectReceiveEndpointObserver(this);
-            _endpoints.TryAdd(configurator.InputAddress, UnHealthEndpointHealth.Instance);
+            _endpoints.TryAdd(configurator.InputAddress, BusHealthy ? ConnectingEndpointHealth.Instance : UnHealthEndpointHealth.Instance);
         }
 
         public Task Ready(ReceiveEndpointReady ready)
@@ -37,17 +39,16 @@ namespace MassTransit.Monitoring.Health
 
         public Task Stopping(ReceiveEndpointStopping stopping)
         {
-            UpdateEndpoint(stopping);
-
-            if (stopping.Removed)
-                _endpoints.TryRemove(stopping.InputAddress, out var endpoint);
+            if (stopping.Removed && _endpoints.TryGetValue(stopping.InputAddress, out var endpoint))
+                _endpoints.TryUpdate(stopping.InputAddress, new RemoveWhenCompletedEndpointHealth(stopping.ReceiveEndpoint), endpoint);
 
             return TaskUtil.Completed;
         }
 
         public Task Completed(ReceiveEndpointCompleted completed)
         {
-            UpdateEndpoint(completed);
+            if (_endpoints.TryGetValue(completed.InputAddress, out var endpoint) && endpoint is RemoveWhenCompletedEndpointHealth)
+                _endpoints.TryRemove(completed.InputAddress, out var removed);
 
             return TaskUtil.Completed;
         }
@@ -106,6 +107,42 @@ namespace MassTransit.Monitoring.Health
             public EndpointHealthResult CheckHealth()
             {
                 return _result;
+            }
+        }
+
+
+        class ConnectingEndpointHealth :
+            IEndpointHealth
+        {
+            readonly EndpointHealthResult _result;
+
+            ConnectingEndpointHealth()
+            {
+                _result = EndpointHealthResult.Healthy(null, "starting");
+            }
+
+            public static IEndpointHealth Instance { get; } = new ConnectingEndpointHealth();
+
+            public EndpointHealthResult CheckHealth()
+            {
+                return _result;
+            }
+        }
+
+
+        class RemoveWhenCompletedEndpointHealth :
+            IEndpointHealth
+        {
+            readonly IReceiveEndpoint _receiveEndpoint;
+
+            public RemoveWhenCompletedEndpointHealth(IReceiveEndpoint receiveEndpoint)
+            {
+                _receiveEndpoint = receiveEndpoint;
+            }
+
+            public EndpointHealthResult CheckHealth()
+            {
+                return _receiveEndpoint.CheckHealth();
             }
         }
     }

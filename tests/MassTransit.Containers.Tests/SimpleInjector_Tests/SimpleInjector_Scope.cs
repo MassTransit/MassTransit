@@ -1,9 +1,7 @@
 namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 {
-    using System;
     using System.Threading.Tasks;
     using Common_Tests;
-    using GreenPipes;
     using NUnit.Framework;
     using SimpleInjector;
 
@@ -35,14 +33,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public async Task Close_container()
         {
             await _container.DisposeAsync();
-        }
-
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.UseExecute(context => Console.WriteLine(
-                $"Received (input_queue): {context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A")}, Types = ({string.Join(",", context.SupportedMessageTypes)})"));
-
-            base.ConfigureInMemoryBus(configurator);
         }
 
         protected override ISendEndpointProvider GetSendEndpointProvider()

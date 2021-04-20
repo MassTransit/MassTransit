@@ -90,7 +90,7 @@
         [Test]
         public async Task Should_be_received()
         {
-            Task<ConsumeContext<Fault<AttributeSpecifiedEntityMessage>>> faulted = ConnectPublishHandler<Fault<AttributeSpecifiedEntityMessage>>();
+            Task<ConsumeContext<Fault<AttributeSpecifiedEntityMessage>>> faulted = await ConnectPublishHandler<Fault<AttributeSpecifiedEntityMessage>>();
 
             await Bus.Publish<AttributeSpecifiedEntityMessage>(new {Value = "Yawn"});
 

@@ -53,7 +53,7 @@ namespace MassTransit.Registration
             foreach (Action<ISagaConfigurator<TInstance>> action in _configureActions)
                 action(stateMachineConfigurator);
 
-            LogContext.Debug?.Log("Configured endpoint {Endpoint}, Saga: {SagaType}, State Machine: {StateMachineType}",
+            LogContext.Info?.Log("Configured endpoint {Endpoint}, Saga: {SagaType}, State Machine: {StateMachineType}",
                 configurator.InputAddress.GetLastPart(),
                 TypeMetadataCache<TInstance>.ShortName, TypeMetadataCache.GetShortName(stateMachine.GetType()));
 

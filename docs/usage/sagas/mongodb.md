@@ -4,7 +4,7 @@ MongoDB is easy to setup as a saga repository. MassTransit includes sensible def
 
 Storing a saga in MongoDB requires an additional interface, _ISagaVersion_, which has a _Version_ property used for optimistic concurrency. An example saga is shown below.
 
-<<< @/docs/code/sagas/MongoDbSaga.cs
+<<< @/docs/code/sagas/OrderState.cs
 
 ### Configuration
 

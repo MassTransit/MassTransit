@@ -21,7 +21,6 @@
         static readonly Lazy<JsonSerializer> _deserializer;
         static readonly Lazy<JsonSerializer> _serializer;
 
-        public static readonly ListJsonConverter ListJsonConverter;
         public static readonly CaseInsensitiveDictionaryJsonConverter CaseInsensitiveDictionaryJsonConverter;
         public static readonly InterfaceProxyConverter InterfaceProxyConverter;
         public static readonly MessageDataJsonConverter MessageDataJsonConverter;
@@ -32,7 +31,6 @@
 
         static BsonMessageSerializer()
         {
-            ListJsonConverter = new ListJsonConverter();
             CaseInsensitiveDictionaryJsonConverter = new CaseInsensitiveDictionaryJsonConverter();
             InterfaceProxyConverter = new InterfaceProxyConverter();
             MessageDataJsonConverter = new MessageDataJsonConverter();
@@ -41,7 +39,6 @@
             var namingStrategy = new CamelCaseNamingStrategy();
 
             DefaultContractResolver deserializerContractResolver = new JsonContractResolver(
-                ListJsonConverter,
                 CaseInsensitiveDictionaryJsonConverter,
                 InterfaceProxyConverter,
                 IsoDateTimeConverter,

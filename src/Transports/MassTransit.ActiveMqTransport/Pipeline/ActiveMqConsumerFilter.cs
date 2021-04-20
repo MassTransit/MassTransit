@@ -37,7 +37,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostAddress);
 
-            var executor = new ChannelExecutor(1, receiveSettings.PrefetchCount);
+            var executor = new ChannelExecutor(1, receiveSettings.ConcurrentMessageLimit);
 
             var consumers = new List<Task<ActiveMqConsumer>>
             {
@@ -99,7 +99,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
             return supervisor;
         }
 
-        async Task<ActiveMqConsumer> CreateConsumer(SessionContext context, string entityName, string selector, ushort prefetchCount, ChannelExecutor executor)
+        async Task<ActiveMqConsumer> CreateConsumer(SessionContext context, string entityName, string selector, int prefetchCount, ChannelExecutor executor)
         {
             var queueName = $"{entityName}?consumer.prefetchSize={prefetchCount}";
 

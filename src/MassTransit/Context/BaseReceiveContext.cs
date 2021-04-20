@@ -131,7 +131,7 @@ namespace MassTransit.Context
                     return contentType;
 
                 if (contentTypeHeader is string contentTypeString)
-                    return new ContentType(contentTypeString);
+                    return ConvertToContentType(contentTypeString);
             }
 
             return default;
@@ -140,6 +140,18 @@ namespace MassTransit.Context
         public void Cancel()
         {
             _cancellationTokenSource.Cancel();
+        }
+
+        protected static ContentType ConvertToContentType(string text)
+        {
+            try
+            {
+                return new ContentType(text);
+            }
+            catch (FormatException)
+            {
+                return default;
+            }
         }
 
 

@@ -49,8 +49,10 @@ To configure the receive endpoint without a container, the state machine and ins
 
 ```cs
 var sagaStateMachine = new OrderStateMachine();
-var repository = new MessageSessionSagaRepository<OrderState>(); 
-
+// This gives an Obsolete-warning 
+// var repository = new MessageSessionSagaRepository<OrderState>(); 
+// This is suggested instead
+var repository = MessageSessionSagaRepository.Create<OrderState>();
 cfg.ReceiveEndpoint("order-state", ep =>
 {
     ep.RequiresSession = true;

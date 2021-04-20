@@ -18,5 +18,7 @@
         ITopologyConfiguration Topology { get; }
 
         ISerializationConfiguration Serialization { get; }
+
+        ITransportConfiguration Transport { get; }
     }
 }

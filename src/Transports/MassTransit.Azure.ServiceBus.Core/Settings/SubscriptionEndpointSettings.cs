@@ -2,6 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 {
     using System;
     using System.Collections.Generic;
+    using Configuration;
     using Microsoft.Azure.ServiceBus;
     using Microsoft.Azure.ServiceBus.Management;
     using Topology;
@@ -16,18 +17,18 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
         readonly SubscriptionConfigurator _subscriptionConfigurator;
         readonly TopicDescription _topicDescription;
 
-        public SubscriptionEndpointSettings(string topicName, string subscriptionName)
-            : this(Defaults.CreateTopicDescription(topicName), subscriptionName)
+        public SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, string topicName, string subscriptionName)
+            : this(configuration, Defaults.CreateTopicDescription(topicName), subscriptionName)
         {
         }
 
-        public SubscriptionEndpointSettings(TopicDescription topicDescription, string subscriptionName)
-            : this(topicDescription, new SubscriptionConfigurator(topicDescription.Path, subscriptionName))
+        public SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, TopicDescription topicDescription, string subscriptionName)
+            : this(configuration, topicDescription, new SubscriptionConfigurator(topicDescription.Path, subscriptionName))
         {
         }
 
-        SubscriptionEndpointSettings(TopicDescription topicDescription, SubscriptionConfigurator configurator)
-            : base(configurator)
+        SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, TopicDescription topicDescription, SubscriptionConfigurator configurator)
+            : base(configuration, configurator)
         {
             _topicDescription = topicDescription;
             _subscriptionConfigurator = configurator;

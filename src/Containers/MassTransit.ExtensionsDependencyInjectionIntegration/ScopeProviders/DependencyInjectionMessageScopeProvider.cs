@@ -39,11 +39,11 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             var serviceScope = serviceProvider.CreateScope();
             try
             {
-                serviceScope.UpdateScope(context);
+                var scopeContext = new ConsumeContextScope<T>(context, serviceScope, serviceScope.ServiceProvider);
 
-                var consumeContext = new ConsumeContextScope<T>(context, serviceScope, serviceScope.ServiceProvider);
+                serviceScope.UpdateScope(scopeContext);
 
-                return new CreatedMessageScopeContext<IServiceScope, T>(serviceScope, consumeContext);
+                return new CreatedMessageScopeContext<IServiceScope, T>(serviceScope, scopeContext);
             }
             catch
             {

@@ -263,8 +263,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
         [Test]
         public async Task Should_receive_the_response_from_the_consumer()
         {
-            Task<ConsumeContext<PingReceived>> received = ConnectPublishHandler<PingReceived>();
-            Task<ConsumeContext<PingCompleted>> completed = ConnectPublishHandler<PingCompleted>();
+            Task<ConsumeContext<PingReceived>> received = await ConnectPublishHandler<PingReceived>();
+            Task<ConsumeContext<PingCompleted>> completed = await ConnectPublishHandler<PingCompleted>();
 
             IRequestClient<PingMessage> client = GetRequestClient();
 

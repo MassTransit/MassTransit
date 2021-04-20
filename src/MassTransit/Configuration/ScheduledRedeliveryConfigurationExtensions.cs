@@ -1,14 +1,70 @@
 namespace MassTransit
 {
     using System;
+    using System.Threading;
     using ConsumeConfigurators;
+    using Context;
+    using GreenPipes;
     using GreenPipes.Configurators;
     using PipeConfigurators;
+    using Pipeline.Filters;
     using Saga;
 
 
     public static class ScheduledRedeliveryConfigurationExtensions
     {
+        /// <summary>
+        /// Use the message scheduler to schedule redelivery of a specific message type based upon the retry policy, via
+        /// the delayed exchange feature of ActiveMQ.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void UseScheduledRedelivery<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Action<IRetryConfigurator> configure)
+            where T : class
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            var redeliverySpecification = new ScheduledRedeliveryPipeSpecification<T>();
+
+            configurator.AddPipeSpecification(redeliverySpecification);
+
+            var retrySpecification = new RedeliveryRetryPipeSpecification<T>();
+
+            configure?.Invoke(retrySpecification);
+
+            configurator.AddPipeSpecification(retrySpecification);
+        }
+
+        /// <summary>
+        /// Use the message scheduler to schedule redelivery of a specific message type based upon the retry policy.
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="retryPolicy"></param>
+        public static void UseScheduledRedelivery<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, IRetryPolicy retryPolicy)
+            where T : class
+        {
+            if (configurator == null)
+                throw new ArgumentNullException(nameof(configurator));
+
+            var redeliverySpecification = new ScheduledRedeliveryPipeSpecification<T>();
+
+            configurator.AddPipeSpecification(redeliverySpecification);
+
+            var retrySpecification = new RedeliveryRetryPipeSpecification<T>();
+
+            retrySpecification.SetRetryPolicy(exceptionFilter =>
+                new ConsumeContextRetryPolicy<ConsumeContext<T>, RetryConsumeContext<T>>(retryPolicy, CancellationToken.None, Factory));
+
+            configurator.AddPipeSpecification(retrySpecification);
+        }
+
+        static RetryConsumeContext<T> Factory<T>(ConsumeContext<T> context, IRetryPolicy retryPolicy, RetryContext retryContext)
+            where T : class
+        {
+            return new RetryConsumeContext<T>(context, retryPolicy, retryContext);
+        }
+
         /// <summary>
         /// Configure scheduled redelivery for all message types
         /// </summary>
@@ -36,7 +92,7 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var observer = new MessageRedeliveryConsumerConfigurationObserver<TConsumer>(configurator, configure);
+            var observer = new ScheduledRedeliveryConsumerConfigurationObserver<TConsumer>(configurator, configure);
             configurator.ConnectConsumerConfigurationObserver(observer);
         }
 
@@ -51,7 +107,7 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var observer = new MessageRedeliverySagaConfigurationObserver<TSaga>(configurator, configure);
+            var observer = new ScheduledRedeliverySagaConfigurationObserver<TSaga>(configurator, configure);
             configurator.ConnectSagaConfigurationObserver(observer);
         }
 
@@ -66,7 +122,7 @@ namespace MassTransit
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var observer = new MessageRedeliveryHandlerConfigurationObserver(configure);
+            var observer = new ScheduledRedeliveryHandlerConfigurationObserver(configure);
             configurator.ConnectHandlerConfigurationObserver(observer);
         }
     }

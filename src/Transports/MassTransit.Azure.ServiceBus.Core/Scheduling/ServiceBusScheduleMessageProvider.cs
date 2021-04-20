@@ -25,7 +25,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Scheduling
         {
             var payload = await message.ConfigureAwait(false);
 
-            var scheduleMessagePipe = new ServiceBusScheduleSendPipe<T>(pipe, scheduledTime);
+            var scheduleMessagePipe = new ScheduleSendPipe<T>(pipe, scheduledTime);
 
             var tokenId = ScheduleTokenIdCache<T>.GetTokenId(payload);
 

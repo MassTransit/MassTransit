@@ -8,7 +8,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Configurators
         QueueConfigurator,
         IQueueBindingConfigurator
     {
-        public QueueBindingConfigurator(string queueName, string exchangeType, bool durable, bool autoDelete)
+        protected QueueBindingConfigurator(string queueName, string exchangeType, bool durable, bool autoDelete)
             : base(queueName, exchangeType, durable, autoDelete)
         {
             BindingArguments = new Dictionary<string, object>();

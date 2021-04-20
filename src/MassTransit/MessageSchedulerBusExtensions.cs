@@ -4,6 +4,7 @@ namespace MassTransit
     using System.Threading.Tasks;
     using Scheduling;
     using Topology;
+    using Transports.Scheduling;
 
 
     public static class MessageSchedulerBusExtensions
@@ -75,6 +76,31 @@ namespace MassTransit
         public static IMessageScheduler CreateMessageScheduler(this IPublishEndpoint publishEndpoint, IBusTopology busTopology)
         {
             return new MessageScheduler(new PublishScheduleMessageProvider(publishEndpoint), busTopology);
+        }
+
+        /// <summary>
+        /// Create a message scheduler that uses the built-in transport message delay to schedule messages.
+        /// NOTE that this should only be used to schedule messages outside of a message consumer. Consumers should
+        /// use the ScheduleSend extensions on ConsumeContext.
+        /// </summary>
+        /// <param name="bus"></param>
+        /// <returns></returns>
+        public static IMessageScheduler CreateDelayedMessageScheduler(this IBus bus)
+        {
+            return new MessageScheduler(new DelayedScheduleMessageProvider(bus), bus.Topology);
+        }
+
+        /// <summary>
+        /// Create a message scheduler that uses the built-in transport message delay to schedule messages.
+        /// NOTE that this should only be used to schedule messages outside of a message consumer. Consumers should
+        /// use the ScheduleSend extensions on ConsumeContext.
+        /// </summary>
+        /// <param name="sendEndpointProvider"></param>
+        /// <param name="busTopology"></param>
+        /// <returns></returns>
+        public static IMessageScheduler CreateDelayedMessageScheduler(this ISendEndpointProvider sendEndpointProvider, IBusTopology busTopology)
+        {
+            return new MessageScheduler(new DelayedScheduleMessageProvider(sendEndpointProvider), busTopology);
         }
     }
 }

@@ -31,7 +31,7 @@ namespace MassTransit.Definition
         void IActivityDefinition<TActivity, TArguments, TLog>.Configure(IReceiveEndpointConfigurator endpointConfigurator,
             ICompensateActivityConfigurator<TActivity, TLog> compensateActivityConfigurator)
         {
-            ConfigureConcurrencyLimit(compensateActivityConfigurator.RoutingSlip);
+            ConfigureConcurrencyLimit(endpointConfigurator, compensateActivityConfigurator.RoutingSlip);
 
             ConfigureCompensateActivity(endpointConfigurator, compensateActivityConfigurator);
         }

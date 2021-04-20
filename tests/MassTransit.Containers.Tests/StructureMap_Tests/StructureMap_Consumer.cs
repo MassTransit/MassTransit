@@ -36,6 +36,27 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
 
 
     [TestFixture]
+    public class StructureMap_Consumer_ConfigureEndpoint :
+        Common_Consumer_ConfigureEndpoint
+    {
+        readonly IContainer _container;
+
+        public StructureMap_Consumer_ConfigureEndpoint()
+        {
+            _container = new Container(expression =>
+            {
+                expression.AddMassTransit(ConfigureRegistration);
+
+                expression.For<IConfigureReceiveEndpoint>()
+                    .Add<DoNotPublishFaults>();
+            });
+        }
+
+        protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class StructureMap_Consumer_Endpoint :
         Common_Consumer_Endpoint
     {

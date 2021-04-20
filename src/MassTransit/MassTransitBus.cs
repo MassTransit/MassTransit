@@ -186,7 +186,7 @@ namespace MassTransit
 
                 var hostHandle = _host.Start(cancellationToken);
 
-                busHandle = new Handle(hostHandle, this, _busObservable, _logContext);
+                busHandle = new Handle(_host, hostHandle, this, _busObservable, _logContext);
 
                 try
                 {
@@ -210,7 +210,7 @@ namespace MassTransit
 
                 _busHandle = busHandle;
 
-                LogContext.Debug?.Log("Bus started: {HostAddress}", _host.Address);
+                LogContext.Info?.Log("Bus started: {HostAddress}", _host.Address);
 
                 return _busHandle;
             }
@@ -338,14 +338,16 @@ namespace MassTransit
         class Handle :
             BusHandle
         {
+            readonly IHost _host;
             readonly IBus _bus;
             readonly IBusObserver _busObserver;
             readonly HostHandle _hostHandle;
             readonly ILogContext _logContext;
             bool _stopped;
 
-            public Handle(HostHandle hostHandle, IBus bus, IBusObserver busObserver, ILogContext logContext)
+            public Handle(IHost host, HostHandle hostHandle, IBus bus, IBusObserver busObserver, ILogContext logContext)
             {
+                _host = host;
                 _bus = bus;
                 _busObserver = busObserver;
                 _logContext = logContext;
@@ -367,12 +369,6 @@ namespace MassTransit
 
                 try
                 {
-                    var hostAddress = _hostHandle.Ready.IsCompletedSuccessfully()
-                        ? _hostHandle.Ready.GetAwaiter().GetResult().HostAddress
-                        : new Uri(_bus.Address.GetLeftPart(UriPartial.Authority));
-
-                    LogContext.Debug?.Log("Stopping host: {HostAddress}", hostAddress);
-
                     await _hostHandle.Stop(cancellationToken).ConfigureAwait(false);
 
                     await _busObserver.PostStop(_bus).ConfigureAwait(false);
@@ -384,10 +380,12 @@ namespace MassTransit
                 {
                     await _busObserver.StopFaulted(_bus, exception).ConfigureAwait(false);
 
-                    LogContext.Warning?.Log(exception, "Bus stop faulted");
+                    LogContext.Warning?.Log(exception, "Bus stop faulted: {HostAddress}", _host.Address);
 
                     throw;
                 }
+
+                LogContext.Info?.Log("Bus stopped: {HostAddress}", _host.Address);
 
                 _stopped = true;
             }

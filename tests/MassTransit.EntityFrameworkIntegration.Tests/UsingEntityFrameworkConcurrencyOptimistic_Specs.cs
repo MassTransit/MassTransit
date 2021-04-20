@@ -136,7 +136,7 @@
         public When_using_EntityFrameworkConcurrencyOptimistic()
         {
             _sagaDbContextFactory = new DelegateSagaDbContextFactory<ChoirStateOptimistic>(() =>
-                new ChoirStateOptimisticSagaDbContext(SagaDbContextFactoryProvider.GetLocalDbConnectionString()));
+                new ChoirStateOptimisticSagaDbContext(LocalDbConnectionStringProvider.GetLocalDbConnectionString()));
 
             _repository = new Lazy<ISagaRepository<ChoirStateOptimistic>>(() =>
                 EntityFrameworkSagaRepository<ChoirStateOptimistic>.CreateOptimistic(_sagaDbContextFactory));

@@ -21,7 +21,7 @@ namespace MassTransit.RedisIntegration.Configuration
         {
             if (typeof(TSaga).HasInterface<ISagaVersion>())
             {
-                var proxy = (IProxy)Activator.CreateInstance(typeof(Proxy<>).MakeGenericType(typeof(TSaga)));
+                var proxy = (IProxy)Activator.CreateInstance(typeof(Proxy<>).MakeGenericType(typeof(TSaga)), configurator);
 
                 proxy.Configure(this);
             }

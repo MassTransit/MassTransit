@@ -54,6 +54,7 @@
                 _settings.Durable,
                 _settings.AutoDelete,
                 _settings.PrefetchCount,
+                ConcurrentMessageLimit,
                 _settings.WaitTimeSeconds,
                 _settings.PurgeOnStartup
             });

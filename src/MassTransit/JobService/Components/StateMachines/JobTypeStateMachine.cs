@@ -5,7 +5,7 @@ namespace MassTransit.JobService.Components.StateMachines
     using Automatonymous;
     using Automatonymous.Binders;
     using Context;
-    using MassTransit.Contracts.JobService;
+    using Contracts.JobService;
     using Topology.Topologies;
 
 
@@ -21,6 +21,18 @@ namespace MassTransit.JobService.Components.StateMachines
 
         public JobTypeStateMachine()
         {
+            Event(() => JobSlotRequested, x =>
+            {
+                x.CorrelateById(m => m.Message.JobTypeId);
+                x.ConfigureConsumeTopology = false;
+            });
+            Event(() => JobSlotReleased, x =>
+            {
+                x.CorrelateById(m => m.Message.JobTypeId);
+                x.ConfigureConsumeTopology = false;
+            });
+            Event(() => SetConcurrentJobLimit, x => x.CorrelateById(m => m.Message.JobTypeId));
+
             InstanceState(x => x.CurrentState, Active, Idle);
 
             During(Initial, Active, Idle,
@@ -70,9 +82,7 @@ namespace MassTransit.JobService.Components.StateMachines
             During(Active, Idle,
                 When(SetConcurrentJobLimit)
                     .SetConcurrentLimit());
-        }
-
-        // ReSharper disable UnassignedGetOnlyAutoProperty
+        } // ReSharper disable UnassignedGetOnlyAutoProperty
         public State Active { get; }
         public State Idle { get; }
 

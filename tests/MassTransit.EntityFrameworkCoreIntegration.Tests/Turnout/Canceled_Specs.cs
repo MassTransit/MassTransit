@@ -12,6 +12,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
     using Shared;
 
 
+    [Category("Flaky")]
     [TestFixture(typeof(SqlServerTestDbParameters))]
     [TestFixture(typeof(PostgresTestDbParameters))]
     public class Submitting_a_job_to_turnout_that_is_cancelled<T> :

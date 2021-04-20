@@ -49,6 +49,16 @@
             set => _busConfiguration.HostConfiguration.DeployTopologyOnly = value;
         }
 
+        public int? ConcurrentMessageLimit
+        {
+            set => _busConfiguration.Transport.Configurator.ConcurrentMessageLimit = value;
+        }
+
+        public int PrefetchCount
+        {
+            set => _busConfiguration.Transport.Configurator.PrefetchCount = value;
+        }
+
         public ConnectHandle ConnectBusObserver(IBusObserver observer)
         {
             return _busConfiguration.ConnectBusObserver(observer);

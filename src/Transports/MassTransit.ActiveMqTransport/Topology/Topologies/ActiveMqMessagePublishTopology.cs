@@ -20,11 +20,11 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         readonly IMessageTopology<TMessage> _messageTopology;
         readonly TopicConfigurator _topic;
 
-        public ActiveMqMessagePublishTopology(IMessageTopology<TMessage> messageTopology)
+        public ActiveMqMessagePublishTopology(IActiveMqPublishTopology publishTopology, IMessageTopology<TMessage> messageTopology)
         {
             _messageTopology = messageTopology;
 
-            var topicName = $"VirtualTopic.{messageTopology.EntityName}";
+            var topicName = $"{publishTopology.VirtualTopicPrefix}{messageTopology.EntityName}";
 
             var temporary = TypeMetadataCache<TMessage>.IsTemporaryMessageType;
 

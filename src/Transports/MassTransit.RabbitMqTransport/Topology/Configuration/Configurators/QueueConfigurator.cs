@@ -11,7 +11,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Configurators
         IQueueConfigurator,
         Queue
     {
-        public QueueConfigurator(string queueName, string exchangeType, bool durable, bool autoDelete)
+        protected QueueConfigurator(string queueName, string exchangeType, bool durable, bool autoDelete)
             : base(queueName, exchangeType, durable, autoDelete)
         {
             QueueArguments = new Dictionary<string, object>();
@@ -19,12 +19,34 @@ namespace MassTransit.RabbitMqTransport.Topology.Configurators
             QueueName = queueName;
         }
 
-        public QueueConfigurator(QueueConfigurator source, string name)
-            : base(name, source.ExchangeType, source.Durable, source.AutoDelete)
+        public void SetQuorumQueue(int? replicationFactor)
         {
-            QueueArguments = new Dictionary<string, object>();
+            SetQueueArgument(Headers.XQueueType, "quorum");
+            Durable = true;
+            Exclusive = false;
 
-            QueueName = name;
+            QueueArguments.Remove(Headers.XMaxPriority);
+
+            if (replicationFactor.HasValue)
+            {
+                if (replicationFactor.Value < 1)
+                    throw new ArgumentOutOfRangeException(nameof(replicationFactor), "Must be greater than zero and less than or equal to the cluster size.");
+
+                SetQueueArgument(Headers.XQuorumInitialGroupSize, replicationFactor.Value);
+            }
+        }
+
+        public bool SingleActiveConsumer
+        {
+            set
+            {
+                if (value)
+                    SetQueueArgument(Headers.XSingleActiveConsumer, true);
+                else
+                {
+                    QueueArguments.Remove(Headers.XSingleActiveConsumer);
+                }
+            }
         }
 
         public void SetQueueArgument(string key, object value)
@@ -47,7 +69,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Configurators
 
         public bool Lazy
         {
-            set => SetQueueArgument("x-queue-mode", value ? "lazy" : "default");
+            set => SetQueueArgument(Headers.XQueueMode, value ? "lazy" : "default");
         }
 
         public void EnablePriority(byte maxPriority)
@@ -57,9 +79,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Configurators
 
         public bool Exclusive { get; set; }
         public TimeSpan? QueueExpiration { get; set; }
-
         public string QueueName { get; set; }
-
         public IDictionary<string, object> QueueArguments { get; }
 
         public override RabbitMqEndpointAddress GetEndpointAddress(Uri hostAddress)

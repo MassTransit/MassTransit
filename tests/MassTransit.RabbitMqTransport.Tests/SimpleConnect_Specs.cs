@@ -10,11 +10,6 @@
         RabbitMqTestFixture
     {
         [Test]
-        public void Should_be_good()
-        {
-        }
-
-        [Test]
         public async Task Should_receive_a_message()
         {
             Task<ConsumeContext<PongMessage>> response = SubscribeHandler<PongMessage>();
@@ -25,6 +20,11 @@
             });
 
             await response;
+        }
+
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.AutoStart = true;
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -39,11 +39,6 @@
         RabbitMqTestFixture
     {
         [Test]
-        public void Should_be_good()
-        {
-        }
-
-        [Test]
         public async Task Should_receive_a_message()
         {
             Task<ConsumeContext<PongMessage>> response = SubscribeHandler<PongMessage>();
@@ -54,6 +49,11 @@
             });
 
             await response;
+        }
+
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            configurator.AutoStart = true;
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -68,7 +68,7 @@
         RabbitMqTestFixture
     {
         [Test]
-        public async Task Should_receive_a_message()
+        public async Task Should_not_fault()
         {
             await Bus.Publish(new PingMessage(), x =>
             {

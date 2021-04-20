@@ -13,6 +13,7 @@ namespace MassTransit.Registration
     {
         readonly BusHealth _busHealth;
         readonly IRegistrationCache<IEndpointRegistration> _endpoints;
+        IConfigureReceiveEndpoint _configureReceiveEndpoints;
 
         public BusRegistrationContext(IConfigurationServiceProvider provider, BusHealth busHealth, IRegistrationCache<IEndpointRegistration> endpoints,
             IRegistrationCache<IConsumerRegistration> consumers, IRegistrationCache<ISagaRegistration> sagas,
@@ -40,6 +41,8 @@ namespace MassTransit.Registration
             where T : IReceiveEndpointConfigurator
         {
             endpointNameFormatter ??= GetService<IEndpointNameFormatter>() ?? DefaultEndpointNameFormatter.Instance;
+
+            var configureReceiveEndpoint = GetConfigureReceiveEndpoints();
 
             var builder = new RegistrationFilterConfigurator();
             configureFilter?.Invoke(builder);
@@ -129,6 +132,8 @@ namespace MassTransit.Registration
             {
                 configurator.ReceiveEndpoint(endpoint.Definition, endpointNameFormatter, cfg =>
                 {
+                    configureReceiveEndpoint.Configure(endpoint.Definition.GetEndpointName(endpointNameFormatter), cfg);
+
                     if (endpoint.Consumers != null)
                     {
                         foreach (var consumer in endpoint.Consumers)
@@ -154,6 +159,8 @@ namespace MassTransit.Registration
                             {
                                 configurator.ReceiveEndpoint(compensateDefinition, endpointNameFormatter, compensateEndpointConfigurator =>
                                 {
+                                    configureReceiveEndpoint.Configure(compensateDefinition.GetEndpointName(endpointNameFormatter), cfg);
+
                                     ConfigureActivity(activity.ActivityType, cfg, compensateEndpointConfigurator);
                                 });
                             }
@@ -161,6 +168,8 @@ namespace MassTransit.Registration
                             {
                                 configurator.ReceiveEndpoint(compensateEndpointName, compensateEndpointConfigurator =>
                                 {
+                                    configureReceiveEndpoint.Configure(compensateEndpointName, cfg);
+
                                     ConfigureActivity(activity.ActivityType, cfg, compensateEndpointConfigurator);
                                 });
                             }
@@ -176,8 +185,47 @@ namespace MassTransit.Registration
             }
         }
 
+        public IConfigureReceiveEndpoint GetConfigureReceiveEndpoints()
+        {
+            if (_configureReceiveEndpoints != null)
+                return _configureReceiveEndpoints;
+
+            var configureReceiveEndpoints = GetService<IEnumerable<IConfigureReceiveEndpoint>>();
+
+            if (configureReceiveEndpoints == null)
+            {
+                var configureReceiveEndpoint = GetService<IConfigureReceiveEndpoint>();
+                if (configureReceiveEndpoint != null)
+                    configureReceiveEndpoints = new[] {configureReceiveEndpoint};
+            }
+
+            _configureReceiveEndpoints = configureReceiveEndpoints == null
+                ? new ConfigureReceiveEndpoint(Array.Empty<IConfigureReceiveEndpoint>())
+                : new ConfigureReceiveEndpoint(configureReceiveEndpoints.ToArray());
+
+            return _configureReceiveEndpoints;
+        }
+
         static void NoFilter(IRegistrationFilterConfigurator configurator)
         {
+        }
+
+
+        class ConfigureReceiveEndpoint :
+            IConfigureReceiveEndpoint
+        {
+            readonly IConfigureReceiveEndpoint[] _configurators;
+
+            public ConfigureReceiveEndpoint(IConfigureReceiveEndpoint[] configurators)
+            {
+                _configurators = configurators;
+            }
+
+            public void Configure(string name, IReceiveEndpointConfigurator configurator)
+            {
+                for (var i = 0; i < _configurators.Length; i++)
+                    _configurators[i].Configure(name, configurator);
+            }
         }
     }
 }

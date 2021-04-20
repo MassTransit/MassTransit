@@ -90,7 +90,9 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             if (!QueueHasTopicPermission(policy, topicArnPattern, sqsQueueArn))
             {
                 var statement = new Statement(Statement.StatementEffect.Allow);
+            #pragma warning disable 618
                 statement.Actions.Add(SQSActionIdentifiers.SendMessage);
+            #pragma warning restore 618
                 statement.Resources.Add(new Resource(sqsQueueArn));
                 statement.Conditions.Add(ConditionFactory.NewSourceArnCondition(topicArnPattern));
                 statement.Principals.Add(new Principal("*"));

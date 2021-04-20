@@ -24,7 +24,7 @@ namespace MassTransit.RabbitMqTransport
             if (string.IsNullOrWhiteSpace(address))
                 throw new ArgumentNullException(nameof(address), "Address must not be null or empty");
 
-            string[] elements = address.Split(':');
+            var elements = address.Split(':');
 
             return elements.Length switch
             {

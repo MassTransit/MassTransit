@@ -26,12 +26,8 @@
             _hostConfiguration = busConfiguration.HostConfiguration;
 
             var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
-            _settings = new QueueReceiveSettings(queueName, false, true);
-        }
 
-        public ushort PrefetchCount
-        {
-            set => _settings.PrefetchCount = value;
+            _settings = new QueueReceiveSettings(busConfiguration.BusEndpointConfiguration, queueName, false, true);
         }
 
         public bool Durable

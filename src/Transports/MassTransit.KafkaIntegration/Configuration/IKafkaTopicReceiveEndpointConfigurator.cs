@@ -34,6 +34,7 @@
         /// <summary>
         /// The number of concurrent messages to process. Could increase throughput but will not preserve an order (default: 1)
         /// </summary>
+        [Obsolete("Use ConcurrentMessageLimit instead")]
         int ConcurrencyLimit { set; }
 
         /// <summary>

@@ -48,7 +48,7 @@ namespace MassTransit.RabbitMqTransport
             Prefetch = default;
             TimeToLive = default;
 
-            foreach ((var key, var value) in address.SplitQueryString())
+            foreach (var (key, value) in address.SplitQueryString())
             {
                 switch (key)
                 {

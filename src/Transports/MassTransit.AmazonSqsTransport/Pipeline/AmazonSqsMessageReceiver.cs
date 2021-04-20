@@ -54,8 +54,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
         async Task Consume()
         {
-            // TODO add ConcurrencyLimit for receive settings
-            var executor = new ChannelExecutor(_receiveSettings.PrefetchCount, _receiveSettings.PrefetchCount);
+            var executor = new ChannelExecutor(_receiveSettings.PrefetchCount, _receiveSettings.ConcurrentMessageLimit);
 
             SetReady();
 
@@ -92,8 +91,6 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             if (IsStopping)
                 return;
 
-
-
             var redelivered = message.Attributes.TryGetInt("ApproximateReceiveCount", out var receiveCount) && receiveCount > 1;
 
             var context = new AmazonSqsReceiveContext(message, redelivered, _context, _client, _receiveSettings, _client.ConnectionContext);
@@ -115,10 +112,11 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         {
             var maxReceiveCount = (_receiveSettings.PrefetchCount + 9) / 10;
             var receiveCount = 1;
+            var messageLimit = Math.Min(_receiveSettings.PrefetchCount, 10);
 
             while (!IsStopping)
             {
-                Task<int>[] receiveTasks = Enumerable.Repeat(0, receiveCount).Select(_ => ReceiveMessages(10, executor)).ToArray();
+                Task<int>[] receiveTasks = Enumerable.Repeat(0, receiveCount).Select(_ => ReceiveMessages(messageLimit, executor)).ToArray();
 
                 int[] counts = await Task.WhenAll(receiveTasks).ConfigureAwait(false);
 
@@ -138,7 +136,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
                 IList<Message> messages = await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, Stopping)
                     .ConfigureAwait(false);
 
-                await Task.WhenAll(messages.Select(message => executor.Push(() => HandleMessage(message), Stopping))).ConfigureAwait(false);
+                await Task.WhenAll(messages.Select(message => executor.Run(() => HandleMessage(message), Stopping))).ConfigureAwait(false);
 
                 return messages.Count;
             }

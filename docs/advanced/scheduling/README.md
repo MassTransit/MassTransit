@@ -13,13 +13,35 @@ MassTransit supports two different methods of message scheduling:
 
 Depending upon the scheduling method used, the bus must be configured to use the appropriate scheduler.
 
-### Quartz.NET / Hangfire
-
-To configure the bus to use either Quartz.NET or Hangfire for message scheduling, add the _UseMessageScheduler_ method as shown below.
-
+<code-group>
+<code-block title="Quartz/Hangfire">
 <<< @/docs/code/scheduling/SchedulingEndpoint.cs
+</code-block>
 
-The _UseMessageScheduler_ configures the bus to use the scheduler endpoint. The _AddMessageScheduler_ adds _IMessageScheduler_ to the container, which will use the same scheduler endpoint.
+<code-block title="RabbitMQ">
+<<< @/docs/code/scheduling/SchedulingRabbitMQ.cs
+</code-block>
+
+<code-block title="Azure Service Bus">
+<<< @/docs/code/scheduling/SchedulingAzure.cs
+</code-block>
+
+<code-block title="ActiveMQ">
+<<< @/docs/code/scheduling/SchedulingActiveMQ.cs
+</code-block>
+
+<code-block title="Amazon SQS">
+<<< @/docs/code/scheduling/SchedulingAmazonSQS.cs
+</code-block>
+</code-group>
+
+### Using the message scheduler
+
+To use the message scheduler (outside of a consumer), use _IMessageScheduler_ from the container.
+
+## Quartz.NET
+
+To use Quartz.NET, an instance of Quartz.NET must be running and configured to use the message broker.
 
 ::: tip Quartz.NET Docker Image
 MassTransit provides a [Docker Image](https://hub.docker.com/r/masstransit/quartz) with Quartz.NET ready-to-run using SQL Server. A complementary [SQL Server Image](https://hub.docker.com/r/masstransit/sqlserver-quartz) configured to run with Quartz.NET is also available. Combined, these images make getting started with Quartz easy.

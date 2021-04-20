@@ -3,7 +3,7 @@
     using System;
 
 
-    class DependencyGraphNode<T> :
+    public class DependencyGraphNode<T> :
         Node<T>,
         ITopologicalSortNodeProperties,
         ITarjanNodeProperties,

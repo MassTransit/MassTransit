@@ -16,6 +16,9 @@ namespace MassTransit.Azure.Table.Tests.Turnout
         TimeSpan Duration { get; }
     }
 
+
+    [TestFixture]
+    [Category("Flaky")]
     public class Submitting_a_job_to_turnout_that_faults :
         AzureTableInMemoryTestFixture
     {

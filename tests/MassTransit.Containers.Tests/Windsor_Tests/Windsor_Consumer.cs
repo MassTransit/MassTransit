@@ -41,6 +41,32 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
 
 
     [TestFixture]
+    public class Windsor_Consumer_ConfigureEndpoint :
+        Common_Consumer_ConfigureEndpoint
+    {
+        readonly IWindsorContainer _container;
+
+        public Windsor_Consumer_ConfigureEndpoint()
+        {
+            var container = new WindsorContainer();
+            container.AddMassTransit(ConfigureRegistration);
+
+            container.Register(Component.For<IConfigureReceiveEndpoint>().ImplementedBy<DoNotPublishFaults>());
+
+            _container = container;
+        }
+
+        [OneTimeTearDown]
+        public void Close_container()
+        {
+            _container.Dispose();
+        }
+
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class Windsor_Consumer_From_Container :
         Common_Consumer
     {

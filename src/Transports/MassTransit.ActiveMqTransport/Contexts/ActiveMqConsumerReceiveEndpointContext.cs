@@ -52,7 +52,8 @@
                 _settings.EntityName,
                 _settings.Durable,
                 _settings.AutoDelete,
-                _settings.PrefetchCount
+                _settings.PrefetchCount,
+                _settings.ConcurrentMessageLimit
             });
             var topologyScope = context.CreateScope("topology");
 

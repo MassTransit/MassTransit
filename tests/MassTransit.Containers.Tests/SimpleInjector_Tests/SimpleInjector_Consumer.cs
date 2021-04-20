@@ -1,9 +1,7 @@
 namespace MassTransit.Containers.Tests.SimpleInjector_Tests
 {
-    using System;
     using System.Threading.Tasks;
     using Common_Tests;
-    using GreenPipes;
     using NUnit.Framework;
     using Scenarios;
     using SimpleInjector;
@@ -44,14 +42,38 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         }
 
         protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
+    }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+
+    [TestFixture]
+    public class SimpleInjector_Consumer_ConfigureEndpoint :
+        Common_Consumer_ConfigureEndpoint
+    {
+        [Test]
+        public void Should_be_a_valid_container()
         {
-            configurator.UseExecute(context => Console.WriteLine(
-                $"Received (input_queue): {context.ReceiveContext.TransportHeaders.Get("MessageId", "N/A")}, Types = ({string.Join(",", context.SupportedMessageTypes)})"));
-
-            base.ConfigureInMemoryBus(configurator);
+            _container.Verify();
         }
+
+        [OneTimeTearDown]
+        public async Task Close_container()
+        {
+            await _container.DisposeAsync();
+        }
+
+        readonly Container _container;
+
+        public SimpleInjector_Consumer_ConfigureEndpoint()
+        {
+            _container = new Container();
+            _container.SetMassTransitContainerOptions();
+
+            _container.AddMassTransit(ConfigureRegistration);
+
+            _container.Collection.Register<IConfigureReceiveEndpoint>(typeof(DoNotPublishFaults));
+        }
+
+        protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
     }
 
 
@@ -88,18 +110,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     public class SimpleInjector_Consumer_Connect :
         Common_Consumer_Connect
     {
-        [Test]
-        public void Should_be_a_valid_container()
-        {
-            _container.Verify();
-        }
-
-        [OneTimeTearDown]
-        public async Task Close_container()
-        {
-            await _container.DisposeAsync();
-        }
-
         readonly Container _container;
 
         public SimpleInjector_Consumer_Connect()
@@ -113,5 +123,17 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         }
 
         protected override IReceiveEndpointConnector Connector => _container.GetInstance<IReceiveEndpointConnector>();
+
+        [Test]
+        public void Should_be_a_valid_container()
+        {
+            _container.Verify();
+        }
+
+        [OneTimeTearDown]
+        public async Task Close_container()
+        {
+            await _container.DisposeAsync();
+        }
     }
 }

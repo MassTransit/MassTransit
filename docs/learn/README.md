@@ -12,15 +12,9 @@ Before you just post your question, however, spend a few moments to compose your
 
 ## Discord
 
-MassTransit has a Discord server, which will ultimately replace the Gitter chat room, since it's a better platform for chat that also adds voice collaboration.
+MassTransit has a Discord server, which has replaced the Gitter chat room, since it's a better platform for chat that also adds voice collaboration.
 
 <iframe src="https://discordapp.com/widget?id=682238261753675864&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>
-
-## Gitter
-
-[![alt Gitter](https://badges.gitter.im/Join%20Chat.svg "Gitter")][5]
-
-Our chat room at [Gitter][5] is becoming more and more popular. There you can find people who use MassTransit in their systems and can provide you with quick advise. Get engaged, get help and help others too!
 
 ## Mailing List
 
@@ -48,4 +42,3 @@ This policy is in place to avoid bugs being drowned out in a pile of sensible su
 [2]: https://groups.google.com/forum/#!forum/masstransit-discuss
 [3]: https://github.com/masstransit/masstransit/issues
 [4]: https://gist.github.com/
-[5]: https://gitter.im/MassTransit/MassTransit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
