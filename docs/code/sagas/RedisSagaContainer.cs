@@ -1,10 +1,8 @@
 namespace RedisSagaContainer
 {
-    using System;
     using MassTransit;
-    using MassTransit.RedisIntegration;
     using Microsoft.Extensions.DependencyInjection;
-    using RedisSaga;
+    using PersistedSaga;
 
     public class Program
     {
