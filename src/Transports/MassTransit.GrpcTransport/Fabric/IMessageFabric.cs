@@ -2,6 +2,7 @@
 {
     using System;
     using Contexts;
+    using Contracts;
     using GreenPipes;
 
 
@@ -10,11 +11,16 @@
         IProbeSite,
         IAsyncDisposable
     {
-        void ExchangeDeclare(NodeContext context, string name);
-        void QueueDeclare(NodeContext context, string name, int? concurrencyLimit = default);
-        void ExchangeBind(NodeContext context, string source, string destination, string routingKey = default);
-        void QueueBind(NodeContext context, string source, string destination, string routingKey = default);
+        void ExchangeDeclare(NodeContext context, string name, ExchangeType exchangeType);
+
+        void ExchangeBind(NodeContext context, string source, string destination, string routingKey);
+
+        void QueueDeclare(NodeContext context, string name);
+
+        void QueueBind(NodeContext context, string source, string destination);
+
+        IGrpcExchange GetExchange(NodeContext context, string name, ExchangeType exchangeType = ExchangeType.FanOut);
+
         IGrpcQueue GetQueue(NodeContext context, string name);
-        IGrpcExchange GetExchange(NodeContext context, string name);
     }
 }

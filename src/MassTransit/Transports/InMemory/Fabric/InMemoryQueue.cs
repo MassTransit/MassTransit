@@ -56,11 +56,16 @@
             return _executor.DisposeAsync();
         }
 
-        async Task DeliverWithDelay(DeliveryContext<InMemoryTransportMessage> context)
+        Task DeliverWithDelay(DeliveryContext<InMemoryTransportMessage> context)
         {
-            await Task.Delay(context.Message.Delay.Value, context.CancellationToken).ConfigureAwait(false);
+            Task.Run(async () =>
+            {
+                await Task.Delay(context.Message.Delay.Value, context.CancellationToken).ConfigureAwait(false);
 
-            await _executor.Push(() => DispatchMessage(context), context.CancellationToken).ConfigureAwait(false);
+                await _executor.Push(() => DispatchMessage(context), context.CancellationToken).ConfigureAwait(false);
+            }, context.CancellationToken);
+
+            return Task.CompletedTask;
         }
 
         async Task DispatchMessage(DeliveryContext<InMemoryTransportMessage> context)

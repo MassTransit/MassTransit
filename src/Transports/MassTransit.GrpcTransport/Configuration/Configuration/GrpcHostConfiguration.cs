@@ -38,8 +38,6 @@
 
             _serverConfigurations = new List<GrpcServerConfiguration>();
 
-            TransportConcurrencyLimit = Math.Max(Environment.ProcessorCount, 4);
-
             ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
             {
                 x.Handle<ConnectionException>();
@@ -61,8 +59,6 @@
             get => _baseAddress ?? _defaultHostAddress;
             set => _baseAddress = value ?? _defaultHostAddress;
         }
-
-        public int TransportConcurrencyLimit { get; set; }
 
         IGrpcHostConfigurator IGrpcHostConfiguration.Configurator => this;
         IGrpcTransportProvider IGrpcHostConfiguration.TransportProvider => _transportProvider.Supervisor;

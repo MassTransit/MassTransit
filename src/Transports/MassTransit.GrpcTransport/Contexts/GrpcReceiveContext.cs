@@ -2,6 +2,7 @@ namespace MassTransit.GrpcTransport.Contexts
 {
     using System;
     using System.IO;
+    using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -44,6 +45,11 @@ namespace MassTransit.GrpcTransport.Contexts
         public override Stream GetBodyStream()
         {
             return new MemoryStream(_body, 0, _body.Length, false);
+        }
+
+        protected override ContentType GetContentType()
+        {
+            return ConvertToContentType(Message.ContentType);
         }
     }
 }

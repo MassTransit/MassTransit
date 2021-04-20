@@ -1,18 +1,20 @@
 ﻿namespace MassTransit.GrpcTransport.Topology.Configurators
 {
+    using Contracts;
     using MassTransit.Topology;
 
 
     public interface IGrpcMessagePublishTopologyConfigurator<TMessage> :
         IMessagePublishTopologyConfigurator<TMessage>,
         IGrpcMessagePublishTopology<TMessage>,
-        IInMemoryMessagePublishTopologyConfigurator
+        IGrpcMessagePublishTopologyConfigurator
         where TMessage : class
     {
+        new ExchangeType ExchangeType { set; }
     }
 
 
-    public interface IInMemoryMessagePublishTopologyConfigurator :
+    public interface IGrpcMessagePublishTopologyConfigurator :
         IMessagePublishTopologyConfigurator
     {
     }

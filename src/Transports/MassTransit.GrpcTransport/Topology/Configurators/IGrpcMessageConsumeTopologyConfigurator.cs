@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.GrpcTransport.Topology.Configurators
 {
+    using Contracts;
     using GrpcTransport.Builders;
     using MassTransit.Topology;
 
@@ -12,7 +13,7 @@
         /// <summary>
         /// Adds the exchange bindings for this message type
         /// </summary>
-        void Bind();
+        void Bind(ExchangeType? exchangeType = ExchangeType.FanOut, string routingKey = default);
     }
 
 

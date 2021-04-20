@@ -21,9 +21,16 @@ namespace MassTransit.GrpcTransport.Integration
             _node = nodes.HostNode;
         }
 
-        public void ExchangeDeclared(NodeContext context, string name)
+        public void ExchangeDeclared(NodeContext context, string name, ExchangeType exchangeType)
         {
-            Send(context, new Topology {Exchange = new Exchange {Name = name}});
+            Send(context, new Topology
+            {
+                Exchange = new Exchange
+                {
+                    Name = name,
+                    Type = exchangeType
+                }
+            });
         }
 
         public void ExchangeBindingCreated(NodeContext context, string source, string destination, string routingKey)
@@ -44,7 +51,7 @@ namespace MassTransit.GrpcTransport.Integration
             Send(context, new Topology {Queue = new Queue {Name = name}});
         }
 
-        public void QueueBindingCreated(NodeContext context, string source, string destination, string routingKey)
+        public void QueueBindingCreated(NodeContext context, string source, string destination)
         {
             Send(context, new Topology
             {
@@ -52,7 +59,6 @@ namespace MassTransit.GrpcTransport.Integration
                 {
                     Source = source,
                     Destination = destination,
-                    RoutingKey = routingKey.ToNullableString()
                 }
             });
         }

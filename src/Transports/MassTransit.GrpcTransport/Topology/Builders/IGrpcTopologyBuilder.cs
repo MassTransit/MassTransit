@@ -1,13 +1,16 @@
 namespace MassTransit.GrpcTransport.Topology.Builders
 {
+    using Contracts;
+
+
     public interface IGrpcTopologyBuilder
     {
-        void ExchangeBind(string source, string destination);
+        void ExchangeBind(string source, string destination, string routingKey);
 
         void QueueBind(string source, string destination);
 
-        void ExchangeDeclare(string name);
+        void ExchangeDeclare(string name, ExchangeType exchangeType);
 
-        void QueueDeclare(string name, int concurrencyLimit);
+        void QueueDeclare(string name);
     }
 }

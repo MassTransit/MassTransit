@@ -4,7 +4,7 @@ namespace MassTransit.GrpcTransport.Builders
     using Contexts;
     using GreenPipes;
     using MassTransit.Builders;
-    using Pipeline;
+    using MassTransit.Pipeline;
 
 
     public class GrpcReceiveEndpointBuilder :

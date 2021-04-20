@@ -11,7 +11,6 @@ namespace MassTransit.GrpcTransport.Fabric
         MessageContext
     {
         readonly Envelope _envelope;
-        readonly HostInfo _host;
         Guid? _conversationId;
         Guid? _correlationId;
         Uri _destinationAddress;
@@ -28,7 +27,7 @@ namespace MassTransit.GrpcTransport.Fabric
 
         public GrpcTransportMessage(TransportMessage message, HostInfo host)
         {
-            _host = host;
+            Host = host;
             Message = message;
             _envelope = message.Deliver.Envelope;
 
@@ -40,8 +39,6 @@ namespace MassTransit.GrpcTransport.Fabric
 
             foreach (var (key, value) in message.Deliver.Envelope.Headers)
                 SendHeaders.Set(key, value);
-
-            SendHeaders.Set(MessageHeaders.MessageId, MessageId.Value);
         }
 
         public string[] MessageType => _messageType ??= _envelope.MessageType.ToArray();
@@ -79,6 +76,8 @@ namespace MassTransit.GrpcTransport.Fabric
 
         public DateTime? SentTime => _sentTime ??= _envelope.SentTime.ToDateTime();
 
-        public HostInfo Host => _host;
+        public HostInfo Host { get; }
+
+        public string RoutingKey => Message.Deliver.Exchange?.RoutingKey?.Value;
     }
 }

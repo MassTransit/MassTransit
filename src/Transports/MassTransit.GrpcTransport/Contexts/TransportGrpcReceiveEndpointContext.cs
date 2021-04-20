@@ -4,6 +4,7 @@
     using Builders;
     using Configuration;
     using Context;
+    using Contracts;
     using Fabric;
     using GreenPipes.Agents;
     using Integration;
@@ -42,11 +43,14 @@
         {
             var builder = new GrpcConsumeTopologyBuilder(nodeContext, MessageFabric);
 
-            var queueName = _configuration.InputAddress.GetQueueOrExchangeName();
+            var name = _configuration.InputAddress.GetQueueOrExchangeName();
 
-            builder.Queue = queueName;
-            builder.QueueDeclare(queueName, _configuration.Transport.GetConcurrentMessageLimit());
-            builder.Exchange = queueName;
+            builder.Exchange = name;
+            builder.ExchangeDeclare(name, ExchangeType.FanOut);
+
+            builder.Queue = name;
+            builder.QueueDeclare(name);
+
             builder.QueueBind(builder.Exchange, builder.Queue);
 
             _configuration.Topology.Consume.Apply(builder);

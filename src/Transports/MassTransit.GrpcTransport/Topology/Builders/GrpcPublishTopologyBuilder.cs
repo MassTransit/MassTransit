@@ -1,6 +1,7 @@
 namespace MassTransit.GrpcTransport.Topology.Builders
 {
     using Contexts;
+    using Contracts;
     using Fabric;
 
 
@@ -17,15 +18,16 @@ namespace MassTransit.GrpcTransport.Topology.Builders
         }
 
         public string ExchangeName { get; set; }
+        public ExchangeType ExchangeType { get; set; }
 
         public IGrpcPublishTopologyBuilder CreateImplementedBuilder()
         {
             return new ImplementedBuilder(this);
         }
 
-        public void ExchangeBind(string source, string destination)
+        public void ExchangeBind(string source, string destination, string routingKey)
         {
-            _messageFabric.ExchangeBind(_context, source, destination);
+            _messageFabric.ExchangeBind(_context, source, destination, routingKey);
         }
 
         public void QueueBind(string source, string destination)
@@ -33,14 +35,14 @@ namespace MassTransit.GrpcTransport.Topology.Builders
             _messageFabric.QueueBind(_context, source, destination);
         }
 
-        public void ExchangeDeclare(string name)
+        public void ExchangeDeclare(string name, ExchangeType exchangeType)
         {
-            _messageFabric.ExchangeDeclare(_context, name);
+            _messageFabric.ExchangeDeclare(_context, name, exchangeType);
         }
 
-        public void QueueDeclare(string name, int concurrencyLimit)
+        public void QueueDeclare(string name)
         {
-            _messageFabric.QueueDeclare(_context, name, concurrencyLimit);
+            _messageFabric.QueueDeclare(_context, name);
         }
 
 
@@ -62,13 +64,15 @@ namespace MassTransit.GrpcTransport.Topology.Builders
                 {
                     _exchangeName = value;
                     if (_builder.ExchangeName != null)
-                        _builder.ExchangeBind(_builder.ExchangeName, _exchangeName);
+                        _builder.ExchangeBind(_builder.ExchangeName, _exchangeName, default);
                 }
             }
 
-            public void ExchangeBind(string source, string destination)
+            public ExchangeType ExchangeType { get; set; }
+
+            public void ExchangeBind(string source, string destination, string routingKey)
             {
-                _builder.ExchangeBind(source, destination);
+                _builder.ExchangeBind(source, destination, routingKey);
             }
 
             public void QueueBind(string source, string destination)
@@ -76,14 +80,14 @@ namespace MassTransit.GrpcTransport.Topology.Builders
                 _builder.QueueBind(source, destination);
             }
 
-            public void ExchangeDeclare(string name)
+            public void ExchangeDeclare(string name, ExchangeType exchangeType)
             {
-                _builder.ExchangeDeclare(name);
+                _builder.ExchangeDeclare(name, exchangeType);
             }
 
-            public void QueueDeclare(string name, int concurrencyLimit)
+            public void QueueDeclare(string name)
             {
-                _builder.QueueDeclare(name, concurrencyLimit);
+                _builder.QueueDeclare(name);
             }
 
             public IGrpcPublishTopologyBuilder CreateImplementedBuilder()

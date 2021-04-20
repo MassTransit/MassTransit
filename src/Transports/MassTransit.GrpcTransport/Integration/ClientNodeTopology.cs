@@ -63,9 +63,9 @@ namespace MassTransit.GrpcTransport.Integration
                     {
                         var exchangeName = nextEntry.Topology.Exchange.Name;
 
-                        _messageFabric.ExchangeDeclare(_node, exchangeName);
+                        _messageFabric.ExchangeDeclare(_node, exchangeName, nextEntry.Topology.Exchange.Type);
 
-                        _node.LogTopology(nextEntry.Topology.Exchange);
+                        _node.LogTopology(nextEntry.Topology.Exchange, nextEntry.Topology.Exchange.Type);
                     }
                     else if (nextEntry.Topology.ChangeCase == Topology.ChangeOneofCase.Queue)
                     {
@@ -89,7 +89,7 @@ namespace MassTransit.GrpcTransport.Integration
                         var source = nextEntry.Topology.QueueBind.Source;
                         var destination = nextEntry.Topology.QueueBind.Destination;
 
-                        _messageFabric.QueueBind(_node, source, destination, nextEntry.Topology.QueueBind.RoutingKey.ToStringValue());
+                        _messageFabric.QueueBind(_node, source, destination);
 
                         _node.LogTopology(nextEntry.Topology.QueueBind);
                     }

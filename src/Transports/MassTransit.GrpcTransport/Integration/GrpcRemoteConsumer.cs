@@ -1,6 +1,5 @@
 namespace MassTransit.GrpcTransport.Integration
 {
-    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Fabric;
@@ -18,9 +17,6 @@ namespace MassTransit.GrpcTransport.Integration
 
         public async Task Consume(GrpcTransportMessage message, CancellationToken cancellationToken)
         {
-            if (message.SourceAddress.GetLeftPart(UriPartial.Authority) == _node.NodeAddress.GetLeftPart(UriPartial.Authority))
-                return;
-
             await _node.DeliverMessage(message).ConfigureAwait(false);
         }
     }

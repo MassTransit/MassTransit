@@ -68,10 +68,23 @@ message Deliver {
   Envelope envelope = 2;
 
   oneof destination {
-    string exchange = 3;
-    string queue = 4;
-    string consumer = 5;
+    ExchangeDestination exchange = 3;
+    QueueDestination queue = 4;
+    ConsumerDestination consumer = 5;
   }
+}
+
+message QueueDestination {
+  string name = 1;
+}
+
+message ExchangeDestination {
+  string name = 1;
+  NullableString routing_key = 2;
+}
+
+message ConsumerDestination {
+  string node_address = 1;
 }
 
 message ConfirmDelivery {
@@ -91,8 +104,15 @@ message Topology {
   }
 }
 
+enum ExchangeType {
+  FanOut = 0;
+  Direct = 1;
+  Topic = 2;
+}
+
 message Exchange {
   string name = 1;
+  ExchangeType type = 2;
 }
 
 message ExchangeBind {
@@ -108,7 +128,6 @@ message Queue {
 message QueueBind {
   string source = 1;
   string destination = 2;
-  NullableString routing_key = 3;
 }
 
 message Consumer {

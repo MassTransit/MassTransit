@@ -1,6 +1,7 @@
 namespace MassTransit.GrpcTransport.Builders
 {
     using Contexts;
+    using Contracts;
     using Fabric;
 
 
@@ -8,35 +9,35 @@ namespace MassTransit.GrpcTransport.Builders
         IGrpcConsumeTopologyBuilder
     {
         readonly NodeContext _context;
-        readonly IMessageFabric _messageFabric;
+        readonly IMessageFabric _fabric;
 
-        public GrpcConsumeTopologyBuilder(NodeContext context, IMessageFabric messageFabric)
+        public GrpcConsumeTopologyBuilder(NodeContext context, IMessageFabric fabric)
         {
             _context = context;
-            _messageFabric = messageFabric;
+            _fabric = fabric;
         }
 
         public string Exchange { get; set; }
         public string Queue { get; set; }
 
-        public void ExchangeBind(string source, string destination)
+        public void ExchangeBind(string source, string destination, string routingKey)
         {
-            _messageFabric.ExchangeBind(_context, source, destination);
+            _fabric.ExchangeBind(_context, source, destination, routingKey);
         }
 
         public void QueueBind(string source, string destination)
         {
-            _messageFabric.QueueBind(_context, source, destination);
+            _fabric.QueueBind(_context, source, destination);
         }
 
-        public void ExchangeDeclare(string name)
+        public void ExchangeDeclare(string name, ExchangeType exchangeType)
         {
-            _messageFabric.ExchangeDeclare(_context, name);
+            _fabric.ExchangeDeclare(_context, name, exchangeType);
         }
 
-        public void QueueDeclare(string name, int concurrencyLimit)
+        public void QueueDeclare(string name)
         {
-            _messageFabric.QueueDeclare(_context, name, concurrencyLimit);
+            _fabric.QueueDeclare(_context, name);
         }
     }
 }

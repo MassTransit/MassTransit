@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Contexts;
+    using Contracts;
     using GreenPipes;
     using Internals.GraphValidation;
 
@@ -12,29 +13,21 @@
     public class MessageFabric :
         IMessageFabric
     {
-        readonly int _concurrencyLimit;
         readonly ConcurrentDictionary<string, IGrpcExchange> _exchanges;
         readonly MessageFabricObservable _observers;
         readonly ConcurrentDictionary<string, IGrpcQueue> _queues;
 
-        public MessageFabric(int concurrencyLimit)
+        public MessageFabric()
         {
-            _concurrencyLimit = concurrencyLimit;
-
             _observers = new MessageFabricObservable();
 
             _exchanges = new ConcurrentDictionary<string, IGrpcExchange>(StringComparer.OrdinalIgnoreCase);
             _queues = new ConcurrentDictionary<string, IGrpcQueue>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public void ExchangeDeclare(NodeContext context, string name)
+        public void ExchangeDeclare(NodeContext context, string name, ExchangeType exchangeType)
         {
-            _exchanges.GetOrAdd(name, x => CreateExchange(context, x));
-        }
-
-        public void QueueDeclare(NodeContext context, string name, int? concurrencyLimit = default)
-        {
-            _queues.GetOrAdd(name, x => CreateQueue(context, x, concurrencyLimit ?? _concurrencyLimit));
+            _exchanges.GetOrAdd(name, x => CreateExchange(context, x, exchangeType));
         }
 
         public void ExchangeBind(NodeContext context, string source, string destination, string routingKey)
@@ -42,38 +35,43 @@
             if (source.Equals(destination))
                 throw new ArgumentException("The source and destination exchange cannot be the same");
 
-            var sourceExchange = _exchanges.GetOrAdd(source, name => CreateExchange(context, name));
+            var sourceExchange = _exchanges.GetOrAdd(source, name => CreateExchange(context, name, ExchangeType.FanOut));
 
-            var destinationExchange = _exchanges.GetOrAdd(destination, name => CreateExchange(context, name));
+            var destinationExchange = _exchanges.GetOrAdd(destination, name => CreateExchange(context, name, ExchangeType.FanOut));
 
             ValidateBinding(destinationExchange, sourceExchange);
 
             _observers.ExchangeBindingCreated(context, source, destination, routingKey);
 
-            sourceExchange.Connect(destinationExchange);
+            sourceExchange.Connect(destinationExchange, routingKey);
         }
 
-        public void QueueBind(NodeContext context, string source, string destination, string routingKey)
+        public void QueueDeclare(NodeContext context, string name)
         {
-            var sourceExchange = _exchanges.GetOrAdd(source, name => CreateExchange(context, name));
+            _queues.GetOrAdd(name, x => CreateQueue(context, x));
+        }
 
-            var destinationQueue = _queues.GetOrAdd(destination, name => CreateQueue(context, name, _concurrencyLimit));
+        public void QueueBind(NodeContext context, string source, string destination)
+        {
+            var sourceExchange = _exchanges.GetOrAdd(source, name => CreateExchange(context, name, ExchangeType.FanOut));
+
+            var destinationQueue = _queues.GetOrAdd(destination, name => CreateQueue(context, name));
 
             ValidateBinding(destinationQueue, sourceExchange);
 
-            _observers.QueueBindingCreated(context, source, destination, routingKey);
+            _observers.QueueBindingCreated(context, source, destination);
 
-            sourceExchange.Connect(destinationQueue);
+            sourceExchange.Connect(destinationQueue, default);
+        }
+
+        public IGrpcExchange GetExchange(NodeContext context, string name, ExchangeType exchangeType)
+        {
+            return _exchanges.GetOrAdd(name, x => CreateExchange(context, x, exchangeType));
         }
 
         public IGrpcQueue GetQueue(NodeContext context, string name)
         {
-            return _queues.GetOrAdd(name, x => CreateQueue(context, name, _concurrencyLimit));
-        }
-
-        public IGrpcExchange GetExchange(NodeContext context, string name)
-        {
-            return _exchanges.GetOrAdd(name, x => CreateExchange(context, x));
+            return _queues.GetOrAdd(name, x => CreateQueue(context, name));
         }
 
         public void Probe(ProbeContext context)
@@ -105,18 +103,23 @@
             return _observers.Connect(observer);
         }
 
-        GrpcExchange CreateExchange(NodeContext context, string name)
+        IGrpcExchange CreateExchange(NodeContext context, string name, ExchangeType exchangeType)
         {
-            _observers.ExchangeDeclared(context, name);
+            _observers.ExchangeDeclared(context, name, exchangeType);
 
-            return new GrpcExchange(name);
+            return exchangeType switch
+            {
+                ExchangeType.FanOut => new GrpcFanOutExchange(name),
+                ExchangeType.Direct => new GrpcDirectExchange(name),
+                _ => throw new ArgumentException($"Unsupported exchange type: {exchangeType}", nameof(exchangeType))
+            };
         }
 
-        GrpcQueue CreateQueue(NodeContext context, string name, int concurrencyLimit)
+        IGrpcQueue CreateQueue(NodeContext context, string name)
         {
             _observers.QueueDeclared(context, name);
 
-            return new GrpcQueue(_observers, name, concurrencyLimit == 0 ? _concurrencyLimit : concurrencyLimit);
+            return new GrpcQueue(_observers, name);
         }
 
         void ValidateBinding(IMessageSink<GrpcTransportMessage> destination, IGrpcExchange sourceExchange)

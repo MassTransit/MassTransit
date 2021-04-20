@@ -57,6 +57,8 @@ namespace MassTransit.GrpcTransport.Contexts
 
         public override IEnumerable<string> SupportedMessageTypes => _context.Message.MessageType;
 
+        public string RoutingKey => _context.Message.RoutingKey;
+
         public override bool HasMessageType(Type messageType)
         {
             lock (_messageTypes)

@@ -1,6 +1,7 @@
 namespace MassTransit.GrpcTransport.Fabric
 {
     using Contexts;
+    using Contracts;
     using GreenPipes;
     using GreenPipes.Util;
 
@@ -9,11 +10,11 @@ namespace MassTransit.GrpcTransport.Fabric
         Connectable<IMessageFabricObserver>,
         IMessageFabricObserver
     {
-        public void ExchangeDeclared(NodeContext context, string name)
+        public void ExchangeDeclared(NodeContext context, string name, ExchangeType exchangeType)
         {
             All(x =>
             {
-                x.ExchangeDeclared(context, name);
+                x.ExchangeDeclared(context, name, exchangeType);
 
                 return true;
             });
@@ -39,11 +40,11 @@ namespace MassTransit.GrpcTransport.Fabric
             });
         }
 
-        public void QueueBindingCreated(NodeContext context, string source, string destination, string routingKey)
+        public void QueueBindingCreated(NodeContext context, string source, string destination)
         {
             All(x =>
             {
-                x.QueueBindingCreated(context, source, destination, routingKey);
+                x.QueueBindingCreated(context, source, destination);
 
                 return true;
             });

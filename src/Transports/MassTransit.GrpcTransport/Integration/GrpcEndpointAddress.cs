@@ -3,6 +3,7 @@ namespace MassTransit.GrpcTransport.Integration
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using Contracts;
     using Util;
 
 
@@ -11,6 +12,7 @@ namespace MassTransit.GrpcTransport.Integration
     {
         const string BindQueueKey = "bind";
         const string QueueNameKey = "queue";
+        const string ExchangeTypeKey = "type";
         const string InstanceIdKey = "instance";
 
         public readonly string Scheme;
@@ -19,6 +21,7 @@ namespace MassTransit.GrpcTransport.Integration
         public readonly string VirtualHost;
 
         public readonly string Name;
+        public readonly ExchangeType ExchangeType;
         public readonly bool BindToQueue;
         public readonly string QueueName;
         public readonly string InstanceId;
@@ -29,6 +32,8 @@ namespace MassTransit.GrpcTransport.Integration
             Host = default;
             Port = default;
             VirtualHost = default;
+
+            ExchangeType = ExchangeType.FanOut;
 
             BindToQueue = false;
             QueueName = default;
@@ -71,6 +76,10 @@ namespace MassTransit.GrpcTransport.Integration
             {
                 switch (key)
                 {
+                    case ExchangeTypeKey when Enum.TryParse<ExchangeType>(value, out var result):
+                        ExchangeType = result;
+                        break;
+
                     case BindQueueKey when bool.TryParse(value, out var result):
                         BindToQueue = result;
                         break;
@@ -86,11 +95,13 @@ namespace MassTransit.GrpcTransport.Integration
             }
         }
 
-        public GrpcEndpointAddress(Uri hostAddress, string exchangeName, bool bindToQueue = false, string queueName = default, string instanceId = default)
+        public GrpcEndpointAddress(Uri hostAddress, string exchangeName, bool bindToQueue = false, string queueName = default,
+            ExchangeType exchangeType = ExchangeType.FanOut, string instanceId = default)
         {
             ParseLeft(hostAddress, out Scheme, out Host, out Port, out VirtualHost);
 
             Name = exchangeName;
+            ExchangeType = exchangeType;
 
             BindToQueue = bindToQueue;
             QueueName = queueName;
@@ -131,6 +142,8 @@ namespace MassTransit.GrpcTransport.Integration
                 yield return $"{BindQueueKey}=true";
             if (!string.IsNullOrWhiteSpace(QueueName))
                 yield return $"{QueueNameKey}={Uri.EscapeDataString(QueueName)}";
+            if (ExchangeType != ExchangeType.FanOut)
+                yield return $"{ExchangeTypeKey}={ExchangeType}";
             if (!string.IsNullOrWhiteSpace(InstanceId))
                 yield return $"{InstanceIdKey}={InstanceId}";
         }

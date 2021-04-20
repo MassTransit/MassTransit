@@ -2,6 +2,7 @@ namespace MassTransit.GrpcTransport.Integration
 {
     using System;
     using System.Threading;
+    using System.Threading.Channels;
     using System.Threading.Tasks;
     using Context;
     using Contexts;
@@ -10,6 +11,7 @@ namespace MassTransit.GrpcTransport.Integration
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using MassTransit.Pipeline.Filters.ConcurrencyLimit;
     using Transports;
 
 
@@ -72,8 +74,11 @@ namespace MassTransit.GrpcTransport.Integration
             ReceiveTransportHandle,
             IGrpcQueueConsumer
         {
+            readonly Channel<GrpcTransportMessage> _channel;
+            readonly Task _consumeDispatcher;
             readonly GrpcReceiveEndpointContext _context;
             readonly IReceivePipeDispatcher _dispatcher;
+            readonly IConcurrencyLimiter _limiter;
             readonly string _queueName;
             ConnectHandle _consumerHandle;
 
@@ -84,6 +89,20 @@ namespace MassTransit.GrpcTransport.Integration
 
                 _dispatcher = context.CreateReceivePipeDispatcher();
 
+                var outputOptions = new BoundedChannelOptions(context.PrefetchCount)
+                {
+                    SingleWriter = true,
+                    SingleReader = true,
+                    AllowSynchronousContinuations = true
+                };
+
+                _channel = Channel.CreateBounded<GrpcTransportMessage>(outputOptions);
+
+                if (context.ConcurrentMessageLimit.HasValue)
+                    _limiter = new ConcurrencyLimiter(context.ConcurrentMessageLimit.Value);
+
+                _consumeDispatcher = Task.Run(() => StartDispatcher());
+
                 var startup = Task.Run(() => Startup());
 
                 SetReady(startup);
@@ -91,31 +110,58 @@ namespace MassTransit.GrpcTransport.Integration
 
             public async Task Consume(GrpcTransportMessage message, CancellationToken cancellationToken)
             {
-                await Ready.ConfigureAwait(false);
-
                 if (IsStopped)
                     return;
 
-                LogContext.Current = _context.LogContext;
-
-                await using var context = new GrpcReceiveContext(message, _context, cancellationToken);
-                try
-                {
-                    await _dispatcher.Dispatch(context).ConfigureAwait(false);
-                }
-                catch (Exception exception)
-                {
-                    context.LogTransportFaulted(exception);
-                }
-                finally
-                {
-                    context.Dispose();
-                }
+                await _channel.Writer.WriteAsync(message, cancellationToken).ConfigureAwait(false);
             }
 
             async Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
             {
                 await this.Stop("Stop Receive Transport", cancellationToken).ConfigureAwait(false);
+            }
+
+            async Task StartDispatcher()
+            {
+                LogContext.Current = _context.LogContext;
+
+                try
+                {
+                    await Ready.ConfigureAwait(false);
+
+                    while (await _channel.Reader.WaitToReadAsync(Stopping).ConfigureAwait(false))
+                    {
+                        var message = await _channel.Reader.ReadAsync(Stopping).ConfigureAwait(false);
+
+                        if (_limiter != null)
+                            await _limiter.Wait(Stopping).ConfigureAwait(false);
+
+                        _ = Task.Run(async () =>
+                        {
+                            await using var context = new GrpcReceiveContext(message, _context, Stopping);
+                            try
+                            {
+                                await _dispatcher.Dispatch(context).ConfigureAwait(false);
+                            }
+                            catch (Exception exception)
+                            {
+                                context.LogTransportFaulted(exception);
+                            }
+                            finally
+                            {
+                                _limiter?.Release();
+                                context.Dispose();
+                            }
+                        }, Stopping);
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (Exception exception)
+                {
+                    LogContext.Warning?.Log(exception, "Consumer dispatcher faulted: {Queue}", _queueName);
+                }
             }
 
             async Task Startup()
@@ -154,6 +200,12 @@ namespace MassTransit.GrpcTransport.Integration
             protected override async Task StopAgent(StopContext context)
             {
                 LogContext.SetCurrentIfNull(_context.LogContext);
+
+                _channel.Writer.Complete();
+
+                await _channel.Reader.Completion.ConfigureAwait(false);
+
+                await _consumeDispatcher.ConfigureAwait(false);
 
                 var metrics = _dispatcher.GetMetrics();
                 var completed = new ReceiveTransportCompletedEvent(_context.InputAddress, metrics);

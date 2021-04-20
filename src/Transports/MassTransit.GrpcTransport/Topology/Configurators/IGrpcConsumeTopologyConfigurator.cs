@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.GrpcTransport.Topology.Configurators
 {
+    using Contracts;
     using MassTransit.Topology;
 
 
@@ -11,5 +12,7 @@
             where T : class;
 
         void AddSpecification(IGrpcConsumeTopologySpecification specification);
+
+        void Bind(string exchangeName, ExchangeType exchangeType = ExchangeType.FanOut, string routingKey = default);
     }
 }

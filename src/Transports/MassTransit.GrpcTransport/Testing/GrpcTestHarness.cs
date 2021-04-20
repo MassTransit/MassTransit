@@ -18,14 +18,14 @@ namespace MassTransit.GrpcTransport.Testing
         readonly string _inputQueueName;
         readonly IEnumerable<IBusInstanceSpecification> _specifications;
 
-        public GrpcTestHarness()
-            : this(Enumerable.Empty<IBusInstanceSpecification>())
+        public GrpcTestHarness(Uri baseAddress = default)
+            : this(Enumerable.Empty<IBusInstanceSpecification>(), baseAddress)
         {
         }
 
-        public GrpcTestHarness(IEnumerable<IBusInstanceSpecification> specifications)
+        public GrpcTestHarness(IEnumerable<IBusInstanceSpecification> specifications, Uri baseAddress = default)
         {
-            BaseAddress = new Uri("http://127.0.0.1:19796/");
+            BaseAddress = baseAddress ?? new Uri("http://127.0.0.1:19796/");
 
             _inputQueueName = "input-queue";
             _busConfiguration = new GrpcBusConfiguration(new GrpcTopologyConfiguration(GrpcBus.MessageTopology), BaseAddress);

@@ -23,7 +23,7 @@ namespace MassTransit.GrpcTransport.Integration
                 var message = new TransportMessage
                 {
                     MessageId = receivedMessage.Message.MessageId,
-                    Deliver = new Deliver(receivedMessage.Message.Deliver) {Exchange = _exchange.Name}
+                    Deliver = new Deliver(receivedMessage.Message.Deliver) {Exchange = new ExchangeDestination {Name = _exchange.Name}}
                 };
 
                 var transportMessage = new GrpcTransportMessage(message, receivedMessage.Host);

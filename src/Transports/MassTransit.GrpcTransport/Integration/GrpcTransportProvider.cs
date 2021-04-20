@@ -37,7 +37,7 @@ namespace MassTransit.GrpcTransport.Integration
             _hostConfiguration = hostConfiguration;
             _topologyConfiguration = topologyConfiguration;
 
-            _messageFabric = new MessageFabric(hostConfiguration.TransportConcurrencyLimit);
+            _messageFabric = new MessageFabric();
 
             _nodeCollection = new NodeCollection(this, _messageFabric);
             _clients = new List<IGrpcClient>();
@@ -85,7 +85,7 @@ namespace MassTransit.GrpcTransport.Integration
 
             TransportLogMessages.CreateSendTransport(address);
 
-            var exchange = _messageFabric.GetExchange(HostNodeContext, endpointAddress.Name);
+            var exchange = _messageFabric.GetExchange(HostNodeContext, endpointAddress.Name, endpointAddress.ExchangeType);
 
             var transportContext = new ExchangeGrpcSendTransportContext(_hostConfiguration, exchange);
 
@@ -109,7 +109,6 @@ namespace MassTransit.GrpcTransport.Integration
 
         public void Probe(ProbeContext context)
         {
-            _messageFabric.Probe(context);
         }
 
         public IGrpcClient GetClient(Uri address)

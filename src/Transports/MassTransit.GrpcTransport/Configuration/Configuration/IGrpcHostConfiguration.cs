@@ -16,13 +16,6 @@
         /// </summary>
         Uri BaseAddress { get; set; }
 
-        /// <summary>
-        /// Sets the maximum number of threads used by an in-memory transport, for partitioning
-        /// the input queue. This setting also specifies how many threads will be used for dispatching
-        /// messages to consumers.
-        /// </summary>
-        int TransportConcurrencyLimit { get; set; }
-
         IGrpcHostConfigurator Configurator { get; }
 
         IGrpcTransportProvider TransportProvider { get; }

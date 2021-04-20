@@ -1,5 +1,8 @@
 namespace MassTransit.GrpcTransport.Topology.Builders
 {
+    using Contracts;
+
+
     /// <summary>
     /// A builder for creating the topology when publishing a message
     /// </summary>
@@ -7,6 +10,7 @@ namespace MassTransit.GrpcTransport.Topology.Builders
         IGrpcTopologyBuilder
     {
         string ExchangeName { get; set; }
+        ExchangeType ExchangeType { get; set; }
 
         IGrpcPublishTopologyBuilder CreateImplementedBuilder();
     }

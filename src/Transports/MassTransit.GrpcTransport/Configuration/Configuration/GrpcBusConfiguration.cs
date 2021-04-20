@@ -4,7 +4,7 @@
     using EndpointConfigurators;
     using GreenPipes;
     using MassTransit.Configuration;
-    using Pipeline.Observables;
+    using MassTransit.Pipeline.Observables;
     using Serialization;
 
 
@@ -20,6 +20,7 @@
             HostConfiguration = new GrpcHostConfiguration(this, baseAddress, topologyConfiguration);
 
             Serialization.ClearDeserializers();
+            Serialization.DefaultContentType = GrpcMessageSerializer.GrpcContentType;
             Serialization.AddDeserializer(GrpcMessageSerializer.GrpcContentType,
                 () => new GrpcMessageDeserializer(GrpcMessageSerializer.Deserializer));
             Serialization.SetSerializer(() => new GrpcMessageSerializer());

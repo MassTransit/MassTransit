@@ -32,21 +32,23 @@ namespace MassTransit.GrpcTransport.Integration
 
         public static NullableString ToNullableString(this string value)
         {
-            return value == null ? new NullableString() : new NullableString {Value = value};
+            return value != null
+                ? new NullableString {Value = value}
+                : default;
         }
 
         public static string ToStringValue(this NullableString value)
         {
-            return value.StringCase == NullableString.StringOneofCase.None
-                ? default
-                : value.Value;
+            return value is {StringCase: NullableString.StringOneofCase.Value}
+                ? value.Value
+                : default;
         }
 
         public static Guid? ToGuid(this NullableUuid value)
         {
-            return value.UuidCase == NullableUuid.UuidOneofCase.None
-                ? default
-                : new Guid(value.Value.Value.ToByteArray());
+            return value is {UuidCase: NullableUuid.UuidOneofCase.Value}
+                ? new Guid(value.Value.Value.ToByteArray())
+                : default;
         }
 
         public static Uuid ToUuid(this Guid value)
@@ -58,28 +60,28 @@ namespace MassTransit.GrpcTransport.Integration
         {
             return value.HasValue
                 ? new NullableUuid {Value = new Uuid {Value = ByteString.CopyFrom(value.Value.ToByteArray())}}
-                : new NullableUuid();
+                : default;
         }
 
         public static NullableString ToNullableString(this Uri value)
         {
             return value != null
                 ? new NullableString {Value = value.ToString()}
-                : new NullableString();
+                : default;
         }
 
         public static DateTime? ToDateTime(this NullableTimestamp value)
         {
-            return value.TimestampCase == NullableTimestamp.TimestampOneofCase.None
-                ? default
-                : value.Value.ToDateTime();
+            return value is {TimestampCase: NullableTimestamp.TimestampOneofCase.Value}
+                ? value.Value.ToDateTime()
+                : default;
         }
 
         public static NullableTimestamp ToFutureDateTime(this TimeSpan? value)
         {
             return value.HasValue
                 ? new NullableTimestamp {Value = Timestamp.FromDateTime(DateTime.UtcNow + value.Value)}
-                : new NullableTimestamp();
+                : default;
         }
 
         public static Guid ToGuid(this Uuid value)
@@ -91,9 +93,9 @@ namespace MassTransit.GrpcTransport.Integration
         {
             try
             {
-                return value.StringCase == NullableString.StringOneofCase.None
-                    ? default
-                    : new Uri(value.Value);
+                return value is {StringCase: NullableString.StringOneofCase.Value}
+                    ? new Uri(value.Value)
+                    : default;
             }
             catch (FormatException)
             {

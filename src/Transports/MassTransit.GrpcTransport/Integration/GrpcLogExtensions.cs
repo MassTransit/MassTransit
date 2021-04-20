@@ -53,7 +53,7 @@ namespace MassTransit.GrpcTransport.Integration
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void LogTopology(this NodeContext context, Exchange exchange)
+        public static void LogTopology(this NodeContext context, Exchange exchange, ExchangeType exchangeType)
         {
             // _logExchange(context.NodeAddress, exchange.Name);
         }

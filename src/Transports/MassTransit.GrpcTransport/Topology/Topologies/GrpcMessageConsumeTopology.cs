@@ -3,7 +3,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using Configurators;
+    using Contracts;
     using GreenPipes;
+    using GrpcTransport.Builders;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Metadata;
@@ -17,21 +19,23 @@
         where TMessage : class
     {
         readonly IMessageTopology<TMessage> _messageTopology;
+        readonly IGrpcMessagePublishTopology<TMessage> _publishTopology;
         readonly IList<IGrpcConsumeTopologySpecification> _specifications;
 
-        public GrpcMessageConsumeTopology(IMessageTopology<TMessage> messageTopology)
+        public GrpcMessageConsumeTopology(IMessageTopology<TMessage> messageTopology, IGrpcMessagePublishTopology<TMessage> publishTopology)
         {
             _messageTopology = messageTopology;
+            _publishTopology = publishTopology;
             _specifications = new List<IGrpcConsumeTopologySpecification>();
         }
 
-        public void Apply(GrpcTransport.Builders.IGrpcConsumeTopologyBuilder builder)
+        public void Apply(IGrpcConsumeTopologyBuilder builder)
         {
             foreach (var specification in _specifications)
                 specification.Apply(builder);
         }
 
-        public void Bind()
+        public void Bind(ExchangeType? exchangeType = default, string routingKey = default)
         {
             if (!IsBindableMessageType)
             {
@@ -39,7 +43,8 @@
                 return;
             }
 
-            var specification = new ExchangeBindingConsumeTopologySpecification(_messageTopology.EntityName);
+            var specification = new ExchangeBindingConsumeTopologySpecification(_messageTopology.EntityName, exchangeType ?? _publishTopology.ExchangeType,
+                routingKey);
 
             _specifications.Add(specification);
         }

@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using Builders;
     using Configurators;
+    using Contracts;
+    using Integration;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
 
@@ -22,14 +24,21 @@
             _implementedMessageTypes = new List<IGrpcMessagePublishTopology>();
         }
 
+        public ExchangeType ExchangeType { get; set; }
+
         public void Apply(IGrpcPublishTopologyBuilder builder)
         {
-            var exchangeHandle = ExchangeDeclare(builder);
+            var exchangeName = _messageTopology.EntityName;
+
+            builder.ExchangeDeclare(exchangeName, ExchangeType);
 
             if (builder.ExchangeName != null)
-                builder.ExchangeBind(builder.ExchangeName, exchangeHandle);
+                builder.ExchangeBind(builder.ExchangeName, exchangeName, builder.ExchangeType == ExchangeType.Topic ? "#" : default);
             else
-                builder.ExchangeName = exchangeHandle;
+            {
+                builder.ExchangeName = exchangeName;
+                builder.ExchangeType = ExchangeType;
+            }
 
             foreach (var configurator in _implementedMessageTypes)
                 configurator.Apply(builder);
@@ -39,17 +48,8 @@
         {
             var exchangeName = _messageTopology.EntityName;
 
-            publishAddress = new Uri($"{baseAddress}{exchangeName}");
+            publishAddress = new GrpcEndpointAddress(new GrpcHostAddress(baseAddress), exchangeName, exchangeType: ExchangeType);
             return true;
-        }
-
-        string ExchangeDeclare(IGrpcTopologyBuilder builder)
-        {
-            var exchangeName = _messageTopology.EntityName;
-
-            builder.ExchangeDeclare(exchangeName);
-
-            return exchangeName;
         }
 
         public void AddImplementedMessageConfigurator<T>(IGrpcMessagePublishTopologyConfigurator<T> configurator, bool direct)

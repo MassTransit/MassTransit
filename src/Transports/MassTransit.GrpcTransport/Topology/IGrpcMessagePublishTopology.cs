@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.GrpcTransport.Topology
 {
     using Builders;
+    using Contracts;
     using MassTransit.Topology;
 
 
@@ -9,6 +10,7 @@
         IGrpcMessagePublishTopology
         where TMessage : class
     {
+        ExchangeType ExchangeType { get; }
     }
 
 

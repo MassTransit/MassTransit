@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.GrpcTransport.Topology.Specifications
 {
     using System.Collections.Generic;
+    using Contracts;
     using GreenPipes;
     using GrpcTransport.Builders;
 
@@ -12,10 +13,14 @@
         IGrpcConsumeTopologySpecification
     {
         readonly string _exchange;
+        readonly ExchangeType _exchangeType;
+        readonly string _routingKey;
 
-        public ExchangeBindingConsumeTopologySpecification(string exchange)
+        public ExchangeBindingConsumeTopologySpecification(string exchange, ExchangeType exchangeType, string routingKey)
         {
             _exchange = exchange;
+            _routingKey = routingKey;
+            _exchangeType = exchangeType;
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -25,7 +30,8 @@
 
         public void Apply(IGrpcConsumeTopologyBuilder builder)
         {
-            builder.ExchangeBind(_exchange, builder.Exchange);
+            builder.ExchangeDeclare(_exchange, _exchangeType);
+            builder.ExchangeBind(_exchange, builder.Exchange, _routingKey);
         }
     }
 }

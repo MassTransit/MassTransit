@@ -8,6 +8,7 @@
     using MassTransit.Topology.Observers;
     using MassTransit.Topology.Topologies;
     using Topology.Configurators;
+    using Topology.Conventions.RoutingKey;
     using Topology.Topologies;
 
 
@@ -25,6 +26,7 @@
 
             _sendTopology = new SendTopology();
             _sendTopology.ConnectSendTopologyConfigurationObserver(new DelegateSendTopologyConfigurationObserver(GlobalTopology.Send));
+            _sendTopology.TryAddConvention(new RoutingKeySendTopologyConvention());
 
             _publishTopology = new GrpcPublishTopology(messageTopology);
             _publishTopology.ConnectPublishTopologyConfigurationObserver(new DelegatePublishTopologyConfigurationObserver(GlobalTopology.Publish));
@@ -32,7 +34,7 @@
             var observer = new PublishToSendTopologyConfigurationObserver(_sendTopology);
             _publishTopology.ConnectPublishTopologyConfigurationObserver(observer);
 
-            _consumeTopology = new GrpcConsumeTopology(messageTopology);
+            _consumeTopology = new GrpcConsumeTopology(messageTopology, _publishTopology);
         }
 
         public GrpcTopologyConfiguration(IGrpcTopologyConfiguration topologyConfiguration)
@@ -41,7 +43,7 @@
             _sendTopology = topologyConfiguration.Send;
             _publishTopology = topologyConfiguration.Publish;
 
-            _consumeTopology = new GrpcConsumeTopology(topologyConfiguration.Message);
+            _consumeTopology = new GrpcConsumeTopology(topologyConfiguration.Message, _publishTopology);
         }
 
         IMessageTopologyConfigurator ITopologyConfiguration.Message => _messageTopology;

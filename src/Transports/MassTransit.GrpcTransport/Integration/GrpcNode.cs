@@ -193,15 +193,17 @@ namespace MassTransit.GrpcTransport.Integration
 
             if (message.Deliver.DestinationCase == Deliver.DestinationOneofCase.Exchange)
             {
-                var exchange = _messageFabric.GetExchange(_context, message.Deliver.Exchange);
+                var destination = message.Deliver.Exchange;
+
+                var exchange = _messageFabric.GetExchange(_context, destination.Name);
 
                 await exchange.Send(transportMessage, Stopping).ConfigureAwait(false);
             }
             else if (message.Deliver.DestinationCase == Deliver.DestinationOneofCase.Queue)
             {
-                var queue = _messageFabric.GetQueue(_context, message.Deliver.Queue);
+                var queue = _messageFabric.GetQueue(_context, message.Deliver.Queue.Name);
 
-                await queue.Send(transportMessage).ConfigureAwait(false);
+                await queue.Send(transportMessage, Stopping).ConfigureAwait(false);
             }
             else
                 LogContext.Warning?.Log("Unknown destination from {NodeAddress}:  {Destination}", _context.NodeAddress, message.Deliver.DestinationCase);

@@ -2,6 +2,7 @@
 {
     using System;
     using Builders;
+    using Contracts;
     using Integration;
     using MassTransit.Configuration;
     using Transports;
@@ -55,9 +56,18 @@
             ReceiveEndpoint = receiveEndpoint;
         }
 
-        public int ConcurrencyLimit
+        public void Bind(string exchangeName, ExchangeType exchangeType = ExchangeType.FanOut, string routingKey = default)
         {
-            set => ConcurrentMessageLimit = value;
+            if (exchangeName == null)
+                throw new ArgumentNullException(nameof(exchangeName));
+
+            _endpointConfiguration.Topology.Consume.Bind(exchangeName, exchangeType, routingKey);
+        }
+
+        public void Bind<T>(ExchangeType? exchangeType, string routingKey = default)
+            where T : class
+        {
+            _endpointConfiguration.Topology.Consume.GetMessageTopology<T>().Bind(exchangeType, routingKey);
         }
     }
 }

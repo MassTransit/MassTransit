@@ -32,13 +32,11 @@ namespace MassTransit.GrpcTransport.Integration
             _context = context;
         }
 
-        public string ExchangeName => _context.Exchange.Name;
-
         async Task ISendTransport.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
             LogContext.SetCurrentIfNull(_context.LogContext);
 
-            var context = new MessageSendContext<T>(message, cancellationToken);
+            var context = new TransportGrpcSendContext<T>(_context.Exchange.Name, message, cancellationToken);
 
             await pipe.Send(context).ConfigureAwait(false);
 
@@ -54,7 +52,11 @@ namespace MassTransit.GrpcTransport.Integration
                 {
                     Deliver = new Deliver
                     {
-                        Exchange = _context.Exchange.Name,
+                        Exchange = new ExchangeDestination
+                        {
+                            Name = _context.Exchange.Name,
+                            RoutingKey = context.RoutingKey.ToNullableString()
+                        },
                         Envelope = new Envelope
                         {
                             MessageId = messageId.ToUuid(),
@@ -111,41 +113,41 @@ namespace MassTransit.GrpcTransport.Integration
 
         static void SetHeaders(IDictionary<string, string> dictionary, SendHeaders headers)
         {
-            foreach (KeyValuePair<string, object> header in headers.GetAll())
+            foreach (var (key, headerValue) in headers.GetAll())
             {
-                if (header.Value == null)
+                if (headerValue == null)
                 {
-                    if (dictionary.ContainsKey(header.Key))
-                        dictionary.Remove(header.Key);
+                    if (dictionary.ContainsKey(key))
+                        dictionary.Remove(key);
 
                     continue;
                 }
 
-                if (dictionary.ContainsKey(header.Key))
+                if (dictionary.ContainsKey(key))
                     continue;
 
-                switch (header.Value)
+                switch (headerValue)
                 {
                     case DateTimeOffset value:
                         if (_dateTimeOffsetConverter.TryConvert(value, out string text))
-                            dictionary[header.Key] = text;
+                            dictionary[key] = text;
                         break;
 
                     case DateTime value:
                         if (_dateTimeConverter.TryConvert(value, out text))
-                            dictionary[header.Key] = text;
+                            dictionary[key] = text;
                         break;
 
                     case string value:
-                        dictionary[header.Key] = value;
+                        dictionary[key] = value;
                         break;
 
                     case bool value when value:
-                        dictionary[header.Key] = bool.TrueString;
+                        dictionary[key] = bool.TrueString;
                         break;
 
                     case IFormattable formatValue:
-                        dictionary[header.Key] = formatValue.ToString();
+                        dictionary[key] = formatValue.ToString();
                         break;
                 }
             }
