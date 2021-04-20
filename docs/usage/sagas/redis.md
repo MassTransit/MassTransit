@@ -10,7 +10,7 @@ Redis only supports event correlation by _CorrelationId_, it does not support qu
 
 Storing a saga in Redis requires an additional interface, _ISagaVersion_, which has a _Version_ property used for optimistic concurrency. An example saga is shown below.
 
-<<< @/docs/code/sagas/RedisSaga.cs
+<<< @/docs/code/sagas/OrderState.cs
 
 ### Configuration
 
