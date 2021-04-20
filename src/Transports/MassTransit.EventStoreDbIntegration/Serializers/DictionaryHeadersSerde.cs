@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Net.Mime;
 using System.Text;
 using EventStore.Client;
-using MassTransit;
 using MassTransit.Context;
 using MassTransit.Serialization;
 using MassTransit.Transports;
@@ -16,7 +15,6 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
         const string EsDbCorrelationIdKey = "$correlationId";
         const string EsDbCausationIdKey = "$causationId";
         const string InstanceIdKey = "InstanceId";
-        const string ContentTypeKey = "Content-Type";
         const string ClrTypeKey = "ClrType";
 
         static readonly Encoding _encoding;
@@ -43,24 +41,24 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
 
                 if (dictionary.ContainsKey(EsDbCorrelationIdKey))
                 {
-                    dictionary.Add(nameof(MessageContext.ConversationId), dictionary[EsDbCorrelationIdKey]);
+                    dictionary.Add(MessageHeaders.ConversationId, dictionary[EsDbCorrelationIdKey]);
                     dictionary.Remove(EsDbCorrelationIdKey);
                 }
 
                 if (dictionary.ContainsKey(EsDbCausationIdKey))
                 {
-                    dictionary.Add(nameof(MessageContext.InitiatorId), dictionary[EsDbCausationIdKey]);
+                    dictionary.Add(MessageHeaders.InitiatorId, dictionary[EsDbCausationIdKey]);
                     dictionary.Remove(EsDbCausationIdKey);
                 }
 
-                if (!dictionary.ContainsKey(ContentTypeKey) && resolvedEvent.Event.ContentType == MediaTypeNames.Application.Json)
+                if (!dictionary.ContainsKey(MessageHeaders.ContentType) && resolvedEvent.Event.ContentType == MediaTypeNames.Application.Json)
                 {
-                    dictionary.Add(ContentTypeKey, MediaTypeNames.Application.Json);
+                    dictionary.Add(MessageHeaders.ContentType, MediaTypeNames.Application.Json);
                 }
 
                 if (dictionary.ContainsKey(InstanceIdKey))
                 {
-                    dictionary.Add(nameof(MessageContext.CorrelationId), dictionary[InstanceIdKey]);
+                    dictionary.Add(MessageHeaders.CorrelationId, dictionary[InstanceIdKey]);
                     dictionary.Remove(InstanceIdKey);
                 }
 
@@ -83,7 +81,7 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
                 if (context.InitiatorId.HasValue)
                     dictionary.Add(EsDbCausationIdKey, context.InitiatorId.Value);
 
-                dictionary.Add(ContentTypeKey, context.ContentType?.MediaType ?? JsonMessageSerializer.ContentTypeHeaderValue);
+                dictionary.Add(MessageHeaders.ContentType, context.ContentType?.MediaType ?? JsonMessageSerializer.ContentTypeHeaderValue);
 
                 dictionary.Add(ClrTypeKey, typeof(T).FullName);
 
@@ -94,15 +92,13 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
                     {
                         switch (headerValue.Key)
                         {
-                            //case MessageHeaders.ConversationId:
-                            //case MessageHeaders.InitiatorId:
-                            case "ConversationId":
-                            case "InitiatorId":
+                            case MessageHeaders.ConversationId:
+                            case MessageHeaders.InitiatorId:
                             case MessageHeaders.ContentType:
+                                //Do nothing, already added above
                                 break;
 
-                            //case MessageHeaders.CorrelationId:
-                            case "CorrelationId":
+                            case MessageHeaders.CorrelationId:
                                 dictionary.Add(InstanceIdKey, headerValue.Value);
                                 break;
 
