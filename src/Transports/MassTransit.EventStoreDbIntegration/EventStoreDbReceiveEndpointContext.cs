@@ -12,22 +12,22 @@ namespace MassTransit.EventStoreDbIntegration
 {
     public class EventStoreDbReceiveEndpointContext :
         BaseReceiveEndpointContext,
-        IEventStoreDbReceiveEndpointContext
+        IEventStoreDbSubscriptionContext
     {
         readonly IBusInstance _busInstance;
-        readonly Recycle<IProcessorContextSupervisor> _contextSupervisor;
+        readonly Recycle<ISubscriptionContextSupervisor> _contextSupervisor;
 
         public EventStoreDbReceiveEndpointContext(IEventStoreDbHostConfiguration hostConfiguration, IBusInstance busInstance,
             IReceiveEndpointConfiguration endpointConfiguration,
-            ReceiveSettings receiveSettings,
+            SubscriptionSettings receiveSettings,
             IHeadersDeserializer headersDeserializer,
             CheckpointStoreFactory checkpointStoreFactory)
             : base(busInstance.HostConfiguration, endpointConfiguration)
         {
 
             _busInstance = busInstance;
-            _contextSupervisor = new Recycle<IProcessorContextSupervisor>(() =>
-                new ProcessorContextSupervisor(hostConfiguration.ConnectionContextSupervisor, busInstance.HostConfiguration, receiveSettings,
+            _contextSupervisor = new Recycle<ISubscriptionContextSupervisor>(() =>
+                new SubscriptionContextSupervisor(hostConfiguration.ConnectionContextSupervisor, busInstance.HostConfiguration, receiveSettings,
                     headersDeserializer, checkpointStoreFactory));
         }
 
@@ -41,7 +41,7 @@ namespace MassTransit.EventStoreDbIntegration
             return new EventStoreDbConnectionException(message, exception);
         }
 
-        public IProcessorContextSupervisor ContextSupervisor => _contextSupervisor.Supervisor;
+        public ISubscriptionContextSupervisor ContextSupervisor => _contextSupervisor.Supervisor;
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {

@@ -12,26 +12,26 @@ using MassTransit.Transports;
 
 namespace MassTransit.EventStoreDbIntegration.Configurators
 {
-    public class EventStoreDbCatchupSubscriptionConfigurator :
+    public sealed class EventStoreDbCatchupSubscriptionConfigurator :
         ReceiverConfiguration,
         IEventStoreDbCatchupSubscriptionConfigurator,
-        ReceiveSettings
+        SubscriptionSettings
     {
         readonly IBusInstance _busInstance;
         readonly IReceiveEndpointConfiguration _endpointConfiguration;
         readonly IEventStoreDbHostConfiguration _hostConfiguration;
-        readonly PipeConfigurator<ProcessorContext> _processorConfigurator;
+        readonly PipeConfigurator<SubscriptionContext> _processorConfigurator;
         IHeadersDeserializer _headersDeserializer;
-        Action<SubscriptionFilterOptions> _filterOptions;
-        Action<UserCredentials> _userCredentials;
+        IEventFilter _allStreamFilter;
+        UserCredentials _userCredentials;
         CheckpointStoreFactory _checkpointStoreFactory;
         bool _isCheckpointStoreConfigured = false;
 
-        public EventStoreDbCatchupSubscriptionConfigurator(IEventStoreDbHostConfiguration hostConfiguration, StreamCategory streamCategory, string subscriptionName,
+        public EventStoreDbCatchupSubscriptionConfigurator(IEventStoreDbHostConfiguration hostConfiguration, StreamName streamName, string subscriptionName,
             IBusInstance busInstance, IReceiveEndpointConfiguration endpointConfiguration, IHeadersDeserializer headersDeserializer)
             : base(endpointConfiguration)
         {
-            StreamCategory = streamCategory;
+            StreamName = streamName;
             SubscriptionName = subscriptionName;
             _hostConfiguration = hostConfiguration;
             _busInstance = busInstance;
@@ -43,8 +43,10 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
             HeadersDeserializer = headersDeserializer;
 
-            _processorConfigurator = new PipeConfigurator<ProcessorContext>();
+            _processorConfigurator = new PipeConfigurator<SubscriptionContext>();
         }
+
+        public bool IsCatchupSubscription => true;
 
         public TimeSpan CheckpointInterval { get; set; }
 
@@ -52,23 +54,25 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
         public int ConcurrencyLimit { get; }
 
-        public Action<SubscriptionFilterOptions> FilterOptions
+        public IEventFilter AllStreamEventFilter
         {
+            get => _allStreamFilter;
             set
             {
-                if (StreamCategory != StreamCategory.AllStream)
-                    throw new InvalidOperationException("A filter can only be applied to an '$all' stream subscription.");
+                if (!StreamName.IsAllStream)
+                    throw new InvalidOperationException($"The {nameof(AllStreamEventFilter)} can only be set for an AllStream subscription.");
 
-                _filterOptions = value ?? throw new ArgumentNullException(nameof(value));
+                _allStreamFilter = value ?? throw new ArgumentNullException(nameof(value));
             }
         }
 
-        public Action<UserCredentials> UserCredentials
+        public UserCredentials UserCredentials
         {
+            get => _userCredentials;
             set => _userCredentials = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        public StreamCategory StreamCategory { get; }
+        public StreamName StreamName { get; }
 
         public string SubscriptionName { get; }
 
@@ -99,7 +103,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
         public ReceiveEndpoint Build()
         {
-            IEventStoreDbReceiveEndpointContext CreateContext()
+            IEventStoreDbSubscriptionContext CreateContext()
             {
                 var builder = new EventStoreDbReceiveEndpointBuilder(_hostConfiguration, _busInstance, _endpointConfiguration, this, _headersDeserializer,
                     _checkpointStoreFactory);
@@ -112,11 +116,11 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
             var context = CreateContext();
 
-            _processorConfigurator.UseFilter(new EventStoreDbConsumerFilter(context));
+            _processorConfigurator.UseFilter(new EventStoreDbSubscriptionFilter(context));
 
-            IPipe<ProcessorContext> processorPipe = _processorConfigurator.Build();
+            IPipe<SubscriptionContext> processorPipe = _processorConfigurator.Build();
 
-            var transport = new ReceiveTransport<ProcessorContext>(_busInstance.HostConfiguration, context, () => context.ContextSupervisor,
+            var transport = new ReceiveTransport<SubscriptionContext>(_busInstance.HostConfiguration, context, () => context.ContextSupervisor,
                 processorPipe);
 
             return new ReceiveEndpoint(transport, context);

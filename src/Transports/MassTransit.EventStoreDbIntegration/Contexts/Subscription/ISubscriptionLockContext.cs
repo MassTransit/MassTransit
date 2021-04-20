@@ -3,7 +3,7 @@ using EventStore.Client;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
-    public interface IProcessorLockContext
+    public interface ISubscriptionLockContext
     {
         Task Complete(ResolvedEvent resolvedEvent);
     }

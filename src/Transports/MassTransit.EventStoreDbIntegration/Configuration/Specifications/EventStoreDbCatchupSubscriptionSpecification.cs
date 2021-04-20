@@ -10,28 +10,26 @@ using MassTransit.Transports;
 
 namespace MassTransit.EventStoreDbIntegration.Specifications
 {
-    public class EventStoreDbCatchupSubscriptionSpecification :
+    public sealed class EventStoreDbCatchupSubscriptionSpecification :
         IEventStoreDbSubscriptionSpecification
     {
         readonly Action<IEventStoreDbCatchupSubscriptionConfigurator> _configure;      
         readonly ReceiveEndpointObservable _endpointObservers;      
         readonly IHeadersDeserializer _headersDeserializer;
         readonly IEventStoreDbHostConfiguration _hostConfiguration;
-        readonly IHostSettings _hostSettings;
-        readonly StreamCategory _streamCategory;
+        readonly StreamName _streamName;
         readonly string _subscriptionName;
 
-        public EventStoreDbCatchupSubscriptionSpecification(IEventStoreDbHostConfiguration hostConfiguration, StreamCategory streamCategory,
-            string subscriptionName, IHostSettings hostSettings, IHeadersDeserializer headersDeserializer,
+        public EventStoreDbCatchupSubscriptionSpecification(IEventStoreDbHostConfiguration hostConfiguration, StreamName streamName,
+            string subscriptionName, IHeadersDeserializer headersDeserializer,
             Action<IEventStoreDbCatchupSubscriptionConfigurator> configure)
         {
             _hostConfiguration = hostConfiguration;
-            _streamCategory = streamCategory;
+            _streamName = streamName;
             _subscriptionName = subscriptionName;
-            _hostSettings = hostSettings;
             _headersDeserializer = headersDeserializer;
             _configure = configure;
-            EndpointName = $"{EventStoreDbEndpointAddress.PathPrefix}/{_streamCategory}/{_subscriptionName}";
+            EndpointName = $"{EventStoreDbEndpointAddress.PathPrefix}/{_streamName}/{_subscriptionName}";
 
             _endpointObservers = new ReceiveEndpointObservable();
         }
@@ -45,8 +43,8 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
 
         public IEnumerable<ValidationResult> Validate()
         {
-            if (string.IsNullOrWhiteSpace(_streamCategory))
-                yield return this.Failure("StreamCategory", "should not be empty");
+            if (_streamName == null)
+                yield return this.Failure("StreamName", "should not be empty");
 
             if (string.IsNullOrWhiteSpace(_subscriptionName))
                 yield return this.Failure("SubscriptionName", "should not be empty");
@@ -57,7 +55,7 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
             var endpointConfiguration = busInstance.HostConfiguration.CreateReceiveEndpointConfiguration(EndpointName);
             endpointConfiguration.ConnectReceiveEndpointObserver(_endpointObservers);
 
-            var configurator = new EventStoreDbCatchupSubscriptionConfigurator(_hostConfiguration, _streamCategory, _subscriptionName, busInstance,
+            var configurator = new EventStoreDbCatchupSubscriptionConfigurator(_hostConfiguration, _streamName, _subscriptionName, busInstance,
                 endpointConfiguration, _headersDeserializer);
             _configure?.Invoke(configurator);
 

@@ -9,22 +9,22 @@ using MassTransit.Util;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
-    public sealed class ResolvedEventReceiveContext :
+    public sealed class ResolvedEventSubscriptionContext :
         BaseReceiveContext,
         ResolvedEventContext,
         ReceiveLockContext
     {
         readonly ResolvedEvent _resolvedEvent;
         readonly EventRecord _eventRecord;
-        readonly IProcessorLockContext _lockContext;
+        readonly ISubscriptionLockContext _lockContext;
         readonly IHeadersDeserializer _headersDeserializer;
         byte[] _body;
         byte[] _metadata;
 
-        public ResolvedEventReceiveContext(
+        public ResolvedEventSubscriptionContext(
             ResolvedEvent resolvedEvent,
             ReceiveEndpointContext receiveEndpointContext,
-            IProcessorLockContext lockContext,
+            ISubscriptionLockContext lockContext,
             IHeadersDeserializer headersDeserializer)
             : base(false, receiveEndpointContext)
         {
@@ -38,7 +38,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         public string EventStreamId => _eventRecord.EventStreamId;
         public string EventType => _eventRecord.EventType;
-        public ulong CommitPosition => _resolvedEvent.Event.Position.CommitPosition;
+        public ulong? CommitPosition => _resolvedEvent.OriginalPosition?.CommitPosition;
         public ulong EventNumber => _resolvedEvent.Event.EventNumber.ToUInt64();
         public DateTime TimeStamp => _eventRecord.Created;
         public byte[] Metadata => _metadata ??= _eventRecord.Metadata.ToArray();

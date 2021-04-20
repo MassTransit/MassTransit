@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using EventStore.Client;
 using GreenPipes;
 using MassTransit.Configuration;
 using MassTransit.EventStoreDbIntegration.Serializers;
@@ -9,7 +8,7 @@ using MassTransit.Registration;
 
 namespace MassTransit.EventStoreDbIntegration.Specifications
 {
-    public class EventStoreDbProducerSpecification :
+    public sealed class EventStoreDbProducerSpecification :
         IEventStoreDbProducerConfigurator,
         IEventStoreDbProducerSpecification
     {

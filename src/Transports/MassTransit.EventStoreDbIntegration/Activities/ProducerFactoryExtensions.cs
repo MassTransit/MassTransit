@@ -10,7 +10,7 @@ namespace MassTransit.EventStoreDbIntegration.Activities
         {
             var factory = context.GetStateMachineActivityFactory();
 
-            var rider = factory.GetService<IEventStoreDbRider>(context) ?? throw new ProduceException("EventStoreDBRider not found");
+            var rider = factory.GetService<IEventStoreDbRider>(context) ?? throw new ProduceException("EventStoreDbRider not found");
 
             var producerProvider = rider.GetProducerProvider(consumeContext);
 

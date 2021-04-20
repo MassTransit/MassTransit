@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Mime;
 using System.Text;
 using EventStore.Client;
+using MassTransit;
 using MassTransit.Context;
 using MassTransit.Serialization;
 using MassTransit.Transports;
@@ -12,8 +13,8 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
 {
     public static class DictionaryHeadersSerde
     {
-        const string CorrelationIdKey = "$correlationId";
-        const string CausationIdKey = "$causationId";
+        const string EsDbCorrelationIdKey = "$correlationId";
+        const string EsDbCausationIdKey = "$causationId";
         const string InstanceIdKey = "InstanceId";
         const string ContentTypeKey = "Content-Type";
         const string ClrTypeKey = "ClrType";
@@ -40,16 +41,16 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
             {
                 var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(_encoding.GetString(resolvedEvent.Event.Metadata.ToArray()));
 
-                if (dictionary.ContainsKey(CorrelationIdKey))
+                if (dictionary.ContainsKey(EsDbCorrelationIdKey))
                 {
-                    dictionary.Add(nameof(MessageContext.ConversationId), dictionary[CorrelationIdKey]);
-                    dictionary.Remove(CorrelationIdKey);
+                    dictionary.Add(nameof(MessageContext.ConversationId), dictionary[EsDbCorrelationIdKey]);
+                    dictionary.Remove(EsDbCorrelationIdKey);
                 }
 
-                if (dictionary.ContainsKey(CausationIdKey))
+                if (dictionary.ContainsKey(EsDbCausationIdKey))
                 {
-                    dictionary.Add(nameof(MessageContext.InitiatorId), dictionary[CausationIdKey]);
-                    dictionary.Remove(CausationIdKey);
+                    dictionary.Add(nameof(MessageContext.InitiatorId), dictionary[EsDbCausationIdKey]);
+                    dictionary.Remove(EsDbCausationIdKey);
                 }
 
                 if (!dictionary.ContainsKey(ContentTypeKey) && resolvedEvent.Event.ContentType == MediaTypeNames.Application.Json)
@@ -77,10 +78,10 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
                 var dictionary = new Dictionary<string, object>();
 
                 if (context.ConversationId.HasValue)
-                    dictionary.Add(CorrelationIdKey, context.ConversationId.Value);
+                    dictionary.Add(EsDbCorrelationIdKey, context.ConversationId.Value);
 
                 if (context.InitiatorId.HasValue)
-                    dictionary.Add(CausationIdKey, context.InitiatorId.Value);
+                    dictionary.Add(EsDbCausationIdKey, context.InitiatorId.Value);
 
                 dictionary.Add(ContentTypeKey, context.ContentType?.MediaType ?? JsonMessageSerializer.ContentTypeHeaderValue);
 
@@ -89,35 +90,27 @@ namespace MassTransit.EventStoreDbIntegration.Serializers
                 //If UseRawJsonSerializer
                 if (context.ContentType.MediaType.Equals(MediaTypeNames.Application.Json))
                 {
-                    if (context.RequestId.HasValue)
-                        dictionary.Add(nameof(MessageContext.RequestId), context.RequestId.Value);
-
-                    if (context.CorrelationId.HasValue)
-                        dictionary.Add(InstanceIdKey, context.CorrelationId.Value);
-
-                    if (context.ScheduledMessageId.HasValue)
-                        dictionary.Add(nameof(context.ScheduledMessageId), context.ScheduledMessageId.Value);
-
-                    if (context.SourceAddress != null)
-                        dictionary.Add(nameof(MessageContext.SourceAddress), context.SourceAddress.ToString());
-
-                    if (context.DestinationAddress != null)
-                        dictionary.Add(nameof(MessageContext.DestinationAddress), context.DestinationAddress.ToString());
-
-                    if (context.ResponseAddress != null)
-                        dictionary.Add(nameof(MessageContext.ResponseAddress), context.ResponseAddress.ToString());
-
-                    if (context.FaultAddress != null)
-                        dictionary.Add(nameof(MessageContext.FaultAddress), context.FaultAddress.ToString());
-
-                    if (context.TimeToLive.HasValue)
-                        dictionary.Add(nameof(MessageContext.ExpirationTime), DateTime.UtcNow.Add(context.TimeToLive.Value));
-
-                    if (context.SentTime.HasValue)
-                        dictionary.Add(nameof(MessageContext.SentTime), context.SentTime.Value);
-
                     foreach (var headerValue in context.Headers)
-                        dictionary.Add(headerValue.Key, headerValue.Value);
+                    {
+                        switch (headerValue.Key)
+                        {
+                            //case MessageHeaders.ConversationId:
+                            //case MessageHeaders.InitiatorId:
+                            case "ConversationId":
+                            case "InitiatorId":
+                            case MessageHeaders.ContentType:
+                                break;
+
+                            //case MessageHeaders.CorrelationId:
+                            case "CorrelationId":
+                                dictionary.Add(InstanceIdKey, headerValue.Value);
+                                break;
+
+                            default:
+                                dictionary.Add(headerValue.Key, headerValue.Value);
+                                break;
+                        }
+                    }
                 }
 
                 return _encoding.GetBytes(JsonConvert.SerializeObject(dictionary));

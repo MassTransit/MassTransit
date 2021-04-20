@@ -7,17 +7,17 @@ using MassTransit.Transports.Metrics;
 
 namespace MassTransit.EventStoreDbIntegration.Filters
 {
-    public sealed class EventStoreDbConsumerFilter :
-        IFilter<ProcessorContext>
+    public sealed class EventStoreDbSubscriptionFilter :
+        IFilter<SubscriptionContext>
     {
         readonly ReceiveEndpointContext _context;
 
-        public EventStoreDbConsumerFilter(ReceiveEndpointContext context)
+        public EventStoreDbSubscriptionFilter(ReceiveEndpointContext context)
         {
             _context = context;
         }
 
-        public async Task Send(ProcessorContext context, IPipe<ProcessorContext> next)
+        public async Task Send(SubscriptionContext context, IPipe<SubscriptionContext> next)
         {
             var inputAddress = _context.InputAddress;
 
@@ -41,7 +41,7 @@ namespace MassTransit.EventStoreDbIntegration.Filters
 
                 await _context.TransportObservers.Completed(new ReceiveTransportCompletedEvent(inputAddress, metrics));
 
-                LogContext.Debug?.Log("Consumer completed {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent", inputAddress,
+                LogContext.Debug?.Log("Subscription completed {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent", inputAddress,
                     metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
             }
 

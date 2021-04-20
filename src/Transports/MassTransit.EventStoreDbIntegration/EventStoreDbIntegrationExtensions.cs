@@ -1,5 +1,4 @@
 ﻿using System;
-using EventStore.Client;
 using MassTransit.EventStoreDbIntegration;
 using MassTransit.EventStoreDbIntegration.Registration;
 using MassTransit.Registration;
@@ -9,7 +8,7 @@ namespace MassTransit
 {
     public static class EventStoreDbIntegrationExtensions
     {
-        public static void UsingEventStoreDB(this IRiderRegistrationConfigurator configurator,
+        public static void UsingEventStoreDb(this IRiderRegistrationConfigurator configurator,
             Action<IRiderRegistrationContext, IEventStoreDbFactoryConfigurator> configure)
         {
             if (configurator == null)

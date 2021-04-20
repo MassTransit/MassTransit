@@ -7,18 +7,18 @@ using MassTransit.EventStoreDbIntegration.Serializers;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
-    public interface ProcessorContext :
+    public interface SubscriptionContext :
         PipeContext,
-        IProcessorLockContext
+        ISubscriptionLockContext
     {
-        ReceiveSettings ReceiveSettings { get; }
+        SubscriptionSettings SubscriptionSettings { get; }
         IHeadersDeserializer HeadersDeserializer { get; }
         ICheckpointStore CheckpointStore { get; }
         
         event Func<StreamSubscription, ResolvedEvent, CancellationToken, Task> ProcessEvent;
         event Action<StreamSubscription, SubscriptionDroppedReason, Exception> ProcessSubscriptionDropped;
 
-        Task StartProcessingAsync(CancellationToken cancellationToken = default);
-        Task StopProcessingAsync(CancellationToken cancellationToken = default);
+        Task SubscribeAsync(CancellationToken cancellationToken = default);
+        Task CloseAsync(CancellationToken cancellationToken = default);
     }
 }

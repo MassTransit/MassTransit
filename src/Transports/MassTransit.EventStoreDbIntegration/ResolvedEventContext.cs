@@ -15,7 +15,7 @@ namespace MassTransit.EventStoreDbIntegration
         /// <summary>
         /// The position of this event within the transaction log.
         /// </summary>
-        ulong CommitPosition { get; }
+        ulong? CommitPosition { get; }
         /// <summary>
         /// The position of this event within the stream to which it belongs.
         /// </summary>

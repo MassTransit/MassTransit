@@ -43,11 +43,11 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                 x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
                 x.AddRider(rider =>
                 {
-                    rider.UsingEventStoreDB((context, esdb) =>
+                    rider.UsingEventStoreDb((context, esdb) =>
                     {
-                        esdb.CatchupSubscription(StreamCategory.AllStream, SubscriptionName, c =>
+                        esdb.CatchupSubscription(StreamName.AllStream, SubscriptionName, c =>
                         {
-                            c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint(SubscriptionName));
+                            c.UseEventStoreDbCheckpointStore(StreamName.ForCheckpoint(SubscriptionName));
                         });
                     });
                 });

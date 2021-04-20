@@ -7,13 +7,13 @@ using MassTransit.EventStoreDbIntegration.Serializers;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
-    public class SharedProcessorContext :
+    public class SharedSubscriptionContext :
         ProxyPipeContext,
-        ProcessorContext
+        SubscriptionContext
     {
-        readonly ProcessorContext _context;
+        readonly SubscriptionContext _context;
 
-        public SharedProcessorContext(ProcessorContext context, CancellationToken cancellationToken)
+        public SharedSubscriptionContext(SubscriptionContext context, CancellationToken cancellationToken)
             : base(context)
         {
             _context = context;
@@ -33,18 +33,18 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
             remove => _context.ProcessSubscriptionDropped -= value;
         }
 
-        public ReceiveSettings ReceiveSettings => _context.ReceiveSettings;
+        public SubscriptionSettings SubscriptionSettings => _context.SubscriptionSettings;
         public IHeadersDeserializer HeadersDeserializer => _context.HeadersDeserializer;
         public ICheckpointStore CheckpointStore => _context.CheckpointStore;
         
-        public Task StartProcessingAsync(CancellationToken cancellationToken = default)
+        public Task SubscribeAsync(CancellationToken cancellationToken = default)
         {
-            return _context.StartProcessingAsync(cancellationToken);
+            return _context.SubscribeAsync(cancellationToken);
         }
 
-        public Task StopProcessingAsync(CancellationToken cancellationToken = default)
+        public Task CloseAsync(CancellationToken cancellationToken = default)
         {
-            return _context.StopProcessingAsync(cancellationToken);
+            return _context.CloseAsync(cancellationToken);
         }
 
         public Task Complete(ResolvedEvent resolvedEvent)

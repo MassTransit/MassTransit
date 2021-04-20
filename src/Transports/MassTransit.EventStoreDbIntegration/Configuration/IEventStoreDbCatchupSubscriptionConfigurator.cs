@@ -6,7 +6,7 @@ namespace MassTransit.EventStoreDbIntegration
     public interface IEventStoreDbCatchupSubscriptionConfigurator :
         IReceiveEndpointConfigurator
     {
-        StreamCategory StreamCategory { get; }
+        StreamName StreamName { get; }
 
         string SubscriptionName { get; }
 
@@ -21,14 +21,14 @@ namespace MassTransit.EventStoreDbIntegration
         ushort CheckpointMessageCount { set; }
 
         /// <summary>
-        /// Filter options when subscribing to the all stream.
+        /// Event filter when subscribing to the all stream. If not set, will default to ExcludeSystemEvents.
         /// </summary>
-        Action<SubscriptionFilterOptions> FilterOptions { set; }
+        IEventFilter AllStreamEventFilter { set; }
 
         /// <summary>
-        /// User credentials used for the subscription.
+        /// User credentials to use for the subscription.
         /// </summary>
-        Action<UserCredentials> UserCredentials { set; }
+        UserCredentials UserCredentials { set; }
 
         void SetCheckpointStore(CheckpointStoreFactory checkpointStoreFactory);
     }

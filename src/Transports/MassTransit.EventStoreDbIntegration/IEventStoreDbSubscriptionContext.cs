@@ -3,9 +3,9 @@ using MassTransit.EventStoreDbIntegration.Contexts;
 
 namespace MassTransit.EventStoreDbIntegration
 {
-    public interface IEventStoreDbReceiveEndpointContext :
+    public interface IEventStoreDbSubscriptionContext :
         ReceiveEndpointContext
     {
-        IProcessorContextSupervisor ContextSupervisor { get; }
+        ISubscriptionContextSupervisor ContextSupervisor { get; }
     }
 }

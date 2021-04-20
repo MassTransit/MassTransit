@@ -13,13 +13,13 @@ namespace MassTransit.EventStoreDbIntegration
         readonly IReceiveEndpointConfiguration _configuration;
         readonly IHeadersDeserializer _headersDeserializer;
         readonly IEventStoreDbHostConfiguration _hostConfiguration;
-        readonly ReceiveSettings _receiveSettings;
+        readonly SubscriptionSettings _receiveSettings;
 
         public EventStoreDbReceiveEndpointBuilder(
             IEventStoreDbHostConfiguration hostConfiguration,
             IBusInstance busInstance,
             IReceiveEndpointConfiguration configuration,
-            ReceiveSettings receiveSettings,
+            SubscriptionSettings receiveSettings,
             IHeadersDeserializer headersDeserializer,
             CheckpointStoreFactory checkpointStoreFactory)
             : base(configuration)
@@ -32,7 +32,7 @@ namespace MassTransit.EventStoreDbIntegration
             _checkpointStoreFactory = checkpointStoreFactory;
         }
 
-        public IEventStoreDbReceiveEndpointContext CreateReceiveEndpointContext()
+        public IEventStoreDbSubscriptionContext CreateReceiveEndpointContext()
         {
             var context = new EventStoreDbReceiveEndpointContext(_hostConfiguration, _busInstance, _configuration, _receiveSettings,
                 _headersDeserializer, _checkpointStoreFactory);

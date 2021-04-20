@@ -74,9 +74,9 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _hostSettings.DefaultCredentials = userCredentials;
         }
 
-        public void CatchupSubscription(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbCatchupSubscriptionConfigurator> configure)
+        public void CatchupSubscription(StreamName streamName, string subscriptionName, Action<IEventStoreDbCatchupSubscriptionConfigurator> configure)
         {
-            var specification = CreateCatchupSubscriptionSpecification(streamCategory, subscriptionName, configure);
+            var specification = CreateCatchupSubscriptionSpecification(streamName, subscriptionName, configure);
             _endpoints.Add(specification);
         }
 
@@ -105,15 +105,15 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _producerSpecification.ConfigureSend(callback);
         }
 
-        public IEventStoreDbSubscriptionSpecification CreateCatchupSubscriptionSpecification(StreamCategory streamCategory, string subscriptionName,
+        public IEventStoreDbSubscriptionSpecification CreateCatchupSubscriptionSpecification(StreamName streamName, string subscriptionName,
             Action<IEventStoreDbCatchupSubscriptionConfigurator> configure)
         {
-            if (streamCategory == null)
-                throw new ArgumentNullException(nameof(streamCategory));
+            if (streamName == null)
+                throw new ArgumentNullException(nameof(streamName));
             if (string.IsNullOrWhiteSpace(subscriptionName))
                 throw new ArgumentException(nameof(subscriptionName));
 
-            var specification = new EventStoreDbCatchupSubscriptionSpecification(this, streamCategory, subscriptionName, _hostSettings, _headersDeserializer, configure);
+            var specification = new EventStoreDbCatchupSubscriptionSpecification(this, streamName, subscriptionName, _headersDeserializer, configure);
             specification.ConnectReceiveEndpointObserver(_endpointObservers);
             return specification;
         }

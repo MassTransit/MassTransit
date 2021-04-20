@@ -19,20 +19,20 @@ namespace MassTransit.EventStoreDbIntegration
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly ChannelExecutor _executor;
-        readonly ProcessorContext _processorContext;
+        readonly SubscriptionContext _subscriptionContext;
 
-        public EventStoreDbDataReceiver(ReceiveEndpointContext context, ProcessorContext processorContext)
+        public EventStoreDbDataReceiver(ReceiveEndpointContext context, SubscriptionContext subscriptionContext)
         {
             _context = context;
-            _processorContext = processorContext;
+            _subscriptionContext = subscriptionContext;
 
             _deliveryComplete = TaskUtil.GetTask<bool>();
 
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-            var prefetchCount = Math.Max(1000, processorContext.ReceiveSettings.CheckpointMessageCount / 10);
-            _executor = new ChannelExecutor(prefetchCount, processorContext.ReceiveSettings.ConcurrencyLimit);
+            var prefetchCount = Math.Max(1000, subscriptionContext.SubscriptionSettings.CheckpointMessageCount / 10);
+            _executor = new ChannelExecutor(prefetchCount, subscriptionContext.SubscriptionSettings.ConcurrencyLimit);
         }
 
         public long DeliveryCount => _dispatcher.DispatchCount;
@@ -41,10 +41,10 @@ namespace MassTransit.EventStoreDbIntegration
 
         public async Task Start()
         {
-            _processorContext.ProcessEvent += HandleEvent;
-            _processorContext.ProcessSubscriptionDropped += HandleSubscriptionDropped;
+            _subscriptionContext.ProcessEvent += HandleEvent;
+            _subscriptionContext.ProcessSubscriptionDropped += HandleSubscriptionDropped;
 
-            await _processorContext.StartProcessingAsync(Stopping).ConfigureAwait(false);
+            await _subscriptionContext.SubscribeAsync(Stopping).ConfigureAwait(false);
 
             SetReady();
         }
@@ -87,7 +87,7 @@ namespace MassTransit.EventStoreDbIntegration
 
         async Task Handle(ResolvedEvent resolvedEvent)
         {
-            var context = new ResolvedEventReceiveContext(resolvedEvent, _context, _processorContext, _processorContext.HeadersDeserializer);
+            var context = new ResolvedEventSubscriptionContext(resolvedEvent, _context, _subscriptionContext, _subscriptionContext.HeadersDeserializer);
 
             try
             {
@@ -110,10 +110,10 @@ namespace MassTransit.EventStoreDbIntegration
 
         protected override async Task StopAgent(StopContext context)
         {
-            await _processorContext.StopProcessingAsync().ConfigureAwait(false);
+            await _subscriptionContext.CloseAsync().ConfigureAwait(false);
 
-            _processorContext.ProcessEvent -= HandleEvent;
-            _processorContext.ProcessSubscriptionDropped -= HandleSubscriptionDropped;
+            _subscriptionContext.ProcessEvent -= HandleEvent;
+            _subscriptionContext.ProcessSubscriptionDropped -= HandleSubscriptionDropped;
 
             await _executor.DisposeAsync().ConfigureAwait(false);
 

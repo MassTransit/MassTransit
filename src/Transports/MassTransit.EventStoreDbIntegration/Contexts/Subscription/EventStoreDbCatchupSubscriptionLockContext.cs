@@ -7,8 +7,8 @@ using MassTransit.Context;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
-    public class ProcessorLockContext :
-        IProcessorLockContext
+    public sealed class EventStoreDbCatchupSubscriptionLockContext :
+        ISubscriptionLockContext
     {
         readonly SubscriptionCheckpointData _data;
         readonly IHostConfiguration _hostConfiguration;
@@ -16,13 +16,14 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         readonly TimeSpan _timeout;
         readonly ICheckpointStore _checkpointStore;
         
-        public ProcessorLockContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings, ICheckpointStore checkpointStore)
+        public EventStoreDbCatchupSubscriptionLockContext(IHostConfiguration hostConfiguration, SubscriptionSettings subscriptionSettings,
+            ICheckpointStore checkpointStore)
         {
             _hostConfiguration = hostConfiguration;
-            _timeout = receiveSettings.CheckpointInterval;
-            _maxCount = receiveSettings.CheckpointMessageCount;
+            _timeout = subscriptionSettings.CheckpointInterval;
+            _maxCount = subscriptionSettings.CheckpointMessageCount;
             _checkpointStore = checkpointStore;
-            _data = new SubscriptionCheckpointData(_checkpointStore, receiveSettings.SubscriptionName, receiveSettings.StreamCategory,
+            _data = new SubscriptionCheckpointData(_checkpointStore, subscriptionSettings.SubscriptionName, subscriptionSettings.StreamName,
                 _timeout, _maxCount);
         }
 
@@ -44,7 +45,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         {
             readonly ICheckpointStore _checkpointStore;
             readonly string _subscriptionName;
-            readonly StreamCategory _streamCategory;
+            readonly StreamName _streamName;
             readonly ushort _maxCount;
             readonly TimeSpan _timeout;
             readonly Stopwatch _timer;
@@ -53,12 +54,12 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
             ulong? _current;
             ushort _processed;
 
-            public SubscriptionCheckpointData(ICheckpointStore checkpointStore, string subscriptionName, StreamCategory streamCategory,
+            public SubscriptionCheckpointData(ICheckpointStore checkpointStore, string subscriptionName, StreamName streamName,
                 TimeSpan timeout, ushort maxCount)
             {
                 _checkpointStore = checkpointStore;
                 _subscriptionName = subscriptionName;
-                _streamCategory = streamCategory;
+                _streamName = streamName;
                 _timeout = timeout;
                 _maxCount = maxCount;
                 _processed = 0;
@@ -78,11 +79,11 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
                     _timer.Restart();
                 }
 
-                ulong position = _streamCategory.IsAllStream
-                    ? resolvedEvent.OriginalPosition.Value.CommitPosition
+                ulong? position = _streamName.IsAllStream
+                    ? resolvedEvent.OriginalPosition?.CommitPosition
                     : resolvedEvent.Event.EventNumber.ToUInt64();
 
-                if (_current >= position)
+                if (!position.HasValue || _current >= position)
                     return false;
 
                 _current = position;
@@ -109,16 +110,16 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
                     _timer.Stop();
                     _current = null;
 
-                    LogContext.Info?.Log("Subscription: {SubscriptionName} for stream: {StreamCategory} was closed, reason: {Reason}",
-                        _subscriptionName, _streamCategory, reason.ToString());
+                    LogContext.Info?.Log("Subscription: {SubscriptionName} for stream: {StreamName} was closed, reason: {Reason}",
+                        _subscriptionName, _streamName, reason.ToString());
                 }
             }
 
             Task CommitCheckpoint()
             {
                 LogContext.Debug?.Log(
-                    "Subscription: {StreamCategory} updating checkpoint with offset: {Offset}",
-                    _streamCategory, _current);
+                    "Subscription: {StreamName} updating checkpoint with position: {Position}",
+                    _streamName, _current);
 
                 return _checkpointStore.StoreCheckpoint(_current);
             }

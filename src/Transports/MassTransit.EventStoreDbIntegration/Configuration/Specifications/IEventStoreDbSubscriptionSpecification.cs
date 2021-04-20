@@ -9,7 +9,7 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
         ISpecification
     {
         /// <summary>
-        /// EventStoreDB stream category with subscription name appended onto the end.
+        /// EventStoreDB subscription endpoint name.
         /// </summary>
         string EndpointName { get; }
 

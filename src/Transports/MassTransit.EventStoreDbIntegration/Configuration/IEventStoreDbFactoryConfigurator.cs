@@ -31,10 +31,10 @@ namespace MassTransit.EventStoreDbIntegration
         /// <summary>
         /// Subscribe to an EventStoreDB stream using a catch-up subscription.
         /// </summary>
-        /// <param name="streamCategory">The stream category to subscribe to.</param>
+        /// <param name="streamName">The name of the stream to subscribe to.</param>
         /// <param name="subscriptionName">Subscription name.</param>
         /// <param name="configure"></param>
-        void CatchupSubscription(StreamCategory streamCategory, string subscriptionName, Action<IEventStoreDbCatchupSubscriptionConfigurator> configure);
+        void CatchupSubscription(StreamName streamName, string subscriptionName, Action<IEventStoreDbCatchupSubscriptionConfigurator> configure);
 
         /// <summary>
         /// Sets the outbound message serializer

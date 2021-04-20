@@ -20,7 +20,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         public string StreamName { get; set; }
 
-        public string EventStoreDBContentType
+        public string EventStoreDbContentType
         {
             get
             {

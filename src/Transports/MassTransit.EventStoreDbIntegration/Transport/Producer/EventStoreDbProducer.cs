@@ -148,7 +148,7 @@ namespace MassTransit.EventStoreDbIntegration
                         typeof(T).Name,
                         sendContext.Body,
                         context.HeadersSerializer.Serialize(sendContext),
-                        sendContext.EventStoreDBContentType);
+                        sendContext.EventStoreDbContentType);
 
                     await context.Produce(sendContext.StreamName, new[] { eventData }, sendContext.CancellationToken).ConfigureAwait(false);
 
@@ -238,7 +238,7 @@ namespace MassTransit.EventStoreDbIntegration
                     if (_context.SendObservers.Count > 0)
                         await Task.WhenAll(contexts.Select(c => _context.SendObservers.PreSend(c))).ConfigureAwait(false);
 
-                    var esdbContentType = sendContext.EventStoreDBContentType;
+                    var esdbContentType = sendContext.EventStoreDbContentType;
                     var eventTypeName = typeof(T).Name;
                     var eventDataBatch = new List<EventData>();
 

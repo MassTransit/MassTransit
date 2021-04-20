@@ -4,6 +4,15 @@ namespace MassTransit.EventStoreDbIntegration
 {
     public sealed class StreamName
     {
+        const string AllStreamName = "$all";
+
+        public static readonly StreamName AllStream = new StreamName(AllStreamName);
+
+        public static StreamName ForCategory(string streamCategory, string prefix = null) =>
+            prefix == null
+                ? new StreamName($"{streamCategory}-")
+                : new StreamName($"[{prefix}]{streamCategory}-");
+
         public static StreamName ForCheckpoint(string checkpointId, string prefix = null) =>
             prefix == null
                 ? new StreamName($"checkpoint-{checkpointId}")
@@ -19,13 +28,12 @@ namespace MassTransit.EventStoreDbIntegration
             if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentNullException(nameof(value));
 
-            if (value == StreamCategory.AllStreamName)
-                throw new ArgumentException("The '$all' stream is not a valid stream name. It is a stream category that can only be subscribed to.", nameof(value));
-
             Value = value;
+            IsAllStream = value.Equals(AllStreamName);
         }
 
         string Value { get; }
+        public bool IsAllStream { get; }
 
         public override string ToString() => Value;
 
