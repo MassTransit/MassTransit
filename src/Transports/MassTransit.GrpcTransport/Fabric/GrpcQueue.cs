@@ -6,18 +6,14 @@
     using System.Threading.Tasks;
     using Context;
     using Contexts;
-    using GreenPipes;
-    using GreenPipes.Internals.Extensions;
-    using Util;
 
 
     public class GrpcQueue :
         IGrpcQueue
     {
-        readonly Channel<DeliveryContext<GrpcTransportMessage>> _channel;
-        readonly TaskCompletionSource<IGrpcQueueConsumer> _consumer;
-        readonly ConsumerCollection<IGrpcQueueConsumer> _consumers;
         readonly CancellationTokenSource _cancel;
+        readonly Channel<DeliveryContext<GrpcTransportMessage>> _channel;
+        readonly ConsumerCollection _consumers;
         readonly Task _dispatcher;
         readonly string _name;
         readonly IMessageFabricObserver _observer;
@@ -27,8 +23,8 @@
             _observer = observer;
             _name = name;
 
-            _consumers = new ConsumerCollection<IGrpcQueueConsumer>();
-            _consumer = TaskUtil.GetTask<IGrpcQueueConsumer>();
+            _consumers = new ConsumerCollection(consumers => new RoundRobinConsumerLoadBalancer(consumers));
+
             _cancel = new CancellationTokenSource();
 
             var outputOptions = new UnboundedChannelOptions
@@ -43,15 +39,13 @@
             _dispatcher = Task.Run(() => StartDispatcher(_cancel.Token));
         }
 
-        public ConnectHandle ConnectConsumer(NodeContext nodeContext, IGrpcQueueConsumer consumer)
+        public TopologyHandle ConnectConsumer(NodeContext nodeContext, IGrpcQueueConsumer consumer)
         {
             try
             {
                 var handle = _consumers.Connect(consumer);
 
                 handle = _observer.ConsumerConnected(nodeContext, handle, _name);
-
-                _consumer.TrySetResult(consumer);
 
                 return handle;
             }
@@ -108,17 +102,17 @@
         {
             try
             {
-
-                // convert to convergent channels
-                await _consumer.Task.OrCanceled(cancellationToken).ConfigureAwait(false);
-
                 while (await _channel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
                 {
                     DeliveryContext<GrpcTransportMessage> context = await _channel.Reader.ReadAsync(cancellationToken).ConfigureAwait(false);
 
                     try
                     {
-                        var consumer = _consumers.Next();
+                        IGrpcQueueConsumer consumer = null;
+                        if (context.Message.Message.Deliver.DestinationCase == Contracts.Deliver.DestinationOneofCase.Consumer)
+                            _consumers.TryGetConsumer(context.Message.Message.Deliver.Consumer.ConsumerId, out consumer);
+
+                        consumer ??= await _consumers.Next(context.Message, cancellationToken).ConfigureAwait(false);
                         if (consumer != null)
                             await consumer.Consume(context.Message, context.CancellationToken).ConfigureAwait(false);
                     }

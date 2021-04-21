@@ -42,11 +42,17 @@ namespace MassTransit.GrpcTransport.Testing
         internal IGrpcHostConfiguration HostConfiguration => _busConfiguration?.HostConfiguration;
 
         public event Action<IGrpcBusFactoryConfigurator> OnConfigureGrpcBus;
+        public event Action<IGrpcHostConfigurator> OnConfigureGrpcHost;
         public event Action<IGrpcReceiveEndpointConfigurator> OnConfigureGrpcReceiveEndpoint;
 
         protected virtual void ConfigureGrpcBus(IGrpcBusFactoryConfigurator configurator)
         {
             OnConfigureGrpcBus?.Invoke(configurator);
+        }
+
+        protected virtual void ConfigureGrpcHost(IGrpcHostConfigurator configurator)
+        {
+            OnConfigureGrpcHost?.Invoke(configurator);
         }
 
         protected virtual void ConfigureGrpcReceiveEndpoint(IGrpcReceiveEndpointConfigurator configurator)
@@ -70,7 +76,10 @@ namespace MassTransit.GrpcTransport.Testing
         {
             var configurator = new GrpcBusFactoryConfigurator(_busConfiguration);
 
-            configurator.Host(BaseAddress);
+            configurator.Host(BaseAddress, x =>
+            {
+                ConfigureGrpcHost(x);
+            });
 
             ConfigureBus(configurator);
 

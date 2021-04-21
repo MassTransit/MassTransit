@@ -80,7 +80,7 @@ namespace MassTransit.GrpcTransport.Integration
             readonly IReceivePipeDispatcher _dispatcher;
             readonly IConcurrencyLimiter _limiter;
             readonly string _queueName;
-            ConnectHandle _consumerHandle;
+            TopologyHandle _topologyHandle;
 
             public ReceiveTransportAgent(GrpcReceiveEndpointContext context, string queueName)
             {
@@ -186,7 +186,7 @@ namespace MassTransit.GrpcTransport.Integration
 
                     _context.ConfigureTopology(hostNodeContext);
 
-                    _consumerHandle = queue.ConnectConsumer(hostNodeContext, this);
+                    _topologyHandle = queue.ConnectConsumer(hostNodeContext, this);
 
                     await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(_context.InputAddress));
                 }
@@ -215,7 +215,7 @@ namespace MassTransit.GrpcTransport.Integration
                 LogContext.Debug?.Log("Consumer completed {InputAddress}: {DeliveryCount} received, {ConcurrentDeliveryCount} concurrent",
                     _context.InputAddress, metrics.DeliveryCount, metrics.ConcurrentDeliveryCount);
 
-                _consumerHandle?.Disconnect();
+                _topologyHandle?.Disconnect();
 
                 await base.StopAgent(context).ConfigureAwait(false);
             }

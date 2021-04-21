@@ -6,11 +6,11 @@ namespace MassTransit.GrpcTransport.Integration
     using Context;
     using Contracts;
     using Fabric;
-    using GreenPipes;
 
 
     public class ClientNodeTopology
     {
+        readonly Dictionary<ConsumerKey, long> _consumerMap;
         readonly Dictionary<long, TopologyEntry> _entries;
         readonly IMessageFabric _messageFabric;
         readonly IGrpcNode _node;
@@ -23,6 +23,7 @@ namespace MassTransit.GrpcTransport.Integration
             _messageFabric = messageFabric;
 
             _entries = new Dictionary<long, TopologyEntry>();
+            _consumerMap = new Dictionary<ConsumerKey, long>();
         }
 
         public void Join(Guid sessionId, IEnumerable<Topology> topologies)
@@ -80,7 +81,7 @@ namespace MassTransit.GrpcTransport.Integration
                         var source = nextEntry.Topology.ExchangeBind.Source;
                         var destination = nextEntry.Topology.ExchangeBind.Destination;
 
-                        _messageFabric.ExchangeBind(_node, source, destination, nextEntry.Topology.ExchangeBind.RoutingKey.ToStringValue());
+                        _messageFabric.ExchangeBind(_node, source, destination, nextEntry.Topology.ExchangeBind.RoutingKey);
 
                         _node.LogTopology(nextEntry.Topology.ExchangeBind);
                     }
@@ -95,15 +96,21 @@ namespace MassTransit.GrpcTransport.Integration
                     }
                     else if (nextEntry.Topology.ChangeCase == Topology.ChangeOneofCase.Consumer)
                     {
-                        var queueName = nextEntry.Topology.Consumer.QueueName;
+                        var consumer = nextEntry.Topology.Consumer;
+
+                        var queueName = consumer.QueueName;
 
                         var queue = _messageFabric.GetQueue(_node, queueName);
 
-                        var consumer = new GrpcRemoteConsumer(_node);
+                        var remoteConsumer = new GrpcRemoteConsumer(_node, queueName, consumer.ConsumerId);
 
-                        nextEntry.Handle = queue.ConnectConsumer(_node, consumer);
+                        nextEntry.Handle = queue.ConnectConsumer(_node, remoteConsumer);
 
-                        _node.LogTopology(nextEntry.Topology.Consumer);
+                        var consumerKey = new ConsumerKey(queueName, consumer.ConsumerId);
+
+                        _consumerMap[consumerKey] = nextEntry.Handle.Id;
+
+                        _node.LogTopology(consumer);
                     }
 
                     _lastSequenceNumber = nextEntry.Topology.SequenceNumber;
@@ -123,6 +130,58 @@ namespace MassTransit.GrpcTransport.Integration
             {
                 foreach (var entry in _entries.Values)
                     entry.Disconnect();
+
+                _lastSequenceNumber = 0;
+
+                _entries.Clear();
+                _consumerMap.Clear();
+            }
+        }
+
+        public long GetLocalConsumerId(string queueName, long consumerId)
+        {
+            return _consumerMap.TryGetValue(new ConsumerKey(queueName, consumerId), out var localConsumerId) ? localConsumerId : consumerId;
+        }
+
+
+        readonly struct ConsumerKey :
+            IEquatable<ConsumerKey>
+        {
+            public bool Equals(ConsumerKey other)
+            {
+                return _queueName == other._queueName && _consumerId == other._consumerId;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is ConsumerKey other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    return (_queueName.GetHashCode() * 397) ^ _consumerId.GetHashCode();
+                }
+            }
+
+            public static bool operator ==(ConsumerKey left, ConsumerKey right)
+            {
+                return left.Equals(right);
+            }
+
+            public static bool operator !=(ConsumerKey left, ConsumerKey right)
+            {
+                return !left.Equals(right);
+            }
+
+            readonly string _queueName;
+            readonly long _consumerId;
+
+            public ConsumerKey(string queueName, long consumerId)
+            {
+                _queueName = queueName;
+                _consumerId = consumerId;
             }
         }
 
@@ -134,7 +193,7 @@ namespace MassTransit.GrpcTransport.Integration
                 Topology = topology;
             }
 
-            public ConnectHandle Handle { get; set; }
+            public TopologyHandle Handle { get; set; }
 
             public Topology Topology { get; }
 

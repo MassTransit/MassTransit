@@ -5,49 +5,61 @@ namespace MassTransit.GrpcTransport.Fabric
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
     using GreenPipes.Internals.Extensions;
     using GreenPipes.Util;
 
 
-    public class ConsumerCollection<T>
-        where T : class
+    public class ConsumerCollection
     {
-        readonly Dictionary<long, T> _connections;
-        T[] _connected;
-        long _index;
+        readonly LoadBalancerFactory _balancerFactory;
+        readonly Dictionary<long, IGrpcQueueConsumer> _connections;
+        TaskCompletionSource<IConsumerLoadBalancer> _balancer;
+        IGrpcQueueConsumer[] _connected;
         long _nextId;
 
-        public ConsumerCollection()
+        public ConsumerCollection(LoadBalancerFactory balancerFactory)
         {
-            _connections = new Dictionary<long, T>();
-            _connected = new T[0];
+            _balancerFactory = balancerFactory;
+
+            _balancer = TaskUtil.GetTask<IConsumerLoadBalancer>();
+            _connections = new Dictionary<long, IGrpcQueueConsumer>();
+            _connected = new IGrpcQueueConsumer[0];
         }
 
         /// <summary>
-        /// The number of connections
+        /// The number of consumer
         /// </summary>
         public int Count => _connected.Length;
 
         /// <summary>
-        /// Connect a connectable type
+        /// Connect the consumer to the queue
         /// </summary>
-        /// <param name="connection">The connection to add</param>
+        /// <param name="consumer">The connection to add</param>
         /// <returns>The connection handle</returns>
-        public ConnectHandle Connect(T connection)
+        public TopologyHandle Connect(IGrpcQueueConsumer consumer)
         {
-            if (connection == null)
-                throw new ArgumentNullException(nameof(connection));
-
-            var id = Interlocked.Increment(ref _nextId);
+            if (consumer == null)
+                throw new ArgumentNullException(nameof(consumer));
 
             lock (_connections)
             {
-                _connections.Add(id, connection);
-                _connected = _connections.Values.ToArray();
-            }
+                var id = ++_nextId;
 
-            return new Handle(id, this);
+                _connections.Add(id, consumer);
+                _connected = _connections.Values.ToArray();
+
+                var balancer = _connected.Length == 1
+                    ? new SingleConsumerLoadBalancer(_connected[0])
+                    : _balancerFactory(_connected);
+
+                if (!_balancer.TrySetResult(balancer))
+                {
+                    _balancer = TaskUtil.GetTask<IConsumerLoadBalancer>();
+                    _balancer.SetResult(balancer);
+                }
+
+                return new Handle(id, this);
+            }
         }
 
         /// <summary>
@@ -55,12 +67,12 @@ namespace MassTransit.GrpcTransport.Fabric
         /// </summary>
         /// <param name="callback">The callback</param>
         /// <returns>An awaitable Task for the operation</returns>
-        public Task ForEachAsync(Func<T, Task> callback)
+        public Task ForEachAsync(Func<IGrpcQueueConsumer, Task> callback)
         {
             if (callback == null)
                 throw new ArgumentNullException(nameof(callback));
 
-            T[] connected;
+            IGrpcQueueConsumer[] connected;
             lock (_connections)
                 connected = _connected;
 
@@ -87,23 +99,30 @@ namespace MassTransit.GrpcTransport.Fabric
             return Task.WhenAll(outputTasks);
         }
 
-        public T Next()
+        public Task<IGrpcQueueConsumer> Next(GrpcTransportMessage message, CancellationToken cancellationToken)
         {
-            T[] connected;
-            lock (_connections)
-                connected = _connected;
+            Task<IConsumerLoadBalancer> task = _balancer.Task;
+            if (task.IsCompletedSuccessfully)
+            {
+                var balancer = task.GetAwaiter().GetResult();
+                var consumer = balancer.SelectConsumer(message);
 
-            if (connected.Length == 0)
-                return default;
+                return Task.FromResult(consumer);
+            }
 
-            var next = _index++ % connected.Length;
+            async Task<IGrpcQueueConsumer> NextAsync()
+            {
+                var balancer = await _balancer.Task.OrCanceled(cancellationToken).ConfigureAwait(false);
 
-            return connected[next];
+                return balancer.SelectConsumer(message);
+            }
+
+            return NextAsync();
         }
 
-        public bool All(Func<T, bool> callback)
+        public bool All(Func<IGrpcQueueConsumer, bool> callback)
         {
-            T[] connected;
+            IGrpcQueueConsumer[] connected;
             lock (_connections)
                 connected = _connected;
 
@@ -128,30 +147,43 @@ namespace MassTransit.GrpcTransport.Fabric
             {
                 _connections.Remove(id);
                 _connected = _connections.Values.ToArray();
+
+                _balancer = TaskUtil.GetTask<IConsumerLoadBalancer>();
+
+                if (_connected.Length > 0)
+                {
+                    var balancer = _connected.Length == 1
+                        ? new SingleConsumerLoadBalancer(_connected[0])
+                        : _balancerFactory(_connected);
+
+                    _balancer.SetResult(balancer);
+                }
             }
+        }
+
+        public bool TryGetConsumer(long id, out IGrpcQueueConsumer consumer)
+        {
+            lock (_connections)
+                return _connections.TryGetValue(id, out consumer);
         }
 
 
         class Handle :
-            ConnectHandle
+            TopologyHandle
         {
-            readonly ConsumerCollection<T> _connectable;
-            readonly long _id;
+            readonly ConsumerCollection _connectable;
 
-            public Handle(long id, ConsumerCollection<T> connectable)
+            public Handle(long id, ConsumerCollection connectable)
             {
-                _id = id;
+                Id = id;
                 _connectable = connectable;
             }
 
+            public long Id { get; }
+
             public void Disconnect()
             {
-                _connectable.Disconnect(_id);
-            }
-
-            public void Dispose()
-            {
-                Disconnect();
+                _connectable.Disconnect(Id);
             }
         }
     }

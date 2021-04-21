@@ -4,7 +4,7 @@ namespace MassTransit.GrpcTransport.Integration
     using System.Collections.Generic;
     using System.Linq;
     using Contracts;
-    using GreenPipes;
+    using Fabric;
 
 
     public class HostNodeTopology
@@ -17,7 +17,7 @@ namespace MassTransit.GrpcTransport.Integration
             _entries = new Dictionary<long, TopologyEntry>();
         }
 
-        public ConnectHandle Add(Topology topology, ConnectHandle handle)
+        public TopologyHandle Add(Topology topology, TopologyHandle handle)
         {
             if (topology == null)
                 throw new ArgumentNullException(nameof(topology));
@@ -43,11 +43,11 @@ namespace MassTransit.GrpcTransport.Integration
 
 
         class TopologyEntry :
-            ConnectHandle
+            TopologyHandle
         {
-            readonly ConnectHandle _handle;
+            readonly TopologyHandle _handle;
 
-            public TopologyEntry(Topology topology, ConnectHandle handle)
+            public TopologyEntry(Topology topology, TopologyHandle handle)
             {
                 _handle = handle;
 
@@ -56,16 +56,13 @@ namespace MassTransit.GrpcTransport.Integration
 
             public Topology Topology { get; }
 
+            public long Id => _handle.Id;
+
             public void Disconnect()
             {
                 _handle?.Disconnect();
 
                 Topology.Valid = false;
-            }
-
-            public void Dispose()
-            {
-                Disconnect();
             }
         }
     }

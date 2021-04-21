@@ -9,7 +9,6 @@ namespace MassTransit.GrpcTransport.Integration
     using Contexts;
     using Contracts;
     using Fabric;
-    using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
     using Grpc.Core;
@@ -77,7 +76,7 @@ namespace MassTransit.GrpcTransport.Integration
             await Task.WhenAll(readerTask, writerTask).ConfigureAwait(false);
         }
 
-        public ConnectHandle AddTopology(Topology topology, ConnectHandle handle)
+        public TopologyHandle AddTopology(Topology topology, TopologyHandle handle)
         {
             return _hostTopology.Add(topology, handle);
         }
@@ -169,7 +168,9 @@ namespace MassTransit.GrpcTransport.Integration
                 {
                     _context.Host = new DictionaryHostInfo(message.Welcome.Node.Host);
 
-                    _clientTopology.Join(message.Welcome.Node.SessionId.ToGuid(), message.Welcome.Node.Topology);
+                    Guid.TryParse(message.Welcome.Node.SessionId, out var sessionId);
+
+                    _clientTopology.Join(sessionId, message.Welcome.Node.Topology);
 
                     if (_context.NodeType == NodeType.Client)
                         SetReady();
@@ -202,6 +203,16 @@ namespace MassTransit.GrpcTransport.Integration
             else if (message.Deliver.DestinationCase == Deliver.DestinationOneofCase.Queue)
             {
                 var queue = _messageFabric.GetQueue(_context, message.Deliver.Queue.Name);
+
+                await queue.Send(transportMessage, Stopping).ConfigureAwait(false);
+            }
+            else if (message.Deliver.DestinationCase == Deliver.DestinationOneofCase.Consumer)
+            {
+                var consumer = message.Deliver.Consumer;
+
+                var queue = _messageFabric.GetQueue(_context, consumer.QueueName);
+
+                message.Deliver.Consumer.ConsumerId = _clientTopology.GetLocalConsumerId(consumer.QueueName, consumer.ConsumerId);
 
                 await queue.Send(transportMessage, Stopping).ConfigureAwait(false);
             }

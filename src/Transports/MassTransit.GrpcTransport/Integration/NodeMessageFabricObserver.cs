@@ -6,7 +6,6 @@ namespace MassTransit.GrpcTransport.Integration
     using Contexts;
     using Contracts;
     using Fabric;
-    using GreenPipes;
 
 
     public class NodeMessageFabricObserver :
@@ -41,7 +40,7 @@ namespace MassTransit.GrpcTransport.Integration
                 {
                     Source = source,
                     Destination = destination,
-                    RoutingKey = routingKey.ToNullableString()
+                    RoutingKey = routingKey ?? ""
                 }
             });
         }
@@ -63,12 +62,19 @@ namespace MassTransit.GrpcTransport.Integration
             });
         }
 
-        public ConnectHandle ConsumerConnected(NodeContext context, ConnectHandle handle, string queueName)
+        public TopologyHandle ConsumerConnected(NodeContext context, TopologyHandle handle, string queueName)
         {
-            return Send(context, new Topology {Consumer = new Consumer {QueueName = queueName}});
+            return Send(context, new Topology
+            {
+                Consumer = new Consumer
+                {
+                    QueueName = queueName,
+                    ConsumerId = handle.Id
+                }
+            }, handle);
         }
 
-        ConnectHandle Send(NodeContext context, Topology topology, ConnectHandle handle = default)
+        TopologyHandle Send(NodeContext context, Topology topology, TopologyHandle handle = default)
         {
             if (!_nodes.IsHostNode(context))
                 return handle;

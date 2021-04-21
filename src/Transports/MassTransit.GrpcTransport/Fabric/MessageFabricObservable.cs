@@ -2,7 +2,6 @@ namespace MassTransit.GrpcTransport.Fabric
 {
     using Contexts;
     using Contracts;
-    using GreenPipes;
     using GreenPipes.Util;
 
 
@@ -50,7 +49,7 @@ namespace MassTransit.GrpcTransport.Fabric
             });
         }
 
-        public ConnectHandle ConsumerConnected(NodeContext context, ConnectHandle handle, string queueName)
+        public TopologyHandle ConsumerConnected(NodeContext context, TopologyHandle handle, string queueName)
         {
             All(x =>
             {

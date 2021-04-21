@@ -38,7 +38,8 @@ namespace MassTransit.GrpcTransport.Integration
                         var joinNode = message.Join.Node;
 
                         var nodeAddress = new Uri(joinNode.Address);
-                        var sessionId = joinNode.SessionId.ToGuid();
+
+                        Guid.TryParse(joinNode.SessionId, out var sessionId);
 
                         var nodeContext = new GrpcServerNodeContext(context, nodeAddress, sessionId, joinNode.Host);
 

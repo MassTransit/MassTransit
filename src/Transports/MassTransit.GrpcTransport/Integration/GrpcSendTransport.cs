@@ -55,20 +55,20 @@ namespace MassTransit.GrpcTransport.Integration
                         Exchange = new ExchangeDestination
                         {
                             Name = _context.Exchange.Name,
-                            RoutingKey = context.RoutingKey.ToNullableString()
+                            RoutingKey = context.RoutingKey ?? ""
                         },
                         Envelope = new Envelope
                         {
-                            MessageId = messageId.ToUuid(),
-                            RequestId = context.RequestId.ToUuid(),
-                            ConversationId = context.ConversationId.ToUuid(),
-                            CorrelationId = context.CorrelationId.ToUuid(),
-                            InitiatorId = context.InitiatorId.ToUuid(),
-                            SourceAddress = context.SourceAddress.ToNullableString(),
-                            DestinationAddress = context.DestinationAddress.ToNullableString(),
-                            ResponseAddress = context.ResponseAddress.ToNullableString(),
-                            FaultAddress = context.FaultAddress.ToNullableString(),
-                            ContentType = context.ContentType.MediaType,
+                            MessageId = messageId.ToString("D"),
+                            RequestId = context.RequestId?.ToString("D") ?? "",
+                            ConversationId = context.ConversationId?.ToString("D") ?? "",
+                            CorrelationId = context.CorrelationId?.ToString("D") ?? "",
+                            InitiatorId = context.InitiatorId?.ToString("D") ?? "",
+                            SourceAddress = context.SourceAddress?.ToString() ?? "",
+                            DestinationAddress = context.DestinationAddress?.ToString() ?? "",
+                            ResponseAddress = context.ResponseAddress?.ToString() ?? "",
+                            FaultAddress = context.FaultAddress?.ToString() ?? "",
+                            ContentType = context.ContentType?.MediaType ?? "",
                             Body = ByteString.CopyFrom(context.Body),
                             EnqueueTime = context.Delay.ToFutureDateTime(),
                             ExpirationTime = context.TimeToLive.ToFutureDateTime(),

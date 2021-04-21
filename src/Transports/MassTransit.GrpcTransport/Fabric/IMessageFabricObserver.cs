@@ -2,7 +2,6 @@ namespace MassTransit.GrpcTransport.Fabric
 {
     using Contexts;
     using Contracts;
-    using GreenPipes;
 
 
     public interface IMessageFabricObserver
@@ -15,6 +14,6 @@ namespace MassTransit.GrpcTransport.Fabric
 
         void QueueBindingCreated(NodeContext context, string source, string destination);
 
-        ConnectHandle ConsumerConnected(NodeContext context, ConnectHandle handle, string queueName);
+        TopologyHandle ConsumerConnected(NodeContext context, TopologyHandle handle, string queueName);
     }
 }

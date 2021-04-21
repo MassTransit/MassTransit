@@ -111,7 +111,7 @@ namespace MassTransit.GrpcTransport.Integration
         {
         }
 
-        public IGrpcClient GetClient(Uri address)
+        IGrpcClient GetClient(Uri address)
         {
             var channel = GrpcChannel.ForAddress(address.GetLeftPart(UriPartial.Authority), new GrpcChannelOptions
             {

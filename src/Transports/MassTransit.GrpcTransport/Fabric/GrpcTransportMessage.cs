@@ -54,23 +54,23 @@ namespace MassTransit.GrpcTransport.Fabric
 
         public Headers Headers => SendHeaders;
 
-        public Guid? MessageId => _messageId ??= _envelope.MessageId.ToGuid();
+        public Guid? MessageId => _messageId ??= ToGuid(_envelope.MessageId);
 
-        public Guid? RequestId => _requestId ??= _envelope.RequestId.ToGuid();
+        public Guid? RequestId => _requestId ??= ToGuid(_envelope.RequestId);
 
-        public Guid? CorrelationId => _correlationId ??= _envelope.CorrelationId.ToGuid();
+        public Guid? CorrelationId => _correlationId ??= ToGuid(_envelope.CorrelationId);
 
-        public Guid? ConversationId => _conversationId ??= _envelope.ConversationId.ToGuid();
+        public Guid? ConversationId => _conversationId ??= ToGuid(_envelope.ConversationId);
 
-        public Guid? InitiatorId => _initiatorId ??= _envelope.InitiatorId.ToGuid();
+        public Guid? InitiatorId => _initiatorId ??= ToGuid(_envelope.InitiatorId);
 
-        public Uri SourceAddress => _sourceAddress ??= _envelope.SourceAddress.ToUri();
+        public Uri SourceAddress => _sourceAddress ??= ToUri(_envelope.SourceAddress);
 
-        public Uri DestinationAddress => _destinationAddress ??= _envelope.DestinationAddress.ToUri();
+        public Uri DestinationAddress => _destinationAddress ??= ToUri(_envelope.DestinationAddress);
 
-        public Uri ResponseAddress => _responseAddress ??= _envelope.ResponseAddress.ToUri();
+        public Uri ResponseAddress => _responseAddress ??= ToUri(_envelope.ResponseAddress);
 
-        public Uri FaultAddress => _faultAddress ??= _envelope.FaultAddress.ToUri();
+        public Uri FaultAddress => _faultAddress ??= ToUri(_envelope.FaultAddress);
 
         public DateTime? ExpirationTime => _expirationTime ??= _envelope.ExpirationTime.ToDateTime();
 
@@ -78,6 +78,27 @@ namespace MassTransit.GrpcTransport.Fabric
 
         public HostInfo Host { get; }
 
-        public string RoutingKey => Message.Deliver.Exchange?.RoutingKey?.Value;
+        public string RoutingKey => Message.Deliver.Exchange?.RoutingKey;
+
+        static Guid? ToGuid(string value)
+        {
+            return Guid.TryParse(value, out var guid)
+                ? guid
+                : default;
+        }
+
+        static Uri ToUri(string value)
+        {
+            try
+            {
+                return string.IsNullOrWhiteSpace(value)
+                    ? default
+                    : new Uri(value);
+            }
+            catch (FormatException)
+            {
+                return default;
+            }
+        }
     }
 }

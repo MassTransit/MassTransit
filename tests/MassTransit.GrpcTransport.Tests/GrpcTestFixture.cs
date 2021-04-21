@@ -12,7 +12,7 @@ namespace MassTransit.GrpcTransport.Tests
     public class GrpcTestFixture :
         BusTestFixture
     {
-        TestExecutionContext _fixtureContext;
+        protected TestExecutionContext FixtureContext;
 
         public GrpcTestFixture()
             : this(new GrpcTestHarness())
@@ -59,19 +59,19 @@ namespace MassTransit.GrpcTransport.Tests
             return TaskUtil.Completed;
         }
 
-        protected IRequestClient<TRequest> CreateRequestClient<TRequest>()
+        protected virtual IRequestClient<TRequest> CreateRequestClient<TRequest>()
             where TRequest : class
         {
             return GrpcTestHarness.CreateRequestClient<TRequest>();
         }
 
-        protected IRequestClient<TRequest> CreateRequestClient<TRequest>(Uri destinationAddress)
+        protected virtual IRequestClient<TRequest> CreateRequestClient<TRequest>(Uri destinationAddress)
             where TRequest : class
         {
             return GrpcTestHarness.CreateRequestClient<TRequest>(destinationAddress);
         }
 
-        protected Task<IRequestClient<TRequest>> ConnectRequestClient<TRequest>()
+        protected virtual Task<IRequestClient<TRequest>> ConnectRequestClient<TRequest>()
             where TRequest : class
         {
             return GrpcTestHarness.ConnectRequestClient<TRequest>();
@@ -80,9 +80,9 @@ namespace MassTransit.GrpcTransport.Tests
         [OneTimeSetUp]
         public Task SetupGrpcTestFixture()
         {
-            _fixtureContext = TestExecutionContext.CurrentContext;
+            FixtureContext = TestExecutionContext.CurrentContext;
 
-            LoggerFactory.Current = _fixtureContext;
+            LoggerFactory.Current = FixtureContext;
 
             return GrpcTestHarness.Start();
         }
@@ -95,7 +95,7 @@ namespace MassTransit.GrpcTransport.Tests
         [OneTimeTearDown]
         public async Task TearDownGrpcTestFixture()
         {
-            LoggerFactory.Current = _fixtureContext;
+            LoggerFactory.Current = FixtureContext;
 
             await GrpcTestHarness.Stop().ConfigureAwait(false);
 

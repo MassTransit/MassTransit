@@ -91,6 +91,9 @@
 
         public virtual async Task Start(CancellationToken cancellationToken = default)
         {
+            if(!cancellationToken.CanBeCanceled)
+                cancellationToken = TestCancellationToken;
+
             _received = new BusTestReceiveObserver(TestInactivityTimeout);
             _received.ConnectInactivityObserver(InactivityObserver);
 
