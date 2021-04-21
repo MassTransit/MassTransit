@@ -13,16 +13,14 @@ namespace MassTransit.EventStoreDbIntegration.Specifications
         IEventStoreDbProducerSpecification
     {
         readonly IEventStoreDbHostConfiguration _hostConfiguration;
-        readonly IHostSettings _hostSettings;
         readonly SendObservable _sendObservers;
         readonly ISerializationConfiguration _serializationConfiguration;
         Action<ISendPipeConfigurator> _configureSend;
         IHeadersSerializer _headersSerializer;
 
-        public EventStoreDbProducerSpecification(IEventStoreDbHostConfiguration hostConfiguration, IHostSettings hostSettings)
+        public EventStoreDbProducerSpecification(IEventStoreDbHostConfiguration hostConfiguration)
         {
             _hostConfiguration = hostConfiguration;
-            _hostSettings = hostSettings;
             _serializationConfiguration = new SerializationConfiguration();
             _sendObservers = new SendObservable();
         }

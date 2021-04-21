@@ -13,13 +13,13 @@ namespace MassTransit.EventStoreDbIntegration
         readonly IReceiveEndpointConfiguration _configuration;
         readonly IHeadersDeserializer _headersDeserializer;
         readonly IEventStoreDbHostConfiguration _hostConfiguration;
-        readonly SubscriptionSettings _receiveSettings;
+        readonly SubscriptionSettings _subscriptionSettings;
 
         public EventStoreDbReceiveEndpointBuilder(
             IEventStoreDbHostConfiguration hostConfiguration,
             IBusInstance busInstance,
             IReceiveEndpointConfiguration configuration,
-            SubscriptionSettings receiveSettings,
+            SubscriptionSettings subscriptionSettings,
             IHeadersDeserializer headersDeserializer,
             CheckpointStoreFactory checkpointStoreFactory)
             : base(configuration)
@@ -27,18 +27,18 @@ namespace MassTransit.EventStoreDbIntegration
             _hostConfiguration = hostConfiguration;
             _busInstance = busInstance;
             _configuration = configuration;
-            _receiveSettings = receiveSettings;
+            _subscriptionSettings = subscriptionSettings;
             _headersDeserializer = headersDeserializer;
             _checkpointStoreFactory = checkpointStoreFactory;
         }
 
         public IEventStoreDbSubscriptionContext CreateReceiveEndpointContext()
         {
-            var context = new EventStoreDbReceiveEndpointContext(_hostConfiguration, _busInstance, _configuration, _receiveSettings,
+            var context = new EventStoreDbReceiveEndpointContext(_hostConfiguration, _busInstance, _configuration, _subscriptionSettings,
                 _headersDeserializer, _checkpointStoreFactory);
 
             _ = context.GetOrAddPayload(() => _busInstance.HostConfiguration.HostTopology);
-            _ = context.AddOrUpdatePayload(() => _receiveSettings, _ => _receiveSettings);
+            _ = context.AddOrUpdatePayload(() => _subscriptionSettings, _ => _subscriptionSettings);
 
             return context;
         }

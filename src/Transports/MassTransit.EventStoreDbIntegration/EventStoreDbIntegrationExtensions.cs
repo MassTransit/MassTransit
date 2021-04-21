@@ -8,7 +8,7 @@ namespace MassTransit
 {
     public static class EventStoreDbIntegrationExtensions
     {
-        public static void UsingEventStoreDb(this IRiderRegistrationConfigurator configurator,
+        public static void UsingEventStoreDB(this IRiderRegistrationConfigurator configurator,
             Action<IRiderRegistrationContext, IEventStoreDbFactoryConfigurator> configure)
         {
             if (configurator == null)

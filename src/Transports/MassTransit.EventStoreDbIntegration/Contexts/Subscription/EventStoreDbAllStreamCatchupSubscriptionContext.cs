@@ -41,20 +41,32 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         {
             var position = await CheckpointStore.GetLastCheckpoint().ConfigureAwait(false);
  
-            _streamSubscription = await _client.SubscribeToAllAsync(
-                    GetAllStreamPosition(),
+            _streamSubscription = position.HasValue
+                ? await _client.SubscribeToAllAsync(
+                    new Position(position.Value, position.Value),
                     EventAppeared,
                     resolveLinkTos: false,
                     subscriptionDropped: SubscriptionDropped,
-                    filterOptions: null,
+                    filterOptions: new SubscriptionFilterOptions(
+                        SubscriptionSettings.AllStreamEventFilter ?? EventTypeFilter.ExcludeSystemEvents(),
+                        SubscriptionSettings.CheckpointMessageCount,
+                        CheckpointReached
+                    ),
                     configureOperationOptions: null,
-                    userCredentials: null,
+                    userCredentials: SubscriptionSettings.UserCredentials,
+                    cancellationToken: cancellationToken)
+                : await _client.SubscribeToAllAsync(
+                    EventAppeared,
+                    resolveLinkTos: false,
+                    subscriptionDropped: SubscriptionDropped,
+                    filterOptions: new SubscriptionFilterOptions(
+                        SubscriptionSettings.AllStreamEventFilter ?? EventTypeFilter.ExcludeSystemEvents(),
+                        SubscriptionSettings.CheckpointMessageCount,
+                        CheckpointReached
+                    ),
+                    configureOperationOptions: null,
+                    userCredentials: SubscriptionSettings.UserCredentials,
                     cancellationToken: cancellationToken);
-
-            Position GetAllStreamPosition() =>
-                position.HasValue
-                    ? new Position(position.Value, position.Value)
-                    : Position.Start;
         }
 
         public Task CloseAsync(CancellationToken cancellationToken = default)
@@ -65,21 +77,23 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         public Task Complete(ResolvedEvent resolvedEvent) => _lockContext.Complete(resolvedEvent);
 
+        public async Task CheckpointReached(StreamSubscription streamSubscription, Position position, CancellationToken cancellationToken)
+        {
+            await _lockContext.CheckpointReached(streamSubscription, position, cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task EventAppeared(StreamSubscription streamSubscription, ResolvedEvent resolvedEvent, CancellationToken cancellationToken)
+        {
+            if (ProcessEvent != null)
+                await ProcessEvent.Invoke(streamSubscription, resolvedEvent, cancellationToken).ConfigureAwait(false);
+        }
+
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         void SubscriptionDropped(StreamSubscription streamSubscription, SubscriptionDroppedReason reason, Exception? exc)
         {
-            if (ProcessSubscriptionDropped != null)
-                ProcessSubscriptionDropped.Invoke(streamSubscription, reason, exc);
+            //TODO: Need to implement reconnect manually or handled by MT?
+            ProcessSubscriptionDropped?.Invoke(streamSubscription, reason, exc);
         }
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-
-        async Task EventAppeared(StreamSubscription streamSubscription, ResolvedEvent resolvedEvent, CancellationToken cancellation)
-        {
-            if (resolvedEvent.Event.EventType.StartsWith("$"))
-                return;
-
-            if (ProcessEvent != null)
-                await ProcessEvent.Invoke(streamSubscription, resolvedEvent, cancellation);
-        }
     }
 }

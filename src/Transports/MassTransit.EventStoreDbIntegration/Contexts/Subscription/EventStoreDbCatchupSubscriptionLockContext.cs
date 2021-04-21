@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using EventStore.Client;
 using MassTransit.Configuration;
@@ -32,6 +33,13 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
             LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
             _ = await _data.TryCheckpointAsync(resolvedEvent).ConfigureAwait(false);
+        }
+
+        public async Task CheckpointReached(StreamSubscription streamSubscription, Position position, CancellationToken cancellationToken)
+        {
+            LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
+
+            await _data.ForceCheckpointAsync(position).ConfigureAwait(false);
         }
 
         public async Task OnSubscriptionDropped(SubscriptionDroppedReason reason)
@@ -72,21 +80,14 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
             public async Task<bool> TryCheckpointAsync(ResolvedEvent resolvedEvent)
             {
-                void Reset()
-                {
-                    _processed = 0;
-                    _commitIsRequired = false;
-                    _timer.Restart();
-                }
-
-                ulong? position = _streamName.IsAllStream
+                ulong? commitPosition = _streamName.IsAllStream
                     ? resolvedEvent.OriginalPosition?.CommitPosition
                     : resolvedEvent.Event.EventNumber.ToUInt64();
 
-                if (!position.HasValue || _current >= position)
+                if (!commitPosition.HasValue || _current >= commitPosition)
                     return false;
 
-                _current = position;
+                _current = commitPosition;
                 _commitIsRequired = true;
                 ++_processed;
 
@@ -96,6 +97,19 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
                 await CommitCheckpoint().ConfigureAwait(false);
                 Reset();
                 return true;
+            }
+
+            public async Task ForceCheckpointAsync(Position position)
+            {
+                if (_current >= position.CommitPosition)
+                    return;
+
+                _current = position.CommitPosition;
+                _commitIsRequired = true;
+                ++_processed;
+
+                await CommitCheckpoint().ConfigureAwait(false);
+                Reset();
             }
 
             public async Task Close(SubscriptionDroppedReason reason)
@@ -122,6 +136,13 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
                     _streamName, _current);
 
                 return _checkpointStore.StoreCheckpoint(_current);
+            }
+
+            void Reset()
+            {
+                _processed = 0;
+                _commitIsRequired = false;
+                _timer.Restart();
             }
         }
     }

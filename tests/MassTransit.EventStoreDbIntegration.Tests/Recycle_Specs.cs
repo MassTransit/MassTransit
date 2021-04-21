@@ -53,13 +53,13 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                 {
                     rider.AddConsumer<EventStoreDbMessageConsumer>();
 
-                    rider.UsingEventStoreDb((context, esdb) =>
+                    rider.UsingEventStoreDB((context, esdb) =>
                     {
                         //esdb.Host("esdb://localhost:2113?tls=false", "MassTransit Recycle_Specs Connection");
 
                         esdb.CatchupSubscription(StreamName.Custom(ProducerStreamName), SubscriptionName, c =>
                         {
-                            c.UseEventStoreDbCheckpointStore(StreamName.ForCheckpoint(SubscriptionName));
+                            c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint(SubscriptionName));
                             c.ConfigureConsumer<EventStoreDbMessageConsumer>(context);
                         });
                     });
@@ -79,7 +79,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                     var serviceScope = provider.CreateScope();
 
                     var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventStoreDbProducerProvider>();
-                    var producer = await producerProvider.GetProducer(ProducerStreamName);
+                    var producer = await producerProvider.GetProducer(StreamName.Custom(ProducerStreamName));
 
                     try
                     {
@@ -112,7 +112,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                         Assert.AreEqual("text", result.Message.Text);
                         Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
                         Assert.That(result.DestinationAddress,
-                            Is.EqualTo(new Uri($"loopback://localhost/{EventStoreDbEndpointAddress.PathPrefix}/{ProducerStreamName}")));
+                            Is.EqualTo(new Uri($"loopback://localhost/{EventStoreDbEndpointAddress.PathPrefix}/{StreamName.Custom(ProducerStreamName)}")));
                         Assert.That(result.MessageId, Is.EqualTo(messageId));
                         Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
                         Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));

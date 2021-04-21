@@ -45,7 +45,7 @@ namespace MassTransit.EventStoreDbIntegration
             }
         }
 
-        public EventStoreDbEndpointAddress(Uri hostAddress, string streamName)
+        public EventStoreDbEndpointAddress(Uri hostAddress, StreamName streamName)
         {
             ParseLeft(hostAddress, out Scheme, out Host, out Port);
             StreamName = streamName;

@@ -12,7 +12,7 @@ namespace MassTransit
         /// <param name="checkpointStreamName">
         /// The stream name to use for storing checkpoints. This must be unique.
         /// </param>
-        public static void UseEventStoreDbCheckpointStore(this IEventStoreDbCatchupSubscriptionConfigurator configurator,
+        public static void UseEventStoreDBCheckpointStore(this IEventStoreDbCatchupSubscriptionConfigurator configurator,
             StreamName checkpointStreamName)
         {
             configurator.SetCheckpointStore((client) => new EventStoreDbCheckpointStore(client, checkpointStreamName));

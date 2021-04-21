@@ -51,5 +51,10 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         {
             return _context.Complete(resolvedEvent);
         }
+
+        public Task CheckpointReached(StreamSubscription streamSubscription, Position position, CancellationToken cancellationToken)
+        {
+            return _context.CheckpointReached(streamSubscription, position, cancellationToken);
+        }
     }
 }

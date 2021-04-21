@@ -43,11 +43,11 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                 {
                     rider.AddConsumer<EventStoreDbMessageConsumer>();
 
-                    rider.UsingEventStoreDb((context, esdb) =>
+                    rider.UsingEventStoreDB((context, esdb) =>
                     {
                         esdb.CatchupSubscription(StreamName.Custom(ProducerStreamName), SubscriptionName, c =>
                         {
-                            c.UseEventStoreDbCheckpointStore(StreamName.ForCheckpoint(SubscriptionName));
+                            c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint(SubscriptionName));
                             c.ConfigureConsumer<EventStoreDbMessageConsumer>(context);
                         });
                         esdb.ConfigureSend(s => s.UseFilter(new SendFilter(sendFilterTaskCompletionSource)));
@@ -64,7 +64,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
             var serviceScope = provider.CreateScope();
 
             var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventStoreDbProducerProvider>();
-            var producer = await producerProvider.GetProducer(ProducerStreamName);
+            var producer = await producerProvider.GetProducer(StreamName.Custom(ProducerStreamName));
 
             try
             {
@@ -81,7 +81,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                 Assert.IsTrue(result.TryGetPayload<EventStoreDbSendContext<EventStoreDbMessage>>(out _));
                 Assert.AreEqual(correlationId, result.CorrelationId);
                 Assert.That(result.DestinationAddress,
-                    Is.EqualTo(new Uri($"loopback://localhost/{EventStoreDbEndpointAddress.PathPrefix}/{ProducerStreamName}")));
+                    Is.EqualTo(new Uri($"loopback://localhost/{EventStoreDbEndpointAddress.PathPrefix}/{StreamName.Custom(ProducerStreamName)}")));
 
                 await taskCompletionSource.Task;
             }

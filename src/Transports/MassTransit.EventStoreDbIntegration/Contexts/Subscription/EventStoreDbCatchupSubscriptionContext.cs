@@ -41,20 +41,24 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         {
             var position = await CheckpointStore.GetLastCheckpoint().ConfigureAwait(false);
  
-            _streamSubscription = await _client.SubscribeToAllAsync(
-                    start: GetAllStreamPosition(),
+            _streamSubscription = position.HasValue
+                ? await _client.SubscribeToStreamAsync(
+                    streamName: SubscriptionSettings.StreamName,
+                    start: StreamPosition.FromInt64((long)position),
                     eventAppeared: EventAppeared,
-                    resolveLinkTos: false,
+                    resolveLinkTos: true,
                     subscriptionDropped: SubscriptionDropped,
-                    filterOptions: null,
                     configureOperationOptions: null,
-                    userCredentials: null,
+                    userCredentials: SubscriptionSettings.UserCredentials,
+                    cancellationToken: cancellationToken)
+                : await _client.SubscribeToStreamAsync(
+                    streamName: SubscriptionSettings.StreamName,
+                    eventAppeared: EventAppeared,
+                    resolveLinkTos: true,
+                    subscriptionDropped: SubscriptionDropped,
+                    configureOperationOptions: null,
+                    userCredentials: SubscriptionSettings.UserCredentials,
                     cancellationToken: cancellationToken);
-
-            Position GetAllStreamPosition() =>
-                position.HasValue
-                    ? new Position(position.Value, position.Value)
-                    : Position.Start;
         }
 
         public Task CloseAsync(CancellationToken cancellationToken = default)
@@ -65,21 +69,24 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         public Task Complete(ResolvedEvent resolvedEvent) => _lockContext.Complete(resolvedEvent);
 
+        public Task CheckpointReached(StreamSubscription streamSubscription, Position position, CancellationToken cancellationToken)
+        {
+            throw new NotSupportedException("CheckpointReached is only supported for All Stream subscriptions.");
+        }
+
+        async Task EventAppeared(StreamSubscription streamSubscription, ResolvedEvent resolvedEvent, CancellationToken cancellation)
+        {
+            if (ProcessEvent != null)
+                await ProcessEvent.Invoke(streamSubscription, resolvedEvent, cancellation);
+        }
+
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         void SubscriptionDropped(StreamSubscription streamSubscription, SubscriptionDroppedReason reason, Exception? exc)
         {
+            //TODO: Need to implement reconnect manually or handled by MT?
             if (ProcessSubscriptionDropped != null)
                 ProcessSubscriptionDropped.Invoke(streamSubscription, reason, exc);
         }
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-
-        async Task EventAppeared(StreamSubscription streamSubscription, ResolvedEvent resolvedEvent, CancellationToken cancellation)
-        {
-            if (resolvedEvent.Event.EventType.StartsWith("$"))
-                return;
-
-            if (ProcessEvent != null)
-                await ProcessEvent.Invoke(streamSubscription, resolvedEvent, cancellation);
-        }
     }
 }

@@ -23,17 +23,18 @@ namespace MassTransit.EventStoreDbIntegration
                 ? new StreamName(streamName)
                 : new StreamName($"[{prefix}]{streamName}");
 
+        bool? _isAllStream = null;
+
         StreamName(string value)
         {
             if (string.IsNullOrWhiteSpace(value))
                 throw new ArgumentNullException(nameof(value));
 
             Value = value;
-            IsAllStream = value.Equals(AllStreamName);
         }
 
         string Value { get; }
-        public bool IsAllStream { get; }
+        public bool IsAllStream => _isAllStream ??= Value.Equals(AllStreamName);
 
         public override string ToString() => Value;
 

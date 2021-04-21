@@ -19,7 +19,7 @@ namespace MassTransit.EventStoreDbIntegration
 
         public EventStoreDbReceiveEndpointContext(IEventStoreDbHostConfiguration hostConfiguration, IBusInstance busInstance,
             IReceiveEndpointConfiguration endpointConfiguration,
-            SubscriptionSettings receiveSettings,
+            SubscriptionSettings subscriptionSettings,
             IHeadersDeserializer headersDeserializer,
             CheckpointStoreFactory checkpointStoreFactory)
             : base(busInstance.HostConfiguration, endpointConfiguration)
@@ -27,8 +27,8 @@ namespace MassTransit.EventStoreDbIntegration
 
             _busInstance = busInstance;
             _contextSupervisor = new Recycle<ISubscriptionContextSupervisor>(() =>
-                new SubscriptionContextSupervisor(hostConfiguration.ConnectionContextSupervisor, busInstance.HostConfiguration, receiveSettings,
-                    headersDeserializer, checkpointStoreFactory));
+                new SubscriptionContextSupervisor(hostConfiguration.ConnectionContextSupervisor, busInstance.HostConfiguration,
+                    subscriptionSettings, headersDeserializer, checkpointStoreFactory));
         }
 
         public override void AddConsumeAgent(IAgent agent)

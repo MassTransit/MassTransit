@@ -30,7 +30,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             _endpointObservers = new ReceiveEndpointObservable();
             _endpoints = new List<IEventStoreDbSubscriptionSpecification>();
             _hostSettings = new HostSettings();
-            _producerSpecification = new EventStoreDbProducerSpecification(this, _hostSettings);
+            _producerSpecification = new EventStoreDbProducerSpecification(this);
 
             SetHeadersDeserializer(DictionaryHeadersSerde.Deserializer);
             SetHeadersSerializer(DictionaryHeadersSerde.Serializer);

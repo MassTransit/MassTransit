@@ -22,6 +22,7 @@ namespace MassTransit.EventStoreDbIntegration
         public async Task<IEventStoreDbProducer> GetProducer(Uri address)
         {
             var producer = await _provider.GetProducer(address).ConfigureAwait(false);
+
             return new Producer(producer, _consumeContext);
         }
 

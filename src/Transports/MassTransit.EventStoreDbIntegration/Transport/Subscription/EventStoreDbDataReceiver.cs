@@ -63,6 +63,20 @@ namespace MassTransit.EventStoreDbIntegration
             }
         }
 
+        async Task Handle(ResolvedEvent resolvedEvent)
+        {
+            var context = new ResolvedEventSubscriptionContext(resolvedEvent, _context, _subscriptionContext, _subscriptionContext.HeadersDeserializer);
+
+            try
+            {
+                await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
+            }
+            finally
+            {
+                context.Dispose();
+            }
+        }
+
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         void HandleSubscriptionDropped(StreamSubscription streamSubscription, SubscriptionDroppedReason droppedReason, Exception? exception)
         {
@@ -84,20 +98,6 @@ namespace MassTransit.EventStoreDbIntegration
             }
         }
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-
-        async Task Handle(ResolvedEvent resolvedEvent)
-        {
-            var context = new ResolvedEventSubscriptionContext(resolvedEvent, _context, _subscriptionContext, _subscriptionContext.HeadersDeserializer);
-
-            try
-            {
-                await _dispatcher.Dispatch(context, context).ConfigureAwait(false);
-            }
-            finally
-            {
-                context.Dispose();
-            }
-        }
 
         async Task HandleDeliveryComplete()
         {

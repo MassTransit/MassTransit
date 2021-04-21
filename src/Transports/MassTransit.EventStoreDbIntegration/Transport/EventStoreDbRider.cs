@@ -89,7 +89,7 @@ namespace MassTransit.EventStoreDbIntegration
 
             public Task StopAsync(CancellationToken cancellationToken)
             {
-                return _agent.Stop("EvenStoreDB stopped", cancellationToken);
+                return _agent.Stop("EvenStoreDb stopped", cancellationToken);
             }
 
             async Task ReadyOrNot(IEnumerable<Task<ReceiveEndpointReady>> endpoints)

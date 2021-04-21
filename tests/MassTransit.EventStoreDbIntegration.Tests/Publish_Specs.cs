@@ -51,11 +51,11 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                 {
                     rider.AddConsumer<EventStoreDbMessageConsumer>();
 
-                    rider.UsingEventStoreDb((context, esdb) =>
+                    rider.UsingEventStoreDB((context, esdb) =>
                     {
                         esdb.CatchupSubscription(StreamName.Custom(ProducerStreamName), SubscriptionName, c =>
                         {
-                            c.UseEventStoreDbCheckpointStore(StreamName.ForCheckpoint(SubscriptionName));
+                            c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint(SubscriptionName));
                             c.ConfigureConsumer<EventStoreDbMessageConsumer>(context);
                         });
                     });
