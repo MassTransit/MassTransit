@@ -117,7 +117,7 @@ public class RequestController :
 The controller method will send the command, and return the view once the result has been received.
 
 
-If multiple request clients are needed, there is a generic registration method available (only using MS DI). Since no address is specified, the generic request client will publish the request, allowing the command to be routed to the consumer via the broker topology.
+If multiple request clients are needed, there is a generic registration method available. Since no address is specified, the generic request client will publish the request, allowing the command to be routed to the consumer via the broker topology.
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
@@ -129,6 +129,30 @@ public void ConfigureServices(IServiceCollection services)
         x.AddGenericRequestClient();
     });
 }
+```
+#### Using Autofac
+
+> Uses [MassTransit.AutofacIntegration](https://www.nuget.org/packages/MassTransit.Autofac)
+
+To use the generic request client:
+```csharp
+ContainerBuilder builder;
+builder.RegisterGenericRequestClient();
+```
+
+Or choose one of the following for a typed request:
+```csharp
+ContainerBuilder builder;
+builder.AddMassTransit(x =>
+{
+    // Either this
+    x.AddRequestClient<OrderStatusResult>();
+
+    // Or this to specify a timeout
+    x.AddRequestClient<OrderStatusResult>(TimeSpan.FromSeconds(60));
+    
+    // ...
+});
 ```
 
 ### Customizing Requests
