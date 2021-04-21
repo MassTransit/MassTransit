@@ -3,7 +3,7 @@ namespace MassTransit.Tests.MessageData
     using System;
     using System.Threading.Tasks;
     using GreenPipes;
-    using MassTransit.MessageData;
+    using MassTransit.MessageData.Configuration;
     using NUnit.Framework;
     using TestFramework;
 
@@ -40,14 +40,13 @@ namespace MassTransit.Tests.MessageData
             Assert.That(await response.Message.Value.Value, Is.Not.Empty);
         }
 
-        readonly IMessageDataRepository _repository = new InMemoryMessageDataRepository();
         Task<ConsumeContext<Request>> _received;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseRetry<Response>(r => r.Immediate(1));
 
-            configurator.UseMessageData(_repository);
+            configurator.UseMessageData(x => x.InMemory());
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -59,7 +58,7 @@ namespace MassTransit.Tests.MessageData
                 await context.RespondAsync<Response>(new
                 {
                     context.Message.Key,
-                    Value = await _repository.PutString("This is a huge string, and it is just too big to fit.")
+                    Value = "This is a huge string, and it is just too big to fit."
                 });
             });
         }

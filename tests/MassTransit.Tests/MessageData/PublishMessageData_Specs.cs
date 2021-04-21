@@ -2,7 +2,7 @@ namespace MassTransit.Tests.MessageData
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.MessageData;
+    using MassTransit.MessageData.Configuration;
     using NUnit.Framework;
     using TestFramework;
 
@@ -23,12 +23,11 @@ namespace MassTransit.Tests.MessageData
             ConsumeContext<DocumentProcessed> completed = await _completed.Task;
         }
 
-        readonly IMessageDataRepository _repository = new InMemoryMessageDataRepository();
         TaskCompletionSource<ConsumeContext<DocumentProcessed>> _completed;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseMessageData(_repository);
+            configurator.UseMessageData(x => x.InMemory());
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

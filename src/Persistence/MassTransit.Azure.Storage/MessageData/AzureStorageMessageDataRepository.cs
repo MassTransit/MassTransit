@@ -71,17 +71,24 @@ namespace MassTransit.Azure.Storage.MessageData
 
         public async Task PreStart(IBus bus)
         {
-            var containerExists = await _container.ExistsAsync().ConfigureAwait(false);
-            if (!containerExists)
+            try
             {
-                try
+                var containerExists = await _container.ExistsAsync().ConfigureAwait(false);
+                if (!containerExists)
                 {
-                    await _container.CreateIfNotExistsAsync().ConfigureAwait(false);
+                    try
+                    {
+                        await _container.CreateIfNotExistsAsync().ConfigureAwait(false);
+                    }
+                    catch (RequestFailedException exception)
+                    {
+                        LogContext.Warning?.Log(exception, "Azure Storage Container does not exist: {Address}", _container.Uri);
+                    }
                 }
-                catch (RequestFailedException exception)
-                {
-                    LogContext.Warning?.Log(exception, "Azure Storage Container does not exist: {Address}", _container.Uri);
-                }
+            }
+            catch (Exception exception)
+            {
+                LogContext.Error?.Log(exception, "Azure Storage failure.");
             }
         }
 

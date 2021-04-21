@@ -2,10 +2,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using global::Azure.Storage.Blobs;
+    using MessageData;
     using NUnit.Framework;
-    using Storage;
-    using Storage.MessageData;
 
 
     [TestFixture]
@@ -33,19 +31,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         }
 
         Task<ConsumeContext<DataMessage>> _handler;
-        readonly AzureStorageMessageDataRepository _repository;
         string _data;
-
-        public Sending_a_message_with_data()
-        {
-            var account = new BlobServiceClient(Configuration.StorageAccount);
-            _repository = account.CreateMessageDataRepository("message-data");
-        }
+        IMessageDataRepository _repository;
 
         protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
-            configurator.UseMessageData(_repository);
-            configurator.ConnectBusObserver(_repository);
+            _repository = configurator.UseMessageData(x => x.AzureStorage(Configuration.StorageAccount));
         }
 
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)

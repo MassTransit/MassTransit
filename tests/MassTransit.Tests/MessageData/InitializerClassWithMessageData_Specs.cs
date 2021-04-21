@@ -4,7 +4,7 @@ namespace MassTransit.Tests.MessageData
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
-    using MassTransit.MessageData;
+    using MassTransit.MessageData.Configuration;
     using NUnit.Framework;
     using TestFramework;
 
@@ -41,8 +41,8 @@ namespace MassTransit.Tests.MessageData
             const string stringValue = "This string is soo incredibly huge.";
             const string byteValue = "Such a byte value, a really great byte value.";
 
-            byte[] streamBytes = new byte[1000];
-            await using MemoryStream ms = new MemoryStream(streamBytes);
+            var streamBytes = new byte[1000];
+            await using var ms = new MemoryStream(streamBytes);
 
             Response<DocumentProcessed> response = await client.GetResponse<DocumentProcessed>(new
             {
@@ -63,7 +63,7 @@ namespace MassTransit.Tests.MessageData
             Assert.That(response.Message.StringByteData, Is.Not.Null);
             Assert.That(response.Message.StringByteData.HasValue, Is.True);
             Assert.That(response.Message.StringByteData.Address, Is.EqualTo(_stringDataAddress), "Should use the existing message data address");
-            byte[] bytes = await response.Message.StringByteData.Value;
+            var bytes = await response.Message.StringByteData.Value;
             Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo(stringData));
 
             Assert.That(response.Message.ByteData, Is.Not.Null);
@@ -75,7 +75,7 @@ namespace MassTransit.Tests.MessageData
             Assert.That(response.Message.StreamData, Is.Not.Null);
             Assert.That(response.Message.StreamData.HasValue, Is.True);
             Assert.That(response.Message.StreamData.Address, Is.EqualTo(_streamDataAddress), "Should use the existing message data address");
-            await using MemoryStream receivedStream = new MemoryStream();
+            await using var receivedStream = new MemoryStream();
             var stream = await response.Message.StreamData.Value;
             await stream.CopyToAsync(receivedStream);
             Assert.That(receivedStream.ToArray(), Is.EqualTo(streamBytes));
@@ -96,14 +96,13 @@ namespace MassTransit.Tests.MessageData
             Assert.That(Encoding.UTF8.GetString(bytes), Is.EqualTo(byteValue));
         }
 
-        readonly IMessageDataRepository _repository = new InMemoryMessageDataRepository();
         Uri _stringDataAddress;
         Uri _byteDataAddress;
         Uri _streamDataAddress;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseMessageData(_repository);
+            configurator.UseMessageData(x => x.InMemory());
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
