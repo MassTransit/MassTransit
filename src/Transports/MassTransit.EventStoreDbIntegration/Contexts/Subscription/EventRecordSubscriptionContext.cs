@@ -9,9 +9,9 @@ using MassTransit.Util;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
-    public sealed class ResolvedEventSubscriptionContext :
+    public sealed class EventRecordSubscriptionContext :
         BaseReceiveContext,
-        ResolvedEventContext,
+        EventRecordContext,
         ReceiveLockContext
     {
         readonly ResolvedEvent _resolvedEvent;
@@ -21,7 +21,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         byte[] _body;
         byte[] _metadata;
 
-        public ResolvedEventSubscriptionContext(
+        public EventRecordSubscriptionContext(
             ResolvedEvent resolvedEvent,
             ReceiveEndpointContext receiveEndpointContext,
             ISubscriptionLockContext lockContext,

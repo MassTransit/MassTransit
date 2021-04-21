@@ -65,7 +65,7 @@ namespace MassTransit.EventStoreDbIntegration
 
         async Task Handle(ResolvedEvent resolvedEvent)
         {
-            var context = new ResolvedEventSubscriptionContext(resolvedEvent, _context, _subscriptionContext, _subscriptionContext.HeadersDeserializer);
+            var context = new EventRecordSubscriptionContext(resolvedEvent, _context, _subscriptionContext, _subscriptionContext.HeadersDeserializer);
 
             try
             {

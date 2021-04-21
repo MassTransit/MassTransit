@@ -2,7 +2,7 @@
 
 namespace MassTransit.EventStoreDbIntegration
 {
-    public interface ResolvedEventContext
+    public interface EventRecordContext
     {
         /// <summary>
         /// The stream that this event belongs to.
