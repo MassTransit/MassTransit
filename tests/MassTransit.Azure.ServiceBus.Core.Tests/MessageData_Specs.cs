@@ -44,8 +44,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
         protected override void ConfigureServiceBusBus(IServiceBusBusFactoryConfigurator configurator)
         {
-            configurator.UseMessageData(_repository);
-            configurator.ConnectBusObserver(_repository);
+            configurator.UseMessageData(_ => _repository);
         }
 
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
