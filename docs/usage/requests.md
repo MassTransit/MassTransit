@@ -134,27 +134,25 @@ public void ConfigureServices(IServiceCollection services)
 
 > Uses [MassTransit.AutofacIntegration](https://www.nuget.org/packages/MassTransit.Autofac)
 
-For Autofac configuration, use one of the following registration methods instead:
-
+To use the generic request client:
 ```csharp
-public class OrderProcessingApiModule : Module
+ContainerBuilder builder;
+builder.RegisterGenericRequestClient();
+```
+
+Or choose one of the following for a typed request:
+```csharp
+ContainerBuilder builder;
+builder.AddMassTransit(x =>
 {
-    protected override void Load(ContainerBuilder builder)
-    {
-        builder.GenericRequestClient(); // to register the generic client
+    // Either this
+    x.AddRequestClient<OrderStatusResult>();
 
-        builder.AddMassTransit(x =>
-        {
-            // to register a typed request client
-            x.AddRequestClient<OrderStatusResult>();
-
-            // to register a typed request client specifying a timeout
-            x.AddRequestClient<OrderStatusResult>(TimeSpan.FromSeconds(60));
-            
-            // ...
-        });
-    }
-}
+    // Or this to specify a timeout
+    x.AddRequestClient<OrderStatusResult>(TimeSpan.FromSeconds(60));
+    
+    // ...
+});
 ```
 
 ### Customizing Requests
