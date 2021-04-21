@@ -16,9 +16,11 @@
         string Name { get; }
 
         /// <summary>
-        /// The delay for the message
+        /// Returns the delay, given the instance, for the scheduled message
         /// </summary>
-        TimeSpan Delay { get; }
+        /// <param name="context"></param>
+        /// <returns></returns>
+        TimeSpan GetDelay(ConsumeEventContext<TInstance> context);
 
         /// <summary>
         /// Return the TokenId for the instance

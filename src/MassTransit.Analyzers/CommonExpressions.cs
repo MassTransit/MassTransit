@@ -157,6 +157,7 @@ namespace MassTransit.Analyzers
 
             contractTypes.AddRange(contractType.AllInterfaces);
 
+            #pragma warning disable RS1024
             return contractTypes.SelectMany(i => i.GetMembers().OfType<IPropertySymbol>().Where(x => x.DeclaredAccessibility == Accessibility.Public))
                 .Distinct(PropertyNameEqualityComparer.Instance)
                 .ToList();

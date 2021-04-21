@@ -10,7 +10,8 @@ namespace MassTransit.Context
 
     public class MessageSendContext<TMessage> :
         BasePipeContext,
-        PublishContext<TMessage>
+        PublishContext<TMessage>,
+        DelaySendContext
         where TMessage : class
     {
         readonly DictionarySendHeaders _headers;
@@ -74,6 +75,8 @@ namespace MassTransit.Context
         /// Set to true if the message is being published
         /// </summary>
         public bool IsPublish { get; set; }
+
+        public virtual TimeSpan? Delay { get; set; }
 
         public Guid? MessageId { get; set; }
         public Guid? RequestId { get; set; }

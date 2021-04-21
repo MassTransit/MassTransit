@@ -39,10 +39,17 @@ namespace MassTransit.RabbitMqTransport.Configuration
                 Password = "guest"
             };
 
-            var exchangeTypeSelector = topologyConfiguration.Publish.ExchangeTypeSelector;
             var messageNameFormatter = new RabbitMqMessageNameFormatter();
 
-            _hostTopology = new RabbitMqHostTopology(this, exchangeTypeSelector, messageNameFormatter, _hostSettings.HostAddress, topologyConfiguration);
+            _hostTopology = new RabbitMqHostTopology(this, messageNameFormatter, _hostSettings.HostAddress, topologyConfiguration);
+
+            ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Handle<ConnectionException>();
+                x.Ignore<AuthenticationFailureException>();
+
+                x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+            });
 
             _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }
@@ -57,19 +64,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         IRabbitMqHostTopology IRabbitMqHostConfiguration.HostTopology => _hostTopology;
 
-        public override IRetryPolicy ReceiveTransportRetryPolicy
-        {
-            get
-            {
-                return Retry.CreatePolicy(x =>
-                {
-                    x.Handle<ConnectionException>();
-                    x.Ignore<AuthenticationFailureException>();
-
-                    x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
-                });
-            }
-        }
+        public override IRetryPolicy ReceiveTransportRetryPolicy { get; }
 
         public override IHostTopology HostTopology => _hostTopology;
 

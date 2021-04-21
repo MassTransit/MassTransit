@@ -14,7 +14,7 @@
         [Test]
         public async Task Should_source_address_from_the_endpoint()
         {
-            Task<ConsumeContext<PongMessage>> responseHandled = ConnectPublishHandler<PongMessage>();
+            Task<ConsumeContext<PongMessage>> responseHandled = await ConnectPublishHandler<PongMessage>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
 

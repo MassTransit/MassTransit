@@ -92,6 +92,7 @@ namespace MassTransit.Monitoring.Health
         Task Failure(string message)
         {
             _healthy = false;
+            _endpointHealth.BusHealthy = false;
             _failureMessage = message;
 
             return TaskUtil.Completed;
@@ -100,6 +101,7 @@ namespace MassTransit.Monitoring.Health
         Task Success()
         {
             _healthy = true;
+            _endpointHealth.BusHealthy = true;
             _failureMessage = "";
 
             return TaskUtil.Completed;

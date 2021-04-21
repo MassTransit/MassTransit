@@ -70,14 +70,16 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             {
                 using var serviceScope = serviceProvider.CreateScope();
 
-                serviceScope.UpdateScope(context);
-
                 var scopeServiceProvider = serviceScope.ServiceProvider;
+
+                var scopeContext = new ConsumeContextScope<T>(context, serviceScope, scopeServiceProvider);
+
+                serviceScope.UpdateScope(scopeContext);
 
                 var activityFactory = scopeServiceProvider.GetService<IStateMachineActivityFactory>()
                     ?? DependencyInjectionStateMachineActivityFactory.Instance;
 
-                var consumeContextScope = new ConsumeContextScope<T>(context, serviceScope, scopeServiceProvider, activityFactory);
+                var consumeContextScope = new ConsumeContextScope<T>(scopeContext, activityFactory);
 
                 var factory = scopeServiceProvider.GetRequiredService<ISagaRepositoryContextFactory<TSaga>>();
 

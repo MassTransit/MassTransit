@@ -89,7 +89,16 @@ namespace MassTransit.JobService.Components.StateMachines
                     .ScheduleJobStatusCheck(this)
                     .TransitionTo(Running));
 
-            During(Running, CheckingStatus, Suspect,
+            During(Faulted,
+                When(AttemptStarted)
+                    .Then(context =>
+                    {
+                        context.Instance.Started = context.Data.Timestamp;
+                        context.Instance.RetryAttempt = context.Data.RetryAttempt;
+                        context.Instance.InstanceAddress ??= context.Data.InstanceAddress;
+                    }));
+
+            During(Starting, Running, CheckingStatus, Suspect,
                 When(AttemptCompleted)
                     .Unschedule(StatusCheckRequested)
                     .Finalize(),

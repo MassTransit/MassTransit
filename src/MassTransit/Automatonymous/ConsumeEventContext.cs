@@ -24,5 +24,6 @@
         ConsumeContext
         where TData : class
     {
+        ConsumeEventContext<TInstance> InstanceContext { get; }
     }
 }

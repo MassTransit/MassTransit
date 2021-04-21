@@ -109,8 +109,6 @@ namespace MassTransit.Configuration
         /// <summary>
         /// Enumerate the options which are assignable to the specified type
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
         protected IEnumerable<ValidationResult> ValidateOptions()
         {
             return SelectOptions<ISpecification>().SelectMany(specification => specification.Validate());

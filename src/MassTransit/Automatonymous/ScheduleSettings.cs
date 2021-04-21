@@ -11,9 +11,9 @@
         where TMessage : class
     {
         /// <summary>
-        /// The delay before the message is sent
+        /// Provides the delay for the message
         /// </summary>
-        TimeSpan Delay { get; }
+        ScheduleDelayProvider<TInstance> DelayProvider { get; }
 
         /// <summary>
         /// Configure the received correlation

@@ -4,6 +4,7 @@ namespace MongoDbSaga
     using MassTransit;
     using MassTransit.MongoDbIntegration;
     using Microsoft.Extensions.DependencyInjection;
+    using PersistedSaga;
 
     public class Program
     {

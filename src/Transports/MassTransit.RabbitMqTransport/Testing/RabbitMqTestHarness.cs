@@ -166,6 +166,8 @@
                 }
 
                 CleanupVirtualHost(model);
+
+                model.Close();
             }
             catch (Exception exception)
             {

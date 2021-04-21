@@ -17,7 +17,7 @@ namespace MassTransit.Tests.AutomatonymousIntegration
         [Test]
         public async Task Should_receive_the_published_message()
         {
-            Task<ConsumeContext<StartupComplete>> messageReceived = ConnectPublishHandler<StartupComplete>();
+            Task<ConsumeContext<StartupComplete>> messageReceived = await ConnectPublishHandler<StartupComplete>();
 
             var message = new Start();
 

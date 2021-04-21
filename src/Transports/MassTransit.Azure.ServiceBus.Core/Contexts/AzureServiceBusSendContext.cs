@@ -39,6 +39,12 @@
 
         public string SessionId { get; set; }
 
+        public override TimeSpan? Delay
+        {
+            get => ScheduledEnqueueTimeUtc.HasValue ? ScheduledEnqueueTimeUtc.Value - DateTime.UtcNow : default;
+            set => ScheduledEnqueueTimeUtc = value > TimeSpan.Zero ? DateTime.UtcNow + value.Value : default(DateTime?);
+        }
+
         public void SetScheduledMessageId(long sequenceNumber)
         {
             byte[] key = ScheduledMessageToken.Key;

@@ -91,6 +91,11 @@
             set => _settings.QueueExpiration = value;
         }
 
+        public bool SingleActiveConsumer
+        {
+            set => _settings.SingleActiveConsumer = value;
+        }
+
         public void SetQueueArgument(string key, object value)
         {
             _settings.SetQueueArgument(key, value);
@@ -114,6 +119,11 @@
         public void EnablePriority(byte maxPriority)
         {
             _settings.EnablePriority(maxPriority);
+        }
+
+        public void SetQuorumQueue(int? replicationFactor = default)
+        {
+            _settings.SetQuorumQueue(replicationFactor);
         }
 
         public void Host(RabbitMqHostSettings settings)

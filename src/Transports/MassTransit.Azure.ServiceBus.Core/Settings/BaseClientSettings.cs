@@ -27,7 +27,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 
         public bool UsingBasicTier { get; private set; }
 
-        public int MaxConcurrentCalls => _configuration.Transport.GetConcurrentMessageLimit();
+        public int MaxConcurrentCalls => Math.Max(_configuration.Transport.GetConcurrentMessageLimit(), 1);
         public int PrefetchCount => _configuration.Transport.PrefetchCount;
 
         public TimeSpan MaxAutoRenewDuration { get; set; }

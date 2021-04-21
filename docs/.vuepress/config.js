@@ -39,6 +39,7 @@ module.exports = {
         collapsable: false,
         children: [
           '/getting-started/live-coding',
+          '/getting-started/morning-commute',
           '/getting-started/upgrade-v6',
           {
             title: 'Release Notes',
@@ -53,7 +54,9 @@ module.exports = {
               '/releases/v7.1.3',
               '/releases/v7.1.4',
               '/releases/v7.1.5',
-              '/releases/v7.1.6'
+              '/releases/v7.1.6',
+              '/releases/v7.1.7',
+              '/releases/v7.1.8'
             ]
           }
         ]
@@ -132,6 +135,7 @@ module.exports = {
             ]
           },
           ['/usage/testing', 'Testing'],
+          ['/usage/logging', 'Logging'],
           {
             title: 'Advanced',
             collapsable: true,

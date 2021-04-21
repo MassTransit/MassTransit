@@ -30,10 +30,10 @@ namespace MassTransit.KafkaIntegration.Contexts
         IActivePipeContextAgent<ClientContext> IPipeContextFactory<ClientContext>.CreateActiveContext(ISupervisor supervisor,
             PipeContextHandle<ClientContext> context, CancellationToken cancellationToken)
         {
-            return supervisor.AddActiveContext(context, CreateSharedIKafkaClientContext(context.Context, cancellationToken));
+            return supervisor.AddActiveContext(context, CreateSharedClientContext(context.Context, cancellationToken));
         }
 
-        static async Task<ClientContext> CreateSharedIKafkaClientContext(Task<ClientContext> context, CancellationToken cancellationToken)
+        static async Task<ClientContext> CreateSharedClientContext(Task<ClientContext> context, CancellationToken cancellationToken)
         {
             return context.IsCompletedSuccessfully()
                 ? new SharedClientContext(context.Result, cancellationToken)

@@ -152,7 +152,7 @@ namespace MassTransit.RabbitMqTransport
 
             if (!string.IsNullOrEmpty(address.UserInfo))
             {
-                string[] parts = address.UserInfo.Split(':');
+                var parts = address.UserInfo.Split(':');
                 hostSettings.Username = parts[0];
 
                 if (parts.Length >= 2)

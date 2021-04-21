@@ -15,7 +15,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test, Explicit]
         public async Task Should_source_address_from_the_endpoint()
         {
-            Task<ConsumeContext<PongMessage>> responseHandled = ConnectPublishHandler<PongMessage>(pongContext =>
+            Task<ConsumeContext<PongMessage>> responseHandled = await ConnectPublishHandler<PongMessage>(pongContext =>
             {
                 return Activity.Current?.Baggage.Any(x => x.Key.Equals("Suitcase")) ?? false;
             });

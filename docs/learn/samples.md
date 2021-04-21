@@ -4,17 +4,59 @@ Working code is an excellent way to learn how to use MassTransit features. The s
 
 The new samples are standalone repositories, which use NuGet to pull dependencies exactly as a developerwould use MassTransit.
 
+### Getting Started
+
+This project is [part of the MassTransit documentation](https://masstransit-project.com/getting-started/). Refer to that link for details.
+
+**If you're new to MassTransit, start with this sample to understand how MassTransit works**
+
+Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-GettingStarted)
+
 ### Sample Twitch
 
 This sample was created along with the [Twitch/YouTube video series](/getting-started/live-coding).
 
 Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-Twitch)
 
+### Sample Library
+
+This sample was created along with Season 2 of the [Twitch/YouTube video series](/getting-started/live-coding).
+
+Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-Library)
+
+### Sample ForkJoint
+
+This sample was created along with Season 3 of the [Twitch/YouTube video series](/getting-started/live-coding).
+
+Fork Joint is a fictional restaurant built during Season 3 of the MassTransit Live Code Video Series. You can [watch the episodes on YouTube](https://youtube.com/playlist?list=PLx8uyNNs1ri2JeyDGFWfCYyAjOB1GP-t1) and follow along by resetting to the various commits in the Git history.
+
+Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-ForkJoint)
+
 ### Trashlantis
 
 This sample was created to show how the in-memory outbox is used and ensures message delivery in the presence of transaction failures.
 
 Clone the sample: [GitHub Repository](https://github.com/phatboyg/Trashlantis)
+
+### Node (MassTransit in TypeScript)
+
+This sample uses MassTransit (for .NET) combined with the [MassTransit (for JavaScript) NPM package](https://www.npmjs.com/package/masstransit-rabbitmq) to send requests from a node application and handle the subsequent response from a MassTransit Consumer (running in .NET). The services communicate via RabbitMQ (included in the `docker-compose.yml` file).
+
+Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-Node)
+
+### Scoped Filters
+
+> .NET 5, ASP.NET
+
+This sample uses an HTTP header named `Token` to pass credentials to an API Controller. That header is read into a scoped type (`Token`) using an action filter as part of the API request. The action method then uses the MassTransit request client to send a request to a consumer. Scoped message filters are configured for publish, send, and consume to transfer the header value (via the `Token` object in the container scope) to outbound messages, and then on the consumer side extract that MassTransit message header back into the _Token_ type in the consumer scope.
+
+Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-ScopedFilters)
+
+### Azure Functions
+
+Shows how to use MassTransit with Azure Functions (v3).
+
+Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-AzureFunction)
 
 ### Job Consumers
 
@@ -31,6 +73,12 @@ Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-JobC
 Shows how to perform batch processing and tracking using sagas.
 
 Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-Batch)
+
+### SignalR
+
+This sample will show a variety of built in tools and techniques in MassTransit.
+
+Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-SignalR)
 
 ### Request Response
 
@@ -91,17 +139,6 @@ Features used:
 - Microsoft Extensions Dependency Injection
 
 Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-Containers)
-
-### ASP.NET Core Web
-
-Clone the sample: [GitHub Repository](https://github.com/phatboyg/Sample-DotNetCore-DI)
-
-
-### ASP.NET Core Console
-
-This sample uses the latest setup and integration to create a console service using .NET Core 2.2 (or later). This service can easily be deployed into a Docker container, and hosted in the Kubernetes cluster of choice.
-
-Clone the sample: [GitHub Repository](https://github.com/MassTransit/Sample-ConsoleService)
 
 ### Quartz
 

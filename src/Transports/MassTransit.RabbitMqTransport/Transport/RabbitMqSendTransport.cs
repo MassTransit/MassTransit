@@ -105,7 +105,7 @@
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
-                    byte[] body = context.Body;
+                    var body = context.Body;
 
                     if (context.TryGetPayload(out PublishContext publishContext))
                         context.Mandatory = context.Mandatory || publishContext.Mandatory;
@@ -134,6 +134,15 @@
 
                     if (context.RequestId.HasValue && (context.ResponseAddress?.AbsolutePath?.EndsWith(RabbitMqExchangeNames.ReplyTo) ?? false))
                         context.BasicProperties.ReplyTo = RabbitMqExchangeNames.ReplyTo;
+
+                    var delay = context.Delay?.TotalMilliseconds;
+                    if (delay > 0 && exchange != "")
+                    {
+                        await _context.DelayConfigureTopologyPipe.Send(modelContext).ConfigureAwait(false);
+                        context.SetTransportHeader("x-delay", (long)delay.Value);
+
+                        exchange = _context.DelayExchange;
+                    }
 
                     var publishTask = modelContext.BasicPublishAsync(exchange, context.RoutingKey ?? "", context.Mandatory, context.BasicProperties, body,
                         context.AwaitAck);

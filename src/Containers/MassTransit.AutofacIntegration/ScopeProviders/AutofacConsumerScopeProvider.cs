@@ -4,6 +4,7 @@
     using Autofac;
     using Context;
     using GreenPipes;
+    using Metadata;
     using Scoping;
     using Scoping.ConsumerContexts;
 
@@ -37,9 +38,9 @@
 
             try
             {
-                var proxy = new ConsumeContextScope(context, lifetimeScope);
+                var scopeContext = new ConsumeContextScope(context, lifetimeScope);
 
-                return new CreatedConsumerScopeContext<ILifetimeScope>(lifetimeScope, proxy);
+                return new CreatedConsumerScopeContext<ILifetimeScope>(lifetimeScope, scopeContext);
             }
             catch
             {
@@ -68,7 +69,7 @@
 
             try
             {
-                ConsumerConsumeContext<TConsumer, T> consumerContext = lifetimeScope.GetConsumerScope<TConsumer, T>(context);
+                ConsumerConsumeContext<TConsumer, T> consumerContext = lifetimeScope.GetConsumerScope<TConsumer, T>();
 
                 return new CreatedConsumerScopeContext<ILifetimeScope, TConsumer, T>(lifetimeScope, consumerContext);
             }

@@ -41,6 +41,21 @@
             _hostSettings = new HostSettings();
             _hostTopology = new ServiceBusHostTopology(this, _topologyConfiguration);
 
+            ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Ignore<MessagingEntityNotFoundException>();
+                x.Ignore<MessagingEntityAlreadyExistsException>();
+                x.Ignore<MessageNotFoundException>();
+                x.Ignore<MessageSizeExceededException>();
+
+                x.Ignore<UnauthorizedException>();
+
+                x.Handle<ServerBusyException>(exception => exception.IsTransient);
+                x.Handle<TimeoutException>();
+
+                x.Interval(5, TimeSpan.FromSeconds(10));
+            });
+
             _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }
 
@@ -62,26 +77,7 @@
             }
         }
 
-        public override IRetryPolicy ReceiveTransportRetryPolicy
-        {
-            get
-            {
-                return Retry.CreatePolicy(x =>
-                {
-                    x.Ignore<MessagingEntityNotFoundException>();
-                    x.Ignore<MessagingEntityAlreadyExistsException>();
-                    x.Ignore<MessageNotFoundException>();
-                    x.Ignore<MessageSizeExceededException>();
-
-                    x.Ignore<UnauthorizedException>();
-
-                    x.Handle<ServerBusyException>(exception => exception.IsTransient);
-                    x.Handle<TimeoutException>();
-
-                    x.Interval(5, TimeSpan.FromSeconds(10));
-                });
-            }
-        }
+        public override IRetryPolicy ReceiveTransportRetryPolicy { get; }
 
         IServiceBusHostTopology IServiceBusHostConfiguration.HostTopology => _hostTopology;
 

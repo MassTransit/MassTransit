@@ -1,6 +1,6 @@
 ﻿namespace MassTransit.Internals.GraphValidation
 {
-    interface ITopologicalSortNodeProperties
+    public interface ITopologicalSortNodeProperties
     {
         bool Visited { get; set; }
     }

@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Events
 {
     using System;
+    using System.Collections.Generic;
     using Metadata;
     using Util;
 
@@ -13,6 +14,14 @@
         {
             if (exception == null)
                 throw new ArgumentNullException(nameof(exception));
+
+            if (exception is MassTransitApplicationException applicationException)
+            {
+                Data = applicationException.ApplicationData;
+
+                if (applicationException.InnerException != null)
+                    exception = applicationException.InnerException;
+            }
 
             ExceptionType = TypeMetadataCache.GetShortName(exception.GetType());
             InnerException = exception.InnerException != null
@@ -32,5 +41,7 @@
 
         public string Message { get; private set; }
         public string Source { get; private set; }
+
+        public IDictionary<string, object> Data { get; private set; }
     }
 }

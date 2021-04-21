@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+import "Events/TradeBookedMT.proto";
+
+package MassTransit.Tests.Serialization;
+
+message TradesBookedMT {
+    repeated TradeBookedMT trades = 1;
+}

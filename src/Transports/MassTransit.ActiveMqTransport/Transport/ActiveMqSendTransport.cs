@@ -99,6 +99,8 @@
 
                     transportMessage.NMSDeliveryMode = context.Durable ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent;
 
+                    transportMessage.Content = context.Body;
+
                     if (context.MessageId.HasValue)
                         transportMessage.NMSMessageId = context.MessageId.ToString();
 
@@ -111,7 +113,9 @@
                     if (context.Priority.HasValue)
                         transportMessage.NMSPriority = context.Priority.Value;
 
-                    transportMessage.Content = context.Body;
+                    var delay = context.Delay?.TotalMilliseconds;
+                    if (delay > 0)
+                        transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
 
                     var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
 

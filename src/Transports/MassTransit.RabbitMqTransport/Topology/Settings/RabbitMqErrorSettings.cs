@@ -9,13 +9,16 @@
         QueueBindingConfigurator,
         ErrorSettings
     {
-        public RabbitMqErrorSettings(EntitySettings source, string name)
+        public RabbitMqErrorSettings(ReceiveSettings source, string name)
             : base(name, source.ExchangeType, source.Durable, source.AutoDelete)
         {
             QueueName = name;
 
             foreach (KeyValuePair<string, object> argument in source.ExchangeArguments)
                 SetExchangeArgument(argument.Key, argument.Value);
+
+            foreach (KeyValuePair<string, object> argument in source.QueueArguments)
+                SetQueueArgument(argument.Key, argument.Value);
         }
 
         public BrokerTopology GetBrokerTopology()

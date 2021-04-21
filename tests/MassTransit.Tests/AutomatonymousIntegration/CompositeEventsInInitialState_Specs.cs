@@ -27,7 +27,7 @@
             Assert.IsTrue(saga.HasValue);
 
             Task<ConsumeContext<CompleteMessage>> received =
-                ConnectPublishHandler<CompleteMessage>(x => x.Message.CorrelationId == correlationId);
+                await ConnectPublishHandler<CompleteMessage>(x => x.Message.CorrelationId == correlationId);
 
             await received;
         }

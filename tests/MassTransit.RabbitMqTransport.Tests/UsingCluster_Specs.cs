@@ -7,16 +7,15 @@
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class When_clustering_nodes_into_a_logical_broker :
         RabbitMqTestFixture
     {
         [Test]
         public async Task Should_use_the_logical_host_name()
         {
-            var endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
-
             var message = new PingMessage();
-            await endpoint.Send(message);
+            await InputQueueSendEndpoint.Send(message);
 
             ConsumeContext<PingMessage> received = await _receivedA;
 

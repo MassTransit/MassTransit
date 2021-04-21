@@ -95,6 +95,15 @@
         }
 
         [Test]
+        [Order(9)]
+        public async Task Show_timeline()
+        {
+            var completed = (await _completed).Message;
+
+            await RabbitMqTestHarness.OutputTimeline(TestContext.Out, x => x.Now().IncludeAddress());
+        }
+
+        [Test]
         [Order(2)]
         public async Task Should_receive_the_second_routing_slip_activity_completed_event()
         {

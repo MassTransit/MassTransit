@@ -2,6 +2,7 @@ namespace MassTransit.EventHubIntegration
 {
     using System;
     using Azure.Core;
+    using Azure.Messaging.EventHubs.Producer;
     using Azure.Storage;
     using Azure.Storage.Blobs;
     using Riders;
@@ -86,5 +87,11 @@ namespace MassTransit.EventHubIntegration
         /// </summary>
         /// <param name="serializerFactory">The factory to create the message serializer</param>
         void SetMessageSerializer(SerializerFactory serializerFactory);
+
+        /// <summary>
+        /// Configure Producer options
+        /// </summary>
+        /// <param name="configure"></param>
+        void ConfigureProducerOptions(Action<EventHubProducerClientOptions> configure);
     }
 }

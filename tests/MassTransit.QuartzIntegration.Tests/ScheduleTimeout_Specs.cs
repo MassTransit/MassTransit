@@ -17,7 +17,7 @@
             [Test]
             public async Task Should_cancel_when_the_order_is_submitted()
             {
-                Task<ConsumeContext<CartRemoved>> handler = ConnectPublishHandler<CartRemoved>();
+                Task<ConsumeContext<CartRemoved>> handler = await ConnectPublishHandler<CartRemoved>();
 
                 var memberNumber = NewId.NextGuid().ToString();
 
@@ -37,7 +37,7 @@
             [Test]
             public async Task Should_receive_the_timeout()
             {
-                Task<ConsumeContext<CartRemoved>> handler = ConnectPublishHandler<CartRemoved>();
+                Task<ConsumeContext<CartRemoved>> handler = await ConnectPublishHandler<CartRemoved>();
 
                 var memberNumber = NewId.NextGuid().ToString();
 
@@ -49,7 +49,7 @@
             [Test]
             public async Task Should_reschedule_the_timeout_when_items_are_added()
             {
-                Task<ConsumeContext<CartRemoved>> handler = ConnectPublishHandler<CartRemoved>();
+                Task<ConsumeContext<CartRemoved>> handler = await ConnectPublishHandler<CartRemoved>();
 
                 var memberNumber = NewId.NextGuid().ToString();
 

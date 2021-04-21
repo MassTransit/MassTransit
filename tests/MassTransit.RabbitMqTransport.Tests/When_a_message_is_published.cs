@@ -12,17 +12,19 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_be_received_by_the_queue()
         {
-            ConsumeContext<A> context = await _received;
+            await Bus.Publish(new A
+            {
+                StringA = "ValueA",
+                StringB = "ValueB"
+            }).ConfigureAwait(false);
+
+            ConsumeContext<A> context = await _received.ConfigureAwait(false);
 
             context.Message.StringA.ShouldBe("ValueA");
-        }
 
-        [Test]
-        public async Task Should_receive_the_inherited_version()
-        {
-            ConsumeContext<B> context = await _receivedB;
+            ConsumeContext<B> contextB = await _receivedB.ConfigureAwait(false);
 
-            context.Message.StringB.ShouldBe("ValueB");
+            contextB.Message.StringB.ShouldBe("ValueB");
         }
 
         Task<ConsumeContext<A>> _received;
@@ -32,16 +34,6 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             _received = Handled<A>(configurator);
             _receivedB = Handled<B>(configurator);
-        }
-
-        [OneTimeSetUp]
-        public async Task A_message_is_published()
-        {
-            await Bus.Publish(new A
-            {
-                StringA = "ValueA",
-                StringB = "ValueB"
-            });
         }
 
 

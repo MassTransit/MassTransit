@@ -4,6 +4,7 @@ namespace MassTransit.EventHubIntegration.Configurators
     using System.Collections.Generic;
     using System.Linq;
     using Azure.Core;
+    using Azure.Messaging.EventHubs.Producer;
     using Azure.Storage;
     using Azure.Storage.Blobs;
     using Contexts;
@@ -126,6 +127,13 @@ namespace MassTransit.EventHubIntegration.Configurators
         public void SetMessageSerializer(SerializerFactory serializerFactory)
         {
             _producerSpecification.SetMessageSerializer(serializerFactory);
+        }
+
+        public void ConfigureProducerOptions(Action<EventHubProducerClientOptions> configure)
+        {
+            if (_producerSpecification.ConfigureOptions != null)
+                throw new ConfigurationException("ProducerOptions configurator may not be specified more than once.");
+            _producerSpecification.ConfigureOptions = configure;
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

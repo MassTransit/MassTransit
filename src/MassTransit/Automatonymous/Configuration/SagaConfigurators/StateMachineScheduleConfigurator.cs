@@ -18,7 +18,12 @@ namespace Automatonymous.SagaConfigurators
 
         public ScheduleSettings<TInstance, TMessage> Settings => this;
 
-        public TimeSpan Delay { get; set; }
+        public TimeSpan Delay
+        {
+            set { DelayProvider = _ => value; }
+        }
+
+        public ScheduleDelayProvider<TInstance> DelayProvider { get; set; }
 
         Action<IEventCorrelationConfigurator<TInstance, TMessage>> IScheduleConfigurator<TInstance, TMessage>.Received
         {

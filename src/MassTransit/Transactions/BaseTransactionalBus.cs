@@ -39,67 +39,57 @@
         public Task Publish<T>(T message, CancellationToken cancellationToken = default)
             where T : class
         {
-            Add(() => _publishEndpoint.Publish(message, cancellationToken));
-            return Task.CompletedTask;
+            return Add(() => _publishEndpoint.Publish(message, cancellationToken));
         }
 
         public Task Publish<T>(T message, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            Add(() => _publishEndpoint.Publish(message, publishPipe, cancellationToken));
-            return Task.CompletedTask;
+            return Add(() => _publishEndpoint.Publish(message, publishPipe, cancellationToken));
         }
 
         public Task Publish<T>(T message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            Add(() => _publishEndpoint.Publish(message, publishPipe, cancellationToken));
-            return Task.CompletedTask;
+            return Add(() => _publishEndpoint.Publish(message, publishPipe, cancellationToken));
         }
 
         public Task Publish(object message, CancellationToken cancellationToken = default)
         {
-            Add(() => _publishEndpoint.Publish(message, cancellationToken));
-            return Task.CompletedTask;
+            return Add(() => _publishEndpoint.Publish(message, cancellationToken));
         }
 
         public Task Publish(object message, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default)
         {
-            Add(() => _publishEndpoint.Publish(message, publishPipe, cancellationToken));
-            return Task.CompletedTask;
+            return Add(() => _publishEndpoint.Publish(message, publishPipe, cancellationToken));
         }
 
         public Task Publish(object message, Type messageType, CancellationToken cancellationToken = default)
         {
-            Add(() => _publishEndpoint.Publish(message, messageType, cancellationToken));
-            return Task.CompletedTask;
+            return Add(() => _publishEndpoint.Publish(message, messageType, cancellationToken));
         }
 
         public Task Publish(object message, Type messageType, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default)
         {
-            Add(() => _publishEndpoint.Publish(message, messageType, publishPipe, cancellationToken));
-            return Task.CompletedTask;
+            return Add(() => _publishEndpoint.Publish(message, messageType, publishPipe, cancellationToken));
         }
 
         public Task Publish<T>(object values, CancellationToken cancellationToken = default)
             where T : class
         {
-            Add(() => _publishEndpoint.Publish<T>(values, cancellationToken));
-            return Task.CompletedTask;
+            return Add(() => _publishEndpoint.Publish<T>(values, cancellationToken));
         }
 
         public Task Publish<T>(object values, IPipe<PublishContext<T>> publishPipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            Add(() => _publishEndpoint.Publish(values, publishPipe, cancellationToken));
-            return Task.CompletedTask;
+            return Add(() => _publishEndpoint.Publish(values, publishPipe, cancellationToken));
         }
 
         public Task Publish<T>(object values, IPipe<PublishContext> publishPipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            Add(() => _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken));
-            return Task.CompletedTask;
+            return Add(() => _publishEndpoint.Publish<T>(values, publishPipe, cancellationToken));
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)

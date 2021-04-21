@@ -30,24 +30,20 @@
 
             TransportConcurrencyLimit = Math.Min(Environment.ProcessorCount, 4);
 
+            ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Handle<ConnectionException>();
+
+                x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+            });
+
             _transportProvider = new Recycle<IInMemoryTransportProvider>(() => new InMemoryTransportProvider(this, topologyConfiguration));
         }
 
         public override Uri HostAddress => _hostAddress;
         public override IHostTopology HostTopology => _hostTopology;
 
-        public override IRetryPolicy ReceiveTransportRetryPolicy
-        {
-            get
-            {
-                return Retry.CreatePolicy(x =>
-                {
-                    x.Handle<ConnectionException>();
-
-                    x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
-                });
-            }
-        }
+        public override IRetryPolicy ReceiveTransportRetryPolicy { get; }
 
         public Uri BaseAddress
         {

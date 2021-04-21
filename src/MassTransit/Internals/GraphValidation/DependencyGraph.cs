@@ -5,7 +5,7 @@ namespace MassTransit.Internals.GraphValidation
     using System.Text;
 
 
-    class DependencyGraph<T>
+    public class DependencyGraph<T>
     {
         readonly AdjacencyList<T, DependencyGraphNode<T>> _adjacencyList;
 

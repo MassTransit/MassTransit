@@ -18,11 +18,11 @@ namespace MassTransit.SignalR.Configuration.Definitions
 
         public bool IsTemporary => true;
 
-        public int? PrefetchCount { get; private set; }
+        public int? PrefetchCount => default;
 
-        public int? ConcurrentMessageLimit { get; private set; }
+        public int? ConcurrentMessageLimit => default;
 
-        public bool ConfigureConsumeTopology { get; private set; }
+        public bool ConfigureConsumeTopology => true;
 
         public string GetEndpointName(IEndpointNameFormatter formatter)
         {

@@ -20,7 +20,7 @@
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
 
             Task<ConsumeContext<RoutingSlipFaulted>> handled =
-                ConnectPublishHandler<RoutingSlipFaulted>(x => x.Message.TrackingNumber == builder.TrackingNumber);
+                await ConnectPublishHandler<RoutingSlipFaulted>(x => x.Message.TrackingNumber == builder.TrackingNumber);
 
             var faultActivity = GetActivityContext<NastyFaultyActivity>();
 
@@ -37,7 +37,7 @@
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
 
             Task<ConsumeContext<RoutingSlipFaulted>> handled =
-                ConnectPublishHandler<RoutingSlipFaulted>(x => x.Message.TrackingNumber == builder.TrackingNumber);
+                await ConnectPublishHandler<RoutingSlipFaulted>(x => x.Message.TrackingNumber == builder.TrackingNumber);
 
             var testActivity = GetActivityContext<TestActivity>();
             var faultActivity = GetActivityContext<NastyFaultyActivity>();
@@ -57,9 +57,9 @@
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
 
             Task<ConsumeContext<RoutingSlipActivityCompensationFailed>> handledCompensationFailure =
-                ConnectPublishHandler<RoutingSlipActivityCompensationFailed>(x => x.Message.TrackingNumber == builder.TrackingNumber);
+                await ConnectPublishHandler<RoutingSlipActivityCompensationFailed>(x => x.Message.TrackingNumber == builder.TrackingNumber);
             Task<ConsumeContext<RoutingSlipCompensationFailed>> handledRoutingSlipFailure =
-                ConnectPublishHandler<RoutingSlipCompensationFailed>(x => x.Message.TrackingNumber == builder.TrackingNumber);
+                await ConnectPublishHandler<RoutingSlipCompensationFailed>(x => x.Message.TrackingNumber == builder.TrackingNumber);
 
             var testActivity = GetActivityContext<TestActivity>();
             var faultyCompensateActivity = GetActivityContext<FaultyCompensateActivity>();
@@ -123,8 +123,8 @@
             var faultActivity = GetActivityContext<FaultyActivity>();
 
             Task<ConsumeContext<RoutingSlipFaulted>> handled =
-                ConnectPublishHandler<RoutingSlipFaulted>(x => x.Message.TrackingNumber == builder.TrackingNumber);
-            Task<ConsumeContext<RoutingSlipActivityCompensated>> compensated = ConnectPublishHandler<RoutingSlipActivityCompensated>(
+                await ConnectPublishHandler<RoutingSlipFaulted>(x => x.Message.TrackingNumber == builder.TrackingNumber);
+            Task<ConsumeContext<RoutingSlipActivityCompensated>> compensated = await ConnectPublishHandler<RoutingSlipActivityCompensated>(
                 context => context.Message.ActivityName.Equals(testActivity.Name));
 
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
@@ -146,7 +146,7 @@
             var testActivity = GetActivityContext<SetVariablesFaultyActivity>();
 
             Task<ConsumeContext<RoutingSlipFaulted>> handled =
-                ConnectPublishHandler<RoutingSlipFaulted>(x => x.Message.TrackingNumber == builder.TrackingNumber);
+                await ConnectPublishHandler<RoutingSlipFaulted>(x => x.Message.TrackingNumber == builder.TrackingNumber);
 
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
 

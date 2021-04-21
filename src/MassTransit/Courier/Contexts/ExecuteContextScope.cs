@@ -12,8 +12,8 @@ namespace MassTransit.Courier.Contexts
         readonly TArguments _arguments;
         readonly ExecuteContext<TArguments> _context;
 
-        protected ExecuteContextScope(ExecuteContext<TArguments> context)
-            : base(context)
+        public ExecuteContextScope(ExecuteContext<TArguments> context, params object[] payloads)
+            : base(context, payloads)
         {
             _context = context;
             _arguments = context.Arguments;

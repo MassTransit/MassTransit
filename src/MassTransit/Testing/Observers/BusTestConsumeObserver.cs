@@ -35,7 +35,8 @@
         {
             _messages.Add(context);
 
-            Interlocked.Decrement(ref _activeCount);
+            if (Interlocked.Decrement(ref _activeCount) == 0)
+                NotifyInactive();
 
             return Task.CompletedTask;
         }

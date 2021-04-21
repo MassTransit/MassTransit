@@ -2,7 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using RabbitMqTransport.Contexts;
+    using Transports.Scheduling;
 
 
     public static class RabbitMqDeferMessageExtensions
@@ -18,7 +18,7 @@
         public static Task Defer<T>(this ConsumeContext<T> context, TimeSpan delay, Action<ConsumeContext, SendContext> callback = null)
             where T : class
         {
-            MessageRedeliveryContext redeliveryContext = new DelayedExchangeMessageRedeliveryContext<T>(context);
+            MessageRedeliveryContext redeliveryContext = new DelayedMessageRedeliveryContext<T>(context);
 
             return redeliveryContext.ScheduleRedelivery(delay, callback);
         }

@@ -61,7 +61,7 @@
         [Test]
         public async Task Should_include_a_conversation_id()
         {
-            Task<ConsumeContext<PongMessage>> responseHandled = ConnectPublishHandler<PongMessage>();
+            Task<ConsumeContext<PongMessage>> responseHandled = await ConnectPublishHandler<PongMessage>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
 
@@ -92,7 +92,7 @@
         [Test]
         public async Task Should_include_a_new_conversation_id()
         {
-            Task<ConsumeContext<PongMessage>> responseHandled = ConnectPublishHandler<PongMessage>();
+            Task<ConsumeContext<PongMessage>> responseHandled = await ConnectPublishHandler<PongMessage>();
 
             var conversationId = NewId.NextGuid();
 

@@ -70,7 +70,7 @@
 
                 await _context.ConfigureTopologyPipe.Send(context).ConfigureAwait(false);
 
-                var sendContext = new TransportAmazonSqsSendContext<T>(_message, _cancellationToken);
+                var sendContext = new AmazonSqsMessageSendContext<T>(_message, _cancellationToken);
 
                 await _pipe.Send(sendContext).ConfigureAwait(false);
 

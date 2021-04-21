@@ -37,35 +37,6 @@
             }
 
             [Test]
-            public void Should_get_one_element()
-            {
-                var source = @"{
-  ""messageId"": ""e655000040d800fff4f808d245dca3c8"",
-  ""requestId"": """ + _requestId.ToString("N") + @""",
-  ""sourceAddress"": ""loopback://localhost/source"",
-  ""destinationAddress"": ""loopback://localhost/destination"",
-  ""responseAddress"": ""loopback://localhost/response"",
-  ""faultAddress"": ""loopback://localhost/fault"",
-  ""messageType"": [
-    ""urn:message:MassTransit.Tests.Serialization.Array_Specs:SomeArray""
-  ],
-  ""message"": {
-    ""elements"":
-      {
-        ""value"": 27
-      }
-  },
-  ""headers"": {}
-}";
-
-                var result = Return<SomeArray>(Encoding.UTF8.GetBytes(source));
-
-
-                result.Elements.ShouldNotBe(null);
-                result.Elements.Length.ShouldBe(1);
-            }
-
-            [Test]
             public void Should_return_a_null_array()
             {
                 var someArray = new SomeArray();

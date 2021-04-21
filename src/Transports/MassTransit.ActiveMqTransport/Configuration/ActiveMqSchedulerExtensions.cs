@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.ActiveMqTransport
 {
     using System;
-    using Specifications;
+    using MassTransit.Configurators;
 
 
     public static class ActiveMqSchedulerExtensions
@@ -11,12 +11,13 @@
         /// alternative to Quartz, which does not require any storage outside of ActiveMQ.
         /// </summary>
         /// <param name="configurator"></param>
+        [Obsolete("Use the transport independent UseDelayedMessageScheduler")]
         public static void UseActiveMqMessageScheduler(this IBusFactoryConfigurator configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
-            var specification = new ActiveMqMessageSchedulerSpecification();
+            var specification = new DelayedMessageSchedulerSpecification();
 
             configurator.AddPipeSpecification(specification);
         }

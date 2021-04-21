@@ -26,7 +26,7 @@ namespace MassTransit.Serialization
 
         static readonly Lazy<JsonSerializer> _xmlSerializer;
 
-        public static readonly JsonSerializerSettings XmlSerializerSettings = new JsonSerializerSettings
+        static readonly JsonSerializerSettings XmlSerializerSettings = new JsonSerializerSettings
         {
             NullValueHandling = NullValueHandling.Include,
             DefaultValueHandling = DefaultValueHandling.Include,
@@ -69,7 +69,7 @@ namespace MassTransit.Serialization
                 {
                     jsonWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
 
-                    JsonMessageSerializer.Serializer.Serialize(jsonWriter, envelope, typeof(MessageEnvelope));
+                    XmlJsonMessageSerializer.Serializer.Serialize(jsonWriter, envelope, typeof(MessageEnvelope));
 
                     jsonWriter.Flush();
                     stringWriter.Flush();

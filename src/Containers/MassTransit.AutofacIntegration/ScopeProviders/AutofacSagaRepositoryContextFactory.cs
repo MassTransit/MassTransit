@@ -79,7 +79,9 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
 
                 var activityFactory = scope.ResolveOptional<IStateMachineActivityFactory>() ?? AutofacStateMachineActivityFactory.Instance;
 
-                var consumeContextScope = new ConsumeContextScope<T>(context, scope, activityFactory);
+                var consumeContext = scope.Resolve<ConsumeContext<T>>();
+
+                var consumeContextScope = new ConsumeContextScope<T>(consumeContext, activityFactory);
 
                 var factory = scope.Resolve<ISagaRepositoryContextFactory<TSaga>>();
 

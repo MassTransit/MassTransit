@@ -20,7 +20,7 @@ namespace MassTransit.Analyzers
 
         public int GetHashCode(IPropertySymbol obj)
         {
-            return obj.GetHashCode();
+            return obj.Name.GetHashCode();
         }
     }
 }

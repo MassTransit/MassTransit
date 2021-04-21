@@ -11,8 +11,8 @@ namespace MassTransit.Courier.Contexts
     {
         readonly CourierContext _courierContext;
 
-        protected CourierContextScope(CourierContext courierContext)
-            : base(courierContext)
+        protected CourierContextScope(CourierContext courierContext, params object[] payloads)
+            : base(courierContext, payloads)
         {
             _courierContext = courierContext;
         }

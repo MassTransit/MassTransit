@@ -73,7 +73,8 @@
         string ClientCertificatePassphrase { get; }
 
         /// <summary>
-        /// A certificate to use for client certificate authentication, if not set then the <see cref="ClientCertificatePath" /> and <see cref="ClientCertificatePassphrase" /> will be used
+        /// A certificate to use for client certificate authentication, if not set then the <see cref="ClientCertificatePath" /> and
+        /// <see cref="ClientCertificatePassphrase" /> will be used
         /// </summary>
         X509Certificate ClientCertificate { get; }
 

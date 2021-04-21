@@ -1,5 +1,8 @@
 ﻿namespace MassTransit
 {
+    using System.Collections.Generic;
+
+
     /// <summary>
     /// An exception information that is serializable
     /// </summary>
@@ -29,5 +32,11 @@
         /// The exception source
         /// </summary>
         string Source { get; }
+
+        /// <summary>
+        /// Optional, if present contains any additional data that was added via the <see cref="MassTransitApplicationException"/>
+        /// exception type. To add elements to this dictionary, wrap an exception in <see cref="MassTransitApplicationException"/>.
+        /// </summary>
+        IDictionary<string, object> Data { get; }
     }
 }

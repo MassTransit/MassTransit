@@ -31,23 +31,19 @@
             _hostSettings = new ConfigurationHostSettings(new Uri("activemq://localhost"));
             _hostTopology = new ActiveMqHostTopology(this, topologyConfiguration);
 
+            ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
+            {
+                x.Handle<ConnectionException>();
+
+                x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
+            });
+
             _connectionContext = new Recycle<IConnectionContextSupervisor>(() => new ConnectionContextSupervisor(this, topologyConfiguration));
         }
 
         public override Uri HostAddress => _hostSettings.HostAddress;
 
-        public override IRetryPolicy ReceiveTransportRetryPolicy
-        {
-            get
-            {
-                return Retry.CreatePolicy(x =>
-                {
-                    x.Handle<ConnectionException>();
-
-                    x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
-                });
-            }
-        }
+        public override IRetryPolicy ReceiveTransportRetryPolicy { get; }
 
         public ActiveMqHostSettings Settings
         {

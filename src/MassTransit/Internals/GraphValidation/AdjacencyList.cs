@@ -4,7 +4,7 @@
     using System.Collections.Generic;
 
 
-    class AdjacencyList<T, TNode>
+    public class AdjacencyList<T, TNode>
         where TNode : Node<T>
     {
         readonly IDictionary<TNode, HashSet<Edge<T, TNode>>> _edges;

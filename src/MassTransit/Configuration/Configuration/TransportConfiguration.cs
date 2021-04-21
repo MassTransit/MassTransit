@@ -51,8 +51,8 @@ namespace MassTransit.Configuration
                 yield return this.Warning("ConcurrentMessageLimit", "Should be <= PrefetchCount");
             if (ConcurrentMessageLimit <= 0)
                 yield return this.Failure("ConcurrentMessageLimit", "Must be > 0");
-            if (PrefetchCount <= 0)
-                yield return this.Failure("PrefetchCount", "Must be > 0");
+            if (PrefetchCount < 0)
+                yield return this.Failure("PrefetchCount", "Must be >= 0");
         }
 
 

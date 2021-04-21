@@ -12,7 +12,7 @@
         [Test]
         public async Task Should_be_able_to_read_xml_when_using_json()
         {
-            _responseReceived = ConnectPublishHandler<B>();
+            _responseReceived = await ConnectPublishHandler<B>();
 
             await InputQueueSendEndpoint.Send(new A {Key = "Hello"});
 

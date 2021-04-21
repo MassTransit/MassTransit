@@ -15,7 +15,7 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_receive_using_the_first_consumer()
         {
-            Task<ConsumeContext<Fault<PingMessage>>> fault = ConnectPublishHandler<Fault<PingMessage>>();
+            Task<ConsumeContext<Fault<PingMessage>>> fault = await ConnectPublishHandler<Fault<PingMessage>>();
 
             await InputQueueSendEndpoint.Send(new PingMessage());
 

@@ -91,6 +91,9 @@
 
         public virtual async Task Start(CancellationToken cancellationToken = default)
         {
+            if(!cancellationToken.CanBeCanceled)
+                cancellationToken = TestCancellationToken;
+
             _received = new BusTestReceiveObserver(TestInactivityTimeout);
             _received.ConnectInactivityObserver(InactivityObserver);
 
@@ -165,16 +168,16 @@
             ConnectHandle handler = null;
             handler = Bus.ConnectHandler<T>(async context =>
             {
-                source.SetResult(context);
-
                 handler.Disconnect();
+
+                source.SetResult(context);
             });
 
             TestCancelledTask.ContinueWith(x =>
             {
-                source.TrySetCanceled();
-
                 handler.Disconnect();
+
+                source.TrySetCanceled();
             }, TaskContinuationOptions.OnlyOnCanceled);
 
             return source.Task;
@@ -197,17 +200,17 @@
             {
                 if (filter(context))
                 {
-                    source.SetResult(context);
-
                     handler.Disconnect();
+
+                    source.SetResult(context);
                 }
             });
 
             TestCancelledTask.ContinueWith(x =>
             {
-                source.TrySetCanceled();
-
                 handler.Disconnect();
+
+                source.TrySetCanceled();
             }, TaskContinuationOptions.OnlyOnCanceled);
 
             return source.Task;

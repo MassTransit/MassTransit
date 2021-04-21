@@ -4,7 +4,7 @@
     using System.Collections.Generic;
 
 
-    class Tarjan<T, TNode>
+    public class Tarjan<T, TNode>
         where TNode : Node<T>, ITarjanNodeProperties
     {
         readonly AdjacencyList<T, TNode> _list;

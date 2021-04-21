@@ -23,7 +23,7 @@ namespace MassTransit.Tests.AutomatonymousIntegration
             Guid? saga = await _repository.ShouldContainSaga(sagaId, TestTimeout);
             Assert.IsTrue(saga.HasValue);
 
-            var handler = ConnectPublishHandler<Suspend>();
+            var handler = await ConnectPublishHandler<Suspend>();
 
             await Bus.Publish(new Suspend {CorrelationId = sagaId});
 

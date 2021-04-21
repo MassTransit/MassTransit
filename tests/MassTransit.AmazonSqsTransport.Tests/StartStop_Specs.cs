@@ -11,6 +11,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class StartStop_Specs :
         BusTestFixture
     {
@@ -37,6 +38,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
                     });
                 });
             });
+
+            await Task.Delay(3000);
 
             await bus.StartAsync(TestCancellationToken);
             try

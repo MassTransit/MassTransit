@@ -20,8 +20,8 @@ namespace MassTransit.QuartzIntegration.Tests
             var testActivity = GetActivityContext<TestActivity>();
             var faultActivity = GetActivityContext<FaultyActivity>();
 
-            Task<ConsumeContext<RoutingSlipFaulted>> handled = ConnectPublishHandler<RoutingSlipFaulted>();
-            Task<ConsumeContext<RoutingSlipActivityCompensated>> compensated = ConnectPublishHandler<RoutingSlipActivityCompensated>(
+            Task<ConsumeContext<RoutingSlipFaulted>> handled = await ConnectPublishHandler<RoutingSlipFaulted>();
+            Task<ConsumeContext<RoutingSlipActivityCompensated>> compensated = await ConnectPublishHandler<RoutingSlipActivityCompensated>(
                 context => context.Message.ActivityName.Equals(testActivity.Name));
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
@@ -41,8 +41,8 @@ namespace MassTransit.QuartzIntegration.Tests
             var testActivity = GetActivityContext<TestActivity>();
             var faultActivity = GetActivityContext<FirstFaultyActivity>();
 
-            Task<ConsumeContext<RoutingSlipActivityFaulted>> activityFaulted = ConnectPublishHandler<RoutingSlipActivityFaulted>();
-            Task<ConsumeContext<RoutingSlipCompleted>> completed = ConnectPublishHandler<RoutingSlipCompleted>();
+            Task<ConsumeContext<RoutingSlipActivityFaulted>> activityFaulted = await ConnectPublishHandler<RoutingSlipActivityFaulted>();
+            Task<ConsumeContext<RoutingSlipCompleted>> completed = await ConnectPublishHandler<RoutingSlipCompleted>();
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
@@ -81,8 +81,8 @@ namespace MassTransit.QuartzIntegration.Tests
             var testActivity = GetActivityContext<TestActivity>();
             var faultActivity = GetActivityContext<FaultyActivity>();
 
-            Task<ConsumeContext<RoutingSlipFaulted>> handled = ConnectPublishHandler<RoutingSlipFaulted>();
-            Task<ConsumeContext<RoutingSlipActivityCompensated>> compensated = ConnectPublishHandler<RoutingSlipActivityCompensated>(
+            Task<ConsumeContext<RoutingSlipFaulted>> handled = await ConnectPublishHandler<RoutingSlipFaulted>();
+            Task<ConsumeContext<RoutingSlipActivityCompensated>> compensated = await ConnectPublishHandler<RoutingSlipActivityCompensated>(
                 context => context.Message.ActivityName.Equals(testActivity.Name));
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
@@ -102,8 +102,8 @@ namespace MassTransit.QuartzIntegration.Tests
             var testActivity = GetActivityContext<TestActivity>();
             var faultActivity = GetActivityContext<FirstFaultyActivity>();
 
-            Task<ConsumeContext<RoutingSlipActivityFaulted>> activityFaulted = ConnectPublishHandler<RoutingSlipActivityFaulted>();
-            Task<ConsumeContext<RoutingSlipCompleted>> completed = ConnectPublishHandler<RoutingSlipCompleted>();
+            Task<ConsumeContext<RoutingSlipActivityFaulted>> activityFaulted = await ConnectPublishHandler<RoutingSlipActivityFaulted>();
+            Task<ConsumeContext<RoutingSlipCompleted>> completed = await ConnectPublishHandler<RoutingSlipCompleted>();
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});

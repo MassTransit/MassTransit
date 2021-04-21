@@ -49,7 +49,11 @@
 
         protected override ContentType GetContentType()
         {
-            return !string.IsNullOrWhiteSpace(Properties.ContentType) ? new ContentType(Properties.ContentType) : base.GetContentType();
+            ContentType contentType = default;
+            if (!string.IsNullOrWhiteSpace(Properties.ContentType))
+                contentType = ConvertToContentType(Properties.ContentType);
+
+            return contentType ?? base.GetContentType();
         }
 
         protected override ISendEndpointProvider GetSendEndpointProvider()

@@ -70,12 +70,14 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
             {
                 try
                 {
-                    scope.UpdateScope(context);
+                    var scopeContext = new ConsumeContextScope<T>(context, scope);
+
+                    scope.UpdateScope(scopeContext);
 
                     var activityFactory = scope.TryGetInstance<IStateMachineActivityFactory>()
                         ?? SimpleInjectorStateMachineActivityFactory.Instance;
 
-                    var consumeContextScope = new ConsumeContextScope<T>(context, scope, activityFactory);
+                    var consumeContextScope = new ConsumeContextScope<T>(scopeContext, activityFactory);
 
                     var factory = scope.GetInstance<ISagaRepositoryContextFactory<TSaga>>();
 

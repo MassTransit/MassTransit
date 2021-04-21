@@ -1,6 +1,7 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
+    using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using Initializers;
@@ -107,6 +108,14 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.That(context.Message.ItemNumber, Is.EqualTo(message.ItemNumber));
 
             Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(headerValue));
+
+            Assert.IsTrue(context.MessageId.HasValue);
+            Assert.IsTrue(context.ConversationId.HasValue);
+            Assert.IsTrue(context.CorrelationId.HasValue);
+            Assert.IsTrue(context.SentTime.HasValue);
+            Assert.IsNotNull(context.DestinationAddress);
+            Assert.IsNotNull(context.Host);
+            Assert.That(context.SupportedMessageTypes.Count(), Is.EqualTo(1));
         }
 
         Task<ConsumeContext<Command>> _handled;

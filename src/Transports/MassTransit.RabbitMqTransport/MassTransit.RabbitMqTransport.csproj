@@ -20,4 +20,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Configuration\Specifications" />
+  </ItemGroup>
 </Project>

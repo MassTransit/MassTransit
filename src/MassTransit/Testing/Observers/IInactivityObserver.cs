@@ -8,5 +8,7 @@ namespace MassTransit.Testing.Observers
         void Connected(IInactivityObservationSource source);
 
         Task NoActivity();
+
+        void ForceInactive();
     }
 }

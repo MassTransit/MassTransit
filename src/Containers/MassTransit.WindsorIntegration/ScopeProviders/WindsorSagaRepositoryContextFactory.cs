@@ -63,15 +63,19 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 return send(context, factory);
             }
 
-            var scope = _kernel.CreateNewOrUseExistingMessageScope(context);
+            var scope = _kernel.CreateNewOrUseExistingMessageScope();
 
             async Task CreateMessageScope()
             {
                 try
                 {
+                    var scopeContext = new ConsumeContextScope<T>(context, _kernel);
+
+                    _kernel.UpdateScope(scopeContext);
+
                     var activityFactory = _kernel.TryResolve<IStateMachineActivityFactory>() ?? WindsorStateMachineActivityFactory.Instance;
 
-                    var consumeContextScope = new ConsumeContextScope<T>(context, _kernel, activityFactory);
+                    var consumeContextScope = new ConsumeContextScope<T>(scopeContext, activityFactory);
 
                     var factory = _kernel.Resolve<ISagaRepositoryContextFactory<TSaga>>();
 

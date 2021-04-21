@@ -186,7 +186,6 @@ To configure the outbox with redelivery and retry:
 
         e.Consumer(() => new SubmitOrderConsumer(sessionFactory));
     });
-});
 ```
 
 ### Configuring for a consumer or saga
@@ -205,7 +204,6 @@ To configure a specific consumer.
             c.UseInMemoryOutbox();
         });
     });
-});
 ```
 
 Sagas are configured in the same way, using the saga configurator.

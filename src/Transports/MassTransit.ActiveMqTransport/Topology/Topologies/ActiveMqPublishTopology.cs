@@ -15,12 +15,16 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         public ActiveMqPublishTopology(IMessageTopology messageTopology)
         {
             _messageTopology = messageTopology;
+
+            VirtualTopicPrefix = "VirtualTopic.";
         }
 
         IActiveMqMessagePublishTopology<T> IActiveMqPublishTopology.GetMessageTopology<T>()
         {
             return GetMessageTopology<T>() as IActiveMqMessagePublishTopology<T>;
         }
+
+        public string VirtualTopicPrefix { get; set; }
 
         IActiveMqMessagePublishTopologyConfigurator<T> IActiveMqPublishTopologyConfigurator.GetMessageTopology<T>()
         {
@@ -29,7 +33,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
 
         protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
         {
-            var messageTopology = new ActiveMqMessagePublishTopology<T>(_messageTopology.GetMessageTopology<T>());
+            var messageTopology = new ActiveMqMessagePublishTopology<T>(this, _messageTopology.GetMessageTopology<T>());
 
             var connector = new ImplementedMessageTypeConnector<T>(this, messageTopology);
 

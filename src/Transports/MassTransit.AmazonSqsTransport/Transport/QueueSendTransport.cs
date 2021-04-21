@@ -72,7 +72,7 @@
 
                 await _context.ConfigureTopologyPipe.Send(context).ConfigureAwait(false);
 
-                var sendContext = new TransportAmazonSqsSendContext<T>(_message, _cancellationToken);
+                var sendContext = new AmazonSqsMessageSendContext<T>(_message, _cancellationToken);
 
                 await _pipe.Send(sendContext).ConfigureAwait(false);
 
@@ -82,12 +82,12 @@
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(sendContext).ConfigureAwait(false);
 
-                    var message = new SendMessageBatchRequestEntry("", Encoding.UTF8.GetString(sendContext.Body));
+                    var message = new SendMessageBatchRequestEntry("", Encoding.UTF8.GetString(sendContext.Body)) {Id = sendContext.MessageId.ToString()};
 
                     _context.SqsSetHeaderAdapter.Set(message.MessageAttributes, sendContext.Headers);
 
                     _context.SqsSetHeaderAdapter.Set(message.MessageAttributes, "Content-Type", sendContext.ContentType.MediaType);
-                    _context.SqsSetHeaderAdapter.Set(message.MessageAttributes, nameof(sendContext.CorrelationId), sendContext.CorrelationId);
+                    _context.SqsSetHeaderAdapter.Set(message.MessageAttributes, MessageHeaders.CorrelationId, sendContext.CorrelationId);
 
                     if (!string.IsNullOrEmpty(sendContext.DeduplicationId))
                         message.MessageDeduplicationId = sendContext.DeduplicationId;
@@ -95,8 +95,9 @@
                     if (!string.IsNullOrEmpty(sendContext.GroupId))
                         message.MessageGroupId = sendContext.GroupId;
 
-                    if (sendContext.DelaySeconds.HasValue)
-                        message.DelaySeconds = sendContext.DelaySeconds.Value;
+                    var delay = sendContext.Delay?.TotalSeconds;
+                    if (delay > 0)
+                        message.DelaySeconds = (int)delay.Value;
 
                     await context.SendMessage(_context.EntityName, message, sendContext.CancellationToken).ConfigureAwait(false);
 

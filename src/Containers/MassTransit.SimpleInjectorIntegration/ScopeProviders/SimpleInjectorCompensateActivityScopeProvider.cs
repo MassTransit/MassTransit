@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
 {
     using Courier;
+    using Courier.Contexts;
     using GreenPipes;
     using Scoping;
     using Scoping.CourierContexts;
@@ -38,19 +39,15 @@
             var scope = AsyncScopedLifestyle.BeginScope(_container);
             try
             {
-                scope.UpdateScope(context);
+                CompensateContext<TLog> scopeContext = new CompensateContextScope<TLog>(context, scope);
 
-                var activity = scope
-                    .Container
-                    .GetInstance<TActivity>();
+                scope.UpdateScope(scopeContext);
 
-                CompensateActivityContext<TActivity, TLog> activityContext = context.CreateActivityContext(activity);
+                var activity = scope.Container.GetInstance<TActivity>();
 
-                var contextScope = scope;
+                CompensateActivityContext<TActivity, TLog> activityContext = scopeContext.CreateActivityContext(activity);
 
-                activityContext.UpdatePayload(scope);
-
-                return new CreatedCompensateActivityScopeContext<Scope, TActivity, TLog>(contextScope, activityContext);
+                return new CreatedCompensateActivityScopeContext<Scope, TActivity, TLog>(scope, activityContext);
             }
             catch
             {

@@ -90,7 +90,7 @@
         {
             var message = new Start();
 
-            Task<ConsumeContext<ServiceFaulted>> serviceFaulted = ConnectPublishHandler<ServiceFaulted>();
+            Task<ConsumeContext<ServiceFaulted>> serviceFaulted = await ConnectPublishHandler<ServiceFaulted>();
 
             Response<StartFaulted> startFaulted = await Bus.Request<Start, StartFaulted>(InputQueueAddress, message, TestCancellationToken, TestTimeout);
 
@@ -167,7 +167,7 @@
         {
             var message = new Start();
 
-            Task<ConsumeContext<ServiceFaulted>> serviceFaulted = ConnectPublishHandler<ServiceFaulted>();
+            Task<ConsumeContext<ServiceFaulted>> serviceFaulted = await ConnectPublishHandler<ServiceFaulted>();
 
             Response<StartFaulted> startFaulted = await Bus.Request<Start, StartFaulted>(InputQueueAddress, message, TestCancellationToken, TestTimeout);
 

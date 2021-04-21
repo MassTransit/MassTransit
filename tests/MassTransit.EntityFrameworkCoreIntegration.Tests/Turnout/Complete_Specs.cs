@@ -30,6 +30,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
     }
 
 
+    [Category("Flaky")]
     [TestFixture(typeof(SqlServerTestDbParameters))]
     [TestFixture(typeof(PostgresTestDbParameters))]
     public class Submitting_a_job_to_turnout<T> :
@@ -134,6 +135,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
 
     [TestFixture(typeof(SqlServerTestDbParameters))]
     [TestFixture(typeof(PostgresTestDbParameters))]
+    [Category("Flaky")]
     public class Submitting_a_job_to_turnout_via_container<T> :
         QuartzEntityFrameworkTestFixture<T, JobServiceSagaDbContext>
         where T : ITestDbParameters, new()
@@ -191,7 +193,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
                 {
                     x.AddConsumer<CrunchTheNumbersConsumer>();
 
-                    x.AddServiceClient();
                     x.AddRequestClient<SubmitJob<CrunchTheNumbers>>();
 
                     x.AddSagaRepository<JobSaga>()

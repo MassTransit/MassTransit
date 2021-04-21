@@ -39,6 +39,34 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
 
     [TestFixture]
+    public class Autofac_RequestClient_Generic
+        : Common_RequestClient_Generic
+    {
+        readonly IContainer _container;
+
+        public Autofac_RequestClient_Generic()
+        {
+            var builder = new ContainerBuilder();
+
+            builder.AddMassTransit(ConfigureRegistration);
+            builder.RegisterGenericRequestClient();
+
+            _container = builder.Build();
+        }
+
+        [OneTimeTearDown]
+        public async Task Close_container()
+        {
+            await _container.DisposeAsync();
+        }
+
+        protected override IRequestClient<InitialRequest> RequestClient => _container.CreateRequestClient<InitialRequest>();
+
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class Autofac_RequestClient_Outbox
         : Common_RequestClient_Outbox
     {

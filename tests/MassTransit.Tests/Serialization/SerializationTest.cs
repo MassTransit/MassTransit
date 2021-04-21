@@ -47,7 +47,7 @@ namespace MassTransit.Tests.Serialization
             else if (_serializerType == typeof(XmlMessageSerializer))
             {
                 Serializer = new XmlMessageSerializer();
-                Deserializer = new XmlMessageDeserializer(JsonMessageSerializer.Deserializer);
+                Deserializer = new XmlMessageDeserializer(XmlJsonMessageSerializer.Deserializer);
             }
             else if (_serializerType == typeof(EncryptedMessageSerializer))
             {

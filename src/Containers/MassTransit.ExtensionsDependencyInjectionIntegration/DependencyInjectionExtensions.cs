@@ -86,6 +86,11 @@ namespace MassTransit
             return provider.GetRequiredService<IClientFactory>().CreateRequestClient<T>(destinationAddress, timeout);
         }
 
+        /// <summary>
+        /// Registers a generic request client provider in the container, which will be used for any
+        /// client that is not explicitly registered using AddRequestClient.
+        /// </summary>
+        /// <param name="collection"></param>
         public static void AddGenericRequestClient(this IServiceCollection collection)
         {
             collection.AddScoped(typeof(IRequestClient<>), typeof(GenericRequestClient<>));

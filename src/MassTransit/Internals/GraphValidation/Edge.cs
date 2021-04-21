@@ -3,7 +3,7 @@
     using System;
 
 
-    struct Edge<T, TNode> :
+    public struct Edge<T, TNode> :
         IComparable<Edge<T, TNode>>
         where TNode : Node<T>
     {

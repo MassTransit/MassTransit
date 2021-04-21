@@ -32,7 +32,8 @@ namespace MassTransit.RabbitMqTransport
         string CertificatePassphrase { get; set; }
 
         /// <summary>
-        /// A certficate instance to use for client authentication, if provided then <see cref="CertificatePath" /> and <see cref="CertificatePassphrase" /> are not required
+        /// A certficate instance to use for client authentication, if provided then <see cref="CertificatePath" /> and <see cref="CertificatePassphrase" /> are not
+        /// required
         /// </summary>
         X509Certificate Certificate { get; set; }
 

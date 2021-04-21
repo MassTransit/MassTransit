@@ -2,7 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Azure.Storage;
+    using global::Azure.Storage.Blobs;
     using NUnit.Framework;
     using Storage;
     using Storage.MessageData;
@@ -38,7 +38,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
         public Sending_a_message_with_data()
         {
-            var account = CloudStorageAccount.Parse(Configuration.StorageAccount);
+            var account = new BlobServiceClient(Configuration.StorageAccount);
             _repository = account.CreateMessageDataRepository("message-data");
         }
 

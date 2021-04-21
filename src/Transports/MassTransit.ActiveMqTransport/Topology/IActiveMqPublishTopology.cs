@@ -8,5 +8,7 @@ namespace MassTransit.ActiveMqTransport.Topology
     {
         new IActiveMqMessagePublishTopology<T> GetMessageTopology<T>()
             where T : class;
+
+        string VirtualTopicPrefix { get; }
     }
 }
