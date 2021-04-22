@@ -22,6 +22,15 @@ namespace MassTransit
             return ObjectTypeDeserializer.Deserialize<TJob>(source.Job);
         }
 
+        public static TJob GetJob<TJob>(this FaultJob source)
+            where TJob : class
+        {
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
+
+            return ObjectTypeDeserializer.Deserialize<TJob>(source.Job);
+        }
+
         /// <summary>
         /// Returns the job from the JobCompleted event
         /// </summary>

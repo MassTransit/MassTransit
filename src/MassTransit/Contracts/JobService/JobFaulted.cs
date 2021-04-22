@@ -13,6 +13,8 @@ namespace MassTransit.Contracts.JobService
 
         DateTime Timestamp { get; }
 
+        TimeSpan? Duration { get; }
+
         IDictionary<string, object> Job { get; }
 
         ExceptionInfo Exceptions { get; }

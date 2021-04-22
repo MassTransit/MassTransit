@@ -7,8 +7,9 @@ namespace MassTransit.Azure.Table.Tests.Turnout
     using Definition;
     using JobService;
     using NUnit.Framework;
+    using RabbitMqTransport;
+    using RabbitMqTransport.Tests;
     using TestFramework;
-    using Tests;
 
 
     public interface GrindTheGears
@@ -21,7 +22,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
     [TestFixture]
     [Category("Flaky")]
     public class Submitting_a_job_to_turnout_that_faults :
-        AzureTableInMemoryTestFixture
+        RabbitMqTestFixture
     {
         [Test]
         [Order(1)]
@@ -51,16 +52,16 @@ namespace MassTransit.Azure.Table.Tests.Turnout
 
         [Test]
         [Order(4)]
-        public async Task Should_have_published_the_job_faulted_event()
+        public async Task Should_have_published_the_fault_event()
         {
-            ConsumeContext<JobFaulted> faulted = await _faulted;
+            ConsumeContext<Fault<GrindTheGears>> fault = await _fault;
         }
 
         [Test]
         [Order(4)]
-        public async Task Should_have_published_the_fault_event()
+        public async Task Should_have_published_the_job_faulted_event()
         {
-            ConsumeContext<Fault<GrindTheGears>> fault = await _fault;
+            ConsumeContext<JobFaulted> faulted = await _faulted;
         }
 
         [Test]
@@ -83,9 +84,9 @@ namespace MassTransit.Azure.Table.Tests.Turnout
         Task<ConsumeContext<JobStarted>> _started;
         Task<ConsumeContext<Fault<GrindTheGears>>> _fault;
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            base.ConfigureInMemoryBus(configurator);
+            configurator.UseDelayedExchangeMessageScheduler();
 
             var options = new ServiceInstanceOptions()
                 .EnableInstanceEndpoint()
@@ -93,22 +94,16 @@ namespace MassTransit.Azure.Table.Tests.Turnout
 
             configurator.ServiceInstance(options, instance =>
             {
-                instance.ConfigureJobServiceEndpoints(x =>
-                {
-                    x.UseAzureTableSagaRepository(() => TestCloudTable);
-                });
+                instance.ConfigureJobServiceEndpoints();
 
                 instance.ReceiveEndpoint(instance.EndpointNameFormatter.Message<GrindTheGears>(), e =>
                 {
-                    e.Consumer(() => new GrindTheGearsConsumer(), cfg =>
-                    {
-                        cfg.Options<JobOptions<GrindTheGears>>(jobOptions => jobOptions.SetJobTimeout(TimeSpan.FromSeconds(90)));
-                    });
+                    e.Consumer(() => new GrindTheGearsConsumer());
                 });
             });
         }
 
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
         {
             _submitted = Handled<JobSubmitted>(configurator, context => context.Message.JobId == _jobId);
             _started = Handled<JobStarted>(configurator, context => context.Message.JobId == _jobId);

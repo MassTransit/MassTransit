@@ -10,6 +10,7 @@
 
     public class ConsumeJobContext<TJob> :
         ConsumeContextProxy,
+        ConsumeContext<TJob>,
         JobContext<TJob>,
         IDisposable
         where TJob : class
@@ -34,12 +35,24 @@
             _stopwatch = Stopwatch.StartNew();
         }
 
+        public override CancellationToken CancellationToken => _source.Token;
+
+        TJob ConsumeContext<TJob>.Message => Job;
+
+        Task ConsumeContext<TJob>.NotifyConsumed(TimeSpan duration, string consumerType)
+        {
+            return _context.NotifyConsumed(this, duration, consumerType);
+        }
+
+        public Task NotifyFaulted(TimeSpan duration, string consumerType, Exception exception)
+        {
+            return _context.NotifyFaulted(this, duration, consumerType, exception);
+        }
+
         public void Dispose()
         {
             _source.Dispose();
         }
-
-        public override CancellationToken CancellationToken => _source.Token;
 
         public Guid JobId { get; }
         public Guid AttemptId { get; }
