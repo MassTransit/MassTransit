@@ -83,7 +83,7 @@
             context.Headers.Set(MessageHeaders.Request.Accept, _accept);
 
             if (_timeToLive.HasValue)
-                context.TimeToLive = _timeToLive.Value;
+                context.TimeToLive ??= _timeToLive.Value;
 
             IPipe<SendContext<TRequest>> pipe = _pipeConfigurator.Build();
 
