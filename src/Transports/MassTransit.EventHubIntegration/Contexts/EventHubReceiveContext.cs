@@ -11,9 +11,9 @@
     using Util;
 
 
-    public sealed class EventDataReceiveContext :
+    public sealed class EventHubReceiveContext :
         BaseReceiveContext,
-        EventDataContext,
+        EventHubConsumeContext,
         ReceiveLockContext
     {
         readonly ProcessEventArgs _eventArgs;
@@ -21,7 +21,7 @@
         readonly IProcessorLockContext _lockContext;
         byte[] _body;
 
-        public EventDataReceiveContext(ProcessEventArgs eventArgs, ReceiveEndpointContext receiveEndpointContext, IProcessorLockContext lockContext)
+        public EventHubReceiveContext(ProcessEventArgs eventArgs, ReceiveEndpointContext receiveEndpointContext, IProcessorLockContext lockContext)
             : base(false, receiveEndpointContext)
         {
             _eventArgs = eventArgs;

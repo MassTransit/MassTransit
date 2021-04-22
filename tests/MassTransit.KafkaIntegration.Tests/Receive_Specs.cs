@@ -200,4 +200,94 @@ namespace MassTransit.KafkaIntegration.Tests
             string Text { get; }
         }
     }
+
+
+    public class ReceiveWithPayload_Specs :
+        InMemoryTestFixture
+    {
+        const string Topic = "test-payload";
+
+        [Test]
+        public async Task Should_contains_payload()
+        {
+            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
+            var services = new ServiceCollection();
+            services.AddSingleton(taskCompletionSource);
+
+            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            services.AddMassTransit(x =>
+            {
+                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+                x.AddRider(rider =>
+                {
+                    rider.AddConsumer<KafkaMessageConsumer>();
+                    rider.AddProducer<string, KafkaMessage>(Topic, (context, c) => c.SetKeySerializer(Serializers.Utf8));
+
+                    rider.UsingKafka((context, k) =>
+                    {
+                        k.Host("localhost:9092");
+
+                        k.TopicEndpoint<string, KafkaMessage>(Topic, nameof(ReceiveWithPayload_Specs), c =>
+                        {
+                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
+
+                            c.SetKeyDeserializer(Deserializers.Utf8);
+                        });
+                    });
+                });
+            });
+
+            var provider = services.BuildServiceProvider();
+
+            var busControl = provider.GetRequiredService<IBusControl>();
+
+            var observer = GetConsumeObserver();
+            busControl.ConnectConsumeObserver(observer);
+
+            await busControl.StartAsync(TestCancellationToken);
+
+            try
+            {
+                var producer = provider.GetRequiredService<ITopicProducer<string, KafkaMessage>>();
+                var key = NewId.NextGuid().ToString();
+                await producer.Produce(key, new { }, TestCancellationToken);
+
+                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
+
+                Assert.IsTrue(result.TryGetPayload(out KafkaConsumeContext<string> context));
+                Assert.AreEqual(key, context.Key);
+                Assert.That(await observer.Messages.Any<KafkaMessage>());
+            }
+            finally
+            {
+                await busControl.StopAsync(TestCancellationToken);
+
+                await provider.DisposeAsync();
+            }
+        }
+
+
+        class KafkaMessageConsumer :
+            IConsumer<KafkaMessage>
+        {
+            readonly TaskCompletionSource<ConsumeContext<KafkaMessage>> _taskCompletionSource;
+
+            public KafkaMessageConsumer(TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public async Task Consume(ConsumeContext<KafkaMessage> context)
+            {
+                _taskCompletionSource.TrySetResult(context);
+            }
+        }
+
+
+        public interface KafkaMessage
+        {
+        }
+    }
 }

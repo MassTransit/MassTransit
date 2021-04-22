@@ -82,7 +82,7 @@
             if (IsStopping)
                 return;
 
-            var context = new ConsumeResultReceiveContext<TKey, TValue>(result, _context, _consumerContext, _consumerContext.HeadersDeserializer);
+            var context = new KafkaReceiveContext<TKey, TValue>(result, _context, _consumerContext, _consumerContext.HeadersDeserializer);
 
             try
             {
