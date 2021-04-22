@@ -4,7 +4,7 @@ namespace MassTransit.EventHubIntegration
     using System.Collections.Generic;
 
 
-    public interface EventDataContext
+    public interface EventHubBaseConsumeContext
     {
         DateTimeOffset EnqueuedTime { get; }
         long Offset { get; }
@@ -12,6 +12,6 @@ namespace MassTransit.EventHubIntegration
         string PartitionKey { get; }
         long SequenceNumber { get; }
         IReadOnlyDictionary<string, object> SystemProperties { get; }
-        IDictionary<string, object> Properties { get; }
+        IReadOnlyDictionary<string, object> Properties { get; }
     }
 }

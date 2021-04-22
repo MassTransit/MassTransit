@@ -10,9 +10,9 @@
     using Util;
 
 
-    public sealed class ConsumeResultReceiveContext<TKey, TValue> :
+    public sealed class KafkaReceiveContext<TKey, TValue> :
         BaseReceiveContext,
-        ConsumeResultContext,
+        KafkaBaseConsumeContext<TKey>,
         ReceiveLockContext
         where TValue : class
     {
@@ -20,7 +20,7 @@
         readonly IConsumerLockContext<TKey, TValue> _lockContext;
         readonly ConsumeResult<TKey, TValue> _result;
 
-        public ConsumeResultReceiveContext(ConsumeResult<TKey, TValue> result, ReceiveEndpointContext receiveEndpointContext,
+        public KafkaReceiveContext(ConsumeResult<TKey, TValue> result, ReceiveEndpointContext receiveEndpointContext,
             IConsumerLockContext<TKey, TValue> lockContext, IHeadersDeserializer headersDeserializer)
             : base(false, receiveEndpointContext)
         {
@@ -33,17 +33,17 @@
             AddOrUpdatePayload<ConsumeContext>(() => consumeContext, existing => consumeContext);
         }
 
-        protected override IHeaderProvider HeaderProvider => _headersDeserializer.Deserialize(Headers);
+        protected override IHeaderProvider HeaderProvider => _headersDeserializer.Deserialize(_result.Message.Headers);
+
+        public TKey Key => _result.Message.Key;
 
         public string Topic => _result.Topic;
 
-        public Partition Partition => _result.Partition;
+        public int Partition => _result.Partition;
 
-        public Offset Offset => _result.Offset;
+        public long Offset => _result.Offset;
 
-        public Timestamp Timestamp => _result.Message.Timestamp;
-
-        public Headers Headers => _result.Message.Headers;
+        public DateTime CheckpointUtcDateTime => _result.Message.Timestamp.UtcDateTime;
 
         public Task Complete()
         {

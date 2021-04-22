@@ -82,7 +82,7 @@
             if (!eventArgs.HasEvent)
                 return;
 
-            var context = new EventDataReceiveContext(eventArgs, _context, _processorContext);
+            var context = new EventHubReceiveContext(eventArgs, _context, _processorContext);
 
             try
             {

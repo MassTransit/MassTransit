@@ -117,4 +117,99 @@ namespace MassTransit.EventHubIntegration.Tests
             string Text { get; }
         }
     }
+
+
+    public class ReceiveWithPayload_Specs :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_contains_payload()
+        {
+            TaskCompletionSource<ConsumeContext<EventHubMessage>> taskCompletionSource = GetTask<ConsumeContext<EventHubMessage>>();
+            var services = new ServiceCollection();
+            services.AddSingleton(taskCompletionSource);
+
+            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            services.AddMassTransit(x =>
+            {
+                x.UsingInMemory((context, cfg) => cfg.ConfigureEndpoints(context));
+                x.AddRider(rider =>
+                {
+                    rider.AddConsumer<EventHubMessageConsumer>();
+
+                    rider.UsingEventHub((context, k) =>
+                    {
+                        k.Host(Configuration.EventHubNamespace);
+                        k.Storage(Configuration.StorageAccount);
+
+                        k.ReceiveEndpoint(Configuration.EventHubName, c =>
+                        {
+                            c.ConfigureConsumer<EventHubMessageConsumer>(context);
+                        });
+                    });
+                });
+            });
+
+            var provider = services.BuildServiceProvider();
+
+            var busControl = provider.GetRequiredService<IBusControl>();
+
+            await busControl.StartAsync(TestCancellationToken);
+
+            try
+            {
+                var producerProvider = provider.GetRequiredService<IEventHubProducerProvider>();
+                var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+
+                await producer.Produce<EventHubMessage>(new { }, TestCancellationToken);
+
+                ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
+
+                Assert.IsTrue(result.TryGetPayload(out EventHubBaseConsumeContext _));
+            }
+            finally
+            {
+                await busControl.StopAsync(TestCancellationToken);
+
+                await provider.DisposeAsync();
+            }
+        }
+
+
+        class EventHubMessageClass :
+            EventHubMessage
+        {
+            public EventHubMessageClass(string text)
+            {
+                Text = text;
+            }
+
+            public string Text { get; }
+        }
+
+
+        class EventHubMessageConsumer :
+            IConsumer<EventHubMessage>
+        {
+            readonly TaskCompletionSource<ConsumeContext<EventHubMessage>> _taskCompletionSource;
+
+            public EventHubMessageConsumer(TaskCompletionSource<ConsumeContext<EventHubMessage>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public async Task Consume(ConsumeContext<EventHubMessage> context)
+            {
+                _taskCompletionSource.TrySetResult(context);
+            }
+        }
+
+
+        public interface EventHubMessage
+        {
+            string Text { get; }
+        }
+    }
 }

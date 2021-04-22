@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.IO;
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
@@ -11,9 +12,9 @@
     using Util;
 
 
-    public sealed class EventDataReceiveContext :
+    public sealed class EventHubReceiveContext :
         BaseReceiveContext,
-        EventDataContext,
+        EventHubBaseConsumeContext,
         ReceiveLockContext
     {
         readonly ProcessEventArgs _eventArgs;
@@ -21,7 +22,7 @@
         readonly IProcessorLockContext _lockContext;
         byte[] _body;
 
-        public EventDataReceiveContext(ProcessEventArgs eventArgs, ReceiveEndpointContext receiveEndpointContext, IProcessorLockContext lockContext)
+        public EventHubReceiveContext(ProcessEventArgs eventArgs, ReceiveEndpointContext receiveEndpointContext, IProcessorLockContext lockContext)
             : base(false, receiveEndpointContext)
         {
             _eventArgs = eventArgs;
@@ -35,7 +36,7 @@
         public long Offset => _eventData.Offset;
         public string PartitionId => _eventArgs.Partition.PartitionId;
         public string PartitionKey => _eventData.PartitionKey;
-        public IDictionary<string, object> Properties => _eventData.Properties;
+        public IReadOnlyDictionary<string, object> Properties => new ReadOnlyDictionary<string, object>(_eventData.Properties);
         public long SequenceNumber => _eventData.SequenceNumber;
         public IReadOnlyDictionary<string, object> SystemProperties => _eventData.SystemProperties;
 
