@@ -47,6 +47,7 @@ namespace MassTransit.EventStoreDbIntegration.Tests
                     {
                         esdb.CatchupSubscription(StreamName.AllStream, SubscriptionName, c =>
                         {
+                            c.CheckpointMessageCount = 1;
                             c.UseEventStoreDBCheckpointStore(StreamName.ForCheckpoint(SubscriptionName));
                         });
                     });

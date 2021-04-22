@@ -68,7 +68,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
                     context = _subscriptionSettings.StreamName.IsAllStream
                         ? new EventStoreDbAllStreamCatchupSubscriptionContext(_hostConfiguration, _subscriptionSettings, client, _headersDeserializer,
                             checkpointStore, createCancellationToken)
-                        : (SubscriptionContext)new EventStoreDbCatchupSubscriptionContext(_hostConfiguration, _subscriptionSettings, client, _headersDeserializer,
+                        : (SubscriptionContext)new EventStoreDbStreamCatchupSubscriptionContext(_hostConfiguration, _subscriptionSettings, client, _headersDeserializer,
                             checkpointStore, createCancellationToken);
                 }
                 else {

@@ -8,14 +8,14 @@ using MassTransit.EventStoreDbIntegration.Serializers;
 
 namespace MassTransit.EventStoreDbIntegration.Contexts
 {
-    public class EventStoreDbCatchupSubscriptionContext :
+    public abstract class EventStoreDbCatchupSubscriptionContext :
         BasePipeContext,
         SubscriptionContext
     {
-        readonly EventStoreClient _client;
-        readonly ISubscriptionLockContext _lockContext;
+        protected readonly EventStoreClient _client;
+        protected readonly ISubscriptionLockContext _lockContext;
 
-        StreamSubscription _streamSubscription;
+        protected StreamSubscription _streamSubscription;
 
         public EventStoreDbCatchupSubscriptionContext(IHostConfiguration hostConfiguration, SubscriptionSettings receiveSettings, EventStoreClient client,
             IHeadersDeserializer headersDeserializer, ICheckpointStore checkpointStore, CancellationToken cancellationToken)
@@ -36,30 +36,8 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
         public SubscriptionSettings SubscriptionSettings { get; }
         public IHeadersDeserializer HeadersDeserializer { get; }
         public ICheckpointStore CheckpointStore { get; }
-        
-        public async Task SubscribeAsync(CancellationToken cancellationToken = default)
-        {
-            var position = await CheckpointStore.GetLastCheckpoint().ConfigureAwait(false);
- 
-            _streamSubscription = position.HasValue
-                ? await _client.SubscribeToStreamAsync(
-                    streamName: SubscriptionSettings.StreamName,
-                    start: StreamPosition.FromInt64((long)position),
-                    eventAppeared: EventAppeared,
-                    resolveLinkTos: true,
-                    subscriptionDropped: SubscriptionDropped,
-                    configureOperationOptions: null,
-                    userCredentials: SubscriptionSettings.UserCredentials,
-                    cancellationToken: cancellationToken)
-                : await _client.SubscribeToStreamAsync(
-                    streamName: SubscriptionSettings.StreamName,
-                    eventAppeared: EventAppeared,
-                    resolveLinkTos: true,
-                    subscriptionDropped: SubscriptionDropped,
-                    configureOperationOptions: null,
-                    userCredentials: SubscriptionSettings.UserCredentials,
-                    cancellationToken: cancellationToken);
-        }
+
+        public abstract Task SubscribeAsync(CancellationToken cancellationToken = default);
 
         public Task CloseAsync(CancellationToken cancellationToken = default)
         {
@@ -69,23 +47,19 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         public Task Complete(ResolvedEvent resolvedEvent) => _lockContext.Complete(resolvedEvent);
 
-        public Task CheckpointReached(StreamSubscription streamSubscription, Position position, CancellationToken cancellationToken)
-        {
-            throw new NotSupportedException("CheckpointReached is only supported for All Stream subscriptions.");
-        }
+        public abstract Task CheckpointReached(StreamSubscription streamSubscription, Position position, CancellationToken cancellationToken);
 
-        async Task EventAppeared(StreamSubscription streamSubscription, ResolvedEvent resolvedEvent, CancellationToken cancellation)
+        protected async Task EventAppeared(StreamSubscription streamSubscription, ResolvedEvent resolvedEvent, CancellationToken cancellation)
         {
             if (ProcessEvent != null)
                 await ProcessEvent.Invoke(streamSubscription, resolvedEvent, cancellation);
         }
 
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
-        void SubscriptionDropped(StreamSubscription streamSubscription, SubscriptionDroppedReason reason, Exception? exc)
+        protected void SubscriptionDropped(StreamSubscription streamSubscription, SubscriptionDroppedReason reason, Exception? exc)
         {
-            //TODO: Need to implement reconnect manually or handled by MT?
-            if (ProcessSubscriptionDropped != null)
-                ProcessSubscriptionDropped.Invoke(streamSubscription, reason, exc);
+            //TODO: Need to implement resubscribe/reconnect manually or handled by MT?
+            ProcessSubscriptionDropped?.Invoke(streamSubscription, reason, exc);
         }
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
     }
