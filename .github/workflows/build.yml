@@ -33,6 +33,11 @@ jobs:
         with:
           dotnet-version: '3.1.x'
 
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+
       - name: Restore NuGet packages
         run: dotnet restore
         working-directory: ./
@@ -103,7 +108,7 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '5.0.x'
 
       - name: Test gRPC
         run: dotnet test -c Release --filter Category!=Flaky

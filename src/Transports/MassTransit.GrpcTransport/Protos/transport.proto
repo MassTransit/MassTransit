@@ -136,6 +136,16 @@ message Consumer {
   int64 consumer_id = 2;
 }
 
+message Gossip {
+  repeated Peer peers = 1;
+
+  message Peer {
+    string address = 1;
+    int32 heartbeat = 2;
+    repeated int32 suspect = 3;
+  }
+}
+
 // Supporting types
 message NullableInt64 {
   oneof int64 {

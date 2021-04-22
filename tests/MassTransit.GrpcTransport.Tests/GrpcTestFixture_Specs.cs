@@ -35,4 +35,36 @@ namespace MassTransit.GrpcTransport.Tests
             _receivedA = Handler<A>(configurator, async context => Console.WriteLine("Hi"));
         }
     }
+
+
+    [TestFixture]
+    public class Starting_up_the_client_test_fixture :
+        GrpcClientTestFixture
+    {
+        [Test]
+        public async Task Should_cross_the_border()
+        {
+            await ClientBus.Publish(new A());
+
+            await _receivedA;
+        }
+
+        [Test]
+        public void Should_be_successful()
+        {
+        }
+
+        Task<ConsumeContext<A>> _receivedA;
+
+
+        class A
+        {
+        }
+
+
+        protected override void ConfigureGrpcReceiveEndpoint(IGrpcReceiveEndpointConfigurator configurator)
+        {
+            _receivedA = Handler<A>(configurator, async context => Console.WriteLine("Hi"));
+        }
+    }
 }

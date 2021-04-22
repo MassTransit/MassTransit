@@ -12,7 +12,7 @@ namespace MassTransit.GrpcTransport.Tests
         public GrpcClientTestFixture()
             : base(new GrpcTestHarness(new Uri("http://127.0.0.1:29796")))
         {
-            GrpcClientTestHarness = new GrpcTestHarness(new Uri("http://127.0.0.1:29797"));
+            GrpcClientTestHarness = new GrpcTestHarness(new Uri("http://127.0.0.1:29797"), "client-queue");
             GrpcClientTestHarness.OnConfigureGrpcBus += ConfigureGrpcClientBus;
             GrpcClientTestHarness.OnConfigureGrpcHost += ConfigureGrpcClientHost;
             GrpcClientTestHarness.OnConfigureGrpcReceiveEndpoint += ConfigureGrpcClientReceiveEndpoint;
@@ -31,6 +31,9 @@ namespace MassTransit.GrpcTransport.Tests
         protected Uri ClientBusAddress => GrpcClientTestHarness.BusAddress;
 
         protected Uri ClientInputQueueAddress => GrpcClientTestHarness.InputQueueAddress;
+
+        protected IBus ClientBus => GrpcClientTestHarness.Bus;
+        protected IBusControl ClientBusControl => GrpcClientTestHarness.BusControl;
 
         [OneTimeSetUp]
         public async Task SetupGrpcClientTestFixture()
@@ -56,13 +59,13 @@ namespace MassTransit.GrpcTransport.Tests
         protected override IRequestClient<TRequest> CreateRequestClient<TRequest>()
             where TRequest : class
         {
-            return GrpcClientTestHarness.CreateRequestClient<TRequest>();
+            return GrpcClientTestHarness.CreateRequestClient<TRequest>(InputQueueAddress);
         }
 
         protected override IRequestClient<TRequest> CreateRequestClient<TRequest>(Uri destinationAddress)
             where TRequest : class
         {
-            return GrpcTestHarness.CreateRequestClient<TRequest>(destinationAddress);
+            return GrpcClientTestHarness.CreateRequestClient<TRequest>(destinationAddress);
         }
 
         protected override Task<IRequestClient<TRequest>> ConnectRequestClient<TRequest>()
@@ -73,7 +76,7 @@ namespace MassTransit.GrpcTransport.Tests
 
         protected virtual void ConfigureGrpcClientHost(IGrpcHostConfigurator configurator)
         {
-            //configurator.AddServer(BaseAddress);
+            configurator.AddServer(BaseAddress);
         }
 
         protected virtual void ConfigureGrpcClientBus(IGrpcBusFactoryConfigurator configurator)
