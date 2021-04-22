@@ -58,7 +58,6 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
         protected void SubscriptionDropped(StreamSubscription streamSubscription, SubscriptionDroppedReason reason, Exception? exc)
         {
-            //TODO: Need to implement resubscribe/reconnect manually or handled by MT?
             ProcessSubscriptionDropped?.Invoke(streamSubscription, reason, exc);
         }
 #pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
