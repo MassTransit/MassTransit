@@ -17,15 +17,15 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
 
         protected StreamSubscription _streamSubscription;
 
-        public EventStoreDbCatchupSubscriptionContext(IHostConfiguration hostConfiguration, SubscriptionSettings receiveSettings, EventStoreClient client,
+        public EventStoreDbCatchupSubscriptionContext(IHostConfiguration hostConfiguration, SubscriptionSettings subscriptionSettings, EventStoreClient client,
             IHeadersDeserializer headersDeserializer, ICheckpointStore checkpointStore, CancellationToken cancellationToken)
             : base(cancellationToken)
         {
             _client = client;
 
-            _lockContext = new EventStoreDbCatchupSubscriptionLockContext(hostConfiguration, receiveSettings, checkpointStore);
+            _lockContext = new EventStoreDbCatchupSubscriptionLockContext(hostConfiguration, subscriptionSettings, checkpointStore);
 
-            SubscriptionSettings = receiveSettings;
+            SubscriptionSettings = subscriptionSettings;
             HeadersDeserializer = headersDeserializer;
             CheckpointStore = checkpointStore;
         }
