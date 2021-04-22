@@ -1,6 +1,7 @@
 namespace MassTransit.GrpcTransport.Fabric
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Context;
     using Contracts;
@@ -37,8 +38,8 @@ namespace MassTransit.GrpcTransport.Fabric
 
             SendHeaders = new DictionarySendHeaders();
 
-            foreach (var (key, value) in message.Deliver.Envelope.Headers)
-                SendHeaders.Set(key, value);
+            foreach (KeyValuePair<string, string> header in message.Deliver.Envelope.Headers)
+                SendHeaders.Set(header.Key, header.Value);
         }
 
         public string[] MessageType => _messageType ??= _envelope.MessageType.ToArray();
@@ -51,6 +52,8 @@ namespace MassTransit.GrpcTransport.Fabric
         public TransportMessage Message { get; }
 
         public SendHeaders SendHeaders { get; }
+
+        public string RoutingKey => Message.Deliver.Exchange?.RoutingKey;
 
         public Headers Headers => SendHeaders;
 
@@ -77,8 +80,6 @@ namespace MassTransit.GrpcTransport.Fabric
         public DateTime? SentTime => _sentTime ??= _envelope.SentTime.ToDateTime();
 
         public HostInfo Host { get; }
-
-        public string RoutingKey => Message.Deliver.Exchange?.RoutingKey;
 
         static Guid? ToGuid(string value)
         {

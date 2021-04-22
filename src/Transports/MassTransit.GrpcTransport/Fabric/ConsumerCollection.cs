@@ -102,7 +102,7 @@ namespace MassTransit.GrpcTransport.Fabric
         public Task<IGrpcQueueConsumer> Next(GrpcTransportMessage message, CancellationToken cancellationToken)
         {
             Task<IConsumerLoadBalancer> task = _balancer.Task;
-            if (task.IsCompletedSuccessfully)
+            if (task.IsCompletedSuccessfully())
             {
                 var balancer = task.GetAwaiter().GetResult();
                 var consumer = balancer.SelectConsumer(message);

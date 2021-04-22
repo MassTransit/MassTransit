@@ -113,41 +113,41 @@ namespace MassTransit.GrpcTransport.Integration
 
         static void SetHeaders(IDictionary<string, string> dictionary, SendHeaders headers)
         {
-            foreach (var (key, headerValue) in headers.GetAll())
+            foreach (KeyValuePair<string, object> header in headers.GetAll())
             {
-                if (headerValue == null)
+                if (header.Value == null)
                 {
-                    if (dictionary.ContainsKey(key))
-                        dictionary.Remove(key);
+                    if (dictionary.ContainsKey(header.Key))
+                        dictionary.Remove(header.Key);
 
                     continue;
                 }
 
-                if (dictionary.ContainsKey(key))
+                if (dictionary.ContainsKey(header.Key))
                     continue;
 
-                switch (headerValue)
+                switch (header.Value)
                 {
                     case DateTimeOffset value:
                         if (_dateTimeOffsetConverter.TryConvert(value, out string text))
-                            dictionary[key] = text;
+                            dictionary[header.Key] = text;
                         break;
 
                     case DateTime value:
                         if (_dateTimeConverter.TryConvert(value, out text))
-                            dictionary[key] = text;
+                            dictionary[header.Key] = text;
                         break;
 
                     case string value:
-                        dictionary[key] = value;
+                        dictionary[header.Key] = value;
                         break;
 
                     case bool value when value:
-                        dictionary[key] = bool.TrueString;
+                        dictionary[header.Key] = bool.TrueString;
                         break;
 
                     case IFormattable formatValue:
-                        dictionary[key] = formatValue.ToString();
+                        dictionary[header.Key] = formatValue.ToString();
                         break;
                 }
             }

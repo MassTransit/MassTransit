@@ -27,9 +27,9 @@ namespace MassTransit.GrpcTransport.Fabric
             {
                 var sinks = new List<IMessageSink<GrpcTransportMessage>>();
 
-                foreach ((_, Connectable<IMessageSink<GrpcTransportMessage>> value) in _sinks)
+                foreach (KeyValuePair<string, Connectable<IMessageSink<GrpcTransportMessage>>> sink in _sinks)
                 {
-                    value.All(s =>
+                    sink.Value.All(s =>
                     {
                         sinks.Add(s);
                         return true;

@@ -14,7 +14,7 @@ namespace MassTransit.GrpcTransport.Contexts
         IAsyncDisposable
     {
         readonly byte[] _body;
-        readonly CancellationTokenRegistration _registration;
+        CancellationTokenRegistration _registration;
 
         public GrpcReceiveContext(GrpcTransportMessage message, GrpcReceiveEndpointContext receiveEndpointContext, CancellationToken cancellationToken)
             : base(false, receiveEndpointContext)
@@ -34,7 +34,9 @@ namespace MassTransit.GrpcTransport.Contexts
 
         public ValueTask DisposeAsync()
         {
-            return _registration.DisposeAsync();
+            _registration.Dispose();
+
+            return default;
         }
 
         public override byte[] GetBody()
