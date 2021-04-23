@@ -67,9 +67,9 @@ namespace Example
                 });
             });
 
-            using(bus.Start())
+            using(busControl.StartAsync())
             {
-                bus.Publish(new MyMessage{Value = "Hello, World."});
+                await busControl.Publish(new MyMessage{Value = "Hello, World."});
 
                 await Task.Run(() => Console.ReadLine());
             }
