@@ -299,7 +299,7 @@
                 if (typeDefinition == typeof(CorrelatedBy<>))
                 {
                     _invalidMessageTypeReason =
-                        $"CorrelatedBy<{typeof(T).GetClosingArgument(typeof(CorrelatedBy<>)).Name} is not a valid message type";
+                        $"CorrelatedBy<{typeof(T).GetClosingArgument(typeof(CorrelatedBy<>)).Name}> is not a valid message type";
 
                     return false;
                 }
@@ -307,7 +307,7 @@
                 if (typeDefinition == typeof(Orchestrates<>))
                 {
                     _invalidMessageTypeReason =
-                        $"Orchestrates<{typeof(T).GetClosingArgument(typeof(Orchestrates<>)).Name} is not a valid message type";
+                        $"Orchestrates<{typeof(T).GetClosingArgument(typeof(Orchestrates<>)).Name}> is not a valid message type";
 
                     return false;
                 }
@@ -315,7 +315,7 @@
                 if (typeDefinition == typeof(InitiatedBy<>))
                 {
                     _invalidMessageTypeReason =
-                        $"InitiatedBy<{typeof(T).GetClosingArgument(typeof(InitiatedBy<>)).Name} is not a valid message type";
+                        $"InitiatedBy<{typeof(T).GetClosingArgument(typeof(InitiatedBy<>)).Name}> is not a valid message type";
 
                     return false;
                 }
@@ -323,7 +323,7 @@
                 if (typeDefinition == typeof(InitiatedByOrOrchestrates<>))
                 {
                     _invalidMessageTypeReason =
-                        $"InitiatedByOrOrchestrates<{typeof(T).GetClosingArgument(typeof(InitiatedByOrOrchestrates<>)).Name} is not a valid message type";
+                        $"InitiatedByOrOrchestrates<{typeof(T).GetClosingArgument(typeof(InitiatedByOrOrchestrates<>)).Name}> is not a valid message type";
 
                     return false;
                 }
@@ -331,7 +331,7 @@
                 if (typeDefinition == typeof(Observes<,>))
                 {
                     Type[] closingArguments = Internals.Extensions.InterfaceExtensions.GetClosingArguments(typeof(T), typeof(Observes<,>)).ToArray();
-                    _invalidMessageTypeReason = $"Observes<{closingArguments[0].Name},{closingArguments[1].Name} is not a valid message type";
+                    _invalidMessageTypeReason = $"Observes<{closingArguments[0].Name},{closingArguments[1].Name}> is not a valid message type";
                     return false;
                 }
 

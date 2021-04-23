@@ -121,7 +121,7 @@ namespace MassTransit.JobService.Components.StateMachines
                         context.Instance.Completed = context.Data.Timestamp;
                         context.Instance.Duration = context.Data.Duration;
                     })
-                    .PublishJobCompleted()
+                    .NotifyJobCompleted()
                     .TransitionTo(Completed));
 
             During(StartingJobAttempt, WaitingToStart, Started,
@@ -142,7 +142,7 @@ namespace MassTransit.JobService.Components.StateMachines
 
             During(Completed,
                 When(AttemptCompleted)
-                    .PublishJobCompleted(),
+                    .NotifyJobCompleted(),
                 When(AttemptStarted)
                     .Then(context => context.Instance.Started = context.Data.Timestamp)
                     .PublishJobStarted(),
@@ -303,9 +303,16 @@ namespace MassTransit.JobService.Components.StateMachines
             }));
         }
 
-        public static EventActivityBinder<JobSaga, JobAttemptCompleted> PublishJobCompleted(this EventActivityBinder<JobSaga, JobAttemptCompleted> binder)
+        public static EventActivityBinder<JobSaga, JobAttemptCompleted> NotifyJobCompleted(this EventActivityBinder<JobSaga, JobAttemptCompleted> binder)
         {
-            return binder.PublishAsync(context => context.Init<JobCompleted>(new
+            return binder.SendAsync(context => context.Instance.ServiceAddress,
+                context => context.Init<CompleteJob>(new
+                {
+                    JobId = context.Instance.CorrelationId,
+                    context.Instance.Job,
+                    context.Data.Timestamp,
+                    Duration = context.Data.Timestamp - context.Instance.Started ?? TimeSpan.Zero
+                })).PublishAsync(context => context.Init<JobCompleted>(new
             {
                 JobId = context.Instance.CorrelationId,
                 context.Instance.Job,
@@ -346,14 +353,7 @@ namespace MassTransit.JobService.Components.StateMachines
 
         public static EventActivityBinder<JobSaga, Fault<StartJobAttempt>> NotifyJobFaulted(this EventActivityBinder<JobSaga, Fault<StartJobAttempt>> binder)
         {
-            return binder.PublishAsync(context => context.Init<JobFaulted>(new
-            {
-                JobId = context.Instance.CorrelationId,
-                context.Instance.Job,
-                context.Data.Exceptions,
-                context.Data.Timestamp,
-                Duration = context.Data.Timestamp - context.Instance.Started
-            })).SendAsync(context => context.Instance.ServiceAddress,
+            return binder.SendAsync(context => context.Instance.ServiceAddress,
                 context => context.Init<FaultJob>(new
                 {
                     JobId = context.Instance.CorrelationId,
@@ -362,7 +362,14 @@ namespace MassTransit.JobService.Components.StateMachines
                     context.Instance.RetryAttempt,
                     context.Data.Exceptions,
                     Duration = context.Data.Timestamp - context.Instance.Started
-                }));
+                })).PublishAsync(context => context.Init<JobFaulted>(new
+            {
+                JobId = context.Instance.CorrelationId,
+                context.Instance.Job,
+                context.Data.Exceptions,
+                context.Data.Timestamp,
+                Duration = context.Data.Timestamp - context.Instance.Started
+            }));
         }
     }
 }

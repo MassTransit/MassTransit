@@ -59,6 +59,13 @@ namespace MassTransit.Azure.Table.Tests.Turnout
         }
 
         [Test]
+        [Order(4)]
+        public async Task Should_have_published_the_job_completed_generic_event()
+        {
+            ConsumeContext<JobCompleted<CrunchTheNumbers>> completed = await _completedT;
+        }
+
+        [Test]
         [Order(3)]
         public async Task Should_have_published_the_job_started_event()
         {
@@ -76,6 +83,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
         Task<ConsumeContext<JobCompleted>> _completed;
         Task<ConsumeContext<JobSubmitted>> _submitted;
         Task<ConsumeContext<JobStarted>> _started;
+        Task<ConsumeContext<JobCompleted<CrunchTheNumbers>>> _completedT;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -104,6 +112,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
             _submitted = Handled<JobSubmitted>(configurator, context => context.Message.JobId == _jobId);
             _started = Handled<JobStarted>(configurator, context => context.Message.JobId == _jobId);
             _completed = Handled<JobCompleted>(configurator, context => context.Message.JobId == _jobId);
+            _completedT = Handled<JobCompleted<CrunchTheNumbers>>(configurator, context => context.Message.JobId == _jobId);
         }
     }
 }

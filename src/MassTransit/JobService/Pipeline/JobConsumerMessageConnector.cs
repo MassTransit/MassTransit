@@ -19,7 +19,7 @@ namespace MassTransit.JobService.Pipeline
         where TConsumer : class, IJobConsumer<TJob>
         where TJob : class
     {
-        readonly IConsumerConnector _faultJobConsumerConnector;
+        readonly IConsumerConnector _finalizeJobConsumerConnector;
         readonly IConsumerConnector _startJobConsumerConnector;
         readonly IConsumerConnector _submitJobConsumerConnector;
         readonly IConsumerConnector _superviseJobConsumerConnector;
@@ -28,7 +28,7 @@ namespace MassTransit.JobService.Pipeline
         {
             _submitJobConsumerConnector = ConsumerConnectorCache<SubmitJobConsumer<TJob>>.Connector;
             _startJobConsumerConnector = ConsumerConnectorCache<StartJobConsumer<TJob>>.Connector;
-            _faultJobConsumerConnector = ConsumerConnectorCache<FaultJobConsumer<TJob>>.Connector;
+            _finalizeJobConsumerConnector = ConsumerConnectorCache<FinalizeJobConsumer<TJob>>.Connector;
             _superviseJobConsumerConnector = ConsumerConnectorCache<SuperviseJobConsumer>.Connector;
         }
 
@@ -63,12 +63,12 @@ namespace MassTransit.JobService.Pipeline
             var startJobHandle = ConnectStartJobConsumer(consumePipe, turnoutSpecification.StartJobSpecification, options, jobServiceOptions.JobService,
                 CreateJobPipe(consumerFactory, specification));
 
-            var faultJobHandle = ConnectFaultJobConsumer(consumePipe, turnoutSpecification.FaultJobSpecification, options, jobServiceOptions.JobService,
-                CreateJobPipe(consumerFactory, specification));
+            var finalizeJobHandle = ConnectFinalizeJobConsumer(consumePipe, turnoutSpecification.FinalizeJobSpecification, options,
+                jobServiceOptions.JobService);
 
             var cancelJobHandle = ConnectSuperviseJobConsumer(consumePipe, turnoutSpecification.SuperviseJobSpecification, jobServiceOptions.JobService);
 
-            return new MultipleConnectHandle(submitJobHandle, startJobHandle, faultJobHandle, cancelJobHandle);
+            return new MultipleConnectHandle(submitJobHandle, startJobHandle, finalizeJobHandle, cancelJobHandle);
         }
 
         static IPipe<ConsumeContext<TJob>> CreateJobPipe(IConsumerFactory<TConsumer> consumerFactory, IConsumerSpecification<TConsumer> specification)
@@ -105,13 +105,13 @@ namespace MassTransit.JobService.Pipeline
             return _startJobConsumerConnector.ConnectConsumer(consumePipe, consumerFactory, specification);
         }
 
-        ConnectHandle ConnectFaultJobConsumer(IConsumePipeConnector consumePipe, IConsumerSpecification<FaultJobConsumer<TJob>> specification,
-            JobOptions<TJob> options, IJobService jobService, IPipe<ConsumeContext<TJob>> pipe)
+        ConnectHandle ConnectFinalizeJobConsumer(IConsumePipeConnector consumePipe, IConsumerSpecification<FinalizeJobConsumer<TJob>> specification,
+            JobOptions<TJob> options, IJobService jobService)
         {
-            var consumerFactory = new DelegateConsumerFactory<FaultJobConsumer<TJob>>(() => new FaultJobConsumer<TJob>(jobService, options,
+            var consumerFactory = new DelegateConsumerFactory<FinalizeJobConsumer<TJob>>(() => new FinalizeJobConsumer<TJob>(jobService, options,
                 TypeMetadataCache<TConsumer>.ShortName));
 
-            return _faultJobConsumerConnector.ConnectConsumer(consumePipe, consumerFactory, specification);
+            return _finalizeJobConsumerConnector.ConnectConsumer(consumePipe, consumerFactory, specification);
         }
 
         ConnectHandle ConnectSuperviseJobConsumer(IConsumePipeConnector consumePipe, IConsumerSpecification<SuperviseJobConsumer> specification,

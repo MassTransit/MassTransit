@@ -8,19 +8,31 @@ namespace MassTransit.JobService.Components.Consumers
     using Metadata;
 
 
-    public class FaultJobConsumer<TJob> :
-        IConsumer<FaultJob>
+    public class FinalizeJobConsumer<TJob> :
+        IConsumer<FaultJob>,
+        IConsumer<CompleteJob>
         where TJob : class
     {
         readonly string _jobConsumerTypeName;
         readonly IJobService _jobService;
         readonly JobOptions<TJob> _options;
 
-        public FaultJobConsumer(IJobService jobService, JobOptions<TJob> options, string jobConsumerTypeName)
+        public FinalizeJobConsumer(IJobService jobService, JobOptions<TJob> options, string jobConsumerTypeName)
         {
             _jobService = jobService;
             _options = options;
             _jobConsumerTypeName = jobConsumerTypeName;
+        }
+
+        public Task Consume(ConsumeContext<CompleteJob> context)
+        {
+            var completeJob = context.Message;
+
+            var job = completeJob.GetJob<TJob>();
+            if (job == null)
+                throw new ArgumentNullException(nameof(completeJob.Job), $"The job could not be deserialized: {TypeMetadataCache<TJob>.ShortName}");
+
+            return context.Publish<JobCompleted<TJob>>(context.Message);
         }
 
         public Task Consume(ConsumeContext<FaultJob> context)
@@ -41,7 +53,6 @@ namespace MassTransit.JobService.Components.Consumers
         class JobFaultedException :
             MassTransitException
         {
-            readonly IDictionary _data;
             readonly ExceptionInfo _exceptionInfo;
 
             public JobFaultedException(ExceptionInfo exceptionInfo)
@@ -49,12 +60,12 @@ namespace MassTransit.JobService.Components.Consumers
             {
                 _exceptionInfo = exceptionInfo;
                 if (_exceptionInfo.Data != null)
-                    _data = _exceptionInfo.Data.ToDictionary(x => x.Key);
+                    Data = _exceptionInfo.Data.ToDictionary(x => x.Key);
             }
 
             public override string StackTrace => _exceptionInfo.StackTrace;
             public override string Source => _exceptionInfo.Source;
-            public override IDictionary Data => _data;
+            public override IDictionary Data { get; }
         }
     }
 }
