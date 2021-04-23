@@ -138,7 +138,7 @@ namespace MassTransit.GrpcTransport.Integration
 
                         _ = Task.Run(async () =>
                         {
-                            await using var context = new GrpcReceiveContext(message, _context, Stopping);
+                            var context = new GrpcReceiveContext(message, _context);
                             try
                             {
                                 await _dispatcher.Dispatch(context).ConfigureAwait(false);

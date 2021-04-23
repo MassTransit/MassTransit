@@ -77,19 +77,11 @@
         public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("messageFabric");
-            foreach (KeyValuePair<string, IGrpcExchange> exchange in _exchanges)
-            {
-                var exchangeScope = scope.CreateScope("exchange");
-                exchangeScope.Add("name", exchange.Key);
-                foreach (IMessageSink<GrpcTransportMessage> sink in exchange.Value.Sinks)
-                    exchangeScope.CreateScope("sink").Add("name", sink.ToString());
-            }
+            foreach (var exchange in _exchanges.Values)
+                exchange.Probe(scope);
 
-            foreach (KeyValuePair<string, IGrpcQueue> exchange in _queues)
-            {
-                var exchangeScope = scope.CreateScope("queue");
-                exchangeScope.Add("name", exchange.Key);
-            }
+            foreach (var queue in _queues.Values)
+                queue.Probe(scope);
         }
 
         public async ValueTask DisposeAsync()
@@ -111,6 +103,7 @@
             {
                 ExchangeType.FanOut => new GrpcFanOutExchange(name),
                 ExchangeType.Direct => new GrpcDirectExchange(name),
+                ExchangeType.Topic => new GrpcTopicExchange(name),
                 _ => throw new ArgumentException($"Unsupported exchange type: {exchangeType}", nameof(exchangeType))
             };
         }

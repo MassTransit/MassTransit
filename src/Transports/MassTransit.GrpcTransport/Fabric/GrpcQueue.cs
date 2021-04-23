@@ -6,6 +6,8 @@
     using System.Threading.Tasks;
     using Context;
     using Contexts;
+    using GreenPipes;
+    using Metrics;
 
 
     public class GrpcQueue :
@@ -15,6 +17,7 @@
         readonly Channel<DeliveryContext<GrpcTransportMessage>> _channel;
         readonly ConsumerCollection _consumers;
         readonly Task _dispatcher;
+        readonly QueueMetric _metrics;
         readonly string _name;
         readonly IMessageFabricObserver _observer;
 
@@ -23,20 +26,18 @@
             _observer = observer;
             _name = name;
 
-            _consumers = new ConsumerCollection(consumers => new RoundRobinConsumerLoadBalancer(consumers));
-
             _cancel = new CancellationTokenSource();
+            _consumers = new ConsumerCollection(consumers => new RoundRobinConsumerLoadBalancer(consumers));
+            _metrics = new QueueMetric(name);
 
-            var outputOptions = new UnboundedChannelOptions
+            _channel = Channel.CreateUnbounded<DeliveryContext<GrpcTransportMessage>>(new UnboundedChannelOptions
             {
                 SingleWriter = false,
                 SingleReader = true,
                 AllowSynchronousContinuations = false
-            };
+            });
 
-            _channel = Channel.CreateUnbounded<DeliveryContext<GrpcTransportMessage>>(outputOptions);
-
-            _dispatcher = Task.Run(() => StartDispatcher(_cancel.Token));
+            _dispatcher = Task.Run(() => StartDispatcher());
         }
 
         public TopologyHandle ConnectConsumer(NodeContext nodeContext, IGrpcQueueConsumer consumer)
@@ -63,7 +64,11 @@
             if (context.Message.EnqueueTime.HasValue)
                 DeliverWithDelay(context);
             else
+            {
                 await _channel.Writer.WriteAsync(context, context.CancellationToken).ConfigureAwait(false);
+
+                _metrics.MessageCount.Add();
+            }
         }
 
         public Task Send(GrpcTransportMessage message, CancellationToken cancellationToken)
@@ -86,25 +91,54 @@
             await _dispatcher.ConfigureAwait(false);
         }
 
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("queue");
+            scope.Add("name", _name);
+        }
+
         void DeliverWithDelay(DeliveryContext<GrpcTransportMessage> context)
         {
             Task.Run(async () =>
             {
-                var delay = context.Message.EnqueueTime.Value - DateTime.UtcNow;
-                if (delay > TimeSpan.Zero)
-                    await Task.Delay(delay, context.CancellationToken).ConfigureAwait(false);
+                var delayed = false;
+                try
+                {
+                    var delay = context.Message.EnqueueTime.Value - DateTime.UtcNow;
+                    if (delay > TimeSpan.Zero)
+                    {
+                        _metrics.DelayedMessageCount.Add();
+                        delayed = true;
 
-                await _channel.Writer.WriteAsync(context, context.CancellationToken).ConfigureAwait(false);
+                        await Task.Delay(delay, context.CancellationToken).ConfigureAwait(false);
+                    }
+
+                    await _channel.Writer.WriteAsync(context, context.CancellationToken).ConfigureAwait(false);
+                    _metrics.MessageCount.Add();
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (Exception exception)
+                {
+                    LogContext.Error?.Log(exception, "Message delivery faulted: {Queue}", _name);
+                }
+                finally
+                {
+                    if (delayed)
+                        _metrics.DelayedMessageCount.Remove();
+                }
             }, context.CancellationToken);
         }
 
-        async Task StartDispatcher(CancellationToken cancellationToken)
+        async Task StartDispatcher()
         {
             try
             {
-                while (await _channel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
+                while (await _channel.Reader.WaitToReadAsync(_cancel.Token).ConfigureAwait(false))
                 {
-                    DeliveryContext<GrpcTransportMessage> context = await _channel.Reader.ReadAsync(cancellationToken).ConfigureAwait(false);
+                    DeliveryContext<GrpcTransportMessage> context = await _channel.Reader.ReadAsync(_cancel.Token).ConfigureAwait(false);
+                    _metrics.MessageCount.Remove();
 
                     try
                     {
@@ -112,9 +146,9 @@
                         if (context.Message.Message.Deliver.DestinationCase == Contracts.Deliver.DestinationOneofCase.Consumer)
                             _consumers.TryGetConsumer(context.Message.Message.Deliver.Consumer.ConsumerId, out consumer);
 
-                        consumer ??= await _consumers.Next(context.Message, cancellationToken).ConfigureAwait(false);
+                        consumer ??= await _consumers.Next(context.Message, _cancel.Token).ConfigureAwait(false);
                         if (consumer != null)
-                            await consumer.Consume(context.Message, context.CancellationToken).ConfigureAwait(false);
+                            await consumer.Consume(context.Message, _cancel.Token).ConfigureAwait(false);
                     }
                     catch (Exception exception)
                     {

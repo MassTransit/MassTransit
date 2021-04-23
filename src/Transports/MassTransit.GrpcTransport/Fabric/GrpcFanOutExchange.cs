@@ -61,6 +61,22 @@
             return _sinks.Connect(sink);
         }
 
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("exchange");
+            scope.Add("name", Name);
+            scope.Add("type", "fanOut");
+
+            var sinkScope = scope.CreateScope("sinks");
+
+            _sinks.All(s =>
+            {
+                s.Probe(sinkScope);
+
+                return true;
+            });
+        }
+
         public override string ToString()
         {
             return $"Exchange({Name})";

@@ -73,6 +73,27 @@ namespace MassTransit.GrpcTransport.Fabric
             return Deliver(deliveryContext);
         }
 
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("exchange");
+            scope.Add("name", Name);
+            scope.Add("type", "direct");
+
+            var sinkScope = scope.CreateScope("keys");
+
+            foreach (KeyValuePair<string, Connectable<IMessageSink<GrpcTransportMessage>>> sink in _sinks)
+            {
+                var routingKeyScope = sinkScope.CreateScope(string.IsNullOrWhiteSpace(sink.Key) ? "<empty>" : sink.Key);
+
+                sink.Value.All(s =>
+                {
+                    s.Probe(routingKeyScope);
+
+                    return true;
+                });
+            }
+        }
+
         public override string ToString()
         {
             return $"Exchange({Name})";

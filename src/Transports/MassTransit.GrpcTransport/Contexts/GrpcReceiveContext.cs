@@ -1,43 +1,28 @@
 namespace MassTransit.GrpcTransport.Contexts
 {
-    using System;
     using System.IO;
     using System.Net.Mime;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Context;
     using Fabric;
 
 
     public class GrpcReceiveContext :
-        BaseReceiveContext,
-        IAsyncDisposable
+        BaseReceiveContext
     {
         readonly byte[] _body;
-        CancellationTokenRegistration _registration;
 
-        public GrpcReceiveContext(GrpcTransportMessage message, GrpcReceiveEndpointContext receiveEndpointContext, CancellationToken cancellationToken)
+        public GrpcReceiveContext(GrpcTransportMessage message, GrpcReceiveEndpointContext receiveEndpointContext)
             : base(false, receiveEndpointContext)
         {
             _body = message.Body;
             Message = message;
 
             HeaderProvider = new GrpcHeaderProvider(message.Headers);
-
-            if (cancellationToken.CanBeCanceled)
-                _registration = cancellationToken.Register(() => Cancel());
         }
 
         public GrpcTransportMessage Message { get; }
 
         protected override IHeaderProvider HeaderProvider { get; }
-
-        public ValueTask DisposeAsync()
-        {
-            _registration.Dispose();
-
-            return default;
-        }
 
         public override byte[] GetBody()
         {

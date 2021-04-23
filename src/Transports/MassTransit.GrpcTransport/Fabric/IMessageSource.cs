@@ -8,6 +8,7 @@
         where T : class
     {
         IEnumerable<IMessageSink<T>> Sinks { get; }
+
         ConnectHandle Connect(IMessageSink<T> sink, string routingKey);
     }
 }

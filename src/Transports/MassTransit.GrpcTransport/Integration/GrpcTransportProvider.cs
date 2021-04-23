@@ -109,6 +109,7 @@ namespace MassTransit.GrpcTransport.Integration
 
         public void Probe(ProbeContext context)
         {
+            _messageFabric.Probe(context);
         }
 
         IGrpcClient GetClient(Uri address)
