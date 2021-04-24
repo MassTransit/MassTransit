@@ -6,6 +6,13 @@ MassTransit supports Prometheus metric capture, which provides useful observabil
 
 > The `prometheus-net` library is used as the Prometheus client since it is mentioned on the Prometheus client list.
 
+### Installation
+
+```bash
+$ dotnet add package prometheus-net.AspNetCore
+$ dotnet add package MassTransit.Prometheus
+```
+
 ### Configuration
 
 To configure the bus to capture metrics, add the `UsePrometheusMetrics()` method to your bus configuration.
@@ -24,24 +31,18 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-#### Publishing Metrics
-
-Metrics must be available on an HTTP endpoint, by default it is `/metrics`. Add the ASP.NET Core integration package to get this endpoint out-of-the-box.
-
-::: tip
-To publish metrics so that they can be scraped by Prometheus, an ASP.NET Core Generic Host is recommended, with the Kestrel HTTP server configured.
-:::
-
-```
-dotnet add package prometheus-net.AspNetCore
-``` 
-
-And then, add the metric server to the application builder.
+To then mount the metrics to `/metrics` go to your Startup.cs and add
 
 ```cs
-public void Configure(IApplicationBuilder app)
+public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
-    app.UseMetricServer();
+    // this registration is simplified
+    app.UseEndpoints(endpoints =>
+    {
+        // add this line
+        endpoints.MapMetrics();
+        endpoints.MapControllers();
+    });
 }
 ```
 
@@ -96,3 +97,38 @@ For the metrics above, labels are specified where appropriate.
 | log_type | The activity compensate log type
 | exception_type | The exception type for a fault metric
 
+
+### Example Docker Compose
+
+```yaml
+version: "3.7"
+
+services:
+  prometheus:
+    image: prom/prometheus
+    ports:
+     - "9090:9090"
+```
+
+**Example MassTransit Prometheus Config File**
+
+::: tip
+You can use the domain `host.docker.internal` to access process
+running on the host machine.
+:::
+
+```yaml
+global:
+  scrape_interval: 10s
+
+scrape_configs:
+  - job_name: masstransit
+    tls_config:
+      insecure_skip_verify: true
+    scheme: https
+    static_configs:
+      - targets:
+        - 'host.docker.internal:5001'
+
+
+```
