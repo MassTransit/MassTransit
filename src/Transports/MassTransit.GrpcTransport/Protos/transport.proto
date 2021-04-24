@@ -33,6 +33,10 @@ message Join {
   Node node = 1;
 }
 
+message Part {
+  Node node = 1;
+}
+
 message Welcome {
   Node node = 1;
   map<string, Node> peers = 2;
@@ -70,12 +74,8 @@ message Deliver {
   oneof destination {
     ExchangeDestination exchange = 3;
     QueueDestination queue = 4;
-    ConsumerDestination consumer = 5;
+    ReceiverDestination receiver = 5;
   }
-}
-
-message QueueDestination {
-  string name = 1;
 }
 
 message ExchangeDestination {
@@ -83,9 +83,13 @@ message ExchangeDestination {
   string routing_key = 2;
 }
 
-message ConsumerDestination {
+message QueueDestination {
+  string name = 1;
+}
+
+message ReceiverDestination {
   string queue_name = 1;
-  int64 consumer_id = 2;
+  int64 receiver_id = 2;
 }
 
 message ConfirmDelivery {
@@ -101,7 +105,7 @@ message Topology {
     ExchangeBind exchangeBind = 4;
     Queue queue = 5;
     QueueBind queueBind = 6;
-    Consumer consumer = 7;
+    Receiver receiver = 7;
   }
 }
 
@@ -131,9 +135,9 @@ message QueueBind {
   string destination = 2;
 }
 
-message Consumer {
+message Receiver {
   string queue_name = 1;
-  int64 consumer_id = 2;
+  int64 receiver_id = 2;
 }
 
 message Gossip {
@@ -143,25 +147,6 @@ message Gossip {
     string address = 1;
     int32 heartbeat = 2;
     repeated int32 suspect = 3;
-  }
-}
-
-// Supporting types
-message NullableInt64 {
-  oneof int64 {
-    int64 value = 1;
-  }
-}
-
-message NullableInt32 {
-  oneof int32 {
-    int32 value = 1;
-  }
-}
-
-message NullableBool {
-  oneof bool {
-    bool value = 1;
   }
 }
 

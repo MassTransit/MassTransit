@@ -15,8 +15,8 @@
     {
         readonly CancellationTokenSource _cancel;
         readonly Channel<DeliveryContext<GrpcTransportMessage>> _channel;
-        readonly ConsumerCollection _consumers;
         readonly Task _dispatcher;
+        readonly MessageReceiverCollection _receivers;
         readonly QueueMetric _metrics;
         readonly string _name;
         readonly IMessageFabricObserver _observer;
@@ -27,7 +27,7 @@
             _name = name;
 
             _cancel = new CancellationTokenSource();
-            _consumers = new ConsumerCollection(consumers => new RoundRobinConsumerLoadBalancer(consumers));
+            _receivers = new MessageReceiverCollection(receivers => new RoundRobinReceiverLoadBalancer(receivers));
             _metrics = new QueueMetric(name);
 
             _channel = Channel.CreateUnbounded<DeliveryContext<GrpcTransportMessage>>(new UnboundedChannelOptions
@@ -40,11 +40,11 @@
             _dispatcher = Task.Run(() => StartDispatcher());
         }
 
-        public TopologyHandle ConnectConsumer(NodeContext nodeContext, IGrpcQueueConsumer consumer)
+        public TopologyHandle ConnectMessageReceiver(NodeContext nodeContext, IMessageReceiver receiver)
         {
             try
             {
-                var handle = _consumers.Connect(consumer);
+                var handle = _receivers.Connect(receiver);
 
                 handle = _observer.ConsumerConnected(nodeContext, handle, _name);
 
@@ -95,6 +95,8 @@
         {
             var scope = context.CreateScope("queue");
             scope.Add("name", _name);
+
+            _receivers.Probe(scope);
         }
 
         void DeliverWithDelay(DeliveryContext<GrpcTransportMessage> context)
@@ -142,13 +144,13 @@
 
                     try
                     {
-                        IGrpcQueueConsumer consumer = null;
-                        if (context.Message.Message.Deliver.DestinationCase == Contracts.Deliver.DestinationOneofCase.Consumer)
-                            _consumers.TryGetConsumer(context.Message.Message.Deliver.Consumer.ConsumerId, out consumer);
+                        IMessageReceiver receiver = null;
+                        if (context.Message.Message.Deliver.DestinationCase == Contracts.Deliver.DestinationOneofCase.Receiver)
+                            _receivers.TryGetReceiver(context.Message.Message.Deliver.Receiver.ReceiverId, out receiver);
 
-                        consumer ??= await _consumers.Next(context.Message, _cancel.Token).ConfigureAwait(false);
-                        if (consumer != null)
-                            await consumer.Consume(context.Message, _cancel.Token).ConfigureAwait(false);
+                        receiver ??= await _receivers.Next(context.Message, _cancel.Token).ConfigureAwait(false);
+                        if (receiver != null)
+                            await receiver.Deliver(context.Message, _cancel.Token).ConfigureAwait(false);
                     }
                     catch (Exception exception)
                     {

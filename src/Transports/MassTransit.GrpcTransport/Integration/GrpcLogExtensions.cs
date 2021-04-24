@@ -77,7 +77,7 @@ namespace MassTransit.GrpcTransport.Integration
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void LogTopology(this NodeContext context, Consumer consumer)
+        public static void LogTopology(this NodeContext context, Receiver receiver)
         {
             // _logConsumer(context.NodeAddress, consumer.QueueName);
         }

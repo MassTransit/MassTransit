@@ -8,22 +8,22 @@ namespace MassTransit.GrpcTransport.Integration
     using Fabric;
 
 
-    public class ClientNodeTopology
+    public class RemoteNodeTopology
     {
-        readonly Dictionary<ConsumerKey, long> _consumerMap;
         readonly Dictionary<long, TopologyEntry> _entries;
         readonly IMessageFabric _messageFabric;
         readonly IGrpcNode _node;
+        readonly Dictionary<ReceiverKey, long> _receiverMap;
         long _lastSequenceNumber;
         Guid _sessionId;
 
-        public ClientNodeTopology(IGrpcNode node, IMessageFabric messageFabric)
+        public RemoteNodeTopology(IGrpcNode node, IMessageFabric messageFabric)
         {
             _node = node;
             _messageFabric = messageFabric;
 
             _entries = new Dictionary<long, TopologyEntry>();
-            _consumerMap = new Dictionary<ConsumerKey, long>();
+            _receiverMap = new Dictionary<ReceiverKey, long>();
         }
 
         public void Join(Guid sessionId, IEnumerable<Topology> topologies)
@@ -50,10 +50,7 @@ namespace MassTransit.GrpcTransport.Integration
                 if (_entries.TryGetValue(topologySequenceNumber, out var existingEntry))
                 {
                     if (existingEntry.Topology.ChangeCase != topology.ChangeCase)
-                    {
-                        LogContext.Warning?.Log("Topology Mismatch, expected {Existing} but was {New}", existingEntry.Topology.ChangeCase, topology
-                            .ChangeCase);
-                    }
+                        LogContext.Warning?.Log("Topology Mismatch, {Existing} != {New}", existingEntry.Topology.ChangeCase, topology.ChangeCase);
                 }
                 else
                     _entries.Add(topologySequenceNumber, new TopologyEntry(topology));
@@ -62,55 +59,52 @@ namespace MassTransit.GrpcTransport.Integration
                 {
                     if (nextEntry.Topology.ChangeCase == Topology.ChangeOneofCase.Exchange)
                     {
-                        var exchangeName = nextEntry.Topology.Exchange.Name;
+                        var exchange = nextEntry.Topology.Exchange;
 
-                        _messageFabric.ExchangeDeclare(_node, exchangeName, nextEntry.Topology.Exchange.Type);
+                        _messageFabric.ExchangeDeclare(_node, exchange.Name, exchange.Type);
 
-                        _node.LogTopology(nextEntry.Topology.Exchange, nextEntry.Topology.Exchange.Type);
+                        _node.LogTopology(exchange, exchange.Type);
                     }
                     else if (nextEntry.Topology.ChangeCase == Topology.ChangeOneofCase.Queue)
                     {
-                        var queueName = nextEntry.Topology.Queue.Name;
+                        var queue = nextEntry.Topology.Queue;
 
-                        _messageFabric.QueueDeclare(_node, queueName);
+                        _messageFabric.QueueDeclare(_node, queue.Name);
 
-                        _node.LogTopology(nextEntry.Topology.Queue);
+                        _node.LogTopology(queue);
                     }
                     else if (nextEntry.Topology.ChangeCase == Topology.ChangeOneofCase.ExchangeBind)
                     {
-                        var source = nextEntry.Topology.ExchangeBind.Source;
-                        var destination = nextEntry.Topology.ExchangeBind.Destination;
+                        var exchangeBind = nextEntry.Topology.ExchangeBind;
 
-                        _messageFabric.ExchangeBind(_node, source, destination, nextEntry.Topology.ExchangeBind.RoutingKey);
+                        _messageFabric.ExchangeBind(_node, exchangeBind.Source, exchangeBind.Destination, exchangeBind.RoutingKey);
 
-                        _node.LogTopology(nextEntry.Topology.ExchangeBind);
+                        _node.LogTopology(exchangeBind);
                     }
                     else if (nextEntry.Topology.ChangeCase == Topology.ChangeOneofCase.QueueBind)
                     {
-                        var source = nextEntry.Topology.QueueBind.Source;
-                        var destination = nextEntry.Topology.QueueBind.Destination;
+                        var queueBind = nextEntry.Topology.QueueBind;
 
-                        _messageFabric.QueueBind(_node, source, destination);
+                        _messageFabric.QueueBind(_node, queueBind.Source, queueBind.Destination);
 
-                        _node.LogTopology(nextEntry.Topology.QueueBind);
+                        _node.LogTopology(queueBind);
                     }
-                    else if (nextEntry.Topology.ChangeCase == Topology.ChangeOneofCase.Consumer)
+                    else if (nextEntry.Topology.ChangeCase == Topology.ChangeOneofCase.Receiver)
                     {
-                        var consumer = nextEntry.Topology.Consumer;
-
-                        var queueName = consumer.QueueName;
+                        var receiver = nextEntry.Topology.Receiver;
+                        var queueName = receiver.QueueName;
 
                         var queue = _messageFabric.GetQueue(_node, queueName);
 
-                        var remoteConsumer = new GrpcRemoteConsumer(_node, queueName, consumer.ConsumerId);
+                        var messageReceiver = new RemoteNodeMessageReceiver(_node, queueName, receiver.ReceiverId);
 
-                        nextEntry.Handle = queue.ConnectConsumer(_node, remoteConsumer);
+                        nextEntry.Handle = queue.ConnectMessageReceiver(_node, messageReceiver);
 
-                        var consumerKey = new ConsumerKey(queueName, consumer.ConsumerId);
+                        var key = new ReceiverKey(queueName, receiver.ReceiverId);
 
-                        _consumerMap[consumerKey] = nextEntry.Handle.Id;
+                        _receiverMap[key] = nextEntry.Handle.Id;
 
-                        _node.LogTopology(consumer);
+                        _node.LogTopology(receiver);
                     }
 
                     _lastSequenceNumber = nextEntry.Topology.SequenceNumber;
@@ -134,27 +128,27 @@ namespace MassTransit.GrpcTransport.Integration
                 _lastSequenceNumber = 0;
 
                 _entries.Clear();
-                _consumerMap.Clear();
+                _receiverMap.Clear();
             }
         }
 
         public long GetLocalConsumerId(string queueName, long consumerId)
         {
-            return _consumerMap.TryGetValue(new ConsumerKey(queueName, consumerId), out var localConsumerId) ? localConsumerId : consumerId;
+            return _receiverMap.TryGetValue(new ReceiverKey(queueName, consumerId), out var localConsumerId) ? localConsumerId : consumerId;
         }
 
 
-        readonly struct ConsumerKey :
-            IEquatable<ConsumerKey>
+        readonly struct ReceiverKey :
+            IEquatable<ReceiverKey>
         {
-            public bool Equals(ConsumerKey other)
+            public bool Equals(ReceiverKey other)
             {
                 return _queueName == other._queueName && _consumerId == other._consumerId;
             }
 
             public override bool Equals(object obj)
             {
-                return obj is ConsumerKey other && Equals(other);
+                return obj is ReceiverKey other && Equals(other);
             }
 
             public override int GetHashCode()
@@ -165,12 +159,12 @@ namespace MassTransit.GrpcTransport.Integration
                 }
             }
 
-            public static bool operator ==(ConsumerKey left, ConsumerKey right)
+            public static bool operator ==(ReceiverKey left, ReceiverKey right)
             {
                 return left.Equals(right);
             }
 
-            public static bool operator !=(ConsumerKey left, ConsumerKey right)
+            public static bool operator !=(ReceiverKey left, ReceiverKey right)
             {
                 return !left.Equals(right);
             }
@@ -178,7 +172,7 @@ namespace MassTransit.GrpcTransport.Integration
             readonly string _queueName;
             readonly long _consumerId;
 
-            public ConsumerKey(string queueName, long consumerId)
+            public ReceiverKey(string queueName, long consumerId)
             {
                 _queueName = queueName;
                 _consumerId = consumerId;

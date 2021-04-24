@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Transports.InMemory.Fabric
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using GreenPipes;
     using GreenPipes.Internals.Extensions;
@@ -15,6 +16,7 @@
         readonly Connectable<IInMemoryQueueConsumer> _consumers;
         readonly ChannelExecutor _executor;
         readonly string _name;
+        readonly CancellationTokenSource _source;
 
         public InMemoryQueue(string name, int concurrencyLevel)
         {
@@ -22,6 +24,7 @@
 
             _consumers = new Connectable<IInMemoryQueueConsumer>();
             _consumer = Util.TaskUtil.GetTask<IInMemoryQueueConsumer>();
+            _source = new CancellationTokenSource();
 
             _executor = new ChannelExecutor(concurrencyLevel, false);
         }
@@ -51,9 +54,11 @@
                     : _executor.Push(() => DispatchMessage(context), context.CancellationToken);
         }
 
-        public ValueTask DisposeAsync()
+        public async ValueTask DisposeAsync()
         {
-            return _executor.DisposeAsync();
+            await _executor.DisposeAsync().ConfigureAwait(false);
+
+            _source.Cancel();
         }
 
         Task DeliverWithDelay(DeliveryContext<InMemoryTransportMessage> context)
@@ -74,7 +79,7 @@
 
             try
             {
-                await _consumers.ForEachAsync(x => x.Consume(context.Message, context.CancellationToken)).ConfigureAwait(false);
+                await _consumers.ForEachAsync(x => x.Consume(context.Message, _source.Token)).ConfigureAwait(false);
             }
             // ReSharper disable once EmptyGeneralCatchClause
             catch

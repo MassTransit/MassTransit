@@ -72,7 +72,7 @@ namespace MassTransit.GrpcTransport.Integration
         class ReceiveTransportAgent :
             Agent,
             ReceiveTransportHandle,
-            IGrpcQueueConsumer
+            IMessageReceiver
         {
             readonly Channel<GrpcTransportMessage> _channel;
             readonly Task _consumeDispatcher;
@@ -108,7 +108,7 @@ namespace MassTransit.GrpcTransport.Integration
                 SetReady(startup);
             }
 
-            public async Task Consume(GrpcTransportMessage message, CancellationToken cancellationToken)
+            public async Task Deliver(GrpcTransportMessage message, CancellationToken cancellationToken)
             {
                 if (IsStopped)
                     return;
@@ -186,7 +186,7 @@ namespace MassTransit.GrpcTransport.Integration
 
                     _context.ConfigureTopology(hostNodeContext);
 
-                    _topologyHandle = queue.ConnectConsumer(hostNodeContext, this);
+                    _topologyHandle = queue.ConnectMessageReceiver(hostNodeContext, this);
 
                     await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(_context.InputAddress));
                 }
@@ -218,6 +218,12 @@ namespace MassTransit.GrpcTransport.Integration
                 _topologyHandle?.Disconnect();
 
                 await base.StopAgent(context).ConfigureAwait(false);
+            }
+
+            public void Probe(ProbeContext context)
+            {
+                var scope = context.CreateScope("local");
+                scope.Add("nodeAddress", _context.TransportProvider.HostNodeContext.NodeAddress);
             }
         }
     }

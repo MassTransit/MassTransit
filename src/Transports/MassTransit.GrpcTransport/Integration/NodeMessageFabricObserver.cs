@@ -66,10 +66,10 @@ namespace MassTransit.GrpcTransport.Integration
         {
             return Send(context, new Topology
             {
-                Consumer = new Consumer
+                Receiver = new Receiver
                 {
                     QueueName = queueName,
-                    ConsumerId = handle.Id
+                    ReceiverId = handle.Id
                 }
             }, handle);
         }

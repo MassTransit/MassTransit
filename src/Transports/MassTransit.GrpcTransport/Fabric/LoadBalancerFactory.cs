@@ -1,4 +1,4 @@
 namespace MassTransit.GrpcTransport.Fabric
 {
-    public delegate IConsumerLoadBalancer LoadBalancerFactory(IGrpcQueueConsumer[] consumers);
+    public delegate IReceiverLoadBalancer LoadBalancerFactory(IMessageReceiver[] consumers);
 }

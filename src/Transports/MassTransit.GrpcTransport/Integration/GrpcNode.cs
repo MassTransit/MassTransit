@@ -20,7 +20,7 @@ namespace MassTransit.GrpcTransport.Integration
     {
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly Channel<TransportMessage> _channel;
-        readonly ClientNodeTopology _clientTopology;
+        readonly RemoteNodeTopology _remoteTopology;
         readonly HostNodeTopology _hostTopology;
         readonly IMessageFabric _messageFabric;
         NodeContext _context;
@@ -34,7 +34,7 @@ namespace MassTransit.GrpcTransport.Integration
 
             _hostTopology = new HostNodeTopology();
 
-            _clientTopology = new ClientNodeTopology(this, messageFabric);
+            _remoteTopology = new RemoteNodeTopology(this, messageFabric);
 
             var outputOptions = new UnboundedChannelOptions
             {
@@ -91,7 +91,7 @@ namespace MassTransit.GrpcTransport.Integration
             if (context.SessionId != SessionId)
                 _context = context;
 
-            _clientTopology.Join(context.SessionId, topologies);
+            _remoteTopology.Join(context.SessionId, topologies);
         }
 
         protected override async Task StopAgent(StopContext context)
@@ -170,13 +170,13 @@ namespace MassTransit.GrpcTransport.Integration
 
                     Guid.TryParse(message.Welcome.Node.SessionId, out var sessionId);
 
-                    _clientTopology.Join(sessionId, message.Welcome.Node.Topology);
+                    _remoteTopology.Join(sessionId, message.Welcome.Node.Topology);
 
                     if (_context.NodeType == NodeType.Client)
                         SetReady();
                 }
                 else if (message.ContentCase == TransportMessage.ContentOneofCase.Topology)
-                    _clientTopology.ProcessTopology(message.Topology);
+                    _remoteTopology.ProcessTopology(message.Topology);
                 else if (message.ContentCase == TransportMessage.ContentOneofCase.Deliver)
                     await DeliverMessage(message).ConfigureAwait(false);
                 else
@@ -188,36 +188,39 @@ namespace MassTransit.GrpcTransport.Integration
             }
         }
 
-        async Task DeliverMessage(TransportMessage message)
+        Task DeliverMessage(TransportMessage message)
         {
             var transportMessage = new GrpcTransportMessage(message, _context.Host);
 
-            if (message.Deliver.DestinationCase == Deliver.DestinationOneofCase.Exchange)
+            switch (message.Deliver.DestinationCase)
             {
-                var destination = message.Deliver.Exchange;
+                case Deliver.DestinationOneofCase.Exchange:
+                {
+                    var destination = message.Deliver.Exchange;
 
-                var exchange = _messageFabric.GetExchange(_context, destination.Name);
+                    var exchange = _messageFabric.GetExchange(_context, destination.Name);
 
-                await exchange.Send(transportMessage, Stopping).ConfigureAwait(false);
+                    return exchange.Send(transportMessage, Stopping);
+                }
+                case Deliver.DestinationOneofCase.Queue:
+                {
+                    var queue = _messageFabric.GetQueue(_context, message.Deliver.Queue.Name);
+
+                    return queue.Send(transportMessage, Stopping);
+                }
+                case Deliver.DestinationOneofCase.Receiver:
+                {
+                    var receiver = message.Deliver.Receiver;
+
+                    var queue = _messageFabric.GetQueue(_context, receiver.QueueName);
+
+                    message.Deliver.Receiver.ReceiverId = _remoteTopology.GetLocalConsumerId(receiver.QueueName, receiver.ReceiverId);
+
+                    return queue.Send(transportMessage, Stopping);
+                }
+                default:
+                    return Task.CompletedTask;
             }
-            else if (message.Deliver.DestinationCase == Deliver.DestinationOneofCase.Queue)
-            {
-                var queue = _messageFabric.GetQueue(_context, message.Deliver.Queue.Name);
-
-                await queue.Send(transportMessage, Stopping).ConfigureAwait(false);
-            }
-            else if (message.Deliver.DestinationCase == Deliver.DestinationOneofCase.Consumer)
-            {
-                var consumer = message.Deliver.Consumer;
-
-                var queue = _messageFabric.GetQueue(_context, consumer.QueueName);
-
-                message.Deliver.Consumer.ConsumerId = _clientTopology.GetLocalConsumerId(consumer.QueueName, consumer.ConsumerId);
-
-                await queue.Send(transportMessage, Stopping).ConfigureAwait(false);
-            }
-            else
-                LogContext.Warning?.Log("Unknown destination from {NodeAddress}:  {Destination}", _context.NodeAddress, message.Deliver.DestinationCase);
         }
     }
 }

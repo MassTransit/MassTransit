@@ -10,7 +10,7 @@
         IMessageSink<GrpcTransportMessage>,
         IAsyncDisposable
     {
-        TopologyHandle ConnectConsumer(NodeContext nodeContext, IGrpcQueueConsumer consumer);
+        TopologyHandle ConnectMessageReceiver(NodeContext nodeContext, IMessageReceiver receiver);
 
         Task Send(GrpcTransportMessage message, CancellationToken cancellationToken = default);
     }
