@@ -12,20 +12,20 @@ namespace MassTransit.GrpcTransport.Integration
     public class NodeCollection :
         INodeCollection
     {
-        readonly ConcurrentDictionary<Uri, IGrpcNode> _instances;
         readonly IMessageFabric _messageFabric;
+        readonly ConcurrentDictionary<Uri, IGrpcNode> _nodes;
         readonly ISupervisor _supervisor;
 
         public NodeCollection(ISupervisor supervisor, IMessageFabric messageFabric)
         {
             _supervisor = supervisor;
             _messageFabric = messageFabric;
-            _instances = new ConcurrentDictionary<Uri, IGrpcNode>();
+            _nodes = new ConcurrentDictionary<Uri, IGrpcNode>();
         }
 
         public IEnumerator<IGrpcNode> GetEnumerator()
         {
-            return _instances.Values.GetEnumerator();
+            return _nodes.Values.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -33,16 +33,9 @@ namespace MassTransit.GrpcTransport.Integration
             return GetEnumerator();
         }
 
-        public IGrpcNode HostNode { get; set; }
-
         public IGrpcNode GetNode(NodeContext context)
         {
-            return _instances.GetOrAdd(context.NodeAddress, _ => CreateNode(context));
-        }
-
-        public bool IsHostNode(NodeContext context)
-        {
-            return HostNode.NodeAddress.Equals(context.NodeAddress);
+            return _nodes.GetOrAdd(context.NodeAddress, _ => CreateNode(context));
         }
 
         IGrpcNode CreateNode(NodeContext context)

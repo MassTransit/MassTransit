@@ -4,7 +4,7 @@
     using System.Threading.Tasks;
 
 
-    public interface IGrpcExchange :
+    public interface IMessageExchange :
         IMessageSink<GrpcTransportMessage>,
         IMessageSource<GrpcTransportMessage>
     {

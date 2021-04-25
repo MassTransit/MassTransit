@@ -17,9 +17,6 @@ namespace MassTransit.GrpcTransport.Integration
     using Transports;
 
 
-    /// <summary>
-    /// Support in-memory message queue that is not durable, but supports parallel delivery of messages based on TPL usage.
-    /// </summary>
     public class GrpcSendTransport :
         ISendTransport
     {

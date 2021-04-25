@@ -7,10 +7,6 @@ namespace MassTransit.GrpcTransport.Integration
     public interface INodeCollection :
         IEnumerable<IGrpcNode>
     {
-        IGrpcNode HostNode { get; }
-
         IGrpcNode GetNode(NodeContext context);
-
-        bool IsHostNode(NodeContext context);
     }
 }

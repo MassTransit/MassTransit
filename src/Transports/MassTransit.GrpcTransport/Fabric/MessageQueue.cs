@@ -7,26 +7,26 @@
     using Context;
     using Contexts;
     using GreenPipes;
+    using GreenPipes.Agents;
     using Metrics;
 
 
-    public class GrpcQueue :
-        IGrpcQueue
+    public class MessageQueue :
+        Agent,
+        IMessageQueue
     {
-        readonly CancellationTokenSource _cancel;
         readonly Channel<DeliveryContext<GrpcTransportMessage>> _channel;
         readonly Task _dispatcher;
-        readonly MessageReceiverCollection _receivers;
         readonly QueueMetric _metrics;
         readonly string _name;
         readonly IMessageFabricObserver _observer;
+        readonly MessageReceiverCollection _receivers;
 
-        public GrpcQueue(IMessageFabricObserver observer, string name)
+        public MessageQueue(IMessageFabricObserver observer, string name)
         {
             _observer = observer;
             _name = name;
 
-            _cancel = new CancellationTokenSource();
             _receivers = new MessageReceiverCollection(receivers => new RoundRobinReceiverLoadBalancer(receivers));
             _metrics = new QueueMetric(name);
 
@@ -78,25 +78,23 @@
             return Deliver(deliveryContext);
         }
 
-        public async ValueTask DisposeAsync()
-        {
-            _cancel.Cancel();
-
-            _channel.Writer.Complete();
-
-            await _channel.Reader.Completion.ConfigureAwait(false);
-
-            _cancel.Cancel();
-
-            await _dispatcher.ConfigureAwait(false);
-        }
-
         public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("queue");
             scope.Add("name", _name);
 
             _receivers.Probe(scope);
+        }
+
+        protected override async Task StopAgent(StopContext context)
+        {
+            _channel.Writer.Complete();
+
+            await _channel.Reader.Completion.ConfigureAwait(false);
+
+            await _dispatcher.ConfigureAwait(false);
+
+            await base.StopAgent(context).ConfigureAwait(false);
         }
 
         void DeliverWithDelay(DeliveryContext<GrpcTransportMessage> context)
@@ -112,10 +110,10 @@
                         _metrics.DelayedMessageCount.Add();
                         delayed = true;
 
-                        await Task.Delay(delay, context.CancellationToken).ConfigureAwait(false);
+                        await Task.Delay(delay, Stopping).ConfigureAwait(false);
                     }
 
-                    await _channel.Writer.WriteAsync(context, context.CancellationToken).ConfigureAwait(false);
+                    await _channel.Writer.WriteAsync(context, Stopping).ConfigureAwait(false);
                     _metrics.MessageCount.Add();
                 }
                 catch (OperationCanceledException)
@@ -137,20 +135,24 @@
         {
             try
             {
-                while (await _channel.Reader.WaitToReadAsync(_cancel.Token).ConfigureAwait(false))
+                while (await _channel.Reader.WaitToReadAsync(Stopping).ConfigureAwait(false))
                 {
-                    DeliveryContext<GrpcTransportMessage> context = await _channel.Reader.ReadAsync(_cancel.Token).ConfigureAwait(false);
+                    DeliveryContext<GrpcTransportMessage> context = await _channel.Reader.ReadAsync(Stopping).ConfigureAwait(false);
                     _metrics.MessageCount.Remove();
 
                     try
                     {
                         IMessageReceiver receiver = null;
                         if (context.Message.Message.Deliver.DestinationCase == Contracts.Deliver.DestinationOneofCase.Receiver)
-                            _receivers.TryGetReceiver(context.Message.Message.Deliver.Receiver.ReceiverId, out receiver);
+                        {
+                            var receiverDestination = context.Message.Message.Deliver.Receiver;
+                            if (!_receivers.TryGetReceiver(receiverDestination.ReceiverId, out receiver))
+                                LogContext.Debug?.Log("Received not found: {Queue}, {ReceiverId}", _name, receiverDestination.ReceiverId);
+                        }
 
-                        receiver ??= await _receivers.Next(context.Message, _cancel.Token).ConfigureAwait(false);
+                        receiver ??= await _receivers.Next(context.Message, Stopping).ConfigureAwait(false);
                         if (receiver != null)
-                            await receiver.Deliver(context.Message, _cancel.Token).ConfigureAwait(false);
+                            await receiver.Deliver(context.Message, Stopping).ConfigureAwait(false);
                     }
                     catch (Exception exception)
                     {
@@ -165,11 +167,6 @@
             {
                 LogContext.Warning?.Log(exception, "Queue dispatcher faulted: {Queue}", _name);
             }
-        }
-
-        public override string ToString()
-        {
-            return $"Queue({_name})";
         }
     }
 }

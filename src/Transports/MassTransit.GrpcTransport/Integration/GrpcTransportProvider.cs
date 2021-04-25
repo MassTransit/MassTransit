@@ -26,6 +26,7 @@ namespace MassTransit.GrpcTransport.Integration
         const int MaxMessageLengthBytes = int.MaxValue;
         readonly IList<IGrpcClient> _clients;
         readonly IGrpcHostConfiguration _hostConfiguration;
+        readonly GrpcHostNode _hostNode;
         readonly IMessageFabric _messageFabric;
         readonly NodeCollection _nodeCollection;
         readonly Server _server;
@@ -42,7 +43,7 @@ namespace MassTransit.GrpcTransport.Integration
             _nodeCollection = new NodeCollection(this, _messageFabric);
             _clients = new List<IGrpcClient>();
 
-            var transport = new GrpcTransportService(_hostConfiguration, _nodeCollection);
+            var transport = new GrpcTransportService(this, _hostConfiguration, _nodeCollection);
 
             _server = new Server(GetChannelOptions())
             {
@@ -58,18 +59,18 @@ namespace MassTransit.GrpcTransport.Integration
                 Port = serverPort.BoundPort
             }.Uri;
 
-            HostNodeContext = new GrpcHostNodeContext(HostAddress);
+            HostNodeContext = new HostNodeContext(HostAddress);
 
-            var hostNode = _nodeCollection.GetNode(HostNodeContext);
-            _nodeCollection.HostNode = hostNode;
+            _hostNode = new GrpcHostNode(_messageFabric, HostNodeContext);
 
-            var observer = new NodeMessageFabricObserver(_nodeCollection);
+            var observer = new NodeMessageFabricObserver(_nodeCollection, _hostNode);
 
             _messageFabric.ConnectMessageFabricObserver(observer);
 
             _startupTask = new Lazy<Task>(() => Task.Run(() => Startup()));
         }
 
+        public IGrpcHostNode HostNode => _hostNode;
         public Task StartupTask => _startupTask.Value;
 
         public Uri HostAddress { get; }
@@ -77,7 +78,7 @@ namespace MassTransit.GrpcTransport.Integration
 
         public IMessageFabric MessageFabric => _messageFabric;
 
-        public Task<ISendTransport> GetSendTransport(GrpcReceiveEndpointContext context, Uri address)
+        public Task<ISendTransport> GetSendTransport(Uri address)
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
 
@@ -97,14 +98,14 @@ namespace MassTransit.GrpcTransport.Integration
             return new GrpcEndpointAddress(HostAddress, address);
         }
 
-        public Task<ISendTransport> GetPublishTransport<T>(GrpcReceiveEndpointContext context, Uri publishAddress)
+        public Task<ISendTransport> GetPublishTransport<T>(Uri publishAddress)
             where T : class
         {
             IGrpcMessagePublishTopologyConfigurator<T> publishTopology = _topologyConfiguration.Publish.GetMessageTopology<T>();
 
             publishTopology.Apply(new GrpcPublishTopologyBuilder(HostNodeContext, _messageFabric));
 
-            return GetSendTransport(context, publishAddress);
+            return GetSendTransport(publishAddress);
         }
 
         public void Probe(ProbeContext context)
@@ -122,7 +123,12 @@ namespace MassTransit.GrpcTransport.Integration
 
             var client = new TransportService.TransportServiceClient(channel);
 
-            return new GrpcClient(_hostConfiguration, address, client, _nodeCollection);
+            var clientNodeContext = new ClientNodeContext(address);
+
+            var node = _nodeCollection.GetNode(clientNodeContext);
+
+
+            return new GrpcClient(_hostConfiguration, _hostNode, client, node);
         }
 
         async Task Startup()
@@ -160,7 +166,7 @@ namespace MassTransit.GrpcTransport.Integration
 
             await shutdownAsync.ConfigureAwait(false);
 
-            await _messageFabric.DisposeAsync().ConfigureAwait(false);
+            await _messageFabric.Stop(context).ConfigureAwait(false);
         }
     }
 }

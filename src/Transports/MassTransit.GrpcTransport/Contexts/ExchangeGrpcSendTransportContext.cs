@@ -9,12 +9,12 @@ namespace MassTransit.GrpcTransport.Contexts
         BaseSendTransportContext,
         GrpcSendTransportContext
     {
-        public ExchangeGrpcSendTransportContext(IHostConfiguration hostConfiguration, IGrpcExchange exchange)
+        public ExchangeGrpcSendTransportContext(IHostConfiguration hostConfiguration, IMessageExchange exchange)
             : base(hostConfiguration)
         {
             Exchange = exchange;
         }
 
-        public IGrpcExchange Exchange { get; }
+        public IMessageExchange Exchange { get; }
     }
 }

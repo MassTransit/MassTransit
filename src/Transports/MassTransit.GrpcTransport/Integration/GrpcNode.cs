@@ -14,25 +14,19 @@ namespace MassTransit.GrpcTransport.Integration
     using Grpc.Core;
 
 
-    public sealed class GrpcNode :
+    public class GrpcNode :
         Agent,
         IGrpcNode
     {
-        readonly CancellationTokenSource _cancellationTokenSource;
         readonly Channel<TransportMessage> _channel;
-        readonly RemoteNodeTopology _remoteTopology;
-        readonly HostNodeTopology _hostTopology;
         readonly IMessageFabric _messageFabric;
+        readonly RemoteNodeTopology _remoteTopology;
         NodeContext _context;
 
         public GrpcNode(IMessageFabric messageFabric, NodeContext context)
         {
             _messageFabric = messageFabric;
             _context = context;
-
-            _cancellationTokenSource = new CancellationTokenSource();
-
-            _hostTopology = new HostNodeTopology();
 
             _remoteTopology = new RemoteNodeTopology(this, messageFabric);
 
@@ -46,9 +40,6 @@ namespace MassTransit.GrpcTransport.Integration
             _channel = System.Threading.Channels.Channel.CreateUnbounded<TransportMessage>(outputOptions);
 
             Writer = _channel.Writer;
-
-            if (context.NodeType == NodeType.Host)
-                SetReady();
         }
 
         public ChannelWriter<TransportMessage> Writer { get; }
@@ -74,16 +65,6 @@ namespace MassTransit.GrpcTransport.Integration
             var readerTask = StartReader(reader, source.Token);
 
             await Task.WhenAll(readerTask, writerTask).ConfigureAwait(false);
-        }
-
-        public TopologyHandle AddTopology(Topology topology, TopologyHandle handle)
-        {
-            return _hostTopology.Add(topology, handle);
-        }
-
-        public IEnumerable<Topology> GetTopology()
-        {
-            return _hostTopology.GetTopology();
         }
 
         public void Join(NodeContext context, IEnumerable<Topology> topologies)
@@ -155,7 +136,7 @@ namespace MassTransit.GrpcTransport.Integration
 
         void DispatchMessageAsync(TransportMessage message)
         {
-            Task.Run(() => ProcessMessage(message), _cancellationTokenSource.Token);
+            Task.Run(() => ProcessMessage(message), Stopping);
         }
 
         async Task ProcessMessage(TransportMessage message)

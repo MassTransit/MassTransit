@@ -6,12 +6,12 @@ namespace MassTransit.GrpcTransport.Integration
     using Grpc.Core;
 
 
-    public class GrpcServerNodeContext :
+    public class ServerNodeContext :
         NodeContext
     {
         readonly ServerCallContext _context;
 
-        public GrpcServerNodeContext(ServerCallContext context, Uri nodeAddress, Guid sessionId, IReadOnlyDictionary<string, string> host)
+        public ServerNodeContext(ServerCallContext context, Uri nodeAddress, Guid sessionId, IReadOnlyDictionary<string, string> host)
         {
             _context = context;
             NodeAddress = nodeAddress;

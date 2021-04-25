@@ -5,10 +5,10 @@ namespace MassTransit.GrpcTransport.Integration
     using Metadata;
 
 
-    public class GrpcHostNodeContext :
+    public class HostNodeContext :
         NodeContext
     {
-        public GrpcHostNodeContext(Uri nodeAddress)
+        public HostNodeContext(Uri nodeAddress)
         {
             NodeAddress = nodeAddress;
             SessionId = NewId.NextGuid();

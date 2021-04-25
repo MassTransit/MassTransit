@@ -5,11 +5,11 @@ namespace MassTransit.GrpcTransport.Integration
     using Transports;
 
 
-    public class GrpcMessageErrorTransport :
-        GrpcMessageMoveTransport,
+    public class GrpcErrorTransport :
+        GrpcMoveTransport,
         IErrorTransport
     {
-        public GrpcMessageErrorTransport(IGrpcExchange exchange)
+        public GrpcErrorTransport(IMessageExchange exchange)
             : base(exchange)
         {
         }

@@ -11,17 +11,20 @@ namespace MassTransit.GrpcTransport.Integration
     public class NodeMessageFabricObserver :
         IMessageFabricObserver
     {
-        readonly IGrpcNode _node;
+        readonly IGrpcHostNode _hostNode;
         readonly INodeCollection _nodes;
 
-        public NodeMessageFabricObserver(INodeCollection nodes)
+        public NodeMessageFabricObserver(INodeCollection nodes, IGrpcHostNode hostNode)
         {
             _nodes = nodes;
-            _node = nodes.HostNode;
+            _hostNode = hostNode;
         }
 
         public void ExchangeDeclared(NodeContext context, string name, ExchangeType exchangeType)
         {
+            if (context.NodeType != NodeType.Host)
+                return;
+
             Send(context, new Topology
             {
                 Exchange = new Exchange
@@ -34,6 +37,9 @@ namespace MassTransit.GrpcTransport.Integration
 
         public void ExchangeBindingCreated(NodeContext context, string source, string destination, string routingKey)
         {
+            if (context.NodeType != NodeType.Host)
+                return;
+
             Send(context, new Topology
             {
                 ExchangeBind = new ExchangeBind
@@ -47,11 +53,17 @@ namespace MassTransit.GrpcTransport.Integration
 
         public void QueueDeclared(NodeContext context, string name)
         {
+            if (context.NodeType != NodeType.Host)
+                return;
+
             Send(context, new Topology {Queue = new Queue {Name = name}});
         }
 
         public void QueueBindingCreated(NodeContext context, string source, string destination)
         {
+            if (context.NodeType != NodeType.Host)
+                return;
+
             Send(context, new Topology
             {
                 QueueBind = new QueueBind
@@ -64,6 +76,9 @@ namespace MassTransit.GrpcTransport.Integration
 
         public TopologyHandle ConsumerConnected(NodeContext context, TopologyHandle handle, string queueName)
         {
+            if (context.NodeType != NodeType.Host)
+                return handle;
+
             return Send(context, new Topology
             {
                 Receiver = new Receiver
@@ -76,12 +91,9 @@ namespace MassTransit.GrpcTransport.Integration
 
         TopologyHandle Send(NodeContext context, Topology topology, TopologyHandle handle = default)
         {
-            if (!_nodes.IsHostNode(context))
-                return handle;
-
             try
             {
-                handle = _node.AddTopology(topology, handle);
+                handle = _hostNode.AddTopology(topology, handle);
 
                 var transportMessage = new TransportMessage
                 {
@@ -89,10 +101,10 @@ namespace MassTransit.GrpcTransport.Integration
                     Topology = topology
                 };
 
-                foreach (var instance in _nodes.Where(x => x.NodeAddress != context.NodeAddress))
+                foreach (var node in _nodes.Where(x => x.NodeAddress != context.NodeAddress))
                 {
-                    if (!instance.Writer.TryWrite(transportMessage))
-                        LogContext.Error?.Log("Failed to Send Topology {Topology} to {Address}", topology.ChangeCase, instance.NodeAddress);
+                    if (!node.Writer.TryWrite(transportMessage))
+                        LogContext.Error?.Log("Failed to Send Topology {Topology} to {Address}", topology.ChangeCase, node.NodeAddress);
                 }
 
                 return handle;

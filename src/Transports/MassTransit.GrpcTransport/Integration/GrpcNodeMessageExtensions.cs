@@ -7,7 +7,7 @@ namespace MassTransit.GrpcTransport.Integration
 
     public static class GrpcNodeMessageExtensions
     {
-        public static ValueTask SendWelcome(this IGrpcNode node, IGrpcNode hostNode)
+        public static ValueTask SendWelcome(this IGrpcNode node, IGrpcHostNode hostNode)
         {
             return node.Writer.WriteAsync(new TransportMessage {Welcome = new Welcome {Node = new Node().Initialize(hostNode)}});
         }

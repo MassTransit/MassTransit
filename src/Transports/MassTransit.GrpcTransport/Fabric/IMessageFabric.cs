@@ -1,15 +1,15 @@
 ﻿namespace MassTransit.GrpcTransport.Fabric
 {
-    using System;
     using Contexts;
     using Contracts;
     using GreenPipes;
+    using GreenPipes.Agents;
 
 
     public interface IMessageFabric :
         IMessageFabricObserverConnector,
-        IProbeSite,
-        IAsyncDisposable
+        IAgent,
+        IProbeSite
     {
         void ExchangeDeclare(NodeContext context, string name, ExchangeType exchangeType);
 
@@ -19,8 +19,8 @@
 
         void QueueBind(NodeContext context, string source, string destination);
 
-        IGrpcExchange GetExchange(NodeContext context, string name, ExchangeType exchangeType = ExchangeType.FanOut);
+        IMessageExchange GetExchange(NodeContext context, string name, ExchangeType exchangeType = ExchangeType.FanOut);
 
-        IGrpcQueue GetQueue(NodeContext context, string name);
+        IMessageQueue GetQueue(NodeContext context, string name);
     }
 }

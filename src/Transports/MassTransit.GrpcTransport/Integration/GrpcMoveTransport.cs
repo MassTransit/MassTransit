@@ -7,11 +7,11 @@ namespace MassTransit.GrpcTransport.Integration
     using Fabric;
 
 
-    public class GrpcMessageMoveTransport
+    public class GrpcMoveTransport
     {
-        readonly IGrpcExchange _exchange;
+        readonly IMessageExchange _exchange;
 
-        protected GrpcMessageMoveTransport(IGrpcExchange exchange)
+        protected GrpcMoveTransport(IMessageExchange exchange)
         {
             _exchange = exchange;
         }

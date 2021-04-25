@@ -4,10 +4,10 @@ namespace MassTransit.GrpcTransport.Integration
     using Contexts;
 
 
-    public class GrpcClientNodeContext :
+    public class ClientNodeContext :
         NodeContext
     {
-        public GrpcClientNodeContext(Uri nodeAddress)
+        public ClientNodeContext(Uri nodeAddress)
         {
             NodeAddress = nodeAddress;
             SessionId = NewId.NextGuid();

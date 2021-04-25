@@ -56,18 +56,24 @@
 
         public async ValueTask DisposeAsync()
         {
-            await _executor.DisposeAsync().ConfigureAwait(false);
-
             _source.Cancel();
+
+            await _executor.DisposeAsync().ConfigureAwait(false);
         }
 
         Task DeliverWithDelay(DeliveryContext<InMemoryTransportMessage> context)
         {
             Task.Run(async () =>
             {
-                await Task.Delay(context.Message.Delay.Value, context.CancellationToken).ConfigureAwait(false);
+                try
+                {
+                    await Task.Delay(context.Message.Delay.Value, _source.Token).ConfigureAwait(false);
 
-                await _executor.Push(() => DispatchMessage(context), context.CancellationToken).ConfigureAwait(false);
+                    await _executor.Push(() => DispatchMessage(context), _source.Token).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                }
             }, context.CancellationToken);
 
             return Task.CompletedTask;
@@ -75,7 +81,7 @@
 
         async Task DispatchMessage(DeliveryContext<InMemoryTransportMessage> context)
         {
-            await _consumer.Task.OrCanceled(context.CancellationToken).ConfigureAwait(false);
+            await _consumer.Task.OrCanceled(_source.Token).ConfigureAwait(false);
 
             try
             {

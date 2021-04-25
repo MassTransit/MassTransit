@@ -8,7 +8,7 @@ namespace MassTransit.GrpcTransport.Integration
 
     public static class TransportMessageExtensions
     {
-        public static Node Initialize(this Node node, IGrpcNode hostNode)
+        public static Node Initialize(this Node node, IGrpcHostNode hostNode)
         {
             node.Address = hostNode.NodeAddress.ToString();
             node.Version = "1.0-alpha";

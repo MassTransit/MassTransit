@@ -6,7 +6,6 @@ namespace MassTransit.GrpcTransport.Integration
     using System.Threading.Tasks;
     using Contexts;
     using Contracts;
-    using Fabric;
     using GreenPipes.Agents;
     using Grpc.Core;
 
@@ -18,10 +17,6 @@ namespace MassTransit.GrpcTransport.Integration
         ChannelWriter<TransportMessage> Writer { get; }
 
         Task Connect(IAsyncStreamWriter<TransportMessage> writer, IAsyncStreamReader<TransportMessage> reader, CancellationToken cancellationToken);
-
-        TopologyHandle AddTopology(Topology topology, TopologyHandle handle = default);
-
-        IEnumerable<Topology> GetTopology();
 
         void Join(NodeContext context, IEnumerable<Topology> topologies);
     }

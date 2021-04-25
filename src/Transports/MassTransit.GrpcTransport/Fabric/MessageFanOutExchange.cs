@@ -7,12 +7,12 @@
     using GreenPipes.Util;
 
 
-    public class GrpcFanOutExchange :
-        IGrpcExchange
+    public class MessageFanOutExchange :
+        IMessageExchange
     {
         readonly Connectable<IMessageSink<GrpcTransportMessage>> _sinks;
 
-        public GrpcFanOutExchange(string name)
+        public MessageFanOutExchange(string name)
         {
             Name = name;
 

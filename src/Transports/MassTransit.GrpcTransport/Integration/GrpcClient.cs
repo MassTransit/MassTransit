@@ -4,7 +4,6 @@ namespace MassTransit.GrpcTransport.Integration
     using System.Threading.Tasks;
     using Configuration;
     using Context;
-    using Contexts;
     using Contracts;
     using GreenPipes.Agents;
     using Grpc.Core;
@@ -16,19 +15,17 @@ namespace MassTransit.GrpcTransport.Integration
         IGrpcClient
     {
         readonly TransportService.TransportServiceClient _client;
-        readonly NodeContext _context;
         readonly IGrpcHostConfiguration _hostConfiguration;
-        readonly INodeCollection _nodeCollection;
+        readonly IGrpcHostNode _hostNode;
+        readonly IGrpcNode _node;
         readonly Task _runTask;
 
-        public GrpcClient(IGrpcHostConfiguration hostConfiguration, Uri nodeAddress, TransportService.TransportServiceClient client,
-            INodeCollection nodeCollection)
+        public GrpcClient(IGrpcHostConfiguration hostConfiguration, IGrpcHostNode hostNode, TransportService.TransportServiceClient client, IGrpcNode node)
         {
             _hostConfiguration = hostConfiguration;
+            _hostNode = hostNode;
             _client = client;
-            _nodeCollection = nodeCollection;
-
-            _context = new GrpcClientNodeContext(nodeAddress);
+            _node = node;
 
             _runTask = Task.Run(() => RunAsync());
         }
@@ -39,7 +36,7 @@ namespace MassTransit.GrpcTransport.Integration
 
             try
             {
-                LogContext.Info?.Log("gRPC Connect: {Server}", _context.NodeAddress);
+                LogContext.Info?.Log("gRPC Connect: {Server}", _node.NodeAddress);
 
                 await _hostConfiguration.ReceiveTransportRetryPolicy.Retry(async () =>
                 {
@@ -47,13 +44,11 @@ namespace MassTransit.GrpcTransport.Integration
                     {
                         AsyncDuplexStreamingCall<TransportMessage, TransportMessage> eventStream = _client.EventStream(cancellationToken: Stopping);
 
-                        var node = _nodeCollection.GetNode(_context);
-
                         await SendJoin(eventStream.RequestStream).ConfigureAwait(false);
 
-                        SetReady(node.Ready);
+                        SetReady(_node.Ready);
 
-                        await node.Connect(eventStream.RequestStream, eventStream.ResponseStream, Stopping).ConfigureAwait(false);
+                        await _node.Connect(eventStream.RequestStream, eventStream.ResponseStream, Stopping).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
@@ -82,12 +77,12 @@ namespace MassTransit.GrpcTransport.Integration
             var message = new TransportMessage
             {
                 MessageId = NewId.NextGuid().ToString(),
-                Join = new Join {Node = new Node().Initialize(_nodeCollection.HostNode)}
+                Join = new Join {Node = new Node().Initialize(_hostNode)}
             };
 
             await requestStream.WriteAsync(message).ConfigureAwait(false);
 
-            _context.LogSent(message);
+            _node.LogSent(message);
         }
     }
 }

@@ -7,12 +7,12 @@ namespace MassTransit.GrpcTransport.Fabric
     using GreenPipes;
 
 
-    public class GrpcTopicExchange :
-        IGrpcExchange
+    public class MessageTopicExchange :
+        IMessageExchange
     {
         readonly TopicNode _root;
 
-        public GrpcTopicExchange(string name, StringComparer comparer = default)
+        public MessageTopicExchange(string name, StringComparer comparer = default)
         {
             Name = name;
 

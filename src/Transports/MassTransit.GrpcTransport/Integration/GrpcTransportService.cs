@@ -15,9 +15,11 @@ namespace MassTransit.GrpcTransport.Integration
     {
         readonly INodeCollection _collection;
         readonly IGrpcHostConfiguration _hostConfiguration;
+        readonly IGrpcTransportProvider _transportProvider;
 
-        public GrpcTransportService(IGrpcHostConfiguration hostConfiguration, INodeCollection collection)
+        public GrpcTransportService(IGrpcTransportProvider transportProvider, IGrpcHostConfiguration hostConfiguration, INodeCollection collection)
         {
+            _transportProvider = transportProvider;
             _hostConfiguration = hostConfiguration;
             _collection = collection;
         }
@@ -41,7 +43,7 @@ namespace MassTransit.GrpcTransport.Integration
 
                         Guid.TryParse(joinNode.SessionId, out var sessionId);
 
-                        var nodeContext = new GrpcServerNodeContext(context, nodeAddress, sessionId, joinNode.Host);
+                        var nodeContext = new ServerNodeContext(context, nodeAddress, sessionId, joinNode.Host);
 
                         nodeContext.LogReceived(message);
 
@@ -49,7 +51,7 @@ namespace MassTransit.GrpcTransport.Integration
 
                         node.Join(nodeContext, joinNode.Topology);
 
-                        await node.SendWelcome(_collection.HostNode).ConfigureAwait(false);
+                        await node.SendWelcome(_transportProvider.HostNode).ConfigureAwait(false);
 
                         await node.Connect(responseStream, requestStream, context.CancellationToken).ConfigureAwait(false);
 

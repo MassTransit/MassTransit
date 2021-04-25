@@ -9,12 +9,12 @@ namespace MassTransit.GrpcTransport.Fabric
     using GreenPipes.Util;
 
 
-    public class GrpcDirectExchange :
-        IGrpcExchange
+    public class MessageDirectExchange :
+        IMessageExchange
     {
         readonly ConcurrentDictionary<string, Connectable<IMessageSink<GrpcTransportMessage>>> _sinks;
 
-        public GrpcDirectExchange(string name, StringComparer comparer = default)
+        public MessageDirectExchange(string name, StringComparer comparer = default)
         {
             Name = name;
 

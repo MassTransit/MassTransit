@@ -7,6 +7,6 @@ namespace MassTransit.GrpcTransport.Contexts
     public interface GrpcSendTransportContext :
         SendTransportContext
     {
-        IGrpcExchange Exchange { get; }
+        IMessageExchange Exchange { get; }
     }
 }

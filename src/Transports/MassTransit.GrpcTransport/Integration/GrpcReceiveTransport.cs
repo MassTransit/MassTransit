@@ -177,11 +177,11 @@ namespace MassTransit.GrpcTransport.Integration
                     var queue = _context.MessageFabric.GetQueue(hostNodeContext, _queueName);
 
                     IDeadLetterTransport deadLetterTransport =
-                        new GrpcMessageDeadLetterTransport(_context.MessageFabric.GetExchange(hostNodeContext, $"{_queueName}_skipped"));
+                        new GrpcDeadLetterTransport(_context.MessageFabric.GetExchange(hostNodeContext, $"{_queueName}_skipped"));
                     _context.AddOrUpdatePayload(() => deadLetterTransport, _ => deadLetterTransport);
 
                     IErrorTransport errorTransport =
-                        new GrpcMessageErrorTransport(_context.MessageFabric.GetExchange(hostNodeContext, $"{_queueName}_error"));
+                        new GrpcErrorTransport(_context.MessageFabric.GetExchange(hostNodeContext, $"{_queueName}_error"));
                     _context.AddOrUpdatePayload(() => errorTransport, _ => errorTransport);
 
                     _context.ConfigureTopology(hostNodeContext);

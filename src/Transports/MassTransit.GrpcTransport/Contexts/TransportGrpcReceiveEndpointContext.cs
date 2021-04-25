@@ -58,12 +58,12 @@
 
         protected override ISendTransportProvider CreateSendTransportProvider()
         {
-            return new GrpcSendTransportProvider(_hostConfiguration, this);
+            return _hostConfiguration.TransportProvider;
         }
 
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
-            return new GrpcPublishTransportProvider(_hostConfiguration, this);
+            return _hostConfiguration.TransportProvider;
         }
     }
 }

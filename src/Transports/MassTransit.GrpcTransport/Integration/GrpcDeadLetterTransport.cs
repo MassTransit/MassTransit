@@ -5,11 +5,11 @@ namespace MassTransit.GrpcTransport.Integration
     using Transports;
 
 
-    public class GrpcMessageDeadLetterTransport :
-        GrpcMessageMoveTransport,
+    public class GrpcDeadLetterTransport :
+        GrpcMoveTransport,
         IDeadLetterTransport
     {
-        public GrpcMessageDeadLetterTransport(IGrpcExchange exchange)
+        public GrpcDeadLetterTransport(IMessageExchange exchange)
             : base(exchange)
         {
         }
