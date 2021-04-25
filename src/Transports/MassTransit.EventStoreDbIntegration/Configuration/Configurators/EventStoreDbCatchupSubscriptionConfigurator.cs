@@ -22,7 +22,7 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
         readonly IEventStoreDbHostConfiguration _hostConfiguration;
         readonly PipeConfigurator<SubscriptionContext> _processorConfigurator;
         IHeadersDeserializer _headersDeserializer;
-        IEventFilter _allStreamFilter;
+        IEventFilter _allStreamEventFilter;
         UserCredentials _userCredentials;
         CheckpointStoreFactory _checkpointStoreFactory;
         bool _isCheckpointStoreConfigured = false;
@@ -41,6 +41,9 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
             CheckpointMessageCount = 5000;
             ConcurrencyLimit = 1;
 
+            //Actual checkpoint interval is AllStreamCheckpointInterval * maxSearchWindow (320 * 32 = 10,240)
+            AllStreamCheckpointInterval = 320;
+
             HeadersDeserializer = headersDeserializer;
 
             _processorConfigurator = new PipeConfigurator<SubscriptionContext>();
@@ -56,15 +59,17 @@ namespace MassTransit.EventStoreDbIntegration.Configurators
 
         public IEventFilter AllStreamEventFilter
         {
-            get => _allStreamFilter;
+            get => _allStreamEventFilter;
             set
             {
                 if (!StreamName.IsAllStream)
                     throw new InvalidOperationException($"The {nameof(AllStreamEventFilter)} can only be set for an AllStream subscription.");
 
-                _allStreamFilter = value ?? throw new ArgumentNullException(nameof(value));
+                _allStreamEventFilter = value ?? throw new ArgumentNullException(nameof(value));
             }
         }
+
+        public uint AllStreamCheckpointInterval { get; set; }
 
         public UserCredentials UserCredentials
         {

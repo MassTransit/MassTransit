@@ -27,7 +27,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
                     subscriptionDropped: SubscriptionDropped,
                     filterOptions: new SubscriptionFilterOptions(
                         SubscriptionSettings.AllStreamEventFilter ?? EventTypeFilter.ExcludeSystemEvents(),
-                        SubscriptionSettings.CheckpointMessageCount,
+                        SubscriptionSettings.AllStreamCheckpointInterval,
                         CheckpointReached
                     ),
                     configureOperationOptions: null,
@@ -39,7 +39,7 @@ namespace MassTransit.EventStoreDbIntegration.Contexts
                     subscriptionDropped: SubscriptionDropped,
                     filterOptions: new SubscriptionFilterOptions(
                         SubscriptionSettings.AllStreamEventFilter ?? EventTypeFilter.ExcludeSystemEvents(),
-                        SubscriptionSettings.CheckpointMessageCount,
+                        SubscriptionSettings.AllStreamCheckpointInterval,
                         CheckpointReached
                     ),
                     configureOperationOptions: null,

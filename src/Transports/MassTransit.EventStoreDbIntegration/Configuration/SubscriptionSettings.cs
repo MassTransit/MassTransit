@@ -13,6 +13,7 @@ namespace MassTransit.EventStoreDbIntegration
         int ConcurrencyLimit { get; }
 
         IEventFilter AllStreamEventFilter { get; }
+        uint AllStreamCheckpointInterval { get; }
 
         UserCredentials UserCredentials { get; }
 
