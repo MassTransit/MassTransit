@@ -3,7 +3,6 @@ namespace MassTransit.Transports
     using Automatonymous;
     using Automatonymous.Binders;
     using Context;
-    using Monitoring.Health;
 
 
     public class ReceiveEndpointStateMachine :
@@ -62,9 +61,7 @@ namespace MassTransit.Transports
                     .TransitionTo(Started)
             );
 
-            During(Ready,
-                Ignore(ReceiveEndpointStarted));
-
+            During(Ready, Ignore(ReceiveEndpointStarted));
             During(Started, Ignore(ReceiveEndpointStarted));
 
             DuringAny(

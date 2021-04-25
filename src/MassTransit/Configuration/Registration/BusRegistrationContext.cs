@@ -4,31 +4,22 @@ namespace MassTransit.Registration
     using System.Collections.Generic;
     using System.Linq;
     using Definition;
-    using Monitoring.Health;
 
 
     public class BusRegistrationContext :
         Registration,
         IBusRegistrationContext
     {
-        readonly BusHealth _busHealth;
         readonly IRegistrationCache<IEndpointRegistration> _endpoints;
         IConfigureReceiveEndpoint _configureReceiveEndpoints;
 
-        public BusRegistrationContext(IConfigurationServiceProvider provider, BusHealth busHealth, IRegistrationCache<IEndpointRegistration> endpoints,
+        public BusRegistrationContext(IConfigurationServiceProvider provider, IRegistrationCache<IEndpointRegistration> endpoints,
             IRegistrationCache<IConsumerRegistration> consumers, IRegistrationCache<ISagaRegistration> sagas,
             IRegistrationCache<IExecuteActivityRegistration> executeActivities, IRegistrationCache<IActivityRegistration> activities,
             IRegistrationCache<IFutureRegistration> futures)
             : base(provider, consumers, sagas, executeActivities, activities, futures)
         {
-            _busHealth = busHealth;
             _endpoints = endpoints;
-        }
-
-        public void UseHealthCheck(IBusFactoryConfigurator configurator)
-        {
-            configurator.ConnectBusObserver(_busHealth);
-            configurator.ConnectEndpointConfigurationObserver(_busHealth);
         }
 
         public void ConfigureEndpoints<T>(IReceiveConfigurator<T> configurator, IEndpointNameFormatter endpointNameFormatter = null)

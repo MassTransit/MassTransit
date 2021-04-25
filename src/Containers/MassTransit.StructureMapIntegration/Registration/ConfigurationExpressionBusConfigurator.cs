@@ -37,12 +37,9 @@ namespace MassTransit.StructureMapIntegration.Registration
                 .Use(context => ClientFactoryProvider(context.GetInstance<IConfigurationServiceProvider>(), context.GetInstance<IBus>()))
                 .Singleton();
 
-            _expression.For<BusHealth>()
-                .Use(context => new BusHealth())
-                .Singleton();
-
+        #pragma warning disable 618
             _expression.For<IBusHealth>()
-                .Use<BusHealth>()
+                .Use(context => new BusHealth(context.GetInstance<IBusInstance>()))
                 .Singleton();
 
             expression.For<IConsumerScopeProvider>()
@@ -115,8 +112,7 @@ namespace MassTransit.StructureMapIntegration.Registration
         IBusRegistrationContext CreateRegistrationContext(IContext context)
         {
             var provider = context.GetInstance<IConfigurationServiceProvider>();
-            var busHealth = context.GetInstance<BusHealth>();
-            return new BusRegistrationContext(provider, busHealth, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
+            return new BusRegistrationContext(provider, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
         }
     }
 }

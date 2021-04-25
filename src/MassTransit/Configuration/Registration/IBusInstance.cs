@@ -8,6 +8,7 @@ namespace MassTransit.Registration
     public interface IBusInstance :
         IReceiveEndpointConnector
     {
+        string Name { get; }
         Type InstanceType { get; }
 
         IBus Bus { get; }

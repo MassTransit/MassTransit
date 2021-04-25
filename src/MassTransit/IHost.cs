@@ -30,6 +30,8 @@ namespace MassTransit
         IRider GetRider(string name);
 
         void AddRider(string name, IRiderControl riderControl);
+
+        HealthResult CheckHealth(BusState busState, string healthMessage);
     }
 
 

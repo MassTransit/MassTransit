@@ -8,8 +8,6 @@ namespace MassTransit
     public interface IBusRegistrationContext :
         IRegistration
     {
-        void UseHealthCheck(IBusFactoryConfigurator configurator);
-
         /// <summary>
         /// Configure the endpoints for all defined consumer, saga, and activity types using an optional
         /// endpoint name formatter. If no endpoint name formatter is specified and an <see cref="IEndpointNameFormatter" />

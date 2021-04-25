@@ -3,25 +3,28 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
     using System.Collections.Generic;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Options;
-    using Monitoring.Health;
+    using Registration;
 
 
     public class ConfigureBusHealthCheckServiceOptions :
         IConfigureOptions<HealthCheckServiceOptions>
     {
-        readonly IEnumerable<IBusHealth> _busHealths;
+        readonly IEnumerable<IBusInstance> _busInstances;
         readonly string[] _tags;
 
-        public ConfigureBusHealthCheckServiceOptions(IEnumerable<IBusHealth> busHealths, string[] tags)
+        public ConfigureBusHealthCheckServiceOptions(IEnumerable<IBusInstance> busInstances, string[] tags)
         {
-            _busHealths = busHealths;
+            _busInstances = busInstances;
             _tags = tags;
         }
 
         public void Configure(HealthCheckServiceOptions options)
         {
-            foreach (var busHealth in _busHealths)
-                options.Registrations.Add(new HealthCheckRegistration(busHealth.Name, new BusHealthCheck(busHealth), HealthStatus.Unhealthy, _tags));
+            foreach (var busInstance in _busInstances)
+            {
+                options.Registrations
+                    .Add(new HealthCheckRegistration(busInstance.Name, new BusHealthCheck(busInstance), HealthStatus.Unhealthy, _tags));
+            }
         }
     }
 }

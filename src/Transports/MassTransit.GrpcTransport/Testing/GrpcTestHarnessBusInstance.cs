@@ -19,6 +19,7 @@ namespace MassTransit.GrpcTransport.Testing
 
         public GrpcTestHarness Harness { get; }
 
+        public string Name => "masstransit-bus";
         public Type InstanceType => typeof(GrpcTestHarness);
         public IBus Bus => Harness.Bus;
         public IBusControl BusControl => Harness.BusControl;

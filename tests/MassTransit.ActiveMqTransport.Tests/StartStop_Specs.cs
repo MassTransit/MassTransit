@@ -8,6 +8,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class StartStop_Specs :
         BusTestFixture
     {

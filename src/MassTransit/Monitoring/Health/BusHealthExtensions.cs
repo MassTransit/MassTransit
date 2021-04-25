@@ -9,6 +9,7 @@ namespace MassTransit.Monitoring.Health
 
     public static class BusHealthExtensions
     {
+        [Obsolete("Use IBusControl to check health instead, same extension method")]
         public static async Task<BusHealthStatus> WaitForHealthStatus(this IBusHealth healthChecks, BusHealthStatus expectedStatus, TimeSpan timeout)
         {
             var expiresAt = DateTime.UtcNow + timeout;
@@ -27,11 +28,13 @@ namespace MassTransit.Monitoring.Health
             return result.Status;
         }
 
+        [Obsolete("Use IBusControl to check health instead, same extension method")]
         public static Task<BusHealthStatus[]> WaitForHealthStatus(this IEnumerable<IBusHealth> healthChecks, BusHealthStatus expectedStatus, TimeSpan timeout)
         {
             return Task.WhenAll(healthChecks.Select(healthCheck => WaitForHealthStatus(healthCheck, expectedStatus, timeout)));
         }
 
+        [Obsolete("Use IBusControl to check health instead, same extension method")]
         public static async Task<BusHealthStatus> WaitForHealthStatus(this IBusHealth healthChecks, BusHealthStatus expectedStatus,
             CancellationToken cancellationToken)
         {
@@ -48,6 +51,7 @@ namespace MassTransit.Monitoring.Health
             return result.Status;
         }
 
+        [Obsolete("Use IBusControl to check health instead, same extension method")]
         public static Task<BusHealthStatus[]> WaitForHealthStatus(this IEnumerable<IBusHealth> healthChecks, BusHealthStatus expectedStatus,
             CancellationToken cancellationToken)
         {

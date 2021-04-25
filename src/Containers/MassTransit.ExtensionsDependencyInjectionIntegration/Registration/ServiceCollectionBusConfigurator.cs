@@ -27,19 +27,15 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             IBusRegistrationContext CreateRegistrationContext(IServiceProvider serviceProvider)
             {
                 var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
-                var busHealth = serviceProvider.GetRequiredService<BusHealth>();
 
                 // needs to be built/resolved, prior to registration context
                 _ = serviceProvider.GetService<IServiceDirectory>();
 
-                return new BusRegistrationContext(provider, busHealth, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
+                return new BusRegistrationContext(provider, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
             }
 
             collection.AddSingleton(provider =>
                 ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>(), provider.GetRequiredService<IBus>()));
-
-            collection.AddSingleton(provider => new BusHealth());
-            collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<BusHealth>());
 
             collection.AddSingleton(provider => Bind<IBus>.Create(CreateRegistrationContext(provider)));
             collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusRegistrationContext>>().Value);
@@ -75,6 +71,9 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.AddSingleton<IReceiveEndpointConnector>(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value);
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.BusControl);
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.Bus);
+
+        #pragma warning disable 618
+            Collection.AddSingleton<IBusHealth>(provider => new BusHealth(provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value));
         }
 
         public virtual void AddRider(Action<IRiderRegistrationConfigurator> configure)

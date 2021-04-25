@@ -34,5 +34,7 @@
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         HostReceiveEndpointHandle Start(string endpointName, CancellationToken cancellationToken = default);
+
+        HealthResult CheckHealth(BusState busState, string healthMessage);
     }
 }

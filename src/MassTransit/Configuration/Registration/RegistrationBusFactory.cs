@@ -44,6 +44,7 @@ namespace MassTransit.Registration
                 BusControl = busControl;
             }
 
+            public string Name => "masstransit-bus";
             public Type InstanceType => typeof(IBus);
             public IBus Bus => BusControl;
             public IBusControl BusControl { get; }

@@ -25,6 +25,8 @@ namespace MassTransit
         readonly IPublishEndpoint _publishEndpoint;
         readonly IReceiveEndpoint _receiveEndpoint;
         Handle _busHandle;
+        BusState _busState;
+        string _healthMessage = "not started";
 
         public MassTransitBus(IHost host, IBusObserver busObservable, IReceiveEndpointConfiguration endpointConfiguration)
         {
@@ -210,6 +212,9 @@ namespace MassTransit
 
                 _busHandle = busHandle;
 
+                _busState = BusState.Started;
+                _healthMessage = "";
+
                 LogContext.Info?.Log("Bus started: {HostAddress}", _host.Address);
 
                 return _busHandle;
@@ -232,6 +237,9 @@ namespace MassTransit
                 {
                     LogContext.Warning?.Log(stopException, "Bus start faulted, and failed to stop host");
                 }
+
+                _busState = BusState.Faulted;
+                _healthMessage = $"start faulted: {ex.Message}";
 
                 await _busObservable.StartFaulted(this, ex).ConfigureAwait(false);
 
@@ -256,6 +264,11 @@ namespace MassTransit
             await _busHandle.StopAsync(cancellationToken).ConfigureAwait(false);
 
             _busHandle = null;
+        }
+
+        public HealthResult CheckHealth()
+        {
+            return _host.CheckHealth(_busState, _healthMessage);
         }
 
         ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
@@ -338,14 +351,14 @@ namespace MassTransit
         class Handle :
             BusHandle
         {
-            readonly IHost _host;
-            readonly IBus _bus;
+            readonly MassTransitBus _bus;
             readonly IBusObserver _busObserver;
+            readonly IHost _host;
             readonly HostHandle _hostHandle;
             readonly ILogContext _logContext;
             bool _stopped;
 
-            public Handle(IHost host, HostHandle hostHandle, IBus bus, IBusObserver busObserver, ILogContext logContext)
+            public Handle(IHost host, HostHandle hostHandle, MassTransitBus bus, IBusObserver busObserver, ILogContext logContext)
             {
                 _host = host;
                 _bus = bus;
@@ -382,12 +395,18 @@ namespace MassTransit
 
                     LogContext.Warning?.Log(exception, "Bus stop faulted: {HostAddress}", _host.Address);
 
+                    _bus._busState = BusState.Faulted;
+                    _bus._healthMessage = $"stop faulted: {exception.Message}";
+
                     throw;
                 }
 
                 LogContext.Info?.Log("Bus stopped: {HostAddress}", _host.Address);
 
                 _stopped = true;
+
+                _bus._busState = BusState.Stopped;
+                _bus._healthMessage = "stopped";
             }
 
             async Task<BusReady> ReadyOrNot(Task<HostReady> ready)

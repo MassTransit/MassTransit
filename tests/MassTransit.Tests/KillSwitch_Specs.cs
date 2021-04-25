@@ -4,7 +4,6 @@ namespace MassTransit.Tests
     using System.Linq;
     using System.Threading.Tasks;
     using MassTransit.Testing;
-    using Monitoring.Health;
     using NUnit.Framework;
     using TestFramework;
 
@@ -16,13 +15,13 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_be_degraded_after_too_many_exceptions()
         {
-            Assert.That(await _busHealth.WaitForHealthStatus(BusHealthStatus.Healthy, TimeSpan.FromSeconds(10)), Is.EqualTo(BusHealthStatus.Healthy));
+            Assert.That(await BusControl.WaitForHealthStatus(BusHealthStatus.Healthy, TimeSpan.FromSeconds(10)), Is.EqualTo(BusHealthStatus.Healthy));
 
             await Task.WhenAll(Enumerable.Range(0, 20).Select(x => Bus.Publish(new BadMessage())));
 
-            Assert.That(await _busHealth.WaitForHealthStatus(BusHealthStatus.Degraded, TimeSpan.FromSeconds(15)), Is.EqualTo(BusHealthStatus.Degraded));
+            Assert.That(await BusControl.WaitForHealthStatus(BusHealthStatus.Degraded, TimeSpan.FromSeconds(15)), Is.EqualTo(BusHealthStatus.Degraded));
 
-            Assert.That(await _busHealth.WaitForHealthStatus(BusHealthStatus.Healthy, TimeSpan.FromSeconds(10)), Is.EqualTo(BusHealthStatus.Healthy));
+            Assert.That(await BusControl.WaitForHealthStatus(BusHealthStatus.Healthy, TimeSpan.FromSeconds(10)), Is.EqualTo(BusHealthStatus.Healthy));
 
             await Task.WhenAll(Enumerable.Range(0, 20).Select(x => Bus.Publish(new GoodMessage())));
 
@@ -31,19 +30,12 @@ namespace MassTransit.Tests
             Assert.That(await InMemoryTestHarness.Consumed.SelectAsync<GoodMessage>().Take(20).Count(), Is.EqualTo(20));
         }
 
-        BusHealth _busHealth;
-
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            _busHealth = new BusHealth();
-
             configurator.UseKillSwitch(options => options
                 .SetActivationThreshold(10)
                 .SetTripThreshold(10)
                 .SetRestartTimeout(s: 1));
-
-            configurator.ConnectBusObserver(_busHealth);
-            configurator.ConnectEndpointConfigurationObserver(_busHealth);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

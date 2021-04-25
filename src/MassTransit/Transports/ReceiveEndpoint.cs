@@ -8,7 +8,6 @@ namespace MassTransit.Transports
     using Events;
     using GreenPipes;
     using GreenPipes.Util;
-    using Monitoring.Health;
     using Pipeline;
 
 
@@ -67,22 +66,6 @@ namespace MassTransit.Transports
         public Task Stop(CancellationToken cancellationToken)
         {
             return Stop(false, cancellationToken);
-        }
-
-        public async Task Stop(bool removed, CancellationToken cancellationToken)
-        {
-            LogContext.SetCurrentIfNull(_context.LogContext);
-
-            if (_handle != null)
-            {
-                await _context.EndpointObservers.Stopping(new ReceiveEndpointStoppingEvent(_context.InputAddress, this, removed)).ConfigureAwait(false);
-
-                await _handle.TransportHandle.Stop(cancellationToken).ConfigureAwait(false);
-
-                _handle = null;
-            }
-
-            _context.Reset();
         }
 
         public void Probe(ProbeContext context)
@@ -155,6 +138,22 @@ namespace MassTransit.Transports
         public EndpointHealthResult CheckHealth()
         {
             return HealthResult;
+        }
+
+        public async Task Stop(bool removed, CancellationToken cancellationToken)
+        {
+            LogContext.SetCurrentIfNull(_context.LogContext);
+
+            if (_handle != null)
+            {
+                await _context.EndpointObservers.Stopping(new ReceiveEndpointStoppingEvent(_context.InputAddress, this, removed)).ConfigureAwait(false);
+
+                await _handle.TransportHandle.Stop(cancellationToken).ConfigureAwait(false);
+
+                _handle = null;
+            }
+
+            _context.Reset();
         }
 
 

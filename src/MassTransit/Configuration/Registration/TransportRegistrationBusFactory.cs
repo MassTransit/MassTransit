@@ -37,8 +37,6 @@ namespace MassTransit.Registration
 
             _hostConfiguration.LogContext = LogContext.Current;
 
-            context.UseHealthCheck(configurator);
-
             configure?.Invoke(context, configurator);
 
             specifications ??= Enumerable.Empty<IBusInstanceSpecification>();

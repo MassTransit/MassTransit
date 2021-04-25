@@ -3,7 +3,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Definition;
     using MassTransit.MultiBus;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
@@ -25,17 +24,13 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             IBusRegistrationContext CreateRegistrationContext(IServiceProvider serviceProvider)
             {
                 var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
-                var busHealth = serviceProvider.GetRequiredService<Bind<TBus, BusHealth>>();
-                return new BusRegistrationContext(provider, busHealth.Value, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
+                return new BusRegistrationContext(provider, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
             }
 
             collection.AddScoped(provider => Bind<TBus>.Create(GetSendEndpointProvider(provider)));
             collection.AddScoped(provider => Bind<TBus>.Create(GetPublishEndpoint(provider)));
             collection.AddSingleton(provider =>
                 Bind<TBus>.Create(ClientFactoryProvider(provider.GetRequiredService<IConfigurationServiceProvider>(), provider.GetRequiredService<TBus>())));
-
-            collection.AddSingleton(provider => Bind<TBus>.Create(new BusHealth(FormatBusHealthName())));
-            collection.AddSingleton<IBusHealth>(provider => provider.GetRequiredService<Bind<TBus, BusHealth>>().Value);
 
             collection.AddSingleton(provider => Bind<TBus>.Create(CreateRegistrationContext(provider)));
         }
@@ -58,6 +53,9 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
             Collection.AddSingleton(provider =>
                 Bind<TBus>.Create<IReceiveEndpointConnector>(provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value));
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value.BusInstance);
+
+        #pragma warning disable 618
+            Collection.AddSingleton<IBusHealth>(provider => new BusHealth(provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value));
         }
 
         public override void AddRider(Action<IRiderRegistrationConfigurator> configure)
@@ -86,15 +84,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
         static IPublishEndpoint GetPublishEndpoint(IServiceProvider provider)
         {
             return new PublishEndpoint(new ScopedPublishEndpointProvider<IServiceProvider>(provider.GetRequiredService<TBus>(), provider));
-        }
-
-        static string FormatBusHealthName()
-        {
-            string name = typeof(TBus).Name;
-            if (name.Length >= 2 && name[0] == 'I' && char.IsUpper(name[1]))
-                name = name.Substring(1);
-
-            return $"masstransit-{KebabCaseEndpointNameFormatter.Instance.SanitizeName(name)}";
         }
     }
 }

@@ -12,8 +12,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class Connecting_receive_endpoints :
         RabbitMqTestFixture
     {
-        BusHealth _busHealth;
-
         [Test]
         public async Task Should_clean_up_properly()
         {
@@ -32,27 +30,15 @@ namespace MassTransit.RabbitMqTransport.Tests
                 await handle.StopAsync(TestCancellationToken);
             }
 
-            for (int i = 0; i < 10; i++)
-            {
+            for (var i = 0; i < 10; i++)
                 await ConnectAndRequest();
-            }
 
-            var health = _busHealth.CheckHealth();
+            var health = BusControl.CheckHealth();
 
             foreach (KeyValuePair<string, EndpointHealthResult> healthEndpoint in health.Endpoints)
-            {
                 TestContext.WriteLine("Endpoint: {0}, Status: {1}", healthEndpoint.Key, healthEndpoint.Value.Description);
-            }
 
             Assert.That(health.Status, Is.EqualTo(BusHealthStatus.Healthy));
-        }
-
-        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
-        {
-            _busHealth = new BusHealth();
-
-            configurator.ConnectBusObserver(_busHealth);
-            configurator.ConnectEndpointConfigurationObserver(_busHealth);
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)

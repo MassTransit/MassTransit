@@ -19,6 +19,7 @@ namespace MassTransit.Testing
 
         public InMemoryTestHarness Harness { get; }
 
+        public string Name => "masstransit-bus";
         public Type InstanceType => typeof(InMemoryTestHarness);
         public IBus Bus => Harness.Bus;
         public IBusControl BusControl => Harness.BusControl;

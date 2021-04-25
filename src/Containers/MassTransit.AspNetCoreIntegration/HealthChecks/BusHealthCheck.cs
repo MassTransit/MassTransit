@@ -6,22 +6,22 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
-    using Monitoring.Health;
+    using Registration;
 
 
     public class BusHealthCheck :
         IHealthCheck
     {
-        readonly IBusHealth _busHealth;
+        readonly IBusInstance _busInstance;
 
-        public BusHealthCheck(IBusHealth healthCheck)
+        public BusHealthCheck(IBusInstance busInstance)
         {
-            _busHealth = healthCheck;
+            _busInstance = busInstance;
         }
 
         Task<HealthCheckResult> IHealthCheck.CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken)
         {
-            var result = _busHealth.CheckHealth();
+            var result = _busInstance.BusControl.CheckHealth();
 
             var data = new Dictionary<string, object>
             {

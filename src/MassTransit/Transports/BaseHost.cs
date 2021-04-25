@@ -17,7 +17,6 @@ namespace MassTransit.Transports
         IHost
     {
         readonly IHostConfiguration _hostConfiguration;
-        readonly IRiderCollection _riderCollection;
         HostHandle _handle;
 
         protected BaseHost(IHostConfiguration hostConfiguration, IHostTopology hostTopology)
@@ -26,10 +25,11 @@ namespace MassTransit.Transports
             Topology = hostTopology;
 
             ReceiveEndpoints = new ReceiveEndpointCollection();
-            _riderCollection = new RiderCollection();
+            Riders = new RiderCollection();
         }
 
         protected IReceiveEndpointCollection ReceiveEndpoints { get; }
+        IRiderCollection Riders { get; }
 
         public Uri Address => _hostConfiguration.HostAddress;
 
@@ -91,7 +91,7 @@ namespace MassTransit.Transports
 
             HostReceiveEndpointHandle[] handles = ReceiveEndpoints.StartEndpoints(cancellationToken);
 
-            HostRiderHandle[] riders = _riderCollection.StartRiders(cancellationToken);
+            HostRiderHandle[] riders = Riders.StartRiders(cancellationToken);
 
             _handle = new StartHostHandle(this, handles, riders);
 
@@ -105,12 +105,17 @@ namespace MassTransit.Transports
 
         public IRider GetRider(string name)
         {
-            return _riderCollection.Get(name);
+            return Riders.Get(name);
         }
 
         public void AddRider(string name, IRiderControl riderControl)
         {
-            _riderCollection.Add(name, riderControl);
+            Riders.Add(name, riderControl);
+        }
+
+        public HealthResult CheckHealth(BusState busState, string healthMessage)
+        {
+            return ReceiveEndpoints.CheckHealth(busState, healthMessage);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -128,7 +133,7 @@ namespace MassTransit.Transports
 
             LogContext.Debug?.Log("Stopping bus: {HostAddress}", Address);
 
-            await _riderCollection.Stop(cancellationToken).ConfigureAwait(false);
+            await Riders.Stop(cancellationToken).ConfigureAwait(false);
 
             await ReceiveEndpoints.Stop(cancellationToken).ConfigureAwait(false);
 

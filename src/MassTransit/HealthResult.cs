@@ -1,11 +1,17 @@
-namespace MassTransit.Monitoring.Health
+namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
 
 
-    public readonly struct HealthResult
+    public class HealthResult
     {
+        public readonly IReadOnlyDictionary<string, EndpointHealthResult> Endpoints;
+
+        public readonly Exception Exception;
+
+        public readonly BusHealthStatus Status;
+
         HealthResult(BusHealthStatus status, string description, Exception exception, IReadOnlyDictionary<string, EndpointHealthResult> endpoints)
         {
             Status = status;
@@ -14,13 +20,7 @@ namespace MassTransit.Monitoring.Health
             Endpoints = endpoints;
         }
 
-        public readonly IReadOnlyDictionary<string, EndpointHealthResult> Endpoints;
-
-        public readonly string Description;
-
-        public readonly Exception Exception;
-
-        public readonly BusHealthStatus Status;
+        public string Description { get; }
 
         public static HealthResult Healthy(string description, IReadOnlyDictionary<string, EndpointHealthResult> endpoints)
         {

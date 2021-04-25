@@ -7,7 +7,6 @@ namespace MassTransit
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Options;
-    using Monitoring.Health;
     using Registration;
 
 
@@ -62,7 +61,7 @@ namespace MassTransit
             services.AddOptions();
             services.AddHealthChecks();
             services.AddSingleton<IConfigureOptions<HealthCheckServiceOptions>>(provider =>
-                new ConfigureBusHealthCheckServiceOptions(provider.GetServices<IBusHealth>(), new[] {"ready", "masstransit"}));
+                new ConfigureBusHealthCheckServiceOptions(provider.GetServices<IBusInstance>(), new[] {"ready", "masstransit"}));
         }
     }
 }

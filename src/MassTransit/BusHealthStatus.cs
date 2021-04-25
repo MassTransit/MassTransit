@@ -1,4 +1,4 @@
-namespace MassTransit.Monitoring.Health
+namespace MassTransit
 {
     public enum BusHealthStatus
     {

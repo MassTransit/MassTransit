@@ -23,8 +23,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             IBusRegistrationContext CreateRegistrationContext()
             {
                 var provider = Container.GetInstance<IConfigurationServiceProvider>();
-                var busHealth = Container.GetInstance<BusHealth>();
-                return new BusRegistrationContext(provider, busHealth, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
+                return new BusRegistrationContext(provider, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
             }
 
             Container = container;
@@ -32,10 +31,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             _hybridLifestyle = Lifestyle.CreateHybrid(container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
 
             AddMassTransitComponents(Container);
-
-            Container.RegisterSingleton(() => new BusHealth());
-
-            Container.RegisterSingleton<IBusHealth>(() => Container.GetInstance<BusHealth>());
 
             Container.RegisterSingleton(() => CreateRegistrationContext());
 
@@ -69,6 +64,9 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             Container.RegisterSingleton<IReceiveEndpointConnector>(() => Container.GetInstance<IBusInstance>());
             Container.RegisterSingleton(() => Container.GetInstance<IBusInstance>().BusControl);
             Container.RegisterSingleton(() => Container.GetInstance<IBusInstance>().Bus);
+
+        #pragma warning disable 618
+            Container.RegisterSingleton<IBusHealth>(() => new BusHealth(Container.GetInstance<IBusInstance>()));
         }
 
         public void AddRider(Action<IRiderRegistrationConfigurator> configure)

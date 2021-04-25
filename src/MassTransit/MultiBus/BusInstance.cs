@@ -174,5 +174,10 @@ namespace MassTransit.MultiBus
         {
             return _busControl.StopAsync(cancellationToken);
         }
+
+        public HealthResult CheckHealth()
+        {
+            return _busControl.CheckHealth();
+        }
     }
 }
