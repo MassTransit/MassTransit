@@ -5,7 +5,9 @@ namespace MassTransit.AutofacIntegration
     using Courier;
     using Courier.Contexts;
     using Courier.Contracts;
+    using MassTransit.Registration;
     using Metadata;
+    using ScopeProviders;
 
 
     public static class AutofacLifetimeScopeExtensions
@@ -105,6 +107,10 @@ namespace MassTransit.AutofacIntegration
                 .As<ISendEndpointProvider>()
                 .InstancePerLifetimeScope()
                 .ExternallyOwned();
+
+            builder.RegisterType<AutofacScopeServiceProvider>()
+                .As<IScopeServiceProvider>()
+                .InstancePerLifetimeScope();
         }
 
         public static void ConfigureScope<T>(this ContainerBuilder builder, ConsumeContext<T> context)
@@ -117,6 +123,10 @@ namespace MassTransit.AutofacIntegration
                 .As<ISendEndpointProvider>()
                 .InstancePerLifetimeScope()
                 .ExternallyOwned();
+
+            builder.RegisterType<AutofacScopeServiceProvider>()
+                .As<IScopeServiceProvider>()
+                .InstancePerLifetimeScope();
         }
 
         public static void ConfigureScope<T>(this ContainerBuilder builder, ExecuteContext<T> context)
@@ -131,6 +141,10 @@ namespace MassTransit.AutofacIntegration
                 .As<ISendEndpointProvider>()
                 .InstancePerLifetimeScope()
                 .ExternallyOwned();
+
+            builder.RegisterType<AutofacScopeServiceProvider>()
+                .As<IScopeServiceProvider>()
+                .InstancePerLifetimeScope();
         }
 
         public static void ConfigureScope<T>(this ContainerBuilder builder, CompensateContext<T> context)
@@ -145,6 +159,10 @@ namespace MassTransit.AutofacIntegration
                 .As<ISendEndpointProvider>()
                 .InstancePerLifetimeScope()
                 .ExternallyOwned();
+
+            builder.RegisterType<AutofacScopeServiceProvider>()
+                .As<IScopeServiceProvider>()
+                .InstancePerLifetimeScope();
         }
     }
 }

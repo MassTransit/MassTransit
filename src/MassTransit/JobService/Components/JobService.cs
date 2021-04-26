@@ -5,8 +5,8 @@
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Context;
+    using Contracts.JobService;
     using GreenPipes;
-    using MassTransit.Contracts.JobService;
     using Metadata;
 
 
@@ -55,10 +55,7 @@
             LogContext.Debug?.Log("Executing job: {JobType} {JobId} ({RetryAttempt})", TypeMetadataCache<T>.ShortName, startJob.JobId,
                 startJob.RetryAttempt);
 
-            ConsumeContext<T> jobConsumeContext = new MessageConsumeContext<T>(context, job);
-            jobConsumeContext.AddOrUpdatePayload<JobContext<T>>(() => jobContext, existing => jobContext);
-
-            var jobTask = jobPipe.Send(jobConsumeContext);
+            var jobTask = jobPipe.Send(jobContext);
 
             var jobHandle = new ConsumerJobHandle<T>(jobContext, jobTask);
 

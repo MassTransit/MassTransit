@@ -29,7 +29,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
-                existingServiceScope.UpdateScope(context);
+                existingServiceScope.SetCurrentConsumeContext(context);
 
                 return new ExistingConsumerScopeContext(context);
             }
@@ -44,7 +44,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 
                 var scopeContext = new ConsumeContextScope(context, serviceScope, serviceScope.ServiceProvider, scopeServiceProvider);
 
-                serviceScope.UpdateScope(scopeContext);
+                serviceScope.SetCurrentConsumeContext(scopeContext);
 
                 return new CreatedConsumerScopeContext<IServiceScope>(serviceScope, scopeContext);
             }
@@ -60,7 +60,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
-                existingServiceScope.UpdateScope(context);
+                existingServiceScope.SetCurrentConsumeContext(context);
 
                 var consumer = existingServiceScope.ServiceProvider.GetService<TConsumer>();
                 if (consumer == null)
@@ -81,9 +81,9 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 
                 var scopeContext = new ConsumeContextScope<T>(context, serviceScope, serviceScope.ServiceProvider, scopeServiceProvider);
 
-                serviceScope.UpdateScope(scopeContext);
+                serviceScope.SetCurrentConsumeContext(scopeContext);
 
-                var consumer = serviceScope.ServiceProvider.GetService<TConsumer>();
+                var consumer = scopeServiceProvider.GetService<TConsumer>();
                 if (consumer == null)
                     throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
 

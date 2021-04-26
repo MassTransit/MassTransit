@@ -43,8 +43,7 @@ namespace MassTransit.JobService.Components.Consumers
             if (job == null)
                 throw new ArgumentNullException(nameof(faultJob.Job), $"The job could not be deserialized: {TypeMetadataCache<TJob>.ShortName}");
 
-            var jobContext = new ConsumeJobContext<TJob>(context, _jobService.InstanceAddress, faultJob.JobId, faultJob.AttemptId, faultJob.RetryAttempt, job,
-                _options.JobTimeout);
+            using var jobContext = new ConsumeJobContext<TJob>(context, _jobService.InstanceAddress, faultJob.JobId, faultJob.AttemptId, faultJob.RetryAttempt, job, _options.JobTimeout);
 
             return jobContext.NotifyFaulted(faultJob.Duration ?? TimeSpan.Zero, _jobConsumerTypeName, new JobFaultedException(faultJob.Exceptions));
         }

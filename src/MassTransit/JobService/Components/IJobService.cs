@@ -2,8 +2,8 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Contracts.JobService;
     using GreenPipes;
-    using MassTransit.Contracts.JobService;
 
 
     public interface IJobService

@@ -26,7 +26,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
-                existingServiceScope.UpdateScope(context);
+                existingServiceScope.SetCurrentConsumeContext(context);
 
                 var activity = existingServiceScope.ServiceProvider.GetService<TActivity>();
                 if (activity == null)
@@ -45,7 +45,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             {
                 ExecuteContext<TArguments> scopeContext = new ExecuteContextScope<TArguments>(context, serviceScope, serviceScope.ServiceProvider);
 
-                serviceScope.UpdateScope(scopeContext);
+                serviceScope.SetCurrentConsumeContext(scopeContext);
 
                 var activity = serviceScope.ServiceProvider.GetService<TActivity>();
                 if (activity == null)

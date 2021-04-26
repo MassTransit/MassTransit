@@ -20,12 +20,42 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
     }
 
 
+    public interface NumbersCrunched
+    {
+        Guid JobId { get; }
+        TimeSpan ElapsedTime { get; }
+    }
+
+
     public class CrunchTheNumbersConsumer :
         IJobConsumer<CrunchTheNumbers>
     {
         public async Task Run(JobContext<CrunchTheNumbers> context)
         {
             await Task.Delay(context.Job.Duration);
+        }
+    }
+
+
+    public class CrunchTheNumbersContainerConsumer :
+        IJobConsumer<CrunchTheNumbers>
+    {
+        readonly IPublishEndpoint _publishEndpoint;
+
+        public CrunchTheNumbersContainerConsumer(IPublishEndpoint publishEndpoint)
+        {
+            _publishEndpoint = publishEndpoint;
+        }
+
+        public async Task Run(JobContext<CrunchTheNumbers> context)
+        {
+            await Task.Delay(context.Job.Duration);
+
+            await _publishEndpoint.Publish<NumbersCrunched>(new
+            {
+                context.JobId,
+                context.ElapsedTime
+            });
         }
     }
 
@@ -191,7 +221,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
                 .AddDbContext<JobServiceSagaDbContext>(builder => ApplyBuilderOptions(builder))
                 .AddMassTransit(x =>
                 {
-                    x.AddConsumer<CrunchTheNumbersConsumer>();
+                    x.AddConsumer<CrunchTheNumbersContainerConsumer>();
 
                     x.AddRequestClient<SubmitJob<CrunchTheNumbers>>();
 
@@ -256,7 +286,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
 
                 instance.ReceiveEndpoint(instance.EndpointNameFormatter.Message<CrunchTheNumbers>(), e =>
                 {
-                    e.ConfigureConsumer<CrunchTheNumbersConsumer>(busRegistrationContext);
+                    e.ConfigureConsumer<CrunchTheNumbersContainerConsumer>(busRegistrationContext);
                 });
             });
         }
