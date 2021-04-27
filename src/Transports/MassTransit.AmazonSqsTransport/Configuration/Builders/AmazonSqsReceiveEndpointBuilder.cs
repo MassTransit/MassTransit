@@ -30,9 +30,9 @@
         {
             if (_configuration.ConfigureConsumeTopology && options.HasFlag(ConnectPipeOptions.ConfigureConsumeTopology))
             {
-                _configuration.Topology.Consume
-                    .GetMessageTopology<T>()
-                    .Subscribe();
+                IAmazonSqsMessageConsumeTopologyConfigurator<T> topology = _configuration.Topology.Consume.GetMessageTopology<T>();
+                if (topology.ConfigureConsumeTopology)
+                    topology.Subscribe();
             }
 
             return base.ConnectConsumePipe(pipe, options);

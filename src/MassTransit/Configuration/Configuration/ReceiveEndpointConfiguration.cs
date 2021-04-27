@@ -90,6 +90,12 @@
 
         public Task Dependencies => Task.WhenAll(_dependencies.Select(x => x.Ready));
 
+        public void ConfigureMessageTopology<T>(bool enabled = true)
+            where T : class
+        {
+            Topology.Consume.GetMessageTopology<T>().ConfigureConsumeTopology = enabled;
+        }
+
         public void AddDependency(IReceiveEndpointObserverConnector connector)
         {
             var dependency = new ReceiveEndpointDependency(connector);

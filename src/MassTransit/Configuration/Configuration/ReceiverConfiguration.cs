@@ -46,6 +46,11 @@ namespace MassTransit.Configuration
             return _configuration.ConnectReceiveEndpointObserver(observer);
         }
 
+        public void ConfigureMessageTopology<T>(bool enabled = true)
+            where T : class
+        {
+        }
+
         public void AddEndpointSpecification(IReceiveEndpointSpecification specification)
         {
             Specifications.Add(specification);

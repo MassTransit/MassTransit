@@ -5,6 +5,7 @@ namespace MassTransit.GrpcTransport.Builders
     using GreenPipes;
     using MassTransit.Builders;
     using MassTransit.Pipeline;
+    using Topology.Configurators;
 
 
     public class GrpcReceiveEndpointBuilder :
@@ -24,9 +25,9 @@ namespace MassTransit.GrpcTransport.Builders
         {
             if (_configuration.ConfigureConsumeTopology && options.HasFlag(ConnectPipeOptions.ConfigureConsumeTopology))
             {
-                _configuration.Topology.Consume
-                    .GetMessageTopology<T>()
-                    .Bind();
+                IGrpcMessageConsumeTopologyConfigurator<T> topology = _configuration.Topology.Consume.GetMessageTopology<T>();
+                if (topology.ConfigureConsumeTopology)
+                    topology.Bind();
             }
 
             return base.ConnectConsumePipe(pipe, options);

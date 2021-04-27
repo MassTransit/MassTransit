@@ -42,6 +42,13 @@ namespace MassTransit
         /// </summary>
         int? ConcurrentMessageLimit { get; set; }
 
+        /// <summary>
+        /// Configures whether the broker topology is configured for the specified message type. Related to
+        /// <see cref="ConfigureConsumeTopology"/>, but for an individual message type.
+        /// </summary>
+        void ConfigureMessageTopology<T>(bool enabled = true)
+            where T : class;
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         void AddEndpointSpecification(IReceiveEndpointSpecification configurator);
 

@@ -5,6 +5,7 @@ namespace MassTransit.Transports.InMemory.Builders
     using GreenPipes;
     using MassTransit.Builders;
     using Pipeline;
+    using Topology.Configurators;
 
 
     public class InMemoryReceiveEndpointBuilder :
@@ -24,9 +25,9 @@ namespace MassTransit.Transports.InMemory.Builders
         {
             if (_configuration.ConfigureConsumeTopology && options.HasFlag(ConnectPipeOptions.ConfigureConsumeTopology))
             {
-                _configuration.Topology.Consume
-                    .GetMessageTopology<T>()
-                    .Bind();
+                IInMemoryMessageConsumeTopologyConfigurator<T> topology = _configuration.Topology.Consume.GetMessageTopology<T>();
+                if (topology.ConfigureConsumeTopology)
+                    topology.Bind();
             }
 
             return base.ConnectConsumePipe(pipe, options);

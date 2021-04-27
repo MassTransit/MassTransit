@@ -23,6 +23,7 @@ namespace MassTransit.Topology.Topologies
         }
 
         protected bool IsBindableMessageType => typeof(JToken) != typeof(TMessage);
+        public bool ConfigureConsumeTopology { get; set; } = true;
 
         public void Add(IMessageConsumeTopology<TMessage> consumeTopology)
         {

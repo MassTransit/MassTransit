@@ -31,11 +31,12 @@
         {
             if (_configuration.ConfigureConsumeTopology && options.HasFlag(ConnectPipeOptions.ConfigureConsumeTopology))
             {
-                var subscriptionName = GenerateSubscriptionName();
-
-                _configuration.Topology.Consume
-                    .GetMessageTopology<T>()
-                    .Subscribe(subscriptionName);
+                IServiceBusMessageConsumeTopologyConfigurator<T> topology = _configuration.Topology.Consume.GetMessageTopology<T>();
+                if (topology.ConfigureConsumeTopology)
+                {
+                    var subscriptionName = GenerateSubscriptionName();
+                    topology.Subscribe(subscriptionName);
+                }
             }
 
             return base.ConnectConsumePipe(pipe, options);
