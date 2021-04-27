@@ -20,5 +20,5 @@ To address some common questions related to sagas, retries, Outbox, and concurre
 
 
 [1]: http://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf
-[2]: http://www.rgoarchitects.com/Files/SOAPatterns/Saga.pdf
+[2]: https://arnon.me/wp-content/uploads/Files/SOAPatterns/Saga.pdf
 
