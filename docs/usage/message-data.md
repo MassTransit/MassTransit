@@ -166,7 +166,14 @@ IMessageDataRepository CreateRepository(string connectionString, string database
 
 ### Azure Storage
 
-An Azure Cloud Storage account can be used to store message data. To configure Azure storage, first create the CloudStorageAccount object from your connection string, and then use the extension method to create the repository as shown below. You can replace `message-data` with the desired container name.
+An Azure Cloud Storage account can be used to store message data. To configure Azure storage, first create the BlobServiceClient object using your connection string, and then use the extension method to create the repository as shown below. You can replace `message-data` with the desired container name.
+
+```cs
+var client = new BlobServiceClient("<storage account connection string>");
+_repository = client.CreateMessageDataRepository("message-data");
+```
+
+Previous to version 7.1.8 of MassTransit this was done creating a CloudStorageAccount object from your connection string the following way.
 
 ```cs
 var account = CloudStorageAccount.Parse("<storage account connection string>");
