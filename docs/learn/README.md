@@ -10,35 +10,30 @@ There is a MassTransit tag on [Stack Overflow][1], which has many questions that
 
 Before you just post your question, however, spend a few moments to compose your thoughts and formulate your question. There is nothing as pointless as simply telling us "MassTransit does not work for me" with no further information to give any clue to why. Before you post, search the web to see if your question has already been asked or even answered. And if it has been, you will already have your answer.
 
+## GitHub Discussions
+
+Questions, ideas, and suggestions can be posted on [GitHub Discussions](https://github.com/MassTransit/MassTransit/discussions). Similar to Stack Overflow, but integrated with GitHub, this is a great place to post code samples, share ideas, and get help using MassTransit. The same guidelines above apply to discussions.
+
+> If you have an issue _using_ MassTransit, this is the place to start **before** creating an issue.
+
 ## Discord
 
-MassTransit has a Discord server, which has replaced the Gitter chat room, since it's a better platform for chat that also adds voice collaboration.
+MassTransit has an active Discord server, which is a great place to get quick answers to short questions as well as share in engaging conversations about MassTransit, messaging, or whatever.
 
 <iframe src="https://discordapp.com/widget?id=682238261753675864&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0"></iframe>
 
-## Mailing List
-
-[![alt Google Group](https://img.shields.io/badge/groups-join%20convo-lightgrey.svg "Google Group")][2] 
-
-A long history of support is available on the mailing list, which is hosted on [Google Groups][2]. There are a wide variety of developers using MassTransit on the list, and often times they can help. If you are going to use MassTransit, joining the mailing list is a great way to participate in the community.
-
-When posting on the mailing list, pick a good subject line, and if the subject of the thread changes, please change the subject to match. Some of us deal with hundreds of emails per day and we need all the help we can get to pick the interesting or important ones.
-
-Also, if you are seeing some unexpected behavior, generate a [diagnostic result](/troubleshooting/show-config.md) and post it as a [Gist][4] so that it can be reviewed (mail attachments rarely work, so avoid them). This will help a lot towards understanding how your configuration is setup.
-
 ## Twitter
 
-A fast way to get our attention is on Twitter, by shooting a tweet tagged `#mtproj`. Assuming you can fit your question in ~~140~~ 280 characters or less. A few of us have saved searches on this tag, which makes questions easy to find (strangely, MassTransit is the worst term to search -- go figure). There are several spread out across the US, so think about the time zone when you tweet. Again, post a link to a [Gist][4] with source, configuration, log files, etc. If it is complex, it's likely you'll be pushed to hit the mailing list or Gitter.
+You might be able to get some attention on Twitter, and you're highly encouraged to tweet about MassTransit. Feel free to tag `@mtproj` (strangely, MassTransit is a noisy search term -- go figure). 
 
 ## GitHub Issues
 
-Please **do not open an issue on GitHub**, unless you have spotted an actual bug in MassTransit. If you are unsure, ask on the [mailing list][2] or on [StackOverflow][1], and if we confirm it's a bug, we'll ask you to [create the issue][3]. 
+Please **do not open an issue on GitHub**, unless you have spotted an actual bug in MassTransit. If you are unsure, pursue one of the alternate options first. If we confirm it's a bug, we'll ask you to [create the issue][3]. 
 
 **Issues are not the place for questions, and they'll likely be closed.**
 
 This policy is in place to avoid bugs being drowned out in a pile of sensible suggestions for future enhancements and calls for help from people who forget to check back if they get it and so on.
 
 [1]: http://stackoverflow.com/questions/tagged/masstransit
-[2]: https://groups.google.com/forum/#!forum/masstransit-discuss
 [3]: https://github.com/masstransit/masstransit/issues
 [4]: https://gist.github.com/

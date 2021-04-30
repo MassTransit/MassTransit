@@ -1,10 +1,13 @@
 # Getting Started
 
-Getting started with MassTransit is fast and easy. This quick start guide uses RabbitMQ with .NET 5. RabbitMQ must be installed, instructions for installing RabbitMQ are included [below](#install-rabbitmq). 
+Getting started with MassTransit is fast and easy.
 
-> The [.NET 5 SDK](https://dotnet.microsoft.com/download) should be installed before continuing.
+- The [.NET 5 SDK](https://dotnet.microsoft.com/download) should be installed before continuing.
+- The source for this sample is available [on GitHub](https://github.com/MassTransit/Sample-GettingStarted).
 
-> The source for this sample is available [on GitHub](https://github.com/MassTransit/Sample-GettingStarted).
+::: tip
+MassTransit includes project and item templates simplifying the creation of new projects. Install the templates by executing `dotnet new -i MassTransit.Templates` at the console. A video introducing the templates is available on [YouTube](https://youtu.be/nYKq61-DFBQ).
+:::
 
 To create a service using MassTransit, create a worker via the Command Prompt.
 
@@ -161,10 +164,10 @@ At this point, the consumer is configured on the bus and messages are published 
 ## With RabbitMQ
 
 ::: tip
-See the [Install RabbitMQ](#install-rabbitmq) section below if you need to install RabbitMQ before continuing.
+To continue from this point, RabbitMQ must be installed. If you need to install RabbitMQ, refer to the [Install RabbitMQ](#install-rabbitmq) section below.
 :::
 
-Add RabbitMQ for MassTransit package to the console application.
+Add the _MassTransit.RabbitMQ_ package to the project.
 
 ```bash
 $ dotnet add package MassTransit.RabbitMQ
@@ -218,7 +221,92 @@ info: GettingStarted.MessageConsumer[0]
       Received Text: The time is 3/24/2021 12:11:10 PM -05:00
 ```
 
-At this point, the service is connecting to RabbbitMQ on `localhost`, and publishing messages which are received by the consumer.
+At this point the service is connecting to RabbbitMQ on `localhost` and publishing messages which are received by the consumer.
+
+## With Azure Service Bus
+
+::: tip
+To continue from this point, you must have a valid Azure subscription with an Azure Service Bus namespace. A shared access policy with _Manage_ permissions is required to use MassTransit with Azure Service Bus.
+:::
+
+Add the _MassTransit.Azure.ServiceBus.Core_ package to the project.
+
+```bash
+$ dotnet add package MassTransit.Azure.ServiceBus.Core
+```
+
+### Edit Program.cs
+
+Change `UsingInMemory` to `UsingAzureServiceBus`.
+
+```csharp {9}
+public static IHostBuilder CreateHostBuilder(string[] args) =>
+    Host.CreateDefaultBuilder(args)
+        .ConfigureServices((hostContext, services) =>
+        {
+            services.AddMassTransit(x =>
+            {
+                x.AddConsumer<MessageConsumer>();
+
+                x.UsingAzureServiceBus((context,cfg) =>
+                {
+                    var connectionString = "your connection string";
+                    cfg.Host(connectionString);
+
+                    cfg.ConfigureEndpoints(context);
+                });
+            });
+            services.AddMassTransitHostedService();
+
+            services.AddHostedService<Worker>();
+        });
+```
+
+### Run the project
+
+```bash
+$ dotnet run
+```
+
+The output should have changed to show the message consumer generating the output (again, press Control+C to exit). Notice that the bus address now starts with `rabbitmq`.
+
+``` {11}
+Building...
+info: MassTransit[0]
+      Configured endpoint Message, Consumer: GettingStarted.MessageConsumer
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /Users/chris/Garbage/start/GettingStarted
+info: MassTransit[0]
+      Bus started: sb://your-service-bus-namespace/
+info: GettingStarted.MessageConsumer[0]
+      Received Text: The time is 3/24/2021 12:11:10 PM -05:00
+```
+
+At this point, the service is connecting to Azure Service Bus and publishing messages which are received by the consumer.
+
+
+### What is this doing?
+
+If we are going to create a messaging system, we need to create a message. `Message` is a .NET class that will represent our message. Notice that it's just a Plain Old CLR Object (or POCO).
+
+Next up, the `AddMassTransit` extension is used to configure the bus in the container. The `UsingInMemory` (and `UsingRabbitMq`) method specifies the transport to use for the bus. Each transport has its own `UsingXxx` method.
+
+The consumer is added, using `AddConsumer`. This adds the consumer to the container as scoped.
+
+The `ConfigureEndpoints` method is used to automatically configure the receive endpoints on the bus. In this case, a single receive endpoint will be created for the `MessageConsumer`.
+
+The `AddMassTransitHostedService(true)` adds a hosted service for MassTransit that is responsible for starting and stopping the bus. This is required, as the bus will not operate propertly if it is not started and stopped.
+
+::: warning IMPORTANT
+This hosted service should be configured _prior_ to any other hosted services that may use the bus.
+:::
+
+Lastly, the `Worker` is updated to publish a message every second to the bus, which is subsequently consumed by the consumer.
+
 
 ### Install RabbitMQ
 
@@ -246,22 +334,4 @@ If you are using a Mac, RabbitMQ can be installed using [Homebrew](https://brew.
 1. First, from an elevated command prompt, change directory to the sbin folder within the RabbitMQ Server installation directory e.g. `%PROGRAMFILES%\RabbitMQ Server\rabbitmq_server_3.5.3\sbin\`
 
 2. Next, run the following command to enable the rabbitmq management plugin: `rabbitmq-plugins enable rabbitmq_management`
-
-### What is this doing?
-
-If we are going to create a messaging system, we need to create a message. `Message` is a .NET class that will represent our message. Notice that it's just a Plain Old CLR Object (or POCO).
-
-Next up, the `AddMassTransit` extension is used to configure the bus in the container. The `UsingInMemory` (and `UsingRabbitMq`) method specifies the transport to use for the bus. Each transport has its own `UsingXxx` method.
-
-The consumer is added, using `AddConsumer`. This adds the consumer to the container as scoped.
-
-The `ConfigureEndpoints` method is used to automatically configure the receive endpoints on the bus. In this case, a single receive endpoint will be created for the `MessageConsumer`.
-
-The `AddMassTransitHostedService(true)` adds a hosted service for MassTransit that is responsible for starting and stopping the bus. This is required, as the bus will not operate propertly if it is not started and stopped.
-
-::: warning IMPORTANT
-This hosted service should be configured _prior_ to any other hosted services that may use the bus.
-:::
-
-Lastly, the `Worker` is updated to publish a message every second to the bus, which is subsequently consumed by the consumer.
 

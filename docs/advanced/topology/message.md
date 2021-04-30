@@ -2,6 +2,8 @@
 
 Message types are extensively leveraged in MassTransit, so making it easy to configure how those message types are used by topology seemed obvious.
 
+## Entity Name Formatters
+
 ### Message Type Entity Name Formatting
 
 MassTransit has built-in defaults for naming messaging entities (these are things like exchanges, topics, etc.). The defaults can be overridden as well. For instance, to change the topic name used by a message, just do it!
@@ -74,5 +76,54 @@ Bus.Factory.CreateUsingRabbitMQ(cfg =>
     {
         x.SetEntityNameFormatter(new FancyNameFormatter(cfg.MessageTopology.EntityNameFormatter));;
     });
+});
+```
+
+## Attributes
+
+### EntityName Attribute
+
+_EntityName_ is an optional attribute used to override the default entity name for a message type. If present, the entity name will be used when creating the topic or exchange for the message.
+
+```cs
+[EntityName("order-submitted")]
+public interface LegacyOrderSubmittedEvent
+{
+}
+```
+
+### ConfigureConsumeTopology Attribute
+
+_ConfigureConsumeTopology_ is an optional attribute that may be specified on a message type to indicate whether the topic or exchange for the message type should be created and subscribed to the queue when consumed on a receive endpoint.
+
+```cs
+[ConfigureConsumeTopology(false)]
+public interface DeleteRecord
+{
+}
+```
+
+### ExcludeFromTopology Attribute
+
+_ExcludeFromTopology_ is an optional attribute that may be specified on a message type to indicate whether the topic or exchange for the message type should be created when publishing an implementing type or sub-type. In the example below, publishing the `ReformatHardDrive` command would not create the `ICommand` topic or exchange on the message broker.
+
+```cs
+[ExcludeFromTopology]
+public interface ICommand
+{
+}
+
+public interface ReformatHardDrive :
+    ICommand
+{
+}
+```
+
+To avoid using the property, the publish topology can be configured along with the bus:
+
+```cs
+...UsingRabbitMq((context,cfg) =>
+{
+    cfg.Publish<ICommand>(p => p.Exclude = true);
 });
 ```

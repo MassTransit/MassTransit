@@ -13,7 +13,6 @@ module.exports = {
       ['meta', { name: "theme-color", content: "#ffffff"}],
     ],
   plugins: [
-    '@vuepress/active-header-links',
     '@vuepress/back-to-top',
     [
       '@vuepress/google-analytics', {
