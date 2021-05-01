@@ -2,8 +2,6 @@ namespace MassTransit.Registration
 {
     using System;
     using Automatonymous;
-    using Conductor;
-    using Conductor.Configurators;
     using ConsumeConfigurators;
     using Context;
     using Courier;
@@ -53,7 +51,7 @@ namespace MassTransit.Registration
 
         public IContainerRegistrar Registrar { get; }
 
-        protected Func<IConfigurationServiceProvider, IBus, IClientFactory> ClientFactoryProvider { get; private set; } = BusClientFactoryProvider;
+        protected Func<IConfigurationServiceProvider, IBus, IClientFactory> ClientFactoryProvider { get; } = BusClientFactoryProvider;
 
         public IConsumerRegistrationConfigurator<T> AddConsumer<T>(Action<IConsumerConfigurator<T>> configure)
             where T : class, IConsumer
@@ -316,17 +314,6 @@ namespace MassTransit.Registration
             RequestClientRegistrationCache.Register(requestType, destinationAddress, timeout, Registrar);
         }
 
-        public void AddServiceClient(Action<IServiceClientConfigurator> configure = default)
-        {
-            var configurator = new ServiceClientConfigurator();
-
-            configure?.Invoke(configurator);
-
-            Registrar.RegisterSingleInstance(configurator.Options);
-
-            ClientFactoryProvider = ServiceClientClientFactoryProvider;
-        }
-
         public void SetEndpointNameFormatter(IEndpointNameFormatter endpointNameFormatter)
         {
             Registrar.RegisterSingleInstance(endpointNameFormatter);
@@ -374,11 +361,6 @@ namespace MassTransit.Registration
         static IClientFactory BusClientFactoryProvider(IConfigurationServiceProvider provider, IBus bus)
         {
             return bus.CreateClientFactory();
-        }
-
-        static IClientFactory ServiceClientClientFactoryProvider(IConfigurationServiceProvider provider, IBus bus)
-        {
-            return bus.CreateServiceClient();
         }
     }
 }

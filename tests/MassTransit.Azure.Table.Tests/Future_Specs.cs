@@ -151,17 +151,6 @@ namespace MassTransit.Azure.Table.Tests
 
 
     [TestFixture]
-    public class AzureTableOrdering_using_the_request_client :
-        Ordering_using_the_request_client
-    {
-        public AzureTableOrdering_using_the_request_client()
-            : base(new AzureTableFutureTestFixtureConfigurator())
-        {
-        }
-    }
-
-
-    [TestFixture]
     public class AzureTablePriceCalculationFuture_Specs :
         PriceCalculationFuture_Specs
     {

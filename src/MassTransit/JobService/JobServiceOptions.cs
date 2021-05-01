@@ -114,6 +114,8 @@ namespace MassTransit.JobService
         /// </summary>
         public bool FinalizeCompleted { get; set; }
 
+        internal IReceiveEndpointConfigurator InstanceEndpointConfigurator { get; set; }
+
         IEnumerable<ValidationResult> ISpecification.Validate()
         {
             if (SlotWaitTime < TimeSpan.FromSeconds(1))

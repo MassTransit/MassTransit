@@ -3,10 +3,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
     using System;
     using Automatonymous;
     using Clients;
-    using Conductor.Directory;
     using Definition;
     using Futures;
-    using Internals.Extensions;
     using MassTransit.Registration;
     using Mediator;
     using Microsoft.Extensions.DependencyInjection;
@@ -35,8 +33,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         {
             _collection.AddSingleton<TDefinition>();
             _collection.AddSingleton<IConsumerDefinition<TConsumer>>(provider => provider.GetRequiredService<TDefinition>());
-
-            ConfigureServiceDirectoryIfPresent<TDefinition>();
         }
 
         void IContainerRegistrar.RegisterSaga<T>()
@@ -68,8 +64,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         {
             _collection.AddSingleton<TDefinition>();
             _collection.AddSingleton<ISagaDefinition<TSaga>>(provider => provider.GetRequiredService<TDefinition>());
-
-            ConfigureServiceDirectoryIfPresent<TDefinition>();
         }
 
         void IContainerRegistrar.RegisterExecuteActivity<TActivity, TArguments>()
@@ -91,16 +85,12 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         {
             _collection.AddSingleton<TDefinition>();
             _collection.AddSingleton<IActivityDefinition<TActivity, TArguments, TLog>>(provider => provider.GetRequiredService<TDefinition>());
-
-            ConfigureServiceDirectoryIfPresent<TDefinition>();
         }
 
         void IContainerRegistrar.RegisterExecuteActivityDefinition<TDefinition, TActivity, TArguments>()
         {
             _collection.AddSingleton<TDefinition>();
             _collection.AddSingleton<IExecuteActivityDefinition<TActivity, TArguments>>(provider => provider.GetRequiredService<TDefinition>());
-
-            ConfigureServiceDirectoryIfPresent<TDefinition>();
         }
 
         void IContainerRegistrar.RegisterEndpointDefinition<TDefinition, T>(IEndpointSettings<IEndpointDefinition<T>> settings)
@@ -123,8 +113,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         {
             _collection.AddSingleton<TDefinition>();
             _collection.AddSingleton<IFutureDefinition<TFuture>>(provider => provider.GetRequiredService<TDefinition>());
-
-            ConfigureServiceDirectoryIfPresent<TDefinition>();
         }
 
         void IContainerRegistrar.RegisterRequestClient<T>(RequestTimeout timeout)
@@ -185,12 +173,6 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         protected virtual IClientFactory GetClientFactory(IServiceProvider provider)
         {
             return provider.GetRequiredService<IClientFactory>();
-        }
-
-        void ConfigureServiceDirectoryIfPresent<TDefinition>()
-        {
-            if (typeof(TDefinition).HasInterface<IConfigureServiceDirectory>())
-                _collection.AddSingleton(provider => (IConfigureServiceDirectory)provider.GetRequiredService<TDefinition>());
         }
     }
 

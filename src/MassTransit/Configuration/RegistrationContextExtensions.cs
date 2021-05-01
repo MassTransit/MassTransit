@@ -1,10 +1,10 @@
 namespace MassTransit
 {
     using System;
-    using Conductor;
     using ConsumeConfigurators;
     using Definition;
     using JobService;
+    using JobService.Configuration;
     using Registration;
     using Saga;
 
@@ -47,7 +47,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configure the Conductor service endpoints for all defined consumer, saga, and activity types.
+        /// Configure a service instance for use with the job service
         /// </summary>
         /// <param name="configurator">The <see cref="IBusFactoryConfigurator" /> for the bus being configured</param>
         /// <param name="registration">The registration for this bus instance</param>
@@ -76,7 +76,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Configure the Conductor service endpoints for all defined consumer, saga, and activity types.
+        /// Configure a service instance for use with the job service
         /// </summary>
         /// <param name="configurator">The <see cref="IBusFactoryConfigurator" /> for the bus being configured</param>
         /// <param name="registration">The registration for this bus instance</param>

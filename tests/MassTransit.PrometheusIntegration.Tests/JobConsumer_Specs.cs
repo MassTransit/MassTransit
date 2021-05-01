@@ -4,10 +4,10 @@ namespace MassTransit.PrometheusIntegration.Tests
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
-    using Conductor;
     using Contracts.JobService;
     using Definition;
     using JobService;
+    using JobService.Configuration;
     using NUnit.Framework;
     using Prometheus;
     using TestFramework;
@@ -22,9 +22,7 @@ namespace MassTransit.PrometheusIntegration.Tests
         [Test]
         public async Task Should_capture_the_bus_instance_metric()
         {
-            var serviceClient = Bus.CreateServiceClient();
-
-            IRequestClient<SubmitJob<TheJob>> requestClient = serviceClient.CreateRequestClient<SubmitJob<TheJob>>();
+            IRequestClient<SubmitJob<TheJob>> requestClient = Bus.CreateRequestClient<SubmitJob<TheJob>>();
 
             var jobId = NewId.NextGuid();
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
@@ -67,7 +65,6 @@ namespace MassTransit.PrometheusIntegration.Tests
             configurator.UsePrometheusMetrics(serviceName: "unit_test");
 
             var options = new ServiceInstanceOptions()
-                .EnableInstanceEndpoint()
                 .SetEndpointNameFormatter(KebabCaseEndpointNameFormatter.Instance);
 
             configurator.ServiceInstance(options, instance =>

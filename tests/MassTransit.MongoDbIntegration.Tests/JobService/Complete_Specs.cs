@@ -2,11 +2,11 @@ namespace MassTransit.MongoDbIntegration.Tests.JobService
 {
     using System;
     using System.Threading.Tasks;
-    using Conductor;
     using Contracts.JobService;
     using Definition;
     using MassTransit.JobService;
     using MassTransit.JobService.Components.StateMachines;
+    using MassTransit.JobService.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
 
@@ -44,7 +44,6 @@ namespace MassTransit.MongoDbIntegration.Tests.JobService
                 {
                     x.AddConsumer<CrunchTheNumbersConsumer>();
 
-                    x.AddServiceClient();
                     x.AddRequestClient<SubmitJob<CrunchTheNumbers>>();
 
                     x.AddSagaRepository<JobSaga>()
@@ -121,7 +120,6 @@ namespace MassTransit.MongoDbIntegration.Tests.JobService
             base.ConfigureInMemoryBus(configurator);
 
             var options = new ServiceInstanceOptions()
-                .EnableInstanceEndpoint()
                 .SetEndpointNameFormatter(KebabCaseEndpointNameFormatter.Instance);
 
             configurator.ServiceInstance(options, instance =>

@@ -5,13 +5,13 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
     using NUnit.Framework;
 
 
+    [TestFixture]
     public class Windsor_Conductor :
         Common_Conductor
     {
         readonly IWindsorContainer _container;
 
-        public Windsor_Conductor(bool instanceEndpoint)
-            : base(instanceEndpoint)
+        public Windsor_Conductor()
         {
             _container = new WindsorContainer();
             _container.AddMassTransit(ConfigureRegistration);

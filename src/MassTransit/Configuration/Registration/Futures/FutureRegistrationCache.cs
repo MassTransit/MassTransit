@@ -1,7 +1,6 @@
 namespace MassTransit.Registration
 {
     using System;
-    using Conductor;
     using Futures;
     using Internals.Extensions;
     using Metadata;
@@ -17,11 +16,6 @@ namespace MassTransit.Registration
         public static void AddFuture(IRegistrationConfigurator configurator, Type futureType, Type futureDefinitionType)
         {
             Cached.Instance.GetOrAdd(futureType).AddFuture(configurator, futureDefinitionType);
-        }
-
-        public static void AddFuture(this IServiceDirectoryConfigurator directoryConfigurator, Type futureType)
-        {
-            Cached.Instance.GetOrAdd(futureType).AddFuture(directoryConfigurator);
         }
 
         static CachedRegistration Factory(Type type)
@@ -43,7 +37,6 @@ namespace MassTransit.Registration
         {
             void Register(IContainerRegistrar registrar);
             void AddFuture(IRegistrationConfigurator configurator, Type futureDefinitionType);
-            void AddFuture(IServiceDirectoryConfigurator directoryConfigurator);
         }
 
 
@@ -62,11 +55,6 @@ namespace MassTransit.Registration
             public void AddFuture(IRegistrationConfigurator configurator, Type futureDefinitionType)
             {
                 configurator.AddFuture<TFuture>(futureDefinitionType ?? typeof(DefaultFutureDefinition<TFuture>));
-            }
-
-            public void AddFuture(IServiceDirectoryConfigurator directoryConfigurator)
-            {
-                directoryConfigurator.AddService<TRequest, TResponse>(x => x.Future<TFuture>());
             }
         }
     }

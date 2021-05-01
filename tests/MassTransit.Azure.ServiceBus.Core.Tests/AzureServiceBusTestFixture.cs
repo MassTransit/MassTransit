@@ -56,10 +56,9 @@
         [OneTimeSetUp]
         public async Task SetupAzureServiceBusTestFixture()
         {
-            using (var source = new CancellationTokenSource(TimeSpan.FromSeconds(20)))
-            {
-                await AzureServiceBusTestHarness.Start(source.Token);
-            }
+            using var source = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+
+            await AzureServiceBusTestHarness.Start(source.Token);
         }
 
         [OneTimeTearDown]

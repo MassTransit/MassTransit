@@ -3,9 +3,9 @@ namespace MassTransit.RabbitMqTransport.Tests
     namespace ConductorTests
     {
         using System.Threading.Tasks;
-        using Conductor;
         using Contracts;
         using Definition;
+        using JobService.Configuration;
         using NUnit.Framework;
 
 
@@ -55,9 +55,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             [Test]
             public async Task Should_connect_using_the_service_client()
             {
-                var serviceClient = Bus.CreateServiceClient();
-
-                IRequestClient<DeployPayload> requestClient = serviceClient.CreateRequestClient<DeployPayload>();
+                IRequestClient<DeployPayload> requestClient = Bus.CreateRequestClient<DeployPayload>();
 
                 Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
 
@@ -89,8 +87,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 var instanceA = await CreateInstance();
                 try
                 {
-                    var serviceClient = Bus.CreateServiceClient();
-                    IRequestClient<DeployPayload> requestClient = serviceClient.CreateRequestClient<DeployPayload>();
+                    IRequestClient<DeployPayload> requestClient = Bus.CreateRequestClient<DeployPayload>();
 
                     Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "A"});
 

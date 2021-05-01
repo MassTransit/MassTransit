@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Azure.Table
 {
     using System;
+    using JobService;
     using JobService.Components.StateMachines;
     using JobService.Configuration;
     using Microsoft.Azure.Cosmos.Table;

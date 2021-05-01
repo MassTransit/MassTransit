@@ -5,13 +5,13 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
     using StructureMap;
 
 
+    [TestFixture]
     public class StructureMap_Conductor :
         Common_Conductor
     {
         readonly IContainer _container;
 
-        public StructureMap_Conductor(bool instanceEndpoint)
-            : base(instanceEndpoint)
+        public StructureMap_Conductor()
         {
             _container = new Container(expression => expression.AddMassTransit(ConfigureRegistration));
         }

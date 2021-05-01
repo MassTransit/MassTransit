@@ -3,10 +3,10 @@ namespace MassTransit.Azure.Table.Tests.Turnout
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Conductor;
     using Contracts.JobService;
     using Definition;
     using JobService;
+    using JobService.Configuration;
     using NUnit.Framework;
     using Tests;
     using Util;
@@ -21,9 +21,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
         [Order(1)]
         public async Task Should_get_the_job_accepted()
         {
-            var serviceClient = Bus.CreateServiceClient();
-
-            IRequestClient<SubmitJob<CrunchTheNumbers>> requestClient = serviceClient.CreateRequestClient<SubmitJob<CrunchTheNumbers>>();
+            IRequestClient<SubmitJob<CrunchTheNumbers>> requestClient = Bus.CreateRequestClient<SubmitJob<CrunchTheNumbers>>();
 
             for (var i = 0; i < Count; i++)
             {
@@ -78,7 +76,6 @@ namespace MassTransit.Azure.Table.Tests.Turnout
             base.ConfigureInMemoryBus(configurator);
 
             var options = new ServiceInstanceOptions()
-                .EnableInstanceEndpoint()
                 .SetEndpointNameFormatter(KebabCaseEndpointNameFormatter.Instance);
 
             configurator.ServiceInstance(options, instance =>

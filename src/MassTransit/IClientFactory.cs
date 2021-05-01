@@ -6,8 +6,7 @@
 
 
     /// <summary>
-    /// A client factory supports the creation of smart clients that use the
-    /// smart endpoint aspects of Conductor to intelligently route messages.
+    /// The client factory is used to create request clients
     /// </summary>
     public interface IClientFactory :
         IAsyncDisposable

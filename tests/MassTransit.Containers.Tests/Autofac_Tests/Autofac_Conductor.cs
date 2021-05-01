@@ -6,13 +6,13 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
     using NUnit.Framework;
 
 
+    [TestFixture]
     public class Autofac_Conductor :
         Common_Conductor
     {
         readonly IContainer _container;
 
-        public Autofac_Conductor(bool instanceEndpoint)
-            : base(instanceEndpoint)
+        public Autofac_Conductor()
         {
             _container = new ContainerBuilder()
                 .AddMassTransit(ConfigureRegistration)

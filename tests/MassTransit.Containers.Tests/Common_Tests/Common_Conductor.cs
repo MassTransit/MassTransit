@@ -2,16 +2,14 @@ namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Conductor;
     using ConductorComponents;
     using ConductorContracts;
     using Definition;
+    using JobService.Configuration;
     using NUnit.Framework;
     using TestFramework;
 
 
-    [TestFixture(true)]
-    [TestFixture(false)]
     public abstract class Common_Conductor :
         InMemoryTestFixture
     {
@@ -31,12 +29,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(response.SourceAddress, Is.EqualTo(new Uri(BaseAddress, KebabCaseEndpointNameFormatter.Instance.Consumer<SubmitOrderConsumer>())));
         }
 
-        protected Common_Conductor(bool instanceEndpoint)
+        protected Common_Conductor()
         {
             Options = new ServiceInstanceOptions();
 
-            if (instanceEndpoint)
-                Options.EnableInstanceEndpoint();
         }
 
         protected ServiceInstanceOptions Options { get; private set; }
@@ -55,8 +51,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             configurator.SetKebabCaseEndpointNameFormatter();
 
             configurator.AddConsumersFromNamespaceContaining<SubmitOrderConsumer>();
-
-            configurator.AddServiceClient();
 
             configurator.AddRequestClient<SubmitOrder>();
             configurator.AddRequestClient<AuthorizeOrder>();

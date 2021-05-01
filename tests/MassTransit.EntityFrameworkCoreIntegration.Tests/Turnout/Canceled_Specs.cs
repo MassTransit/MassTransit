@@ -2,11 +2,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
 {
     using System;
     using System.Threading.Tasks;
-    using Conductor;
     using Contracts.JobService;
     using Definition;
     using JobService;
     using MassTransit.JobService;
+    using MassTransit.JobService.Configuration;
     using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
     using Shared;
@@ -23,9 +23,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
         [Order(1)]
         public async Task Should_get_the_job_accepted()
         {
-            var serviceClient = Bus.CreateServiceClient();
-
-            IRequestClient<SubmitJob<GrindTheGears>> requestClient = serviceClient.CreateRequestClient<SubmitJob<GrindTheGears>>();
+            IRequestClient<SubmitJob<GrindTheGears>> requestClient = Bus.CreateRequestClient<SubmitJob<GrindTheGears>>();
 
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
@@ -97,7 +95,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
             base.ConfigureInMemoryBus(configurator);
 
             var options = new ServiceInstanceOptions()
-                .EnableInstanceEndpoint()
                 .SetEndpointNameFormatter(KebabCaseEndpointNameFormatter.Instance);
 
             configurator.ServiceInstance(options, instance =>

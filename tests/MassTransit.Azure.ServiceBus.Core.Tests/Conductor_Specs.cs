@@ -54,9 +54,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             [Test]
             public async Task Should_connect_using_the_service_client()
             {
-                var serviceClient = Bus.CreateServiceClient();
-
-                IRequestClient<DeployPayload> requestClient = serviceClient.CreateRequestClient<DeployPayload>();
+                IRequestClient<DeployPayload> requestClient = Bus.CreateRequestClient<DeployPayload>();
 
                 Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
 

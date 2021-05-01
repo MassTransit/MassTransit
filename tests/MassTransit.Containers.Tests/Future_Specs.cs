@@ -109,17 +109,6 @@ namespace MassTransit.Containers.Tests
 
 
     [TestFixture]
-    public class InMemoryOrdering_using_the_request_client :
-        Ordering_using_the_request_client
-    {
-        public InMemoryOrdering_using_the_request_client()
-            : base(new InMemoryFutureTestFixtureConfigurator())
-        {
-        }
-    }
-
-
-    [TestFixture]
     public class InMemoryPriceCalculationFuture_Specs :
         PriceCalculationFuture_Specs
     {

@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using Automatonymous;
-    using Conductor;
     using ConsumeConfigurators;
     using Courier;
     using Definition;
@@ -210,12 +209,6 @@ namespace MassTransit
         /// <param name="destinationAddress">The destination address for the request</param>
         /// <param name="timeout">The request timeout</param>
         void AddRequestClient(Type requestType, Uri destinationAddress, RequestTimeout timeout = default);
-
-        /// <summary>
-        /// Adds the service client, which enables service discovery via Conductor
-        /// </summary>
-        /// <param name="configure">Configure the service client</param>
-        void AddServiceClient(Action<IServiceClientConfigurator> configure = default);
 
         /// <summary>
         /// Set the default endpoint name formatter used for endpoint names

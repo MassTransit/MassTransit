@@ -5,13 +5,13 @@ namespace MassTransit.Containers.Tests.Lamar_Tests
     using NUnit.Framework;
 
 
+    [TestFixture]
     public class Lamar_Conductor :
         Common_Conductor
     {
         readonly IContainer _container;
 
-        public Lamar_Conductor(bool instanceEndpoint)
-            : base(instanceEndpoint)
+        public Lamar_Conductor()
         {
             _container = new Container(registry =>
             {

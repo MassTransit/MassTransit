@@ -1,15 +1,15 @@
-namespace MassTransit.Azure.Table.Tests.Turnout
+namespace MassTransit.RabbitMqTransport.Tests.Turnout
 {
     using System;
     using System.Threading.Tasks;
-    using Conductor;
-    using Contracts.JobService;
     using Definition;
     using JobService;
+    using JobService.Configuration;
+    using MassTransit.Contracts.JobService;
     using NUnit.Framework;
     using RabbitMqTransport;
-    using RabbitMqTransport.Tests;
     using TestFramework;
+    using Tests;
 
 
     public interface GrindTheGears
@@ -28,9 +28,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
         [Order(1)]
         public async Task Should_get_the_job_accepted()
         {
-            var serviceClient = Bus.CreateServiceClient();
-
-            IRequestClient<SubmitJob<GrindTheGears>> requestClient = serviceClient.CreateRequestClient<SubmitJob<GrindTheGears>>();
+            IRequestClient<SubmitJob<GrindTheGears>> requestClient = Bus.CreateRequestClient<SubmitJob<GrindTheGears>>();
 
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
@@ -89,7 +87,6 @@ namespace MassTransit.Azure.Table.Tests.Turnout
             configurator.UseDelayedExchangeMessageScheduler();
 
             var options = new ServiceInstanceOptions()
-                .EnableInstanceEndpoint()
                 .SetEndpointNameFormatter(KebabCaseEndpointNameFormatter.Instance);
 
             configurator.ServiceInstance(options, instance =>

@@ -7,13 +7,13 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     using SimpleInjector;
 
 
+    [TestFixture]
     public class SimpleInjector_Conductor :
         Common_Conductor
     {
         readonly Container _container;
 
-        public SimpleInjector_Conductor(bool instanceEndpoint)
-            : base(instanceEndpoint)
+        public SimpleInjector_Conductor()
         {
             _container = new Container();
             _container.SetMassTransitContainerOptions();

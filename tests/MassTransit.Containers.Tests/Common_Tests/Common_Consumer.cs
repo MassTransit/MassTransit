@@ -514,9 +514,7 @@
         [Test]
         public async Task Should_handle_the_request()
         {
-            var serviceClient = Bus.CreateServiceClient();
-
-            IRequestClient<PingMessage> requestClient = serviceClient.CreateRequestClient<PingMessage>();
+            IRequestClient<PingMessage> requestClient = Bus.CreateRequestClient<PingMessage>();
 
             var pingId = NewId.NextGuid();
 

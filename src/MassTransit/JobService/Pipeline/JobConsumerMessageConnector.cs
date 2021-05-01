@@ -4,6 +4,7 @@ namespace MassTransit.JobService.Pipeline
     using Components;
     using Components.Consumers;
     using Configuration;
+    using ConsumeConfigurators;
     using ConsumeConnectors;
     using ConsumerSpecifications;
     using GreenPipes;
@@ -43,8 +44,9 @@ namespace MassTransit.JobService.Pipeline
             IConsumerSpecification<TConsumer> specification)
         {
             var jobServiceOptions = specification.Options<JobServiceOptions>();
+            var jobService = jobServiceOptions.JobService;
 
-            if (jobServiceOptions.JobService == null)
+            if (jobService == null || jobServiceOptions.InstanceEndpointConfigurator == null)
             {
                 throw new ConfigurationException(
                     "The job service must be configured prior to configuring a job consumer, using either ConfigureJobServiceEndpoints or ConfigureJobService");
@@ -54,21 +56,24 @@ namespace MassTransit.JobService.Pipeline
 
             IConsumerMessageSpecification<TConsumer, TJob> messageSpecification = specification.GetMessageSpecification<TJob>();
 
-            var turnoutSpecification = messageSpecification as JobConsumerMessageSpecification<TConsumer, TJob>;
-            if (turnoutSpecification == null)
+            var jobSpecification = messageSpecification as JobConsumerMessageSpecification<TConsumer, TJob>;
+            if (jobSpecification == null)
                 throw new ArgumentException("The consumer specification did not match the message specification type");
 
-            var submitJobHandle = ConnectSubmitJobConsumer(consumePipe, turnoutSpecification.SubmitJobSpecification, options);
+            var submitJobHandle = ConnectSubmitJobConsumer(consumePipe, jobSpecification.SubmitJobSpecification, options);
 
-            var startJobHandle = ConnectStartJobConsumer(consumePipe, turnoutSpecification.StartJobSpecification, options, jobServiceOptions.JobService,
-                CreateJobPipe(consumerFactory, specification));
+            IPipe<ConsumeContext<TJob>> jobPipe = CreateJobPipe(consumerFactory, specification);
+            var startJobHandle = ConnectStartJobConsumer(consumePipe, jobSpecification.StartJobSpecification, options, jobService, jobPipe);
 
-            var finalizeJobHandle = ConnectFinalizeJobConsumer(consumePipe, turnoutSpecification.FinalizeJobSpecification, options,
-                jobServiceOptions.JobService);
+            ConfigureStartJobConsumer(jobServiceOptions.InstanceEndpointConfigurator, options, jobService, jobPipe);
 
-            var cancelJobHandle = ConnectSuperviseJobConsumer(consumePipe, turnoutSpecification.SuperviseJobSpecification, jobServiceOptions.JobService);
+            var finalizeJobHandle = ConnectFinalizeJobConsumer(consumePipe, jobSpecification.FinalizeJobSpecification, options, jobService);
 
-            return new MultipleConnectHandle(submitJobHandle, startJobHandle, finalizeJobHandle, cancelJobHandle);
+            var superviseJobHandle = ConnectSuperviseJobConsumer(consumePipe, jobSpecification.SuperviseJobSpecification, jobService);
+
+            ConfigureSuperviseJobConsumer(jobServiceOptions.InstanceEndpointConfigurator, jobService);
+
+            return new MultipleConnectHandle(submitJobHandle, startJobHandle, finalizeJobHandle, superviseJobHandle);
         }
 
         static IPipe<ConsumeContext<TJob>> CreateJobPipe(IConsumerFactory<TConsumer> consumerFactory, IConsumerSpecification<TConsumer> specification)
@@ -112,6 +117,25 @@ namespace MassTransit.JobService.Pipeline
                 TypeMetadataCache<TConsumer>.ShortName));
 
             return _finalizeJobConsumerConnector.ConnectConsumer(consumePipe, consumerFactory, specification);
+        }
+
+        void ConfigureStartJobConsumer(IReceiveEndpointConfigurator configurator, JobOptions<TJob> options, IJobService jobService,
+            IPipe<ConsumeContext<TJob>> pipe)
+        {
+            var consumerFactory = new DelegateConsumerFactory<StartJobConsumer<TJob>>(() => new StartJobConsumer<TJob>(jobService, options, pipe));
+
+            var consumerConfigurator = new ConsumerConfigurator<StartJobConsumer<TJob>>(consumerFactory, configurator);
+
+            configurator.AddEndpointSpecification(consumerConfigurator);
+        }
+
+        void ConfigureSuperviseJobConsumer(IReceiveEndpointConfigurator configurator, IJobService jobService)
+        {
+            var consumerFactory = new DelegateConsumerFactory<SuperviseJobConsumer>(() => new SuperviseJobConsumer(jobService));
+
+            var consumerConfigurator = new ConsumerConfigurator<SuperviseJobConsumer>(consumerFactory, configurator);
+
+            configurator.AddEndpointSpecification(consumerConfigurator);
         }
 
         ConnectHandle ConnectSuperviseJobConsumer(IConsumePipeConnector consumePipe, IConsumerSpecification<SuperviseJobConsumer> specification,

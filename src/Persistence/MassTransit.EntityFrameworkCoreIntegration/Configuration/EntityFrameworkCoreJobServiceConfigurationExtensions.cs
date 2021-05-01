@@ -2,6 +2,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 {
     using System;
     using JobService;
+    using MassTransit.JobService;
     using MassTransit.JobService.Components.StateMachines;
     using MassTransit.JobService.Configuration;
     using Saga;

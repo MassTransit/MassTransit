@@ -3,9 +3,7 @@ namespace MassTransit.JobService.Configuration
     using System;
     using System.Collections.Generic;
     using Components;
-    using Components.Consumers;
     using Components.StateMachines;
-    using Conductor;
     using Contracts.JobService;
     using GreenPipes;
     using GreenPipes.Partitioning;
@@ -17,7 +15,7 @@ namespace MassTransit.JobService.Configuration
         ISpecification
         where TReceiveEndpointConfigurator : IReceiveEndpointConfigurator
     {
-        readonly IServiceInstanceConfigurator<TReceiveEndpointConfigurator> _instanceConfigurator;
+        readonly IBusFactoryConfigurator<TReceiveEndpointConfigurator> _busConfigurator;
         readonly JobServiceOptions _options;
         bool _endpointsConfigured;
         ISagaRepository<JobAttemptSaga> _jobAttemptRepository;
@@ -26,28 +24,28 @@ namespace MassTransit.JobService.Configuration
         IReceiveEndpointConfigurator _jobSagaEndpointConfigurator;
         ISagaRepository<JobTypeSaga> _jobTypeRepository;
         IReceiveEndpointConfigurator _jobTypeSagaEndpointConfigurator;
-        bool _superviseJobConsumerConfigured;
 
         public JobServiceConfigurator(IServiceInstanceConfigurator<TReceiveEndpointConfigurator> instanceConfigurator, JobServiceOptions options = null)
         {
-            _instanceConfigurator = instanceConfigurator;
+            _busConfigurator = instanceConfigurator.BusConfigurator;
 
-            JobService = new JobService(_instanceConfigurator.InstanceAddress);
+            JobService = new JobService(instanceConfigurator.InstanceAddress);
 
-            instanceConfigurator.ConnectBusObserver(new JobServiceBusObserver(JobService));
+            instanceConfigurator.BusConfigurator.ConnectBusObserver(new JobServiceBusObserver(JobService));
             instanceConfigurator.AddSpecification(this);
 
             _options = options != null
-                ? _instanceConfigurator.Options(options)
-                : _instanceConfigurator.Options<JobServiceOptions>();
+                ? instanceConfigurator.Options(options)
+                : instanceConfigurator.Options<JobServiceOptions>();
 
             _options.JobService = JobService;
+            _options.InstanceEndpointConfigurator = instanceConfigurator.InstanceEndpointConfigurator;
 
-            _options.JobTypeSagaEndpointName = _instanceConfigurator.EndpointNameFormatter.Saga<JobTypeSaga>();
-            _options.JobStateSagaEndpointName = _instanceConfigurator.EndpointNameFormatter.Saga<JobSaga>();
-            _options.JobAttemptSagaEndpointName = _instanceConfigurator.EndpointNameFormatter.Saga<JobAttemptSaga>();
+            _options.JobTypeSagaEndpointName = instanceConfigurator.EndpointNameFormatter.Saga<JobTypeSaga>();
+            _options.JobStateSagaEndpointName = instanceConfigurator.EndpointNameFormatter.Saga<JobSaga>();
+            _options.JobAttemptSagaEndpointName = instanceConfigurator.EndpointNameFormatter.Saga<JobAttemptSaga>();
 
-            _instanceConfigurator.ConnectEndpointConfigurationObserver(new JobServiceEndpointConfigurationObserver(_options, cfg =>
+            instanceConfigurator.ConnectEndpointConfigurationObserver(new JobServiceEndpointConfigurationObserver(_options, cfg =>
             {
                 if (_jobTypeSagaEndpointConfigurator != null)
                     cfg.AddDependency(_jobTypeSagaEndpointConfigurator);
@@ -55,8 +53,6 @@ namespace MassTransit.JobService.Configuration
                     cfg.AddDependency(_jobSagaEndpointConfigurator);
                 if (_jobAttemptSagaEndpointConfigurator != null)
                     cfg.AddDependency(_jobAttemptSagaEndpointConfigurator);
-
-                ConfigureSuperviseJobConsumer();
             }));
         }
 
@@ -150,7 +146,7 @@ namespace MassTransit.JobService.Configuration
             if (_endpointsConfigured)
                 return;
 
-            _instanceConfigurator.BusConfigurator.ReceiveEndpoint(_options.JobStateSagaEndpointName, e =>
+            _busConfigurator.ReceiveEndpoint(_options.JobStateSagaEndpointName, e =>
             {
                 e.UseMessageRetry(r => r.Intervals(100, 1000, 2000, 5000));
                 e.UseInMemoryOutbox();
@@ -185,7 +181,7 @@ namespace MassTransit.JobService.Configuration
                 _options.JobSagaEndpointAddress = e.InputAddress;
             });
 
-            _instanceConfigurator.BusConfigurator.ReceiveEndpoint(_options.JobAttemptSagaEndpointName, e =>
+            _busConfigurator.ReceiveEndpoint(_options.JobAttemptSagaEndpointName, e =>
             {
                 e.UseMessageRetry(r => r.Intervals(100, 1000, 2000, 5000));
                 e.UseInMemoryOutbox();
@@ -214,7 +210,7 @@ namespace MassTransit.JobService.Configuration
                 _options.JobAttemptSagaEndpointAddress = e.InputAddress;
             });
 
-            _instanceConfigurator.BusConfigurator.ReceiveEndpoint(_options.JobTypeSagaEndpointName, e =>
+            _busConfigurator.ReceiveEndpoint(_options.JobTypeSagaEndpointName, e =>
             {
                 e.UseMessageRetry(r => r.Intervals(100, 200, 300, 500, 1000, 2000, 5000));
                 e.UseInMemoryOutbox();
@@ -238,16 +234,6 @@ namespace MassTransit.JobService.Configuration
             });
 
             _endpointsConfigured = true;
-        }
-
-        void ConfigureSuperviseJobConsumer()
-        {
-            if (_superviseJobConsumerConfigured)
-                return;
-
-            _instanceConfigurator.InstanceEndpointConfigurator.Consumer(() => new SuperviseJobConsumer(_options.JobService));
-
-            _superviseJobConsumerConfigured = true;
         }
     }
 }

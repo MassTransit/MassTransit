@@ -2,11 +2,11 @@ namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Conductor;
     using Contracts.JobService;
     using Definition;
     using JobConsumerComponents;
     using JobConsumerContracts;
+    using JobService.Configuration;
     using NUnit.Framework;
     using TestFramework;
 
@@ -28,7 +28,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
         protected Common_JobConsumer()
         {
             Options = new ServiceInstanceOptions()
-                .EnableInstanceEndpoint()
                 .EnableJobServiceEndpoints();
         }
 
@@ -48,8 +47,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             configurator.SetKebabCaseEndpointNameFormatter();
 
             configurator.AddConsumersFromNamespaceContaining<CrunchTheNumbersConsumer>();
-
-            configurator.AddServiceClient();
 
             configurator.AddRequestClient<CrunchTheNumbers>();
 
