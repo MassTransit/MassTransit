@@ -1,6 +1,7 @@
 namespace MassTransit.JobService.Configuration
 {
     using System;
+    using System.Collections.Generic;
     using ConsumeConfigurators;
     using Internals.Extensions;
 
@@ -10,6 +11,7 @@ namespace MassTransit.JobService.Configuration
     {
         readonly IReceiveEndpointConfigurator _configurator;
         readonly Action<IReceiveEndpointConfigurator> _configureEndpoint;
+        readonly Dictionary<Type, IConsumeConfigurator> _consumerConfigurators;
         readonly JobServiceOptions _jobServiceOptions;
         bool _endpointConfigured;
 
@@ -19,12 +21,16 @@ namespace MassTransit.JobService.Configuration
             _configurator = configurator;
             _jobServiceOptions = jobServiceOptions;
             _configureEndpoint = configureEndpoint;
+
+            _consumerConfigurators = new Dictionary<Type, IConsumeConfigurator>();
         }
 
         void IConsumerConfigurationObserver.ConsumerConfigured<T>(IConsumerConfigurator<T> configurator)
         {
             if (typeof(T).HasInterface(typeof(IJobConsumer<>)))
             {
+                _consumerConfigurators.Add(typeof(T), configurator);
+
                 configurator.Options(_jobServiceOptions);
 
                 if (_endpointConfigured)
@@ -38,6 +44,14 @@ namespace MassTransit.JobService.Configuration
 
         void IConsumerConfigurationObserver.ConsumerMessageConfigured<T, TMessage>(IConsumerMessageConfigurator<T, TMessage> configurator)
         {
+            if (typeof(T).HasInterface<IJobConsumer<TMessage>>()
+                && _consumerConfigurators.TryGetValue(typeof(T), out var value)
+                && value is IConsumerConfigurator<T> consumerConfigurator)
+            {
+                var options = consumerConfigurator.Options<JobOptions<TMessage>>();
+
+                _jobServiceOptions.JobService.RegisterJobType(_configurator, options);
+            }
         }
     }
 }

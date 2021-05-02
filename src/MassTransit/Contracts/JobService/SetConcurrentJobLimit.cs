@@ -4,11 +4,13 @@ namespace MassTransit.Contracts.JobService
 
 
     /// <summary>
-    /// Set the limit for concurrent consumers of the specified type
+    /// When the bus is started, the current job limit for a job type is published along with the instance address.
     /// </summary>
     public interface SetConcurrentJobLimit
     {
         Guid JobTypeId { get; }
+
+        Uri InstanceAddress { get; }
 
         int ConcurrentJobLimit { get; }
 

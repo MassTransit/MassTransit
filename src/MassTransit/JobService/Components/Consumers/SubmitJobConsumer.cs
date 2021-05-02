@@ -1,11 +1,9 @@
 namespace MassTransit.JobService.Components.Consumers
 {
     using System;
-    using System.Threading;
     using System.Threading.Tasks;
+    using Contracts.JobService;
     using Courier;
-    using MassTransit.Contracts.JobService;
-    using Util;
 
 
     /// <summary>
@@ -17,8 +15,6 @@ namespace MassTransit.JobService.Components.Consumers
         IConsumer<SubmitJob<TJob>>
         where TJob : class
     {
-        static int _publishedStartup;
-
         readonly JobOptions<TJob> _options;
 
         public SubmitJobConsumer(JobOptions<TJob> options)
@@ -40,8 +36,6 @@ namespace MassTransit.JobService.Components.Consumers
 
         async Task PublishJobSubmitted(ConsumeContext context, Guid jobId, TJob job, DateTime timestamp)
         {
-            await PublishConcurrentJobLimit(context);
-
             await context.Publish<JobSubmitted>(new
             {
                 JobId = jobId,
@@ -53,21 +47,6 @@ namespace MassTransit.JobService.Components.Consumers
 
             if (context.RequestId.HasValue && context.ResponseAddress != null)
                 await context.RespondAsync<JobSubmissionAccepted>(new {JobId = jobId});
-        }
-
-        Task PublishConcurrentJobLimit(IPublishEndpoint context)
-        {
-            if (Interlocked.CompareExchange(ref _publishedStartup, 1, 0) == 0)
-            {
-                return context.Publish<SetConcurrentJobLimit>(new
-                {
-                    JobMetadataCache<TJob>.JobTypeId,
-                    _options.ConcurrentJobLimit,
-                    Kind = ConcurrentLimitKind.Configured
-                });
-            }
-
-            return TaskUtil.Completed;
         }
     }
 }

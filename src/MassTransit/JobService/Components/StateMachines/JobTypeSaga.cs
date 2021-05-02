@@ -16,6 +16,8 @@ namespace MassTransit.JobService.Components.StateMachines
         public JobTypeSaga()
         {
             ConcurrentJobLimit = 1;
+
+            Instances = new Dictionary<Uri, JobTypeInstance>();
             ActiveJobs = new List<ActiveJob>();
         }
 
@@ -44,6 +46,11 @@ namespace MassTransit.JobService.Components.StateMachines
         /// The last known active jobs
         /// </summary>
         public List<ActiveJob> ActiveJobs { get; set; }
+
+        /// <summary>
+        /// Tracks the instances, when they were last updated
+        /// </summary>
+        public Dictionary<Uri, JobTypeInstance> Instances { get; set; }
 
         public int Version { get; set; }
 

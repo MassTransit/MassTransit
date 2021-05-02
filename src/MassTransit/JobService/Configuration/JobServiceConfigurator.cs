@@ -29,14 +29,15 @@ namespace MassTransit.JobService.Configuration
         {
             _busConfigurator = instanceConfigurator.BusConfigurator;
 
-            JobService = new JobService(instanceConfigurator.InstanceAddress);
+            _options = options != null
+                ? instanceConfigurator.Options(options)
+                : instanceConfigurator.Options<JobServiceOptions>();
+
+            JobService = new JobService(instanceConfigurator.InstanceAddress, _options);
 
             instanceConfigurator.BusConfigurator.ConnectBusObserver(new JobServiceBusObserver(JobService));
             instanceConfigurator.AddSpecification(this);
 
-            _options = options != null
-                ? instanceConfigurator.Options(options)
-                : instanceConfigurator.Options<JobServiceOptions>();
 
             _options.JobService = JobService;
             _options.InstanceEndpointConfigurator = instanceConfigurator.InstanceEndpointConfigurator;
@@ -224,7 +225,7 @@ namespace MassTransit.JobService.Configuration
                     e.UsePartitioner<SetConcurrentJobLimit>(partition, p => p.Message.JobTypeId);
                 }
 
-                var stateMachine = new JobTypeStateMachine();
+                var stateMachine = new JobTypeStateMachine(_options);
 
                 e.StateMachineSaga(stateMachine, _jobTypeRepository ?? new InMemorySagaRepository<JobTypeSaga>());
 

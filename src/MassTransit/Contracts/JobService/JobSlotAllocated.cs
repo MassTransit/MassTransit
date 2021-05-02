@@ -6,5 +6,7 @@ namespace MassTransit.Contracts.JobService
     public interface JobSlotAllocated
     {
         Guid JobId { get; }
+
+        Uri InstanceAddress { get; }
     }
 }

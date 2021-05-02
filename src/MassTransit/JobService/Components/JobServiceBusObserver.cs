@@ -37,6 +37,8 @@ namespace MassTransit.JobService.Components
 
             await busReady.ConfigureAwait(false);
 
+            await _jobService.BusStarted(bus).ConfigureAwait(false);
+
             LogContext.Info?.Log("Job Service started: {InstanceAddress}", _jobService.InstanceAddress);
         }
 
@@ -49,7 +51,7 @@ namespace MassTransit.JobService.Components
         {
             LogContext.Debug?.Log("Job Service shutting down: {InstanceAddress}", _jobService.InstanceAddress);
 
-            await _jobService.Stop().ConfigureAwait(false);
+            await _jobService.Stop(bus).ConfigureAwait(false);
 
             LogContext.Info?.Log("Job Service shut down: {InstanceAddress}", _jobService.InstanceAddress);
         }

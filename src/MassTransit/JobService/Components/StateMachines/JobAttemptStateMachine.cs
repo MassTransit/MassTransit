@@ -61,6 +61,7 @@ namespace MassTransit.JobService.Components.StateMachines
                     {
                         context.Instance.JobId = context.Data.JobId;
                         context.Instance.RetryAttempt = context.Data.RetryAttempt;
+                        context.Instance.InstanceAddress ??= context.Data.InstanceAddress;
                         context.Instance.ServiceAddress ??= context.Data.ServiceAddress;
                     })
                     .SendStartJob(this)
@@ -193,13 +194,14 @@ namespace MassTransit.JobService.Components.StateMachines
         public static EventActivityBinder<JobAttemptSaga, StartJobAttempt> SendStartJob(this EventActivityBinder<JobAttemptSaga, StartJobAttempt> binder,
             JobAttemptStateMachine machine)
         {
-            return binder.SendAsync(context => context.Instance.ServiceAddress, context => context.Init<StartJob>(new
-            {
-                context.Data.JobId,
-                context.Data.AttemptId,
-                context.Data.RetryAttempt,
-                context.Data.Job
-            }), context => context.ResponseAddress = machine.JobAttemptSagaEndpointAddress);
+            return binder.SendAsync(context => context.Instance.InstanceAddress ?? context.Instance.ServiceAddress,
+                context => context.Init<StartJob>(new
+                {
+                    context.Data.JobId,
+                    context.Data.AttemptId,
+                    context.Data.RetryAttempt,
+                    context.Data.Job
+                }), context => context.ResponseAddress = machine.JobAttemptSagaEndpointAddress);
         }
 
         public static EventActivityBinder<JobAttemptSaga, JobStatusCheckRequested> SendCheckJobStatus(this EventActivityBinder<JobAttemptSaga,

@@ -21,6 +21,8 @@ namespace MassTransit.JobService
             SlotWaitTime = TimeSpan.FromSeconds(30);
             StartJobTimeout = TimeSpan.Zero;
             SlotRequestTimeout = TimeSpan.Zero;
+            HeartbeatInterval = TimeSpan.FromMinutes(1);
+            HeartbeatTimeout = TimeSpan.FromMinutes(5);
         }
 
         public string JobTypeSagaEndpointName
@@ -92,6 +94,16 @@ namespace MassTransit.JobService
         /// The time after which the status of a job should be checked
         /// </summary>
         public TimeSpan StatusCheckInterval { get; set; }
+
+        /// <summary>
+        /// How often a job instance should send a heartbeat
+        /// </summary>
+        public TimeSpan HeartbeatInterval { get; set; }
+
+        /// <summary>
+        /// The time after which an instance will automatically be purged from the instance list
+        /// </summary>
+        public TimeSpan HeartbeatTimeout { get; set; }
 
         /// <summary>
         /// The number of times to retry a suspect job before it is faulted. Defaults to zero.
