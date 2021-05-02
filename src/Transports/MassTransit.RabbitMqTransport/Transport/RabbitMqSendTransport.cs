@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
@@ -205,6 +206,14 @@
                             else if (_dateTimeConverter.TryConvert(value, out string text))
                                 dictionary[header.Key] = text;
 
+                            break;
+
+                        case string value when header.Key == "CC" || header.Key == "BCC":
+                            dictionary[header.Key] = new[] {value};
+                            break;
+
+                        case IEnumerable<string> strings when header.Key == "CC" || header.Key == "BCC":
+                            dictionary[header.Key] = strings.ToArray();
                             break;
 
                         case string value:
