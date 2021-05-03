@@ -23,7 +23,7 @@ namespace MassTransit.KafkaIntegration.Tests
             await CheckBrokerReady();
         }
 
-        Task CheckBrokerReady()
+        static Task CheckBrokerReady()
         {
             return Retry.Interval(10, 5000).Retry(async () =>
             {

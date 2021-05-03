@@ -178,18 +178,6 @@ namespace MassTransit.EventHubIntegration.Tests
         }
 
 
-        class EventHubMessageClass :
-            EventHubMessage
-        {
-            public EventHubMessageClass(string text)
-            {
-                Text = text;
-            }
-
-            public string Text { get; }
-        }
-
-
         class EventHubMessageConsumer :
             IConsumer<EventHubMessage>
         {
@@ -209,7 +197,6 @@ namespace MassTransit.EventHubIntegration.Tests
 
         public interface EventHubMessage
         {
-            string Text { get; }
         }
     }
 }

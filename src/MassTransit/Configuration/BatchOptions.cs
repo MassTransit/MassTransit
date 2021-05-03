@@ -43,6 +43,26 @@ namespace MassTransit
         /// </summary>
         public object GroupKeyProvider { get; private set; }
 
+        public void Configure(string name, IReceiveEndpointConfigurator configurator)
+        {
+            var messageCapacity = ConcurrencyLimit * MessageLimit;
+
+            configurator.PrefetchCount = Math.Max(messageCapacity, configurator.PrefetchCount);
+
+            if (configurator.ConcurrentMessageLimit < messageCapacity)
+                configurator.ConcurrentMessageLimit = messageCapacity;
+        }
+
+        public IEnumerable<ValidationResult> Validate()
+        {
+            if (TimeLimit <= TimeSpan.Zero)
+                yield return this.Failure("Batch", "TimeLimit", "Must be > TimeSpan.Zero");
+            if (MessageLimit <= 0)
+                yield return this.Failure("Batch", "MessageLimit", "Must be > 0");
+            if (ConcurrencyLimit <= 0)
+                yield return this.Failure("Batch", "ConcurrencyLimit", "Must be > 0");
+        }
+
         /// <summary>
         /// Sets the maximum number of messages in a single batch
         /// </summary>
@@ -103,26 +123,6 @@ namespace MassTransit
             GroupKeyProvider = new GroupKeyProvider<T, TProperty>(provider);
 
             return this;
-        }
-
-        public void Configure(string name, IReceiveEndpointConfigurator configurator)
-        {
-            int messageCapacity = ConcurrencyLimit * MessageLimit;
-
-            configurator.PrefetchCount = Math.Max(messageCapacity, configurator.PrefetchCount);
-
-            if (configurator.ConcurrentMessageLimit < messageCapacity)
-                configurator.ConcurrentMessageLimit = messageCapacity;
-        }
-
-        public IEnumerable<ValidationResult> Validate()
-        {
-            if(TimeLimit <= TimeSpan.Zero)
-                yield return this.Failure("Batch", "TimeLimit", "Must be > TimeSpan.Zero");
-            if(MessageLimit <= 0)
-                yield return this.Failure("Batch", "MessageLimit", "Must be > 0");
-            if(ConcurrencyLimit <= 0)
-                yield return this.Failure("Batch", "ConcurrencyLimit", "Must be > 0");
         }
     }
 }
