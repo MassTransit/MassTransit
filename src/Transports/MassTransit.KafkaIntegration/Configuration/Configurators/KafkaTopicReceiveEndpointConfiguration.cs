@@ -4,6 +4,7 @@ namespace MassTransit.KafkaIntegration.Configurators
     using System.Collections.Generic;
     using Configuration;
     using Confluent.Kafka;
+    using Contexts;
     using GreenPipes;
     using GreenPipes.Configurators;
     using MassTransit.Registration;
@@ -20,6 +21,7 @@ namespace MassTransit.KafkaIntegration.Configurators
         where TValue : class
     {
         readonly IBusInstance _busInstance;
+        readonly CheckpointPipeConfiguration _checkpointPipeConfiguration;
         readonly ConsumerConfig _consumerConfig;
         readonly PipeConfigurator<ConsumerContext<TKey, TValue>> _consumerConfigurator;
         readonly IReceiveEndpointConfiguration _endpointConfiguration;
@@ -49,6 +51,7 @@ namespace MassTransit.KafkaIntegration.Configurators
             CheckpointMessageCount = 5000;
             ConcurrencyLimit = 1;
 
+            _checkpointPipeConfiguration = new CheckpointPipeConfiguration();
             _consumerConfigurator = new PipeConfigurator<ConsumerContext<TKey, TValue>>();
         }
 
@@ -161,6 +164,11 @@ namespace MassTransit.KafkaIntegration.Configurators
             _offsetsCommittedHandler = offsetsCommittedHandler ?? throw new ArgumentNullException(nameof(offsetsCommittedHandler));
         }
 
+        public void AddPipeSpecification(IPipeSpecification<CheckpointContext> specification)
+        {
+            _checkpointPipeConfiguration.AddPipeSpecification(specification);
+        }
+
         public TimeSpan CheckpointInterval { set; get; }
 
         public int ConcurrencyLimit
@@ -183,6 +191,9 @@ namespace MassTransit.KafkaIntegration.Configurators
                 foreach (var result in options.Validate())
                     yield return result;
             }
+
+            foreach (var result in _checkpointPipeConfiguration.Validate())
+                yield return result;
 
             foreach (var result in base.Validate())
                 yield return result;
@@ -209,7 +220,7 @@ namespace MassTransit.KafkaIntegration.Configurators
             IKafkaReceiveEndpointContext<TKey, TValue> CreateContext()
             {
                 var builder = new KafkaReceiveEndpointBuilder<TKey, TValue>(_busInstance, _endpointConfiguration, _hostConfiguration, this,
-                    _headersDeserializer, CreateConsumerBuilder);
+                    _headersDeserializer, CreateConsumerBuilder, _checkpointPipeConfiguration);
                 foreach (var specification in Specifications)
                     specification.Configure(builder);
 

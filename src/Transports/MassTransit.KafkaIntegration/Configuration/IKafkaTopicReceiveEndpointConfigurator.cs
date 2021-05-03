@@ -6,7 +6,8 @@
 
 
     public interface IKafkaTopicReceiveEndpointConfigurator :
-        IReceiveEndpointConfigurator
+        IReceiveEndpointConfigurator,
+        ICheckpointPipeConfigurator
     {
         /// <summary>
         /// Action to take when there is no initial offset in offset store or the desired offset is out of range: 'smallest','earliest' - automatically reset the offset to the smallest

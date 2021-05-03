@@ -71,7 +71,7 @@ namespace MassTransit.EventHubIntegration.Contexts
                 _commitIsRequired = false;
             }
 
-            public async Task<bool> TryCheckpointAsync(ProcessEventArgs args)
+            public async Task TryCheckpointAsync(ProcessEventArgs args)
             {
                 void Reset()
                 {
@@ -94,11 +94,10 @@ namespace MassTransit.EventHubIntegration.Contexts
                     _processed += 1;
 
                     if (_processed < _maxCount && _timer.Elapsed < _timeout)
-                        return false;
+                        return;
 
                     await CommitIfRequired().ConfigureAwait(false);
                     Reset();
-                    return true;
                 }
                 finally
                 {

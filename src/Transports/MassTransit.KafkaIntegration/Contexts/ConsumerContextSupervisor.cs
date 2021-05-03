@@ -2,6 +2,7 @@ namespace MassTransit.KafkaIntegration.Contexts
 {
     using System;
     using Configuration;
+    using Configurators;
     using Confluent.Kafka;
     using Serializers;
     using Transport;
@@ -14,9 +15,10 @@ namespace MassTransit.KafkaIntegration.Contexts
         where TValue : class
     {
         public ConsumerContextSupervisor(IClientContextSupervisor clientContextSupervisor, ReceiveSettings receiveSettings,
-            IHostConfiguration hostConfiguration, IHeadersDeserializer headersDeserializer, Func<ConsumerBuilder<TKey, TValue>> consumerBuilderFactory)
+            IHostConfiguration hostConfiguration, IHeadersDeserializer headersDeserializer, Func<ConsumerBuilder<TKey, TValue>> consumerBuilderFactory,
+            CheckpointPipeConfiguration checkpointPipeConfiguration)
             : base(new ConsumerContextFactory<TKey, TValue>(clientContextSupervisor, receiveSettings, hostConfiguration, headersDeserializer,
-                consumerBuilderFactory))
+                consumerBuilderFactory, checkpointPipeConfiguration))
         {
             clientContextSupervisor.AddConsumeAgent(this);
         }

@@ -2,6 +2,7 @@ namespace MassTransit.KafkaIntegration
 {
     using System;
     using Configuration;
+    using Configurators;
     using Confluent.Kafka;
     using Context;
     using Contexts;
@@ -26,7 +27,7 @@ namespace MassTransit.KafkaIntegration
             IKafkaHostConfiguration hostConfiguration,
             ReceiveSettings receiveSettings,
             IHeadersDeserializer headersDeserializer,
-            Func<ConsumerBuilder<TKey, TValue>> consumerBuilderFactory)
+            Func<ConsumerBuilder<TKey, TValue>> consumerBuilderFactory, CheckpointPipeConfiguration checkpointPipeConfiguration)
             : base(busInstance.HostConfiguration, endpointConfiguration)
         {
             _busInstance = busInstance;
@@ -34,7 +35,7 @@ namespace MassTransit.KafkaIntegration
 
             _consumerContext = new Recycle<IConsumerContextSupervisor<TKey, TValue>>(() =>
                 new ConsumerContextSupervisor<TKey, TValue>(hostConfiguration.ClientContextSupervisor, _settings, busInstance.HostConfiguration,
-                    headersDeserializer, consumerBuilderFactory));
+                    headersDeserializer, consumerBuilderFactory, checkpointPipeConfiguration));
         }
 
         public IConsumerContextSupervisor<TKey, TValue> ConsumerContextSupervisor => _consumerContext.Supervisor;

@@ -3,10 +3,12 @@ namespace MassTransit.KafkaIntegration.Contexts
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
     using Confluent.Kafka;
     using Context;
+    using GreenPipes;
     using Util;
 
 
@@ -26,23 +28,26 @@ namespace MassTransit.KafkaIntegration.Contexts
             _maxCount = receiveSettings.CheckpointMessageCount;
         }
 
-        public Task Complete(ConsumeResult<TKey, TValue> result)
+        public async Task Complete(ConsumeResult<TKey, TValue> result)
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
             if (_data.TryGetValue(result.Partition, out var data))
-                data.TryCheckpoint(result);
-
-            return TaskUtil.Completed;
+                await data.TryCheckpoint(result).ConfigureAwait(false);
         }
 
-        public void OnAssigned(IConsumer<TKey, TValue> consumer, IEnumerable<TopicPartition> partitions)
+        public void OnAssigned(IEnumerable<TopicPartition> partitions, IPipe<CheckpointContext> pipe)
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
+            PartitionCheckpointData CreateData(TopicPartition partition)
+            {
+                return new PartitionCheckpointData(partition, _timeout, _maxCount, pipe);
+            }
+
             foreach (var partition in partitions)
             {
-                if (_data.TryAdd(partition.Partition, p => new PartitionCheckpointData(partition, consumer, _timeout, _maxCount)))
+                if (_data.TryAdd(partition.Partition, p => CreateData(partition)))
                     LogContext.Info?.Log("Partition: {PartitionId} was assigned", partition);
             }
         }
@@ -54,36 +59,36 @@ namespace MassTransit.KafkaIntegration.Contexts
             foreach (var partition in partitions)
             {
                 if (_data.TryRemove(partition.Partition, out var data))
-                    data.Close(partition);
+                    TaskUtil.Await(() => data.Close(partition));
             }
         }
 
 
         sealed class PartitionCheckpointData
         {
-            readonly IConsumer<TKey, TValue> _consumer;
-            readonly object _lock;
+            readonly SemaphoreSlim _lock;
             readonly int _maxCount;
             readonly TopicPartition _partition;
+            readonly IPipe<CheckpointContext> _pipe;
             readonly TimeSpan _timeout;
             readonly Stopwatch _timer;
             bool _commitIsRequired;
             Offset _offset;
             ushort _processed;
 
-            public PartitionCheckpointData(TopicPartition partition, IConsumer<TKey, TValue> consumer, TimeSpan timeout, ushort maxCount)
+            public PartitionCheckpointData(TopicPartition partition, TimeSpan timeout, ushort maxCount, IPipe<CheckpointContext> pipe)
             {
                 _partition = partition;
-                _consumer = consumer;
                 _timeout = timeout;
                 _maxCount = maxCount;
+                _pipe = pipe;
                 _processed = 0;
                 _timer = Stopwatch.StartNew();
-                _lock = new object();
+                _lock = new SemaphoreSlim(1);
                 _commitIsRequired = false;
             }
 
-            public bool TryCheckpoint(ConsumeResult<TKey, TValue> result)
+            public async Task TryCheckpoint(ConsumeResult<TKey, TValue> result)
             {
                 void Reset()
                 {
@@ -92,8 +97,10 @@ namespace MassTransit.KafkaIntegration.Contexts
                     _timer.Restart();
                 }
 
-                lock (_lock)
+                try
                 {
+                    await _lock.WaitAsync().ConfigureAwait(false);
+
                     if (_offset < result.Offset)
                     {
                         _offset = result.Offset;
@@ -103,39 +110,55 @@ namespace MassTransit.KafkaIntegration.Contexts
                     _processed += 1;
 
                     if (_processed < _maxCount && _timer.Elapsed < _timeout)
-                        return false;
+                        return;
 
-                    CommitIfRequired();
+                    await CommitIfRequired().ConfigureAwait(false);
                     Reset();
-                    return true;
+                }
+                finally
+                {
+                    _lock.Release();
                 }
             }
 
-            public void Close(TopicPartitionOffset partition)
+            public async Task Close(TopicPartitionOffset partition)
             {
                 try
                 {
-                    lock (_lock)
-                        CommitIfRequired();
+                    await _lock.WaitAsync().ConfigureAwait(false);
+                    await CommitIfRequired().ConfigureAwait(false);
                 }
                 finally
                 {
                     _timer.Stop();
                     _offset = default;
                     _commitIsRequired = false;
+                    _lock.Dispose();
 
                     LogContext.Info?.Log("Partition: {PartitionId} was closed", partition.TopicPartition);
                 }
             }
 
-            void CommitIfRequired()
+            Task CommitIfRequired()
             {
-                if (!_commitIsRequired)
-                    return;
+                return !_commitIsRequired ? TaskUtil.Completed : _pipe.Send(new KafkaCheckpointContext(_partition, _offset + 1));
+            }
 
-                var offset = _offset + 1;
-                LogContext.Debug?.Log("Partition: {PartitionId} updating checkpoint with offset: {Offset}", _partition, offset);
-                _consumer.Commit(new[] {new TopicPartitionOffset(_partition, offset)});
+
+            class KafkaCheckpointContext :
+                BasePipeContext,
+                CheckpointContext
+            {
+                public KafkaCheckpointContext(TopicPartition partition, Offset offset)
+                {
+                    Topic = partition.Topic;
+                    Partition = partition.Partition;
+                    Offset = offset;
+                }
+
+                public string Topic { get; }
+                public int Partition { get; }
+                public long Offset { get; }
             }
         }
     }

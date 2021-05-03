@@ -4,6 +4,7 @@ namespace MassTransit.KafkaIntegration.Contexts
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
+    using Configurators;
     using Confluent.Kafka;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -17,6 +18,7 @@ namespace MassTransit.KafkaIntegration.Contexts
         IPipeContextFactory<ConsumerContext<TKey, TValue>>
         where TValue : class
     {
+        readonly CheckpointPipeConfiguration _checkpointPipeConfiguration;
         readonly IClientContextSupervisor _clientContextSupervisor;
         readonly Func<ConsumerBuilder<TKey, TValue>> _consumerBuilderFactory;
         readonly IHeadersDeserializer _headersDeserializer;
@@ -24,13 +26,15 @@ namespace MassTransit.KafkaIntegration.Contexts
         readonly ReceiveSettings _receiveSettings;
 
         public ConsumerContextFactory(IClientContextSupervisor clientContextSupervisor, ReceiveSettings receiveSettings,
-            IHostConfiguration hostConfiguration, IHeadersDeserializer headersDeserializer, Func<ConsumerBuilder<TKey, TValue>> consumerBuilderFactory)
+            IHostConfiguration hostConfiguration, IHeadersDeserializer headersDeserializer, Func<ConsumerBuilder<TKey, TValue>> consumerBuilderFactory,
+            CheckpointPipeConfiguration checkpointPipeConfiguration)
         {
             _clientContextSupervisor = clientContextSupervisor;
             _receiveSettings = receiveSettings;
             _headersDeserializer = headersDeserializer;
             _hostConfiguration = hostConfiguration;
             _consumerBuilderFactory = consumerBuilderFactory;
+            _checkpointPipeConfiguration = checkpointPipeConfiguration;
         }
 
         public IPipeContextAgent<ConsumerContext<TKey, TValue>> CreateContext(ISupervisor supervisor)
@@ -62,7 +66,7 @@ namespace MassTransit.KafkaIntegration.Contexts
             {
                 ConsumerBuilder<TKey, TValue> consumerBuilder = _consumerBuilderFactory();
                 ConsumerContext<TKey, TValue> context = new KafkaConsumerContext<TKey, TValue>(_hostConfiguration, _receiveSettings,
-                    _headersDeserializer, consumerBuilder, cancellationToken);
+                    _headersDeserializer, consumerBuilder, cancellationToken, _checkpointPipeConfiguration);
                 return Task.FromResult(context);
             }
 
