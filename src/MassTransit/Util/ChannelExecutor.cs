@@ -4,57 +4,67 @@ namespace MassTransit.Util
     using System.Threading;
     using System.Threading.Channels;
     using System.Threading.Tasks;
+    using Context;
 
 
     public class ChannelExecutor :
         IAsyncDisposable
     {
         readonly Channel<IFuture> _channel;
-        readonly Task[] _runTasks;
+        readonly int _concurrencyLimit;
+        readonly CancellationTokenSource _disposeToken = new CancellationTokenSource();
+        readonly SemaphoreSlim _limit;
+        readonly Task _readerTask;
         readonly object _syncLock;
 
         public ChannelExecutor(int prefetchCount, int concurrencyLimit)
         {
+            _concurrencyLimit = concurrencyLimit;
+
             var channelOptions = new BoundedChannelOptions(prefetchCount)
             {
                 AllowSynchronousContinuations = true,
                 FullMode = BoundedChannelFullMode.Wait,
-                SingleReader = concurrencyLimit == 1,
+                SingleReader = true,
                 SingleWriter = false
             };
 
             _channel = Channel.CreateBounded<IFuture>(channelOptions);
 
-            _runTasks = new Task[concurrencyLimit];
             _syncLock = new object();
+            _limit = new SemaphoreSlim(concurrencyLimit);
 
-            for (var i = 0; i < concurrencyLimit; i++)
-                _runTasks[i] = Task.Run(() => RunFromChannel());
+            _readerTask = Task.Run(() => ReadFromChannel());
         }
 
         public ChannelExecutor(int concurrencyLimit, bool allowSynchronousContinuations = true)
         {
+            _concurrencyLimit = concurrencyLimit;
+
             var channelOptions = new UnboundedChannelOptions
             {
                 AllowSynchronousContinuations = allowSynchronousContinuations,
-                SingleReader = concurrencyLimit == 1,
+                SingleReader = true,
                 SingleWriter = false
             };
 
             _channel = Channel.CreateUnbounded<IFuture>(channelOptions);
 
-            _runTasks = new Task[concurrencyLimit];
             _syncLock = new object();
+            _limit = new SemaphoreSlim(concurrencyLimit);
 
-            for (var i = 0; i < concurrencyLimit; i++)
-                _runTasks[i] = Task.Run(() => RunFromChannel());
+            _readerTask = Task.Run(() => ReadFromChannel());
         }
 
         public async ValueTask DisposeAsync()
         {
             _channel.Writer.Complete();
 
-            await Task.WhenAll(_runTasks).ConfigureAwait(false);
+            _disposeToken.Cancel();
+
+            await _readerTask.ConfigureAwait(false);
+
+            _disposeToken.Dispose();
         }
 
         public void PushWithWait(Func<Task> method, CancellationToken cancellationToken = default)
@@ -137,19 +147,42 @@ namespace MassTransit.Util
             return await future.Completed.ConfigureAwait(false);
         }
 
-        async Task RunFromChannel()
+        async Task ReadFromChannel()
         {
-            while (await _channel.Reader.WaitToReadAsync().ConfigureAwait(false))
+            try
             {
-                if (_channel.Reader.TryRead(out var future))
+                var pending = new PendingTaskCollection(_concurrencyLimit);
+
+                while (await _channel.Reader.WaitToReadAsync().ConfigureAwait(false))
                 {
-                    var task = future.Run();
+                    if (!_channel.Reader.TryRead(out var future))
+                        continue;
 
-                    await task.ConfigureAwait(false);
+                    await _limit.WaitAsync(_disposeToken.Token).ConfigureAwait(false);
 
-                    lock (_syncLock)
-                        Monitor.PulseAll(_syncLock);
+                    async Task RunFuture()
+                    {
+                        var task = future.Run();
+
+                        await task.ConfigureAwait(false);
+
+                        _limit.Release();
+
+                        lock (_syncLock)
+                            Monitor.PulseAll(_syncLock);
+                    }
+
+                    pending.Add(Task.Run(() => RunFuture()));
                 }
+
+                await pending.Completed().ConfigureAwait(false);
+            }
+            catch (OperationCanceledException exception) when (exception.CancellationToken == _disposeToken.Token)
+            {
+            }
+            catch (Exception exception)
+            {
+                LogContext.Warning?.Log(exception, "ReadFromChannel faulted");
             }
         }
 
