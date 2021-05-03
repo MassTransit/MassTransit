@@ -46,8 +46,8 @@ namespace MassTransit.RedisIntegration.Contexts
         {
             var instance = context.Saga;
 
-            IAsyncDisposable updateLock = _options.ConcurrencyMode == ConcurrencyMode.Optimistic
-                ? updateLock = await Lock(instance, context.CancellationToken).ConfigureAwait(false)
+            IAsyncDisposable updateLock = _options.ConcurrencyMode == ConcurrencyMode.Pessimistic
+                ? await Lock(instance, context.CancellationToken).ConfigureAwait(false)
                 : null;
 
             try
