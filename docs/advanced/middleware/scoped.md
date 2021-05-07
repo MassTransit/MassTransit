@@ -140,10 +140,10 @@ public class Startup
     {
         services.AddScoped<MyDependency>();
 
-        services.AddConsumer<MyConsumer>();
-
         services.AddMassTransit(x =>
         {
+            x.AddConsumer<MyConsumer>();
+
             x.UsingRabbitMq((context, cfg) =>
             {
                 cfg.UseSendFilter(typeof(MySendFilter<>), context);
