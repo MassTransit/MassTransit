@@ -68,7 +68,7 @@ Azure Service Bus queues includes an extensive set a properties that can be conf
 
 Azure Functions is a consumption-based compute solution that only runs code when there is work to be done. MassTransit supports Azure Service Bus and Azure Event Hubs when running as an Azure Function.
 
-> The [Sample Code](https://github.com/MassTransit/MassTransit/tree/v6.3.2/src/Samples/Sample.AzureFunctions.ServiceBus) is available for reference as well, which is based on the 6.3.2 version of MassTransit.
+> The [Sample Code](https://github.com/MassTransit/Sample-AzureFunction) is available for reference as well, which is based on the 6.3.2 version of MassTransit.
 
 The functions [host.json](https://docs.microsoft.com/en-us/azure/azure-functions/functions-bindings-service-bus-trigger?tabs=csharp) file needs to have messageHandlerOptions > autoComplete set to true. If this isn't set to true, MassTransit will _try_ to set it to true for you. This is so that the message is acknowledged by the Azure Functions runtime, which removes it from the queue once processing has completed successfully.
 
