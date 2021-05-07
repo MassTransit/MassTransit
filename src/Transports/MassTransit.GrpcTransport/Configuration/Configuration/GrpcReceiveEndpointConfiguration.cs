@@ -2,6 +2,8 @@
 {
     using System;
     using Builders;
+    using Context;
+    using Contexts;
     using Contracts;
     using Integration;
     using MassTransit.Configuration;
@@ -39,17 +41,18 @@
 
         public override Uri InputAddress { get; }
 
+        public override ReceiveEndpointContext CreateReceiveEndpointContext()
+        {
+            return CreateGrpcReceiveEndpointContext();
+        }
+
         public void Build(IHost host)
         {
-            var builder = new GrpcReceiveEndpointBuilder(_hostConfiguration, this);
+            var context = CreateGrpcReceiveEndpointContext();
 
-            ApplySpecifications(builder);
+            var transport = new GrpcReceiveTransport(context, _queueName);
 
-            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
-
-            var transport = new GrpcReceiveTransport(receiveEndpointContext, _queueName);
-
-            var receiveEndpoint = new ReceiveEndpoint(transport, receiveEndpointContext);
+            var receiveEndpoint = new ReceiveEndpoint(transport, context);
 
             host.AddReceiveEndpoint(_queueName, receiveEndpoint);
 
@@ -68,6 +71,15 @@
             where T : class
         {
             _endpointConfiguration.Topology.Consume.GetMessageTopology<T>().Bind(exchangeType, routingKey);
+        }
+
+        GrpcReceiveEndpointContext CreateGrpcReceiveEndpointContext()
+        {
+            var builder = new GrpcReceiveEndpointBuilder(_hostConfiguration, this);
+
+            ApplySpecifications(builder);
+
+            return builder.CreateReceiveEndpointContext();
         }
     }
 }

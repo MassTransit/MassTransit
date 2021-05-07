@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Context;
     using Pipeline;
     using Pipeline.Observables;
     using Transports;
@@ -40,5 +41,7 @@
         /// </summary>
         /// <returns></returns>
         IReceivePipe CreateReceivePipe();
+
+        ReceiveEndpointContext CreateReceiveEndpointContext();
     }
 }

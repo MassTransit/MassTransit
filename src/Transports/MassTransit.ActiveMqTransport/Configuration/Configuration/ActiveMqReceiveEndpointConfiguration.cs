@@ -3,6 +3,8 @@
     using System;
     using System.Collections.Generic;
     using Builders;
+    using Context;
+    using Contexts;
     using GreenPipes;
     using GreenPipes.Builders;
     using GreenPipes.Configurators;
@@ -47,27 +49,28 @@
         public override Uri InputAddress => _inputAddress.Value;
         IActiveMqTopologyConfiguration IActiveMqEndpointConfiguration.Topology => _endpointConfiguration.Topology;
 
+        public override ReceiveEndpointContext CreateReceiveEndpointContext()
+        {
+            return CreateActiveMqReceiveEndpointContext();
+        }
+
         public void Build(IHost host)
         {
-            var builder = new ActiveMqReceiveEndpointBuilder(_hostConfiguration, this);
+            var context = CreateActiveMqReceiveEndpointContext();
 
-            ApplySpecifications(builder);
-
-            var receiveEndpointContext = builder.CreateReceiveEndpointContext(_settings);
-
-            _sessionConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology));
+            _sessionConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, context.BrokerTopology));
 
             if (_hostConfiguration.DeployTopologyOnly)
-                _sessionConfigurator.UseFilter(new TransportReadyFilter<SessionContext>(receiveEndpointContext));
+                _sessionConfigurator.UseFilter(new TransportReadyFilter<SessionContext>(context));
             else
-                _sessionConfigurator.UseFilter(new ActiveMqConsumerFilter(receiveEndpointContext));
+                _sessionConfigurator.UseFilter(new ActiveMqConsumerFilter(context));
 
             IPipe<SessionContext> sessionPipe = _sessionConfigurator.Build();
 
-            var transport = new ReceiveTransport<SessionContext>(_hostConfiguration, receiveEndpointContext,
-                () => receiveEndpointContext.SessionContextSupervisor, sessionPipe);
+            var transport = new ReceiveTransport<SessionContext>(_hostConfiguration, context,
+                () => context.SessionContextSupervisor, sessionPipe);
 
-            var receiveEndpoint = new ReceiveEndpoint(transport, receiveEndpointContext);
+            var receiveEndpoint = new ReceiveEndpoint(transport, context);
 
             var queueName = _settings.EntityName ?? NewId.Next().ToString(FormatUtil.Formatter);
 
@@ -129,6 +132,15 @@
         public void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>> configure)
         {
             configure?.Invoke(_connectionConfigurator);
+        }
+
+        ActiveMqReceiveEndpointContext CreateActiveMqReceiveEndpointContext()
+        {
+            var builder = new ActiveMqReceiveEndpointBuilder(_hostConfiguration, this);
+
+            ApplySpecifications(builder);
+
+            return builder.CreateReceiveEndpointContext();
         }
 
         Uri FormatInputAddress()

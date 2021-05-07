@@ -35,6 +35,15 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 
             collection.AddSingleton(provider => Bind<IBus>.Create(CreateRegistrationContext(provider)));
             collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusRegistrationContext>>().Value);
+
+            collection.TryAdd(ServiceDescriptor.Singleton(typeof(IReceiveEndpointDispatcher<>), typeof(ReceiveEndpointDispatcher<>)));
+            collection.AddSingleton<IReceiveEndpointDispatcherFactory>(provider =>
+            {
+                var registrationContext = provider.GetRequiredService<Bind<IBus, IBusRegistrationContext>>().Value;
+                var busInstance = provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value;
+
+                return new ReceiveEndpointDispatcherFactory(registrationContext, busInstance);
+            });
         }
 
         protected ServiceCollectionBusConfigurator(IServiceCollection collection, IContainerRegistrar registrar)

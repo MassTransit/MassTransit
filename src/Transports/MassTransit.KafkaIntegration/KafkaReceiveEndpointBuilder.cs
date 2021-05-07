@@ -4,6 +4,7 @@ namespace MassTransit.KafkaIntegration
     using Builders;
     using Configuration;
     using Confluent.Kafka;
+    using Contexts;
     using MassTransit.Registration;
     using Serializers;
 

@@ -7,6 +7,7 @@ namespace MassTransit.EventHubIntegration
     using Azure.Storage.Blobs;
     using Builders;
     using Configuration;
+    using Contexts;
     using MassTransit.Registration;
 
 

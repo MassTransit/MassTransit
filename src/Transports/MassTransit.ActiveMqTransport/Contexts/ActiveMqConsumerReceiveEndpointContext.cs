@@ -5,7 +5,6 @@
     using Context;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Topology;
     using Topology.Builders;
     using Transport;
     using Util;
@@ -15,16 +14,16 @@
         BaseReceiveEndpointContext,
         ActiveMqReceiveEndpointContext
     {
+        readonly IActiveMqReceiveEndpointConfiguration _configuration;
         readonly IActiveMqHostConfiguration _hostConfiguration;
         readonly Recycle<ISessionContextSupervisor> _sessionContext;
-        readonly ReceiveSettings _settings;
 
         public ActiveMqConsumerReceiveEndpointContext(IActiveMqHostConfiguration hostConfiguration, IActiveMqReceiveEndpointConfiguration configuration,
-            BrokerTopology brokerTopology, ReceiveSettings settings)
+            BrokerTopology brokerTopology)
             : base(hostConfiguration, configuration)
         {
             _hostConfiguration = hostConfiguration;
-            _settings = settings;
+            _configuration = configuration;
             BrokerTopology = brokerTopology;
 
             _sessionContext = new Recycle<ISessionContextSupervisor>(() => new SessionContextSupervisor(hostConfiguration.ConnectionContextSupervisor));
@@ -49,12 +48,13 @@
             context.Add("type", "ActiveMQ");
             context.Set(new
             {
-                _settings.EntityName,
-                _settings.Durable,
-                _settings.AutoDelete,
-                _settings.PrefetchCount,
-                _settings.ConcurrentMessageLimit
+                _configuration.Settings.EntityName,
+                _configuration.Settings.Durable,
+                _configuration.Settings.AutoDelete,
+                _configuration.Settings.PrefetchCount,
+                _configuration.Settings.ConcurrentMessageLimit
             });
+
             var topologyScope = context.CreateScope("topology");
 
             BrokerTopology.Probe(topologyScope);

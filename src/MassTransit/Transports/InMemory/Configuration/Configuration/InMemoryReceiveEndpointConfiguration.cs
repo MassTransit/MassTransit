@@ -2,6 +2,8 @@
 {
     using System;
     using Builders;
+    using Context;
+    using Contexts;
     using MassTransit.Configuration;
 
 
@@ -36,17 +38,18 @@
 
         public override Uri InputAddress { get; }
 
+        public override ReceiveEndpointContext CreateReceiveEndpointContext()
+        {
+            return CreateInMemoryReceiveEndpointContext();
+        }
+
         public void Build(IHost host)
         {
-            var builder = new InMemoryReceiveEndpointBuilder(_hostConfiguration, this);
+            var context = CreateInMemoryReceiveEndpointContext();
 
-            ApplySpecifications(builder);
+            var transport = new InMemoryReceiveTransport(context, _queueName);
 
-            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
-
-            var transport = new InMemoryReceiveTransport(receiveEndpointContext, _queueName);
-
-            var receiveEndpoint = new ReceiveEndpoint(transport, receiveEndpointContext);
+            var receiveEndpoint = new ReceiveEndpoint(transport, context);
 
             host.AddReceiveEndpoint(_queueName, receiveEndpoint);
 
@@ -56,6 +59,15 @@
         public int ConcurrencyLimit
         {
             set => ConcurrentMessageLimit = value;
+        }
+
+        InMemoryReceiveEndpointContext CreateInMemoryReceiveEndpointContext()
+        {
+            var builder = new InMemoryReceiveEndpointBuilder(_hostConfiguration, this);
+
+            ApplySpecifications(builder);
+
+            return builder.CreateReceiveEndpointContext();
         }
     }
 }

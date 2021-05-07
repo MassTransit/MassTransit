@@ -6,7 +6,6 @@
     using Exceptions;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Topology;
     using Topology.Builders;
     using Transport;
     using Util;
@@ -17,15 +16,15 @@
         SqsReceiveEndpointContext
     {
         readonly Recycle<IClientContextSupervisor> _clientContext;
+        readonly IAmazonSqsReceiveEndpointConfiguration _configuration;
         readonly IAmazonSqsHostConfiguration _hostConfiguration;
-        readonly ReceiveSettings _settings;
 
         public SqsQueueReceiveEndpointContext(IAmazonSqsHostConfiguration hostConfiguration, IAmazonSqsReceiveEndpointConfiguration configuration,
-            BrokerTopology brokerTopology, ReceiveSettings settings)
+            BrokerTopology brokerTopology)
             : base(hostConfiguration, configuration)
         {
             _hostConfiguration = hostConfiguration;
-            _settings = settings;
+            _configuration = configuration;
             BrokerTopology = brokerTopology;
 
             _clientContext = new Recycle<IClientContextSupervisor>(() => new ClientContextSupervisor(_hostConfiguration.ConnectionContextSupervisor));
@@ -50,13 +49,13 @@
             context.Add("type", "AmazonSQS");
             context.Set(new
             {
-                _settings.EntityName,
-                _settings.Durable,
-                _settings.AutoDelete,
-                _settings.PrefetchCount,
+                _configuration.Settings.EntityName,
+                _configuration.Settings.Durable,
+                _configuration.Settings.AutoDelete,
+                _configuration.Settings.PrefetchCount,
                 ConcurrentMessageLimit,
-                _settings.WaitTimeSeconds,
-                _settings.PurgeOnStartup
+                _configuration.Settings.WaitTimeSeconds,
+                _configuration.Settings.PurgeOnStartup
             });
 
             var topologyScope = context.CreateScope("topology");

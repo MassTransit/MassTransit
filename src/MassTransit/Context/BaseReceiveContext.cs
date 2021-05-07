@@ -125,7 +125,7 @@ namespace MassTransit.Context
 
         protected virtual ContentType GetContentType()
         {
-            if (_headers.Value.TryGetHeader("Content-Type", out var contentTypeHeader))
+            if (_headers.Value.TryGetHeader("Content-Type", out var contentTypeHeader) || _headers.Value.TryGetHeader("ContentType", out contentTypeHeader))
             {
                 if (contentTypeHeader is ContentType contentType)
                     return contentType;

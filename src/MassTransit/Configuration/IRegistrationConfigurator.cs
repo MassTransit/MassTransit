@@ -252,5 +252,12 @@ namespace MassTransit
         /// <param name="futureType"></param>
         /// <param name="futureDefinitionType">The future definition type</param>
         void AddFuture(Type futureType, Type futureDefinitionType = null);
+
+        /// <summary>
+        /// Adds a method that is called for each receive endpoint when it is configured, allowing additional
+        /// configuration to be specified.
+        /// </summary>
+        /// <param name="configure"></param>
+        void ConfigureReceiveEndpoint(Action<string, IReceiveEndpointConfigurator> configure);
     }
 }

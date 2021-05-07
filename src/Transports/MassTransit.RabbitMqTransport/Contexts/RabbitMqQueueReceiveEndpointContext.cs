@@ -6,7 +6,6 @@
     using GreenPipes;
     using GreenPipes.Agents;
     using Integration;
-    using Topology;
     using Topology.Builders;
     using Transport;
     using Util;
@@ -16,16 +15,16 @@
         BaseReceiveEndpointContext,
         RabbitMqReceiveEndpointContext
     {
+        readonly IRabbitMqReceiveEndpointConfiguration _configuration;
         readonly IRabbitMqHostConfiguration _hostConfiguration;
         readonly Recycle<IModelContextSupervisor> _modelContext;
-        readonly ReceiveSettings _settings;
 
         public RabbitMqQueueReceiveEndpointContext(IRabbitMqHostConfiguration hostConfiguration, IRabbitMqReceiveEndpointConfiguration configuration,
-            BrokerTopology brokerTopology, ReceiveSettings settings)
+            BrokerTopology brokerTopology)
             : base(hostConfiguration, configuration)
         {
             _hostConfiguration = hostConfiguration;
-            _settings = settings;
+            _configuration = configuration;
 
             ExclusiveConsumer = configuration.Settings.ExclusiveConsumer;
             BrokerTopology = brokerTopology;
@@ -53,7 +52,7 @@
         {
             context.Add("type", "RabbitMQ");
             context.Add("concurrentMessageLimit", ConcurrentMessageLimit);
-            context.Set(_settings);
+            context.Set(_configuration.Settings);
 
             var topologyScope = context.CreateScope("topology");
             BrokerTopology.Probe(topologyScope);

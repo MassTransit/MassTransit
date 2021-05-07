@@ -37,14 +37,14 @@
             return base.ConnectConsumePipe(pipe, options);
         }
 
-        public ActiveMqReceiveEndpointContext CreateReceiveEndpointContext(ReceiveSettings receiveSettings)
+        public ActiveMqReceiveEndpointContext CreateReceiveEndpointContext()
         {
             var brokerTopology = BuildTopology(_configuration.Settings);
 
             var deadLetterTransport = CreateDeadLetterTransport();
             var errorTransport = CreateErrorTransport();
 
-            var context = new ActiveMqConsumerReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology, receiveSettings);
+            var context = new ActiveMqConsumerReceiveEndpointContext(_hostConfiguration, _configuration, brokerTopology);
 
             context.GetOrAddPayload(() => deadLetterTransport);
             context.GetOrAddPayload(() => errorTransport);

@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
+    using Context;
+    using Contexts;
     using GreenPipes;
     using Microsoft.Azure.ServiceBus;
     using Pipeline;
@@ -39,6 +41,11 @@
 
         public override Uri InputAddress => _inputAddress.Value;
 
+        public override ReceiveEndpointContext CreateReceiveEndpointContext()
+        {
+            return CreateServiceBusReceiveEndpointContext();
+        }
+
         IServiceBusTopologyConfiguration IServiceBusEndpointConfiguration.Topology => _endpointConfiguration.Topology;
 
         public override IEnumerable<ValidationResult> Validate()
@@ -52,16 +59,12 @@
             this.ConfigureDeadLetterQueueDeadLetterTransport();
             this.ConfigureDeadLetterQueueErrorTransport();
 
-            var builder = new ServiceBusSubscriptionEndpointBuilder(_hostConfiguration, this);
+            var context = CreateServiceBusReceiveEndpointContext();
 
-            ApplySpecifications(builder);
-
-            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
-
-            ClientPipeConfigurator.UseFilter(new ConfigureTopologyFilter<SubscriptionSettings>(_settings, receiveEndpointContext.BrokerTopology,
+            ClientPipeConfigurator.UseFilter(new ConfigureTopologyFilter<SubscriptionSettings>(_settings, context.BrokerTopology,
                 _settings.RemoveSubscriptions, _hostConfiguration.ConnectionContextSupervisor.Stopping));
 
-            CreateReceiveEndpoint(host, receiveEndpointContext);
+            CreateReceiveEndpoint(host, context);
         }
 
         public Filter Filter
@@ -72,6 +75,15 @@
         public RuleDescription Rule
         {
             set => _settings.Rule = value;
+        }
+
+        ServiceBusReceiveEndpointContext CreateServiceBusReceiveEndpointContext()
+        {
+            var builder = new ServiceBusSubscriptionEndpointBuilder(_hostConfiguration, this);
+
+            ApplySpecifications(builder);
+
+            return builder.CreateReceiveEndpointContext();
         }
 
         Uri FormatInputAddress()

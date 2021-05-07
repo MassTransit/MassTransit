@@ -7,7 +7,6 @@
     using GreenPipes.Agents;
     using Pipeline;
     using Topology;
-    using Transport;
     using Util;
 
 
@@ -17,14 +16,12 @@
     {
         readonly Recycle<IClientContextSupervisor> _clientContext;
         readonly IServiceBusHostConfiguration _hostConfiguration;
-        readonly ClientSettings _settings;
 
         public ServiceBusEntityReceiveEndpointContext(IServiceBusHostConfiguration hostConfiguration, IServiceBusEntityEndpointConfiguration configuration,
-            BrokerTopology brokerTopology, Func<IClientContextSupervisor> supervisorFactory, ClientSettings settings)
+            BrokerTopology brokerTopology, Func<IClientContextSupervisor> supervisorFactory)
             : base(hostConfiguration, configuration)
         {
             _hostConfiguration = hostConfiguration;
-            _settings = settings;
 
             BrokerTopology = brokerTopology;
 
@@ -42,9 +39,7 @@
             context.Set(new
             {
                 Type = "Azure Service Bus",
-                _settings.Path,
-                _settings.PrefetchCount,
-                _settings.MaxConcurrentCalls,
+                PrefetchCount,
                 ConcurrentMessageLimit
             });
 

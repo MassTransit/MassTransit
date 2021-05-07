@@ -2,6 +2,7 @@ namespace MassTransit.Registration
 {
     using System;
     using Automatonymous;
+    using Configurators;
     using ConsumeConfigurators;
     using Context;
     using Courier;
@@ -271,6 +272,14 @@ namespace MassTransit.Registration
         public void AddFuture(Type futureType, Type futureDefinitionType)
         {
             FutureRegistrationCache.AddFuture(this, futureType, futureDefinitionType);
+        }
+
+        public void ConfigureReceiveEndpoint(Action<string, IReceiveEndpointConfigurator> configure)
+        {
+            if (configure == null)
+                throw new ArgumentNullException(nameof(configure));
+
+            Registrar.RegisterSingleInstance<IConfigureReceiveEndpoint>(provider => new DelegateConfigureReceiveEndpoint(configure));
         }
 
         public void AddEndpoint(Type definitionType)

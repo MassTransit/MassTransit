@@ -1,4 +1,4 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit.EventHubIntegration.Contexts
 {
     using System;
     using System.Threading.Tasks;
@@ -7,7 +7,6 @@ namespace MassTransit.EventHubIntegration
     using Azure.Storage.Blobs;
     using Configuration;
     using Context;
-    using Contexts;
     using Exceptions;
     using GreenPipes.Agents;
     using MassTransit.Registration;

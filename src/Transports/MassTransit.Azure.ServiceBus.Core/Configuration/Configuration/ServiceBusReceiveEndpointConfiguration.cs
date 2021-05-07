@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using Builders;
+    using Context;
+    using Contexts;
     using GreenPipes;
     using Pipeline;
     using Settings;
@@ -41,6 +43,11 @@
 
         public override Uri InputAddress => _inputAddress.Value;
 
+        public override ReceiveEndpointContext CreateReceiveEndpointContext()
+        {
+            return CreateServiceBusReceiveEndpointContext();
+        }
+
         IServiceBusTopologyConfiguration IServiceBusEndpointConfiguration.Topology => _endpointConfiguration.Topology;
 
         public override IEnumerable<ValidationResult> Validate()
@@ -51,22 +58,18 @@
 
         public void Build(IHost host)
         {
-            var builder = new ServiceBusReceiveEndpointBuilder(_hostConfiguration, this);
+            var context = CreateServiceBusReceiveEndpointContext();
 
-            ApplySpecifications(builder);
-
-            var receiveEndpointContext = builder.CreateReceiveEndpointContext();
-
-            ClientPipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, receiveEndpointContext.BrokerTopology,
+            ClientPipeConfigurator.UseFilter(new ConfigureTopologyFilter<ReceiveSettings>(_settings, context.BrokerTopology,
                 _settings.RemoveSubscriptions, _hostConfiguration.ConnectionContextSupervisor.Stopping));
 
             var errorTransport = CreateErrorTransport();
             var deadLetterTransport = CreateDeadLetterTransport();
 
-            receiveEndpointContext.GetOrAddPayload(() => deadLetterTransport);
-            receiveEndpointContext.GetOrAddPayload(() => errorTransport);
+            context.GetOrAddPayload(() => deadLetterTransport);
+            context.GetOrAddPayload(() => errorTransport);
 
-            CreateReceiveEndpoint(host, receiveEndpointContext);
+            CreateReceiveEndpoint(host, context);
         }
 
         public TimeSpan DuplicateDetectionHistoryTimeWindow
@@ -116,6 +119,15 @@
             base.SelectBasicTier();
 
             ConfigureConsumeTopology = false;
+        }
+
+        ServiceBusReceiveEndpointContext CreateServiceBusReceiveEndpointContext()
+        {
+            var builder = new ServiceBusReceiveEndpointBuilder(_hostConfiguration, this);
+
+            ApplySpecifications(builder);
+
+            return builder.CreateReceiveEndpointContext();
         }
 
         Uri FormatInputAddress()

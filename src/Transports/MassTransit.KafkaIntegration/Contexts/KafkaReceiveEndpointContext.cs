@@ -1,10 +1,9 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit.KafkaIntegration.Contexts
 {
     using System;
     using Configuration;
     using Confluent.Kafka;
     using Context;
-    using Contexts;
     using Exceptions;
     using GreenPipes;
     using GreenPipes.Agents;
