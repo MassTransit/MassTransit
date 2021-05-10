@@ -82,7 +82,7 @@
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(sendContext).ConfigureAwait(false);
 
-                    var message = new SendMessageBatchRequestEntry("", Encoding.UTF8.GetString(sendContext.Body)) {Id = sendContext.MessageId.ToString()};
+                    var message = new SendMessageBatchRequestEntry("", sendContext.BodyText) {Id = sendContext.MessageId.ToString()};
 
                     _context.SqsSetHeaderAdapter.Set(message.MessageAttributes, sendContext.Headers);
 

@@ -257,7 +257,7 @@ namespace MassTransit
         /// Adds a method that is called for each receive endpoint when it is configured, allowing additional
         /// configuration to be specified.
         /// </summary>
-        /// <param name="configure"></param>
-        void ConfigureReceiveEndpoint(Action<string, IReceiveEndpointConfigurator> configure);
+        /// <param name="callback">Callback invoked for each receive endpoint</param>
+        void AddConfigureEndpointsCallback(ConfigureEndpointsCallback callback);
     }
 }

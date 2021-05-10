@@ -274,12 +274,12 @@ namespace MassTransit.Registration
             FutureRegistrationCache.AddFuture(this, futureType, futureDefinitionType);
         }
 
-        public void ConfigureReceiveEndpoint(Action<string, IReceiveEndpointConfigurator> configure)
+        public void AddConfigureEndpointsCallback(ConfigureEndpointsCallback callback)
         {
-            if (configure == null)
-                throw new ArgumentNullException(nameof(configure));
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
 
-            Registrar.RegisterSingleInstance<IConfigureReceiveEndpoint>(provider => new DelegateConfigureReceiveEndpoint(configure));
+            Registrar.RegisterSingleInstance<IConfigureReceiveEndpoint>(provider => new DelegateConfigureReceiveEndpoint(callback));
         }
 
         public void AddEndpoint(Type definitionType)

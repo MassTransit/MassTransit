@@ -48,7 +48,7 @@ namespace MassTransit.EventHubIntegration
         public Task Produce<T>(IEnumerable<T> messages, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
-            var sendPipe = new BathSendPipe<T>(messages, _context, pipe, cancellationToken);
+            var sendPipe = new BatchSendPipe<T>(messages, _context, pipe, cancellationToken);
             return _context.ProducerContextSupervisor.Send(sendPipe, cancellationToken);
         }
 
@@ -185,7 +185,7 @@ namespace MassTransit.EventHubIntegration
         }
 
 
-        class BathSendPipe<T> :
+        class BatchSendPipe<T> :
             IPipe<ProducerContext>
             where T : class
         {
@@ -194,7 +194,7 @@ namespace MassTransit.EventHubIntegration
             readonly IEnumerable<T> _messages;
             readonly IPipe<EventHubSendContext<T>> _pipe;
 
-            public BathSendPipe(IEnumerable<T> messages, EventHubSendTransportContext context, IPipe<EventHubSendContext<T>> pipe,
+            public BatchSendPipe(IEnumerable<T> messages, EventHubSendTransportContext context, IPipe<EventHubSendContext<T>> pipe,
                 CancellationToken cancellationToken)
             {
                 _messages = messages;

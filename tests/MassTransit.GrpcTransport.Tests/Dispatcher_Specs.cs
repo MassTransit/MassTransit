@@ -38,7 +38,7 @@ namespace MassTransit.GrpcTransport.Tests
                     cfg.ConfigureEndpoints(context, filter => filter.Include<SimpleEventConsumer>());
                 });
 
-                x.ConfigureReceiveEndpoint((name, cfg) => cfg.UseRawJsonSerializer());
+                x.AddConfigureEndpointsCallback((name, cfg) => cfg.UseRawJsonSerializer());
             });
 
             await using var provider = services

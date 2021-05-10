@@ -12,7 +12,7 @@ namespace MassTransit.Logging
             where T : class
         {
             if (context is MessageSendContext<T> messageSendContext && messageSendContext.Serializer != null)
-                activity?.AddTag(DiagnosticHeaders.BodyBytes, messageSendContext.Body.LongLength.ToString());
+                activity?.AddTag(DiagnosticHeaders.BodyBytes, messageSendContext.BodyLength.ToString());
         }
 
         public static void AddConsumeContextHeaders(this StartedActivityContext activity, ConsumeContext context)

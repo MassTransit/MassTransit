@@ -6,19 +6,19 @@ namespace MassTransit.Configurators
     public class DelegateConfigureReceiveEndpoint :
         IConfigureReceiveEndpoint
     {
-        readonly Action<string, IReceiveEndpointConfigurator> _configure;
+        readonly ConfigureEndpointsCallback _callback;
 
-        public DelegateConfigureReceiveEndpoint(Action<string, IReceiveEndpointConfigurator> configure)
+        public DelegateConfigureReceiveEndpoint(ConfigureEndpointsCallback callback)
         {
-            if (configure == null)
-                throw new ArgumentNullException(nameof(configure));
+            if (callback == null)
+                throw new ArgumentNullException(nameof(callback));
 
-            _configure = configure;
+            _callback = callback;
         }
 
         public void Configure(string name, IReceiveEndpointConfigurator configurator)
         {
-            _configure(name, configurator);
+            _callback(name, configurator);
         }
     }
 }
