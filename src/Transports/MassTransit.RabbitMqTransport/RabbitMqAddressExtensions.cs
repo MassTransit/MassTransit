@@ -153,15 +153,20 @@ namespace MassTransit.RabbitMqTransport
             if (!string.IsNullOrEmpty(address.UserInfo))
             {
                 var parts = address.UserInfo.Split(':');
-                hostSettings.Username = parts[0];
+                hostSettings.Username = UriDecode(parts[0]);
 
                 if (parts.Length >= 2)
-                    hostSettings.Password = parts[1];
+                    hostSettings.Password = UriDecode(parts[1]);
             }
 
-            hostSettings.Heartbeat = TimeSpan.FromSeconds(hostAddress.Heartbeat ?? (ushort)0);
+            hostSettings.Heartbeat = TimeSpan.FromSeconds(hostAddress.Heartbeat ?? 0);
 
             return hostSettings;
+        }
+
+        static string UriDecode(string uri)
+        {
+            return Uri.UnescapeDataString(uri.Replace("+", "%2B"));
         }
     }
 }
