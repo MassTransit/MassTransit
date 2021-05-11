@@ -439,4 +439,33 @@ namespace MassTransit.RabbitMqTransport.Tests
             _receiveSettings = _uri.GetReceiveSettings();
         }
     }
+
+    [TestFixture]
+    public class Given_encoded_credentials_are_provided_in_the_uri
+    {
+        [Test]
+        public void Should_have_decoded_password()
+        {
+            _hostSettings.Password.ShouldBe(ExpectedPassword);
+        }
+
+        [Test]
+        public void Should_have_decoded_username()
+        {
+            _hostSettings.Username.ShouldBe(ExpectedUsername);
+        }
+
+        const string EncodedUsername = "te%24t";
+        const string ExpectedUsername = "te$t";
+        const string EncodedPassword = "Pa%24%24word";
+        const string ExpectedPassword = "Pa$$word";
+        readonly Uri _uri = new Uri($"rabbitmq://{EncodedUsername}:{EncodedPassword}@some_server");
+        RabbitMqHostSettings _hostSettings;
+
+        [OneTimeSetUp]
+        public void WhenParsed()
+        {
+            _hostSettings = _uri.GetHostSettings();
+        }
+    }
 }
