@@ -29,8 +29,7 @@ namespace MassTransit.AspNetCoreIntegration.HealthChecks
                     x => new
                     {
                         Status = Enum.GetName(typeof(BusHealthStatus), x.Value.Status),
-                        x.Value.Description,
-                        x.Value.Exception
+                        x.Value.Description
                     })
             };
 
