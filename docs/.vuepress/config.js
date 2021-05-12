@@ -37,27 +37,26 @@ module.exports = {
         path: '/getting-started/',
         collapsable: false,
         children: [
-          '/getting-started/live-coding',
-          '/getting-started/morning-commute',
-          '/getting-started/upgrade-v6',
           {
             title: 'Release Notes',
             path: '/releases/',
             collapsable: true,
             children: [
-              '/releases/v7.0.4',
-              '/releases/v7.0.6',
-              '/releases/v7.0.7',
-              '/releases/v7.1.0',
-              '/releases/v7.1.1',
-              '/releases/v7.1.3',
-              '/releases/v7.1.4',
-              '/releases/v7.1.5',
-              '/releases/v7.1.6',
+              '/releases/v7.2.0',
+              '/releases/v7.1.8',
               '/releases/v7.1.7',
-              '/releases/v7.1.8'
+              '/releases/v7.1.6',
+              '/releases/v7.1.5',
+              '/releases/v7.1.4',
+              '/releases/v7.1.3',
+              '/releases/v7.1.1',
+              '/releases/v7.1.0',
+              '/releases/v7.0.7',
+              '/releases/v7.0.6',
+              '/releases/v7.0.4'
             ]
-          }
+          },
+          '/getting-started/upgrade-v6'
         ]
       },
       {
@@ -75,6 +74,7 @@ module.exports = {
               '/usage/transports/azure-sb',
               '/usage/transports/activemq',
               '/usage/transports/amazonsqs',
+              '/usage/transports/grpc',
               '/usage/transports/in-memory'
             ]
           },
@@ -246,7 +246,9 @@ module.exports = {
           '/learn/videos',
           '/learn/courses',
           '/learn/loving-the-community',
-          '/learn/contributing'
+          '/learn/contributing',
+          '/getting-started/live-coding',
+          '/getting-started/morning-commute'
         ]
       },
       {
