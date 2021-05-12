@@ -3,9 +3,15 @@ namespace MassTransit
     using System;
     using Automatonymous;
     using ConsumeConfigurators;
+    using ConsumeConnectors;
+    using ConsumerSpecifications;
+    using Context;
     using Courier;
     using ExtensionsDependencyInjectionIntegration.ScopeProviders;
+    using GreenPipes;
+    using Metadata;
     using Microsoft.Extensions.DependencyInjection;
+    using Pipeline;
     using Saga;
     using Scoping;
 
@@ -50,6 +56,28 @@ namespace MassTransit
             IConsumerFactory<TConsumer> consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
 
             configurator.Consumer(consumerFactory, configure);
+        }
+
+        /// <summary>
+        /// Connect a consumer to the bus/mediator
+        /// </summary>
+        /// <typeparam name="TConsumer"></typeparam>
+        /// <param name="connector"></param>
+        /// <param name="provider"></param>
+        /// <param name="pipeSpecifications"></param>
+        /// <returns></returns>
+        public static ConnectHandle ConnectConsumer<TConsumer>(this IConsumePipeConnector connector, IServiceProvider provider,
+            params IPipeSpecification<ConsumerConsumeContext<TConsumer>>[] pipeSpecifications)
+            where TConsumer : class, IConsumer
+        {
+            if (provider == null)
+                throw new ArgumentNullException(nameof(provider));
+
+            IConsumerScopeProvider scopeProvider = new DependencyInjectionConsumerScopeProvider(provider);
+
+            IConsumerFactory<TConsumer> consumerFactory = new ScopeConsumerFactory<TConsumer>(scopeProvider);
+
+            return connector.ConnectConsumer(consumerFactory, pipeSpecifications);
         }
 
         /// <summary>
