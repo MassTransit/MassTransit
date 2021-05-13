@@ -12,11 +12,11 @@ namespace SchedulingRabbitMQ
 
             services.AddMassTransit(x =>
             {
-                x.AddRabbitMqMessageScheduler();
+                x.AddDelayedMessageScheduler();
 
                 x.UsingRabbitMq((context, cfg) => 
                 {
-                    cfg.UseDelayedExchangeMessageScheduler();
+                    cfg.UseDelayedMessageScheduler();
 
                     cfg.ConfigureEndpoints(context);
                 });

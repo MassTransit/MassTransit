@@ -12,38 +12,56 @@ namespace JobSystem.Jobs
 namespace JobSystemConsoleService
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using JobSystem.Jobs;
     using MassTransit;
-    using MassTransit.Conductor;
     using MassTransit.JobService;
+    using Microsoft.Extensions.DependencyInjection;
 
     public class Program
     {
         public static async Task Main()
         {
-            var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
+            var services = new ServiceCollection();
+
+            services.AddMassTransit(x =>
             {
-                var options = new ServiceInstanceOptions()
-                    .EnableInstanceEndpoint();
-
-                cfg.ServiceInstance(options, instance =>
+                x.AddConsumer<ConvertVideoJobConsumer>(cfg =>
                 {
-                    instance.ConfigureJobServiceEndpoints();
+                    cfg.Options<JobOptions<ConvertVideo>>(options => options
+                        .SetJobTimeout(TimeSpan.FromMinutes(15))
+                        .SetConcurrentJobLimit(10));
+                });
 
-                    var queueName = instance.EndpointNameFormatter.Consumer<ConvertVideoJobConsumer>();
+                x.SetKebabCaseEndpointNameFormatter();
 
-                    instance.ReceiveEndpoint(queueName, e =>
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.ServiceInstance(instance =>
                     {
-                        e.Consumer(() => new ConvertVideoJobConsumer(), c =>
-                        {
-                            c.Options<JobOptions<ConvertVideo>>(options => options
-                                .SetJobTimeout(TimeSpan.FromMinutes(15))
-                                .SetConcurrentJobLimit(10));
-                        });
+                        instance.ConfigureJobServiceEndpoints();
+
+                        instance.ConfigureEndpoints(context);
                     });
                 });
             });
+
+            var provider = services.BuildServiceProvider();
+
+            var busControl = provider.GetRequiredService<IBusControl>();
+
+            await busControl.StartAsync(new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+            try
+            {
+                Console.WriteLine("Press enter to exit");
+
+                await Task.Run(() => Console.ReadLine());
+            }
+            finally
+            {
+                await busControl.StopAsync();
+            }
         }
 
         public class ConvertVideoJobConsumer :

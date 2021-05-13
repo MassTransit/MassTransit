@@ -12,11 +12,11 @@ namespace SchedulingAmazonSQS
 
             services.AddMassTransit(x =>
             {
-                x.AddAmazonSqsMessageScheduler();
+                x.AddDelayedMessageScheduler();
 
                 x.UsingAmazonSqs((context, cfg) => 
                 {
-                    cfg.UseAmazonSqsMessageScheduler();
+                    cfg.UseDelayedMessageScheduler();
 
                     cfg.ConfigureEndpoints(context);
                 });

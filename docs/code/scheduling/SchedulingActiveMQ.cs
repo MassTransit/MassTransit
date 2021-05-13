@@ -13,11 +13,11 @@ namespace SchedulingActiveMQ
 
             services.AddMassTransit(x =>
             {
-                x.AddActiveMqMessageScheduler();
+                x.AddDelayedMessageScheduler();
 
                 x.UsingActiveMq((context, cfg) => 
                 {
-                    cfg.UseActiveMqMessageScheduler();
+                    cfg.UseDelayedMessageScheduler();
 
                     cfg.ConfigureEndpoints(context);
                 });

@@ -18,9 +18,7 @@ namespace JobSystemClient
             await busControl.StartAsync(source.Token);
             try
             {
-                var serviceClient = busControl.CreateServiceClient();
-
-                var requestClient = serviceClient.CreateRequestClient<ConvertVideo>();
+                var requestClient = busControl.CreateRequestClient<ConvertVideo>();
 
                 do
                 {
