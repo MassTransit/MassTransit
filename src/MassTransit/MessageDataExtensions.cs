@@ -19,7 +19,8 @@
             if (value == null)
                 return EmptyMessageData<string>.Instance;
 
-            if (value.Length < MessageDataDefaults.Threshold && !MessageDataDefaults.AlwaysWriteToRepository)
+            var bytesCount = Encoding.UTF8.GetByteCount(value);
+            if (bytesCount < MessageDataDefaults.Threshold && !MessageDataDefaults.AlwaysWriteToRepository)
                 return new StringInlineMessageData(value);
 
             byte[] bytes = Encoding.UTF8.GetBytes(value);
@@ -28,7 +29,7 @@
 
             var address = await repository.Put(ms, default, cancellationToken).ConfigureAwait(false);
 
-            if (value.Length < MessageDataDefaults.Threshold)
+            if (bytesCount < MessageDataDefaults.Threshold)
                 return new StringInlineMessageData(value, address);
 
             return new StoredMessageData<string>(address, value);
@@ -69,7 +70,8 @@
             if (value == null)
                 return EmptyMessageData<string>.Instance;
 
-            if (value.Length < MessageDataDefaults.Threshold && !MessageDataDefaults.AlwaysWriteToRepository)
+            var bytesCount = Encoding.UTF8.GetByteCount(value);
+            if (bytesCount < MessageDataDefaults.Threshold && !MessageDataDefaults.AlwaysWriteToRepository)
                 return new StringInlineMessageData(value);
 
             byte[] bytes = Encoding.UTF8.GetBytes(value);
@@ -78,7 +80,7 @@
 
             var address = await repository.Put(ms, timeToLive, cancellationToken).ConfigureAwait(false);
 
-            if (value.Length < MessageDataDefaults.Threshold)
+            if (bytesCount < MessageDataDefaults.Threshold)
                 return new StringInlineMessageData(value, address);
 
             return new StoredMessageData<string>(address, value);
