@@ -103,10 +103,13 @@
             await Task.WhenAll(_jobTypes.Values.Select(x => x.PublishJobInstanceStopped(bus, InstanceAddress))).ConfigureAwait(false);
         }
 
-        public void RegisterJobType<T>(IReceiveEndpointConfigurator configurator, JobOptions<T> options)
+        public void RegisterJobType<T>(IReceiveEndpointConfigurator configurator, JobOptions<T> options, Guid jobTypeId)
             where T : class
         {
-            _jobTypes.Add(typeof(T), new JobTypeRegistration<T>(configurator, options));
+            if (_jobTypes.ContainsKey(typeof(T)))
+                throw new ConfigurationException($"A job type can only be registered once per service instance: {TypeMetadataCache<T>.ShortName}");
+
+            _jobTypes.Add(typeof(T), new JobTypeRegistration<T>(configurator, options, jobTypeId));
         }
 
         public async Task BusStarted(IBus bus)
@@ -131,6 +134,15 @@
             _heartbeat = new Timer(PublishHeartbeats, null, _options.HeartbeatInterval, _options.HeartbeatInterval);
         }
 
+        public Guid GetJobTypeId<T>()
+            where T : class
+        {
+            if (_jobTypes.TryGetValue(typeof(T), out var registration))
+                return registration.JobTypeId;
+
+            throw new ConfigurationException($"The job type was not registered: {TypeMetadataCache<T>.ShortName}");
+        }
+
         void Add(JobHandle jobHandle)
         {
             if (!_jobs.TryAdd(jobHandle.JobId, jobHandle))
@@ -145,6 +157,7 @@
 
         interface IJobTypeRegistration
         {
+            Guid JobTypeId { get; }
             Task PublishConcurrentJobLimit(IPublishEndpoint publishEndpoint, Uri instanceAddress);
             Task PublishHeartbeat(IPublishEndpoint publishEndpoint, Uri instanceAddress);
             Task PublishJobInstanceStopped(IPublishEndpoint publishEndpoint, Uri instanceAddress);
@@ -158,10 +171,11 @@
             readonly IReceiveEndpointConfigurator _configurator;
             readonly JobOptions<T> _options;
 
-            public JobTypeRegistration(IReceiveEndpointConfigurator configurator, JobOptions<T> options)
+            public JobTypeRegistration(IReceiveEndpointConfigurator configurator, JobOptions<T> options, Guid jobTypeId)
             {
                 _configurator = configurator;
                 _options = options;
+                JobTypeId = jobTypeId;
             }
 
             public Task PublishConcurrentJobLimit(IPublishEndpoint publishEndpoint, Uri instanceAddress)
@@ -170,7 +184,7 @@
 
                 return publishEndpoint.Publish<SetConcurrentJobLimit>(new
                 {
-                    JobMetadataCache<T>.JobTypeId,
+                    JobTypeId,
                     instanceAddress,
                     ServiceAddress = _configurator.InputAddress,
                     _options.ConcurrentJobLimit,
@@ -182,7 +196,7 @@
             {
                 return publishEndpoint.Publish<SetConcurrentJobLimit>(new
                 {
-                    JobMetadataCache<T>.JobTypeId,
+                    JobTypeId,
                     instanceAddress,
                     ServiceAddress = _configurator.InputAddress,
                     _options.ConcurrentJobLimit,
@@ -194,13 +208,15 @@
             {
                 return publishEndpoint.Publish<SetConcurrentJobLimit>(new
                 {
-                    JobMetadataCache<T>.JobTypeId,
+                    JobTypeId,
                     instanceAddress,
                     ServiceAddress = _configurator.InputAddress,
                     _options.ConcurrentJobLimit,
                     Kind = ConcurrentLimitKind.Stopped
                 });
             }
+
+            public Guid JobTypeId { get; }
         }
     }
 }

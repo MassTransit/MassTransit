@@ -2,8 +2,10 @@ namespace MassTransit.JobService.Configuration
 {
     using System;
     using System.Collections.Generic;
+    using Components;
     using ConsumeConfigurators;
     using Internals.Extensions;
+    using Registration;
 
 
     public class JobServiceConsumerConfigurationObserver :
@@ -50,7 +52,9 @@ namespace MassTransit.JobService.Configuration
             {
                 var options = consumerConfigurator.Options<JobOptions<TMessage>>();
 
-                _jobServiceOptions.JobService.RegisterJobType(_configurator, options);
+                var jobTypeId = JobMetadataCache<T, TMessage>.GenerateJobTypeId(_configurator.InputAddress.GetLastPart());
+
+                _jobServiceOptions.JobService.RegisterJobType(_configurator, options, jobTypeId);
             }
         }
     }

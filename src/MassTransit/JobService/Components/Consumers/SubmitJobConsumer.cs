@@ -15,11 +15,13 @@ namespace MassTransit.JobService.Components.Consumers
         IConsumer<SubmitJob<TJob>>
         where TJob : class
     {
+        readonly Guid _jobTypeId;
         readonly JobOptions<TJob> _options;
 
-        public SubmitJobConsumer(JobOptions<TJob> options)
+        public SubmitJobConsumer(JobOptions<TJob> options, Guid jobTypeId)
         {
             _options = options;
+            _jobTypeId = jobTypeId;
         }
 
         public Task Consume(ConsumeContext<SubmitJob<TJob>> context)
@@ -39,7 +41,7 @@ namespace MassTransit.JobService.Components.Consumers
             await context.Publish<JobSubmitted>(new
             {
                 JobId = jobId,
-                JobMetadataCache<TJob>.JobTypeId,
+                JobTypeId = _jobTypeId,
                 Timestamp = timestamp,
                 Job = SerializerCache.GetObjectAsDictionary(job),
                 _options.JobTimeout

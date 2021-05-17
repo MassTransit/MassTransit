@@ -87,7 +87,7 @@ namespace MassTransit.JobService.Components.StateMachines
     }
 
 
-    static class TurnoutJobTypeStateMachineBehaviorExtensions
+    static class JobTypeStateMachineBehaviorExtensions
     {
         public static bool IsSlotAvailable(this BehaviorContext<JobTypeSaga, AllocateJobSlot> context, TimeSpan heartbeatTimeout)
         {

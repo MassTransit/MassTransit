@@ -54,13 +54,15 @@ namespace MassTransit.JobService.Pipeline
 
             var options = specification.Options<JobOptions<TJob>>();
 
+            var jobTypeId = jobService.GetJobTypeId<TJob>();
+
             IConsumerMessageSpecification<TConsumer, TJob> messageSpecification = specification.GetMessageSpecification<TJob>();
 
             var jobSpecification = messageSpecification as JobConsumerMessageSpecification<TConsumer, TJob>;
             if (jobSpecification == null)
                 throw new ArgumentException("The consumer specification did not match the message specification type");
 
-            var submitJobHandle = ConnectSubmitJobConsumer(consumePipe, jobSpecification.SubmitJobSpecification, options);
+            var submitJobHandle = ConnectSubmitJobConsumer(consumePipe, jobSpecification.SubmitJobSpecification, options, jobTypeId);
 
             IPipe<ConsumeContext<TJob>> jobPipe = CreateJobPipe(consumerFactory, specification);
             var startJobHandle = ConnectStartJobConsumer(consumePipe, jobSpecification.StartJobSpecification, options, jobService, jobPipe);
@@ -95,9 +97,9 @@ namespace MassTransit.JobService.Pipeline
         }
 
         ConnectHandle ConnectSubmitJobConsumer(IConsumePipeConnector consumePipe,
-            IConsumerSpecification<SubmitJobConsumer<TJob>> specification, JobOptions<TJob> options)
+            IConsumerSpecification<SubmitJobConsumer<TJob>> specification, JobOptions<TJob> options, Guid jobTypeId)
         {
-            var consumerFactory = new DelegateConsumerFactory<SubmitJobConsumer<TJob>>(() => new SubmitJobConsumer<TJob>(options));
+            var consumerFactory = new DelegateConsumerFactory<SubmitJobConsumer<TJob>>(() => new SubmitJobConsumer<TJob>(options, jobTypeId));
 
             return _submitJobConsumerConnector.ConnectConsumer(consumePipe, consumerFactory, specification);
         }

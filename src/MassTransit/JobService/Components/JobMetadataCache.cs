@@ -3,23 +3,23 @@ namespace MassTransit.JobService.Components
     using System;
     using System.Security.Cryptography;
     using System.Text;
-    using Metadata;
+    using GreenPipes.Internals.Extensions;
 
 
-    public static class JobMetadataCache<TJob>
+    public static class JobMetadataCache<TConsumer, TJob>
+        where TConsumer : class
         where TJob : class
     {
-        static readonly Lazy<Guid> _jobTypeId = new Lazy<Guid>(() => GenerateJobTypeId());
-
-        public static Guid JobTypeId => _jobTypeId.Value;
-
-        static Guid GenerateJobTypeId()
+        public static Guid GenerateJobTypeId(string queueName)
         {
-            var shortName = TypeMetadataCache<TJob>.ShortName;
+            var consumerTypeName = TypeCache<TConsumer>.ShortName;
+            var jobTypeName = TypeCache<TJob>.ShortName;
+
+            var key = $"{consumerTypeName}:{jobTypeName}:{queueName}";
 
             using var hasher = MD5.Create();
 
-            byte[] data = hasher.ComputeHash(Encoding.UTF8.GetBytes(shortName));
+            var data = hasher.ComputeHash(Encoding.UTF8.GetBytes(key));
 
             return new Guid(data);
         }

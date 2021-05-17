@@ -93,9 +93,6 @@ namespace MassTransit.JobService.Components.StateMachines
                     .RequestJobSlot(this));
 
             During(StartingJobAttempt,
-                When(JobAttemptCreated)
-                    .If(context => context.Data.AttemptId == context.Instance.AttemptId,
-                        x => x.TransitionTo(WaitingToStart)),
                 When(StartJobAttemptFaulted)
                     .Then(context =>
                     {

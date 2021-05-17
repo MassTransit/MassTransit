@@ -42,10 +42,19 @@
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="options"></param>
+        /// <param name="jobTypeId"></param>
         /// <typeparam name="T"></typeparam>
-        void RegisterJobType<T>(IReceiveEndpointConfigurator configurator, JobOptions<T> options)
+        void RegisterJobType<T>(IReceiveEndpointConfigurator configurator, JobOptions<T> options, Guid jobTypeId)
             where T : class;
 
         Task BusStarted(IBus bus);
+
+        /// <summary>
+        /// Return the registered JobTypeId for the job type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        Guid GetJobTypeId<T>()
+            where T : class;
     }
 }

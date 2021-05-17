@@ -65,7 +65,6 @@ namespace MassTransit.JobService.Components.StateMachines
                         context.Instance.ServiceAddress ??= context.Data.ServiceAddress;
                     })
                     .SendStartJob(this)
-                    .RespondAsync(context => context.Init<JobAttemptCreated>(context.Data))
                     .TransitionTo(Starting));
 
             During(Starting,
