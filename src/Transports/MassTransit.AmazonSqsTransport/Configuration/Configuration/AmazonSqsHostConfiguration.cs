@@ -42,6 +42,7 @@
             ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
             {
                 x.Handle<AmazonSqsTransportException>();
+                x.Handle<AmazonSqsConnectionException>();
 
                 x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));
             });
