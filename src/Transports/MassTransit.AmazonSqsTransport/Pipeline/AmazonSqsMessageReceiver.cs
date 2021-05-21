@@ -46,7 +46,8 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
-            Task.Run(Consume);
+            var task = Task.Run(Consume);
+            SetCompleted(task);
         }
 
         long DeliveryMetrics.DeliveryCount => _dispatcher.DispatchCount;
@@ -68,13 +69,12 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             catch (Exception exception)
             {
                 LogContext.Error?.Log(exception, "Consume Loop faulted");
+                throw;
             }
             finally
             {
                 await executor.DisposeAsync().ConfigureAwait(false);
             }
-
-            SetCompleted(TaskUtil.Completed);
         }
 
         protected override async Task StopAgent(StopContext context)
