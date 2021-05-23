@@ -369,6 +369,115 @@
 
 
     [TestFixture]
+    public class Processing_a_failing_batch_with_retry_and_delayed_redelivery :
+        InMemoryTestFixture
+    {
+        public Processing_a_failing_batch_with_retry_and_delayed_redelivery()
+        {
+            TestInactivityTimeout = TimeSpan.FromSeconds(8);
+            _firstFault = GetTask<ConsumeContext<Fault<PingMessage>>>();
+            _secondFault = GetTask<ConsumeContext<Fault<PingMessage>>>();
+            _firstId = NewId.NextGuid();
+            _secondId = NewId.NextGuid();
+        }
+
+        [Test]
+        public async Task Should_comply_with_retry_policy()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage(_firstId));
+            await InputQueueSendEndpoint.Send(new PingMessage(_secondId));
+
+            await _firstFault.Task;
+            await _secondFault.Task;
+
+            Assert.That(_consumer.Attempts, Is.EqualTo(4));
+        }
+
+        FailingBatchConsumer _consumer;
+
+        readonly TaskCompletionSource<ConsumeContext<Fault<PingMessage>>> _firstFault;
+        readonly TaskCompletionSource<ConsumeContext<Fault<PingMessage>>> _secondFault;
+        readonly Guid _firstId;
+        readonly Guid _secondId;
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new FailingBatchConsumer();
+
+            configurator.UseDelayedRedelivery(r => r.Intervals(100));
+            configurator.UseMessageRetry(r => r.Immediate(1));
+
+            configurator.Consumer(() => _consumer);
+
+            configurator.Handler<Fault<PingMessage>>(async m =>
+            {
+                if (_firstId == m.Message.Message.CorrelationId)
+                    _firstFault.SetResult(m);
+                if (_secondId == m.Message.Message.CorrelationId)
+                    _secondFault.SetResult(m);
+            });
+        }
+    }
+
+
+    [TestFixture]
+    public class Processing_a_failing_batch_with_retry_and_scheduled_redelivery :
+        InMemoryTestFixture
+    {
+        public Processing_a_failing_batch_with_retry_and_scheduled_redelivery()
+        {
+            TestInactivityTimeout = TimeSpan.FromSeconds(8);
+            _firstFault = GetTask<ConsumeContext<Fault<PingMessage>>>();
+            _secondFault = GetTask<ConsumeContext<Fault<PingMessage>>>();
+            _firstId = NewId.NextGuid();
+            _secondId = NewId.NextGuid();
+        }
+
+        [Test]
+        public async Task Should_comply_with_retry_policy()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage(_firstId));
+            await InputQueueSendEndpoint.Send(new PingMessage(_secondId));
+
+            await _firstFault.Task;
+            await _secondFault.Task;
+
+            Assert.That(_consumer.Attempts, Is.EqualTo(4));
+        }
+
+        FailingBatchConsumer _consumer;
+
+        readonly TaskCompletionSource<ConsumeContext<Fault<PingMessage>>> _firstFault;
+        readonly TaskCompletionSource<ConsumeContext<Fault<PingMessage>>> _secondFault;
+        readonly Guid _firstId;
+        readonly Guid _secondId;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseDelayedMessageScheduler();
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new FailingBatchConsumer();
+
+            configurator.UseScheduledRedelivery(r => r.Intervals(100));
+            configurator.UseMessageRetry(r => r.Immediate(1));
+
+            configurator.Consumer(() => _consumer);
+
+            configurator.Handler<Fault<PingMessage>>(async m =>
+            {
+                if (_firstId == m.Message.Message.CorrelationId)
+                    _firstFault.SetResult(m);
+                if (_secondId == m.Message.Message.CorrelationId)
+                    _secondFault.SetResult(m);
+            });
+        }
+    }
+
+
+    [TestFixture]
     public class Processing_another_failing_batch_consumer :
         InMemoryTestFixture
     {
