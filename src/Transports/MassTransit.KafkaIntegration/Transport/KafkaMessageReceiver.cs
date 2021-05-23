@@ -100,7 +100,7 @@
 
         void HandleKafkaError(IConsumer<TKey, TValue> consumer, Error error)
         {
-            if (_cancellationTokenSource.Token.IsCancellationRequested)
+            if (_cancellationTokenSource.IsCancellationRequested)
                 return;
             var activeDispatchCount = _dispatcher.ActiveDispatchCount;
             EnabledLogger? logger = error.IsFatal ? LogContext.Critical : LogContext.Error;
