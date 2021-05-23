@@ -22,7 +22,6 @@
         readonly ClientContext _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IBrokeredMessageReceiver _messageReceiver;
-        bool _stopped;
 
         public Receiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
         {
@@ -79,21 +78,8 @@
 
             if (requiresRecycle)
             {
-                if (_deliveryComplete.Task.IsCompleted)
-                    requiresRecycle = false;
-                else
-                    _deliveryComplete.TrySetResult(false);
-
-                if (requiresRecycle)
+                if (_deliveryComplete.TrySetResult(false))
                 {
-                    lock (_context)
-                    {
-                        if (_stopped)
-                            return;
-
-                        _stopped = true;
-                    }
-
                     await _context.NotifyFaulted(args.Exception, args.ExceptionReceivedContext.EntityPath).ConfigureAwait(false);
 
                     await this.Stop($"Receiver Exception: {args.Exception.Message}").ConfigureAwait(false);
