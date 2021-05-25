@@ -1,6 +1,10 @@
 # Videos
 
-The best videos to learn MassTransit are in the [Live Coding](/getting-started/live-coding) section. These are the most up-to-date videos detailing how to build applications using MassTransit. 
+### YouTube
+
+There are several seasons of videos [available on YouTube](https://www.youtube.com/playlist?list=PLx8uyNNs1ri2MBx6BjPum5j9_MMdIfM9C), and new episodes are added fairly regularly. There are also many short-format [Commutes](https://youtube.com/playlist?list=PLx8uyNNs1ri2_ldsW1aPb7_8E2FI7ZtaI) that cover quick topics.
+
+### Others
 
 Beyond those videos, there are several other video presentations featuring MassTransit.
 

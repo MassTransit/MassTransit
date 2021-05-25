@@ -37,6 +37,7 @@ module.exports = {
         path: '/getting-started/',
         collapsable: false,
         children: [
+          '/getting-started/upgrade-v6',
           {
             title: 'Release Notes',
             path: '/releases/',
@@ -55,8 +56,7 @@ module.exports = {
               '/releases/v7.0.6',
               '/releases/v7.0.4'
             ]
-          },
-          '/getting-started/upgrade-v6'
+          }
         ]
       },
       {
@@ -247,8 +247,7 @@ module.exports = {
           '/learn/courses',
           '/learn/loving-the-community',
           '/learn/contributing',
-          '/getting-started/live-coding',
-          '/getting-started/morning-commute'
+          '/getting-started/live-coding'
         ]
       },
       {

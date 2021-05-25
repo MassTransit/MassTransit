@@ -40,6 +40,8 @@ In each of these examples, _await_ is a key enabler. Requests are sent asynchron
 
 With HTTP, a connection is maintained by the client on which the response is sent. With MassTransit, a _requestId_ and _responseAddress_ passed to the service are used to send the response which is then read from the queue by the client bus and correlated back to the request.
 
+![Request Response](/requestResponse.svg "Request Response")
+
 ## Task
 
 The return type, `Task<T>`, is a C# language feature that represents a _future_. It's a reference type which means it is only accessible by reference. Since `Task<T>` is a future, is promises to deliver at some point:
