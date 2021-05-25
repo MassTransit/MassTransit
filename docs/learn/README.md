@@ -24,16 +24,23 @@ MassTransit has an active Discord server, which is a great place to get quick an
 
 ## Twitter
 
-You might be able to get some attention on Twitter, and you're highly encouraged to tweet about MassTransit. Feel free to tag `@mtproj` (strangely, MassTransit is a noisy search term -- go figure). 
+You might be able to get some attention on Twitter, and you're highly encouraged to tweet about MassTransit. Feel free to tag `@mtproj` (strangely, MassTransit is a noisy search term -- go figure).
 
 ## GitHub Issues
 
-Please **do not open an issue on GitHub**, unless you have spotted an actual bug in MassTransit. If you are unsure, pursue one of the alternate options first. If we confirm it's a bug, we'll ask you to [create the issue][3]. 
+Please **do not open an issue on GitHub**, unless you have spotted an actual bug in MassTransit. If you are unsure, pursue one of the alternate options first. If we confirm it's a bug, we'll ask you to [create the issue][3].
 
 **Issues are not the place for questions, and they'll likely be closed.**
 
 This policy is in place to avoid bugs being drowned out in a pile of sensible suggestions for future enhancements and calls for help from people who forget to check back if they get it and so on.
 
+## MassTransit Official Partner
+
+[Improving](5) is the only official support partner for MassTransit. In addition to consulting around architecture, integration and development, they provide professional training, and even annual support contracts (both development and production support). For more information, contact them [here](6)
+
+
 [1]: http://stackoverflow.com/questions/tagged/masstransit
 [3]: https://github.com/masstransit/masstransit/issues
 [4]: https://gist.github.com/
+[5]: http://improving.com/
+[6]: mailto://masstransit@improving.com
