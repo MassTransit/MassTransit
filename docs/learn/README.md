@@ -36,7 +36,7 @@ This policy is in place to avoid bugs being drowned out in a pile of sensible su
 
 ## MassTransit Official Partner
 
-[Improving](5) is the only official support partner for MassTransit. In addition to consulting around architecture, integration and development, they provide professional training, and even annual support contracts (both development and production support). For more information, contact them [here](6)
+[Improving][5] is the only official support partner for MassTransit. In addition to consulting around architecture, integration and development, they provide professional training, and even annual support contracts (both development and production support). For more information, contact them [here][6].
 
 
 [1]: http://stackoverflow.com/questions/tagged/masstransit
