@@ -8,6 +8,7 @@
     using Automatonymous;
     using GreenPipes;
     using GreenPipes.Agents;
+    using GreenPipes.Internals.Extensions;
     using Pipeline.Observables;
     using Util;
 
@@ -154,7 +155,11 @@
 
                 handle.Start(cancellationToken);
 
-                TaskUtil.Await(() => _machine.RaiseEvent(endpoint, _machine.ReceiveEndpointStarted, cancellationToken), cancellationToken);
+                var raiseEventTask = _machine.RaiseEvent(endpoint, _machine.ReceiveEndpointStarted, cancellationToken);
+                if (raiseEventTask.IsCompletedSuccessfully())
+                    return handle;
+
+                TaskUtil.Await(() => raiseEventTask, cancellationToken);
 
                 return handle;
             }

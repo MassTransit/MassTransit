@@ -12,7 +12,6 @@ namespace MassTransit.Util
     {
         readonly Channel<IFuture> _channel;
         readonly int _concurrencyLimit;
-        readonly CancellationTokenSource _disposeToken = new CancellationTokenSource();
         readonly SemaphoreSlim _limit;
         readonly Task _readerTask;
         readonly object _syncLock;
@@ -60,11 +59,9 @@ namespace MassTransit.Util
         {
             _channel.Writer.Complete();
 
-            _disposeToken.Cancel();
-
             await _readerTask.ConfigureAwait(false);
 
-            _disposeToken.Dispose();
+            _limit.Dispose();
         }
 
         public void PushWithWait(Func<Task> method, CancellationToken cancellationToken = default)
@@ -158,7 +155,7 @@ namespace MassTransit.Util
                     if (!_channel.Reader.TryRead(out var future))
                         continue;
 
-                    await _limit.WaitAsync(_disposeToken.Token).ConfigureAwait(false);
+                    await _limit.WaitAsync().ConfigureAwait(false);
 
                     async Task RunFuture()
                     {
@@ -177,7 +174,7 @@ namespace MassTransit.Util
 
                 await pending.Completed().ConfigureAwait(false);
             }
-            catch (OperationCanceledException exception) when (exception.CancellationToken == _disposeToken.Token)
+            catch (OperationCanceledException)
             {
             }
             catch (Exception exception)
