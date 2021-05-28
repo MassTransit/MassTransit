@@ -19,7 +19,7 @@ namespace MassTransit.MessageData
             _dataDirectory = dataDirectory;
         }
 
-        async Task<Stream> IMessageDataRepository.Get(Uri address, CancellationToken cancellationToken)
+        Task<Stream> IMessageDataRepository.Get(Uri address, CancellationToken cancellationToken)
         {
             var filePath = ParseFilePath(address);
 
@@ -27,15 +27,9 @@ namespace MassTransit.MessageData
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException("The file was not found", fullPath);
 
-            using var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous);
+            Stream stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous);
 
-            var memoryStream = new MemoryStream();
-
-            await stream.CopyToAsync(memoryStream, DefaultBufferSize, cancellationToken).ConfigureAwait(false);
-
-            memoryStream.Position = 0;
-
-            return memoryStream;
+            return Task.FromResult(stream);
         }
 
         async Task<Uri> IMessageDataRepository.Put(Stream stream, TimeSpan? timeToLive, CancellationToken cancellationToken)
