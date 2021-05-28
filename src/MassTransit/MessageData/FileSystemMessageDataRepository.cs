@@ -27,9 +27,9 @@ namespace MassTransit.MessageData
             if (!File.Exists(fullPath))
                 throw new FileNotFoundException("The file was not found", fullPath);
 
-            Stream stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous);
+            var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, FileOptions.Asynchronous);
 
-            return Task.FromResult(stream);
+            return Task.FromResult<Stream>(stream);
         }
 
         async Task<Uri> IMessageDataRepository.Put(Stream stream, TimeSpan? timeToLive, CancellationToken cancellationToken)
