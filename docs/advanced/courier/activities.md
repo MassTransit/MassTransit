@@ -2,18 +2,18 @@
 
 In MassTransit Courier, an *Activity* refers to a processing step that can be added to a routing slip.
 
-To create an activity, create a class that implements the *Activity* interface.
+To create an activity, create a class that implements the *IActivity* interface.
 
 ```csharp
 public class DownloadImageActivity :
-    Activity<DownloadImageArguments, DownloadImageLog>
+    IActivity<DownloadImageArguments, DownloadImageLog>
 {
-    Task<ExecuteResult> Execute(ExecutionContext<DownloadImageArguments> context);
+    Task<ExecutionResult> Execute(ExecuteContext<DownloadImageArguments> context);
     Task<CompensationResult> Compensate(CompensateContext<DownloadImageLog> context);
 }
 ```
 
-The *Activity* interface is generic with two arguments. The first parameter specifies the activity’s argument type and the second parameter specifies the activity’s log type. In the example shown above, *DownloadImageArguments* is the argument type and *DownloadImageLog* is the log type. Both parameters must be interface types so that the implementations can be dynamically created.
+The *IActivity* interface is generic with two arguments. The first parameter specifies the activity’s argument type and the second parameter specifies the activity’s log type. In the example shown above, *DownloadImageArguments* is the argument type and *DownloadImageLog* is the log type. Both parameters must be interface types so that the implementations can be dynamically created.
 
 ## Execute Activities
 
@@ -21,9 +21,9 @@ An *Execute Activity* is an activity that only executes and does not support com
 
 ```csharp
 public class ValidateImageActivity :
-    ExecuteActivity<ValidateImageArguments>
+    IExecuteActivity<ValidateImageArguments>
 {
-    Task<ExecuteResult> Execute(ExecutionContext<DownloadImageArguments> context);
+    Task<ExecutionResult> Execute(ExecuteContext<DownloadImageArguments> context);
 }
 ```
 
@@ -34,7 +34,7 @@ An activity must implement two interface methods, *Execute* and *Compensate*. Th
 When the *Execute* method is called, an *execution* argument is passed containing the activity arguments, the routing slip *TrackingNumber*, and methods to mark the activity as completed or faulted. The actual routing slip message, as well as any details of the underlying infrastructure, are excluded from the *execution* argument to prevent coupling between the activity and the implementation. An example *Execute* method is shown below.
 
 ```csharp
-async Task<ExecutionResult> Execute(Execution<DownloadImageArguments> execution)
+async Task<ExecutionResult> Execute(ExecuteContext<DownloadImageArguments> execution)
 {
     DownloadImageArguments args = execution.Arguments;
     string imageSavePath = Path.Combine(args.WorkPath, 
@@ -42,7 +42,7 @@ async Task<ExecutionResult> Execute(Execution<DownloadImageArguments> execution)
 
     await _httpClient.GetAndSave(args.ImageUri, imageSavePath);
 
-    return await execution.Completed<DownloadImageLog>(new {ImageSavePath = imageSavePath});
+    return execution.Completed<DownloadImageLog>(new {ImageSavePath = imageSavePath});
 }
 ```
 
@@ -75,7 +75,7 @@ By default, if an activity throws an exception, it will be _faulted_ and a `Rout
 When an activity fails, the *Compensate* method is called for previously executed activities in the routing slip that stored compensation data. If an activity does not store any compensation data, the *Compensate* method is never called. The compensation method for the example above is shown below.
 
 ```csharp
-Task<CompensationResult> Compensate(Compensation<DownloadImageLog> compensation)
+Task<CompensationResult> Compensate(CompensateContext<DownloadImageLog> compensation)
 {
     DownloadImageLog log = compensation.Log;
     File.Delete(log.ImageSavePath);
