@@ -28,7 +28,8 @@ module.exports = {
     },
     nav: [
       { text: "Discord", link: "/discord" },
-      { text: 'NuGet', link: 'https://nuget.org/packages/MassTransit' }
+      { text: 'NuGet', link: 'https://nuget.org/packages/MassTransit' },
+      { text: 'Training', link: "/learn/training.html" }
     ],
     sidebarDepth: 1,
     sidebar: [
@@ -244,7 +245,8 @@ module.exports = {
           '/learn/analyzers',
           '/learn/samples',
           '/learn/videos',
-          '/learn/courses',
+          '/learn/training',
+          '/learn/support',
           '/learn/loving-the-community',
           '/learn/contributing',
           '/getting-started/live-coding'
