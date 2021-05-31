@@ -244,7 +244,8 @@ module.exports = {
           '/learn/analyzers',
           '/learn/samples',
           '/learn/videos',
-          '/learn/courses',
+          '/learn/training',
+          '/learn/support',
           '/learn/loving-the-community',
           '/learn/contributing',
           '/getting-started/live-coding'

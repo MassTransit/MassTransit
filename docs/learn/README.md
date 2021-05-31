@@ -34,13 +34,6 @@ Please **do not open an issue on GitHub**, unless you have spotted an actual bug
 
 This policy is in place to avoid bugs being drowned out in a pile of sensible suggestions for future enhancements and calls for help from people who forget to check back if they get it and so on.
 
-## MassTransit Official Partner
-
-[Improving][5] is the only official support partner for MassTransit. In addition to consulting around architecture, integration and development, they provide professional training, and even annual support contracts (both development and production support). For more information, contact them [here][6].
-
-
 [1]: http://stackoverflow.com/questions/tagged/masstransit
 [3]: https://github.com/masstransit/masstransit/issues
 [4]: https://gist.github.com/
-[5]: http://improving.com/
-[6]: mailto://masstransit@improving.com
