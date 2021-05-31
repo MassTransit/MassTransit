@@ -7,6 +7,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using Microsoft.Extensions.Hosting;
     using MultiBus;
     using NUnit.Framework;
+    using Registration;
     using Scenarios;
     using TestFramework;
     using TestFramework.Messages;
@@ -26,11 +27,17 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
         [Test]
-        public async Task Should_support_request_client_on_default_bus()
+        public void Should_resolve_bus_declaration()
         {
-            IRequestClient<Request> client = GetRequestClient<Request>();
+            Assert.NotNull(Registration.GetService<IBusOne>());
+            Assert.NotNull(Registration.GetService<IBusTwo>());
+        }
 
-            await client.GetResponse<Response>(new Request());
+        [Test]
+        public void Should_resolve_bus_instance()
+        {
+            Assert.NotNull(Registration.GetService<IBusInstance<IBusOne>>());
+            Assert.NotNull(Registration.GetService<IBusInstance<IBusTwo>>());
         }
 
         [Test]
@@ -47,6 +54,14 @@ namespace MassTransit.Containers.Tests.Common_Tests
             IRequestClient<TwoRequest> client = GetRequestClient<TwoRequest>();
 
             await client.GetResponse<TwoResponse>(new TwoRequest());
+        }
+
+        [Test]
+        public async Task Should_support_request_client_on_default_bus()
+        {
+            IRequestClient<Request> client = GetRequestClient<Request>();
+
+            await client.GetResponse<Response>(new Request());
         }
 
         protected readonly TaskCompletionSource<ConsumeContext<SimpleMessageInterface>> Task1;

@@ -47,15 +47,17 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
 
             ThrowIfAlreadyConfigured(nameof(SetBusFactory));
 
-            Collection.AddSingleton(provider => Bind<TBus>.Create(CreateBus(busFactory, provider)));
+            Collection.AddSingleton(provider => CreateBus(busFactory, provider));
+            //TODO: remove it after some versions, only for backward-compatibility for now
+            Collection.AddSingleton(provider => Bind<TBus>.Create(provider.GetRequiredService<IBusInstance<TBus>>()));
 
-            Collection.AddSingleton<IBusInstance>(provider => provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value);
+            Collection.AddSingleton<IBusInstance>(provider => provider.GetRequiredService<IBusInstance<TBus>>());
             Collection.AddSingleton(provider =>
-                Bind<TBus>.Create<IReceiveEndpointConnector>(provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value));
-            Collection.AddSingleton(provider => provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value.BusInstance);
+                Bind<TBus>.Create<IReceiveEndpointConnector>(provider.GetRequiredService<IBusInstance<TBus>>()));
+            Collection.AddSingleton(provider => provider.GetRequiredService<IBusInstance<TBus>>().BusInstance);
 
         #pragma warning disable 618
-            Collection.AddSingleton<IBusHealth>(provider => new BusHealth(provider.GetRequiredService<Bind<TBus, IBusInstance<TBus>>>().Value));
+            Collection.AddSingleton<IBusHealth>(provider => new BusHealth(provider.GetRequiredService<IBusInstance<TBus>>()));
         }
 
         public override void AddRider(Action<IRiderRegistrationConfigurator> configure)
