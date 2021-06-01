@@ -224,7 +224,7 @@ public class MyController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] string value)
     {
-        using(var transaction = await _dbContext.BeginTransactionAsync())
+        using(var transaction = await _dbContext.Database.BeginTransactionAsync())
         {
             try
             {
@@ -296,7 +296,7 @@ public class DbContextTransactionFilter : TypeFilterAttribute
             {
                 try
                 {
-                    await _transactionalBus.RollbackAsync();
+                    await transaction.RollbackAsync();
                 }
                 catch (Exception e)
                 {
