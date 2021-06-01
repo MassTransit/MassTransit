@@ -296,7 +296,7 @@ public class DbContextTransactionFilter : TypeFilterAttribute
             {
                 try
                 {
-                    await _transactionalBus.RollbackAsync();
+                    await transaction.RollbackAsync();
                 }
                 catch (Exception e)
                 {
