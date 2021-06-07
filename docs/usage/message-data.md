@@ -155,6 +155,8 @@ IMessageDataRepository CreateRepository(string path)
 
 ### MongoDB
 
+> [MassTransit.MongoDb](https://www.nuget.org/packages/MassTransit.MongoDb/)
+
 To configure the MongoDB GridFS message data repository, follow the example shown below.
 
 ```cs
@@ -165,6 +167,8 @@ IMessageDataRepository CreateRepository(string connectionString, string database
 ```
 
 ### Azure Storage
+
+> [MassTransit.Azure.Storage](https://www.nuget.org/packages/MassTransit.Azure.Storage/)
 
 An Azure Cloud Storage account can be used to store message data. To configure Azure storage, first create the BlobServiceClient object using your connection string, and then use the extension method to create the repository as shown below. You can replace `message-data` with the desired container name.
 
