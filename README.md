@@ -44,6 +44,7 @@ MassTransit NuGet Packages
 | [MassTransit.Prometheus][Prometheus.nuget] | 2.0 |
 | **Persistence** |
 | [MassTransit.Azure.Cosmos][Cosmos.nuget] | 2.0 |
+| [MassTransit.Azure.Storage][[AzureStorage.nuget] | 2.0 |
 | [MassTransit.Dapper][Dapper.nuget] | 2.0 |
 | [MassTransit.EntityFrameworkCore][EFCore.nuget] | 2.0 |
 | [MassTransit.EntityFramework][EF.nuget] | 2.1 |
@@ -123,6 +124,7 @@ Logo Design by _The Agile Badger_
 [Prometheus.nuget]: https://www.nuget.org/packages/MassTransit.Prometheus
 
 [Cosmos.nuget]: https://www.nuget.org/packages/MassTransit.Azure.Cosmos
+[AzureStorage.nuget]: https://www.nuget.org/packages/MassTransit.Azure.Storage
 [Dapper.nuget]: https://www.nuget.org/packages/MassTransit.Dapper
 [EFCore.nuget]: https://www.nuget.org/packages/MassTransit.EntityFrameworkCore
 [EF.nuget]: https://www.nuget.org/packages/MassTransit.EntityFramework
