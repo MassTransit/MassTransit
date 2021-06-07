@@ -44,7 +44,7 @@ MassTransit NuGet Packages
 | [MassTransit.Prometheus][Prometheus.nuget] | 2.0 |
 | **Persistence** |
 | [MassTransit.Azure.Cosmos][Cosmos.nuget] | 2.0 |
-| [MassTransit.Azure.Storage][[AzureStorage.nuget] | 2.0 |
+| [MassTransit.Azure.Storage][AzureStorage.nuget] | 2.0 |
 | [MassTransit.Dapper][Dapper.nuget] | 2.0 |
 | [MassTransit.EntityFrameworkCore][EFCore.nuget] | 2.0 |
 | [MassTransit.EntityFramework][EF.nuget] | 2.1 |
