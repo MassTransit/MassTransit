@@ -42,10 +42,6 @@ namespace MassTransit.Transports
 
         Task IReceiveEndpointObserver.Faulted(ReceiveEndpointFaulted faulted)
         {
-            _handle.Disconnect();
-
-            _ready.TrySetException(faulted.Exception);
-
             return TaskUtil.Completed;
         }
     }
