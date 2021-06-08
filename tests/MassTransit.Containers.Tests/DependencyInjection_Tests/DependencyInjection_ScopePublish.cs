@@ -1,6 +1,7 @@
 namespace MassTransit.Containers.Tests.DependencyInjection_Tests
 {
     using System;
+    using System.Threading.Tasks;
     using Common_Tests;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
@@ -118,12 +119,13 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
     public class DependencyInjection_Publish_Filter_Fault :
         Common_Publish_Filter_Fault
     {
-        readonly IServiceProvider _provider;
+        readonly ServiceProvider _provider;
 
         public DependencyInjection_Publish_Filter_Fault()
         {
             var services = new ServiceCollection();
             services.AddSingleton(TaskCompletionSource);
+            services.AddSingleton(Marker);
 
             services.AddMassTransit(ConfigureRegistration);
 
@@ -131,20 +133,14 @@ namespace MassTransit.Containers.Tests.DependencyInjection_Tests
         }
 
         [OneTimeTearDown]
-        public void Close_container()
+        public async Task Close_container()
         {
+            await _provider.DisposeAsync();
         }
 
         protected override void ConfigureFilter(IPublishPipelineConfigurator configurator)
         {
             DependencyInjectionFilterExtensions.UsePublishFilter(configurator, typeof(ScopedFilter<>), Registration);
-        }
-
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.UseServiceScope(_provider);
-
-            base.ConfigureInMemoryReceiveEndpoint(configurator);
         }
 
         protected override IBusRegistrationContext Registration => _provider.GetRequiredService<IBusRegistrationContext>();

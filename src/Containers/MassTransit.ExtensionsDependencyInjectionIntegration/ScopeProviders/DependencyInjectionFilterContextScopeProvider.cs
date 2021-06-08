@@ -43,6 +43,9 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             where TContext : class, PipeContext
             where T : class
         {
+            if (typeof(T).HasInterface<Fault>())
+                return;
+
             if (!scopedType.IsGenericType || !scopedType.IsGenericTypeDefinition)
                 throw new ArgumentException("The scoped filter must be a generic type definition", nameof(scopedType));
 

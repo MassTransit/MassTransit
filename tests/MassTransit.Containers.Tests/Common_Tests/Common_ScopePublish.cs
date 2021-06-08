@@ -1,8 +1,6 @@
 namespace MassTransit.Containers.Tests.Common_Tests
 {
-    using System;
     using System.Threading.Tasks;
-    using Context;
     using GreenPipes;
     using NUnit.Framework;
     using Scenarios;
@@ -144,8 +142,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_Publish_Filter_Outbox :
         InMemoryTestFixture
     {
-        protected readonly TaskCompletionSource<MyId> MyIdSource;
         protected readonly TaskCompletionSource<ProducingConsumer> ConsumerSource;
+        protected readonly TaskCompletionSource<MyId> MyIdSource;
 
         protected Common_Publish_Filter_Outbox()
         {
@@ -243,27 +241,25 @@ namespace MassTransit.Containers.Tests.Common_Tests
     public abstract class Common_Publish_Filter_Fault :
         InMemoryTestFixture
     {
-        protected readonly TaskCompletionSource<ConsumeContext> TaskCompletionSource;
+        protected readonly FilterMarker Marker;
+        protected readonly TaskCompletionSource<ConsumeContext<Fault<SimpleMessageInterface>>> TaskCompletionSource;
 
         protected Common_Publish_Filter_Fault()
         {
-            TaskCompletionSource = GetTask<ConsumeContext>();
+            TaskCompletionSource = GetTask<ConsumeContext<Fault<SimpleMessageInterface>>>();
+            Marker = new FilterMarker();
         }
 
         protected abstract IBusRegistrationContext Registration { get; }
 
         [Test]
-        public async Task Should_use_scope()
+        public async Task Should_not_use_scoped_filter_to_publish_fault()
         {
             await InputQueueSendEndpoint.Send<SimpleMessageInterface>(new {Name = "test"});
 
-            var lastConsumer = await FaultyConsumer.LastConsumer;
-
-            ConsumeContext<SimpleMessageInterface> lastConsumeContext = await lastConsumer.Last;
-
-            var result = await TaskCompletionSource.Task;
-
-            Assert.That(lastConsumeContext, Is.Not.InstanceOf<MissingConsumeContext>());
+            ConsumeContext<Fault<SimpleMessageInterface>> result = await TaskCompletionSource.Task;
+            Assert.IsNotNull(result);
+            Assert.IsFalse(Marker.Called);
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -271,7 +267,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             ConfigureFilter(configurator);
         }
 
-        protected abstract void ConfigureFilter(IPublishPipelineConfigurator publishPipelineConfigurator);
+        protected abstract void ConfigureFilter(IPublishPipelineConfigurator configurator);
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -285,54 +281,52 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
 
+        class FaultyConsumer :
+            IConsumer<SimpleMessageInterface>,
+            IConsumer<Fault<SimpleMessageInterface>>
+        {
+            readonly TaskCompletionSource<ConsumeContext<Fault<SimpleMessageInterface>>> _taskCompletionSource;
+
+            public FaultyConsumer(TaskCompletionSource<ConsumeContext<Fault<SimpleMessageInterface>>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public Task Consume(ConsumeContext<Fault<SimpleMessageInterface>> context)
+            {
+                _taskCompletionSource.TrySetResult(context);
+                return TaskUtil.Completed;
+            }
+
+            public Task Consume(ConsumeContext<SimpleMessageInterface> context)
+            {
+                throw new IntentionalTestException();
+            }
+        }
+
+
+        protected class FilterMarker
+        {
+            public bool Called { get; set; }
+        }
+
+
         protected class ScopedFilter<T> :
             IFilter<PublishContext<T>>
             where T : class
         {
-            readonly ConsumeContext _consumeContext;
-            readonly TaskCompletionSource<ConsumeContext> _taskCompletionSource;
-
-            public ScopedFilter(TaskCompletionSource<ConsumeContext> taskCompletionSource, ConsumeContext consumeContext)
+            public ScopedFilter(FilterMarker marker)
             {
-                _taskCompletionSource = taskCompletionSource;
-                _consumeContext = consumeContext;
+                marker.Called = true;
             }
 
             public Task Send(PublishContext<T> context, IPipe<PublishContext<T>> next)
             {
-                _taskCompletionSource.TrySetResult(_consumeContext);
                 return next.Send(context);
             }
 
             public void Probe(ProbeContext context)
             {
-            }
-        }
-
-
-        public class FaultyConsumer :
-            IConsumer<SimpleMessageInterface>
-        {
-            static readonly TaskCompletionSource<FaultyConsumer> _consumerCreated = TaskUtil.GetTask<FaultyConsumer>();
-
-            readonly TaskCompletionSource<ConsumeContext<SimpleMessageInterface>> _received;
-
-            public FaultyConsumer()
-            {
-                _received = TaskUtil.GetTask<ConsumeContext<SimpleMessageInterface>>();
-
-                _consumerCreated.TrySetResult(this);
-            }
-
-            public Task<ConsumeContext<SimpleMessageInterface>> Last => _received.Task;
-
-            public static Task<FaultyConsumer> LastConsumer => _consumerCreated.Task;
-
-            public async Task Consume(ConsumeContext<SimpleMessageInterface> message)
-            {
-                _received.TrySetResult(message);
-
-                throw new IntentionalTestException("Nothing to see here, move along!");
             }
         }
     }
