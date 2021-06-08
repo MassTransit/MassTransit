@@ -122,7 +122,7 @@
             if (busState != BusState.Started || unhealthy.Any() && unhappy.Length == results.Length)
                 return HealthResult.Unhealthy($"Not ready: {healthMessage}", exception, data);
 
-            if (degraded.Any())
+            if (unhappy.Any())
                 return HealthResult.Degraded($"Degraded Endpoints: {string.Join(",", names)}", exception, data);
 
             return HealthResult.Healthy("Ready", data);
