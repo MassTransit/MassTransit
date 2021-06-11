@@ -100,6 +100,9 @@
 
         public void SetEntityNameFormatter(IMessageEntityNameFormatter<TMessage> entityNameFormatter)
         {
+            if (entityNameFormatter == null)
+                throw new ArgumentNullException(nameof(entityNameFormatter));
+
             if (_entityName.IsValueCreated)
             {
                 if (_entityName.Value == entityNameFormatter.FormatEntityName())
@@ -109,11 +112,14 @@
                     $"The message type {TypeMetadataCache<TMessage>.ShortName} entity name was already evaluated: {_entityName.Value}");
             }
 
-            EntityNameFormatter = entityNameFormatter ?? throw new ArgumentNullException(nameof(entityNameFormatter));
+            EntityNameFormatter = entityNameFormatter;
         }
 
         public void SetEntityName(string entityName)
         {
+            if (entityName == null)
+                throw new ArgumentNullException(nameof(entityName));
+
             SetEntityNameFormatter(new StaticEntityNameFormatter<TMessage>(entityName));
         }
 
@@ -136,6 +142,9 @@
 
         IMessagePropertyTopologyConfigurator<TMessage, T> GetPropertyTopology<T>(PropertyInfo propertyInfo)
         {
+            if (propertyInfo == null)
+                throw new ArgumentNullException(nameof(propertyInfo));
+
             IMessagePropertyTopologyConfigurator<TMessage> specification =
                 _properties.GetOrAdd(propertyInfo.Name, _ => CreatePropertyTopology<T>(propertyInfo));
 
