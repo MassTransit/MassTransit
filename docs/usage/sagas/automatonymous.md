@@ -79,7 +79,7 @@ This results in the following values: 0 - None, 1 - Initial, 2 - Final, 3 - Subm
 
 ### State
 
-States represent previously consumed events resulting in an instance being in a current _state_. An instance can only be in one state at a given time. A new instance defaults to the _Initial_ state, which is automatically defined. The _Final_ state is also defined for all state machines and is used to signfify the instance has reached the final state.
+States represent previously consumed events resulting in an instance being in a current _state_. An instance can only be in one state at a given time. A new instance defaults to the _Initial_ state, which is automatically defined. The _Final_ state is also defined for all state machines and is used to signify the instance has reached the final state.
 
 In the example, two states are declared. States are automatically initialized by the _MassTransitStateMachine_ base class constructor.
 
