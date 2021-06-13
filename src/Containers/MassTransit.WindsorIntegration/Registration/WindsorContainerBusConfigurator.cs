@@ -22,7 +22,7 @@ namespace MassTransit.WindsorIntegration.Registration
             IBusRegistrationContext CreateRegistrationContext(IKernel context)
             {
                 var provider = context.Resolve<IConfigurationServiceProvider>();
-                return new BusRegistrationContext(provider, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
+                return new BusRegistrationContext(provider, null, Endpoints, Sagas, ExecuteActivities, Activities, Futures);
             }
 
             Container = container;

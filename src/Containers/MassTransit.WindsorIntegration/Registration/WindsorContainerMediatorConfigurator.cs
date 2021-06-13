@@ -21,7 +21,7 @@ namespace MassTransit.WindsorIntegration.Registration
         {
             IMediatorRegistrationContext CreateRegistrationContext(IKernel kernel)
             {
-                var registration = CreateRegistration(kernel.Resolve<IConfigurationServiceProvider>());
+                var registration = CreateRegistration(kernel.Resolve<IConfigurationServiceProvider>(), null);
                 return new MediatorRegistrationContext(registration);
             }
 

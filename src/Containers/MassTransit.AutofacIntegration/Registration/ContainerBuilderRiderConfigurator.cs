@@ -40,7 +40,7 @@ namespace MassTransit.AutofacIntegration.Registration
 
             IRiderRegistrationContext CreateRegistrationContext(IComponentContext context)
             {
-                var registration = CreateRegistration(context.Resolve<IConfigurationServiceProvider>());
+                var registration = CreateRegistration(context.Resolve<IConfigurationServiceProvider>(), null);
                 return new RiderRegistrationContext(registration, _registrations);
             }
 

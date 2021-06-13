@@ -2,9 +2,10 @@ namespace MassTransit.Registration
 {
     using System;
     using Automatonymous;
+    using ConsumeConfigurators;
     using Courier;
     using Definition;
-    using MassTransit.Futures;
+    using Futures;
     using Saga;
 
 
@@ -107,5 +108,12 @@ namespace MassTransit.Registration
         /// <typeparam name="T"></typeparam>
         void RegisterSingleInstance<T>(T instance)
             where T : class;
+    }
+
+
+    public interface IComponentRegistrar
+    {
+        void RegisterConsumer<T>(Type consumerDefinitionType, Action<IConsumerConfigurator<T>> configure = null)
+            where T : class, IConsumer;
     }
 }

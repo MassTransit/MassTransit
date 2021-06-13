@@ -21,6 +21,7 @@ namespace MassTransit.Registration
         IRegistrationConfigurator
     {
         readonly RegistrationCache<IActivityRegistration> _activities;
+        readonly IComponentRegistrar _componentRegistry;
         readonly RegistrationCache<IConsumerRegistration> _consumers;
         readonly RegistrationCache<IEndpointRegistration> _endpoints;
         readonly RegistrationCache<IExecuteActivityRegistration> _executeActivities;
@@ -29,8 +30,9 @@ namespace MassTransit.Registration
         bool _configured;
         ISagaRepositoryRegistrationProvider _sagaRepositoryRegistrationProvider;
 
-        protected RegistrationConfigurator(IContainerRegistrar registrar = null)
+        protected RegistrationConfigurator(IContainerRegistrar registrar = null, IComponentRegistrar componentRegistry = null)
         {
+            _componentRegistry = componentRegistry;
             Registrar = registrar ?? new NullContainerRegistrar();
 
             _consumers = new RegistrationCache<IConsumerRegistration>();
@@ -44,7 +46,6 @@ namespace MassTransit.Registration
         }
 
         protected IRegistrationCache<IActivityRegistration> Activities => _activities;
-        protected IRegistrationCache<IConsumerRegistration> Consumers => _consumers;
         protected IRegistrationCache<IEndpointRegistration> Endpoints => _endpoints;
         protected IRegistrationCache<IExecuteActivityRegistration> ExecuteActivities => _executeActivities;
         protected IRegistrationCache<ISagaRegistration> Sagas => _sagas;
@@ -66,19 +67,7 @@ namespace MassTransit.Registration
             if (TypeMetadataCache<T>.HasSagaInterfaces)
                 throw new ArgumentException($"{TypeMetadataCache<T>.ShortName} is a saga, and cannot be registered as a consumer", nameof(T));
 
-            IConsumerRegistration ValueFactory(Type type)
-            {
-                ConsumerRegistrationCache.Register(type, Registrar);
-
-                return new ConsumerRegistration<T>();
-            }
-
-            var registration = _consumers.GetOrAdd(typeof(T), ValueFactory);
-
-            registration.AddConfigureAction(configure);
-
-            if (consumerDefinitionType != null)
-                ConsumerDefinitionRegistrationCache.Register(consumerDefinitionType, Registrar);
+            _componentRegistry.RegisterConsumer(consumerDefinitionType, configure);
 
             return new ConsumerRegistrationConfigurator<T>(this);
         }
@@ -347,9 +336,9 @@ namespace MassTransit.Registration
             _sagaRepositoryRegistrationProvider = provider;
         }
 
-        protected IRegistration CreateRegistration(IConfigurationServiceProvider provider)
+        protected IRegistration CreateRegistration(IConfigurationServiceProvider provider, IRegistrationProvider registrationProvider)
         {
-            return new Registration(provider, Consumers, Sagas, ExecuteActivities, Activities, Futures);
+            return new Registration(provider, Sagas, ExecuteActivities, Activities, Futures, registrationProvider);
         }
 
         protected void ThrowIfAlreadyConfigured(string methodName)

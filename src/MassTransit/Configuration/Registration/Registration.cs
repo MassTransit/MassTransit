@@ -15,29 +15,28 @@ namespace MassTransit.Registration
         readonly HashSet<Type> _configuredTypes;
 
         protected readonly IRegistrationCache<IActivityRegistration> Activities;
-        protected readonly IRegistrationCache<IConsumerRegistration> Consumers;
         protected readonly IRegistrationCache<IExecuteActivityRegistration> ExecuteActivities;
         protected readonly IRegistrationCache<IFutureRegistration> Futures;
+        protected readonly IRegistrationProvider RegistrationProvider;
         protected readonly IRegistrationCache<ISagaRegistration> Sagas;
 
-        public Registration(IConfigurationServiceProvider configurationServiceProvider, IRegistrationCache<IConsumerRegistration> consumers,
+        public Registration(IConfigurationServiceProvider configurationServiceProvider,
             IRegistrationCache<ISagaRegistration> sagas, IRegistrationCache<IExecuteActivityRegistration> executeActivities,
-            IRegistrationCache<IActivityRegistration> activities, IRegistrationCache<IFutureRegistration> futures)
+            IRegistrationCache<IActivityRegistration> activities, IRegistrationCache<IFutureRegistration> futures, IRegistrationProvider registrationProvider)
         {
             _configurationServiceProvider = configurationServiceProvider;
-            Consumers = consumers;
             Sagas = sagas;
             ExecuteActivities = executeActivities;
             Activities = activities;
             Futures = futures;
+            RegistrationProvider = registrationProvider;
 
             _configuredTypes = new HashSet<Type>();
         }
 
         public void ConfigureConsumer(Type consumerType, IReceiveEndpointConfigurator configurator)
         {
-            if (!Consumers.TryGetValue(consumerType, out var consumer))
-                throw new ArgumentException($"The consumer type was not found: {TypeMetadataCache.GetShortName(consumerType)}", nameof(consumerType));
+            var consumer = RegistrationProvider.GetConsumerRegistration(consumerType);
 
             consumer.Configure(configurator, this);
 
@@ -47,9 +46,7 @@ namespace MassTransit.Registration
         public void ConfigureConsumer<T>(IReceiveEndpointConfigurator configurator, Action<IConsumerConfigurator<T>> configure)
             where T : class, IConsumer
         {
-            if (!Consumers.TryGetValue(typeof(T), out var consumer))
-                throw new ArgumentException($"The consumer type was not found: {TypeMetadataCache.GetShortName(typeof(T))}", nameof(T));
-
+            IConsumerRegistration<T> consumer = RegistrationProvider.GetConsumerRegistration<T>();
             consumer.AddConfigureAction(configure);
             consumer.Configure(configurator, this);
 
@@ -58,7 +55,7 @@ namespace MassTransit.Registration
 
         public void ConfigureConsumers(IReceiveEndpointConfigurator configurator)
         {
-            foreach (var consumer in Consumers.Values.Where(x => !WasConfigured(x.ConsumerType)))
+            foreach (var consumer in RegistrationProvider.GetConsumerRegistrations().Where(x => !WasConfigured(x.ConsumerType)))
             {
                 consumer.Configure(configurator, this);
 

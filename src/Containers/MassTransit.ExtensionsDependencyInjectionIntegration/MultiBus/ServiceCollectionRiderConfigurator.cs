@@ -26,7 +26,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
 
             IRiderRegistrationContext CreateRegistrationContext(IServiceProvider provider)
             {
-                var registration = CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>());
+                var registration = CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>(),
+                    new DependencyInjectionRegistrationProvider<TBus>(provider));
                 return new RiderRegistrationContext(registration, Registrations);
             }
 

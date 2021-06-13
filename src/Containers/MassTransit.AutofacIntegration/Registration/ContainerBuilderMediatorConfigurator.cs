@@ -25,7 +25,7 @@ namespace MassTransit.AutofacIntegration.Registration
         {
             IMediatorRegistrationContext CreateRegistrationContext(IComponentContext context)
             {
-                var registration = CreateRegistration(context.Resolve<IConfigurationServiceProvider>());
+                var registration = CreateRegistration(context.Resolve<IConfigurationServiceProvider>(), null);
                 return new MediatorRegistrationContext(registration);
             }
 

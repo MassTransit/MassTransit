@@ -50,7 +50,7 @@ namespace MassTransit.StructureMapIntegration.Registration
 
         IMediatorRegistrationContext CreateRegistrationContext(IContext context)
         {
-            var registration = CreateRegistration(context.GetInstance<IConfigurationServiceProvider>());
+            var registration = CreateRegistration(context.GetInstance<IConfigurationServiceProvider>(), null);
             return new MediatorRegistrationContext(registration);
         }
 

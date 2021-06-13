@@ -9,11 +9,23 @@ namespace MassTransit.Registration
     {
         Type ConsumerType { get; }
 
-        void AddConfigureAction<T>(Action<IConsumerConfigurator<T>> configure)
-            where T : class, IConsumer;
-
         void Configure(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider scopeProvider);
 
         IConsumerDefinition GetDefinition(IConfigurationServiceProvider provider);
+    }
+
+
+    public interface IConsumerRegistration<T> :
+        IConsumerRegistration
+        where T : class, IConsumer
+    {
+        void AddConfigureAction(Action<IConsumerConfigurator<T>> configure);
+    }
+
+
+    public interface IConsumerConfiguratorAction<T>
+        where T : class, IConsumer
+    {
+        void Configure(IConsumerConfigurator<T> configurator);
     }
 }

@@ -13,11 +13,11 @@ namespace MassTransit.Registration
         readonly IRegistrationCache<IEndpointRegistration> _endpoints;
         IConfigureReceiveEndpoint _configureReceiveEndpoints;
 
-        public BusRegistrationContext(IConfigurationServiceProvider provider, IRegistrationCache<IEndpointRegistration> endpoints,
-            IRegistrationCache<IConsumerRegistration> consumers, IRegistrationCache<ISagaRegistration> sagas,
+        public BusRegistrationContext(IConfigurationServiceProvider provider, IRegistrationProvider registrationProvider,
+            IRegistrationCache<IEndpointRegistration> endpoints, IRegistrationCache<ISagaRegistration> sagas,
             IRegistrationCache<IExecuteActivityRegistration> executeActivities, IRegistrationCache<IActivityRegistration> activities,
             IRegistrationCache<IFutureRegistration> futures)
-            : base(provider, consumers, sagas, executeActivities, activities, futures)
+            : base(provider, sagas, executeActivities, activities, futures, registrationProvider)
         {
             _endpoints = endpoints;
         }
@@ -41,7 +41,7 @@ namespace MassTransit.Registration
 
             var registrationFilter = builder.Filter;
 
-            List<IGrouping<string, IConsumerDefinition>> consumersByEndpoint = Consumers.Values
+            List<IGrouping<string, IConsumerDefinition>> consumersByEndpoint = RegistrationProvider.GetConsumerRegistrations()
                 .Where(x => registrationFilter.Matches(x) && !WasConfigured(x.ConsumerType))
                 .Select(x => x.GetDefinition(this))
                 .GroupBy(x => x.GetEndpointName(endpointNameFormatter))

@@ -19,12 +19,13 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
         where TBusInstance : BusInstance<TBus>, TBus
     {
         public ServiceCollectionBusConfigurator(IServiceCollection collection)
-            : base(collection, new DependencyInjectionContainerRegistrar<TBus>(collection))
+            : base(collection, new DependencyInjectionContainerRegistrar<TBus>(collection), new DependencyInjectionComponentRegistrar<TBus>(collection))
         {
             IBusRegistrationContext CreateRegistrationContext(IServiceProvider serviceProvider)
             {
                 var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
-                return new BusRegistrationContext(provider, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
+                var registrationProvider = new DependencyInjectionRegistrationProvider<TBus>(serviceProvider);
+                return new BusRegistrationContext(provider, registrationProvider, Endpoints, Sagas, ExecuteActivities, Activities, Futures);
             }
 
             collection.AddScoped(provider => Bind<TBus>.Create(GetSendEndpointProvider(provider)));

@@ -21,13 +21,14 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         protected readonly HashSet<Type> RiderTypes;
 
         public ServiceCollectionBusConfigurator(IServiceCollection collection)
-            : this(collection, new DependencyInjectionContainerRegistrar(collection))
+            : this(collection, new DependencyInjectionContainerRegistrar(collection), new DependencyInjectionComponentRegistrar<IBus>(collection))
         {
             IBusRegistrationContext CreateRegistrationContext(IServiceProvider serviceProvider)
             {
                 var provider = serviceProvider.GetRequiredService<IConfigurationServiceProvider>();
 
-                return new BusRegistrationContext(provider, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
+                var registrationProvider = new DependencyInjectionRegistrationProvider<IBus>(provider);
+                return new BusRegistrationContext(provider, registrationProvider, Endpoints, Sagas, ExecuteActivities, Activities, Futures);
             }
 
             collection.AddSingleton(provider =>
@@ -46,8 +47,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             });
         }
 
-        protected ServiceCollectionBusConfigurator(IServiceCollection collection, IContainerRegistrar registrar)
-            : base(registrar)
+        protected ServiceCollectionBusConfigurator(IServiceCollection collection, IContainerRegistrar registrar, IComponentRegistrar componentRegistry)
+            : base(registrar, componentRegistry)
         {
             Collection = collection;
             RiderTypes = new HashSet<Type>();

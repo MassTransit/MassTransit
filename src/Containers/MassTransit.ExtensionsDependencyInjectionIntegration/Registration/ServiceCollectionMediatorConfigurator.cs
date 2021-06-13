@@ -20,7 +20,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
         {
             IMediatorRegistrationContext CreateRegistrationContext(IServiceProvider provider)
             {
-                var registration = CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>());
+                var registration = CreateRegistration(provider.GetRequiredService<IConfigurationServiceProvider>(), null);
                 return new MediatorRegistrationContext(registration);
             }
 

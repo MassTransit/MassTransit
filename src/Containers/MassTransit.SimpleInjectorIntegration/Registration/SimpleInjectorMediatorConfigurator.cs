@@ -20,7 +20,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         {
             IMediatorRegistrationContext CreateRegistrationContext()
             {
-                var registration = CreateRegistration(Container.GetInstance<IConfigurationServiceProvider>());
+                var registration = CreateRegistration(Container.GetInstance<IConfigurationServiceProvider>(), null);
                 return new MediatorRegistrationContext(registration);
             }
 

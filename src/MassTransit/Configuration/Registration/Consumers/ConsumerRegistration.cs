@@ -16,24 +16,26 @@ namespace MassTransit.Registration
     /// </summary>
     /// <typeparam name="TConsumer">The consumer type</typeparam>
     public class ConsumerRegistration<TConsumer> :
-        IConsumerRegistration
+        IConsumerRegistration<TConsumer>
         where TConsumer : class, IConsumer
     {
+        readonly Func<IEnumerable<IConsumerConfiguratorAction<TConsumer>>> _actionsProvider;
         readonly List<Action<IConsumerConfigurator<TConsumer>>> _configureActions;
         IConsumerDefinition<TConsumer> _definition;
 
-        public ConsumerRegistration()
+        public ConsumerRegistration(Func<IEnumerable<IConsumerConfiguratorAction<TConsumer>>> actionsProvider)
         {
             _configureActions = new List<Action<IConsumerConfigurator<TConsumer>>>();
+            _actionsProvider = actionsProvider;
+        }
+
+        public void AddConfigureAction(Action<IConsumerConfigurator<TConsumer>> configure)
+        {
+            if (configure != null)
+                _configureActions.Add(configure);
         }
 
         public Type ConsumerType => typeof(TConsumer);
-
-        void IConsumerRegistration.AddConfigureAction<T>(Action<IConsumerConfigurator<T>> configure)
-        {
-            if (configure is Action<IConsumerConfigurator<TConsumer>> action)
-                _configureActions.Add(action);
-        }
 
         void IConsumerRegistration.Configure(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider configurationServiceProvider)
         {
@@ -48,6 +50,9 @@ namespace MassTransit.Registration
 
             GetConsumerDefinition(configurationServiceProvider)
                 .Configure(configurator, consumerConfigurator);
+
+            foreach (IConsumerConfiguratorAction<TConsumer> action in _actionsProvider())
+                action.Configure(consumerConfigurator);
 
             foreach (Action<IConsumerConfigurator<TConsumer>> action in _configureActions)
                 action(consumerConfigurator);
