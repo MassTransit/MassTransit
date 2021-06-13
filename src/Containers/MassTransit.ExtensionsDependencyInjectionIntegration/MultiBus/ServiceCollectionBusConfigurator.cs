@@ -14,7 +14,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
 
     public class ServiceCollectionBusConfigurator<TBus, TBusInstance> :
         ServiceCollectionBusConfigurator,
-        IServiceCollectionConfigurator<TBus>
+        IServiceCollectionBusConfigurator<TBus>
         where TBus : class, IBus
         where TBusInstance : BusInstance<TBus>, TBus
     {

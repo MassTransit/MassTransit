@@ -20,7 +20,7 @@ namespace MassTransit.MultiBus
         /// <param name="collection">The service collection</param>
         /// <param name="configure">Bus instance configuration method</param>
         public static IServiceCollection AddMassTransit<TBus, TBusInstance>(this IServiceCollection collection,
-            Action<IServiceCollectionConfigurator<TBus>> configure)
+            Action<IServiceCollectionBusConfigurator<TBus>> configure)
             where TBus : class, IBus
             where TBusInstance : BusInstance<TBus>, TBus
         {
@@ -47,7 +47,7 @@ namespace MassTransit.MultiBus
         /// </summary>
         /// <param name="collection">The service collection</param>
         /// <param name="configure">Bus instance configuration method</param>
-        public static IServiceCollection AddMassTransit<TBus>(this IServiceCollection collection, Action<IServiceCollectionConfigurator<TBus>> configure)
+        public static IServiceCollection AddMassTransit<TBus>(this IServiceCollection collection, Action<IServiceCollectionBusConfigurator<TBus>> configure)
             where TBus : class, IBus
         {
             if (configure == null)
@@ -63,10 +63,10 @@ namespace MassTransit.MultiBus
             IBusInstanceBuilderCallback<TBus, IServiceCollection>
             where TBus : class, IBus
         {
-            readonly Action<IServiceCollectionConfigurator<TBus>> _configure;
+            readonly Action<IServiceCollectionBusConfigurator<TBus>> _configure;
             readonly IServiceCollection _services;
 
-            public Callback(IServiceCollection services, Action<IServiceCollectionConfigurator<TBus>> configure)
+            public Callback(IServiceCollection services, Action<IServiceCollectionBusConfigurator<TBus>> configure)
             {
                 _services = services;
                 _configure = configure;
