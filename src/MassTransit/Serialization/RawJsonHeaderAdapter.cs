@@ -36,11 +36,11 @@ namespace MassTransit.Serialization
 
         public string[] SupportedMessageTypes => _messageTypes ??= GetMessageTypes().ToArray();
 
-        public Guid? MessageId => _messageId ??= _headers.Get<Guid>(MessageHeaders.MessageId);
-        public Guid? RequestId => _requestId ??= _headers.Get<Guid>(MessageHeaders.RequestId);
-        public Guid? CorrelationId => _correlationId ??= _headers.Get<Guid>(MessageHeaders.CorrelationId);
-        public Guid? ConversationId => _conversationId ??= _headers.Get<Guid>(MessageHeaders.ConversationId);
-        public Guid? InitiatorId => _initiatorId ??= _headers.Get<Guid>(MessageHeaders.InitiatorId);
+        public Guid? MessageId => _messageId ??= _receiveContext.GetMessageId();
+        public Guid? RequestId => _requestId ??= _receiveContext.GetRequestId();
+        public Guid? CorrelationId => _correlationId ??= _receiveContext.GetCorrelationId();
+        public Guid? ConversationId => _conversationId ??= _receiveContext.GetConversationId();
+        public Guid? InitiatorId => _initiatorId ??= _receiveContext.GetInitiatorId();
 
         public DateTime? ExpirationTime { get; } = default;
 
