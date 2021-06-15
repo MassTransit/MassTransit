@@ -49,3 +49,11 @@ To configure mediator using a container, use the _AddMediator_ method.
 <<< @/docs/code/usage/UsageMediatorContainer.cs
 
 Consumers and sagas (including saga repositories) can be added, routing slip activities are not supported using mediator. Consumer and saga definitions are supported as well, but certain properties like _EndpointName_ are ignored. Middleware components, including _UseMessageRetry_ and _UseInMemoryOutbox_, are fully supported.
+
+### Middleware
+
+MassTransit Mediator is built using the same components used to create a bus, which means all the same middleware components can be configured. For instance, to configure the Mediator pipeline, such as adding a scoped filter, see the example below.
+
+<<< @/docs/code/usage/UsageMediatorConfigure.cs
+
+
