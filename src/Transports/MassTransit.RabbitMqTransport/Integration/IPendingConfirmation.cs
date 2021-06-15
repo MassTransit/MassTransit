@@ -1,5 +1,6 @@
 namespace MassTransit.RabbitMqTransport.Integration
 {
+    using System;
     using System.Threading.Tasks;
 
 
@@ -14,6 +15,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
         void Acknowledged();
         void NotAcknowledged();
+        void NotConfirmed(Exception exception);
         void NotConfirmed(string reason);
         void Returned(ushort code, string text);
     }

@@ -37,6 +37,11 @@ namespace MassTransit.RabbitMqTransport.Integration
             _source.TrySetException(new MessageNotAcknowledgedException(DestinationAddress, "The message was not acknowledged by RabbitMQ"));
         }
 
+        public void NotConfirmed(Exception exception)
+        {
+            _source.TrySetException(new MessageNotConfirmedException(DestinationAddress, exception));
+        }
+
         public void NotConfirmed(string reason)
         {
             _source.TrySetException(new MessageNotConfirmedException(DestinationAddress, reason));

@@ -49,6 +49,11 @@ namespace MassTransit.RabbitMqTransport.Integration
             _confirmed.TrySetException(new MessageNotConfirmedException(DestinationAddress, reason));
         }
 
+        public void NotConfirmed(Exception exception)
+        {
+            _confirmed.TrySetException(new MessageNotConfirmedException(DestinationAddress, exception));
+        }
+
         public void Returned(ushort code, string text)
         {
             _confirmed.TrySetException(new MessageReturnedException(DestinationAddress, $"The message was returned by RabbitMQ: {code}-{text}"));

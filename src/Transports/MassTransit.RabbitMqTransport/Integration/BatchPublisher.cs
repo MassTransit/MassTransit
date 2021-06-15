@@ -119,7 +119,7 @@ namespace MassTransit.RabbitMqTransport.Integration
             catch (Exception exception)
             {
                 for (var i = 0; i < batch.Count; i++)
-                    batch[i].NotConfirmed(exception.Message);
+                    batch[i].NotConfirmed(exception);
             }
             finally
             {
@@ -167,7 +167,7 @@ namespace MassTransit.RabbitMqTransport.Integration
 
                     _confirmations?.Faulted(publish);
 
-                    publish.NotConfirmed(exception.Message);
+                    publish.NotConfirmed(exception);
                 }
             }
         }

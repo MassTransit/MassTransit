@@ -46,6 +46,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
             ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
             {
                 x.Handle<ConnectionException>();
+                x.Handle<MessageNotConfirmedException>(exception => exception.Message.Contains("CONNECTION_FORCED"));
+
                 x.Ignore<AuthenticationFailureException>();
 
                 x.Exponential(1000, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(3));

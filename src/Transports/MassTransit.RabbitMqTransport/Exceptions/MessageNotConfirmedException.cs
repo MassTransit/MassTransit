@@ -20,6 +20,11 @@
         {
         }
 
+        public MessageNotConfirmedException(Uri uri, Exception innerException)
+            : base(uri, $"The message was not confirmed: {innerException.Message}", innerException)
+        {
+        }
+
         public MessageNotConfirmedException(Uri uri, string message, Exception innerException)
             : base(uri, message, innerException)
         {
