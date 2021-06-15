@@ -13,7 +13,9 @@
         {
             var consumeContextFactory = new SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>();
 
-            var repositoryContextFactory = new AzureTableSagaRepositoryContextFactory<TSaga>(tableFactory, consumeContextFactory, keyFormatter);
+            var cloudTableProvider = new DelegateCloudTableProvider<TSaga>(tableFactory);
+
+            var repositoryContextFactory = new AzureTableSagaRepositoryContextFactory<TSaga>(cloudTableProvider, consumeContextFactory, keyFormatter);
 
             return new SagaRepository<TSaga>(repositoryContextFactory);
         }

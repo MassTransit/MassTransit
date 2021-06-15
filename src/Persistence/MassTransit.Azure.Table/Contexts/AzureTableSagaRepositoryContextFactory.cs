@@ -13,27 +13,25 @@ namespace MassTransit.Azure.Table.Contexts
         ISagaRepositoryContextFactory<TSaga>
         where TSaga : class, ISaga
     {
-        readonly Func<CloudTable> _databaseFactory;
+        readonly ICloudTableProvider<TSaga> _cloudTableProvider;
         readonly ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> _factory;
         readonly ISagaKeyFormatter<TSaga> _keyFormatter;
 
-        public AzureTableSagaRepositoryContextFactory(Func<CloudTable> databaseFactory,
+        public AzureTableSagaRepositoryContextFactory(ICloudTableProvider<TSaga> cloudTableProvider,
             ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> factory,
             ISagaKeyFormatter<TSaga> keyFormatter)
         {
-            _databaseFactory = databaseFactory;
+            _cloudTableProvider = cloudTableProvider;
             _factory = factory;
             _keyFormatter = keyFormatter;
         }
 
-
-        public AzureTableSagaRepositoryContextFactory(CloudTable databaseFactory,
+        public AzureTableSagaRepositoryContextFactory(CloudTable cloudTable,
             ISagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga> factory,
-            ISagaKeyFormatter<TSaga> keyFormatter) :
-            this(() => databaseFactory, factory, keyFormatter)
+            ISagaKeyFormatter<TSaga> keyFormatter)
+            : this(new ConstCloudTableProvider<TSaga>(cloudTable), factory, keyFormatter)
         {
         }
-
 
         public void Probe(ProbeContext context)
         {
@@ -43,7 +41,7 @@ namespace MassTransit.Azure.Table.Contexts
         public async Task Send<T>(ConsumeContext<T> context, IPipe<SagaRepositoryContext<TSaga, T>> next)
             where T : class
         {
-            var database = _databaseFactory();
+            var database = _cloudTableProvider.GetCloudTable();
 
             var databaseContext = new AzureTableDatabaseContext<TSaga>(database, _keyFormatter);
 
@@ -61,7 +59,7 @@ namespace MassTransit.Azure.Table.Contexts
         public async Task<T> Execute<T>(Func<SagaRepositoryContext<TSaga>, Task<T>> asyncMethod, CancellationToken cancellationToken = default)
             where T : class
         {
-            var database = _databaseFactory();
+            var database = _cloudTableProvider.GetCloudTable();
 
             var databaseContext = new AzureTableDatabaseContext<TSaga>(database, _keyFormatter);
             var repositoryContext = new CosmosTableSagaRepositoryContext<TSaga>(databaseContext, cancellationToken);

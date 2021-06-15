@@ -56,7 +56,7 @@ namespace MassTransit.Azure.Table.Configurators
         public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)
             where T : class, ISaga
         {
-            configurator.RegisterSingleInstance(_connectionFactory);
+            configurator.RegisterSingleInstance<ICloudTableProvider<TSaga>>(provider => new ConstCloudTableProvider<TSaga>(_connectionFactory(provider)));
             configurator.RegisterSingleInstance(_formatterFactory);
             configurator.RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>,
                 AzureTableSagaRepositoryContextFactory<T>>();
