@@ -109,12 +109,12 @@ namespace MassTransit.Analyzers.Tests
         /// <returns>
         /// A Tuple containing the Documents produced from the sources and their TextSpans if relevant
         /// </returns>
-        static Document[] GetDocuments(string[] sources, string language)
+        static Document[] GetDocuments(string[] sources, string language, bool includeMassTransit = true)
         {
             if (language != LanguageNames.CSharp && language != LanguageNames.VisualBasic)
                 throw new ArgumentException("Unsupported Language");
 
-            var project = CreateProject(sources, language);
+            var project = CreateProject(sources, language, includeMassTransit);
             Document[] documents = project.Documents.ToArray();
 
             if (sources.Length != documents.Length)
@@ -139,8 +139,9 @@ namespace MassTransit.Analyzers.Tests
         /// </summary>
         /// <param name="sources">Classes in the form of strings</param>
         /// <param name="language">The language the source code is in</param>
+        /// <param name="includeMassTransit">Whether the resulting Project has a dependency on MassTransit or not</param>
         /// <returns>A Project created out of the Documents created from the source strings</returns>
-        static Project CreateProject(string[] sources, string language = LanguageNames.CSharp)
+        static Project CreateProject(string[] sources, string language = LanguageNames.CSharp, bool includeMassTransit = true)
         {
             var fileNamePrefix = DefaultFilePathPrefix;
             var fileExt = language == LanguageNames.CSharp ? CSharpDefaultFileExt : VisualBasicDefaultExt;
@@ -157,10 +158,14 @@ namespace MassTransit.Analyzers.Tests
                 .AddMetadataReference(projectId, CollectionsReference)
                 .AddMetadataReference(projectId, RuntimeReference)
                 .AddMetadataReference(projectId, NetStandardReference)
-                .AddMetadataReference(projectId, MassTransitReference)
-                .AddMetadataReference(projectId, GreenPipesReference)
-                .AddMetadataReference(projectId, NewIdReference)
                 .AddMetadataReference(projectId, SystemPrivateUriReference);
+
+            if (includeMassTransit)
+            {
+                solution = solution.AddMetadataReference(projectId, MassTransitReference)
+                    .AddMetadataReference(projectId, GreenPipesReference)
+                    .AddMetadataReference(projectId, NewIdReference);
+            }
 
             var count = 0;
             foreach (var source in sources)

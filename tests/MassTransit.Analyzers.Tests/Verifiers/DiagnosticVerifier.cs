@@ -125,6 +125,13 @@ namespace MassTransit.Analyzers.Tests
             VerifyDiagnostics(sources, LanguageNames.VisualBasic, GetBasicDiagnosticAnalyzer(), expected);
         }
 
+        protected void VerifyCSharpDiagnosticWithoutMassTransit(string source, params DiagnosticResult[] expected)
+        {
+            var analyzer = GetCSharpDiagnosticAnalyzer();
+            Diagnostic[] diagnostics = GetSortedDiagnosticsFromDocuments(analyzer, GetDocuments(new []{ source }, LanguageNames.CSharp, includeMassTransit: false));
+            VerifyDiagnosticResults(diagnostics, analyzer, expected);
+        }
+
         /// <summary>
         /// General method that gets a collection of actual diagnostics found in the source after the analyzer is run,
         /// then verifies each of them.

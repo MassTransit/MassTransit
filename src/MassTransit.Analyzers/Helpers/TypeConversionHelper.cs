@@ -87,12 +87,15 @@ namespace MassTransit.Analyzers.Helpers
 
             _typeSymbols.Add(semanticModel, SpecialType.System_String, SpecialType.System_Object);
 
-            var exceptionInfoSymbol = semanticModel.Compilation.GetTypeByMetadataName("MassTransit.ExceptionInfo");
             var exceptionSymbol = semanticModel.Compilation.GetTypeByMetadataName(typeof(Exception).FullName);
 
-            _typeSymbols.Add(exceptionInfoSymbol, exceptionSymbol);
-            _typeSymbols.Add(semanticModel, SpecialType.System_String, exceptionInfoSymbol);
-            _typeSymbols.Add(semanticModel, exceptionInfoSymbol, SpecialType.System_Object);
+            var exceptionInfoSymbol = semanticModel.Compilation.GetTypeByMetadataName("MassTransit.ExceptionInfo");
+            if (exceptionInfoSymbol != null)
+            {
+                _typeSymbols.Add(exceptionInfoSymbol, exceptionSymbol);
+                _typeSymbols.Add(semanticModel, SpecialType.System_String, exceptionInfoSymbol);
+                _typeSymbols.Add(semanticModel, exceptionInfoSymbol, SpecialType.System_Object);
+            }
 
             var uriSymbol = semanticModel.Compilation.GetTypeByMetadataName(typeof(Uri).FullName);
 
@@ -104,12 +107,14 @@ namespace MassTransit.Analyzers.Helpers
             _typeSymbols.Add(semanticModel, SpecialType.System_String, versionSymbol);
             _typeSymbols.Add(semanticModel, versionSymbol, SpecialType.System_Object, SpecialType.System_String);
 
-            var newIdSymbol = semanticModel.Compilation.GetTypeByMetadataName("MassTransit.NewId");
             var guidSymbol = semanticModel.Compilation.GetTypeByMetadataName(typeof(Guid).FullName);
 
             _typeSymbols.Add(semanticModel, SpecialType.System_String, guidSymbol);
             _typeSymbols.Add(semanticModel, guidSymbol, SpecialType.System_Object, SpecialType.System_String);
-            _typeSymbols.Add(guidSymbol, newIdSymbol);
+
+            var newIdSymbol = semanticModel.Compilation.GetTypeByMetadataName("MassTransit.NewId");
+            if (newIdSymbol != null)
+                _typeSymbols.Add(guidSymbol, newIdSymbol);
         }
 
         public bool CanConvert(Type type, ITypeSymbol sourceSymbol)

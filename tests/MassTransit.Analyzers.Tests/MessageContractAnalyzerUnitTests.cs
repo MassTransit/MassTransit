@@ -129,6 +129,30 @@ namespace ConsoleApplication1
         }
 
         [Test]
+        public void WhenNotUsingMassTransitSymbols_ShouldNotInterfere()
+        {
+            var test = @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static void Main()
+        {
+            var test = new { Module = 13, Index = 412 };
+        }
+    }
+}
+";
+
+            VerifyCSharpDiagnosticWithoutMassTransit(test);
+        }
+
+        [Test]
         public void WhenActivatingGenericContractAreStructurallyIncompatibleAndNoMissingProperties_ShouldHaveDiagnostic()
         {
             var test = Usings + @"
@@ -2188,7 +2212,7 @@ namespace ConsoleApplication1
 
     public interface Bar
     {
-        
+
     }
 }
 ";
