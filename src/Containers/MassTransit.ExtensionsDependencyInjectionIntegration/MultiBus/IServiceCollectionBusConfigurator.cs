@@ -12,6 +12,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
 
 
     public interface IServiceCollectionBusConfigurator<in TBus> :
+    #pragma warning disable 618
         IServiceCollectionConfigurator<TBus>
         where TBus : class, IBus
     {
