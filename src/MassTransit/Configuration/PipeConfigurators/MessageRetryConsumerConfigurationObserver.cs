@@ -41,7 +41,7 @@ namespace MassTransit.PipeConfigurators
             {
                 typeof(MessageRetryConsumerConfigurationObserver<TConsumer>)
                     .GetMethod(nameof(BatchConsumerConfigured))
-                    .MakeGenericMethod(typeof(TConsumer), types[0])
+                    .MakeGenericMethod(types[0])
                     .Invoke(this, new object[] {configurator});
             }
             else
