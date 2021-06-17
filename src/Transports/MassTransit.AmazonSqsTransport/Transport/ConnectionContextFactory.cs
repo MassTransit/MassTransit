@@ -51,7 +51,7 @@
             return await _hostConfiguration.ReceiveTransportRetryPolicy.Retry(async () =>
             {
                 if (supervisor.Stopping.IsCancellationRequested)
-                    throw new OperationCanceledException($"The connection is stopping and cannot be used: {_hostConfiguration.HostAddress}");
+                    throw new AmazonSqsConnectionException($"The connection is stopping and cannot be used: {_hostConfiguration.HostAddress}");
 
                 IConnection connection = null;
                 try

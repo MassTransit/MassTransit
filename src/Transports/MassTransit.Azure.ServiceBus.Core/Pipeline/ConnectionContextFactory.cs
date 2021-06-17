@@ -49,7 +49,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
             var endpoint = new UriBuilder(_hostConfiguration.HostAddress) {Path = ""}.Uri.ToString();
 
             if (supervisor.Stopping.IsCancellationRequested)
-                throw new OperationCanceledException($"The connection is stopping and cannot be used: {endpoint}");
+                throw new ServiceBusConnectionException($"The connection is stopping and cannot be used: {endpoint}");
 
             var settings = _hostConfiguration.Settings;
             var retryPolicy = new RetryExponential(settings.RetryMinBackoff, settings.RetryMaxBackoff, settings.RetryLimit);

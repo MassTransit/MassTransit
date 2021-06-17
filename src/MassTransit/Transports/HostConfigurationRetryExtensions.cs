@@ -31,8 +31,7 @@ namespace MassTransit.Transports
 
                         if (supervisor.Stopping.IsCancellationRequested)
                         {
-                            throw new OperationCanceledException($"The connection is stopping and cannot be used: {description}", retryContext?.Exception,
-                                supervisor.Stopping);
+                            throw new ConnectionException($"The connection is stopping and cannot be used: {description}", retryContext?.Exception);
                         }
 
                         await factory().ConfigureAwait(false);
@@ -68,8 +67,7 @@ namespace MassTransit.Transports
                     }
                 }
 
-                throw new OperationCanceledException($"The connection is stopping and cannot be used: {description}", retryContext?.Exception,
-                    supervisor.Stopping);
+                throw new ConnectionException($"The connection is stopping and cannot be used: {description}", retryContext?.Exception);
             }
             finally
             {

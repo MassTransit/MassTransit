@@ -68,7 +68,7 @@
             var description = _hostConfiguration.Settings.ToDescription();
 
             if (supervisor.Stopping.IsCancellationRequested)
-                throw new OperationCanceledException($"The connection is stopping and cannot be used: {description}");
+                throw new RabbitMqConnectionException($"The connection is stopping and cannot be used: {description}");
 
             IConnection connection = null;
             try
