@@ -32,7 +32,7 @@ To configure the endpoint for a consumer registration, or override the endpoint 
 
 <<< @/docs/code/containers/MicrosoftContainerAddConsumerEndpoint.cs
 
-When the endpoint is configured after the _AddConsumer_ method, the configuration overrides then endpoint configuration in the consumer definition. However, it cannot override the `EndpointName` if it is specified in the constructor. The order of precedence for endpoint naming is explained below.
+When the endpoint is configured after the _AddConsumer_ method, the configuration then overrides the endpoint configuration in the consumer definition. However, it cannot override the `EndpointName` if it is specified in the constructor. The order of precedence for endpoint naming is explained below.
 
 1. Specifying `EndpointName = "submit-order-extreme"` in the constructor which cannot be overridden
 
