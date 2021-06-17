@@ -19,6 +19,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Submitting_a_job_to_turnout_that_faults :
         QuartzInMemoryTestFixture
     {
@@ -115,6 +116,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Submitting_a_job_to_turnout_that_faults_with_retry :
         QuartzInMemoryTestFixture
     {
@@ -222,6 +224,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Submitting_a_job_to_turnout_that_is_abandoned :
         QuartzInMemoryTestFixture
     {
@@ -333,6 +336,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Submitting_a_job_to_turnout_that_is_abandoned_and_retried :
         QuartzInMemoryTestFixture
     {

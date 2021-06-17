@@ -10,6 +10,7 @@
     using TestFramework.Messages;
 
 
+    [Category("Flaky")]
     public class Cancel_scheduled_message_through_the_outbox :
         QuartzInMemoryTestFixture
     {
@@ -69,6 +70,7 @@
     }
 
 
+    [Category("Flaky")]
     public class Not_cancel_scheduled_message_with_no_outbox :
         QuartzInMemoryTestFixture
     {

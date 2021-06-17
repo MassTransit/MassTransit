@@ -10,6 +10,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Submitting_a_job_to_turnout_that_is_cancelled :
         QuartzInMemoryTestFixture
     {
