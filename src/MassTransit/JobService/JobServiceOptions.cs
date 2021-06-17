@@ -23,6 +23,8 @@ namespace MassTransit.JobService
             SlotRequestTimeout = TimeSpan.Zero;
             HeartbeatInterval = TimeSpan.FromMinutes(1);
             HeartbeatTimeout = TimeSpan.FromMinutes(5);
+
+            SuspectJobRetryCount = 1;
         }
 
         public string JobTypeSagaEndpointName
