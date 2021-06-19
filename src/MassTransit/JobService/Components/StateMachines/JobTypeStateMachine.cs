@@ -58,6 +58,12 @@ namespace MassTransit.JobService.Components.StateMachines
 
                                     LogContext.Debug?.Log("Released Job Slot: {JobId} ({JobCount}): {InstanceAddress}", activeJob.JobId,
                                         context.Instance.ActiveJobCount, activeJob.InstanceAddress);
+
+                                    if (context.Data.Disposition == JobSlotDisposition.Suspect)
+                                    {
+                                        if (context.Instance.Instances.Remove(activeJob.InstanceAddress))
+                                            LogContext.Warning?.Log("Removed Suspect Job Service Instance: {InstanceAddress}", activeJob.InstanceAddress);
+                                    }
                                 }
                             }))
                     .If(context => context.Instance.ActiveJobCount == 0,

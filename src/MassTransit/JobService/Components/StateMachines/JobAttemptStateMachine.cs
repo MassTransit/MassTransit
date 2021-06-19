@@ -65,6 +65,7 @@ namespace MassTransit.JobService.Components.StateMachines
                         context.Instance.ServiceAddress ??= context.Data.ServiceAddress;
                     })
                     .SendStartJob(this)
+                    .ScheduleJobStatusCheck(this)
                     .TransitionTo(Starting));
 
             During(Starting,
@@ -77,6 +78,11 @@ namespace MassTransit.JobService.Components.StateMachines
                     .SendJobAttemptFaulted(this)
                     .TransitionTo(Faulted));
 
+            During(Starting,
+                When(StatusCheckRequested.Received)
+                    .SendJobAttemptStartTimeout(this)
+                    .TransitionTo(Faulted));
+
             During(Initial, Starting, Running,
                 When(AttemptStarted)
                     .Then(context =>
@@ -86,7 +92,6 @@ namespace MassTransit.JobService.Components.StateMachines
                         context.Instance.RetryAttempt = context.Data.RetryAttempt;
                         context.Instance.InstanceAddress ??= context.Data.InstanceAddress;
                     })
-                    .ScheduleJobStatusCheck(this)
                     .TransitionTo(Running));
 
             During(Faulted,
@@ -164,6 +169,7 @@ namespace MassTransit.JobService.Components.StateMachines
         public TimeSpan SuspectJobRetryDelay { get; }
 
         public Uri JobSagaEndpointAddress => _options.JobSagaEndpointAddress;
+        public Uri JobTypeSagaEndpointAddress => _options.JobTypeSagaEndpointAddress;
         public Uri JobAttemptSagaEndpointAddress => _options.JobAttemptSagaEndpointAddress;
 
         // ReSharper disable UnassignedGetOnlyAutoProperty
@@ -247,6 +253,21 @@ namespace MassTransit.JobService.Components.StateMachines
                 InVar.Timestamp,
                 RetryDelay = context.Instance.RetryAttempt < machine.SuspectJobRetryCount ? machine.SuspectJobRetryDelay : default(TimeSpan?),
                 Exceptions = new FaultExceptionInfo(new TimeoutException("The job status check timed out."))
+            }));
+        }
+
+        public static EventActivityBinder<JobAttemptSaga, T> SendJobAttemptStartTimeout<T>(this EventActivityBinder<JobAttemptSaga, T> binder,
+            JobAttemptStateMachine machine)
+            where T : class
+        {
+            return binder.SendAsync(context => machine.JobSagaEndpointAddress, context => context.Init<JobAttemptFaulted>(new
+            {
+                context.Instance.JobId,
+                AttemptId = context.Instance.CorrelationId,
+                context.Instance.RetryAttempt,
+                InVar.Timestamp,
+                RetryDelay = context.Instance.RetryAttempt < machine.SuspectJobRetryCount ? machine.SuspectJobRetryDelay : default(TimeSpan?),
+                Exceptions = new FaultExceptionInfo(new TimeoutException($"The job service failed to respond: {context.Instance.InstanceAddress} (Suspect)"))
             }));
         }
     }

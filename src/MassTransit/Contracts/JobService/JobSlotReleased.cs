@@ -8,5 +8,7 @@ namespace MassTransit.Contracts.JobService
         Guid JobTypeId { get; }
 
         Guid JobId { get; }
+
+        JobSlotDisposition Disposition { get; }
     }
 }

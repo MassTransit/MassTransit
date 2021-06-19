@@ -169,7 +169,7 @@ namespace MassTransit.JobService.Components.StateMachines
                     .Then(context =>
                     {
                         context.Instance.Faulted = context.Data.Timestamp;
-                        context.Instance.Reason = "Job attempt canceled";
+                        context.Instance.Reason = "Job Attempt Canceled";
                     })
                     .PublishJobCanceled()
                     .TransitionTo(Canceled));
@@ -178,10 +178,10 @@ namespace MassTransit.JobService.Components.StateMachines
                 When(AttemptCanceled)
                     .PublishJobCanceled());
 
-            WhenEnter(Completed, x => x.SendJobSlotReleased(this));
-            WhenEnter(Canceled, x => x.SendJobSlotReleased(this));
-            WhenEnter(Faulted, x => x.SendJobSlotReleased(this));
-            WhenEnter(WaitingToRetry, x => x.SendJobSlotReleased(this));
+            WhenEnter(Completed, x => x.SendJobSlotReleased(this, JobSlotDisposition.Completed));
+            WhenEnter(Canceled, x => x.SendJobSlotReleased(this, JobSlotDisposition.Canceled));
+            WhenEnter(Faulted, x => x.SendJobSlotReleased(this, JobSlotDisposition.Faulted));
+            WhenEnter(WaitingToRetry, x => x.SendJobSlotReleased(this, JobSlotDisposition.Faulted));
 
             SetCompletedWhenFinalized();
         }
@@ -280,13 +280,17 @@ namespace MassTransit.JobService.Components.StateMachines
                 .TransitionTo(machine.WaitingForSlot);
         }
 
-        public static EventActivityBinder<JobSaga> SendJobSlotReleased(this EventActivityBinder<JobSaga> binder, JobStateMachine machine)
+        public static EventActivityBinder<JobSaga> SendJobSlotReleased(this EventActivityBinder<JobSaga> binder, JobStateMachine machine,
+            JobSlotDisposition disposition)
         {
             return binder.SendAsync(context => machine.JobTypeSagaEndpointAddress,
                 context => context.Init<JobSlotReleased>(new
                 {
                     JobId = context.Instance.CorrelationId,
-                    context.Instance.JobTypeId
+                    context.Instance.JobTypeId,
+                    Disposition = disposition == JobSlotDisposition.Faulted && context.Instance.Reason.Contains("(Suspect)")
+                        ? JobSlotDisposition.Suspect
+                        : disposition
                 }));
         }
 
