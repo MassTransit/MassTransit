@@ -20,7 +20,7 @@
         /// If within a retry attempt, the return value indicates the number of retry attempts that have already occurred.
         /// </summary>
         /// <param name="context"></param>
-        /// <returns>The number of retries that have already been attempted, 0 = first time, 0 = first retry, >= 1 = subsequent retry</returns>
+        /// <returns>The number of retries that have already been attempted, 0 = first time or first retry, >= 1 = subsequent retry</returns>
         public static int GetRetryCount(this ConsumeContext context)
         {
             return context.TryGetPayload(out ConsumeRetryContext retryContext) ? retryContext.RetryCount : 0;
