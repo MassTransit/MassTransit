@@ -1,16 +1,16 @@
 namespace MassTransit.Analyzers.Helpers
 {
-    using System.Collections.Generic;
-
+    using System;
+    using System.Collections.Concurrent;
 
     class NodeTable<T>
     {
-        readonly IDictionary<T, int> _nodes;
+        readonly ConcurrentDictionary<T, int> _nodes;
         int _count;
 
         public NodeTable(int capacity)
         {
-            _nodes = new Dictionary<T, int>(capacity);
+            _nodes = new ConcurrentDictionary<T, int>(Environment.ProcessorCount, capacity);
         }
 
         /// <summary>
@@ -23,13 +23,7 @@ namespace MassTransit.Analyzers.Helpers
         {
             get
             {
-                if (_nodes.TryGetValue(key, out var value))
-                    return value;
-
-                value = ++_count;
-                _nodes.Add(key, value);
-
-                return value;
+                return _nodes.GetOrAdd(key, k => ++_count);
             }
         }
     }
