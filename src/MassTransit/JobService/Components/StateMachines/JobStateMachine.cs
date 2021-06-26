@@ -268,7 +268,8 @@ namespace MassTransit.JobService.Components.StateMachines
                         context.Instance.ServiceAddress,
                         context.Data.InstanceAddress,
                         context.Instance.RetryAttempt,
-                        context.Instance.Job
+                        context.Instance.Job,
+                        context.Instance.JobTypeId
                     }), context => context.ResponseAddress = machine.JobSagaEndpointAddress)
                 .TransitionTo(machine.StartingJobAttempt);
         }
@@ -312,6 +313,7 @@ namespace MassTransit.JobService.Components.StateMachines
                 {
                     JobId = context.Instance.CorrelationId,
                     context.Instance.Job,
+                    context.Instance.JobTypeId,
                     context.Data.Timestamp,
                     Duration = context.Data.Timestamp - context.Instance.Started ?? TimeSpan.Zero
                 })).PublishAsync(context => context.Init<JobCompleted>(new
@@ -337,6 +339,7 @@ namespace MassTransit.JobService.Components.StateMachines
                 {
                     JobId = context.Instance.CorrelationId,
                     context.Instance.Job,
+                    context.Instance.JobTypeId,
                     context.Instance.AttemptId,
                     context.Instance.RetryAttempt,
                     context.Data.Exceptions,
@@ -360,6 +363,7 @@ namespace MassTransit.JobService.Components.StateMachines
                 {
                     JobId = context.Instance.CorrelationId,
                     context.Instance.Job,
+                    context.Instance.JobTypeId,
                     context.Instance.AttemptId,
                     context.Instance.RetryAttempt,
                     context.Data.Exceptions,

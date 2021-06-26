@@ -23,5 +23,10 @@ namespace MassTransit.Contracts.JobService
         /// The result of the job
         /// </summary>
         IDictionary<string, object> Result { get; }
+
+        /// <summary>
+        /// The JobTypeId, to ensure the proper job type is started
+        /// </summary>
+        Guid JobTypeId { get; }
     }
 }

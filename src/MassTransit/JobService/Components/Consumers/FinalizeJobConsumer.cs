@@ -15,17 +15,22 @@ namespace MassTransit.JobService.Components.Consumers
     {
         readonly string _jobConsumerTypeName;
         readonly IJobService _jobService;
+        readonly Guid _jobTypeId;
         readonly JobOptions<TJob> _options;
 
-        public FinalizeJobConsumer(IJobService jobService, JobOptions<TJob> options, string jobConsumerTypeName)
+        public FinalizeJobConsumer(IJobService jobService, JobOptions<TJob> options, Guid jobTypeId, string jobConsumerTypeName)
         {
             _jobService = jobService;
             _options = options;
+            _jobTypeId = jobTypeId;
             _jobConsumerTypeName = jobConsumerTypeName;
         }
 
         public Task Consume(ConsumeContext<CompleteJob> context)
         {
+            if (context.Message.JobTypeId != _jobTypeId)
+                return Task.CompletedTask;
+
             var completeJob = context.Message;
 
             var job = completeJob.GetJob<TJob>();
@@ -37,13 +42,17 @@ namespace MassTransit.JobService.Components.Consumers
 
         public Task Consume(ConsumeContext<FaultJob> context)
         {
+            if (context.Message.JobTypeId != _jobTypeId)
+                return Task.CompletedTask;
+
             var faultJob = context.Message;
 
             var job = faultJob.GetJob<TJob>();
             if (job == null)
                 throw new ArgumentNullException(nameof(faultJob.Job), $"The job could not be deserialized: {TypeMetadataCache<TJob>.ShortName}");
 
-            using var jobContext = new ConsumeJobContext<TJob>(context, _jobService.InstanceAddress, faultJob.JobId, faultJob.AttemptId, faultJob.RetryAttempt, job, _options.JobTimeout);
+            using var jobContext = new ConsumeJobContext<TJob>(context, _jobService.InstanceAddress, faultJob.JobId, faultJob.AttemptId, faultJob.RetryAttempt,
+                job, _options.JobTimeout);
 
             return jobContext.NotifyFaulted(faultJob.Duration ?? TimeSpan.Zero, _jobConsumerTypeName, new JobFaultedException(faultJob.Exceptions));
         }

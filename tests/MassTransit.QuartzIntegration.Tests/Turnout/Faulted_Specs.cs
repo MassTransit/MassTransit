@@ -302,7 +302,10 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
 
             configurator.ServiceInstance(options, instance =>
             {
-                instance.ConfigureJobServiceEndpoints();
+                instance.ConfigureJobServiceEndpoints(x =>
+                {
+                    x.SuspectJobRetryCount = 0;
+                });
 
                 instance.ReceiveEndpoint(instance.EndpointNameFormatter.Message<GrindTheGears>(), e =>
                 {

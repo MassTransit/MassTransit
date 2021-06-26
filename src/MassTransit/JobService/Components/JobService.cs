@@ -6,9 +6,12 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using ConsumeConfigurators;
+    using Consumers;
     using Context;
     using Contracts.JobService;
     using GreenPipes;
+    using MassTransit.Pipeline.ConsumerFactories;
     using Metadata;
 
 
@@ -20,13 +23,15 @@
         readonly JobServiceOptions _options;
         Timer _heartbeat;
 
-        public JobService(Uri instanceAddress, JobServiceOptions options)
+        public JobService(IServiceInstanceConfigurator configurator, JobServiceOptions options)
         {
             _options = options;
-            InstanceAddress = instanceAddress;
+            InstanceAddress = configurator.InstanceAddress;
 
             _jobTypes = new Dictionary<Type, IJobTypeRegistration>();
             _jobs = new ConcurrentDictionary<Guid, JobHandle>();
+
+            ConfigureSuperviseJobConsumer(configurator.InstanceEndpointConfigurator);
         }
 
         public bool TryGetJob(Guid jobId, out JobHandle jobReference)
@@ -152,6 +157,15 @@
             {
                 TryRemoveJob(jobHandle.JobId, out _);
             });
+        }
+
+        void ConfigureSuperviseJobConsumer(IReceiveEndpointConfigurator configurator)
+        {
+            var consumerFactory = new DelegateConsumerFactory<SuperviseJobConsumer>(() => new SuperviseJobConsumer(this));
+
+            var consumerConfigurator = new ConsumerConfigurator<SuperviseJobConsumer>(consumerFactory, configurator);
+
+            configurator.AddEndpointSpecification(consumerConfigurator);
         }
 
 

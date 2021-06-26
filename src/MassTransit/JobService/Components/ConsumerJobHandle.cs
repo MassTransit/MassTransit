@@ -22,6 +22,9 @@
 
         public async Task Cancel()
         {
+            if (_context.CancellationToken.IsCancellationRequested)
+                return;
+
             _context.Cancel();
 
             try

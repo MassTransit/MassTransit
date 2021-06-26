@@ -205,7 +205,8 @@ namespace MassTransit.JobService.Components.StateMachines
                     context.Data.JobId,
                     context.Data.AttemptId,
                     context.Data.RetryAttempt,
-                    context.Data.Job
+                    context.Data.Job,
+                    context.Data.JobTypeId,
                 }), context => context.ResponseAddress = machine.JobAttemptSagaEndpointAddress);
         }
 

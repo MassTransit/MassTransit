@@ -4,10 +4,9 @@ namespace MassTransit
     using GreenPipes;
 
 
-    public interface IServiceInstanceConfigurator<out TEndpointConfigurator> :
-        IReceiveConfigurator<TEndpointConfigurator>,
+    public interface IServiceInstanceConfigurator :
+        IReceiveConfigurator,
         IOptionsSet
-        where TEndpointConfigurator : IReceiveEndpointConfigurator
     {
         IEndpointNameFormatter EndpointNameFormatter { get; }
 
@@ -16,13 +15,23 @@ namespace MassTransit
         /// </summary>
         Uri InstanceAddress { get; }
 
-        IBusFactoryConfigurator<TEndpointConfigurator> BusConfigurator { get; }
-        TEndpointConfigurator InstanceEndpointConfigurator { get; }
+        IBusFactoryConfigurator BusConfigurator { get; }
+        IReceiveEndpointConfigurator InstanceEndpointConfigurator { get; }
 
         /// <summary>
         /// Add a specification for validation
         /// </summary>
         /// <param name="specification"></param>
         void AddSpecification(ISpecification specification);
+    }
+
+
+    public interface IServiceInstanceConfigurator<out TEndpointConfigurator> :
+        IServiceInstanceConfigurator,
+        IReceiveConfigurator<TEndpointConfigurator>
+        where TEndpointConfigurator : IReceiveEndpointConfigurator
+    {
+        new IBusFactoryConfigurator<TEndpointConfigurator> BusConfigurator { get; }
+        new TEndpointConfigurator InstanceEndpointConfigurator { get; }
     }
 }

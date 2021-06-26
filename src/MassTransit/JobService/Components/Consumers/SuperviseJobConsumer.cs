@@ -2,8 +2,7 @@ namespace MassTransit.JobService.Components.Consumers
 {
     using System.Threading.Tasks;
     using Context;
-    using GreenPipes.Util;
-    using MassTransit.Contracts.JobService;
+    using Contracts.JobService;
 
 
     public class SuperviseJobConsumer :
@@ -44,7 +43,7 @@ namespace MassTransit.JobService.Components.Consumers
 
             LogContext.Debug?.Log("CheckJobStatus, job not found: {JobId}", context.Message.JobId);
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }
