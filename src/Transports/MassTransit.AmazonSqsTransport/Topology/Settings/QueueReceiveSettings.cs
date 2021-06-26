@@ -16,7 +16,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
         {
             _configuration = configuration;
 
-            WaitTimeSeconds = 1;
+            WaitTimeSeconds = 3;
         }
 
         public int PrefetchCount => _configuration.Transport.PrefetchCount;
