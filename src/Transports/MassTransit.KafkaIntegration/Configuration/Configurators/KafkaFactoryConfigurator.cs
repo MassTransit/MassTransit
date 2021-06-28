@@ -152,11 +152,6 @@ namespace MassTransit.KafkaIntegration.Configurators
             set => _clientConfig.MaxInFlight = value;
         }
 
-        public TimeSpan? MetadataRequestTimeout
-        {
-            set => _clientConfig.MetadataRequestTimeoutMs = value?.Milliseconds;
-        }
-
         public TimeSpan? TopicMetadataRefreshInterval
         {
             set => _clientConfig.TopicMetadataRefreshIntervalMs = value?.Milliseconds;

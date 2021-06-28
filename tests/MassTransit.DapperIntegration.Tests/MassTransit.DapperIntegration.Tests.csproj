@@ -6,7 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.11" />
   </ItemGroup>
 

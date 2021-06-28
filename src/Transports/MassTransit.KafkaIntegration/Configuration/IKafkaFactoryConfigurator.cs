@@ -66,13 +66,6 @@ namespace MassTransit.KafkaIntegration
         int? MaxInFlight { set; }
 
         /// <summary>
-        /// Non-topic request timeout in milliseconds. This is for metadata requests, etc.
-        /// default: 60000
-        /// importance: low
-        /// </summary>
-        TimeSpan? MetadataRequestTimeout { set; }
-
-        /// <summary>
         /// Period of time in milliseconds at which topic and broker metadata is refreshed in order to proactively discover any new brokers, topics, partitions or
         /// partition leader
         /// changes. Use -1 to disable the intervalled refresh (not recommended). If there are no locally referenced topics (no topic objects created, no messages

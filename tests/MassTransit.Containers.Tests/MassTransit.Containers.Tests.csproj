@@ -5,9 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lamar" Version="5.0.3" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
-    <PackageReference Include="NUnit" Version="3.13.1" />
+    <PackageReference Include="Lamar" Version="5.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
+    <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.11" />
