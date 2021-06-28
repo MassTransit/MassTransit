@@ -69,6 +69,8 @@ namespace MassTransit.HangfireIntegration.Tests
 
             _machine = new TestStateMachine(settings);
 
+            configurator.UseInMemoryOutbox();
+
             configurator.StateMachineSaga(_machine, _repository);
         }
 
