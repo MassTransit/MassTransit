@@ -5,6 +5,7 @@ namespace MassTransit.Transports
     using System.Threading.Tasks;
     using Automatonymous;
     using Context;
+    using EndpointConfigurators;
     using Events;
     using GreenPipes;
     using GreenPipes.Util;
@@ -31,6 +32,8 @@ namespace MassTransit.Transports
             _transport = transport;
 
             _started = Util.TaskUtil.GetTask<ReceiveEndpointReady>();
+
+            InputAddress = context.InputAddress;
 
             _startObserver = new StartObserver();
 
@@ -186,6 +189,16 @@ namespace MassTransit.Transports
             public Task Faulted(ReceiveTransportFaulted faulted)
             {
                 return _observer.Faulted(new ReceiveEndpointFaultedEvent(faulted, _endpoint));
+            }
+        }
+
+
+        class ConfiguredObserver :
+            IEndpointConfigurationObserver
+        {
+            public void EndpointConfigured<T>(T configurator)
+                where T : IReceiveEndpointConfigurator
+            {
             }
         }
 
