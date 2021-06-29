@@ -6,7 +6,8 @@ namespace MassTransit.Context
 
 
     public class PublishContextProxy<TMessage> :
-        PublishContextProxy
+        PublishContextProxy,
+        PublishContext<TMessage>
         where TMessage : class
     {
         public PublishContextProxy(PublishContext context, TMessage message)
@@ -20,7 +21,8 @@ namespace MassTransit.Context
 
 
     public class PublishContextProxy :
-        ProxyPipeContext
+        ProxyPipeContext,
+        PublishContext
     {
         readonly PublishContext _context;
 
@@ -116,6 +118,12 @@ namespace MassTransit.Context
         {
             get => _context.Serializer;
             set => _context.Serializer = value;
+        }
+
+        public SendContext<T> CreateProxy<T>(T message)
+            where T : class
+        {
+            return new PublishContextProxy<T>(this, message);
         }
 
         public bool Mandatory

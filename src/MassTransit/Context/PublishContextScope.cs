@@ -116,11 +116,5 @@
         }
 
         public TMessage Message => _context.Message;
-
-        public SendContext<T> CreateProxy<T>(T message)
-            where T : class
-        {
-            return _context.CreateProxy(message);
-        }
     }
 }

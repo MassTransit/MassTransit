@@ -3,6 +3,7 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
     using Initializers;
 
@@ -194,7 +195,7 @@
         {
             ScheduleRecurringMessage<T> command = await CreateCommand(destinationAddress, schedule, message).ConfigureAwait(false);
 
-            await _publishEndpoint.Publish(command, cancellationToken).ConfigureAwait(false);
+            await _publishEndpoint.Publish<ScheduleRecurringMessage>(command, cancellationToken).ConfigureAwait(false);
 
             return new ScheduledRecurringMessageHandle<T>(schedule, command.Destination, command.Payload);
         }
@@ -206,7 +207,7 @@
         {
             ScheduleRecurringMessage<T> command = await CreateCommand(destinationAddress, schedule, message).ConfigureAwait(false);
 
-            await _publishEndpoint.Publish(command, pipe, cancellationToken).ConfigureAwait(false);
+            await _publishEndpoint.Publish<ScheduleRecurringMessage>(command, pipe, cancellationToken).ConfigureAwait(false);
 
             return new ScheduledRecurringMessageHandle<T>(schedule, command.Destination, command.Payload);
         }
@@ -218,7 +219,9 @@
         {
             ScheduleRecurringMessage<T> command = await CreateCommand(destinationAddress, schedule, message).ConfigureAwait(false);
 
-            await _publishEndpoint.Publish(command, pipe, cancellationToken).ConfigureAwait(false);
+            var scheduleMessagePipe = new ScheduleRecurringMessageContextPipe<T>(command.Payload, pipe);
+
+            await _publishEndpoint.Publish(command, scheduleMessagePipe, cancellationToken).ConfigureAwait(false);
 
             return new ScheduledRecurringMessageHandle<T>(schedule, command.Destination, command.Payload);
         }
@@ -229,6 +232,36 @@
             var payload = await message.ConfigureAwait(false);
 
             return new ScheduleRecurringMessageCommand<T>(schedule, destinationAddress, payload);
+        }
+
+
+        class ScheduleRecurringMessageContextPipe<T> :
+            IPipe<PublishContext<ScheduleRecurringMessage>>
+            where T : class
+        {
+            readonly T _payload;
+            readonly IPipe<PublishContext<T>> _pipe;
+
+            public ScheduleRecurringMessageContextPipe(T payload, IPipe<PublishContext<T>> pipe)
+            {
+                _payload = payload;
+                _pipe = pipe;
+            }
+
+            public async Task Send(PublishContext<ScheduleRecurringMessage> context)
+            {
+                if (_pipe.IsNotEmpty())
+                {
+                    var proxy = new PublishContextProxy<T>(context, _payload);
+
+                    await _pipe.Send(proxy).ConfigureAwait(false);
+                }
+            }
+
+            void IProbeSite.Probe(ProbeContext context)
+            {
+                _pipe?.Probe(context);
+            }
         }
     }
 }
