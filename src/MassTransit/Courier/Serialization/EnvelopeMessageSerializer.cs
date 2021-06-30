@@ -7,8 +7,8 @@
     using System.Text;
     using MassTransit.Serialization;
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Bson;
     using Newtonsoft.Json.Linq;
-
 
     /// <summary>
     /// Serializes an already existing message envelope to the transport, rather than using the message in the SendContext,
@@ -20,11 +20,30 @@
         readonly MessageEnvelope _envelope;
         readonly object _message;
 
+        private static ICryptoStreamProviderV2 _streamProvider;
+        private static bool _useEncryption = false;
+
+        /// <summary>
+        /// The purpose of this method is to switch plain json serialization to encrypted serialization in this class.
+        /// This is a workaround for the scenario when encryption is enabled globally as without it this class would unconditionally
+        /// use plain json serialization not taking the current SendContext serializer configuration into consideration
+        /// leaving routing slip event messages unencrypted.
+        /// Once the message serializer architecture is evolved to enable layer based approach to add encryption on top of
+        /// another serializer, this workaround should be removed.
+        /// </summary>
+        /// <param name="keyProvider"></param>
+        [Obsolete("This method is temporary and is going to be removed in the future once subscription events start using serializer/encryption configured on the endpoint.")]
+        public static void UseEncryption(ISecureKeyProvider keyProvider)
+        {
+            _streamProvider = new AesCryptoStreamProviderV2(keyProvider);
+            _useEncryption = true;
+        }
+
         public EnvelopeMessageSerializer(ContentType contentType, MessageEnvelope envelope, object message)
         {
             _envelope = envelope;
             _message = message;
-            ContentType = contentType;
+            ContentType = _useEncryption ? EncryptedMessageSerializerV2.EncryptedContentType : contentType;
         }
 
         public ContentType ContentType { get; }
@@ -76,15 +95,27 @@
                 if (context.TimeToLive.HasValue)
                     envelope["expirationTime"] = DateTime.UtcNow + context.TimeToLive;
 
-                using (var writer = new StreamWriter(stream, Encoding.UTF8, 1024, true))
-                using (var jsonWriter = new JsonTextWriter(writer))
+                if (_useEncryption == false)
                 {
-                    jsonWriter.Formatting = Formatting.Indented;
+                    using (var writer = new StreamWriter(stream, Encoding.UTF8, 1024, true))
+                    using (var jsonWriter = new JsonTextWriter(writer))
+                    {
+                        jsonWriter.Formatting = Formatting.Indented;
 
-                    SerializerCache.Serializer.Serialize(jsonWriter, envelope, typeof(MessageEnvelope));
+                        SerializerCache.Serializer.Serialize(jsonWriter, envelope, typeof(MessageEnvelope));
+
+                        jsonWriter.Flush();
+                        writer.Flush();
+                    }
+                }
+                else
+                {
+                    using var cryptoStream = _streamProvider.GetEncryptStream(stream, context);
+                    using var jsonWriter = new BsonDataWriter(cryptoStream);
+
+                    BsonMessageSerializer.Serializer.Serialize(jsonWriter, envelope, typeof(MessageEnvelope));
 
                     jsonWriter.Flush();
-                    writer.Flush();
                 }
             }
             catch (SerializationException)
