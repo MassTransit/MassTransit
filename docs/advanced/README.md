@@ -13,6 +13,7 @@
   * [Receive Pipeline](middleware/receive.md)
   * [Circuit breaker](middleware/circuit-breaker.md)
   * [Rate limiter](middleware/rate-limiter.md)
+  * [Concurrency limit](middleware/concurrency-limit.md)
   * [Latest](middleware/latest.md)
   * [Custom](middleware/custom.md)
 * [Topology](topology/README.md)
