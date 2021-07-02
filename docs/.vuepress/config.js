@@ -174,6 +174,7 @@ module.exports = {
                   '/advanced/middleware/killswitch',
                   '/advanced/middleware/circuit-breaker',
                   '/advanced/middleware/rate-limiter',
+                  '/advanced/middleware/concurrency-limit',
                   '/advanced/middleware/transactions',
                   '/advanced/middleware/custom',
                   '/advanced/middleware/scoped'
