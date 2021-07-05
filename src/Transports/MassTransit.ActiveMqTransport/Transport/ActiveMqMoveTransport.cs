@@ -28,7 +28,7 @@
             var queue = await sessionContext.GetQueue(_destination).ConfigureAwait(false);
 
             var producer = await sessionContext.CreateMessageProducer(queue).ConfigureAwait(false);
-            byte[] body = context.GetBody();
+            var body = context.GetBody();
 
             var message = producer.CreateBytesMessage();
 

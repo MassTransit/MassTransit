@@ -15,18 +15,19 @@ namespace MassTransit.ActiveMqTransport.Topology.Specifications
         TopicBindingConfigurator,
         IActiveMqConsumeTopologySpecification
     {
-        readonly string _consumerName;
+        readonly IActiveMqConsumerEndpointQueueNameFormatter _consumerEndpointQueueNameFormatter;
 
-        public ConsumerConsumeTopologySpecification(string topicName, string consumerName, bool durable = true, bool autoDelete = false)
+        public ConsumerConsumeTopologySpecification(string topicName, IActiveMqConsumerEndpointQueueNameFormatter consumerEndpointQueueNameFormatter,
+            bool durable = true, bool autoDelete = false)
             : base(topicName, durable, autoDelete)
         {
-            _consumerName = consumerName;
+            _consumerEndpointQueueNameFormatter = consumerEndpointQueueNameFormatter;
         }
 
-        public ConsumerConsumeTopologySpecification(Topic topic, string consumerName)
+        public ConsumerConsumeTopologySpecification(Topic topic, IActiveMqConsumerEndpointQueueNameFormatter consumerEndpointQueueNameFormatter)
             : base(topic)
         {
-            _consumerName = consumerName;
+            _consumerEndpointQueueNameFormatter = consumerEndpointQueueNameFormatter;
         }
 
         public IEnumerable<ValidationResult> Validate()
@@ -36,13 +37,18 @@ namespace MassTransit.ActiveMqTransport.Topology.Specifications
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
-            var topic = builder.CreateTopic(EntityName, Durable, AutoDelete);
-
             var destinationQueue = builder.Queue.Queue;
 
-            var consumerQueueName = _consumerName.Replace("{queue}", destinationQueue.EntityName);
+            var topicName = EntityName;
 
-            var queue = builder.CreateQueue(consumerQueueName, destinationQueue.Durable, destinationQueue.AutoDelete);
+            var consumerEndpointQueueName = _consumerEndpointQueueNameFormatter != null
+                ? _consumerEndpointQueueNameFormatter.Format(topicName, destinationQueue.EntityName)
+                : $"Consumer.{destinationQueue.EntityName}.{EntityName}";
+
+
+            var topic = builder.CreateTopic(EntityName, Durable, AutoDelete);
+
+            var queue = builder.CreateQueue(consumerEndpointQueueName, destinationQueue.Durable, destinationQueue.AutoDelete);
 
             var consumer = builder.BindConsumer(topic, queue, Selector);
         }

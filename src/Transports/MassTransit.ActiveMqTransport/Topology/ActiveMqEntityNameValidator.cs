@@ -18,8 +18,10 @@ namespace MassTransit.ActiveMqTransport.Topology
 
             var success = IsValidEntityName(name);
             if (!success)
+            {
                 throw new ActiveMqTransportConfigurationException(
                     "The entity name must be a sequence of these characters: letters, digits, hyphen, underscore, period, or colon.");
+            }
         }
 
         public bool IsValidEntityName(string name)

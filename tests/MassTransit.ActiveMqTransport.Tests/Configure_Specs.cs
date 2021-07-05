@@ -225,11 +225,25 @@ namespace MassTransit.ActiveMqTransport.Tests
 
         [Test]
         [Category("Flaky")]
-        public async Task Should_do_a_bunch_of_requests_and_responses()
+        [TestCase("activemq")]
+        [TestCase("artemis")]
+        public async Task Should_do_a_bunch_of_requests_and_responses(string flavor)
         {
-            var bus = Bus.Factory.CreateUsingActiveMq(sbc =>
+            var bus = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
-                sbc.ReceiveEndpoint("test", e =>
+                if (flavor == "artemis")
+                {
+                    cfg.Host("localhost", 61618, cfgHost =>
+                    {
+                        cfgHost.Username("admin");
+                        cfgHost.Password("admin");
+                    });
+                    cfg.EnableArtemisCompatibility();
+                    cfg.SetTemporaryQueueNamePrefix("myprefix.");
+                }
+
+
+                cfg.ReceiveEndpoint("test", e =>
                 {
                     e.Handler<PingMessage>(async context => await context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
                 });
@@ -251,7 +265,9 @@ namespace MassTransit.ActiveMqTransport.Tests
 
         [Test]
         [Category("Flaky")]
-        public async Task Should_succeed_and_connect_when_properly_configured()
+        [TestCase("activemq")]
+        [TestCase("artemis")]
+        public async Task Should_succeed_and_connect_when_properly_configured(string flavor)
         {
             TaskCompletionSource<bool> received = TaskUtil.GetTask<bool>();
 
@@ -259,6 +275,16 @@ namespace MassTransit.ActiveMqTransport.Tests
 
             var busControl = Bus.Factory.CreateUsingActiveMq(cfg =>
             {
+                if (flavor == "artemis")
+                {
+                    cfg.Host("localhost", 61618, cfgHost =>
+                    {
+                        cfgHost.Username("admin");
+                        cfgHost.Password("admin");
+                    });
+                    cfg.EnableArtemisCompatibility();
+                }
+
                 cfg.ReceiveEndpoint("input-queue", x =>
                 {
                     x.Handler<PingMessage>(async context =>

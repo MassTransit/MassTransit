@@ -84,9 +84,24 @@
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }
 
+        public void EnableArtemisCompatibility()
+        {
+            _busConfiguration.Topology.Consume.ConsumerEndpointQueueNameFormatter = new ArtemisConsumerEndpointQueueNameFormatter();
+        }
+
+        public void SetTemporaryQueueNamePrefix(string prefix)
+        {
+            _busConfiguration.Topology.Consume.TemporaryQueueNameFormatter = string.IsNullOrWhiteSpace(prefix)
+                ? null
+                : new PrefixTemporaryQueueNameFormatter(prefix);
+        }
+
         public IReceiveEndpointConfiguration CreateBusEndpointConfiguration(Action<IReceiveEndpointConfigurator> configure)
         {
-            return _busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration(_settings, _busConfiguration.BusEndpointConfiguration, configure);
+            var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
+            var settings = new QueueReceiveSettings(_busConfiguration.BusEndpointConfiguration, queueName, _settings.Durable, _settings.AutoDelete);
+
+            return _busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration(settings, _busConfiguration.BusEndpointConfiguration, configure);
         }
 
         public override IEnumerable<ValidationResult> Validate()

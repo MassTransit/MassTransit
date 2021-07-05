@@ -8,6 +8,10 @@
     public interface IActiveMqConsumeTopology :
         IConsumeTopology
     {
+        IActiveMqConsumerEndpointQueueNameFormatter ConsumerEndpointQueueNameFormatter { get; }
+
+        IActiveMqTemporaryQueueNameFormatter TemporaryQueueNameFormatter { get; }
+
         new IActiveMqMessageConsumeTopology<T> GetMessageTopology<T>()
             where T : class;
 

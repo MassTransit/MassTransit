@@ -12,3 +12,9 @@ services:
       - 8161:8161
       - 61616:61616
       - 61613:61613
+  artemis:
+    image: hugoham/artemis:2.16.0
+    hostname: artemis
+    ports:
+      - '61618:61616'
+      - '8163:8161'

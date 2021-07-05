@@ -61,9 +61,7 @@
                 }
 
                 if (header.Key == "AMQ_SCHEDULED_DELAY")
-                {
                     headers.Set(header.Key, null);
-                }
             }
         }
     }

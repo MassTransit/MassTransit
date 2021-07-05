@@ -35,5 +35,16 @@
         /// <param name="settings"></param>
         /// <returns></returns>
         void Host(ActiveMqHostSettings settings);
+
+        /// <summary>
+        /// Configure the consumer topology so that it is compatible for the format required for ActiveMQ Artemis
+        /// </summary>
+        void EnableArtemisCompatibility();
+
+        /// <summary>
+        /// Specify the prefix to be added to temporary queue names, including the bus endpoint
+        /// </summary>
+        /// <param name="prefix"></param>
+        void SetTemporaryQueueNamePrefix(string prefix);
     }
 }

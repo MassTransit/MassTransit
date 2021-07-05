@@ -18,13 +18,23 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         readonly IActiveMqPublishTopology _publishTopology;
         readonly IList<IActiveMqConsumeTopologySpecification> _specifications;
 
-        public ActiveMqConsumeTopology(IMessageTopology messageTopology, IActiveMqPublishTopology publishTopology)
+        public ActiveMqConsumeTopology(IMessageTopology messageTopology, IActiveMqPublishTopology publishTopology,
+            IActiveMqConsumeTopology consumeTopology = default)
         {
             _messageTopology = messageTopology;
             _publishTopology = publishTopology;
 
+            if (consumeTopology?.ConsumerEndpointQueueNameFormatter != null)
+                ConsumerEndpointQueueNameFormatter = consumeTopology.ConsumerEndpointQueueNameFormatter;
+
+            if (consumeTopology?.TemporaryQueueNameFormatter != null)
+                TemporaryQueueNameFormatter = consumeTopology.TemporaryQueueNameFormatter;
+
             _specifications = new List<IActiveMqConsumeTopologySpecification>();
         }
+
+        public IActiveMqConsumerEndpointQueueNameFormatter ConsumerEndpointQueueNameFormatter { get; set; }
+        public IActiveMqTemporaryQueueNameFormatter TemporaryQueueNameFormatter { get; set; }
 
         IActiveMqMessageConsumeTopology<T> IActiveMqConsumeTopology.GetMessageTopology<T>()
         {
@@ -56,9 +66,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         {
             if (string.IsNullOrEmpty(_publishTopology.VirtualTopicPrefix) || topicName.StartsWith(_publishTopology.VirtualTopicPrefix))
             {
-                var consumerName = $"Consumer.{{queue}}.{topicName}";
-
-                var specification = new ConsumerConsumeTopologySpecification(topicName, consumerName);
+                var specification = new ConsumerConsumeTopologySpecification(topicName, ConsumerEndpointQueueNameFormatter);
 
                 configure?.Invoke(specification);
 
@@ -70,8 +78,12 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
 
         public override string CreateTemporaryQueueName(string tag)
         {
-            var result = base.CreateTemporaryQueueName(tag);
-            return new string(result.Where(c => c != '.').ToArray());
+            var queueName = new string(base.CreateTemporaryQueueName(tag).Where(c => c != '.').ToArray());
+
+            if (TemporaryQueueNameFormatter != null)
+                queueName = TemporaryQueueNameFormatter.Format(queueName);
+
+            return queueName;
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -81,7 +93,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
 
         protected override IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)
         {
-            var messageTopology = new ActiveMqMessageConsumeTopology<T>(_publishTopology.GetMessageTopology<T>());
+            var messageTopology = new ActiveMqMessageConsumeTopology<T>(_publishTopology.GetMessageTopology<T>(), ConsumerEndpointQueueNameFormatter);
 
             OnMessageTopologyCreated(messageTopology);
 
