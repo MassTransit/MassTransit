@@ -1,3 +1,5 @@
+using MassTransit.ActiveMqTransport.Configuration;
+
 namespace MassTransit.ActiveMqTransport.Topology.Topologies
 {
     using System;
@@ -16,16 +18,15 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         IActiveMqMessageConsumeTopologyConfigurator
         where TMessage : class
     {
-        readonly string _consumerName;
+        //readonly string _consumerName;
         readonly IActiveMqMessagePublishTopology<TMessage> _publishTopology;
+        private readonly ActiveMqConsumeTopology _consumeTopology;
         readonly IList<IActiveMqConsumeTopologySpecification> _specifications;
 
-        public ActiveMqMessageConsumeTopology(IActiveMqMessagePublishTopology<TMessage> publishTopology)
+        public ActiveMqMessageConsumeTopology(IActiveMqMessagePublishTopology<TMessage> publishTopology, ActiveMqConsumeTopology consumeTopology)
         {
             _publishTopology = publishTopology;
-
-            _consumerName = $"Consumer.{{queue}}.{_publishTopology.Topic.EntityName}";
-
+            _consumeTopology = consumeTopology;
             _specifications = new List<IActiveMqConsumeTopologySpecification>();
         }
 
@@ -43,7 +44,22 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
                 return;
             }
 
-            var specification = new ConsumerConsumeTopologySpecification(_publishTopology.Topic, _consumerName);
+            // get the bind specification factory method
+            var specificationFactoryMethod = _consumeTopology?.Topology?.BusConfiguration
+                ?.BindingConsumeTopologySpecificationFactoryMethod;
+
+            IActiveMqBindingConsumeTopologySpecification specification =null;
+
+            // if specification factory method is null then do default behavior
+            if (specificationFactoryMethod == null)
+            {
+                specification = new ActiveMqBindConsumeTopologySpecification(_publishTopology.Topic.EntityName);
+            }
+            else
+            {
+                // use the factory method to create the desired specification
+                specification = specificationFactoryMethod(_publishTopology.Topic.EntityName);
+            }
 
             configure?.Invoke(specification);
 

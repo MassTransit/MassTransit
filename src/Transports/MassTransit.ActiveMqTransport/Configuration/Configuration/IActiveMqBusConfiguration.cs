@@ -1,7 +1,12 @@
-﻿namespace MassTransit.ActiveMqTransport.Configuration
+﻿using System;
+using MassTransit.ActiveMqTransport.Configurators;
+
+namespace MassTransit.ActiveMqTransport.Configuration
 {
     using MassTransit.Configuration;
-
+    using Topology;
+    
+    public delegate IActiveMqBindingConsumeTopologySpecification ActiveMqBindingConsumeTopologySpecificationFactoryMethod(string topic);
 
     public interface IActiveMqBusConfiguration :
         IBusConfiguration
@@ -17,5 +22,7 @@
         /// </summary>
         /// <returns></returns>
         IActiveMqEndpointConfiguration CreateEndpointConfiguration();
+
+        ActiveMqBindingConsumeTopologySpecificationFactoryMethod BindingConsumeTopologySpecificationFactoryMethod { get; set; }
     }
 }

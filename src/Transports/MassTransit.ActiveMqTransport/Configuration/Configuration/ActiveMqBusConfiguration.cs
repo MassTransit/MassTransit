@@ -1,4 +1,6 @@
-﻿namespace MassTransit.ActiveMqTransport.Configuration
+﻿using MassTransit.ActiveMqTransport.Configurators;
+
+namespace MassTransit.ActiveMqTransport.Configuration
 {
     using EndpointConfigurators;
     using GreenPipes;
@@ -17,12 +19,19 @@
         {
             HostConfiguration = new ActiveMqHostConfiguration(this, topologyConfiguration);
             BusEndpointConfiguration = CreateEndpointConfiguration();
+            topologyConfiguration.BusConfiguration = this;
 
             _busObservers = new BusObservable();
         }
 
         IHostConfiguration IBusConfiguration.HostConfiguration => HostConfiguration;
         IEndpointConfiguration IBusConfiguration.BusEndpointConfiguration => BusEndpointConfiguration;
+        public ActiveMqBindingConsumeTopologySpecificationFactoryMethod BindingConsumeTopologySpecificationFactoryMethod
+        {
+            get;
+            set;
+        }
+
         IBusObserver IBusConfiguration.BusObservers => _busObservers;
 
         public IActiveMqEndpointConfiguration BusEndpointConfiguration { get; }

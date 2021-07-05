@@ -12,5 +12,7 @@
         new IActiveMqSendTopologyConfigurator Send { get; }
 
         new IActiveMqConsumeTopologyConfigurator Consume { get; }
+
+        IActiveMqBusConfiguration BusConfiguration { get; set; }
     }
 }

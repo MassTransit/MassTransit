@@ -1,3 +1,5 @@
+using MassTransit.ActiveMqTransport.Configuration;
+
 namespace MassTransit.ActiveMqTransport.Topology.Topologies
 {
     using System;
@@ -17,13 +19,16 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         readonly IMessageTopology _messageTopology;
         readonly IActiveMqPublishTopology _publishTopology;
         readonly IList<IActiveMqConsumeTopologySpecification> _specifications;
+        readonly IActiveMqTopologyConfiguration _topology;
 
-        public ActiveMqConsumeTopology(IMessageTopology messageTopology, IActiveMqPublishTopology publishTopology)
+        public ActiveMqConsumeTopology(IMessageTopology messageTopology, IActiveMqPublishTopology publishTopology, IActiveMqTopologyConfiguration topology )
         {
             _messageTopology = messageTopology;
             _publishTopology = publishTopology;
 
             _specifications = new List<IActiveMqConsumeTopologySpecification>();
+
+            _topology = topology;
         }
 
         IActiveMqMessageConsumeTopology<T> IActiveMqConsumeTopology.GetMessageTopology<T>()
@@ -56,9 +61,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         {
             if (string.IsNullOrEmpty(_publishTopology.VirtualTopicPrefix) || topicName.StartsWith(_publishTopology.VirtualTopicPrefix))
             {
-                var consumerName = $"Consumer.{{queue}}.{topicName}";
-
-                var specification = new ConsumerConsumeTopologySpecification(topicName, consumerName);
+                var specification = new ActiveMqBindConsumeTopologySpecification(topicName);
 
                 configure?.Invoke(specification);
 
@@ -71,7 +74,8 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
         public override string CreateTemporaryQueueName(string tag)
         {
             var result = base.CreateTemporaryQueueName(tag);
-            return new string(result.Where(c => c != '.').ToArray());
+            var tempName = new string(result.Where(c => c != '.').ToArray());
+            return tempName;
         }
 
         public override IEnumerable<ValidationResult> Validate()
@@ -79,9 +83,11 @@ namespace MassTransit.ActiveMqTransport.Topology.Topologies
             return base.Validate().Concat(_specifications.SelectMany(x => x.Validate()));
         }
 
+        public IActiveMqTopologyConfiguration Topology => _topology;
+
         protected override IMessageConsumeTopologyConfigurator CreateMessageTopology<T>(Type type)
         {
-            var messageTopology = new ActiveMqMessageConsumeTopology<T>(_publishTopology.GetMessageTopology<T>());
+            var messageTopology = new ActiveMqMessageConsumeTopology<T>(_publishTopology.GetMessageTopology<T>(),this);
 
             OnMessageTopologyCreated(messageTopology);
 
