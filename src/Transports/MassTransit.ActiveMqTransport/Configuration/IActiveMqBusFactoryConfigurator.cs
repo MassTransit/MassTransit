@@ -12,6 +12,8 @@
 
         new IActiveMqPublishTopologyConfigurator PublishTopology { get; }
 
+        new IActiveMqConsumeTopologyConfigurator ConsumeTopology { get; }
+    
         /// <summary>
         /// Configure the send topology of the message type
         /// </summary>

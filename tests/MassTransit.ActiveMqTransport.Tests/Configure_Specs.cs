@@ -4,9 +4,11 @@ namespace MassTransit.ActiveMqTransport.Tests
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration.Definition;
     using Configurators;
     using GreenPipes.Internals.Extensions;
     using MassTransit.Testing;
+    using MassTransit.Topology.Topologies;
     using NUnit.Framework;
     using TestFramework.Messages;
     using Testing;
@@ -238,8 +240,15 @@ namespace MassTransit.ActiveMqTransport.Tests
                         cfgHost.Username("admin");
                         cfgHost.Password("admin");
                     });
+
+                    //expression below is shortcut for:
+                    //cfg.ConsumeTopology.ConsumerEndpointQueueNameFormatter = new ArtemisConsumerEndpointQueueNameFormatter();
                     cfg.EnableArtemisCompatibility();
+
+                    //expression below is shortcut for:
+                    //cfg.ConsumeTopology.TemporaryQueueNameFormatter = new PrefixTemporaryQueueNameFormatter("myprefix.");
                     cfg.SetPrefixForTemporaryQueueNames("myprefix.");
+
                 }
 
 
