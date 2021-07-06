@@ -13,7 +13,7 @@ namespace MassTransit.ActiveMqTransport.Configuration
         readonly Action<IBusRegistrationContext, IActiveMqBusFactoryConfigurator> _configure;
 
         public ActiveMqRegistrationBusFactory(Action<IBusRegistrationContext, IActiveMqBusFactoryConfigurator> configure)
-            : this(new ActiveMqBusConfiguration(new ActiveMqTopologyConfiguration(ActiveMqBusFactory.MessageTopology, null)), configure)
+            : this(new ActiveMqBusConfiguration(new ActiveMqTopologyConfiguration(ActiveMqBusFactory.MessageTopology)), configure)
         {
         }
 

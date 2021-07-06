@@ -1,5 +1,3 @@
-using MassTransit.ActiveMqTransport.Topology.Specifications;
-
 namespace MassTransit.ActiveMqTransport.Tests
 {
     using System;
@@ -124,7 +122,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         [Test]
         public async Task Pub_Sub_Queue_Names_Should_Not_Contain_Periods()
         {
-            var consumeTopology = new ActiveMqConsumeTopology(null, null, null);
+            var consumeTopology = new ActiveMqConsumeTopology(null, null, null,null);
             var queueName = consumeTopology.CreateTemporaryQueueName("bus.test");
             Assert.That(queueName, Does.Not.Contain('.'));
         }
@@ -241,12 +239,10 @@ namespace MassTransit.ActiveMqTransport.Tests
                         cfgHost.Password("admin");
                     });
                     cfg.EnableArtemisCompatibility();
-                    cfg.UpdateReceiveQueueName((generatedName) =>
-                    {
-                        return "myprefix." + generatedName;
-                    });
+                    cfg.SetPrefixForTemporaryQueueNames("myprefix.");
                 }
-                
+
+
                 cfg.ReceiveEndpoint("test", e =>
                 {
                     e.Handler<PingMessage>(async context => await context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
@@ -288,7 +284,7 @@ namespace MassTransit.ActiveMqTransport.Tests
                     });
                     cfg.EnableArtemisCompatibility();
                 }
-
+                
                 cfg.ReceiveEndpoint("input-queue", x =>
                 {
                     x.Handler<PingMessage>(async context =>

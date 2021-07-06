@@ -14,7 +14,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Configurators
 
         public bool Durable { get; set; }
         public bool AutoDelete { get; set; }
-        public string EntityName { get; set; }
+        public string EntityName { get; }
 
         protected abstract ActiveMqEndpointAddress.AddressType AddressType { get; }
 

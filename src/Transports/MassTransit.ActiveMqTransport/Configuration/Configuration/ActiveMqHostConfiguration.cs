@@ -6,6 +6,7 @@
     using GreenPipes;
     using MassTransit.Configuration;
     using MassTransit.Configurators;
+    using MassTransit.Definition;
     using MassTransit.Topology;
     using Topology;
     using Topology.Settings;

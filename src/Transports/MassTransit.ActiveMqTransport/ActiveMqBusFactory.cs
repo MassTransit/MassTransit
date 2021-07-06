@@ -20,12 +20,9 @@
         /// <returns></returns>
         public static IBusControl Create(Action<IActiveMqBusFactoryConfigurator> configure)
         {
-            var topologyConfiguration = new ActiveMqTopologyConfiguration(MessageTopology, null);
-
+            var topologyConfiguration = new ActiveMqTopologyConfiguration(MessageTopology);
             var busConfiguration = new ActiveMqBusConfiguration(topologyConfiguration);
 
-            topologyConfiguration.BusConfiguration = busConfiguration;
-            
             var configurator = new ActiveMqBusFactoryConfigurator(busConfiguration);
 
             configure(configurator);

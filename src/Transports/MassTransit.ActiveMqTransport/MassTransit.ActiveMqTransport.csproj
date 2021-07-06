@@ -8,6 +8,7 @@
     <Title>MassTransit.ActiveMQ</Title>
     <PackageTags>MassTransit;ActiveMQ</PackageTags>
     <Description>MassTransit ActiveMQ transport support; $(Description)</Description>
+    <RootNamespace>MassTransit.ActiveMqTransport</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,9 +1,6 @@
-﻿using MassTransit.ActiveMqTransport.Configurators;
-
-namespace MassTransit.ActiveMqTransport
+﻿namespace MassTransit.ActiveMqTransport
 {
     using System;
-    using Configuration;
     using Topology;
 
 
@@ -39,34 +36,8 @@ namespace MassTransit.ActiveMqTransport
         /// <returns></returns>
         void Host(ActiveMqHostSettings settings);
 
-        /// <summary>
-        /// New configurable extensionpoint, available/accessble via the configurator.
-        /// This extension point can be used to enable artimis compatibility
-        /// It allows to override the generated BindingConsumeTopologySpecification
-        /// That specification is responsible (on calling its Apply method) for interacting with an instance of IReceiveEndpointBrokerTopologyBuilder.
-        /// This allows the specification to control what queues, bindings, are created.
-        /// For the interop with Artemis the name of the consumer queue is important
-        /// The original specification was : ActiveMqBindConsumeTopologySpecification
-        /// a new one has been already provided for Artemis => ArtemisBindConsumeTopologySpecification
-        ///
-        /// When you call EnableArtemisCompatibility() => this factory method is automatically initialized with a factory method that will
-        /// create a ArtemisBindConsumeTopologySpecification
-        ///
-        /// This extension could also be used to create your own specifications if you prefer other behavior for creating queues and bindings or
-        /// name conventions
-        /// </summary>
-        public ActiveMqBindingConsumeTopologySpecificationFactoryMethod BindingConsumeTopologySpecificationFactoryMethod
-        {
-            get;
-            set;
-        }
+        void EnableArtemisCompatibility();
 
-        /// <summary>
-        /// This is a handy shortcut method that will initialize the required extensionpoints
-        /// in order to have the activemq transport working with Artemis
-        /// </summary>
-        public void EnableArtemisCompatibility();
-
-        void UpdateReceiveQueueName(Func<string, string> transformReceiveQueueName);
+        void SetPrefixForTemporaryQueueNames(string prefix);
     }
 }

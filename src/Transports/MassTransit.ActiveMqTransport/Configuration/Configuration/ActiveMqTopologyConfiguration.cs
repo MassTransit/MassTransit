@@ -18,9 +18,8 @@
         readonly IMessageTopologyConfigurator _messageTopology;
         readonly IActiveMqPublishTopologyConfigurator _publishTopology;
         readonly IActiveMqSendTopologyConfigurator _sendTopology;
-        private IActiveMqBusConfiguration _busConfiguration;
 
-        public ActiveMqTopologyConfiguration(IMessageTopologyConfigurator messageTopology, IActiveMqBusConfiguration busConfiguration)
+        public ActiveMqTopologyConfiguration(IMessageTopologyConfigurator messageTopology)
         {
             _messageTopology = messageTopology;
 
@@ -33,8 +32,8 @@
             var observer = new PublishToSendTopologyConfigurationObserver(_sendTopology);
             _publishTopology.ConnectPublishTopologyConfigurationObserver(observer);
 
-            _consumeTopology = new ActiveMqConsumeTopology(messageTopology, _publishTopology, topology: this);
-            _busConfiguration = busConfiguration;
+            _consumeTopology = new ActiveMqConsumeTopology(messageTopology, _publishTopology,
+                consumerEndpointQueueNameFormatter: null, temporaryQueueNameFormatter: null);
         }
 
         public ActiveMqTopologyConfiguration(IActiveMqTopologyConfiguration topologyConfiguration)
@@ -43,20 +42,16 @@
             _sendTopology = topologyConfiguration.Send;
             _publishTopology = topologyConfiguration.Publish;
 
-            _consumeTopology = new ActiveMqConsumeTopology(topologyConfiguration.Message, topologyConfiguration.Publish, topology: this);
-
-            _busConfiguration = topologyConfiguration.BusConfiguration;
+            _consumeTopology = new ActiveMqConsumeTopology(topologyConfiguration.Message,
+                topologyConfiguration.Publish,
+                topologyConfiguration.Consume.ConsumerEndpointQueueNameFormatter,
+                topologyConfiguration.Consume.TemporaryQueueNameFormatter);
         }
 
         IMessageTopologyConfigurator ITopologyConfiguration.Message => _messageTopology;
         ISendTopologyConfigurator ITopologyConfiguration.Send => _sendTopology;
         IPublishTopologyConfigurator ITopologyConfiguration.Publish => _publishTopology;
         IConsumeTopologyConfigurator ITopologyConfiguration.Consume => _consumeTopology;
-        public IActiveMqBusConfiguration BusConfiguration
-        {
-            get => _busConfiguration;
-            set => _busConfiguration = value;
-        }
 
         IActiveMqPublishTopologyConfigurator IActiveMqTopologyConfiguration.Publish => _publishTopology;
         IActiveMqSendTopologyConfigurator IActiveMqTopologyConfiguration.Send => _sendTopology;
