@@ -4,8 +4,8 @@ using System.Text;
 
 namespace MassTransit.ActiveMqTransport.Topology
 {
-    public interface IActiveMqConsumerEndpointQueueNameFormatter
+    public interface IActiveMqTemporaryQueueNameFormatter
     {
-        public string Format(string topic, string endpointName);
+        public string Format(string Tag, string systemGeneratedQueueName);
     }
 }
