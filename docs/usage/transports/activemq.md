@@ -60,12 +60,14 @@ Currently the only thing `cfg.EnableArtemisCompatibility()` does is setting a pr
 
 Example of setting your own ConsumerEndpointQueueNameFormatter:
 ```
-cfg.ConsumeTopology.ConsumerEndpointQueueNameFormatter= new MyCustomConsumerEndpointQueueNameFormatter();
-
+cfg.SetConsumerEndpointQueueNameFormatter(new MyCustomConsumerEndpointQueueNameFormatter());
 ```
 So it is still possible to create your own IActiveMqConsumerEndpointQueueNameFormatter if you want to tweak the queue name.
 
-The responsibility of the formatter is to create the queuename for a given endpoint name and a given topic.
+The responsibility of the formatter is to create the queuename for a given 
+
+    - a given receive/consumer endpoint name 
+    - a given topic.
 
 
 ## TemporaryQueueNameFormatter
@@ -86,6 +88,5 @@ cfg.SetTemporaryQueueNamePrefix("mycustomnamespace.");
 Behind the scenes this does something like this:
 
 ```cs
-cfg.ConsumeTopology.TemporaryQueueNameFormatter = new PrefixTemporaryQueueNameFormatter("mycustomnamespace.");
-
+cfg.SetTemporaryQueueNameFormatter( new PrefixTemporaryQueueNameFormatter("mycustomnamespace."));
 ```
