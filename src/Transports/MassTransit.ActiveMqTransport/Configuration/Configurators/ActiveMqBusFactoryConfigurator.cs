@@ -84,16 +84,24 @@
             _hostConfiguration.ReceiveEndpoint(queueName, configureEndpoint);
         }
 
+        public void SetConsumerEndpointQueueNameFormatter(IActiveMqConsumerEndpointQueueNameFormatter formatter)
+        {
+            _busConfiguration.Topology.Consume.ConsumerEndpointQueueNameFormatter = formatter;
+        }
+
         public void EnableArtemisCompatibility()
         {
-            _busConfiguration.Topology.Consume.ConsumerEndpointQueueNameFormatter = new ArtemisConsumerEndpointQueueNameFormatter();
+            SetConsumerEndpointQueueNameFormatter(new ArtemisConsumerEndpointQueueNameFormatter());
+        }
+
+        public void SetTemporaryQueueNameFormatter(IActiveMqTemporaryQueueNameFormatter formatter)
+        {
+            _busConfiguration.Topology.Consume.TemporaryQueueNameFormatter = formatter;
         }
 
         public void SetTemporaryQueueNamePrefix(string prefix)
         {
-            _busConfiguration.Topology.Consume.TemporaryQueueNameFormatter = string.IsNullOrWhiteSpace(prefix)
-                ? null
-                : new PrefixTemporaryQueueNameFormatter(prefix);
+            SetTemporaryQueueNameFormatter(string.IsNullOrWhiteSpace(prefix) ? null : new PrefixTemporaryQueueNameFormatter(prefix));
         }
 
         public IReceiveEndpointConfiguration CreateBusEndpointConfiguration(Action<IReceiveEndpointConfigurator> configure)
