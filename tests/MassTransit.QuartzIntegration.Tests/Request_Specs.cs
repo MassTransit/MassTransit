@@ -11,6 +11,7 @@
 
 
         [TestFixture]
+        [Category("Flaky")]
         public class Sending_a_request_from_a_state_machine :
             QuartzInMemoryTestFixture
         {
