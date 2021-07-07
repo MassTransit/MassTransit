@@ -10,6 +10,7 @@ namespace MassTransit.ActiveMqTransport.Tests
     using NUnit.Framework;
     using TestFramework.Messages;
     using Testing;
+    using Topology;
     using Topology.Topologies;
     using Util;
 
@@ -242,6 +243,45 @@ namespace MassTransit.ActiveMqTransport.Tests
                     cfg.SetTemporaryQueueNamePrefix("myprefix.");
                 }
 
+
+                cfg.ReceiveEndpoint("test", e =>
+                {
+                    e.Handler<PingMessage>(async context => await context.RespondAsync(new PongMessage(context.Message.CorrelationId)));
+                });
+            });
+
+            await bus.StartAsync();
+            try
+            {
+                for (var i = 0; i < 100; i += 1)
+                {
+                    Response<PongMessage> result = await bus.Request<PingMessage, PongMessage>(new PingMessage());
+                }
+            }
+            finally
+            {
+                await bus.StopAsync();
+            }
+        }
+
+        [Test]
+        [Category("Flaky")]
+        [TestCase("activemq")]
+        [TestCase("artemis")]
+        public async Task Should_do_a_bunch_of_requests_and_responses_explicit_configuration(string flavor)
+        {
+            var bus = Bus.Factory.CreateUsingActiveMq(cfg =>
+            {
+                if (flavor == "artemis")
+                {
+                    cfg.Host("localhost", 61618, cfgHost =>
+                    {
+                        cfgHost.Username("admin");
+                        cfgHost.Password("admin");
+                    });
+                    cfg.SetConsumerEndpointQueueNameFormatter(new ArtemisConsumerEndpointQueueNameFormatter());
+                    cfg.SetTemporaryQueueNameFormatter(new PrefixTemporaryQueueNameFormatter("myprefix."));
+                }
 
                 cfg.ReceiveEndpoint("test", e =>
                 {

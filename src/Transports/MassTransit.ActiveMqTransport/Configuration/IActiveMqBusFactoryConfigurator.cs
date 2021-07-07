@@ -46,5 +46,20 @@
         /// </summary>
         /// <param name="prefix"></param>
         void SetTemporaryQueueNamePrefix(string prefix);
+
+        /// <summary>
+        /// Specify a consumer endpoint queue name formatter. Generate name for consumer queue using
+        /// topic and endpointname
+        /// </summary>
+        /// <param name="formatter"></param>
+        public void SetConsumerEndpointQueueNameFormatter(IActiveMqConsumerEndpointQueueNameFormatter formatter);
+
+
+        /// <summary>
+        /// Specify a temporary queue name formatter. Allows for the transformation of masstransit generated temporary queuenames
+        /// e.g. adding a prefix
+        /// </summary>
+        /// <param name="formatter"></param>
+        public void SetTemporaryQueueNameFormatter(IActiveMqTemporaryQueueNameFormatter formatter);
     }
 }
