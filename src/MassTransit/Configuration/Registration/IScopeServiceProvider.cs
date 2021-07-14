@@ -6,7 +6,7 @@ namespace MassTransit.Registration
     /// <summary>
     /// Supports retrieval of services used by the ConfigurationRegistry
     /// </summary>
-    public interface IConfigurationServiceProvider :
+    public interface IScopeServiceProvider :
         IServiceProvider
     {
         /// <summary>

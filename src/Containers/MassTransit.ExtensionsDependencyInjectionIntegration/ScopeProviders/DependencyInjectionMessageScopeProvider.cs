@@ -1,6 +1,7 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 {
     using System;
+    using System.Threading.Tasks;
     using Context;
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
@@ -24,7 +25,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             context.Add("provider", "dependencyInjection");
         }
 
-        public IMessageScopeContext<T> GetScope<T>(ConsumeContext<T> context)
+        public async ValueTask<IMessageScopeContext<T>> GetScope<T>(ConsumeContext<T> context)
             where T : class
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
@@ -50,7 +51,10 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             }
             catch
             {
-                serviceScope.Dispose();
+                if (serviceScope is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                else
+                    serviceScope.Dispose();
 
                 throw;
             }

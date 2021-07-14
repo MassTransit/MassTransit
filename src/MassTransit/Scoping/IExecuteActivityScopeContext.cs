@@ -5,7 +5,7 @@
 
 
     public interface IExecuteActivityScopeContext<out TActivity, out TArguments> :
-        IDisposable
+        IAsyncDisposable
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {

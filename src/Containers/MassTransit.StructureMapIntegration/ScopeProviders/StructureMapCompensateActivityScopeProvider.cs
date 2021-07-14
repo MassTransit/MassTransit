@@ -1,6 +1,7 @@
 namespace MassTransit.StructureMapIntegration.ScopeProviders
 {
     using System;
+    using System.Threading.Tasks;
     using Courier;
     using GreenPipes;
     using Scoping;
@@ -23,7 +24,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             _container = container;
         }
 
-        public ICompensateActivityScopeContext<TActivity, TLog> GetScope(CompensateContext<TLog> context)
+        public async ValueTask<ICompensateActivityScopeContext<TActivity, TLog>> GetScope(CompensateContext<TLog> context)
         {
             if (context.TryGetPayload<IContainer>(out var existingContainer))
             {

@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
 {
+    using System.Threading.Tasks;
     using Courier;
     using Courier.Contexts;
     using GreenPipes;
@@ -21,7 +22,7 @@
             _container = container;
         }
 
-        public IExecuteActivityScopeContext<TActivity, TArguments> GetScope(ExecuteContext<TArguments> context)
+        public async ValueTask<IExecuteActivityScopeContext<TActivity, TArguments>> GetScope(ExecuteContext<TArguments> context)
         {
             if (context.TryGetPayload<Scope>(out var existingScope))
             {
@@ -51,8 +52,7 @@
             }
             catch
             {
-                scope.Dispose();
-
+                await scope.DisposeScopeAsync().ConfigureAwait(false);
                 throw;
             }
         }

@@ -5,7 +5,7 @@
 
 
     public interface ICompensateActivityScopeContext<out TActivity, out TLog> :
-        IDisposable
+        IAsyncDisposable
         where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {

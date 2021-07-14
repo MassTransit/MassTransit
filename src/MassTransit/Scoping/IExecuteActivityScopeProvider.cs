@@ -1,14 +1,15 @@
 ﻿namespace MassTransit.Scoping
 {
+    using System.Threading.Tasks;
     using Courier;
     using GreenPipes;
 
 
-    public interface IExecuteActivityScopeProvider<out TActivity, TArguments> :
+    public interface IExecuteActivityScopeProvider<TActivity, TArguments> :
         IProbeSite
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
-        IExecuteActivityScopeContext<TActivity, TArguments> GetScope(ExecuteContext<TArguments> context);
+        ValueTask<IExecuteActivityScopeContext<TActivity, TArguments>> GetScope(ExecuteContext<TArguments> context);
     }
 }

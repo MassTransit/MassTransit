@@ -1,5 +1,8 @@
 namespace MassTransit.Scoping.ConsumerContexts
 {
+    using System.Threading.Tasks;
+
+
     public class ExistingMessageScopeContext<T> :
         IMessageScopeContext<T>
         where T : class
@@ -9,8 +12,9 @@ namespace MassTransit.Scoping.ConsumerContexts
             Context = context;
         }
 
-        public void Dispose()
+        public ValueTask DisposeAsync()
         {
+            return default;
         }
 
         public ConsumeContext<T> Context { get; }

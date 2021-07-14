@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Scoping.ConsumerContexts
 {
     using System;
+    using System.Threading.Tasks;
 
 
     public class ExistingConsumerScopeContext :
@@ -11,11 +12,12 @@
             Context = context;
         }
 
-        public void Dispose()
-        {
-        }
-
         public ConsumeContext Context { get; }
+
+        public ValueTask DisposeAsync()
+        {
+            return default;
+        }
     }
 
 
@@ -32,11 +34,13 @@
             Context = context;
         }
 
-        public void Dispose()
+        public ConsumerConsumeContext<TConsumer, T> Context { get; }
+
+        public ValueTask DisposeAsync()
         {
             _disposeCallback?.Invoke(Context.Consumer);
-        }
 
-        public ConsumerConsumeContext<TConsumer, T> Context { get; }
+            return default;
+        }
     }
 }

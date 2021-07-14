@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
 {
+    using System.Threading.Tasks;
     using Context;
     using GreenPipes;
     using Metadata;
@@ -24,7 +25,7 @@
             context.Add("provider", "simpleInjector");
         }
 
-        public IConsumerScopeContext GetScope(ConsumeContext context)
+        public async ValueTask<IConsumerScopeContext> GetScope(ConsumeContext context)
         {
             if (context.TryGetPayload<Scope>(out var existingScope))
             {
@@ -44,13 +45,12 @@
             }
             catch
             {
-                scope.Dispose();
-
+                await scope.DisposeScopeAsync().ConfigureAwait(false);
                 throw;
             }
         }
 
-        public IConsumerScopeContext<TConsumer, T> GetScope<TConsumer, T>(ConsumeContext<T> context)
+        public async ValueTask<IConsumerScopeContext<TConsumer, T>> GetScope<TConsumer, T>(ConsumeContext<T> context)
             where TConsumer : class
             where T : class
         {
@@ -84,8 +84,7 @@
             }
             catch
             {
-                scope.Dispose();
-
+                await scope.DisposeScopeAsync().ConfigureAwait(false);
                 throw;
             }
         }

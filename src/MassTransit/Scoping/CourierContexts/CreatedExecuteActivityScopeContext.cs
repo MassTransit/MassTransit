@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Scoping.CourierContexts
 {
     using System;
+    using System.Threading.Tasks;
     using Courier;
 
 
@@ -20,12 +21,16 @@
             Context = context;
         }
 
-        public void Dispose()
+        public ExecuteActivityContext<TActivity, TArguments> Context { get; }
+
+        public async ValueTask DisposeAsync()
         {
             _disposeCallback?.Invoke(Context.Activity);
-            _scope.Dispose();
-        }
 
-        public ExecuteActivityContext<TActivity, TArguments> Context { get; }
+            if (_scope is IAsyncDisposable asyncDisposable)
+                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+            else
+                _scope?.Dispose();
+        }
     }
 }

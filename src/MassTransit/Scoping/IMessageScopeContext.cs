@@ -4,7 +4,7 @@ namespace MassTransit.Scoping
 
 
     public interface IMessageScopeContext<out T> :
-        IDisposable
+        IAsyncDisposable
         where T : class
     {
         ConsumeContext<T> Context { get; }

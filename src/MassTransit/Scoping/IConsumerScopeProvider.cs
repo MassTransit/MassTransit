@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.Scoping
 {
+    using System.Threading.Tasks;
     using GreenPipes;
 
 
@@ -9,9 +10,9 @@
     public interface IConsumerScopeProvider :
         IProbeSite
     {
-        IConsumerScopeContext GetScope(ConsumeContext context);
+        ValueTask<IConsumerScopeContext> GetScope(ConsumeContext context);
 
-        IConsumerScopeContext<TConsumer, T> GetScope<TConsumer, T>(ConsumeContext<T> context)
+        ValueTask<IConsumerScopeContext<TConsumer, T>> GetScope<TConsumer, T>(ConsumeContext<T> context)
             where TConsumer : class
             where T : class;
     }

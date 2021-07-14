@@ -20,7 +20,7 @@ namespace MassTransit.Pipeline.Filters
 
         public async Task Send(ExecuteContext<TArguments> context, IPipe<ExecuteContext<TArguments>> next)
         {
-            using var scope = _scopeProvider.GetScope(context);
+            await using IExecuteActivityScopeContext<TActivity, TArguments> scope = await _scopeProvider.GetScope(context);
 
             await next.Send(scope.Context).ConfigureAwait(false);
         }

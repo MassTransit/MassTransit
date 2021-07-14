@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.AutofacIntegration.ScopeProviders
 {
     using System;
+    using System.Threading.Tasks;
     using Autofac;
     using Context;
     using GreenPipes;
@@ -22,7 +23,7 @@
             _configureScope = configureScope;
         }
 
-        IConsumerScopeContext IConsumerScopeProvider.GetScope(ConsumeContext context)
+        async ValueTask<IConsumerScopeContext> IConsumerScopeProvider.GetScope(ConsumeContext context)
         {
             if (context.TryGetPayload<ILifetimeScope>(out _))
                 return new ExistingConsumerScopeContext(context);
@@ -43,13 +44,12 @@
             }
             catch
             {
-                lifetimeScope.Dispose();
-
+                await lifetimeScope.DisposeAsync().ConfigureAwait(false);
                 throw;
             }
         }
 
-        IConsumerScopeContext<TConsumer, T> IConsumerScopeProvider.GetScope<TConsumer, T>(ConsumeContext<T> context)
+        async ValueTask<IConsumerScopeContext<TConsumer, T>> IConsumerScopeProvider.GetScope<TConsumer, T>(ConsumeContext<T> context)
         {
             if (context.TryGetPayload<ILifetimeScope>(out var existingLifetimeScope))
             {
@@ -74,8 +74,7 @@
             }
             catch
             {
-                lifetimeScope.Dispose();
-
+                await lifetimeScope.DisposeAsync().ConfigureAwait(false);
                 throw;
             }
         }

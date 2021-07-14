@@ -18,7 +18,7 @@
 
         public async Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
-            using var scope = _scopeProvider.GetScope(context);
+            await using IMessageScopeContext<T> scope = await _scopeProvider.GetScope(context).ConfigureAwait(false);
 
             await next.Send(scope.Context).ConfigureAwait(false);
         }

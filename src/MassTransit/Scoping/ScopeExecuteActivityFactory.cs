@@ -24,10 +24,9 @@
 
         public async Task Execute(ExecuteContext<TArguments> context, IPipe<ExecuteActivityContext<TActivity, TArguments>> next)
         {
-            using (IExecuteActivityScopeContext<TActivity, TArguments> scope = _scopeProvider.GetScope(context))
-            {
-                await next.Send(scope.Context).ConfigureAwait(false);
-            }
+            await using IExecuteActivityScopeContext<TActivity, TArguments> scope = await _scopeProvider.GetScope(context).ConfigureAwait(false);
+
+            await next.Send(scope.Context).ConfigureAwait(false);
         }
 
         public void Probe(ProbeContext context)

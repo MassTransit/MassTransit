@@ -18,7 +18,7 @@ namespace MassTransit.Scoping
         public async Task Send<TMessage>(ConsumeContext<TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             where TMessage : class
         {
-            using IConsumerScopeContext<TConsumer, TMessage> scope = _scopeProvider.GetScope<TConsumer, TMessage>(context);
+            await using IConsumerScopeContext<TConsumer, TMessage> scope = await _scopeProvider.GetScope<TConsumer, TMessage>(context);
 
             await next.Send(scope.Context).ConfigureAwait(false);
         }

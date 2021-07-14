@@ -1,6 +1,7 @@
 namespace MassTransit.AutofacIntegration.ScopeProviders
 {
     using System;
+    using System.Threading.Tasks;
     using Autofac;
     using Courier;
     using GreenPipes;
@@ -25,7 +26,7 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
             _configureScope = configureScope;
         }
 
-        public IExecuteActivityScopeContext<TActivity, TArguments> GetScope(ExecuteContext<TArguments> context)
+        public async ValueTask<IExecuteActivityScopeContext<TActivity, TArguments>> GetScope(ExecuteContext<TArguments> context)
         {
             if (context.TryGetPayload<ILifetimeScope>(out var existingLifetimeScope))
             {
@@ -56,7 +57,7 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
             }
             catch
             {
-                lifetimeScope.Dispose();
+                await lifetimeScope.DisposeAsync().ConfigureAwait(false);
                 throw;
             }
         }

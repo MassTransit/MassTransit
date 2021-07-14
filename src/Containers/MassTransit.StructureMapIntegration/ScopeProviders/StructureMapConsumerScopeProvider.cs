@@ -1,6 +1,7 @@
 namespace MassTransit.StructureMapIntegration.ScopeProviders
 {
     using System;
+    using System.Threading.Tasks;
     using Context;
     using GreenPipes;
     using Metadata;
@@ -27,7 +28,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             context.Add("provider", "structuremap");
         }
 
-        public IConsumerScopeContext GetScope(ConsumeContext context)
+        public async ValueTask<IConsumerScopeContext> GetScope(ConsumeContext context)
         {
             if (context.TryGetPayload<IContainer>(out var existingContainer))
             {
@@ -50,7 +51,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             }
         }
 
-        public IConsumerScopeContext<TConsumer, T> GetScope<TConsumer, T>(ConsumeContext<T> context)
+        public async ValueTask<IConsumerScopeContext<TConsumer, T>> GetScope<TConsumer, T>(ConsumeContext<T> context)
             where TConsumer : class
             where T : class
         {

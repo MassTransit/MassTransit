@@ -20,7 +20,7 @@ namespace MassTransit.Pipeline.Filters
 
         public async Task Send(CompensateContext<TLog> context, IPipe<CompensateContext<TLog>> next)
         {
-            using var scope = _scopeProvider.GetScope(context);
+            await using ICompensateActivityScopeContext<TActivity, TLog> scope = await _scopeProvider.GetScope(context).ConfigureAwait(false);
 
             await next.Send(scope.Context).ConfigureAwait(false);
         }

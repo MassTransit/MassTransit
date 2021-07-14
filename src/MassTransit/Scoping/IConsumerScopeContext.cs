@@ -4,14 +4,14 @@
 
 
     public interface IConsumerScopeContext :
-        IDisposable
+        IAsyncDisposable
     {
         ConsumeContext Context { get; }
     }
 
 
     public interface IConsumerScopeContext<out TConsumer, out T> :
-        IDisposable
+        IAsyncDisposable
         where T : class
         where TConsumer : class
     {

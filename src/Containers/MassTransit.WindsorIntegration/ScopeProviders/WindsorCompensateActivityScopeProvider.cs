@@ -1,6 +1,7 @@
 namespace MassTransit.WindsorIntegration.ScopeProviders
 {
     using System;
+    using System.Threading.Tasks;
     using Castle.MicroKernel;
     using Courier;
     using Courier.Contexts;
@@ -21,7 +22,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             _kernel = kernel;
         }
 
-        public ICompensateActivityScopeContext<TActivity, TLog> GetScope(CompensateContext<TLog> context)
+        public async ValueTask<ICompensateActivityScopeContext<TActivity, TLog>> GetScope(CompensateContext<TLog> context)
         {
             if (context.TryGetPayload<IKernel>(out var kernel))
             {

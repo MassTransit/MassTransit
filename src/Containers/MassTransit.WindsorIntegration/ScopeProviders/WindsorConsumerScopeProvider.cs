@@ -2,6 +2,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading.Tasks;
     using Castle.MicroKernel;
     using Context;
     using GreenPipes;
@@ -27,7 +28,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             context.Add("provider", "windsor");
         }
 
-        public IConsumerScopeContext GetScope(ConsumeContext context)
+        public async ValueTask<IConsumerScopeContext> GetScope(ConsumeContext context)
         {
             if (context.TryGetPayload<IKernel>(out var kernel))
             {
@@ -55,7 +56,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             }
         }
 
-        public IConsumerScopeContext<TConsumer, T> GetScope<TConsumer, T>(ConsumeContext<T> context)
+        public async ValueTask<IConsumerScopeContext<TConsumer, T>> GetScope<TConsumer, T>(ConsumeContext<T> context)
             where TConsumer : class
             where T : class
         {

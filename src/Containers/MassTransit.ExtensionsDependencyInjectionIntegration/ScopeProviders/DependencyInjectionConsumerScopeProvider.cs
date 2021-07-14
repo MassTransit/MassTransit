@@ -1,6 +1,7 @@
 namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 {
     using System;
+    using System.Threading.Tasks;
     using Context;
     using GreenPipes;
     using Metadata;
@@ -25,7 +26,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             context.Add("provider", "dependencyInjection");
         }
 
-        IConsumerScopeContext IConsumerScopeProvider.GetScope(ConsumeContext context)
+        async ValueTask<IConsumerScopeContext> IConsumerScopeProvider.GetScope(ConsumeContext context)
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
@@ -50,13 +51,16 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             }
             catch
             {
-                serviceScope.Dispose();
+                if (serviceScope is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                else
+                    serviceScope.Dispose();
 
                 throw;
             }
         }
 
-        IConsumerScopeContext<TConsumer, T> IConsumerScopeProvider.GetScope<TConsumer, T>(ConsumeContext<T> context)
+        async ValueTask<IConsumerScopeContext<TConsumer, T>> IConsumerScopeProvider.GetScope<TConsumer, T>(ConsumeContext<T> context)
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
@@ -93,7 +97,10 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             }
             catch
             {
-                serviceScope.Dispose();
+                if (serviceScope is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                else
+                    serviceScope.Dispose();
 
                 throw;
             }

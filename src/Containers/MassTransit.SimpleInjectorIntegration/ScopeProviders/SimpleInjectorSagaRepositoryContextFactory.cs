@@ -85,7 +85,7 @@ namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
                 }
                 finally
                 {
-                    scope.Dispose();
+                    await scope.DisposeScopeAsync().ConfigureAwait(false);
                 }
             }
 

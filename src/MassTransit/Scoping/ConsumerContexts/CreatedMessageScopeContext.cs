@@ -1,6 +1,7 @@
 namespace MassTransit.Scoping.ConsumerContexts
 {
     using System;
+    using System.Threading.Tasks;
 
 
     public class CreatedMessageScopeContext<TScope, T> :
@@ -16,11 +17,14 @@ namespace MassTransit.Scoping.ConsumerContexts
             Context = context;
         }
 
-        public void Dispose()
-        {
-            _scope?.Dispose();
-        }
-
         public ConsumeContext<T> Context { get; }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (_scope is IAsyncDisposable asyncDisposable)
+                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+            else
+                _scope?.Dispose();
+        }
     }
 }
