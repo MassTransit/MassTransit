@@ -8,7 +8,7 @@ namespace MassTransit.Courier
         IConsumer<TRequest>
         where TRequest : class
     {
-        public async Task Consume(ConsumeContext<TRequest> context)
+        public virtual async Task Consume(ConsumeContext<TRequest> context)
         {
             var builder = new RoutingSlipBuilder(NewId.NextGuid());
 
