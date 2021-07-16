@@ -16,7 +16,7 @@
         where TResponse : class
         where TFaultResponse : class
     {
-        public async Task Consume(ConsumeContext<RoutingSlipCompleted> context)
+        public virtual async Task Consume(ConsumeContext<RoutingSlipCompleted> context)
         {
             var request = context.Message.GetVariable<TRequest>("Request");
             var requestId = context.Message.GetVariable<Guid>("RequestId");
@@ -35,7 +35,7 @@
             await endpoint.Send(response).ConfigureAwait(false);
         }
 
-        public async Task Consume(ConsumeContext<RoutingSlipFaulted> context)
+        public virtual async Task Consume(ConsumeContext<RoutingSlipFaulted> context)
         {
             var request = context.Message.GetVariable<TRequest>("Request");
             var requestId = context.Message.GetVariable<Guid>("RequestId");
