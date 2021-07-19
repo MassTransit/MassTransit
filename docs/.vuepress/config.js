@@ -179,14 +179,6 @@ module.exports = {
                   '/advanced/middleware/scoped'
                 ]
               },
-              {
-                title: 'Conductor',
-                path: '/advanced/conductor/',
-                collapsable: true,
-                children: [
-                  '/advanced/conductor/configuration'
-                ]
-              },
               '/usage/message-data',
               {
                 title: 'Monitoring',
