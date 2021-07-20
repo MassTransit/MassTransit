@@ -32,6 +32,7 @@
         /// another serializer, this workaround should be removed.
         /// </summary>
         /// <param name="keyProvider"></param>
+        [Obsolete("This method is temporary and is going to be removed in the future once subscription events start using serializer/encryption configured on the endpoint.")]
         public static void UseEncryption(ISecureKeyProvider keyProvider)
         {
             _streamProvider = new AesCryptoStreamProviderV2(keyProvider);
