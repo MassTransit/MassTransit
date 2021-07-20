@@ -215,6 +215,7 @@ namespace MassTransit.JobService.Configuration
             {
                 e.UseMessageRetry(r => r.Intervals(100, 200, 300, 500, 1000, 2000, 5000));
                 e.UseInMemoryOutbox();
+                e.UseConcurrencyLimit(1);
 
                 if (_options.SagaPartitionCount.HasValue)
                 {
