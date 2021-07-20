@@ -64,8 +64,14 @@ namespace MassTransit.AmazonSqsTransport.Contexts
                 {
                     return await CreateMissingQueue(queue).ConfigureAwait(false);
                 }
-                catch (QueueNameExistsException)
+                catch (QueueNameExistsException queueNameExistsException)
                 {
+                    Console.WriteLine($"QueueNameExistsException: {queueNameExistsException.Message}, {queueNameExistsException.StatusCode}, {queueNameExistsException.ErrorType}, {queueNameExistsException.ErrorCode}, {queueNameExistsException.GetType().FullName}, {queueNameExistsException.StackTrace}");
+                    return await GetExistingQueue(queue.EntityName).ConfigureAwait(false);
+                }
+                catch (Exception exception)
+                {
+                    Console.WriteLine($"Exception: {exception.Message}, {exception.GetType().FullName}, {exception.StackTrace}");
                     return await GetExistingQueue(queue.EntityName).ConfigureAwait(false);
                 }
             });
