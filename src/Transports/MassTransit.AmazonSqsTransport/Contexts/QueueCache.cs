@@ -62,11 +62,11 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             {
                 try
                 {
-                    return await CreateMissingQueue(queue).ConfigureAwait(false);
-                }
-                catch (QueueNameExistsException)
-                {
                     return await GetExistingQueue(queue.EntityName).ConfigureAwait(false);
+                }
+                catch (QueueDoesNotExistException)
+                {
+                    return await CreateMissingQueue(queue).ConfigureAwait(false);
                 }
             });
         }
