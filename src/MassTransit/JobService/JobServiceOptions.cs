@@ -25,6 +25,7 @@ namespace MassTransit.JobService
             HeartbeatTimeout = TimeSpan.FromMinutes(5);
 
             SuspectJobRetryCount = 3;
+            SagaPartitionCount = 16;
         }
 
         public string JobTypeSagaEndpointName
