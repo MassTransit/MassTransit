@@ -8,6 +8,10 @@ namespace MassTransit.Courier.InternalMessages
     class RoutingSlipActivityCompletedMessage :
         RoutingSlipActivityCompleted
     {
+        protected RoutingSlipActivityCompletedMessage()
+        {
+        }
+
         public RoutingSlipActivityCompletedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid executionId,
             DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables, IDictionary<string, object> arguments,
             IDictionary<string, object> data)

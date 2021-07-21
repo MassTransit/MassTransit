@@ -9,6 +9,10 @@
     class RoutingSlipImpl :
         RoutingSlip
     {
+        protected RoutingSlipImpl()
+        {
+        }
+
         public RoutingSlipImpl(Guid trackingNumber, DateTime createTimestamp, IEnumerable<Activity> activities,
             IEnumerable<ActivityLog> activityLogs, IEnumerable<CompensateLog> compensateLogs, IEnumerable<ActivityException> exceptions,
             IDictionary<string, object> variables, IEnumerable<Subscription> subscriptions)

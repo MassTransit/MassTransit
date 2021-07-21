@@ -8,8 +8,11 @@
     class CompensateLogImpl :
         CompensateLog
     {
-        public CompensateLogImpl(Guid executionId, Uri address,
-            IDictionary<string, object> data)
+        protected CompensateLogImpl()
+        {
+        }
+
+        public CompensateLogImpl(Guid executionId, Uri address, IDictionary<string, object> data)
         {
             ExecutionId = executionId;
             Address = address;

@@ -8,6 +8,10 @@
     public class ReceiveFaultEvent :
         ReceiveFault
     {
+        protected ReceiveFaultEvent()
+        {
+        }
+
         public ReceiveFaultEvent(HostInfo host, Exception exception, string contentType, Guid? faultedMessageId, string[] faultMessageTypes)
         {
             Timestamp = DateTime.UtcNow;
@@ -23,12 +27,12 @@
                 ?? new ExceptionInfo[] {new FaultExceptionInfo(exception)};
         }
 
-        public Guid FaultId { get; }
-        public DateTime Timestamp { get; }
-        public Guid? FaultedMessageId { get; }
-        public ExceptionInfo[] Exceptions { get; }
-        public HostInfo Host { get; }
-        public string[] FaultMessageTypes { get; }
-        public string ContentType { get; }
+        public Guid FaultId { get; private set; }
+        public DateTime Timestamp { get; private set; }
+        public Guid? FaultedMessageId { get; private set; }
+        public ExceptionInfo[] Exceptions { get; private set; }
+        public HostInfo Host { get; private set; }
+        public string[] FaultMessageTypes { get; private set; }
+        public string ContentType { get; private set; }
     }
 }

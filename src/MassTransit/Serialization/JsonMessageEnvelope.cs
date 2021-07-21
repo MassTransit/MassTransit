@@ -8,6 +8,10 @@ namespace MassTransit.Serialization
     public class JsonMessageEnvelope :
         MessageEnvelope
     {
+        protected JsonMessageEnvelope()
+        {
+        }
+
         public JsonMessageEnvelope(SendContext context, object message, string[] messageTypeNames)
         {
             if (context.MessageId.HasValue)
@@ -54,20 +58,20 @@ namespace MassTransit.Serialization
             Host = HostMetadataCache.Host;
         }
 
-        public string MessageId { get; }
-        public string RequestId { get; }
-        public string CorrelationId { get; }
-        public string ConversationId { get; }
-        public string InitiatorId { get; }
-        public string SourceAddress { get; }
-        public string DestinationAddress { get; }
-        public string ResponseAddress { get; }
-        public string FaultAddress { get; }
-        public string[] MessageType { get; }
-        public object Message { get; }
-        public DateTime? ExpirationTime { get; }
-        public DateTime? SentTime { get; }
-        public IDictionary<string, object> Headers { get; }
-        public HostInfo Host { get; }
+        public string MessageId { get; private set; }
+        public string RequestId { get; private set; }
+        public string CorrelationId { get; private set; }
+        public string ConversationId { get; private set; }
+        public string InitiatorId { get; private set; }
+        public string SourceAddress { get; private set; }
+        public string DestinationAddress { get; private set; }
+        public string ResponseAddress { get; private set; }
+        public string FaultAddress { get; private set; }
+        public string[] MessageType { get; private set; }
+        public object Message { get; private set; }
+        public DateTime? ExpirationTime { get; private set; }
+        public DateTime? SentTime { get; private set; }
+        public IDictionary<string, object> Headers { get; private set; }
+        public HostInfo Host { get; private set; }
     }
 }

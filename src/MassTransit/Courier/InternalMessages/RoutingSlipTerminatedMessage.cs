@@ -9,6 +9,10 @@ namespace MassTransit.Courier.InternalMessages
     class RoutingSlipTerminatedMessage :
         RoutingSlipTerminated
     {
+        protected RoutingSlipTerminatedMessage()
+        {
+        }
+
         public RoutingSlipTerminatedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid executionId, DateTime timestamp, TimeSpan duration,
             IDictionary<string, object> variables, IEnumerable<Activity> discardedItinerary)
         {

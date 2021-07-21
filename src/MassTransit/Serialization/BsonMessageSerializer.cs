@@ -23,6 +23,7 @@
 
         public static readonly CaseInsensitiveDictionaryJsonConverter CaseInsensitiveDictionaryJsonConverter;
         public static readonly InterfaceProxyConverter InterfaceProxyConverter;
+        public static readonly InternalTypeConverter InternalTypeConverter;
         public static readonly MessageDataJsonConverter MessageDataJsonConverter;
         public static readonly IsoDateTimeConverter IsoDateTimeConverter;
 
@@ -33,6 +34,7 @@
         {
             CaseInsensitiveDictionaryJsonConverter = new CaseInsensitiveDictionaryJsonConverter();
             InterfaceProxyConverter = new InterfaceProxyConverter();
+            InternalTypeConverter = new InternalTypeConverter();
             MessageDataJsonConverter = new MessageDataJsonConverter();
             IsoDateTimeConverter = new IsoDateTimeConverter {DateTimeStyles = DateTimeStyles.RoundtripKind};
 
@@ -40,6 +42,7 @@
 
             DefaultContractResolver deserializerContractResolver = new JsonContractResolver(
                 CaseInsensitiveDictionaryJsonConverter,
+                InternalTypeConverter,
                 InterfaceProxyConverter,
                 IsoDateTimeConverter,
                 MessageDataJsonConverter) {NamingStrategy = namingStrategy};

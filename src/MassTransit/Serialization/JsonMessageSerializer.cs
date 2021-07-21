@@ -25,6 +25,7 @@ namespace MassTransit.Serialization
         public static readonly ByteArrayConverter ByteArrayConverter;
         public static readonly CaseInsensitiveDictionaryJsonConverter CaseInsensitiveDictionaryJsonConverter;
         public static readonly InterfaceProxyConverter InterfaceProxyConverter;
+        public static readonly InternalTypeConverter InternalTypeConverter;
         public static readonly MessageDataJsonConverter MessageDataJsonConverter;
         public static readonly StringDecimalConverter StringDecimalConverter;
 
@@ -36,6 +37,7 @@ namespace MassTransit.Serialization
             ByteArrayConverter = new ByteArrayConverter();
             CaseInsensitiveDictionaryJsonConverter = new CaseInsensitiveDictionaryJsonConverter();
             InterfaceProxyConverter = new InterfaceProxyConverter();
+            InternalTypeConverter = new InternalTypeConverter();
             MessageDataJsonConverter = new MessageDataJsonConverter();
             StringDecimalConverter = new StringDecimalConverter();
 
@@ -44,6 +46,7 @@ namespace MassTransit.Serialization
             DefaultContractResolver deserializerContractResolver = new JsonContractResolver(
                 ByteArrayConverter,
                 CaseInsensitiveDictionaryJsonConverter,
+                InternalTypeConverter,
                 InterfaceProxyConverter,
                 MessageDataJsonConverter,
                 StringDecimalConverter) {NamingStrategy = namingStrategy};
@@ -86,6 +89,8 @@ namespace MassTransit.Serialization
         public static JsonSerializer Deserializer => _deserializer.Value;
 
         public static JsonSerializer Serializer => _serializer.Value;
+
+        public static Encoding Encoding => _encoding.Value;
 
         public void Serialize<T>(Stream stream, SendContext<T> context)
             where T : class

@@ -8,6 +8,10 @@
     public class SubscriptionImpl :
         Subscription
     {
+        protected SubscriptionImpl()
+        {
+        }
+
         public SubscriptionImpl(Uri address, RoutingSlipEvents events, RoutingSlipEventContents include, string activityName = null,
             MessageEnvelope message = null)
         {

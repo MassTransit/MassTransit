@@ -9,6 +9,10 @@
     public class FaultEvent<T> :
         Fault<T>
     {
+        protected FaultEvent()
+        {
+        }
+
         public FaultEvent(T message, Guid? faultedMessageId, HostInfo host, Exception exception, string[] faultMessageTypes)
             : this(message, faultedMessageId, host, GetExceptions(exception), faultMessageTypes)
         {
@@ -27,13 +31,13 @@
             Exceptions = exceptions.ToArray();
         }
 
-        public Guid FaultId { get; }
-        public Guid? FaultedMessageId { get; }
-        public DateTime Timestamp { get; }
-        public ExceptionInfo[] Exceptions { get; }
-        public HostInfo Host { get; }
-        public string[] FaultMessageTypes { get; }
-        public T Message { get; }
+        public Guid FaultId { get; private set; }
+        public Guid? FaultedMessageId { get; private set; }
+        public DateTime Timestamp { get; private set; }
+        public ExceptionInfo[] Exceptions { get; private set; }
+        public HostInfo Host { get; private set; }
+        public string[] FaultMessageTypes { get; private set; }
+        public T Message { get; private set; }
 
         static ExceptionInfo[] GetExceptions(Exception exception)
         {
@@ -45,5 +49,18 @@
                     .ToArray()
                 ?? new ExceptionInfo[] {new FaultExceptionInfo(exception)};
         }
+    }
+
+
+    [Serializable]
+    public class FaultEvent :
+        Fault
+    {
+        public Guid FaultId { get; private set; }
+        public Guid? FaultedMessageId { get; private set; }
+        public DateTime Timestamp { get; private set; }
+        public ExceptionInfo[] Exceptions { get; private set; }
+        public HostInfo Host { get; private set; }
+        public string[] FaultMessageTypes { get; private set; }
     }
 }

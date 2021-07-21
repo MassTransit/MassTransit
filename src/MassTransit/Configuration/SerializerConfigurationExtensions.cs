@@ -96,7 +96,7 @@ namespace MassTransit
             configurator.SetMessageSerializer(() => new RawJsonMessageSerializer());
 
             configurator.AddMessageDeserializer(RawJsonMessageSerializer.RawJsonContentType,
-                () => new RawJsonMessageDeserializer(RawJsonMessageSerializer.Deserializer));
+                () => new RawJsonMessageDeserializer(JsonMessageSerializer.Deserializer));
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace MassTransit
             configurator.SetMessageSerializer(() => new RawJsonMessageSerializer());
 
             configurator.AddMessageDeserializer(RawJsonMessageSerializer.RawJsonContentType,
-                () => new RawJsonMessageDeserializer(RawJsonMessageSerializer.Deserializer, options));
+                () => new RawJsonMessageDeserializer(JsonMessageSerializer.Deserializer, options));
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace MassTransit
             configurator.SetMessageSerializer(() => new RawJsonMessageSerializer());
 
             configurator.AddMessageDeserializer(RawJsonMessageSerializer.RawJsonContentType,
-                () => new RawJsonMessageDeserializer(RawJsonMessageSerializer.Deserializer));
+                () => new RawJsonMessageDeserializer(JsonMessageSerializer.Deserializer));
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace MassTransit
             configurator.SetMessageSerializer(() => new RawJsonMessageSerializer());
 
             configurator.AddMessageDeserializer(RawJsonMessageSerializer.RawJsonContentType,
-                () => new RawJsonMessageDeserializer(RawJsonMessageSerializer.Deserializer, options));
+                () => new RawJsonMessageDeserializer(JsonMessageSerializer.Deserializer, options));
         }
 
         public static void UseEncryptedSerializer(this IBusFactoryConfigurator configurator, ICryptoStreamProvider streamProvider)

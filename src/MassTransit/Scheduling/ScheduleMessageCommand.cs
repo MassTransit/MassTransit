@@ -8,6 +8,10 @@ namespace MassTransit.Scheduling
         ScheduleMessage<T>
         where T : class
     {
+        protected ScheduleMessageCommand()
+        {
+        }
+
         public ScheduleMessageCommand(DateTime scheduledTime, Uri destination, T payload, Guid tokenId)
         {
             CorrelationId = tokenId;
@@ -22,10 +26,20 @@ namespace MassTransit.Scheduling
             PayloadType = TypeMetadataCache<T>.MessageTypeNames;
         }
 
-        public Guid CorrelationId { get; }
-        public DateTime ScheduledTime { get; }
-        public string[] PayloadType { get; }
-        public Uri Destination { get; }
-        public T Payload { get; }
+        public Guid CorrelationId { get; private set; }
+        public DateTime ScheduledTime { get; private set; }
+        public string[] PayloadType { get; private set; }
+        public Uri Destination { get; private set; }
+        public T Payload { get; private set; }
+    }
+
+
+    public class ScheduleMessageCommand :
+        ScheduleMessage
+    {
+        public Guid CorrelationId { get; private set; }
+        public DateTime ScheduledTime { get; private set; }
+        public string[] PayloadType { get; private set; }
+        public Uri Destination { get; private set; }
     }
 }

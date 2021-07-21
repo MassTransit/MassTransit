@@ -9,6 +9,10 @@
     class RoutingSlipRevisedMessage :
         RoutingSlipRevised
     {
+        protected RoutingSlipRevisedMessage()
+        {
+        }
+
         public RoutingSlipRevisedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid executionId, DateTime timestamp, TimeSpan duration,
             IDictionary<string, object> variables,
             IEnumerable<Activity> itinerary, IEnumerable<Activity> discardedItinerary)

@@ -8,6 +8,10 @@
     class ActivityImpl :
         Activity
     {
+        protected ActivityImpl()
+        {
+        }
+
         public ActivityImpl(string name, Uri address, IDictionary<string, object> arguments)
         {
             Name = name;

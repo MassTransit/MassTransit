@@ -7,6 +7,10 @@
     class ActivityLogImpl :
         ActivityLog
     {
+        protected ActivityLogImpl()
+        {
+        }
+
         public ActivityLogImpl(HostInfo host, Guid executionId, string name, DateTime timestamp, TimeSpan duration)
         {
             ExecutionId = executionId;

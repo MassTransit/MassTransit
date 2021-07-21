@@ -8,6 +8,10 @@ namespace MassTransit.Courier.InternalMessages
     class RoutingSlipActivityFaultedMessage :
         RoutingSlipActivityFaulted
     {
+        protected RoutingSlipActivityFaultedMessage()
+        {
+        }
+
         public RoutingSlipActivityFaultedMessage(HostInfo host, Guid trackingNumber, string activityName, Guid executionId,
             DateTime timestamp, TimeSpan duration, ExceptionInfo exceptionInfo, IDictionary<string, object> variables,
             IDictionary<string, object> arguments)

@@ -7,8 +7,11 @@
     class ActivityExceptionImpl :
         ActivityException
     {
-        public ActivityExceptionImpl(string activityName, HostInfo host, Guid executionId, DateTime timestamp, TimeSpan elapsed,
-            ExceptionInfo exceptionInfo)
+        protected ActivityExceptionImpl()
+        {
+        }
+
+        public ActivityExceptionImpl(string activityName, HostInfo host, Guid executionId, DateTime timestamp, TimeSpan elapsed, ExceptionInfo exceptionInfo)
         {
             ExecutionId = executionId;
 

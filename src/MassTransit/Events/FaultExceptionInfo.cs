@@ -10,6 +10,10 @@
     public class FaultExceptionInfo :
         ExceptionInfo
     {
+        protected FaultExceptionInfo()
+        {
+        }
+
         public FaultExceptionInfo(Exception exception)
         {
             if (exception == null)
