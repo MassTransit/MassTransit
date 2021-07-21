@@ -165,7 +165,7 @@ public class OrderStateMachine :
 
 Message brokers typically do not guarantee message order. Therefore, it is important to consider out-of-order messages in state machine design.
 
-In the example above, receiving a _SubmitOrder_ message after an _OrderAccepted_ event could cause the _SubmitOrder_ message to end up in the *_error* queue. If the _OrderAccepted_ event is received first, it would be discarded since it isn't accepted in the _Initial_ state. Below is an updated state machine that handles both of these scenarios.
+In the example above, receiving a _SubmitOrder_ message after an _OrderAccepted_ event could cause the _SubmitOrder_ message to end up in the *_error* queue. If the _OrderAccepted_ event is received first, it would be discarded since it isn't subitted in the _Initial_ state. Below is an updated state machine that handles both of these scenarios.
 
 
 ```cs
