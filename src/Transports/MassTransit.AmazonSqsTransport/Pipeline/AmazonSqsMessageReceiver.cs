@@ -118,7 +118,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             {
                 Task<int>[] receiveTasks = Enumerable.Repeat(0, receiveCount).Select(_ => ReceiveMessages(messageLimit, executor)).ToArray();
 
-                int[] counts = await Task.WhenAll(receiveTasks).ConfigureAwait(false);
+                var counts = await Task.WhenAll(receiveTasks).ConfigureAwait(false);
 
                 var received = counts.Sum();
 
@@ -136,7 +136,8 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
                 IList<Message> messages = await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, Stopping)
                     .ConfigureAwait(false);
 
-                await Task.WhenAll(messages.Select(message => executor.Run(() => HandleMessage(message), Stopping))).ConfigureAwait(false);
+                foreach (var message in messages)
+                    await executor.Push(() => HandleMessage(message), Stopping).ConfigureAwait(false);
 
                 return messages.Count;
             }
@@ -149,9 +150,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         Task HandleDeliveryComplete()
         {
             if (IsStopping)
-            {
                 _deliveryComplete.TrySetResult(true);
-            }
 
             return TaskUtil.Completed;
         }
