@@ -149,6 +149,10 @@
             }
         }
 
+        public virtual async Task Clean()
+        {
+        }
+
         public async Task<ISendEndpoint> GetSendEndpoint(Uri address)
         {
             return await BusControl.GetSendEndpoint(address).ConfigureAwait(false);

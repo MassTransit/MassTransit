@@ -142,6 +142,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.GrpcTransport.T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.TestComponents", "tests\MassTransit.TestComponents\MassTransit.TestComponents.csproj", "{27DF8220-6885-4E08-89CB-EE56582702D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Tests", "tests\MassTransit.Transports.Tests\MassTransit.Transports.Tests.csproj", "{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -781,6 +783,18 @@ Global
 		{27DF8220-6885-4E08-89CB-EE56582702D8}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
 		{27DF8220-6885-4E08-89CB-EE56582702D8}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
 		{27DF8220-6885-4E08-89CB-EE56582702D8}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
+		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.Debug|x86.Build.0 = Debug|Any CPU
+		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.Release|x86.ActiveCfg = Release|Any CPU
+		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.Release|x86.Build.0 = Release|Any CPU
+		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.ReleaseUnsigned|Any CPU.ActiveCfg = Debug|Any CPU
+		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
+		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
+		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -840,6 +854,7 @@ Global
 		{17E04A9B-5DB5-4857-99CD-E9AF22DA00E4} = {56F516D7-BC3C-49E1-A639-83C5F14953F8}
 		{AF56509B-0B95-4ACE-9CFC-F9A79756C357} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{082488F6-6322-462A-85D7-9E893A67B8CD} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
+		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43D3A7D5-0945-435E-8D03-1E631E5CDBA8}
