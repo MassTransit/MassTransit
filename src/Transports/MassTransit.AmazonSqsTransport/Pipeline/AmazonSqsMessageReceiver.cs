@@ -3,6 +3,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Numerics;
     using System.Threading.Tasks;
     using Amazon.SQS.Model;
     using Context;
@@ -86,6 +87,14 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             await Completed.ConfigureAwait(false);
         }
 
+        async Task HandleMessageGroup(IEnumerable<Message> messages, ChannelExecutor executor)
+        {
+            foreach (var message in messages.OrderBy(x => x.Attributes["SequenceNumber"], SequenceNumberComparer.Instance))
+            {
+                await executor.Run(() => HandleMessage(message), Stopping).ConfigureAwait(false);
+            }
+        }
+
         async Task HandleMessage(Message message)
         {
             if (IsStopping)
@@ -116,11 +125,22 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
             while (!IsStopping)
             {
-                Task<int>[] receiveTasks = Enumerable.Repeat(0, receiveCount).Select(_ => ReceiveMessages(messageLimit, executor)).ToArray();
+                var received = 0;
 
-                int[] counts = await Task.WhenAll(receiveTasks).ConfigureAwait(false);
+                if (_receiveSettings.OrderedMessageHandlingEnabled)
+                {
+                    Task<IList<Message>>[] receiveTasks = Enumerable.Repeat(0, receiveCount).Select(_ => ReceiveMessages(messageLimit)).ToArray();
+                    IList<Message>[] messages = await Task.WhenAll(receiveTasks).ConfigureAwait(false);
 
-                var received = counts.Sum();
+                    received = await OrderedHandleMessages(executor, messages);
+                }
+                else
+                {
+                    Task<int>[] receiveTasks = Enumerable.Repeat(0, receiveCount).Select(_ => ReceiveAndHandleMessages(messageLimit, executor)).ToArray();
+                    var counts = await Task.WhenAll(receiveTasks).ConfigureAwait(false);
+
+                    received = counts.Sum();
+                }
 
                 if (received == receiveCount * 10) // ramp up receivers when busy
                     receiveCount = Math.Min(maxReceiveCount, receiveCount + (maxReceiveCount - receiveCount) / 2);
@@ -129,7 +149,43 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             }
         }
 
-        async Task<int> ReceiveMessages(int messageLimit, ChannelExecutor executor)
+        async Task<int> OrderedHandleMessages(ChannelExecutor executor, IList<Message>[] messages)
+        {
+            var messagesByGroupId = new Dictionary<string, List<Message>>();
+            var messagesWithoutGroupId = new List<Message>();
+            var messagesCount = 0;
+
+            foreach (var message in messages.SelectMany(x => x))
+            {
+                messagesCount++;
+
+                if (!message.Attributes.TryGetValue("MessageGroupId", out var groupId))
+                {
+                    messagesWithoutGroupId.Add(message);
+
+                    continue;
+                }
+
+                if (!messagesByGroupId.TryGetValue(groupId, out List<Message> groupedMessages))
+                {
+                    groupedMessages = new List<Message>();
+                    messagesByGroupId[groupId] = groupedMessages;
+                }
+
+                groupedMessages.Add(message);
+            }
+
+            List<Task> handleMessagesTasks = messagesWithoutGroupId.Select(message => executor.Run(() => HandleMessage(message), Stopping)).ToList();
+            IEnumerable<Task> groupedHandleMessagesTasks = messagesByGroupId.Select(x => HandleMessageGroup(x.Value, executor));
+
+            handleMessagesTasks.AddRange(groupedHandleMessagesTasks);
+
+            await Task.WhenAll(handleMessagesTasks).ConfigureAwait(false);
+
+            return messagesCount;
+        }
+
+        async Task<int> ReceiveAndHandleMessages(int messageLimit, ChannelExecutor executor)
         {
             try
             {
@@ -143,6 +199,21 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             catch (OperationCanceledException)
             {
                 return 0;
+            }
+        }
+
+        async Task<IList<Message>> ReceiveMessages(int messageLimit)
+        {
+            try
+            {
+                IList<Message> messages = await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, Stopping)
+                                                       .ConfigureAwait(false);
+
+                return messages;
+            }
+            catch (OperationCanceledException)
+            {
+                return Array.Empty<Message>();
             }
         }
 
@@ -168,6 +239,40 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
                 {
                     LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
                 }
+            }
+        }
+
+        class SequenceNumberComparer : IComparer<string>
+        {
+            public static readonly SequenceNumberComparer Instance = new SequenceNumberComparer();
+
+            public int Compare(string x, string y)
+            {
+                if (string.IsNullOrEmpty(x))
+                {
+                    throw new ArgumentNullException(nameof(x));
+                }
+
+                if (string.IsNullOrEmpty(y))
+                {
+                    throw new ArgumentNullException(nameof(y));
+                }
+
+                if (x.Length != y.Length)
+                {
+                    return x.Length > y.Length ? 1 : -1;
+                }
+
+                if (string.Equals(x, y, StringComparison.OrdinalIgnoreCase))
+                {
+                    return 0;
+                }
+
+                //SequenceNumber has 128 bits
+                var xBigInt = BigInteger.Parse(x);
+                var yBigInt = BigInteger.Parse(y);
+
+                return xBigInt > yBigInt ? 1 : -1;
             }
         }
     }

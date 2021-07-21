@@ -12,6 +12,11 @@
         IQueueEndpointConfigurator
     {
         /// <summary>
+        /// Use only if you use FIFO queue, this setting enables grouping by MessageGroupId and process messages in ordered way by SequenceNumber
+        /// </summary>
+        bool OrderedMessageHandlingEnabled { set; }
+
+        /// <summary>
         /// Bind an existing exchange for the message type to the receive endpoint by name
         /// </summary>
         /// <typeparam name="T"></typeparam>
