@@ -1,0 +1,71 @@
+name: Transport Validation
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: true
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  test-transports:
+    name: "Transport Validation"
+    runs-on: ubuntu-latest
+    services:
+      rabbitmq:
+        image: masstransit/rabbitmq:latest
+        ports:
+          - "5672:5672"
+          - "15672:15672"
+      activemq:
+        image: masstransit/activemq:latest
+        environment:
+          - "ACTIVEMQ_ADMIN_LOGIN=admin"
+          - "ACTIVEMQ_ADMIN_PASSWORD=admin"
+          - "ACTIVEMQ_LOGGER_LOGLEVEL=TRACE"
+          - "ACTIVEMQ_OPTS=-Xms512m -Xms512m"
+          - "ACTIVEMQ_CONFIG_SCHEDULERENABLED=true"
+        ports:
+          - 8161:8161
+          - 61616:61616
+          - 61613:61613
+      artemis:
+        image: hugoham/artemis:2.16.0
+        hostname: artemis
+        ports:
+          - '61618:61616'
+          - '8163:8161'
+      localstack:
+        image: localstack/localstack
+        ports:
+          - "4566:4566"
+          - "4571:4571"
+          - "${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}"
+        environment:
+          - SERVICES=${SERVICES- }
+          - DEBUG=${DEBUG- }
+          - DATA_DIR=${DATA_DIR- }
+          - PORT_WEB_UI=${PORT_WEB_UI- }
+          - LAMBDA_EXECUTOR=${LAMBDA_EXECUTOR- }
+          - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
+          - DOCKER_HOST=unix:///var/run/docker.sock
+          - HOST_TMP_FOLDER=${TMPDIR}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Install .NET 3.1
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.x'
+
+      - name: Install .NET 5
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '5.0.x'
+
+      - name: Test Transports
+        env:
+          MT_ASB_KEYVALUE: ${{ secrets.AZURE_SERVICEBUS }}
+          MT_AZURE_STORAGE_ACCOUNT: ${{ secrets.AZURE_STORAGE }}
+        run: dotnet test -c Release
+        working-directory: tests/MassTransit.Transports.Tests
