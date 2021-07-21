@@ -26,7 +26,7 @@
             _hostConfiguration = busConfiguration.HostConfiguration;
 
             var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
-            _settings = new QueueReceiveSettings(busConfiguration.BusEndpointConfiguration, queueName, false, true);
+            _settings = new QueueReceiveSettings(busConfiguration.BusEndpointConfiguration, queueName, false, true, false);
         }
 
         public ushort WaitTimeSeconds
@@ -47,6 +47,11 @@
         public bool PurgeOnStartup
         {
             set => _settings.PurgeOnStartup = value;
+        }
+
+        public bool OrderedMessageProcessingEnabled
+        {
+            set => _settings.OrderedMessageHandlingEnabled = value;
         }
 
         public void OverrideDefaultBusEndpointQueueName(string value)
