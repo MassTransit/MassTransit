@@ -48,6 +48,8 @@ namespace MassTransit.Configurators
 
         public bool DeployTopologyOnly { get; set; }
 
+        public ISendObserver SendObservers => _sendObservers;
+
         public ILogContext LogContext
         {
             get => _logContext;

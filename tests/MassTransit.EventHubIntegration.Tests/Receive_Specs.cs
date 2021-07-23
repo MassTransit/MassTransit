@@ -5,6 +5,7 @@ namespace MassTransit.EventHubIntegration.Tests
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Producer;
     using Context;
+    using Contracts;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
@@ -110,12 +111,6 @@ namespace MassTransit.EventHubIntegration.Tests
                 _taskCompletionSource.TrySetResult(context);
             }
         }
-
-
-        public interface EventHubMessage
-        {
-            string Text { get; }
-        }
     }
 
 
@@ -192,11 +187,6 @@ namespace MassTransit.EventHubIntegration.Tests
             {
                 _taskCompletionSource.TrySetResult(context);
             }
-        }
-
-
-        public interface EventHubMessage
-        {
         }
     }
 }

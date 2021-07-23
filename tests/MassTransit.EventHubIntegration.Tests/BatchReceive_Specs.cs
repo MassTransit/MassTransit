@@ -3,6 +3,7 @@ namespace MassTransit.EventHubIntegration.Tests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using Contracts;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
@@ -19,7 +20,7 @@ namespace MassTransit.EventHubIntegration.Tests
             const int batchSize = 100;
             var checkpointInterval = TimeSpan.FromMinutes(1);
 
-            TaskCompletionSource<ConsumeContext<Batch<EventHubMessage>>> taskCompletionSource = GetTask<ConsumeContext<Batch<EventHubMessage>>>();
+            TaskCompletionSource<ConsumeContext<Batch<BatchEventHubMessage>>> taskCompletionSource = GetTask<ConsumeContext<Batch<BatchEventHubMessage>>>();
             var services = new ServiceCollection();
             services.AddSingleton(taskCompletionSource);
 
@@ -34,7 +35,7 @@ namespace MassTransit.EventHubIntegration.Tests
                     rider.AddConsumer<EventHubMessageConsumer>(c => c
                         .Options<BatchOptions>(o => o.SetMessageLimit(batchSize)
                             .SetTimeLimit(checkpointInterval)
-                            .GroupBy<EventHubMessage, string>(m => m.PartitionKey())));
+                            .GroupBy<BatchEventHubMessage, string>(m => m.PartitionKey())));
 
                     rider.UsingEventHub((context, k) =>
                     {
@@ -66,9 +67,9 @@ namespace MassTransit.EventHubIntegration.Tests
             try
             {
                 var messages = Enumerable.Range(0, batchSize).Select(x => new {Index = x}).ToArray();
-                await producer.Produce<EventHubMessage>(messages, TestCancellationToken);
+                await producer.Produce<BatchEventHubMessage>(messages, TestCancellationToken);
 
-                ConsumeContext<Batch<EventHubMessage>> result = await taskCompletionSource.Task;
+                ConsumeContext<Batch<BatchEventHubMessage>> result = await taskCompletionSource.Task;
 
                 Assert.AreEqual(batchSize, result.Message.Length);
 
@@ -87,25 +88,19 @@ namespace MassTransit.EventHubIntegration.Tests
 
 
         class EventHubMessageConsumer :
-            IConsumer<Batch<EventHubMessage>>
+            IConsumer<Batch<BatchEventHubMessage>>
         {
-            readonly TaskCompletionSource<ConsumeContext<Batch<EventHubMessage>>> _taskCompletionSource;
+            readonly TaskCompletionSource<ConsumeContext<Batch<BatchEventHubMessage>>> _taskCompletionSource;
 
-            public EventHubMessageConsumer(TaskCompletionSource<ConsumeContext<Batch<EventHubMessage>>> taskCompletionSource)
+            public EventHubMessageConsumer(TaskCompletionSource<ConsumeContext<Batch<BatchEventHubMessage>>> taskCompletionSource)
             {
                 _taskCompletionSource = taskCompletionSource;
             }
 
-            public async Task Consume(ConsumeContext<Batch<EventHubMessage>> context)
+            public async Task Consume(ConsumeContext<Batch<BatchEventHubMessage>> context)
             {
                 _taskCompletionSource.TrySetResult(context);
             }
-        }
-
-
-        public interface EventHubMessage
-        {
-            int Index { get; }
         }
     }
 }

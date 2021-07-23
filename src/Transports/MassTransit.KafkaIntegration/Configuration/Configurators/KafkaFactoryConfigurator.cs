@@ -288,6 +288,8 @@ namespace MassTransit.KafkaIntegration.Configurators
 
         public IKafkaRider Build(IRiderRegistrationContext context, IBusInstance busInstance)
         {
+            ConnectSendObserver(busInstance.HostConfiguration.SendObservers);
+
             var endpoints = new ReceiveEndpointCollection();
             foreach (var topic in _topics)
                 endpoints.Add(topic.EndpointName, topic.CreateReceiveEndpoint(busInstance));
