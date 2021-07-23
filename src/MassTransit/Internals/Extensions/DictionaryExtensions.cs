@@ -2,6 +2,7 @@ namespace MassTransit.Internals.Extensions
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
 
     public static class DictionaryExtensions
@@ -15,6 +16,19 @@ namespace MassTransit.Internals.Extensions
             dictionary.Add(key, value);
 
             return value;
+        }
+
+        public static IDictionary<TKey, TValue> MergeLeft<TKey, TValue>(this IDictionary<TKey, TValue> source, params IDictionary<TKey, TValue>[] others)
+        {
+            var result = new Dictionary<TKey, TValue>(source.Count);
+
+            foreach (IDictionary<TKey, TValue> dictionary in new[] {source}.Concat(others))
+            {
+                foreach (KeyValuePair<TKey, TValue> element in dictionary)
+                    result[element.Key] = element.Value;
+            }
+
+            return result;
         }
     }
 }

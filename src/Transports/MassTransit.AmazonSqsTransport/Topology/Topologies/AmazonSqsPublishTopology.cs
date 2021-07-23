@@ -1,6 +1,7 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 {
     using System;
+    using System.Collections.Generic;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
 
@@ -14,7 +15,15 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
         public AmazonSqsPublishTopology(IMessageTopology messageTopology)
         {
             _messageTopology = messageTopology;
+
+            TopicAttributes = new Dictionary<string, object>();
+            TopicSubscriptionAttributes = new Dictionary<string, object>();
+            TopicTags = new Dictionary<string, string>();
         }
+
+        public IDictionary<string, object> TopicAttributes { get; private set; }
+        public IDictionary<string, object> TopicSubscriptionAttributes { get; private set; }
+        public IDictionary<string, string> TopicTags { get; private set; }
 
         IAmazonSqsMessagePublishTopology<T> IAmazonSqsPublishTopology.GetMessageTopology<T>()
         {
@@ -28,7 +37,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
 
         protected override IMessagePublishTopologyConfigurator CreateMessageTopology<T>(Type type)
         {
-            var messageTopology = new AmazonSqsMessagePublishTopology<T>(_messageTopology.GetMessageTopology<T>());
+            var messageTopology = new AmazonSqsMessagePublishTopology<T>(this, _messageTopology.GetMessageTopology<T>());
 
             OnMessageTopologyCreated(messageTopology);
 
