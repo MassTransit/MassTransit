@@ -11,6 +11,7 @@ namespace MassTransit.KafkaIntegration.Tests
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Sagas;
+    using Util;
 
 
     public class Producer_Specs :
@@ -94,6 +95,78 @@ namespace MassTransit.KafkaIntegration.Tests
                 Assert.That(headerType, Is.Not.Null);
                 Assert.That(headerType.Key, Is.EqualTo("Hello"));
                 Assert.That(headerType.Value, Is.EqualTo("World"));
+            }
+            finally
+            {
+                serviceScope.Dispose();
+
+                await busControl.StopAsync(TestCancellationToken);
+
+                await provider.DisposeAsync();
+            }
+        }
+
+        [Test]
+        public async Task Should_use_bus_send_observer()
+        {
+            TaskCompletionSource<ConsumeContext<KafkaMessage>> taskCompletionSource = GetTask<ConsumeContext<KafkaMessage>>();
+            TaskCompletionSource<SendContext> preSendCompletionSource = GetTask<SendContext>();
+            TaskCompletionSource<SendContext> postSendCompletionSource = GetTask<SendContext>();
+            var services = new ServiceCollection();
+            services.AddSingleton(taskCompletionSource);
+
+            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            services.AddMassTransit(x =>
+            {
+                x.UsingInMemory((context, cfg) =>
+                {
+                    cfg.ConnectSendObserver(new TestSendObserver(preSendCompletionSource, postSendCompletionSource));
+                    cfg.ConfigureEndpoints(context);
+                });
+                x.AddRider(rider =>
+                {
+                    rider.AddConsumer<KafkaMessageConsumer>();
+
+                    rider.AddProducer<KafkaMessage>(Topic);
+
+                    rider.UsingKafka((context, k) =>
+                    {
+                        k.Host("localhost:9092");
+
+                        k.TopicEndpoint<KafkaMessage>(Topic, nameof(Producer_Specs), c =>
+                        {
+                            c.AutoOffsetReset = AutoOffsetReset.Earliest;
+                            c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                        });
+                    });
+                });
+            });
+
+            var provider = services.BuildServiceProvider(true);
+
+            var busControl = provider.GetRequiredService<IBusControl>();
+
+            await busControl.StartAsync(TestCancellationToken);
+
+            var serviceScope = provider.CreateScope();
+
+            var producer = serviceScope.ServiceProvider.GetRequiredService<ITopicProducer<KafkaMessage>>();
+
+            try
+            {
+                await producer.Produce(new {Text = "text"}, TestCancellationToken);
+
+                await preSendCompletionSource.Task;
+
+                ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
+
+                Assert.AreEqual("text", result.Message.Text);
+                Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
+                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+
+                await postSendCompletionSource.Task;
             }
             finally
             {
@@ -235,6 +308,40 @@ namespace MassTransit.KafkaIntegration.Tests
             public State Active { get; private set; }
 
             public Event<StartTest> Started { get; private set; }
+        }
+
+
+        class TestSendObserver :
+            ISendObserver
+        {
+            readonly TaskCompletionSource<SendContext> _postSend;
+            readonly TaskCompletionSource<SendContext> _preSend;
+
+            public TestSendObserver(TaskCompletionSource<SendContext> preSend, TaskCompletionSource<SendContext> postSend)
+            {
+                _preSend = preSend;
+                _postSend = postSend;
+            }
+
+            public Task PreSend<T>(SendContext<T> context)
+                where T : class
+            {
+                _preSend.TrySetResult(context);
+                return TaskUtil.Completed;
+            }
+
+            public Task PostSend<T>(SendContext<T> context)
+                where T : class
+            {
+                _postSend.TrySetResult(context);
+                return TaskUtil.Completed;
+            }
+
+            public Task SendFault<T>(SendContext<T> context, Exception exception)
+                where T : class
+            {
+                return TaskUtil.Completed;
+            }
         }
     }
 }

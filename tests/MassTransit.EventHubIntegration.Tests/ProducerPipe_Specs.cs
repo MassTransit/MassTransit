@@ -2,6 +2,7 @@ namespace MassTransit.EventHubIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Contracts;
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -121,13 +122,6 @@ namespace MassTransit.EventHubIntegration.Tests
             public void Probe(ProbeContext context)
             {
             }
-        }
-
-
-        public interface EventHubMessage
-        {
-            Guid CorrelationId { get; }
-            string Text { get; }
         }
     }
 }

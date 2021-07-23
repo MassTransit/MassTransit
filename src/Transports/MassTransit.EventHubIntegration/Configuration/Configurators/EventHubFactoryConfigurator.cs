@@ -163,6 +163,8 @@ namespace MassTransit.EventHubIntegration.Configurators
 
         public IEventHubRider Build(IRiderRegistrationContext context, IBusInstance busInstance)
         {
+            ConnectSendObserver(busInstance.HostConfiguration.SendObservers);
+
             var endpoints = new ReceiveEndpointCollection();
             foreach (var endpoint in _endpoints)
                 endpoints.Add(endpoint.EndpointName, endpoint.CreateReceiveEndpoint(busInstance));

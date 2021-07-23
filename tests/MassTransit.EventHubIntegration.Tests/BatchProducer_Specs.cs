@@ -5,6 +5,7 @@ namespace MassTransit.EventHubIntegration.Tests
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using Contracts;
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -122,12 +123,6 @@ namespace MassTransit.EventHubIntegration.Tests
 
                 return TaskUtil.Completed;
             }
-        }
-
-
-        public interface EventHubMessage
-        {
-            string Text { get; }
         }
 
 

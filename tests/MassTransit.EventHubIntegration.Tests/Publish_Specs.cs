@@ -6,6 +6,7 @@ namespace MassTransit.EventHubIntegration.Tests
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Producer;
     using Context;
+    using Contracts;
     using GreenPipes.Util;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -129,12 +130,6 @@ namespace MassTransit.EventHubIntegration.Tests
         }
 
 
-        public interface EventHubMessage
-        {
-            string Text { get; }
-        }
-
-
         class BusPingConsumer :
             IConsumer<BusPing>
         {
@@ -154,6 +149,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
 
         public interface BusPing
-        {}
+        {
+        }
     }
 }

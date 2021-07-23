@@ -24,6 +24,8 @@
         /// </summary>
         bool DeployTopologyOnly { get; set; }
 
+        ISendObserver SendObservers { get; }
+
         ILogContext LogContext { get; set; }
         ILogContext ReceiveLogContext { get; }
         ILogContext SendLogContext { get; }

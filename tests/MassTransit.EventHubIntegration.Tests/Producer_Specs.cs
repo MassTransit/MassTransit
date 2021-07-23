@@ -2,12 +2,14 @@ namespace MassTransit.EventHubIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
+    using Contracts;
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
+    using Util;
 
 
     public class Producer_Specs :
@@ -123,11 +125,133 @@ namespace MassTransit.EventHubIntegration.Tests
             string Key { get; }
             string Value { get; }
         }
+    }
 
 
-        public interface EventHubMessage
+    public class ProducerObserver_Specs :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_use_bus_observers()
         {
-            string Text { get; }
+            TaskCompletionSource<ConsumeContext<EventHubMessage>> taskCompletionSource = GetTask<ConsumeContext<EventHubMessage>>();
+            TaskCompletionSource<SendContext> preSendCompletionSource = GetTask<SendContext>();
+            TaskCompletionSource<SendContext> postSendCompletionSource = GetTask<SendContext>();
+            var services = new ServiceCollection();
+            services.AddSingleton(taskCompletionSource);
+
+            services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
+            services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
+
+            services.AddMassTransit(x =>
+            {
+                x.UsingInMemory((context, cfg) =>
+                {
+                    cfg.ConnectSendObserver(new TestSendObserver(preSendCompletionSource, postSendCompletionSource));
+                    cfg.ConfigureEndpoints(context);
+                });
+                x.AddRider(rider =>
+                {
+                    rider.AddConsumer<EventHubMessageConsumer>();
+
+                    rider.UsingEventHub((context, k) =>
+                    {
+                        k.Host(Configuration.EventHubNamespace);
+                        k.Storage(Configuration.StorageAccount);
+
+                        k.ReceiveEndpoint(Configuration.EventHubName, c =>
+                        {
+                            c.ConfigureConsumer<EventHubMessageConsumer>(context);
+                        });
+                    });
+                });
+            });
+
+            var provider = services.BuildServiceProvider(true);
+
+            var busControl = provider.GetRequiredService<IBusControl>();
+
+            await busControl.StartAsync(TestCancellationToken);
+
+            var serviceScope = provider.CreateScope();
+
+            var producerProvider = serviceScope.ServiceProvider.GetRequiredService<IEventHubProducerProvider>();
+            var producer = await producerProvider.GetProducer(Configuration.EventHubName);
+
+            try
+            {
+                await producer.Produce<EventHubMessage>(new {Text = "text"}, TestCancellationToken);
+
+                await preSendCompletionSource.Task;
+
+                ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
+
+                Assert.AreEqual("text", result.Message.Text);
+                Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
+                Assert.That(result.DestinationAddress,
+                    Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
+
+                await postSendCompletionSource.Task;
+            }
+            finally
+            {
+                serviceScope.Dispose();
+
+                await busControl.StopAsync(TestCancellationToken);
+
+                await provider.DisposeAsync();
+            }
+        }
+
+
+        class TestSendObserver :
+            ISendObserver
+        {
+            readonly TaskCompletionSource<SendContext> _postSend;
+            readonly TaskCompletionSource<SendContext> _preSend;
+
+            public TestSendObserver(TaskCompletionSource<SendContext> preSend, TaskCompletionSource<SendContext> postSend)
+            {
+                _preSend = preSend;
+                _postSend = postSend;
+            }
+
+            public Task PreSend<T>(SendContext<T> context)
+                where T : class
+            {
+                _preSend.TrySetResult(context);
+                return TaskUtil.Completed;
+            }
+
+            public Task PostSend<T>(SendContext<T> context)
+                where T : class
+            {
+                _postSend.TrySetResult(context);
+                return TaskUtil.Completed;
+            }
+
+            public Task SendFault<T>(SendContext<T> context, Exception exception)
+                where T : class
+            {
+                return TaskUtil.Completed;
+            }
+        }
+
+
+        class EventHubMessageConsumer :
+            IConsumer<EventHubMessage>
+        {
+            readonly TaskCompletionSource<ConsumeContext<EventHubMessage>> _taskCompletionSource;
+
+            public EventHubMessageConsumer(TaskCompletionSource<ConsumeContext<EventHubMessage>> taskCompletionSource)
+            {
+                _taskCompletionSource = taskCompletionSource;
+            }
+
+            public async Task Consume(ConsumeContext<EventHubMessage> context)
+            {
+                _taskCompletionSource.TrySetResult(context);
+            }
         }
     }
 }

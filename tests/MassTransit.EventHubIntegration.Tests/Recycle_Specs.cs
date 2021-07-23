@@ -3,6 +3,7 @@ namespace MassTransit.EventHubIntegration.Tests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using Contracts;
     using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -24,8 +25,8 @@ namespace MassTransit.EventHubIntegration.Tests
         {
             const int numOfTries = 2;
 
-            TaskCompletionSource<ConsumeContext<EventHubMessage>>[] taskCompletionSources = Enumerable.Range(0, numOfTries)
-                .Select(x => GetTask<ConsumeContext<EventHubMessage>>())
+            TaskCompletionSource<ConsumeContext<BatchEventHubMessage>>[] taskCompletionSources = Enumerable.Range(0, numOfTries)
+                .Select(x => GetTask<ConsumeContext<BatchEventHubMessage>>())
                 .ToArray();
             var services = new ServiceCollection();
             services.AddSingleton(taskCompletionSources);
@@ -92,10 +93,9 @@ namespace MassTransit.EventHubIntegration.Tests
                             }),
                             TestCancellationToken);
 
-                        TaskCompletionSource<ConsumeContext<EventHubMessage>> taskCompletionSource = taskCompletionSources[i];
-                        ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
+                        TaskCompletionSource<ConsumeContext<BatchEventHubMessage>> taskCompletionSource = taskCompletionSources[i];
+                        ConsumeContext<BatchEventHubMessage> result = await taskCompletionSource.Task;
 
-                        Assert.AreEqual("text", result.Message.Text);
                         Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
                         Assert.That(result.DestinationAddress,
                             Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
@@ -127,16 +127,16 @@ namespace MassTransit.EventHubIntegration.Tests
 
 
         class EventHubMessageConsumer :
-            IConsumer<EventHubMessage>
+            IConsumer<BatchEventHubMessage>
         {
-            readonly TaskCompletionSource<ConsumeContext<EventHubMessage>>[] _taskCompletionSource;
+            readonly TaskCompletionSource<ConsumeContext<BatchEventHubMessage>>[] _taskCompletionSource;
 
-            public EventHubMessageConsumer(TaskCompletionSource<ConsumeContext<EventHubMessage>>[] taskCompletionSource)
+            public EventHubMessageConsumer(TaskCompletionSource<ConsumeContext<BatchEventHubMessage>>[] taskCompletionSource)
             {
                 _taskCompletionSource = taskCompletionSource;
             }
 
-            public async Task Consume(ConsumeContext<EventHubMessage> context)
+            public async Task Consume(ConsumeContext<BatchEventHubMessage> context)
             {
                 _taskCompletionSource[context.Message.Index].TrySetResult(context);
             }
@@ -147,13 +147,6 @@ namespace MassTransit.EventHubIntegration.Tests
         {
             string Key { get; }
             string Value { get; }
-        }
-
-
-        public interface EventHubMessage
-        {
-            int Index { get; }
-            string Text { get; }
         }
     }
 }
