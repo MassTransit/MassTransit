@@ -4,6 +4,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Amazon.SQS;
     using Amazon.SQS.Model;
     using Context;
     using Contexts;
@@ -116,11 +117,22 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
 
             while (!IsStopping)
             {
-                Task<int>[] receiveTasks = Enumerable.Repeat(0, receiveCount).Select(_ => ReceiveMessages(messageLimit, executor)).ToArray();
+                var received = 0;
 
-                var counts = await Task.WhenAll(receiveTasks).ConfigureAwait(false);
+                if (_receiveSettings.IsOrdered)
+                {
+                    Task<IList<Message>>[] receiveTasks = Enumerable.Repeat(0, receiveCount).Select(_ => ReceiveOrderedMessages(messageLimit)).ToArray();
+                    IList<Message>[] messages = await Task.WhenAll(receiveTasks).ConfigureAwait(false);
 
-                var received = counts.Sum();
+                    received = await HandleOrderedMessages(executor, messages.SelectMany(x => x)).ConfigureAwait(false);
+                }
+                else
+                {
+                    Task<int>[] receiveTasks = Enumerable.Repeat(0, receiveCount).Select(_ => ReceiveAndHandleMessages(messageLimit, executor)).ToArray();
+                    var counts = await Task.WhenAll(receiveTasks).ConfigureAwait(false);
+
+                    received = counts.Sum();
+                }
 
                 if (received == receiveCount * 10) // ramp up receivers when busy
                     receiveCount = Math.Min(maxReceiveCount, receiveCount + (maxReceiveCount - receiveCount) / 2);
@@ -129,7 +141,42 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             }
         }
 
-        async Task<int> ReceiveMessages(int messageLimit, ChannelExecutor executor)
+        async Task<IList<Message>> ReceiveOrderedMessages(int messageLimit)
+        {
+            try
+            {
+                return await _client.ReceiveMessages(_receiveSettings.EntityName, messageLimit, _receiveSettings.WaitTimeSeconds, Stopping)
+                    .ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                return Array.Empty<Message>();
+            }
+        }
+
+        async Task<int> HandleOrderedMessages(ChannelExecutor executor, IEnumerable<Message> messages)
+        {
+            IEnumerable<IGrouping<string, Message>> messageGroups = messages
+                .GroupBy(x => x.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var groupId)
+                    ? groupId
+                    : "")
+                .ToList();
+
+            List<Task> messageGroupTasks = messageGroups.Select(x => HandleOrderedMessageGroup(executor, x)).ToList();
+
+            await Task.WhenAll(messageGroupTasks).ConfigureAwait(false);
+
+            return messageGroups.Sum(x => x.Count());
+        }
+
+        async Task HandleOrderedMessageGroup(ChannelExecutor executor, IEnumerable<Message> messages)
+        {
+            foreach (var message in messages.OrderBy(x => x.Attributes.TryGetValue("SequenceNumber", out var sequenceNumber) ? sequenceNumber : "",
+                SequenceNumberComparer.Instance))
+                await executor.Run(() => HandleMessage(message), Stopping).ConfigureAwait(false);
+        }
+
+        async Task<int> ReceiveAndHandleMessages(int messageLimit, ChannelExecutor executor)
         {
             try
             {
@@ -167,6 +214,27 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
                 {
                     LogContext.Warning?.Log("Stop canceled waiting for message consumers to complete: {InputAddress}", _context.InputAddress);
                 }
+            }
+        }
+
+
+        class SequenceNumberComparer :
+            IComparer<string>
+        {
+            public static readonly SequenceNumberComparer Instance = new SequenceNumberComparer();
+
+            public int Compare(string x, string y)
+            {
+                if (string.IsNullOrWhiteSpace(x))
+                    throw new ArgumentNullException(nameof(x));
+
+                if (string.IsNullOrWhiteSpace(y))
+                    throw new ArgumentNullException(nameof(y));
+
+                if (x.Length != y.Length)
+                    return x.Length > y.Length ? 1 : -1;
+
+                return string.Compare(x, y, StringComparison.Ordinal);
             }
         }
     }

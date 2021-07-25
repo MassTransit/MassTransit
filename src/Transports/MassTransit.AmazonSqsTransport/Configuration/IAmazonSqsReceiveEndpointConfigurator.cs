@@ -28,5 +28,11 @@
         void ConfigureClient(Action<IPipeConfigurator<ClientContext>> configure);
 
         void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>> configure);
+
+        /// <summary>
+        /// FIFO queues deliver messages to consumers partitioned by MessageGroupId, in SequenceNumber order. Calling this method will
+        /// disable that behavior.
+        /// </summary>
+        void DisableMessageOrdering();
     }
 }

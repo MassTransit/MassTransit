@@ -39,5 +39,10 @@
         /// Get the input address for the transport on the specified host
         /// </summary>
         Uri GetInputAddress(Uri hostAddress);
+
+        /// <summary>
+        /// If the queue is ordered, enables grouping by MessageGroupId and process messages in ordered way by SequenceNumber
+        /// </summary>
+        bool IsOrdered { get; }
     }
 }

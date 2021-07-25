@@ -133,7 +133,6 @@
         }
 
         public IDictionary<string, object> QueueAttributes => _settings.QueueAttributes;
-
         public IDictionary<string, object> QueueSubscriptionAttributes => _settings.QueueSubscriptionAttributes;
         public IDictionary<string, string> QueueTags => _settings.QueueTags;
 
@@ -159,6 +158,11 @@
         public void ConfigureConnection(Action<IPipeConfigurator<ConnectionContext>> configure)
         {
             configure?.Invoke(_connectionConfigurator);
+        }
+
+        public void DisableMessageOrdering()
+        {
+            _settings.IsOrdered = false;
         }
 
         SqsReceiveEndpointContext CreateSqsReceiveEndpointContext()
