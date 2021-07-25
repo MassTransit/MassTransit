@@ -92,7 +92,7 @@
         {
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
 
-            var settings = new QueueReceiveSettings(endpointConfiguration, queueName, true, false);
+            var settings = new QueueReceiveSettings(endpointConfiguration, queueName, true, false, false);
 
             return CreateReceiveEndpointConfiguration(settings, endpointConfiguration, configure);
         }

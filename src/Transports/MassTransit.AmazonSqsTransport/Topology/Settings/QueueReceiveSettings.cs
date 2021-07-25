@@ -11,10 +11,11 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
     {
         readonly IAmazonSqsEndpointConfiguration _configuration;
 
-        public QueueReceiveSettings(IAmazonSqsEndpointConfiguration configuration, string queueName, bool durable, bool autoDelete)
+        public QueueReceiveSettings(IAmazonSqsEndpointConfiguration configuration, string queueName, bool durable, bool autoDelete, bool orderedMessageProcessingEnabled)
             : base(queueName, durable, autoDelete)
         {
             _configuration = configuration;
+            OrderedMessageHandlingEnabled = orderedMessageProcessingEnabled;
 
             WaitTimeSeconds = 3;
         }
@@ -25,6 +26,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
         public int WaitTimeSeconds { get; set; }
 
         public bool PurgeOnStartup { get; set; }
+
+        public bool OrderedMessageHandlingEnabled { get; set; }
 
         public Uri GetInputAddress(Uri hostAddress)
         {

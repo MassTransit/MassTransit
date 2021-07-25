@@ -132,6 +132,11 @@
             set => _settings.PurgeOnStartup = value;
         }
 
+        public bool OrderedMessageHandlingEnabled
+        {
+            set => _settings.OrderedMessageHandlingEnabled = value;
+        }
+
         public IDictionary<string, object> QueueAttributes => _settings.QueueAttributes;
 
         public IDictionary<string, object> QueueSubscriptionAttributes => _settings.QueueSubscriptionAttributes;
