@@ -156,7 +156,7 @@
             var dbResponse = await _cosmosClient.CreateDatabaseIfNotExistsAsync(_databaseName).ConfigureAwait(false);
             _database = dbResponse.Database;
             var cResponse = await _database
-                .CreateContainerAsync(_collectionName, "/id")
+                .CreateContainerIfNotExistsAsync(_collectionName, "/id")
                 .ConfigureAwait(false);
             _container = cResponse.Container;
         }
