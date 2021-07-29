@@ -48,6 +48,9 @@
                 delaySendContext.Delay = delay;
             }
 
+            if (ScheduledMessageId.HasValue)
+                context.Headers.Set(MessageHeaders.SchedulingTokenId, ScheduledMessageId.Value.ToString("N"));
+
             if (_pipe.IsNotEmpty())
                 await _pipe.Send(context).ConfigureAwait(false);
         }

@@ -3,7 +3,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Scheduling
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using GreenPipes;
     using MassTransit.Scheduling;
     using Util;
@@ -26,10 +25,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Scheduling
             var payload = await message.ConfigureAwait(false);
 
             var scheduleMessagePipe = new ScheduleSendPipe<T>(pipe, scheduledTime);
-
-            var tokenId = ScheduleTokenIdCache<T>.GetTokenId(payload);
-
-            scheduleMessagePipe.ScheduledMessageId = tokenId;
 
             var endpoint = await _sendEndpointProvider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 

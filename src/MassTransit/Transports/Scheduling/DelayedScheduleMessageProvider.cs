@@ -3,6 +3,7 @@ namespace MassTransit.Transports.Scheduling
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Context;
     using GreenPipes;
     using MassTransit.Scheduling;
     using Util;
@@ -25,6 +26,10 @@ namespace MassTransit.Transports.Scheduling
             var payload = await message.ConfigureAwait(false);
 
             var scheduleMessagePipe = new ScheduleSendPipe<T>(pipe, scheduledTime);
+
+            var tokenId = ScheduleTokenIdCache<T>.GetTokenId(payload);
+
+            scheduleMessagePipe.ScheduledMessageId = tokenId;
 
             var schedulerEndpoint = await _sendEndpointProvider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
