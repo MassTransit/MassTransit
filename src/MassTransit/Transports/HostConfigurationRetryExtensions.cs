@@ -10,11 +10,14 @@ namespace MassTransit.Transports
 
     public static class HostConfigurationRetryExtensions
     {
-        public static async Task Retry(this IHostConfiguration hostConfiguration, Func<Task> factory, ISupervisor supervisor)
+        public static async Task Retry(this IHostConfiguration hostConfiguration, Func<Task> factory, ISupervisor supervisor,
+            CancellationToken cancellationToken)
         {
             var description = hostConfiguration.HostAddress;
 
-            var stoppingContext = new SupervisorStoppingContext(supervisor.Stopping);
+            var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, supervisor.Stopping);
+
+            var stoppingContext = new SupervisorStoppingContext(tokenSource.Token);
 
             RetryPolicyContext<SupervisorStoppingContext> policyContext = hostConfiguration.ReceiveTransportRetryPolicy.CreatePolicyContext(stoppingContext);
 
@@ -22,17 +25,15 @@ namespace MassTransit.Transports
             {
                 RetryContext<SupervisorStoppingContext> retryContext = null;
 
-                while (!supervisor.Stopping.IsCancellationRequested)
+                while (!tokenSource.Token.IsCancellationRequested)
                 {
                     try
                     {
                         if (retryContext?.Delay != null)
-                            await Task.Delay(retryContext.Delay.Value, supervisor.Stopping).ConfigureAwait(false);
+                            await Task.Delay(retryContext.Delay.Value, tokenSource.Token).ConfigureAwait(false);
 
-                        if (supervisor.Stopping.IsCancellationRequested)
-                        {
+                        if (tokenSource.Token.IsCancellationRequested)
                             throw new ConnectionException($"The connection is stopping and cannot be used: {description}", retryContext?.Exception);
-                        }
 
                         await factory().ConfigureAwait(false);
                         return;
@@ -54,12 +55,12 @@ namespace MassTransit.Transports
                             throw;
                     }
 
-                    if (supervisor.Stopping.IsCancellationRequested)
+                    if (tokenSource.Token.IsCancellationRequested)
                         break;
 
                     try
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(1), supervisor.Stopping).ConfigureAwait(false);
+                        await Task.Delay(TimeSpan.FromSeconds(1), tokenSource.Token).ConfigureAwait(false);
                     }
                     catch
                     {

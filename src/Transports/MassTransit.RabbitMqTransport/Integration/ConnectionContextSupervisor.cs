@@ -119,7 +119,7 @@
 
             public Task Send(IPipe<ModelContext> pipe, CancellationToken cancellationToken)
             {
-                return _hostConfiguration.Retry(() => ModelContextSupervisor.Send(pipe, cancellationToken), ModelContextSupervisor);
+                return _hostConfiguration.Retry(() => ModelContextSupervisor.Send(pipe, cancellationToken), ModelContextSupervisor, cancellationToken);
             }
 
             public void Probe(ProbeContext context)

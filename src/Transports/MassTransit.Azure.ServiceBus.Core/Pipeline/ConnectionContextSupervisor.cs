@@ -120,7 +120,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
             public Task Send(IPipe<SendEndpointContext> pipe, CancellationToken cancellationToken)
             {
-                return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), _supervisor);
+                return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), _supervisor, cancellationToken);
             }
 
             public void Probe(ProbeContext context)

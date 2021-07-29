@@ -101,7 +101,7 @@
 
             public Task Send(IPipe<SessionContext> pipe, CancellationToken cancellationToken)
             {
-                return _hostConfiguration.Retry(() => SessionContextSupervisor.Send(pipe, cancellationToken), SessionContextSupervisor);
+                return _hostConfiguration.Retry(() => SessionContextSupervisor.Send(pipe, cancellationToken), SessionContextSupervisor, cancellationToken);
             }
 
             public void Probe(ProbeContext context)
