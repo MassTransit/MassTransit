@@ -5,7 +5,6 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using NUnit.Framework;
     using RawMessages;
     using Serialization;
-    using TestFramework.Messages;
 
 
     namespace RawMessages
@@ -24,6 +23,17 @@ namespace MassTransit.AmazonSqsTransport.Tests
         {
             public Guid CommandId { get; set; }
             public string ItemNumber { get; set; }
+        }
+
+
+        public class CrapConsumed
+        {
+            public CrapConsumed(Guid correlationId)
+            {
+                CorrelationId = correlationId;
+            }
+
+            public Guid CorrelationId { get; set; }
         }
     }
 
@@ -105,7 +115,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
             Assert.That(commandContext.ReceiveContext.ContentType, Is.EqualTo(RawJsonMessageSerializer.RawJsonContentType),
                 $"unexpected content-type {commandContext.ReceiveContext.ContentType}");
 
-            ConsumeContext<PingMessage> context = await _handled;
+            ConsumeContext<CrapConsumed> context = await _handled;
 
             Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(JsonMessageSerializer.JsonContentType),
                 $"unexpected content-type {context.ReceiveContext.ContentType}");
@@ -115,14 +125,22 @@ namespace MassTransit.AmazonSqsTransport.Tests
             Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(default));
         }
 
-        Task<ConsumeContext<PingMessage>> _handled;
+        Task<ConsumeContext<CrapConsumed>> _handled;
         Task<ConsumeContext<Command>> _handler;
+
+        public Sending_and_consuming_raw_json_with_headers_and_producing()
+        {
+            AmazonSqsTestHarness.OnCleanupVirtualHost += (sqs, sns) =>
+            {
+                AmazonSqsTestHarness.CleanUpQueue(sqs, "second-queue");
+            };
+        }
 
         protected override void ConfigureAmazonSqsBus(IAmazonSqsBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("second-queue", e =>
             {
-                _handled = Handled<PingMessage>(e);
+                _handled = Handled<CrapConsumed>(e);
             });
         }
 
@@ -136,7 +154,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             Handler<Command>(configurator, async context =>
             {
-                await context.Publish(new PingMessage(context.Message.CommandId));
+                await context.Publish(new CrapConsumed(context.Message.CommandId));
 
                 handler.SetResult(context);
             });
@@ -171,7 +189,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
             Assert.That(commandContext.ReceiveContext.ContentType, Is.EqualTo(RawJsonMessageSerializer.RawJsonContentType),
                 $"unexpected content-type {commandContext.ReceiveContext.ContentType}");
 
-            ConsumeContext<PingMessage> context = await _handled;
+            ConsumeContext<CrapConsumed> context = await _handled;
 
             Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(JsonMessageSerializer.JsonContentType),
                 $"unexpected content-type {context.ReceiveContext.ContentType}");
@@ -181,14 +199,22 @@ namespace MassTransit.AmazonSqsTransport.Tests
             Assert.That(context.Headers.Get<string>(headerName), Is.EqualTo(headerValue));
         }
 
-        Task<ConsumeContext<PingMessage>> _handled;
+        Task<ConsumeContext<CrapConsumed>> _handled;
         Task<ConsumeContext<Command>> _handler;
+
+        public Sending_and_consuming_raw_json_with_headers_and_producing_with_copy_enabled()
+        {
+            AmazonSqsTestHarness.OnCleanupVirtualHost += (sqs, sns) =>
+            {
+                AmazonSqsTestHarness.CleanUpQueue(sqs, "second-queue");
+            };
+        }
 
         protected override void ConfigureAmazonSqsBus(IAmazonSqsBusFactoryConfigurator configurator)
         {
             configurator.ReceiveEndpoint("second-queue", e =>
             {
-                _handled = Handled<PingMessage>(e);
+                _handled = Handled<CrapConsumed>(e);
             });
         }
 
@@ -202,7 +228,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             Handler<Command>(configurator, async context =>
             {
-                await context.Publish(new PingMessage(context.Message.CommandId));
+                await context.Publish(new CrapConsumed(context.Message.CommandId));
 
                 handler.SetResult(context);
             });

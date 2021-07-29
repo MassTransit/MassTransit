@@ -104,7 +104,7 @@
             {
                 ConfigureHost(x);
 
-                // CleanUpVirtualHost();
+                CleanUpVirtualHost();
 
                 ConfigureBus(x);
 
@@ -146,15 +146,14 @@
                 var settings = GetHostSettings();
                 var connection = settings.CreateConnection();
 
-                using (var amazonSqs = connection.CreateAmazonSqsClient())
-                using (var amazonSns = connection.CreateAmazonSnsClient())
-                {
-                    CleanUpQueue(amazonSqs, "input_queue");
+                using var amazonSqs = connection.CreateAmazonSqsClient();
+                using var amazonSns = connection.CreateAmazonSnsClient();
 
-                    CleanUpQueue(amazonSqs, InputQueueName);
+                CleanUpQueue(amazonSqs, "input_queue");
 
-                    CleanupVirtualHost(amazonSqs, amazonSns);
-                }
+                CleanUpQueue(amazonSqs, InputQueueName);
+
+                CleanupVirtualHost(amazonSqs, amazonSns);
             }
             catch (Exception exception)
             {
@@ -162,9 +161,9 @@
             }
         }
 
-        static void CleanUpQueue(IAmazonSQS amazonSqs, string queueName)
+        public void CleanUpQueue(IAmazonSQS amazonSqs, string queueName)
         {
-            async Task CleanUpQueue(string queue)
+            async Task CleanUpQueueAsync(string queue)
             {
                 try
                 {
@@ -179,9 +178,9 @@
 
             Task.Run(async () =>
             {
-                await CleanUpQueue(queueName).ConfigureAwait(false);
-                await CleanUpQueue($"{queueName}_skipped").ConfigureAwait(false);
-                await CleanUpQueue($"{queueName}_error").ConfigureAwait(false);
+                await CleanUpQueueAsync(queueName).ConfigureAwait(false);
+                await CleanUpQueueAsync($"{queueName}_skipped").ConfigureAwait(false);
+                await CleanUpQueueAsync($"{queueName}_error").ConfigureAwait(false);
             });
         }
     }
