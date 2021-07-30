@@ -118,7 +118,7 @@ namespace MassTransit.KafkaIntegration.Transport
 
                     var topic = new TopicPartition(_context.TopicAddress.Topic, sendContext.Partition);
 
-                    await context.Produce(topic, message, context.CancellationToken).ConfigureAwait(false);
+                    await context.Produce(topic, message, sendContext.CancellationToken).ConfigureAwait(false);
 
                     sendContext.LogSent();
                     activity.AddSendContextHeadersPostSend(sendContext);

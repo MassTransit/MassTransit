@@ -253,7 +253,7 @@ namespace MassTransit.EventHubIntegration
 
                     async Task FlushAsync(EventDataBatch batch)
                     {
-                        await context.Produce(batch, context.CancellationToken).ConfigureAwait(false);
+                        await context.Produce(batch, _cancellationToken).ConfigureAwait(false);
                         batch.Dispose();
                     }
 
@@ -268,7 +268,7 @@ namespace MassTransit.EventHubIntegration
                         while (!eventDataBatch.TryAdd(eventData) && eventDataBatch.Count > 0)
                         {
                             await FlushAsync(eventDataBatch);
-                            eventDataBatch = await context.CreateBatch(options, context.CancellationToken).ConfigureAwait(false);
+                            eventDataBatch = await context.CreateBatch(options, _cancellationToken).ConfigureAwait(false);
                         }
                     }
 

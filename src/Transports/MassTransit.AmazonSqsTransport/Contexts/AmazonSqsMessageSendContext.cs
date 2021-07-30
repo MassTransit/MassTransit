@@ -20,7 +20,6 @@
 
         public int? DelaySeconds
         {
-            get => (int?)Delay?.TotalSeconds;
             set => Delay = value.HasValue ? TimeSpan.FromSeconds(value.Value) : default;
         }
     }
