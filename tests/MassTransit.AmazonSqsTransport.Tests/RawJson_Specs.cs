@@ -89,6 +89,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Sending_and_consuming_raw_json_with_headers_and_producing :
         AmazonSqsTestFixture
     {
@@ -163,6 +164,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class Sending_and_consuming_raw_json_with_headers_and_producing_with_copy_enabled :
         AmazonSqsTestFixture
     {
