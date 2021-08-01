@@ -29,6 +29,7 @@ namespace MassTransit.Configuration
             _deserializerFactories = new Dictionary<string, DeserializerFactory>(StringComparer.OrdinalIgnoreCase);
 
             AddDeserializer(JsonMessageSerializer.JsonContentType, () => new JsonMessageDeserializer(JsonMessageSerializer.Deserializer));
+            AddDeserializer(SystemTextJsonMessageSerializer.JsonContentType, () => new SystemTextJsonMessageDeserializer());
             AddDeserializer(BsonMessageSerializer.BsonContentType, () => new BsonMessageDeserializer(BsonMessageSerializer.Deserializer));
             AddDeserializer(XmlMessageSerializer.XmlContentType, () => new XmlMessageDeserializer(XmlJsonMessageSerializer.Deserializer));
         }

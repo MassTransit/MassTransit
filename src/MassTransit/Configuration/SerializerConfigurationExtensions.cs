@@ -1,6 +1,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Text.Json;
     using Newtonsoft.Json;
     using Serialization;
 
@@ -23,6 +24,35 @@ namespace MassTransit
         public static void UseJsonSerializer(this IReceiveEndpointConfigurator configurator)
         {
             configurator.SetMessageSerializer(() => new JsonMessageSerializer());
+        }
+
+        /// <summary>
+        /// Serialize messages using the System.Text.Json serializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="options"></param>
+        public static void UseMicrosoftJsonSerializer(this IBusFactoryConfigurator configurator,
+            Func<JsonSerializerOptions, JsonSerializerOptions> options = null)
+        {
+            if (options != null)
+            {
+                SystemTextJsonConfiguration.Options = options(SystemTextJsonConfiguration.Options);
+            }
+
+            configurator.SetMessageSerializer(() => new SystemTextJsonMessageSerializer());
+            configurator.AddMessageDeserializer(SystemTextJsonMessageSerializer.JsonContentType,
+                () => new SystemTextJsonMessageDeserializer());
+        }
+
+        /// <summary>
+        /// Serialize messages using the System.Text.Json serializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void UseMicrosoftJsonSerializer(this IReceiveEndpointConfigurator configurator)
+        {
+            configurator.SetMessageSerializer(() => new SystemTextJsonMessageSerializer());
+            configurator.AddMessageDeserializer(SystemTextJsonMessageSerializer.JsonContentType,
+                () => new SystemTextJsonMessageDeserializer());
         }
 
         /// <summary>

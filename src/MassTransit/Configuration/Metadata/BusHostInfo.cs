@@ -4,11 +4,10 @@ namespace MassTransit.Metadata
     using System.Diagnostics;
     using System.IO;
     using System.Reflection;
-
+    using System.Text.Json.Serialization;
 
     [Serializable]
-    public class BusHostInfo :
-        HostInfo
+    public class BusHostInfo : HostInfo
     {
         public BusHostInfo()
         {
@@ -41,13 +40,21 @@ namespace MassTransit.Metadata
             AssemblyVersion = assemblyName.Version.ToString();
         }
 
+        [JsonInclude]
         public string MachineName { get; private set; }
+        [JsonInclude]
         public string ProcessName { get; private set; }
+        [JsonInclude]
         public int ProcessId { get; private set; }
+        [JsonInclude]
         public string Assembly { get; private set; }
+        [JsonInclude]
         public string AssemblyVersion { get; private set; }
+        [JsonInclude]
         public string FrameworkVersion { get; private set; }
+        [JsonInclude]
         public string MassTransitVersion { get; private set; }
+        [JsonInclude]
         public string OperatingSystemVersion { get; private set; }
 
         static string GetAssemblyFileVersion(Assembly assembly)
