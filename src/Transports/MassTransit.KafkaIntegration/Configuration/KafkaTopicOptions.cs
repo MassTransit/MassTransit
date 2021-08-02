@@ -1,5 +1,6 @@
 namespace MassTransit.KafkaIntegration
 {
+    using System;
     using System.Collections.Generic;
     using Configuration;
     using Confluent.Kafka.Admin;
@@ -19,6 +20,7 @@ namespace MassTransit.KafkaIntegration
             _topic = topic;
             _numPartitions = 1;
             _replicaFactor = 1;
+            RequestTimeout = TimeSpan.FromSeconds(5);
         }
 
         /// <summary>
@@ -37,6 +39,8 @@ namespace MassTransit.KafkaIntegration
             set => _replicaFactor = value;
         }
 
+        public TimeSpan RequestTimeout { set; internal get; }
+
         public IEnumerable<ValidationResult> Validate()
         {
             if (_numPartitions == 0)
@@ -44,6 +48,9 @@ namespace MassTransit.KafkaIntegration
 
             if (_replicaFactor <= 0)
                 yield return this.Failure(nameof(ReplicationFactor), "should be greater than 0");
+
+            if (RequestTimeout <= TimeSpan.Zero)
+                yield return this.Failure(nameof(RequestTimeout), "should be greater than 0");
         }
 
         internal TopicSpecification ToSpecification()

@@ -32,8 +32,9 @@ namespace MassTransit.KafkaIntegration.Contexts
 
         public void Dispose()
         {
-            var timeout = TimeSpan.FromSeconds(30);
-            _producer.Flush(timeout);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            _producer.Flush(cts.Token);
+
             _producer.Dispose();
         }
     }

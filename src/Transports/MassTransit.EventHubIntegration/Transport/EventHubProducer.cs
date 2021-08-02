@@ -268,7 +268,9 @@ namespace MassTransit.EventHubIntegration
                         while (!eventDataBatch.TryAdd(eventData) && eventDataBatch.Count > 0)
                         {
                             await FlushAsync(eventDataBatch);
-                            eventDataBatch = await context.CreateBatch(options, _cancellationToken).ConfigureAwait(false);
+
+                            if (contexts.Length - i > 1)
+                                eventDataBatch = await context.CreateBatch(options, _cancellationToken).ConfigureAwait(false);
                         }
                     }
 
