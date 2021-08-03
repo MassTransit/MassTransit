@@ -24,4 +24,22 @@ Producing messages to Kafka topics requires the producer to be registered. The p
 
 <<< @/docs/code/riders/KafkaProducer.cs
 
+### Producing and Consuming Multiple Message Types on a Single Topic
 
+There are situations where you might want to produce / consume events of different types on the same Kafka topic. A common use case is to use a single topic to log ordered meaningful state change events like `SomethingRequested`, `SomethingStarted`, `SomethingFinished`.
+
+Confluent have some documentation about how this can be implemented on the Schema Registry side:
+
+https://docs.confluent.io/platform/current/schema-registry/serdes-develop/index.html#multiple-event-types-in-the-same-topic
+https://docs.confluent.io/platform/current/schema-registry/serdes-develop/serdes-avro.html#multiple-event-types-in-the-same-topic
+https://www.confluent.io/blog/multiple-event-types-in-the-same-kafka-topic/
+
+Unfortunately, it is [not yet widely supported in client tools and products](https://docs.confluent.io/platform/current/schema-registry/serdes-develop/index.html#limitations) and there is limited documentation about how to support this in your own applications. 
+
+However, it is possible... The following demo uses the MassTransit Kafka rider with custom Avro serializer / deserializer implementations and the Schema Registry to support multiple event types on a single topic:
+
+https://github.com/danmalcolm/masstransit-kafka-demo
+
+The custom serializers / deserializer implementations leverage the wire format used by the standard Confluent schema-based serializers, which includes the schema id in the data stored for each message. This is also good news for interoperability with non-MassTransit applications.
+
+Warning: It's a little hacky and only supports the Avro format, but there's enough there to get you started. 
