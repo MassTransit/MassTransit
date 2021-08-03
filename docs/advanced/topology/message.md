@@ -9,7 +9,7 @@ Message types are extensively leveraged in MassTransit, so making it easy to con
 MassTransit has built-in defaults for naming messaging entities (these are things like exchanges, topics, etc.). The defaults can be overridden as well. For instance, to change the topic name used by a message, just do it!
 
 ```csharp
-Bus.Factory.CreateUsingRabbitMQ(cfg =>
+Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
     cfg.Message<OrderSubmitted>(x =>
     {
@@ -31,7 +31,7 @@ class FancyNameFormatter<T> :
     }
 }
 
-Bus.Factory.CreateUsingRabbitMQ(cfg =>
+Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
     cfg.Message<OrderSubmitted>(x =>
     {
@@ -70,7 +70,7 @@ class FancyNameFormatter :
     }
 }
 
-Bus.Factory.CreateUsingRabbitMQ(cfg =>
+Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
     cfg.Message<OrderSubmitted>(x =>
     {
