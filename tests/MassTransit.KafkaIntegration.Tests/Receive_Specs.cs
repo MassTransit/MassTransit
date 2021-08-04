@@ -17,6 +17,7 @@ namespace MassTransit.KafkaIntegration.Tests
         InMemoryTestFixture
     {
         const string Topic = "test";
+        const string TopicConcurrent = "test-concurrent";
 
         [Test]
         public async Task Should_receive()
@@ -41,6 +42,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
                         k.TopicEndpoint<KafkaMessage>(Topic, nameof(Receive_Specs), c =>
                         {
+                            c.CreateIfMissing();
                             c.ConfigureConsumer<KafkaMessageConsumer>(context);
                         });
                     });
@@ -111,8 +113,9 @@ namespace MassTransit.KafkaIntegration.Tests
                     {
                         k.Host("localhost:9092");
 
-                        k.TopicEndpoint<KafkaMessage>(Topic, nameof(Receive_Specs), c =>
+                        k.TopicEndpoint<KafkaMessage>(TopicConcurrent, nameof(Receive_Specs), c =>
                         {
+                            c.CreateIfMissing();
                             c.ConfigureConsumer<KafkaMessageConsumer>(context);
 
                             c.CheckpointMessageCount = 10;
@@ -147,13 +150,13 @@ namespace MassTransit.KafkaIntegration.Tests
                     Headers = DictionaryHeadersSerialize.Serializer.Serialize(sendContext)
                 };
 
-                await Task.WhenAll(Enumerable.Range(0, 100).Select(x => p.ProduceAsync(Topic, message)));
+                await Task.WhenAll(Enumerable.Range(0, 100).Select(x => p.ProduceAsync(TopicConcurrent, message)));
 
                 ConsumeContext<KafkaMessage> result = await taskCompletionSource.Task;
 
                 Assert.AreEqual(message.Value.Text, result.Message.Text);
                 Assert.AreEqual(sendContext.MessageId, result.MessageId);
-                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{Topic}")));
+                Assert.That(result.DestinationAddress, Is.EqualTo(new Uri($"loopback://localhost/{KafkaTopicAddress.PathPrefix}/{TopicConcurrent}")));
 
                 Assert.That(await observer.Messages.Any<KafkaMessage>());
             }
@@ -240,6 +243,7 @@ namespace MassTransit.KafkaIntegration.Tests
                         k.TopicEndpoint<KafkaMessage>(Topic, nameof(BatchReceive_Specs), c =>
                         {
                             c.ConfigureConsumer<KafkaMessageConsumer>(context);
+                            c.CreateIfMissing();
 
                             c.CheckpointMessageCount = batchSize;
                             c.CheckpointInterval = checkpointInterval;
@@ -330,6 +334,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
                         k.TopicEndpoint<string, KafkaMessage>(Topic, nameof(ReceiveWithPayload_Specs), c =>
                         {
+                            c.CreateIfMissing();
                             c.ConfigureConsumer<KafkaMessageConsumer>(context);
 
                             c.SetKeyDeserializer(Deserializers.Utf8);

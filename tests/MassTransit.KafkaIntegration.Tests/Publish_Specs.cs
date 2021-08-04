@@ -45,6 +45,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
                         k.TopicEndpoint<KafkaMessage>(Topic, nameof(Receive_Specs), c =>
                         {
+                            c.CreateIfMissing();
                             c.AutoOffsetReset = AutoOffsetReset.Earliest;
                             c.ConfigureConsumer<KafkaMessageConsumer>(context);
                         });

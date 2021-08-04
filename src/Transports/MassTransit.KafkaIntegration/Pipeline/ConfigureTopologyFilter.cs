@@ -1,5 +1,6 @@
 namespace MassTransit.KafkaIntegration.Pipeline
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -51,8 +52,11 @@ namespace MassTransit.KafkaIntegration.Pipeline
             }
             catch (CreateTopicsException e)
             {
-                EnabledLogger? logger = e.Error.IsFatal ? LogContext.Error : LogContext.Debug;
-                logger?.Log("An error occured creating topics. {Errors}", string.Join(", ", e.Results.Select(x => $"{x.Topic}:{x.Error.Reason}")));
+                if (!e.Results.All(x => x.Error.Reason.EndsWith("already exists.", StringComparison.OrdinalIgnoreCase)))
+                {
+                    EnabledLogger? logger = e.Error.IsFatal ? LogContext.Error : LogContext.Debug;
+                    logger?.Log("An error occured creating topics. {Errors}", string.Join(", ", e.Results.Select(x => $"{x.Topic}:{x.Error.Reason}")));
+                }
             }
             finally
             {

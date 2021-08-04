@@ -17,8 +17,8 @@ namespace MassTransit.KafkaIntegration.Contexts
         where TValue : class
     {
         readonly IConsumer<TKey, TValue> _consumer;
-        readonly ChannelExecutor _executor;
         readonly IConsumerLockContext<TKey, TValue> _lockContext;
+        ChannelExecutor _executor;
 
         public KafkaConsumerContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings, IHeadersDeserializer headersDeserializer,
             ConsumerBuilder<TKey, TValue> consumerBuilder, CancellationToken cancellationToken)
@@ -50,20 +50,27 @@ namespace MassTransit.KafkaIntegration.Contexts
             return TaskUtil.Completed;
         }
 
-        public Task Close()
+        public async Task Close()
         {
+            await _executor.DisposeAsync().ConfigureAwait(false);
+            _executor = null;
+
             _consumer.Close();
-            return TaskUtil.Completed;
         }
 
         public Task<ConsumeResult<TKey, TValue>> Consume(CancellationToken cancellationToken)
         {
+            if (_executor == null)
+                throw new InvalidOperationException("The consumer is being closed");
+
             return _executor.Run(() => _consumer.Consume(cancellationToken), cancellationToken);
         }
 
         public async ValueTask DisposeAsync()
         {
-            await _executor.DisposeAsync().ConfigureAwait(false);
+            if (_executor != null)
+                await _executor.DisposeAsync().ConfigureAwait(false);
+
             _consumer.Dispose();
         }
 

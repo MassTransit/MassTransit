@@ -60,21 +60,24 @@
                     ConsumeResult<TKey, TValue> consumeResult = await _consumerContext.Consume(_cancellationTokenSource.Token).ConfigureAwait(false);
                     await executor.Push(() => Handle(consumeResult), Stopping).ConfigureAwait(false);
                 }
+
+                SetCompleted(TaskUtil.Completed);
             }
             catch (OperationCanceledException exception) when (exception.CancellationToken == Stopping
                 || exception.CancellationToken == _cancellationTokenSource.Token)
             {
+                SetCompleted(TaskUtil.Completed);
             }
             catch (Exception exception)
             {
                 LogContext.Error?.Log(exception, "Consume Loop faulted");
+
+                SetCompleted(TaskUtil.Faulted<bool>(exception));
             }
             finally
             {
                 await executor.DisposeAsync().ConfigureAwait(false);
             }
-
-            SetCompleted(TaskUtil.Completed);
         }
 
         async Task Handle(ConsumeResult<TKey, TValue> result)
@@ -100,11 +103,13 @@
 
         void HandleKafkaError(IConsumer<TKey, TValue> consumer, Error error)
         {
+            EnabledLogger? logger = error.IsFatal ? LogContext.Error : LogContext.Warning;
+            logger?.Log("Consumer error ({Code}): {Reason} on {Topic}", error.Code, error.Reason, _consumerContext.ReceiveSettings.Topic);
+
             if (_cancellationTokenSource.IsCancellationRequested)
                 return;
+
             var activeDispatchCount = _dispatcher.ActiveDispatchCount;
-            EnabledLogger? logger = error.IsFatal ? LogContext.Critical : LogContext.Error;
-            logger?.Log("Consumer error ({Code}): {Reason} on {Topic}", error.Code, error.Reason, _consumerContext.ReceiveSettings.Topic);
             if (activeDispatchCount == 0 || error.IsLocalError)
             {
                 _cancellationTokenSource.Cancel();
