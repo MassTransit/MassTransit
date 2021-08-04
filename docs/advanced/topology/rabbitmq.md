@@ -15,7 +15,7 @@ To configure the properties used when an exchange is created, the publish topolo
 In versions of MassTransit prior to 4.x, every implemented type was connected directly to the top-level exchange for the published message type. Starting with v4.0, the broker topology for inherited types can be configured to maintain the type hierarchy, which can significantly reduce the number of exchange bindings in some cases. To configure this new behavior, the publish topology is used to specify the broker topology option.
 
 ```csharp
-Bus.Factory.CreateUsingRabbitMQ(cfg =>
+Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
     cfg.PublishTopology.BrokerTopologyOptions = PublishBrokerTopologyOptions.MaintainHierarchy;
 });
