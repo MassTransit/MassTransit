@@ -25,7 +25,7 @@ namespace MassTransit.KafkaIntegration.Contexts
             ISendPipe sendPipe, SendObservable sendObservers, IClientContextSupervisor clientContextSupervisor,
             IHostConfiguration hostConfiguration, IHeadersSerializer headersSerializer,
             Func<ProducerBuilder<TKey, TValue>> producerBuilderFactory)
-            : base(new ProducerContextFactory<TKey, TValue>(clientContextSupervisor, headersSerializer, producerBuilderFactory))
+            : base(new ProducerContextFactory<TKey, TValue>(clientContextSupervisor, hostConfiguration, headersSerializer, producerBuilderFactory))
         {
             _sendObservers = sendObservers;
             _hostConfiguration = hostConfiguration;

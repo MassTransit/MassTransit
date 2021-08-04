@@ -160,9 +160,6 @@ namespace MassTransit.KafkaIntegration.Specifications
             ProducerBuilder<TKey, TValue> CreateProducerBuilder()
             {
                 ProducerBuilder<TKey, TValue> producerBuilder = new ProducerBuilder<TKey, TValue>(producerConfig)
-                    .SetErrorHandler((c, error) =>
-                        busInstance.HostConfiguration.SendLogContext?.Error?.Log("Consumer error ({code}): {reason} on {topic}", error.Code, error.Reason,
-                            TopicName))
                     .SetLogHandler((c, message) => busInstance.HostConfiguration.SendLogContext?.Debug?.Log(message.Message));
 
                 if (_keySerializer != null)

@@ -3,6 +3,7 @@ namespace MassTransit.KafkaIntegration.Contexts
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using Configuration;
     using Confluent.Kafka;
     using GreenPipes;
     using GreenPipes.Agents;
@@ -18,12 +19,15 @@ namespace MassTransit.KafkaIntegration.Contexts
     {
         readonly IClientContextSupervisor _clientContextSupervisor;
         readonly IHeadersSerializer _headersSerializer;
+        readonly IHostConfiguration _hostConfiguration;
         readonly Func<ProducerBuilder<TKey, TValue>> _producerBuilderFactory;
 
-        public ProducerContextFactory(IClientContextSupervisor clientContextSupervisor, IHeadersSerializer headersSerializer,
+        public ProducerContextFactory(IClientContextSupervisor clientContextSupervisor, IHostConfiguration hostConfiguration,
+            IHeadersSerializer headersSerializer,
             Func<ProducerBuilder<TKey, TValue>> producerBuilderFactory)
         {
             _clientContextSupervisor = clientContextSupervisor;
+            _hostConfiguration = hostConfiguration;
             _headersSerializer = headersSerializer;
             _producerBuilderFactory = producerBuilderFactory;
         }
@@ -56,7 +60,8 @@ namespace MassTransit.KafkaIntegration.Contexts
             Task<ProducerContext<TKey, TValue>> Create(ClientContext clientContext, CancellationToken createCancellationToken)
             {
                 ProducerBuilder<TKey, TValue> producerBuilder = _producerBuilderFactory();
-                ProducerContext<TKey, TValue> context = new KafkaProducerContext<TKey, TValue>(producerBuilder, _headersSerializer, cancellationToken);
+                ProducerContext<TKey, TValue> context =
+                    new KafkaProducerContext<TKey, TValue>(producerBuilder, _headersSerializer, _hostConfiguration.SendLogContext, cancellationToken);
                 return Task.FromResult(context);
             }
 
