@@ -66,7 +66,7 @@ public interface SubmitOrder
     // ...
 }
 
-Bus.Factory.CreateUsingRabbitMQ(cfg =>
+Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
     cfg.Send<SubmitOrder>(x =>
     {
@@ -102,7 +102,7 @@ public class OrderConsumer :
 And then connected to a receive endpoint:
 
 ```csharp
-Bus.Factory.CreateUsingRabbitMQ(cfg =>
+Bus.Factory.CreateUsingRabbitMq(cfg =>
 {
     cfg.ReceiveEndpoint("priority-orders", x =>
     {

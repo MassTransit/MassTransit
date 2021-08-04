@@ -26,7 +26,7 @@ public interface OrderSubmitted
     Guid CustomerId { get; }
 }
 
-Bus.Factory.CreateUsingRabbitMQ(..., cfg =>
+Bus.Factory.CreateUsingRabbitMq(..., cfg =>
 {
     cfg.Send<OrderSubmitted>(x =>
     {
