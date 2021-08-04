@@ -66,7 +66,7 @@ namespace MassTransit.Transports.Components
                 if (IsActive && TripThresholdExceeded(failureCount))
                 {
                     _killSwitch.Stop(exception, this);
-                    _timer.Dispose();
+                    _timer?.Dispose();
                 }
             }
         }
