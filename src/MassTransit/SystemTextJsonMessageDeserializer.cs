@@ -36,8 +36,8 @@
         {
             using var body = receiveContext.GetBodyStream();
 
-            return AsyncUtil.RunSync(
-                () => JsonSerializer.DeserializeAsync<SystemTextJsonMessageEnvelope>(body, SystemTextJsonConfiguration.Options).AsTask());
+            return JsonSerializer.DeserializeAsync<SystemTextJsonMessageEnvelope>(body, SystemTextJsonConfiguration.Options)
+                .ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
     }

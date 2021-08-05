@@ -16,7 +16,7 @@
                 WriteIndented = true,
             };
 
-            Options.Converters.Add(new HostInfoJsonConverter());
+            Options.Converters.Add(new SystemTextJsonConverterFactory());
         }
     }
 }

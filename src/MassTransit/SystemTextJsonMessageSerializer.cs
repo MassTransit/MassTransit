@@ -21,7 +21,8 @@
                 context.ContentType = JsonContentType;
 
                 var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypeNames);
-                AsyncUtil.RunSync(() => JsonSerializer.SerializeAsync<MessageEnvelope>(stream, envelope, SystemTextJsonConfiguration.Options));
+                JsonSerializer.SerializeAsync<MessageEnvelope>(stream, envelope, SystemTextJsonConfiguration.Options)
+                    .ConfigureAwait(false).GetAwaiter().GetResult();
             }
             catch (Exception ex)
             {
