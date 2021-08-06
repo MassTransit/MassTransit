@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Serialization
 {
     using MassTransit.Metadata;
-    using MassTransit.Util;
     using System;
     using System.IO;
     using System.Net.Mime;
@@ -21,8 +20,12 @@
                 context.ContentType = JsonContentType;
 
                 var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypeNames);
-                JsonSerializer.SerializeAsync<MessageEnvelope>(stream, envelope, SystemTextJsonConfiguration.Options)
-                    .ConfigureAwait(false).GetAwaiter().GetResult();
+
+                using (var ms = new MemoryStream(JsonSerializer.SerializeToUtf8Bytes<MessageEnvelope>(envelope, SystemTextJsonConfiguration.Options)))
+                {
+                    ms.CopyTo(stream);
+                }
+
             }
             catch (Exception ex)
             {

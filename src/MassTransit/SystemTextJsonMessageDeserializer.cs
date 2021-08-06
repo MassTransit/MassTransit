@@ -35,9 +35,10 @@
         private static MessageEnvelope DeserializerEnvelope(ReceiveContext receiveContext)
         {
             using var body = receiveContext.GetBodyStream();
+            using var ms = new MemoryStream();
 
-            return JsonSerializer.DeserializeAsync<SystemTextJsonMessageEnvelope>(body, SystemTextJsonConfiguration.Options)
-                .ConfigureAwait(false).GetAwaiter().GetResult();
+            body.CopyTo(ms);
+            return JsonSerializer.Deserialize<SystemTextJsonMessageEnvelope>(ms.ToArray(), SystemTextJsonConfiguration.Options);
         }
 
     }
