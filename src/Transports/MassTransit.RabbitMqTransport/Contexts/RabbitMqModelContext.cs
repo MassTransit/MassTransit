@@ -39,6 +39,8 @@
                 _confirmations = new PendingConfirmationCollection();
             }
 
+            _model.ContinuationTimeout = _connectionContext.ContinuationTimeout;
+
             _executor = new ChannelExecutor(1);
 
             _publisher = connectionContext.BatchSettings.Enabled

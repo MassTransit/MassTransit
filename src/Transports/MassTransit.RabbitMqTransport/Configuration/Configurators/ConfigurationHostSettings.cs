@@ -26,6 +26,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
             _batchSettings = new ConfigurationBatchSettings();
 
             RequestedConnectionTimeout = TimeSpan.FromSeconds(10);
+            ContinuationTimeout = TimeSpan.FromSeconds(20);
 
             ClientProvidedName = HostMetadataCache.Host.ProcessName;
 
@@ -56,6 +57,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
         public TimeSpan RequestedConnectionTimeout { get; set; }
 
         public BatchSettings BatchSettings => _batchSettings;
+        public TimeSpan ContinuationTimeout { get; set; }
 
         public void ConfigureBatch(Action<ConfigurationBatchSettings> configure)
         {

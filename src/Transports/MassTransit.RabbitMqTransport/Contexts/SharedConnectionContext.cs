@@ -28,6 +28,7 @@
         public Uri HostAddress => _context.HostAddress;
         public bool PublisherConfirmation => _context.PublisherConfirmation;
         public BatchSettings BatchSettings => _context.BatchSettings;
+        public TimeSpan ContinuationTimeout => _context.ContinuationTimeout;
 
         public TimeSpan StopTimeout => _context.StopTimeout;
         public IRabbitMqHostTopology Topology => _context.Topology;

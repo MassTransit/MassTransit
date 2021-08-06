@@ -72,5 +72,11 @@
         /// </summary>
         /// <param name="configure"></param>
         void ConfigureBatchPublish(Action<IBatchPublishConfigurator> configure);
+
+        /// <summary>
+        /// Sets the continuation timeout for command communication with RabbitMQ
+        /// </summary>
+        /// <param name="timeout"></param>
+        void ContinuationTimeout(TimeSpan timeout);
     }
 }

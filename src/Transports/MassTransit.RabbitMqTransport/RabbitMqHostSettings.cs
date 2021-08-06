@@ -133,5 +133,10 @@
         /// Batch settings used for the batch publish
         /// </summary>
         BatchSettings BatchSettings { get; }
+
+        /// <summary>
+        /// The confirmation timeout for RPC commands via Models
+        /// </summary>
+        TimeSpan ContinuationTimeout { get; }
     }
 }

@@ -30,6 +30,8 @@
 
         BatchSettings BatchSettings { get; }
 
+        TimeSpan ContinuationTimeout { get; }
+
         /// <summary>
         /// The time to wait during shutdown of any dependencies before giving up and killing things
         /// </summary>

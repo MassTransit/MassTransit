@@ -29,6 +29,8 @@ namespace MassTransit.RabbitMqTransport.Contexts
 
             PublisherConfirmation = hostConfiguration.PublisherConfirmation;
             BatchSettings = hostConfiguration.BatchSettings;
+            ContinuationTimeout = hostConfiguration.Settings.ContinuationTimeout;
+
             Topology = hostConfiguration.HostTopology;
 
             StopTimeout = TimeSpan.FromSeconds(30);
@@ -44,6 +46,7 @@ namespace MassTransit.RabbitMqTransport.Contexts
         public bool PublisherConfirmation { get; }
 
         public BatchSettings BatchSettings { get; }
+        public TimeSpan ContinuationTimeout { get; }
 
         public TimeSpan StopTimeout { get; }
 
