@@ -5,7 +5,9 @@
     using GreenPipes;
     using MassTransit.Saga;
     using NUnit.Framework;
+    using NUnit.Framework.Internal;
     using Saga;
+    using TestFramework;
     using TestFramework.Messages;
 
 
@@ -40,11 +42,36 @@
                         c.UseRateLimit(100);
                     });
 
+                    e.Instance(new MyConsumer(), c =>
+                    {
+                        c.UseConcurrentMessageLimit(1);
+                        c.UseRateLimit(100);
+                    });
+
                     e.UseTransaction();
                     e.UseConcurrencyLimit(7);
                     e.UseRateLimit(100);
                 });
             });
+
+            TestContext.Out.WriteLine(busControl.GetProbeResult().ToJsonString());
+        }
+
+        [Test]
+        public void Should_include_concurrent_limit_on_instance()
+        {
+            var busControl = Bus.Factory.CreateUsingInMemory(x =>
+            {
+                x.ReceiveEndpoint("input_queue", e =>
+                {
+                    e.UseConcurrencyLimit(5);
+
+                    e.Instance(new MyConsumer());
+                    //e.Consumer<MyConsumer>();
+                });
+            });
+
+            TestContext.Out.WriteLine(busControl.GetProbeResult().ToJsonString());
         }
 
 

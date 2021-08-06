@@ -45,33 +45,29 @@
         readonly TInstance _instance;
         readonly IConsumerSpecification<TInstance> _specification;
 
-        public InstanceConfigurator(TInstance instance)
+        public InstanceConfigurator(TInstance instance, IConsumerConfigurationObserver observer)
         {
             _instance = instance;
 
             _specification = ConsumerConnectorCache<TInstance>.Connector.CreateConsumerSpecification<TInstance>();
+
+            _specification.ConnectConsumerConfigurationObserver(observer);
         }
 
         public void Message<T>(Action<IConsumerMessageConfigurator<T>> configure)
             where T : class
         {
-            if (configure == null)
-                throw new ArgumentNullException(nameof(configure));
-
             IConsumerMessageSpecification<TInstance, T> specification = _specification.GetMessageSpecification<T>();
 
-            configure(specification);
+            configure?.Invoke(specification);
         }
 
         public void ConsumerMessage<T>(Action<IConsumerMessageConfigurator<TInstance, T>> configure)
             where T : class
         {
-            if (configure == null)
-                throw new ArgumentNullException(nameof(configure));
-
             IConsumerMessageSpecification<TInstance, T> specification = _specification.GetMessageSpecification<T>();
 
-            configure(specification);
+            configure?.Invoke(specification);
         }
 
         public T Options<T>(Action<T> configure = null)

@@ -62,7 +62,7 @@
         public static void Instance<T>(this IReceiveEndpointConfigurator configurator, T instance, Action<IInstanceConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
-            var instanceConfigurator = new InstanceConfigurator<T>(instance);
+            var instanceConfigurator = new InstanceConfigurator<T>(instance, configurator);
 
             configure?.Invoke(instanceConfigurator);
 
