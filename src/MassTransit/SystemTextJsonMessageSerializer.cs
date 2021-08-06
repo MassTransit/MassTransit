@@ -11,7 +11,7 @@
     {
         public ContentType ContentType => JsonContentType;
 
-        internal static readonly ContentType JsonContentType = new ContentType("application/vnd.masstransit+json2");
+        internal static readonly ContentType JsonContentType = new ContentType("application/vnd.masstransit+text-json");
 
         public void Serialize<T>(Stream stream, SendContext<T> context) where T : class
         {
@@ -20,17 +20,15 @@
                 context.ContentType = JsonContentType;
 
                 var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypeNames);
+                var bytes = JsonSerializer.SerializeToUtf8Bytes<MessageEnvelope>(envelope, SystemTextJsonConfiguration.Options);
 
-                using (var ms = new MemoryStream(JsonSerializer.SerializeToUtf8Bytes<MessageEnvelope>(envelope, SystemTextJsonConfiguration.Options)))
-                {
-                    ms.CopyTo(stream);
-                }
-
+                using var ms = new MemoryStream(bytes, true);
+                ms.CopyTo(stream);
             }
             catch (Exception ex)
             {
                 throw new SerializationException("Failed to serialize message", ex);
-            }
-        }
+    }
+}
     }
 }

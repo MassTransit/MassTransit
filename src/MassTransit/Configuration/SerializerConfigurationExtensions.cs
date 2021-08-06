@@ -31,7 +31,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="options"></param>
-        public static void UseMicrosoftJsonSerializer(this IBusFactoryConfigurator configurator,
+        public static void UseSystemTextJsonSerializer(this IBusFactoryConfigurator configurator,
             Func<JsonSerializerOptions, JsonSerializerOptions> options = null)
         {
             if (options != null)
@@ -48,7 +48,7 @@ namespace MassTransit
         /// Serialize messages using the System.Text.Json serializer
         /// </summary>
         /// <param name="configurator"></param>
-        public static void UseMicrosoftJsonSerializer(this IReceiveEndpointConfigurator configurator)
+        public static void UseSystemTextJsonSerializer(this IReceiveEndpointConfigurator configurator)
         {
             configurator.SetMessageSerializer(() => new SystemTextJsonMessageSerializer());
             configurator.AddMessageDeserializer(SystemTextJsonMessageSerializer.JsonContentType,
