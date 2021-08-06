@@ -13,8 +13,6 @@ namespace MassTransit.PipeConfigurators
         ITimeoutConfigurator
         where T : class
     {
-        public TimeSpan Timeout { get; set; }
-
         public void Apply(IPipeBuilder<ConsumeContext<T>> builder)
         {
             builder.AddFilter(new TimeoutFilter<ConsumeContext<T>, TimeoutConsumeContext<T>>(Factory, Timeout));
@@ -22,8 +20,11 @@ namespace MassTransit.PipeConfigurators
 
         public IEnumerable<ValidationResult> Validate()
         {
-            yield break;
+            if (Timeout <= TimeSpan.Zero)
+                yield return this.Failure("Timeout", "must be > TimeSpan.Zero");
         }
+
+        public TimeSpan Timeout { get; set; }
 
         static TimeoutConsumeContext<T> Factory(ConsumeContext<T> context, CancellationToken cancellationToken)
         {

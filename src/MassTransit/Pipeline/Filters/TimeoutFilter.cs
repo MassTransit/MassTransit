@@ -22,12 +22,11 @@
 
         public async Task Send(TContext context, IPipe<TContext> next)
         {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken);
-
-            cts.CancelAfter(_timeout);
-
+            var cts = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken);
             try
             {
+                cts.CancelAfter(_timeout);
+
                 var timeoutContext = _contextFactory(context, cts.Token);
 
                 await next.Send(timeoutContext).ConfigureAwait(false);
@@ -36,7 +35,11 @@
             }
             catch (OperationCanceledException ex) when (ex.CancellationToken == cts.Token)
             {
-                throw new ConsumerCanceledException("The operation was canceled by the timeout filter", ex);
+                throw new ConsumerCanceledException("The operation was canceled by the timeout filter");
+            }
+            finally
+            {
+                cts.Dispose();
             }
         }
 

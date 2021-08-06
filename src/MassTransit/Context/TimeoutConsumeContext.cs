@@ -5,31 +5,21 @@ namespace MassTransit.Context
     using System.Threading.Tasks;
 
 
-    public class TimeoutConsumeContext :
-        ConsumeContextProxy
-    {
-        public TimeoutConsumeContext(ConsumeContext context, CancellationToken cancellationToken)
-            : base(context)
-        {
-            CancellationToken = cancellationToken;
-        }
-
-        public override CancellationToken CancellationToken { get; }
-    }
-
-
     public class TimeoutConsumeContext<T> :
-        TimeoutConsumeContext,
+        ConsumeContextProxy,
         ConsumeContext<T>
         where T : class
     {
         readonly ConsumeContext<T> _context;
 
         public TimeoutConsumeContext(ConsumeContext<T> context, CancellationToken cancellationToken)
-            : base(context, cancellationToken)
+            : base(context)
         {
+            CancellationToken = cancellationToken;
             _context = context;
         }
+
+        public override CancellationToken CancellationToken { get; }
 
         public T Message => _context.Message;
 

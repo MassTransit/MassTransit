@@ -14,18 +14,18 @@ namespace MassTransit.PipeConfigurators
         ITimeoutConfigurator
         where TArguments : class
     {
-        public TimeSpan Timeout { get; set; }
-
         public void Apply(IPipeBuilder<ExecuteContext<TArguments>> builder)
         {
-            builder.AddFilter(
-                new TimeoutFilter<ExecuteContext<TArguments>, TimeoutExecuteContext<TArguments>>(Factory, Timeout));
+            builder.AddFilter(new TimeoutFilter<ExecuteContext<TArguments>, TimeoutExecuteContext<TArguments>>(Factory, Timeout));
         }
 
         public IEnumerable<ValidationResult> Validate()
         {
-            yield break;
+            if (Timeout <= TimeSpan.Zero)
+                yield return this.Failure("Timeout", "must be > TimeSpan.Zero");
         }
+
+        public TimeSpan Timeout { get; set; }
 
         static TimeoutExecuteContext<TArguments> Factory(ExecuteContext<TArguments> context, CancellationToken cancellationToken)
         {
