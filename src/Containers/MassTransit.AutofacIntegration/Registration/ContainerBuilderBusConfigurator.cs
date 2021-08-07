@@ -16,15 +16,10 @@ namespace MassTransit.AutofacIntegration.Registration
         IContainerBuilderBusConfigurator
     {
         readonly AutofacContainerRegistrar _registrar;
-        readonly HashSet<Type> _riderTypes;
+        protected readonly HashSet<Type> RiderTypes;
 
         public ContainerBuilderBusRegistrationConfigurator(ContainerBuilder builder)
             : this(builder, new AutofacContainerRegistrar(builder))
-        {
-        }
-
-        ContainerBuilderBusRegistrationConfigurator(ContainerBuilder builder, AutofacContainerRegistrar registrar)
-            : base(registrar)
         {
             IBusRegistrationContext CreateRegistrationContext(IComponentContext context)
             {
@@ -32,9 +27,24 @@ namespace MassTransit.AutofacIntegration.Registration
                 return new BusRegistrationContext(provider, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
             }
 
+            builder.Register(context => ClientFactoryProvider(context.Resolve<IConfigurationServiceProvider>(), context.Resolve<IBus>()))
+                .As<IClientFactory>()
+                .SingleInstance();
+
+            builder.Register(context => Bind<IBus>.Create(CreateRegistrationContext(context)))
+                .As<Bind<IBus, IBusRegistrationContext>>()
+                .SingleInstance();
+            builder.Register(context => context.Resolve<Bind<IBus, IBusRegistrationContext>>().Value)
+                .As<IBusRegistrationContext>()
+                .SingleInstance();
+        }
+
+        protected ContainerBuilderBusRegistrationConfigurator(ContainerBuilder builder, AutofacContainerRegistrar registrar)
+            : base(registrar)
+        {
             Builder = builder;
             _registrar = registrar;
-            _riderTypes = new HashSet<Type>();
+            RiderTypes = new HashSet<Type>();
 
             ScopeName = "message";
 
@@ -42,22 +52,14 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IBusDepot>()
                 .SingleInstance();
 
-            Builder.RegisterType<BusHealth>()
-            #pragma warning disable 618
-                .As<IBusHealth>()
-                .SingleInstance();
-
-            Builder.Register(GetCurrentSendEndpointProvider)
+            builder.Register(GetCurrentSendEndpointProvider)
                 .As<ISendEndpointProvider>()
                 .InstancePerLifetimeScope();
 
-            Builder.Register(GetCurrentPublishEndpoint)
+            builder.Register(GetCurrentPublishEndpoint)
                 .As<IPublishEndpoint>()
                 .InstancePerLifetimeScope();
 
-            Builder.Register(context => ClientFactoryProvider(context.Resolve<IConfigurationServiceProvider>(), context.Resolve<IBus>()))
-                .As<IClientFactory>()
-                .SingleInstance();
 
             builder.Register(CreateConsumerScopeProvider)
                 .As<IConsumerScopeProvider>()
@@ -68,10 +70,6 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IConfigurationServiceProvider>()
                 .SingleInstance()
                 .IfNotRegistered(typeof(IConfigurationServiceProvider));
-
-            builder.Register(CreateRegistrationContext)
-                .As<IBusRegistrationContext>()
-                .SingleInstance();
         }
 
         public string ScopeName
@@ -88,12 +86,12 @@ namespace MassTransit.AutofacIntegration.Registration
             set => _registrar.ConfigureScope = value;
         }
 
-        public void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
+        public virtual void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
         {
             SetBusFactory(new RegistrationBusFactory(busFactory));
         }
 
-        public void SetBusFactory<T>(T busFactory)
+        public virtual void SetBusFactory<T>(T busFactory)
             where T : IRegistrationBusFactory
         {
             if (busFactory == null)
@@ -101,23 +99,32 @@ namespace MassTransit.AutofacIntegration.Registration
 
             ThrowIfAlreadyConfigured(nameof(SetBusFactory));
 
-            Builder.Register(context => CreateBus(busFactory, context))
+            Builder.Register(context => Bind<IBus>.Create(CreateBus(busFactory, context)))
+                .As<Bind<IBus, IBusInstance>>()
+                .SingleInstance();
+
+            Builder.Register(context => context.Resolve<Bind<IBus, IBusInstance>>().Value)
                 .As<IBusInstance>()
                 .As<IReceiveEndpointConnector>()
                 .SingleInstance();
 
-            Builder.Register(context => context.Resolve<IBusInstance>().BusControl)
+            Builder.Register(context => context.Resolve<Bind<IBus, IBusInstance>>().Value.BusControl)
                 .As<IBusControl>()
                 .SingleInstance();
 
-            Builder.Register(context => context.Resolve<IBusInstance>().Bus)
+            Builder.Register(context => context.Resolve<Bind<IBus, IBusInstance>>().Value.Bus)
                 .As<IBus>()
+                .SingleInstance();
+
+        #pragma warning disable 618
+            Builder.Register(context => new BusHealth(context.Resolve<Bind<IBus, IBusInstance>>().Value))
+                .As<IBusHealth>()
                 .SingleInstance();
         }
 
-        public void AddRider(Action<IRiderRegistrationConfigurator> configure)
+        public virtual void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
-            var configurator = new ContainerBuilderRiderConfigurator(Builder, _registrar, _riderTypes);
+            var configurator = new ContainerBuilderRiderConfigurator(Builder, _registrar, RiderTypes);
             configure?.Invoke(configurator);
         }
 

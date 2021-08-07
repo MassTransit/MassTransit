@@ -11,7 +11,7 @@ namespace MassTransit.AutofacIntegration.Registration
         RegistrationConfigurator,
         IContainerBuilderRiderConfigurator
     {
-        readonly RegistrationCache<object> _registrations;
+        protected readonly RegistrationCache<object> Registrations;
         readonly HashSet<Type> _riderTypes;
 
         public ContainerBuilderRiderConfigurator(ContainerBuilder builder, IContainerRegistrar registrar, HashSet<Type> riderTypes)
@@ -19,7 +19,7 @@ namespace MassTransit.AutofacIntegration.Registration
         {
             Builder = builder;
             _riderTypes = riderTypes;
-            _registrations = new RegistrationCache<object>();
+            Registrations = new RegistrationCache<object>();
         }
 
         public ContainerBuilder Builder { get; }
@@ -27,10 +27,10 @@ namespace MassTransit.AutofacIntegration.Registration
         public void AddRegistration<T>(T registration)
             where T : class
         {
-            _registrations.GetOrAdd(typeof(T), _ => registration);
+            Registrations.GetOrAdd(typeof(T), _ => registration);
         }
 
-        public void SetRiderFactory<TRider>(IRegistrationRiderFactory<TRider> riderFactory)
+        public virtual void SetRiderFactory<TRider>(IRegistrationRiderFactory<TRider> riderFactory)
             where TRider : class, IRider
         {
             if (riderFactory == null)
@@ -41,7 +41,7 @@ namespace MassTransit.AutofacIntegration.Registration
             IRiderRegistrationContext CreateRegistrationContext(IComponentContext context)
             {
                 var registration = CreateRegistration(context.Resolve<IConfigurationServiceProvider>());
-                return new RiderRegistrationContext(registration, _registrations);
+                return new RiderRegistrationContext(registration, Registrations);
             }
 
             var registrationKey = typeof(TRider).Name;
@@ -57,7 +57,7 @@ namespace MassTransit.AutofacIntegration.Registration
                 .SingleInstance();
         }
 
-        void ThrowIfAlreadyConfigured<TRider>()
+        protected void ThrowIfAlreadyConfigured<TRider>()
             where TRider : IRider
         {
             ThrowIfAlreadyConfigured(nameof(SetRiderFactory));
