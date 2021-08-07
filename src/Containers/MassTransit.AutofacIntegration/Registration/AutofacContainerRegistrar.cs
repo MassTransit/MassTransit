@@ -233,6 +233,21 @@ namespace MassTransit.AutofacIntegration.Registration
     }
 
 
+    public class AutofacContainerRegistrar<TBus> :
+        AutofacContainerRegistrar
+    {
+        public AutofacContainerRegistrar(ContainerBuilder builder)
+            : base(builder)
+        {
+        }
+
+        protected override IClientFactory GetClientFactory(IComponentContext componentContext)
+        {
+            return componentContext.Resolve<Bind<TBus, IClientFactory>>().Value;
+        }
+    }
+
+
     public class AutofacContainerMediatorRegistrar :
         AutofacContainerRegistrar
     {
