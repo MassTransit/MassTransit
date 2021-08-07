@@ -5,10 +5,11 @@ namespace MassTransit.Courier.InternalMessages
     using Contracts;
 
 
+    [Serializable]
     class RoutingSlipActivityCompletedMessage :
         RoutingSlipActivityCompleted
     {
-        protected RoutingSlipActivityCompletedMessage()
+        public RoutingSlipActivityCompletedMessage()
         {
         }
 
@@ -28,14 +29,14 @@ namespace MassTransit.Courier.InternalMessages
             Arguments = arguments;
         }
 
-        public Guid TrackingNumber { get; private set; }
-        public DateTime Timestamp { get; private set; }
-        public TimeSpan Duration { get; private set; }
-        public Guid ExecutionId { get; private set; }
-        public string ActivityName { get; private set; }
-        public HostInfo Host { get; private set; }
-        public IDictionary<string, object> Arguments { get; private set; }
-        public IDictionary<string, object> Data { get; private set; }
-        public IDictionary<string, object> Variables { get; private set; }
+        public Guid TrackingNumber { get; set; }
+        public DateTime Timestamp { get; set; }
+        public TimeSpan Duration { get; set; }
+        public Guid ExecutionId { get; set; }
+        public string ActivityName { get; set; }
+        public HostInfo Host { get; set; }
+        public IDictionary<string, object> Arguments { get; set; }
+        public IDictionary<string, object> Data { get; set; }
+        public IDictionary<string, object> Variables { get; set; }
     }
 }

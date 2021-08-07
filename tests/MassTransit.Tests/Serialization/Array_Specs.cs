@@ -11,6 +11,7 @@
 
 
         [TestFixture(typeof(JsonMessageSerializer))]
+        [TestFixture(typeof(SystemTextJsonMessageSerializer))]
         public class A_null_array :
             SerializationTest
         {

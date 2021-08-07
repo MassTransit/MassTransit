@@ -4,10 +4,11 @@
     using Contracts;
 
 
+    [Serializable]
     class ActivityExceptionImpl :
         ActivityException
     {
-        protected ActivityExceptionImpl()
+        public ActivityExceptionImpl()
         {
         }
 
@@ -22,11 +23,11 @@
             ExceptionInfo = exceptionInfo;
         }
 
-        public Guid ExecutionId { get; private set; }
-        public DateTime Timestamp { get; private set; }
-        public TimeSpan Elapsed { get; private set; }
-        public string Name { get; private set; }
-        public HostInfo Host { get; private set; }
-        public ExceptionInfo ExceptionInfo { get; private set; }
+        public Guid ExecutionId { get; set; }
+        public DateTime Timestamp { get; set; }
+        public TimeSpan Elapsed { get; set; }
+        public string Name { get; set; }
+        public HostInfo Host { get; set; }
+        public ExceptionInfo ExceptionInfo { get; set; }
     }
 }

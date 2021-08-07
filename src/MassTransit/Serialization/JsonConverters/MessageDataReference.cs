@@ -4,7 +4,8 @@
     using Newtonsoft.Json;
 
 
-    public class MessageDataReference
+    public class MessageDataReference :
+        IMessageDataReference
     {
         [JsonProperty("data-ref")]
         public Uri Reference { get; set; }

@@ -9,7 +9,7 @@
     public class FaultEvent<T> :
         Fault<T>
     {
-        protected FaultEvent()
+        public FaultEvent()
         {
         }
 
@@ -31,13 +31,13 @@
             Exceptions = exceptions.ToArray();
         }
 
-        public Guid FaultId { get; private set; }
-        public Guid? FaultedMessageId { get; private set; }
-        public DateTime Timestamp { get; private set; }
-        public ExceptionInfo[] Exceptions { get; private set; }
-        public HostInfo Host { get; private set; }
-        public string[] FaultMessageTypes { get; private set; }
-        public T Message { get; private set; }
+        public Guid FaultId { get; set; }
+        public Guid? FaultedMessageId { get; set; }
+        public DateTime Timestamp { get; set; }
+        public ExceptionInfo[] Exceptions { get; set; }
+        public HostInfo Host { get; set; }
+        public string[] FaultMessageTypes { get; set; }
+        public T Message { get; set; }
 
         static ExceptionInfo[] GetExceptions(Exception exception)
         {
@@ -47,7 +47,7 @@
                     .Where(x => x != null)
                     .Select(x => (ExceptionInfo)new FaultExceptionInfo(x))
                     .ToArray()
-                ?? new ExceptionInfo[] {new FaultExceptionInfo(exception)};
+                ?? new ExceptionInfo[] { new FaultExceptionInfo(exception) };
         }
     }
 
@@ -56,11 +56,11 @@
     public class FaultEvent :
         Fault
     {
-        public Guid FaultId { get; private set; }
-        public Guid? FaultedMessageId { get; private set; }
-        public DateTime Timestamp { get; private set; }
-        public ExceptionInfo[] Exceptions { get; private set; }
-        public HostInfo Host { get; private set; }
-        public string[] FaultMessageTypes { get; private set; }
+        public Guid FaultId { get; set; }
+        public Guid? FaultedMessageId { get; set; }
+        public DateTime Timestamp { get; set; }
+        public ExceptionInfo[] Exceptions { get; set; }
+        public HostInfo Host { get; set; }
+        public string[] FaultMessageTypes { get; set; }
     }
 }

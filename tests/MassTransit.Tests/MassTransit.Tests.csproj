@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="NewConfigurationModel.cs" />
-    <Compile Remove="Saga\SagaTestContext.cs" />
+    <Compile Remove="NewConfigurationModel.cs"/>
+    <Compile Remove="Saga\SagaTestContext.cs"/>
   </ItemGroup>
 
   <ItemGroup>

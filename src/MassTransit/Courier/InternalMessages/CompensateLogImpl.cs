@@ -5,10 +5,11 @@
     using Contracts;
 
 
+    [Serializable]
     class CompensateLogImpl :
         CompensateLog
     {
-        protected CompensateLogImpl()
+        public CompensateLogImpl()
         {
         }
 
@@ -19,8 +20,8 @@
             Data = data;
         }
 
-        public Guid ExecutionId { get; private set; }
-        public Uri Address { get; private set; }
-        public IDictionary<string, object> Data { get; private set; }
+        public Guid ExecutionId { get; set; }
+        public Uri Address { get; set; }
+        public IDictionary<string, object> Data { get; set; }
     }
 }

@@ -6,10 +6,11 @@ namespace MassTransit.Courier.InternalMessages
     using Contracts;
 
 
+    [Serializable]
     class RoutingSlipFaultedMessage :
         RoutingSlipFaulted
     {
-        protected RoutingSlipFaultedMessage()
+        public RoutingSlipFaultedMessage()
         {
         }
 
@@ -30,13 +31,13 @@ namespace MassTransit.Courier.InternalMessages
             Duration = duration;
 
             TrackingNumber = trackingNumber;
-            ActivityExceptions = new[] {activityException};
+            ActivityExceptions = new[] { activityException };
         }
 
-        public Guid TrackingNumber { get; private set; }
-        public DateTime Timestamp { get; private set; }
-        public TimeSpan Duration { get; private set; }
-        public ActivityException[] ActivityExceptions { get; private set; }
-        public IDictionary<string, object> Variables { get; private set; }
+        public Guid TrackingNumber { get; set; }
+        public DateTime Timestamp { get; set; }
+        public TimeSpan Duration { get; set; }
+        public ActivityException[] ActivityExceptions { get; set; }
+        public IDictionary<string, object> Variables { get; set; }
     }
 }

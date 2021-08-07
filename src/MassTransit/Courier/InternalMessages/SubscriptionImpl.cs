@@ -5,10 +5,11 @@
     using MassTransit.Serialization;
 
 
+    [Serializable]
     public class SubscriptionImpl :
         Subscription
     {
-        protected SubscriptionImpl()
+        public SubscriptionImpl()
         {
         }
 
@@ -22,10 +23,10 @@
             Message = message;
         }
 
-        public Uri Address { get; private set; }
-        public RoutingSlipEvents Events { get; private set; }
-        public RoutingSlipEventContents Include { get; private set; }
-        public MessageEnvelope Message { get; private set; }
-        public string ActivityName { get; private set; }
+        public Uri Address { get; set; }
+        public RoutingSlipEvents Events { get; set; }
+        public RoutingSlipEventContents Include { get; set; }
+        public MessageEnvelope Message { get; set; }
+        public string ActivityName { get; set; }
     }
 }

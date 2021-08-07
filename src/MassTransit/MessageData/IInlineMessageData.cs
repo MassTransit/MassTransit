@@ -5,6 +5,6 @@ namespace MassTransit.MessageData
 
     public interface IInlineMessageData
     {
-        void Set(MessageDataReference reference);
+        void Set(IMessageDataReference reference);
     }
 }

@@ -194,7 +194,7 @@ namespace MassTransit.Courier
                         : EmptyObject));
 
             var slipTask = PublishEvent<RoutingSlipCompensationFailed>(RoutingSlipEvents.CompensationFailed,
-                contents => new CompensationFailed(
+                contents => new RoutingSlipCompensationFailedMessage(
                     _host,
                     _routingSlip.TrackingNumber,
                     failureTimestamp,
