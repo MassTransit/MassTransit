@@ -8,6 +8,7 @@
 
 
     [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(SystemTextJsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(XmlMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
@@ -22,7 +23,7 @@
 
             var dataId = new InMemoryMessageDataId().Uri;
 
-            var obj = new SampleMessage {Value = await repository.PutString("Hello, World!")};
+            var obj = new SampleMessage {Value = await repository.PutString(new string('*', MessageDataDefaults.Threshold + 100))};
 
             Serialize(obj);
         }

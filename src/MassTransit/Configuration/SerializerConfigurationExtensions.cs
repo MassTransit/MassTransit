@@ -1,6 +1,7 @@
 namespace MassTransit
 {
     using System;
+    using System.Text.Json;
     using Newtonsoft.Json;
     using Serialization;
 
@@ -23,6 +24,56 @@ namespace MassTransit
         public static void UseJsonSerializer(this IReceiveEndpointConfigurator configurator)
         {
             configurator.SetMessageSerializer(() => new JsonMessageSerializer());
+        }
+
+        /// <summary>
+        /// Serialize messages using the System.Text.Json serializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void UseSystemTextJsonSerializer(this IReceiveEndpointConfigurator configurator)
+        {
+            configurator.SetMessageSerializer(() => new SystemTextJsonMessageSerializer());
+        }
+
+        /// <summary>
+        /// Serialize messages using the System.Text.Json serializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="configure"></param>
+        public static void UseSystemTextJsonSerializer(this IBusFactoryConfigurator configurator,
+            Func<JsonSerializerOptions, JsonSerializerOptions> configure = null)
+        {
+            if (configure != null)
+                SystemTextJsonMessageSerializer.Options = configure(SystemTextJsonMessageSerializer.Options);
+
+            configurator.SetMessageSerializer(() => new SystemTextJsonMessageSerializer());
+        }
+
+        /// <summary>
+        /// Replace the built-in message serializer with System.Text.Json (experimental, not yet recommended)
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void UseSystemTextJsonOnly(this IBusFactoryConfigurator configurator)
+        {
+            configurator.ClearMessageDeserializers();
+
+            configurator.AddMessageDeserializer(JsonMessageSerializer.JsonContentType, () => new SystemTextJsonMessageDeserializer());
+
+            configurator.SetMessageSerializer(() => new SystemTextJsonMessageSerializer(JsonMessageSerializer.JsonContentType));
+        }
+
+        /// <summary>
+        /// Replace the built-in message serializer with System.Text.Json (experimental, not yet recommended)
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void UseSystemTextJsonOnly(this IReceiveEndpointConfigurator configurator)
+        {
+            configurator.ClearMessageDeserializers();
+
+            configurator.AddMessageDeserializer(JsonMessageSerializer.JsonContentType,
+                () => new SystemTextJsonMessageDeserializer(JsonMessageSerializer.JsonContentType));
+
+            configurator.SetMessageSerializer(() => new SystemTextJsonMessageSerializer(JsonMessageSerializer.JsonContentType));
         }
 
         /// <summary>

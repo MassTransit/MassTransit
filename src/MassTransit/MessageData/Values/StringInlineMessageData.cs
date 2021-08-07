@@ -19,7 +19,7 @@ namespace MassTransit.MessageData.Values
             Value = Task.FromResult(value);
         }
 
-        public void Set(MessageDataReference reference)
+        public void Set(IMessageDataReference reference)
         {
             reference.Text = _value;
             reference.Data = default;

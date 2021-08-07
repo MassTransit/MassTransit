@@ -8,7 +8,7 @@
     public class ReceiveFaultEvent :
         ReceiveFault
     {
-        protected ReceiveFaultEvent()
+        public ReceiveFaultEvent()
         {
         }
 
@@ -24,15 +24,15 @@
 
             var aggregateException = exception as AggregateException;
             Exceptions = aggregateException?.InnerExceptions.Select(x => (ExceptionInfo)new FaultExceptionInfo(x)).ToArray()
-                ?? new ExceptionInfo[] {new FaultExceptionInfo(exception)};
+                ?? new ExceptionInfo[] { new FaultExceptionInfo(exception) };
         }
 
-        public Guid FaultId { get; private set; }
-        public DateTime Timestamp { get; private set; }
-        public Guid? FaultedMessageId { get; private set; }
-        public ExceptionInfo[] Exceptions { get; private set; }
-        public HostInfo Host { get; private set; }
-        public string[] FaultMessageTypes { get; private set; }
-        public string ContentType { get; private set; }
+        public Guid FaultId { get; set; }
+        public DateTime Timestamp { get; set; }
+        public Guid? FaultedMessageId { get; set; }
+        public ExceptionInfo[] Exceptions { get; set; }
+        public HostInfo Host { get; set; }
+        public string[] FaultMessageTypes { get; set; }
+        public string ContentType { get; set; }
     }
 }

@@ -39,6 +39,11 @@ namespace MassTransit.Tests.Serialization
                 Serializer = new JsonMessageSerializer();
                 Deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer);
             }
+            else if (_serializerType == typeof(SystemTextJsonMessageSerializer))
+            {
+                Serializer = new SystemTextJsonMessageSerializer();
+                Deserializer = new SystemTextJsonMessageDeserializer();
+            }
             else if (_serializerType == typeof(BsonMessageSerializer))
             {
                 Serializer = new BsonMessageSerializer();

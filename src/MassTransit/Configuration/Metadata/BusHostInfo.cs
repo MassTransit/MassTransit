@@ -41,14 +41,14 @@ namespace MassTransit.Metadata
             AssemblyVersion = assemblyName.Version.ToString();
         }
 
-        public string MachineName { get; private set; }
-        public string ProcessName { get; private set; }
-        public int ProcessId { get; private set; }
-        public string Assembly { get; private set; }
-        public string AssemblyVersion { get; private set; }
-        public string FrameworkVersion { get; private set; }
-        public string MassTransitVersion { get; private set; }
-        public string OperatingSystemVersion { get; private set; }
+        public string MachineName { get; set; }
+        public string ProcessName { get; set; }
+        public int ProcessId { get; set; }
+        public string Assembly { get; set; }
+        public string AssemblyVersion { get; set; }
+        public string FrameworkVersion { get; set; }
+        public string MassTransitVersion { get; set; }
+        public string OperatingSystemVersion { get; set; }
 
         static string GetAssemblyFileVersion(Assembly assembly)
         {

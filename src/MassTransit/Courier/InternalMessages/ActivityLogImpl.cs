@@ -4,10 +4,11 @@
     using Contracts;
 
 
+    [Serializable]
     class ActivityLogImpl :
         ActivityLog
     {
-        protected ActivityLogImpl()
+        public ActivityLogImpl()
         {
         }
 
@@ -20,10 +21,10 @@
             Host = host;
         }
 
-        public Guid ExecutionId { get; private set; }
-        public string Name { get; private set; }
-        public DateTime Timestamp { get; private set; }
-        public TimeSpan Duration { get; private set; }
-        public HostInfo Host { get; private set; }
+        public Guid ExecutionId { get; set; }
+        public string Name { get; set; }
+        public DateTime Timestamp { get; set; }
+        public TimeSpan Duration { get; set; }
+        public HostInfo Host { get; set; }
     }
 }

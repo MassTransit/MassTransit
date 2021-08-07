@@ -21,7 +21,7 @@ namespace MassTransit.MessageData.Values
             Value = Task.FromResult(value);
         }
 
-        public void Set(MessageDataReference reference)
+        public void Set(IMessageDataReference reference)
         {
             reference.Text = default;
             reference.Data = _value;
@@ -53,7 +53,7 @@ namespace MassTransit.MessageData.Values
             _converter = converter;
         }
 
-        public void Set(MessageDataReference reference)
+        public void Set(IMessageDataReference reference)
         {
             reference.Text = default;
             reference.Data = _value;

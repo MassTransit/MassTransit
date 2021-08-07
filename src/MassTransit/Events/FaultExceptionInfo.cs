@@ -10,7 +10,7 @@
     public class FaultExceptionInfo :
         ExceptionInfo
     {
-        protected FaultExceptionInfo()
+        public FaultExceptionInfo()
         {
         }
 
@@ -37,15 +37,15 @@
             Source = exception.Source;
         }
 
-        public string ExceptionType { get; private set; }
+        public string ExceptionType { get; set; }
 
-        public ExceptionInfo InnerException { get; private set; }
+        public ExceptionInfo InnerException { get; set; }
 
-        public string StackTrace { get; private set; }
+        public string StackTrace { get; set; }
 
-        public string Message { get; private set; }
-        public string Source { get; private set; }
+        public string Message { get; set; }
+        public string Source { get; set; }
 
-        public IDictionary<string, object> Data { get; private set; }
+        public IDictionary<string, object> Data { get; set; }
     }
 }

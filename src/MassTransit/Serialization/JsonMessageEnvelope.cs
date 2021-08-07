@@ -5,10 +5,11 @@ namespace MassTransit.Serialization
     using Metadata;
 
 
+    [Serializable]
     public class JsonMessageEnvelope :
         MessageEnvelope
     {
-        protected JsonMessageEnvelope()
+        public JsonMessageEnvelope()
         {
         }
 
@@ -58,20 +59,20 @@ namespace MassTransit.Serialization
             Host = HostMetadataCache.Host;
         }
 
-        public string MessageId { get; private set; }
-        public string RequestId { get; private set; }
-        public string CorrelationId { get; private set; }
-        public string ConversationId { get; private set; }
-        public string InitiatorId { get; private set; }
-        public string SourceAddress { get; private set; }
-        public string DestinationAddress { get; private set; }
-        public string ResponseAddress { get; private set; }
-        public string FaultAddress { get; private set; }
-        public string[] MessageType { get; private set; }
-        public object Message { get; private set; }
-        public DateTime? ExpirationTime { get; private set; }
-        public DateTime? SentTime { get; private set; }
-        public IDictionary<string, object> Headers { get; private set; }
-        public HostInfo Host { get; private set; }
+        public string MessageId { get; set; }
+        public string RequestId { get; set; }
+        public string CorrelationId { get; set; }
+        public string ConversationId { get; set; }
+        public string InitiatorId { get; set; }
+        public string SourceAddress { get; set; }
+        public string DestinationAddress { get; set; }
+        public string ResponseAddress { get; set; }
+        public string FaultAddress { get; set; }
+        public string[] MessageType { get; set; }
+        public object Message { get; set; }
+        public DateTime? ExpirationTime { get; set; }
+        public DateTime? SentTime { get; set; }
+        public IDictionary<string, object> Headers { get; set; }
+        public HostInfo Host { get; set; }
     }
 }
