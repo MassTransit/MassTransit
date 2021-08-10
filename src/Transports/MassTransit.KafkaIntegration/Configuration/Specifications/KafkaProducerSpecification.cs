@@ -34,7 +34,8 @@ namespace MassTransit.KafkaIntegration.Specifications
             _headersSerializer = headersSerializer;
             _sendObservers = new SendObservable();
 
-            SetKeySerializer(new MassTransitJsonSerializer<TKey>());
+            if (!SerializationUtils.Serializers.IsDefaultKeyType<TKey>())
+                SetKeySerializer(new MassTransitJsonSerializer<TKey>());
             SetValueSerializer(new MassTransitJsonSerializer<TValue>());
             SetHeadersSerializer(headersSerializer);
         }

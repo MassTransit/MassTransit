@@ -19,7 +19,7 @@ namespace MassTransit.KafkaIntegration
         /// <param name="configure"></param>
         /// <typeparam name="T">The message type</typeparam>
         public static void AddProducer<T>(this IRiderRegistrationConfigurator configurator, string topicName,
-            Action<IRiderRegistrationContext, IKafkaProducerConfigurator<Ignore, T>> configure = null)
+            Action<IRiderRegistrationContext, IKafkaProducerConfigurator<Null, T>> configure = null)
             where T : class
         {
             configurator.AddProducer(topicName, _ => default, configure);
@@ -36,7 +36,7 @@ namespace MassTransit.KafkaIntegration
         /// <typeparam name="T">The message type</typeparam>
         public static void AddProducer<T>(this IRiderRegistrationConfigurator configurator, string topicName,
             ProducerConfig producerConfig,
-            Action<IRiderRegistrationContext, IKafkaProducerConfigurator<Ignore, T>> configure = null)
+            Action<IRiderRegistrationContext, IKafkaProducerConfigurator<Null, T>> configure = null)
             where T : class
         {
             configurator.AddProducer(topicName, producerConfig, _ => default, configure);

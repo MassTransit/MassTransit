@@ -41,8 +41,9 @@ namespace MassTransit.KafkaIntegration.Configurators
             _options = new OptionsSet();
             Topic = topic;
 
+            if (!SerializationUtils.DeSerializers.IsDefaultKeyType<TKey>())
+                SetKeyDeserializer(new MassTransitJsonDeserializer<TKey>());
             SetValueDeserializer(new MassTransitJsonDeserializer<TValue>());
-            SetKeyDeserializer(new MassTransitJsonDeserializer<TKey>());
             SetHeadersDeserializer(headersDeserializer);
 
             CheckpointInterval = TimeSpan.FromMinutes(1);
