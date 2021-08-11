@@ -22,7 +22,7 @@ namespace MassTransit.RabbitMqTransport.Configurators
                 });
             }
 
-            _settings.VirtualHost = GetVirtualHost(hostAddress);
+            _settings.VirtualHost = Uri.UnescapeDataString(GetVirtualHost(hostAddress));
 
             if (!string.IsNullOrEmpty(connectionName))
                 _settings.ClientProvidedName = connectionName;
