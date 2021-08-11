@@ -79,6 +79,15 @@
         }
 
         [Test]
+        [Description("Should parse vhost with escape characteres %2f")]
+        public void Should_ParseVhost_With_escapes()
+        {
+            var configurator = new RabbitMqHostConfigurator(new Uri("rabbitmq://localhost/%2fv%2fhost"));
+
+            configurator.Settings.VirtualHost.ShouldBe("/v/host");
+        }
+
+        [Test]
         [Description("Custom client certificate selector should be used when set.")]
         public void Should_use_custom_client_certificate_selector_when_set()
         {
