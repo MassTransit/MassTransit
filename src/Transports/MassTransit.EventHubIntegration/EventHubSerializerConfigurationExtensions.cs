@@ -22,6 +22,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
+        /// <remarks>
+        /// These settings are applied globally to <see cref="JsonMessageSerializer.SerializerSettings"/>.
+        /// </remarks>
         public static void ConfigureJsonSerializer(this IEventHubFactoryConfigurator configurator,
             Func<JsonSerializerSettings, JsonSerializerSettings> configure)
         {
@@ -33,6 +36,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
+        /// <remarks>
+        /// These settings are applied globally to <see cref="JsonMessageSerializer.SerializerSettings"/>.
+        /// </remarks>
         public static void ConfigureJsonDeserializer(this IEventHubFactoryConfigurator configurator,
             Func<JsonSerializerSettings, JsonSerializerSettings> configure)
         {
@@ -44,6 +50,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
+        /// <remarks>
+        /// These settings are applied globally to <see cref="JsonMessageSerializer.SerializerSettings"/>.
+        /// </remarks>
         public static void ConfigureBsonSerializer(this IEventHubFactoryConfigurator configurator,
             Func<JsonSerializerSettings, JsonSerializerSettings> configure)
         {
@@ -55,6 +64,9 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
+        /// <remarks>
+        /// These settings are applied globally to <see cref="JsonMessageSerializer.SerializerSettings"/>.
+        /// </remarks>
         public static void ConfigureBsonDeserializer(this IEventHubFactoryConfigurator configurator,
             Func<JsonSerializerSettings, JsonSerializerSettings> configure)
         {
