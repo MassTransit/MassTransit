@@ -1,13 +1,16 @@
 namespace MassTransit.EventHubIntegration
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
     using Context;
     using Contexts;
+    using GreenPipes;
     using MassTransit.Registration;
     using Pipeline;
     using Pipeline.Observables;
+    using Transports;
     using Util;
 
 
@@ -46,13 +49,14 @@ namespace MassTransit.EventHubIntegration
             BaseSendTransportContext,
             EventHubSendTransportContext
         {
+            readonly IHostConfiguration _configuration;
             readonly Recycle<IProducerContextSupervisor> _producerContextSupervisor;
 
             public EventHubTransportContext(IEventHubHostConfiguration hostConfiguration, ISendPipe sendPipe,
                 IHostConfiguration configuration, Uri endpointAddress, IMessageSerializer messageSerializer)
                 : base(configuration)
             {
-                HostAddress = configuration.HostAddress;
+                _configuration = configuration;
                 SendPipe = sendPipe;
                 EndpointAddress = new EventHubEndpointAddress(HostAddress, endpointAddress);
                 _producerContextSupervisor =
@@ -60,13 +64,17 @@ namespace MassTransit.EventHubIntegration
                         new ProducerContextSupervisor(hostConfiguration.ConnectionContextSupervisor, EndpointAddress.EventHubName, messageSerializer));
             }
 
-            public Uri HostAddress { get; }
+            public Uri HostAddress => _configuration.HostAddress;
 
             public EventHubEndpointAddress EndpointAddress { get; }
 
             public ISendPipe SendPipe { get; }
 
-            public IProducerContextSupervisor ProducerContextSupervisor => _producerContextSupervisor.Supervisor;
+            public Task Send(IPipe<ProducerContext> pipe, CancellationToken cancellationToken)
+            {
+                var supervisor = _producerContextSupervisor.Supervisor;
+                return _configuration.Retry(() => supervisor.Send(pipe, cancellationToken), supervisor, cancellationToken);
+            }
         }
     }
 }

@@ -17,13 +17,11 @@ namespace MassTransit.KafkaIntegration.Transport
         ITopicProducer<TKey, TValue>
         where TValue : class
     {
-        readonly KafkaSendTransportContext _context;
-        readonly IProducerContextSupervisor<TKey, TValue> _supervisor;
+        readonly KafkaSendTransportContext<TKey, TValue> _context;
 
-        public TopicProducer(KafkaSendTransportContext context, IProducerContextSupervisor<TKey, TValue> supervisor)
+        public TopicProducer(KafkaSendTransportContext<TKey, TValue> context)
         {
             _context = context;
-            _supervisor = supervisor;
         }
 
         public Task Produce(TKey key, TValue value, CancellationToken cancellationToken = default)
@@ -35,7 +33,7 @@ namespace MassTransit.KafkaIntegration.Transport
         {
             var sendPipe = new SendPipe(_context, key, value, pipe, cancellationToken);
 
-            return _supervisor.Send(sendPipe, cancellationToken);
+            return _context.Send(sendPipe, cancellationToken);
         }
 
         public Task Produce(TKey key, object values, CancellationToken cancellationToken = default)
@@ -69,12 +67,12 @@ namespace MassTransit.KafkaIntegration.Transport
             IPipe<ProducerContext<TKey, TValue>>
         {
             readonly CancellationToken _cancellationToken;
-            readonly KafkaSendTransportContext _context;
+            readonly KafkaSendTransportContext<TKey, TValue> _context;
             readonly TKey _key;
             readonly IPipe<KafkaSendContext<TKey, TValue>> _pipe;
             readonly TValue _value;
 
-            public SendPipe(KafkaSendTransportContext context, TKey key, TValue value,
+            public SendPipe(KafkaSendTransportContext<TKey, TValue> context, TKey key, TValue value,
                 IPipe<KafkaSendContext<TKey, TValue>> pipe, CancellationToken cancellationToken)
             {
                 _context = context;
@@ -88,7 +86,7 @@ namespace MassTransit.KafkaIntegration.Transport
             {
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
-                var sendContext = new KafkaMessageSendContext<TKey, TValue>(_key, _value, _cancellationToken) {DestinationAddress = _context.TopicAddress};
+                var sendContext = new KafkaMessageSendContext<TKey, TValue>(_key, _value, _cancellationToken) { DestinationAddress = _context.TopicAddress };
 
                 await _context.SendPipe.Send(sendContext).ConfigureAwait(false);
 
