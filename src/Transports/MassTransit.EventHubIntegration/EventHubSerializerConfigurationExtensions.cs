@@ -22,6 +22,10 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
+        /// <remarks>
+        /// Note that this is a shortcut to replacing <see cref="JsonMessageSerializer.SerializerSettings"/>,
+        /// so you are changing global state!
+        /// </remarks>
         public static void ConfigureJsonSerializer(this IEventHubFactoryConfigurator configurator,
             Func<JsonSerializerSettings, JsonSerializerSettings> configure)
         {
@@ -33,6 +37,10 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
+        /// <remarks>
+        /// Note that this is a shortcut to replacing <see cref="JsonMessageSerializer.DeserializerSettings"/>,
+        /// so you are changing global state!
+        /// </remarks>
         public static void ConfigureJsonDeserializer(this IEventHubFactoryConfigurator configurator,
             Func<JsonSerializerSettings, JsonSerializerSettings> configure)
         {
@@ -44,6 +52,10 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
+        /// <remarks>
+        /// Note that this is a shortcut to replacing <see cref="BsonMessageSerializer.SerializerSettings"/>,
+        /// so you are changing global state!
+        /// </remarks>
         public static void ConfigureBsonSerializer(this IEventHubFactoryConfigurator configurator,
             Func<JsonSerializerSettings, JsonSerializerSettings> configure)
         {
@@ -55,6 +67,10 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
+        /// <remarks>
+        /// Note that this is a shortcut to replacing <see cref="BsonMessageSerializer.DeserializerSettings"/>,
+        /// so you are changing global state!
+        /// </remarks>
         public static void ConfigureBsonDeserializer(this IEventHubFactoryConfigurator configurator,
             Func<JsonSerializerSettings, JsonSerializerSettings> configure)
         {
