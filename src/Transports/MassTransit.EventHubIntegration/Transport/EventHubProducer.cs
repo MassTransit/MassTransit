@@ -42,14 +42,14 @@ namespace MassTransit.EventHubIntegration
             where T : class
         {
             var sendPipe = new SendPipe<T>(message, _context, pipe, cancellationToken);
-            return _context.ProducerContextSupervisor.Send(sendPipe, cancellationToken);
+            return _context.Send(sendPipe, cancellationToken);
         }
 
         public Task Produce<T>(IEnumerable<T> messages, IPipe<EventHubSendContext<T>> pipe, CancellationToken cancellationToken = default)
             where T : class
         {
             var sendPipe = new BatchSendPipe<T>(messages, _context, pipe, cancellationToken);
-            return _context.ProducerContextSupervisor.Send(sendPipe, cancellationToken);
+            return _context.Send(sendPipe, cancellationToken);
         }
 
         public Task Produce<T>(object values, CancellationToken cancellationToken = default)
@@ -156,7 +156,7 @@ namespace MassTransit.EventHubIntegration
 
                     eventData.Properties.Set(sendContext.Headers);
 
-                    await context.Produce(new[] {eventData}, options, sendContext.CancellationToken).ConfigureAwait(false);
+                    await context.Produce(new[] { eventData }, options, sendContext.CancellationToken).ConfigureAwait(false);
 
                     sendContext.LogSent();
                     activity.AddSendContextHeadersPostSend(sendContext);
@@ -211,7 +211,7 @@ namespace MassTransit.EventHubIntegration
                 LogContext.SetCurrentIfNull(_context.LogContext);
 
                 EventHubMessageSendContext<T>[] contexts = _messages
-                    .Select(x => new EventHubMessageSendContext<T>(x, _cancellationToken) {Serializer = context.Serializer})
+                    .Select(x => new EventHubMessageSendContext<T>(x, _cancellationToken) { Serializer = context.Serializer })
                     .ToArray();
 
                 if (contexts.Length == 0)

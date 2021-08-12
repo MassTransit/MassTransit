@@ -1,9 +1,12 @@
 namespace MassTransit.KafkaIntegration.Contexts
 {
     using System;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Configuration;
     using Confluent.Kafka;
     using Context;
+    using GreenPipes;
     using MassTransit.Pipeline;
     using MassTransit.Pipeline.Observables;
     using Serializers;
@@ -37,30 +40,40 @@ namespace MassTransit.KafkaIntegration.Contexts
 
         public ITopicProducer<TKey, TValue> CreateProducer()
         {
-            var context = new KafkaTransportContext(_sendPipe, _hostConfiguration, _topicAddress);
+            var context = new KafkaTransportContext(_sendPipe, _hostConfiguration, _topicAddress, this);
 
             if (_sendObservers.Count > 0)
                 context.ConnectSendObserver(_sendObservers);
 
-            return new TopicProducer<TKey, TValue>(context, this);
+            return new TopicProducer<TKey, TValue>(context);
         }
 
 
         class KafkaTransportContext :
             BaseSendTransportContext,
-            KafkaSendTransportContext
+            KafkaSendTransportContext<TKey, TValue>
         {
-            public KafkaTransportContext(ISendPipe sendPipe, IHostConfiguration hostConfiguration, KafkaTopicAddress topicAddress)
+            readonly IHostConfiguration _hostConfiguration;
+            readonly IProducerContextSupervisor<TKey, TValue> _supervisor;
+
+            public KafkaTransportContext(ISendPipe sendPipe, IHostConfiguration hostConfiguration, KafkaTopicAddress topicAddress,
+                IProducerContextSupervisor<TKey, TValue> supervisor)
                 : base(hostConfiguration)
             {
+                _hostConfiguration = hostConfiguration;
+                _supervisor = supervisor;
                 SendPipe = sendPipe;
-                HostAddress = hostConfiguration.HostAddress;
                 TopicAddress = topicAddress;
             }
 
-            public Uri HostAddress { get; }
+            public Uri HostAddress => _hostConfiguration.HostAddress;
             public KafkaTopicAddress TopicAddress { get; }
             public ISendPipe SendPipe { get; }
+
+            public Task Send(IPipe<ProducerContext<TKey, TValue>> pipe, CancellationToken cancellationToken)
+            {
+                return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), _supervisor, cancellationToken);
+            }
         }
     }
 }
