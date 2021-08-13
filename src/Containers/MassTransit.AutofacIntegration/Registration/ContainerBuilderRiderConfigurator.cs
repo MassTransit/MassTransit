@@ -3,6 +3,7 @@ namespace MassTransit.AutofacIntegration.Registration
     using System;
     using System.Collections.Generic;
     using Autofac;
+    using Autofac.Core;
     using MassTransit.Registration;
     using Riders;
 
@@ -52,7 +53,7 @@ namespace MassTransit.AutofacIntegration.Registration
             Builder.Register(context => riderFactory.CreateRider(context.ResolveKeyed<IRiderRegistrationContext>(registrationKey)))
                 .As<IBusInstanceSpecification>()
                 .SingleInstance();
-            Builder.Register(context => context.Resolve<IBusInstance>().GetRider<TRider>())
+            Builder.Register(context => context.Resolve<Bind<IBus, IBusInstance>>().Value.GetRider<TRider>())
                 .As<TRider>()
                 .SingleInstance();
         }
@@ -61,8 +62,13 @@ namespace MassTransit.AutofacIntegration.Registration
             where TRider : IRider
         {
             ThrowIfAlreadyConfigured(nameof(SetRiderFactory));
-            if (!_riderTypes.Add(typeof(TRider)))
-                throw new ConfigurationException($"'{typeof(TRider).Name}' can be added only once.");
+            var riderType = typeof(TRider);
+            if (!_riderTypes.Add(riderType))
+                throw new ConfigurationException($"'{riderType.Name}' can be added only once.");
+
+            //TODO: maybe support it at some point....
+            if (Builder.ComponentRegistryBuilder.IsRegistered(new TypedService(riderType)))
+                throw new ConfigurationException($"'{riderType.Name}' has been already registered.");
         }
     }
 }

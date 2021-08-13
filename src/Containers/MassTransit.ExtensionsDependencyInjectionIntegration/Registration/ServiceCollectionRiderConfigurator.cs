@@ -2,6 +2,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
     using Riders;
@@ -47,7 +48,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.AddSingleton(provider => Bind<IBus, TRider>.Create(CreateRegistrationContext(provider)));
             Collection.AddSingleton(provider =>
                 Bind<IBus>.Create(riderFactory.CreateRider(provider.GetRequiredService<Bind<IBus, TRider, IRiderRegistrationContext>>().Value)));
-            Collection.AddSingleton(provider => Bind<IBus>.Create(provider.GetRequiredService<IBusInstance>().GetRider<TRider>()));
+            Collection.AddSingleton(provider => Bind<IBus>.Create(provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.GetRider<TRider>()));
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, TRider>>().Value);
         }
 
@@ -55,8 +56,13 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             where TRider : IRider
         {
             ThrowIfAlreadyConfigured(nameof(SetRiderFactory));
-            if (!_riderTypes.Add(typeof(TRider)))
-                throw new ConfigurationException($"'{typeof(TRider).Name}' can be added only once.");
+            var riderType = typeof(TRider);
+            if (!_riderTypes.Add(riderType))
+                throw new ConfigurationException($"'{riderType.Name}' can be added only once.");
+
+            //TODO: maybe support it at some point....
+            if (Collection.Any(d => d.ServiceType == riderType))
+                throw new ConfigurationException($"'{riderType.Name}' has been already registered.");
         }
     }
 }
