@@ -96,4 +96,28 @@
         /// </summary>
         Event<TResponse2> Completed2 { get; set; }
     }
+
+
+    /// <summary>
+    /// A request is a state-machine based request configuration that includes
+    /// the events and states related to the execution of a request.
+    /// </summary>
+    /// <typeparam name="TRequest">The request type</typeparam>
+    /// <typeparam name="TResponse">The response type</typeparam>
+    /// <typeparam name="TInstance"></typeparam>
+    /// <typeparam name="TResponse2"></typeparam>
+    /// <typeparam name="TResponse3"></typeparam>
+    public interface Request<in TInstance, TRequest, TResponse, TResponse2, TResponse3> :
+        Request<TInstance, TRequest, TResponse, TResponse2>
+        where TInstance : class, SagaStateMachineInstance
+        where TRequest : class
+        where TResponse : class
+        where TResponse2 : class
+        where TResponse3 : class
+    {
+        /// <summary>
+        /// The event that is raised when the request completes and the response is received
+        /// </summary>
+        Event<TResponse3> Completed3 { get; set; }
+    }
 }

@@ -108,4 +108,23 @@ namespace Automatonymous.Requests
 
         public Event<TResponse2> Completed2 { get; set; }
     }
+
+
+    public class StateMachineRequest<TInstance, TRequest, TResponse, TResponse2, TResponse3> :
+        StateMachineRequest<TInstance, TRequest, TResponse, TResponse2>,
+        Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>
+        where TInstance : class, SagaStateMachineInstance
+        where TRequest : class
+        where TResponse : class
+        where TResponse2 : class
+        where TResponse3 : class
+    {
+        public StateMachineRequest(string name, RequestSettings settings, Expression<Func<TInstance, Guid?>> requestIdExpression = default)
+            : base(name, settings, requestIdExpression)
+        {
+            AcceptResponse<TResponse3>();
+        }
+
+        public Event<TResponse3> Completed3 { get; set; }
+    }
 }
