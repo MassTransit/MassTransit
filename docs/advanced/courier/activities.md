@@ -13,7 +13,7 @@ public class DownloadImageActivity :
 }
 ```
 
-The *IActivity* interface is generic with two arguments. The first parameter specifies the activity’s argument type and the second parameter specifies the activity’s log type. In the example shown above, *DownloadImageArguments* is the argument type and *DownloadImageLog* is the log type. Both parameters must be interface types so that the implementations can be dynamically created.
+The *IActivity* interface is generic with two arguments. The first parameter specifies the activity’s argument type and the second parameter specifies the activity’s log type. In the example shown above, *DownloadImageArguments* is the argument type and *DownloadImageLog* is the log type. Both parameters may be interface, class or record types. Where the type is a class or a record, the proper accessors should be specified (i.e. `{ get; set; }` or `{ get; init; }`).
 
 ## Execute Activities
 
