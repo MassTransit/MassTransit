@@ -62,6 +62,19 @@ namespace MassTransit.Definition
         }
 
         /// <summary>
+        /// Configure the saga endpoint
+        /// </summary>
+        /// <param name="configure"></param>
+        protected void Endpoint(Action<ISagaEndpointRegistrationConfigurator> configure)
+        {
+            var configurator = new SagaEndpointRegistrationConfigurator<TSaga>();
+
+            configure?.Invoke(configurator);
+
+            EndpointDefinition = new SagaEndpointDefinition<TSaga>(configurator.Settings);
+        }
+
+        /// <summary>
         /// Called when configuring the saga on the endpoint. Configuration only applies to this saga, and does not apply to
         /// the endpoint.
         /// </summary>
@@ -69,19 +82,6 @@ namespace MassTransit.Definition
         /// <param name="sagaConfigurator">The saga configurator</param>
         protected virtual void ConfigureSaga(IReceiveEndpointConfigurator endpointConfigurator, ISagaConfigurator<TSaga> sagaConfigurator)
         {
-        }
-
-        /// <summary>
-        /// Configure the saga endpoint
-        /// </summary>
-        /// <param name="configure"></param>
-        protected void Endpoint(Action<ISagaEndpointRegistrationConfigurator<TSaga>> configure)
-        {
-            var configurator = new SagaEndpointRegistrationConfigurator<TSaga>();
-
-            configure?.Invoke(configurator);
-
-            EndpointDefinition = new SagaEndpointDefinition<TSaga>(configurator.Settings);
         }
     }
 }

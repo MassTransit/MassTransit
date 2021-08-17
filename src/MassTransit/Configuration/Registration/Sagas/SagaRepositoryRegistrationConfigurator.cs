@@ -18,16 +18,6 @@ namespace MassTransit.Registration
             _registrar = registrar;
         }
 
-        void ISagaRepositoryRegistrationConfigurator<TSaga>.RegisterFactoryMethod(Func<IConfigurationServiceProvider, ISagaRepository<TSaga>> repositoryFactory)
-        {
-            _registrar.RegisterSagaRepository(repositoryFactory);
-        }
-
-        void ISagaRepositoryRegistrationConfigurator<TSaga>.RegisterComponents<TContext, TConsumeContextFactory, TRepositoryContextFactory>()
-        {
-            _registrar.RegisterSagaRepository<TSaga, TContext, TConsumeContextFactory, TRepositoryContextFactory>();
-        }
-
         void IContainerRegistrar.RegisterConsumer<T>()
         {
             _registrar.RegisterConsumer<T>();

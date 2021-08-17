@@ -17,7 +17,7 @@ namespace MassTransit.Registration
             _configurator = configurator;
         }
 
-        public void Endpoint(Action<IExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments>> configure)
+        public void Endpoint(Action<IExecuteActivityEndpointRegistrationConfigurator> configure)
         {
             var configurator = new ExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments>();
 

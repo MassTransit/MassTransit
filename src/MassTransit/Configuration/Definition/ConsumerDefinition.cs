@@ -64,7 +64,7 @@ namespace MassTransit.Definition
         /// Configure the consumer endpoint
         /// </summary>
         /// <param name="configure"></param>
-        protected void Endpoint(Action<IConsumerEndpointRegistrationConfigurator<TConsumer>> configure)
+        protected void Endpoint(Action<IConsumerEndpointRegistrationConfigurator> configure)
         {
             var configurator = new ConsumerEndpointRegistrationConfigurator<TConsumer>();
 

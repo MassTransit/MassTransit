@@ -3,8 +3,8 @@ namespace MassTransit.Registration
     using System;
     using System.Linq;
     using Automatonymous;
+    using Futures;
     using Internals.Extensions;
-    using MassTransit.Futures;
     using Metadata;
 
 

@@ -63,7 +63,7 @@ namespace MassTransit.Definition
         /// Configure the execute endpoint
         /// </summary>
         /// <param name="configure"></param>
-        protected void ExecuteEndpoint(Action<IExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments>> configure)
+        protected void ExecuteEndpoint(Action<IExecuteActivityEndpointRegistrationConfigurator> configure)
         {
             var configurator = new ExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments>();
 

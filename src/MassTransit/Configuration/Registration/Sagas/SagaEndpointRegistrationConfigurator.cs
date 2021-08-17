@@ -5,7 +5,7 @@ namespace MassTransit.Registration
 
     public class SagaEndpointRegistrationConfigurator<TSaga> :
         EndpointRegistrationConfigurator<TSaga>,
-        ISagaEndpointRegistrationConfigurator<TSaga>
+        ISagaEndpointRegistrationConfigurator
         where TSaga : class, ISaga
     {
     }

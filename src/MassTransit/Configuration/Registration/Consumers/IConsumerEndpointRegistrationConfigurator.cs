@@ -1,8 +1,7 @@
 namespace MassTransit.Registration
 {
-    public interface IConsumerEndpointRegistrationConfigurator<TConsumer> :
+    public interface IConsumerEndpointRegistrationConfigurator :
         IEndpointRegistrationConfigurator
-        where TConsumer : class, IConsumer
     {
     }
 }

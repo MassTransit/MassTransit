@@ -14,9 +14,10 @@ namespace MassTransit.Registration
             Cached.Instance.GetOrAdd(activityType).Register(registrar);
         }
 
-        public static IExecuteActivityRegistration CreateRegistration(Type activityType, Type activityDefinitionType, IContainerRegistrar registrar)
+        public static IExecuteActivityRegistrationConfigurator AddExecuteActivity(IRegistrationConfigurator configurator, Type activityType,
+            Type activityDefinitionType = null)
         {
-            return Cached.Instance.GetOrAdd(activityType).CreateRegistration(activityDefinitionType, registrar);
+            return Cached.Instance.GetOrAdd(activityType).AddExecuteActivity(configurator, activityDefinitionType);
         }
 
         static CachedRegistration Factory(Type activityType)
@@ -45,7 +46,7 @@ namespace MassTransit.Registration
         interface CachedRegistration
         {
             void Register(IContainerRegistrar registrar);
-            IExecuteActivityRegistration CreateRegistration(Type activityDefinitionType, IContainerRegistrar registrar);
+            IExecuteActivityRegistrationConfigurator AddExecuteActivity(IRegistrationConfigurator configurator, Type activityDefinitionType);
         }
 
 
@@ -59,14 +60,12 @@ namespace MassTransit.Registration
                 registrar.RegisterExecuteActivity<TActivity, TArguments>();
             }
 
-            public IExecuteActivityRegistration CreateRegistration(Type activityDefinitionType, IContainerRegistrar registrar)
+            public IExecuteActivityRegistrationConfigurator AddExecuteActivity(IRegistrationConfigurator configurator, Type activityDefinitionType)
             {
-                Register(registrar);
+                IExecuteActivityRegistrationConfigurator<TActivity, TArguments> registrationConfigurator =
+                    configurator.AddExecuteActivity<TActivity, TArguments>(activityDefinitionType);
 
-                if (activityDefinitionType != null)
-                    ExecuteActivityDefinitionRegistrationCache.Register(activityDefinitionType, registrar);
-
-                return new ExecuteActivityRegistration<TActivity, TArguments>();
+                return registrationConfigurator;
             }
         }
     }

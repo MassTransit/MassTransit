@@ -13,9 +13,9 @@ namespace MassTransit.Registration
             Cached.Instance.GetOrAdd(futureType).Register(registrar);
         }
 
-        public static void AddFuture(IRegistrationConfigurator configurator, Type futureType, Type futureDefinitionType)
+        public static IFutureRegistrationConfigurator AddFuture(IRegistrationConfigurator configurator, Type futureType, Type futureDefinitionType)
         {
-            Cached.Instance.GetOrAdd(futureType).AddFuture(configurator, futureDefinitionType);
+            return Cached.Instance.GetOrAdd(futureType).AddFuture(configurator, futureDefinitionType);
         }
 
         static CachedRegistration Factory(Type type)
@@ -36,7 +36,7 @@ namespace MassTransit.Registration
         interface CachedRegistration
         {
             void Register(IContainerRegistrar registrar);
-            void AddFuture(IRegistrationConfigurator configurator, Type futureDefinitionType);
+            IFutureRegistrationConfigurator AddFuture(IRegistrationConfigurator configurator, Type futureDefinitionType);
         }
 
 
@@ -52,9 +52,9 @@ namespace MassTransit.Registration
                 registrar.RegisterFuture<TFuture>();
             }
 
-            public void AddFuture(IRegistrationConfigurator configurator, Type futureDefinitionType)
+            public IFutureRegistrationConfigurator AddFuture(IRegistrationConfigurator configurator, Type futureDefinitionType)
             {
-                configurator.AddFuture<TFuture>(futureDefinitionType ?? typeof(DefaultFutureDefinition<TFuture>));
+                return configurator.AddFuture<TFuture>(futureDefinitionType ?? typeof(DefaultFutureDefinition<TFuture>));
             }
         }
     }

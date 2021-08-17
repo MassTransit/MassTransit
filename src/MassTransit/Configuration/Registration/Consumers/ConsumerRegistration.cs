@@ -67,6 +67,11 @@ namespace MassTransit.Registration
             return GetConsumerDefinition(provider);
         }
 
+        public IConsumerRegistrationConfigurator GetConsumerRegistrationConfigurator(IRegistrationConfigurator registrationConfigurator)
+        {
+            return new ConsumerRegistrationConfigurator<TConsumer>(registrationConfigurator);
+        }
+
         IConsumerDefinition<TConsumer> GetConsumerDefinition(IConfigurationServiceProvider provider)
         {
             if (_definition != null)

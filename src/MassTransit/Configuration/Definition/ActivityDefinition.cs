@@ -49,7 +49,7 @@ namespace MassTransit.Definition
         /// Configure the compensate endpoint
         /// </summary>
         /// <param name="configure"></param>
-        protected void CompensateEndpoint(Action<ICompensateActivityEndpointRegistrationConfigurator<TActivity, TLog>> configure)
+        protected void CompensateEndpoint(Action<ICompensateActivityEndpointRegistrationConfigurator> configure)
         {
             var configurator = new CompensateActivityEndpointRegistrationConfigurator<TActivity, TLog>();
 

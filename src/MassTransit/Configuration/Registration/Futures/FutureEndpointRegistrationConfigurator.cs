@@ -1,12 +1,12 @@
 namespace MassTransit.Registration
 {
     using Automatonymous;
-    using MassTransit.Futures;
+    using Futures;
 
 
     public class FutureEndpointRegistrationConfigurator<TFuture> :
         EndpointRegistrationConfigurator<TFuture>,
-        IFutureEndpointRegistrationConfigurator<TFuture>
+        IFutureEndpointRegistrationConfigurator
         where TFuture : MassTransitStateMachine<FutureState>
     {
     }

@@ -11,10 +11,10 @@ namespace MassTransit.Registration
             Cached.Instance.GetOrAdd(sagaType).Register(registrar);
         }
 
-        public static void AddSaga(IRegistrationConfigurator configurator, ISagaRepositoryRegistrationProvider provider, Type sagaType,
+        public static ISagaRegistrationConfigurator AddSaga(IRegistrationConfigurator configurator, ISagaRepositoryRegistrationProvider provider, Type sagaType,
             Type sagaDefinitionType = null)
         {
-            Cached.Instance.GetOrAdd(sagaType).AddSaga(configurator, provider, sagaDefinitionType);
+            return Cached.Instance.GetOrAdd(sagaType).AddSaga(configurator, provider, sagaDefinitionType);
         }
 
         /// <summary>
@@ -41,8 +41,10 @@ namespace MassTransit.Registration
 
         interface CachedRegistration
         {
+            ISagaRegistrationConfigurator AddSaga(IRegistrationConfigurator configurator, ISagaRepositoryRegistrationProvider provider,
+                Type sagaDefinitionType);
+
             void Register(IContainerRegistrar registrar);
-            void AddSaga(IRegistrationConfigurator registry, ISagaRepositoryRegistrationProvider provider, Type sagaDefinitionType);
 
             void DoNotRegister();
         }
@@ -62,16 +64,19 @@ namespace MassTransit.Registration
                 registrar.RegisterSaga<T>();
             }
 
-            public void AddSaga(IRegistrationConfigurator registry, ISagaRepositoryRegistrationProvider provider, Type sagaDefinitionType)
-            {
-                ISagaRegistrationConfigurator<T> configurator = registry.AddSaga<T>(sagaDefinitionType);
-
-                provider?.Configure(configurator);
-            }
-
             public void DoNotRegister()
             {
                 _doNotRegister = true;
+            }
+
+            public ISagaRegistrationConfigurator AddSaga(IRegistrationConfigurator configurator, ISagaRepositoryRegistrationProvider provider,
+                Type sagaDefinitionType)
+            {
+                ISagaRegistrationConfigurator<T> registrationConfigurator = configurator.AddSaga<T>(sagaDefinitionType);
+
+                provider?.Configure(registrationConfigurator);
+
+                return registrationConfigurator;
             }
         }
     }

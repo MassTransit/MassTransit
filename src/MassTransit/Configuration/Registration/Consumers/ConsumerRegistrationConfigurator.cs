@@ -15,7 +15,7 @@ namespace MassTransit.Registration
             _configurator = configurator;
         }
 
-        public void Endpoint(Action<IConsumerEndpointRegistrationConfigurator<TConsumer>> configure)
+        public void Endpoint(Action<IConsumerEndpointRegistrationConfigurator> configure)
         {
             var configurator = new ConsumerEndpointRegistrationConfigurator<TConsumer>();
 

@@ -75,7 +75,7 @@ namespace MassTransit.Registration
         /// Configure the saga endpoint
         /// </summary>
         /// <param name="configure"></param>
-        protected void Endpoint(Action<IFutureEndpointRegistrationConfigurator<TFuture>> configure)
+        protected void Endpoint(Action<IFutureEndpointRegistrationConfigurator> configure)
         {
             var configurator = new FutureEndpointRegistrationConfigurator<TFuture>();
 

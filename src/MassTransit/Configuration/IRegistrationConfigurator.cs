@@ -34,7 +34,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="consumerType">The consumer type</param>
         /// <param name="consumerDefinitionType">The consumer definition type</param>
-        void AddConsumer(Type consumerType, Type consumerDefinitionType = null);
+        IConsumerRegistrationConfigurator AddConsumer(Type consumerType, Type consumerDefinitionType = null);
 
         /// <summary>
         /// Adds the saga, allowing configuration when it is configured on the endpoint. This should not
@@ -60,7 +60,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="sagaType">The saga type</param>
         /// <param name="sagaDefinitionType">The saga definition type</param>
-        void AddSaga(Type sagaType, Type sagaDefinitionType = null);
+        ISagaRegistrationConfigurator AddSaga(Type sagaType, Type sagaDefinitionType = null);
 
         /// <summary>
         /// Adds a SagaStateMachine to the registry, using the factory method, and updates the registrar prior to registering so that the default
@@ -120,7 +120,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="activityType"></param>
         /// <param name="activityDefinitionType"></param>
-        void AddExecuteActivity(Type activityType, Type activityDefinitionType);
+        IExecuteActivityRegistrationConfigurator AddExecuteActivity(Type activityType, Type activityDefinitionType);
 
         /// <summary>
         /// Adds an activity (Courier), allowing configuration when it is configured on the endpoint.
@@ -158,7 +158,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="activityType"></param>
         /// <param name="activityDefinitionType"></param>
-        void AddActivity(Type activityType, Type activityDefinitionType = null);
+        IActivityRegistrationConfigurator AddActivity(Type activityType, Type activityDefinitionType = null);
 
         /// <summary>
         /// Adds an endpoint definition, which will to used for consumers, sagas, etc. that are on that same endpoint. If a consumer, etc.
@@ -251,7 +251,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="futureType"></param>
         /// <param name="futureDefinitionType">The future definition type</param>
-        void AddFuture(Type futureType, Type futureDefinitionType = null);
+        IFutureRegistrationConfigurator AddFuture(Type futureType, Type futureDefinitionType = null);
 
         /// <summary>
         /// Adds a method that is called for each receive endpoint when it is configured, allowing additional

@@ -5,7 +5,7 @@ namespace MassTransit.Registration
 
     public class CompensateActivityEndpointRegistrationConfigurator<TActivity, TLog> :
         EndpointRegistrationConfigurator<ICompensateActivity<TLog>>,
-        ICompensateActivityEndpointRegistrationConfigurator<TActivity, TLog>
+        ICompensateActivityEndpointRegistrationConfigurator
         where TActivity : class, ICompensateActivity<TLog>
         where TLog : class
     {

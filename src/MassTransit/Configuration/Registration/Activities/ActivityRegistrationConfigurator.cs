@@ -18,29 +18,33 @@ namespace MassTransit.Registration
             _configurator = configurator;
         }
 
-        public void Endpoints(Action<IExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments>> configureExecute,
-            Action<ICompensateActivityEndpointRegistrationConfigurator<TActivity, TLog>> configureCompensate)
+        public void Endpoints(Action<IExecuteActivityEndpointRegistrationConfigurator> configureExecute,
+            Action<ICompensateActivityEndpointRegistrationConfigurator> configureCompensate)
         {
             ExecuteEndpoint(configureExecute);
             CompensateEndpoint(configureCompensate);
         }
 
-        public void ExecuteEndpoint(Action<IExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments>> configureExecute)
+        public IActivityRegistrationConfigurator ExecuteEndpoint(Action<IExecuteActivityEndpointRegistrationConfigurator> configureExecute)
         {
             var configurator = new ExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments>();
 
             configureExecute?.Invoke(configurator);
 
             _configurator.AddEndpoint<ExecuteActivityEndpointDefinition<TActivity, TArguments>, IExecuteActivity<TArguments>>(configurator.Settings);
+
+            return this;
         }
 
-        public void CompensateEndpoint(Action<ICompensateActivityEndpointRegistrationConfigurator<TActivity, TLog>> configureCompensate)
+        public IActivityRegistrationConfigurator CompensateEndpoint(Action<ICompensateActivityEndpointRegistrationConfigurator> configureCompensate)
         {
             var compensateConfigurator = new CompensateActivityEndpointRegistrationConfigurator<TActivity, TLog>();
 
             configureCompensate?.Invoke(compensateConfigurator);
 
             _configurator.AddEndpoint<CompensateActivityEndpointDefinition<TActivity, TLog>, ICompensateActivity<TLog>>(compensateConfigurator.Settings);
+
+            return this;
         }
     }
 }

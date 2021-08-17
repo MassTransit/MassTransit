@@ -14,9 +14,10 @@ namespace MassTransit.Registration
             Cached.Instance.GetOrAdd(activityType).Register(registrar);
         }
 
-        public static IActivityRegistration CreateRegistration(Type activityType, Type activityDefinitionType, IContainerRegistrar registrar)
+        public static IActivityRegistrationConfigurator AddActivity(IRegistrationConfigurator configurator, Type activityType,
+            Type activityDefinitionType = null)
         {
-            return Cached.Instance.GetOrAdd(activityType).CreateRegistration(activityDefinitionType, registrar);
+            return Cached.Instance.GetOrAdd(activityType).AddActivity(configurator, activityDefinitionType);
         }
 
         static CachedRegistration Factory(Type activityType)
@@ -40,7 +41,7 @@ namespace MassTransit.Registration
         interface CachedRegistration
         {
             void Register(IContainerRegistrar registrar);
-            IActivityRegistration CreateRegistration(Type activityDefinitionType, IContainerRegistrar registrar);
+            IActivityRegistrationConfigurator AddActivity(IRegistrationConfigurator configurator, Type activityDefinitionType);
         }
 
 
@@ -56,14 +57,12 @@ namespace MassTransit.Registration
                 registrar.RegisterCompensateActivity<TActivity, TLog>();
             }
 
-            public IActivityRegistration CreateRegistration(Type activityDefinitionType, IContainerRegistrar registrar)
+            public IActivityRegistrationConfigurator AddActivity(IRegistrationConfigurator configurator, Type activityDefinitionType)
             {
-                Register(registrar);
+                IActivityRegistrationConfigurator<TActivity, TArguments, TLog> registrationConfigurator =
+                    configurator.AddActivity<TActivity, TArguments, TLog>(activityDefinitionType);
 
-                if (activityDefinitionType != null)
-                    ActivityDefinitionRegistrationCache.Register(activityDefinitionType, registrar);
-
-                return new ActivityRegistration<TActivity, TArguments, TLog>();
+                return registrationConfigurator;
             }
         }
     }

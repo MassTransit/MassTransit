@@ -5,10 +5,16 @@ namespace MassTransit
     using Registration;
 
 
-    public interface IExecuteActivityRegistrationConfigurator<TActivity, TArguments>
+    public interface IExecuteActivityRegistrationConfigurator<TActivity, TArguments> :
+        IExecuteActivityRegistrationConfigurator
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {
-        void Endpoint(Action<IExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments>> configure);
+    }
+
+
+    public interface IExecuteActivityRegistrationConfigurator
+    {
+        void Endpoint(Action<IExecuteActivityEndpointRegistrationConfigurator> configure);
     }
 }

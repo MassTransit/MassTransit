@@ -5,7 +5,7 @@ namespace MassTransit.Registration
 
     public class ExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments> :
         EndpointRegistrationConfigurator<IExecuteActivity<TArguments>>,
-        IExecuteActivityEndpointRegistrationConfigurator<TActivity, TArguments>
+        IExecuteActivityEndpointRegistrationConfigurator
         where TActivity : class, IExecuteActivity<TArguments>
         where TArguments : class
     {

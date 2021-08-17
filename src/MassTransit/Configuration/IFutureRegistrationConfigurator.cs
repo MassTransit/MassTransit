@@ -3,11 +3,20 @@ namespace MassTransit
     using System;
     using Automatonymous;
     using Futures;
+    using Registration;
 
 
-    public interface IFutureRegistrationConfigurator<TFuture>
+    public interface IFutureRegistrationConfigurator<TFuture> :
+        IFutureRegistrationConfigurator
         where TFuture : MassTransitStateMachine<FutureState>
     {
-        IFutureRegistrationConfigurator<TFuture> Endpoint(Action<IFutureEndpointRegistrationConfigurator<TFuture>> configure);
+        new IFutureRegistrationConfigurator<TFuture> Endpoint(Action<IFutureEndpointRegistrationConfigurator> configure);
+        IFutureRegistrationConfigurator<TFuture> Repository(Action<ISagaRepositoryRegistrationConfigurator<FutureState>> configure);
+    }
+
+
+    public interface IFutureRegistrationConfigurator
+    {
+        IFutureRegistrationConfigurator Endpoint(Action<IFutureEndpointRegistrationConfigurator> configure);
     }
 }

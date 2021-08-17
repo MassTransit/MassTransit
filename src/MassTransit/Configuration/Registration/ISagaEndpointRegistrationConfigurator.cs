@@ -1,6 +1,6 @@
 namespace MassTransit.Registration
 {
-    public interface ICompensateActivityEndpointRegistrationConfigurator :
+    public interface ISagaEndpointRegistrationConfigurator :
         IEndpointRegistrationConfigurator
     {
     }

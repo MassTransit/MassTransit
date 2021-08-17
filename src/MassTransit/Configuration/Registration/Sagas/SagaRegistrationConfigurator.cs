@@ -18,7 +18,12 @@ namespace MassTransit.Registration
             _registrar = registrar;
         }
 
-        public ISagaRegistrationConfigurator<TSaga> Endpoint(Action<ISagaEndpointRegistrationConfigurator<TSaga>> configure)
+        ISagaRegistrationConfigurator ISagaRegistrationConfigurator.Endpoint(Action<ISagaEndpointRegistrationConfigurator> configure)
+        {
+            return Endpoint(configure);
+        }
+
+        public ISagaRegistrationConfigurator<TSaga> Endpoint(Action<ISagaEndpointRegistrationConfigurator> configure)
         {
             var configurator = new SagaEndpointRegistrationConfigurator<TSaga>();
 

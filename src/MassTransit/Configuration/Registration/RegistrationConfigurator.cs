@@ -83,7 +83,7 @@ namespace MassTransit.Registration
             return new ConsumerRegistrationConfigurator<T>(this);
         }
 
-        public void AddConsumer(Type consumerType, Type consumerDefinitionType)
+        public IConsumerRegistrationConfigurator AddConsumer(Type consumerType, Type consumerDefinitionType)
         {
             if (TypeMetadataCache.HasSagaInterfaces(consumerType))
             {
@@ -91,17 +91,7 @@ namespace MassTransit.Registration
                     nameof(consumerType));
             }
 
-            IConsumerRegistration ValueFactory(Type type)
-            {
-                ConsumerRegistrationCache.Register(type, Registrar);
-
-                return (IConsumerRegistration)Activator.CreateInstance(typeof(ConsumerRegistration<>).MakeGenericType(type));
-            }
-
-            _consumers.GetOrAdd(consumerType, ValueFactory);
-
-            if (consumerDefinitionType != null)
-                ConsumerDefinitionRegistrationCache.Register(consumerDefinitionType, Registrar);
+            return ConsumerRegistrationCache.AddConsumer(this, consumerType, consumerDefinitionType);
         }
 
         public ISagaRegistrationConfigurator<T> AddSaga<T>(Action<ISagaConfigurator<T>> configure)
@@ -133,12 +123,12 @@ namespace MassTransit.Registration
             return new SagaRegistrationConfigurator<T>(this, Registrar);
         }
 
-        public void AddSaga(Type sagaType, Type sagaDefinitionType)
+        public ISagaRegistrationConfigurator AddSaga(Type sagaType, Type sagaDefinitionType)
         {
             if (sagaType.HasInterface<SagaStateMachineInstance>())
                 throw new ArgumentException($"State machine sagas must be registered using AddSagaStateMachine: {TypeMetadataCache.GetShortName(sagaType)}");
 
-            SagaRegistrationCache.AddSaga(this, _sagaRepositoryRegistrationProvider, sagaType, sagaDefinitionType);
+            return SagaRegistrationCache.AddSaga(this, _sagaRepositoryRegistrationProvider, sagaType, sagaDefinitionType);
         }
 
         public ISagaRegistrationConfigurator<T> AddSagaStateMachine<TStateMachine, T>(Action<ISagaConfigurator<T>> configure = null)
@@ -204,10 +194,9 @@ namespace MassTransit.Registration
             return new ExecuteActivityRegistrationConfigurator<TActivity, TArguments>(this);
         }
 
-        public void AddExecuteActivity(Type activityType, Type activityDefinitionType)
+        public IExecuteActivityRegistrationConfigurator AddExecuteActivity(Type activityType, Type activityDefinitionType)
         {
-            _executeActivities.GetOrAdd(activityType,
-                type => ExecuteActivityRegistrationCache.CreateRegistration(type, activityDefinitionType, Registrar));
+            return ExecuteActivityRegistrationCache.AddExecuteActivity(this, activityType, activityDefinitionType);
         }
 
         public IActivityRegistrationConfigurator<TActivity, TArguments, TLog> AddActivity<TActivity, TArguments, TLog>(
@@ -245,10 +234,9 @@ namespace MassTransit.Registration
             return new ActivityRegistrationConfigurator<TActivity, TArguments, TLog>(this);
         }
 
-        public void AddActivity(Type activityType, Type activityDefinitionType)
+        public IActivityRegistrationConfigurator AddActivity(Type activityType, Type activityDefinitionType)
         {
-            _activities.GetOrAdd(activityType,
-                type => ActivityRegistrationCache.CreateRegistration(type, activityDefinitionType, Registrar));
+            return ActivityRegistrationCache.AddActivity(this, activityType, activityDefinitionType);
         }
 
         public IFutureRegistrationConfigurator<TFuture> AddFuture<TFuture>(Type futureDefinitionType)
@@ -266,12 +254,12 @@ namespace MassTransit.Registration
             if (futureDefinitionType != null)
                 FutureDefinitionRegistrationCache.Register(futureDefinitionType, Registrar);
 
-            return new FutureRegistrationConfigurator<TFuture>(this);
+            return new FutureRegistrationConfigurator<TFuture>(this, Registrar);
         }
 
-        public void AddFuture(Type futureType, Type futureDefinitionType)
+        public IFutureRegistrationConfigurator AddFuture(Type futureType, Type futureDefinitionType)
         {
-            FutureRegistrationCache.AddFuture(this, futureType, futureDefinitionType);
+            return FutureRegistrationCache.AddFuture(this, futureType, futureDefinitionType);
         }
 
         public void AddConfigureEndpointsCallback(ConfigureEndpointsCallback callback)

@@ -15,5 +15,7 @@ namespace MassTransit.Registration
         void Configure(IReceiveEndpointConfigurator configurator, IConfigurationServiceProvider scopeProvider);
 
         IConsumerDefinition GetDefinition(IConfigurationServiceProvider provider);
+
+        IConsumerRegistrationConfigurator GetConsumerRegistrationConfigurator(IRegistrationConfigurator registrationConfigurator);
     }
 }

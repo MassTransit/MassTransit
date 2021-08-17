@@ -4,9 +4,15 @@ namespace MassTransit
     using Registration;
 
 
-    public interface IConsumerRegistrationConfigurator<TConsumer>
+    public interface IConsumerRegistrationConfigurator<TConsumer> :
+        IConsumerRegistrationConfigurator
         where TConsumer : class, IConsumer
     {
-        void Endpoint(Action<IConsumerEndpointRegistrationConfigurator<TConsumer>> configure);
+    }
+
+
+    public interface IConsumerRegistrationConfigurator
+    {
+        void Endpoint(Action<IConsumerEndpointRegistrationConfigurator> configure);
     }
 }
