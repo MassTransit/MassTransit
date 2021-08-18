@@ -64,3 +64,36 @@ public class OrderServicePlatformStartup :
     }
 }
 ```
+
+### Changing Logging
+
+To configure logging, simply re-define the Serilog logger in the ConfigureMassTransit method of your platform startup:
+
+```cs
+public class OrderServicePlatformStartup :
+    IPlatformStartup
+{
+    readonly IConfiguration _configuration;
+
+    public QuartzPlatformStartup(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+    
+    public void ConfigureMassTransit(IServiceCollectionBusConfigurator configurator, IServiceCollection services)
+    {
+        Log.Logger = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .MinimumLevel.Debug()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+            .CreateLogger();
+        
+        // services.AddSingleton<IMyService, MyService>(); etc.
+        
+        configurator.AddConsumer<MyConsumer>();
+    }
+}
+```        
+
+This example configures Serilog to log to the console with Debug messages - you could also load the logger configuration by using the .ReadFrom.Configuration() method.
