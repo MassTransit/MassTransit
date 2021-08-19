@@ -1,6 +1,7 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Configurators
 {
     using System.Collections.Generic;
+    using Amazon.SQS;
     using Entities;
 
 
@@ -16,6 +17,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configurators
             QueueAttributes = queueAttributes ?? new Dictionary<string, object>();
             QueueSubscriptionAttributes = queueSubscriptionAttributes ?? new Dictionary<string, object>();
             QueueTags = queueTags ?? new Dictionary<string, string>();
+
+            if (AmazonSqsEndpointAddress.IsFifo(queueName))
+                QueueAttributes[QueueAttributeName.FifoQueue] = "true";
         }
 
         public QueueConfigurator(Queue source)

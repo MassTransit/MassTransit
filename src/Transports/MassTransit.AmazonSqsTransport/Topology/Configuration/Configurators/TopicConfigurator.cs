@@ -16,6 +16,9 @@ namespace MassTransit.AmazonSqsTransport.Topology.Configurators
             TopicAttributes = topicAttributes ?? new Dictionary<string, object>();
             TopicSubscriptionAttributes = topicSubscriptionAttributes ?? new Dictionary<string, object>();
             TopicTags = topicTags ?? new Dictionary<string, string>();
+
+            if (AmazonSqsEndpointAddress.IsFifo(topicName))
+                TopicAttributes["FifoTopic"] = "true";
         }
 
         public TopicConfigurator(Topic source)

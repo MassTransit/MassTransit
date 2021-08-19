@@ -16,7 +16,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
     public class QueueCache :
         IAsyncDisposable
     {
-        static readonly List<string> AllAttributes = new List<string> {QueueAttributeName.All};
+        static readonly List<string> AllAttributes = new List<string> { QueueAttributeName.All };
 
         readonly ICache<QueueInfo> _cache;
         readonly CancellationToken _cancellationToken;
@@ -94,7 +94,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         {
             Dictionary<string, string> attributes = queue.QueueAttributes.ToDictionary(x => x.Key, x => x.Value.ToString());
 
-            if (queue.EntityName.EndsWith(".fifo", true, CultureInfo.InvariantCulture) && !attributes.ContainsKey(QueueAttributeName.FifoQueue))
+            if (AmazonSqsEndpointAddress.IsFifo(queue.EntityName) && !attributes.ContainsKey(QueueAttributeName.FifoQueue))
             {
                 LogContext.Warning?.Log("Using '.fifo' suffix without 'FifoQueue' attribute might cause unexpected behavior.");
 

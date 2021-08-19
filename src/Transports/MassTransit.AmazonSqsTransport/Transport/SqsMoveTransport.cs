@@ -2,8 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using Amazon.SQS;
     using Amazon.SQS.Model;
     using GreenPipes;
 
@@ -11,12 +13,15 @@
     public class SqsMoveTransport
     {
         readonly string _destination;
+        readonly bool _isFifo;
         readonly IFilter<ClientContext> _topologyFilter;
 
         protected SqsMoveTransport(string destination, IFilter<ClientContext> topologyFilter)
         {
-            _topologyFilter = topologyFilter;
             _destination = destination;
+            _topologyFilter = topologyFilter;
+
+            _isFifo = AmazonSqsEndpointAddress.IsFifo(destination);
         }
 
         protected async Task Move(ReceiveContext context, Action<SendMessageBatchRequestEntry, IDictionary<string, MessageAttributeValue>> preSend)
@@ -28,7 +33,21 @@
 
             var message = new SendMessageBatchRequestEntry("", Encoding.UTF8.GetString(context.GetBody()));
 
-            CopyReceivedMessageHeaders(context, message.MessageAttributes);
+            if (context.TryGetPayload(out AmazonSqsMessageContext receiveContext))
+            {
+                if (_isFifo)
+                {
+                    if (receiveContext.TransportMessage.Attributes.TryGetValue(MessageSystemAttributeName.MessageGroupId, out var messageGroupId)
+                        && !string.IsNullOrWhiteSpace(messageGroupId))
+                        message.MessageGroupId = messageGroupId;
+                    if (receiveContext.TransportMessage.Attributes.TryGetValue(MessageSystemAttributeName.MessageDeduplicationId,
+                            out var messageDeduplicationId)
+                        && !string.IsNullOrWhiteSpace(messageDeduplicationId))
+                        message.MessageDeduplicationId = messageDeduplicationId;
+                }
+
+                CopyReceivedMessageHeaders(receiveContext, message.MessageAttributes);
+            }
 
             preSend(message, message.MessageAttributes);
 
@@ -37,18 +56,10 @@
             context.AddReceiveTask(task);
         }
 
-        static void CopyReceivedMessageHeaders(ReceiveContext context, IDictionary<string, MessageAttributeValue> attributes)
+        static void CopyReceivedMessageHeaders(AmazonSqsMessageContext context, IDictionary<string, MessageAttributeValue> attributes)
         {
-            if (context.TryGetPayload(out AmazonSqsMessageContext messageContext))
-            {
-                foreach (var key in messageContext.Attributes.Keys)
-                {
-                    if (key.StartsWith("MT-"))
-                        continue;
-
-                    attributes[key] = messageContext.Attributes[key];
-                }
-            }
+            foreach (var key in context.Attributes.Keys.Where(key => !key.StartsWith("MT-")))
+                attributes[key] = context.Attributes[key];
         }
     }
 }

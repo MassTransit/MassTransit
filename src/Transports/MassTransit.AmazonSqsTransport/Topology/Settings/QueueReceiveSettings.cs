@@ -1,8 +1,6 @@
 namespace MassTransit.AmazonSqsTransport.Topology.Settings
 {
     using System;
-    using System.Globalization;
-    using Amazon.SQS;
     using Configuration;
     using Configurators;
 
@@ -20,11 +18,8 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
 
             WaitTimeSeconds = 3;
 
-            if (queueName.EndsWith(".fifo", true, CultureInfo.InvariantCulture))
-            {
-                QueueAttributes[QueueAttributeName.FifoQueue] = "true";
+            if (AmazonSqsEndpointAddress.IsFifo(queueName))
                 IsOrdered = true;
-            }
         }
 
         public int PrefetchCount => _configuration.Transport.PrefetchCount;

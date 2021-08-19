@@ -3,6 +3,7 @@ namespace MassTransit.AmazonSqsTransport
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Globalization;
     using Initializers;
     using Initializers.TypeConverters;
     using Topology;
@@ -132,6 +133,11 @@ namespace MassTransit.AmazonSqsTransport
             builder.Query += string.Join("&", address.GetQueryStringOptions());
 
             return builder.Uri;
+        }
+
+        public static bool IsFifo(string name)
+        {
+            return name.EndsWith(".fifo", true, CultureInfo.InvariantCulture);
         }
 
         public Uri TopicAddress
