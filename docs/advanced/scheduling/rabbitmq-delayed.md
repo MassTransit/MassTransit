@@ -2,7 +2,7 @@
 
 MassTransit uses the [RabbitMQ delayed exchange][1] plug-in to schedule messages.
 
-::: tip Quartz.NET Docker Image
+::: tip RabbitMQ Docker Image
 MassTransit provides a [Docker Image](https://hub.docker.com/r/masstransit/rabbitmq) with RabbitMQ ready to run, including the delayed exchange plug-in. 
 :::
 
