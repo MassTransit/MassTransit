@@ -77,6 +77,8 @@ namespace MassTransit.TestComponents
             try
             {
                 await TestHarness.Stop();
+
+                await _testFixtureConfigurator.OneTimeTearDown(Provider);
             }
             finally
             {

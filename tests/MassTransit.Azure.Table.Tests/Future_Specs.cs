@@ -70,6 +70,11 @@ namespace MassTransit.Azure.Table.Tests
                 segment = await table.ExecuteQuerySegmentedAsync(query, segment.ContinuationToken);
             }
         }
+
+        public Task OneTimeTearDown(IServiceProvider provider)
+        {
+            return Task.CompletedTask;
+        }
     }
 
 

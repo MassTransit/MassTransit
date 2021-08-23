@@ -28,6 +28,11 @@ namespace MassTransit.Containers.Tests
         {
             return Task.CompletedTask;
         }
+
+        public Task OneTimeTearDown(IServiceProvider provider)
+        {
+            return Task.CompletedTask;
+        }
     }
 
 

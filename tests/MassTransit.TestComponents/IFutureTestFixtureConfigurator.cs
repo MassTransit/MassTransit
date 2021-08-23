@@ -11,5 +11,6 @@ namespace MassTransit.TestComponents
         void ConfigureFutureSagaRepository(IServiceCollectionBusConfigurator configurator);
         void ConfigureServices(IServiceCollection collection);
         Task OneTimeSetup(IServiceProvider provider);
+        Task OneTimeTearDown(IServiceProvider provider);
     }
 }
