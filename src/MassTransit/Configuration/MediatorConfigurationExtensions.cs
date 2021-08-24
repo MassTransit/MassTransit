@@ -25,6 +25,9 @@ namespace MassTransit
             var topologyConfiguration = new InMemoryTopologyConfiguration(InMemoryBus.MessageTopology);
             var busConfiguration = new InMemoryBusConfiguration(topologyConfiguration, new Uri("loopback://localhost"));
 
+            if (LogContext.Current != null)
+                busConfiguration.HostConfiguration.LogContext = LogContext.Current;
+
             var endpointConfiguration = busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration("mediator");
 
             var configurator = new MediatorConfiguration(busConfiguration.HostConfiguration, endpointConfiguration);

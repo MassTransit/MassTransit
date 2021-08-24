@@ -365,6 +365,8 @@ namespace MassTransit.Registration
             var loggerFactory = provider.GetService<ILoggerFactory>();
             if (loggerFactory != null)
                 LogContext.ConfigureCurrentLogContext(loggerFactory);
+            else if (LogContext.Current == null)
+                LogContext.ConfigureCurrentLogContext();
         }
 
         static IClientFactory BusClientFactoryProvider(IConfigurationServiceProvider provider, IBus bus)
