@@ -1,7 +1,9 @@
 namespace MassTransit.Registration
 {
     using System;
+    using Automatonymous;
     using Definition;
+    using MassTransit.Futures;
     using Saga;
 
 
@@ -104,6 +106,18 @@ namespace MassTransit.Registration
         void IContainerRegistrar.RegisterSingleInstance<T>(T instance)
         {
             _registrar.RegisterSingleInstance(instance);
+        }
+
+        public void RegisterFuture<TFuture>() where TFuture : MassTransitStateMachine<FutureState>
+        {
+            _registrar.RegisterFuture<TFuture>();
+        }
+
+        public void RegisterFutureDefinition<TDefinition, TFuture>()
+            where TDefinition : class, IFutureDefinition<TFuture>
+            where TFuture : MassTransitStateMachine<FutureState>
+        {
+            _registrar.RegisterFutureDefinition<TDefinition, TFuture>();
         }
     }
 }
