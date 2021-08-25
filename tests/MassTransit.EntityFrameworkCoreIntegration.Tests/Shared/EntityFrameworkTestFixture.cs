@@ -10,7 +10,7 @@
         where TTestDbParameters : ITestDbParameters, new()
         where TDbContext : DbContext
     {
-        protected readonly DbContextOptionsBuilder<TDbContext> DbContextOptionsBuilder;
+        protected readonly DbContextOptionsBuilder DbContextOptionsBuilder;
         protected readonly ILockStatementProvider RawSqlLockStatements;
         TTestDbParameters _testDbParameters;
 
@@ -23,10 +23,10 @@
 
         protected void ApplyBuilderOptions(IConfigurationServiceProvider provider, DbContextOptionsBuilder<TDbContext> builder)
         {
-            _testDbParameters.Apply(builder);
+            _testDbParameters.Apply<TDbContext>(builder);
         }
 
-        protected void ApplyBuilderOptions(DbContextOptionsBuilder<TDbContext> builder)
+        protected void ApplyBuilderOptions(DbContextOptionsBuilder builder)
         {
             _testDbParameters.Apply<TDbContext>(builder);
         }

@@ -7,17 +7,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Shared
     public class PostgresTestDbParameters :
         ITestDbParameters
     {
-        public DbContextOptionsBuilder<TDbContext> GetDbContextOptions<TDbContext>()
+        public DbContextOptionsBuilder GetDbContextOptions<TDbContext>()
             where TDbContext : DbContext
         {
             var builder = new DbContextOptionsBuilder<TDbContext>();
 
-            Apply(builder);
+            Apply<TDbContext>(builder);
 
             return builder;
         }
 
-        public void Apply<TDbContext>(DbContextOptionsBuilder<TDbContext> builder)
+        public void Apply<TDbContext>(DbContextOptionsBuilder builder)
             where TDbContext : DbContext
         {
             builder.UseNpgsql("host=localhost;user id=postgres;password=Password12!;database=MassTransitUnitTests;", m =>

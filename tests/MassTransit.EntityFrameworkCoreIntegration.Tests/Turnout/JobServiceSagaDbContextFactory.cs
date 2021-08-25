@@ -17,7 +17,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
             return new JobServiceSagaDbContext(optionsBuilder.Options);
         }
 
-        public JobServiceSagaDbContext CreateDbContext(DbContextOptionsBuilder<JobServiceSagaDbContext> optionsBuilder)
+        public JobServiceSagaDbContext CreateDbContext(DbContextOptionsBuilder optionsBuilder)
         {
             return new JobServiceSagaDbContext(optionsBuilder.Options);
         }

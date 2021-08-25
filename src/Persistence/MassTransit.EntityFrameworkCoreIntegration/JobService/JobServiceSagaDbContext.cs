@@ -13,6 +13,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.JobService
         {
         }
 
+        public JobServiceSagaDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
         protected override IEnumerable<ISagaClassMap> Configurations
         {
             get

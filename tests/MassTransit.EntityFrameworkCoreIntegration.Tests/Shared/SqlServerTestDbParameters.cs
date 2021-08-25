@@ -12,17 +12,17 @@
         /// Get DB context options for SQL Server.
         /// </summary>
         /// <param name="dbContextType">Type of the DbContext, used for migration conventions</param>
-        public DbContextOptionsBuilder<TDbContext> GetDbContextOptions<TDbContext>()
+        public DbContextOptionsBuilder GetDbContextOptions<TDbContext>()
             where TDbContext : DbContext
         {
-            var builder = new DbContextOptionsBuilder<TDbContext>();
+            var builder = new DbContextOptionsBuilder();
 
-            Apply(builder);
+            Apply<TDbContext>(builder);
 
             return builder;
         }
 
-        public void Apply<TDbContext>(DbContextOptionsBuilder<TDbContext> dbContextOptionsBuilder)
+        public void Apply<TDbContext>(DbContextOptionsBuilder dbContextOptionsBuilder)
             where TDbContext : DbContext
         {
             dbContextOptionsBuilder.UseSqlServer(LocalDbConnectionStringProvider.GetLocalDbConnectionString(), m =>
