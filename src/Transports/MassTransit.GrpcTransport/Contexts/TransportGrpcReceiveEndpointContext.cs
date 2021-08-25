@@ -8,6 +8,7 @@
     using Fabric;
     using GreenPipes.Agents;
     using Integration;
+    using MassTransit.Transports.Outbox;
     using Transports.InMemory;
 
 
@@ -64,6 +65,34 @@
         protected override IPublishTransportProvider CreatePublishTransportProvider()
         {
             return _hostConfiguration.TransportProvider;
+        }
+
+        protected override IPublishTransportProvider CreateDecoratedPublishTransportProvider()
+        {
+            var transport = CreatePublishTransportProvider();
+
+            if (_hostConfiguration.UseOutbox)
+            {
+                return new OutboxPublishTransportProvider(_hostConfiguration, transport);
+            }
+            else
+            {
+                return transport;
+            }
+        }
+
+        protected override ISendTransportProvider CreateDecoratedSendTransportProvider()
+        {
+            var transport = CreateSendTransportProvider();
+
+            if (_hostConfiguration.UseOutbox)
+            {
+                return new OutboxSendTransportProvider(_hostConfiguration, transport);
+            }
+            else
+            {
+                return transport;
+            }
         }
     }
 }

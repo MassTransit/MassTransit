@@ -37,7 +37,7 @@
             public ReadOnlySagaDbContext CreateDbContext(string[] args)
             {
                 var optionsBuilder = new SqlServerTestDbParameters()
-                    .GetDbContextOptions(typeof(ReadOnlySagaDbContext));
+                    .GetDbContextOptions<ReadOnlySagaDbContext>();
 
                 return new ReadOnlySagaDbContext(optionsBuilder.Options);
             }
