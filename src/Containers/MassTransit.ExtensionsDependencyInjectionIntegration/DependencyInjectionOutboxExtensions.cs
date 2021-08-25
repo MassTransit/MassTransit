@@ -6,10 +6,10 @@ namespace MassTransit.Transports.Outbox
     {
         public static void UseOutboxTransport(this IBusFactoryConfigurator configurator, IConfigurationServiceProvider serviceProvider)
         {
-            configurator.UsePublishFilter(typeof(OutboxScopedRepositoryFilter<>), serviceProvider);
-            configurator.UseSendFilter(typeof(OutboxScopedRepositoryFilter<>), serviceProvider);
+            configurator.UsePublishFilter(typeof(OnRampScopedRepositoryFilter<>), serviceProvider);
+            configurator.UseSendFilter(typeof(OnRampScopedRepositoryFilter<>), serviceProvider);
             configurator.UseOutboxTransport = true;
-            configurator.AutoStart = true; // This is for the the IBusHealth checks to know if we need to stop trying while the bus is down
+            configurator.AutoStart = true; // This is for the the IBusControl Health checks to know if we need to stop trying while the bus is down
         }
     }
 }

@@ -66,7 +66,7 @@ namespace SampleApi
             //});
             //services.AddScoped<DbConnection>(p => new SqlConnection(p.GetRequiredService<IConfiguration>().GetConnectionString("mydb")));
 
-            services.AddOutboxTransportHostedService();
+            services.AddOnRampTransportHostedService();
 
             services.AddOpenApiDocument(cfg => cfg.PostProcess = d => d.Info.Title = "Sample-Api");
         }

@@ -51,7 +51,7 @@ namespace OutboxSweeper
             //services.AddScoped<DbConnection>(p => new SqlConnection(p.GetRequiredService<IConfiguration>().GetConnectionString("mydb")));
 
             services.AddMassTransitHostedService();
-            services.AddOutboxTransportHostedService();
+            services.AddOnRampTransportHostedService();
         });
 
         static async Task Main(string[] args)

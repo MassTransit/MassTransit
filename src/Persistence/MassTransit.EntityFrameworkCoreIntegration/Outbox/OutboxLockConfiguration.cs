@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
 {
-    public class OutboxLockConfiguration : IEntityTypeConfiguration<OutboxLock>
+    public class OutboxLockConfiguration : IEntityTypeConfiguration<OnRampLock>
     {
-        public void Configure(EntityTypeBuilder<OutboxLock> builder)
+        public void Configure(EntityTypeBuilder<OnRampLock> builder)
         {
             builder.ToTable("Locks", "mt");
 
-            builder.HasKey(o => new { o.OutboxName, o.LockName });
+            builder.HasKey(o => new { o.OnRampName, o.LockName });
         }
     }
 }

@@ -87,7 +87,7 @@
 
             if (_hostConfiguration.UseOutbox)
             {
-                return new OutboxSendTransportProvider(_hostConfiguration, transport);
+                return new OnRampSendTransportProvider(_hostConfiguration, transport);
             }
             else
             {

@@ -5,13 +5,13 @@ using System;
 
 namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
 {
-    public class OutboxSweeperConfiguration : IEntityTypeConfiguration<OutboxSweeper>
+    public class OutboxSweeperConfiguration : IEntityTypeConfiguration<OnRampSweeper>
     {
-        public void Configure(EntityTypeBuilder<OutboxSweeper> builder)
+        public void Configure(EntityTypeBuilder<OnRampSweeper> builder)
         {
             builder.ToTable("Sweepers", "mt");
 
-            builder.HasKey(o => new { o.OutboxName, o.InstanceId });
+            builder.HasKey(o => new { o.OnRampName, o.InstanceId });
 
             builder.Property(x => x.LastCheckinTime)
                 .HasConversion(

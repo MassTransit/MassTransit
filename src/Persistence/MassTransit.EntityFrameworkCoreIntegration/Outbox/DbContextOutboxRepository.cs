@@ -16,17 +16,17 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
 {
     public class DbContextOutboxRepository<TDbContext>
         : IClusterRepository
-        , IOutboxTransportRepository
+        , IOnRampTransportRepository
         , ISweeperRepository
         , ILockRepository
         where TDbContext : DbContext
     {
         private readonly TDbContext _db;
-        private readonly IOutboxTransportOptions _outboxTransportOptions;
+        private readonly IOnRampTransportOptions _outboxTransportOptions;
         private readonly IRepositoryStatementProvider _statementProvider;
         private IDbContextTransaction _currentTransaction;
 
-        public DbContextOutboxRepository(TDbContext db, IRepositoryStatementProvider statementProvider, IOutboxTransportOptions outboxTransportOptions)
+        public DbContextOutboxRepository(TDbContext db, IRepositoryStatementProvider statementProvider, IOnRampTransportOptions outboxTransportOptions)
         {
             _db = db;
             _outboxTransportOptions = outboxTransportOptions;
@@ -108,33 +108,33 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
             await _db.Database.ExecuteSqlRawAsync(_statementProvider.FreeMessagesFromFailedSweeperInstanceStatement(), new object[] { outboxName, instanceId }, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyList<OutboxSweeper>> GetAllSweepers(string outboxName, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<OnRampSweeper>> GetAllSweepers(string outboxName, CancellationToken cancellationToken = default)
         {
-            return await _db.Set<OutboxSweeper>().AsNoTracking().Where(x => x.OutboxName == outboxName).ToListAsync(cancellationToken).ConfigureAwait(false);
+            return await _db.Set<OnRampSweeper>().AsNoTracking().Where(x => x.OnRampName == outboxName).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task<IReadOnlyList<string>> GetMessageSweeperInstanceIds(string outboxName, CancellationToken cancellationToken = default)
         {
-            return await _db.Set<OutboxMessage>().Where(x => x.OutboxName == outboxName && x.InstanceId != null).Select(x => x.InstanceId).Distinct().ToListAsync(cancellationToken).ConfigureAwait(false);
+            return await _db.Set<OnRampMessage>().Where(x => x.OnRampName == outboxName && x.InstanceId != null).Select(x => x.InstanceId).Distinct().ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public Task InsertSweeper(string outboxName, string instanceId, DateTime lastCheckin, TimeSpan checkinInterval, CancellationToken cancellationToken = default)
         {
-            _db.Set<OutboxSweeper>().Add(new OutboxSweeper { OutboxName = outboxName, InstanceId = instanceId, LastCheckinTime = lastCheckin, CheckinInterval = checkinInterval });
+            _db.Set<OnRampSweeper>().Add(new OnRampSweeper { OnRampName = outboxName, InstanceId = instanceId, LastCheckinTime = lastCheckin, CheckinInterval = checkinInterval });
 
             return Task.CompletedTask;
         }
 
         public async Task RemoveSweeper(string outboxName, string instanceId, CancellationToken cancellationToken = default)
         {
-            var sweeper = await _db.Set<OutboxSweeper>().FindAsync(new object[] { outboxName, instanceId }, cancellationToken: cancellationToken).ConfigureAwait(false);
+            var sweeper = await _db.Set<OnRampSweeper>().FindAsync(new object[] { outboxName, instanceId }, cancellationToken: cancellationToken).ConfigureAwait(false);
 
-            if (sweeper != null) _db.Set<OutboxSweeper>().Remove(sweeper);
+            if (sweeper != null) _db.Set<OnRampSweeper>().Remove(sweeper);
         }
 
         public async Task<bool> UpdateSweeper(string outboxName, string instanceId, DateTime lastCheckin, CancellationToken cancellationToken = default)
         {
-            var sweeper = await _db.Set<OutboxSweeper>().FindAsync(new object[] { outboxName, instanceId }, cancellationToken).ConfigureAwait(false);
+            var sweeper = await _db.Set<OnRampSweeper>().FindAsync(new object[] { outboxName, instanceId }, cancellationToken).ConfigureAwait(false);
 
             if (sweeper == null) return false;
 
@@ -150,19 +150,19 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
         #endregion IClusterRepository
 
         #region ISweeperRepository
-        public async Task FailedToSendMessage(OutboxSweeperSendException exception, CancellationToken cancellationToken = default)
+        public async Task FailedToSendMessage(OnRampSweeperSendException exception, CancellationToken cancellationToken = default)
         {
-            await _db.Database.ExecuteSqlRawAsync(_statementProvider.FailedToSendMessageStatement(), new object[] { exception.OutboxMessage.OutboxName, exception.OutboxMessage.Id }, cancellationToken).ConfigureAwait(false);
+            await _db.Database.ExecuteSqlRawAsync(_statementProvider.FailedToSendMessageStatement(), new object[] { exception.OnRampMessage.OnRampName, exception.OnRampMessage.Id }, cancellationToken).ConfigureAwait(false);
         }
 
-        public async Task<IReadOnlyList<OutboxMessage>> FetchNextMessages(string outboxName, int prefetchCount, CancellationToken cancellationToken = default)
+        public async Task<IReadOnlyList<OnRampMessage>> FetchNextMessages(string outboxName, int prefetchCount, CancellationToken cancellationToken = default)
         {
-            return await _db.Set<OutboxMessage>().AsNoTracking().Where(x => x.OutboxName == outboxName && x.InstanceId == null).OrderBy(x => x.Added).Take(prefetchCount).ToListAsync(cancellationToken).ConfigureAwait(false);
+            return await _db.Set<OnRampMessage>().AsNoTracking().Where(x => x.OnRampName == outboxName && x.InstanceId == null).OrderBy(x => x.Added).Take(prefetchCount).ToListAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public virtual Task RemoveMessage(OutboxMessage message, CancellationToken cancellationToken = default)
+        public virtual Task RemoveMessage(OnRampMessage message, CancellationToken cancellationToken = default)
         {
-            return _db.Database.ExecuteSqlRawAsync(_statementProvider.RemoveMessageStatement(), new object[] { message.OutboxName, message.Id }, cancellationToken);
+            return _db.Database.ExecuteSqlRawAsync(_statementProvider.RemoveMessageStatement(), new object[] { message.OnRampName, message.Id }, cancellationToken);
         }
 
         public virtual async Task ReserveMessages(IEnumerable<Guid> enumerable, string outboxName, string instanceId, CancellationToken cancellationToken = default)
@@ -182,22 +182,22 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
             return _db.Database.ExecuteSqlRawAsync(_statementProvider.RemoveAllMessagesStatement(), new object[] { outboxName, instanceId }, cancellationToken);
         }
 
-        public async Task RemoveAllCompletedMessages(List<OutboxMessage> completedMessages, CancellationToken cancellationToken = default)
+        public async Task RemoveAllCompletedMessages(List<OnRampMessage> completedMessages, CancellationToken cancellationToken = default)
         {
             if (!completedMessages.Any()) return;
             var ids = completedMessages.Select(x => x.ToString().ToUpper()).ToList();
             var placeholders = string.Join(",", Enumerable.Range(0, ids.Count).Select(i => "{" + (i + 1) + "}"));
             var query = _statementProvider.RemoveAllCompletedMessagesStatement();
             query = query.Replace("{1}", $"{placeholders}");
-            ids.Insert(0, completedMessages.First().OutboxName);
+            ids.Insert(0, completedMessages.First().OnRampName);
             var values = ids.Cast<object>().ToArray();
             await _db.Database.ExecuteSqlRawAsync(query, values, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task FailedToSendMessages(List<OutboxMessage> failedMessages, string instanceId, CancellationToken cancellationToken = default)
+        public Task FailedToSendMessages(List<OnRampMessage> failedMessages, string instanceId, CancellationToken cancellationToken = default)
         {
             if (!failedMessages.Any()) return Task.CompletedTask;
-            return _db.Database.ExecuteSqlRawAsync(_statementProvider.FailedToSendMessagesStatement(), new object[] { failedMessages[0].OutboxName, instanceId }, cancellationToken);
+            return _db.Database.ExecuteSqlRawAsync(_statementProvider.FailedToSendMessagesStatement(), new object[] { failedMessages[0].OnRampName, instanceId }, cancellationToken);
         }
         #endregion ISweeperRepository
 
@@ -208,7 +208,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
             {
                 // To speed up inserts, turn off changetracker
                 _db.ChangeTracker.AutoDetectChangesEnabled = false;
-                _db.Set<OutboxMessage>().Add(new OutboxMessage { OutboxName = _outboxTransportOptions.OutboxName, Id = NewId.NextGuid(), SerializedMessage = message, Added = DateTime.UtcNow });
+                _db.Set<OnRampMessage>().Add(new OnRampMessage { OnRampName = _outboxTransportOptions.OnRampName, Id = NewId.NextGuid(), SerializedMessage = message, Added = DateTime.UtcNow });
             }
             finally
             {
@@ -222,11 +222,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
         #region ILockRepository
         public virtual async Task ObtainLock(string outboxName, string lockName)
         {
-            var @lock = await _db.Set<OutboxLock>().FromSqlRaw(_statementProvider.SelectRowLockStatement(), outboxName, lockName).FirstOrDefaultAsync();
+            var @lock = await _db.Set<OnRampLock>().FromSqlRaw(_statementProvider.SelectRowLockStatement(), outboxName, lockName).FirstOrDefaultAsync();
 
             if (@lock == null)
             {
-                _db.Set<OutboxLock>().Add(new OutboxLock { OutboxName = outboxName, LockName = lockName });
+                _db.Set<OnRampLock>().Add(new OnRampLock { OnRampName = outboxName, LockName = lockName });
                 await _db.SaveChangesAsync();
             }
         }

@@ -18,8 +18,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
             modelBuilder.ApplyConfiguration(new OutboxSweeperConfiguration());
         }
 
-        public DbSet<OutboxLock> MassTransitOutboxLocks { get; set; }
-        public DbSet<OutboxMessage> MassTransitOutboxMessages { get; set; }
-        public DbSet<OutboxSweeper> MassTransitOutboxSweepers { get; set; }
+        public DbSet<OnRampLock> MassTransitOutboxLocks { get; set; }
+        public DbSet<OnRampMessage> MassTransitOutboxMessages { get; set; }
+        public DbSet<OnRampSweeper> MassTransitOutboxSweepers { get; set; }
     }
 }
