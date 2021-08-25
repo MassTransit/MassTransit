@@ -1,4 +1,5 @@
 ﻿using MassTransit.Serialization;
+using MassTransit.Transports.Outbox;
 using MassTransit.Transports.Outbox.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
