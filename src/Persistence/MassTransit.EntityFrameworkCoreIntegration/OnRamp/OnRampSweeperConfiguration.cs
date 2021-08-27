@@ -1,11 +1,11 @@
-﻿using MassTransit.Transports.Outbox.Entities;
+﻿using MassTransit.Transports.OnRamp.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System;
 
-namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
+namespace MassTransit.EntityFrameworkCoreIntegration.OnRamp
 {
-    public class OutboxSweeperConfiguration : IEntityTypeConfiguration<OnRampSweeper>
+    public class OnRampSweeperConfiguration : IEntityTypeConfiguration<OnRampSweeper>
     {
         public void Configure(EntityTypeBuilder<OnRampSweeper> builder)
         {

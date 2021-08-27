@@ -1,10 +1,10 @@
-﻿using MassTransit.Transports.Outbox.Entities;
+﻿using MassTransit.Transports.OnRamp.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
+namespace MassTransit.EntityFrameworkCoreIntegration.OnRamp
 {
-    public class OutboxLockConfiguration : IEntityTypeConfiguration<OnRampLock>
+    public class OnRampLockConfiguration : IEntityTypeConfiguration<OnRampLock>
     {
         public void Configure(EntityTypeBuilder<OnRampLock> builder)
         {

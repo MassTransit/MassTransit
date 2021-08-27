@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MassTransit.Transports.Outbox
+namespace MassTransit.Transports.OnRamp
 {
     public class SimpleSemaphore : IOnRampSemaphore
     {

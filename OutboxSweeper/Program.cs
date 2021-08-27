@@ -11,9 +11,11 @@ using System.Threading.Tasks;
 using MassTransit;
 using System.Data.Common;
 using Microsoft.Data.SqlClient;
-using MassTransit.Transports.Outbox;
+using MassTransit.Transports.OnRamp;
 using Microsoft.EntityFrameworkCore;
-using MassTransit.EntityFrameworkCoreIntegration.Outbox;
+using MassTransit.EntityFrameworkCoreIntegration.OnRamp;
+using Npgsql;
+using System.Data.SQLite;
 
 namespace OutboxSweeper
 {
@@ -40,19 +42,30 @@ namespace OutboxSweeper
                     });
                 });
 
-            services.AddOutboxTransport<OutboxDbContext>(cfg =>
-            {
-                cfg.SetInstanceId(hostContext.Configuration.GetValue<string>("name"));
-                cfg.Clustered = true;
-                cfg.PrefetchCount = 1000;
-                cfg.BulkRemove = true; // This dramatically increases sweeper speed, because it will wait until all messages in the prefetch are complete and perform fewer SQL queries. You run the risk of more duplicates should there be an outage between publish, and database write.
-            });
-            services.AddDbContext<OutboxDbContext>((p,opt) => opt.UseSqlServer(p.GetRequiredService<IConfiguration>().GetConnectionString("mydb")));
-            //services.AddScoped<DbConnection>(p => new SqlConnection(p.GetRequiredService<IConfiguration>().GetConnectionString("mydb")));
+                //services.AddOnRampTransport<OnRampDbContext>(cfg =>
+                //{
+                //    cfg.SetInstanceId(hostContext.Configuration.GetValue<string>("name"));
+                //    cfg.Clustered = true;
+                //    cfg.PrefetchCount = 1000;
+                //    cfg.BulkRemove = true; // This dramatically increases sweeper speed, because it will wait until all messages in the prefetch are complete and perform fewer SQL queries. You run the risk of more duplicates should there be an outage between publish, and database write.
+                //});
+                //services.AddDbContext<OnRampDbContext>((p,opt) => opt.UseSqlServer(p.GetRequiredService<IConfiguration>().GetConnectionString("mydb")));
 
-            services.AddMassTransitHostedService();
-            services.AddOnRampTransportHostedService();
-        });
+                services.AddOnRampTransport(cfg =>
+                {
+                    cfg.SetInstanceId(hostContext.Configuration.GetValue<string>("name"));
+                    cfg.Clustered = true;
+                    cfg.PrefetchCount = 1000;
+                    cfg.BulkRemove = true;
+                    cfg.UsePostgres();
+                });
+                //services.AddScoped<DbConnection>(p => new SQLiteConnection(p.GetRequiredService<IConfiguration>().GetConnectionString("mydb")));
+                services.AddScoped<DbConnection>(p => new NpgsqlConnection(p.GetRequiredService<IConfiguration>().GetConnectionString("mydb")));
+                //services.AddScoped<DbConnection>(p => new SqlConnection(p.GetRequiredService<IConfiguration>().GetConnectionString("mydb")));
+
+                services.AddMassTransitHostedService();
+                services.AddOnRampTransportHostedService();
+            });
 
         static async Task Main(string[] args)
         {

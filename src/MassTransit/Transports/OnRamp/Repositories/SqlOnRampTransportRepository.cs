@@ -1,19 +1,19 @@
-﻿using MassTransit.Transports.Outbox.Configuration;
+﻿using MassTransit.Transports.OnRamp.Configuration;
 using Newtonsoft.Json;
 using System;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MassTransit.Transports.Outbox.Repositories
+namespace MassTransit.Transports.OnRamp.Repositories
 {
-    public class SqlOutboxTransportRepository : IOnRampTransportRepository
+    public class SqlOnRampTransportRepository : IOnRampTransportRepository
     {
         private readonly IOnRampDbTransactionContext _transactionContextAccessor;
         private readonly IOnRampTransportOptions _onRampTransportOptions;
         private readonly IOnRampTransportRepositoryStatementProvider _statementProvider;
 
-        public SqlOutboxTransportRepository(
+        public SqlOnRampTransportRepository(
             IOnRampDbTransactionContext transactionContextAccessor,
             IOnRampTransportOptions onRampTransportOptions,
             IOnRampTransportRepositoryStatementProvider statementProvider)
@@ -23,7 +23,7 @@ namespace MassTransit.Transports.Outbox.Repositories
             _statementProvider = statementProvider;
         }
 
-        public async Task InsertMessage(JsonSerializedMessage message, CancellationToken cancellationToken = default)
+        public async Task InsertMessage(OnRampSerializedMessage message, CancellationToken cancellationToken = default)
         {
             var transaction = _transactionContextAccessor.Transaction as DbTransaction ?? throw new ArgumentException("Transaction was not set in the IDbTransactionContextAccessor", nameof(_transactionContextAccessor.Transaction));
 
@@ -36,7 +36,6 @@ namespace MassTransit.Transports.Outbox.Repositories
                 cmd.CreateParameter("@Retries", 0),
                 cmd.CreateParameter("@SerializedMessage", JsonConvert.SerializeObject(message, Formatting.None)),
                 cmd.CreateParameter("@Added", DateTime.UtcNow.Ticks),
-                cmd.CreateParameter("@ExpirationTime", DBNull.Value),
             };
 
             var sql = _statementProvider.InsertMessageStatement();

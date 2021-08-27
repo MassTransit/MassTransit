@@ -1,4 +1,4 @@
-﻿using MassTransit.Transports.Outbox.Entities;
+﻿using MassTransit.Transports.OnRamp.Entities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MassTransit.Transports.Outbox.Repositories
+namespace MassTransit.Transports.OnRamp.Repositories
 {
     public class SqlSweeperRepository : SqlLockRepository, ISweeperRepository
     {
@@ -46,7 +46,7 @@ namespace MassTransit.Transports.Outbox.Repositories
             object[] sqlParams =
             {
                 cmd.CreateParameter("@OnRampName", failedMessages[0].OnRampName),
-                cmd.CreateParameter("@Instance", instanceId),
+                cmd.CreateParameter("@InstanceId", instanceId),
             };
 
             var sql = _statementProvider.FailedToSendMessagesStatement();
@@ -57,9 +57,11 @@ namespace MassTransit.Transports.Outbox.Repositories
         public async Task<IReadOnlyList<OnRampMessage>> FetchNextMessages(string onRampName, int prefetchCount, CancellationToken cancellationToken = default)
         {
             using var cmd = _connection.CreateCommand();
+
+            var p = cmd.CreateParameter("@OnRampName", onRampName);
             object[] sqlParams =
             {
-                    cmd.CreateParameter("@OnRampName", onRampName),
+                p
             };
 
             var sql = _statementProvider.FetchNextMessagesStatement();
@@ -76,7 +78,7 @@ namespace MassTransit.Transports.Outbox.Repositories
                         Id = reader.GetGuid(1),
                         InstanceId = reader.IsDBNull(2) ? null : reader.GetString(2),
                         Retries = reader.GetInt32(3),
-                        SerializedMessage = JsonConvert.DeserializeObject<JsonSerializedMessage>(reader.GetString(4)),
+                        SerializedMessage = JsonConvert.DeserializeObject<OnRampSerializedMessage>(reader.GetString(4)),
                         Added = new DateTime(reader.GetInt64(5), DateTimeKind.Utc),
                     });
                 }
@@ -111,7 +113,7 @@ namespace MassTransit.Transports.Outbox.Repositories
             object[] sqlParams =
             {
                 cmd.CreateParameter("@OnRampName", onRampName),
-                cmd.CreateParameter("@Instance", instanceId),
+                cmd.CreateParameter("@InstanceId", instanceId),
             };
 
             var sql = _statementProvider.RemoveAllMessagesStatement();

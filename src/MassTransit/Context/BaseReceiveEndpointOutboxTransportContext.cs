@@ -1,5 +1,5 @@
 ﻿using MassTransit.Configuration;
-using MassTransit.Transports.Outbox;
+using MassTransit.Transports.OnRamp;
 
 namespace MassTransit.Context
 {

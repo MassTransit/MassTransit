@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace MassTransit.Transports.Outbox
+namespace MassTransit.Transports.OnRamp
 {
     public interface ILockRepository : IConnectionAndTransactionHolder
     {

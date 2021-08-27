@@ -22,5 +22,6 @@ services:
     image: "postgres:13.1"
     environment:
       - "POSTGRES_PASSWORD=Password12!"
+      - "POSTGRES_DB=onramp-sample1"
     ports:
       - 5432:5432

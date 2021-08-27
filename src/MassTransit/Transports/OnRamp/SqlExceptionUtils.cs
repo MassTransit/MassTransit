@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 
-namespace MassTransit.Transports.Outbox
+namespace MassTransit.Transports.OnRamp
 {
     internal static class SqlExceptionUtils
     {

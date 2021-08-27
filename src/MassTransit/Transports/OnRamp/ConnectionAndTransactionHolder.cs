@@ -5,7 +5,7 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MassTransit.Transports.Outbox
+namespace MassTransit.Transports.OnRamp
 {
     public abstract class ConnectionAndTransactionHolder : IConnectionAndTransactionHolder, IDisposable
     {

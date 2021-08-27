@@ -2,7 +2,7 @@
 using MassTransit.Context;
 using System;
 
-namespace MassTransit.Transports.Outbox
+namespace MassTransit.Transports.OnRamp
 {
     public class OnRampSendTransportContext :
         BaseSendTransportContext,

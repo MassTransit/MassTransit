@@ -1,7 +1,7 @@
 ﻿using System.Data.Common;
 using System.Threading.Tasks;
 
-namespace MassTransit.Transports.Outbox.Repositories
+namespace MassTransit.Transports.OnRamp.Repositories
 {
     public class SqlLockRepository : ConnectionAndTransactionHolder, ILockRepository
     {

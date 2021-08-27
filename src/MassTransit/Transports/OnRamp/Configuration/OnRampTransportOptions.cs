@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MassTransit.Transports.Outbox.Configuration
+namespace MassTransit.Transports.OnRamp.Configuration
 {
     public class OnRampTransportOptions : IOnRampTransportOptions
     {

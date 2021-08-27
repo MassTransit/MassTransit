@@ -1,6 +1,6 @@
-﻿using MassTransit.Transports.Outbox.StatementProviders;
+﻿using MassTransit.Transports.OnRamp.StatementProviders;
 
-namespace MassTransit.Transports.Outbox.Configuration
+namespace MassTransit.Transports.OnRamp.Configuration
 {
     public class OnRampTransportConfiguration : OnRampTransportOptions
     {
@@ -19,16 +19,26 @@ namespace MassTransit.Transports.Outbox.Configuration
             InstanceIdGenerator = new StaticInstanceIdGenerator(instanceId);
         }
 
-        public IRepositoryNamingProvider RepositoryNamingProvider { get; private set; } = new RepositoryNamingProvider("mt");
-
-        public void UseRepositoryNamingProvider(string schema)
-        {
-            RepositoryNamingProvider = new RepositoryNamingProvider(schema);
-        }
+        public IRepositoryNamingProvider RepositoryNamingProvider { get; private set; }
 
         public void UseRepositoryNamingProvider(IRepositoryNamingProvider namingProvider)
         {
             RepositoryNamingProvider = namingProvider;
+        }
+
+        public void UseSqlite()
+        {
+            RepositoryNamingProvider = new SqliteRepositoryNamingProvider("mt");
+        }
+
+        public void UseSqlServer()
+        {
+            RepositoryNamingProvider = new SqlServerRepositoryNamingProvider("mt");
+        }
+
+        public void UsePostgres()
+        {
+            RepositoryNamingProvider = new PostgresRepositoryNamingProvider("mt");
         }
     }
 }

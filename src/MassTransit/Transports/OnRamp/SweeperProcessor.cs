@@ -1,7 +1,7 @@
 ﻿using GreenPipes;
 using MassTransit.Serialization;
-using MassTransit.Transports.Outbox.Configuration;
-using MassTransit.Transports.Outbox.Entities;
+using MassTransit.Transports.OnRamp.Configuration;
+using MassTransit.Transports.OnRamp.Entities;
 using MassTransit.Util;
 using Microsoft.Extensions.Logging;
 using System;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MassTransit.Transports.Outbox
+namespace MassTransit.Transports.OnRamp
 {
     public class SweeperProcessor : ISweeperProcessor
     {

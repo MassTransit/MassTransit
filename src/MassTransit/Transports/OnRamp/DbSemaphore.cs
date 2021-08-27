@@ -1,11 +1,11 @@
 ﻿using MassTransit.Context;
-using MassTransit.Transports.Outbox.Configuration;
+using MassTransit.Transports.OnRamp.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MassTransit.Transports.Outbox
+namespace MassTransit.Transports.OnRamp
 {
     public class DbSemaphore : IOnRampSemaphore
     {

@@ -1,7 +1,7 @@
 ﻿using GreenPipes;
 using System.Threading.Tasks;
 
-namespace MassTransit.Transports.Outbox
+namespace MassTransit.Transports.OnRamp
 {
     public class OnRampScopedRepositoryFilter<T> :
         IFilter<PublishContext<T>>,

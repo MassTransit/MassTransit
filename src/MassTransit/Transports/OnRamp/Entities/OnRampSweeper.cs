@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MassTransit.Transports.Outbox.Entities
+namespace MassTransit.Transports.OnRamp.Entities
 {
     public class OnRampSweeper
     {

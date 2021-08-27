@@ -8,7 +8,7 @@
     using Fabric;
     using GreenPipes.Agents;
     using Integration;
-    using MassTransit.Transports.Outbox;
+    using MassTransit.Transports.OnRamp;
     using Transports.InMemory;
 
 

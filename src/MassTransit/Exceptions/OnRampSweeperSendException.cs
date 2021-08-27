@@ -1,6 +1,6 @@
 namespace MassTransit
 {
-    using MassTransit.Transports.Outbox.Entities;
+    using MassTransit.Transports.OnRamp.Entities;
     using System;
     using System.Runtime.Serialization;
 

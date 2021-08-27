@@ -1,12 +1,11 @@
-﻿using MassTransit.Serialization;
-using MassTransit.Transports.Outbox;
-using MassTransit.Transports.Outbox.Entities;
+﻿using MassTransit.Transports.OnRamp;
+using MassTransit.Transports.OnRamp.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
+namespace MassTransit.EntityFrameworkCoreIntegration.OnRamp
 {
-    public class OutboxMessageConfiguration : IEntityTypeConfiguration<OnRampMessage>
+    public class OnRampMessageConfiguration : IEntityTypeConfiguration<OnRampMessage>
     {
         public void Configure(EntityTypeBuilder<OnRampMessage> builder)
         {
@@ -16,8 +15,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
 
             builder.Property(x => x.SerializedMessage)
                 .IsRequired()
-                .HasConversion(new JsonValueConverter<JsonSerializedMessage>())
-                .Metadata.SetValueComparer(new JsonValueComparer<JsonSerializedMessage>());
+                .HasConversion(new JsonValueConverter<OnRampSerializedMessage>())
+                .Metadata.SetValueComparer(new JsonValueComparer<OnRampSerializedMessage>());
 
             builder.Property(x => x.Added)
                 .HasConversion(

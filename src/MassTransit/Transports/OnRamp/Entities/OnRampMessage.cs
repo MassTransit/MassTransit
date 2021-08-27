@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MassTransit.Transports.Outbox.Entities
+namespace MassTransit.Transports.OnRamp.Entities
 {
     public class OnRampMessage
     {
@@ -10,7 +10,7 @@ namespace MassTransit.Transports.Outbox.Entities
         public string InstanceId { get; set; } // this should be nullable, and not part of PK. It represents the node in cluster that has fetched it for processing
         public int Retries { get; set; }
 
-        public JsonSerializedMessage SerializedMessage { get; set; }
+        public OnRampSerializedMessage SerializedMessage { get; set; }
 
         public DateTime Added { get; set; }
     }

@@ -1,8 +1,8 @@
-﻿using MassTransit.EntityFrameworkCoreIntegration.Outbox;
-using MassTransit.Transports.Outbox;
-using MassTransit.Transports.Outbox.Configuration;
-using MassTransit.Transports.Outbox.Repositories;
-using MassTransit.Transports.Outbox.StatementProviders;
+﻿using MassTransit.EntityFrameworkCoreIntegration.OnRamp;
+using MassTransit.Transports.OnRamp;
+using MassTransit.Transports.OnRamp.Configuration;
+using MassTransit.Transports.OnRamp.Repositories;
+using MassTransit.Transports.OnRamp.StatementProviders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -10,9 +10,9 @@ using System;
 
 namespace MassTransit
 {
-    public static class OutboxTransportConfigurationExtensions
+    public static class OnRampTransportConfigurationExtensions
     {
-        public static void AddOutboxTransport<TDbContext>(this IServiceCollection services,
+        public static void AddOnRampTransport<TDbContext>(this IServiceCollection services,
             Action<OnRampTransportConfiguration> configure = null)
             where TDbContext : DbContext
         {
@@ -39,13 +39,13 @@ namespace MassTransit
 
             // Repositories
             //services.TryAddScoped<IOutboxDbTransactionContext, OutboxDbTransactionContext>(); // don't need with Entity Framework, because the DbContext manages the transaction
-            services.TryAddScoped<DbContextOutboxRepository<TDbContext>>();
-            services.TryAddScoped<IClusterRepository>(p => p.GetRequiredService<DbContextOutboxRepository<TDbContext>>());
-            services.TryAddScoped<IOnRampTransportRepository>(p => p.GetRequiredService<DbContextOutboxRepository<TDbContext>>());
-            services.TryAddScoped<ISweeperRepository>(p => p.GetRequiredService<DbContextOutboxRepository<TDbContext>>());
+            services.TryAddScoped<DbContextOnRampRepository<TDbContext>>();
+            services.TryAddScoped<IClusterRepository>(p => p.GetRequiredService<DbContextOnRampRepository<TDbContext>>());
+            services.TryAddScoped<IOnRampTransportRepository>(p => p.GetRequiredService<DbContextOnRampRepository<TDbContext>>());
+            services.TryAddScoped<ISweeperRepository>(p => p.GetRequiredService<DbContextOnRampRepository<TDbContext>>());
 
             // Lock Statement Providers
-            services.TryAddSingleton<IRepositoryStatementProvider, SqlFormatItemRepositoryStatementProvider>();
+            services.TryAddSingleton<IRepositoryStatementProvider, SqlRepositoryStatementProvider>();
             services.TryAddSingleton<IOnRampTransportRepositoryStatementProvider>(p => p.GetRequiredService<IRepositoryStatementProvider>());
             services.TryAddSingleton<ISweeperRepositoryStatementProvider>(p => p.GetRequiredService<IRepositoryStatementProvider>());
             services.TryAddSingleton<IClusterRepositoryStatementProvider>(p => p.GetRequiredService<IRepositoryStatementProvider>());
@@ -55,7 +55,7 @@ namespace MassTransit
             services.TryAddSingleton(config.RepositoryNamingProvider);
 
             // Initializer
-            services.TryAddScoped<IRepositoryInitializer>(p => new SqlServerRepositoryInitializer(p.GetRequiredService<TDbContext>().Database.GetDbConnection(), p.GetRequiredService<IRepositoryNamingProvider>()));
+            services.TryAddScoped<IRepositoryInitializer>(p => new SqlRepositoryInitializer(p.GetRequiredService<TDbContext>().Database.GetDbConnection(), p.GetRequiredService<IRepositoryNamingProvider>()));
         }
     }
 }

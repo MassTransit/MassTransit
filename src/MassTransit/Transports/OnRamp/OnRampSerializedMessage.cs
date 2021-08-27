@@ -1,9 +1,9 @@
 ﻿using System;
 using MassTransit.Serialization;
 
-namespace MassTransit.Transports.Outbox
+namespace MassTransit.Transports.OnRamp
 {
-    public class JsonSerializedMessage :
+    public class OnRampSerializedMessage :
         SerializedMessage
     {
         public Uri Destination { get; set; }

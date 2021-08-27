@@ -10,7 +10,7 @@ namespace MassTransit
 {
     public static class IDbConnectionExtensions
     {
-        public static IDbTransaction BeginTransaction(this IDbConnection conn, Transports.Outbox.IOnRampDbTransactionContext accessor, IsolationLevel il = IsolationLevel.ReadCommitted)
+        public static IDbTransaction BeginTransaction(this IDbConnection conn, Transports.OnRamp.IOnRampDbTransactionContext accessor, IsolationLevel il = IsolationLevel.ReadCommitted)
         {
             var transaction = conn.BeginTransaction();
             accessor.SetTransaction(transaction);

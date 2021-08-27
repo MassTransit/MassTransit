@@ -1,6 +1,6 @@
 ﻿using MassTransit.Context;
-using MassTransit.Transports.Outbox.Configuration;
-using MassTransit.Transports.Outbox.Entities;
+using MassTransit.Transports.OnRamp.Configuration;
+using MassTransit.Transports.OnRamp.Entities;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MassTransit.Transports.Outbox
+namespace MassTransit.Transports.OnRamp
 {
     public class ClusterManager : IClusterManager
     {

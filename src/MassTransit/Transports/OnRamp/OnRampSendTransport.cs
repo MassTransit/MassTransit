@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MassTransit.Transports.Outbox
+namespace MassTransit.Transports.OnRamp
 {
     public class OnRampSendTransport : ISendTransport
     {
@@ -80,7 +80,7 @@ namespace MassTransit.Transports.Outbox
             }
         }
 
-        static async Task<JsonSerializedMessage> CreateOutboxMessage<T>(MessageSendContext<T> context) where T : class
+        static async Task<OnRampSerializedMessage> CreateOutboxMessage<T>(MessageSendContext<T> context) where T : class
         {
             var messageId = context.MessageId ?? NewId.NextGuid();
 
@@ -88,7 +88,7 @@ namespace MassTransit.Transports.Outbox
 
             var mediaType = context.ContentType.MediaType;
 
-            var serializedMessage = new JsonSerializedMessage
+            var serializedMessage = new OnRampSerializedMessage
             {
                 MessageId = messageId.ToString(),
                 Body = body,

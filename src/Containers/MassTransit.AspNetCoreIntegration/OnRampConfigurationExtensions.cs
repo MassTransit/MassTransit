@@ -1,10 +1,10 @@
 namespace MassTransit
 {
     using AspNetCoreIntegration;
-    using MassTransit.Transports.Outbox;
-    using MassTransit.Transports.Outbox.Configuration;
-    using MassTransit.Transports.Outbox.Repositories;
-    using MassTransit.Transports.Outbox.StatementProviders;
+    using MassTransit.Transports.OnRamp;
+    using MassTransit.Transports.OnRamp.Configuration;
+    using MassTransit.Transports.OnRamp.Repositories;
+    using MassTransit.Transports.OnRamp.StatementProviders;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using System;
@@ -12,7 +12,7 @@ namespace MassTransit
     public static class OnRampConfigurationExtensions
     {
         /// <summary>
-        /// Must have called AddOnRamp(...) in addition to this.
+        /// Must have called AddOnRampTransport(...) in addition to this.
         /// </summary>
         public static IServiceCollection AddOnRampTransportHostedService(this IServiceCollection services)
         {
@@ -21,6 +21,12 @@ namespace MassTransit
             return services;
         }
 
+        /// <summary>
+        /// Adds OnRamp Transport using System.Data to allow support for any Relational Database. Db type can
+        /// be specified with cfg.Use...  If none is specified, then Sqlite is the default
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="configure"></param>
         public static void AddOnRampTransport(this IServiceCollection services,
         Action<OnRampTransportConfiguration> configure = null)
         {
@@ -48,21 +54,34 @@ namespace MassTransit
             // Repositories
             services.TryAddScoped<IOnRampDbTransactionContext, OnRampDbTransactionContext>();
             services.TryAddScoped<IClusterRepository, SqlClusterRepository>();
-            services.TryAddScoped<IOnRampTransportRepository, SqlOutboxTransportRepository>();
+            services.TryAddScoped<IOnRampTransportRepository, SqlOnRampTransportRepository>();
             services.TryAddScoped<ISweeperRepository, SqlSweeperRepository>();
 
-            // Lock Statement Providers
-            services.TryAddSingleton<IRepositoryStatementProvider, SqlServerRepositoryStatementProvider>();
+            // Schema and Table Name Providers
+            var provider = config.RepositoryNamingProvider ?? new SqliteRepositoryNamingProvider("mt");
+            services.TryAddSingleton(provider);
+
+            switch (provider)
+            {
+                // SQL Server has some special exceptions, like TOP instead of LIMIT, and UPD/ROW lock statements
+                case SqlServerRepositoryNamingProvider:
+                    services.TryAddSingleton<IRepositoryStatementProvider, SqlServerRepositoryStatementProvider>();
+                    break;
+                default:
+                    services.TryAddSingleton<IRepositoryStatementProvider, SqlRepositoryStatementProvider>();
+                    break;
+            }
+
+            // Statement Providers
             services.TryAddSingleton<IOnRampTransportRepositoryStatementProvider>(p => p.GetRequiredService<IRepositoryStatementProvider>());
             services.TryAddSingleton<ISweeperRepositoryStatementProvider>(p => p.GetRequiredService<IRepositoryStatementProvider>());
             services.TryAddSingleton<IClusterRepositoryStatementProvider>(p => p.GetRequiredService<IRepositoryStatementProvider>());
             services.TryAddSingleton<ILockRepositoryStatementProvider>(p => p.GetRequiredService<IRepositoryStatementProvider>());
 
-            // Schema and Table Name Providers
-            services.TryAddSingleton(config.RepositoryNamingProvider);
+            
 
             // Initializer
-            services.TryAddScoped<IRepositoryInitializer, SqlServerRepositoryInitializer>();
+            services.TryAddScoped<IRepositoryInitializer, SqlRepositoryInitializer>();
         }
     }
 }

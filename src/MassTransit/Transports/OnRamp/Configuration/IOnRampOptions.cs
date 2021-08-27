@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Transports.Outbox.Configuration
+﻿namespace MassTransit.Transports.OnRamp.Configuration
 {
     /// <summary>
     /// Settings need for the Send/Publish Transport

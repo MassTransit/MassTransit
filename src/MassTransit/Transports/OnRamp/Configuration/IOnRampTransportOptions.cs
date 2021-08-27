@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MassTransit.Transports.Outbox.Configuration
+namespace MassTransit.Transports.OnRamp.Configuration
 {
     /// <summary>
     /// Options needed for the Cluster and Sweeper

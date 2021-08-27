@@ -5,7 +5,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
     using System.Linq;
     using Context;
     using MassTransit.Registration;
-    using MassTransit.Transports.Outbox;
+    using MassTransit.Transports.OnRamp;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Monitoring.Health;

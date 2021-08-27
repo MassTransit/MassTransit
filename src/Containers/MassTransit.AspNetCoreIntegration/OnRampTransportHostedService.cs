@@ -1,6 +1,5 @@
-﻿using MassTransit.Monitoring.Health;
-using MassTransit.Transports.Outbox;
-using MassTransit.Transports.Outbox.Configuration;
+﻿using MassTransit.Transports.OnRamp;
+using MassTransit.Transports.OnRamp.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -17,25 +16,25 @@ namespace MassTransit.AspNetCoreIntegration
         private readonly IBusControl _busControl;
         private readonly ILogger _logger;
         private readonly IServiceProvider _provider;
-        private readonly IOnRampTransportOptions _outboxTransportOptions;
+        private readonly IOnRampTransportOptions _onRampTransportOptions;
 
         public OnRampTransportHostedService(
             OnRampInstanceState state,
             IBusControl busControl,
             ILogger<OnRampTransportHostedService> logger,
-            IOnRampTransportOptions outboxTransportOptions,
+            IOnRampTransportOptions onRampTransportOptions,
             IServiceProvider provider)
         {
             _state = state;
             _busControl = busControl;
             _provider = provider;
-            _outboxTransportOptions = outboxTransportOptions;
+            _onRampTransportOptions = onRampTransportOptions;
             _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Outbox Transport Hosted Service is working.");
+            _logger.LogInformation("OnRamp Transport Hosted Service is working.");
 
             await _state.Initialize();
 
@@ -53,7 +52,7 @@ namespace MassTransit.AspNetCoreIntegration
 
             var busHealthCircuitBreaker = new BusHealthCircuitBreaker(_busControl);
 
-            if (!_outboxTransportOptions.DisableServices)
+            if (!_onRampTransportOptions.DisableServices)
             {
                 tasks.Add(BusHealthChecker(busHealthCircuitBreaker, cancellationToken));
                 tasks.Add(Sweeper(busHealthCircuitBreaker, cancellationToken));
@@ -88,7 +87,7 @@ namespace MassTransit.AspNetCoreIntegration
                 // This will wait until the bus is considered healthy and we've had our first check in completed
                 while (!cancellationToken.IsCancellationRequested && (circuitBreakerCancellationToken == null || _state.FirstCheckin))
                 {
-                    await Task.Delay(_outboxTransportOptions.SweeperPollingInterval, cancellationToken);
+                    await Task.Delay(_onRampTransportOptions.SweeperPollingInterval, cancellationToken);
                     circuitBreakerCancellationToken = circuitBreaker.IsBusHealthy();
                 }
 
@@ -104,7 +103,7 @@ namespace MassTransit.AspNetCoreIntegration
 
                 await sweeperService.ExecuteAsync(_sweeperRequestorId, combinedCts.Token).ConfigureAwait(false);
 
-                await Task.Delay(_outboxTransportOptions.SweeperPollingInterval, cancellationToken).ConfigureAwait(false);
+                await Task.Delay(_onRampTransportOptions.SweeperPollingInterval, cancellationToken).ConfigureAwait(false);
             }
         }
         #endregion Sweeper
@@ -114,9 +113,9 @@ namespace MassTransit.AspNetCoreIntegration
         private readonly Guid _clusterRequestorId = Guid.NewGuid();
         private async Task Cluster(CancellationToken cancellationToken)
         {
-            if (!_outboxTransportOptions.Clustered)
+            if (!_onRampTransportOptions.Clustered)
             {
-                _logger.LogInformation("Clustering is off, cleaning up any jobs, and then stopping Outbox Cluster Hosted Service.");
+                _logger.LogInformation("Clustering is off, cleaning up any jobs, and then stopping OnRamp Cluster Hosted Service.");
 
                 using var scope = _provider.CreateScope();
                 var clusterManager =
@@ -127,13 +126,13 @@ namespace MassTransit.AspNetCoreIntegration
             }
             else
             {
-                _logger.LogInformation("Outbox Cluster Hosted Service is working.");
+                _logger.LogInformation("OnRamp Cluster Hosted Service is working.");
                 while (!cancellationToken.IsCancellationRequested)
                 {
 
                     await CheckIn(cancellationToken).ConfigureAwait(false);
 
-                    TimeSpan timeToSleep = _outboxTransportOptions.ClusterCheckinInterval;
+                    TimeSpan timeToSleep = _onRampTransportOptions.ClusterCheckinInterval;
                     TimeSpan transpiredTime = DateTimeOffset.UtcNow - _state.LastCheckin;
                     timeToSleep = timeToSleep - transpiredTime;
                     if (timeToSleep <= TimeSpan.Zero)
@@ -143,7 +142,7 @@ namespace MassTransit.AspNetCoreIntegration
 
                     if (_numFails > 0)
                     {
-                        timeToSleep = _outboxTransportOptions.ClusterDbRetryInterval > timeToSleep ? _outboxTransportOptions.ClusterDbRetryInterval : timeToSleep;
+                        timeToSleep = _onRampTransportOptions.ClusterDbRetryInterval > timeToSleep ? _onRampTransportOptions.ClusterDbRetryInterval : timeToSleep;
                     }
 
                     await Task.Delay(timeToSleep, cancellationToken).ConfigureAwait(false);
@@ -166,7 +165,7 @@ namespace MassTransit.AspNetCoreIntegration
             }
             catch (Exception e)
             {
-                if (_numFails % _outboxTransportOptions.ClusterRetryableActionErrorLogThreshold == 0)
+                if (_numFails % _onRampTransportOptions.ClusterRetryableActionErrorLogThreshold == 0)
                 {
                     _logger.LogError(e, "Error managing cluster: " + e.Message);
                 }
@@ -177,7 +176,7 @@ namespace MassTransit.AspNetCoreIntegration
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Outbox Transport Hosted Service is stopping.");
+            _logger.LogInformation("OnRamp Transport Hosted Service is stopping.");
 
             await base.StopAsync(cancellationToken).ConfigureAwait(false);
         }

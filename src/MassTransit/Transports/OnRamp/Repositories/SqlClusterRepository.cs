@@ -1,11 +1,11 @@
-﻿using MassTransit.Transports.Outbox.Entities;
+﻿using MassTransit.Transports.OnRamp.Entities;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MassTransit.Transports.Outbox.Repositories
+namespace MassTransit.Transports.OnRamp.Repositories
 {
     public class SqlClusterRepository : SqlLockRepository, IClusterRepository
     {

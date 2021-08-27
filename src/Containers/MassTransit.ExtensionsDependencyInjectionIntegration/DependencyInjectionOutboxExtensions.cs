@@ -1,6 +1,6 @@
 ﻿using MassTransit.Registration;
 
-namespace MassTransit.Transports.Outbox
+namespace MassTransit.Transports.OnRamp
 {
     public static class DependencyInjectionOutboxExtensions
     {

@@ -10,13 +10,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MassTransit;
-using MassTransit.Transports.Outbox;
+using MassTransit.Transports.OnRamp;
 using GreenPipes;
-using MassTransit.EntityFrameworkCoreIntegration.Outbox;
+using MassTransit.EntityFrameworkCoreIntegration.OnRamp;
 using Microsoft.EntityFrameworkCore;
 using SampleApi.Controllers;
 using System.Data.Common;
 using Microsoft.Data.SqlClient;
+using System.Data.SQLite;
+using Npgsql;
 
 namespace SampleApi
 {
@@ -52,19 +54,31 @@ namespace SampleApi
 
             services.AddMassTransitHostedService();
 
-            services.AddOutboxTransport<OutboxDbContext>(cfg =>
-            {
-                cfg.DisableServices = true;
-            });
-            services.AddDbContext<OutboxDbContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("mydb")));
+            // Using EFCore for interacting with db
+            //services.AddOnRampTransport<OnRampDbContext>(cfg =>
+            //{
+            //    cfg.DisableServices = true;
+            //});
+            //services.AddDbContext<OnRampDbContext>(opt => opt.UseSqlServer(Configuration.GetConnectionString("mydb")));
 
             // ## For direct IDbConnection instead of EFCore
-            //services.AddOutboxTransport(cfg =>
+            //services.AddOnRampTransport(cfg =>
             //{
             //    cfg.DisableServices = true;
             //    cfg.PrefetchCount = 500;
             //});
             //services.AddScoped<DbConnection>(p => new SqlConnection(p.GetRequiredService<IConfiguration>().GetConnectionString("mydb")));
+
+            // ## For sqlite
+            services.AddOnRampTransport(cfg =>
+            {
+                cfg.DisableServices = true;
+                cfg.PrefetchCount = 500;
+                cfg.UsePostgres();
+            });
+            // Initializer
+            //services.AddScoped<DbConnection>(p => new SQLiteConnection(p.GetRequiredService<IConfiguration>().GetConnectionString("mydb")));
+            services.AddScoped<DbConnection>(p => new NpgsqlConnection(p.GetRequiredService<IConfiguration>().GetConnectionString("mydb")));
 
             services.AddOnRampTransportHostedService();
 

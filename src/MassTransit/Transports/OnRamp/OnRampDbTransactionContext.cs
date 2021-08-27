@@ -1,6 +1,6 @@
 ﻿using System.Data;
 
-namespace MassTransit.Transports.Outbox
+namespace MassTransit.Transports.OnRamp
 {
     public class OnRampDbTransactionContext : IOnRampDbTransactionContext
     {

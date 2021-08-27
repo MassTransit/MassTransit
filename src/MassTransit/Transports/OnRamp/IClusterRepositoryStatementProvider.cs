@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Transports.Outbox
+﻿namespace MassTransit.Transports.OnRamp
 {
     public interface IClusterRepositoryStatementProvider
     {

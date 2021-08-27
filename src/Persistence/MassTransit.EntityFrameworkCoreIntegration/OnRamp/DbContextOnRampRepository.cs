@@ -1,8 +1,7 @@
 ﻿using MassTransit.Context;
-using MassTransit.Serialization;
-using MassTransit.Transports.Outbox;
-using MassTransit.Transports.Outbox.Configuration;
-using MassTransit.Transports.Outbox.Entities;
+using MassTransit.Transports.OnRamp;
+using MassTransit.Transports.OnRamp.Configuration;
+using MassTransit.Transports.OnRamp.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using System;
@@ -12,9 +11,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
+namespace MassTransit.EntityFrameworkCoreIntegration.OnRamp
 {
-    public class DbContextOutboxRepository<TDbContext>
+    public class DbContextOnRampRepository<TDbContext>
         : IClusterRepository
         , IOnRampTransportRepository
         , ISweeperRepository
@@ -26,7 +25,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
         private readonly IRepositoryStatementProvider _statementProvider;
         private IDbContextTransaction _currentTransaction;
 
-        public DbContextOutboxRepository(TDbContext db, IRepositoryStatementProvider statementProvider, IOnRampTransportOptions outboxTransportOptions)
+        public DbContextOnRampRepository(TDbContext db, IRepositoryStatementProvider statementProvider, IOnRampTransportOptions outboxTransportOptions)
         {
             _db = db;
             _outboxTransportOptions = outboxTransportOptions;
@@ -202,7 +201,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Outbox
         #endregion ISweeperRepository
 
         #region IOutboxTransportRepository
-        public Task InsertMessage(JsonSerializedMessage message, CancellationToken cancellationToken = default) // this is called by the adding method, so we don't call save changes async. let that be up to the calling app
+        public Task InsertMessage(OnRampSerializedMessage message, CancellationToken cancellationToken = default) // this is called by the adding method, so we don't call save changes async. let that be up to the calling app
         {
             try
             {
