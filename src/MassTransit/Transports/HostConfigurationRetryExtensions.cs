@@ -15,7 +15,7 @@ namespace MassTransit.Transports
         {
             var description = hostConfiguration.HostAddress;
 
-            var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, supervisor.Stopping);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, supervisor.Stopping);
 
             var stoppingContext = new SupervisorStoppingContext(tokenSource.Token);
 
