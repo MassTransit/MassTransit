@@ -24,6 +24,9 @@ namespace MassTransit.JobService.Components.StateMachines
         public DateTime? Faulted { get; set; }
 
         public Guid? StatusCheckTokenId { get; set; }
+
+        public byte[] RowVersion { get; set; }
+
         public int Version { get; set; }
 
         // AttemptId

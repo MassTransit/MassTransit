@@ -52,6 +52,8 @@ namespace MassTransit.JobService.Components.StateMachines
         /// </summary>
         public Dictionary<Uri, JobTypeInstance> Instances { get; set; }
 
+        public byte[] RowVersion { get; set; }
+
         public int Version { get; set; }
 
         /// <summary>

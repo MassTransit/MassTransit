@@ -34,6 +34,9 @@ namespace MassTransit.JobService.Components.StateMachines
 
         public Guid? JobSlotWaitToken { get; set; }
         public Guid? JobRetryDelayToken { get; set; }
+
+        public byte[] RowVersion { get; set; }
+
         public int Version { get; set; }
 
         public Guid CorrelationId { get; set; }

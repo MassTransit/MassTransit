@@ -17,9 +17,29 @@ namespace MassTransit.EntityFrameworkCoreIntegration.JobService
         {
             get
             {
-                yield return new JobTypeSagaMap();
-                yield return new JobSagaMap();
-                yield return new JobAttemptSagaMap();
+                yield return new JobTypeSagaMap(false);
+                yield return new JobSagaMap(false);
+                yield return new JobAttemptSagaMap(false);
+            }
+        }
+    }
+
+
+    public class OptimisticJobServiceSagaDbContext :
+        JobServiceSagaDbContext
+    {
+        public OptimisticJobServiceSagaDbContext(DbContextOptions options)
+            : base(options)
+        {
+        }
+
+        protected override IEnumerable<ISagaClassMap> Configurations
+        {
+            get
+            {
+                yield return new JobTypeSagaMap(true);
+                yield return new JobSagaMap(true);
+                yield return new JobAttemptSagaMap(true);
             }
         }
     }

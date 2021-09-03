@@ -11,9 +11,24 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     public class FutureStateMap :
         SagaClassMap<FutureState>
     {
+        readonly bool _optimistic;
+
+        public FutureStateMap(bool optimistic)
+        {
+            _optimistic = optimistic;
+        }
+
         protected override void Configure(EntityTypeBuilder<FutureState> entity, ModelBuilder model)
         {
             entity.Property(x => x.CurrentState);
+
+            if (_optimistic)
+            {
+                entity.Property(x => x.RowVersion)
+                    .IsRowVersion();
+            }
+            else
+                entity.Ignore(x => x.RowVersion);
 
             entity.Property(x => x.Created);
             entity.Property(x => x.Completed);

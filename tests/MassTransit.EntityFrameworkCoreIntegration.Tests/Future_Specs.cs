@@ -10,7 +10,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
     using TestComponents;
     using TestComponents.ForkJoint.Tests;
     using TestComponents.Futures.Tests;
-    using Turnout;
 
 
     class EntityFrameworkFutureTestFixtureConfigurator :
