@@ -42,6 +42,7 @@ namespace MassTransit.EventHubIntegration.Configurators
 
             CheckpointInterval = TimeSpan.FromMinutes(1);
             CheckpointMessageCount = 5000;
+            MessageLimit = 10000;
 
             _processorConfigurator = new PipeConfigurator<ProcessorContext>();
         }
@@ -54,6 +55,7 @@ namespace MassTransit.EventHubIntegration.Configurators
 
         public TimeSpan CheckpointInterval { get; set; }
 
+        public ushort MessageLimit { get; set; }
         public ushort CheckpointMessageCount { get; set; }
 
         public int ConcurrencyLimit

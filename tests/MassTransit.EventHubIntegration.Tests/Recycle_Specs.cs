@@ -4,7 +4,6 @@ namespace MassTransit.EventHubIntegration.Tests
     using System.Linq;
     using System.Threading.Tasks;
     using Contracts;
-    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
@@ -71,43 +70,9 @@ namespace MassTransit.EventHubIntegration.Tests
 
                     try
                     {
-                        var correlationId = NewId.NextGuid();
-                        var conversationId = NewId.NextGuid();
-                        var initiatorId = NewId.NextGuid();
-                        var messageId = NewId.NextGuid();
-                        await producer.Produce<EventHubMessage>(new
-                            {
-                                Text = "text",
-                                Index = i
-                            }, Pipe.Execute<SendContext>(context =>
-                            {
-                                context.CorrelationId = correlationId;
-                                context.MessageId = messageId;
-                                context.InitiatorId = initiatorId;
-                                context.ConversationId = conversationId;
-                                context.Headers.Set("Special", new
-                                {
-                                    Key = "Hello",
-                                    Value = "World"
-                                });
-                            }),
-                            TestCancellationToken);
+                        await producer.Produce<BatchEventHubMessage>(new { Index = i }, TestCancellationToken);
 
-                        TaskCompletionSource<ConsumeContext<BatchEventHubMessage>> taskCompletionSource = taskCompletionSources[i];
-                        ConsumeContext<BatchEventHubMessage> result = await taskCompletionSource.Task;
-
-                        Assert.That(result.SourceAddress, Is.EqualTo(new Uri("loopback://localhost/")));
-                        Assert.That(result.DestinationAddress,
-                            Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
-                        Assert.That(result.MessageId, Is.EqualTo(messageId));
-                        Assert.That(result.CorrelationId, Is.EqualTo(correlationId));
-                        Assert.That(result.InitiatorId, Is.EqualTo(initiatorId));
-                        Assert.That(result.ConversationId, Is.EqualTo(conversationId));
-
-                        var headerType = result.Headers.Get<HeaderType>("Special");
-                        Assert.That(headerType, Is.Not.Null);
-                        Assert.That(headerType.Key, Is.EqualTo("Hello"));
-                        Assert.That(headerType.Value, Is.EqualTo("World"));
+                        await taskCompletionSources[i].Task;
                     }
                     finally
                     {
@@ -140,13 +105,6 @@ namespace MassTransit.EventHubIntegration.Tests
             {
                 _taskCompletionSource[context.Message.Index].TrySetResult(context);
             }
-        }
-
-
-        public interface HeaderType
-        {
-            string Key { get; }
-            string Value { get; }
         }
     }
 }

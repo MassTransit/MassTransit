@@ -2,8 +2,8 @@ namespace MassTransit.KafkaIntegration.Contexts
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Threading.Tasks;
+    using Checkpoints;
     using Configuration;
     using Confluent.Kafka;
     using Context;
@@ -16,14 +16,20 @@ namespace MassTransit.KafkaIntegration.Contexts
     {
         readonly SingleThreadedDictionary<Partition, PartitionCheckpointData> _data = new SingleThreadedDictionary<Partition, PartitionCheckpointData>();
         readonly IHostConfiguration _hostConfiguration;
-        readonly ushort _maxCount;
-        readonly TimeSpan _timeout;
+        readonly ReceiveSettings _receiveSettings;
 
         public ConsumerLockContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings)
         {
             _hostConfiguration = hostConfiguration;
-            _timeout = receiveSettings.CheckpointInterval;
-            _maxCount = receiveSettings.CheckpointMessageCount;
+            _receiveSettings = receiveSettings;
+        }
+
+        public async Task Pending(ConsumeResult<TKey, TValue> result)
+        {
+            LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
+
+            if (_data.TryGetValue(result.Partition, out var data))
+                await data.Pending(result).ConfigureAwait(false);
         }
 
         public Task Complete(ConsumeResult<TKey, TValue> result)
@@ -31,7 +37,17 @@ namespace MassTransit.KafkaIntegration.Contexts
             LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
             if (_data.TryGetValue(result.Partition, out var data))
-                data.TryCheckpoint(result);
+                data.Complete(result);
+
+            return TaskUtil.Completed;
+        }
+
+        public Task Faulted(ConsumeResult<TKey, TValue> result, Exception exception)
+        {
+            LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
+
+            if (_data.TryGetValue(result.Partition, out var data))
+                data.Faulted(result, exception);
 
             return TaskUtil.Completed;
         }
@@ -42,7 +58,7 @@ namespace MassTransit.KafkaIntegration.Contexts
 
             foreach (var partition in partitions)
             {
-                if (_data.TryAdd(partition.Partition, p => new PartitionCheckpointData(partition, consumer, _timeout, _maxCount)))
+                if (_data.TryAdd(partition.Partition, p => new PartitionCheckpointData(partition, consumer, _receiveSettings)))
                     LogContext.Info?.Log("Partition: {PartitionId} was assigned", partition);
             }
         }
@@ -51,91 +67,57 @@ namespace MassTransit.KafkaIntegration.Contexts
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
+            var tasks = new List<Task>();
             foreach (var partition in partitions)
             {
                 if (_data.TryRemove(partition.Partition, out var data))
-                    data.Close(partition);
+                    tasks.Add(data.Close(partition));
             }
+
+            async Task Close()
+            {
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+            }
+
+            TaskUtil.Await(Close);
         }
 
 
         sealed class PartitionCheckpointData
         {
-            readonly IConsumer<TKey, TValue> _consumer;
-            readonly object _lock;
-            readonly int _maxCount;
-            readonly TopicPartition _partition;
-            readonly TimeSpan _timeout;
-            readonly Stopwatch _timer;
-            bool _commitIsRequired;
-            Offset _offset;
-            ushort _processed;
+            readonly ICheckpointer _checkpointer;
+            readonly ChannelExecutor _executor;
+            readonly PendingConfirmationCollection _pending;
 
-            public PartitionCheckpointData(TopicPartition partition, IConsumer<TKey, TValue> consumer, TimeSpan timeout, ushort maxCount)
+            public PartitionCheckpointData(TopicPartition partition, IConsumer<TKey, TValue> consumer, ReceiveSettings settings)
             {
-                _partition = partition;
-                _consumer = consumer;
-                _timeout = timeout;
-                _maxCount = maxCount;
-                _processed = 0;
-                _timer = Stopwatch.StartNew();
-                _lock = new object();
-                _commitIsRequired = false;
+                _pending = new PendingConfirmationCollection(partition);
+                _executor = new ChannelExecutor(1);
+                _checkpointer = new BatchCheckpointer<TKey, TValue>(_executor, consumer, settings);
             }
 
-            public bool TryCheckpoint(ConsumeResult<TKey, TValue> result)
+            public Task Pending(ConsumeResult<TKey, TValue> result)
             {
-                void Reset()
-                {
-                    _processed = 0;
-                    _commitIsRequired = false;
-                    _timer.Restart();
-                }
-
-                lock (_lock)
-                {
-                    if (_offset < result.Offset)
-                    {
-                        _offset = result.Offset;
-                        _commitIsRequired = true;
-                    }
-
-                    _processed += 1;
-
-                    if (_processed < _maxCount && _timer.Elapsed < _timeout)
-                        return false;
-
-                    CommitIfRequired();
-                    Reset();
-                    return true;
-                }
+                var pendingConfirmation = _pending.Add(result.Offset);
+                return _checkpointer.Pending(pendingConfirmation);
             }
 
-            public void Close(TopicPartitionOffset partition)
+            public void Complete(ConsumeResult<TKey, TValue> result)
             {
-                try
-                {
-                    lock (_lock)
-                        CommitIfRequired();
-                }
-                finally
-                {
-                    _timer.Stop();
-                    _offset = default;
-                    _commitIsRequired = false;
-
-                    LogContext.Info?.Log("Partition: {PartitionId} was closed", partition.TopicPartition);
-                }
+                _pending.Complete(result.Offset);
             }
 
-            void CommitIfRequired()
+            public void Faulted(ConsumeResult<TKey, TValue> result, Exception exception)
             {
-                if (!_commitIsRequired)
-                    return;
+                _pending.Faulted(result.Offset, exception);
+            }
 
-                var offset = _offset + 1;
-                LogContext.Debug?.Log("Partition: {PartitionId} updating checkpoint with offset: {Offset}", _partition, offset);
-                _consumer.Commit(new[] {new TopicPartitionOffset(_partition, offset)});
+            public async Task Close(TopicPartitionOffset partition)
+            {
+                await _checkpointer.DisposeAsync().ConfigureAwait(false);
+                await _executor.DisposeAsync().ConfigureAwait(false);
+
+                LogContext.Info?.Log("Partition: {PartitionId} was closed", partition.TopicPartition);
             }
         }
     }

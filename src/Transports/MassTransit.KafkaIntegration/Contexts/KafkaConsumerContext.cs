@@ -58,12 +58,14 @@ namespace MassTransit.KafkaIntegration.Contexts
             _consumer.Close();
         }
 
-        public Task<ConsumeResult<TKey, TValue>> Consume(CancellationToken cancellationToken)
+        public async Task<ConsumeResult<TKey, TValue>> Consume(CancellationToken cancellationToken)
         {
             if (_executor == null)
                 throw new InvalidOperationException("The consumer is being closed");
 
-            return _executor.Run(() => _consumer.Consume(cancellationToken), cancellationToken);
+            ConsumeResult<TKey, TValue> result = await _executor.Run(() => _consumer.Consume(cancellationToken), cancellationToken).ConfigureAwait(false);
+            await _lockContext.Pending(result).ConfigureAwait(false);
+            return result;
         }
 
         public async ValueTask DisposeAsync()
@@ -74,9 +76,19 @@ namespace MassTransit.KafkaIntegration.Contexts
             _consumer.Dispose();
         }
 
+        public Task Pending(ConsumeResult<TKey, TValue> result)
+        {
+            return _lockContext.Pending(result);
+        }
+
         public Task Complete(ConsumeResult<TKey, TValue> result)
         {
             return _lockContext.Complete(result);
+        }
+
+        public Task Faulted(ConsumeResult<TKey, TValue> result, Exception exception)
+        {
+            return _lockContext.Faulted(result, exception);
         }
 
         void OnError(IConsumer<TKey, TValue> consumer, Error error)

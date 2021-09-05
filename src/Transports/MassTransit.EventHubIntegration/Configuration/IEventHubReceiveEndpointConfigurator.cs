@@ -25,6 +25,11 @@ namespace MassTransit.EventHubIntegration
         ushort CheckpointMessageCount { set; }
 
         /// <summary>
+        /// The maximum number of messages in a single partition before checkpoint (default: 10000)
+        /// </summary>
+        ushort MessageLimit { set; }
+
+        /// <summary>
         /// The number of concurrent messages to process. Could increase throughput but will not preserve an order (default: 1)
         /// </summary>
         int ConcurrencyLimit { set; }

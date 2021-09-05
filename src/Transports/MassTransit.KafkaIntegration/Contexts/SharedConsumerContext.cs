@@ -55,9 +55,19 @@ namespace MassTransit.KafkaIntegration.Contexts
             return _context.DisposeAsync();
         }
 
-        public async Task Complete(ConsumeResult<TKey, TValue> result)
+        public Task Pending(ConsumeResult<TKey, TValue> result)
         {
-            await _context.Complete(result);
+            return _context.Pending(result);
+        }
+
+        public Task Complete(ConsumeResult<TKey, TValue> result)
+        {
+            return _context.Complete(result);
+        }
+
+        public Task Faulted(ConsumeResult<TKey, TValue> result, Exception exception)
+        {
+            return _context.Faulted(result, exception);
         }
     }
 }

@@ -1,10 +1,9 @@
 namespace MassTransit.EventHubIntegration.Contexts
 {
     using System;
-    using System.Diagnostics;
-    using System.Threading;
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs.Processor;
+    using Checkpoints;
     using Configuration;
     using Context;
     using Util;
@@ -15,30 +14,47 @@ namespace MassTransit.EventHubIntegration.Contexts
     {
         readonly SingleThreadedDictionary<string, PartitionCheckpointData> _data = new SingleThreadedDictionary<string, PartitionCheckpointData>();
         readonly IHostConfiguration _hostConfiguration;
-        readonly ushort _maxCount;
-        readonly TimeSpan _timeout;
+        readonly ReceiveSettings _receiveSettings;
 
         public ProcessorLockContext(IHostConfiguration hostConfiguration, ReceiveSettings receiveSettings)
         {
             _hostConfiguration = hostConfiguration;
-            _timeout = receiveSettings.CheckpointInterval;
-            _maxCount = receiveSettings.CheckpointMessageCount;
+            _receiveSettings = receiveSettings;
+        }
+
+        public async Task Pending(ProcessEventArgs eventArgs)
+        {
+            LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
+
+            if (_data.TryGetValue(eventArgs.Partition.PartitionId, out var data))
+                await data.Pending(eventArgs).ConfigureAwait(false);
+        }
+
+        public Task Faulted(ProcessEventArgs eventArgs, Exception exception)
+        {
+            LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
+
+            if (_data.TryGetValue(eventArgs.Partition.PartitionId, out var data))
+                data.Faulted(eventArgs, exception);
+
+            return TaskUtil.Completed;
         }
 
         public Task Complete(ProcessEventArgs eventArgs)
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
-            return _data.TryGetValue(eventArgs.Partition.PartitionId, out var data)
-                ? data.TryCheckpointAsync(eventArgs)
-                : TaskUtil.Completed;
+            if (_data.TryGetValue(eventArgs.Partition.PartitionId, out var data))
+                data.Complete(eventArgs);
+
+            return TaskUtil.Completed;
         }
 
         public async Task OnPartitionInitializing(PartitionInitializingEventArgs eventArgs)
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.ReceiveLogContext);
 
-            _data.TryAdd(eventArgs.PartitionId, _ => new PartitionCheckpointData(_timeout, _maxCount));
+            _data.TryAdd(eventArgs.PartitionId, _ => new PartitionCheckpointData(_receiveSettings));
             LogContext.Info?.Log("Partition: {PartitionId} was initialized", eventArgs.PartitionId);
         }
 
@@ -53,89 +69,39 @@ namespace MassTransit.EventHubIntegration.Contexts
 
         sealed class PartitionCheckpointData
         {
-            readonly SemaphoreSlim _lock;
-            readonly ushort _maxCount;
-            readonly TimeSpan _timeout;
-            readonly Stopwatch _timer;
-            bool _commitIsRequired;
-            ProcessEventArgs _current;
-            ushort _processed;
+            readonly ChannelExecutor _executor;
+            readonly PendingConfirmationCollection _pending;
+            readonly ICheckpointer _receiver;
 
-            public PartitionCheckpointData(TimeSpan timeout, ushort maxCount)
+            public PartitionCheckpointData(ReceiveSettings settings)
             {
-                _timeout = timeout;
-                _maxCount = maxCount;
-                _processed = 0;
-                _timer = Stopwatch.StartNew();
-                _lock = new SemaphoreSlim(1);
-                _commitIsRequired = false;
+                _executor = new ChannelExecutor(1);
+                _receiver = new BatchCheckpointer(_executor, settings);
+                _pending = new PendingConfirmationCollection(settings.EventHubName);
             }
 
-            public async Task<bool> TryCheckpointAsync(ProcessEventArgs args)
+            public Task Pending(ProcessEventArgs eventArgs)
             {
-                void Reset()
-                {
-                    _processed = 0;
-                    _commitIsRequired = false;
-                    _timer.Restart();
-                }
+                var pendingConfirmation = _pending.Add(eventArgs);
+                return _receiver.Pending(pendingConfirmation);
+            }
 
-                try
-                {
-                    //if we can't acquire lock with this token, commit will likely to throw
-                    await _lock.WaitAsync(args.CancellationToken).ConfigureAwait(false);
+            public void Complete(ProcessEventArgs eventArgs)
+            {
+                _pending.Complete(eventArgs.Data.Offset);
+            }
 
-                    if (_current.Data == null || _current.Data.Offset < args.Data.Offset)
-                    {
-                        _current = args;
-                        _commitIsRequired = true;
-                    }
-
-                    _processed += 1;
-
-                    if (_processed < _maxCount && _timer.Elapsed < _timeout)
-                        return false;
-
-                    await CommitIfRequired().ConfigureAwait(false);
-                    Reset();
-                    return true;
-                }
-                finally
-                {
-                    _lock.Release();
-                }
+            public void Faulted(ProcessEventArgs eventArgs, Exception exception)
+            {
+                _pending.Faulted(eventArgs.Data.Offset, exception);
             }
 
             public async Task Close(PartitionClosingEventArgs args)
             {
-                try
-                {
-                    //if we can't acquire lock with this token, commit will likely to throw
-                    await _lock.WaitAsync(args.CancellationToken).ConfigureAwait(false);
+                await _receiver.Close(args.Reason).ConfigureAwait(false);
+                await _executor.DisposeAsync().ConfigureAwait(false);
 
-                    if (args.Reason != ProcessingStoppedReason.Shutdown)
-                        return;
-
-                    await CommitIfRequired().ConfigureAwait(false);
-                }
-                finally
-                {
-                    _timer.Stop();
-                    _current = default;
-                    _lock.Dispose();
-
-                    LogContext.Info?.Log("Partition: {PartitionId} was closed, reason: {Reason}", args.PartitionId, args.Reason);
-                }
-            }
-
-            Task CommitIfRequired()
-            {
-                if (!_commitIsRequired)
-                    return TaskUtil.Completed;
-
-                LogContext.Debug?.Log("Partition: {PartitionId} updating checkpoint with offset: {Offset}", _current.Partition.PartitionId,
-                    _current.Data.Offset);
-                return _current.UpdateCheckpointAsync();
+                LogContext.Info?.Log("Partition: {PartitionId} was closed, reason: {Reason}", args.PartitionId, args.Reason);
             }
         }
     }

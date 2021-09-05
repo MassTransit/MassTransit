@@ -53,7 +53,7 @@
 
         public Task Faulted(Exception exception)
         {
-            return TaskUtil.Completed;
+            return _lockContext.Faulted(_result, exception);
         }
 
         public Task ValidateLockStatus()

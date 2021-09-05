@@ -48,6 +48,7 @@ namespace MassTransit.KafkaIntegration.Configurators
 
             CheckpointInterval = TimeSpan.FromMinutes(1);
             CheckpointMessageCount = 5000;
+            MessageLimit = 10000;
             ConcurrencyLimit = 1;
 
             _consumerConfigurator = new PipeConfigurator<ConsumerContext<TKey, TValue>>();
@@ -171,6 +172,7 @@ namespace MassTransit.KafkaIntegration.Configurators
         }
 
         public string Topic { get; }
+        public ushort MessageLimit { get; set; }
 
         public ushort CheckpointMessageCount { set; get; }
 

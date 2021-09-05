@@ -51,6 +51,16 @@ namespace MassTransit.EventHubIntegration.Contexts
             return _context.StopProcessingAsync(cancellationToken);
         }
 
+        public Task Pending(ProcessEventArgs eventArgs)
+        {
+            return _context.Pending(eventArgs);
+        }
+
+        public Task Faulted(ProcessEventArgs eventArgs, Exception exception)
+        {
+            return _context.Faulted(eventArgs, exception);
+        }
+
         public Task Complete(ProcessEventArgs eventArgs)
         {
             return _context.Complete(eventArgs);

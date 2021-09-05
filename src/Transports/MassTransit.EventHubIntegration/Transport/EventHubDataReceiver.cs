@@ -79,9 +79,6 @@
 
         async Task Handle(ProcessEventArgs eventArgs)
         {
-            if (!eventArgs.HasEvent)
-                return;
-
             var context = new EventHubReceiveContext(eventArgs, _context, _processorContext);
 
             try

@@ -2,8 +2,6 @@ namespace MassTransit.EventHubIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Contracts;
-    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
@@ -11,14 +9,13 @@ namespace MassTransit.EventHubIntegration.Tests
     using TestFramework;
 
 
-    public class ProducerPipe_Specs :
+    public class Faults_Receive_Specs :
         InMemoryTestFixture
     {
         [Test]
         public async Task Should_produce()
         {
             TaskCompletionSource<ConsumeContext<EventHubMessage>> taskCompletionSource = GetTask<ConsumeContext<EventHubMessage>>();
-            TaskCompletionSource<SendContext> sendFilterTaskCompletionSource = GetTask<SendContext>();
             var services = new ServiceCollection();
             services.AddSingleton(taskCompletionSource);
 
@@ -41,7 +38,6 @@ namespace MassTransit.EventHubIntegration.Tests
                         {
                             c.ConfigureConsumer<EventHubMessageConsumer>(context);
                         });
-                        k.ConfigureSend(s => s.UseFilter(new SendFilter(sendFilterTaskCompletionSource)));
                     });
                 });
             });
@@ -59,14 +55,8 @@ namespace MassTransit.EventHubIntegration.Tests
 
             try
             {
-                await producer.Produce<EventHubMessage>(new { Text = "text" }, TestCancellationToken);
-
-                var result = await sendFilterTaskCompletionSource.Task;
-
-                Assert.IsTrue(result.TryGetPayload<EventHubSendContext>(out _));
-                Assert.IsTrue(result.TryGetPayload<EventHubSendContext<EventHubMessage>>(out _));
-                Assert.That(result.DestinationAddress,
-                    Is.EqualTo(new Uri($"loopback://localhost/{EventHubEndpointAddress.PathPrefix}/{Configuration.EventHubName}")));
+                await producer.Produce<EventHubMessage>(new { Index = 0 }, TestCancellationToken);
+                await producer.Produce<EventHubMessage>(new { Index = 1 }, TestCancellationToken);
 
                 await taskCompletionSource.Task;
             }
@@ -93,29 +83,17 @@ namespace MassTransit.EventHubIntegration.Tests
 
             public async Task Consume(ConsumeContext<EventHubMessage> context)
             {
+                if (context.Message.Index == 0)
+                    throw new ArgumentException("Expected failure");
+
                 _taskCompletionSource.TrySetResult(context);
             }
         }
 
 
-        class SendFilter :
-            IFilter<SendContext>
+        public interface EventHubMessage
         {
-            readonly TaskCompletionSource<SendContext> _taskCompletionSource;
-
-            public SendFilter(TaskCompletionSource<SendContext> taskCompletionSource)
-            {
-                _taskCompletionSource = taskCompletionSource;
-            }
-
-            public async Task Send(SendContext context, IPipe<SendContext> next)
-            {
-                _taskCompletionSource.TrySetResult(context);
-            }
-
-            public void Probe(ProbeContext context)
-            {
-            }
+            int Index { get; }
         }
     }
 }

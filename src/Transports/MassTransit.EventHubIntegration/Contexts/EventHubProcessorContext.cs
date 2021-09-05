@@ -81,6 +81,16 @@ namespace MassTransit.EventHubIntegration.Contexts
             return _client.StopProcessingAsync(cancellationToken);
         }
 
+        public Task Pending(ProcessEventArgs eventArgs)
+        {
+            return _lockContext.Pending(eventArgs);
+        }
+
+        public Task Faulted(ProcessEventArgs eventArgs, Exception exception)
+        {
+            return _lockContext.Faulted(eventArgs, exception);
+        }
+
         public Task Complete(ProcessEventArgs eventArgs)
         {
             return _lockContext.Complete(eventArgs);
@@ -94,6 +104,11 @@ namespace MassTransit.EventHubIntegration.Contexts
 
         async Task OnMessage(ProcessEventArgs arg)
         {
+            if (!arg.HasEvent)
+                return;
+
+            await _lockContext.Pending(arg).ConfigureAwait(false);
+
             if (ProcessEvent != null)
                 await ProcessEvent.Invoke(arg).ConfigureAwait(false);
         }
