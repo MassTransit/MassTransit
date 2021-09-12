@@ -81,7 +81,7 @@ MassTransit will briefly buffer messages before sending them to RabbitMQ, to inc
 | Enabled        | bool | true | Enable or disable batch sends to RabbitMQ
 | MessageLimit        | int | 100 | Limit the number of messages per batch
 | SizeLimit        | int | 64K | A rough limit of the total message size
-| Timeout        | TimeSpan | 4ms | The time to wait for additional messages before sending
+| Timeout        | TimeSpan | 1ms | The time to wait for additional messages before sending
 
 MassTransit includes several receive endpoint level configuration options that control receive endpoint behavior.
 
