@@ -17,6 +17,19 @@ namespace MassTransit
         }
 
         /// <summary>
+        /// Serialize messages using the raw xml message serializer
+        /// </summary>
+        /// <param name="configurator"></param>
+        /// <param name="options">If false, only supported messages types (read from the message headers) will be returned</param>
+        public static void UseRawXmlSerialzier(this IBusFactoryConfigurator configurator, RawXmlSerializerOptions options)
+        {
+            configurator.SetMessageSerializer(() => new XmlRawSerializer());
+
+            configurator.AddMessageDeserializer(XmlRawSerializer.XmlContentType,
+                () => new RawXmlMessageDeserializer(XmlRawSerializer.XmlSerializer, options));
+        }
+
+        /// <summary>
         /// Serialize messages using the JSON serializer
         /// </summary>
         /// <param name="configurator"></param>
