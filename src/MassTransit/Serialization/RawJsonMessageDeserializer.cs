@@ -14,12 +14,12 @@ namespace MassTransit.Serialization
         IMessageDeserializer
     {
         readonly JsonSerializer _deserializer;
-        readonly RawJsonSerializerOptions _options;
+        readonly RawSerializerOptions _options;
 
         public RawJsonMessageDeserializer(JsonSerializer deserializer, RawJsonSerializerOptions options = RawJsonSerializerOptions.Default)
         {
             _deserializer = deserializer;
-            _options = options;
+            _options = (RawSerializerOptions)options;
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -42,7 +42,7 @@ namespace MassTransit.Serialization
 
                 var messageToken = _deserializer.Deserialize<JToken>(jsonReader);
 
-                return new RawJsonConsumeContext(_deserializer, receiveContext, messageToken, _options);
+                return new RawConsumeContext(_deserializer, receiveContext, messageToken, _options);
             }
             catch (JsonSerializationException ex)
             {

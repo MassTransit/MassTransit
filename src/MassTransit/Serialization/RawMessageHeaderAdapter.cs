@@ -6,13 +6,13 @@ namespace MassTransit.Serialization
     using System.Linq;
 
 
-    public class RawJsonHeaderAdapter :
+    public class RawMessageHeaderAdapter :
         MessageContext
     {
         static readonly DateTime _unixEpoch = new DateTime(1970, 1, 1);
 
         readonly Headers _headers;
-        readonly RawJsonSerializerOptions _options;
+        readonly RawSerializerOptions _options;
         readonly ReceiveContext _receiveContext;
         Guid? _conversationId;
         Guid? _correlationId;
@@ -27,7 +27,7 @@ namespace MassTransit.Serialization
         DateTime? _sentTime;
         Uri _sourceAddress;
 
-        public RawJsonHeaderAdapter(ReceiveContext receiveContext, RawJsonSerializerOptions options)
+        public RawMessageHeaderAdapter(ReceiveContext receiveContext, RawSerializerOptions options)
         {
             _receiveContext = receiveContext;
             _options = options;
@@ -101,9 +101,9 @@ namespace MassTransit.Serialization
             Headers
         {
             readonly Headers _headers;
-            readonly RawJsonSerializerOptions _options;
+            readonly RawSerializerOptions _options;
 
-            public TransportHeaderFilter(Headers headers, RawJsonSerializerOptions options)
+            public TransportHeaderFilter(Headers headers, RawSerializerOptions options)
             {
                 _headers = headers;
                 _options = options;
@@ -121,7 +121,7 @@ namespace MassTransit.Serialization
 
             public IEnumerable<KeyValuePair<string, object>> GetAll()
             {
-                if (_options.HasFlag(RawJsonSerializerOptions.CopyHeaders))
+                if (_options.HasFlag(RawSerializerOptions.CopyHeaders))
                 {
                     foreach (KeyValuePair<string, object> header in _headers.GetAll())
                     {

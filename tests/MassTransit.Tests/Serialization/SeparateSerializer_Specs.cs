@@ -98,4 +98,57 @@
             public string ItemNumber { get; set; }
         }
     }
+
+    [TestFixture]
+    public class Sending_and_consuming_raw_xml :
+        InMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_handle_any_requested_message_type()
+        {
+            var message = new BagOfCrap
+            {
+                CommandId = NewId.NextGuid(),
+                ItemNumber = "27"
+            };
+
+            await InputQueueSendEndpoint.Send(message);
+
+            ConsumeContext<Command> context = await _handled;
+
+            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(RawXmlMessageSerializer.RawXmlContentType),
+                $"unexpected content-type {context.ReceiveContext.ContentType}");
+
+            Assert.That(context.Message.CommandId, Is.EqualTo(message.CommandId));
+            Assert.That(context.Message.ItemNumber, Is.EqualTo(message.ItemNumber));
+        }
+
+        Task<ConsumeContext<Command>> _handled;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseRawXmlSerializer();
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            base.ConfigureInMemoryReceiveEndpoint(configurator);
+
+            _handled = Handled<Command>(configurator);
+        }
+
+
+        public interface Command
+        {
+            Guid CommandId { get; }
+            string ItemNumber { get; }
+        }
+
+
+        public class BagOfCrap
+        {
+            public Guid CommandId { get; set; }
+            public string ItemNumber { get; set; }
+        }
+    }
 }

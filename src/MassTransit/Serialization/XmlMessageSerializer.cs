@@ -49,6 +49,8 @@ namespace MassTransit.Serialization
             _xmlSerializer = new Lazy<JsonSerializer>(() => JsonSerializer.Create(XmlSerializerSettings));
         }
 
+        public static Encoding Encoding => _encoding.Value;
+
         public static JsonSerializer XmlSerializer => _xmlSerializer.Value;
 
         public ContentType ContentType => XmlContentType;
@@ -62,30 +64,7 @@ namespace MassTransit.Serialization
 
                 var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypeNames);
 
-                var json = new StringBuilder(1024);
-
-                using (var stringWriter = new StringWriter(json, CultureInfo.InvariantCulture))
-                using (var jsonWriter = new JsonTextWriter(stringWriter))
-                {
-                    jsonWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
-
-                    XmlJsonMessageSerializer.Serializer.Serialize(jsonWriter, envelope, typeof(MessageEnvelope));
-
-                    jsonWriter.Flush();
-                    stringWriter.Flush();
-                }
-
-                using (var stringReader = new StringReader(json.ToString()))
-                using (var jsonReader = new JsonTextReader(stringReader))
-                {
-                    var document = (XDocument)XmlSerializer.Deserialize(jsonReader, typeof(XDocument));
-
-                    using (var writer = new StreamWriter(stream, _encoding.Value, 1024, true))
-                    using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings {CheckCharacters = false}))
-                    {
-                        document.WriteTo(xmlWriter);
-                    }
-                }
+                Serialize(stream, envelope, typeof(MessageEnvelope));
             }
             catch (SerializationException)
             {
@@ -94,6 +73,34 @@ namespace MassTransit.Serialization
             catch (Exception ex)
             {
                 throw new SerializationException("Failed to serialize message", ex);
+            }
+        }
+
+        public static void Serialize(Stream stream, object message, Type messageType)
+        {
+            var json = new StringBuilder(1024);
+
+            using (var stringWriter = new StringWriter(json, CultureInfo.InvariantCulture))
+            using (var jsonWriter = new JsonTextWriter(stringWriter))
+            {
+                jsonWriter.Formatting = Newtonsoft.Json.Formatting.Indented;
+
+                XmlJsonMessageSerializer.Serializer.Serialize(jsonWriter, message, messageType);
+
+                jsonWriter.Flush();
+                stringWriter.Flush();
+            }
+
+            using (var stringReader = new StringReader(json.ToString()))
+            using (var jsonReader = new JsonTextReader(stringReader))
+            {
+                var document = (XDocument)XmlSerializer.Deserialize(jsonReader, typeof(XDocument));
+
+                using (var writer = new StreamWriter(stream, _encoding.Value, 1024, true))
+                using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings { CheckCharacters = false }))
+                {
+                    document.WriteTo(xmlWriter);
+                }
             }
         }
     }
