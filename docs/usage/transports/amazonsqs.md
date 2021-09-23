@@ -31,3 +31,4 @@ Required AWS permissions:
 * _sns:CreateTopic_
 * _sns:Publish_
 * _sns:Subscribe_
+* _sns:ListTopics_
