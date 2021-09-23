@@ -40,11 +40,11 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             {
                 try
                 {
-                    return await CreateMissingTopic(topic).ConfigureAwait(false);
-                }
-                catch (InvalidParameterException e) when (e.Message.Contains("Topic already exists"))
-                {
                     return await GetExistingTopic(topic.EntityName).ConfigureAwait(false);
+                }
+                catch (AmazonSqsTransportException e) when (e.Message.Equals($"Topic {topic.EntityName} not found."))
+                {
+                    return await CreateMissingTopic(topic).ConfigureAwait(false);
                 }
             });
         }
