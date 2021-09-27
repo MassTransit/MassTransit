@@ -364,32 +364,19 @@ namespace MassTransit.Initializers.PropertyProviders
 
             public bool TryGetConverter<T, TProperty>(out IPropertyConverter<T, TProperty> converter)
             {
-                if (typeof(TValue) == typeof(string) || typeof(TValue) == typeof(byte[]) || typeof(Stream).IsAssignableFrom(typeof(TValue)))
+                if (typeof(T).ClosesType(typeof(MessageData<>), out Type[] types))
                 {
-                    if (typeof(T).ClosesType(typeof(MessageData<>), out Type[] types) && types[0] == typeof(string))
-                    {
-                        if (typeof(TProperty) == typeof(string) || typeof(TProperty) == typeof(MessageData<string>))
-                        {
-                            converter = new MessageDataPropertyConverter() as IPropertyConverter<T, TProperty>;
-                            return converter != null;
-                        }
-                    }
+                    converter = MessageDataPropertyConverter.Instance as IPropertyConverter<T, TProperty>;
+                    if (converter != null)
+                        return true;
 
-                    if (typeof(T).ClosesType(typeof(MessageData<>), out types) && typeof(Stream).IsAssignableFrom(types[0]))
+                    if (MessageDataExtensions.IsValidMessageDataType(types[0]))
                     {
-                        if (typeof(Stream).IsAssignableFrom(typeof(TProperty)) || typeof(TProperty) == typeof(MessageData<Stream>))
+                        if (typeof(TProperty) == types[0] || typeof(TProperty) == typeof(MessageData<>).MakeGenericType(types[0]))
                         {
-                            converter = new MessageDataPropertyConverter() as IPropertyConverter<T, TProperty>;
-                            return converter != null;
-                        }
-                    }
+                            var converterType = typeof(MessageDataPropertyConverter<>).MakeGenericType(types[0]);
 
-                    if (typeof(T).ClosesType(typeof(MessageData<>), out types) && types[0] == typeof(byte[]))
-                    {
-                        if (typeof(TProperty) == typeof(string) || typeof(TProperty) == typeof(MessageData<string>)
-                            || typeof(TProperty) == typeof(byte[]) || typeof(TProperty) == typeof(MessageData<byte[]>))
-                        {
-                            converter = new MessageDataPropertyConverter() as IPropertyConverter<T, TProperty>;
+                            converter = Activator.CreateInstance(converterType) as IPropertyConverter<T, TProperty>;
                             return converter != null;
                         }
                     }

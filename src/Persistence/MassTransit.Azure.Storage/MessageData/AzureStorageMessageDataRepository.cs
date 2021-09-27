@@ -123,6 +123,8 @@ namespace MassTransit.Azure.Storage.MessageData
             var blob = _container.GetBlobClient(blobName);
             try
             {
+                LogContext.Debug?.Log("GET Message Data: {Address} ({Blob})", address, blob.Name);
+
                 return await blob.OpenReadAsync(new BlobOpenReadOptions(false), cancellationToken).ConfigureAwait(false);
             }
             catch (RequestFailedException exception)
@@ -140,7 +142,7 @@ namespace MassTransit.Azure.Storage.MessageData
 
             await SetBlobExpiration(blob, timeToLive).ConfigureAwait(false);
 
-            LogContext.Debug?.Log("MessageData:Put {Blob} {Address}", blob.Name, blob.Uri);
+            LogContext.Debug?.Log("PUT Message Data: {Address} ({Blob})", blob.Uri, blob.Name);
 
             return blob.Uri;
         }
@@ -155,7 +157,7 @@ namespace MassTransit.Azure.Storage.MessageData
                 if (expirationDate <= utcNow)
                     expirationDate = utcNow + TimeSpan.FromMinutes(1);
 
-                var metadata = new Dictionary<string, string> {{"ValidUntilUtc", expirationDate.ToString("O")}};
+                var metadata = new Dictionary<string, string> { { "ValidUntilUtc", expirationDate.ToString("O") } };
                 await blob.SetMetadataAsync(metadata).ConfigureAwait(false);
             }
         }

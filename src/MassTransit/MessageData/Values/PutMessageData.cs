@@ -11,13 +11,10 @@ namespace MassTransit.MessageData.Values
     public class PutMessageData<T> :
         MessageData<T>
     {
-        readonly T _value;
-
         public PutMessageData(T value, bool hasValue = true)
         {
             HasValue = hasValue;
-            _value = value;
-            Value = Task.FromResult(_value);
+            Value = Task.FromResult(value);
         }
 
         public Uri Address => null;

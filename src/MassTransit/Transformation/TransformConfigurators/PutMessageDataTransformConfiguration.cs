@@ -26,14 +26,14 @@ namespace MassTransit.Transformation.TransformConfigurators
 
         public void Apply(ITransformConfigurator<TInput> configurator)
         {
-            if (TypeMetadataCache<TInput>.IsValidMessageType)
-            {
-                var inputPropertyProvider = new InputPropertyProvider<TInput, MessageData<TValue>>(_property);
+            if (!TypeMetadataCache<TInput>.IsValidMessageType)
+                return;
 
-                var provider = new PutMessageDataPropertyProvider<TInput, TValue>(inputPropertyProvider, _repository);
+            var inputPropertyProvider = new InputPropertyProvider<TInput, MessageData<TValue>>(_property);
 
-                configurator.Set(_property, provider);
-            }
+            var provider = new PutMessageDataPropertyProvider<TInput, TValue>(inputPropertyProvider, _repository);
+
+            configurator.Set(_property, provider);
         }
     }
 }

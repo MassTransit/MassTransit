@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using Context;
     using Courier;
-    using Initializers.PropertyProviders;
     using Metadata;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;

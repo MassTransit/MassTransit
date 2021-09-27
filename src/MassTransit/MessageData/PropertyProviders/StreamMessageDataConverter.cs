@@ -5,7 +5,8 @@ namespace MassTransit.MessageData.PropertyProviders
     using System.Threading.Tasks;
 
 
-    public class StreamMessageDataConverter : IMessageDataConverter<Stream>
+    public class StreamMessageDataConverter :
+        IMessageDataConverter<Stream>
     {
         public Task<Stream> Convert(Stream stream, CancellationToken cancellationToken)
         {

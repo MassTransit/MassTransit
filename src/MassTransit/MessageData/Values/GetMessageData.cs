@@ -50,9 +50,7 @@
             finally
             {
                 if (_converter.GetType() != typeof(StreamMessageDataConverter))
-                {
                     valueStream?.Dispose();
-                }
             }
         }
     }
