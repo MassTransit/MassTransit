@@ -81,7 +81,7 @@ namespace MassTransit.TestComponents.ForkJoint.Tests
         protected override void ConfigureMassTransit(IServiceCollectionBusConfigurator configurator)
         {
             configurator.AddConsumer<PourShakeConsumer>();
-            configurator.AddConsumer<CookFryConsumer>();
+            configurator.AddConsumer<CookFryConsumer, CookFryConsumerDefinition>();
 
             configurator.AddFuture<FryFuture>();
             configurator.AddFuture<ShakeFuture>();
