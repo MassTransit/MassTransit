@@ -118,11 +118,9 @@
             {
                 IRequestClient<A> client = _clientFactory.CreateRequestClient<A>(x, InputQueueAddress);
 
-                RequestHandle<A> request = client.Create(new A(), x.CancellationToken);
+                await client.GetResponse<B>(new A(), context => context.TimeToLive = TimeSpan.FromSeconds(30), x.CancellationToken);
 
-                await request.GetResponse<B>();
-
-                x.Respond(new PongMessage(x.Message.CorrelationId));
+                await x.RespondAsync(new PongMessage(x.Message.CorrelationId));
             });
 
             _a = Handler<A>(configurator, x => x.RespondAsync(new B()));

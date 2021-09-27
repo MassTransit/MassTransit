@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
 
 
     /// <summary>
@@ -12,7 +11,7 @@
     /// <typeparam name="TRequest">The request type</typeparam>
     public interface RequestHandle<TRequest> :
         RequestHandle,
-        IPipeConfigurator<SendContext<TRequest>>
+        IRequestPipeConfigurator<TRequest>
         where TRequest : class
     {
         /// <summary>
