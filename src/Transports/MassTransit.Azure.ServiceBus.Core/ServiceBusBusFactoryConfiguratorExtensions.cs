@@ -18,11 +18,11 @@
         /// <param name="configure">A callback to further configure the service bus</param>
         /// <returns>The service bus host</returns>
         public static void Host(this IServiceBusBusFactoryConfigurator configurator, Uri hostAddress,
-            Action<IServiceBusHostConfigurator> configure)
+            Action<IServiceBusHostConfigurator> configure = null)
         {
             var hostConfigurator = new ServiceBusHostConfigurator(hostAddress);
 
-            configure(hostConfigurator);
+            configure?.Invoke(hostConfigurator);
 
             configurator.Host(hostConfigurator.Settings);
         }
