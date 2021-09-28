@@ -36,5 +36,9 @@
         Task PurgeQueue(string queueName, CancellationToken cancellationToken);
 
         Task<IList<Message>> ReceiveMessages(string queueName, int messageLimit, int waitTime, CancellationToken cancellationToken);
+
+        Task<QueueInfo> GetQueueInfo(string queueName);
+
+        Task ChangeMessageVisibility(string queueUrl, string receiptHandle, int seconds);
     }
 }

@@ -11,6 +11,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Internals.Extensions;
     using Topology;
     using Transports;
     using Transports.Metrics;
@@ -47,6 +48,7 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             _dispatcher = context.CreateReceivePipeDispatcher();
             _dispatcher.ZeroActivity += HandleDeliveryComplete;
 
+
             var task = Task.Run(Consume);
             SetCompleted(task);
         }
@@ -57,6 +59,8 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
         async Task Consume()
         {
             var executor = new ChannelExecutor(_receiveSettings.PrefetchCount, _receiveSettings.ConcurrentMessageLimit);
+
+            await GetQueueAttributes().ConfigureAwait(false);
 
             SetReady();
 
@@ -85,6 +89,22 @@ namespace MassTransit.AmazonSqsTransport.Pipeline
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
             await Completed.ConfigureAwait(false);
+        }
+
+        async Task GetQueueAttributes()
+        {
+            var queueInfo = await _client.GetQueueInfo(_receiveSettings.EntityName).ConfigureAwait(false);
+
+            _receiveSettings.QueueUrl = queueInfo.Url;
+
+            if (queueInfo.Attributes.TryGetValue(QueueAttributeName.VisibilityTimeout, out var value)
+                && int.TryParse(value, out var visibilityTimeout)
+                && visibilityTimeout != _receiveSettings.VisibilityTimeout)
+            {
+                LogContext.Debug?.Log("Using queue visibility timeout of {VisibilityTimeout}", TimeSpan.FromSeconds(visibilityTimeout).ToFriendlyString());
+
+                _receiveSettings.VisibilityTimeout = visibilityTimeout;
+            }
         }
 
         async Task HandleMessage(Message message)

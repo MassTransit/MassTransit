@@ -49,7 +49,7 @@ namespace MassTransit.Context
 
         protected abstract IHeaderProvider HeaderProvider { get; }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             _cancellationTokenSource.Dispose();
         }

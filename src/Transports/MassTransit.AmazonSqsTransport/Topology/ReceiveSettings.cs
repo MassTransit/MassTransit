@@ -44,5 +44,9 @@
         /// If the queue is ordered, enables grouping by MessageGroupId and process messages in ordered way by SequenceNumber
         /// </summary>
         bool IsOrdered { get; }
+
+        int VisibilityTimeout { get; set; }
+
+        string QueueUrl { get; set; }
     }
 }

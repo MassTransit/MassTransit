@@ -5,7 +5,6 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Amazon.Runtime;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using GreenPipes.Internals.Extensions;
@@ -127,8 +126,8 @@
                 {
                     h.AccessKey("admin");
                     h.SecretKey("admin");
-                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
-                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
+                    h.Config(new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://localhost:4566" });
+                    h.Config(new AmazonSQSConfig { ServiceURL = "http://localhost:4566" });
                 });
             });
 
@@ -210,8 +209,8 @@
                 {
                     h.AccessKey("admin");
                     h.SecretKey("admin");
-                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
-                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
+                    h.Config(new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://localhost:4566" });
+                    h.Config(new AmazonSQSConfig { ServiceURL = "http://localhost:4566" });
                 });
             });
 
@@ -237,8 +236,8 @@
                 {
                     h.AccessKey("admin");
                     h.SecretKey("admin");
-                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
-                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
+                    h.Config(new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://localhost:4566" });
+                    h.Config(new AmazonSQSConfig { ServiceURL = "http://localhost:4566" });
                 });
             });
 
@@ -293,8 +292,8 @@
                 {
                     h.AccessKey("admin");
                     h.SecretKey("admin");
-                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
-                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
+                    h.Config(new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://localhost:4566" });
+                    h.Config(new AmazonSQSConfig { ServiceURL = "http://localhost:4566" });
                 });
 
                 Func<object, Task> receiveTask = t =>
@@ -354,8 +353,8 @@
                 {
                     h.AccessKey("admin");
                     h.SecretKey("admin");
-                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
-                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
+                    h.Config(new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://localhost:4566" });
+                    h.Config(new AmazonSQSConfig { ServiceURL = "http://localhost:4566" });
                 });
 
                 sbc.ReceiveEndpoint("test", e =>
@@ -395,8 +394,8 @@
                 {
                     h.AccessKey("admin");
                     h.SecretKey("admin");
-                    h.Config(new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"});
-                    h.Config(new AmazonSQSConfig {ServiceURL = "http://localhost:4566"});
+                    h.Config(new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://localhost:4566" });
+                    h.Config(new AmazonSQSConfig { ServiceURL = "http://localhost:4566" });
                 });
 
                 cfg.ReceiveEndpoint("input-queue", x =>

@@ -17,6 +17,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
             _configuration = configuration;
 
             WaitTimeSeconds = 3;
+            VisibilityTimeout = 30;
 
             if (AmazonSqsEndpointAddress.IsFifo(queueName))
                 IsOrdered = true;
@@ -30,6 +31,10 @@ namespace MassTransit.AmazonSqsTransport.Topology.Settings
         public bool PurgeOnStartup { get; set; }
 
         public bool IsOrdered { get; set; }
+
+        public int VisibilityTimeout { get; set; }
+
+        public string QueueUrl { get; set; }
 
         public Uri GetInputAddress(Uri hostAddress)
         {

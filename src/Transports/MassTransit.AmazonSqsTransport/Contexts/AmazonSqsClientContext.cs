@@ -100,7 +100,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
                 var jsonPolicy = policy.ToJson();
 
-                var setAttributes = new Dictionary<string, string> {{QueueAttributeName.Policy, jsonPolicy}};
+                var setAttributes = new Dictionary<string, string> { { QueueAttributeName.Policy, jsonPolicy } };
                 var setAttributesResponse = await _amazonSqs.SetQueueAttributesAsync(queueInfo.Url, setAttributes, _cancellationToken).ConfigureAwait(false);
 
                 setAttributesResponse.EnsureSuccessfulResponse();
@@ -189,8 +189,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             {
                 MaxNumberOfMessages = messageLimit,
                 WaitTimeSeconds = waitTime,
-                AttributeNames = new List<string> {"All"},
-                MessageAttributeNames = new List<string> {"All"}
+                AttributeNames = new List<string> { "All" },
+                MessageAttributeNames = new List<string> { "All" }
             };
 
             var response = await _amazonSqs.ReceiveMessageAsync(request, cancellationToken).ConfigureAwait(false);
@@ -198,6 +198,23 @@ namespace MassTransit.AmazonSqsTransport.Contexts
             response.EnsureSuccessfulResponse();
 
             return response.Messages;
+        }
+
+        public Task<QueueInfo> GetQueueInfo(string queueName)
+        {
+            return _queueCache.GetByName(queueName);
+        }
+
+        public async Task ChangeMessageVisibility(string queueUrl, string receiptHandle, int seconds)
+        {
+            var response = await _amazonSqs.ChangeMessageVisibilityAsync(new ChangeMessageVisibilityRequest
+            {
+                QueueUrl = queueUrl,
+                ReceiptHandle = receiptHandle,
+                VisibilityTimeout = seconds
+            }, _cancellationToken).ConfigureAwait(false);
+
+            response.EnsureSuccessfulResponse();
         }
 
         public async ValueTask DisposeAsync()
@@ -212,7 +229,7 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         async Task DeleteQueueSubscription(string subscriptionArn)
         {
-            var unsubscribeRequest = new UnsubscribeRequest {SubscriptionArn = subscriptionArn};
+            var unsubscribeRequest = new UnsubscribeRequest { SubscriptionArn = subscriptionArn };
 
             var response = await _amazonSns.UnsubscribeAsync(unsubscribeRequest, _cancellationToken).ConfigureAwait(false);
 

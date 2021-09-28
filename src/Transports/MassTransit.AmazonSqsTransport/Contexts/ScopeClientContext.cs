@@ -80,5 +80,15 @@ namespace MassTransit.AmazonSqsTransport.Contexts
         {
             return _context.ReceiveMessages(queueName, messageLimit, waitTime, cancellationToken);
         }
+
+        public Task<QueueInfo> GetQueueInfo(string queueName)
+        {
+            return _context.GetQueueInfo(queueName);
+        }
+
+        public Task ChangeMessageVisibility(string queueUrl, string receiptHandle, int seconds)
+        {
+            return _context.ChangeMessageVisibility(queueUrl, receiptHandle, seconds);
+        }
     }
 }
