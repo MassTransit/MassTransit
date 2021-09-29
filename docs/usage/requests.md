@@ -125,9 +125,8 @@ public void ConfigureServices(IServiceCollection services)
     services.AddMassTransit(x =>
     {
         // ...
-
-        x.AddGenericRequestClient();
     });
+    services.AddGenericRequestClient();
 }
 ```
 #### Using Autofac
