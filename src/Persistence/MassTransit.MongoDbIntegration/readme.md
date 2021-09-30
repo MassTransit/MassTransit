@@ -209,7 +209,7 @@ Or if you wish to impliment in C# e.g. via a hosted service
 
 ```csharp
 MongoClient client = new MongoClient(connectionString);
-IMongoDatabase database = client.GetDatabase(database);
+IMongoDatabase database = client.GetDatabase(databaseName);
 var bucket = new GridFSBucket(database);
 
 DateTime now = DateTime.UtcNow;
