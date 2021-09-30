@@ -112,9 +112,10 @@
 
         async Task RenewMessageVisibility()
         {
-            TimeSpan CalculateDelay(int timeout) => TimeSpan.FromSeconds((timeout - ElapsedTime.TotalSeconds) * 0.6);
+            TimeSpan CalculateDelay(int timeout) => TimeSpan.FromSeconds(timeout * 0.7);
 
             var visibilityTimeout = _receiveSettings.VisibilityTimeout;
+            var totalTimeout = _receiveSettings.VisibilityTimeout;
 
             var delay = CalculateDelay(visibilityTimeout);
 
@@ -128,15 +129,12 @@
                     if (_activeTokenSource.Token.IsCancellationRequested)
                         break;
 
-                    visibilityTimeout = Math.Min(MaxVisibilityTimeout, visibilityTimeout * 2);
-
                     await _clientContext.ChangeMessageVisibility(_receiveSettings.QueueUrl, TransportMessage.ReceiptHandle, visibilityTimeout)
                         .ConfigureAwait(false);
 
-                    // LogContext.Debug?.Log("Extended message {ReceiptHandle} visibility to {VisibilityTimeout} ({ElapsedTime})", TransportMessage.ReceiptHandle,
-                    //     TimeSpan.FromSeconds(visibilityTimeout).ToFriendlyString(), ElapsedTime);
+                    totalTimeout += visibilityTimeout;
 
-                    if (visibilityTimeout >= MaxVisibilityTimeout)
+                    if (totalTimeout >= MaxVisibilityTimeout)
                         break;
 
                     delay = CalculateDelay(visibilityTimeout);
