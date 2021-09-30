@@ -161,10 +161,12 @@ var busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
     cfg.Host("rabbitmq://localhost/");
 
     cfg.UseMessageScheduler(new Uri("rabbitmq://localhost/quartz"));
+    // cfg.UseDelayedMessageScheduler(); // use this, if you are using delayed scheduler
 
     cfg.ReceiveEndpoint("submit-order", e =>
     {
         e.UseScheduledRedelivery(r => r.Intervals(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(30)));
+        // e.UseDelayedRedelivery(r => r.Intervals(TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(30))); // use this, if you are using delayed scheduler
         e.UseMessageRetry(r => r.Immediate(5));
         e.Consumer(() => new SubmitOrderConsumer(sessionFactory));
     });
