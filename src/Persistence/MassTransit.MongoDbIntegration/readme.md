@@ -205,6 +205,31 @@ cursor.forEach(function (toDelete) {
 });    
 ```
 
+Or if you wish to impliment in C# e.g. via a hosted service
+
+```csharp
+MongoClient client = new MongoClient(connectionString);
+IMongoDatabase database = client.GetDatabase(databaseName);
+var bucket = new GridFSBucket(database);
+
+DateTime now = DateTime.UtcNow;
+
+var filter = Builders<GridFSFileInfo>.Filter.Lte(x => x.Metadata["expiration"], now);
+var sort = Builders<GridFSFileInfo>.Sort.Descending(x => x.Length);
+var options = new GridFSFindOptions
+{
+    Sort = sort
+};
+
+using (var cursor = await bucket.FindAsync(filter, options))
+{
+    await cursor.ForEachAsync(async file =>
+    {
+        await bucket.DeleteAsync(file.Id);
+    });
+}
+```
+
 Alternatively, you can import the `CreateDeleteExpiredMassTransitMessageDataTask.xml` file into Windows Task Scheduler and configure the script's arguments so that expired documents are deleted on a schedule.
 
 # Contribute
