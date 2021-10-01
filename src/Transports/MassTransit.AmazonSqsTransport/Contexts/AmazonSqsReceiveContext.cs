@@ -22,7 +22,7 @@
         AmazonSqsMessageContext,
         ReceiveLockContext
     {
-        static readonly int MaxVisibilityTimeout = (int)TimeSpan.FromHours(12).TotalSeconds;
+        static readonly TimeSpan MaxVisibilityTimeout = TimeSpan.FromHours(12);
 
         readonly CancellationTokenSource _activeTokenSource;
         readonly SqsReceiveEndpointContext _context;
@@ -119,6 +119,8 @@
 
             var delay = CalculateDelay(visibilityTimeout);
 
+            visibilityTimeout = Math.Min(60, visibilityTimeout);
+
             while (_activeTokenSource.Token.IsCancellationRequested == false)
             {
                 try
@@ -134,7 +136,8 @@
 
                     totalTimeout += visibilityTimeout;
 
-                    if (totalTimeout >= MaxVisibilityTimeout)
+                    // Max 12 hours, https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html
+                    if (ElapsedTime + TimeSpan.FromSeconds(visibilityTimeout) >= MaxVisibilityTimeout)
                         break;
 
                     delay = CalculateDelay(visibilityTimeout);
