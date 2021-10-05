@@ -43,9 +43,21 @@ To use the message scheduler (outside of a consumer), use _IMessageScheduler_ fr
 
 To use Quartz.NET, an instance of Quartz.NET must be running and configured to use the message broker.
 
-::: tip Quartz.NET Docker Image
-MassTransit provides a [Docker Image](https://hub.docker.com/r/masstransit/quartz) with Quartz.NET ready-to-run using SQL Server. A complementary [SQL Server Image](https://hub.docker.com/r/masstransit/sqlserver-quartz) configured to run with Quartz.NET is also available. Combined, these images make getting started with Quartz easy.
+### Internal Quartz.NET instance
+
+MassTransit is able to connect to an existing Quartz.NET instance running in the same executable.
+
+<<< @/docs/code/scheduling/SchedulingInternalInstance.cs
+
+::: warning
+The code above asumes Quartz.NET is already configured using dependency injection.
 :::
+
+### External Quartz.NET instance
+
+MassTransit provides a [Docker Image](https://hub.docker.com/r/masstransit/quartz) with Quartz.NET ready-to-run using SQL Server. A complementary [SQL Server Image](https://hub.docker.com/r/masstransit/sqlserver-quartz) configured to run with Quartz.NET is also available. Combined, these images make getting started with Quartz easy.
+
+### Testing
 
 Quartz.NET can also be configured in-memory, which is great for unit testing. 
 
@@ -59,7 +71,7 @@ The _UseInMemoryScheduler_ method initializes Quartz.NET for standalone in-memor
 Using the in-memory scheduler uses non-durable storage. If the process terminates, any scheduled messages will be lost, immediately, never to be found again. For any production system, using a standalone service is recommended with persistent storage.
 :::
 
-### Transport-based
+## Transport-based
 
 To configure transport-based message scheduling, refer to the transport-specific section for details.
 
