@@ -1,9 +1,13 @@
 ﻿using MassTransit;
 using MassTransit.ActiveMqTransport;
+using MassTransit.ActiveMqTransport.Transport;
 using MassTransit.Serialization;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace SendActiveMQTest
 {
@@ -17,18 +21,31 @@ namespace SendActiveMQTest
                 {
                     h.Username("admin");
                     h.Password("admin");
+
                 });
                 config.ClearMessageDeserializers();
                 config.UseRawXmlSerialzier(RawXmlSerializerOptions.Default);
-
             });
             EndpointConvention.Map<LoadProfile>(new Uri($"queue:TestQueue"));
-         
-            await _bus.Send(new LoadProfile { Message ="Hello"}, new Dictionary<string, string> { ["Type"] = "Text" });
+            EndpointConvention.Map<AhmedProfile>(new Uri($"queue:AhmedQueue"));
+            var profile = new LoadProfile
+            {
+                Message = "Hello"
+            };
+            var ahmedProfile = new AhmedProfile { Message = "Ahmed" };
+            await _bus.Send(profile);
+            await _bus.SendAsTextMessage(profile);
+            await _bus.SendAsBinaryMessage(ahmedProfile);
         }
     }
 
-    public class LoadProfile{
+    public class LoadProfile
+    {
+        public string Message { get; set; }
+    }
+
+    public class AhmedProfile
+    {
         public string Message { get; set; }
     }
 }

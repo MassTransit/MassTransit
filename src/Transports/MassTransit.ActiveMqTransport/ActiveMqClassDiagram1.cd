@@ -1,0 +1,1253 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MassTransit.ActiveMqTransport.ActiveMqBusFactory">
+    <Position X="3.25" Y="3.25" Width="1.75" />
+    <NestedTypes>
+      <Class Name="MassTransit.ActiveMqTransport.ActiveMqBusFactory.Cached" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>ActiveMqBusFactory.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAQEAAAAAAAAAAAAA=</HashCode>
+      <FileName>ActiveMqBusFactory.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.ActiveMqDeferMessageExtensions">
+    <Position X="5.75" Y="6.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ActiveMqDeferMessageExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.ActiveMqHostSettingsExtensions">
+    <Position X="9" Y="6.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ActiveMqHostSettingsExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.ActiveMqMessageNameFormatter" BaseTypeListCollapsed="true">
+    <Position X="5.5" Y="0.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQA=</HashCode>
+      <FileName>ActiveMqMessageNameFormatter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.ActiveMqSendContextExtensions">
+    <Position X="9" Y="8.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>ActiveMqSendContextExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqMessageSchedulerExtensions">
+    <Position X="8" Y="10" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEA=</HashCode>
+      <FileName>ActiveMqMessageSchedulerExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Transport.ActiveMqDeadLetterTransport" Collapsed="true">
+    <Position X="0.5" Y="12.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Transport\ActiveMqDeadLetterTransport.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Transport.ActiveMqErrorTransport" Collapsed="true">
+    <Position X="3" Y="12.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Transport\ActiveMqErrorTransport.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Transport.ActiveMqHost" BaseTypeListCollapsed="true">
+    <Position X="4" Y="17" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAQAACAAAAAAAABAAAAAAAAQAAAAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Transport\ActiveMqHost.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Transport.ActiveMqMoveTransport">
+    <Position X="1" Y="10" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAIAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Transport\ActiveMqMoveTransport.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Transport.ActiveMqPublishTransportProvider" BaseTypeListCollapsed="true">
+    <Position X="8.75" Y="11.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AYAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Transport\ActiveMqPublishTransportProvider.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Transport.ActiveMqSendConfigurator">
+    <Position X="5" Y="14.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEIAAAAEAIAAAAAAAAEAAAAAAACAAAAAAAAAAAA=</HashCode>
+      <FileName>Transport\ActiveMqSendConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Transport.ActiveMqSendTransport" BaseTypeListCollapsed="true">
+    <Position X="5.75" Y="11" Width="2" />
+    <NestedTypes>
+      <Class Name="MassTransit.ActiveMqTransport.Transport.ActiveMqSendTransport.SendPipe&lt;T&gt;" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Transport\ActiveMqSendTransport.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAABBIAAAAAAAAAAAAACAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Transport\ActiveMqSendTransport.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Transport.ActiveMqSendTransportProvider" BaseTypeListCollapsed="true">
+    <Position X="4.75" Y="22.5" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAQAAAAAACAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Transport\ActiveMqSendTransportProvider.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Transport.ConnectionContextFactory" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="0.5" Width="4.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAEAAAAAAARAQAAAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>Transport\ConnectionContextFactory.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Transport.ConnectionContextSupervisor" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="16.5" Width="3.25" />
+    <NestedTypes>
+      <Class Name="MassTransit.ActiveMqTransport.Transport.ConnectionContextSupervisor.SendTransportContext" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Transport\ConnectionContextSupervisor.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAAAAACAAAEAAAAAQCAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Transport\ConnectionContextSupervisor.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Transport.ScopeSessionContextFactory" BaseTypeListCollapsed="true">
+    <Position X="7.5" Y="14.25" Width="4" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAgAABAAAAAAAAAAAAAAAAAAAAAEIAAAAAA=</HashCode>
+      <FileName>Transport\ScopeSessionContextFactory.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Transport.SessionContextFactory" BaseTypeListCollapsed="true">
+    <Position X="7.5" Y="17.25" Width="4" />
+    <TypeIdentifier>
+      <HashCode>AJAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAEIAAAAAA=</HashCode>
+      <FileName>Transport\SessionContextFactory.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Transport.SessionContextSupervisor" BaseTypeListCollapsed="true">
+    <Position X="5.75" Y="25.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Transport\SessionContextSupervisor.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Builders.ActiveMqBrokerTopology" BaseTypeListCollapsed="true">
+    <Position X="0.75" Y="86.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAAAAAAAAAAAAAAQAAAAAAAAAACACAAAAA=</HashCode>
+      <FileName>Topology\Builders\ActiveMqBrokerTopology.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Builders.BrokerTopologyBuilder" Collapsed="true">
+    <Position X="1.75" Y="34.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgABAAAAAAAAAAQIAAAAAAAAACQCgAAAA=</HashCode>
+      <FileName>Topology\Builders\BrokerTopologyBuilder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Builders.PublishEndpointBrokerTopologyBuilder" Collapsed="true">
+    <Position X="0.5" Y="36.25" Width="3" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAA=</HashCode>
+      <FileName>Topology\Builders\PublishEndpointBrokerTopologyBuilder.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Builders.ReceiveEndpointBrokerTopologyBuilder" Collapsed="true">
+    <Position X="4.25" Y="35.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAABAAQAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Builders\ReceiveEndpointBrokerTopologyBuilder.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Configurators.EntityConfigurator">
+    <Position X="6.5" Y="36.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAQAAAAAAAABAgAAAAQAAAA=</HashCode>
+      <FileName>Topology\Configuration\Configurators\EntityConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Configurators.QueueBindingConfigurator">
+    <Position X="3.5" Y="39.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\Configurators\QueueBindingConfigurator.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Configurators.QueueConfigurator">
+    <Position X="0.5" Y="37.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAA=</HashCode>
+      <FileName>Topology\Configuration\Configurators\QueueConfigurator.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Configurators.TopicBindingConfigurator">
+    <Position X="7.75" Y="40.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\Configurators\TopicBindingConfigurator.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Configurators.TopicConfigurator">
+    <Position X="10" Y="37.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAA=</HashCode>
+      <FileName>Topology\Configuration\Configurators\TopicConfigurator.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Specifications.ConsumerConsumeTopologySpecification" Collapsed="true">
+    <Position X="8.5" Y="44" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABCAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\Specifications\ConsumerConsumeTopologySpecification.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Specifications.InvalidActiveMqConsumeTopologySpecification" BaseTypeListCollapsed="true">
+    <Position X="5" Y="92" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABCAAAAAAACAAAAAAAAAAAAAEAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\Specifications\InvalidActiveMqConsumeTopologySpecification.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.ActiveMqEntityNameValidator" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="83.25" Width="2.25" />
+    <NestedTypes>
+      <Class Name="MassTransit.ActiveMqTransport.Topology.ActiveMqEntityNameValidator.Cached" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Topology\ActiveMqEntityNameValidator.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAgAJAAAAAAAA=</HashCode>
+      <FileName>Topology\ActiveMqEntityNameValidator.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.ActiveMqHostEqualityComparer" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="89.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAgAAAIAAAAAAAAIAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\ActiveMqHostEqualityComparer.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.ArtemisConsumerEndpointQueueNameFormatter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="98" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\ArtemisConsumerEndpointQueueNameFormatter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.PrefixTemporaryQueueNameFormatter" BaseTypeListCollapsed="true">
+    <Position X="6.75" Y="95.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAQAAAAAAAAAA=</HashCode>
+      <FileName>Topology\PrefixTemporaryQueueNameFormatter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Entities.ConsumerEntity" BaseTypeListCollapsed="true">
+    <Position X="10" Y="94.75" Width="1.5" />
+    <NestedTypes>
+      <Class Name="MassTransit.ActiveMqTransport.Topology.Entities.ConsumerEntity.ConsumerEntityEqualityComparer" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Topology\Entities\ConsumerEntity.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+      <Class Name="MassTransit.ActiveMqTransport.Topology.Entities.ConsumerEntity.NameEqualityComparer" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Topology\Entities\ConsumerEntity.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AIACAAAAAgAEACAEEAAAAAAAAAAAAAAEAEACAAAAAAA=</HashCode>
+      <FileName>Topology\Entities\ConsumerEntity.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Entities.QueueEntity" BaseTypeListCollapsed="true">
+    <Position X="7" Y="98" Width="1.5" />
+    <NestedTypes>
+      <Class Name="MassTransit.ActiveMqTransport.Topology.Entities.QueueEntity.QueueEntityEqualityComparer" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Topology\Entities\QueueEntity.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+      <Class Name="MassTransit.ActiveMqTransport.Topology.Entities.QueueEntity.NameEqualityComparer" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Topology\Entities\QueueEntity.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AACCAAAAAAAAACAEAAAAAAAAQgAAAAABEgAAAAAAAAA=</HashCode>
+      <FileName>Topology\Entities\QueueEntity.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Entities.TopicEntity" BaseTypeListCollapsed="true">
+    <Position X="4.75" Y="98" Width="1.5" />
+    <NestedTypes>
+      <Class Name="MassTransit.ActiveMqTransport.Topology.Entities.TopicEntity.NameEqualityComparer" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Topology\Entities\TopicEntity.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+      <Class Name="MassTransit.ActiveMqTransport.Topology.Entities.TopicEntity.ExchangeEntityEqualityComparer" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Topology\Entities\TopicEntity.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AACCAAAAAAAAACAEAAAAAAAAAAAAAAABAkAAACAAAAA=</HashCode>
+      <FileName>Topology\Entities\TopicEntity.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Settings.ActiveMqDeadLetterSettings">
+    <Position X="0.5" Y="42.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Settings\ActiveMqDeadLetterSettings.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Settings.ActiveMqErrorSettings">
+    <Position X="4" Y="43" Width="1.75" />
+    <InheritanceLine Type="MassTransit.ActiveMqTransport.Topology.Configurators.QueueBindingConfigurator" FixedToPoint="true">
+      <Path>
+        <Point X="4.625" Y="41.184" />
+        <Point X="4.625" Y="42.375" />
+        <Point X="5" Y="42.375" />
+        <Point X="5" Y="43" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Settings\ActiveMqErrorSettings.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Settings.QueueReceiveSettings">
+    <Position X="6.25" Y="42.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAEAAAEAQAA=</HashCode>
+      <FileName>Settings\QueueReceiveSettings.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Settings.QueueSendSettings">
+    <Position X="0.5" Y="40" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAQAAAQAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Settings\QueueSendSettings.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Settings.TopicSendSettings">
+    <Position X="10" Y="40.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAQAAAQAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Settings\TopicSendSettings.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Topologies.ActiveMqConsumeTopology" BaseTypeListCollapsed="true">
+    <Position X="5.75" Y="85.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AoAAiAAAABCAAAAAAAAAAIAAAAAAACAgAgIAABAAQAA=</HashCode>
+      <FileName>Topology\Topologies\ActiveMqConsumeTopology.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Topologies.ActiveMqHostTopology" BaseTypeListCollapsed="true">
+    <Position X="3.25" Y="85.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AEgAAQAAAEgAAAAAAAAAAAAAQCAAIAAAAAAAAAAAABA=</HashCode>
+      <FileName>Topology\Topologies\ActiveMqHostTopology.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Topologies.ActiveMqMessageConsumeTopology&lt;TMessage&gt;" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="3.5" Y="90.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAABCAAAAAAAAAAAAAAAAAACAAAAICAAAAAAA=</HashCode>
+      <FileName>Topology\Topologies\ActiveMqMessageConsumeTopology.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Topologies.ActiveMqMessagePublishTopology&lt;TMessage&gt;" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="93.25" Width="3.5" />
+    <NestedTypes>
+      <Class Name="MassTransit.ActiveMqTransport.Topology.Topologies.ActiveMqMessagePublishTopology&lt;TMessage&gt;.ImplementedTypeAdapter&lt;T&gt;" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Topology\Topologies\ActiveMqMessagePublishTopology.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAIQAAABgEAQCAAAAAAIAAAACAAAAAAAIAACAAAAA=</HashCode>
+      <FileName>Topology\Topologies\ActiveMqMessagePublishTopology.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Topologies.ActiveMqMessageSendTopology&lt;TMessage&gt;" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="91.75" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Topologies\ActiveMqMessageSendTopology.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Topologies.ActiveMqPublishTopology" BaseTypeListCollapsed="true">
+    <Position X="9.5" Y="91" Width="2" />
+    <NestedTypes>
+      <Class Name="MassTransit.ActiveMqTransport.Topology.Topologies.ActiveMqPublishTopology.ImplementedMessageTypeConnector&lt;TMessage&gt;" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Topology\Topologies\ActiveMqPublishTopology.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAASAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAQAA=</HashCode>
+      <FileName>Topology\Topologies\ActiveMqPublishTopology.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Topology.Topologies.ActiveMqSendTopology" BaseTypeListCollapsed="true">
+    <Position X="4.5" Y="95" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAACgAAAAAAAAAAAAAgAAAIAAAAAAAAAAQCA=</HashCode>
+      <FileName>Topology\Topologies\ActiveMqSendTopology.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Testing.ActiveMqTestHarness">
+    <Position X="0.5" Y="56.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEgCAACQAgBoYAIAAMAABAAAIgCAEAAACgAQSI=</HashCode>
+      <FileName>Testing\ActiveMqTestHarness.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Pipeline.ActiveMqConsumer" BaseTypeListCollapsed="true">
+    <Position X="4.5" Y="53.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAxAgAAABQAAAQAAAIAAAAAAAgAgAAAAAIABAAA=</HashCode>
+      <FileName>Pipeline\ActiveMqConsumer.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Pipeline.ActiveMqConsumerFilter" BaseTypeListCollapsed="true">
+    <Position X="6.5" Y="54.5" Width="2" />
+    <NestedTypes>
+      <Class Name="MassTransit.ActiveMqTransport.Pipeline.ActiveMqConsumerFilter.CombinedDeliveryMetrics" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Pipeline\ActiveMqConsumerFilter.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAABAEAAAAAAAAAAAAAAAAAAAEAAAAAgAA=</HashCode>
+      <FileName>Pipeline\ActiveMqConsumerFilter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Pipeline.ConfigureTopologyFilter&lt;TSettings&gt;" BaseTypeListCollapsed="true">
+    <Position X="8.75" Y="58" Width="2.75" />
+    <NestedTypes>
+      <Class Name="MassTransit.ActiveMqTransport.Pipeline.ConfigureTopologyFilter&lt;TSettings&gt;.Context" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Pipeline\ConfigureTopologyFilter.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAIAAgAACAAAAAAgAAAAQAAAAEBAAAAAAEAAAAAAAA=</HashCode>
+      <FileName>Pipeline\ConfigureTopologyFilter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.ActiveMqConnectException" Collapsed="true">
+    <Position X="9.25" Y="56.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Exceptions\ActiveMqConnectException.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.ActiveMqConnectionException">
+    <Position X="9.25" Y="54.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Exceptions\ActiveMqConnectionException.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.ActiveMqTransportConfigurationException" Collapsed="true">
+    <Position X="2.75" Y="59.5" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Exceptions\ActiveMqTransportConfigurationException.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.ActiveMqTransportException" Collapsed="true">
+    <Position X="2.75" Y="58" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Exceptions\ActiveMqTransportException.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Contexts.ActiveMqConnectionContext" BaseTypeListCollapsed="true">
+    <Position X="4.25" Y="71" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAAAgAJAAAAAAAAAAAAAAAAIAAAAQAIAABAA=</HashCode>
+      <FileName>Contexts\ActiveMqConnectionContext.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Contexts.ActiveMqConsumerReceiveEndpointContext" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="73.25" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQCAACAAAAAAAAEEAAAAQAAAAQAAAAEAACAEAAA=</HashCode>
+      <FileName>Contexts\ActiveMqConsumerReceiveEndpointContext.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Contexts.ActiveMqHeaderAdapter" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="69.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAFBBAAAAAAAAAAAAAAAAEQgAAAAAAAAA=</HashCode>
+      <FileName>Contexts\ActiveMqHeaderAdapter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Contexts.ActiveMqHeaderProvider" BaseTypeListCollapsed="true">
+    <Position X="2.75" Y="60.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAEgAAAAAAABA=</HashCode>
+      <FileName>Contexts\ActiveMqHeaderProvider.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Contexts.ActiveMqReceiveContext" BaseTypeListCollapsed="true">
+    <Position X="4.25" Y="74.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAIAAIIAAAABAAAgAAAAAAAAAAAACACEAA=</HashCode>
+      <FileName>Contexts\ActiveMqReceiveContext.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Contexts.ActiveMqSessionContext" BaseTypeListCollapsed="true">
+    <Position X="9.5" Y="73" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAABAEIAAgAQATAAABgAEAAAgAAgAAICAAAA=</HashCode>
+      <FileName>Contexts\ActiveMqSessionContext.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Contexts.CachedMessageProducer" BaseTypeListCollapsed="true">
+    <Position X="7" Y="71.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AFAAAAAAACBQgBAEAEAgAABCAEAAQACEAAAAEACAAEA=</HashCode>
+      <FileName>Contexts\CachedMessageProducer.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Contexts.MessageProducerCache">
+    <Position X="9.5" Y="69.75" Width="2" />
+    <NestedTypes>
+      <Delegate Name="MassTransit.ActiveMqTransport.Contexts.MessageProducerCache.MessageProducerFactory" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Contexts\MessageProducerCache.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Delegate>
+      <Class Name="MassTransit.ActiveMqTransport.Contexts.MessageProducerCache.CloseAndDisposeOnRemoveObserver" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Contexts\MessageProducerCache.cs</NewMemberFileName>
+        </TypeIdentifier>
+        <Lollipop Position="0.2" />
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAAAAAAAgAIAAAAAEAAAAAAAAAAAIAAA=</HashCode>
+      <FileName>Contexts\MessageProducerCache.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Contexts.ScopeSessionContext" BaseTypeListCollapsed="true">
+    <Position X="9.75" Y="82.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAAQAAAABAAAAAAAgAAABgAAAAIAAAEACAACAAA=</HashCode>
+      <FileName>Contexts\ScopeSessionContext.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Contexts.SharedConnectionContext" BaseTypeListCollapsed="true">
+    <Position X="6.75" Y="77.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAEAAAAgBAAAAAAAAAAAAAAAAAIAAAAQAAACAAA=</HashCode>
+      <FileName>Contexts\SharedConnectionContext.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Contexts.SharedSessionContext" BaseTypeListCollapsed="true">
+    <Position X="9.75" Y="78.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAAQAAAABAAAAAAAgAAABgAAAAIAAAEACAACAAA=</HashCode>
+      <FileName>Contexts\SharedSessionContext.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Contexts.TransportActiveMqSendContext&lt;T&gt;" BaseTypeListCollapsed="true">
+    <Position X="8.75" Y="67.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Contexts\TransportActiveMqSendContext.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Contexts.TransportHeaderExtensions">
+    <Position X="3.75" Y="101.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAgAA=</HashCode>
+      <FileName>Contexts\TransportHeaderExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Builders.ActiveMqReceiveEndpointBuilder">
+    <Position X="9" Y="104.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAAAAIAAAEAAAAAQAAQAAAAAAEAACAAAAA=</HashCode>
+      <FileName>Configuration\Builders\ActiveMqReceiveEndpointBuilder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Configuration.ActiveMqBusConfiguration">
+    <Position X="9.25" Y="61.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAIAAABAAAAQAAAAAAAgAAAAAAAAADACAAAAAAQAAAA=</HashCode>
+      <FileName>Configuration\Configuration\ActiveMqBusConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Configuration.ActiveMqEndpointConfiguration">
+    <Position X="5.5" Y="61.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Configuration\Configuration\ActiveMqEndpointConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Configuration.ActiveMqHostConfiguration" BaseTypeListCollapsed="true">
+    <Position X="3.25" Y="80.5" Width="5.75" />
+    <TypeIdentifier>
+      <HashCode>AhAAAAGAAABAEAIIAAAAAAAIAAAAgAAAgDAAAAAAAgA=</HashCode>
+      <FileName>Configuration\Configuration\ActiveMqHostConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Configuration.ActiveMqReceiveEndpointConfiguration" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="99.25" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AACQgAEAAACAABIAgAABAAEAQAAEiAQAkgAAAAAAAgA=</HashCode>
+      <FileName>Configuration\Configuration\ActiveMqReceiveEndpointConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Configuration.ActiveMqRegistrationBusFactory">
+    <Position X="7.25" Y="102" Width="4.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAIAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\Configuration\ActiveMqRegistrationBusFactory.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Configuration.ActiveMqTopologyConfiguration" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="105.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAKAAAQAAAARAIAABAAAgAEAAAIAAAAAAQA=</HashCode>
+      <FileName>Configuration\Configuration\ActiveMqTopologyConfiguration.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Configurators.ActiveMqBusFactoryConfigurator" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="77.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAACAUIIAgAAAAAAAQgBACAAAggBAAgAAABI=</HashCode>
+      <FileName>Configuration\Configurators\ActiveMqBusFactoryConfigurator.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Configurators.ActiveMqHostConfigurator" BaseTypeListCollapsed="true">
+    <Position X="9.25" Y="86.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>EgAAAQAAAAAASAAAgQAAAAAAAAAAAAACgAABAAAAAAA=</HashCode>
+      <FileName>Configuration\Configurators\ActiveMqHostConfigurator.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.Configurators.ConfigurationHostSettings" BaseTypeListCollapsed="true">
+    <Position X="6.75" Y="104.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>EAAAAQEAAAAAQAEEAQAAAAARCAAACAADAEAAAAAIAAA=</HashCode>
+      <FileName>Configuration\Configurators\ConfigurationHostSettings.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MassTransit.ActiveMqBusFactoryConfiguratorExtensions">
+    <Position X="3.25" Y="78.75" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAQAA=</HashCode>
+      <FileName>Configuration\ActiveMqBusFactoryConfiguratorExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.ActiveMqHostConfigurationExtensions">
+    <Position X="8.75" Y="99.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAEAAAAAAAAAAAAAAACAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\ActiveMqHostConfigurationExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MassTransit.ActiveMqTransport.ActiveMqSchedulerExtensions">
+    <Position X="3.75" Y="103.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\ActiveMqSchedulerExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="MassTransit.ActiveMqTransport.ActiveMqEndpointAddress">
+    <Position X="8.5" Y="0.5" Width="3" />
+    <NestedTypes>
+      <Enum Name="MassTransit.ActiveMqTransport.ActiveMqEndpointAddress.AddressType" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>ActiveMqEndpointAddress.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="MassTransit.ActiveMqTransport.ActiveMqEndpointAddress.ActiveMqMessageType" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>ActiveMqEndpointAddress.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AICAAMAAgCAMAAAAAQAAAAwESEAACAABAyACAAAAAAA=</HashCode>
+      <FileName>ActiveMqEndpointAddress.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="MassTransit.ActiveMqTransport.ActiveMqHostAddress">
+    <Position X="5.5" Y="2.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AIAAAEAAwAAAAAAAAAAAAAAECEAACAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ActiveMqHostAddress.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Interface Name="MassTransit.ActiveMqTransport.ActiveMqHostSettings">
+    <Position X="3.75" Y="5.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAEAAAAAAAEAAQAAAAAACAAACAACAAAAAAAIAAA=</HashCode>
+      <FileName>ActiveMqHostSettings.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.ActiveMqMessageContext">
+    <Position X="3.25" Y="9" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACACAAA=</HashCode>
+      <FileName>ActiveMqMessageContext.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.ActiveMqSendContext&lt;T&gt;" Collapsed="true">
+    <Position X="0.5" Y="5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ActiveMqSendContext.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.ActiveMqSendContext" Collapsed="true">
+    <Position X="0.75" Y="3.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ActiveMqSendContext.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.ConnectionContext">
+    <Position X="5.75" Y="7.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAAAgABEAAAAAAAAAAAAAAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>ConnectionContext.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.IActiveMqHost">
+    <Position X="0.5" Y="6.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>IActiveMqHost.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.SessionContext" Collapsed="true">
+    <Position X="0.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAEQAAgAQACAAAACAEAAAAAAAAAACAAAA=</HashCode>
+      <FileName>SessionContext.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Transport.IConnectionContextSupervisor" Collapsed="true">
+    <Position X="2.25" Y="14.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAAAAACAAAEAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Transport\IConnectionContextSupervisor.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Transport.ISessionContextSupervisor" Collapsed="true">
+    <Position X="2.25" Y="15.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Transport\ISessionContextSupervisor.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.Builders.IPublishEndpointBrokerTopologyBuilder" Collapsed="true">
+    <Position X="0.5" Y="24.5" Width="3" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAA=</HashCode>
+      <FileName>Topology\Builders\IPublishEndpointBrokerTopologyBuilder.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.Builders.IReceiveEndpointBrokerTopologyBuilder" Collapsed="true">
+    <Position X="4" Y="24.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Builders\IReceiveEndpointBrokerTopologyBuilder.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqConsumeTopologyConfigurator" Collapsed="true">
+    <Position X="8.5" Y="27.25" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\IActiveMqConsumeTopologyConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqMessageConsumeTopologyConfigurator&lt;TMessage&gt;" Collapsed="true">
+    <Position X="7.25" Y="21.5" Width="4.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\IActiveMqMessageConsumeTopologyConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqMessagePublishTopologyConfigurator&lt;TMessage&gt;" Collapsed="true">
+    <Position X="4.25" Y="48" Width="4.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\IActiveMqMessagePublishTopologyConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqMessagePublishTopologyConfigurator" Collapsed="true">
+    <Position X="0.5" Y="46.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\IActiveMqMessagePublishTopologyConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqMessageSendTopologyConfigurator&lt;TMessage&gt;" Collapsed="true">
+    <Position X="0.5" Y="22" Width="4" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\IActiveMqMessageSendTopologyConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqMessageSendTopologyConfigurator" Collapsed="true">
+    <Position X="0.5" Y="20.25" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\IActiveMqMessageSendTopologyConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqPublishTopologyConfigurator" Collapsed="true">
+    <Position X="8.5" Y="35.5" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAABAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\IActiveMqPublishTopologyConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqSendTopologyConfigurator" Collapsed="true">
+    <Position X="8.75" Y="24.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\IActiveMqSendTopologyConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.DeadLetterSettings">
+    <Position X="0.5" Y="32.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\DeadLetterSettings.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.EntitySettings">
+    <Position X="4.5" Y="29" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAABAgAAAAAAAAA=</HashCode>
+      <FileName>Topology\EntitySettings.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.ErrorSettings">
+    <Position X="5.75" Y="32.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\ErrorSettings.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqConsumeTopology" Collapsed="true">
+    <Position X="9.25" Y="25.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AIAAgAAAABAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAA=</HashCode>
+      <FileName>Topology\IActiveMqConsumeTopology.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqMessageConsumeTopology&lt;TMessage&gt;" Collapsed="true">
+    <Position X="8" Y="20" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\IActiveMqMessageConsumeTopology.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqMessagePublishTopology&lt;TMessage&gt;" Collapsed="true">
+    <Position X="8" Y="46.75" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAACAAAAA=</HashCode>
+      <FileName>Topology\IActiveMqMessagePublishTopology.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqMessagePublishTopology" Collapsed="true">
+    <Position X="1.25" Y="45" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\IActiveMqMessagePublishTopology.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqMessageSendTopology&lt;TMessage&gt;" Collapsed="true">
+    <Position X="4.5" Y="20.25" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\IActiveMqMessageSendTopology.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqPublishTopology" Collapsed="true">
+    <Position X="7.75" Y="34.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAABAAAAAAAAAA=</HashCode>
+      <FileName>Topology\IActiveMqPublishTopology.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqSendTopology" Collapsed="true">
+    <Position X="9.5" Y="22.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAACAAAAAAAAAAAAAAgAAAAAABAAAAAAAAAA=</HashCode>
+      <FileName>Topology\IActiveMqSendTopology.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IBrokerTopologyBuilder" Collapsed="true">
+    <Position X="1.75" Y="23.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAQAgAAAA=</HashCode>
+      <FileName>Topology\IBrokerTopologyBuilder.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.ReceiveSettings">
+    <Position X="2.75" Y="32.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAEAQAA=</HashCode>
+      <FileName>Topology\ReceiveSettings.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.SendSettings">
+    <Position X="9.75" Y="32.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\SendSettings.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.Builders.BrokerTopology">
+    <Position X="3.75" Y="49.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAACACAAAAA=</HashCode>
+      <FileName>Topology\Builders\BrokerTopology.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqConsumeTopologySpecification">
+    <Position X="0.5" Y="49.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\IActiveMqConsumeTopologySpecification.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqMessageConsumeTopologyConfigurator">
+    <Position X="4.5" Y="69.5" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Configuration\IActiveMqMessageConsumeTopologyConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqConsumerEndpointQueueNameFormatter">
+    <Position X="7.75" Y="45.25" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\IActiveMqConsumerEndpointQueueNameFormatter.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqHostTopology">
+    <Position X="2.75" Y="25.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAEAAAAAAAEAAAAAAAAAAAAAAgAAAAAAAAAI=</HashCode>
+      <FileName>Topology\IActiveMqHostTopology.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IActiveMqTemporaryQueueNameFormatter">
+    <Position X="4.75" Y="68" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\IActiveMqTemporaryQueueNameFormatter.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IExchangeTypeSelector">
+    <Position X="0.5" Y="51.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\IExchangeTypeSelector.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IMessageExchangeTypeSelector&lt;TMessage&gt;">
+    <Position X="8.25" Y="52.75" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\IMessageExchangeTypeSelector.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.IMessageRoutingKeyFormatter&lt;TMessage&gt;">
+    <Position X="8.25" Y="51.25" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\IMessageRoutingKeyFormatter.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.Entities.Consumer">
+    <Position X="0.5" Y="26" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAAAgAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Entities\Consumer.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.Entities.ConsumerHandle">
+    <Position X="2.5" Y="53.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>Topology\Entities\ConsumerHandle.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.Entities.Queue">
+    <Position X="0.5" Y="54.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAABAgAAAAAAAAA=</HashCode>
+      <FileName>Topology\Entities\Queue.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.Entities.QueueHandle">
+    <Position X="0.5" Y="53" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Topology\Entities\QueueHandle.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.Entities.Topic">
+    <Position X="5.5" Y="51.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAABAgAAAAAAAAA=</HashCode>
+      <FileName>Topology\Entities\Topic.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Topology.Entities.TopicHandle">
+    <Position X="5.5" Y="49.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAA=</HashCode>
+      <FileName>Topology\Entities\TopicHandle.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Pipeline.ConfigureTopologyContext&lt;T&gt;">
+    <Position X="5.5" Y="57.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Pipeline\ConfigureTopologyContext.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Contexts.ActiveMqReceiveEndpointContext">
+    <Position X="3.5" Y="105.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAA=</HashCode>
+      <FileName>Contexts\ActiveMqReceiveEndpointContext.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Contexts.ActiveMqSendTransportContext">
+    <Position X="9" Y="109.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAQABAAAAAIAAAAA=</HashCode>
+      <FileName>Contexts\ActiveMqSendTransportContext.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Configuration.IActiveMqBusConfiguration">
+    <Position X="0.5" Y="109.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAQAAQAAAA=</HashCode>
+      <FileName>Configuration\Configuration\IActiveMqBusConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Configuration.IActiveMqEndpointConfiguration" Collapsed="true">
+    <Position X="0.75" Y="66.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>Configuration\Configuration\IActiveMqEndpointConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Configuration.IActiveMqHostConfiguration">
+    <Position X="3.25" Y="109.75" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AhAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAgBAAAAAAAAA=</HashCode>
+      <FileName>Configuration\Configuration\IActiveMqHostConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Configuration.IActiveMqReceiveEndpointConfiguration" Collapsed="true">
+    <Position X="0.75" Y="68.25" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAgAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\Configuration\IActiveMqReceiveEndpointConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.Configuration.IActiveMqTopologyConfiguration">
+    <Position X="9" Y="107.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\Configuration\IActiveMqTopologyConfiguration.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.IActiveMqBusFactoryConfigurator" Collapsed="true">
+    <Position X="3.5" Y="66.5" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAEAAAAAAAgAACAAAgABAAgAAABI=</HashCode>
+      <FileName>Configuration\IActiveMqBusFactoryConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.IActiveMqHostConfigurator">
+    <Position X="3.75" Y="107" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>EgAAAQAAAAAASAAAAQAAAAAAAAAAAAACAAABAAAAAAA=</HashCode>
+      <FileName>Configuration\IActiveMqHostConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.IActiveMqReceiveEndpointConfigurator" Collapsed="true">
+    <Position X="8.5" Y="66.25" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAQgAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\IActiveMqReceiveEndpointConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.IQueueBindingConfigurator" Collapsed="true">
+    <Position X="1" Y="65" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\IQueueBindingConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.IQueueConfigurator" Collapsed="true">
+    <Position X="3.25" Y="63.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAA=</HashCode>
+      <FileName>Configuration\IQueueConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.IQueueEndpointConfigurator" Collapsed="true">
+    <Position X="4.25" Y="65" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\IQueueEndpointConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.ITopicBindingConfigurator">
+    <Position X="8" Y="49.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\ITopicBindingConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="MassTransit.ActiveMqTransport.ITopicConfigurator">
+    <Position X="0.5" Y="48.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAA=</HashCode>
+      <FileName>Configuration\ITopicConfigurator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="MassTransit.ActiveMqTransport.Transport.MsgType">
+    <Position X="0.5" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAACAAAAAA=</HashCode>
+      <FileName>Transport\MsgType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="MassTransit.ActiveMqTransport.Topology.PublishBrokerTopologyOptions">
+    <Position X="2.75" Y="52" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAA=</HashCode>
+      <FileName>Topology\PublishBrokerTopologyOptions.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

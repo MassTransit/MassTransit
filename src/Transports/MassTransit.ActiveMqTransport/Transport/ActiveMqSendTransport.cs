@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.ActiveMqTransport.Transport
 {
     using System;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Apache.NMS;
@@ -91,35 +92,22 @@
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(context).ConfigureAwait(false);
 
-                    var transportMessage = sessionContext.Session.CreateBytesMessage();
+                    var messageTypeReturned = ActiveMqSendConfigurator.MessageTypesConfigurator.TryGetValue(typeof(T).Name, out var msgType);
 
-                    transportMessage.Properties.SetHeaders(context.Headers);
 
-                    transportMessage.Properties["Content-Type"] = context.ContentType.MediaType;
+                    if (!messageTypeReturned || msgType == MsgType.Binary )
+                    {
+                        await HandleAsBinaryMessage(sessionContext, context, producer);
+                    }
+                    else if (msgType == MsgType.Text)
+                    {
+                       await HandleAsTextMessage(sessionContext, context, producer);
+                    }
+                    else
+                    {
+                        await HandleAsObjectMessage(sessionContext, context, producer);
+                    }
 
-                    transportMessage.NMSDeliveryMode = context.Durable ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent;
-
-                    transportMessage.Content = context.Body;
-
-                    if (context.MessageId.HasValue)
-                        transportMessage.NMSMessageId = context.MessageId.ToString();
-
-                    if (context.CorrelationId.HasValue)
-                        transportMessage.NMSCorrelationID = context.CorrelationId.ToString();
-
-                    if (context.TimeToLive.HasValue)
-                        transportMessage.NMSTimeToLive = context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1);
-
-                    if (context.Priority.HasValue)
-                        transportMessage.NMSPriority = context.Priority.Value;
-
-                    var delay = context.Delay?.TotalMilliseconds;
-                    if (delay > 0)
-                        transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
-
-                    var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
-
-                    await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
 
                     context.LogSent();
                     activity.AddSendContextHeadersPostSend(context);
@@ -140,6 +128,99 @@
                 {
                     activity?.Stop();
                 }
+            }
+
+            static async Task HandleAsBinaryMessage(SessionContext sessionContext, TransportActiveMqSendContext<T> context, IMessageProducer producer)
+            {
+                var transportMessage = sessionContext.Session.CreateBytesMessage();
+
+                transportMessage.Properties.SetHeaders(context.Headers);
+
+                transportMessage.Properties["Content-Type"] = context.ContentType.MediaType;
+
+                transportMessage.NMSDeliveryMode = context.Durable ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent;
+
+                transportMessage.Content = context.Body;
+
+                if (context.MessageId.HasValue)
+                    transportMessage.NMSMessageId = context.MessageId.ToString();
+
+                if (context.CorrelationId.HasValue)
+                    transportMessage.NMSCorrelationID = context.CorrelationId.ToString();
+
+                if (context.TimeToLive.HasValue)
+                    transportMessage.NMSTimeToLive = context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1);
+
+                if (context.Priority.HasValue)
+                    transportMessage.NMSPriority = context.Priority.Value;
+
+                var delay = context.Delay?.TotalMilliseconds;
+                if (delay > 0)
+                    transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
+
+                var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
+                await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
+            }
+
+            static async Task HandleAsTextMessage(SessionContext sessionContext, TransportActiveMqSendContext<T> context, IMessageProducer producer)
+            {
+                var transportMessage = sessionContext.Session.CreateTextMessage();
+
+                transportMessage.Properties.SetHeaders(context.Headers);
+
+                transportMessage.Properties["Content-Type"] = context.ContentType.MediaType;
+
+                transportMessage.NMSDeliveryMode = context.Durable ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent;
+
+                transportMessage.Text = Encoding.UTF8.GetString(context.Body);
+
+                if (context.MessageId.HasValue)
+                    transportMessage.NMSMessageId = context.MessageId.ToString();
+
+                if (context.CorrelationId.HasValue)
+                    transportMessage.NMSCorrelationID = context.CorrelationId.ToString();
+
+                if (context.TimeToLive.HasValue)
+                    transportMessage.NMSTimeToLive = context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1);
+
+                if (context.Priority.HasValue)
+                    transportMessage.NMSPriority = context.Priority.Value;
+
+                var delay = context.Delay?.TotalMilliseconds;
+                if (delay > 0)
+                    transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
+
+                var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
+                await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
+            }
+            static async Task HandleAsObjectMessage(SessionContext sessionContext, TransportActiveMqSendContext<T> context, IMessageProducer producer)
+            {
+                var transportMessage = sessionContext.Session.CreateObjectMessage(context.Body);
+
+                transportMessage.Properties.SetHeaders(context.Headers);
+
+                transportMessage.Properties["Content-Type"] = context.ContentType.MediaType;
+
+                transportMessage.NMSDeliveryMode = context.Durable ? MsgDeliveryMode.Persistent : MsgDeliveryMode.NonPersistent;
+
+                if (context.MessageId.HasValue)
+                    transportMessage.NMSMessageId = context.MessageId.ToString();
+
+                if (context.CorrelationId.HasValue)
+                    transportMessage.NMSCorrelationID = context.CorrelationId.ToString();
+
+                if (context.TimeToLive.HasValue)
+                    transportMessage.NMSTimeToLive = context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1);
+
+                if (context.Priority.HasValue)
+                    transportMessage.NMSPriority = context.Priority.Value;
+
+                var delay = context.Delay?.TotalMilliseconds;
+                if (delay > 0)
+                    transportMessage.Properties["AMQ_SCHEDULED_DELAY"] = (long)delay.Value;
+
+                var publishTask = Task.Run(() => producer.Send(transportMessage), context.CancellationToken);
+                await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
             }
 
             public void Probe(ProbeContext context)

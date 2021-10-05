@@ -4,9 +4,7 @@ namespace MassTransit.ActiveMqTransport.Topology.Settings
     using System.Collections.Generic;
     using Builders;
     using Configurators;
-
-
-    public class QueueSendSettings :
+public class QueueSendSettings :
         QueueConfigurator,
         SendSettings
     {

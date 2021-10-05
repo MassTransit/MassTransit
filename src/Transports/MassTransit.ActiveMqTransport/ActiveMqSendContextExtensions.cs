@@ -2,7 +2,7 @@ namespace MassTransit.ActiveMqTransport
 {
     using System;
     using Apache.NMS;
-
+    using MassTransit.ActiveMqTransport.Contexts;
 
     public static class ActiveMqSendContextExtensions
     {
@@ -18,6 +18,9 @@ namespace MassTransit.ActiveMqTransport
 
             sendContext.Priority = priority;
         }
+
+
+
 
         /// <summary>
         /// Sets the priority of a message sent to the broker

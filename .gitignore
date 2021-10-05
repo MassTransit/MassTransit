@@ -62,3 +62,4 @@ tools/**
 artifacts/**
 artifacts_old/**
 /src/.ionide
+/src/Transports/MassTransit.ActiveMqTransport/Settings

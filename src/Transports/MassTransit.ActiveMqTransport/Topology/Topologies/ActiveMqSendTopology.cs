@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.ActiveMqTransport.Topology.Topologies
 {
     using System;
+using MassTransit.ActiveMqTransport.Transport;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Settings;

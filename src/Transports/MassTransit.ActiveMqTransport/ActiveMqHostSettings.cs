@@ -8,7 +8,7 @@
     /// Settings to configure a ActiveMQ host explicitly without requiring the fluent interface
     /// </summary>
     public interface ActiveMqHostSettings
-    {
+    {       
         /// <summary>
         /// The ActiveMQ host to connect to (should be a valid hostname)
         /// </summary>

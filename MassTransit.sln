@@ -132,17 +132,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EventHubIntegra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.EventHubIntegration.Tests", "tests\MassTransit.EventHubIntegration.Tests\MassTransit.EventHubIntegration.Tests.csproj", "{24CC1B47-AE01-4871-A939-2BF6EB789860}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Azure.Table", "src\Persistence\MassTransit.Azure.Table\MassTransit.Azure.Table.csproj", "{338E2B7E-4301-4547-9172-4415F739C029}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Azure.Table", "src\Persistence\MassTransit.Azure.Table\MassTransit.Azure.Table.csproj", "{338E2B7E-4301-4547-9172-4415F739C029}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Azure.Table.Tests", "tests\MassTransit.Azure.Table.Tests\MassTransit.Azure.Table.Tests.csproj", "{17E04A9B-5DB5-4857-99CD-E9AF22DA00E4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Azure.Table.Tests", "tests\MassTransit.Azure.Table.Tests\MassTransit.Azure.Table.Tests.csproj", "{17E04A9B-5DB5-4857-99CD-E9AF22DA00E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.GrpcTransport", "src\Transports\MassTransit.GrpcTransport\MassTransit.GrpcTransport.csproj", "{AF56509B-0B95-4ACE-9CFC-F9A79756C357}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.GrpcTransport", "src\Transports\MassTransit.GrpcTransport\MassTransit.GrpcTransport.csproj", "{AF56509B-0B95-4ACE-9CFC-F9A79756C357}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.GrpcTransport.Tests", "tests\MassTransit.GrpcTransport.Tests\MassTransit.GrpcTransport.Tests.csproj", "{082488F6-6322-462A-85D7-9E893A67B8CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.GrpcTransport.Tests", "tests\MassTransit.GrpcTransport.Tests\MassTransit.GrpcTransport.Tests.csproj", "{082488F6-6322-462A-85D7-9E893A67B8CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.TestComponents", "tests\MassTransit.TestComponents\MassTransit.TestComponents.csproj", "{27DF8220-6885-4E08-89CB-EE56582702D8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.TestComponents", "tests\MassTransit.TestComponents\MassTransit.TestComponents.csproj", "{27DF8220-6885-4E08-89CB-EE56582702D8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MassTransit.Transports.Tests", "tests\MassTransit.Transports.Tests\MassTransit.Transports.Tests.csproj", "{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MassTransit.Transports.Tests", "tests\MassTransit.Transports.Tests\MassTransit.Transports.Tests.csproj", "{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{51823FD7-9385-477B-980E-3E9615B3C882}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SendActiveMQTest", "src\Tests\SendActiveMQTest\SendActiveMQTest.csproj", "{0EB76B40-17F0-4239-B0A8-E8B283121B6B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -795,6 +799,18 @@ Global
 		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.ReleaseUnsigned|Any CPU.Build.0 = Debug|Any CPU
 		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.ReleaseUnsigned|x86.ActiveCfg = Debug|Any CPU
 		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B}.ReleaseUnsigned|x86.Build.0 = Debug|Any CPU
+		{0EB76B40-17F0-4239-B0A8-E8B283121B6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EB76B40-17F0-4239-B0A8-E8B283121B6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EB76B40-17F0-4239-B0A8-E8B283121B6B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0EB76B40-17F0-4239-B0A8-E8B283121B6B}.Debug|x86.Build.0 = Debug|Any CPU
+		{0EB76B40-17F0-4239-B0A8-E8B283121B6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EB76B40-17F0-4239-B0A8-E8B283121B6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EB76B40-17F0-4239-B0A8-E8B283121B6B}.Release|x86.ActiveCfg = Release|Any CPU
+		{0EB76B40-17F0-4239-B0A8-E8B283121B6B}.Release|x86.Build.0 = Release|Any CPU
+		{0EB76B40-17F0-4239-B0A8-E8B283121B6B}.ReleaseUnsigned|Any CPU.ActiveCfg = Release|Any CPU
+		{0EB76B40-17F0-4239-B0A8-E8B283121B6B}.ReleaseUnsigned|Any CPU.Build.0 = Release|Any CPU
+		{0EB76B40-17F0-4239-B0A8-E8B283121B6B}.ReleaseUnsigned|x86.ActiveCfg = Release|Any CPU
+		{0EB76B40-17F0-4239-B0A8-E8B283121B6B}.ReleaseUnsigned|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -855,6 +871,7 @@ Global
 		{AF56509B-0B95-4ACE-9CFC-F9A79756C357} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{082488F6-6322-462A-85D7-9E893A67B8CD} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
 		{7632EDAF-29A1-4E69-952F-C75D3BF34B3B} = {0006D6BB-1382-4B32-AD32-CA037F5CD4F6}
+		{0EB76B40-17F0-4239-B0A8-E8B283121B6B} = {51823FD7-9385-477B-980E-3E9615B3C882}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {43D3A7D5-0945-435E-8D03-1E631E5CDBA8}

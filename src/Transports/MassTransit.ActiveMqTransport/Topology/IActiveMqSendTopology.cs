@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.ActiveMqTransport.Topology
 {
+using MassTransit.ActiveMqTransport.Transport;
     using MassTransit.Topology;
 
 

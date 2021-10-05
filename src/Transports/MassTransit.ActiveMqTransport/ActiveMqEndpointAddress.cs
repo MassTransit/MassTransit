@@ -16,7 +16,7 @@ namespace MassTransit.ActiveMqTransport
         const string DurableKey = "durable";
         const string TemporaryKey = "temporary";
         const string TypeKey = "type";
-
+        const string MessageTypeKey = "binary";
 
         public enum AddressType
         {
@@ -24,6 +24,12 @@ namespace MassTransit.ActiveMqTransport
             Topic = 1
         }
 
+        public enum ActiveMqMessageType
+        {
+            Binary,
+            Text,
+            Object
+        }
 
         static readonly ITypeConverter<AddressType, string> _parseConverter = new EnumTypeConverter<AddressType>();
 
@@ -36,6 +42,7 @@ namespace MassTransit.ActiveMqTransport
         public readonly bool Durable;
         public readonly bool AutoDelete;
         public readonly AddressType Type;
+        public readonly ActiveMqMessageType MessageType;
 
         public ActiveMqEndpointAddress(Uri hostAddress, Uri address)
         {
@@ -47,7 +54,7 @@ namespace MassTransit.ActiveMqTransport
             Durable = true;
             AutoDelete = false;
             Type = AddressType.Queue;
-
+            MessageType = ActiveMqMessageType.Binary;
             var scheme = address.Scheme.ToLowerInvariant();
             if (scheme.EndsWith("s"))
                 Port = 5671;
@@ -110,20 +117,20 @@ namespace MassTransit.ActiveMqTransport
             }
         }
 
-        public ActiveMqEndpointAddress(Uri hostAddress, string exchangeName, bool durable = true, bool autoDelete = false, AddressType type = AddressType.Queue)
+        public ActiveMqEndpointAddress(Uri hostAddress, string exchangeName, bool durable = true, bool autoDelete = false, AddressType type = AddressType.Queue,  ActiveMqMessageType messageType = ActiveMqMessageType.Binary)
         {
             ParseLeft(hostAddress, out Scheme, out Host, out Port, out VirtualHost);
 
             Name = exchangeName;
-
+            MessageType = messageType;
             Durable = durable;
             AutoDelete = autoDelete;
             Type = type;
         }
 
         ActiveMqEndpointAddress(string scheme, string host, int? port, string virtualHost, string name, bool durable, bool autoDelete,
-            AddressType type = AddressType.Queue)
-        {
+            AddressType type = AddressType.Queue,  ActiveMqMessageType messageType = ActiveMqMessageType.Binary)
+        { 
             Scheme = scheme;
             Host = host;
             Port = port;
@@ -132,13 +139,15 @@ namespace MassTransit.ActiveMqTransport
             Durable = durable;
             AutoDelete = autoDelete;
             Type = type;
+            MessageType = messageType;
+
         }
 
         public ActiveMqEndpointAddress GetDelayAddress()
         {
             var name = $"{Name}_delay";
 
-            return new ActiveMqEndpointAddress(Scheme, Host, Port, VirtualHost, name, Durable, AutoDelete, Type);
+            return new ActiveMqEndpointAddress(Scheme, Host, Port, VirtualHost, name, Durable, AutoDelete, Type, MessageType);
         }
 
         static void ParseLeft(Uri address, out string scheme, out string host, out int? port, out string virtualHost)
@@ -198,6 +207,14 @@ namespace MassTransit.ActiveMqTransport
 
             if (Type != AddressType.Queue)
                 yield return $"{TypeKey}=topic";
+
+            if (MessageType == ActiveMqMessageType.Binary)
+                yield return $"{MessageType}=binary";
+            else if (MessageType == ActiveMqMessageType.Text)
+                yield return $"{MessageType}=text";
+            else
+                yield return $"{MessageType}=object";
+
         }
     }
 }
