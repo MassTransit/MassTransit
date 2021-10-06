@@ -13,10 +13,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.18.0" />
-    <PackageReference Include="Grpc.Net.Client" Version="2.39.0" />
-    <PackageReference Include="Grpc.Core" Version="2.40.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.40.0">
+    <PackageReference Include="Google.Protobuf" Version="3.18.1" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.40.0" />
+    <PackageReference Include="Grpc.Core" Version="2.41.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.41.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

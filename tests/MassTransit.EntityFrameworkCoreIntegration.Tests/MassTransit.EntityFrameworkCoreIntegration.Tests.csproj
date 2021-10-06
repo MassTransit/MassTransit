@@ -5,15 +5,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.11">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.18">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.18" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.11" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.18" />
     <PackageReference Include="NUnit" Version="3.13.2" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <ProjectReference Include="..\..\src\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
     <ProjectReference Include="..\..\src\MassTransit\MassTransit.csproj" />
