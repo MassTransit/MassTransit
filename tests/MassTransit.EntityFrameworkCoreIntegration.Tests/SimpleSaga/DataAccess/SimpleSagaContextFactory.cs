@@ -14,7 +14,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SimpleSaga.DataAccess
             // we only support command line tools for SQL Server, so use SQL Server if you need to do
             // migrations.
 
-            var optionsBuilder = new SqlServerTestDbParameters().GetDbContextOptions(typeof(SimpleSagaDbContext));
+            var optionsBuilder = new SqlServerTestDbParameters().GetDbContextOptions<SimpleSagaDbContext>();
 
             return new SimpleSagaDbContext(optionsBuilder.Options);
         }

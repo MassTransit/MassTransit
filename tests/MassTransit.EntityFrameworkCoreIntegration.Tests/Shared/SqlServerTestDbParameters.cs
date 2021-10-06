@@ -12,12 +12,12 @@
         /// <summary>
         /// Get DB context options for SQL Server.
         /// </summary>
-        /// <param name="dbContextType">Type of the DbContext, used for migration conventions</param>
-        public DbContextOptionsBuilder GetDbContextOptions(Type dbContextType)
+        public DbContextOptionsBuilder<T> GetDbContextOptions<T>()
+            where T : DbContext
         {
-            var builder = new DbContextOptionsBuilder();
+            var builder = new DbContextOptionsBuilder<T>();
 
-            Apply(dbContextType, builder);
+            Apply(typeof(T), builder);
 
             return builder;
         }

@@ -11,7 +11,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.JobService
     public class JobTypeSagaMap :
         SagaClassMap<JobTypeSaga>
     {
-        bool _optimistic;
+        readonly bool _optimistic;
 
         public JobTypeSagaMap(bool optimistic)
         {

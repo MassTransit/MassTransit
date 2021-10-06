@@ -8,7 +8,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.JobService
     public class JobServiceSagaDbContext :
         SagaDbContext
     {
-        public JobServiceSagaDbContext(DbContextOptions options)
+        public JobServiceSagaDbContext(DbContextOptions<JobServiceSagaDbContext> options)
             : base(options)
         {
         }
@@ -26,9 +26,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration.JobService
 
 
     public class OptimisticJobServiceSagaDbContext :
-        JobServiceSagaDbContext
+        SagaDbContext
     {
-        public OptimisticJobServiceSagaDbContext(DbContextOptions options)
+        public OptimisticJobServiceSagaDbContext(DbContextOptions<OptimisticJobServiceSagaDbContext> options)
             : base(options)
         {
         }

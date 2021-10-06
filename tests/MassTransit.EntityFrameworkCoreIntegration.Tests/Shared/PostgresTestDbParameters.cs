@@ -8,11 +8,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Shared
     public class PostgresTestDbParameters :
         ITestDbParameters
     {
-        public DbContextOptionsBuilder GetDbContextOptions(Type dbContextType)
+        public DbContextOptionsBuilder<T> GetDbContextOptions<T>()
+            where T : DbContext
         {
-            var builder = new DbContextOptionsBuilder();
+            var builder = new DbContextOptionsBuilder<T>();
 
-            Apply(dbContextType, builder);
+            Apply(typeof(T), builder);
 
             return builder;
         }
