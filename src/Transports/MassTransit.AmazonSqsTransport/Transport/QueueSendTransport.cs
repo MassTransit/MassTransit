@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.AmazonSqsTransport.Transport
 {
     using System;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Amazon.SQS.Model;
@@ -82,7 +81,7 @@
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PreSend(sendContext).ConfigureAwait(false);
 
-                    var message = new SendMessageBatchRequestEntry("", sendContext.BodyText) {Id = sendContext.MessageId.ToString()};
+                    var message = new SendMessageBatchRequestEntry("", sendContext.BodyText) { Id = sendContext.MessageId.ToString() };
 
                     _context.SqsSetHeaderAdapter.Set(message.MessageAttributes, sendContext.Headers);
 

@@ -9,26 +9,28 @@ namespace MassTransit.AmazonSqsTransport.Transport
     public class Connection :
         IConnection
     {
-        readonly AmazonSimpleNotificationServiceConfig _amazonSnsConfig;
-        readonly AmazonSQSConfig _amazonSqsConfig;
-        readonly AWSCredentials _credentials;
-
         public Connection(AWSCredentials credentials, RegionEndpoint regionEndpoint = null, AmazonSQSConfig amazonSqsConfig = null,
             AmazonSimpleNotificationServiceConfig amazonSnsConfig = null)
         {
-            _credentials = credentials;
-            _amazonSqsConfig = amazonSqsConfig ?? new AmazonSQSConfig {RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1};
-            _amazonSnsConfig = amazonSnsConfig ?? new AmazonSimpleNotificationServiceConfig {RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1};
+            amazonSqsConfig ??= new AmazonSQSConfig { RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1 };
+            amazonSnsConfig ??= new AmazonSimpleNotificationServiceConfig { RegionEndpoint = regionEndpoint ?? RegionEndpoint.USEast1 };
+
+            SqsClient = credentials == null
+                ? new AmazonSQSClient(amazonSqsConfig)
+                : new AmazonSQSClient(credentials, amazonSqsConfig);
+
+            SnsClient = credentials == null
+                ? new AmazonSimpleNotificationServiceClient(amazonSnsConfig)
+                : new AmazonSimpleNotificationServiceClient(credentials, amazonSnsConfig);
         }
 
-        public IAmazonSQS CreateAmazonSqsClient()
-        {
-            return _credentials == null ? new AmazonSQSClient(_amazonSqsConfig) : new AmazonSQSClient(_credentials, _amazonSqsConfig);
-        }
+        public IAmazonSQS SqsClient { get; }
+        public IAmazonSimpleNotificationService SnsClient { get; }
 
-        public IAmazonSimpleNotificationService CreateAmazonSnsClient()
+        public void Dispose()
         {
-            return _credentials == null ? new AmazonSimpleNotificationServiceClient(_amazonSnsConfig) : new AmazonSimpleNotificationServiceClient(_credentials, _amazonSnsConfig);
+            SnsClient.Dispose();
+            SqsClient.Dispose();
         }
     }
 }

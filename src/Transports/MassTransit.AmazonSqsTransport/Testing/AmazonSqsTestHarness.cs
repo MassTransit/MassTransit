@@ -30,8 +30,8 @@
             AccessKey = "admin";
             SecretKey = "admin";
 
-            AmazonSqsConfig = new AmazonSQSConfig {ServiceURL = "http://localhost:4566"};
-            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig {ServiceURL = "http://localhost:4566"};
+            AmazonSqsConfig = new AmazonSQSConfig { ServiceURL = "http://localhost:4566" };
+            AmazonSnsConfig = new AmazonSimpleNotificationServiceConfig { ServiceURL = "http://localhost:4566" };
 
             InputQueueName = "input_queue";
 
@@ -144,16 +144,13 @@
             try
             {
                 var settings = GetHostSettings();
-                var connection = settings.CreateConnection();
+                using var connection = settings.CreateConnection();
 
-                using var amazonSqs = connection.CreateAmazonSqsClient();
-                using var amazonSns = connection.CreateAmazonSnsClient();
+                CleanUpQueue(connection.SqsClient, "input_queue");
 
-                CleanUpQueue(amazonSqs, "input_queue");
+                CleanUpQueue(connection.SqsClient, InputQueueName);
 
-                CleanUpQueue(amazonSqs, InputQueueName);
-
-                CleanupVirtualHost(amazonSqs, amazonSns);
+                CleanupVirtualHost(connection.SqsClient, connection.SnsClient);
             }
             catch (Exception exception)
             {

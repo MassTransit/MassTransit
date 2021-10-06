@@ -1,13 +1,15 @@
 namespace MassTransit.AmazonSqsTransport.Transport
 {
+    using System;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
 
 
-    public interface IConnection
+    public interface IConnection :
+        IDisposable
     {
-        IAmazonSQS CreateAmazonSqsClient();
+        IAmazonSQS SqsClient { get; }
 
-        IAmazonSimpleNotificationService CreateAmazonSnsClient();
+        IAmazonSimpleNotificationService SnsClient { get; }
     }
 }

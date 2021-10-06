@@ -10,7 +10,8 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
     public class AmazonSqsConnectionContext :
         BasePipeContext,
-        ConnectionContext
+        ConnectionContext,
+        IDisposable
     {
         readonly IAmazonSqsHostConfiguration _hostConfiguration;
 
@@ -30,10 +31,12 @@ namespace MassTransit.AmazonSqsTransport.Contexts
 
         public ClientContext CreateClientContext(CancellationToken cancellationToken)
         {
-            var amazonSqs = Connection.CreateAmazonSqsClient();
-            var amazonSns = Connection.CreateAmazonSnsClient();
+            return new AmazonSqsClientContext(this, Connection.SqsClient, Connection.SnsClient, cancellationToken);
+        }
 
-            return new AmazonSqsClientContext(this, amazonSqs, amazonSns, cancellationToken);
+        public void Dispose()
+        {
+            Connection?.Dispose();
         }
     }
 }
