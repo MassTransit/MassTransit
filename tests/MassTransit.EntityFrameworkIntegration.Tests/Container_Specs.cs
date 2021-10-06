@@ -77,7 +77,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
             {
                 configurator.UseMessageRetry(r => r.Immediate(5));
                 configurator.UseInMemoryOutbox();
-                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IRiderRegistrationContext>());
+                configurator.ConfigureSaga<TestInstance>(_provider.GetRequiredService<IBusRegistrationContext>());
             }
         }
 
