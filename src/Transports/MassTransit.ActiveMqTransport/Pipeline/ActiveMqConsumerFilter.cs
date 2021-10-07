@@ -4,6 +4,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using Apache.NMS.ActiveMQ;
     using Context;
     using Contexts;
     using Events;
@@ -37,7 +38,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             var inputAddress = receiveSettings.GetInputAddress(context.ConnectionContext.HostAddress);
 
-            var executor = new ChannelExecutor(1, receiveSettings.ConcurrentMessageLimit);
+            var executor = new ChannelExecutor(receiveSettings.PrefetchCount, receiveSettings.ConcurrentMessageLimit);
 
             var consumers = new List<Task<ActiveMqConsumer>>
             {
@@ -109,7 +110,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
             LogContext.Debug?.Log("Created consumer for {InputAddress}: {Queue}", _context.InputAddress, queueName);
 
-            var consumer = new ActiveMqConsumer(context, messageConsumer, _context, executor);
+            var consumer = new ActiveMqConsumer(context, (MessageConsumer)messageConsumer, _context, executor);
 
             await consumer.Ready.ConfigureAwait(false);
 

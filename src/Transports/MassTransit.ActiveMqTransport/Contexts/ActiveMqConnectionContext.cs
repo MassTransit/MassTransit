@@ -42,7 +42,7 @@ namespace MassTransit.ActiveMqTransport.Contexts
         {
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(CancellationToken, cancellationToken);
 
-            return await _executor.Run(() => _connection.CreateSession(AcknowledgementMode.ClientAcknowledge), tokenSource.Token).ConfigureAwait(false);
+            return await _executor.Run(() => _connection.CreateSession(AcknowledgementMode.IndividualAcknowledge), tokenSource.Token).ConfigureAwait(false);
         }
 
         public async ValueTask DisposeAsync()

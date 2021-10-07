@@ -3,6 +3,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
     using System;
     using System.Threading.Tasks;
     using Apache.NMS;
+    using Apache.NMS.ActiveMQ;
     using Context;
     using Contexts;
     using GreenPipes;
@@ -25,7 +26,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         readonly TaskCompletionSource<bool> _deliveryComplete;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly ChannelExecutor _executor;
-        readonly IMessageConsumer _messageConsumer;
+        readonly MessageConsumer _messageConsumer;
         readonly ReceiveSettings _receiveSettings;
         readonly SessionContext _session;
 
@@ -36,7 +37,7 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         /// <param name="messageConsumer"></param>
         /// <param name="context">The topology</param>
         /// <param name="executor"></param>
-        public ActiveMqConsumer(SessionContext session, IMessageConsumer messageConsumer, ActiveMqReceiveEndpointContext context, ChannelExecutor executor)
+        public ActiveMqConsumer(SessionContext session, MessageConsumer messageConsumer, ActiveMqReceiveEndpointContext context, ChannelExecutor executor)
         {
             _session = session;
             _messageConsumer = messageConsumer;
@@ -91,6 +92,8 @@ namespace MassTransit.ActiveMqTransport.Pipeline
 
         protected override async Task StopAgent(StopContext context)
         {
+            _messageConsumer.Stop();
+
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
             await Completed.ConfigureAwait(false);
