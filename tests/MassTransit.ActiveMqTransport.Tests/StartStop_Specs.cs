@@ -79,7 +79,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 
                     e.Handler<SuperMessage>(async context =>
                     {
-                        await Task.Delay(1000);
+                        await Task.Delay(5000);
 
                         Interlocked.Increment(ref count);
                     });
@@ -91,7 +91,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             {
                 await bus.PublishBatch(Enumerable.Range(0, 30).Select(x => new SuperMessage() { Value = x.ToString() }));
 
-                await Task.Delay(2000);
+                await Task.Delay(15000);
             }
             finally
             {
@@ -101,7 +101,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             await bus.StartAsync(TestCancellationToken);
             try
             {
-                await Task.Delay(20000);
+                await Task.Delay(40000);
             }
             finally
             {

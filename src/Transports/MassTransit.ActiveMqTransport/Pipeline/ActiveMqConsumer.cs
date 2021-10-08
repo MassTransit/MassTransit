@@ -93,6 +93,8 @@ namespace MassTransit.ActiveMqTransport.Pipeline
         protected override async Task StopAgent(StopContext context)
         {
             _messageConsumer.Stop();
+            _messageConsumer.Listener -= HandleMessage;
+            _messageConsumer.Start();
 
             SetCompleted(ActiveAndActualAgentsCompleted(context));
 
