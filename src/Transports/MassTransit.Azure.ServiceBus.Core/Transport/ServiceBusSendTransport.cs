@@ -140,6 +140,8 @@
 
                 try
                 {
+                    context.Headers.Set(MessageHeaders.SchedulingTokenId, null);
+
                     var message = CreateMessage(context);
 
                     var sequenceNumber = await clientContext.ScheduleSend(message, enqueueTimeUtc).ConfigureAwait(false);
@@ -188,7 +190,7 @@
 
             static Message CreateMessage(AzureServiceBusSendContext<T> context)
             {
-                var message = new Message(context.Body) {ContentType = context.ContentType.MediaType};
+                var message = new Message(context.Body) { ContentType = context.ContentType.MediaType };
 
                 _adapter.Set(message.UserProperties, context.Headers);
 
