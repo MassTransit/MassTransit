@@ -25,8 +25,8 @@
         static readonly TimeSpan MaxVisibilityTimeout = TimeSpan.FromHours(12);
 
         readonly CancellationTokenSource _activeTokenSource;
-        readonly SqsReceiveEndpointContext _context;
         readonly ClientContext _clientContext;
+        readonly SqsReceiveEndpointContext _context;
         readonly ReceiveSettings _receiveSettings;
         byte[] _body;
         bool _locked;
@@ -112,10 +112,12 @@
 
         async Task RenewMessageVisibility()
         {
-            TimeSpan CalculateDelay(int timeout) => TimeSpan.FromSeconds(timeout * 0.7);
+            TimeSpan CalculateDelay(int timeout)
+            {
+                return TimeSpan.FromSeconds(timeout * 0.7);
+            }
 
             var visibilityTimeout = _receiveSettings.VisibilityTimeout;
-            var totalTimeout = _receiveSettings.VisibilityTimeout;
 
             var delay = CalculateDelay(visibilityTimeout);
 
@@ -133,8 +135,6 @@
 
                     await _clientContext.ChangeMessageVisibility(_receiveSettings.QueueUrl, TransportMessage.ReceiptHandle, visibilityTimeout)
                         .ConfigureAwait(false);
-
-                    totalTimeout += visibilityTimeout;
 
                     // Max 12 hours, https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html
                     if (ElapsedTime + TimeSpan.FromSeconds(visibilityTimeout) >= MaxVisibilityTimeout)
@@ -165,7 +165,7 @@
                     LogContext.Error?.Log(exception, "Failed to extend message {ReceiptHandle} visibility to {VisibilityTimeout} ({ElapsedTime})",
                         TransportMessage.ReceiptHandle, TimeSpan.FromSeconds(visibilityTimeout).ToFriendlyString(), ElapsedTime);
 
-                    delay = TimeSpan.FromSeconds(1);
+                    break;
                 }
                 catch (TimeoutException)
                 {
