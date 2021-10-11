@@ -187,11 +187,13 @@ namespace MassTransit.Analyzers
             if (contractProperty.Type.IsImmutableArray(out var contractElementType)
                 || contractProperty.Type.IsList(out contractElementType)
                 || contractProperty.Type.IsArray(out contractElementType)
-                || contractProperty.Type.IsCollection(out contractElementType))
+                || contractProperty.Type.IsCollection(out contractElementType)
+                || contractProperty.Type.IsEnumerable(out contractElementType))
             {
                 if (inputProperty.Type.IsImmutableArray(out var inputElementType)
                     || inputProperty.Type.IsList(out inputElementType)
                     || inputProperty.Type.IsArray(out inputElementType)
+                    || inputProperty.Type.IsEnumerable(out inputElementType)
                     || inputProperty.Type.IsCollection(out inputElementType))
                 {
                     if (!ElementTypesAreStructurallyCompatible(typeConverterHelper, contractElementType, inputElementType, path, incompatibleProperties))
