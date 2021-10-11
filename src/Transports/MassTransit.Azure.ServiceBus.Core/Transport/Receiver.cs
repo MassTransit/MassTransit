@@ -53,17 +53,18 @@
             {
                 MessageLockLostException _ => false,
                 MessageTimeToLiveExpiredException _ => false,
-                ServiceBusException {IsTransient: true} => false,
+                ServiceBusCommunicationException _ => true,
+                ServiceBusException { IsTransient: true } => false,
                 _ => true
             };
 
-            if (args.Exception is ServiceBusCommunicationException {IsTransient: true})
+            if (args.Exception is ServiceBusCommunicationException { IsTransient: true })
             {
                 LogContext.Debug?.Log(args.Exception,
                     "Exception on Receiver {InputAddress} during {Action} ActiveDispatchCount({activeDispatch}) ErrorRequiresRecycle({requiresRecycle})",
                     _context.InputAddress, args.ExceptionReceivedContext.Action, _messageReceiver.ActiveDispatchCount, requiresRecycle);
             }
-            else if (args.Exception is ObjectDisposedException {ObjectName: "$cbs"})
+            else if (args.Exception is ObjectDisposedException { ObjectName: "$cbs" })
             {
                 // don't log this one
             }
