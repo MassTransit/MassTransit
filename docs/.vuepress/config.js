@@ -43,6 +43,7 @@ module.exports = {
             path: '/releases/',
             collapsable: true,
             children: [
+              '/releases/v7.2.3',
               '/releases/v7.2.0',
               '/releases/v7.1.8',
               '/releases/v7.1.7',
