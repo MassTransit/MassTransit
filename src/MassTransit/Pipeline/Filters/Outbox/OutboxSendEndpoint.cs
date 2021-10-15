@@ -5,7 +5,6 @@
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
-    using Util;
 
 
     public class OutboxSendEndpoint :
@@ -37,72 +36,52 @@
 
         Task ISendEndpoint.Send<T>(T message, CancellationToken cancellationToken)
         {
-            _outboxContext.Add(() => _endpoint.Send(message, cancellationToken));
-
-            return TaskUtil.Completed;
+            return _outboxContext.Add(() => _endpoint.Send(message, cancellationToken));
         }
 
         Task ISendEndpoint.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
-            _outboxContext.Add(() => _endpoint.Send(message, pipe, cancellationToken));
-
-            return TaskUtil.Completed;
+            return _outboxContext.Add(() => _endpoint.Send(message, pipe, cancellationToken));
         }
 
         Task ISendEndpoint.Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
-            _outboxContext.Add(() => _endpoint.Send(message, pipe, cancellationToken));
-
-            return TaskUtil.Completed;
+            return _outboxContext.Add(() => _endpoint.Send(message, pipe, cancellationToken));
         }
 
         Task ISendEndpoint.Send(object message, CancellationToken cancellationToken)
         {
-            _outboxContext.Add(() => _endpoint.Send(message, cancellationToken));
-
-            return TaskUtil.Completed;
+            return _outboxContext.Add(() => _endpoint.Send(message, cancellationToken));
         }
 
         Task ISendEndpoint.Send(object message, Type messageType, CancellationToken cancellationToken)
         {
-            _outboxContext.Add(() => _endpoint.Send(message, messageType, cancellationToken));
-
-            return TaskUtil.Completed;
+            return _outboxContext.Add(() => _endpoint.Send(message, messageType, cancellationToken));
         }
 
         Task ISendEndpoint.Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
-            _outboxContext.Add(() => _endpoint.Send(message, pipe, cancellationToken));
-
-            return TaskUtil.Completed;
+            return _outboxContext.Add(() => _endpoint.Send(message, pipe, cancellationToken));
         }
 
         Task ISendEndpoint.Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
-            _outboxContext.Add(() => _endpoint.Send(message, messageType, pipe, cancellationToken));
-
-            return TaskUtil.Completed;
+            return _outboxContext.Add(() => _endpoint.Send(message, messageType, pipe, cancellationToken));
         }
 
         Task ISendEndpoint.Send<T>(object values, CancellationToken cancellationToken)
         {
-            _outboxContext.Add(() => _endpoint.Send<T>(values, cancellationToken));
-
-            return TaskUtil.Completed;
+            return _outboxContext.Add(() => _endpoint.Send<T>(values, cancellationToken));
         }
 
         Task ISendEndpoint.Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
-            _outboxContext.Add(() => _endpoint.Send(values, pipe, cancellationToken));
-
-            return TaskUtil.Completed;
+            return _outboxContext.Add(() => _endpoint.Send(values, pipe, cancellationToken));
         }
 
         Task ISendEndpoint.Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
-            _outboxContext.Add(() => _endpoint.Send<T>(values, pipe, cancellationToken));
-
-            return TaskUtil.Completed;
+            return _outboxContext.Add(() => _endpoint.Send<T>(values, pipe, cancellationToken));
         }
     }
 }

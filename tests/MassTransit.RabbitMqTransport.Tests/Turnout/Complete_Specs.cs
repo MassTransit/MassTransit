@@ -15,12 +15,23 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
     }
 
 
+    public interface NumbersCrunched
+    {
+        Guid JobId { get; }
+    }
+
+
     public class CrunchTheNumbersConsumer :
         IJobConsumer<CrunchTheNumbers>
     {
         public async Task Run(JobContext<CrunchTheNumbers> context)
         {
             await Task.Delay(context.Job.Duration);
+
+            await context.Publish<NumbersCrunched>(new
+            {
+                context.JobId
+            });
         }
     }
 
@@ -39,7 +50,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
-                Job = new {Duration = TimeSpan.FromSeconds(1)}
+                Job = new { Duration = TimeSpan.FromSeconds(1) }
             });
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));
@@ -53,6 +64,13 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
         public async Task Should_have_published_the_job_completed_event()
         {
             ConsumeContext<JobCompleted> completed = await _completed;
+        }
+
+        [Test]
+        [Order(5)]
+        public async Task Should_have_published_the_numbers_crunched_event()
+        {
+            ConsumeContext<NumbersCrunched> completed = await _crunched;
         }
 
         [Test]
@@ -73,6 +91,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
         Task<ConsumeContext<JobCompleted>> _completed;
         Task<ConsumeContext<JobSubmitted>> _submitted;
         Task<ConsumeContext<JobStarted>> _started;
+        Task<ConsumeContext<NumbersCrunched>> _crunched;
 
         [OneTimeSetUp]
         public async Task Arrange()
@@ -93,6 +112,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
 
                 instance.ReceiveEndpoint(instance.EndpointNameFormatter.Message<CrunchTheNumbers>(), e =>
                 {
+                    e.UseInMemoryOutbox();
                     e.Consumer(() => new CrunchTheNumbersConsumer());
                 });
             });
@@ -103,6 +123,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
             _submitted = Handled<JobSubmitted>(configurator, context => context.Message.JobId == _jobId);
             _started = Handled<JobStarted>(configurator, context => context.Message.JobId == _jobId);
             _completed = Handled<JobCompleted>(configurator, context => context.Message.JobId == _jobId);
+            _crunched = Handled<NumbersCrunched>(configurator, context => context.Message.JobId == _jobId);
         }
     }
 
@@ -121,7 +142,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
-                Job = new {Duration = TimeSpan.FromMinutes(3.5)}
+                Job = new { Duration = TimeSpan.FromMinutes(3.5) }
             });
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));

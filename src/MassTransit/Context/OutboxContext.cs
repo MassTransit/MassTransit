@@ -19,7 +19,7 @@
         /// Adds a method to be invoked once the outbox is ready to be sent
         /// </summary>
         /// <param name="method"></param>
-        void Add(Func<Task> method);
+        Task Add(Func<Task> method);
 
         /// <summary>
         /// Execute all the pending outbox operations (success case)

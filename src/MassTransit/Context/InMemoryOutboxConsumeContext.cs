@@ -12,14 +12,14 @@ namespace MassTransit.Context
         OutboxContext
     {
         readonly TaskCompletionSource<InMemoryOutboxConsumeContext> _clearToSend;
-        readonly ConsumeContext _context;
         readonly InMemoryOutboxMessageSchedulerContext _outboxSchedulerContext;
         readonly List<Func<Task>> _pendingActions;
 
         public InMemoryOutboxConsumeContext(ConsumeContext context)
             : base(context)
         {
-            _context = context;
+            CapturedContext = context;
+
             var outboxReceiveContext = new InMemoryOutboxReceiveContext(this, context.ReceiveContext);
 
             ReceiveContext = outboxReceiveContext;
@@ -35,14 +35,21 @@ namespace MassTransit.Context
             }
         }
 
-        public ConsumeContext CapturedContext => _context;
+        public ConsumeContext CapturedContext { get; }
 
         public Task ClearToSend => _clearToSend.Task;
 
-        public void Add(Func<Task> method)
+        public Task Add(Func<Task> method)
         {
+            if (_clearToSend.Task.IsCompleted)
+                return method();
+
             lock (_pendingActions)
+            {
                 _pendingActions.Add(method);
+
+                return Task.CompletedTask;
+            }
         }
 
         public async Task ExecutePendingActions(bool concurrentMessageDelivery)
