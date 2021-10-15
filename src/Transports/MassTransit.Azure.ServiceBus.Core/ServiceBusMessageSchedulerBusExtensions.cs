@@ -16,6 +16,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="bus"></param>
         /// <returns></returns>
+        [Obsolete("Use the transport independent CreateDelayedMessageScheduler")]
         public static IMessageScheduler CreateServiceBusMessageScheduler(this IBus bus)
         {
             return new MessageScheduler(new ServiceBusScheduleMessageProvider(bus), bus.Topology);
@@ -30,6 +31,7 @@ namespace MassTransit
         /// <param name="sendEndpointProvider"></param>
         /// <param name="busTopology"></param>
         /// <returns></returns>
+        [Obsolete("Use the transport independent CreateDelayedMessageScheduler")]
         public static IMessageScheduler CreateServiceBusMessageScheduler(this ISendEndpointProvider sendEndpointProvider, IBusTopology busTopology)
         {
             return new MessageScheduler(new ServiceBusScheduleMessageProvider(sendEndpointProvider), busTopology);
@@ -39,6 +41,7 @@ namespace MassTransit
         /// Add a <see cref="IMessageScheduler" /> to the container that uses the Azure message enqueue time to schedule messages.
         /// </summary>
         /// <param name="configurator"></param>
+        [Obsolete("Use the transport independent AddDelayedMessageScheduler")]
         public static void AddServiceBusMessageScheduler(this IRegistrationConfigurator configurator)
         {
             configurator.AddMessageScheduler(new MessageSchedulerRegistration());
