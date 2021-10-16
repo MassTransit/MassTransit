@@ -4,7 +4,6 @@ namespace MassTransit.Topology.Topologies
     using System.Collections.Generic;
     using System.Linq;
     using GreenPipes;
-    using Internals.Extensions;
 
 
     public class MessagePublishTopology<TMessage> :
@@ -21,7 +20,7 @@ namespace MassTransit.Topology.Topologies
             _topologies = new List<IMessagePublishTopology<TMessage>>();
             _delegateTopologies = new List<IMessagePublishTopology<TMessage>>();
 
-            if (typeof(TMessage).HasAttribute<ExcludeFromTopologyAttribute>())
+            if (typeof(TMessage).GetCustomAttributes(typeof(ExcludeFromTopologyAttribute), false).Any())
                 Exclude = true;
         }
 
