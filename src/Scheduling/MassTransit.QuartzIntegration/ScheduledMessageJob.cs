@@ -20,7 +20,14 @@
     public class ScheduledMessageJob :
         IJob
     {
+        internal const string BUS_CONTEXT_KEY = "MassTransit.Bus";
+
         readonly IBus _bus;
+
+        public ScheduledMessageJob()
+        {
+
+        }
 
         public ScheduledMessageJob(IBus bus)
         {
@@ -39,13 +46,16 @@
 
             try
             {
+                var bus = (IBus)context.Scheduler.Context[BUS_CONTEXT_KEY] ?? _bus;
+                if (bus == null)
+                    throw new Exception("Could not find MassTransit Bus instance on the Job or the Scheduler Context.");
 
                 var destinationAddress = messageData.Destination;
-                var sourceAddress = _bus.Address;
+                var sourceAddress = bus.Address;
 
                 IPipe<SendContext> sendPipe = CreateMessageContext(messageData, sourceAddress);
 
-                var endpoint = await _bus.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
+                var endpoint = await bus.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
                 var scheduled = new Scheduled();
 

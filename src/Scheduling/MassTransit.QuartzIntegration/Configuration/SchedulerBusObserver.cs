@@ -50,6 +50,7 @@
             try
             {
                 _scheduler = await _options.SchedulerFactory.GetScheduler().ConfigureAwait(false);
+                _scheduler.Context[ScheduledMessageJob.BUS_CONTEXT_KEY] = bus;
 
                 _schedulerSource.TrySetResult(_scheduler);
             }
