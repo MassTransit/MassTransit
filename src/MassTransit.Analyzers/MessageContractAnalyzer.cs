@@ -1,7 +1,6 @@
 namespace MassTransit.Analyzers
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Collections.Immutable;
     using System.Linq;
@@ -43,9 +42,6 @@ namespace MassTransit.Analyzers
             Category, DiagnosticSeverity.Info, true,
             "Anonymous type misses properties that are in the message contract.");
 
-        readonly ConcurrentDictionary<SemanticModel, Lazy<TypeConversionHelper>> _typeConverterHelpers =
-            new ConcurrentDictionary<SemanticModel, Lazy<TypeConversionHelper>>();
-
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
             ImmutableArray.Create(StructurallyCompatibleRule, ValidMessageContractStructureRule, MissingPropertiesRule);
 
@@ -64,7 +60,7 @@ namespace MassTransit.Analyzers
 
         void AnalyzeAnonymousObjectCreationNode(SyntaxNodeAnalysisContext context)
         {
-            var typeConverterHelper = GetTypeConverterHelper(context);
+            var typeConverterHelper = new TypeConversionHelper(context.SemanticModel);
 
             var anonymousObject = (AnonymousObjectCreationExpressionSyntax)context.Node;
 
@@ -84,7 +80,7 @@ namespace MassTransit.Analyzers
                     }
 
                     var missingProperties = new List<string>();
-                    var symbolPath = Enumerable.Empty<ITypeSymbol>();
+                    IEnumerable<ITypeSymbol> symbolPath = Enumerable.Empty<ITypeSymbol>();
                     if (HasMissingProperties(anonymousType, messageContractType, string.Empty, symbolPath, missingProperties))
                     {
                         var diagnostic = Diagnostic.Create(MissingPropertiesRule, anonymousType.Locations[0],
@@ -98,11 +94,6 @@ namespace MassTransit.Analyzers
                     context.ReportDiagnostic(diagnostic);
                 }
             }
-        }
-
-        TypeConversionHelper GetTypeConverterHelper(SyntaxNodeAnalysisContext context)
-        {
-            return _typeConverterHelpers.GetOrAdd(context.SemanticModel, model => new Lazy<TypeConversionHelper>(() => new TypeConversionHelper(model))).Value;
         }
 
         static bool TypesAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, ITypeSymbol contractType, ITypeSymbol inputType,
@@ -130,35 +121,31 @@ namespace MassTransit.Analyzers
                     }
                 }
                 else if (!PropertyTypesAreStructurallyCompatible(typeConverterHelper, contractProperty, inputProperty, propertyPath, incompatibleProperties))
-                {
                     result = false;
-                }
             }
 
             return result;
         }
 
-        static bool PropertyTypesAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, IPropertySymbol contractProperty, IPropertySymbol inputProperty,
+        static bool PropertyTypesAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, IPropertySymbol contractProperty,
+            IPropertySymbol inputProperty,
             string path, ICollection<string> incompatibleProperties)
         {
             if (typeConverterHelper.CanConvert(contractProperty.Type, inputProperty.Type))
-            {
                 return true;
-            }
 
             var result = AnonymousTypeAndInterfaceAreStructurallyCompatible(typeConverterHelper, contractProperty, inputProperty, path, incompatibleProperties)
                 ?? EnumerableTypesAreStructurallyCompatible(typeConverterHelper, contractProperty, inputProperty, path, incompatibleProperties)
                 ?? DictionaryTypesAreStructurallyCompatible(typeConverterHelper, contractProperty, inputProperty, path, incompatibleProperties);
             if (result.HasValue)
-            {
                 return result.Value;
-            }
 
             incompatibleProperties.Add(path);
             return false;
         }
 
-        static bool? AnonymousTypeAndInterfaceAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, IPropertySymbol contractProperty, IPropertySymbol inputProperty,
+        static bool? AnonymousTypeAndInterfaceAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, IPropertySymbol contractProperty,
+            IPropertySymbol inputProperty,
             string path, ICollection<string> incompatibleProperties)
         {
             if (inputProperty.Type.IsAnonymousType)
@@ -181,7 +168,8 @@ namespace MassTransit.Analyzers
             return null;
         }
 
-        static bool? EnumerableTypesAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, IPropertySymbol contractProperty, IPropertySymbol inputProperty,
+        static bool? EnumerableTypesAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, IPropertySymbol contractProperty,
+            IPropertySymbol inputProperty,
             string path, ICollection<string> incompatibleProperties)
         {
             if (contractProperty.Type.IsImmutableArray(out var contractElementType)
@@ -197,9 +185,7 @@ namespace MassTransit.Analyzers
                     || inputProperty.Type.IsCollection(out inputElementType))
                 {
                     if (!ElementTypesAreStructurallyCompatible(typeConverterHelper, contractElementType, inputElementType, path, incompatibleProperties))
-                    {
                         return false;
-                    }
                 }
                 // a single element will be added to a list in the message contract
                 else if (!typeConverterHelper.CanConvert(contractElementType, inputProperty.Type))
@@ -214,13 +200,12 @@ namespace MassTransit.Analyzers
             return null;
         }
 
-        static bool ElementTypesAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, ITypeSymbol contractElementType, ITypeSymbol inputElementType,
+        static bool ElementTypesAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, ITypeSymbol contractElementType,
+            ITypeSymbol inputElementType,
             string path, ICollection<string> incompatibleProperties)
         {
             if (typeConverterHelper.CanConvert(contractElementType, inputElementType))
-            {
                 return true;
-            }
 
             if (contractElementType.TypeKind.IsClassOrInterface())
             {
@@ -237,17 +222,17 @@ namespace MassTransit.Analyzers
             return true;
         }
 
-        static bool? DictionaryTypesAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, IPropertySymbol contractProperty, IPropertySymbol inputProperty,
+        static bool? DictionaryTypesAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, IPropertySymbol contractProperty,
+            IPropertySymbol inputProperty,
             string path, ICollection<string> incompatibleProperties)
         {
             if (contractProperty.Type.IsDictionary(out var contractKeyType, out var contractValueType))
             {
                 if (inputProperty.Type.IsDictionary(out var inputKeyType, out var inputValueType))
                 {
-                    if (!KeyValueTypesAreStructurallyCompatible(typeConverterHelper, contractKeyType, contractValueType, inputKeyType, inputValueType, path, incompatibleProperties))
-                    {
+                    if (!KeyValueTypesAreStructurallyCompatible(typeConverterHelper, contractKeyType, contractValueType, inputKeyType, inputValueType, path,
+                        incompatibleProperties))
                         return false;
-                    }
                 }
                 else
                 {
@@ -261,14 +246,13 @@ namespace MassTransit.Analyzers
             return null;
         }
 
-        static bool KeyValueTypesAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, ITypeSymbol contractKeyType, ITypeSymbol contractValueType, ITypeSymbol inputKeyType, ITypeSymbol inputValueType,
+        static bool KeyValueTypesAreStructurallyCompatible(TypeConversionHelper typeConverterHelper, ITypeSymbol contractKeyType, ITypeSymbol contractValueType,
+            ITypeSymbol inputKeyType, ITypeSymbol inputValueType,
             string path, ICollection<string> incompatibleProperties)
         {
             if (typeConverterHelper.CanConvert(contractKeyType, inputKeyType)
                 && typeConverterHelper.CanConvert(contractValueType, inputValueType))
-            {
                 return true;
-            }
 
             if (contractValueType.TypeKind.IsClassOrInterface())
             {
@@ -330,15 +314,13 @@ namespace MassTransit.Analyzers
                     result = true;
                 }
                 else if (HasMissingProperties(inputProperty, contractProperty, propertyPath, symbolPath, missingProperties))
-                {
                     result = true;
-                }
             }
 
             return result;
         }
 
-        private static bool HasMissingProperties(IPropertySymbol inputProperty, IPropertySymbol contractProperty,
+        static bool HasMissingProperties(IPropertySymbol inputProperty, IPropertySymbol contractProperty,
             string path, IEnumerable<ITypeSymbol> symbolPath, ICollection<string> missingProperties)
         {
             var result = EnumerableTypeHasMissingProperties(inputProperty, contractProperty, path, symbolPath, missingProperties)
@@ -347,7 +329,7 @@ namespace MassTransit.Analyzers
             return result ?? false;
         }
 
-        private static bool? EnumerableTypeHasMissingProperties(IPropertySymbol inputProperty, IPropertySymbol contractProperty,
+        static bool? EnumerableTypeHasMissingProperties(IPropertySymbol inputProperty, IPropertySymbol contractProperty,
             string path, IEnumerable<ITypeSymbol> symbolPath, ICollection<string> missingProperties)
         {
             if (contractProperty.Type.IsImmutableArray(out var contractElementType)
@@ -360,9 +342,7 @@ namespace MassTransit.Analyzers
                     && contractElementType.TypeKind.IsClassOrInterface()
                     && !symbolPath.Contains(contractElementType, SymbolEqualityComparer.Default)
                     && HasMissingProperties(inputElementType, contractElementType, path, symbolPath.Concat(new[] { contractElementType }), missingProperties))
-                {
                     return true;
-                }
 
                 return false;
             }
@@ -370,17 +350,16 @@ namespace MassTransit.Analyzers
             return null;
         }
 
-        private static bool? AnonymousTypeHasMissingProperties(IPropertySymbol inputProperty, IPropertySymbol contractProperty,
+        static bool? AnonymousTypeHasMissingProperties(IPropertySymbol inputProperty, IPropertySymbol contractProperty,
             string path, IEnumerable<ITypeSymbol> symbolPath, ICollection<string> missingProperties)
         {
             if (contractProperty.Type.TypeKind.IsClassOrInterface())
             {
                 if (inputProperty.Type.IsAnonymousType
                     && !symbolPath.Contains(contractProperty.Type, SymbolEqualityComparer.Default)
-                    && HasMissingProperties(inputProperty.Type, contractProperty.Type, path, symbolPath.Concat(new[] { contractProperty.Type }), missingProperties))
-                {
+                    && HasMissingProperties(inputProperty.Type, contractProperty.Type, path, symbolPath.Concat(new[] { contractProperty.Type }),
+                        missingProperties))
                     return true;
-                }
 
                 return false;
             }
