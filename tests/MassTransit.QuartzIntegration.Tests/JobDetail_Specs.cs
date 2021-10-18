@@ -40,7 +40,6 @@
         {
             var factory = new StdSchedulerFactory();
             var scheduler = await factory.GetScheduler().ConfigureAwait(false);
-            scheduler.JobFactory = new MassTransitJobFactory(null, null);
             await scheduler.Start().ConfigureAwait(false);
 
             var jobDetail = JobBuilder.Create<MyJob>()

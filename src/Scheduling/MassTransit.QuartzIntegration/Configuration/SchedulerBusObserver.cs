@@ -2,8 +2,11 @@
 {
     using System;
     using System.Threading.Tasks;
+
     using Context;
+
     using Quartz;
+
     using Util;
 
     /// <summary>
@@ -73,8 +76,6 @@
                 _scheduler.SchedulerInstanceId);
 
             await busReady.ConfigureAwait(false);
-
-            _scheduler.JobFactory = new MassTransitJobFactory(bus, _options.JobFactory);
 
             await _scheduler.Start().ConfigureAwait(false);
 
