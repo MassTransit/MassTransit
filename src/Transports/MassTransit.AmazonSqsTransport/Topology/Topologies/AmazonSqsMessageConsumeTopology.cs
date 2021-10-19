@@ -17,14 +17,16 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
         IAmazonSqsMessageConsumeTopologyConfigurator
         where TMessage : class
     {
+        readonly IAmazonSqsMessagePublishTopology<TMessage> _messagePublishTopology;
         readonly IMessageTopology<TMessage> _messageTopology;
-        readonly IAmazonSqsMessagePublishTopology<TMessage> _publishTopology;
+        readonly IAmazonSqsPublishTopology _publishTopology;
         readonly IList<IAmazonSqsConsumeTopologySpecification> _specifications;
 
-        public AmazonSqsMessageConsumeTopology(IMessageTopology<TMessage> messageTopology, IAmazonSqsMessagePublishTopology<TMessage> publishTopology)
+        public AmazonSqsMessageConsumeTopology(IMessageTopology<TMessage> messageTopology, IAmazonSqsPublishTopology publishTopology)
         {
             _messageTopology = messageTopology;
             _publishTopology = publishTopology;
+            _messagePublishTopology = _publishTopology.GetMessageTopology<TMessage>();
 
             _specifications = new List<IAmazonSqsConsumeTopologySpecification>();
         }
@@ -43,7 +45,7 @@ namespace MassTransit.AmazonSqsTransport.Topology.Topologies
                 return;
             }
 
-            var specification = new ConsumerConsumeTopologySpecification(_publishTopology.Topic);
+            var specification = new ConsumerConsumeTopologySpecification(_publishTopology, _messagePublishTopology.Topic);
 
             configure?.Invoke(specification);
 
