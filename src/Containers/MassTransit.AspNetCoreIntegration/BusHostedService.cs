@@ -8,13 +8,15 @@ namespace MassTransit.AspNetCoreIntegration
 
 
     public class BusHostedService :
-        IHostedService
+        IHostedService,
+        IDisposable
     {
         readonly IBusControl _bus;
         readonly TimeSpan? _startTimeout;
         readonly TimeSpan? _stopTimeout;
         readonly bool _waitUntilStarted;
-        Task _startTask;
+        Task<BusHandle> _startTask;
+        bool _stopped;
 
         public BusHostedService(IBusControl bus, bool waitUntilStarted, TimeSpan? startTimeout = null, TimeSpan? stopTimeout = null)
         {
@@ -22,6 +24,19 @@ namespace MassTransit.AspNetCoreIntegration
             _waitUntilStarted = waitUntilStarted;
             _startTimeout = startTimeout;
             _stopTimeout = stopTimeout;
+        }
+
+        public void Dispose()
+        {
+            if (_stopped)
+                return;
+
+            if (_stopTimeout.HasValue)
+                _bus.Stop(_stopTimeout.Value);
+            else
+                _bus.Stop();
+
+            _stopped = true;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -35,11 +50,16 @@ namespace MassTransit.AspNetCoreIntegration
                 : TaskUtil.Completed;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            return _stopTimeout.HasValue
-                ? _bus.StopAsync(_stopTimeout.Value)
-                : _bus.StopAsync(cancellationToken);
+            if (!_stopped)
+            {
+                await (_stopTimeout.HasValue
+                    ? _bus.StopAsync(_stopTimeout.Value)
+                    : _bus.StopAsync(cancellationToken)).ConfigureAwait(false);
+
+                _stopped = true;
+            }
         }
     }
 }

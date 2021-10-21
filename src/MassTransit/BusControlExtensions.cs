@@ -51,6 +51,7 @@
         {
             using var cancellationTokenSource = new CancellationTokenSource(startTimeout);
 
+            // ReSharper disable once AccessToDisposedClosure
             TaskUtil.Await(() => bus.StartAsync(cancellationTokenSource.Token), cancellationTokenSource.Token);
         }
 
@@ -59,11 +60,11 @@
         /// </summary>
         /// <param name="bus">The bus handle</param>
         /// <param name="startTimeout">The wait time before throwing an exception</param>
-        public static async Task StartAsync(this IBusControl bus, TimeSpan startTimeout)
+        public static async Task<BusHandle> StartAsync(this IBusControl bus, TimeSpan startTimeout)
         {
             using var cancellationTokenSource = new CancellationTokenSource(startTimeout);
 
-            await bus.StartAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+            return await bus.StartAsync(cancellationTokenSource.Token).ConfigureAwait(false);
         }
 
         /// <summary>

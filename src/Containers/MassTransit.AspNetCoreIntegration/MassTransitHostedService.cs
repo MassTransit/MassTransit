@@ -9,13 +9,15 @@ namespace MassTransit.AspNetCoreIntegration
 
 
     public class MassTransitHostedService :
-        IHostedService
+        IHostedService,
+        IDisposable
     {
         readonly IBusDepot _depot;
         readonly TimeSpan? _startTimeout;
         readonly TimeSpan? _stopTimeout;
         readonly bool _waitUntilStarted;
         Task _startTask;
+        bool _stopped;
 
         public MassTransitHostedService(IBusDepot depot, bool waitUntilStarted, TimeSpan? startTimeout = null, TimeSpan? stopTimeout = null)
         {
@@ -23,6 +25,24 @@ namespace MassTransit.AspNetCoreIntegration
             _waitUntilStarted = waitUntilStarted;
             _startTimeout = startTimeout;
             _stopTimeout = stopTimeout;
+        }
+
+        public void Dispose()
+        {
+            if (_stopped)
+                return;
+
+            if (_stopTimeout.HasValue)
+            {
+                using var tokenSource = new CancellationTokenSource(_stopTimeout.Value);
+
+                // ReSharper disable once AccessToDisposedClosure
+                TaskUtil.Await(() => _depot.Stop(tokenSource.Token), tokenSource.Token);
+            }
+            else
+                TaskUtil.Await(() => _depot.Stop(CancellationToken.None));
+
+            _stopped = true;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -36,11 +56,16 @@ namespace MassTransit.AspNetCoreIntegration
                 : TaskUtil.Completed;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            return _stopTimeout.HasValue
-                ? _depot.Stop(_stopTimeout.Value)
-                : _depot.Stop(cancellationToken);
+            if (!_stopped)
+            {
+                await (_stopTimeout.HasValue
+                    ? _depot.Stop(_stopTimeout.Value)
+                    : _depot.Stop(cancellationToken)).ConfigureAwait(false);
+
+                _stopped = true;
+            }
         }
     }
 }
