@@ -1,5 +1,6 @@
 namespace MassTransit.AspNetCoreIntegration
 {
+    using System;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Hosting;
@@ -8,7 +9,7 @@ namespace MassTransit.AspNetCoreIntegration
 
 
     public class MassTransitHostedService :
-        IHostedService
+        IHostedService, IDisposable
     {
         readonly IBusDepot _depot;
         readonly bool _waitUntilStarted;
@@ -32,6 +33,11 @@ namespace MassTransit.AspNetCoreIntegration
         public Task StopAsync(CancellationToken cancellationToken)
         {
             return _depot.Stop(cancellationToken);
+        }
+
+        public void Dispose()
+        {
+            _depot.Stop(CancellationToken.None).GetAwaiter().GetResult();
         }
     }
 }
