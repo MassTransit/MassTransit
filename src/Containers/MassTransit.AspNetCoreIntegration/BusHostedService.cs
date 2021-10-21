@@ -13,6 +13,7 @@ namespace MassTransit.AspNetCoreIntegration
         readonly IBusControl _bus;
         readonly bool _waitUntilStarted;
         Task<BusHandle> _startTask;
+        bool _stopped = false;
 
         public BusHostedService(IBusControl bus, bool waitUntilStarted)
         {
@@ -29,14 +30,22 @@ namespace MassTransit.AspNetCoreIntegration
                 : TaskUtil.Completed;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            return _bus.StopAsync(cancellationToken);
+            if (!_stopped)
+            {
+                await _bus.StopAsync(cancellationToken);
+                _stopped = true;
+            }
         }
 
         public void Dispose()
         {
-            _bus.Stop();
+            if (!_stopped)
+            {
+                _bus.Stop();
+                _stopped = true;
+            }
         }
     }
 }

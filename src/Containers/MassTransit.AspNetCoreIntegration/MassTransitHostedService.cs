@@ -14,6 +14,7 @@ namespace MassTransit.AspNetCoreIntegration
         readonly IBusDepot _depot;
         readonly bool _waitUntilStarted;
         Task _startTask;
+        bool _stopped = false;
 
         public MassTransitHostedService(IBusDepot depot, bool waitUntilStarted)
         {
@@ -30,14 +31,22 @@ namespace MassTransit.AspNetCoreIntegration
                 : TaskUtil.Completed;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public async Task StopAsync(CancellationToken cancellationToken)
         {
-            return _depot.Stop(cancellationToken);
+            if (!_stopped)
+            {
+                await _depot.Stop(cancellationToken);
+                _stopped = true;
+            }
         }
 
         public void Dispose()
         {
-            _depot.Stop(CancellationToken.None).GetAwaiter().GetResult();
+            if (!_stopped)
+            {
+                _depot.Stop(CancellationToken.None).GetAwaiter().GetResult();
+                _stopped = true;
+            }
         }
     }
 }
