@@ -60,7 +60,8 @@ namespace MassTransit
             if (configure != null)
                 SystemTextJsonMessageSerializer.Options = configure(SystemTextJsonMessageSerializer.Options);
 
-            configurator.AddMessageDeserializer(JsonMessageSerializer.JsonContentType, () => new SystemTextJsonMessageDeserializer());
+            configurator.AddMessageDeserializer(JsonMessageSerializer.JsonContentType,
+                () => new SystemTextJsonMessageDeserializer(JsonMessageSerializer.JsonContentType));
 
             configurator.SetMessageSerializer(() => new SystemTextJsonMessageSerializer(JsonMessageSerializer.JsonContentType));
         }
