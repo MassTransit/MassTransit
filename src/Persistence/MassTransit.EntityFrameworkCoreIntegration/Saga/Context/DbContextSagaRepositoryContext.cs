@@ -99,6 +99,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             await _inUse.WaitAsync(context.CancellationToken).ConfigureAwait(false);
             try
             {
+                _dbContext.Set<TSaga>().Update(context.Saga);
+
                 await _dbContext.SaveChangesAsync(CancellationToken).ConfigureAwait(false);
             }
             finally
@@ -127,13 +129,19 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Saga.Context
             return TaskUtil.Completed;
         }
 
-        public Task Undo(SagaConsumeContext<TSaga> context)
+        public async Task Undo(SagaConsumeContext<TSaga> context)
         {
-            var entity = _dbContext.ChangeTracker.Entries<TSaga>().FirstOrDefault(x => x.Entity.CorrelationId == context.Saga.CorrelationId);
-            if (entity != null)
-                entity.State = EntityState.Unchanged;
-
-            return TaskUtil.Completed;
+            await _inUse.WaitAsync(context.CancellationToken).ConfigureAwait(false);
+            try
+            {
+                var entity = _dbContext.ChangeTracker.Entries<TSaga>().FirstOrDefault(x => x.Entity.CorrelationId == context.Saga.CorrelationId);
+                if (entity != null)
+                    entity.State = EntityState.Unchanged;
+            }
+            finally
+            {
+                _inUse.Release();
+            }
         }
 
         public Task<SagaConsumeContext<TSaga, T>> CreateSagaConsumeContext<T>(ConsumeContext<T> consumeContext, TSaga instance, SagaConsumeContextMode mode)
