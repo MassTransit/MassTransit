@@ -330,7 +330,7 @@
 
         Task<IList<RuleProperties>> GetRulesAsync(string topicPath, string subscriptionName)
         {
-            return RunOperation(() => _managementClient.GetRulesAsync(topicPath, subscriptionName).ToList());
+            return RunOperation(() => _managementClient.GetRulesAsync(topicPath, subscriptionName).ToListAsync());
         }
 
         Task<RuleProperties> UpdateRuleAsync(string topicPath, string subscriptionName, RuleProperties ruleDescription)

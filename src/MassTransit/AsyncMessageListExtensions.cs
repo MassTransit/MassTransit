@@ -6,7 +6,7 @@ namespace MassTransit
 
     public static class AsyncMessageListExtensions
     {
-        public static async Task<IList<TElement>> ToList<TElement>(this IAsyncEnumerable<TElement> elements)
+        public static async Task<IList<TElement>> ToListAsync<TElement>(this IAsyncEnumerable<TElement> elements)
             where TElement : class
         {
             var elementsList = new List<TElement>();

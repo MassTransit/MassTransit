@@ -35,16 +35,6 @@ namespace MassTransit.Testing
             return count;
         }
 
-        public static async Task<IList<TElement>> ToList<TElement>(this IAsyncEnumerable<TElement> elements)
-            where TElement : class
-        {
-            var elementsList = new List<TElement>();
-            await foreach (var element in elements.ConfigureAwait(false))
-                elementsList.Add(element);
-
-            return elementsList;
-        }
-
         public static async IAsyncEnumerable<TElement> Take<TElement>(this IAsyncEnumerable<TElement> elements, int quantity)
             where TElement : class, IAsyncListElement
         {
