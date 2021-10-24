@@ -2,8 +2,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Configurators
 {
     using System;
     using System.Collections.Generic;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using GreenPipes;
-    using Microsoft.Azure.ServiceBus.Management;
 
 
     public class QueueConfigurator :
@@ -41,9 +41,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Configurators
                 yield return this.Failure("AutoDeleteOnIdle", "must be zero, or >= 5:00");
         }
 
-        public QueueDescription GetQueueDescription()
+        public CreateQueueOptions GetQueueDescription()
         {
-            var description = new QueueDescription(FullPath);
+            var description = new CreateQueueOptions(FullPath);
 
             if (AutoDeleteOnIdle.HasValue)
                 description.AutoDeleteOnIdle = AutoDeleteOnIdle.Value;
@@ -58,7 +58,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Configurators
                 description.EnableBatchedOperations = EnableBatchedOperations.Value;
 
             if (EnableDeadLetteringOnMessageExpiration.HasValue)
-                description.EnableDeadLetteringOnMessageExpiration = EnableDeadLetteringOnMessageExpiration.Value;
+                description.DeadLetteringOnMessageExpiration = EnableDeadLetteringOnMessageExpiration.Value;
 
             if (EnablePartitioning.HasValue)
                 description.EnablePartitioning = EnablePartitioning.Value;
@@ -76,7 +76,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Configurators
                 description.MaxDeliveryCount = MaxDeliveryCount.Value;
 
             if (MaxSizeInMB.HasValue)
-                description.MaxSizeInMB = MaxSizeInMB.Value;
+                description.MaxSizeInMegabytes = MaxSizeInMB.Value;
 
             if (RequiresDuplicateDetection.HasValue)
                 description.RequiresDuplicateDetection = RequiresDuplicateDetection.Value;

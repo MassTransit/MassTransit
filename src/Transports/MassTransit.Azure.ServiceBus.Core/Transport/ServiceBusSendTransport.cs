@@ -5,11 +5,11 @@
     using System.Threading.Tasks;
     using Context;
     using Contexts;
+    using global::Azure.Messaging.ServiceBus;
     using GreenPipes;
     using GreenPipes.Agents;
     using Logging;
     using MassTransit.Scheduling;
-    using Microsoft.Azure.ServiceBus;
     using Transports;
 
 
@@ -168,7 +168,7 @@
 
                     LogContext.Debug?.Log("CANCEL {DestinationAddress} {TokenId}", clientContext.EntityPath, tokenId, sequenceNumber);
                 }
-                catch (MessageNotFoundException)
+                catch (ServiceBusException exception) when (exception.Reason == ServiceBusFailureReason.MessageNotFound)
                 {
                     LogContext.Debug?.Log("CANCEL {DestinationAddress} {TokenId} message not found", clientContext.EntityPath, tokenId);
                 }
@@ -190,11 +190,11 @@
                 return false;
             }
 
-            static Message CreateMessage(AzureServiceBusSendContext<T> context)
+            static ServiceBusMessage CreateMessage(AzureServiceBusSendContext<T> context)
             {
-                var message = new Message(context.Body) { ContentType = context.ContentType.MediaType };
+                var message = new ServiceBusMessage(context.Body) { ContentType = context.ContentType.MediaType };
 
-                _adapter.Set(message.UserProperties, context.Headers);
+                _adapter.Set(message.ApplicationProperties, context.Headers);
 
                 if (context.TimeToLive.HasValue)
                     message.TimeToLive = context.TimeToLive > TimeSpan.Zero ? context.TimeToLive.Value : TimeSpan.FromSeconds(1);

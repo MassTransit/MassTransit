@@ -5,11 +5,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     using System.Threading.Tasks;
     using Configuration;
     using Contexts;
+    using global::Azure.Messaging.ServiceBus;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Management;
 
 
     public class ConnectionContextFactory :
@@ -46,23 +46,53 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
         async Task<ConnectionContext> CreateConnection(ISupervisor supervisor)
         {
-            var endpoint = new UriBuilder(_hostConfiguration.HostAddress) {Path = ""}.Uri.ToString();
+            var endpoint = new UriBuilder(_hostConfiguration.HostAddress) {Path = ""}.Uri.Host.ToString();
 
             if (supervisor.Stopping.IsCancellationRequested)
                 throw new ServiceBusConnectionException($"The connection is stopping and cannot be used: {endpoint}");
 
             var settings = _hostConfiguration.Settings;
-            var retryPolicy = new RetryExponential(settings.RetryMinBackoff, settings.RetryMaxBackoff, settings.RetryLimit);
 
-            var connection = new ServiceBusConnection(endpoint, settings.TransportType, retryPolicy)
+            var clientOptions = new ServiceBusClientOptions
             {
-                TokenProvider = settings.TokenProvider,
-                OperationTimeout = settings.OperationTimeout
+                TransportType = settings.TransportType,
+                RetryOptions = new ServiceBusRetryOptions
+                {
+                    MaxRetries = settings.RetryLimit,
+                    Mode = ServiceBusRetryMode.Exponential,
+                    MaxDelay = settings.RetryMaxBackoff,
+                },
+                EnableCrossEntityTransactions = false, // Is that right?
             };
 
-            var managementClient = new ManagementClient(endpoint, settings.TokenProvider);
+            var managementClientOptions = new ServiceBusAdministrationClientOptions
+            {
+            };
 
-            return new ServiceBusConnectionContext(connection, managementClient, retryPolicy, settings.OperationTimeout, supervisor.Stopped);
+            ServiceBusClient client;
+            ServiceBusAdministrationClient managementClient;
+            if (settings.TokenCredential != null)
+            {
+                client = new ServiceBusClient(endpoint, settings.TokenCredential, clientOptions);
+                managementClient = new ServiceBusAdministrationClient(endpoint, settings.TokenCredential, managementClientOptions);
+            }
+            else if (settings.NamedKeyCredential != null)
+            {
+                client = new ServiceBusClient(endpoint, settings.NamedKeyCredential, clientOptions);
+                managementClient = new ServiceBusAdministrationClient(endpoint, settings.NamedKeyCredential, managementClientOptions);
+            }
+            else if (settings.SasCredential != null)
+            {
+                client = new ServiceBusClient(endpoint, settings.SasCredential, clientOptions);
+                managementClient = new ServiceBusAdministrationClient(endpoint, settings.SasCredential, managementClientOptions);
+            }
+            else
+            {
+                client = new ServiceBusClient(settings.ConnectionString, clientOptions);
+                managementClient = new ServiceBusAdministrationClient(settings.ConnectionString, managementClientOptions);
+            }
+
+            return new ServiceBusConnectionContext(client, managementClient, supervisor.Stopped);
         }
     }
 }

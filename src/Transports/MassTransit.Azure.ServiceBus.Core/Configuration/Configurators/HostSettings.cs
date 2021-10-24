@@ -1,8 +1,9 @@
 namespace MassTransit.Azure.ServiceBus.Core.Configurators
 {
     using System;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Primitives;
+    using global::Azure;
+    using global::Azure.Core;
+    using global::Azure.Messaging.ServiceBus;
 
 
     public class HostSettings :
@@ -10,23 +11,23 @@ namespace MassTransit.Azure.ServiceBus.Core.Configurators
     {
         public HostSettings()
         {
-            OperationTimeout = TimeSpan.FromSeconds(60);
-
             RetryMinBackoff = TimeSpan.FromMilliseconds(100);
             RetryMaxBackoff = TimeSpan.FromSeconds(30);
             RetryLimit = 10;
 
-            TransportType = TransportType.Amqp;
+            TransportType = ServiceBusTransportType.AmqpTcp;
 
             ServiceUri = new Uri("sb://no-host-configured");
         }
 
         public Uri ServiceUri { get; set; }
-        public ITokenProvider TokenProvider { get; set; }
-        public TimeSpan OperationTimeout { get; set; }
+        public string ConnectionString { get; set; }
+        public AzureNamedKeyCredential NamedKeyCredential { get; set; }
+        public AzureSasCredential SasCredential { get; set; }
+        public TokenCredential TokenCredential { get; set; }
         public TimeSpan RetryMinBackoff { get; set; }
         public TimeSpan RetryMaxBackoff { get; set; }
         public int RetryLimit { get; set; }
-        public TransportType TransportType { get; set; }
+        public ServiceBusTransportType TransportType { get; set; }
     }
 }

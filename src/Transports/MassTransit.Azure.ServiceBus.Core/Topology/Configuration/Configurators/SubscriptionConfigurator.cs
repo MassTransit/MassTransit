@@ -2,9 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using GreenPipes;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Management;
 
 
     public class SubscriptionConfigurator :
@@ -19,8 +18,8 @@
 
         public bool? EnableDeadLetteringOnFilterEvaluationExceptions { private get; set; }
 
-        public Filter Filter { get; set; }
-        public RuleDescription Rule { get; set; }
+        public RuleFilter Filter { get; set; }
+        public CreateRuleOptions Rule { get; set; }
 
         public string ForwardTo { private get; set; }
 
@@ -43,9 +42,9 @@
                 yield return this.Failure("Rule/Filter", "only a rule or a filter may be specified");
         }
 
-        public SubscriptionDescription GetSubscriptionDescription()
+        public CreateSubscriptionOptions GetSubscriptionDescription()
         {
-            var description = new SubscriptionDescription(TopicPath, SubscriptionName);
+            var description = new CreateSubscriptionOptions(TopicPath, SubscriptionName);
 
             if (AutoDeleteOnIdle.HasValue)
                 description.AutoDeleteOnIdle = AutoDeleteOnIdle.Value;
@@ -60,7 +59,7 @@
                 description.EnableDeadLetteringOnFilterEvaluationExceptions = EnableDeadLetteringOnFilterEvaluationExceptions.Value;
 
             if (EnableDeadLetteringOnMessageExpiration.HasValue)
-                description.EnableDeadLetteringOnMessageExpiration = EnableDeadLetteringOnMessageExpiration.Value;
+                description.DeadLetteringOnMessageExpiration = EnableDeadLetteringOnMessageExpiration.Value;
 
             if (!string.IsNullOrWhiteSpace(ForwardDeadLetteredMessagesTo))
                 description.ForwardDeadLetteredMessagesTo = ForwardDeadLetteredMessagesTo;

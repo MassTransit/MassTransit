@@ -19,12 +19,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
         protected override ClientContext CreateClientContext(ConnectionContext connectionContext, Uri inputAddress, IAgent agent)
         {
-            var subscriptionClient = connectionContext.CreateSubscriptionClient(_settings.TopicDescription.Path,
-                _settings.SubscriptionDescription.SubscriptionName);
+            (var subscriptionClient, var sessionClient) = connectionContext.CreateSubscriptionClient(_settings);
 
-            subscriptionClient.PrefetchCount = _settings.PrefetchCount;
-
-            return new SubscriptionClientContext(connectionContext, subscriptionClient, inputAddress, _settings, agent);
+            return new SubscriptionClientContext(connectionContext, subscriptionClient, sessionClient, inputAddress, _settings, agent);
         }
     }
 }

@@ -1,8 +1,9 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Configurators
 {
     using System;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Primitives;
+    using global::Azure;
+    using global::Azure.Core;
+    using global::Azure.Messaging.ServiceBus;
 
 
     public class ServiceBusHostConfigurator :
@@ -19,38 +20,88 @@
 
         public ServiceBusHostConfigurator(string connectionString)
         {
-            var builder = new ServiceBusConnectionStringBuilder(connectionString);
-
-            var serviceUri = ParseEndpointWithScope(connectionString);
+            var properties = ServiceBusConnectionStringProperties.Parse(connectionString);
 
             _settings = new HostSettings
             {
-                ServiceUri = serviceUri,
-                OperationTimeout = builder.OperationTimeout,
-                TransportType = builder.TransportType
+                ConnectionString = connectionString,
+                ServiceUri = properties.Endpoint,
             };
 
-            if (builder.SasToken != null)
-                _settings.TokenProvider = TokenProvider.CreateSharedAccessSignatureTokenProvider(builder.SasToken);
-            else if (builder.SasKeyName != null && builder.SasKey != null)
-                _settings.TokenProvider = TokenProvider.CreateSharedAccessSignatureTokenProvider(builder.SasKeyName, builder.SasKey);
-            else
-                throw new Exception("The connection string did not contain an SAS token or an SAS key name and SAS key pair.");
+            if (IsMissingCredentials(properties))
+            {
+                _settings.ConnectionString = null;
+            }
+        }
+
+        static bool IsMissingCredentials(ServiceBusConnectionStringProperties properties)
+        {
+            return string.IsNullOrWhiteSpace(properties.SharedAccessKeyName) && string.IsNullOrWhiteSpace(properties.SharedAccessKey) && string.IsNullOrWhiteSpace(properties.SharedAccessSignature);
         }
 
         public ServiceBusHostSettings Settings => _settings;
 
-        ITokenProvider IServiceBusHostConfigurator.TokenProvider
+        string IServiceBusHostConfigurator.ConnectionString
         {
-            set => _settings.TokenProvider = value;
+            set
+            {
+                if (_settings.NamedKeyCredential != null
+                    || _settings.SasCredential != null
+                    || _settings.TokenCredential != null)
+                {
+                    throw new ArgumentException("Another type of authentication is already being used");
+                }
+
+                _settings.ConnectionString = value;
+            }
         }
 
-        public TimeSpan OperationTimeout
+        AzureNamedKeyCredential IServiceBusHostConfigurator.NamedKeyCredential
         {
-            set => _settings.OperationTimeout = value;
+            set
+            {
+                if (_settings.ConnectionString != null
+                    || _settings.SasCredential != null
+                    || _settings.TokenCredential != null)
+                {
+                    throw new ArgumentException("Another type of authentication is already being used");
+                }
+
+                _settings.NamedKeyCredential = value;
+            }
         }
 
-        public TransportType TransportType
+        AzureSasCredential IServiceBusHostConfigurator.SasCredential
+        {
+            set
+            {
+                if (_settings.ConnectionString != null
+                    || _settings.NamedKeyCredential != null
+                    || _settings.TokenCredential != null)
+                {
+                    throw new ArgumentException("Another type of authentication is already being used");
+                }
+
+                _settings.SasCredential = value;
+            }
+        }
+
+        TokenCredential IServiceBusHostConfigurator.TokenCredential
+        {
+            set
+            {
+                if (_settings.ConnectionString != null
+                    || _settings.SasCredential != null
+                    || _settings.NamedKeyCredential != null)
+                {
+                    throw new ArgumentException("Another type of authentication is already being used");
+                }
+
+                _settings.TokenCredential = value;
+            }
+        }
+
+        public ServiceBusTransportType TransportType
         {
             set => _settings.TransportType = value;
         }
@@ -68,25 +119,6 @@
         public int RetryLimit
         {
             set => _settings.RetryLimit = value;
-        }
-
-        // Code copied from: https://github.com/Azure/azure-service-bus-dotnet/blob/8f619194132faab19507811f38137a9a8582f488/src/Microsoft.Azure.ServiceBus/ServiceBusConnectionStringBuilder.cs#L294
-        static Uri ParseEndpointWithScope(string connectionString)
-        {
-            string[] keyValuePairs = connectionString.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
-            foreach (var keyValuePair in keyValuePairs)
-            {
-                // Now split based on the _first_ '='
-                string[] keyAndValue = keyValuePair.Split(new[] {'='}, 2);
-                var key = keyAndValue[0];
-                if (keyAndValue.Length != 2)
-                    throw new UriFormatException($"Value for the connection string parameter name '{key}' was not found.");
-
-                if (key.Equals("Endpoint", StringComparison.OrdinalIgnoreCase))
-                    return new Uri(keyAndValue[1].Trim());
-            }
-
-            return null;
         }
     }
 }

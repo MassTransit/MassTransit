@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Topology
 {
+    using global::Azure.Messaging.ServiceBus.Administration;
     using GreenPipes;
-    using Microsoft.Azure.ServiceBus.Management;
 
 
     public interface IQueueConfigurator :
@@ -23,6 +23,6 @@
         /// Create the queueDescription for the configuration
         /// </summary>
         /// <returns></returns>
-        QueueDescription GetQueueDescription();
+        CreateQueueOptions GetQueueDescription();
     }
 }

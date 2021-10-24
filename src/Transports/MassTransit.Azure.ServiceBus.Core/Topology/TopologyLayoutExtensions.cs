@@ -8,12 +8,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology
         public static void LogResult(this BrokerTopology topology)
         {
             foreach (var topic in topology.Topics)
-                LogContext.Info?.Log("Topic: {Topic}", topic.TopicDescription.Path);
+                LogContext.Info?.Log("Topic: {Topic}", topic.TopicDescription.Name);
 
             foreach (var subscription in topology.Subscriptions)
             {
                 LogContext.Info?.Log("Subscription: {Subscription}, topic: {Topic}", subscription.SubscriptionDescription.SubscriptionName,
-                    subscription.SubscriptionDescription.TopicPath);
+                    subscription.SubscriptionDescription.TopicName);
             }
         }
     }

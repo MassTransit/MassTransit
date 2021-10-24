@@ -1,6 +1,7 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
+    using global::Azure.Messaging.ServiceBus;
     using Topology;
 
 

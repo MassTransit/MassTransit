@@ -52,7 +52,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
         [Test]
         public async Task Should_succeed()
         {
-            await _handler;
+            try
+            {
+                await _handler;
+            }
+            catch(System.Exception e)
+            {
+                throw;
+            }
         }
 
         Task<ConsumeContext<PingMessage>> _handler;

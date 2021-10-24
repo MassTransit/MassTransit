@@ -2,9 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Management;
-
+    using global::Azure.Messaging.ServiceBus.Administration;
 
     public class TopicSubscriptionEntity :
         TopicSubscription,
@@ -15,8 +13,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
         readonly SubscriptionEntity _subscription;
 
         public TopicSubscriptionEntity(long id, long subscriptionId, TopicEntity source, TopicEntity destination,
-            SubscriptionDescription subscriptionDescription,
-            RuleDescription rule = null, Filter filter = null)
+            CreateSubscriptionOptions subscriptionDescription,
+            CreateRuleOptions rule = null, RuleFilter filter = null)
         {
             Id = id;
             _source = source;
@@ -39,8 +37,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
             return string.Join(", ",
                 new[]
                 {
-                    $"source: {_source.TopicDescription.Path}",
-                    $"destination: {_destination.TopicDescription.Path}",
+                    $"source: {_source.TopicDescription.Name}",
+                    $"destination: {_destination.TopicDescription.Name}",
                     $"subscription: {_subscription.SubscriptionDescription.SubscriptionName}"
                 }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
@@ -100,15 +98,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
                     return false;
 
                 return string.Equals(x.Subscription.SubscriptionDescription.SubscriptionName, y.Subscription.SubscriptionDescription.SubscriptionName)
-                    && string.Equals(x.Subscription.SubscriptionDescription.TopicPath, y.Subscription.SubscriptionDescription.TopicPath)
-                    && string.Equals(x.Destination.TopicDescription.Path, y.Destination.TopicDescription.Path);
+                    && string.Equals(x.Subscription.SubscriptionDescription.TopicName, y.Subscription.SubscriptionDescription.TopicName)
+                    && string.Equals(x.Destination.TopicDescription.Name, y.Destination.TopicDescription.Name);
             }
 
             public int GetHashCode(TopicSubscriptionEntity obj)
             {
                 var hashCode = obj.Subscription.SubscriptionDescription.SubscriptionName.GetHashCode();
-                hashCode = (hashCode * 397) ^ obj.Subscription.SubscriptionDescription.TopicPath.GetHashCode();
-                hashCode = (hashCode * 397) ^ obj.Destination.TopicDescription.Path.GetHashCode();
+                hashCode = (hashCode * 397) ^ obj.Subscription.SubscriptionDescription.TopicName.GetHashCode();
+                hashCode = (hashCode * 397) ^ obj.Destination.TopicDescription.Name.GetHashCode();
 
                 return hashCode;
             }

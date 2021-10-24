@@ -3,8 +3,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
     using System;
     using System.Collections.Generic;
     using Configuration;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Management;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using Topology;
     using Topology.Configurators;
     using Transport;
@@ -15,19 +14,19 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
         SubscriptionSettings
     {
         readonly SubscriptionConfigurator _subscriptionConfigurator;
-        readonly TopicDescription _topicDescription;
+        readonly CreateTopicOptions _topicDescription;
 
         public SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, string topicName, string subscriptionName)
             : this(configuration, Defaults.CreateTopicDescription(topicName), subscriptionName)
         {
         }
 
-        public SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, TopicDescription topicDescription, string subscriptionName)
-            : this(configuration, topicDescription, new SubscriptionConfigurator(topicDescription.Path, subscriptionName))
+        public SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, CreateTopicOptions topicDescription, string subscriptionName)
+            : this(configuration, topicDescription, new SubscriptionConfigurator(topicDescription.Name, subscriptionName))
         {
         }
 
-        SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, TopicDescription topicDescription, SubscriptionConfigurator configurator)
+        SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, CreateTopicOptions topicDescription, SubscriptionConfigurator configurator)
             : base(configuration, configurator)
         {
             _topicDescription = topicDescription;
@@ -38,11 +37,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 
         public ISubscriptionConfigurator SubscriptionConfigurator => _subscriptionConfigurator;
 
-        TopicDescription SubscriptionSettings.TopicDescription => _topicDescription;
-        SubscriptionDescription SubscriptionSettings.SubscriptionDescription => _subscriptionConfigurator.GetSubscriptionDescription();
+        CreateTopicOptions SubscriptionSettings.TopicDescription => _topicDescription;
+        CreateSubscriptionOptions SubscriptionSettings.SubscriptionDescription => _subscriptionConfigurator.GetSubscriptionDescription();
 
-        public RuleDescription Rule { get; set; }
-        public Filter Filter { get; set; }
+        public CreateRuleOptions Rule { get; set; }
+        public RuleFilter Filter { get; set; }
 
         public override TimeSpan LockDuration => _subscriptionConfigurator.LockDuration ?? Defaults.LockDuration;
 

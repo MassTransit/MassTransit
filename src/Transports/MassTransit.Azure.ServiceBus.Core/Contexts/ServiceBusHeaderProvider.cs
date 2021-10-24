@@ -3,15 +3,15 @@
     using System;
     using System.Collections.Generic;
     using Context;
-    using Microsoft.Azure.ServiceBus;
+    using global::Azure.Messaging.ServiceBus;
 
 
     public class ServiceBusHeaderProvider :
         IHeaderProvider
     {
-        readonly Message _message;
+        readonly ServiceBusReceivedMessage _message;
 
-        public ServiceBusHeaderProvider(Message message)
+        public ServiceBusHeaderProvider(ServiceBusReceivedMessage message)
         {
             _message = message;
         }
@@ -25,16 +25,16 @@
             if (!string.IsNullOrWhiteSpace(_message.ContentType))
                 yield return new KeyValuePair<string, object>(MessageHeaders.ContentType, _message.ContentType);
 
-            if (_message.UserProperties != null)
+            if (_message.ApplicationProperties != null)
             {
-                foreach (KeyValuePair<string, object> header in _message.UserProperties)
+                foreach (KeyValuePair<string, object> header in _message.ApplicationProperties)
                     yield return header;
             }
         }
 
         public bool TryGetHeader(string key, out object value)
         {
-            if (_message.UserProperties != null && _message.UserProperties.TryGetValue(key, out value))
+            if (_message.ApplicationProperties != null && _message.ApplicationProperties.TryGetValue(key, out value))
                 return true;
 
             if (nameof(_message.MessageId).Equals(key, StringComparison.OrdinalIgnoreCase))

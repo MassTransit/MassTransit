@@ -1,14 +1,12 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core
 {
-    using System;
-    using Microsoft.Azure.ServiceBus.Primitives;
-
+    using global::Azure;
+    using global::Azure.Core;
 
     public interface ServiceBusTokenProviderSettings
     {
-        string KeyName { get; }
-        string SharedAccessKey { get; }
-        TimeSpan TokenTimeToLive { get; }
-        TokenScope TokenScope { get; }
+        AzureNamedKeyCredential NamedKeyCredential { get; }
+        AzureSasCredential SasCredential { get; }
+        TokenCredential TokenCredential { get; }
     }
 }

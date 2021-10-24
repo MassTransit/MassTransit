@@ -2,10 +2,10 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 {
     using System;
     using System.Threading.Tasks;
+    using global::Azure.Messaging.ServiceBus;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using GreenPipes;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
-    using Microsoft.Azure.ServiceBus.Management;
+    using MassTransit.Azure.ServiceBus.Core.Transport;
 
 
     /// <summary>
@@ -19,25 +19,25 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         /// </summary>
         Uri Endpoint { get; }
 
-        IQueueClient CreateQueueClient(string entityPath);
+        (ServiceBusProcessor, ServiceBusSessionProcessor) CreateQueueClient(ReceiveSettings settings);
 
-        ISubscriptionClient CreateSubscriptionClient(string topicPath, string subscriptionName);
+        (ServiceBusProcessor, ServiceBusSessionProcessor) CreateSubscriptionClient(SubscriptionSettings settings);
 
-        IMessageSender CreateMessageSender(string entityPath);
+        ServiceBusSender CreateMessageSender(string entityPath);
 
         /// <summary>
         /// Create a queue in the host namespace (which is scoped to the full ServiceUri)
         /// </summary>
         /// <param name="queueDescription"></param>
         /// <returns></returns>
-        Task<QueueDescription> CreateQueue(QueueDescription queueDescription);
+        Task<QueueProperties> CreateQueue(CreateQueueOptions queueDescription);
 
         /// <summary>
         /// Create a topic in the root namespace
         /// </summary>
         /// <param name="topicDescription"></param>
         /// <returns></returns>
-        Task<TopicDescription> CreateTopic(TopicDescription topicDescription);
+        Task<TopicProperties> CreateTopic(CreateTopicOptions topicDescription);
 
         /// <summary>
         /// Create a topic subscription
@@ -46,13 +46,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         /// <param name="rule"></param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription subscriptionDescription, RuleDescription rule, Filter filter);
+        Task<SubscriptionProperties> CreateTopicSubscription(CreateSubscriptionOptions subscriptionDescription, CreateRuleOptions rule, RuleFilter filter);
 
         /// <summary>
         /// Delete a subscription from the topic
         /// </summary>
         /// <param name="description"></param>
         /// <returns></returns>
-        Task DeleteTopicSubscription(SubscriptionDescription description);
+        Task DeleteTopicSubscription(CreateSubscriptionOptions description);
     }
 }

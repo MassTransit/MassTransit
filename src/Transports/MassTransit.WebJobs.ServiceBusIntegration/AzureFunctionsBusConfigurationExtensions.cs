@@ -1,14 +1,17 @@
 namespace MassTransit
 {
     using System;
+    using System.Linq;
     using Azure.ServiceBus.Core;
     using ExtensionsDependencyInjectionIntegration;
+    using global::Azure.Core;
+    using global::Azure.Identity;
+    using global::Azure.Messaging.ServiceBus;
     using Microsoft.ApplicationInsights.DependencyCollector;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Primitives;
-    using Microsoft.Azure.Services.AppAuthentication;
     using Microsoft.Azure.WebJobs.ServiceBus;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using WebJobs.ServiceBusIntegration;
 
@@ -24,9 +27,15 @@ namespace MassTransit
         /// <param name="configure">
         /// Configure via <see cref="DependencyInjectionRegistrationExtensions.AddMassTransit" />, to configure consumers, etc.
         /// </param>
+        /// <param name="connectionStringConfigurationKey">
+        /// Optional, the name of the configuration value for the connection string. If not found
+        /// </param>
         /// <param name="configureBus">Optional, the configuration callback for the bus factory</param>
         /// <returns></returns>
-        public static IServiceCollection AddMassTransitForAzureFunctions(this IServiceCollection services, Action<IServiceCollectionBusConfigurator> configure,
+        public static IServiceCollection AddMassTransitForAzureFunctions(
+            this IServiceCollection services,
+            Action<IServiceCollectionBusConfigurator> configure,
+            string connectionStringConfigurationKey = "ServiceBus",
             Action<IBusRegistrationContext, IServiceBusBusFactoryConfigurator> configureBus = default)
         {
             ConfigureApplicationInsights(services);
@@ -42,13 +51,24 @@ namespace MassTransit
                     {
                         var options = context.GetRequiredService<IOptions<ServiceBusOptions>>();
 
-                        options.Value.MessageHandlerOptions.AutoComplete = true;
+                        options.Value.AutoCompleteMessages = true;
 
-                        cfg.Host(options.Value.ConnectionString, h =>
+                        var config = context.GetRequiredService<IConfiguration>();
+                        var connectionString = config[connectionStringConfigurationKey];
+
+                        if (string.IsNullOrWhiteSpace(connectionString))
                         {
-                            if (IsMissingCredentials(options.Value.ConnectionString))
-                                h.TokenProvider = new ManagedIdentityTokenProvider(new AzureServiceTokenProvider());
+                            throw new ArgumentNullException(connectionStringConfigurationKey, "A connection string must be used for Azure Functions.");
+                        }
+
+                        cfg.Host(connectionString, h =>
+                        {
+                            if (IsMissingCredentials(connectionString))
+                            {
+                                h.TokenCredential = new ManagedIdentityCredential();
+                            }
                         });
+
                         cfg.UseServiceBusMessageScheduler();
 
                         configureBus?.Invoke(context, cfg);
@@ -60,9 +80,9 @@ namespace MassTransit
 
         static bool IsMissingCredentials(string connectionString)
         {
-            var builder = new ServiceBusConnectionStringBuilder(connectionString);
+            var properties = ServiceBusConnectionStringProperties.Parse(connectionString);
 
-            return string.IsNullOrWhiteSpace(builder.SasKeyName) && string.IsNullOrWhiteSpace(builder.SasKey) && string.IsNullOrWhiteSpace(builder.SasToken);
+            return string.IsNullOrWhiteSpace(properties.SharedAccessKeyName) && string.IsNullOrWhiteSpace(properties.SharedAccessKey) && string.IsNullOrWhiteSpace(properties.SharedAccessSignature);
         }
 
         static void ConfigureApplicationInsights(IServiceCollection services)

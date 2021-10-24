@@ -3,14 +3,12 @@
     using System;
     using Configurators;
     using Definition;
+    using global::Azure.Messaging.ServiceBus;
     using GreenPipes;
     using MassTransit.Configuration;
     using MassTransit.Configurators;
     using MassTransit.Topology;
     using MassTransit.Topology.EntityNameFormatters;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Management;
-    using Microsoft.Azure.ServiceBus.Primitives;
     using Pipeline;
     using Settings;
     using Topology;
@@ -43,14 +41,14 @@
 
             ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
             {
-                x.Ignore<MessagingEntityNotFoundException>();
-                x.Ignore<MessagingEntityAlreadyExistsException>();
-                x.Ignore<MessageNotFoundException>();
-                x.Ignore<MessageSizeExceededException>();
+                x.Ignore<ServiceBusException>(ex => ex.Reason == ServiceBusFailureReason.MessagingEntityNotFound);
+                x.Ignore<ServiceBusException>(ex => ex.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists);
+                x.Ignore<ServiceBusException>(ex => ex.Reason == ServiceBusFailureReason.MessageNotFound);
+                x.Ignore<ServiceBusException>(ex => ex.Reason == ServiceBusFailureReason.MessageSizeExceeded);
 
-                x.Ignore<UnauthorizedException>();
+                x.Ignore<UnauthorizedAccessException>();
 
-                x.Handle<ServerBusyException>(exception => exception.IsTransient);
+                x.Handle<ServiceBusException>(exception => exception.Reason == ServiceBusFailureReason.ServiceBusy && exception.IsTransient);
                 x.Handle<TimeoutException>();
 
                 x.Interval(5, TimeSpan.FromSeconds(10));
@@ -72,7 +70,7 @@
             {
                 _hostSettings = value ?? throw new ArgumentNullException(nameof(value));
 
-                if (_hostSettings.TokenProvider is ManagedIdentityTokenProvider)
+                if (_hostSettings.TokenCredential != null)
                     SetNamespaceSeparatorToUnderscore();
             }
         }

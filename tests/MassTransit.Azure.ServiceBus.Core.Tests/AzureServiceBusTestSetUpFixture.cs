@@ -9,8 +9,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus.Management;
-
+    using global::Azure;
 
     [SetUpFixture]
     public class AzureServiceBusTestSetUpFixture
@@ -27,22 +26,35 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             {
                 var managementClient = Configuration.GetManagementClient();
 
-                IList<TopicDescription> topics = await managementClient.GetTopicsAsync();
+                async Task<List<T>> ToListAsync<T>(AsyncPageable<T> pageable)
+                {
+                    var items = new List<T>();
+                    await foreach (var item in pageable)
+                    {
+                        items.Add(item);
+                    }
+
+                    return items;
+                }
+
+                var pageableTopics = managementClient.GetTopicsAsync();
+                var topics = await ToListAsync(pageableTopics);
                 while (topics.Count > 0)
                 {
                     foreach (var topic in topics)
-                        await managementClient.DeleteTopicAsync(topic.Path);
+                        await managementClient.DeleteTopicAsync(topic.Name);
 
-                    topics = await managementClient.GetTopicsAsync();
+                    topics = await ToListAsync(managementClient.GetTopicsAsync());
                 }
 
-                IList<QueueDescription> queues = await managementClient.GetQueuesAsync();
+                var pageableQueues = managementClient.GetQueuesAsync();
+                var queues = await ToListAsync(pageableQueues);
                 while (queues.Count > 0)
                 {
                     foreach (var queue in queues)
-                        await managementClient.DeleteQueueAsync(queue.Path);
+                        await managementClient.DeleteQueueAsync(queue.Name);
 
-                    queues = await managementClient.GetQueuesAsync();
+                    queues = await ToListAsync(managementClient.GetQueuesAsync());
                 }
             }
             catch (Exception exception)

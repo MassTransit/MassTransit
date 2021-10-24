@@ -3,18 +3,18 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
+    using global::Azure.Messaging.ServiceBus;
     using Util;
 
 
     public class SessionMessageLockContext :
         MessageLockContext
     {
-        readonly Message _message;
-        readonly IMessageSession _session;
+        readonly ServiceBusReceivedMessage _message;
+        readonly ProcessSessionMessageEventArgs _session;
         bool _deadLettered;
 
-        public SessionMessageLockContext(IMessageSession session, Message message)
+        public SessionMessageLockContext(ProcessSessionMessageEventArgs session, ServiceBusReceivedMessage message)
         {
             _session = session;
             _message = message;
@@ -24,28 +24,28 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         {
             return _deadLettered
                 ? TaskUtil.Completed
-                : _session.CompleteAsync(_message.SystemProperties.LockToken);
+                : _session.CompleteMessageAsync(_message);
         }
 
         public Task Abandon(Exception exception)
         {
             return _deadLettered
                 ? TaskUtil.Completed
-                : _session.AbandonAsync(_message.SystemProperties.LockToken, ExceptionUtil.GetExceptionHeaderDictionary(exception));
+                : _session.AbandonMessageAsync(_message, ExceptionUtil.GetExceptionHeaderDictionary(exception));
         }
 
         public async Task DeadLetter()
         {
             var headers = new Dictionary<string, object> {{MessageHeaders.Reason, "dead-letter"}};
 
-            await _session.DeadLetterAsync(_message.SystemProperties.LockToken, headers).ConfigureAwait(false);
+            await _session.DeadLetterMessageAsync(_message, headers).ConfigureAwait(false);
 
             _deadLettered = true;
         }
 
         public async Task DeadLetter(Exception exception)
         {
-            await _session.DeadLetterAsync(_message.SystemProperties.LockToken, ExceptionUtil.GetExceptionHeaderDictionary(exception)).ConfigureAwait(false);
+            await _session.DeadLetterMessageAsync(_message, ExceptionUtil.GetExceptionHeaderDictionary(exception)).ConfigureAwait(false);
 
             _deadLettered = true;
         }

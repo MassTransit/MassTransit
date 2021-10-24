@@ -61,7 +61,17 @@
 
             configure(tokenProviderConfigurator);
 
-            configurator.TokenProvider = tokenProviderConfigurator.GetTokenProvider();
+            configurator.SasCredential = tokenProviderConfigurator.SasCredential;
+        }
+
+        public static void NamedKey(this IServiceBusHostConfigurator configurator,
+            Action<INamedKeyTokenProviderConfigurator> configure)
+        {
+            var namedKeyConfigurator = new NamedKeyTokenProviderConfigurator();
+
+            configure(namedKeyConfigurator);
+
+            configurator.NamedKeyCredential = namedKeyConfigurator.NamedKeyCredential;
         }
 
         /// <summary>

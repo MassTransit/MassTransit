@@ -2,7 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
+    using global::Azure.Messaging.ServiceBus;
 
 
     /// <summary>
@@ -37,6 +37,6 @@ namespace MassTransit.Azure.ServiceBus.Core
         /// Renews the session lock
         /// </summary>
         /// <returns></returns>
-        Task RenewLockAsync(Message message);
+        Task RenewLockAsync(ServiceBusReceivedMessage message);
     }
 }

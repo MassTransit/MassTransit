@@ -5,8 +5,8 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Contexts;
+    using global::Azure.Messaging.ServiceBus;
     using GreenPipes;
-    using Microsoft.Azure.ServiceBus;
     using Pipeline;
     using Transports;
     using Util;
@@ -21,7 +21,7 @@
             _sendEndpointContext = new Recycle<ISendEndpointContextSupervisor>(() => supervisor.CreateSendEndpointContextSupervisor(settings));
         }
 
-        protected Task Move(ReceiveContext context, Action<Message, IDictionary<string, object>> preSend)
+        protected Task Move(ReceiveContext context, Action<ServiceBusMessage, IDictionary<string, object>> preSend)
         {
             IPipe<SendEndpointContext> clientPipe = Pipe.ExecuteAsync<SendEndpointContext>(async clientContext =>
             {
@@ -30,13 +30,13 @@
 
                 using var messageBodyStream = context.GetBodyStream();
 
-                var message = new Message(messageBodyStream.ReadAsBytes())
+                var message = new ServiceBusMessage(messageBodyStream.ReadAsBytes())
                 {
                     ContentType = context.ContentType?.MediaType,
                     TimeToLive = messageContext.TimeToLive,
                     CorrelationId = messageContext.CorrelationId,
                     MessageId = messageContext.MessageId,
-                    Label = messageContext.Label,
+                    Subject = messageContext.Label,
                     PartitionKey = messageContext.PartitionKey,
                     ReplyTo = messageContext.ReplyTo,
                     ReplyToSessionId = messageContext.ReplyToSessionId,
@@ -44,17 +44,17 @@
                 };
 
                 foreach (KeyValuePair<string, object> property in messageContext.Properties.Where(x => !x.Key.StartsWith("MT-")))
-                    message.UserProperties.Set(new HeaderValue(property.Key, property.Value));
+                    message.ApplicationProperties.Set(new HeaderValue(property.Key, property.Value));
 
-                message.UserProperties.SetHostHeaders();
+                message.ApplicationProperties.SetHostHeaders();
 
-                preSend(message, message.UserProperties);
+                preSend(message, message.ApplicationProperties);
 
                 await clientContext.Send(message).ConfigureAwait(false);
 
-                var reason = message.UserProperties.TryGetValue(MessageHeaders.Reason, out var reasonProperty) ? reasonProperty.ToString() : "";
+                var reason = message.ApplicationProperties.TryGetValue(MessageHeaders.Reason, out var reasonProperty) ? reasonProperty.ToString() : "";
                 if (reason == "fault")
-                    reason = message.UserProperties.TryGetValue(MessageHeaders.FaultMessage, out var fault) ? $"Fault: {fault}" : "Fault";
+                    reason = message.ApplicationProperties.TryGetValue(MessageHeaders.FaultMessage, out var fault) ? $"Fault: {fault}" : "Fault";
 
                 context.LogMoved(clientContext.EntityPath, reason);
             });

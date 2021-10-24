@@ -32,12 +32,9 @@
                     BusTestFixture.ConfigureBusDiagnostics(x);
                     x.Host(serviceUri, h =>
                     {
-                        h.SharedAccessSignature(s =>
+                        h.NamedKey(s =>
                         {
-                            s.KeyName = settings.KeyName;
-                            s.SharedAccessKey = settings.SharedAccessKey;
-                            s.TokenTimeToLive = settings.TokenTimeToLive;
-                            s.TokenScope = settings.TokenScope;
+                            s.NamedKeyCredential = settings.NamedKeyCredential;
                         });
                     });
 
@@ -74,12 +71,9 @@
                 var bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {
                     BusTestFixture.ConfigureBusDiagnostics(x);
-                    x.Host(serviceUri, h => h.SharedAccessSignature(s =>
+                    x.Host(serviceUri, h => h.NamedKey(s =>
                     {
-                        s.KeyName = settings.KeyName;
-                        s.SharedAccessKey = settings.SharedAccessKey;
-                        s.TokenTimeToLive = settings.TokenTimeToLive;
-                        s.TokenScope = settings.TokenScope;
+                        s.NamedKeyCredential = settings.NamedKeyCredential;
                     }));
                 });
 
@@ -106,12 +100,9 @@
                 {
                     x.Host(serviceUri, h =>
                     {
-                        h.SharedAccessSignature(s =>
+                        h.NamedKey(s =>
                         {
-                            s.KeyName = settings.KeyName;
-                            s.SharedAccessKey = settings.SharedAccessKey;
-                            s.TokenTimeToLive = settings.TokenTimeToLive;
-                            s.TokenScope = settings.TokenScope;
+                            s.NamedKeyCredential = settings.NamedKeyCredential;
                         });
                     });
 
@@ -146,12 +137,9 @@
                 var bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
                 {
                     BusTestFixture.ConfigureBusDiagnostics(x);
-                    x.Host(serviceUri, h => h.SharedAccessSignature(s =>
+                    x.Host(serviceUri, h => h.NamedKey(s =>
                     {
-                        s.KeyName = settings.KeyName;
-                        s.SharedAccessKey = settings.SharedAccessKey;
-                        s.TokenTimeToLive = settings.TokenTimeToLive;
-                        s.TokenScope = settings.TokenScope;
+                        s.NamedKeyCredential = settings.NamedKeyCredential;
                     }));
 
                     x.ReceiveEndpoint("no-messages-allowed", e =>
@@ -188,12 +176,9 @@
 
                     x.Host(serviceUri, h =>
                     {
-                        h.SharedAccessSignature(s =>
+                        h.NamedKey(s =>
                         {
-                            s.KeyName = settings.KeyName;
-                            s.SharedAccessKey = settings.SharedAccessKey;
-                            s.TokenTimeToLive = settings.TokenTimeToLive;
-                            s.TokenScope = settings.TokenScope;
+                            s.NamedKeyCredential = settings.NamedKeyCredential;
                         });
                     });
 

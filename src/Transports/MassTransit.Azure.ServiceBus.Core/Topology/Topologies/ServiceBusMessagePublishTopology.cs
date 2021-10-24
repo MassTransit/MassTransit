@@ -4,10 +4,10 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
     using System.Collections.Generic;
     using Builders;
     using Configurators;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
     using Metadata;
-    using Microsoft.Azure.ServiceBus.Management;
     using Settings;
     using Transport;
 
@@ -21,14 +21,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
         readonly IMessageTopology<TMessage> _messageTopology;
         readonly IServiceBusPublishTopology _publishTopology;
         readonly TopicConfigurator _topicConfigurator;
-        readonly Lazy<TopicDescription> _topicDescription;
+        readonly Lazy<CreateTopicOptions> _topicDescription;
 
         public ServiceBusMessagePublishTopology(IMessageTopology<TMessage> messageTopology, IServiceBusPublishTopology publishTopology)
         {
             _messageTopology = messageTopology;
             _publishTopology = publishTopology;
 
-            _topicDescription = new Lazy<TopicDescription>(GetTopicDescription);
+            _topicDescription = new Lazy<CreateTopicOptions>(GetTopicDescription);
 
             _topicConfigurator = new TopicConfigurator(messageTopology.EntityName, TypeMetadataCache<TMessage>.IsTemporaryMessageType);
             _implementedMessageTypes = new List<IServiceBusMessagePublishTopology>();
@@ -40,7 +40,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
             return true;
         }
 
-        public TopicDescription TopicDescription => _topicDescription.Value;
+        public CreateTopicOptions TopicDescription => _topicDescription.Value;
 
         public SendSettings GetSendSettings()
         {
@@ -55,7 +55,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
 
         public SubscriptionConfigurator GetSubscriptionConfigurator(string subscriptionName)
         {
-            return new SubscriptionConfigurator(TopicDescription.Path, _publishTopology.FormatSubscriptionName(subscriptionName));
+            return new SubscriptionConfigurator(TopicDescription.Name, _publishTopology.FormatSubscriptionName(subscriptionName));
         }
 
         string IMessageEntityConfigurator.Path => _topicConfigurator.Path;
@@ -131,7 +131,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
                 configurator.Apply(builder);
         }
 
-        TopicDescription GetTopicDescription()
+        CreateTopicOptions GetTopicDescription()
         {
             return _topicConfigurator.GetTopicDescription();
         }

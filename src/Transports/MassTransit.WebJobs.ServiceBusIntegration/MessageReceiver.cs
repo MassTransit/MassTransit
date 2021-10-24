@@ -4,11 +4,11 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
+    using global::Azure.Messaging.ServiceBus;
     using Azure.ServiceBus.Core;
     using Azure.ServiceBus.Core.Configuration;
     using Azure.ServiceBus.Core.Topology.Configurators;
     using Azure.ServiceBus.Core.Transport;
-    using Microsoft.Azure.ServiceBus;
     using Registration;
     using Saga;
 
@@ -32,7 +32,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             _receivers = new ConcurrentDictionary<string, Lazy<IBrokeredMessageReceiver>>();
         }
 
-        public Task Handle(string queueName, Message message, CancellationToken cancellationToken)
+        public Task Handle(string queueName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
         {
             var receiver = CreateBrokeredMessageReceiver(queueName, cfg =>
             {
@@ -43,7 +43,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             return receiver.Handle(message, cancellationToken);
         }
 
-        public Task Handle(string topicPath, string subscriptionName, Message message, CancellationToken cancellationToken)
+        public Task Handle(string topicPath, string subscriptionName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
         {
             var receiver = CreateBrokeredMessageReceiver(topicPath, subscriptionName, cfg =>
             {
@@ -54,7 +54,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             return receiver.Handle(message, cancellationToken);
         }
 
-        public Task HandleConsumer<TConsumer>(string queueName, Message message, CancellationToken cancellationToken)
+        public Task HandleConsumer<TConsumer>(string queueName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
             where TConsumer : class, IConsumer
         {
             var receiver = CreateBrokeredMessageReceiver(queueName, cfg =>
@@ -65,7 +65,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             return receiver.Handle(message, cancellationToken);
         }
 
-        public Task HandleConsumer<TConsumer>(string topicPath, string subscriptionName, Message message, CancellationToken cancellationToken)
+        public Task HandleConsumer<TConsumer>(string topicPath, string subscriptionName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
             where TConsumer : class, IConsumer
         {
             var receiver = CreateBrokeredMessageReceiver(topicPath, subscriptionName, cfg =>
@@ -76,7 +76,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             return receiver.Handle(message, cancellationToken);
         }
 
-        public Task HandleSaga<TSaga>(string queueName, Message message, CancellationToken cancellationToken)
+        public Task HandleSaga<TSaga>(string queueName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
             where TSaga : class, ISaga
         {
             var receiver = CreateBrokeredMessageReceiver(queueName, cfg =>
@@ -87,7 +87,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             return receiver.Handle(message, cancellationToken);
         }
 
-        public Task HandleSaga<TSaga>(string topicPath, string subscriptionName, Message message, CancellationToken cancellationToken)
+        public Task HandleSaga<TSaga>(string topicPath, string subscriptionName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
             where TSaga : class, ISaga
         {
             var receiver = CreateBrokeredMessageReceiver(topicPath, subscriptionName, cfg =>
@@ -98,7 +98,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             return receiver.Handle(message, cancellationToken);
         }
 
-        public Task HandleExecuteActivity<TActivity>(string queueName, Message message, CancellationToken cancellationToken)
+        public Task HandleExecuteActivity<TActivity>(string queueName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
             where TActivity : class
         {
             var receiver = CreateBrokeredMessageReceiver(queueName, cfg =>
@@ -139,7 +139,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
-            var subscriptionPath = EntityNameHelper.FormatSubscriptionPath(topicPath, subscriptionName);
+            var subscriptionPath = "abc";// EntityNameHelper.FormatSubscriptionPath(topicPath, subscriptionName);
 
             return _receivers.GetOrAdd(subscriptionPath, name => new Lazy<IBrokeredMessageReceiver>(() =>
             {

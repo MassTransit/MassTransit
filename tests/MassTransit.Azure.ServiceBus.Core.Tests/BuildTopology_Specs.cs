@@ -121,16 +121,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             var interfaceName = _nameFormatter.GetMessageName(typeof(SecondInterface)).ToString();
 
-            Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == interfaceName), Is.True);
+            Assert.That(topology.Topics.Any(x => x.TopicDescription.Name == interfaceName), Is.True);
             Assert.That(
-                topology.QueueSubscriptions.Any(x => x.Source.TopicDescription.Path == interfaceName && x.Destination.QueueDescription.Path == _inputQueueName),
+                topology.QueueSubscriptions.Any(x => x.Source.TopicDescription.Name == interfaceName && x.Destination.QueueDescription.Name == _inputQueueName),
                 Is.True);
 
             interfaceName = _nameFormatter.GetMessageName(typeof(FirstInterface)).ToString();
 
-            Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == interfaceName), Is.False);
+            Assert.That(topology.Topics.Any(x => x.TopicDescription.Name == interfaceName), Is.False);
             Assert.That(
-                topology.QueueSubscriptions.Any(x => x.Source.TopicDescription.Path == interfaceName && x.Destination.QueueDescription.Path == _inputQueueName),
+                topology.QueueSubscriptions.Any(x => x.Source.TopicDescription.Name == interfaceName && x.Destination.QueueDescription.Name == _inputQueueName),
                 Is.False);
         }
 
@@ -146,10 +146,10 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();
 
-            Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == singleInterfaceName), Is.True);
+            Assert.That(topology.Topics.Any(x => x.TopicDescription.Name == singleInterfaceName), Is.True);
             Assert.That(
                 topology.QueueSubscriptions.Any(x =>
-                    x.Source.TopicDescription.Path == singleInterfaceName && x.Destination.QueueDescription.Path == _inputQueueName),
+                    x.Source.TopicDescription.Name == singleInterfaceName && x.Destination.QueueDescription.Name == _inputQueueName),
                 Is.True);
         }
 
@@ -188,14 +188,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(FirstInterface)).ToString();
             var interfaceName = _nameFormatter.GetMessageName(typeof(SecondInterface)).ToString();
 
-            Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == interfaceName), Is.True);
+            Assert.That(topology.Topics.Any(x => x.TopicDescription.Name == interfaceName), Is.True);
             Assert.That(topology.Topics.Length, Is.EqualTo(2));
             Assert.That(topology.TopicSubscriptions.Length, Is.EqualTo(1));
             Assert.That(
                 topology.TopicSubscriptions.Any(x =>
-                    x.Source.TopicDescription.Path == interfaceName && x.Destination.TopicDescription.Path == singleInterfaceName), Is.True);
+                    x.Source.TopicDescription.Name == interfaceName && x.Destination.TopicDescription.Name == singleInterfaceName), Is.True);
 
-            Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == singleInterfaceName), Is.True);
+            Assert.That(topology.Topics.Any(x => x.TopicDescription.Name == singleInterfaceName), Is.True);
         }
 
         [Test]
@@ -208,7 +208,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();
 
-            Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == singleInterfaceName), Is.True);
+            Assert.That(topology.Topics.Any(x => x.TopicDescription.Name == singleInterfaceName), Is.True);
             Assert.That(topology.Topics.Length, Is.EqualTo(1));
             Assert.That(topology.TopicSubscriptions.Length, Is.EqualTo(0));
         }
@@ -245,14 +245,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(FirstInterface)).ToString();
             var interfaceName = _nameFormatter.GetMessageName(typeof(SecondInterface)).ToString();
 
-            Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == interfaceName), Is.True);
+            Assert.That(topology.Topics.Any(x => x.TopicDescription.Name == interfaceName), Is.True);
             Assert.That(topology.Topics.Length, Is.EqualTo(2));
             Assert.That(topology.TopicSubscriptions.Length, Is.EqualTo(1));
             Assert.That(
                 topology.TopicSubscriptions.Any(x =>
-                    x.Source.TopicDescription.Path == interfaceName && x.Destination.TopicDescription.Path == singleInterfaceName), Is.True);
+                    x.Source.TopicDescription.Name == interfaceName && x.Destination.TopicDescription.Name == singleInterfaceName), Is.True);
 
-            Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == singleInterfaceName), Is.True);
+            Assert.That(topology.Topics.Any(x => x.TopicDescription.Name == singleInterfaceName), Is.True);
         }
 
         [Test]
@@ -266,7 +266,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             var singleInterfaceName = _nameFormatter.GetMessageName(typeof(SingleInterface)).ToString();
 
-            Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == singleInterfaceName), Is.True);
+            Assert.That(topology.Topics.Any(x => x.TopicDescription.Name == singleInterfaceName), Is.True);
             Assert.That(topology.Topics.Length, Is.EqualTo(1));
             Assert.That(topology.TopicSubscriptions.Length, Is.EqualTo(0));
         }
@@ -284,20 +284,20 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             var secondInterfaceName = _nameFormatter.GetMessageName(typeof(SecondInterface)).ToString();
             var thirdInterfaceName = _nameFormatter.GetMessageName(typeof(ThirdInterface)).ToString();
 
-            Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == secondInterfaceName), Is.True);
+            Assert.That(topology.Topics.Any(x => x.TopicDescription.Name == secondInterfaceName), Is.True);
             Assert.That(topology.Topics.Length, Is.EqualTo(3));
             Assert.That(topology.TopicSubscriptions.Length, Is.EqualTo(2));
             Assert.That(
                 topology.TopicSubscriptions.Any(x =>
-                    x.Source.TopicDescription.Path == secondInterfaceName && x.Destination.TopicDescription.Path == firstInterfaceName),
+                    x.Source.TopicDescription.Name == secondInterfaceName && x.Destination.TopicDescription.Name == firstInterfaceName),
                 Is.True);
 
             Assert.That(
                 topology.TopicSubscriptions.Any(x =>
-                    x.Source.TopicDescription.Path == thirdInterfaceName && x.Destination.TopicDescription.Path == secondInterfaceName),
+                    x.Source.TopicDescription.Name == thirdInterfaceName && x.Destination.TopicDescription.Name == secondInterfaceName),
                 Is.True);
 
-            Assert.That(topology.Topics.Any(x => x.TopicDescription.Path == firstInterfaceName), Is.True);
+            Assert.That(topology.Topics.Any(x => x.TopicDescription.Name == firstInterfaceName), Is.True);
         }
 
         [SetUp]

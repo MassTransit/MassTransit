@@ -2,8 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
     using System.Runtime.Serialization;
-    using Microsoft.Azure.ServiceBus;
-
+    using global::Azure.Messaging.ServiceBus;
 
     public class ServiceBusConnectionException :
         ConnectionException
@@ -31,7 +30,7 @@ namespace MassTransit.Azure.ServiceBus.Core
         {
             return exception switch
             {
-                UnauthorizedException _ => false,
+                UnauthorizedAccessException _ => false,
                 _ => true
             };
         }

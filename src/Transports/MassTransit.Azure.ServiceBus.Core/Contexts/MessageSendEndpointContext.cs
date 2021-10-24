@@ -2,18 +2,17 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 {
     using System;
     using System.Threading.Tasks;
+    using global::Azure.Messaging.ServiceBus;
     using GreenPipes;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
 
 
     public class MessageSendEndpointContext :
         BasePipeContext,
         SendEndpointContext
     {
-        readonly IMessageSender _client;
+        readonly ServiceBusSender _client;
 
-        public MessageSendEndpointContext(ConnectionContext connectionContext, IMessageSender client)
+        public MessageSendEndpointContext(ConnectionContext connectionContext, ServiceBusSender client)
         {
             _client = client;
             ConnectionContext = connectionContext;
@@ -21,14 +20,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public ConnectionContext ConnectionContext { get; }
 
-        public string EntityPath => _client.Path;
+        public string EntityPath => _client.EntityPath;
 
-        public Task Send(Message message)
+        public Task Send(ServiceBusMessage message)
         {
-            return _client.SendAsync(message);
+            return _client.SendMessageAsync(message);
         }
 
-        public Task<long> ScheduleSend(Message message, DateTime scheduleEnqueueTimeUtc)
+        public Task<long> ScheduleSend(ServiceBusMessage message, DateTime scheduleEnqueueTimeUtc)
         {
             return _client.ScheduleMessageAsync(message, scheduleEnqueueTimeUtc);
         }

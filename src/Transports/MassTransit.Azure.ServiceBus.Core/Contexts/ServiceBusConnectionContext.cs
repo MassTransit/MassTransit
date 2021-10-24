@@ -6,11 +6,11 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using global::Azure.Messaging.ServiceBus;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using GreenPipes;
     using Internals.Extensions;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
-    using Microsoft.Azure.ServiceBus.Management;
+    using MassTransit.Azure.ServiceBus.Core.Transport;
     using Transports;
 
 
@@ -19,92 +19,128 @@
         ConnectionContext,
         IAsyncDisposable
     {
-        readonly ServiceBusConnection _connection;
-        readonly ManagementClient _managementClient;
-        readonly TimeSpan _operationTimeout;
-        readonly RetryPolicy _retryPolicy;
+        readonly ServiceBusClient _connection;
+        readonly ServiceBusAdministrationClient _managementClient;
 
-        public ServiceBusConnectionContext(ServiceBusConnection connection, ManagementClient managementClient, RetryPolicy retryPolicy,
-            TimeSpan operationTimeout, CancellationToken cancellationToken)
+        public ServiceBusConnectionContext(ServiceBusClient connection, ServiceBusAdministrationClient managementClient,
+            CancellationToken cancellationToken)
             : base(cancellationToken)
         {
             _connection = connection;
             _managementClient = managementClient;
-            _retryPolicy = retryPolicy;
-            _operationTimeout = operationTimeout;
         }
 
-        public Uri Endpoint => _connection.Endpoint;
+        public Uri Endpoint => new Uri($"amqps://{_connection.FullyQualifiedNamespace}");
 
-        public IQueueClient CreateQueueClient(string entityPath)
+        public (ServiceBusProcessor, ServiceBusSessionProcessor) CreateQueueClient(ReceiveSettings settings)
         {
-            return new QueueClient(_connection, entityPath, ReceiveMode.PeekLock, _retryPolicy);
+            return
+                (_connection.CreateProcessor(
+                    settings.Path,
+                    new ServiceBusProcessorOptions
+                    {
+                        AutoCompleteMessages = false,
+                        PrefetchCount = settings.PrefetchCount,
+                        MaxConcurrentCalls = settings.MaxConcurrentCalls,
+                        MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
+                        ReceiveMode = ServiceBusReceiveMode.PeekLock,
+                    }),
+                _connection.CreateSessionProcessor(
+                    settings.Path,
+                    new ServiceBusSessionProcessorOptions
+                    {
+                        AutoCompleteMessages = false,
+                        PrefetchCount = settings.PrefetchCount,
+                        MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
+                        ReceiveMode = ServiceBusReceiveMode.PeekLock,
+                    }));
         }
 
-        public ISubscriptionClient CreateSubscriptionClient(string topicPath, string subscriptionName)
+        public (ServiceBusProcessor, ServiceBusSessionProcessor) CreateSubscriptionClient(SubscriptionSettings settings)
         {
-            return new SubscriptionClient(_connection, topicPath, subscriptionName, ReceiveMode.PeekLock, _retryPolicy);
+            return
+                (_connection.CreateProcessor(
+                    settings.TopicDescription.Name, settings.SubscriptionDescription.SubscriptionName,
+                    new ServiceBusProcessorOptions
+                    {
+                        AutoCompleteMessages = false,
+                        PrefetchCount = settings.PrefetchCount,
+                        MaxConcurrentCalls = settings.MaxConcurrentCalls,
+                        MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
+                        ReceiveMode = ServiceBusReceiveMode.PeekLock,
+                    }),
+                _connection.CreateSessionProcessor(
+                    settings.TopicDescription.Name, settings.SubscriptionDescription.SubscriptionName,
+                    new ServiceBusSessionProcessorOptions
+                    {
+                        AutoCompleteMessages = false,
+                        PrefetchCount = settings.PrefetchCount,
+                        MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
+                        ReceiveMode = ServiceBusReceiveMode.PeekLock,
+                    }));
         }
 
-        public IMessageSender CreateMessageSender(string entityPath)
+        public ServiceBusSender CreateMessageSender(string entityPath)
         {
-            return new MessageSender(_connection, entityPath, _retryPolicy);
+            return _connection.CreateSender(entityPath);
         }
 
-        public async Task<QueueDescription> CreateQueue(QueueDescription queueDescription)
+        public async Task<QueueProperties> CreateQueue(CreateQueueOptions queueDescription)
         {
-            var queueExists = await QueueExistsAsync(queueDescription.Path).ConfigureAwait(false);
+            QueueProperties queueProperties;
+            var queueExists = await QueueExistsAsync(queueDescription.Name).ConfigureAwait(false);
             if (queueExists)
-                queueDescription = await GetQueueAsync(queueDescription.Path).ConfigureAwait(false);
+                queueProperties = await GetQueueAsync(queueDescription.Name).ConfigureAwait(false);
             else
             {
                 try
                 {
-                    TransportLogMessages.CreateQueue(queueDescription.Path);
+                    TransportLogMessages.CreateQueue(queueDescription.Name);
 
-                    queueDescription = await CreateQueueAsync(queueDescription).ConfigureAwait(false);
+                    queueProperties = await CreateQueueAsync(queueDescription).ConfigureAwait(false);
                 }
-                catch (MessagingEntityAlreadyExistsException)
+                catch (ServiceBusException sbe) when (sbe.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists)
                 {
-                    queueDescription = await GetQueueAsync(queueDescription.Path).ConfigureAwait(false);
+                    queueProperties = await GetQueueAsync(queueDescription.Name).ConfigureAwait(false);
                 }
             }
 
-            LogContext.Debug?.Log("Queue: {Queue} ({Attributes})", queueDescription.Path,
+            LogContext.Debug?.Log("Queue: {Queue} ({Attributes})", queueDescription.Name,
                 string.Join(", ",
                     new[]
                     {
                         queueDescription.RequiresDuplicateDetection ? "dupe detect" : "",
-                        queueDescription.EnableDeadLetteringOnMessageExpiration ? "dead letter" : "",
+                        queueDescription.DeadLetteringOnMessageExpiration ? "dead letter" : "",
                         queueDescription.RequiresSession ? "session" : "",
                         queueDescription.AutoDeleteOnIdle != Defaults.AutoDeleteOnIdle
                             ? $"auto-delete: {queueDescription.AutoDeleteOnIdle.ToFriendlyString()}"
                             : ""
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
 
-            return queueDescription;
+            return queueProperties;
         }
 
-        public async Task<TopicDescription> CreateTopic(TopicDescription topicDescription)
+        public async Task<TopicProperties> CreateTopic(CreateTopicOptions topicDescription)
         {
-            var topicExists = await TopicExistsAsync(topicDescription.Path).ConfigureAwait(false);
+            TopicProperties topicProperties;
+            var topicExists = await TopicExistsAsync(topicDescription.Name).ConfigureAwait(false);
             if (topicExists)
-                topicDescription = await GetTopicAsync(topicDescription.Path).ConfigureAwait(false);
+                topicProperties = await GetTopicAsync(topicDescription.Name).ConfigureAwait(false);
             else
             {
                 try
                 {
-                    TransportLogMessages.CreateTopic(topicDescription.Path);
+                    TransportLogMessages.CreateTopic(topicDescription.Name);
 
-                    topicDescription = await CreateTopicAsync(topicDescription).ConfigureAwait(false);
+                    topicProperties = await CreateTopicAsync(topicDescription).ConfigureAwait(false);
                 }
-                catch (MessagingEntityAlreadyExistsException)
+                catch(ServiceBusException e) when (e.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists)
                 {
-                    await GetTopicAsync(topicDescription.Path).ConfigureAwait(false);
+                    topicProperties = await GetTopicAsync(topicDescription.Name).ConfigureAwait(false);
                 }
             }
 
-            LogContext.Debug?.Log("Topic: {Topic} ({Attributes})", topicDescription.Path,
+            LogContext.Debug?.Log("Topic: {Topic} ({Attributes})", topicDescription.Name,
                 string.Join(", ",
                     new[]
                     {
@@ -113,16 +149,16 @@
                         topicDescription.SupportOrdering ? "ordered" : ""
                     }.Where(x => !string.IsNullOrWhiteSpace(x))));
 
-            return topicDescription;
+            return topicProperties;
         }
 
-        public async Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription description, RuleDescription rule, Filter filter)
+        public async Task<SubscriptionProperties> CreateTopicSubscription(CreateSubscriptionOptions description, CreateRuleOptions rule, RuleFilter filter)
         {
             var create = true;
-            SubscriptionDescription subscriptionDescription = null;
+            SubscriptionProperties subscriptionDescription = null;
             try
             {
-                subscriptionDescription = await GetSubscriptionAsync(description.TopicPath, description.SubscriptionName).ConfigureAwait(false);
+                subscriptionDescription = await GetSubscriptionAsync(description.TopicName, description.SubscriptionName).ConfigureAwait(false);
 
                 string NormalizeForwardTo(string forwardTo)
                 {
@@ -138,25 +174,25 @@
                 if (!targetForwardTo.Equals(currentForwardTo))
                 {
                     LogContext.Debug?.Log("Updating subscription: {Subscription} ({Topic} -> {ForwardTo})", subscriptionDescription.SubscriptionName,
-                        subscriptionDescription.TopicPath, subscriptionDescription.ForwardTo);
+                        subscriptionDescription.TopicName, subscriptionDescription.ForwardTo);
 
-                    await UpdateSubscriptionAsync(description).ConfigureAwait(false);
+                    await UpdateSubscriptionAsync(subscriptionDescription).ConfigureAwait(false);
                 }
 
                 if (rule != null)
                 {
-                    var ruleDescription = await GetRuleAsync(description.TopicPath, description.SubscriptionName, rule.Name).ConfigureAwait(false);
+                    var ruleDescription = await GetRuleAsync(description.TopicName, description.SubscriptionName, rule.Name).ConfigureAwait(false);
                     if (rule.Name == ruleDescription.Name && (rule.Filter != ruleDescription.Filter || rule.Action != ruleDescription.Action))
                     {
                         LogContext.Debug?.Log("Updating subscription Rule: {Rule} ({DescriptionFilter} -> {Filter})", rule.Name,
                             ruleDescription.Filter.ToString(), rule.Filter.ToString());
 
-                        await UpdateRuleAsync(description.TopicPath, description.SubscriptionName, rule).ConfigureAwait(false);
+                        await UpdateRuleAsync(description.TopicName, description.SubscriptionName, ruleDescription).ConfigureAwait(false);
                     }
                 }
                 else if (filter != null)
                 {
-                    IList<RuleDescription> rules = await GetRulesAsync(description.TopicPath, description.SubscriptionName).ConfigureAwait(false);
+                    IList<RuleProperties> rules = await GetRulesAsync(description.TopicName, description.SubscriptionName).ConfigureAwait(false);
                     if (rules.Count == 1)
                     {
                         var existingRule = rules[0];
@@ -168,14 +204,14 @@
 
                             existingRule.Filter = filter;
 
-                            await UpdateRuleAsync(description.TopicPath, description.SubscriptionName, existingRule).ConfigureAwait(false);
+                            await UpdateRuleAsync(description.TopicName, description.SubscriptionName, existingRule).ConfigureAwait(false);
                         }
                     }
                 }
 
                 create = false;
             }
-            catch (MessagingEntityNotFoundException)
+            catch (ServiceBusException e) when (e.Reason == ServiceBusFailureReason.MessagingEntityNotFound)
             {
             }
 
@@ -184,7 +220,7 @@
                 var created = false;
                 try
                 {
-                    LogContext.Debug?.Log("Creating subscription {Subscription} {Topic} -> {ForwardTo}", description.SubscriptionName, description.TopicPath,
+                    LogContext.Debug?.Log("Creating subscription {Subscription} {Topic} -> {ForwardTo}", description.SubscriptionName, description.TopicName,
                         description.ForwardTo);
 
                     subscriptionDescription = rule != null
@@ -195,88 +231,86 @@
 
                     created = true;
                 }
-                catch (MessagingEntityAlreadyExistsException)
+                catch (ServiceBusException e) when (e.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists)
                 {
                 }
 
                 if (!created)
                 {
-                    subscriptionDescription = await GetSubscriptionAsync(description.TopicPath, description.SubscriptionName)
+                    subscriptionDescription = await GetSubscriptionAsync(description.TopicName, description.SubscriptionName)
                         .ConfigureAwait(false);
                 }
             }
 
             LogContext.Debug?.Log("Subscription {Subscription} ({Topic} -> {ForwardTo})", subscriptionDescription.SubscriptionName,
-                subscriptionDescription.TopicPath, subscriptionDescription.ForwardTo);
+                subscriptionDescription.TopicName, subscriptionDescription.ForwardTo);
 
             return subscriptionDescription;
         }
 
-        public async Task DeleteTopicSubscription(SubscriptionDescription description)
+        public async Task DeleteTopicSubscription(CreateSubscriptionOptions description)
         {
             try
             {
-                await DeleteSubscriptionAsync(description.TopicPath, description.SubscriptionName).ConfigureAwait(false);
+                await DeleteSubscriptionAsync(description.TopicName, description.SubscriptionName).ConfigureAwait(false);
 
-                LogContext.Debug?.Log("Subscription Deleted: {Subscription} ({Topic} -> {ForwardTo})", description.SubscriptionName, description.TopicPath,
+                LogContext.Debug?.Log("Subscription Deleted: {Subscription} ({Topic} -> {ForwardTo})", description.SubscriptionName, description.TopicName,
                     description.ForwardTo);
             }
-            catch (MessagingEntityNotFoundException)
+            catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityNotFound)
             {
             }
             catch (Exception ex)
             {
                 LogContext.Error?.Log(ex, "Subscription Delete Faulted: {Subscription} ({Topic} -> {ForwardTo})", description.SubscriptionName,
-                    description.TopicPath, description.ForwardTo);
+                    description.TopicName, description.ForwardTo);
             }
         }
 
         public async ValueTask DisposeAsync()
         {
-            var address = _connection.Endpoint.ToString();
+            var address = _connection.FullyQualifiedNamespace;
 
             TransportLogMessages.DisconnectHost(address);
 
-            await _connection.CloseAsync().ConfigureAwait(false);
-
-            await _managementClient.CloseAsync().ConfigureAwait(false);
+            await _connection.DisposeAsync().ConfigureAwait(false);
 
             TransportLogMessages.DisconnectedHost(address);
         }
 
-        Task<QueueDescription> GetQueueAsync(string path)
+        Task<QueueProperties> GetQueueAsync(string path)
         {
-            return RunOperation(() => _managementClient.GetQueueAsync(path));
+            return RunOperation(async () => (await _managementClient.GetQueueAsync(path)).Value);
         }
 
         Task<bool> QueueExistsAsync(string path)
         {
-            return RunOperation(() => _managementClient.QueueExistsAsync(path));
+            return RunOperation(async () => (await _managementClient.QueueExistsAsync(path)).Value);
         }
 
-        Task<QueueDescription> CreateQueueAsync(QueueDescription queueDescription)
+        Task<QueueProperties> CreateQueueAsync(CreateQueueOptions queueDescription)
         {
-            return RunOperation(() => _managementClient.CreateQueueAsync(queueDescription));
+            return RunOperation(async () => (await _managementClient.CreateQueueAsync(queueDescription)).Value);
         }
 
-        Task<TopicDescription> GetTopicAsync(string path)
+        Task<TopicProperties> GetTopicAsync(string path)
         {
-            return RunOperation(() => _managementClient.GetTopicAsync(path));
+            return RunOperation(async () => (await _managementClient.GetTopicAsync(path)).Value);
         }
 
         Task<bool> TopicExistsAsync(string path)
         {
-            return RunOperation(() => _managementClient.TopicExistsAsync(path));
+            return RunOperation(async () => (await _managementClient.TopicExistsAsync(path)).Value);
         }
 
-        Task<TopicDescription> CreateTopicAsync(TopicDescription topicDescription)
+        Task<TopicProperties> CreateTopicAsync(CreateTopicOptions topicDescription)
         {
-            return RunOperation(() => _managementClient.CreateTopicAsync(topicDescription));
+            return RunOperation(async () => (await _managementClient.CreateTopicAsync(topicDescription)).Value);
         }
 
-        Task<SubscriptionDescription> GetSubscriptionAsync(string topicPath, string subscriptionName)
+        Task<SubscriptionProperties> GetSubscriptionAsync(string topicPath, string subscriptionName)
         {
-            return RunOperation(() => _managementClient.GetSubscriptionAsync(topicPath, subscriptionName));
+            return RunOperation(async () => (await _managementClient.GetSubscriptionAsync(topicPath, subscriptionName)).Value);
         }
 
         Task DeleteSubscriptionAsync(string topicPath, string subscriptionName)
@@ -284,54 +318,62 @@
             return RunOperation(() => _managementClient.DeleteSubscriptionAsync(topicPath, subscriptionName));
         }
 
-        Task<SubscriptionDescription> UpdateSubscriptionAsync(SubscriptionDescription description)
+        Task<SubscriptionProperties> UpdateSubscriptionAsync(SubscriptionProperties description)
         {
-            return RunOperation(() => _managementClient.UpdateSubscriptionAsync(description));
+            return RunOperation(async () => (await _managementClient.UpdateSubscriptionAsync(description)).Value);
         }
 
-        Task<RuleDescription> GetRuleAsync(string topicPath, string subscriptionName, string ruleName)
+        Task<RuleProperties> GetRuleAsync(string topicPath, string subscriptionName, string ruleName)
         {
-            return RunOperation(() => _managementClient.GetRuleAsync(topicPath, subscriptionName, ruleName));
+            return RunOperation(async () => (await _managementClient.GetRuleAsync(topicPath, subscriptionName, ruleName)).Value);
         }
 
-        Task<IList<RuleDescription>> GetRulesAsync(string topicPath, string subscriptionName)
+        Task<IList<RuleProperties>> GetRulesAsync(string topicPath, string subscriptionName)
         {
-            return RunOperation(() => _managementClient.GetRulesAsync(topicPath, subscriptionName));
+            return RunOperation(async () =>
+            {
+                var pageable = _managementClient.GetRulesAsync(topicPath, subscriptionName);
+                IList<RuleProperties> rules = new List<RuleProperties>();
+                await foreach (var rule in pageable)
+                {
+                    rules.Add(rule);
+                }
+
+                return rules;
+            });
         }
 
-        Task<RuleDescription> UpdateRuleAsync(string topicPath, string subscriptionName, RuleDescription ruleDescription)
+        Task<RuleProperties> UpdateRuleAsync(string topicPath, string subscriptionName, RuleProperties ruleDescription)
         {
-            return RunOperation(() => _managementClient.UpdateRuleAsync(topicPath, subscriptionName, ruleDescription));
+            return RunOperation(async () => (await _managementClient.UpdateRuleAsync(topicPath, subscriptionName, ruleDescription)).Value);
         }
 
-        Task<SubscriptionDescription> CreateSubscriptionAsync(SubscriptionDescription description, RuleDescription rule)
+        Task<SubscriptionProperties> CreateSubscriptionAsync(CreateSubscriptionOptions description, CreateRuleOptions rule)
         {
-            return RunOperation(() => _managementClient.CreateSubscriptionAsync(description, rule));
+            return RunOperation(async () => (await _managementClient.CreateSubscriptionAsync(description, rule)).Value);
         }
 
-        Task<SubscriptionDescription> CreateSubscriptionAsync(SubscriptionDescription description, Filter filter)
+        Task<SubscriptionProperties> CreateSubscriptionAsync(CreateSubscriptionOptions description, RuleFilter filter)
         {
-            var ruleDescription = new RuleDescription(NewId.NextGuid().ToString(), filter);
-            return RunOperation(() => _managementClient.CreateSubscriptionAsync(description, ruleDescription));
+            var ruleDescription = new CreateRuleOptions(NewId.NextGuid().ToString(), filter);
+            return RunOperation(async () => (await _managementClient.CreateSubscriptionAsync(description, ruleDescription)).Value);
         }
 
-        Task<SubscriptionDescription> CreateSubscriptionAsync(SubscriptionDescription description)
+        Task<SubscriptionProperties> CreateSubscriptionAsync(CreateSubscriptionOptions description)
         {
-            return RunOperation(() => _managementClient.CreateSubscriptionAsync(description));
+            return RunOperation(async () => (await _managementClient.CreateSubscriptionAsync(description)).Value);
         }
 
         async Task<T> RunOperation<T>(Func<Task<T>> operation)
         {
             T result = default;
-
-            await _retryPolicy.RunOperation(async () => result = await operation().ConfigureAwait(false), _operationTimeout).ConfigureAwait(false);
-
+            result = await operation().ConfigureAwait(false);
             return result;
         }
 
         Task RunOperation(Func<Task> operation)
         {
-            return _retryPolicy.RunOperation(operation, _operationTimeout);
+            return operation();
         }
     }
 }

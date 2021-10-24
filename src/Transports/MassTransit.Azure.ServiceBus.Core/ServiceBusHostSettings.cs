@@ -1,8 +1,9 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Primitives;
+    using global::Azure;
+    using global::Azure.Core;
+    using global::Azure.Messaging.ServiceBus;
 
 
     /// <summary>
@@ -16,14 +17,41 @@
         Uri ServiceUri { get; }
 
         /// <summary>
-        /// The token provider to access the namespace
+        /// The named key to use to connect to the Service Bus
         /// </summary>
-        ITokenProvider TokenProvider { get; }
+        /// <remarks>
+        /// This property cannot be used if <see cref="SasCredential"/> or <see cref="TokenCredential"/>
+        /// is being used.
+        /// </remarks>
+        AzureNamedKeyCredential NamedKeyCredential { get; }
 
         /// <summary>
-        /// The operation timeout for timing out operations
+        /// The shared access signature to use to connect to the Service Bus
         /// </summary>
-        TimeSpan OperationTimeout { get; }
+        /// <remarks>
+        /// This property cannot be used if <see cref="NamedKeyCredential"/> or <see cref="TokenCredential"/>
+        /// is being used.
+        /// </remarks>
+        AzureSasCredential SasCredential { get; }
+
+        /// <summary>
+        /// The token credential to use to connect to the Service Bus
+        /// </summary>
+        /// <remarks>
+        /// This property cannot be used if <see cref="SasCredential"/> or <see cref="NamedKeyCredential"/>
+        /// is being used.
+        /// </remarks>
+        TokenCredential TokenCredential { get; }
+
+        /// <summary>
+        /// The connection string to use to connect to the Service Bus
+        /// </summary>
+        /// <remarks>
+        /// If a credential is not part of the connection string, one of the other authentication
+        /// methods needs to be used. <see cref="NamedKeyCredential"/> or <see cref="SasCredential"/>
+        /// or <see cref="TokenCredential"/>
+        /// </remarks>
+        string ConnectionString { get; }
 
         /// <summary>
         /// The minimum back off interval for the exponential retry policy
@@ -41,8 +69,8 @@
         int RetryLimit { get; }
 
         /// <summary>
-        /// The type of transport to use AMQP or NetMessaging
+        /// The type of transport to use AMQP TCP or AMQP Websockets
         /// </summary>
-        TransportType TransportType { get; }
+        ServiceBusTransportType TransportType { get; }
     }
 }

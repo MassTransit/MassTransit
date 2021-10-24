@@ -21,11 +21,10 @@ namespace MassTransit.Azure.ServiceBus.Core
         string To { get; }
         string ReplyToSessionId { get; }
         string PartitionKey { get; }
-        string ViaPartitionKey { get; }
         string ReplyTo { get; }
         DateTime EnqueuedTime { get; }
         DateTime ScheduledEnqueueTime { get; }
-        IDictionary<string, object> Properties { get; }
+        IReadOnlyDictionary<string, object> Properties { get; }
         TimeSpan TimeToLive { get; }
         string CorrelationId { get; }
         string MessageId { get; }

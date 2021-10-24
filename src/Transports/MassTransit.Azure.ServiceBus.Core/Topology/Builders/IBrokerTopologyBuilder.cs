@@ -1,8 +1,7 @@
 namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
 {
     using Entities;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Management;
+    using global::Azure.Messaging.ServiceBus.Administration;
 
 
     public interface IBrokerTopologyBuilder
@@ -12,7 +11,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
         /// </summary>
         /// <param name="topicDescription">The immutable topic description</param>
         /// <returns>An entity handle used to reference the exchange in subsequent calls</returns>
-        TopicHandle CreateTopic(TopicDescription topicDescription);
+        TopicHandle CreateTopic(CreateTopicOptions topicDescription);
 
         /// <summary>
         /// Creates a subscription
@@ -22,7 +21,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
         /// <param name="rule"></param>
         /// <param name="filter"></param>
         /// <returns>An entity handle used to reference the binding in subsequent calls</returns>
-        SubscriptionHandle CreateSubscription(TopicHandle topic, SubscriptionDescription subscriptionDescription, RuleDescription rule, Filter filter);
+        SubscriptionHandle CreateSubscription(TopicHandle topic, CreateSubscriptionOptions subscriptionDescription, CreateRuleOptions rule, RuleFilter filter);
 
         /// <summary>
         /// Creates a subscription which forwards to a different topic
@@ -31,14 +30,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
         /// <param name="destination">The destination topic</param>
         /// <param name="subscriptionDescription"></param>
         /// <returns>An entity handle used to reference the binding in subsequent calls</returns>
-        TopicSubscriptionHandle CreateTopicSubscription(TopicHandle source, TopicHandle destination, SubscriptionDescription subscriptionDescription);
+        TopicSubscriptionHandle CreateTopicSubscription(TopicHandle source, TopicHandle destination, CreateSubscriptionOptions subscriptionDescription);
 
         /// <summary>
         /// Creates a queue
         /// </summary>
         /// <param name="queueDescription"></param>
         /// <returns></returns>
-        QueueHandle CreateQueue(QueueDescription queueDescription);
+        QueueHandle CreateQueue(CreateQueueOptions queueDescription);
 
         /// <summary>
         /// Creates a subscription which forwards to a queue
@@ -49,8 +48,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
         /// <param name="rule"></param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, SubscriptionDescription subscriptionDescription,
-            RuleDescription rule,
-            Filter filter);
+        QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, CreateSubscriptionOptions subscriptionDescription,
+            CreateRuleOptions rule,
+            RuleFilter filter);
     }
 }

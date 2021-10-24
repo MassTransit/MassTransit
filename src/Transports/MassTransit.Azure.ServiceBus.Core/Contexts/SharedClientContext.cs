@@ -3,9 +3,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using global::Azure.Messaging.ServiceBus;
     using GreenPipes;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
 
 
     public class SharedClientContext :
@@ -31,14 +30,19 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public bool IsClosedOrClosing => _context.IsClosedOrClosing;
 
-        public void OnMessageAsync(Func<IReceiverClient, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
+        public void OnMessageAsync(Func<ProcessMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback, Func<ProcessErrorEventArgs, Task> exceptionHandler)
         {
             _context.OnMessageAsync(callback, exceptionHandler);
         }
 
-        public void OnSessionAsync(Func<IMessageSession, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
+        public void OnSessionAsync(Func<ProcessSessionMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback, Func<ProcessErrorEventArgs, Task> exceptionHandler)
         {
             _context.OnSessionAsync(callback, exceptionHandler);
+        }
+
+        public Task StartAsync()
+        {
+            return _context.StartAsync();
         }
 
         public Task ShutdownAsync()

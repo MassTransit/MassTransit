@@ -3,8 +3,7 @@ namespace MassTransit.Azure.ServiceBus.Core
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
+    using global::Azure.Messaging.ServiceBus;
 
 
     /// <summary>
@@ -33,14 +32,20 @@ namespace MassTransit.Azure.ServiceBus.Core
         /// </summary>
         /// <param name="callback"></param>
         /// <param name="exceptionHandler"></param>
-        void OnMessageAsync(Func<IReceiverClient, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler);
+        void OnMessageAsync(Func<ProcessMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback, Func<ProcessErrorEventArgs, Task> exceptionHandler);
 
         /// <summary>
         /// Register a message session handler
         /// </summary>
         /// <param name="callback"></param>
         /// <param name="exceptionHandler"></param>
-        void OnSessionAsync(Func<IMessageSession, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler);
+        void OnSessionAsync(Func<ProcessSessionMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback, Func<ProcessErrorEventArgs, Task> exceptionHandler);
+
+        /// <summary>
+        /// Starts the message/session receivers
+        /// </summary>
+        /// <returns></returns>
+        Task StartAsync();
 
         /// <summary>
         /// Shutdown the message/session receivers

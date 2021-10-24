@@ -4,10 +4,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using global::Azure.Messaging.ServiceBus;
     using GreenPipes;
     using GreenPipes.Agents;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
     using Transport;
 
 
@@ -17,15 +16,20 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         IAsyncDisposable
     {
         readonly IAgent _agent;
-        readonly IQueueClient _queueClient;
-        readonly ClientSettings _settings;
-        bool _unregisterMessageHandler;
-        bool _unregisterSessionHandler;
+        readonly ServiceBusProcessor _queueClient;
+        readonly ServiceBusSessionProcessor _sessionClient;
+        bool _processQueueMessages;
+        bool _processSessionMessages;
 
-        public QueueClientContext(ConnectionContext connectionContext, IQueueClient queueClient, Uri inputAddress, ClientSettings settings, IAgent agent)
+        public QueueClientContext(
+            ConnectionContext connectionContext,
+            ServiceBusProcessor queueClient,
+            ServiceBusSessionProcessor sessionClient,
+            Uri inputAddress,
+            IAgent agent)
         {
             _queueClient = queueClient;
-            _settings = settings;
+            _sessionClient = sessionClient;
             _agent = agent;
             ConnectionContext = connectionContext;
             InputAddress = inputAddress;
@@ -33,45 +37,54 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public ConnectionContext ConnectionContext { get; }
 
-        public string EntityPath => _queueClient.Path;
+        public string EntityPath => _queueClient.EntityPath;
 
-        public bool IsClosedOrClosing => _queueClient.IsClosedOrClosing || _queueClient.ServiceBusConnection.IsClosedOrClosing;
+        public bool IsClosedOrClosing => _queueClient.IsClosed || _sessionClient.IsClosed;
 
         public Uri InputAddress { get; }
 
-        public void OnMessageAsync(Func<IReceiverClient, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
+        public void OnMessageAsync(Func<ProcessMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback, Func<ProcessErrorEventArgs, Task> exceptionHandler)
         {
-            _queueClient.RegisterMessageHandler(async (message, token) =>
-            {
-                await callback(_queueClient, message, token).ConfigureAwait(false);
-            }, _settings.GetOnMessageOptions(exceptionHandler));
+            _queueClient.ProcessMessageAsync += (args) => callback(args, args.Message, args.CancellationToken);
+            _queueClient.ProcessErrorAsync += exceptionHandler;
 
-            _unregisterMessageHandler = true;
+            _processQueueMessages = true;
         }
 
-        public void OnSessionAsync(Func<IMessageSession, Message, CancellationToken, Task> callback, Func<ExceptionReceivedEventArgs, Task> exceptionHandler)
+        public void OnSessionAsync(Func<ProcessSessionMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback, Func<ProcessErrorEventArgs, Task> exceptionHandler)
         {
-            _queueClient.RegisterSessionHandler(callback, _settings.GetSessionHandlerOptions(exceptionHandler));
+            _sessionClient.ProcessMessageAsync += (args) => callback(args, args.Message, args.CancellationToken);
+            _sessionClient.ProcessErrorAsync += exceptionHandler;
 
-            _unregisterSessionHandler = true;
+            _processSessionMessages = true;
+        }
+
+        public async Task StartAsync()
+        {
+            if (_queueClient != null && _processQueueMessages)
+            {
+                await _queueClient.StartProcessingAsync();
+            }
+
+            if(_sessionClient != null && _processSessionMessages)
+            {
+                await _sessionClient.StartProcessingAsync();
+            }
         }
 
         public async Task ShutdownAsync()
         {
             try
             {
-                if (_queueClient != null && !_queueClient.IsClosedOrClosing)
-                {
-                    if (_unregisterMessageHandler)
-                        await _queueClient.UnregisterMessageHandlerAsync(_settings.ShutdownTimeout).ConfigureAwait(false);
+                if (_queueClient != null && !_queueClient.IsClosed)
+                    await _queueClient.StopProcessingAsync().ConfigureAwait(false);
 
-                    if (_unregisterSessionHandler)
-                        await _queueClient.UnregisterSessionHandlerAsync(_settings.ShutdownTimeout).ConfigureAwait(false);
-                }
+                if (_sessionClient != null && !_sessionClient.IsClosed)
+                    await _sessionClient.StopProcessingAsync().ConfigureAwait(false);
             }
             catch (Exception exception)
             {
-                LogContext.Warning?.Log(exception, "Shutdown client faulted: {InputAddress}", InputAddress);
+                LogContext.Warning?.Log(exception, "Stop processing client faulted: {InputAddress}", InputAddress);
             }
         }
 
@@ -79,8 +92,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         {
             try
             {
-                if (_queueClient != null && !_queueClient.IsClosedOrClosing)
+                if (_queueClient != null && !_queueClient.IsClosed)
                     await _queueClient.CloseAsync().ConfigureAwait(false);
+
+                if (_sessionClient != null && !_sessionClient.IsClosed)
+                    await _sessionClient.CloseAsync().ConfigureAwait(false);
             }
             catch (Exception exception)
             {

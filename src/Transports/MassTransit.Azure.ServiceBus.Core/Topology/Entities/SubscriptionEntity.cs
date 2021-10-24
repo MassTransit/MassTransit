@@ -2,8 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Management;
+    using global::Azure.Messaging.ServiceBus.Administration;
 
 
     public class SubscriptionEntity :
@@ -12,8 +11,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
     {
         readonly TopicEntity _topic;
 
-        public SubscriptionEntity(long id, TopicEntity topic, SubscriptionDescription subscriptionDescription, RuleDescription rule = null,
-            Filter filter = null)
+        public SubscriptionEntity(long id, TopicEntity topic, CreateSubscriptionOptions subscriptionDescription, CreateRuleOptions rule = null,
+            RuleFilter filter = null)
         {
             Id = id;
 
@@ -30,17 +29,17 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
 
         public TopicHandle Topic => _topic;
 
-        public RuleDescription Rule { get; }
-        public Filter Filter { get; }
+        public CreateRuleOptions Rule { get; }
+        public RuleFilter Filter { get; }
 
-        public SubscriptionDescription SubscriptionDescription { get; }
+        public CreateSubscriptionOptions SubscriptionDescription { get; }
         public long Id { get; }
         public Subscription Subscription => this;
 
         public override string ToString()
         {
             return string.Join(", ",
-                new[] {$"topic: {_topic.TopicDescription.Path}", $"subscription: {SubscriptionDescription.SubscriptionName}"}.Where(x =>
+                new[] {$"topic: {_topic.TopicDescription.Name}", $"subscription: {SubscriptionDescription.SubscriptionName}"}.Where(x =>
                     !string.IsNullOrWhiteSpace(x)));
         }
 
@@ -63,11 +62,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
                     return false;
 
                 return string.Equals(x.SubscriptionDescription.SubscriptionName, y.SubscriptionDescription.SubscriptionName)
-                    && string.Equals(x.SubscriptionDescription.TopicPath, y.SubscriptionDescription.TopicPath)
+                    && string.Equals(x.SubscriptionDescription.TopicName, y.SubscriptionDescription.TopicName)
                     && x.SubscriptionDescription.AutoDeleteOnIdle == y.SubscriptionDescription.AutoDeleteOnIdle
                     && x.SubscriptionDescription.DefaultMessageTimeToLive == y.SubscriptionDescription.DefaultMessageTimeToLive
                     && x.SubscriptionDescription.EnableBatchedOperations == y.SubscriptionDescription.EnableBatchedOperations
-                    && x.SubscriptionDescription.EnableDeadLetteringOnMessageExpiration == y.SubscriptionDescription.EnableDeadLetteringOnMessageExpiration
+                    && x.SubscriptionDescription.DeadLetteringOnMessageExpiration == y.SubscriptionDescription.DeadLetteringOnMessageExpiration
                     && x.SubscriptionDescription.EnableDeadLetteringOnFilterEvaluationExceptions
                     == y.SubscriptionDescription.EnableDeadLetteringOnFilterEvaluationExceptions
                     && string.Equals(x.SubscriptionDescription.ForwardDeadLetteredMessagesTo, y.SubscriptionDescription.ForwardDeadLetteredMessagesTo)
@@ -83,11 +82,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
                 unchecked
                 {
                     var hashCode = obj.SubscriptionDescription.SubscriptionName.GetHashCode();
-                    hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.TopicPath.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.TopicName.GetHashCode();
                     hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.AutoDeleteOnIdle.GetHashCode();
                     hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.DefaultMessageTimeToLive.GetHashCode();
                     hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.EnableBatchedOperations.GetHashCode();
-                    hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.EnableDeadLetteringOnMessageExpiration.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.DeadLetteringOnMessageExpiration.GetHashCode();
                     hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.EnableDeadLetteringOnFilterEvaluationExceptions.GetHashCode();
                     if (!string.IsNullOrWhiteSpace(obj.SubscriptionDescription.ForwardDeadLetteredMessagesTo))
                         hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.ForwardDeadLetteredMessagesTo.GetHashCode();
@@ -125,13 +124,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
                     return false;
 
                 return string.Equals(x.SubscriptionDescription.SubscriptionName, y.SubscriptionDescription.SubscriptionName)
-                    && string.Equals(x.SubscriptionDescription.TopicPath, y.SubscriptionDescription.TopicPath);
+                    && string.Equals(x.SubscriptionDescription.TopicName, y.SubscriptionDescription.TopicName);
             }
 
             public int GetHashCode(SubscriptionEntity obj)
             {
                 var hashCode = obj.SubscriptionDescription.SubscriptionName.GetHashCode();
-                hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.TopicPath.GetHashCode();
+                hashCode = (hashCode * 397) ^ obj.SubscriptionDescription.TopicName.GetHashCode();
 
                 return hashCode;
             }

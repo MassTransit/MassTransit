@@ -2,8 +2,8 @@
 {
     using System;
     using System.Collections.Generic;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using GreenPipes;
-    using Microsoft.Azure.ServiceBus.Management;
 
 
     public class TopicConfigurator :
@@ -28,9 +28,9 @@
                 yield return this.Failure("AutoDeleteOnIdle", "must be zero, or >= 5:00");
         }
 
-        public TopicDescription GetTopicDescription()
+        public CreateTopicOptions GetTopicDescription()
         {
-            var topicDescription = new TopicDescription(FullPath);
+            var topicDescription = new CreateTopicOptions(FullPath);
 
             if (AutoDeleteOnIdle.HasValue)
                 topicDescription.AutoDeleteOnIdle = AutoDeleteOnIdle.Value;
@@ -48,7 +48,7 @@
                 topicDescription.EnablePartitioning = EnablePartitioning.Value;
 
             if (MaxSizeInMB.HasValue)
-                topicDescription.MaxSizeInMB = MaxSizeInMB.Value;
+                topicDescription.MaxSizeInMegabytes = MaxSizeInMB.Value;
 
             if (RequiresDuplicateDetection.HasValue)
                 topicDescription.RequiresDuplicateDetection = RequiresDuplicateDetection.Value;

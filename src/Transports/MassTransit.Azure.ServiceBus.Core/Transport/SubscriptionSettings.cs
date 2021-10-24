@@ -1,19 +1,18 @@
 namespace MassTransit.Azure.ServiceBus.Core.Transport
 {
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Management;
+    using global::Azure.Messaging.ServiceBus.Administration;
 
 
     public interface SubscriptionSettings :
         ClientSettings
     {
-        TopicDescription TopicDescription { get; }
+        CreateTopicOptions TopicDescription { get; }
 
-        SubscriptionDescription SubscriptionDescription { get; }
+        CreateSubscriptionOptions SubscriptionDescription { get; }
 
-        RuleDescription Rule { get; }
+        CreateRuleOptions Rule { get; }
 
-        Filter Filter { get; }
+        RuleFilter Filter { get; }
 
         bool RemoveSubscriptions { get; }
     }
