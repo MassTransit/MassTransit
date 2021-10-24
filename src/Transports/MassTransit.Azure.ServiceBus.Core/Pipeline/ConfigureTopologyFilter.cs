@@ -124,7 +124,7 @@
 
         Task Delete(ConnectionContext context, QueueSubscription subscription)
         {
-            return context.DeleteTopicSubscription(subscription.Subscription.SubscriptionDescription);
+            return context.DeleteTopicSubscription(subscription.Subscription.SubscriptionDescription.TopicName, subscription.Subscription.SubscriptionDescription.SubscriptionName);
         }
 
         Task Create(ConnectionContext context, TopicSubscription subscription)

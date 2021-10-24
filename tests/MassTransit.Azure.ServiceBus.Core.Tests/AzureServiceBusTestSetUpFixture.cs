@@ -7,10 +7,8 @@ using NUnit.Framework;
 namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus.Management;
-
+    using MassTransit.Testing;
 
     [SetUpFixture]
     public class AzureServiceBusTestSetUpFixture
@@ -27,22 +25,24 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             {
                 var managementClient = Configuration.GetManagementClient();
 
-                IList<TopicDescription> topics = await managementClient.GetTopicsAsync();
+                var pageableTopics = managementClient.GetTopicsAsync();
+                var topics = await pageableTopics.ToListAsync();
                 while (topics.Count > 0)
                 {
                     foreach (var topic in topics)
-                        await managementClient.DeleteTopicAsync(topic.Path);
+                        await managementClient.DeleteTopicAsync(topic.Name);
 
-                    topics = await managementClient.GetTopicsAsync();
+                    topics = await managementClient.GetTopicsAsync().ToListAsync();
                 }
 
-                IList<QueueDescription> queues = await managementClient.GetQueuesAsync();
+                var pageableQueues = managementClient.GetQueuesAsync();
+                var queues = await pageableQueues.ToListAsync();
                 while (queues.Count > 0)
                 {
                     foreach (var queue in queues)
-                        await managementClient.DeleteQueueAsync(queue.Path);
+                        await managementClient.DeleteQueueAsync(queue.Name);
 
-                    queues = await managementClient.GetQueuesAsync();
+                    queues = await managementClient.GetQueuesAsync().ToListAsync();
                 }
             }
             catch (Exception exception)

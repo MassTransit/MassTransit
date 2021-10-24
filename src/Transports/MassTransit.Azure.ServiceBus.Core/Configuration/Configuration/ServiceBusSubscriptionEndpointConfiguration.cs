@@ -6,8 +6,8 @@
     using Builders;
     using Context;
     using Contexts;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using GreenPipes;
-    using Microsoft.Azure.ServiceBus;
     using Pipeline;
     using Settings;
     using Transport;
@@ -67,12 +67,12 @@
             CreateReceiveEndpoint(host, context);
         }
 
-        public Filter Filter
+        public RuleFilter Filter
         {
             set => _settings.Filter = value;
         }
 
-        public RuleDescription Rule
+        public CreateRuleOptions Rule
         {
             set => _settings.Rule = value;
         }

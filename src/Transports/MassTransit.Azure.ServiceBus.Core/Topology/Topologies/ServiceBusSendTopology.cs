@@ -2,9 +2,9 @@
 {
     using System;
     using Builders;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using MassTransit.Topology;
     using MassTransit.Topology.Topologies;
-    using Microsoft.Azure.ServiceBus.Management;
     using Settings;
     using Transport;
 
@@ -50,7 +50,7 @@
         public SendSettings GetErrorSettings(IQueueConfigurator configurator)
         {
             var description = configurator.GetQueueDescription();
-            description.Path += ErrorQueueSuffix;
+            description.Name += ErrorQueueSuffix;
 
             var errorSettings = new QueueSendSettings(description);
 
@@ -62,7 +62,7 @@
         public SendSettings GetDeadLetterSettings(IQueueConfigurator configurator)
         {
             var description = configurator.GetQueueDescription();
-            description.Path += DeadLetterQueueSuffix;
+            description.Name += DeadLetterQueueSuffix;
 
             var deadLetterSetting = new QueueSendSettings(description);
 
@@ -80,7 +80,7 @@
             return messageTopology;
         }
 
-        static QueueDescription GetQueueDescription(ServiceBusEndpointAddress address)
+        static CreateQueueOptions GetQueueDescription(ServiceBusEndpointAddress address)
         {
             var queueDescription = Defaults.CreateQueueDescription(address.Path);
 
@@ -90,7 +90,7 @@
             return queueDescription;
         }
 
-        static TopicDescription GetTopicDescription(ServiceBusEndpointAddress address)
+        static CreateTopicOptions GetTopicDescription(ServiceBusEndpointAddress address)
         {
             var topicDescription = Defaults.CreateTopicDescription(address.Path);
 

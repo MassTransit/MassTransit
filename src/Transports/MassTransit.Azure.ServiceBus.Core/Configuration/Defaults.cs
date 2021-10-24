@@ -2,8 +2,7 @@
 {
     using System;
     using System.ComponentModel;
-    using Microsoft.Azure.ServiceBus.Management;
-
+    using global::Azure.Messaging.ServiceBus.Administration;
 
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class Defaults
@@ -18,22 +17,22 @@
         public static TimeSpan MessageWaitTimeout { get; set; } = TimeSpan.FromSeconds(10);
         public static TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
-        public static QueueDescription CreateQueueDescription(string queueName)
+        public static CreateQueueOptions CreateQueueDescription(string queueName)
         {
-            return new QueueDescription(queueName)
+            return new CreateQueueOptions(queueName)
             {
                 AutoDeleteOnIdle = AutoDeleteOnIdle,
                 DefaultMessageTimeToLive = DefaultMessageTimeToLive,
                 EnableBatchedOperations = true,
-                EnableDeadLetteringOnMessageExpiration = true,
+                DeadLetteringOnMessageExpiration = true,
                 LockDuration = LockDuration,
                 MaxDeliveryCount = 5
             };
         }
 
-        public static TopicDescription CreateTopicDescription(string topicName)
+        public static CreateTopicOptions CreateTopicDescription(string topicName)
         {
-            return new TopicDescription(topicName)
+            return new CreateTopicOptions(topicName)
             {
                 AutoDeleteOnIdle = AutoDeleteOnIdle,
                 DefaultMessageTimeToLive = DefaultMessageTimeToLive,

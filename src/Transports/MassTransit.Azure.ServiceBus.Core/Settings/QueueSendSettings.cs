@@ -1,7 +1,7 @@
 namespace MassTransit.Azure.ServiceBus.Core.Settings
 {
     using System;
-    using Microsoft.Azure.ServiceBus.Management;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using Topology;
     using Topology.Builders;
     using Transport;
@@ -11,9 +11,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
         SendSettings,
         IEntityConfigurator
     {
-        readonly QueueDescription _description;
+        readonly CreateQueueOptions _description;
 
-        public QueueSendSettings(QueueDescription description)
+        public QueueSendSettings(CreateQueueOptions description)
         {
             _description = description;
         }
@@ -50,7 +50,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
             set => _description.UserMetadata = value;
         }
 
-        public string EntityPath => _description.Path;
+        public string EntityPath => _description.Name;
 
         public BrokerTopology GetBrokerTopology()
         {

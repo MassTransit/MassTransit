@@ -3,11 +3,10 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using global::Azure.Messaging.ServiceBus;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using GreenPipes;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Core;
-    using Microsoft.Azure.ServiceBus.Management;
-
+    using MassTransit.Azure.ServiceBus.Core.Transport;
 
     public class SharedConnectionContext :
         ProxyPipeContext,
@@ -24,39 +23,49 @@
 
         public override CancellationToken CancellationToken { get; }
 
-        public IQueueClient CreateQueueClient(string entityPath)
+        public ServiceBusProcessor CreateQueueProcessor(ReceiveSettings settings)
         {
-            return _context.CreateQueueClient(entityPath);
+            return _context.CreateQueueProcessor(settings);
         }
 
-        public ISubscriptionClient CreateSubscriptionClient(string topicPath, string subscriptionName)
+        public ServiceBusSessionProcessor CreateQueueSessionProcessor(ReceiveSettings settings)
         {
-            return _context.CreateSubscriptionClient(topicPath, subscriptionName);
+            return _context.CreateQueueSessionProcessor(settings);
         }
 
-        public IMessageSender CreateMessageSender(string entityPath)
+        public ServiceBusProcessor CreateSubscriptionProcessor(SubscriptionSettings settings)
+        {
+            return _context.CreateSubscriptionProcessor(settings);
+        }
+
+        public ServiceBusSessionProcessor CreateSubscriptionSessionProcessor(SubscriptionSettings settings)
+        {
+            return _context.CreateSubscriptionSessionProcessor(settings);
+        }
+
+        public ServiceBusSender CreateMessageSender(string entityPath)
         {
             return _context.CreateMessageSender(entityPath);
         }
 
-        public Task<QueueDescription> CreateQueue(QueueDescription queueDescription)
+        public Task<QueueProperties> CreateQueue(CreateQueueOptions queueDescription)
         {
             return _context.CreateQueue(queueDescription);
         }
 
-        public Task<TopicDescription> CreateTopic(TopicDescription topicDescription)
+        public Task<TopicProperties> CreateTopic(CreateTopicOptions topicDescription)
         {
             return _context.CreateTopic(topicDescription);
         }
 
-        public Task<SubscriptionDescription> CreateTopicSubscription(SubscriptionDescription subscriptionDescription, RuleDescription rule, Filter filter)
+        public Task<SubscriptionProperties> CreateTopicSubscription(CreateSubscriptionOptions subscriptionDescription, CreateRuleOptions rule, RuleFilter filter)
         {
             return _context.CreateTopicSubscription(subscriptionDescription, rule, filter);
         }
 
-        public Task DeleteTopicSubscription(SubscriptionDescription description)
+        public Task DeleteTopicSubscription(string topicName, string subscriptionName)
         {
-            return _context.DeleteTopicSubscription(description);
+            return _context.DeleteTopicSubscription(topicName, subscriptionName);
         }
 
         Uri ConnectionContext.Endpoint => _context.Endpoint;

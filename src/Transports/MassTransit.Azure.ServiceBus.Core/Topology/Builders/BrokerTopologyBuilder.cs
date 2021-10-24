@@ -2,9 +2,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
 {
     using System.Threading;
     using Entities;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using MassTransit.Topology.Entities;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Management;
 
 
     public class BrokerTopologyBuilder :
@@ -33,14 +32,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
         protected EntityCollection<TopicSubscriptionEntity, TopicSubscriptionHandle> TopicSubscriptions { get; }
         protected NamedEntityCollection<QueueEntity, QueueHandle> Queues { get; }
 
-        public TopicHandle CreateTopic(TopicDescription topicDescription)
+        public TopicHandle CreateTopic(CreateTopicOptions topicDescription)
         {
             var exchange = new TopicEntity(GetNextId(), topicDescription);
 
             return Topics.GetOrAdd(exchange);
         }
 
-        public SubscriptionHandle CreateSubscription(TopicHandle topic, SubscriptionDescription subscriptionDescription, RuleDescription rule, Filter filter)
+        public SubscriptionHandle CreateSubscription(TopicHandle topic, CreateSubscriptionOptions subscriptionDescription, CreateRuleOptions rule, RuleFilter filter)
         {
             var topicEntity = Topics.Get(topic);
 
@@ -49,16 +48,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
             return Subscriptions.GetOrAdd(subscriptionEntity);
         }
 
-        public QueueHandle CreateQueue(QueueDescription queueDescription)
+        public QueueHandle CreateQueue(CreateQueueOptions queueDescription)
         {
             var queue = new QueueEntity(GetNextId(), queueDescription);
 
             return Queues.GetOrAdd(queue);
         }
 
-        public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, SubscriptionDescription subscriptionDescription,
-            RuleDescription rule,
-            Filter filter)
+        public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, CreateSubscriptionOptions subscriptionDescription,
+            CreateRuleOptions rule,
+            RuleFilter filter)
         {
             var topicEntity = Topics.Get(exchange);
 
@@ -72,7 +71,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
             return QueueSubscriptions.GetOrAdd(binding);
         }
 
-        public TopicSubscriptionHandle CreateTopicSubscription(TopicHandle source, TopicHandle destination, SubscriptionDescription subscriptionDescription)
+        public TopicSubscriptionHandle CreateTopicSubscription(TopicHandle source, TopicHandle destination, CreateSubscriptionOptions subscriptionDescription)
         {
             var sourceEntity = Topics.Get(source);
 

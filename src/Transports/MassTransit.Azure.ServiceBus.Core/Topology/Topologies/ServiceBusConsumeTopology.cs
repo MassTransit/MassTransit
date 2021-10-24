@@ -57,7 +57,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
 
             var topicDescription = Defaults.CreateTopicDescription(topicName);
 
-            var subscriptionConfigurator = new SubscriptionConfigurator(topicDescription.Path, subscriptionName);
+            var subscriptionConfigurator = new SubscriptionConfigurator(topicDescription.Name, subscriptionName);
 
             callback?.Invoke(subscriptionConfigurator);
 

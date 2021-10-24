@@ -1,7 +1,8 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
-    using Microsoft.Azure.ServiceBus.Primitives;
+    using global::Azure;
+    using global::Azure.Core;
 
 
     public class TestAzureServiceBusAccountSettings :
@@ -9,16 +10,10 @@
     {
         public TestAzureServiceBusAccountSettings()
         {
-            TokenTimeToLive = TimeSpan.FromDays(1);
-            TokenScope = TokenScope.Namespace;
         }
 
-        public string KeyName => Configuration.KeyName;
-
-        public string SharedAccessKey => Configuration.SharedAccessKey;
-
-        public TimeSpan TokenTimeToLive { get; }
-
-        public TokenScope TokenScope { get; }
+        public AzureNamedKeyCredential NamedKeyCredential => new AzureNamedKeyCredential(Configuration.KeyName, Configuration.SharedAccessKey);
+        public AzureSasCredential SasCredential { get; }
+        public TokenCredential TokenCredential { get; }
     }
 }

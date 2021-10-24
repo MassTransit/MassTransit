@@ -92,7 +92,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
             {
                 Type = "Azure Service Bus",
                 _hostConfiguration.HostAddress,
-                _hostConfiguration.Settings.OperationTimeout
             });
 
             _hostConfiguration.ConnectionContextSupervisor.Probe(context);

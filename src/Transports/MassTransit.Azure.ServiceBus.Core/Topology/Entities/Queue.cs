@@ -1,6 +1,6 @@
 namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
 {
-    using Microsoft.Azure.ServiceBus.Management;
+    using global::Azure.Messaging.ServiceBus.Administration;
 
 
     /// <summary>
@@ -8,6 +8,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
     /// </summary>
     public interface Queue
     {
-        QueueDescription QueueDescription { get; }
+        CreateQueueOptions QueueDescription { get; }
     }
 }

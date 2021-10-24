@@ -17,7 +17,7 @@ namespace MassTransit.Testing
         }
 
         public static async Task<TElement> First<TElement>(this IAsyncEnumerable<TElement> elements)
-            where TElement : class, IAsyncListElement
+            where TElement : class
         {
             await foreach (var element in elements.ConfigureAwait(false))
                 return element;
@@ -26,7 +26,7 @@ namespace MassTransit.Testing
         }
 
         public static async Task<int> Count<TElement>(this IAsyncEnumerable<TElement> elements)
-            where TElement : class, IAsyncListElement
+            where TElement : class
         {
             var count = 0;
             await foreach (var element in elements.ConfigureAwait(false))

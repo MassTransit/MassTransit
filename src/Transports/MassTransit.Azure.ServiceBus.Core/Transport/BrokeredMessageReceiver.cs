@@ -5,9 +5,9 @@
     using System.Threading.Tasks;
     using Context;
     using Contexts;
+    using global::Azure.Messaging.ServiceBus;
     using GreenPipes;
     using MassTransit.Pipeline;
-    using Microsoft.Azure.ServiceBus;
     using Transports;
     using Transports.Metrics;
 
@@ -48,7 +48,7 @@
             return _context.ConnectSendObserver(observer);
         }
 
-        async Task IBrokeredMessageReceiver.Handle(Message message, CancellationToken cancellationToken, Action<ReceiveContext> contextCallback)
+        async Task IBrokeredMessageReceiver.Handle(ServiceBusReceivedMessage message, CancellationToken cancellationToken, Action<ReceiveContext> contextCallback)
         {
             var context = new ServiceBusReceiveContext(message, _context);
             contextCallback?.Invoke(context);
@@ -65,7 +65,7 @@
             {
                 await _dispatcher.Dispatch(context, receiveLock).ConfigureAwait(false);
             }
-            catch (SessionLockLostException ex)
+            catch(ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.SessionLockLost)
             {
                 LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId}", message.MessageId);
 
@@ -74,7 +74,7 @@
 
                 throw;
             }
-            catch (MessageLockLostException ex)
+            catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessageLockLost)
             {
                 LogContext.Warning?.Log(ex, "Message Lock Lost: {MessageId}", message.MessageId);
 

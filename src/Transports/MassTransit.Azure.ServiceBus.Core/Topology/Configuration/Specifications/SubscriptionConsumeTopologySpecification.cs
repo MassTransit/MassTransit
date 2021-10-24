@@ -2,9 +2,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Specifications
 {
     using System.Collections.Generic;
     using Builders;
+    using global::Azure.Messaging.ServiceBus.Administration;
     using GreenPipes;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Management;
 
 
     /// <summary>
@@ -13,13 +12,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Specifications
     public class SubscriptionConsumeTopologySpecification :
         IServiceBusConsumeTopologySpecification
     {
-        readonly Filter _filter;
-        readonly RuleDescription _rule;
-        readonly SubscriptionDescription _subscriptionDescription;
-        readonly TopicDescription _topicDescription;
+        readonly RuleFilter _filter;
+        readonly CreateRuleOptions _rule;
+        readonly CreateSubscriptionOptions _subscriptionDescription;
+        readonly CreateTopicOptions _topicDescription;
 
-        public SubscriptionConsumeTopologySpecification(TopicDescription topicDescription, SubscriptionDescription subscriptionDescription,
-            RuleDescription rule, Filter filter)
+        public SubscriptionConsumeTopologySpecification(CreateTopicOptions topicDescription, CreateSubscriptionOptions subscriptionDescription,
+            CreateRuleOptions rule, RuleFilter filter)
         {
             _topicDescription = topicDescription;
             _subscriptionDescription = subscriptionDescription;
@@ -38,7 +37,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Specifications
 
             var subscriptionDescription = _subscriptionDescription;
 
-            subscriptionDescription.ForwardTo = builder.Queue.Queue.QueueDescription.Path;
+            subscriptionDescription.ForwardTo = builder.Queue.Queue.QueueDescription.Name;
 
             builder.CreateQueueSubscription(topic, builder.Queue, subscriptionDescription, _rule, _filter);
         }

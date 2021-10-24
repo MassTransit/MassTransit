@@ -1,7 +1,6 @@
 namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
 {
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Management;
+    using global::Azure.Messaging.ServiceBus.Administration;
 
 
     /// <summary>
@@ -9,12 +8,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
     /// </summary>
     public interface Subscription
     {
-        SubscriptionDescription SubscriptionDescription { get; }
+        CreateSubscriptionOptions SubscriptionDescription { get; }
 
         TopicHandle Topic { get; }
 
-        RuleDescription Rule { get; }
+        CreateRuleOptions Rule { get; }
 
-        Filter Filter { get; }
+        RuleFilter Filter { get; }
     }
 }

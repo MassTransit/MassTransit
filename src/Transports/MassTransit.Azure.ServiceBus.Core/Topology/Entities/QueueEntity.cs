@@ -2,14 +2,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
 {
     using System.Collections.Generic;
     using System.Linq;
-    using Microsoft.Azure.ServiceBus.Management;
+    using global::Azure.Messaging.ServiceBus.Administration;
 
 
     public class QueueEntity :
         Queue,
         QueueHandle
     {
-        public QueueEntity(long id, QueueDescription queueDescription)
+        public QueueEntity(long id, CreateQueueOptions queueDescription)
         {
             Id = id;
             QueueDescription = queueDescription;
@@ -18,13 +18,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
         public static IEqualityComparer<QueueEntity> NameComparer { get; } = new NameEqualityComparer();
         public static IEqualityComparer<QueueEntity> EntityComparer { get; } = new QueueEntityEqualityComparer();
 
-        public QueueDescription QueueDescription { get; }
+        public CreateQueueOptions QueueDescription { get; }
         public long Id { get; }
         public Queue Queue => this;
 
         public override string ToString()
         {
-            return string.Join(", ", new[] {$"path: {QueueDescription.Path}"}.Where(x => !string.IsNullOrWhiteSpace(x)));
+            return string.Join(", ", new[] {$"path: {QueueDescription.Name}"}.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 
 
@@ -41,18 +41,18 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
                     return false;
                 if (x.GetType() != y.GetType())
                     return false;
-                return string.Equals(x.QueueDescription.Path, y.QueueDescription.Path)
+                return string.Equals(x.QueueDescription.Name, y.QueueDescription.Name)
                     && x.QueueDescription.AutoDeleteOnIdle == y.QueueDescription.AutoDeleteOnIdle
                     && x.QueueDescription.DefaultMessageTimeToLive == y.QueueDescription.DefaultMessageTimeToLive
                     && x.QueueDescription.DuplicateDetectionHistoryTimeWindow == y.QueueDescription.DuplicateDetectionHistoryTimeWindow
                     && x.QueueDescription.EnableBatchedOperations == y.QueueDescription.EnableBatchedOperations
-                    && x.QueueDescription.EnableDeadLetteringOnMessageExpiration == y.QueueDescription.EnableDeadLetteringOnMessageExpiration
+                    && x.QueueDescription.DeadLetteringOnMessageExpiration == y.QueueDescription.DeadLetteringOnMessageExpiration
                     && x.QueueDescription.EnablePartitioning == y.QueueDescription.EnablePartitioning
                     && string.Equals(x.QueueDescription.ForwardDeadLetteredMessagesTo, y.QueueDescription.ForwardDeadLetteredMessagesTo)
                     && string.Equals(x.QueueDescription.ForwardTo, y.QueueDescription.ForwardTo)
                     && x.QueueDescription.LockDuration == y.QueueDescription.LockDuration
                     && x.QueueDescription.MaxDeliveryCount == y.QueueDescription.MaxDeliveryCount
-                    && x.QueueDescription.MaxSizeInMB == y.QueueDescription.MaxSizeInMB
+                    && x.QueueDescription.MaxSizeInMegabytes == y.QueueDescription.MaxSizeInMegabytes
                     && x.QueueDescription.RequiresDuplicateDetection == y.QueueDescription.RequiresDuplicateDetection
                     && x.QueueDescription.RequiresSession == y.QueueDescription.RequiresSession
                     && string.Equals(x.QueueDescription.UserMetadata, y.QueueDescription.UserMetadata);
@@ -62,12 +62,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
             {
                 unchecked
                 {
-                    var hashCode = obj.QueueDescription.Path.GetHashCode();
+                    var hashCode = obj.QueueDescription.Name.GetHashCode();
                     hashCode = (hashCode * 397) ^ obj.QueueDescription.AutoDeleteOnIdle.GetHashCode();
                     hashCode = (hashCode * 397) ^ obj.QueueDescription.DefaultMessageTimeToLive.GetHashCode();
                     hashCode = (hashCode * 397) ^ obj.QueueDescription.DuplicateDetectionHistoryTimeWindow.GetHashCode();
                     hashCode = (hashCode * 397) ^ obj.QueueDescription.EnableBatchedOperations.GetHashCode();
-                    hashCode = (hashCode * 397) ^ obj.QueueDescription.EnableDeadLetteringOnMessageExpiration.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.QueueDescription.DeadLetteringOnMessageExpiration.GetHashCode();
                     hashCode = (hashCode * 397) ^ obj.QueueDescription.EnablePartitioning.GetHashCode();
                     if (!string.IsNullOrWhiteSpace(obj.QueueDescription.ForwardDeadLetteredMessagesTo))
                         hashCode = (hashCode * 397) ^ obj.QueueDescription.ForwardDeadLetteredMessagesTo.GetHashCode();
@@ -99,12 +99,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
                     return false;
                 if (x.GetType() != y.GetType())
                     return false;
-                return string.Equals(x.QueueDescription.Path, y.QueueDescription.Path);
+                return string.Equals(x.QueueDescription.Name, y.QueueDescription.Name);
             }
 
             public int GetHashCode(QueueEntity obj)
             {
-                return obj.QueueDescription.Path.GetHashCode();
+                return obj.QueueDescription.Name.GetHashCode();
             }
         }
     }

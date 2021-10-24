@@ -3,8 +3,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using global::Azure.Messaging.ServiceBus;
     using GreenPipes;
-    using Microsoft.Azure.ServiceBus;
 
 
     public class SharedSendEndpointContext :
@@ -26,12 +26,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         string SendEndpointContext.EntityPath => _context.EntityPath;
 
-        Task SendEndpointContext.Send(Message message)
+        Task SendEndpointContext.Send(ServiceBusMessage message)
         {
             return _context.Send(message);
         }
 
-        Task<long> SendEndpointContext.ScheduleSend(Message message, DateTime scheduleEnqueueTimeUtc)
+        Task<long> SendEndpointContext.ScheduleSend(ServiceBusMessage message, DateTime scheduleEnqueueTimeUtc)
         {
             return _context.ScheduleSend(message, scheduleEnqueueTimeUtc);
         }

@@ -32,7 +32,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
                 var exchangeScope = context.CreateScope("topic");
                 exchangeScope.Set(new
                 {
-                    topic.TopicDescription.Path,
+                    topic.TopicDescription.Name,
                     topic.TopicDescription.EnablePartitioning,
                     topic.TopicDescription.SupportOrdering,
                     topic.TopicDescription.EnableBatchedOperations,
@@ -40,7 +40,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
                     topic.TopicDescription.AutoDeleteOnIdle,
                     topic.TopicDescription.DefaultMessageTimeToLive,
                     topic.TopicDescription.DuplicateDetectionHistoryTimeWindow,
-                    topic.TopicDescription.MaxSizeInMB
+                    topic.TopicDescription.MaxSizeInMegabytes
                 });
             }
 
@@ -49,7 +49,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
                 var exchangeScope = context.CreateScope("queue");
                 exchangeScope.Set(new
                 {
-                    queue.QueueDescription.Path,
+                    queue.QueueDescription.Name,
                     queue.QueueDescription.EnablePartitioning,
                     queue.QueueDescription.EnableBatchedOperations,
                     queue.QueueDescription.ForwardTo,
@@ -60,9 +60,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
                     queue.QueueDescription.AutoDeleteOnIdle,
                     queue.QueueDescription.DefaultMessageTimeToLive,
                     queue.QueueDescription.DuplicateDetectionHistoryTimeWindow,
-                    queue.QueueDescription.MaxSizeInMB,
+                    queue.QueueDescription.MaxSizeInMegabytes,
                     queue.QueueDescription.ForwardDeadLetteredMessagesTo,
-                    queue.QueueDescription.EnableDeadLetteringOnMessageExpiration
+                    queue.QueueDescription.DeadLetteringOnMessageExpiration
                 });
             }
 
@@ -98,7 +98,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
                 subscription.SubscriptionDescription.AutoDeleteOnIdle,
                 subscription.SubscriptionDescription.DefaultMessageTimeToLive,
                 subscription.SubscriptionDescription.ForwardDeadLetteredMessagesTo,
-                subscription.SubscriptionDescription.EnableDeadLetteringOnMessageExpiration
+                subscription.SubscriptionDescription.DeadLetteringOnMessageExpiration
             };
         }
     }

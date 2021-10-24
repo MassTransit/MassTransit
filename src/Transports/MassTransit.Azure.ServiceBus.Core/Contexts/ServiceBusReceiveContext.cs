@@ -5,17 +5,16 @@
     using System.IO;
     using System.Net.Mime;
     using Context;
-    using Microsoft.Azure.ServiceBus;
-
+    using global::Azure.Messaging.ServiceBus;
 
     public sealed class ServiceBusReceiveContext :
         BaseReceiveContext,
         BrokeredMessageContext
     {
-        readonly Message _message;
+        readonly ServiceBusReceivedMessage _message;
 
-        public ServiceBusReceiveContext(Message message, ReceiveEndpointContext receiveEndpointContext)
-            : base(message.SystemProperties.DeliveryCount > 1, receiveEndpointContext)
+        public ServiceBusReceiveContext(ServiceBusReceivedMessage message, ReceiveEndpointContext receiveEndpointContext)
+            : base(message.DeliveryCount > 1, receiveEndpointContext)
         {
             _message = message;
         }
@@ -28,25 +27,25 @@
 
         public TimeSpan TimeToLive => _message.TimeToLive;
 
-        public DateTime ExpiresAt => _message.ExpiresAtUtc;
+        public DateTime ExpiresAt => _message.ExpiresAt.UtcDateTime;
 
-        public IDictionary<string, object> Properties => _message.UserProperties;
+        public IReadOnlyDictionary<string, object> Properties => _message.ApplicationProperties;
 
-        public int DeliveryCount => _message.SystemProperties.DeliveryCount;
+        public int DeliveryCount => _message.DeliveryCount;
 
-        public string Label => _message.Label;
+        public string Label => _message.Subject;
 
-        public long SequenceNumber => _message.SystemProperties.SequenceNumber;
+        public long SequenceNumber => _message.SequenceNumber;
 
-        public long EnqueuedSequenceNumber => _message.SystemProperties.EnqueuedSequenceNumber;
+        public long EnqueuedSequenceNumber => _message.EnqueuedSequenceNumber;
 
-        public string LockToken => _message.SystemProperties.LockToken;
+        public string LockToken => _message.LockToken;
 
-        public DateTime LockedUntil => _message.SystemProperties.LockedUntilUtc;
+        public DateTime LockedUntil => _message.LockedUntil.UtcDateTime;
 
         public string SessionId => _message.SessionId;
 
-        public long Size => _message.Size;
+        public long Size => _message.Body?.ToArray().Length ?? 0;
 
         public string To => _message.To;
 
@@ -54,22 +53,20 @@
 
         public string PartitionKey => _message.PartitionKey;
 
-        public string ViaPartitionKey => _message.ViaPartitionKey;
-
         public string ReplyTo => _message.ReplyTo;
 
-        public DateTime EnqueuedTime => _message.SystemProperties.EnqueuedTimeUtc;
+        public DateTime EnqueuedTime => _message.EnqueuedTime.UtcDateTime;
 
-        public DateTime ScheduledEnqueueTime => _message.ScheduledEnqueueTimeUtc;
+        public DateTime ScheduledEnqueueTime => _message.ScheduledEnqueueTime.UtcDateTime;
 
         public override byte[] GetBody()
         {
-            return _message.Body;
+            return _message.Body.ToArray();
         }
 
         public override Stream GetBodyStream()
         {
-            return new MemoryStream(_message.Body, false);
+            return new MemoryStream(_message.Body.ToArray(), false);
         }
 
         protected override ContentType GetContentType()

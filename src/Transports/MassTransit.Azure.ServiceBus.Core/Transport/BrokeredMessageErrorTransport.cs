@@ -2,7 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
+    using global::Azure.Messaging.ServiceBus;
     using Pipeline;
     using Transports;
 
@@ -18,7 +18,7 @@
 
         public Task Send(ExceptionReceiveContext context)
         {
-            void PreSend(Message message, IDictionary<string, object> headers)
+            void PreSend(ServiceBusMessage message, IDictionary<string, object> headers)
             {
                 headers.SetExceptionHeaders(context);
 

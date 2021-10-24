@@ -4,7 +4,8 @@
     using Azure.ServiceBus.Core;
     using Azure.ServiceBus.Core.Configurators;
     using Definition;
-
+    using global::Azure.Messaging.ServiceBus;
+    using global::Azure.Messaging.ServiceBus.Administration;
 
     public static class ServiceBusBusFactoryConfiguratorExtensions
     {
@@ -23,6 +24,23 @@
             var hostConfigurator = new ServiceBusHostConfigurator(hostAddress);
 
             configure?.Invoke(hostConfigurator);
+
+            configurator.Host(hostConfigurator.Settings);
+        }
+
+        /// <summary>
+        /// Adds a service bus host using the MassTransit style URI host name with the pre-configured clients.
+        /// </summary>
+        /// <param name="configurator">The bus factory configurator</param>
+        /// <param name="hostAddress">
+        /// The host address, in MassTransit format (sb://namespace.servicebus.windows.net/scope)
+        /// </param>
+        /// <param name="serviceBusClient">A pre-configured client used to perform message operations on the Service Bus</param>
+        /// <param name="serviceBusAdministrationClient">A pre-configured client to perform namespace operations on the Service Bus</param>
+        public static void Host(this IServiceBusBusFactoryConfigurator configurator, Uri hostAddress,
+            ServiceBusClient serviceBusClient, ServiceBusAdministrationClient serviceBusAdministrationClient)
+        {
+            var hostConfigurator = new ServiceBusHostConfigurator(hostAddress, serviceBusClient, serviceBusAdministrationClient);
 
             configurator.Host(hostConfigurator.Settings);
         }
@@ -61,7 +79,17 @@
 
             configure(tokenProviderConfigurator);
 
-            configurator.TokenProvider = tokenProviderConfigurator.GetTokenProvider();
+            configurator.SasCredential = tokenProviderConfigurator.SasCredential;
+        }
+
+        public static void NamedKey(this IServiceBusHostConfigurator configurator,
+            Action<INamedKeyTokenProviderConfigurator> configure)
+        {
+            var namedKeyConfigurator = new NamedKeyTokenProviderConfigurator();
+
+            configure(namedKeyConfigurator);
+
+            configurator.NamedKeyCredential = namedKeyConfigurator.NamedKeyCredential;
         }
 
         /// <summary>

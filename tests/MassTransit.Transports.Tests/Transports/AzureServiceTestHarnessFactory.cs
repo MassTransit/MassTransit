@@ -3,6 +3,7 @@ namespace MassTransit.Transports.Tests.Transports
     using System;
     using System.Threading.Tasks;
     using Azure.ServiceBus.Core.Testing;
+    using global::Azure;
     using NUnit.Framework;
     using Testing;
 
@@ -12,7 +13,7 @@ namespace MassTransit.Transports.Tests.Transports
     {
         public async Task<BusTestHarness> CreateTestHarness()
         {
-            return new AzureServiceBusTestHarness(Configuration.ServiceEndpoint, Configuration.KeyName, Configuration.SharedAccessKey);
+            return new AzureServiceBusTestHarness(Configuration.ServiceEndpoint, new AzureNamedKeyCredential(Configuration.KeyName, Configuration.SharedAccessKey));
         }
 
 

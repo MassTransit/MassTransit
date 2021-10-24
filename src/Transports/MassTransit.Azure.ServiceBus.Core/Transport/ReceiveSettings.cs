@@ -1,6 +1,6 @@
 namespace MassTransit.Azure.ServiceBus.Core.Transport
 {
-    using Microsoft.Azure.ServiceBus.Management;
+    using global::Azure.Messaging.ServiceBus.Administration;
 
 
     public interface ReceiveSettings :
@@ -11,6 +11,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         /// </summary>
         bool RemoveSubscriptions { get; }
 
-        QueueDescription GetQueueDescription();
+        CreateQueueOptions GetQueueDescription();
     }
 }

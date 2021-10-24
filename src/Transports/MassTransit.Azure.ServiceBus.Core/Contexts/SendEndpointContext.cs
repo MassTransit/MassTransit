@@ -2,7 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 {
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
+    using global::Azure.Messaging.ServiceBus;
 
 
     public interface SendEndpointContext :
@@ -18,7 +18,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        Task Send(Message message);
+        Task Send(ServiceBusMessage message);
 
         /// <summary>
         /// Schedule a send in the future to the messaging entity
@@ -26,7 +26,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         /// <param name="message"></param>
         /// <param name="scheduleEnqueueTimeUtc"></param>
         /// <returns></returns>
-        Task<long> ScheduleSend(Message message, DateTime scheduleEnqueueTimeUtc);
+        Task<long> ScheduleSend(ServiceBusMessage message, DateTime scheduleEnqueueTimeUtc);
 
         /// <summary>
         /// Cancel a previously schedule send on the messaging entity

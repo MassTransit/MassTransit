@@ -1,8 +1,7 @@
 namespace MassTransit.Azure.ServiceBus.Core.Topology
 {
+    using global::Azure.Messaging.ServiceBus.Administration;
     using GreenPipes;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Management;
 
 
     public interface ISubscriptionConfigurator :
@@ -32,13 +31,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology
         /// <summary>
         /// Specify the filter for the subscription
         /// </summary>
-        Filter Filter { set; }
+        RuleFilter Filter { set; }
 
         /// <summary>
         /// Specify a rule for the subscription
         /// </summary>
-        RuleDescription Rule { set; }
+        CreateRuleOptions Rule { set; }
 
-        SubscriptionDescription GetSubscriptionDescription();
+        CreateSubscriptionOptions GetSubscriptionDescription();
     }
 }

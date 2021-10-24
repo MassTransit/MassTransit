@@ -2,35 +2,35 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 {
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Azure.ServiceBus;
-
+    using global::Azure.Messaging.ServiceBus;
+    using MassTransit.Util;
 
     public class BrokeredMessageSessionContext :
         MessageSessionContext
     {
-        readonly IMessageSession _session;
+        readonly ProcessSessionMessageEventArgs _session;
 
-        public BrokeredMessageSessionContext(IMessageSession session)
+        public BrokeredMessageSessionContext(ProcessSessionMessageEventArgs session)
         {
             _session = session;
         }
 
-        public Task<byte[]> GetStateAsync()
+        public async Task<byte[]> GetStateAsync()
         {
-            return _session.GetStateAsync();
+            return (await _session.GetSessionStateAsync())?.ToArray();
         }
 
         public Task SetStateAsync(byte[] sessionState)
         {
-            return _session.SetStateAsync(sessionState);
+            return _session.SetSessionStateAsync(new BinaryData(sessionState ?? Array.Empty<byte>()));
         }
 
-        public Task RenewLockAsync(Message message)
+        public Task RenewLockAsync(ServiceBusReceivedMessage message)
         {
-            return _session.RenewLockAsync(message);
+            return TaskUtil.Completed;
         }
 
-        public DateTime LockedUntilUtc => _session.LockedUntilUtc;
+        public DateTime LockedUntilUtc => _session.Message.LockedUntil.UtcDateTime;
 
         public string SessionId => _session.SessionId;
     }

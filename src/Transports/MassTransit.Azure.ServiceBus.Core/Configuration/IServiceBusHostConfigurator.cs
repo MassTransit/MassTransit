@@ -1,21 +1,49 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
-    using Microsoft.Azure.ServiceBus;
-    using Microsoft.Azure.ServiceBus.Primitives;
+    using global::Azure;
+    using global::Azure.Core;
+    using global::Azure.Messaging.ServiceBus;
 
 
     public interface IServiceBusHostConfigurator
     {
         /// <summary>
-        /// Sets the TokenProvider for the host
+        /// The named key to use to connect to the Service Bus
         /// </summary>
-        ITokenProvider TokenProvider { set; }
+        /// <remarks>
+        /// This property cannot be used if <see cref="SasCredential"/> or <see cref="TokenCredential"/>
+        /// is being used.
+        /// </remarks>
+        AzureNamedKeyCredential NamedKeyCredential { set; }
 
         /// <summary>
-        /// Sets the operation timeout for the messaging factory
+        /// The shared access signature to use to connect to the Service Bus
         /// </summary>
-        TimeSpan OperationTimeout { set; }
+        /// <remarks>
+        /// This property cannot be used if <see cref="NamedKeyCredential"/> or <see cref="TokenCredential"/>
+        /// is being used.
+        /// </remarks>
+        AzureSasCredential SasCredential { set; }
+
+        /// <summary>
+        /// The token credential to use to connect to the Service Bus
+        /// </summary>
+        /// <remarks>
+        /// This property cannot be used if <see cref="SasCredential"/> or <see cref="NamedKeyCredential"/>
+        /// is being used.
+        /// </remarks>
+        TokenCredential TokenCredential { set; }
+
+        /// <summary>
+        /// The connection string to use to connect to the Service Bus
+        /// </summary>
+        /// <remarks>
+        /// If a credential is not part of the connection string, one of the other authentication
+        /// methods needs to be used. <see cref="NamedKeyCredential"/> or <see cref="SasCredential"/>
+        /// or <see cref="TokenCredential"/>
+        /// </remarks>
+        string ConnectionString { set; }
 
         /// <summary>
         /// The minimum back off interval for the exponential retry policy
@@ -33,8 +61,8 @@
         int RetryLimit { set; }
 
         /// <summary>
-        /// Sets the messaging protocol to use with the messaging factory, defaults to AMQP.
+        /// Sets the messaging protocol to use with the messaging factory, defaults to AMQP TCP.
         /// </summary>
-        TransportType TransportType { set; }
+        ServiceBusTransportType TransportType { set; }
     }
 }

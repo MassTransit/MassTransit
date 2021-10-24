@@ -3,9 +3,9 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using global::Azure.Messaging.ServiceBus;
     using GreenPipes;
     using MassTransit.Pipeline;
-    using Microsoft.Azure.ServiceBus;
     using Transports.Metrics;
 
 
@@ -25,6 +25,6 @@
         /// <param name="cancellationToken">Specify an optional cancellationToken</param>
         /// <param name="contextCallback">Callback to adjust the context</param>
         /// <returns></returns>
-        Task Handle(Message message, CancellationToken cancellationToken = default, Action<ReceiveContext> contextCallback = null);
+        Task Handle(ServiceBusReceivedMessage message, CancellationToken cancellationToken = default, Action<ReceiveContext> contextCallback = null);
     }
 }
