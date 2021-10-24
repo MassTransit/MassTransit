@@ -20,15 +20,14 @@ namespace MassTransit
     {
         /// <summary>
         /// Add the Azure Function support for MassTransit, which uses Azure Service Bus, and configures
-        /// <see cref="IMessageReceiver" /> for use by functions to handle messages. Uses <see cref="ServiceBusOptions.ConnectionString" />
-        /// to connect to Azure Service Bus.
+        /// <see cref="IMessageReceiver" /> for use by functions to handle messages.
         /// </summary>
         /// <param name="services"></param>
         /// <param name="configure">
         /// Configure via <see cref="DependencyInjectionRegistrationExtensions.AddMassTransit" />, to configure consumers, etc.
         /// </param>
         /// <param name="connectionStringConfigurationKey">
-        /// Optional, the name of the configuration value for the connection string. If not found
+        /// Optional, the name of the configuration value for the connection string.
         /// </param>
         /// <param name="configureBus">Optional, the configuration callback for the bus factory</param>
         /// <returns></returns>

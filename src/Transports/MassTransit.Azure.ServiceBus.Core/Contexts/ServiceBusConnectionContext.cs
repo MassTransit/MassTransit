@@ -330,11 +330,7 @@
 
         Task<IList<RuleProperties>> GetRulesAsync(string topicPath, string subscriptionName)
         {
-            return RunOperation(async () =>
-            {
-                var pageableRules = _managementClient.GetRulesAsync(topicPath, subscriptionName);
-                return pageableRules.ToList();
-            });
+            return RunOperation(() => _managementClient.GetRulesAsync(topicPath, subscriptionName).ToList());
         }
 
         Task<RuleProperties> UpdateRuleAsync(string topicPath, string subscriptionName, RuleProperties ruleDescription)
