@@ -95,14 +95,12 @@
             await busHandle.StopAsync(new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
             var pageableRules = managementClient.GetRulesAsync(topicName, subscriptionName);
-            var rules = new List<RuleProperties>();
-            await foreach (var rule in pageableRules)
-                rules.Add(rule);
 
-            Assert.That(rules.Count, Is.EqualTo(1));
-            Assert.That(rules[0].Filter, Is.InstanceOf<SqlRuleFilter>());
+            Assert.That(await pageableRules.Count(), Is.EqualTo(1));
+            var rule = await pageableRules.First();
+            Assert.That(rule.Filter, Is.InstanceOf<SqlRuleFilter>());
 
-            var filter = rules[0].Filter as SqlRuleFilter;
+            var filter = rule.Filter as SqlRuleFilter;
             Assert.That(filter.SqlExpression, Is.EqualTo("0 = 1"));
 
             bus = Bus.Factory.CreateUsingAzureServiceBus(x =>
@@ -126,14 +124,12 @@
             await busHandle.StopAsync(new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
             pageableRules = managementClient.GetRulesAsync(topicName, subscriptionName);
-            rules = new List<RuleProperties>();
-            await foreach (var rule in pageableRules)
-                rules.Add(rule);
 
-            Assert.That(rules.Count, Is.EqualTo(1));
-            Assert.That(rules[0].Filter, Is.InstanceOf<SqlRuleFilter>());
+            Assert.That(await pageableRules.Count(), Is.EqualTo(1));
+            rule = await pageableRules.First();
+            Assert.That(rule.Filter, Is.InstanceOf<SqlRuleFilter>());
 
-            filter = rules[0].Filter as SqlRuleFilter;
+            filter = rule.Filter as SqlRuleFilter;
             Assert.That(filter.SqlExpression, Is.EqualTo("1 = 1"));
         }
 

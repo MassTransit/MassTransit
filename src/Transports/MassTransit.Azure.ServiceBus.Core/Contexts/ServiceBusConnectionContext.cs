@@ -332,14 +332,8 @@
         {
             return RunOperation(async () =>
             {
-                var pageable = _managementClient.GetRulesAsync(topicPath, subscriptionName);
-                IList<RuleProperties> rules = new List<RuleProperties>();
-                await foreach (var rule in pageable)
-                {
-                    rules.Add(rule);
-                }
-
-                return rules;
+                var pageableRules = _managementClient.GetRulesAsync(topicPath, subscriptionName);
+                return pageableRules.ToList();
             });
         }
 

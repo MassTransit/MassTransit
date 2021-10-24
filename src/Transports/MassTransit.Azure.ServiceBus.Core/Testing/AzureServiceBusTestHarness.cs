@@ -52,19 +52,8 @@
         {
             var managementClient = CreateManagementClient();
 
-            async Task<List<T>> ToListAsync<T>(AsyncPageable<T> pageable)
-            {
-                var items = new List<T>();
-                await foreach (var item in pageable)
-                {
-                    items.Add(item);
-                }
-
-                return items;
-            }
-
             var pageableTopics = managementClient.GetTopicsAsync();
-            var topics = await ToListAsync(pageableTopics);
+            var topics = await pageableTopics.ToList();
             while (topics.Count > 0)
             {
                 foreach (var topic in topics)
@@ -72,11 +61,11 @@
 
                 await Task.Delay(500);
 
-                topics = await ToListAsync(managementClient.GetTopicsAsync());
+                topics = await managementClient.GetTopicsAsync().ToList();
             }
 
             var pageableQueues = managementClient.GetQueuesAsync();
-            var queues = await ToListAsync(pageableQueues);
+            var queues = await pageableQueues.ToList();
             while (queues.Count > 0)
             {
                 foreach (var queue in queues)
@@ -84,7 +73,7 @@
 
                 await Task.Delay(500);
 
-                queues = await ToListAsync(managementClient.GetQueuesAsync());
+                queues = await managementClient.GetQueuesAsync().ToList();
             }
         }
 
