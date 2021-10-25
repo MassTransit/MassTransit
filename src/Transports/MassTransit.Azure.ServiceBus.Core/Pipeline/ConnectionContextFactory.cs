@@ -53,6 +53,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
             var settings = _hostConfiguration.Settings;
 
+            ServiceBusClient client = settings.ServiceBusClient;
+            ServiceBusAdministrationClient managementClient = settings.ServiceBusAdministrationClient;
+
             var clientOptions = new ServiceBusClientOptions
             {
                 TransportType = settings.TransportType,
@@ -62,34 +65,28 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
                     Mode = ServiceBusRetryMode.Exponential,
                     MaxDelay = settings.RetryMaxBackoff,
                 },
-                EnableCrossEntityTransactions = false, // Is that right?
+                EnableCrossEntityTransactions = false,
             };
 
-            var managementClientOptions = new ServiceBusAdministrationClientOptions
-            {
-            };
-
-            ServiceBusClient client;
-            ServiceBusAdministrationClient managementClient;
             if (settings.TokenCredential != null)
             {
-                client = new ServiceBusClient(endpoint, settings.TokenCredential, clientOptions);
-                managementClient = new ServiceBusAdministrationClient(endpoint, settings.TokenCredential, managementClientOptions);
+                client ??= new ServiceBusClient(endpoint, settings.TokenCredential, clientOptions);
+                managementClient ??= new ServiceBusAdministrationClient(endpoint, settings.TokenCredential);
             }
             else if (settings.NamedKeyCredential != null)
             {
-                client = new ServiceBusClient(endpoint, settings.NamedKeyCredential, clientOptions);
-                managementClient = new ServiceBusAdministrationClient(endpoint, settings.NamedKeyCredential, managementClientOptions);
+                client ??= new ServiceBusClient(endpoint, settings.NamedKeyCredential, clientOptions);
+                managementClient ??= new ServiceBusAdministrationClient(endpoint, settings.NamedKeyCredential);
             }
             else if (settings.SasCredential != null)
             {
-                client = new ServiceBusClient(endpoint, settings.SasCredential, clientOptions);
-                managementClient = new ServiceBusAdministrationClient(endpoint, settings.SasCredential, managementClientOptions);
+                client ??= new ServiceBusClient(endpoint, settings.SasCredential, clientOptions);
+                managementClient ??= new ServiceBusAdministrationClient(endpoint, settings.SasCredential);
             }
             else
             {
-                client = new ServiceBusClient(settings.ConnectionString, clientOptions);
-                managementClient = new ServiceBusAdministrationClient(settings.ConnectionString, managementClientOptions);
+                client ??= new ServiceBusClient(settings.ConnectionString, clientOptions);
+                managementClient ??= new ServiceBusAdministrationClient(settings.ConnectionString);
             }
 
             return new ServiceBusConnectionContext(client, managementClient, supervisor.Stopped);

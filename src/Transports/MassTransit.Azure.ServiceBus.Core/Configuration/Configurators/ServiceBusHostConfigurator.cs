@@ -4,6 +4,7 @@
     using global::Azure;
     using global::Azure.Core;
     using global::Azure.Messaging.ServiceBus;
+    using global::Azure.Messaging.ServiceBus.Administration;
 
 
     public class ServiceBusHostConfigurator :
@@ -16,6 +17,21 @@
             var hostAddress = new ServiceBusHostAddress(serviceAddress);
 
             _settings = new HostSettings {ServiceUri = hostAddress};
+        }
+
+        public ServiceBusHostConfigurator(
+            Uri serviceAddress,
+            ServiceBusClient serviceBusClient,
+            ServiceBusAdministrationClient serviceBusAdministrationClient)
+        {
+            var hostAddress = new ServiceBusHostAddress(serviceAddress);
+
+            _settings = new HostSettings
+            {
+                ServiceUri = hostAddress,
+                ServiceBusClient = serviceBusClient ?? throw new ArgumentNullException(nameof(serviceBusClient)),
+                ServiceBusAdministrationClient = serviceBusAdministrationClient ?? throw new ArgumentNullException(nameof(serviceBusAdministrationClient)),
+            };
         }
 
         public ServiceBusHostConfigurator(string connectionString)

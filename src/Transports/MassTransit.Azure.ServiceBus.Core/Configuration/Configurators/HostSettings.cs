@@ -4,7 +4,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Configurators
     using global::Azure;
     using global::Azure.Core;
     using global::Azure.Messaging.ServiceBus;
-
+    using global::Azure.Messaging.ServiceBus.Administration;
 
     public class HostSettings :
         ServiceBusHostSettings
@@ -21,6 +21,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Configurators
         }
 
         public Uri ServiceUri { get; set; }
+        public ServiceBusClient ServiceBusClient { get; set; }
+        public ServiceBusAdministrationClient ServiceBusAdministrationClient { get; set; }
         public string ConnectionString { get; set; }
         public AzureNamedKeyCredential NamedKeyCredential { get; set; }
         public AzureSasCredential SasCredential { get; set; }

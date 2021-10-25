@@ -4,6 +4,7 @@
     using global::Azure;
     using global::Azure.Core;
     using global::Azure.Messaging.ServiceBus;
+    using global::Azure.Messaging.ServiceBus.Administration;
 
 
     /// <summary>
@@ -15,6 +16,16 @@
         /// The address of the service bus namespace (and accompanying service scope)
         /// </summary>
         Uri ServiceUri { get; }
+
+        /// <summary>
+        /// A custom client that will be used instead of one defined by the settings provided here.
+        /// </summary>
+        ServiceBusClient ServiceBusClient { get; }
+
+        /// <summary>
+        /// A custom adminsitration client that will be used instead of one defined by the settings provided here.
+        /// </summary>
+        ServiceBusAdministrationClient ServiceBusAdministrationClient { get; }
 
         /// <summary>
         /// The named key to use to connect to the Service Bus
