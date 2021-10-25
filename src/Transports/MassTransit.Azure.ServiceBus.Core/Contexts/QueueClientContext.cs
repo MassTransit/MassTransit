@@ -15,21 +15,18 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         ClientContext,
         IAsyncDisposable
     {
+        readonly ReceiveSettings _settings;
         readonly IAgent _agent;
-        readonly ServiceBusProcessor _queueClient;
-        readonly ServiceBusSessionProcessor _sessionClient;
-        bool _processQueueMessages;
-        bool _processSessionMessages;
+        ServiceBusProcessor _queueClient;
+        ServiceBusSessionProcessor _sessionClient;
 
         public QueueClientContext(
             ConnectionContext connectionContext,
-            ServiceBusProcessor queueClient,
-            ServiceBusSessionProcessor sessionClient,
             Uri inputAddress,
+            ReceiveSettings settings,
             IAgent agent)
         {
-            _queueClient = queueClient;
-            _sessionClient = sessionClient;
+            _settings = settings;
             _agent = agent;
             ConnectionContext = connectionContext;
             InputAddress = inputAddress;
@@ -45,28 +42,38 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public void OnMessageAsync(Func<ProcessMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback, Func<ProcessErrorEventArgs, Task> exceptionHandler)
         {
+            if (_queueClient != null)
+            {
+                throw new InvalidOperationException("OnMessageAsync can only be called once");
+            }
+
+            _queueClient = ConnectionContext.CreateQueueProcessor(_settings);
+
             _queueClient.ProcessMessageAsync += (args) => callback(args, args.Message, args.CancellationToken);
             _queueClient.ProcessErrorAsync += exceptionHandler;
-
-            _processQueueMessages = true;
         }
 
         public void OnSessionAsync(Func<ProcessSessionMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback, Func<ProcessErrorEventArgs, Task> exceptionHandler)
         {
+            if (_sessionClient != null)
+            {
+                throw new InvalidOperationException("OnSessionAsync can only be called once");
+            }
+
+            _sessionClient = ConnectionContext.CreateQueueSessionProcessor(_settings);
+
             _sessionClient.ProcessMessageAsync += (args) => callback(args, args.Message, args.CancellationToken);
             _sessionClient.ProcessErrorAsync += exceptionHandler;
-
-            _processSessionMessages = true;
         }
 
         public async Task StartAsync()
         {
-            if (_queueClient != null && _processQueueMessages)
+            if (_queueClient != null)
             {
                 await _queueClient.StartProcessingAsync();
             }
 
-            if(_sessionClient != null && _processSessionMessages)
+            if(_sessionClient != null)
             {
                 await _sessionClient.StartProcessingAsync();
             }

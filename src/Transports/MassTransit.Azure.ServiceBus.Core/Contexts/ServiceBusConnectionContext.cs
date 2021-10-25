@@ -32,52 +32,58 @@
 
         public Uri Endpoint => new Uri($"amqps://{_connection.FullyQualifiedNamespace}");
 
-        public (ServiceBusProcessor, ServiceBusSessionProcessor) CreateQueueClient(ReceiveSettings settings)
+        public ServiceBusProcessor CreateQueueProcessor(ReceiveSettings settings)
         {
-            return
-                (_connection.CreateProcessor(
-                    settings.Path,
-                    new ServiceBusProcessorOptions
-                    {
-                        AutoCompleteMessages = false,
-                        PrefetchCount = settings.PrefetchCount,
-                        MaxConcurrentCalls = settings.MaxConcurrentCalls,
-                        MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
-                        ReceiveMode = ServiceBusReceiveMode.PeekLock,
-                    }),
-                _connection.CreateSessionProcessor(
-                    settings.Path,
-                    new ServiceBusSessionProcessorOptions
-                    {
-                        AutoCompleteMessages = false,
-                        PrefetchCount = settings.PrefetchCount,
-                        MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
-                        ReceiveMode = ServiceBusReceiveMode.PeekLock,
-                    }));
+            return _connection.CreateProcessor(
+                settings.Path,
+                new ServiceBusProcessorOptions
+                {
+                    AutoCompleteMessages = false,
+                    PrefetchCount = settings.PrefetchCount,
+                    MaxConcurrentCalls = settings.MaxConcurrentCalls,
+                    MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
+                    ReceiveMode = ServiceBusReceiveMode.PeekLock,
+                });
         }
 
-        public (ServiceBusProcessor, ServiceBusSessionProcessor) CreateSubscriptionClient(SubscriptionSettings settings)
+        public ServiceBusSessionProcessor CreateQueueSessionProcessor(ReceiveSettings settings)
         {
-            return
-                (_connection.CreateProcessor(
-                    settings.TopicDescription.Name, settings.SubscriptionDescription.SubscriptionName,
-                    new ServiceBusProcessorOptions
-                    {
-                        AutoCompleteMessages = false,
-                        PrefetchCount = settings.PrefetchCount,
-                        MaxConcurrentCalls = settings.MaxConcurrentCalls,
-                        MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
-                        ReceiveMode = ServiceBusReceiveMode.PeekLock,
-                    }),
-                _connection.CreateSessionProcessor(
-                    settings.TopicDescription.Name, settings.SubscriptionDescription.SubscriptionName,
-                    new ServiceBusSessionProcessorOptions
-                    {
-                        AutoCompleteMessages = false,
-                        PrefetchCount = settings.PrefetchCount,
-                        MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
-                        ReceiveMode = ServiceBusReceiveMode.PeekLock,
-                    }));
+            return _connection.CreateSessionProcessor(
+                settings.Path,
+                new ServiceBusSessionProcessorOptions
+                {
+                    AutoCompleteMessages = false,
+                    PrefetchCount = settings.PrefetchCount,
+                    MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
+                    ReceiveMode = ServiceBusReceiveMode.PeekLock,
+                });
+        }
+
+        public ServiceBusProcessor CreateSubscriptionProcessor(SubscriptionSettings settings)
+        {
+            return _connection.CreateProcessor(
+                settings.TopicDescription.Name, settings.SubscriptionDescription.SubscriptionName,
+                new ServiceBusProcessorOptions
+                {
+                    AutoCompleteMessages = false,
+                    PrefetchCount = settings.PrefetchCount,
+                    MaxConcurrentCalls = settings.MaxConcurrentCalls,
+                    MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
+                    ReceiveMode = ServiceBusReceiveMode.PeekLock,
+                });
+        }
+
+        public ServiceBusSessionProcessor CreateSubscriptionSessionProcessor(SubscriptionSettings settings)
+        {
+            return _connection.CreateSessionProcessor(
+                settings.TopicDescription.Name, settings.SubscriptionDescription.SubscriptionName,
+                new ServiceBusSessionProcessorOptions
+                {
+                    AutoCompleteMessages = false,
+                    PrefetchCount = settings.PrefetchCount,
+                    MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
+                    ReceiveMode = ServiceBusReceiveMode.PeekLock,
+                });
         }
 
         public ServiceBusSender CreateMessageSender(string entityPath)

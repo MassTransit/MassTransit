@@ -23,14 +23,24 @@
 
         public override CancellationToken CancellationToken { get; }
 
-        public (ServiceBusProcessor, ServiceBusSessionProcessor) CreateQueueClient(ReceiveSettings settings)
+        public ServiceBusProcessor CreateQueueProcessor(ReceiveSettings settings)
         {
-            return _context.CreateQueueClient(settings);
+            return _context.CreateQueueProcessor(settings);
         }
 
-        public (ServiceBusProcessor, ServiceBusSessionProcessor) CreateSubscriptionClient(SubscriptionSettings settings)
+        public ServiceBusSessionProcessor CreateQueueSessionProcessor(ReceiveSettings settings)
         {
-            return _context.CreateSubscriptionClient(settings);
+            return _context.CreateQueueSessionProcessor(settings);
+        }
+
+        public ServiceBusProcessor CreateSubscriptionProcessor(SubscriptionSettings settings)
+        {
+            return _context.CreateSubscriptionProcessor(settings);
+        }
+
+        public ServiceBusSessionProcessor CreateSubscriptionSessionProcessor(SubscriptionSettings settings)
+        {
+            return _context.CreateSubscriptionSessionProcessor(settings);
         }
 
         public ServiceBusSender CreateMessageSender(string entityPath)

@@ -19,9 +19,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         /// </summary>
         Uri Endpoint { get; }
 
-        (ServiceBusProcessor, ServiceBusSessionProcessor) CreateQueueClient(ReceiveSettings settings);
+        ServiceBusProcessor CreateQueueProcessor(ReceiveSettings settings);
+        ServiceBusSessionProcessor CreateQueueSessionProcessor(ReceiveSettings settings);
 
-        (ServiceBusProcessor, ServiceBusSessionProcessor) CreateSubscriptionClient(SubscriptionSettings settings);
+        ServiceBusProcessor CreateSubscriptionProcessor(SubscriptionSettings settings);
+        ServiceBusSessionProcessor CreateSubscriptionSessionProcessor(SubscriptionSettings settings);
 
         ServiceBusSender CreateMessageSender(string entityPath);
 
