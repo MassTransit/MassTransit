@@ -34,7 +34,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public string EntityPath => _settings.TopicDescription.Name;
 
-        public bool IsClosedOrClosing => _sessionClient.IsClosed || _queueClient.IsClosed;
+        public bool IsClosedOrClosing => _sessionClient?.IsClosed ?? _queueClient?.IsClosed ?? false;
 
         public Uri InputAddress { get; }
 
@@ -43,6 +43,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             if (_queueClient != null)
             {
                 throw new InvalidOperationException("OnMessageAsync can only be called once");
+            }
+
+            if (_sessionClient != null)
+            {
+                throw new InvalidOperationException("OnMessageAsync cannot be called with operating on a session");
             }
 
             _queueClient = ConnectionContext.CreateSubscriptionProcessor(_settings);
@@ -56,6 +61,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
             if (_sessionClient != null)
             {
                 throw new InvalidOperationException("OnSessionAsync can only be called once");
+            }
+
+            if (_queueClient != null)
+            {
+                throw new InvalidOperationException("OnSessionAsync cannot be called with operating without a session");
             }
 
             _sessionClient = ConnectionContext.CreateSubscriptionSessionProcessor(_settings);
