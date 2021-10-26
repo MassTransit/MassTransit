@@ -30,7 +30,7 @@ namespace MassTransit.Context
 
             if (context.TryGetPayload(out MessageSchedulerContext schedulerContext))
             {
-                _outboxSchedulerContext = new InMemoryOutboxMessageSchedulerContext(schedulerContext);
+                _outboxSchedulerContext = new InMemoryOutboxMessageSchedulerContext(schedulerContext, _clearToSend.Task);
                 context.AddOrUpdatePayload(() => _outboxSchedulerContext, _ => _outboxSchedulerContext);
             }
         }

@@ -13,13 +13,15 @@
         MessageSchedulerContext
     {
         readonly List<Func<Task>> _cancelMessages;
+        readonly Task _clearToSend;
         readonly MessageSchedulerContext _context;
         readonly object _listLock = new object();
         readonly List<ScheduledMessage> _scheduledMessages;
 
-        public InMemoryOutboxMessageSchedulerContext(MessageSchedulerContext context)
+        public InMemoryOutboxMessageSchedulerContext(MessageSchedulerContext context, Task clearToSend)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _clearToSend = clearToSend;
 
             _scheduledMessages = new List<ScheduledMessage>();
             _cancelMessages = new List<Func<Task>>();
@@ -332,35 +334,37 @@
         public Task CancelScheduledPublish<T>(Guid tokenId)
             where T : class
         {
-            AddCancelMessage(() => _context.CancelScheduledPublish<T>(tokenId));
-
-            return TaskUtil.Completed;
+            return AddCancelMessage(() => _context.CancelScheduledPublish<T>(tokenId));
         }
 
         public Task CancelScheduledPublish(Type messageType, Guid tokenId)
         {
-            AddCancelMessage(() => _context.CancelScheduledPublish(messageType, tokenId));
-
-            return TaskUtil.Completed;
+            return AddCancelMessage(() => _context.CancelScheduledPublish(messageType, tokenId));
         }
 
         public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
         {
-            AddCancelMessage(() => _context.CancelScheduledSend(destinationAddress, tokenId));
-
-            return TaskUtil.Completed;
+            return AddCancelMessage(() => _context.CancelScheduledSend(destinationAddress, tokenId));
         }
 
         void AddScheduledMessage(ScheduledMessage scheduledMessage)
         {
+            if (_clearToSend.IsCompleted)
+                return;
+
             lock (_listLock)
                 _scheduledMessages.Add(scheduledMessage);
         }
 
-        void AddCancelMessage(Func<Task> cancel)
+        Task AddCancelMessage(Func<Task> cancel)
         {
+            if (_clearToSend.IsCompleted)
+                return cancel();
+
             lock (_listLock)
                 _cancelMessages.Add(cancel);
+
+            return Task.CompletedTask;
         }
 
         public Task CancelAllScheduledMessages()

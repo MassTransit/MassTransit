@@ -82,9 +82,9 @@
                     (nameof(context.SessionId), context.SessionId));
                 try
                 {
-                    if (IsCancelScheduledSend(context, out var sequenceNumber))
+                    if (IsCancelScheduledSend(context, out var tokenId, out var sequenceNumber))
                     {
-                        await CancelScheduledSend(clientContext, sequenceNumber).ConfigureAwait(false);
+                        await CancelScheduledSend(clientContext, tokenId, sequenceNumber).ConfigureAwait(false);
 
                         return;
                     }
@@ -160,30 +160,32 @@
                 }
             }
 
-            static async Task CancelScheduledSend(SendEndpointContext clientContext, long sequenceNumber)
+            static async Task CancelScheduledSend(SendEndpointContext clientContext, Guid tokenId, long sequenceNumber)
             {
                 try
                 {
                     await clientContext.CancelScheduledSend(sequenceNumber).ConfigureAwait(false);
 
-                    LogContext.Debug?.Log("Canceled scheduled message {SequenceNumber} {EntityPath}", sequenceNumber, clientContext.EntityPath);
+                    LogContext.Debug?.Log("CANCEL {DestinationAddress} {TokenId}", clientContext.EntityPath, tokenId, sequenceNumber);
                 }
-                catch (MessageNotFoundException exception)
+                catch (MessageNotFoundException)
                 {
-                    LogContext.Warning?.Log(exception, "The scheduled message was not found: {SequenceNumber} {EntityPath}", sequenceNumber,
-                        clientContext.EntityPath);
+                    LogContext.Debug?.Log("CANCEL {DestinationAddress} {TokenId} message not found", clientContext.EntityPath, tokenId);
                 }
             }
 
-            bool IsCancelScheduledSend(AzureServiceBusSendContext<T> context, out long sequenceNumber)
+            bool IsCancelScheduledSend(AzureServiceBusSendContext<T> context, out Guid tokenId, out long sequenceNumber)
             {
                 if (_message is CancelScheduledMessage cancelScheduledMessage)
                 {
+                    tokenId = cancelScheduledMessage.TokenId;
+
                     if (context.TryGetScheduledMessageId(out sequenceNumber)
                         || context.TryGetSequenceNumber(cancelScheduledMessage.TokenId, out sequenceNumber))
                         return true;
                 }
 
+                tokenId = default;
                 sequenceNumber = default;
                 return false;
             }
