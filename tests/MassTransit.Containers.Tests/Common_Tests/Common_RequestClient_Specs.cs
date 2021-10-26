@@ -198,7 +198,106 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             public Task Consume(ConsumeContext<SubsequentRequest> context)
             {
-                return context.RespondAsync<SubsequentResponse>(new {Value = $"Hello, {context.Message.Value}"});
+                return context.RespondAsync<SubsequentResponse>(new { Value = $"Hello, {context.Message.Value}" });
+            }
+        }
+
+
+        public interface InitialRequest
+        {
+            string Value { get; }
+        }
+
+
+        public interface InitialResponse
+        {
+            string Value { get; }
+        }
+
+
+        public interface SubsequentRequest
+        {
+            string Value { get; }
+        }
+
+
+        public interface SubsequentResponse
+        {
+            string Value { get; }
+        }
+    }
+
+
+    public abstract class Common_ScopedClientFactory :
+        InMemoryTestFixture
+    {
+        Guid _correlationId;
+
+        protected abstract IRequestClient<InitialRequest> RequestClient { get; }
+
+        protected abstract IBusRegistrationContext Registration { get; }
+
+        [Test]
+        public async Task Should_receive_the_response()
+        {
+            IRequestClient<InitialRequest> client = RequestClient;
+
+            _correlationId = NewId.NextGuid();
+
+            Response<InitialResponse> response = await client.GetResponse<InitialResponse>(new
+            {
+                CorrelationId = _correlationId,
+                Value = "World"
+            });
+
+            Assert.That(response.Message.Value, Is.EqualTo("Hello, World"));
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ConfigureEndpoints(Registration);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.ConfigureConsumer<InitialConsumer>(Registration);
+        }
+
+        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<InitialConsumer>();
+            configurator.AddConsumer<SubsequentConsumer>();
+            configurator.AddRequestClient<InitialRequest>();
+
+            configurator.AddBus(context => BusControl);
+        }
+
+
+        protected class InitialConsumer :
+            IConsumer<InitialRequest>
+        {
+            readonly IRequestClient<SubsequentRequest> _client;
+
+            public InitialConsumer(IScopedClientFactory clientFactory)
+            {
+                _client = clientFactory.CreateRequestClient<SubsequentRequest>();
+            }
+
+            public async Task Consume(ConsumeContext<InitialRequest> context)
+            {
+                Response<SubsequentResponse> response = await _client.GetResponse<SubsequentResponse>(context.Message);
+
+                await context.RespondAsync<InitialResponse>(response.Message);
+            }
+        }
+
+
+        protected class SubsequentConsumer :
+            IConsumer<SubsequentRequest>
+        {
+            public Task Consume(ConsumeContext<SubsequentRequest> context)
+            {
+                return context.RespondAsync<SubsequentResponse>(new { Value = $"Hello, {context.Message.Value}" });
             }
         }
 

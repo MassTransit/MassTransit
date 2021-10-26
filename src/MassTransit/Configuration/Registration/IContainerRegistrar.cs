@@ -4,7 +4,7 @@ namespace MassTransit.Registration
     using Automatonymous;
     using Courier;
     using Definition;
-    using MassTransit.Futures;
+    using Futures;
     using Saga;
 
 
@@ -72,6 +72,8 @@ namespace MassTransit.Registration
 
         void RegisterRequestClient<T>(Uri destinationAddress, RequestTimeout timeout = default)
             where T : class;
+
+        void RegisterScopedClientFactory();
 
         /// <summary>
         /// Register a service, implemented by the implementation type, which is created in each

@@ -56,6 +56,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.MultiBus
                 Bind<TBus>.Create<IReceiveEndpointConnector>(provider.GetRequiredService<IBusInstance<TBus>>()));
             Collection.AddSingleton(provider => provider.GetRequiredService<IBusInstance<TBus>>().BusInstance);
 
+            Registrar.RegisterScopedClientFactory();
+
         #pragma warning disable 618
             Collection.AddSingleton<IBusHealth>(provider => new BusHealth(provider.GetRequiredService<IBusInstance<TBus>>()));
         }

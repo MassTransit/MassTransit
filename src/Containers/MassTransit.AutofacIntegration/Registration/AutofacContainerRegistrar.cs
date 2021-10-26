@@ -173,6 +173,19 @@ namespace MassTransit.AutofacIntegration.Registration
             }).InstancePerLifetimeScope();
         }
 
+        public void RegisterScopedClientFactory()
+        {
+            _builder.Register<IScopedClientFactory>(context =>
+            {
+                var clientFactory = GetClientFactory(context);
+
+                return context.TryResolve(out ConsumeContext consumeContext)
+                    ? new ScopedClientFactory(clientFactory, consumeContext)
+                    : new ScopedClientFactory(new ClientFactory(
+                        new ScopedClientFactoryContext<ILifetimeScope>(clientFactory, context.Resolve<ILifetimeScope>())), null);
+            }).InstancePerLifetimeScope();
+        }
+
         public void Register<T, TImplementation>()
             where T : class
             where TImplementation : class, T

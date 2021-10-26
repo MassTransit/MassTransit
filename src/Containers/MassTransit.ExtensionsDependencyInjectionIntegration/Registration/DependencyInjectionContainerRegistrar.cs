@@ -145,6 +145,19 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             });
         }
 
+        void IContainerRegistrar.RegisterScopedClientFactory()
+        {
+            _collection.AddScoped<IScopedClientFactory>(provider =>
+            {
+                var clientFactory = GetClientFactory(provider);
+                var consumeContext = provider.GetRequiredService<ScopedConsumeContextProvider>().GetContext();
+
+                return consumeContext != null
+                    ? new ScopedClientFactory(clientFactory, consumeContext)
+                    : new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext<IServiceProvider>(clientFactory, provider)), null);
+            });
+        }
+
         public void Register<T, TImplementation>()
             where T : class
             where TImplementation : class, T

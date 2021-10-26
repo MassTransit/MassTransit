@@ -150,6 +150,11 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<IRequestClient<T>>().Use(context => CreateRequestClient<T>(destinationAddress, timeout, context));
         }
 
+        public void RegisterScopedClientFactory()
+        {
+            _expression.For<IScopedClientFactory>().Use(context => CreateScopedClientFactory(context));
+        }
+
         public void Register<T, TImplementation>()
             where T : class
             where TImplementation : class, T
@@ -199,6 +204,17 @@ namespace MassTransit.StructureMapIntegration.Registration
 
             return new ClientFactory(new ScopedClientFactoryContext<IContainer>(clientFactory, context.GetInstance<IContainer>()))
                 .CreateRequestClient<T>(destinationAddress, timeout);
+        }
+
+        IScopedClientFactory CreateScopedClientFactory(IContext context)
+        {
+            var clientFactory = GetClientFactory(context);
+            var consumeContext = context.TryGetInstance<ConsumeContext>();
+
+            return consumeContext != null
+                ? new ScopedClientFactory(clientFactory, consumeContext)
+                : new ScopedClientFactory(new ClientFactory(
+                    new ScopedClientFactoryContext<IContainer>(clientFactory, context.GetInstance<IContainer>())), null);
         }
 
         IExecuteActivityScopeProvider<TActivity, TArguments> CreateExecuteActivityScopeProvider<TActivity, TArguments>(IContext context)

@@ -39,6 +39,38 @@ namespace MassTransit.Containers.Tests.Autofac_Tests
 
 
     [TestFixture]
+    public class Autofac_ScopedClientFactory
+        : Common_ScopedClientFactory
+    {
+        readonly IContainer _container;
+
+        public Autofac_ScopedClientFactory()
+        {
+            var builder = new ContainerBuilder();
+
+            builder.AddMassTransit(ConfigureRegistration);
+
+            builder.Register(context => GetConsumeObserver<InitialRequest>())
+                .As<IConsumeMessageObserver<InitialRequest>>()
+                .AsSelf()
+                .SingleInstance();
+
+            _container = builder.Build();
+        }
+
+        [OneTimeTearDown]
+        public async Task Close_container()
+        {
+            await _container.DisposeAsync();
+        }
+
+        protected override IRequestClient<InitialRequest> RequestClient => _container.Resolve<IRequestClient<InitialRequest>>();
+
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class Autofac_RequestClient_Generic
         : Common_RequestClient_Generic
     {

@@ -190,6 +190,19 @@ namespace MassTransit.WindsorIntegration.Registration
             }));
         }
 
+        public void RegisterScopedClientFactory()
+        {
+            _container.Register(Component.For<IScopedClientFactory>().UsingFactoryMethod(kernel =>
+            {
+                var clientFactory = GetClientFactory(kernel);
+                var consumeContext = kernel.GetConsumeContext();
+
+                return consumeContext != null
+                    ? new ScopedClientFactory(clientFactory, consumeContext)
+                    : new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext<IKernel>(clientFactory, kernel)), null);
+            }));
+        }
+
         public void Register<T, TImplementation>()
             where T : class
             where TImplementation : class, T

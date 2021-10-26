@@ -24,6 +24,24 @@ namespace MassTransit.Containers.Tests.Windsor_Tests
 
 
     [TestFixture]
+    public class Windsor_ScopedClientFactory
+        : Common_ScopedClientFactory
+    {
+        readonly IWindsorContainer _container;
+
+        public Windsor_ScopedClientFactory()
+        {
+            _container = new WindsorContainer();
+            _container.AddMassTransit(ConfigureRegistration);
+        }
+
+        protected override IRequestClient<InitialRequest> RequestClient => _container.Resolve<IRequestClient<InitialRequest>>();
+
+        protected override IBusRegistrationContext Registration => _container.Resolve<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class Windsor_RequestClient_Outbox
         : Common_RequestClient_Outbox
     {

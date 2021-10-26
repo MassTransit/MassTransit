@@ -101,6 +101,11 @@ namespace MassTransit.Registration
             _registrar.RegisterRequestClient<T>(destinationAddress, timeout);
         }
 
+        public void RegisterScopedClientFactory()
+        {
+            _registrar.RegisterScopedClientFactory();
+        }
+
         void IContainerRegistrar.Register<T, TImplementation>()
         {
             _registrar.Register<T, TImplementation>();

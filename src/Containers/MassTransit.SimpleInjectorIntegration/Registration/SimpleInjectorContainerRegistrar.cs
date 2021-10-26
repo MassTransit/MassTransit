@@ -169,6 +169,19 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             }, _hybridLifestyle);
         }
 
+        public void RegisterScopedClientFactory()
+        {
+            _container.Register<IScopedClientFactory>(() =>
+            {
+                var clientFactory = GetClientFactory(_container);
+                var consumeContext = _container.GetConsumeContext();
+
+                return consumeContext != null
+                    ? new ScopedClientFactory(clientFactory, consumeContext)
+                    : new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext<Container>(clientFactory, _container)), null);
+            }, _hybridLifestyle);
+        }
+
         public void Register<T, TImplementation>()
             where T : class
             where TImplementation : class, T

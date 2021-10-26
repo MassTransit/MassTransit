@@ -116,6 +116,8 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IBus>()
                 .SingleInstance();
 
+            Registrar.RegisterScopedClientFactory();
+
         #pragma warning disable 618
             Builder.Register(context => new BusHealth(context.Resolve<Bind<IBus, IBusInstance>>().Value))
                 .As<IBusHealth>()

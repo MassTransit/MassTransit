@@ -77,6 +77,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.Registration
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.BusControl);
             Collection.AddSingleton(provider => provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value.Bus);
 
+            Registrar.RegisterScopedClientFactory();
+
         #pragma warning disable 618
             Collection.AddSingleton<IBusHealth>(provider => new BusHealth(provider.GetRequiredService<Bind<IBus, IBusInstance>>().Value));
         }

@@ -27,6 +27,27 @@ namespace MassTransit.Containers.Tests.StructureMap_Tests
 
 
     [TestFixture]
+    public class StructureMap_ScopedClientFactory
+        : Common_ScopedClientFactory
+    {
+        readonly IContainer _container;
+
+        public StructureMap_ScopedClientFactory()
+        {
+            _container = new Container(collection =>
+            {
+                collection.AddMassTransit(ConfigureRegistration);
+
+                collection.For<IConsumeMessageObserver<InitialRequest>>().Use(context => GetConsumeObserver<InitialRequest>());
+            });
+        }
+
+        protected override IRequestClient<InitialRequest> RequestClient => _container.GetInstance<IRequestClient<InitialRequest>>();
+        protected override IBusRegistrationContext Registration => _container.GetInstance<IBusRegistrationContext>();
+    }
+
+
+    [TestFixture]
     public class StructureMap_RequestClient_Outbox
         : Common_RequestClient_Outbox
     {

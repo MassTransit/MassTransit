@@ -65,6 +65,8 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             Container.RegisterSingleton(() => Container.GetInstance<IBusInstance>().BusControl);
             Container.RegisterSingleton(() => Container.GetInstance<IBusInstance>().Bus);
 
+            Registrar.RegisterScopedClientFactory();
+
         #pragma warning disable 618
             Container.RegisterSingleton<IBusHealth>(() => new BusHealth(Container.GetInstance<IBusInstance>()));
         }

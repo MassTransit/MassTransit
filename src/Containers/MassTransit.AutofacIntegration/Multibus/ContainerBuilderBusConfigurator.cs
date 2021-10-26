@@ -78,6 +78,7 @@
                 .As<TBus>()
                 .SingleInstance();
 
+            Registrar.RegisterScopedClientFactory();
 
         #pragma warning disable 618
             Builder.Register(context => new BusHealth(context.Resolve<IBusInstance<TBus>>()))

@@ -83,6 +83,8 @@ namespace MassTransit.StructureMapIntegration.Registration
             _expression.For<IBus>()
                 .Use(context => context.GetInstance<IBusInstance>().Bus)
                 .Singleton();
+
+            Registrar.RegisterScopedClientFactory();
         }
 
         public void AddRider(Action<IRiderRegistrationConfigurator> configure)

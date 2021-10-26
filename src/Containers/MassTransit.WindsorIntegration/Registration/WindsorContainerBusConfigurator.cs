@@ -93,6 +93,8 @@ namespace MassTransit.WindsorIntegration.Registration
                     .UsingFactoryMethod(kernel => new BusHealth(kernel.Resolve<IBusInstance>()))
                     .LifestyleSingleton()
             );
+
+            Registrar.RegisterScopedClientFactory();
         }
 
         public void AddRider(Action<IRiderRegistrationConfigurator> configure)
