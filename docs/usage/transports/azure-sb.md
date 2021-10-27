@@ -2,6 +2,8 @@
 
 > [MassTransit.Azure.ServiceBus.Core](https://nuget.org/packages/MassTransit.Azure.ServiceBus.Core/)
 
+The Azure Service Bus transport only supports Standard and Premium tiers of the Microsoft Azure Service Bus service. Premium tier is recommended for production environments.
+
 To configure Azure Service Bus, use the connection string (from the Azure portal) to configure the host as shown below.
 
 <<< @/docs/code/transports/ServiceBusConsoleListener.cs
