@@ -7,17 +7,26 @@ To connect, set the current log context prior to bus configuration using:
 ```csharp
 public static async Task Main(string[] args)
 {
-    var subscription = DiagnosticListener.AllListeners.Subscribe(delegate (DiagnosticListener listener)
-    {
-        if (listener.Name == "MassTransit")
-        {
-            // subscribe to the listener with your monitoring tool, etc.
-        }
-    });
+    var subscription = DiagnosticListener.AllListeners.Subscribe(new DiagnosticObserver());
 
     var busControl = Bus.Factory.CreateUsingInMemory(cfg =>
     {
     });
+}
+
+public class DiagnosticObserver : IObserver<DiagnosticListener>
+{
+    public void OnCompleted() { }
+
+    public void OnError(Exception error) { }
+
+    public void OnNext(DiagnosticListener value)
+    {
+        if (value.Name == "MassTransit")
+        {
+            // subscribe to the listener with your monitoring tool, etc.
+        }
+    }
 }
 ```
 
