@@ -1,17 +1,14 @@
 namespace MassTransit
 {
     using System;
-    using System.Linq;
     using Azure.ServiceBus.Core;
     using ExtensionsDependencyInjectionIntegration;
-    using global::Azure.Core;
     using global::Azure.Identity;
     using global::Azure.Messaging.ServiceBus;
     using Microsoft.ApplicationInsights.DependencyCollector;
     using Microsoft.Azure.WebJobs.ServiceBus;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using WebJobs.ServiceBusIntegration;
 
@@ -81,7 +78,8 @@ namespace MassTransit
         {
             var properties = ServiceBusConnectionStringProperties.Parse(connectionString);
 
-            return string.IsNullOrWhiteSpace(properties.SharedAccessKeyName) && string.IsNullOrWhiteSpace(properties.SharedAccessKey) && string.IsNullOrWhiteSpace(properties.SharedAccessSignature);
+            return (string.IsNullOrWhiteSpace(properties.SharedAccessKeyName) || string.IsNullOrWhiteSpace(properties.SharedAccessKey))
+                && string.IsNullOrWhiteSpace(properties.SharedAccessSignature);
         }
 
         static void ConfigureApplicationInsights(IServiceCollection services)

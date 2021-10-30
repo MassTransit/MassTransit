@@ -254,22 +254,21 @@
             return subscriptionDescription;
         }
 
-        public async Task DeleteTopicSubscription(CreateSubscriptionOptions description)
+        public async Task DeleteTopicSubscription(string topicName, string subscriptionName)
         {
             try
             {
-                await DeleteSubscriptionAsync(description.TopicName, description.SubscriptionName).ConfigureAwait(false);
+                await DeleteSubscriptionAsync(topicName, subscriptionName).ConfigureAwait(false);
 
-                LogContext.Debug?.Log("Subscription Deleted: {Subscription} ({Topic} -> {ForwardTo})", description.SubscriptionName, description.TopicName,
-                    description.ForwardTo);
+                LogContext.Debug?.Log("Subscription Deleted: {Subscription} {Topic}", subscriptionName, topicName);
             }
             catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityNotFound)
             {
             }
             catch (Exception ex)
             {
-                LogContext.Error?.Log(ex, "Subscription Delete Faulted: {Subscription} ({Topic} -> {ForwardTo})", description.SubscriptionName,
-                    description.TopicName, description.ForwardTo);
+                LogContext.Error?.Log(ex, "Subscription Delete Faulted: {Subscription} {Topic}", subscriptionName,
+                    topicName);
             }
         }
 
