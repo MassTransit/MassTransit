@@ -46,13 +46,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
                 return;
             }
 
-            var topicDescription = _publishTopology.TopicDescription;
+            var createTopicOptions = _publishTopology.CreateTopicOptions;
 
             var subscriptionConfigurator = _publishTopology.GetSubscriptionConfigurator(subscriptionName);
 
             configure?.Invoke(subscriptionConfigurator);
 
-            var specification = new SubscriptionConsumeTopologySpecification(topicDescription, subscriptionConfigurator.GetSubscriptionDescription(),
+            var specification = new SubscriptionConsumeTopologySpecification(createTopicOptions, subscriptionConfigurator.GetCreateSubscriptionOptions(),
                 subscriptionConfigurator.Rule,
                 subscriptionConfigurator.Filter);
 

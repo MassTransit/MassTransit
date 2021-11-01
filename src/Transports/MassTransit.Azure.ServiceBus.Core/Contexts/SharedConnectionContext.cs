@@ -6,7 +6,8 @@
     using global::Azure.Messaging.ServiceBus;
     using global::Azure.Messaging.ServiceBus.Administration;
     using GreenPipes;
-    using MassTransit.Azure.ServiceBus.Core.Transport;
+    using Transport;
+
 
     public class SharedConnectionContext :
         ProxyPipeContext,
@@ -48,19 +49,20 @@
             return _context.CreateMessageSender(entityPath);
         }
 
-        public Task<QueueProperties> CreateQueue(CreateQueueOptions queueDescription)
+        public Task<QueueProperties> CreateQueue(CreateQueueOptions createQueueOptions)
         {
-            return _context.CreateQueue(queueDescription);
+            return _context.CreateQueue(createQueueOptions);
         }
 
-        public Task<TopicProperties> CreateTopic(CreateTopicOptions topicDescription)
+        public Task<TopicProperties> CreateTopic(CreateTopicOptions createTopicOptions)
         {
-            return _context.CreateTopic(topicDescription);
+            return _context.CreateTopic(createTopicOptions);
         }
 
-        public Task<SubscriptionProperties> CreateTopicSubscription(CreateSubscriptionOptions subscriptionDescription, CreateRuleOptions rule, RuleFilter filter)
+        public Task<SubscriptionProperties> CreateTopicSubscription(CreateSubscriptionOptions createSubscriptionOptions, CreateRuleOptions rule,
+            RuleFilter filter)
         {
-            return _context.CreateTopicSubscription(subscriptionDescription, rule, filter);
+            return _context.CreateTopicSubscription(createSubscriptionOptions, rule, filter);
         }
 
         public Task DeleteTopicSubscription(string topicName, string subscriptionName)

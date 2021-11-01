@@ -1,6 +1,5 @@
 namespace MassTransit.Azure.ServiceBus.Core
 {
-    using Contexts;
     using GreenPipes;
 
 

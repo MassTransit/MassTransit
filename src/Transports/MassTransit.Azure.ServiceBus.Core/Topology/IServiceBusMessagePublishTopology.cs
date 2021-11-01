@@ -13,9 +13,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology
         where TMessage : class
     {
         /// <summary>
-        /// Returns the topic description for the message type
+        /// Returns the topic options for the message type
         /// </summary>
-        CreateTopicOptions TopicDescription { get; }
+        CreateTopicOptions CreateTopicOptions { get; }
 
         SendSettings GetSendSettings();
 

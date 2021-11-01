@@ -34,7 +34,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration
 
         public Task Handle(string entityName, EventData message, CancellationToken cancellationToken)
         {
-            var receiver = CreateBrokeredMessageReceiver(entityName, cfg =>
+            var receiver = CreateEventDataReceiver(entityName, cfg =>
             {
                 cfg.ConfigureConsumers(_registration);
                 cfg.ConfigureSagas(_registration);
@@ -46,7 +46,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration
         public Task HandleConsumer<TConsumer>(string entityName, EventData message, CancellationToken cancellationToken)
             where TConsumer : class, IConsumer
         {
-            var receiver = CreateBrokeredMessageReceiver(entityName, cfg =>
+            var receiver = CreateEventDataReceiver(entityName, cfg =>
             {
                 cfg.ConfigureConsumer<TConsumer>(_registration);
             });
@@ -57,7 +57,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration
         public Task HandleSaga<TSaga>(string entityName, EventData message, CancellationToken cancellationToken)
             where TSaga : class, ISaga
         {
-            var receiver = CreateBrokeredMessageReceiver(entityName, cfg =>
+            var receiver = CreateEventDataReceiver(entityName, cfg =>
             {
                 cfg.ConfigureSaga<TSaga>(_registration);
             });
@@ -68,7 +68,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration
         public Task HandleExecuteActivity<TActivity>(string entityName, EventData message, CancellationToken cancellationToken)
             where TActivity : class
         {
-            var receiver = CreateBrokeredMessageReceiver(entityName, cfg =>
+            var receiver = CreateEventDataReceiver(entityName, cfg =>
             {
                 cfg.ConfigureExecuteActivity(_registration, typeof(TActivity));
             });
@@ -80,7 +80,7 @@ namespace MassTransit.WebJobs.EventHubsIntegration
         {
         }
 
-        IEventDataReceiver CreateBrokeredMessageReceiver(string entityName, Action<IReceiveEndpointConfigurator> configure)
+        IEventDataReceiver CreateEventDataReceiver(string entityName, Action<IReceiveEndpointConfigurator> configure)
         {
             if (string.IsNullOrWhiteSpace(entityName))
                 throw new ArgumentNullException(nameof(entityName));

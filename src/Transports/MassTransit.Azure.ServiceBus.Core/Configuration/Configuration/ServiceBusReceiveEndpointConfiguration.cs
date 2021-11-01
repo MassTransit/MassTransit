@@ -144,14 +144,14 @@
         {
             var settings = _endpointConfiguration.Topology.Send.GetErrorSettings(_settings.QueueConfigurator);
 
-            return new BrokeredMessageErrorTransport(_hostConfiguration.ConnectionContextSupervisor, settings);
+            return new ServiceBusQueueErrorTransport(_hostConfiguration.ConnectionContextSupervisor, settings);
         }
 
         IDeadLetterTransport CreateDeadLetterTransport()
         {
             var settings = _endpointConfiguration.Topology.Send.GetDeadLetterSettings(_settings.QueueConfigurator);
 
-            return new BrokeredMessageDeadLetterTransport(_hostConfiguration.ConnectionContextSupervisor, settings);
+            return new ServiceBusQueueDeadLetterTransport(_hostConfiguration.ConnectionContextSupervisor, settings);
         }
     }
 }

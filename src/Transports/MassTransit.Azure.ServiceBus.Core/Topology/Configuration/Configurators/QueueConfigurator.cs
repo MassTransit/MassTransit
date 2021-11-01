@@ -41,53 +41,53 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Configurators
                 yield return this.Failure("AutoDeleteOnIdle", "must be zero, or >= 5:00");
         }
 
-        public CreateQueueOptions GetQueueDescription()
+        public CreateQueueOptions GetCreateQueueOptions()
         {
-            var description = new CreateQueueOptions(FullPath);
+            var options = new CreateQueueOptions(FullPath);
 
             if (AutoDeleteOnIdle.HasValue)
-                description.AutoDeleteOnIdle = AutoDeleteOnIdle.Value;
+                options.AutoDeleteOnIdle = AutoDeleteOnIdle.Value;
 
             if (DefaultMessageTimeToLive.HasValue)
-                description.DefaultMessageTimeToLive = DefaultMessageTimeToLive.Value;
+                options.DefaultMessageTimeToLive = DefaultMessageTimeToLive.Value;
 
             if (DuplicateDetectionHistoryTimeWindow.HasValue)
-                description.DuplicateDetectionHistoryTimeWindow = DuplicateDetectionHistoryTimeWindow.Value;
+                options.DuplicateDetectionHistoryTimeWindow = DuplicateDetectionHistoryTimeWindow.Value;
 
             if (EnableBatchedOperations.HasValue)
-                description.EnableBatchedOperations = EnableBatchedOperations.Value;
+                options.EnableBatchedOperations = EnableBatchedOperations.Value;
 
             if (EnableDeadLetteringOnMessageExpiration.HasValue)
-                description.DeadLetteringOnMessageExpiration = EnableDeadLetteringOnMessageExpiration.Value;
+                options.DeadLetteringOnMessageExpiration = EnableDeadLetteringOnMessageExpiration.Value;
 
             if (EnablePartitioning.HasValue)
-                description.EnablePartitioning = EnablePartitioning.Value;
+                options.EnablePartitioning = EnablePartitioning.Value;
 
             if (!string.IsNullOrWhiteSpace(ForwardDeadLetteredMessagesTo))
-                description.ForwardDeadLetteredMessagesTo = ForwardDeadLetteredMessagesTo;
+                options.ForwardDeadLetteredMessagesTo = ForwardDeadLetteredMessagesTo;
 
             if (!string.IsNullOrWhiteSpace(ForwardTo))
-                description.ForwardTo = ForwardTo;
+                options.ForwardTo = ForwardTo;
 
             if (LockDuration.HasValue)
-                description.LockDuration = LockDuration.Value;
+                options.LockDuration = LockDuration.Value;
 
             if (MaxDeliveryCount.HasValue)
-                description.MaxDeliveryCount = MaxDeliveryCount.Value;
+                options.MaxDeliveryCount = MaxDeliveryCount.Value;
 
             if (MaxSizeInMB.HasValue)
-                description.MaxSizeInMegabytes = MaxSizeInMB.Value;
+                options.MaxSizeInMegabytes = MaxSizeInMB.Value;
 
             if (RequiresDuplicateDetection.HasValue)
-                description.RequiresDuplicateDetection = RequiresDuplicateDetection.Value;
+                options.RequiresDuplicateDetection = RequiresDuplicateDetection.Value;
 
             if (RequiresSession.HasValue)
-                description.RequiresSession = RequiresSession.Value;
+                options.RequiresSession = RequiresSession.Value;
 
             if (!string.IsNullOrWhiteSpace(UserMetadata))
-                description.UserMetadata = UserMetadata;
+                options.UserMetadata = UserMetadata;
 
-            return description;
+            return options;
         }
 
         public Uri GetQueueAddress(Uri hostAddress)

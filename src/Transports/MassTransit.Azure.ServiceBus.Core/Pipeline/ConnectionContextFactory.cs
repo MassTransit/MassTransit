@@ -46,15 +46,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 
         async Task<ConnectionContext> CreateConnection(ISupervisor supervisor)
         {
-            var endpoint = new UriBuilder(_hostConfiguration.HostAddress) {Path = ""}.Uri.Host.ToString();
+            var endpoint = new UriBuilder(_hostConfiguration.HostAddress) { Path = "" }.Uri.Host;
 
             if (supervisor.Stopping.IsCancellationRequested)
                 throw new ServiceBusConnectionException($"The connection is stopping and cannot be used: {endpoint}");
 
             var settings = _hostConfiguration.Settings;
 
-            ServiceBusClient client = settings.ServiceBusClient;
-            ServiceBusAdministrationClient managementClient = settings.ServiceBusAdministrationClient;
+            var client = settings.ServiceBusClient;
+            var managementClient = settings.ServiceBusAdministrationClient;
 
             var clientOptions = new ServiceBusClientOptions
             {

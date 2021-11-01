@@ -38,6 +38,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology
         /// </summary>
         CreateRuleOptions Rule { set; }
 
-        CreateSubscriptionOptions GetSubscriptionDescription();
+        CreateSubscriptionOptions GetCreateSubscriptionOptions();
     }
 }

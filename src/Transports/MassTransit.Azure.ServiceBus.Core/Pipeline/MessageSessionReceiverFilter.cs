@@ -10,12 +10,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
     public class MessageSessionReceiverFilter :
         MessageReceiverFilter
     {
-        public MessageSessionReceiverFilter(IBrokeredMessageReceiver messageReceiver, ServiceBusReceiveEndpointContext context)
+        public MessageSessionReceiverFilter(IServiceBusMessageReceiver messageReceiver, ServiceBusReceiveEndpointContext context)
             : base(messageReceiver, context)
         {
         }
 
-        protected override IReceiver CreateMessageReceiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
+        protected override IReceiver CreateMessageReceiver(ClientContext context, IServiceBusMessageReceiver messageReceiver)
         {
             return new SessionReceiver(context, messageReceiver);
         }

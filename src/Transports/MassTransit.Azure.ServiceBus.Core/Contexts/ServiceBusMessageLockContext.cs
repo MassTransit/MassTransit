@@ -7,16 +7,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     using Util;
 
 
-    public class SessionMessageLockContext :
+    public class ServiceBusMessageLockContext :
         MessageLockContext
     {
+        readonly ProcessMessageEventArgs _eventArgs;
         readonly ServiceBusReceivedMessage _message;
-        readonly ProcessSessionMessageEventArgs _session;
         bool _deadLettered;
 
-        public SessionMessageLockContext(ProcessSessionMessageEventArgs session, ServiceBusReceivedMessage message)
+        public ServiceBusMessageLockContext(ProcessMessageEventArgs eventArgs, ServiceBusReceivedMessage message)
         {
-            _session = session;
+            _eventArgs = eventArgs;
             _message = message;
         }
 
@@ -24,28 +24,27 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         {
             return _deadLettered
                 ? TaskUtil.Completed
-                : _session.CompleteMessageAsync(_message);
+                : _eventArgs.CompleteMessageAsync(_message);
         }
 
         public Task Abandon(Exception exception)
         {
             return _deadLettered
                 ? TaskUtil.Completed
-                : _session.AbandonMessageAsync(_message, ExceptionUtil.GetExceptionHeaderDictionary(exception));
+                : _eventArgs.AbandonMessageAsync(_message, ExceptionUtil.GetExceptionHeaderDictionary(exception));
         }
 
         public async Task DeadLetter()
         {
-            var headers = new Dictionary<string, object> {{MessageHeaders.Reason, "dead-letter"}};
-
-            await _session.DeadLetterMessageAsync(_message, headers).ConfigureAwait(false);
+            await _eventArgs.DeadLetterMessageAsync(_message, new Dictionary<string, object> { { MessageHeaders.Reason, "dead-letter" } })
+                .ConfigureAwait(false);
 
             _deadLettered = true;
         }
 
         public async Task DeadLetter(Exception exception)
         {
-            await _session.DeadLetterMessageAsync(_message, ExceptionUtil.GetExceptionHeaderDictionary(exception)).ConfigureAwait(false);
+            await _eventArgs.DeadLetterMessageAsync(_message, ExceptionUtil.GetExceptionHeaderDictionary(exception)).ConfigureAwait(false);
 
             _deadLettered = true;
         }

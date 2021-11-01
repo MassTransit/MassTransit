@@ -4,11 +4,11 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     using System.Collections.Concurrent;
     using System.Threading;
     using System.Threading.Tasks;
-    using global::Azure.Messaging.ServiceBus;
     using Azure.ServiceBus.Core;
     using Azure.ServiceBus.Core.Configuration;
     using Azure.ServiceBus.Core.Topology.Configurators;
     using Azure.ServiceBus.Core.Transport;
+    using global::Azure.Messaging.ServiceBus;
     using Registration;
     using Saga;
 
@@ -18,7 +18,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     {
         readonly IAsyncBusHandle _busHandle;
         readonly IServiceBusHostConfiguration _hostConfiguration;
-        readonly ConcurrentDictionary<string, Lazy<IBrokeredMessageReceiver>> _receivers;
+        readonly ConcurrentDictionary<string, Lazy<IServiceBusMessageReceiver>> _receivers;
         readonly IBusRegistrationContext _registration;
 
         public MessageReceiver(IBusRegistrationContext registration, IAsyncBusHandle busHandle, IBusInstance busInstance)
@@ -29,12 +29,12 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             _registration = registration;
             _busHandle = busHandle;
 
-            _receivers = new ConcurrentDictionary<string, Lazy<IBrokeredMessageReceiver>>();
+            _receivers = new ConcurrentDictionary<string, Lazy<IServiceBusMessageReceiver>>();
         }
 
         public Task Handle(string queueName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
         {
-            var receiver = CreateBrokeredMessageReceiver(queueName, cfg =>
+            var receiver = CreateMessageReceiver(queueName, cfg =>
             {
                 cfg.ConfigureConsumers(_registration);
                 cfg.ConfigureSagas(_registration);
@@ -45,7 +45,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
 
         public Task Handle(string topicPath, string subscriptionName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
         {
-            var receiver = CreateBrokeredMessageReceiver(topicPath, subscriptionName, cfg =>
+            var receiver = CreateMessageReceiver(topicPath, subscriptionName, cfg =>
             {
                 cfg.ConfigureConsumers(_registration);
                 cfg.ConfigureSagas(_registration);
@@ -57,7 +57,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
         public Task HandleConsumer<TConsumer>(string queueName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
             where TConsumer : class, IConsumer
         {
-            var receiver = CreateBrokeredMessageReceiver(queueName, cfg =>
+            var receiver = CreateMessageReceiver(queueName, cfg =>
             {
                 cfg.ConfigureConsumer<TConsumer>(_registration);
             });
@@ -68,7 +68,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
         public Task HandleConsumer<TConsumer>(string topicPath, string subscriptionName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
             where TConsumer : class, IConsumer
         {
-            var receiver = CreateBrokeredMessageReceiver(topicPath, subscriptionName, cfg =>
+            var receiver = CreateMessageReceiver(topicPath, subscriptionName, cfg =>
             {
                 cfg.ConfigureConsumer<TConsumer>(_registration);
             });
@@ -79,7 +79,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
         public Task HandleSaga<TSaga>(string queueName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
             where TSaga : class, ISaga
         {
-            var receiver = CreateBrokeredMessageReceiver(queueName, cfg =>
+            var receiver = CreateMessageReceiver(queueName, cfg =>
             {
                 cfg.ConfigureSaga<TSaga>(_registration);
             });
@@ -90,7 +90,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
         public Task HandleSaga<TSaga>(string topicPath, string subscriptionName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
             where TSaga : class, ISaga
         {
-            var receiver = CreateBrokeredMessageReceiver(topicPath, subscriptionName, cfg =>
+            var receiver = CreateMessageReceiver(topicPath, subscriptionName, cfg =>
             {
                 cfg.ConfigureSaga<TSaga>(_registration);
             });
@@ -101,7 +101,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
         public Task HandleExecuteActivity<TActivity>(string queueName, ServiceBusReceivedMessage message, CancellationToken cancellationToken)
             where TActivity : class
         {
-            var receiver = CreateBrokeredMessageReceiver(queueName, cfg =>
+            var receiver = CreateMessageReceiver(queueName, cfg =>
             {
                 cfg.ConfigureExecuteActivity(_registration, typeof(TActivity));
             });
@@ -113,14 +113,14 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
         {
         }
 
-        IBrokeredMessageReceiver CreateBrokeredMessageReceiver(string queueName, Action<IReceiveEndpointConfigurator> configure)
+        IServiceBusMessageReceiver CreateMessageReceiver(string queueName, Action<IReceiveEndpointConfigurator> configure)
         {
             if (string.IsNullOrWhiteSpace(queueName))
                 throw new ArgumentNullException(nameof(queueName));
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
-            return _receivers.GetOrAdd(queueName, name => new Lazy<IBrokeredMessageReceiver>(() =>
+            return _receivers.GetOrAdd(queueName, name => new Lazy<IServiceBusMessageReceiver>(() =>
             {
                 var endpointConfiguration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
 
@@ -132,16 +132,16 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             })).Value;
         }
 
-        IBrokeredMessageReceiver CreateBrokeredMessageReceiver(string topicPath, string subscriptionName, Action<IReceiveEndpointConfigurator> configure)
+        IServiceBusMessageReceiver CreateMessageReceiver(string topicPath, string subscriptionName, Action<IReceiveEndpointConfigurator> configure)
         {
             if (string.IsNullOrWhiteSpace(topicPath))
                 throw new ArgumentNullException(nameof(topicPath));
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
-            var subscriptionPath = "abc";// EntityNameHelper.FormatSubscriptionPath(topicPath, subscriptionName);
+            var subscriptionPath = "abc"; // EntityNameHelper.FormatSubscriptionPath(topicPath, subscriptionName);
 
-            return _receivers.GetOrAdd(subscriptionPath, name => new Lazy<IBrokeredMessageReceiver>(() =>
+            return _receivers.GetOrAdd(subscriptionPath, name => new Lazy<IServiceBusMessageReceiver>(() =>
             {
                 var topicConfigurator = new TopicConfigurator(topicPath, false);
 

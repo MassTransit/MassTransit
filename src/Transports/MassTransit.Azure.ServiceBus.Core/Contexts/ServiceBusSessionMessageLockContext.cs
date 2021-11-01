@@ -7,16 +7,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     using Util;
 
 
-    public class ReceiverClientMessageLockContext :
+    public class ServiceBusSessionMessageLockContext :
         MessageLockContext
     {
         readonly ServiceBusReceivedMessage _message;
-        readonly ProcessMessageEventArgs _receiverClient;
+        readonly ProcessSessionMessageEventArgs _session;
         bool _deadLettered;
 
-        public ReceiverClientMessageLockContext(ProcessMessageEventArgs receiverClient, ServiceBusReceivedMessage message)
+        public ServiceBusSessionMessageLockContext(ProcessSessionMessageEventArgs session, ServiceBusReceivedMessage message)
         {
-            _receiverClient = receiverClient;
+            _session = session;
             _message = message;
         }
 
@@ -24,30 +24,28 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         {
             return _deadLettered
                 ? TaskUtil.Completed
-                : _receiverClient.CompleteMessageAsync(_message);
+                : _session.CompleteMessageAsync(_message);
         }
 
         public Task Abandon(Exception exception)
         {
             return _deadLettered
                 ? TaskUtil.Completed
-                : _receiverClient.AbandonMessageAsync(_message, ExceptionUtil.GetExceptionHeaderDictionary(exception));
+                : _session.AbandonMessageAsync(_message, ExceptionUtil.GetExceptionHeaderDictionary(exception));
         }
 
         public async Task DeadLetter()
         {
             var headers = new Dictionary<string, object> {{MessageHeaders.Reason, "dead-letter"}};
 
-            await _receiverClient.DeadLetterMessageAsync(_message, headers).ConfigureAwait(false);
+            await _session.DeadLetterMessageAsync(_message, headers).ConfigureAwait(false);
 
             _deadLettered = true;
         }
 
         public async Task DeadLetter(Exception exception)
         {
-            IDictionary<string, object> propertiesToModify = ExceptionUtil.GetExceptionHeaderDictionary(exception);
-
-            await _receiverClient.DeadLetterMessageAsync(_message, propertiesToModify).ConfigureAwait(false);
+            await _session.DeadLetterMessageAsync(_message, ExceptionUtil.GetExceptionHeaderDictionary(exception)).ConfigureAwait(false);
 
             _deadLettered = true;
         }

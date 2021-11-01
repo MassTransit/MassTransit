@@ -225,7 +225,7 @@
             static void CopyIncomingIdentifiersIfPresent(AzureServiceBusSendContext<T> context)
             {
                 if (context.TryGetPayload<ConsumeContext>(out var consumeContext)
-                    && consumeContext.TryGetPayload<BrokeredMessageContext>(out var brokeredMessageContext))
+                    && consumeContext.TryGetPayload<ServiceBusMessageContext>(out var brokeredMessageContext))
                 {
                     if (context.SessionId == null)
                     {

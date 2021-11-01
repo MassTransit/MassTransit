@@ -40,7 +40,7 @@
 
         Task RemoveState()
         {
-            return _sessionContext.SetStateAsync(new byte[0]);
+            return _sessionContext.SetStateAsync(BinaryData.FromBytes(Array.Empty<byte>()));
         }
     }
 }

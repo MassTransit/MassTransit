@@ -113,7 +113,7 @@ namespace MassTransit.ActiveMqTransport.Tests
             var settings = new ConfigurationHostSettings(new Uri("activemq://fake-host"))
             {
                 Port = 61616,
-                FailoverHosts = new[] {"failover1", "failover2"}
+                FailoverHosts = new[] { "failover1", "failover2" }
             };
 
             Assert.That(settings.BrokerAddress, Is.EqualTo(new Uri(

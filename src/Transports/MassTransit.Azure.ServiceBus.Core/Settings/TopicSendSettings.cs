@@ -9,15 +9,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
         SendSettings
     {
         readonly BrokerTopology _brokerTopology;
-        readonly CreateTopicOptions _description;
+        readonly CreateTopicOptions _createTopicOptions;
 
-        public TopicSendSettings(CreateTopicOptions description, BrokerTopology brokerTopology)
+        public TopicSendSettings(CreateTopicOptions createTopicOptions, BrokerTopology brokerTopology)
         {
-            _description = description;
+            _createTopicOptions = createTopicOptions;
             _brokerTopology = brokerTopology;
         }
 
-        public string EntityPath => _description.Name;
+        public string EntityPath => _createTopicOptions.Name;
 
         public BrokerTopology GetBrokerTopology()
         {

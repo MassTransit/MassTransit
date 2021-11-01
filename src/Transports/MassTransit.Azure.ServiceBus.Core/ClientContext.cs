@@ -32,14 +32,16 @@ namespace MassTransit.Azure.ServiceBus.Core
         /// </summary>
         /// <param name="callback"></param>
         /// <param name="exceptionHandler"></param>
-        void OnMessageAsync(Func<ProcessMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback, Func<ProcessErrorEventArgs, Task> exceptionHandler);
+        void OnMessageAsync(Func<ProcessMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback,
+            Func<ProcessErrorEventArgs, Task> exceptionHandler);
 
         /// <summary>
         /// Register a message session handler
         /// </summary>
         /// <param name="callback"></param>
         /// <param name="exceptionHandler"></param>
-        void OnSessionAsync(Func<ProcessSessionMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback, Func<ProcessErrorEventArgs, Task> exceptionHandler);
+        void OnSessionAsync(Func<ProcessSessionMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback,
+            Func<ProcessErrorEventArgs, Task> exceptionHandler);
 
         /// <summary>
         /// Starts the message/session receivers

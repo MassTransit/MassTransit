@@ -13,23 +13,24 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
         BaseClientSettings,
         SubscriptionSettings
     {
+        readonly CreateTopicOptions _createTopicOptions;
         readonly SubscriptionConfigurator _subscriptionConfigurator;
-        readonly CreateTopicOptions _topicDescription;
 
         public SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, string topicName, string subscriptionName)
-            : this(configuration, Defaults.CreateTopicDescription(topicName), subscriptionName)
+            : this(configuration, Defaults.GetCreateTopicOptions(topicName), subscriptionName)
         {
         }
 
-        public SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, CreateTopicOptions topicDescription, string subscriptionName)
-            : this(configuration, topicDescription, new SubscriptionConfigurator(topicDescription.Name, subscriptionName))
+        public SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, CreateTopicOptions createTopicOptions, string subscriptionName)
+            : this(configuration, createTopicOptions, new SubscriptionConfigurator(createTopicOptions.Name, subscriptionName))
         {
         }
 
-        SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, CreateTopicOptions topicDescription, SubscriptionConfigurator configurator)
+        SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, CreateTopicOptions createTopicOptions,
+            SubscriptionConfigurator configurator)
             : base(configuration, configurator)
         {
-            _topicDescription = topicDescription;
+            _createTopicOptions = createTopicOptions;
             _subscriptionConfigurator = configurator;
 
             Name = Path = EntityNameFormatter.FormatSubscriptionPath(_subscriptionConfigurator.TopicPath, _subscriptionConfigurator.SubscriptionName);
@@ -37,8 +38,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 
         public ISubscriptionConfigurator SubscriptionConfigurator => _subscriptionConfigurator;
 
-        CreateTopicOptions SubscriptionSettings.TopicDescription => _topicDescription;
-        CreateSubscriptionOptions SubscriptionSettings.SubscriptionDescription => _subscriptionConfigurator.GetSubscriptionDescription();
+        CreateTopicOptions SubscriptionSettings.CreateTopicOptions => _createTopicOptions;
+        CreateSubscriptionOptions SubscriptionSettings.CreateSubscriptionOptions => _subscriptionConfigurator.GetCreateSubscriptionOptions();
 
         public CreateRuleOptions Rule { get; set; }
         public RuleFilter Filter { get; set; }

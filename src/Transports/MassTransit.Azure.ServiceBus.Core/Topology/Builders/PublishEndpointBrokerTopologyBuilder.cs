@@ -64,11 +64,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
                     _topic = value;
                     if (_builder.Topic != null)
                     {
-                        var subscriptionName = string.Join("-", value.Topic.TopicDescription.Name.Split('/').Reverse());
-                        var subscriptionDescription = new CreateSubscriptionOptions(_builder.Topic.Topic.TopicDescription.Name,
-                            _topology.FormatSubscriptionName(subscriptionName)) {ForwardTo = value.Topic.TopicDescription.Name};
+                        var subscriptionName = string.Join("-", value.Topic.CreateTopicOptions.Name.Split('/').Reverse());
+                        var createSubscriptionOptions = new CreateSubscriptionOptions(_builder.Topic.Topic.CreateTopicOptions.Name,
+                            _topology.FormatSubscriptionName(subscriptionName)) {ForwardTo = value.Topic.CreateTopicOptions.Name};
 
-                        _builder.CreateTopicSubscription(_builder.Topic, _topic, subscriptionDescription);
+                        _builder.CreateTopicSubscription(_builder.Topic, _topic, createSubscriptionOptions);
                     }
                 }
             }
@@ -78,32 +78,32 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
                 return _options.HasFlag(Options.MaintainHierarchy) ? new ImplementedBuilder(this, _topology, _options) : this;
             }
 
-            public TopicHandle CreateTopic(CreateTopicOptions topicDescription)
+            public TopicHandle CreateTopic(CreateTopicOptions createTopicOptions)
             {
-                return _builder.CreateTopic(topicDescription);
+                return _builder.CreateTopic(createTopicOptions);
             }
 
-            public SubscriptionHandle CreateSubscription(TopicHandle topic, CreateSubscriptionOptions subscriptionDescription, CreateRuleOptions rule,
+            public SubscriptionHandle CreateSubscription(TopicHandle topic, CreateSubscriptionOptions createSubscriptionOptions, CreateRuleOptions rule,
                 RuleFilter filter)
             {
-                return _builder.CreateSubscription(topic, subscriptionDescription, rule, filter);
+                return _builder.CreateSubscription(topic, createSubscriptionOptions, rule, filter);
             }
 
-            public TopicSubscriptionHandle CreateTopicSubscription(TopicHandle source, TopicHandle destination, CreateSubscriptionOptions subscriptionDescription)
+            public TopicSubscriptionHandle CreateTopicSubscription(TopicHandle source, TopicHandle destination, CreateSubscriptionOptions createSubscriptionOptions)
             {
-                return _builder.CreateTopicSubscription(source, destination, subscriptionDescription);
+                return _builder.CreateTopicSubscription(source, destination, createSubscriptionOptions);
             }
 
-            public QueueHandle CreateQueue(CreateQueueOptions queueDescription)
+            public QueueHandle CreateQueue(CreateQueueOptions createQueueOptions)
             {
-                return _builder.CreateQueue(queueDescription);
+                return _builder.CreateQueue(createQueueOptions);
             }
 
-            public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, CreateSubscriptionOptions subscriptionDescription,
+            public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, CreateSubscriptionOptions createSubscriptionOptions,
                 CreateRuleOptions rule,
                 RuleFilter filter)
             {
-                return _builder.CreateQueueSubscription(exchange, queue, subscriptionDescription, rule, filter);
+                return _builder.CreateQueueSubscription(exchange, queue, createSubscriptionOptions, rule, filter);
             }
         }
     }

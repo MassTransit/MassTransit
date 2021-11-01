@@ -21,14 +21,14 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
         readonly IMessageTopology<TMessage> _messageTopology;
         readonly IServiceBusPublishTopology _publishTopology;
         readonly TopicConfigurator _topicConfigurator;
-        readonly Lazy<CreateTopicOptions> _topicDescription;
+        readonly Lazy<CreateTopicOptions> _createTopicOptions;
 
         public ServiceBusMessagePublishTopology(IMessageTopology<TMessage> messageTopology, IServiceBusPublishTopology publishTopology)
         {
             _messageTopology = messageTopology;
             _publishTopology = publishTopology;
 
-            _topicDescription = new Lazy<CreateTopicOptions>(GetTopicDescription);
+            _createTopicOptions = new Lazy<CreateTopicOptions>(() => _topicConfigurator.GetCreateTopicOptions());
 
             _topicConfigurator = new TopicConfigurator(messageTopology.EntityName, TypeMetadataCache<TMessage>.IsTemporaryMessageType);
             _implementedMessageTypes = new List<IServiceBusMessagePublishTopology>();
@@ -40,22 +40,22 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
             return true;
         }
 
-        public CreateTopicOptions TopicDescription => _topicDescription.Value;
+        public CreateTopicOptions CreateTopicOptions => _createTopicOptions.Value;
 
         public SendSettings GetSendSettings()
         {
-            var description = GetTopicDescription();
+            var createTopicOptions = _topicConfigurator.GetCreateTopicOptions();
 
             var builder = new PublishEndpointBrokerTopologyBuilder(_publishTopology);
 
             Apply(builder);
 
-            return new TopicSendSettings(description, builder.BuildBrokerTopology());
+            return new TopicSendSettings(createTopicOptions, builder.BuildBrokerTopology());
         }
 
         public SubscriptionConfigurator GetSubscriptionConfigurator(string subscriptionName)
         {
-            return new SubscriptionConfigurator(TopicDescription.Name, _publishTopology.FormatSubscriptionName(subscriptionName));
+            return new SubscriptionConfigurator(CreateTopicOptions.Name, _publishTopology.FormatSubscriptionName(subscriptionName));
         }
 
         string IMessageEntityConfigurator.Path => _topicConfigurator.Path;
@@ -123,17 +123,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Topologies
             if (Exclude)
                 return;
 
-            var topicHandle = builder.CreateTopic(_topicDescription.Value);
+            var topicHandle = builder.CreateTopic(_createTopicOptions.Value);
 
             builder.Topic = topicHandle;
 
             foreach (var configurator in _implementedMessageTypes)
                 configurator.Apply(builder);
-        }
-
-        CreateTopicOptions GetTopicDescription()
-        {
-            return _topicConfigurator.GetTopicDescription();
         }
 
         public void AddImplementedMessageConfigurator<T>(IServiceBusMessagePublishTopologyConfigurator<T> configurator, bool direct)

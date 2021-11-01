@@ -1,4 +1,4 @@
-namespace MassTransit.Azure.ServiceBus.Core.Contexts
+namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
     using System.Threading.Tasks;

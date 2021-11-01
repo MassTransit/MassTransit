@@ -8,6 +8,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
     /// </summary>
     public interface Queue
     {
-        CreateQueueOptions QueueDescription { get; }
+        CreateQueueOptions CreateQueueOptions { get; }
     }
 }

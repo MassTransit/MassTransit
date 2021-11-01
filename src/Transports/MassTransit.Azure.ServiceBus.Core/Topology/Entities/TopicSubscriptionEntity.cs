@@ -4,6 +4,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
     using System.Linq;
     using global::Azure.Messaging.ServiceBus.Administration;
 
+
     public class TopicSubscriptionEntity :
         TopicSubscription,
         TopicSubscriptionHandle
@@ -13,13 +14,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
         readonly SubscriptionEntity _subscription;
 
         public TopicSubscriptionEntity(long id, long subscriptionId, TopicEntity source, TopicEntity destination,
-            CreateSubscriptionOptions subscriptionDescription,
-            CreateRuleOptions rule = null, RuleFilter filter = null)
+            CreateSubscriptionOptions createSubscriptionOptions, CreateRuleOptions rule = null, RuleFilter filter = null)
         {
             Id = id;
             _source = source;
             _destination = destination;
-            _subscription = new SubscriptionEntity(subscriptionId, source, subscriptionDescription, rule, filter);
+            _subscription = new SubscriptionEntity(subscriptionId, source, createSubscriptionOptions, rule, filter);
         }
 
         public static IEqualityComparer<TopicSubscriptionEntity> EntityComparer { get; } = new TopicSubscriptionEntityEqualityComparer();
@@ -37,9 +37,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
             return string.Join(", ",
                 new[]
                 {
-                    $"source: {_source.TopicDescription.Name}",
-                    $"destination: {_destination.TopicDescription.Name}",
-                    $"subscription: {_subscription.SubscriptionDescription.SubscriptionName}"
+                    $"source: {_source.CreateTopicOptions.Name}",
+                    $"destination: {_destination.CreateTopicOptions.Name}",
+                    $"subscription: {_subscription.CreateSubscriptionOptions.SubscriptionName}"
                 }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 
@@ -97,16 +97,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
                 if (x.GetType() != y.GetType())
                     return false;
 
-                return string.Equals(x.Subscription.SubscriptionDescription.SubscriptionName, y.Subscription.SubscriptionDescription.SubscriptionName)
-                    && string.Equals(x.Subscription.SubscriptionDescription.TopicName, y.Subscription.SubscriptionDescription.TopicName)
-                    && string.Equals(x.Destination.TopicDescription.Name, y.Destination.TopicDescription.Name);
+                return string.Equals(x.Subscription.CreateSubscriptionOptions.SubscriptionName, y.Subscription.CreateSubscriptionOptions.SubscriptionName)
+                    && string.Equals(x.Subscription.CreateSubscriptionOptions.TopicName, y.Subscription.CreateSubscriptionOptions.TopicName)
+                    && string.Equals(x.Destination.CreateTopicOptions.Name, y.Destination.CreateTopicOptions.Name);
             }
 
             public int GetHashCode(TopicSubscriptionEntity obj)
             {
-                var hashCode = obj.Subscription.SubscriptionDescription.SubscriptionName.GetHashCode();
-                hashCode = (hashCode * 397) ^ obj.Subscription.SubscriptionDescription.TopicName.GetHashCode();
-                hashCode = (hashCode * 397) ^ obj.Destination.TopicDescription.Name.GetHashCode();
+                var hashCode = obj.Subscription.CreateSubscriptionOptions.SubscriptionName.GetHashCode();
+                hashCode = (hashCode * 397) ^ obj.Subscription.CreateSubscriptionOptions.TopicName.GetHashCode();
+                hashCode = (hashCode * 397) ^ obj.Destination.CreateTopicOptions.Name.GetHashCode();
 
                 return hashCode;
             }

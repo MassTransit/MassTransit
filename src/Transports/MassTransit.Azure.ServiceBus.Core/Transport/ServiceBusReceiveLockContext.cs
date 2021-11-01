@@ -8,13 +8,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using Util;
 
 
-    public class MessageLockContextReceiveLock :
+    public class ServiceBusReceiveLockContext :
         ReceiveLockContext
     {
         readonly MessageLockContext _lockContext;
         readonly ServiceBusReceiveContext _message;
 
-        public MessageLockContextReceiveLock(MessageLockContext lockContext, ServiceBusReceiveContext message)
+        public ServiceBusReceiveLockContext(MessageLockContext lockContext, ServiceBusReceiveContext message)
         {
             _lockContext = lockContext;
             _message = message;

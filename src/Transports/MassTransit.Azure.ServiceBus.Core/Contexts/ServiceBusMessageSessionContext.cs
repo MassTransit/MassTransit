@@ -3,26 +3,27 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     using System;
     using System.Threading.Tasks;
     using global::Azure.Messaging.ServiceBus;
-    using MassTransit.Util;
+    using Util;
 
-    public class BrokeredMessageSessionContext :
+
+    public class ServiceBusMessageSessionContext :
         MessageSessionContext
     {
         readonly ProcessSessionMessageEventArgs _session;
 
-        public BrokeredMessageSessionContext(ProcessSessionMessageEventArgs session)
+        public ServiceBusMessageSessionContext(ProcessSessionMessageEventArgs session)
         {
             _session = session;
         }
 
-        public async Task<byte[]> GetStateAsync()
+        public Task<BinaryData> GetStateAsync()
         {
-            return (await _session.GetSessionStateAsync())?.ToArray();
+            return _session.GetSessionStateAsync();
         }
 
-        public Task SetStateAsync(byte[] sessionState)
+        public Task SetStateAsync(BinaryData state)
         {
-            return _session.SetSessionStateAsync(new BinaryData(sessionState ?? Array.Empty<byte>()));
+            return _session.SetSessionStateAsync(state);
         }
 
         public Task RenewLockAsync(ServiceBusReceivedMessage message)

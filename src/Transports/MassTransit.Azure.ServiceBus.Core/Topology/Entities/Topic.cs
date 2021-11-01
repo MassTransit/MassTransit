@@ -8,6 +8,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
     /// </summary>
     public interface Topic
     {
-        CreateTopicOptions TopicDescription { get; }
+        CreateTopicOptions CreateTopicOptions { get; }
     }
 }

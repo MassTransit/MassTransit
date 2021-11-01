@@ -41,15 +41,18 @@
 
             ReceiveTransportRetryPolicy = Retry.CreatePolicy(x =>
             {
-                x.Ignore<ServiceBusException>(ex => ex.Reason == ServiceBusFailureReason.MessagingEntityNotFound);
-                x.Ignore<ServiceBusException>(ex => ex.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists);
-                x.Ignore<ServiceBusException>(ex => ex.Reason == ServiceBusFailureReason.MessageNotFound);
-                x.Ignore<ServiceBusException>(ex => ex.Reason == ServiceBusFailureReason.MessageSizeExceeded);
-
                 x.Ignore<UnauthorizedAccessException>();
 
-                x.Handle<ServiceBusException>(exception => exception.Reason == ServiceBusFailureReason.ServiceBusy && exception.IsTransient);
                 x.Handle<TimeoutException>();
+                x.Handle<ServiceBusException>(ex => ex.Reason switch
+                {
+                    ServiceBusFailureReason.MessagingEntityNotFound => false,
+                    ServiceBusFailureReason.MessagingEntityAlreadyExists => false,
+                    ServiceBusFailureReason.MessageNotFound => false,
+                    ServiceBusFailureReason.MessageSizeExceeded => false,
+                    ServiceBusFailureReason.ServiceBusy when ex.IsTransient => true,
+                    _ => false
+                });
 
                 x.Interval(5, TimeSpan.FromSeconds(10));
             });
@@ -159,7 +162,7 @@
             where T : class
         {
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
-            var settings = new SubscriptionEndpointSettings(endpointConfiguration, _busConfiguration.Topology.Publish.GetMessageTopology<T>().TopicDescription,
+            var settings = new SubscriptionEndpointSettings(endpointConfiguration, _busConfiguration.Topology.Publish.GetMessageTopology<T>().CreateTopicOptions,
                 subscriptionName);
 
             CreateSubscriptionEndpointConfiguration(settings, endpointConfiguration, configure);
@@ -196,7 +199,7 @@
             where T : class
         {
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
-            var settings = new SubscriptionEndpointSettings(endpointConfiguration, _busConfiguration.Topology.Publish.GetMessageTopology<T>().TopicDescription,
+            var settings = new SubscriptionEndpointSettings(endpointConfiguration, _busConfiguration.Topology.Publish.GetMessageTopology<T>().CreateTopicOptions,
                 subscriptionName);
 
             return CreateSubscriptionEndpointConfiguration(settings, endpointConfiguration, configure);

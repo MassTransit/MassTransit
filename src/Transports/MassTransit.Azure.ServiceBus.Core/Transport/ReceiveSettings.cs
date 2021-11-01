@@ -11,6 +11,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         /// </summary>
         bool RemoveSubscriptions { get; }
 
-        CreateQueueOptions GetQueueDescription();
+        CreateQueueOptions GetCreateQueueOptions();
     }
 }

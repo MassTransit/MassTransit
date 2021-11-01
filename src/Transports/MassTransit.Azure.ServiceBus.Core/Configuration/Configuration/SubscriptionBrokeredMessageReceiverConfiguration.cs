@@ -21,7 +21,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
             _endpointConfiguration = endpointConfiguration;
         }
 
-        public IBrokeredMessageReceiver Build()
+        public IServiceBusMessageReceiver Build()
         {
             var result = BusConfigurationResult.CompileResults(Validate());
 
@@ -32,7 +32,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Configuration
                 foreach (var specification in Specifications)
                     specification.Configure(builder);
 
-                return new BrokeredMessageReceiver(builder.CreateReceiveEndpointContext());
+                return new ServiceBusMessageReceiver(builder.CreateReceiveEndpointContext());
             }
             catch (Exception ex)
             {

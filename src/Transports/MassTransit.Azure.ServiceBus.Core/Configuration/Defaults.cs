@@ -17,7 +17,7 @@
         public static TimeSpan MessageWaitTimeout { get; set; } = TimeSpan.FromSeconds(10);
         public static TimeSpan ShutdownTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
-        public static CreateQueueOptions CreateQueueDescription(string queueName)
+        public static CreateQueueOptions GetCreateQueueOptions(string queueName)
         {
             return new CreateQueueOptions(queueName)
             {
@@ -30,7 +30,7 @@
             };
         }
 
-        public static CreateTopicOptions CreateTopicDescription(string topicName)
+        public static CreateTopicOptions GetCreateTopicOptions(string topicName)
         {
             return new CreateTopicOptions(topicName)
             {

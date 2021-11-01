@@ -9,23 +9,23 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
         Topic,
         TopicHandle
     {
-        public TopicEntity(long id, CreateTopicOptions topicDescription)
+        public TopicEntity(long id, CreateTopicOptions createTopicOptions)
         {
             Id = id;
 
-            TopicDescription = topicDescription;
+            CreateTopicOptions = createTopicOptions;
         }
 
         public static IEqualityComparer<TopicEntity> NameComparer { get; } = new NameEqualityComparer();
         public static IEqualityComparer<TopicEntity> EntityComparer { get; } = new TopicEntityEqualityComparer();
 
-        public CreateTopicOptions TopicDescription { get; }
+        public CreateTopicOptions CreateTopicOptions { get; }
         public long Id { get; }
         public Topic Topic => this;
 
         public override string ToString()
         {
-            return string.Join(", ", new[] {$"path: {TopicDescription.Name}"}.Where(x => !string.IsNullOrWhiteSpace(x)));
+            return string.Join(", ", new[] { $"path: {CreateTopicOptions.Name}" }.Where(x => !string.IsNullOrWhiteSpace(x)));
         }
 
 
@@ -42,31 +42,31 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
                     return false;
                 if (x.GetType() != y.GetType())
                     return false;
-                return string.Equals(x.TopicDescription.Name, y.TopicDescription.Name)
-                    && x.TopicDescription.AutoDeleteOnIdle == y.TopicDescription.AutoDeleteOnIdle
-                    && x.TopicDescription.DefaultMessageTimeToLive == y.TopicDescription.DefaultMessageTimeToLive
-                    && x.TopicDescription.DuplicateDetectionHistoryTimeWindow == y.TopicDescription.DuplicateDetectionHistoryTimeWindow
-                    && x.TopicDescription.EnableBatchedOperations == y.TopicDescription.EnableBatchedOperations
-                    && x.TopicDescription.EnablePartitioning == y.TopicDescription.EnablePartitioning
-                    && x.TopicDescription.RequiresDuplicateDetection == y.TopicDescription.RequiresDuplicateDetection
-                    && x.TopicDescription.SupportOrdering == y.TopicDescription.SupportOrdering
-                    && string.Equals(x.TopicDescription.UserMetadata, y.TopicDescription.UserMetadata);
+                return string.Equals(x.CreateTopicOptions.Name, y.CreateTopicOptions.Name)
+                    && x.CreateTopicOptions.AutoDeleteOnIdle == y.CreateTopicOptions.AutoDeleteOnIdle
+                    && x.CreateTopicOptions.DefaultMessageTimeToLive == y.CreateTopicOptions.DefaultMessageTimeToLive
+                    && x.CreateTopicOptions.DuplicateDetectionHistoryTimeWindow == y.CreateTopicOptions.DuplicateDetectionHistoryTimeWindow
+                    && x.CreateTopicOptions.EnableBatchedOperations == y.CreateTopicOptions.EnableBatchedOperations
+                    && x.CreateTopicOptions.EnablePartitioning == y.CreateTopicOptions.EnablePartitioning
+                    && x.CreateTopicOptions.RequiresDuplicateDetection == y.CreateTopicOptions.RequiresDuplicateDetection
+                    && x.CreateTopicOptions.SupportOrdering == y.CreateTopicOptions.SupportOrdering
+                    && string.Equals(x.CreateTopicOptions.UserMetadata, y.CreateTopicOptions.UserMetadata);
             }
 
             public int GetHashCode(TopicEntity obj)
             {
                 unchecked
                 {
-                    var hashCode = obj.TopicDescription.Name.GetHashCode();
-                    hashCode = (hashCode * 397) ^ obj.TopicDescription.AutoDeleteOnIdle.GetHashCode();
-                    hashCode = (hashCode * 397) ^ obj.TopicDescription.DefaultMessageTimeToLive.GetHashCode();
-                    hashCode = (hashCode * 397) ^ obj.TopicDescription.DuplicateDetectionHistoryTimeWindow.GetHashCode();
-                    hashCode = (hashCode * 397) ^ obj.TopicDescription.EnableBatchedOperations.GetHashCode();
-                    hashCode = (hashCode * 397) ^ obj.TopicDescription.EnablePartitioning.GetHashCode();
-                    hashCode = (hashCode * 397) ^ obj.TopicDescription.RequiresDuplicateDetection.GetHashCode();
-                    hashCode = (hashCode * 397) ^ obj.TopicDescription.SupportOrdering.GetHashCode();
-                    if (!string.IsNullOrWhiteSpace(obj.TopicDescription.UserMetadata))
-                        hashCode = (hashCode * 397) ^ obj.TopicDescription.UserMetadata.GetHashCode();
+                    var hashCode = obj.CreateTopicOptions.Name.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.CreateTopicOptions.AutoDeleteOnIdle.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.CreateTopicOptions.DefaultMessageTimeToLive.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.CreateTopicOptions.DuplicateDetectionHistoryTimeWindow.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.CreateTopicOptions.EnableBatchedOperations.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.CreateTopicOptions.EnablePartitioning.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.CreateTopicOptions.RequiresDuplicateDetection.GetHashCode();
+                    hashCode = (hashCode * 397) ^ obj.CreateTopicOptions.SupportOrdering.GetHashCode();
+                    if (!string.IsNullOrWhiteSpace(obj.CreateTopicOptions.UserMetadata))
+                        hashCode = (hashCode * 397) ^ obj.CreateTopicOptions.UserMetadata.GetHashCode();
 
                     return hashCode;
                 }
@@ -87,12 +87,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
                     return false;
                 if (x.GetType() != y.GetType())
                     return false;
-                return string.Equals(x.TopicDescription.Name, y.TopicDescription.Name);
+                return string.Equals(x.CreateTopicOptions.Name, y.CreateTopicOptions.Name);
             }
 
             public int GetHashCode(TopicEntity obj)
             {
-                return obj.TopicDescription.Name.GetHashCode();
+                return obj.CreateTopicOptions.Name.GetHashCode();
             }
         }
     }

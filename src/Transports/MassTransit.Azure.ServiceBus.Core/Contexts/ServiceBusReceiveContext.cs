@@ -7,9 +7,10 @@
     using Context;
     using global::Azure.Messaging.ServiceBus;
 
+
     public sealed class ServiceBusReceiveContext :
         BaseReceiveContext,
-        BrokeredMessageContext
+        ServiceBusMessageContext
     {
         readonly ServiceBusReceivedMessage _message;
 
@@ -45,7 +46,7 @@
 
         public string SessionId => _message.SessionId;
 
-        public long Size => _message.Body?.ToArray().Length ?? 0;
+        public long Size => _message.Body?.ToMemory().Length ?? 0;
 
         public string To => _message.To;
 
@@ -66,7 +67,7 @@
 
         public override Stream GetBodyStream()
         {
-            return new MemoryStream(_message.Body.ToArray(), false);
+            return _message.Body.ToStream();
         }
 
         protected override ContentType GetContentType()

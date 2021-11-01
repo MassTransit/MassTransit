@@ -1,11 +1,11 @@
-namespace MassTransit.Azure.ServiceBus.Core.Contexts
+namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
     using System.Threading.Tasks;
     using global::Azure.Messaging.ServiceBus;
     using global::Azure.Messaging.ServiceBus.Administration;
     using GreenPipes;
-    using MassTransit.Azure.ServiceBus.Core.Transport;
+    using Transport;
 
 
     /// <summary>
@@ -30,25 +30,25 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         /// <summary>
         /// Create a queue in the host namespace (which is scoped to the full ServiceUri)
         /// </summary>
-        /// <param name="queueDescription"></param>
+        /// <param name="createQueueOptions"></param>
         /// <returns></returns>
-        Task<QueueProperties> CreateQueue(CreateQueueOptions queueDescription);
+        Task<QueueProperties> CreateQueue(CreateQueueOptions createQueueOptions);
 
         /// <summary>
         /// Create a topic in the root namespace
         /// </summary>
-        /// <param name="topicDescription"></param>
+        /// <param name="createTopicOptions"></param>
         /// <returns></returns>
-        Task<TopicProperties> CreateTopic(CreateTopicOptions topicDescription);
+        Task<TopicProperties> CreateTopic(CreateTopicOptions createTopicOptions);
 
         /// <summary>
         /// Create a topic subscription
         /// </summary>
-        /// <param name="subscriptionDescription"></param>
+        /// <param name="createSubscriptionOptions"></param>
         /// <param name="rule"></param>
         /// <param name="filter"></param>
         /// <returns></returns>
-        Task<SubscriptionProperties> CreateTopicSubscription(CreateSubscriptionOptions subscriptionDescription, CreateRuleOptions rule, RuleFilter filter);
+        Task<SubscriptionProperties> CreateTopicSubscription(CreateSubscriptionOptions createSubscriptionOptions, CreateRuleOptions rule, RuleFilter filter);
 
         /// <summary>
         /// Delete a subscription from the topic

@@ -7,6 +7,7 @@
     using Context;
     using global::Azure;
     using global::Azure.Messaging.ServiceBus.Administration;
+    using Internals.Extensions;
     using MassTransit.Testing;
 
 

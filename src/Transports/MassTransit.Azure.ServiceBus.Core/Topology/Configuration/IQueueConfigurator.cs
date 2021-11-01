@@ -20,9 +20,9 @@
         string ForwardTo { set; }
 
         /// <summary>
-        /// Create the queueDescription for the configuration
+        /// Create the CreateQueueOptions for the configuration
         /// </summary>
         /// <returns></returns>
-        CreateQueueOptions GetQueueDescription();
+        CreateQueueOptions GetCreateQueueOptions();
     }
 }

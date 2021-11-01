@@ -11,9 +11,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         Receiver
     {
         readonly ClientContext _context;
-        readonly IBrokeredMessageReceiver _messageReceiver;
+        readonly IServiceBusMessageReceiver _messageReceiver;
 
-        public SessionReceiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
+        public SessionReceiver(ClientContext context, IServiceBusMessageReceiver messageReceiver)
             : base(context, messageReceiver)
         {
             _context = context;
@@ -39,8 +39,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         void AddReceiveContextPayloads(ReceiveContext receiveContext, ProcessSessionMessageEventArgs messageSession, ServiceBusReceivedMessage message)
         {
-            MessageSessionContext sessionContext = new BrokeredMessageSessionContext(messageSession);
-            MessageLockContext lockContext = new SessionMessageLockContext(messageSession, message);
+            MessageSessionContext sessionContext = new ServiceBusMessageSessionContext(messageSession);
+            MessageLockContext lockContext = new ServiceBusSessionMessageLockContext(messageSession, message);
 
             receiveContext.GetOrAddPayload(() => sessionContext);
             receiveContext.GetOrAddPayload(() => lockContext);

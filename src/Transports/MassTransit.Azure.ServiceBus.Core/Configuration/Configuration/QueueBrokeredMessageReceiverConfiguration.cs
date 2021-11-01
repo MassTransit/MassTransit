@@ -21,7 +21,7 @@
             _endpointConfiguration = endpointConfiguration;
         }
 
-        public IBrokeredMessageReceiver Build()
+        public IServiceBusMessageReceiver Build()
         {
             var result = BusConfigurationResult.CompileResults(Validate());
 
@@ -32,7 +32,7 @@
                 foreach (var specification in Specifications)
                     specification.Configure(builder);
 
-                return new BrokeredMessageReceiver(builder.CreateReceiveEndpointContext());
+                return new ServiceBusMessageReceiver(builder.CreateReceiveEndpointContext());
             }
             catch (Exception ex)
             {

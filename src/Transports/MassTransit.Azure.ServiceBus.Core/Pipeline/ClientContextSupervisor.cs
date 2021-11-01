@@ -1,5 +1,6 @@
 namespace MassTransit.Azure.ServiceBus.Core.Pipeline
 {
+    using Contexts;
     using GreenPipes.Agents;
     using Transports;
 

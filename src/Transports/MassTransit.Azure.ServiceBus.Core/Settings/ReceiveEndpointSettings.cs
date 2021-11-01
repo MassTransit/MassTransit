@@ -33,9 +33,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 
         public override bool RequiresSession => _queueConfigurator.RequiresSession ?? false;
 
-        public CreateQueueOptions GetQueueDescription()
+        public CreateQueueOptions GetCreateQueueOptions()
         {
-            return _queueConfigurator.GetQueueDescription();
+            return _queueConfigurator.GetCreateQueueOptions();
         }
 
         public override void SelectBasicTier()

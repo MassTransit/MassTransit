@@ -9,7 +9,7 @@
     using Transports.Metrics;
 
 
-    public interface IBrokeredMessageReceiver :
+    public interface IServiceBusMessageReceiver :
         IDispatchMetrics,
         IReceiveObserverConnector,
         IPublishObserverConnector,

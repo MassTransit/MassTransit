@@ -61,7 +61,7 @@
         {
             var topologyBuilder = new ReceiveEndpointBrokerTopologyBuilder();
 
-            topologyBuilder.Queue = topologyBuilder.CreateQueue(settings.GetQueueDescription());
+            topologyBuilder.Queue = topologyBuilder.CreateQueue(settings.GetCreateQueueOptions());
 
             _configuration.Topology.Consume.Apply(topologyBuilder);
 

@@ -5,7 +5,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using Contexts;
     using GreenPipes;
     using Topology;
     using Topology.Entities;
@@ -103,33 +102,34 @@
 
         Task Create(ConnectionContext context, Topic topic)
         {
-            return context.CreateTopic(topic.TopicDescription);
+            return context.CreateTopic(topic.CreateTopicOptions);
         }
 
         Task Create(ConnectionContext context, Queue queue)
         {
-            return context.CreateQueue(queue.QueueDescription);
+            return context.CreateQueue(queue.CreateQueueOptions);
         }
 
         Task Create(ConnectionContext context, Subscription subscription)
         {
-            return context.CreateTopicSubscription(subscription.SubscriptionDescription, subscription.Rule, subscription.Filter);
+            return context.CreateTopicSubscription(subscription.CreateSubscriptionOptions, subscription.Rule, subscription.Filter);
         }
 
         Task Create(ConnectionContext context, QueueSubscription subscription)
         {
-            return context.CreateTopicSubscription(subscription.Subscription.SubscriptionDescription, subscription.Subscription.Rule,
+            return context.CreateTopicSubscription(subscription.Subscription.CreateSubscriptionOptions, subscription.Subscription.Rule,
                 subscription.Subscription.Filter);
         }
 
         Task Delete(ConnectionContext context, QueueSubscription subscription)
         {
-            return context.DeleteTopicSubscription(subscription.Subscription.SubscriptionDescription.TopicName, subscription.Subscription.SubscriptionDescription.SubscriptionName);
+            return context.DeleteTopicSubscription(subscription.Subscription.CreateSubscriptionOptions.TopicName,
+                subscription.Subscription.CreateSubscriptionOptions.SubscriptionName);
         }
 
         Task Create(ConnectionContext context, TopicSubscription subscription)
         {
-            return context.CreateTopicSubscription(subscription.Subscription.SubscriptionDescription, subscription.Subscription.Rule,
+            return context.CreateTopicSubscription(subscription.Subscription.CreateSubscriptionOptions, subscription.Subscription.Rule,
                 subscription.Subscription.Filter);
         }
 

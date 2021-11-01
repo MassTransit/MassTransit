@@ -15,10 +15,10 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
         IFilter<ClientContext>
     {
         readonly ServiceBusReceiveEndpointContext _context;
-        readonly IBrokeredMessageReceiver _messageReceiver;
+        readonly IServiceBusMessageReceiver _messageReceiver;
         readonly IReceiveTransportObserver _transportObserver;
 
-        public MessageReceiverFilter(IBrokeredMessageReceiver messageReceiver, ServiceBusReceiveEndpointContext context)
+        public MessageReceiverFilter(IServiceBusMessageReceiver messageReceiver, ServiceBusReceiveEndpointContext context)
         {
             _messageReceiver = messageReceiver;
             _transportObserver = context.TransportObservers;
@@ -63,7 +63,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Pipeline
             await next.Send(context).ConfigureAwait(false);
         }
 
-        protected virtual IReceiver CreateMessageReceiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
+        protected virtual IReceiver CreateMessageReceiver(ClientContext context, IServiceBusMessageReceiver messageReceiver)
         {
             return new Receiver(context, messageReceiver);
         }

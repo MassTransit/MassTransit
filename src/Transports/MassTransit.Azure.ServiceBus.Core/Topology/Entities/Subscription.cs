@@ -8,7 +8,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Entities
     /// </summary>
     public interface Subscription
     {
-        CreateSubscriptionOptions SubscriptionDescription { get; }
+        CreateSubscriptionOptions CreateSubscriptionOptions { get; }
 
         TopicHandle Topic { get; }
 

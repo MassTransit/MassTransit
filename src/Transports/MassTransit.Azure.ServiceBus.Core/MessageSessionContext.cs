@@ -24,14 +24,14 @@ namespace MassTransit.Azure.ServiceBus.Core
         /// Returns the state as a stream
         /// </summary>
         /// <returns></returns>
-        Task<byte[]> GetStateAsync();
+        Task<BinaryData> GetStateAsync();
 
         /// <summary>
         /// Writes the message state from the specified stream
         /// </summary>
-        /// <param name="sessionState"></param>
+        /// <param name="state"></param>
         /// <returns></returns>
-        Task SetStateAsync(byte[] sessionState);
+        Task SetStateAsync(BinaryData state);
 
         /// <summary>
         /// Renews the session lock

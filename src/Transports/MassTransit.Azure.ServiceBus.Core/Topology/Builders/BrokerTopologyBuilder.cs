@@ -32,55 +32,55 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
         protected EntityCollection<TopicSubscriptionEntity, TopicSubscriptionHandle> TopicSubscriptions { get; }
         protected NamedEntityCollection<QueueEntity, QueueHandle> Queues { get; }
 
-        public TopicHandle CreateTopic(CreateTopicOptions topicDescription)
+        public TopicHandle CreateTopic(CreateTopicOptions createTopicOptions)
         {
-            var exchange = new TopicEntity(GetNextId(), topicDescription);
+            var exchange = new TopicEntity(GetNextId(), createTopicOptions);
 
             return Topics.GetOrAdd(exchange);
         }
 
-        public SubscriptionHandle CreateSubscription(TopicHandle topic, CreateSubscriptionOptions subscriptionDescription, CreateRuleOptions rule, RuleFilter filter)
+        public SubscriptionHandle CreateSubscription(TopicHandle topic, CreateSubscriptionOptions createSubscriptionOptions, CreateRuleOptions rule,
+            RuleFilter filter)
         {
             var topicEntity = Topics.Get(topic);
 
-            var subscriptionEntity = new SubscriptionEntity(GetNextId(), topicEntity, subscriptionDescription, rule, filter);
+            var subscriptionEntity = new SubscriptionEntity(GetNextId(), topicEntity, createSubscriptionOptions, rule, filter);
 
             return Subscriptions.GetOrAdd(subscriptionEntity);
         }
 
-        public QueueHandle CreateQueue(CreateQueueOptions queueDescription)
+        public QueueHandle CreateQueue(CreateQueueOptions createQueueOptions)
         {
-            var queue = new QueueEntity(GetNextId(), queueDescription);
+            var queue = new QueueEntity(GetNextId(), createQueueOptions);
 
             return Queues.GetOrAdd(queue);
         }
 
-        public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, CreateSubscriptionOptions subscriptionDescription,
-            CreateRuleOptions rule,
-            RuleFilter filter)
+        public QueueSubscriptionHandle CreateQueueSubscription(TopicHandle exchange, QueueHandle queue, CreateSubscriptionOptions createSubscriptionOptions,
+            CreateRuleOptions rule, RuleFilter filter)
         {
             var topicEntity = Topics.Get(exchange);
 
             var queueEntity = Queues.Get(queue);
 
-            if (topicEntity.TopicDescription.EnablePartitioning)
-                queueEntity.QueueDescription.EnablePartitioning = true;
+            if (topicEntity.CreateTopicOptions.EnablePartitioning)
+                queueEntity.CreateQueueOptions.EnablePartitioning = true;
 
-            var binding = new QueueSubscriptionEntity(GetNextId(), GetNextId(), topicEntity, queueEntity, subscriptionDescription, rule, filter);
+            var binding = new QueueSubscriptionEntity(GetNextId(), GetNextId(), topicEntity, queueEntity, createSubscriptionOptions, rule, filter);
 
             return QueueSubscriptions.GetOrAdd(binding);
         }
 
-        public TopicSubscriptionHandle CreateTopicSubscription(TopicHandle source, TopicHandle destination, CreateSubscriptionOptions subscriptionDescription)
+        public TopicSubscriptionHandle CreateTopicSubscription(TopicHandle source, TopicHandle destination, CreateSubscriptionOptions createSubscriptionOptions)
         {
             var sourceEntity = Topics.Get(source);
 
             var destinationEntity = Topics.Get(destination);
 
-            if (sourceEntity.TopicDescription.EnablePartitioning)
-                destinationEntity.TopicDescription.EnablePartitioning = true;
+            if (sourceEntity.CreateTopicOptions.EnablePartitioning)
+                destinationEntity.CreateTopicOptions.EnablePartitioning = true;
 
-            var subscriptionEntity = new TopicSubscriptionEntity(GetNextId(), GetNextId(), sourceEntity, destinationEntity, subscriptionDescription);
+            var subscriptionEntity = new TopicSubscriptionEntity(GetNextId(), GetNextId(), sourceEntity, destinationEntity, createSubscriptionOptions);
 
             return TopicSubscriptions.GetOrAdd(subscriptionEntity);
         }

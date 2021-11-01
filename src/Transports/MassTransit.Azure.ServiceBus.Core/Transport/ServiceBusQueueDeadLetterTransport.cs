@@ -7,22 +7,20 @@
     using Transports;
 
 
-    public class BrokeredMessageErrorTransport :
-        BrokeredMessageMoveTransport,
-        IErrorTransport
+    public class ServiceBusQueueDeadLetterTransport :
+        ServiceBusQueueMoveTransport,
+        IDeadLetterTransport
     {
-        public BrokeredMessageErrorTransport(IConnectionContextSupervisor supervisor, SendSettings settings)
+        public ServiceBusQueueDeadLetterTransport(IConnectionContextSupervisor supervisor, SendSettings settings)
             : base(supervisor, settings)
         {
         }
 
-        public Task Send(ExceptionReceiveContext context)
+        public Task Send(ReceiveContext context, string reason)
         {
             void PreSend(ServiceBusMessage message, IDictionary<string, object> headers)
             {
-                headers.SetExceptionHeaders(context);
-
-                message.TimeToLive = Defaults.BasicMessageTimeToLive;
+                headers.Set(new HeaderValue(MessageHeaders.Reason, reason ?? "Unspecified"));
             }
 
             return Move(context, PreSend);

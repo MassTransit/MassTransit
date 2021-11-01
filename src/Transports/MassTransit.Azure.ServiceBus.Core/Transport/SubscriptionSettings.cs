@@ -6,9 +6,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     public interface SubscriptionSettings :
         ClientSettings
     {
-        CreateTopicOptions TopicDescription { get; }
+        CreateTopicOptions CreateTopicOptions { get; }
 
-        CreateSubscriptionOptions SubscriptionDescription { get; }
+        CreateSubscriptionOptions CreateSubscriptionOptions { get; }
 
         CreateRuleOptions Rule { get; }
 

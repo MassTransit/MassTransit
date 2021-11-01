@@ -42,7 +42,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 
         public Uri GetInputAddress(Uri serviceUri, string path)
         {
-            var builder = new UriBuilder(serviceUri) {Path = path};
+            var builder = new UriBuilder(serviceUri) { Path = path };
 
             builder.Query += string.Join("&", GetQueryStringOptions());
 

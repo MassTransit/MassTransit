@@ -20,9 +20,9 @@
     {
         readonly ClientContext _context;
         readonly TaskCompletionSource<bool> _deliveryComplete;
-        readonly IBrokeredMessageReceiver _messageReceiver;
+        readonly IServiceBusMessageReceiver _messageReceiver;
 
-        public Receiver(ClientContext context, IBrokeredMessageReceiver messageReceiver)
+        public Receiver(ClientContext context, IServiceBusMessageReceiver messageReceiver)
         {
             _context = context;
             _messageReceiver = messageReceiver;
@@ -128,7 +128,7 @@
 
         void AddReceiveContextPayloads(ReceiveContext receiveContext, ProcessMessageEventArgs receiverClient, ServiceBusReceivedMessage message)
         {
-            MessageLockContext lockContext = new ReceiverClientMessageLockContext(receiverClient, message);
+            MessageLockContext lockContext = new ServiceBusMessageLockContext(receiverClient, message);
 
             receiveContext.GetOrAddPayload(() => lockContext);
             receiveContext.GetOrAddPayload(() => _context);

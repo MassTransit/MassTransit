@@ -91,13 +91,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Saga
         {
             using var serializeStream = new MemoryStream();
             using var writer = new StreamWriter(serializeStream, Encoding.UTF8, 1024, true);
-            using var bsonWriter = new JsonTextWriter(writer);
-            JsonMessageSerializer.Serializer.Serialize(bsonWriter, saga);
+            using var jsonWriter = new JsonTextWriter(writer);
+            JsonMessageSerializer.Serializer.Serialize(jsonWriter, saga);
 
-            await bsonWriter.FlushAsync().ConfigureAwait(false);
+            await jsonWriter.FlushAsync().ConfigureAwait(false);
             await serializeStream.FlushAsync().ConfigureAwait(false);
 
-            await context.SetStateAsync(serializeStream.ToArray()).ConfigureAwait(false);
+            await context.SetStateAsync(new BinaryData(serializeStream.ToArray())).ConfigureAwait(false);
         }
 
         static async Task<TSaga> ReadSagaState(MessageSessionContext context)
@@ -106,13 +106,13 @@ namespace MassTransit.Azure.ServiceBus.Core.Saga
             if (state == null)
                 return default;
 
-            using var stateStream = new MemoryStream(state);
+            using var stateStream = state.ToStream();
             if (stateStream.Length == 0)
                 return default;
 
             using var reader = new StreamReader(stateStream, Encoding.UTF8, false, 1024, true);
-            using var bsonReader = new JsonTextReader(reader);
-            return JsonMessageSerializer.Deserializer.Deserialize<TSaga>(bsonReader);
+            using var jsonReader = new JsonTextReader(reader);
+            return JsonMessageSerializer.Deserializer.Deserialize<TSaga>(jsonReader);
         }
     }
 }

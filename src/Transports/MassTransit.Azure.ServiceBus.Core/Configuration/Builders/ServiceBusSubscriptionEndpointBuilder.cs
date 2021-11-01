@@ -33,9 +33,9 @@ namespace MassTransit.Azure.ServiceBus.Core.Builders
         {
             var topologyBuilder = new SubscriptionEndpointBrokerTopologyBuilder();
 
-            topologyBuilder.Topic = topologyBuilder.CreateTopic(settings.TopicDescription);
+            topologyBuilder.Topic = topologyBuilder.CreateTopic(settings.CreateTopicOptions);
 
-            topologyBuilder.CreateSubscription(topologyBuilder.Topic, settings.SubscriptionDescription, settings.Rule, settings.Filter);
+            topologyBuilder.CreateSubscription(topologyBuilder.Topic, settings.CreateSubscriptionOptions, settings.Rule, settings.Filter);
 
             return topologyBuilder.BuildBrokerTopology();
         }

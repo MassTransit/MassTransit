@@ -12,11 +12,11 @@
     using Util;
 
 
-    public class BrokeredMessageMoveTransport
+    public class ServiceBusQueueMoveTransport
     {
         readonly Recycle<ISendEndpointContextSupervisor> _sendEndpointContext;
 
-        protected BrokeredMessageMoveTransport(IConnectionContextSupervisor supervisor, SendSettings settings)
+        protected ServiceBusQueueMoveTransport(IConnectionContextSupervisor supervisor, SendSettings settings)
         {
             _sendEndpointContext = new Recycle<ISendEndpointContextSupervisor>(() => supervisor.CreateSendEndpointContextSupervisor(settings));
         }
@@ -25,12 +25,12 @@
         {
             IPipe<SendEndpointContext> clientPipe = Pipe.ExecuteAsync<SendEndpointContext>(async clientContext =>
             {
-                if (!context.TryGetPayload(out BrokeredMessageContext messageContext))
+                if (!context.TryGetPayload(out ServiceBusMessageContext messageContext))
                     throw new ArgumentException("The ReceiveContext must contain a BrokeredMessageContext (from Azure Service Bus)", nameof(context));
 
-                using var messageBodyStream = context.GetBodyStream();
+                var body = context.GetBody();
 
-                var message = new ServiceBusMessage(messageBodyStream.ReadAsBytes())
+                var message = new ServiceBusMessage(body)
                 {
                     ContentType = context.ContentType?.MediaType,
                     TimeToLive = messageContext.TimeToLive,

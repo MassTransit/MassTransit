@@ -12,13 +12,13 @@
     using Transports.Metrics;
 
 
-    public class BrokeredMessageReceiver :
-        IBrokeredMessageReceiver
+    public class ServiceBusMessageReceiver :
+        IServiceBusMessageReceiver
     {
         readonly ReceiveEndpointContext _context;
         readonly IReceivePipeDispatcher _dispatcher;
 
-        public BrokeredMessageReceiver(ReceiveEndpointContext context)
+        public ServiceBusMessageReceiver(ReceiveEndpointContext context)
         {
             _context = context;
 
@@ -48,7 +48,7 @@
             return _context.ConnectSendObserver(observer);
         }
 
-        async Task IBrokeredMessageReceiver.Handle(ServiceBusReceivedMessage message, CancellationToken cancellationToken, Action<ReceiveContext> contextCallback)
+        async Task IServiceBusMessageReceiver.Handle(ServiceBusReceivedMessage message, CancellationToken cancellationToken, Action<ReceiveContext> contextCallback)
         {
             var context = new ServiceBusReceiveContext(message, _context);
             contextCallback?.Invoke(context);
@@ -58,7 +58,7 @@
                 registration = cancellationToken.Register(context.Cancel);
 
             var receiveLock = context.TryGetPayload<MessageLockContext>(out var lockContext)
-                ? new MessageLockContextReceiveLock(lockContext, context)
+                ? new ServiceBusReceiveLockContext(lockContext, context)
                 : default;
 
             try

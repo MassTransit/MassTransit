@@ -40,7 +40,7 @@
         public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("sagaRepository");
-            scope.Set(new {Persistence = "messageSession"});
+            scope.Set(new { Persistence = "messageSession" });
         }
 
         async Task ISagaRepository<TSaga>.Send<T>(ConsumeContext<T> context, ISagaPolicy<TSaga, T> policy, IPipe<SagaConsumeContext<TSaga, T>> next)
@@ -101,19 +101,21 @@
         /// <param name="context">The message session context</param>
         /// <param name="saga">The saga state</param>
         /// <returns>An awaitable task, of course</returns>
+        /// <returns>An awaitable task, of course</returns>
         async Task WriteSagaState(MessageSessionContext context, TSaga saga)
         {
-            using (var serializeStream = new MemoryStream())
-            using (var writer = new StreamWriter(serializeStream, Encoding.UTF8, 1024, true))
-            using (var bsonWriter = new JsonTextWriter(writer))
-            {
-                JsonMessageSerializer.Serializer.Serialize(bsonWriter, saga);
+            using var serializeStream = new MemoryStream();
+            using var writer = new StreamWriter(serializeStream, Encoding.UTF8, 1024, true);
+            using var jsonWriter = new JsonTextWriter(writer);
 
-                bsonWriter.Flush();
-                await serializeStream.FlushAsync().ConfigureAwait(false);
 
-                await context.SetStateAsync(serializeStream.ToArray()).ConfigureAwait(false);
-            }
+            JsonMessageSerializer.Serializer.Serialize(jsonWriter, saga);
+
+
+            await jsonWriter.FlushAsync().ConfigureAwait(false);
+            await serializeStream.FlushAsync().ConfigureAwait(false);
+
+            await context.SetStateAsync(new BinaryData(serializeStream.ToArray())).ConfigureAwait(false);
         }
 
         async Task<TSaga> ReadSagaState(MessageSessionContext context)
@@ -122,17 +124,15 @@
             if (state == null)
                 return default;
 
-            using (var stateStream = new MemoryStream(state))
-            {
-                if (stateStream.Length == 0)
-                    return default;
+            using var stateStream = state.ToStream();
+            if (stateStream.Length == 0)
+                return default;
 
-                using (var reader = new StreamReader(stateStream, Encoding.UTF8, false, 1024, true))
-                using (var bsonReader = new JsonTextReader(reader))
-                {
-                    return JsonMessageSerializer.Deserializer.Deserialize<TSaga>(bsonReader);
-                }
-            }
+
+            using var reader = new StreamReader(stateStream, Encoding.UTF8, false, 1024, true);
+            using var jsonReader = new JsonTextReader(reader);
+
+            return JsonMessageSerializer.Deserializer.Deserialize<TSaga>(jsonReader);
         }
 
 

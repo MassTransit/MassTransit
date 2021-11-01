@@ -32,15 +32,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
                 var exchangeScope = context.CreateScope("topic");
                 exchangeScope.Set(new
                 {
-                    topic.TopicDescription.Name,
-                    topic.TopicDescription.EnablePartitioning,
-                    topic.TopicDescription.SupportOrdering,
-                    topic.TopicDescription.EnableBatchedOperations,
-                    topic.TopicDescription.RequiresDuplicateDetection,
-                    topic.TopicDescription.AutoDeleteOnIdle,
-                    topic.TopicDescription.DefaultMessageTimeToLive,
-                    topic.TopicDescription.DuplicateDetectionHistoryTimeWindow,
-                    topic.TopicDescription.MaxSizeInMegabytes
+                    topic.CreateTopicOptions.Name,
+                    topic.CreateTopicOptions.EnablePartitioning,
+                    topic.CreateTopicOptions.SupportOrdering,
+                    topic.CreateTopicOptions.EnableBatchedOperations,
+                    topic.CreateTopicOptions.RequiresDuplicateDetection,
+                    topic.CreateTopicOptions.AutoDeleteOnIdle,
+                    topic.CreateTopicOptions.DefaultMessageTimeToLive,
+                    topic.CreateTopicOptions.DuplicateDetectionHistoryTimeWindow,
+                    topic.CreateTopicOptions.MaxSizeInMegabytes
                 });
             }
 
@@ -49,20 +49,20 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
                 var exchangeScope = context.CreateScope("queue");
                 exchangeScope.Set(new
                 {
-                    queue.QueueDescription.Name,
-                    queue.QueueDescription.EnablePartitioning,
-                    queue.QueueDescription.EnableBatchedOperations,
-                    queue.QueueDescription.ForwardTo,
-                    queue.QueueDescription.LockDuration,
-                    queue.QueueDescription.MaxDeliveryCount,
-                    queue.QueueDescription.RequiresSession,
-                    queue.QueueDescription.RequiresDuplicateDetection,
-                    queue.QueueDescription.AutoDeleteOnIdle,
-                    queue.QueueDescription.DefaultMessageTimeToLive,
-                    queue.QueueDescription.DuplicateDetectionHistoryTimeWindow,
-                    queue.QueueDescription.MaxSizeInMegabytes,
-                    queue.QueueDescription.ForwardDeadLetteredMessagesTo,
-                    queue.QueueDescription.DeadLetteringOnMessageExpiration
+                    queue.CreateQueueOptions.Name,
+                    queue.CreateQueueOptions.EnablePartitioning,
+                    queue.CreateQueueOptions.EnableBatchedOperations,
+                    queue.CreateQueueOptions.ForwardTo,
+                    queue.CreateQueueOptions.LockDuration,
+                    queue.CreateQueueOptions.MaxDeliveryCount,
+                    queue.CreateQueueOptions.RequiresSession,
+                    queue.CreateQueueOptions.RequiresDuplicateDetection,
+                    queue.CreateQueueOptions.AutoDeleteOnIdle,
+                    queue.CreateQueueOptions.DefaultMessageTimeToLive,
+                    queue.CreateQueueOptions.DuplicateDetectionHistoryTimeWindow,
+                    queue.CreateQueueOptions.MaxSizeInMegabytes,
+                    queue.CreateQueueOptions.ForwardDeadLetteredMessagesTo,
+                    queue.CreateQueueOptions.DeadLetteringOnMessageExpiration
                 });
             }
 
@@ -89,16 +89,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Builders
         {
             return new
             {
-                subscription.SubscriptionDescription.SubscriptionName,
-                subscription.SubscriptionDescription.EnableBatchedOperations,
-                subscription.SubscriptionDescription.ForwardTo,
-                subscription.SubscriptionDescription.LockDuration,
-                subscription.SubscriptionDescription.MaxDeliveryCount,
-                subscription.SubscriptionDescription.RequiresSession,
-                subscription.SubscriptionDescription.AutoDeleteOnIdle,
-                subscription.SubscriptionDescription.DefaultMessageTimeToLive,
-                subscription.SubscriptionDescription.ForwardDeadLetteredMessagesTo,
-                subscription.SubscriptionDescription.DeadLetteringOnMessageExpiration
+                subscription.CreateSubscriptionOptions.SubscriptionName,
+                subscription.CreateSubscriptionOptions.EnableBatchedOperations,
+                subscription.CreateSubscriptionOptions.ForwardTo,
+                subscription.CreateSubscriptionOptions.LockDuration,
+                subscription.CreateSubscriptionOptions.MaxDeliveryCount,
+                subscription.CreateSubscriptionOptions.RequiresSession,
+                subscription.CreateSubscriptionOptions.AutoDeleteOnIdle,
+                subscription.CreateSubscriptionOptions.DefaultMessageTimeToLive,
+                subscription.CreateSubscriptionOptions.ForwardDeadLetteredMessagesTo,
+                subscription.CreateSubscriptionOptions.DeadLetteringOnMessageExpiration
             };
         }
     }

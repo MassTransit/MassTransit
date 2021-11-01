@@ -12,16 +12,16 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Specifications
     public class SubscriptionConsumeTopologySpecification :
         IServiceBusConsumeTopologySpecification
     {
+        readonly CreateSubscriptionOptions _createSubscriptionOptions;
+        readonly CreateTopicOptions _createTopicOptions;
         readonly RuleFilter _filter;
         readonly CreateRuleOptions _rule;
-        readonly CreateSubscriptionOptions _subscriptionDescription;
-        readonly CreateTopicOptions _topicDescription;
 
-        public SubscriptionConsumeTopologySpecification(CreateTopicOptions topicDescription, CreateSubscriptionOptions subscriptionDescription,
+        public SubscriptionConsumeTopologySpecification(CreateTopicOptions createTopicOptions, CreateSubscriptionOptions createSubscriptionOptions,
             CreateRuleOptions rule, RuleFilter filter)
         {
-            _topicDescription = topicDescription;
-            _subscriptionDescription = subscriptionDescription;
+            _createTopicOptions = createTopicOptions;
+            _createSubscriptionOptions = createSubscriptionOptions;
             _rule = rule;
             _filter = filter;
         }
@@ -33,13 +33,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology.Specifications
 
         public void Apply(IReceiveEndpointBrokerTopologyBuilder builder)
         {
-            var topic = builder.CreateTopic(_topicDescription);
+            var topic = builder.CreateTopic(_createTopicOptions);
 
-            var subscriptionDescription = _subscriptionDescription;
+            _createSubscriptionOptions.ForwardTo = builder.Queue.Queue.CreateQueueOptions.Name;
 
-            subscriptionDescription.ForwardTo = builder.Queue.Queue.QueueDescription.Name;
-
-            builder.CreateQueueSubscription(topic, builder.Queue, subscriptionDescription, _rule, _filter);
+            builder.CreateQueueSubscription(topic, builder.Queue, _createSubscriptionOptions, _rule, _filter);
         }
     }
 }

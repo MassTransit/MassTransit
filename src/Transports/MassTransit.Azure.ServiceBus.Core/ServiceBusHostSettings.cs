@@ -23,7 +23,7 @@
         ServiceBusClient ServiceBusClient { get; }
 
         /// <summary>
-        /// A custom adminsitration client that will be used instead of one defined by the settings provided here.
+        /// A custom administration client that will be used instead of one defined by the settings provided here.
         /// </summary>
         ServiceBusAdministrationClient ServiceBusAdministrationClient { get; }
 
@@ -31,7 +31,7 @@
         /// The named key to use to connect to the Service Bus
         /// </summary>
         /// <remarks>
-        /// This property cannot be used if <see cref="SasCredential"/> or <see cref="TokenCredential"/>
+        /// This property cannot be used if <see cref="SasCredential" /> or <see cref="TokenCredential" />
         /// is being used.
         /// </remarks>
         AzureNamedKeyCredential NamedKeyCredential { get; }
@@ -40,7 +40,7 @@
         /// The shared access signature to use to connect to the Service Bus
         /// </summary>
         /// <remarks>
-        /// This property cannot be used if <see cref="NamedKeyCredential"/> or <see cref="TokenCredential"/>
+        /// This property cannot be used if <see cref="NamedKeyCredential" /> or <see cref="TokenCredential" />
         /// is being used.
         /// </remarks>
         AzureSasCredential SasCredential { get; }
@@ -49,7 +49,7 @@
         /// The token credential to use to connect to the Service Bus
         /// </summary>
         /// <remarks>
-        /// This property cannot be used if <see cref="SasCredential"/> or <see cref="NamedKeyCredential"/>
+        /// This property cannot be used if <see cref="SasCredential" /> or <see cref="NamedKeyCredential" />
         /// is being used.
         /// </remarks>
         TokenCredential TokenCredential { get; }
@@ -59,8 +59,8 @@
         /// </summary>
         /// <remarks>
         /// If a credential is not part of the connection string, one of the other authentication
-        /// methods needs to be used. <see cref="NamedKeyCredential"/> or <see cref="SasCredential"/>
-        /// or <see cref="TokenCredential"/>
+        /// methods needs to be used. <see cref="NamedKeyCredential" /> or <see cref="SasCredential" />
+        /// or <see cref="TokenCredential" />
         /// </remarks>
         string ConnectionString { get; }
 

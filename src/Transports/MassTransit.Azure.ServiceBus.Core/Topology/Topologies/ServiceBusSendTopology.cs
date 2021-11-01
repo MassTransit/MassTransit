@@ -33,26 +33,25 @@
         {
             if (address.Type == ServiceBusEndpointAddress.AddressType.Queue)
             {
-                var queueDescription = GetQueueDescription(address);
+                var createQueueOptions = GetCreateQueueOptions(address);
 
-                return new QueueSendSettings(queueDescription);
+                return new QueueSendSettings(createQueueOptions);
             }
 
-
-            var topicDescription = GetTopicDescription(address);
+            var createTopicOptions = GetCreateTopicOptions(address);
 
             var builder = new BrokerTopologyBuilder();
-            builder.CreateTopic(topicDescription);
+            builder.CreateTopic(createTopicOptions);
 
-            return new TopicSendSettings(topicDescription, builder.BuildBrokerTopology());
+            return new TopicSendSettings(createTopicOptions, builder.BuildBrokerTopology());
         }
 
         public SendSettings GetErrorSettings(IQueueConfigurator configurator)
         {
-            var description = configurator.GetQueueDescription();
-            description.Name += ErrorQueueSuffix;
+            var createQueueOptions = configurator.GetCreateQueueOptions();
+            createQueueOptions.Name += ErrorQueueSuffix;
 
-            var errorSettings = new QueueSendSettings(description);
+            var errorSettings = new QueueSendSettings(createQueueOptions);
 
             ConfigureErrorSettings?.Invoke(errorSettings);
 
@@ -61,10 +60,10 @@
 
         public SendSettings GetDeadLetterSettings(IQueueConfigurator configurator)
         {
-            var description = configurator.GetQueueDescription();
-            description.Name += DeadLetterQueueSuffix;
+            var createQueueOptions = configurator.GetCreateQueueOptions();
+            createQueueOptions.Name += DeadLetterQueueSuffix;
 
-            var deadLetterSetting = new QueueSendSettings(description);
+            var deadLetterSetting = new QueueSendSettings(createQueueOptions);
 
             ConfigureDeadLetterSettings?.Invoke(deadLetterSetting);
 
@@ -80,24 +79,24 @@
             return messageTopology;
         }
 
-        static CreateQueueOptions GetQueueDescription(ServiceBusEndpointAddress address)
+        static CreateQueueOptions GetCreateQueueOptions(ServiceBusEndpointAddress address)
         {
-            var queueDescription = Defaults.CreateQueueDescription(address.Path);
+            var createQueueOptions = Defaults.GetCreateQueueOptions(address.Path);
 
             if (address.AutoDelete.HasValue)
-                queueDescription.AutoDeleteOnIdle = address.AutoDelete.Value;
+                createQueueOptions.AutoDeleteOnIdle = address.AutoDelete.Value;
 
-            return queueDescription;
+            return createQueueOptions;
         }
 
-        static CreateTopicOptions GetTopicDescription(ServiceBusEndpointAddress address)
+        static CreateTopicOptions GetCreateTopicOptions(ServiceBusEndpointAddress address)
         {
-            var topicDescription = Defaults.CreateTopicDescription(address.Path);
+            var createTopicOptions = Defaults.GetCreateTopicOptions(address.Path);
 
             if (address.AutoDelete.HasValue)
-                topicDescription.AutoDeleteOnIdle = address.AutoDelete.Value;
+                createTopicOptions.AutoDeleteOnIdle = address.AutoDelete.Value;
 
-            return topicDescription;
+            return createTopicOptions;
         }
     }
 }

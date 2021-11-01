@@ -8,7 +8,7 @@ namespace MassTransit.Azure.ServiceBus.Core
     /// The context of a Message from AzureServiceBus - gives access to the transport
     /// message when requested.
     /// </summary>
-    public interface BrokeredMessageContext
+    public interface ServiceBusMessageContext
     {
         int DeliveryCount { get; }
         string Label { get; }
