@@ -216,6 +216,10 @@
                             dictionary[header.Key] = strings.ToArray();
                             break;
 
+                        case Uri value:
+                            dictionary[header.Key] = value.ToString();
+                            break;
+
                         case string value:
                             dictionary[header.Key] = value;
                             break;

@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using GreenPipes;
     using NUnit.Framework;
+    using Serialization;
     using Shouldly;
     using TestFramework.Messages;
 
@@ -51,6 +52,45 @@
 
 
     [TestFixture]
+    public class Sending_a_request_using_the_request_client_with_raw_json :
+        RabbitMqTestFixture
+    {
+        [Test]
+        public async Task Should_receive_the_response()
+        {
+            using RequestHandle<PingMessage> requestHandle = _requestClient.Create(new PingMessage());
+
+            requestHandle.UseExecute(context => context.SetAwaitAck(false));
+
+            Response<PongMessage> response = await requestHandle.GetResponse<PongMessage>();
+
+            response.Message.CorrelationId.ShouldBe(_ping.Result.Message.CorrelationId);
+        }
+
+        Task<ConsumeContext<PingMessage>> _ping;
+        IRequestClient<PingMessage> _requestClient;
+
+        protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
+        {
+            base.ConfigureRabbitMqBus(configurator);
+
+            configurator.UseRawJsonSerializer();
+        }
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            _requestClient = Bus.CreateRequestClient<PingMessage>(TestTimeout);
+        }
+
+        protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
+        {
+            _ping = Handler<PingMessage>(configurator, async x => await x.RespondAsync(new PongMessage(x.Message.CorrelationId)));
+        }
+    }
+
+
+    [TestFixture]
     public class Sending_a_request_with_a_different_host_name :
         RabbitMqTestFixture
     {
@@ -62,7 +102,7 @@
             requestHandle.UseExecute(context =>
             {
                 context.SetAwaitAck(false);
-                context.ResponseAddress = new UriBuilder(Bus.Address) {Host = "totally-bogus-host"}.Uri;
+                context.ResponseAddress = new UriBuilder(Bus.Address) { Host = "totally-bogus-host" }.Uri;
             });
 
             Response<PongMessage> response = await requestHandle.GetResponse<PongMessage>();

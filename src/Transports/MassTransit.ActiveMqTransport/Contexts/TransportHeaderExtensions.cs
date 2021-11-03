@@ -44,6 +44,10 @@
 
                         break;
 
+                    case Uri value:
+                        dictionary[header.Key] = value.ToString();
+                        break;
+
                     case string s:
                         dictionary[header.Key] = s;
                         break;

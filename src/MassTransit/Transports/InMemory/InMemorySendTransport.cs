@@ -106,6 +106,10 @@ namespace MassTransit.Transports.InMemory
                             dictionary[header.Key] = text;
                         break;
 
+                    case Uri value:
+                        dictionary[header.Key] = value.ToString();
+                        break;
+
                     case string value:
                         dictionary[header.Key] = value;
                         break;
