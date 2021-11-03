@@ -50,9 +50,9 @@
         {
             var requiresRecycle = args.Exception switch
             {
-                ServiceBusException sbe when sbe.Reason == ServiceBusFailureReason.MessageLockLost => false,
                 MessageTimeToLiveExpiredException _ => false,
-                ServiceBusException sbe when sbe.Reason == ServiceBusFailureReason.ServiceCommunicationProblem => true,
+                ServiceBusException { Reason: ServiceBusFailureReason.MessageLockLost } => false,
+                ServiceBusException { Reason: ServiceBusFailureReason.ServiceCommunicationProblem } => true,
                 ServiceBusException { IsTransient: true } => false,
                 _ => true
             };

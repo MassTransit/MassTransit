@@ -2,7 +2,7 @@ namespace MassTransit.Azure.ServiceBus.Core
 {
     using System;
     using System.Runtime.Serialization;
-    using global::Azure.Messaging.ServiceBus;
+
 
     public class ServiceBusConnectionException :
         ConnectionException

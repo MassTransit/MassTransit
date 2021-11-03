@@ -50,6 +50,7 @@
                     ServiceBusFailureReason.MessagingEntityAlreadyExists => false,
                     ServiceBusFailureReason.MessageNotFound => false,
                     ServiceBusFailureReason.MessageSizeExceeded => false,
+                    ServiceBusFailureReason.ServiceCommunicationProblem => true,
                     ServiceBusFailureReason.ServiceBusy when ex.IsTransient => true,
                     _ => false
                 });
