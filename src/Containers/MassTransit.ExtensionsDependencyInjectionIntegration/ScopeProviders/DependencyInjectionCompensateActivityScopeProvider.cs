@@ -9,6 +9,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
     using Microsoft.Extensions.DependencyInjection;
     using Scoping;
     using Scoping.CourierContexts;
+    using Util;
 
 
     public class DependencyInjectionCompensateActivityScopeProvider<TActivity, TLog> :
@@ -23,7 +24,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             _serviceProvider = serviceProvider;
         }
 
-        public async ValueTask<ICompensateActivityScopeContext<TActivity, TLog>> GetScope(CompensateContext<TLog> context)
+        public ValueTask<ICompensateActivityScopeContext<TActivity, TLog>> GetScope(CompensateContext<TLog> context)
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
@@ -35,7 +36,8 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 
                 CompensateActivityContext<TActivity, TLog> activityContext = context.CreateActivityContext(activity);
 
-                return new ExistingCompensateActivityScopeContext<TActivity, TLog>(activityContext);
+                return new ValueTask<ICompensateActivityScopeContext<TActivity, TLog>>(
+                    new ExistingCompensateActivityScopeContext<TActivity, TLog>(activityContext));
             }
 
             if (!context.TryGetPayload(out IServiceProvider serviceProvider))
@@ -54,15 +56,15 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 
                 CompensateActivityContext<TActivity, TLog> activityContext = scopeContext.CreateActivityContext(activity);
 
-                return new CreatedCompensateActivityScopeContext<IServiceScope, TActivity, TLog>(serviceScope, activityContext);
+                return new ValueTask<ICompensateActivityScopeContext<TActivity, TLog>>(
+                    new CreatedCompensateActivityScopeContext<IServiceScope, TActivity, TLog>(serviceScope, activityContext));
             }
-            catch
+            catch (Exception ex)
             {
                 if (serviceScope is IAsyncDisposable asyncDisposable)
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                else
-                    serviceScope.Dispose();
+                    return ex.DisposeAsync<ICompensateActivityScopeContext<TActivity, TLog>>(() => asyncDisposable.DisposeAsync());
 
+                serviceScope.Dispose();
                 throw;
             }
         }

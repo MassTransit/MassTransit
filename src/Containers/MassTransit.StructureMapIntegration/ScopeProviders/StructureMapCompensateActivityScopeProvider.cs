@@ -24,7 +24,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             _container = container;
         }
 
-        public async ValueTask<ICompensateActivityScopeContext<TActivity, TLog>> GetScope(CompensateContext<TLog> context)
+        public ValueTask<ICompensateActivityScopeContext<TActivity, TLog>> GetScope(CompensateContext<TLog> context)
         {
             if (context.TryGetPayload<IContainer>(out var existingContainer))
             {
@@ -36,7 +36,8 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
 
                 CompensateActivityContext<TActivity, TLog> activityContext = context.CreateActivityContext(activity);
 
-                return new ExistingCompensateActivityScopeContext<TActivity, TLog>(activityContext);
+                return new ValueTask<ICompensateActivityScopeContext<TActivity, TLog>>(
+                    new ExistingCompensateActivityScopeContext<TActivity, TLog>(activityContext));
             }
 
             var nestedContainer = _container.CreateNestedContainer(context);
@@ -49,7 +50,8 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
                 CompensateActivityContext<TActivity, TLog> activityContext = context.CreateActivityContext(activity);
                 activityContext.UpdatePayload(nestedContainer);
 
-                return new CreatedCompensateActivityScopeContext<IContainer, TActivity, TLog>(nestedContainer, activityContext);
+                return new ValueTask<ICompensateActivityScopeContext<TActivity, TLog>>(
+                    new CreatedCompensateActivityScopeContext<IContainer, TActivity, TLog>(nestedContainer, activityContext));
             }
             catch
             {

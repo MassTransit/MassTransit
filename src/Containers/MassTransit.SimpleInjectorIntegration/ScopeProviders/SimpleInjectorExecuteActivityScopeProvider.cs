@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
 {
+    using System;
     using System.Threading.Tasks;
     using Courier;
     using Courier.Contexts;
@@ -8,6 +9,7 @@
     using Scoping.CourierContexts;
     using SimpleInjector;
     using SimpleInjector.Lifestyles;
+    using Util;
 
 
     public class SimpleInjectorExecuteActivityScopeProvider<TActivity, TArguments> :
@@ -22,7 +24,7 @@
             _container = container;
         }
 
-        public async ValueTask<IExecuteActivityScopeContext<TActivity, TArguments>> GetScope(ExecuteContext<TArguments> context)
+        public ValueTask<IExecuteActivityScopeContext<TActivity, TArguments>> GetScope(ExecuteContext<TArguments> context)
         {
             if (context.TryGetPayload<Scope>(out var existingScope))
             {
@@ -34,7 +36,8 @@
 
                 ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
 
-                return new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext);
+                return new ValueTask<IExecuteActivityScopeContext<TActivity, TArguments>>(
+                    new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext));
             }
 
             var scope = AsyncScopedLifestyle.BeginScope(_container);
@@ -48,12 +51,12 @@
 
                 ExecuteActivityContext<TActivity, TArguments> activityContext = scopeContext.CreateActivityContext(activity);
 
-                return new CreatedExecuteActivityScopeContext<Scope, TActivity, TArguments>(scope, activityContext);
+                return new ValueTask<IExecuteActivityScopeContext<TActivity, TArguments>>(
+                    new CreatedExecuteActivityScopeContext<Scope, TActivity, TArguments>(scope, activityContext));
             }
-            catch
+            catch (Exception ex)
             {
-                await scope.DisposeScopeAsync().ConfigureAwait(false);
-                throw;
+                return ex.DisposeAsync<IExecuteActivityScopeContext<TActivity, TArguments>>(() => scope.DisposeScopeAsync());
             }
         }
 

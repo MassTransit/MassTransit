@@ -13,6 +13,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
     using ScopeProviders;
     using Scoping;
     using SimpleInjector;
+    using SimpleInjector.Lifestyles;
 
 
     public class SimpleInjectorContainerRegistrar :
@@ -25,7 +26,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         {
             _container = container;
 
-            _hybridLifestyle = Lifestyle.CreateHybrid(_container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
+            _hybridLifestyle = Lifestyle.CreateHybrid(_container.Options.DefaultScopedLifestyle ?? new AsyncScopedLifestyle(), Lifestyle.Singleton);
         }
 
         public void RegisterConsumer<T>()

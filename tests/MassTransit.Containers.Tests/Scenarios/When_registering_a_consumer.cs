@@ -3,11 +3,12 @@ namespace MassTransit.Containers.Tests.Scenarios
     using System.Threading.Tasks;
     using NUnit.Framework;
     using Shouldly;
+    using TestFramework;
 
 
     [TestFixture]
     public abstract class When_registering_a_consumer :
-        Given_a_service_bus_instance
+        InMemoryTestFixture
     {
         [Test]
         public async Task Should_receive_using_the_first_consumer()
@@ -35,7 +36,7 @@ namespace MassTransit.Containers.Tests.Scenarios
 
     [TestFixture]
     public abstract class When_registering_a_consumer_by_interface :
-        Given_a_service_bus_instance
+        InMemoryTestFixture
     {
         [Test]
         public async Task Should_receive_using_the_first_consumer()

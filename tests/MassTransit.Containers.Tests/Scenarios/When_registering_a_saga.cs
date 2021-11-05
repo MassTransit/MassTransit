@@ -5,11 +5,12 @@ namespace MassTransit.Containers.Tests.Scenarios
     using NUnit.Framework;
     using Saga;
     using Shouldly;
+    using TestFramework;
     using Testing;
 
 
     public abstract class When_registering_a_saga :
-        Given_a_service_bus_instance
+        InMemoryTestFixture
     {
         [Test]
         public async Task Should_have_a_subscription_for_the_first_saga_message()

@@ -7,6 +7,7 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
     using GreenPipes;
     using Scoping;
     using Scoping.CourierContexts;
+    using Util;
 
 
     public class AutofacExecuteActivityScopeProvider<TActivity, TArguments> :
@@ -26,7 +27,7 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
             _configureScope = configureScope;
         }
 
-        public async ValueTask<IExecuteActivityScopeContext<TActivity, TArguments>> GetScope(ExecuteContext<TArguments> context)
+        public ValueTask<IExecuteActivityScopeContext<TActivity, TArguments>> GetScope(ExecuteContext<TArguments> context)
         {
             if (context.TryGetPayload<ILifetimeScope>(out var existingLifetimeScope))
             {
@@ -34,7 +35,8 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
 
                 ExecuteActivityContext<TActivity, TArguments> activityContext = context.CreateActivityContext(activity);
 
-                return new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext);
+                return new ValueTask<IExecuteActivityScopeContext<TActivity, TArguments>>(
+                    new ExistingExecuteActivityScopeContext<TActivity, TArguments>(activityContext));
             }
 
             var parentLifetimeScope = _scopeProvider.GetLifetimeScope(context);
@@ -53,12 +55,12 @@ namespace MassTransit.AutofacIntegration.ScopeProviders
 
                 ExecuteActivityContext<TActivity, TArguments> activityContext = executeContext.CreateActivityContext(activity);
 
-                return new CreatedExecuteActivityScopeContext<ILifetimeScope, TActivity, TArguments>(lifetimeScope, activityContext);
+                return new ValueTask<IExecuteActivityScopeContext<TActivity, TArguments>>(
+                    new CreatedExecuteActivityScopeContext<ILifetimeScope, TActivity, TArguments>(lifetimeScope, activityContext));
             }
-            catch
+            catch (Exception ex)
             {
-                await lifetimeScope.DisposeAsync().ConfigureAwait(false);
-                throw;
+                return ex.DisposeAsync<IExecuteActivityScopeContext<TActivity, TArguments>>(() => lifetimeScope.DisposeAsync());
             }
         }
 

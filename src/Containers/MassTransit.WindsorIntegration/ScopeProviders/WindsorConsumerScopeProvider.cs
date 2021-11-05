@@ -28,13 +28,13 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             context.Add("provider", "windsor");
         }
 
-        public async ValueTask<IConsumerScopeContext> GetScope(ConsumeContext context)
+        public ValueTask<IConsumerScopeContext> GetScope(ConsumeContext context)
         {
             if (context.TryGetPayload<IKernel>(out var kernel))
             {
                 kernel.UpdateScope(context);
 
-                return new ExistingConsumerScopeContext(context);
+                return new ValueTask<IConsumerScopeContext>(new ExistingConsumerScopeContext(context));
             }
 
             var scope = _kernel.CreateNewOrUseExistingMessageScope();
@@ -47,7 +47,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(scopeContext);
 
-                return new CreatedConsumerScopeContext<IDisposable>(scope, scopeContext);
+                return new ValueTask<IConsumerScopeContext>(new CreatedConsumerScopeContext<IDisposable>(scope, scopeContext));
             }
             catch
             {
@@ -56,7 +56,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
             }
         }
 
-        public async ValueTask<IConsumerScopeContext<TConsumer, T>> GetScope<TConsumer, T>(ConsumeContext<T> context)
+        public ValueTask<IConsumerScopeContext<TConsumer, T>> GetScope<TConsumer, T>(ConsumeContext<T> context)
             where TConsumer : class
             where T : class
         {
@@ -70,7 +70,7 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
 
                 var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer);
 
-                return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext, ReleaseComponent);
+                return new ValueTask<IConsumerScopeContext<TConsumer, T>>(new ExistingConsumerScopeContext<TConsumer, T>(consumerContext, ReleaseComponent));
             }
 
             var scope = _kernel.CreateNewOrUseExistingMessageScope();
@@ -89,7 +89,8 @@ namespace MassTransit.WindsorIntegration.ScopeProviders
                 foreach (Action<ConsumeContext> scopeAction in _scopeActions)
                     scopeAction(consumerContext);
 
-                return new CreatedConsumerScopeContext<IDisposable, TConsumer, T>(scope, consumerContext, ReleaseComponent);
+                return new ValueTask<IConsumerScopeContext<TConsumer, T>>(
+                    new CreatedConsumerScopeContext<IDisposable, TConsumer, T>(scope, consumerContext, ReleaseComponent));
             }
             catch
             {

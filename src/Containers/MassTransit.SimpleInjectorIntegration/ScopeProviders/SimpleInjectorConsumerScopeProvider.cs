@@ -1,5 +1,6 @@
 ﻿namespace MassTransit.SimpleInjectorIntegration.ScopeProviders
 {
+    using System;
     using System.Threading.Tasks;
     using Context;
     using GreenPipes;
@@ -8,6 +9,7 @@
     using Scoping.ConsumerContexts;
     using SimpleInjector;
     using SimpleInjector.Lifestyles;
+    using Util;
 
 
     public class SimpleInjectorConsumerScopeProvider :
@@ -25,13 +27,13 @@
             context.Add("provider", "simpleInjector");
         }
 
-        public async ValueTask<IConsumerScopeContext> GetScope(ConsumeContext context)
+        public ValueTask<IConsumerScopeContext> GetScope(ConsumeContext context)
         {
             if (context.TryGetPayload<Scope>(out var existingScope))
             {
                 existingScope.UpdateScope(context);
 
-                return new ExistingConsumerScopeContext(context);
+                return new ValueTask<IConsumerScopeContext>(new ExistingConsumerScopeContext(context));
             }
 
             var scope = AsyncScopedLifestyle.BeginScope(_container);
@@ -41,16 +43,15 @@
 
                 scope.UpdateScope(scopeContext);
 
-                return new CreatedConsumerScopeContext<Scope>(scope, scopeContext);
+                return new ValueTask<IConsumerScopeContext>(new CreatedConsumerScopeContext<Scope>(scope, scopeContext));
             }
-            catch
+            catch (Exception ex)
             {
-                await scope.DisposeScopeAsync().ConfigureAwait(false);
-                throw;
+                return ex.DisposeAsync<IConsumerScopeContext>(() => scope.DisposeScopeAsync());
             }
         }
 
-        public async ValueTask<IConsumerScopeContext<TConsumer, T>> GetScope<TConsumer, T>(ConsumeContext<T> context)
+        public ValueTask<IConsumerScopeContext<TConsumer, T>> GetScope<TConsumer, T>(ConsumeContext<T> context)
             where TConsumer : class
             where T : class
         {
@@ -64,7 +65,7 @@
 
                 var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer);
 
-                return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext);
+                return new ValueTask<IConsumerScopeContext<TConsumer, T>>(new ExistingConsumerScopeContext<TConsumer, T>(consumerContext));
             }
 
             var scope = AsyncScopedLifestyle.BeginScope(_container);
@@ -80,12 +81,11 @@
 
                 var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(scopeContext, consumer);
 
-                return new CreatedConsumerScopeContext<Scope, TConsumer, T>(scope, consumerContext);
+                return new ValueTask<IConsumerScopeContext<TConsumer, T>>(new CreatedConsumerScopeContext<Scope, TConsumer, T>(scope, consumerContext));
             }
-            catch
+            catch (Exception ex)
             {
-                await scope.DisposeScopeAsync().ConfigureAwait(false);
-                throw;
+                return ex.DisposeAsync<IConsumerScopeContext<TConsumer, T>>(() => scope.DisposeScopeAsync());
             }
         }
     }

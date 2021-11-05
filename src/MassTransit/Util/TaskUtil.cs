@@ -2,8 +2,10 @@
 {
     using System;
     using System.Runtime.CompilerServices;
+    using System.Runtime.ExceptionServices;
     using System.Threading;
     using System.Threading.Tasks;
+    using Scoping;
 
 
     public static class TaskUtil
@@ -182,6 +184,54 @@
             {
                 SynchronizationContext.SetSynchronizationContext(previousContext);
             }
+        }
+
+        /// <summary>
+        /// Invoke the dispose callback, and then rethrow the exception
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <param name="disposeCallback"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="MassTransitException"></exception>
+        public static ValueTask<T> DisposeAsync<T>(this Exception exception, Func<Task> disposeCallback)
+        {
+            var dispatchInfo = ExceptionDispatchInfo.Capture(exception.GetBaseException());
+
+            async ValueTask<T> Faulted()
+            {
+                await disposeCallback().ConfigureAwait(false);
+
+                dispatchInfo.Throw();
+
+                throw new MassTransitException("DisposeAsync", exception);
+            }
+
+            return Faulted();
+        }
+
+        /// <summary>
+        /// Invoke the dispose callback, and then rethrow the exception
+        /// </summary>
+        /// <param name="exception"></param>
+        /// <param name="disposeCallback"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        /// <exception cref="MassTransitException"></exception>
+        public static ValueTask<T> DisposeAsync<T>(this Exception exception, Func<ValueTask> disposeCallback)
+        {
+            var dispatchInfo = ExceptionDispatchInfo.Capture(exception.GetBaseException());
+
+            async ValueTask<T> Faulted()
+            {
+                await disposeCallback().ConfigureAwait(false);
+
+                dispatchInfo.Throw();
+
+                throw new MassTransitException("DisposeAsync", exception);
+            }
+
+            return Faulted();
         }
 
         public static T Await<T>(Func<Task<T>> taskFactory, CancellationToken cancellationToken = default)

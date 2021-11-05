@@ -28,13 +28,13 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             context.Add("provider", "structuremap");
         }
 
-        public async ValueTask<IConsumerScopeContext> GetScope(ConsumeContext context)
+        public ValueTask<IConsumerScopeContext> GetScope(ConsumeContext context)
         {
             if (context.TryGetPayload<IContainer>(out var existingContainer))
             {
                 existingContainer.Inject(context);
 
-                return new ExistingConsumerScopeContext(context);
+                return new ValueTask<IConsumerScopeContext>(new ExistingConsumerScopeContext(context));
             }
 
             var nestedContainer = _container.CreateNestedContainer(context);
@@ -42,7 +42,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             {
                 var proxy = new ConsumeContextScope(context, nestedContainer);
 
-                return new CreatedConsumerScopeContext<IContainer>(nestedContainer, proxy);
+                return new ValueTask<IConsumerScopeContext>(new CreatedConsumerScopeContext<IContainer>(nestedContainer, proxy));
             }
             catch
             {
@@ -51,7 +51,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
             }
         }
 
-        public async ValueTask<IConsumerScopeContext<TConsumer, T>> GetScope<TConsumer, T>(ConsumeContext<T> context)
+        public ValueTask<IConsumerScopeContext<TConsumer, T>> GetScope<TConsumer, T>(ConsumeContext<T> context)
             where TConsumer : class
             where T : class
         {
@@ -65,7 +65,7 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
 
                 var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer);
 
-                return new ExistingConsumerScopeContext<TConsumer, T>(consumerContext);
+                return new ValueTask<IConsumerScopeContext<TConsumer, T>>(new ExistingConsumerScopeContext<TConsumer, T>(consumerContext));
             }
 
             var nestedContainer = _container.CreateNestedContainer(context);
@@ -77,7 +77,8 @@ namespace MassTransit.StructureMapIntegration.ScopeProviders
 
                 var consumerContext = new ConsumerConsumeContextScope<TConsumer, T>(context, consumer, nestedContainer);
 
-                return new CreatedConsumerScopeContext<IContainer, TConsumer, T>(nestedContainer, consumerContext);
+                return new ValueTask<IConsumerScopeContext<TConsumer, T>>(
+                    new CreatedConsumerScopeContext<IContainer, TConsumer, T>(nestedContainer, consumerContext));
             }
             catch
             {

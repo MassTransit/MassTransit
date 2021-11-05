@@ -8,6 +8,7 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
     using Registration;
     using Scoping;
     using Scoping.ConsumerContexts;
+    using Util;
 
 
     public class DependencyInjectionMessageScopeProvider :
@@ -25,14 +26,14 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
             context.Add("provider", "dependencyInjection");
         }
 
-        public async ValueTask<IMessageScopeContext<T>> GetScope<T>(ConsumeContext<T> context)
+        public ValueTask<IMessageScopeContext<T>> GetScope<T>(ConsumeContext<T> context)
             where T : class
         {
             if (context.TryGetPayload<IServiceScope>(out var existingServiceScope))
             {
                 existingServiceScope.SetCurrentConsumeContext(context);
 
-                return new ExistingMessageScopeContext<T>(context);
+                return new ValueTask<IMessageScopeContext<T>>(new ExistingMessageScopeContext<T>(context));
             }
 
             if (!context.TryGetPayload(out IServiceProvider serviceProvider))
@@ -47,15 +48,14 @@ namespace MassTransit.ExtensionsDependencyInjectionIntegration.ScopeProviders
 
                 serviceScope.SetCurrentConsumeContext(scopeContext);
 
-                return new CreatedMessageScopeContext<IServiceScope, T>(serviceScope, scopeContext);
+                return new ValueTask<IMessageScopeContext<T>>(new CreatedMessageScopeContext<IServiceScope, T>(serviceScope, scopeContext));
             }
-            catch
+            catch (Exception ex)
             {
                 if (serviceScope is IAsyncDisposable asyncDisposable)
-                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
-                else
-                    serviceScope.Dispose();
+                    return ex.DisposeAsync<IMessageScopeContext<T>>(() => asyncDisposable.DisposeAsync());
 
+                serviceScope.Dispose();
                 throw;
             }
         }
