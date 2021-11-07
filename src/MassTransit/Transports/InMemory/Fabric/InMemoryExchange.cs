@@ -1,22 +1,19 @@
 ﻿namespace MassTransit.Transports.InMemory.Fabric
 {
-    using System;
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
 
 
     public class InMemoryExchange :
-        IInMemoryExchange,
-        IDisposable
+        IInMemoryExchange
     {
         readonly HashSet<IMessageSink<InMemoryTransportMessage>> _sinks;
-        readonly SemaphoreSlim _semaphoreSlim;
+        readonly object _sinksLock = new object();
 
         public InMemoryExchange(string name)
         {
             Name = name;
-            _semaphoreSlim = new SemaphoreSlim(1, 1);
             _sinks = new HashSet<IMessageSink<InMemoryTransportMessage>>();
         }
 
@@ -37,14 +34,9 @@
 
         public void Connect(IMessageSink<InMemoryTransportMessage> sink)
         {
-            _semaphoreSlim.Wait();
-            try
+            lock (_sinksLock)
             {
                 _sinks.Add(sink);
-            }
-            finally
-            {
-                _semaphoreSlim.Release();
             }
         }
 
@@ -60,11 +52,6 @@
         public override string ToString()
         {
             return $"Exchange({Name})";
-        }
-
-        public void Dispose()
-        {
-            _semaphoreSlim?.Dispose();
         }
     }
 }
