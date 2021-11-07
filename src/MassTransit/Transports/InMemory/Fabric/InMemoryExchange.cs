@@ -33,7 +33,8 @@
 
         public void Connect(IMessageSink<InMemoryTransportMessage> sink)
         {
-            _sinks.Add(sink);
+            lock (_sinks)
+                _sinks.Add(sink);
         }
 
         public IEnumerable<IMessageSink<InMemoryTransportMessage>> Sinks => _sinks;
