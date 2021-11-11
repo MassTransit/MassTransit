@@ -100,46 +100,44 @@ namespace Automatonymous.Activities
 
         static string TranslateXmlBody(string body, RequestState requestState)
         {
-            using (var reader = new StringReader(body))
+            using var reader = new StringReader(body);
+            var document = XDocument.Load(reader);
+
+            var envelope = (from e in document.Descendants("envelope") select e).Single();
+
+            var destinationAddress = (from a in envelope.Descendants("destinationAddress") select a).Single();
+
+            var message = (from m in envelope.Descendants("message") select m).Single();
+            IEnumerable<XElement> messageType = from mt in envelope.Descendants("messageType") select mt;
+
+            var payload = (from p in message.Descendants("payload") select p).Single();
+            IEnumerable<XElement> payloadType = from pt in message.Descendants("payloadType") select pt;
+
+            message.Remove();
+            messageType.Remove();
+
+            if (requestState.ConversationId.HasValue)
             {
-                var document = XDocument.Load(reader);
-
-                var envelope = (from e in document.Descendants("envelope") select e).Single();
-
-                var destinationAddress = (from a in envelope.Descendants("destinationAddress") select a).Single();
-
-                var message = (from m in envelope.Descendants("message") select m).Single();
-                IEnumerable<XElement> messageType = from mt in envelope.Descendants("messageType") select mt;
-
-                var payload = (from p in message.Descendants("payload") select p).Single();
-                IEnumerable<XElement> payloadType = from pt in message.Descendants("payloadType") select pt;
-
-                message.Remove();
-                messageType.Remove();
-
-                if (requestState.ConversationId.HasValue)
-                {
-                    var conversationId = (from a in envelope.Descendants("conversationId") select a).Single();
-                    conversationId.Value = requestState.ConversationId.Value.ToString("D");
-                }
-
-                destinationAddress.Value = requestState.ResponseAddress.ToString();
-
-                var sourceAddress = (from a in envelope.Descendants("sourceAddress") select a).Single();
-                sourceAddress.Value = requestState.SagaAddress.ToString();
-
-                message = new XElement("message");
-                message.Add(payload.Descendants());
-                envelope.Add(message);
-
-                envelope.Add(payloadType.Select(x => new XElement("messageType", x.Value)));
-
-                envelope.Add(new XElement("requestId", requestState.CorrelationId.ToString("D")));
-                if (requestState.FaultAddress != null)
-                    envelope.Add(new XElement("faultAddress", requestState.FaultAddress.ToString()));
-
-                return document.ToString(SaveOptions.DisableFormatting);
+                var conversationId = (from a in envelope.Descendants("conversationId") select a).Single();
+                conversationId.Value = requestState.ConversationId.Value.ToString("D");
             }
+
+            destinationAddress.Value = requestState.ResponseAddress.ToString();
+
+            var sourceAddress = (from a in envelope.Descendants("sourceAddress") select a).Single();
+            sourceAddress.Value = requestState.SagaAddress.ToString();
+
+            message = new XElement("message");
+            message.Add(payload.Descendants());
+            envelope.Add(message);
+
+            envelope.Add(payloadType.Select(x => new XElement("messageType", x.Value)));
+
+            envelope.Add(new XElement("requestId", requestState.CorrelationId.ToString("D")));
+            if (requestState.FaultAddress != null)
+                envelope.Add(new XElement("faultAddress", requestState.FaultAddress.ToString()));
+
+            return document.ToString(SaveOptions.DisableFormatting);
         }
 
 
