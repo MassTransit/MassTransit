@@ -13,6 +13,56 @@ namespace MassTransit.KafkaIntegration.Configurators
             _clientConfig = clientConfig;
         }
 
+        public string SslCertificateLocation
+        {
+            set => _clientConfig.SslCertificateLocation = value;
+        }
+
+        public string SslCertificatePem
+        {
+            set => _clientConfig.SslCertificatePem = value;
+        }
+
+        public string SslCaLocation
+        {
+            set => _clientConfig.SslCaLocation = value;
+        }
+
+        public string SslCrlLocation
+        {
+            set => _clientConfig.SslCrlLocation = value;
+        }
+
+        public string SslCaPem
+        {
+            set => _clientConfig.SslCaPem = value;
+        }
+
+        public string SslCaCertificateStores
+        {
+            set => _clientConfig.SslCaCertificateStores = value;
+        }
+
+        public string SslEngineLocation
+        {
+            set => _clientConfig.SslEngineLocation = value;
+        }
+
+        public string SslEngineId
+        {
+            set => _clientConfig.SslEngineId = value;
+        }
+
+        public bool? EnableSslCertificateVerification
+        {
+            set => _clientConfig.EnableSslCertificateVerification = value;
+        }
+
+        public SslEndpointIdentificationAlgorithm? SslEndpointIdentificationAlgorithm
+        {
+            set => _clientConfig.SslEndpointIdentificationAlgorithm = value;
+        }
+
         public string CipherSuites
         {
             set => _clientConfig.SslCipherSuites = value;
