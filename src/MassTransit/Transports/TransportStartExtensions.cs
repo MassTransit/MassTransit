@@ -8,6 +8,7 @@ namespace MassTransit.Transports
     using GreenPipes;
     using GreenPipes.Agents;
     using GreenPipes.Internals.Extensions;
+    using Metrics;
 
 
     public static class TransportStartExtensions
@@ -48,6 +49,10 @@ namespace MassTransit.Transports
                 {
                     await _context.ReceivePipe.Connected.OrCanceled(_stopping).ConfigureAwait(false);
                 }
+                catch (OperationCanceledException ex) when (ex.CancellationToken == _stopping)
+                {
+                    await _context.TransportObservers.Completed(new ReceiveTransportCompletedEvent(_context.InputAddress, Metrics.None)).ConfigureAwait(false);
+                }
                 catch (OperationCanceledException)
                 {
                 }
@@ -56,6 +61,16 @@ namespace MassTransit.Transports
             public void Probe(ProbeContext context)
             {
             }
+        }
+
+
+        class Metrics :
+            DeliveryMetrics
+        {
+            public static readonly DeliveryMetrics None = new Metrics();
+
+            public long DeliveryCount => 0;
+            public int ConcurrentDeliveryCount => 0;
         }
     }
 }
