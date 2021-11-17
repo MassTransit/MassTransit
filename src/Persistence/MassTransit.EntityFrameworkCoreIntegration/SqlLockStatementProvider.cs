@@ -6,7 +6,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using MassTransit.Saga;
     using Metadata;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Internal;
 
 
     public class SqlLockStatementProvider :
@@ -31,7 +30,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             return FormatLockStatement<TSaga>(context);
         }
 
-        string FormatLockStatement<TSaga>(IDbContextDependencies context)
+        string FormatLockStatement<TSaga>(DbContext context)
             where TSaga : class, ISaga
         {
             var schemaTableTrio = GetSchemaAndTableNameAndColumnName(context, typeof(TSaga));
@@ -39,13 +38,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             return string.Format(RowLockStatement, schemaTableTrio.Schema, schemaTableTrio.Table, schemaTableTrio.ColumnName);
         }
 
-        SchemaTableColumnTrio GetSchemaAndTableNameAndColumnName(IDbContextDependencies dependencies, Type type)
+        SchemaTableColumnTrio GetSchemaAndTableNameAndColumnName(DbContext context, Type type)
         {
             if (TableNames.TryGetValue(type, out var result) && _enableSchemaCaching)
                 return result;
 
-        #pragma warning disable EF1001
-            var entityType = dependencies.Model.FindEntityType(type);
+            var entityType = context.Model.FindEntityType(type);
 
             var schema = entityType.GetSchema();
             var tableName = entityType.GetTableName();
