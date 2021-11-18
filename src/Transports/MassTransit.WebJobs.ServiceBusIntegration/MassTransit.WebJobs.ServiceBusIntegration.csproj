@@ -15,7 +15,7 @@
 
   <ItemGroup>
       <PackageReference Include="Azure.Identity" Version="1.5.0" />
-      <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.16.0" />
+      <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.19.0" />
       <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.0.0" />
       <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
       <ProjectReference Include="..\..\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />

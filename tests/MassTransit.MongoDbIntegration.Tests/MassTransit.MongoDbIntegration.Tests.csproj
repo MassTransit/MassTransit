@@ -13,7 +13,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.18" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
     <PackageReference Include="NUnit" Version="3.13.2" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
     <ProjectReference Include="..\..\src\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
     <ProjectReference Include="..\..\src\Scheduling\MassTransit.QuartzIntegration\MassTransit.QuartzIntegration.csproj" />
     <ProjectReference Include="..\..\src\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
