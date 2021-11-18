@@ -6,6 +6,7 @@
     using Quartz;
     using Util;
 
+
     /// <summary>
     /// Used to start and stop an in-memory scheduler using Quartz
     /// </summary>
@@ -30,14 +31,12 @@
 
         public Task<IScheduler> Scheduler => _schedulerSource.Task;
 
-        public Task PostCreate(IBus bus)
+        public void PostCreate(IBus bus)
         {
-            return TaskUtil.Completed;
         }
 
-        public Task CreateFaulted(Exception exception)
+        public void CreateFaulted(Exception exception)
         {
-            return TaskUtil.Completed;
         }
 
         public async Task PreStart(IBus bus)
@@ -90,9 +89,7 @@
         public async Task PreStop(IBus bus)
         {
             if (!_options.StartScheduler)
-            {
                 return;
-            }
 
             await _scheduler.Standby().ConfigureAwait(false);
 

@@ -8,7 +8,6 @@ namespace MassTransit.Registration
     using Context;
     using GreenPipes;
     using Microsoft.Extensions.Logging;
-    using Util;
 
 
     public abstract class TransportRegistrationBusFactory<TEndpointConfigurator> :
@@ -56,9 +55,9 @@ namespace MassTransit.Registration
 
                 var bus = new MassTransitBus(host, _hostConfiguration.BusConfiguration.BusObservers, busReceiveEndpointConfiguration);
 
-                TaskUtil.Await(() => _hostConfiguration.BusConfiguration.BusObservers.PostCreate(bus));
+                _hostConfiguration.BusConfiguration.BusObservers.PostCreate(bus);
 
-                IBusInstance instance = CreateBusInstance(bus, host, _hostConfiguration, context);
+                var instance = CreateBusInstance(bus, host, _hostConfiguration, context);
 
                 foreach (var specification in busInstanceSpecifications)
                     specification.Configure(instance);
@@ -67,7 +66,7 @@ namespace MassTransit.Registration
             }
             catch (Exception ex)
             {
-                TaskUtil.Await(() => _hostConfiguration.BusConfiguration.BusObservers.CreateFaulted(ex));
+                _hostConfiguration.BusConfiguration.BusObservers.CreateFaulted(ex);
 
                 throw new ConfigurationException(result, "An exception occurred during bus creation", ex);
             }

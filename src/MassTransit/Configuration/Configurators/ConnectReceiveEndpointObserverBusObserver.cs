@@ -19,18 +19,15 @@ namespace MassTransit.Configurators
             _provider = provider;
         }
 
-        public Task PostCreate(IBus bus)
+        public void PostCreate(IBus bus)
         {
             var observer = _provider.GetService<T>();
             if (observer != null)
                 _handle = bus.ConnectReceiveEndpointObserver(observer);
-
-            return TaskUtil.Completed;
         }
 
-        public Task CreateFaulted(Exception exception)
+        public void CreateFaulted(Exception exception)
         {
-            return TaskUtil.Completed;
         }
 
         public Task PreStart(IBus bus)

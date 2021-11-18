@@ -1,14 +1,3 @@
-using AzureSasCredential = Azure.AzureSasCredential;
-using BlobBaseClient = Azure.Storage.Blobs.Specialized.BlobBaseClient;
-using BlobContainerClient = Azure.Storage.Blobs.BlobContainerClient;
-using BlobOpenReadOptions = Azure.Storage.Blobs.Models.BlobOpenReadOptions;
-using BlobServiceClient = Azure.Storage.Blobs.BlobServiceClient;
-using BlobUriBuilder = Azure.Storage.Blobs.BlobUriBuilder;
-using ClientSecretCredential = Azure.Identity.ClientSecretCredential;
-using RequestFailedException = Azure.RequestFailedException;
-using StorageSharedKeyCredential = Azure.Storage.StorageSharedKeyCredential;
-
-
 namespace MassTransit.Azure.Storage.MessageData
 {
     using System;
@@ -17,6 +6,12 @@ namespace MassTransit.Azure.Storage.MessageData
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using global::Azure;
+    using global::Azure.Identity;
+    using global::Azure.Storage;
+    using global::Azure.Storage.Blobs;
+    using global::Azure.Storage.Blobs.Models;
+    using global::Azure.Storage.Blobs.Specialized;
     using MassTransit.MessageData;
     using Util;
 
@@ -59,21 +54,19 @@ namespace MassTransit.Azure.Storage.MessageData
             _nameGenerator = nameGenerator;
         }
 
-        public Task PostCreate(IBus bus)
+        public void PostCreate(IBus bus)
         {
-            return TaskUtil.Completed;
         }
 
-        public Task CreateFaulted(Exception exception)
+        public void CreateFaulted(Exception exception)
         {
-            return TaskUtil.Completed;
         }
 
         public async Task PreStart(IBus bus)
         {
             try
             {
-                var containerExists = await _container.ExistsAsync().ConfigureAwait(false);
+                Response<bool> containerExists = await _container.ExistsAsync().ConfigureAwait(false);
                 if (!containerExists)
                 {
                     try

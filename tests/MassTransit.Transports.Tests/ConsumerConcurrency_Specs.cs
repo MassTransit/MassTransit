@@ -16,29 +16,29 @@ namespace MassTransit.Transports.Tests
 
             await Harness.InputQueueSendEndpoint.SendBatch(new[]
             {
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = NewId.NextGuid()},
-                new SubmitOrder {Id = orderId}
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = NewId.NextGuid() },
+                new SubmitOrder { Id = orderId }
             });
 
             Assert.That(await _consumer.Consumed.Any<SubmitOrder>(x => x.Context.Message.Id == orderId), Is.True);
@@ -84,14 +84,12 @@ namespace MassTransit.Transports.Tests
                 _observer = observer;
             }
 
-            public Task PostCreate(IBus bus)
+            public void PostCreate(IBus bus)
             {
-                return Task.CompletedTask;
             }
 
-            public Task CreateFaulted(Exception exception)
+            public void CreateFaulted(Exception exception)
             {
-                return Task.CompletedTask;
             }
 
             public Task PreStart(IBus bus)

@@ -14,14 +14,14 @@
         /// </summary>
         /// <param name="bus"></param>
         /// <returns></returns>
-        Task PostCreate(IBus bus);
+        void PostCreate(IBus bus);
 
         /// <summary>
         /// Called when the bus fails to be created
         /// </summary>
         /// <param name="exception"></param>
         /// <returns></returns>
-        Task CreateFaulted(Exception exception);
+        void CreateFaulted(Exception exception);
 
         /// <summary>
         /// Called when the bus is being started, before the actual Start commences.

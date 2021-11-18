@@ -7,18 +7,15 @@ namespace MassTransit.PrometheusIntegration.Observers
     public class PrometheusBusObserver :
         IBusObserver
     {
-        public Task PostCreate(IBus bus)
+        public void PostCreate(IBus bus)
         {
             bus.ConnectPublishObserver(new PrometheusPublishObserver());
             bus.ConnectSendObserver(new PrometheusSendObserver());
             bus.ConnectReceiveObserver(new PrometheusReceiveObserver());
-
-            return Task.CompletedTask;
         }
 
-        public Task CreateFaulted(Exception exception)
+        public void CreateFaulted(Exception exception)
         {
-            return Task.CompletedTask;
         }
 
         public Task PreStart(IBus bus)

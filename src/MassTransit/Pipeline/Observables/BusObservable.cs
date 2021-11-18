@@ -9,14 +9,22 @@
         Connectable<IBusObserver>,
         IBusObserver
     {
-        public Task PostCreate(IBus bus)
+        public void PostCreate(IBus bus)
         {
-            return ForEachAsync(x => x.PostCreate(bus));
+            All(x =>
+            {
+                x.PostCreate(bus);
+                return true;
+            });
         }
 
-        public Task CreateFaulted(Exception exception)
+        public void CreateFaulted(Exception exception)
         {
-            return ForEachAsync(x => x.CreateFaulted(exception));
+            All(x =>
+            {
+                x.CreateFaulted(exception);
+                return true;
+            });
         }
 
         public Task PreStart(IBus bus)

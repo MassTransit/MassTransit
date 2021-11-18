@@ -18,14 +18,12 @@
 
         public CancellationToken Stopping => _stopping.Token;
 
-        public Task PostCreate(IBus bus)
+        public void PostCreate(IBus bus)
         {
-            return TaskUtil.Completed;
         }
 
-        public Task CreateFaulted(Exception exception)
+        public void CreateFaulted(Exception exception)
         {
-            return TaskUtil.Completed;
         }
 
         public Task PreStart(IBus bus)

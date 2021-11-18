@@ -28,14 +28,12 @@
             _configureServer = configureServer;
         }
 
-        public Task PostCreate(IBus bus)
+        public void PostCreate(IBus bus)
         {
-            return TaskUtil.Completed;
         }
 
-        public Task CreateFaulted(Exception exception)
+        public void CreateFaulted(Exception exception)
         {
-            return TaskUtil.Completed;
         }
 
         public Task PreStart(IBus bus)
@@ -55,7 +53,7 @@
             _configureServer?.Invoke(backgroundJobServerOptions);
 
             backgroundJobServerOptions.Activator = new MassTransitJobActivator(bus);
-            backgroundJobServerOptions.Queues = new[] {DefaultQueueName};
+            backgroundJobServerOptions.Queues = new[] { DefaultQueueName };
 
             _server = new BackgroundJobServer(
                 backgroundJobServerOptions,
