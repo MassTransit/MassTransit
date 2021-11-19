@@ -51,6 +51,7 @@
             var requiresRecycle = args.Exception switch
             {
                 MessageTimeToLiveExpiredException _ => false,
+                MessageLockExpiredException _ => false,
                 ServiceBusException { Reason: ServiceBusFailureReason.MessageLockLost } => false,
                 ServiceBusException { Reason: ServiceBusFailureReason.ServiceCommunicationProblem } => true,
                 ServiceBusException { IsTransient: true } => false,
@@ -64,6 +65,10 @@
                     _context.InputAddress, args.ErrorSource, _messageReceiver.ActiveDispatchCount, requiresRecycle);
             }
             else if (args.Exception is ObjectDisposedException { ObjectName: "$cbs" })
+            {
+                // don't log this one
+            }
+            else if (args.Exception is ServiceBusException { Reason: ServiceBusFailureReason.MessageLockLost })
             {
                 // don't log this one
             }

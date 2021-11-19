@@ -48,7 +48,8 @@
             return _context.ConnectSendObserver(observer);
         }
 
-        async Task IServiceBusMessageReceiver.Handle(ServiceBusReceivedMessage message, CancellationToken cancellationToken, Action<ReceiveContext> contextCallback)
+        async Task IServiceBusMessageReceiver.Handle(ServiceBusReceivedMessage message, CancellationToken cancellationToken,
+            Action<ReceiveContext> contextCallback)
         {
             var context = new ServiceBusReceiveContext(message, _context);
             contextCallback?.Invoke(context);
@@ -65,9 +66,10 @@
             {
                 await _dispatcher.Dispatch(context, receiveLock).ConfigureAwait(false);
             }
-            catch(ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.SessionLockLost)
+            catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.SessionLockLost)
             {
-                LogContext.Warning?.Log(ex, "Session Lock Lost: {MessageId}", message.MessageId);
+                LogContext.Error?.Log("Session Lock Lost: {InputAddress} {MessageId} {SequenceNumber} ({SessionId})", _context.InputAddress,
+                    message.MessageId, message.SequenceNumber, message.SessionId);
 
                 if (_context.ReceiveObservers.Count > 0)
                     await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);
@@ -76,7 +78,8 @@
             }
             catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessageLockLost)
             {
-                LogContext.Warning?.Log(ex, "Message Lock Lost: {MessageId}", message.MessageId);
+                LogContext.Error?.Log("Message Lock Lost: {InputAddress} {MessageId} {SequenceNumber}", _context.InputAddress, message.MessageId,
+                    message.SequenceNumber);
 
                 if (_context.ReceiveObservers.Count > 0)
                     await _context.ReceiveObservers.ReceiveFault(context, ex).ConfigureAwait(false);

@@ -4,6 +4,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
     using System.Threading.Tasks;
     using Context;
     using Contexts;
+    using global::Azure.Messaging.ServiceBus;
     using Transports;
     using Util;
 
@@ -27,18 +28,24 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
 
         public async Task Faulted(Exception exception)
         {
-            if (exception is MessageLockExpiredException)
-                return;
-            if (exception is MessageTimeToLiveExpiredException)
-                return;
+            switch (exception)
+            {
+                case MessageLockExpiredException _:
+                case MessageTimeToLiveExpiredException _:
+                case ServiceBusException { Reason: ServiceBusFailureReason.MessageLockLost }:
+                case ServiceBusException { Reason: ServiceBusFailureReason.ServiceCommunicationProblem }:
+                    return;
+                default:
+                    try
+                    {
+                        await _lockContext.Abandon(exception).ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogContext.Warning?.Log(exception, "Abandon message faulted: {MessageId} - {Exception}", _message.MessageId, ex);
+                    }
 
-            try
-            {
-                await _lockContext.Abandon(exception).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                LogContext.Warning?.Log(exception, "Abandon message faulted: {MessageId} - {Exception}", _message.MessageId, ex);
+                    break;
             }
         }
 
