@@ -87,7 +87,9 @@
                 {
                     await _context.NotifyFaulted(args.Exception, args.EntityPath).ConfigureAwait(false);
 
-                    await this.Stop($"Receiver Exception: {args.Exception.Message}").ConfigureAwait(false);
+                #pragma warning disable 4014
+                    Task.Run(() => this.Stop($"Receiver Exception: {args.Exception.Message}"));
+                #pragma warning restore 4014
                 }
             }
         }
