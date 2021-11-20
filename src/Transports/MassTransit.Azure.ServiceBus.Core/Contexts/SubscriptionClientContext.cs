@@ -7,6 +7,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     using global::Azure.Messaging.ServiceBus;
     using GreenPipes;
     using GreenPipes.Agents;
+    using MassTransit.Util;
     using Transport;
 
 
@@ -75,36 +76,51 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
                 await _sessionClient.StartProcessingAsync();
         }
 
-        public async Task ShutdownAsync()
+        public Task ShutdownAsync()
         {
+            // StopProcessingAsync will wait for the message handler(s) to be completed and this could result a deadlock.
+            // The current implementation goes against the guidance of managing the state of the client in the handler.
+            // https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/servicebus/Azure.Messaging.ServiceBus/src/Processor/ServiceBusProcessor.cs#L318
+            // To prevent the deadlock, the call to StopProcessingAsync won't be awaited.
+
             try
             {
                 if (_queueClient is { IsClosed: false })
-                    await _queueClient.StopProcessingAsync().ConfigureAwait(false);
+                    _ = _queueClient.StopProcessingAsync().ConfigureAwait(false);
 
                 if (_sessionClient is { IsClosed: false })
-                    await _sessionClient.StopProcessingAsync().ConfigureAwait(false);
+                    _ = _sessionClient.StopProcessingAsync().ConfigureAwait(false);
             }
             catch (Exception exception)
             {
                 LogContext.Warning?.Log(exception, "Stop processing client faulted: {InputAddress}", InputAddress);
             }
+
+            return TaskUtil.Completed;
         }
 
-        public async Task CloseAsync()
+        public Task CloseAsync()
         {
+            // If an exception occurs that requires the agent to be recycled, this method will be called as part of the processing of
+            // a message. CloseAsync will wait for the message handler(s) to be completed and this creates a deadlock.
+            // The current implementation goes against the guidance of managing the state of the client in the handler.
+            // https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/servicebus/Azure.Messaging.ServiceBus/src/Processor/ServiceBusProcessor.cs#L318
+            // To prevent the deadlock, the call to CloseAsync won't be awaited.
+
             try
             {
                 if (_queueClient is { IsClosed: false })
-                    await _queueClient.CloseAsync().ConfigureAwait(false);
+                    _ = _queueClient.CloseAsync().ConfigureAwait(false);
 
                 if (_sessionClient is { IsClosed: false })
-                    await _sessionClient.CloseAsync().ConfigureAwait(false);
+                    _ = _sessionClient.CloseAsync().ConfigureAwait(false);
             }
             catch (Exception exception)
             {
                 LogContext.Warning?.Log(exception, "Close client faulted: {InputAddress}", InputAddress);
             }
+
+            return TaskUtil.Completed;
         }
 
         public Task NotifyFaulted(Exception exception, string entityPath)
