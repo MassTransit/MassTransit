@@ -266,6 +266,7 @@
                 MaxAutoLockRenewalDuration = settings.MaxAutoRenewDuration,
                 ReceiveMode = ServiceBusReceiveMode.PeekLock,
                 MaxConcurrentCallsPerSession = settings.MaxConcurrentCalls,
+                SessionIdleTimeout = settings.SessionIdleTimeout
             };
         }
 

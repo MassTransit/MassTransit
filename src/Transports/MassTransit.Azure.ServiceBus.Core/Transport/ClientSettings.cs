@@ -23,22 +23,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         /// <summary>
         /// The timeout before a message session is abandoned
         /// </summary>
-        TimeSpan MessageWaitTimeout { get; }
-
-        /// <summary>
-        /// The lock duration for messages read from the client
-        /// </summary>
-        TimeSpan LockDuration { get; }
-
-        /// <summary>
-        /// True if a session is required/desired
-        /// </summary>
-        bool RequiresSession { get; }
-
-        /// <summary>
-        /// True if the basic tier was selected
-        /// </summary>
-        bool UsingBasicTier { get; }
+        TimeSpan SessionIdleTimeout { get; }
 
         /// <summary>
         /// The path of the message entity
@@ -49,11 +34,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Transport
         /// The name of the message entity
         /// </summary>
         string Name { get; }
-
-        /// <summary>
-        /// The time to wait for in-flight messages to complete during shutdown
-        /// </summary>
-        TimeSpan ShutdownTimeout { get; }
 
         /// <summary>
         /// Get the input address for the client on the specified host

@@ -38,17 +38,15 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 
         public ISubscriptionConfigurator SubscriptionConfigurator => _subscriptionConfigurator;
 
+        public override bool RequiresSession => _subscriptionConfigurator.RequiresSession ?? false;
+
         CreateTopicOptions SubscriptionSettings.CreateTopicOptions => _createTopicOptions;
         CreateSubscriptionOptions SubscriptionSettings.CreateSubscriptionOptions => _subscriptionConfigurator.GetCreateSubscriptionOptions();
 
         public CreateRuleOptions Rule { get; set; }
         public RuleFilter Filter { get; set; }
 
-        public override TimeSpan LockDuration => _subscriptionConfigurator.LockDuration ?? Defaults.LockDuration;
-
         public override string Path { get; }
-
-        public override bool RequiresSession => _subscriptionConfigurator.RequiresSession ?? false;
 
         public bool RemoveSubscriptions { get; set; }
 

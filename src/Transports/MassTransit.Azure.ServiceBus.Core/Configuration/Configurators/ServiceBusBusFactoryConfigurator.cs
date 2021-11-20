@@ -27,7 +27,7 @@
 
             var queueName = _busConfiguration.Topology.Consume.CreateTemporaryQueueName("bus");
 
-            _queueConfigurator = new QueueConfigurator(queueName) {AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle};
+            _queueConfigurator = new QueueConfigurator(queueName) { AutoDeleteOnIdle = Defaults.TemporaryAutoDeleteOnIdle };
 
             _settings = new ReceiveEndpointSettings(_busConfiguration.BusEndpointConfiguration, queueName, _queueConfigurator);
         }
@@ -191,7 +191,12 @@
 
         public TimeSpan MessageWaitTimeout
         {
-            set => _settings.MessageWaitTimeout = value;
+            set => _settings.SessionIdleTimeout = value;
+        }
+
+        public TimeSpan SessionIdleTimeout
+        {
+            set => _settings.SessionIdleTimeout = value;
         }
 
         public TimeSpan MaxAutoRenewDuration

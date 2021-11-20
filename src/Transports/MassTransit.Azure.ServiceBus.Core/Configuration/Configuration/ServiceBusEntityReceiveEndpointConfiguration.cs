@@ -93,7 +93,12 @@
 
         public TimeSpan MessageWaitTimeout
         {
-            set => _settings.MessageWaitTimeout = value;
+            set => _settings.SessionIdleTimeout = value;
+        }
+
+        public TimeSpan SessionIdleTimeout
+        {
+            set => _settings.SessionIdleTimeout = value;
         }
 
         public TimeSpan MaxAutoRenewDuration

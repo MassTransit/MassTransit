@@ -17,8 +17,8 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
     {
         readonly IAgent _agent;
         readonly ReceiveSettings _settings;
-        ServiceBusProcessor _queueClient;
-        ServiceBusSessionProcessor _sessionClient;
+        ServiceBusProcessor _processor;
+        ServiceBusSessionProcessor _sessionProcessor;
 
         public QueueClientContext(ConnectionContext connectionContext, Uri inputAddress, ReceiveSettings settings, IAgent agent)
         {
@@ -30,58 +30,58 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
 
         public ConnectionContext ConnectionContext { get; }
 
-        public string EntityPath => _queueClient?.EntityPath ?? _sessionClient?.EntityPath;
+        public string EntityPath => _processor?.EntityPath ?? _sessionProcessor?.EntityPath;
 
-        public bool IsClosedOrClosing => _queueClient?.IsClosed ?? _sessionClient?.IsClosed ?? false;
+        public bool IsClosedOrClosing => _processor?.IsClosed ?? _sessionProcessor?.IsClosed ?? false;
 
         public Uri InputAddress { get; }
 
         public void OnMessageAsync(Func<ProcessMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback,
             Func<ProcessErrorEventArgs, Task> exceptionHandler)
         {
-            if (_queueClient != null)
+            if (_processor != null)
                 throw new InvalidOperationException("OnMessageAsync can only be called once");
-            if (_sessionClient != null)
+            if (_sessionProcessor != null)
                 throw new InvalidOperationException("OnMessageAsync cannot be called with operating on a session");
 
-            _queueClient = ConnectionContext.CreateQueueProcessor(_settings);
+            _processor = ConnectionContext.CreateQueueProcessor(_settings);
 
-            _queueClient.ProcessMessageAsync += args => callback(args, args.Message, args.CancellationToken);
-            _queueClient.ProcessErrorAsync += exceptionHandler;
+            _processor.ProcessMessageAsync += args => callback(args, args.Message, args.CancellationToken);
+            _processor.ProcessErrorAsync += exceptionHandler;
         }
 
         public void OnSessionAsync(Func<ProcessSessionMessageEventArgs, ServiceBusReceivedMessage, CancellationToken, Task> callback,
             Func<ProcessErrorEventArgs, Task> exceptionHandler)
         {
-            if (_sessionClient != null)
+            if (_sessionProcessor != null)
                 throw new InvalidOperationException("OnSessionAsync can only be called once");
-            if (_queueClient != null)
+            if (_processor != null)
                 throw new InvalidOperationException("OnSessionAsync cannot be called with operating without a session");
 
-            _sessionClient = ConnectionContext.CreateQueueSessionProcessor(_settings);
+            _sessionProcessor = ConnectionContext.CreateQueueSessionProcessor(_settings);
 
-            _sessionClient.ProcessMessageAsync += args => callback(args, args.Message, args.CancellationToken);
-            _sessionClient.ProcessErrorAsync += exceptionHandler;
+            _sessionProcessor.ProcessMessageAsync += args => callback(args, args.Message, args.CancellationToken);
+            _sessionProcessor.ProcessErrorAsync += exceptionHandler;
         }
 
         public async Task StartAsync()
         {
-            if (_queueClient != null)
-                await _queueClient.StartProcessingAsync().ConfigureAwait(false);
+            if (_processor != null)
+                await _processor.StartProcessingAsync(CancellationToken).ConfigureAwait(false);
 
-            if (_sessionClient != null)
-                await _sessionClient.StartProcessingAsync().ConfigureAwait(false);
+            if (_sessionProcessor != null)
+                await _sessionProcessor.StartProcessingAsync(CancellationToken).ConfigureAwait(false);
         }
 
         public async Task ShutdownAsync()
         {
             try
             {
-                if (_queueClient is { IsClosed: false })
-                    await _queueClient.StopProcessingAsync().ConfigureAwait(false);
+                if (_processor is { IsClosed: false })
+                    await _processor.StopProcessingAsync().ConfigureAwait(false);
 
-                if (_sessionClient is { IsClosed: false })
-                    await _sessionClient.StopProcessingAsync().ConfigureAwait(false);
+                if (_sessionProcessor is { IsClosed: false })
+                    await _sessionProcessor.StopProcessingAsync().ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -93,11 +93,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Contexts
         {
             try
             {
-                if (_queueClient is { IsClosed: false })
-                    await _queueClient.CloseAsync().ConfigureAwait(false);
+                if (_processor is { IsClosed: false })
+                    await _processor.CloseAsync().ConfigureAwait(false);
 
-                if (_sessionClient is { IsClosed: false })
-                    await _sessionClient.CloseAsync().ConfigureAwait(false);
+                if (_sessionProcessor is { IsClosed: false })
+                    await _sessionProcessor.CloseAsync().ConfigureAwait(false);
             }
             catch (Exception exception)
             {

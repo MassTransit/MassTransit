@@ -27,8 +27,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
 
         public bool RemoveSubscriptions { get; set; }
 
-        public override TimeSpan LockDuration => _queueConfigurator.LockDuration ?? Defaults.LockDuration;
-
         public override string Path => _queueConfigurator.FullPath;
 
         public override bool RequiresSession => _queueConfigurator.RequiresSession ?? false;

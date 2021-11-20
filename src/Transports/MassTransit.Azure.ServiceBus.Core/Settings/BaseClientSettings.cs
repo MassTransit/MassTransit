@@ -18,24 +18,22 @@ namespace MassTransit.Azure.ServiceBus.Core.Settings
             Configurator = configurator;
 
             MaxAutoRenewDuration = Defaults.MaxAutoRenewDuration;
-            MessageWaitTimeout = Defaults.MessageWaitTimeout;
-
-            ShutdownTimeout = Defaults.ShutdownTimeout;
+            SessionIdleTimeout = Defaults.SessionIdleTimeout;
         }
 
         public IEndpointEntityConfigurator Configurator { get; }
 
         public bool UsingBasicTier { get; private set; }
 
+        public abstract bool RequiresSession { get; }
+
+        public TimeSpan SessionIdleTimeout { get; set; }
+
         public int MaxConcurrentCalls => Math.Max(_configuration.Transport.GetConcurrentMessageLimit(), 1);
         public int PrefetchCount => _configuration.Transport.PrefetchCount;
 
         public TimeSpan MaxAutoRenewDuration { get; set; }
-        public TimeSpan MessageWaitTimeout { get; set; }
-        public TimeSpan ShutdownTimeout { get; set; }
 
-        public abstract TimeSpan LockDuration { get; }
-        public abstract bool RequiresSession { get; }
         public abstract string Path { get; }
 
         public string Name { get; set; }
