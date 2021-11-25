@@ -6,7 +6,9 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using MassTransit.Saga;
     using Metadata;
     using Microsoft.EntityFrameworkCore;
-
+#if NETSTANDARD2_0
+    using Microsoft.EntityFrameworkCore.Internal;
+#endif
 
     public class SqlLockStatementProvider :
         ILockStatementProvider
@@ -30,7 +32,11 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             return FormatLockStatement<TSaga>(context);
         }
 
+#if NET6_0_OR_GREATER
         string FormatLockStatement<TSaga>(DbContext context)
+#else
+        string FormatLockStatement<TSaga>(IDbContextDependencies context)
+#endif
             where TSaga : class, ISaga
         {
             var schemaTableTrio = GetSchemaAndTableNameAndColumnName(context, typeof(TSaga));
@@ -38,12 +44,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             return string.Format(RowLockStatement, schemaTableTrio.Schema, schemaTableTrio.Table, schemaTableTrio.ColumnName);
         }
 
+#if NET6_0_OR_GREATER
         SchemaTableColumnTrio GetSchemaAndTableNameAndColumnName(DbContext context, Type type)
+#else
+        SchemaTableColumnTrio GetSchemaAndTableNameAndColumnName(IDbContextDependencies context, Type type)
+#endif
         {
             if (TableNames.TryGetValue(type, out var result) && _enableSchemaCaching)
                 return result;
 
+#pragma warning disable EF1001 // Internal EF Core API usage.
             var entityType = context.Model.FindEntityType(type);
+#pragma warning restore EF1001 // Internal EF Core API usage.
 
             var schema = entityType.GetSchema();
             var tableName = entityType.GetTableName();

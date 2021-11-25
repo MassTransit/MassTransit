@@ -36,7 +36,7 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '5.0.x'
+          dotnet-version: '6.0.x'
 
       - name: Restore NuGet packages
         run: dotnet restore
@@ -264,11 +264,16 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2
-
-      - name: Install .NET Core SDK
+        
+      - name: Install .NET Core 3.1.X SDK
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
+
+      - name: Install .NET 6.0 SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
 
       - name: Test EntityFrameworkCore
         run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
@@ -523,7 +528,7 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '3.1.x'
+          dotnet-version: '6.0.x'
 
       - name: Build and Publish MassTransit
         # was: brandedoutcast/publish-nuget@v2.5.5
