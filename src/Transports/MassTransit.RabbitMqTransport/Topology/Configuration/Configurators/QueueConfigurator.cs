@@ -43,9 +43,7 @@ namespace MassTransit.RabbitMqTransport.Topology.Configurators
                 if (value)
                     SetQueueArgument(Headers.XSingleActiveConsumer, true);
                 else
-                {
                     QueueArguments.Remove(Headers.XSingleActiveConsumer);
-                }
             }
         }
 
@@ -78,7 +76,25 @@ namespace MassTransit.RabbitMqTransport.Topology.Configurators
         }
 
         public bool Exclusive { get; set; }
-        public TimeSpan? QueueExpiration { get; set; }
+
+        public TimeSpan? QueueExpiration
+        {
+            get
+            {
+                if (QueueArguments.TryGetValue("x-expires", out var value) && value is long milliseconds)
+                    return TimeSpan.FromMilliseconds(milliseconds);
+
+                return null;
+            }
+            set
+            {
+                if (value.HasValue && value.Value > TimeSpan.Zero)
+                    QueueArguments["x-expires"] = (long)value.Value.TotalMilliseconds;
+                else
+                    QueueArguments.Remove("x-expires");
+            }
+        }
+
         public string QueueName { get; set; }
         public IDictionary<string, object> QueueArguments { get; }
 

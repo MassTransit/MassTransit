@@ -27,7 +27,7 @@
 
             builder.Exchange = builder.ExchangeDeclare(ExchangeName, ExchangeType, Durable, AutoDelete, ExchangeArguments);
 
-            var queue = builder.QueueDeclare(QueueName, Durable, AutoDelete, false, QueueArguments);
+            var queue = builder.QueueDeclare(QueueName, Durable, !QueueExpiration.HasValue && AutoDelete, false, QueueArguments);
 
             builder.QueueBind(builder.Exchange, queue, RoutingKey, BindingArguments);
 
