@@ -8,8 +8,8 @@ namespace MassTransit.Tests.Serialization
     using NUnit.Framework;
 
 
-    [TestFixture(typeof(XmlMessageSerializer))]
-    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftXmlMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
     [TestFixture(typeof(SystemTextJsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
@@ -800,7 +800,7 @@ namespace MassTransit.Tests.Serialization
     public class SucceededCommandResult : CommandResult
     {
         public SucceededCommandResult(Guid commandId, object referenceId = null)
-            : base(commandId, Serialization.ValidationResult.Succeeded, referenceId)
+            : base(commandId, Tests.Serialization.ValidationResult.Succeeded, referenceId)
         {
         }
     }

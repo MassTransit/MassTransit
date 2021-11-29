@@ -1,8 +1,6 @@
 namespace MassTransit.Testing
 {
-    using Decorators;
-    using MessageObservers;
-    using Saga;
+    using Implementations;
 
 
     public class SagaTestHarness<TSaga> :

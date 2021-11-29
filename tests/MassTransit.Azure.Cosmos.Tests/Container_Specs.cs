@@ -4,13 +4,11 @@ namespace MassTransit.Azure.Cosmos.Tests
     {
         using System;
         using System.Threading.Tasks;
-        using Automatonymous;
-        using Cosmos.Configuration;
-        using GreenPipes;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
         using TestFramework;
         using TestFramework.Sagas;
+        using Testing;
 
 
         public class Using_the_container_integration :
@@ -21,7 +19,20 @@ namespace MassTransit.Azure.Cosmos.Tests
             public Using_the_container_integration()
             {
                 _provider = new ServiceCollection()
-                    .AddMassTransit(ConfigureRegistration)
+                    .AddMassTransit(configurator =>
+                    {
+                        configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
+                            .CosmosRepository(r =>
+                            {
+                                r.EndpointUri = Configuration.EndpointUri;
+                                r.Key = Configuration.Key;
+
+                                r.DatabaseId = "sagaTest";
+                                r.CollectionId = "TestInstance";
+                            });
+
+                        configurator.AddBus(provider => BusControl);
+                    })
                     .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
             }
 
@@ -48,21 +59,6 @@ namespace MassTransit.Azure.Cosmos.Tests
                 });
 
                 await updated;
-            }
-
-            protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
-            {
-                configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
-                    .CosmosRepository(r =>
-                    {
-                        r.EndpointUri = Configuration.EndpointUri;
-                        r.Key = Configuration.Key;
-
-                        r.DatabaseId = "sagaTest";
-                        r.CollectionId = "TestInstance";
-                    });
-
-                configurator.AddBus(provider => BusControl);
             }
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -73,18 +69,85 @@ namespace MassTransit.Azure.Cosmos.Tests
         }
 
 
+        [TestFixture]
+        public class Testing_with_the_container
+        {
+            [Test]
+            public async Task Should_work_as_expected()
+            {
+                await using var provider = new ServiceCollection()
+                    .AddMassTransitTestHarness(x =>
+                    {
+                        x.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
+                            .CosmosRepository(r =>
+                            {
+                                r.EndpointUri = Configuration.EndpointUri;
+                                r.Key = Configuration.Key;
+
+                                r.DatabaseId = "sagaTest";
+                                r.CollectionId = "TestInstance";
+                            });
+
+                        x.AddConfigureEndpointsCallback((name, configurator) =>
+                        {
+                            configurator.UseInMemoryOutbox();
+                        });
+                    })
+                    .AddScoped<PublishTestStartedActivity>()
+                    .BuildServiceProvider(true);
+
+                var harness = provider.GetRequiredService<ITestHarness>();
+
+                await harness.Start();
+
+                var correlationId = NewId.NextGuid();
+
+                await harness.Bus.Publish(new StartTest
+                {
+                    CorrelationId = correlationId,
+                    TestKey = "Unique"
+                });
+
+                Assert.IsTrue(await harness.Published.Any<TestStarted>(x => x.Context.Message.CorrelationId == correlationId));
+
+                // For some reason, the LINQ provider for Cosmos does not properly resolve this query.
+                 var sagaHarness = harness.GetSagaStateMachineHarness<TestStateMachineSaga, TestInstance>();
+                // Assert.IsNotNull(await sagaHarness.Exists(correlationId, x => x.Active));
+
+                await harness.Bus.Publish(new UpdateTest
+                {
+                    TestId = correlationId,
+                    TestKey = "Unique"
+                });
+
+                Assert.IsTrue(await harness.Published.Any<TestUpdated>(x => x.Context.Message.CorrelationId == correlationId));
+            }
+        }
+
+
         public class Using_the_container_integration_with_client_factory :
             InMemoryTestFixture
         {
-            readonly string _clientName;
             readonly IServiceProvider _provider;
 
             public Using_the_container_integration_with_client_factory()
             {
-                _clientName = Guid.NewGuid().ToString();
+                var clientName = Guid.NewGuid().ToString();
+
                 _provider = new ServiceCollection()
-                    .AddSingleton<ICosmosClientFactory>(provider => new StaticCosmosClientFactory(Configuration.EndpointUri, Configuration.Key))
-                    .AddMassTransit(ConfigureRegistration)
+                    .AddCosmosClientFactory(Configuration.EndpointUri, Configuration.Key)
+                    .AddMassTransit(configurator =>
+                    {
+                        configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
+                            .CosmosRepository(r =>
+                            {
+                                r.DatabaseId = "sagaTest";
+                                r.CollectionId = "TestInstance";
+                                r.UseClientFactory(clientName);
+                            });
+
+                        configurator.AddBus(provider => BusControl);
+                    })
                     .AddScoped<PublishTestStartedActivity>().BuildServiceProvider();
             }
 
@@ -111,19 +174,6 @@ namespace MassTransit.Azure.Cosmos.Tests
                 });
 
                 await updated;
-            }
-
-            protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
-            {
-                configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
-                    .CosmosRepository(r =>
-                    {
-                        r.DatabaseId = "sagaTest";
-                        r.CollectionId = "TestInstance";
-                        r.UseClientFactory(_clientName);
-                    });
-
-                configurator.AddBus(provider => BusControl);
             }
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -188,7 +238,7 @@ namespace MassTransit.Azure.Cosmos.Tests
 
 
         public class PublishTestStartedActivity :
-            Activity<TestInstance>
+            IStateMachineActivity<TestInstance>
         {
             readonly ConsumeContext _context;
 
@@ -207,7 +257,7 @@ namespace MassTransit.Azure.Cosmos.Tests
                 visitor.Visit(this);
             }
 
-            public async Task Execute(BehaviorContext<TestInstance> context, Behavior<TestInstance> next)
+            public async Task Execute(BehaviorContext<TestInstance> context, IBehavior<TestInstance> next)
             {
                 await _context.Publish(new TestStarted
                 {
@@ -218,7 +268,8 @@ namespace MassTransit.Azure.Cosmos.Tests
                 await next.Execute(context).ConfigureAwait(false);
             }
 
-            public async Task Execute<T>(BehaviorContext<TestInstance, T> context, Behavior<TestInstance, T> next)
+            public async Task Execute<T>(BehaviorContext<TestInstance, T> context, IBehavior<TestInstance, T> next)
+                where T : class
             {
                 await _context.Publish(new TestStarted
                 {
@@ -229,14 +280,15 @@ namespace MassTransit.Azure.Cosmos.Tests
                 await next.Execute(context).ConfigureAwait(false);
             }
 
-            public Task Faulted<TException>(BehaviorExceptionContext<TestInstance, TException> context, Behavior<TestInstance> next)
+            public Task Faulted<TException>(BehaviorExceptionContext<TestInstance, TException> context, IBehavior<TestInstance> next)
                 where TException : Exception
             {
                 return next.Faulted(context);
             }
 
-            public Task Faulted<T, TException>(BehaviorExceptionContext<TestInstance, T, TException> context, Behavior<TestInstance, T> next)
+            public Task Faulted<T, TException>(BehaviorExceptionContext<TestInstance, T, TException> context, IBehavior<TestInstance, T> next)
                 where TException : Exception
+                where T : class
             {
                 return next.Faulted(context);
             }

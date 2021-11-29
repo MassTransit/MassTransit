@@ -3,10 +3,8 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using GreenPipes.Util;
     using MassTransit.Testing;
-    using MassTransit.Testing.Indicators;
+    using MassTransit.Testing.Implementations;
     using NUnit.Framework;
     using TestFramework;
 
@@ -20,7 +18,7 @@
         {
             for (var i = 1; i <= 30; i++)
             {
-                await Bus.Publish(new BreakingMessage {MessageIndex = i});
+                await Bus.Publish(new BreakingMessage { MessageIndex = i });
                 await Task.Delay(50);
             }
 
@@ -61,7 +59,7 @@
                 {
                     Interlocked.Increment(ref _faultCount);
 
-                    return TaskUtil.Completed;
+                    return Task.CompletedTask;
                 });
             });
         }
@@ -81,7 +79,7 @@
                 if (context.Message.MessageIndex % 2 == 0)
                     throw new IntentionalTestException("Every other message seems to fail");
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

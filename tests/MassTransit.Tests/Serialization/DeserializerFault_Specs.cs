@@ -4,6 +4,7 @@ namespace MassTransit.Tests.Serialization
     using System.Text;
     using System.Threading.Tasks;
     using MassTransit.Serialization;
+    using MassTransit.Transports;
     using NUnit.Framework;
     using TestFramework;
     using TestMessages;
@@ -30,7 +31,7 @@ namespace MassTransit.Tests.Serialization
 
         void ApplyStaticMessageToContext(SendContext<SubmitOrder> context, string body)
         {
-            context.Serializer = new BodySerializer(JsonMessageSerializer.JsonContentType, Encoding.UTF8.GetBytes(body));
+            context.Serializer = new CopyBodySerializer(NewtonsoftJsonMessageSerializer.JsonContentType, new StringMessageBody(body));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

@@ -4,14 +4,13 @@ namespace MassTransit.PrometheusIntegration.Tests
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
-    using Courier;
     using Courier.Contracts;
     using NUnit.Framework;
     using Prometheus;
     using TestFramework;
     using TestFramework.Courier;
     using Testing;
-    using Testing.Indicators;
+    using Testing.Implementations;
 
 
     [TestFixture]
@@ -21,11 +20,11 @@ namespace MassTransit.PrometheusIntegration.Tests
         [Test]
         public async Task Should_complete_with_metrics_available()
         {
-            var completed = (await _completed).Message;
+            await _completed;
 
             await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
 
-            using var stream = new MemoryStream();
+            await using var stream = new MemoryStream();
             await Metrics.DefaultRegistry.CollectAndExportAsTextAsync(stream);
 
             var text = Encoding.UTF8.GetString(stream.ToArray());
@@ -37,8 +36,6 @@ namespace MassTransit.PrometheusIntegration.Tests
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
-        Task<ConsumeContext<RoutingSlipActivityCompleted>> _firstActivityCompleted;
-        Task<ConsumeContext<RoutingSlipActivityCompleted>> _secondActivityCompleted;
         RoutingSlip _routingSlip;
         IBusActivityMonitor _activityMonitor;
 
@@ -61,10 +58,8 @@ namespace MassTransit.PrometheusIntegration.Tests
                 var testActivity = GetActivityContext<TestActivity>();
                 var secondActivity = GetActivityContext<SecondTestActivity>();
 
-                _firstActivityCompleted =
-                    Handled<RoutingSlipActivityCompleted>(x, context => context.Message.ActivityName.Equals(testActivity.Name));
-                _secondActivityCompleted =
-                    Handled<RoutingSlipActivityCompleted>(x, context => context.Message.ActivityName.Equals(secondActivity.Name));
+                Handled<RoutingSlipActivityCompleted>(x, context => context.Message.ActivityName.Equals(testActivity.Name));
+                Handled<RoutingSlipActivityCompleted>(x, context => context.Message.ActivityName.Equals(secondActivity.Name));
             });
         }
 

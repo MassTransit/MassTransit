@@ -1,7 +1,6 @@
-﻿namespace MassTransit.Configuration
+namespace MassTransit.Configuration
 {
-    using Pipeline;
-    using PublishPipeSpecifications;
+    using Transports;
 
 
     public interface IPublishPipeConfiguration

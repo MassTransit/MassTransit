@@ -5,11 +5,8 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Automatonymous;
-    using GreenPipes;
-    using GreenPipes.Agents;
-    using GreenPipes.Internals.Extensions;
-    using Pipeline.Observables;
+    using Middleware;
+    using Observables;
     using Util;
 
 
@@ -18,14 +15,11 @@
         IReceiveEndpointCollection
     {
         readonly SingleThreadedDictionary<string, ReceiveEndpoint> _endpoints;
-        readonly ReceiveEndpointStateMachine _machine;
         readonly ReceiveEndpointObservable _receiveEndpointObservers;
         bool _started;
 
         public ReceiveEndpointCollection()
         {
-            _machine = new ReceiveEndpointStateMachine();
-
             _receiveEndpointObservers = new ReceiveEndpointObservable();
 
             _endpoints = new SingleThreadedDictionary<string, ReceiveEndpoint>(StringComparer.OrdinalIgnoreCase);
@@ -44,7 +38,7 @@
 
             var added = _endpoints.TryAdd(endpointName, key =>
             {
-                endpoint.ConnectReceiveEndpointObserver(new ReceiveEndpointStateMachineObserver(_machine, endpoint));
+                endpoint.ConnectReceiveEndpointObserver(new HealthResultReceiveEndpointObserver(endpoint));
 
                 return endpoint;
             });
@@ -57,7 +51,7 @@
         {
             _started = true;
 
-            KeyValuePair<string, ReceiveEndpoint>[] endpointsToStart = _endpoints.Where(x => !_machine.IsStarted(x.Value)).ToArray();
+            KeyValuePair<string, ReceiveEndpoint>[] endpointsToStart = _endpoints.Where(x => !x.Value.IsStarted()).ToArray();
 
             return endpointsToStart.Select(x => StartEndpoint(x.Key, x.Value, cancellationToken)).ToArray();
         }
@@ -70,7 +64,7 @@
             if (!_endpoints.TryGetValue(endpointName, out var endpoint))
                 throw new ConfigurationException($"A receive endpoint with the key was not found: {endpointName}");
 
-            if (_machine.IsStarted(endpoint))
+            if (endpoint.IsStarted())
                 throw new ArgumentException($"The specified endpoint has already been started: {endpointName}", nameof(endpointName));
 
             return StartEndpoint(endpointName, endpoint, cancellationToken);
@@ -82,7 +76,7 @@
             {
                 var endpointScope = context.CreateScope("receiveEndpoint");
                 endpointScope.Add("name", endpoint.Key);
-                if (_machine.IsStarted(endpoint.Value))
+                if (endpoint.Value.IsStarted())
                     endpointScope.Add("started", true);
 
                 endpoint.Value.Probe(endpointScope);
@@ -100,7 +94,7 @@
             return new MultipleConnectHandle(_endpoints.Values.Select(x => x.ConnectConsumeMessageObserver(observer)));
         }
 
-        public HealthResult CheckHealth(BusState busState, string healthMessage)
+        public BusHealthResult CheckHealth(BusState busState, string healthMessage)
         {
             var results = _endpoints.Values.Select(x => new
             {
@@ -120,17 +114,17 @@
             var exception = results.Where(x => x.Result.Exception != null).Select(x => x.Result.Exception).FirstOrDefault();
 
             if (busState != BusState.Started || unhealthy.Any() && unhappy.Length == results.Length)
-                return HealthResult.Unhealthy($"Not ready: {healthMessage}", exception, data);
+                return BusHealthResult.Unhealthy($"Not ready: {healthMessage}", exception, data);
 
             if (unhappy.Any())
-                return HealthResult.Degraded($"Degraded Endpoints: {string.Join(",", names)}", exception, data);
+                return BusHealthResult.Degraded($"Degraded Endpoints: {string.Join(",", names)}", exception, data);
 
-            return HealthResult.Healthy("Ready", data);
+            return BusHealthResult.Healthy("Ready", data);
         }
 
         protected override async Task StopAgent(StopContext context)
         {
-            ReceiveEndpoint[] endpoints = _endpoints.Values.Where(x => _machine.IsStarted(x)).ToArray();
+            ReceiveEndpoint[] endpoints = _endpoints.Values.Where(x => x.IsStarted()).ToArray();
 
             await Task.WhenAll(endpoints.Select(x => x.Stop(context.CancellationToken))).ConfigureAwait(false);
 
@@ -154,12 +148,6 @@
                 var handle = new Handle(endpoint, RemoveEndpoint);
 
                 handle.Start(cancellationToken);
-
-                var raiseEventTask = _machine.RaiseEvent(endpoint, _machine.ReceiveEndpointStarted, cancellationToken);
-                if (raiseEventTask.IsCompletedSuccessfully())
-                    return handle;
-
-                TaskUtil.Await(() => raiseEventTask, cancellationToken);
 
                 return handle;
             }

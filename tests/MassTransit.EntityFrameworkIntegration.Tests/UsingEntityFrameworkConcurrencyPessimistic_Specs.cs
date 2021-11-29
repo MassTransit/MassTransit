@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Data.Entity;
     using System.Threading.Tasks;
-    using MassTransit.Saga;
     using NUnit.Framework;
     using Saga;
     using TestFramework;
@@ -26,7 +25,7 @@
             {
                 var correlationId = NewId.NextGuid();
 
-                await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
+                await InputQueueSendEndpoint.Send(new RehersalBegins { CorrelationId = correlationId });
 
                 sagaIds[i] = correlationId;
             }
@@ -77,7 +76,7 @@
         {
             var correlationId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new RehersalBegins { CorrelationId = correlationId });
 
             Guid? sagaId = await _repository.Value.ShouldContainSaga(correlationId, TestTimeout);
 

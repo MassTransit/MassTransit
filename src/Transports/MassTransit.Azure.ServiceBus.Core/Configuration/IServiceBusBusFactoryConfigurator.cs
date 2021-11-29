@@ -1,8 +1,6 @@
-﻿namespace MassTransit.Azure.ServiceBus.Core
+﻿namespace MassTransit
 {
     using System;
-    using global::Azure.Messaging.ServiceBus;
-    using Topology;
 
 
     public interface IServiceBusBusFactoryConfigurator :

@@ -2,7 +2,6 @@ namespace MassTransit.GrpcTransport.Tests.JobServiceTests
 {
     using System;
     using System.Threading.Tasks;
-    using JobService;
     using Microsoft.Extensions.Logging;
 
 

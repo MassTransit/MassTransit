@@ -1,4 +1,4 @@
-﻿namespace MassTransit.AmazonSqsTransport
+﻿namespace MassTransit
 {
     public interface AmazonSqsSendContext<out T> :
         AmazonSqsSendContext,

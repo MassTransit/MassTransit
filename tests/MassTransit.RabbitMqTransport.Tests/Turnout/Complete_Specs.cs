@@ -2,9 +2,6 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
 {
     using System;
     using System.Threading.Tasks;
-    using Definition;
-    using JobService;
-    using JobService.Configuration;
     using MassTransit.Contracts.JobService;
     using NUnit.Framework;
 
@@ -28,10 +25,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
         {
             await Task.Delay(context.Job.Duration);
 
-            await context.Publish<NumbersCrunched>(new
-            {
-                context.JobId
-            });
+            await context.Publish<NumbersCrunched>(new { context.JobId });
         }
     }
 
@@ -67,13 +61,6 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
         }
 
         [Test]
-        [Order(5)]
-        public async Task Should_have_published_the_numbers_crunched_event()
-        {
-            ConsumeContext<NumbersCrunched> completed = await _crunched;
-        }
-
-        [Test]
         [Order(3)]
         public async Task Should_have_published_the_job_started_event()
         {
@@ -85,6 +72,13 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
         public async Task Should_have_published_the_job_submitted_event()
         {
             ConsumeContext<JobSubmitted> submitted = await _submitted;
+        }
+
+        [Test]
+        [Order(5)]
+        public async Task Should_have_published_the_numbers_crunched_event()
+        {
+            ConsumeContext<NumbersCrunched> completed = await _crunched;
         }
 
         Guid _jobId;
@@ -101,7 +95,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            configurator.UseDelayedExchangeMessageScheduler();
+            configurator.UseDelayedMessageScheduler();
 
             var options = new ServiceInstanceOptions()
                 .SetEndpointNameFormatter(KebabCaseEndpointNameFormatter.Instance);
@@ -190,7 +184,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            configurator.UseDelayedExchangeMessageScheduler();
+            configurator.UseDelayedMessageScheduler();
 
             var options = new ServiceInstanceOptions()
                 .SetEndpointNameFormatter(KebabCaseEndpointNameFormatter.Instance);

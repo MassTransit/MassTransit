@@ -4,12 +4,11 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using MassTransit.Topology.EntityNameFormatters;
+    using AzureServiceBusTransport;
+    using AzureServiceBusTransport.Configuration;
+    using AzureServiceBusTransport.Topology;
+    using MassTransit.Topology;
     using NUnit.Framework;
-    using Topology;
-    using Topology.Builders;
-    using Topology.Configurators;
-    using Topology.Topologies;
     using TopologyTestTypes;
 
 
@@ -163,7 +162,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
             _builder = new ReceiveEndpointBrokerTopologyBuilder();
 
             _inputQueueName = "input-queue";
-            _builder.Queue = _builder.CreateQueue(new QueueConfigurator(_inputQueueName).GetCreateQueueOptions());
+            _builder.Queue = _builder.CreateQueue(new ServiceBusQueueConfigurator(_inputQueueName).GetCreateQueueOptions());
         }
 
         ServiceBusMessageNameFormatter _nameFormatter;

@@ -1,14 +1,10 @@
 namespace MassTransit.Tests.Serialization
 {
     using System;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Text;
     using Context;
+    using InMemoryTransport;
+    using InMemoryTransport.Fabric;
     using MassTransit.Serialization;
-    using MassTransit.Transports.InMemory.Contexts;
-    using MassTransit.Transports.InMemory.Fabric;
-    using Metadata;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -34,25 +30,26 @@ namespace MassTransit.Tests.Serialization
         [OneTimeSetUp]
         public void SetupSerializationTest()
         {
-            if (_serializerType == typeof(JsonMessageSerializer))
+            if (_serializerType == typeof(NewtonsoftJsonMessageSerializer))
             {
-                Serializer = new JsonMessageSerializer();
-                Deserializer = new JsonMessageDeserializer(JsonMessageSerializer.Deserializer);
+                Serializer = new NewtonsoftJsonMessageSerializer();
+                Deserializer = new NewtonsoftJsonMessageDeserializer(NewtonsoftJsonMessageSerializer.Deserializer);
             }
             else if (_serializerType == typeof(SystemTextJsonMessageSerializer))
             {
-                Serializer = new SystemTextJsonMessageSerializer();
-                Deserializer = new SystemTextJsonMessageDeserializer();
+                var serializer = new SystemTextJsonMessageSerializer();
+                Serializer = serializer;
+                Deserializer = serializer;
             }
             else if (_serializerType == typeof(BsonMessageSerializer))
             {
                 Serializer = new BsonMessageSerializer();
-                Deserializer = new BsonMessageDeserializer(BsonMessageSerializer.Deserializer);
+                Deserializer = new NewtonsoftBsonMessageDeserializer(BsonMessageSerializer.Deserializer);
             }
-            else if (_serializerType == typeof(XmlMessageSerializer))
+            else if (_serializerType == typeof(NewtonsoftXmlMessageSerializer))
             {
-                Serializer = new XmlMessageSerializer();
-                Deserializer = new XmlMessageDeserializer(XmlJsonMessageSerializer.Deserializer);
+                Serializer = new NewtonsoftXmlMessageSerializer();
+                Deserializer = new NewtonsoftXmlMessageDeserializer(NewtonsoftXmlJsonMessageSerializer.Deserializer);
             }
             else if (_serializerType == typeof(EncryptedMessageSerializer))
             {
@@ -112,7 +109,7 @@ namespace MassTransit.Tests.Serialization
         protected T SerializeAndReturn<T>(T obj)
             where T : class
         {
-            byte[] serializedMessageData = Serialize(obj);
+            var serializedMessageData = Serialize(obj);
 
             return Return<T>(serializedMessageData);
         }
@@ -120,30 +117,24 @@ namespace MassTransit.Tests.Serialization
         protected byte[] Serialize<T>(T obj)
             where T : class
         {
-            using (var output = new MemoryStream())
+            var sendContext = new MessageSendContext<T>(obj)
             {
-                var sendContext = new MessageSendContext<T>(obj);
+                SourceAddress = _sourceAddress,
+                DestinationAddress = _destinationAddress,
+                FaultAddress = _faultAddress,
+                ResponseAddress = _responseAddress,
+                RequestId = _requestId
+            };
 
-                sendContext.SourceAddress = _sourceAddress;
-                sendContext.DestinationAddress = _destinationAddress;
-                sendContext.FaultAddress = _faultAddress;
-                sendContext.ResponseAddress = _responseAddress;
-                sendContext.RequestId = _requestId;
+            var serializedMessageData = Serializer.GetMessageBody(sendContext).GetBytes();
 
-
-                Serializer.Serialize(output, sendContext);
-
-                byte[] serializedMessageData = output.ToArray();
-
-                Trace.WriteLine(Encoding.UTF8.GetString(serializedMessageData));
-                return serializedMessageData;
-            }
+            return serializedMessageData;
         }
 
         protected T Return<T>(byte[] serializedMessageData)
             where T : class
         {
-            var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, Serializer.ContentType.MediaType, TypeMetadataCache<T>.ShortName);
+            var message = new InMemoryTransportMessage(Guid.NewGuid(), serializedMessageData, Serializer.ContentType.MediaType, TypeCache<T>.ShortName);
             var receiveContext = new InMemoryReceiveContext(message, TestConsumeContext.GetContext());
 
             var consumeContext = Deserializer.Deserialize(receiveContext);

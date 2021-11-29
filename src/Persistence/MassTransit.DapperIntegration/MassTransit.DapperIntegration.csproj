@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>MassTransit</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -14,8 +15,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
     <PackageReference Include="dapper.contrib" Version="2.0.78" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.2" />
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.4" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

@@ -4,9 +4,7 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using GreenPipes.Internals.Extensions;
-    using Metadata;
+    using Internals;
     using NUnit.Framework;
     using RequestClientMessages;
     using TestFramework;
@@ -50,7 +48,7 @@
         {
             IRequestClient<GetValue> client = Bus.CreateRequestClient<GetValue>(InputQueueAddress, RequestTimeout.After(s: 1));
 
-            Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}), Throws.TypeOf<RequestTimeoutException>());
+            Assert.That(async () => await client.GetResponse<Value>(new GetValue { Discard = true }), Throws.TypeOf<RequestTimeoutException>());
         }
 
         [Test]
@@ -58,7 +56,7 @@
         {
             IRequestClient<GetValue> client = Bus.CreateRequestClient<GetValue>(InputQueueAddress, 100);
 
-            Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}), Throws.TypeOf<RequestTimeoutException>());
+            Assert.That(async () => await client.GetResponse<Value>(new GetValue { Discard = true }), Throws.TypeOf<RequestTimeoutException>());
         }
 
         [Test]
@@ -70,7 +68,7 @@
             {
                 source.Cancel();
 
-                Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}, source.Token), Throws.TypeOf<TaskCanceledException>());
+                Assert.That(async () => await client.GetResponse<Value>(new GetValue { Discard = true }, source.Token), Throws.TypeOf<TaskCanceledException>());
             }
         }
 
@@ -81,7 +79,7 @@
 
             using (var source = new CancellationTokenSource(100))
             {
-                Assert.That(async () => await client.GetResponse<Value>(new GetValue {Discard = true}, source.Token), Throws.TypeOf<TaskCanceledException>());
+                Assert.That(async () => await client.GetResponse<Value>(new GetValue { Discard = true }, source.Token), Throws.TypeOf<TaskCanceledException>());
             }
         }
 
@@ -90,7 +88,7 @@
         {
             IRequestClient<GetValue> client = Bus.CreateRequestClient<GetValue>(InputQueueAddress);
 
-            Assert.That(async () => await client.GetResponse<Value>(new GetValue {BlowUp = true}), Throws.TypeOf<RequestFaultException>());
+            Assert.That(async () => await client.GetResponse<Value>(new GetValue { BlowUp = true }), Throws.TypeOf<RequestFaultException>());
         }
 
         [Test]
@@ -100,15 +98,15 @@
 
             try
             {
-                await client.GetResponse<Value>(new GetValue {BlowUp = true});
+                await client.GetResponse<Value>(new GetValue { BlowUp = true });
 
                 Assert.Fail("Should have thrown");
             }
             catch (RequestFaultException exception)
             {
-                Assert.That(exception.Fault.Exceptions.First().ExceptionType, Is.EqualTo(TypeMetadataCache<IntentionalTestException>.ShortName));
-                Assert.That(exception.RequestType, Is.EqualTo(TypeMetadataCache<GetValue>.ShortName));
-                Assert.That(exception.Fault.FaultMessageTypes, Is.EqualTo(TypeMetadataCache<GetValue>.MessageTypeNames));
+                Assert.That(exception.Fault.Exceptions.First().ExceptionType, Is.EqualTo(TypeCache<IntentionalTestException>.ShortName));
+                Assert.That(exception.RequestType, Is.EqualTo(TypeCache<GetValue>.ShortName));
+                Assert.That(exception.Fault.FaultMessageTypes, Is.EqualTo(MessageTypeCache<GetValue>.MessageTypeNames));
             }
             catch
             {
@@ -141,6 +139,24 @@
         InMemoryTestFixture
     {
         [Test]
+        public async Task Should_fault_at_the_request_if_the_consumer_faults_with_one_response_type()
+        {
+            IRequestClient<RegisterMember> client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
+
+            Assert.That(async () => await client.GetResponse<MemberRegistered>(new RegisterMember { MemberId = "Logan5" }),
+                Throws.TypeOf<RequestFaultException>());
+        }
+
+        [Test]
+        public async Task Should_fault_at_the_request_if_the_consumer_faults_with_two_response_types()
+        {
+            IRequestClient<RegisterMember> client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
+
+            Assert.That(async () => await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember { MemberId = "Logan5" }),
+                Throws.TypeOf<RequestFaultException>());
+        }
+
+        [Test]
         public async Task Should_match_the_first_result()
         {
             IRequestClient<RegisterMember> client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
@@ -158,29 +174,11 @@
             IRequestClient<RegisterMember> client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
 
             Response<MemberRegistered, ExistingMemberFound> response =
-                await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember {MemberId = "Johnny5"});
+                await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember { MemberId = "Johnny5" });
 
             Assert.That(response.Is(out Response<MemberRegistered> _), Is.False, "Should not have been registered");
 
             Assert.That(response.Is(out Response<ExistingMemberFound> _), Is.True, "Should have been an existing member");
-        }
-
-        [Test]
-        public async Task Should_fault_at_the_request_if_the_consumer_faults_with_two_response_types()
-        {
-            IRequestClient<RegisterMember> client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
-
-            Assert.That(async () => await client.GetResponse<MemberRegistered, ExistingMemberFound>(new RegisterMember {MemberId = "Logan5"}),
-                Throws.TypeOf<RequestFaultException>());
-        }
-
-        [Test]
-        public async Task Should_fault_at_the_request_if_the_consumer_faults_with_one_response_type()
-        {
-            IRequestClient<RegisterMember> client = Bus.CreateRequestClient<RegisterMember>(InputQueueAddress);
-
-            Assert.That(async () => await client.GetResponse<MemberRegistered>(new RegisterMember {MemberId = "Logan5"}),
-                Throws.TypeOf<RequestFaultException>());
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -191,9 +189,9 @@
                     throw new IntentionalTestException("Logon Ran");
 
                 if (context.Message.MemberId == "Johnny5")
-                    return context.RespondAsync<ExistingMemberFound>(new {context.Message.MemberId});
+                    return context.RespondAsync<ExistingMemberFound>(new { context.Message.MemberId });
 
-                return context.RespondAsync<MemberRegistered>(new {context.Message.MemberId});
+                return context.RespondAsync<MemberRegistered>(new { context.Message.MemberId });
             });
         }
 
@@ -404,7 +402,7 @@
 
             try
             {
-                await client.GetResponse<Value>(new GetValue {BlowUp = true});
+                await client.GetResponse<Value>(new GetValue { BlowUp = true });
 
                 Assert.Fail("Should have thrown");
             }

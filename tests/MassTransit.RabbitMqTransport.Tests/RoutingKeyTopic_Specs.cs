@@ -109,7 +109,7 @@
                 if (context.Message.Symbol == "UBER")
                     _uber.TrySetResult(context.Message);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

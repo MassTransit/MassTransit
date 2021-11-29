@@ -1,10 +1,10 @@
-namespace MassTransit.Futures
+namespace MassTransit
 {
     using System;
-    using MassTransit.Internals.Extensions;
+    using Internals;
     using NewIdFormatters;
     using NewIdParsers;
-    using Registration;
+    using Transports;
 
 
     public readonly struct FutureLocation
@@ -26,7 +26,7 @@ namespace MassTransit.Futures
         public FutureLocation(Guid id, Uri address)
         {
             Id = id;
-            Address = new Uri($"queue:{address.GetLastPart()}");
+            Address = new Uri($"queue:{address.GetEndpointName()}");
         }
 
         public static implicit operator Uri(FutureLocation location)
@@ -34,7 +34,7 @@ namespace MassTransit.Futures
             var newId = location.Id.ToNewId();
             var id = newId.ToString(IdFormatter);
 
-            return new UriBuilder(location.Address) {Query = $"id={id}"}.Uri;
+            return new UriBuilder(location.Address) { Query = $"id={id}" }.Uri;
         }
 
         static readonly INewIdFormatter IdFormatter = new ZBase32Formatter();

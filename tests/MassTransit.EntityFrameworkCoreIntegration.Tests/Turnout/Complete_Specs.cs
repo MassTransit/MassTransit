@@ -3,12 +3,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
     using System;
     using System.Threading.Tasks;
     using Contracts.JobService;
-    using Definition;
-    using JobService;
-    using MassTransit.JobService;
-    using MassTransit.JobService.Components.StateMachines;
-    using MassTransit.JobService.Configuration;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Shared;
@@ -76,7 +70,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
-                Job = new {Duration = TimeSpan.FromSeconds(1)}
+                Job = new { Duration = TimeSpan.FromSeconds(1) }
             });
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));
@@ -118,7 +112,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
 
             await using var context = new JobServiceSagaDbContextFactory().CreateDbContext(DbContextOptionsBuilder);
 
-            await context.Database.MigrateAsync();
+            await context.Database.EnsureDeletedAsync();
+            await context.Database.EnsureCreatedAsync();
         }
 
         [OneTimeTearDown]
@@ -176,7 +171,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
-                Job = new {Duration = TimeSpan.FromSeconds(1)}
+                Job = new { Duration = TimeSpan.FromSeconds(1) }
             });
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));
@@ -253,7 +248,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
 
             await using var context = new JobServiceSagaDbContextFactory().CreateDbContext(DbContextOptionsBuilder);
 
-            await context.Database.MigrateAsync();
+            await context.Database.EnsureDeletedAsync();
+            await context.Database.EnsureCreatedAsync();
         }
 
         [OneTimeTearDown]

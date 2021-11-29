@@ -3,8 +3,7 @@ namespace MassTransit.Transports
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using GreenPipes.Caching;
+    using Caching;
 
 
     public class CachedSendEndpoint<TKey> :
@@ -28,10 +27,6 @@ namespace MassTransit.Transports
             {
                 case IAsyncDisposable disposable:
                     await disposable.DisposeAsync().ConfigureAwait(false);
-                    break;
-
-                case IDisposable disposable:
-                    disposable.Dispose();
                     break;
             }
         }

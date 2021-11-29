@@ -1,13 +1,13 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using global::Azure;
     using global::Azure.Messaging.ServiceBus.Administration;
-    using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
+    using Testing;
     using TopologyTestTypes;
 
 
@@ -15,18 +15,18 @@
     public class Using_a_subscription_filter_on_int :
         AzureServiceBusTestFixture
     {
-        Task<ConsumeContext<ClientUpdated>> _handled;
-
         [Test]
         public async Task Should_only_match_integers()
         {
-            await Bus.Publish<ClientUpdated>(new {Value = "Invalid"}, x => x.Headers.Set("ClientId", 69));
-            await Bus.Publish<ClientUpdated>(new {Value = "Valid"}, x => x.Headers.Set("ClientId", 27));
+            await Bus.Publish<ClientUpdated>(new { Value = "Invalid" }, x => x.Headers.Set("ClientId", 69));
+            await Bus.Publish<ClientUpdated>(new { Value = "Valid" }, x => x.Headers.Set("ClientId", 27));
 
             ConsumeContext<ClientUpdated> handled = await _handled;
 
             Assert.That(handled.Message.Value, Is.EqualTo("Valid"));
         }
+
+        Task<ConsumeContext<ClientUpdated>> _handled;
 
         protected override void ConfigureServiceBusReceiveEndpoint(IServiceBusReceiveEndpointConfigurator configurator)
         {
@@ -94,7 +94,7 @@
             var busHandle = await bus.StartAsync();
             await busHandle.StopAsync(new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
-            var pageableRules = managementClient.GetRulesAsync(topicName, subscriptionName);
+            AsyncPageable<RuleProperties> pageableRules = managementClient.GetRulesAsync(topicName, subscriptionName);
 
             Assert.That(await pageableRules.Count(), Is.EqualTo(1));
             var rule = await pageableRules.First();

@@ -2,16 +2,14 @@ namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Definition;
     using NUnit.Framework;
     using TestFramework;
 
 
-    public abstract class Common_Registration :
-        InMemoryTestFixture
+    public class Common_Registration<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected abstract IBusRegistrationContext Registration { get; }
-
         [Test]
         public async Task Should_come_from_the_default_address()
         {
@@ -21,7 +19,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             ConsumeContext<PlainEvent> context = await handled;
 
-            var expected = new Uri(InMemoryTestHarness.BaseAddress, DefaultEndpointNameFormatter.Instance.Consumer<PlainConsumer>());
+            var expected = new Uri(InMemoryTestHarness.BaseAddress, EndpointNameFormatter.Consumer<PlainConsumer>());
             Assert.That(context.SourceAddress, Is.EqualTo(expected));
         }
 
@@ -52,19 +50,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
         }
 
         [Test]
-        public async Task Should_come_from_the_endpoint_override_address()
-        {
-            Task<ConsumeContext<ByEndpointDefinitionEvent>> handled = await ConnectPublishHandler<ByEndpointDefinitionEvent>();
-
-            await Bus.Publish(new ByEndpointDefinitionCommand());
-
-            ConsumeContext<ByEndpointDefinitionEvent> context = await handled;
-
-            var expected = new Uri(InMemoryTestHarness.BaseAddress, "by_endpoint_definition");
-            Assert.That(context.SourceAddress, Is.EqualTo(expected));
-        }
-
-        [Test]
         public async Task Should_come_from_the_endpoint_name()
         {
             Task<ConsumeContext<ByEndpointNameEvent>> handled = await ConnectPublishHandler<ByEndpointNameEvent>();
@@ -74,6 +59,19 @@ namespace MassTransit.Containers.Tests.Common_Tests
             ConsumeContext<ByEndpointNameEvent> context = await handled;
 
             var expected = new Uri(InMemoryTestHarness.BaseAddress, "by_endpoint_name");
+            Assert.That(context.SourceAddress, Is.EqualTo(expected));
+        }
+
+        [Test]
+        public async Task Should_come_from_the_endpoint_override_address()
+        {
+            Task<ConsumeContext<ByEndpointDefinitionEvent>> handled = await ConnectPublishHandler<ByEndpointDefinitionEvent>();
+
+            await Bus.Publish(new ByEndpointDefinitionCommand());
+
+            ConsumeContext<ByEndpointDefinitionEvent> context = await handled;
+
+            var expected = new Uri(InMemoryTestHarness.BaseAddress, "by_endpoint_definition");
             Assert.That(context.SourceAddress, Is.EqualTo(expected));
         }
 
@@ -90,12 +88,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(context.SourceAddress, Is.EqualTo(expected));
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(Registration);
-        }
-
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<PlainConsumer>();
 
@@ -112,8 +105,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             configurator.AddConsumer<ByEndpointOverrideConsumer, ByEndpointOverrideConsumerDefinition>()
                 .Endpoint(x => x.Name = "by_endpoint_override");
-
-            configurator.AddBus(provider => BusControl);
         }
 
 

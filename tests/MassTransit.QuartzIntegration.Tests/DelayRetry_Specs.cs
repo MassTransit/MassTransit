@@ -3,7 +3,6 @@
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -135,7 +134,7 @@
                 _receivedTimeSpan = _timer.Elapsed;
                 _received.TrySetResult(context);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }
@@ -214,7 +213,7 @@
                 RedeliveryCount = context.GetRedeliveryCount();
                 _received.TrySetResult(context);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

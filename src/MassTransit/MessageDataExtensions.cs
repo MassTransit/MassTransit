@@ -5,11 +5,7 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Internals.Extensions;
-    using MessageData;
     using MessageData.Values;
-    using Metadata;
-    using Newtonsoft.Json;
     using Serialization;
 
 
@@ -87,19 +83,7 @@
             if (value == null)
                 return EmptyMessageData<byte[]>.Instance;
 
-            using var stream = new MemoryStream();
-            using var writer = new StreamWriter(stream, Encoding.UTF8, 1024, true);
-            using var jsonWriter = new JsonTextWriter(writer);
-
-            jsonWriter.Formatting = Formatting.None;
-
-            JsonMessageSerializer.Serializer.Serialize(jsonWriter, value, objectType);
-
-            await jsonWriter.FlushAsync(cancellationToken).ConfigureAwait(false);
-            await writer.FlushAsync().ConfigureAwait(false);
-            await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
-
-            var bytes = stream.ToArray();
+            var bytes = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(value, objectType, SystemTextJsonMessageSerializer.Options);
 
             if (bytes.Length < MessageDataDefaults.Threshold && !MessageDataDefaults.AlwaysWriteToRepository)
                 return new BytesInlineMessageData(bytes);
@@ -161,11 +145,6 @@
             await stream.CopyToAsync(ms).ConfigureAwait(false);
 
             return new StoredMessageData<byte[]>(address, ms.ToArray());
-        }
-
-        public static bool IsValidMessageDataType(Type type)
-        {
-            return type.IsInterfaceOrConcreteClass() && TypeMetadataCache.IsValidMessageType(type) && !type.IsValueTypeOrObject();
         }
     }
 }

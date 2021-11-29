@@ -6,12 +6,7 @@ namespace MassTransit.Transports
     using System.Threading.Tasks;
     using Context;
     using Courier;
-    using Definition;
-    using GreenPipes;
-    using Internals.Extensions;
-    using Metrics;
-    using Pipeline;
-    using Saga;
+    using Internals;
 
 
     public class ReceiveEndpointDispatcher :
@@ -27,34 +22,35 @@ namespace MassTransit.Transports
             _dispatcher = context.CreateReceivePipeDispatcher();
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("dispatcher");
 
             _context.ReceivePipe.Probe(scope);
         }
 
-        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
+        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
             return _context.ConnectReceiveObserver(observer);
         }
 
-        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
             return _context.ConnectPublishObserver(observer);
         }
 
-        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _context.ConnectSendObserver(observer);
         }
 
-        ConnectHandle IConsumeMessageObserverConnector.ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+        public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+            where T : class
         {
             return _context.ReceivePipe.ConnectConsumeMessageObserver(observer);
         }
 
-        ConnectHandle IConsumeObserverConnector.ConnectConsumeObserver(IConsumeObserver observer)
+        public ConnectHandle ConnectConsumeObserver(IConsumeObserver observer)
         {
             return _context.ReceivePipe.ConnectConsumeObserver(observer);
         }
@@ -119,10 +115,10 @@ namespace MassTransit.Transports
                 return dispatcherFactory.Create(factory, formatter);
             }
 
-            if (typeof(T).HasInterface<IConsumer>())
-                _dispatcher = CreateDispatcher(typeof(ConsumerReceiveEndpointDispatcher<>).MakeGenericType(typeof(T)));
-            else if (typeof(T).HasInterface<ISaga>())
+            if (typeof(T).HasInterface<ISaga>())
                 _dispatcher = CreateDispatcher(typeof(SagaReceiveEndpointDispatcher<>).MakeGenericType(typeof(T)));
+            else if (typeof(T).HasInterface<IConsumer>())
+                _dispatcher = CreateDispatcher(typeof(ConsumerReceiveEndpointDispatcher<>).MakeGenericType(typeof(T)));
             else if (typeof(T).ClosesType(typeof(IExecuteActivity<>), out Type[] arguments))
                 _dispatcher = CreateDispatcher(typeof(ExecuteActivityReceiveEndpointDispatcher<,>).MakeGenericType(typeof(T), arguments[0]));
             else

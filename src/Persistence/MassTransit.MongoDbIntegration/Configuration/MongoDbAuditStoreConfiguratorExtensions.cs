@@ -1,9 +1,10 @@
-﻿using System;
-using MassTransit.MongoDbIntegration.Audit;
-using MongoDB.Driver;
-
-namespace MassTransit.MongoDbIntegration.Configuration
+﻿namespace MassTransit
 {
+    using System;
+    using MongoDB.Driver;
+    using MongoDbIntegration.Audit;
+
+
     public static class MongoDbAuditStoreConfiguratorExtensions
     {
         /// <summary>

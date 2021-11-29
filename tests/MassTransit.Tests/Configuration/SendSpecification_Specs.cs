@@ -6,17 +6,13 @@
     using System.Reflection;
     using System.Threading.Tasks;
     using Context;
-    using GreenPipes;
-    using GreenPipes.Filters;
-    using GreenPipes.Observers;
-    using GreenPipes.Policies;
-    using GreenPipes.Policies.ExceptionFilters;
+    using MassTransit.Configuration;
+    using MassTransit.Middleware;
     using MassTransit.Topology;
-    using MassTransit.Topology.Observers;
-    using MassTransit.Topology.Topologies;
-    using Metadata;
     using NUnit.Framework;
-    using SendPipeSpecifications;
+    using Observables;
+    using RetryPolicies;
+    using RetryPolicies.ExceptionFilters;
 
 
     [TestFixture]
@@ -28,7 +24,7 @@
             IEnumerable<Type> messageTypes = GetMessageTypes<SubClass>();
 
             foreach (var type in messageTypes)
-                Console.WriteLine(TypeMetadataCache.GetShortName(type));
+                Console.WriteLine(TypeCache.GetShortName(type));
         }
 
         [Test]
@@ -174,14 +170,14 @@
 
         static IEnumerable<Type> GetMessageTypes<TMessage>()
         {
-            if (TypeMetadataCache<TMessage>.IsValidMessageType)
+            if (MessageTypeCache<TMessage>.IsValidMessageType)
                 yield return typeof(TMessage);
 
             foreach (var baseInterface in GetImplementedInterfaces(typeof(TMessage)))
                 yield return baseInterface;
 
             var baseType = typeof(TMessage).GetTypeInfo().BaseType;
-            while (baseType != null && TypeMetadataCache.IsValidMessageType(baseType))
+            while (baseType != null && MessageTypeCache.IsValidMessageType(baseType))
             {
                 yield return baseType;
 
@@ -196,7 +192,7 @@
         {
             IEnumerable<Type> baseInterfaces = baseType
                 .GetInterfaces()
-                .Where(TypeMetadataCache.IsValidMessageType)
+                .Where(MessageTypeCache.IsValidMessageType)
                 .ToArray();
 
             if (baseType.GetTypeInfo().BaseType != null && baseType.GetTypeInfo().BaseType != typeof(object))

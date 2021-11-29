@@ -4,7 +4,6 @@
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Marten.Schema;
-    using MassTransit.Saga;
 
 
     public class SimpleSaga :

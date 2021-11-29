@@ -1,7 +1,7 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit
 {
-    using Context;
-    using Contexts;
+    using EventHubIntegration;
+    using Transports;
 
 
     public interface IEventHubReceiveEndpointContext :

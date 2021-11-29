@@ -1,12 +1,12 @@
 ﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Shared
 {
+    using System;
     using Microsoft.EntityFrameworkCore;
-    using Registration;
     using TestFramework;
 
 
-    public class EntityFrameworkTestFixture<TTestDbParameters, TDbContext>
-        : InMemoryTestFixture
+    public class EntityFrameworkTestFixture<TTestDbParameters, TDbContext> :
+        InMemoryTestFixture
         where TTestDbParameters : ITestDbParameters, new()
         where TDbContext : DbContext
     {
@@ -21,7 +21,7 @@
             RawSqlLockStatements = _testDbParameters.RawSqlLockStatements;
         }
 
-        protected void ApplyBuilderOptions(IConfigurationServiceProvider provider, DbContextOptionsBuilder<TDbContext> builder)
+        protected void ApplyBuilderOptions(IServiceProvider provider, DbContextOptionsBuilder<TDbContext> builder)
         {
             _testDbParameters.Apply(typeof(TDbContext), builder);
         }

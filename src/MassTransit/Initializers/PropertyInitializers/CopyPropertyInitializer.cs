@@ -3,8 +3,7 @@
     using System;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Internals.Reflection;
-    using Util;
+    using Internals;
 
 
     /// <summary>
@@ -36,7 +35,7 @@
             if (context.HasInput)
                 _messageProperty.Set(context.Message, _inputProperty.Get(context.Input));
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

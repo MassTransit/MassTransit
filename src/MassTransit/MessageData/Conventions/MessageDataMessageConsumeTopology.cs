@@ -1,7 +1,8 @@
 namespace MassTransit.MessageData.Conventions
 {
     using Initializers;
-    using Pipeline.Filters;
+    using MassTransit.Configuration;
+    using Middleware;
     using Topology;
 
 

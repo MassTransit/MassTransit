@@ -3,8 +3,7 @@
     using System;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Internals.Reflection;
-    using Util;
+    using Internals;
 
 
     public class CopyObjectPropertyInitializer<TMessage, TInput, TInputProperty> :
@@ -28,7 +27,7 @@
         {
             _messageProperty.Set(context.Message, _inputProperty.Get(context.Input));
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

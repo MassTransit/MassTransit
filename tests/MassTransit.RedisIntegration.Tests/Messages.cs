@@ -3,7 +3,8 @@
     using System;
 
 
-    public class SimpleSagaMessageBase : CorrelatedBy<Guid>
+    public class SimpleSagaMessageBase :
+        CorrelatedBy<Guid>
     {
         public SimpleSagaMessageBase()
         {
@@ -19,7 +20,8 @@
 
 
     [Serializable]
-    public class InitiateSimpleSaga : SimpleSagaMessageBase
+    public class InitiateSimpleSaga :
+        SimpleSagaMessageBase
     {
         public InitiateSimpleSaga()
         {
@@ -35,7 +37,8 @@
 
 
     [Serializable]
-    public class CompleteSimpleSaga : SimpleSagaMessageBase
+    public class CompleteSimpleSaga :
+        SimpleSagaMessageBase
     {
         public CompleteSimpleSaga()
         {

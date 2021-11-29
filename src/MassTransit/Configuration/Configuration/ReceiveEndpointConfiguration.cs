@@ -4,10 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Context;
-    using GreenPipes;
-    using Pipeline;
-    using Pipeline.Observables;
+    using Observables;
     using Transports;
 
 
@@ -86,7 +83,7 @@
 
         public virtual IReceivePipe CreateReceivePipe()
         {
-            return Receive.CreatePipe(CreateConsumePipe(), Serialization.Deserializer);
+            return Receive.CreatePipe(CreateConsumePipe(), Serialization.CreateSerializerCollection());
         }
 
         public abstract ReceiveEndpointContext CreateReceiveEndpointContext();
@@ -131,6 +128,48 @@
         protected virtual bool IsAlreadyConfigured()
         {
             return false;
+        }
+
+
+        class ReceiveEndpointDependency :
+            IReceiveEndpointDependency,
+            IReceiveEndpointObserver
+        {
+            readonly ConnectHandle _handle;
+            readonly TaskCompletionSource<ReceiveEndpointReady> _ready;
+
+            public ReceiveEndpointDependency(IReceiveEndpointObserverConnector connector)
+            {
+                _ready = new TaskCompletionSource<ReceiveEndpointReady>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+                _handle = connector.ConnectReceiveEndpointObserver(this);
+            }
+
+            public Task Ready => _ready.Task;
+
+            Task IReceiveEndpointObserver.Ready(ReceiveEndpointReady ready)
+            {
+                _handle.Disconnect();
+
+                _ready.TrySetResult(ready);
+
+                return Task.CompletedTask;
+            }
+
+            Task IReceiveEndpointObserver.Stopping(ReceiveEndpointStopping stopping)
+            {
+                return Task.CompletedTask;
+            }
+
+            Task IReceiveEndpointObserver.Completed(ReceiveEndpointCompleted completed)
+            {
+                return Task.CompletedTask;
+            }
+
+            Task IReceiveEndpointObserver.Faulted(ReceiveEndpointFaulted faulted)
+            {
+                return Task.CompletedTask;
+            }
         }
     }
 }

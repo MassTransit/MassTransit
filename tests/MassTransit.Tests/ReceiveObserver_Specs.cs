@@ -25,7 +25,7 @@
 
                     Tuple<ConsumeContext, string> context = await observer.PostConsumed;
 
-                    Assert.AreEqual(TypeMetadataCache<MessageHandler<PingMessage>>.ShortName, context.Item2);
+                    Assert.AreEqual(TypeCache<MessageHandler<PingMessage>>.ShortName, context.Item2);
                 }
             }
 
@@ -81,7 +81,7 @@
 
                     Tuple<ConsumeContext, string> context = await observer.PostConsumed;
 
-                    Assert.AreEqual(TypeMetadataCache<PingConsumerDude>.ShortName, context.Item2);
+                    Assert.AreEqual(TypeCache<PingConsumerDude>.ShortName, context.Item2);
                 }
             }
 

@@ -4,11 +4,9 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Contracts;
-    using GreenPipes;
     using MassTransit.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;
-    using Util;
 
 
     [TestFixture]
@@ -84,7 +82,7 @@
         {
             public Task Consume(ConsumeContext<A> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

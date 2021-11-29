@@ -6,7 +6,7 @@ namespace MassTransit.Tests.Initializers
     using System.Linq.Expressions;
     using System.Threading;
     using System.Threading.Tasks;
-    using Internals.Extensions;
+    using Internals;
     using MassTransit.Initializers;
     using MassTransit.Initializers.Contexts;
     using MassTransit.Initializers.PropertyProviders;

@@ -1,12 +1,8 @@
 ﻿namespace MassTransit.Serialization
 {
-    using GreenPipes;
-
-
-    public interface ISecureKeyProvider : IProbeSite
+    public interface ISecureKeyProvider :
+        IProbeSite
     {
-        byte[] GetKey(ReceiveContext receiveContext);
-
-        byte[] GetKey(SendContext sendContext);
+        byte[] GetKey(Headers headers);
     }
 }

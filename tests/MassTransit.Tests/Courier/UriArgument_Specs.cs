@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -26,7 +25,7 @@
 
             var testActivity = GetActivityContext<AddressActivity>();
             var faultyActivity = GetActivityContext<FaultyActivity>();
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Address = new Uri("http://google.com/")});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Address = new Uri("http://google.com/") });
             builder.AddActivity(faultyActivity.Name, faultyActivity.ExecuteUri);
 
             await Bus.Execute(builder.Build());
@@ -35,11 +34,11 @@
 
             ConsumeContext<RoutingSlipActivityCompleted> consumeContext = await activity;
 
-            Assert.AreEqual(new Uri("http://google.com/"), consumeContext.Message.GetResult<string>("UsedAddress"));
+            Assert.AreEqual(new Uri("http://google.com/"), consumeContext.GetResult<string>("UsedAddress"));
 
             ConsumeContext<RoutingSlipActivityCompensated> context = await activityCompensated;
 
-            Assert.AreEqual(new Uri("http://google.com/"), context.Message.GetResult<string>("UsedAddress"));
+            Assert.AreEqual(new Uri("http://google.com/"), context.GetResult<string>("UsedAddress"));
         }
 
         [Test]
@@ -54,7 +53,7 @@
             var testActivity = GetActivityContext<AddressActivity>();
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);
 
-            builder.SetVariables(new {Address = new Uri("http://google.com/")});
+            builder.SetVariables(new { Address = new Uri("http://google.com/") });
 
             await Bus.Execute(builder.Build());
 
@@ -62,7 +61,7 @@
 
             ConsumeContext<RoutingSlipActivityCompleted> consumeContext = await activity;
 
-            Assert.AreEqual(new Uri("http://google.com/"), consumeContext.Message.GetResult<string>("UsedAddress"));
+            Assert.AreEqual(new Uri("http://google.com/"), consumeContext.GetResult<string>("UsedAddress"));
         }
 
         protected override void SetupActivities(BusTestHarness testHarness)

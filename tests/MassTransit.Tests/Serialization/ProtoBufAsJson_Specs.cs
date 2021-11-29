@@ -5,7 +5,7 @@ namespace MassTransit.Tests.Serialization
     using NUnit.Framework;
 
 
-    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
     public class Serializing_a_protocol_buffer_message :
         SerializationTest
     {

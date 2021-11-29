@@ -2,11 +2,9 @@ namespace MassTransit.Logging
 {
     using System.Collections.Generic;
     using System.Diagnostics;
-    using Context;
     using Courier;
     using Courier.Contracts;
     using Metadata;
-    using Saga;
 
 
     public readonly struct EnabledDiagnosticSource
@@ -111,9 +109,9 @@ namespace MassTransit.Logging
         {
             var activity = new System.Diagnostics.Activity(_name);
 
-            activity.AddTag(DiagnosticHeaders.ConsumerType, TypeMetadataCache<TConsumer>.ShortName);
+            activity.AddTag(DiagnosticHeaders.ConsumerType, TypeCache<TConsumer>.ShortName);
             activity.AddTag(DiagnosticHeaders.PeerService, "Consumer");
-            activity.AddTag(DiagnosticHeaders.PeerAddress, TypeMetadataCache<T>.DiagnosticAddress);
+            activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
 
             return StartActivity(context, activity);
         }
@@ -124,7 +122,7 @@ namespace MassTransit.Logging
             var activity = new System.Diagnostics.Activity(_name);
 
             activity.AddTag(DiagnosticHeaders.PeerService, "Handler");
-            activity.AddTag(DiagnosticHeaders.PeerAddress, TypeMetadataCache<T>.DiagnosticAddress);
+            activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
 
             return StartActivity(context, activity);
         }
@@ -136,8 +134,8 @@ namespace MassTransit.Logging
             var activity = new System.Diagnostics.Activity(_name);
 
             activity.AddTag(DiagnosticHeaders.PeerService, "Repository");
-            activity.AddTag(DiagnosticHeaders.PeerAddress, TypeMetadataCache<T>.DiagnosticAddress);
-            activity.AddTag(DiagnosticHeaders.SagaType, TypeMetadataCache<TSaga>.ShortName);
+            activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
+            activity.AddTag(DiagnosticHeaders.SagaType, TypeCache<TSaga>.ShortName);
 
             return StartActivity(context, activity);
         }
@@ -149,8 +147,8 @@ namespace MassTransit.Logging
             var activity = new System.Diagnostics.Activity(_name);
 
             activity.AddTag(DiagnosticHeaders.PeerService, "Saga");
-            activity.AddTag(DiagnosticHeaders.PeerAddress, TypeMetadataCache<T>.DiagnosticAddress);
-            activity.AddTag(DiagnosticHeaders.SagaType, TypeMetadataCache<TSaga>.ShortName);
+            activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
+            activity.AddTag(DiagnosticHeaders.SagaType, TypeCache<TSaga>.ShortName);
             activity.AddTag(DiagnosticHeaders.SagaId, context.Saga.CorrelationId.ToString("D"));
 
             if (beginState != null)
@@ -168,9 +166,9 @@ namespace MassTransit.Logging
             activity.AddBaggage(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber.ToString("D"));
 
             activity.AddTag(DiagnosticHeaders.PeerService, "Execute");
-            activity.AddTag(DiagnosticHeaders.PeerAddress, TypeMetadataCache<TActivity>.DiagnosticAddress);
-            activity.AddTag(DiagnosticHeaders.ActivityType, TypeMetadataCache<TActivity>.ShortName);
-            activity.AddTag(DiagnosticHeaders.ArgumentType, TypeMetadataCache<TArguments>.ShortName);
+            activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<TActivity>.DiagnosticAddress);
+            activity.AddTag(DiagnosticHeaders.ActivityType, TypeCache<TActivity>.ShortName);
+            activity.AddTag(DiagnosticHeaders.ArgumentType, TypeCache<TArguments>.ShortName);
             activity.AddTag(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber.ToString("D"));
 
             return StartActivity(context, activity);
@@ -185,9 +183,9 @@ namespace MassTransit.Logging
             activity.AddBaggage(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber.ToString("D"));
 
             activity.AddTag(DiagnosticHeaders.PeerService, "Compensate");
-            activity.AddTag(DiagnosticHeaders.PeerAddress, TypeMetadataCache<TActivity>.DiagnosticAddress);
-            activity.AddTag(DiagnosticHeaders.ActivityType, TypeMetadataCache<TActivity>.ShortName);
-            activity.AddTag(DiagnosticHeaders.LogType, TypeMetadataCache<TLog>.ShortName);
+            activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<TActivity>.DiagnosticAddress);
+            activity.AddTag(DiagnosticHeaders.ActivityType, TypeCache<TActivity>.ShortName);
+            activity.AddTag(DiagnosticHeaders.LogType, TypeCache<TLog>.ShortName);
             activity.AddTag(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber.ToString("D"));
 
             return StartActivity(context, activity);

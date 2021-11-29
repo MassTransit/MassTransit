@@ -1,8 +1,7 @@
 ﻿namespace MassTransit.Tests.Pipeline
 {
     using System;
-    using Context.Converters;
-    using GreenPipes;
+    using MassTransit.Middleware;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;

@@ -6,7 +6,6 @@
     using NUnit.Framework;
     using Quartz;
     using Quartz.Impl;
-    using Util;
 
 
     [TestFixture]
@@ -40,7 +39,6 @@
         {
             var factory = new StdSchedulerFactory();
             var scheduler = await factory.GetScheduler().ConfigureAwait(false);
-            scheduler.JobFactory = new MassTransitJobFactory(null, null);
             await scheduler.Start().ConfigureAwait(false);
 
             var jobDetail = JobBuilder.Create<MyJob>()
@@ -77,7 +75,7 @@
             {
                 SignaledBody = Body;
                 Signaled.Set();
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

@@ -2,8 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using GreenPipes.Util;
     using NUnit.Framework;
     using RabbitMQ.Client;
 
@@ -16,7 +14,7 @@
         [Test]
         public async Task Should_not_send_twice()
         {
-            await Bus.Publish<TestCommand>(new {Id = NewId.NextGuid()});
+            await Bus.Publish<TestCommand>(new { Id = NewId.NextGuid() });
 
             await _faulted;
 
@@ -75,12 +73,12 @@
             {
                 ++Count;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task Consume(ConsumeContext<TestCommand> context)
             {
-                context.Publish<InnerCommand>(new {context.Message.Id});
+                context.Publish<InnerCommand>(new { context.Message.Id });
 
                 throw new Exception("something went wrong...");
             }
@@ -96,7 +94,7 @@
         [Test]
         public async Task Should_not_send_twice()
         {
-            await Bus.Publish<TestCommand>(new {Id = NewId.NextGuid()});
+            await Bus.Publish<TestCommand>(new { Id = NewId.NextGuid() });
 
             await _faulted;
 
@@ -155,12 +153,12 @@
             {
                 ++Count;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task Consume(ConsumeContext<TestCommand> context)
             {
-                context.Send<InnerCommand>(context.ReceiveContext.InputAddress, new {context.Message.Id});
+                context.Send<InnerCommand>(context.ReceiveContext.InputAddress, new { context.Message.Id });
 
                 throw new Exception("something went wrong...");
             }
@@ -176,7 +174,7 @@
         [Test]
         public async Task Should_not_send_twice()
         {
-            await Bus.Publish<TestCommand>(new {Id = NewId.NextGuid()});
+            await Bus.Publish<TestCommand>(new { Id = NewId.NextGuid() });
 
             await _faulted;
 
@@ -231,12 +229,12 @@
             {
                 ++Count;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task Consume(ConsumeContext<TestCommand> context)
             {
-                context.Publish<InnerCommand>(new {context.Message.Id});
+                context.Publish<InnerCommand>(new { context.Message.Id });
 
                 throw new Exception("something went wrong...");
             }

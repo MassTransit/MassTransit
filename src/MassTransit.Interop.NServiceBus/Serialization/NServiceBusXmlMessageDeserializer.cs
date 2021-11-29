@@ -1,4 +1,5 @@
-namespace MassTransit.Interop.NServiceBus.Serialization
+#nullable enable
+namespace MassTransit.Serialization
 {
     using System;
     using System.Globalization;
@@ -8,9 +9,6 @@ namespace MassTransit.Interop.NServiceBus.Serialization
     using System.Text;
     using System.Xml;
     using System.Xml.Linq;
-    using Contexts;
-    using GreenPipes;
-    using MassTransit.Serialization;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
@@ -21,10 +19,12 @@ namespace MassTransit.Interop.NServiceBus.Serialization
         public const string ContentTypeHeaderValue = "text/xml";
         public static readonly ContentType XmlContentType = new ContentType(ContentTypeHeaderValue);
         readonly JsonSerializer _deserializer;
+        readonly IObjectDeserializer _objectDeserializer;
 
         public NServiceBusXmlMessageDeserializer(JsonSerializer deserializer)
         {
             _deserializer = deserializer;
+            _objectDeserializer = new NewtonsoftObjectDeserializer(deserializer);
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -33,21 +33,26 @@ namespace MassTransit.Interop.NServiceBus.Serialization
             scope.Add("contentType", XmlContentType.MediaType);
         }
 
-        ContentType IMessageDeserializer.ContentType => XmlContentType;
+        public ContentType ContentType => XmlContentType;
 
-        ConsumeContext IMessageDeserializer.Deserialize(ReceiveContext receiveContext)
+        public ConsumeContext Deserialize(ReceiveContext receiveContext)
+        {
+            return new BodyConsumeContext(receiveContext, Deserialize(receiveContext.Body, receiveContext.TransportHeaders, receiveContext.InputAddress));
+        }
+
+        public SerializerContext Deserialize(MessageBody body, Headers headers, Uri? destinationAddress = null)
         {
             try
             {
                 XDocument document;
                 long position;
-                using (var body = receiveContext.GetBodyStream())
+                using (var stream = body.GetStream())
                 {
-                    using (var xmlReader = XmlReader.Create(body, new XmlReaderSettings {CheckCharacters = false}))
+                    using (var xmlReader = XmlReader.Create(stream, new XmlReaderSettings { CheckCharacters = false }))
                     {
                         document = XDocument.Load(xmlReader);
 
-                        position = body.Position;
+                        position = stream.Position;
                     }
                 }
 
@@ -58,7 +63,7 @@ namespace MassTransit.Interop.NServiceBus.Serialization
                 {
                     jsonWriter.Formatting = Newtonsoft.Json.Formatting.None;
 
-                    XmlMessageSerializer.XmlSerializer.Serialize(jsonWriter, document.Root);
+                    NewtonsoftXmlMessageSerializer.XmlSerializer.Serialize(jsonWriter, document.Root);
                 }
 
                 using (var stringReader = new StringReader(json.ToString()))
@@ -66,7 +71,10 @@ namespace MassTransit.Interop.NServiceBus.Serialization
                 {
                     var messageToken = _deserializer.Deserialize<JToken>(jsonReader);
 
-                    return new NServiceBusConsumeContext(_deserializer, receiveContext, messageToken);
+                    var messageContext = new NServiceBusHeaderAdapter(headers);
+
+                    return new NewtonsoftRawXmlSerializerContext(_deserializer, _objectDeserializer, messageContext, messageToken, headers.GetMessageTypes(),
+                        RawSerializerOptions.Default, ContentType);
                 }
             }
             catch (JsonSerializationException ex)

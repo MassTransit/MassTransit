@@ -1,10 +1,8 @@
 ﻿namespace MassTransit.Configuration
 {
     using System;
-    using Context;
-    using EndpointConfigurators;
-    using GreenPipes;
-    using Topology;
+    using Logging;
+    using Transports;
 
 
     public interface IHostConfiguration :
@@ -30,7 +28,7 @@
         ILogContext ReceiveLogContext { get; }
         ILogContext SendLogContext { get; }
 
-        IHostTopology HostTopology { get; }
+        IBusTopology Topology { get; }
 
         IRetryPolicy ReceiveTransportRetryPolicy { get; }
 

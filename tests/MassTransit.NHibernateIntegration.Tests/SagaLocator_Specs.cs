@@ -2,12 +2,10 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Saga;
     using MassTransit.Tests.Saga;
     using MassTransit.Tests.Saga.Messages;
     using NHibernate;
     using NUnit.Framework;
-    using Saga;
     using Shouldly;
     using TestFramework;
     using Testing;
@@ -30,7 +28,7 @@
 
             foundId.HasValue.ShouldBe(true);
 
-            var nextMessage = new CompleteSimpleSaga {CorrelationId = sagaId};
+            var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 

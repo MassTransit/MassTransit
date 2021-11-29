@@ -1,13 +1,10 @@
-namespace MassTransit.JobService.Configuration
+namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
-    using Components;
-    using Components.StateMachines;
     using Contracts.JobService;
-    using GreenPipes;
-    using GreenPipes.Partitioning;
-    using Saga;
+    using JobService;
+    using Middleware;
 
 
     public class JobServiceConfigurator<TReceiveEndpointConfigurator> :

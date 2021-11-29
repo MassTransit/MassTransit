@@ -1,8 +1,5 @@
-namespace MassTransit.RabbitMqTransport.Topology
+namespace MassTransit
 {
-    using MassTransit.Topology;
-
-
     public interface IRabbitMqMessageSendTopology<TMessage> :
         IMessageSendTopology<TMessage>
         where TMessage : class

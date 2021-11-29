@@ -2,7 +2,6 @@
 {
     using System;
     using Marten.Schema;
-    using MassTransit.Saga;
 
 
     public class TestSaga : ISaga

@@ -4,13 +4,9 @@ namespace MassTransit
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
-    using Context;
-    using EndpointConfigurators;
     using Events;
-    using GreenPipes;
-    using GreenPipes.Internals.Extensions;
-    using Pipeline;
-    using Topology;
+    using Internals;
+    using Logging;
     using Transports;
     using Util;
 
@@ -266,7 +262,7 @@ namespace MassTransit
             _busHandle = null;
         }
 
-        public HealthResult CheckHealth()
+        public BusHealthResult CheckHealth()
         {
             return _host.CheckHealth(_busState, _healthMessage);
         }

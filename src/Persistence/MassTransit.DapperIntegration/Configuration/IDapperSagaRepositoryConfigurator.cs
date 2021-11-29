@@ -1,7 +1,6 @@
-namespace MassTransit.DapperIntegration
+namespace MassTransit
 {
     using System.Data;
-    using Saga;
 
 
     public interface IDapperSagaRepositoryConfigurator

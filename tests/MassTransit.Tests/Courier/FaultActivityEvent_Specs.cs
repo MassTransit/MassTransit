@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -36,7 +35,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual("Hello", context.Message.GetResult<string>("OriginalValue"));
+            Assert.AreEqual("Hello", context.GetResult<string>("OriginalValue"));
         }
 
         [Test]
@@ -60,7 +59,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual("Knife", context.Message.GetVariable<string>("Variable"));
+            Assert.AreEqual("Knife", context.GetVariable<string>("Variable"));
         }
 
         [Test]
@@ -68,7 +67,7 @@
         {
             ConsumeContext<RoutingSlipActivityFaulted> context = await _activityFaulted;
 
-            Assert.AreEqual("Knife", context.Message.GetVariable<string>("Variable"));
+            Assert.AreEqual("Knife", context.GetVariable<string>("Variable"));
         }
 
         [Test]
@@ -84,7 +83,7 @@
         {
             ConsumeContext<RoutingSlipFaulted> context = await _faulted;
 
-            Assert.AreEqual("Knife", context.Message.GetVariable<string>("Variable"));
+            Assert.AreEqual("Knife", context.GetVariable<string>("Variable"));
         }
 
         Task<ConsumeContext<RoutingSlipFaulted>> _faulted;
@@ -108,7 +107,7 @@
             builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
 
             var testActivity = GetActivityContext<TestActivity>();
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
 
             testActivity = GetActivityContext<SecondTestActivity>();
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri);

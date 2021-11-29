@@ -1,8 +1,5 @@
-namespace MassTransit.GrpcTransport.Topology
+namespace MassTransit
 {
-    using MassTransit.Topology;
-
-
     public interface IGrpcMessageConsumeTopology<TMessage> :
         IMessageConsumeTopology<TMessage>
         where TMessage : class

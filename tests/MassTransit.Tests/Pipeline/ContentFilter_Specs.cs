@@ -2,11 +2,9 @@
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
-    using Util;
 
 
     [TestFixture]
@@ -16,8 +14,8 @@
         [Test]
         public async Task Should_only_get_one_message()
         {
-            await InputQueueSendEndpoint.Send<TestMessage>(new {Key = "DENY"});
-            await InputQueueSendEndpoint.Send<TestMessage>(new {Key = "ACCEPT"});
+            await InputQueueSendEndpoint.Send<TestMessage>(new { Key = "DENY" });
+            await InputQueueSendEndpoint.Send<TestMessage>(new { Key = "ACCEPT" });
 
             await _accepted;
             await _denied;
@@ -58,7 +56,7 @@
             {
                 Interlocked.Increment(ref _count);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

@@ -1,8 +1,8 @@
-namespace MassTransit.Azure.ServiceBus.Core
+namespace MassTransit
 {
     using System;
     using System.Diagnostics;
-    using Util;
+    using Internals;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]

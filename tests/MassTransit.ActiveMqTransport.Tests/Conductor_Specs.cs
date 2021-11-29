@@ -5,7 +5,6 @@ namespace MassTransit.ActiveMqTransport.Tests
         using System.Collections.Generic;
         using System.Threading.Tasks;
         using Contracts;
-        using Definition;
         using NUnit.Framework;
 
 

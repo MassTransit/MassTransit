@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.NHibernateIntegration.Tests
 {
     using System;
-    using Automatonymous;
 
 
     /// <summary>

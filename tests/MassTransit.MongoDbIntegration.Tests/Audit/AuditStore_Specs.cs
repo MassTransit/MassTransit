@@ -7,7 +7,6 @@
     using Newtonsoft.Json;
     using NUnit.Framework;
     using Testing;
-    using MassTransit.MongoDbIntegration.Configuration;
     using static MongoDbAuditStoreFixture;
 
 
@@ -54,7 +53,7 @@
 
             await _harness.Start();
 
-            await _harness.InputQueueSendEndpoint.Send(new A {Data = TestData});
+            await _harness.InputQueueSendEndpoint.Send(new A { Data = TestData });
 
             _sent = _harness.Sent.Select<A>().First();
             List<AuditDocument> audit = await GetAuditRecords("Send");

@@ -1,6 +1,6 @@
 namespace MassTransit.TestFramework
 {
-     using System;
+    using System;
     using System.Collections.Generic;
     using Microsoft.Data.SqlClient;
 
@@ -42,14 +42,12 @@ namespace MassTransit.TestFramework
                 {
                     try
                     {
-                        using (var connection = new SqlConnection(connectionString))
-                        {
-                            connection.Open();
+                        using var connection = new SqlConnection(connectionString);
+                        connection.Open();
 
-                            // It worked, we can save this as our connection string
-                            _connectionString = connectionString;
-                            break;
-                        }
+                        // It worked, we can save this as our connection string
+                        _connectionString = connectionString;
+                        break;
                     }
                     catch (Exception ex)
                     {

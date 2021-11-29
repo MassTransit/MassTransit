@@ -1,13 +1,13 @@
-namespace MassTransit.AmazonSqsTransport
+namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Globalization;
+    using AmazonSqsTransport.Topology;
     using Initializers;
     using Initializers.TypeConverters;
-    using Topology;
-    using Util;
+    using Internals;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]

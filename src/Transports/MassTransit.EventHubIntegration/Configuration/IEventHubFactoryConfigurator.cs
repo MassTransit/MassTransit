@@ -1,11 +1,10 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit
 {
     using System;
     using Azure.Core;
     using Azure.Messaging.EventHubs.Producer;
     using Azure.Storage;
     using Azure.Storage.Blobs;
-    using Riders;
 
 
     public interface IEventHubFactoryConfigurator :
@@ -17,7 +16,8 @@ namespace MassTransit.EventHubIntegration
         /// Configure EventHub namespace using connection string
         /// </summary>
         /// <param name="connectionString">
-        /// The connection string to use for connecting to the Event Hubs namespace; it is expected that the Event Hub name and the shared key properties are contained in this connection
+        /// The connection string to use for connecting to the Event Hubs namespace; it is expected that the Event Hub name and the shared key properties are contained in
+        /// this connection
         /// string
         /// </param>
         void Host(string connectionString);
@@ -29,7 +29,8 @@ namespace MassTransit.EventHubIntegration
         /// The fully qualified Event Hubs namespace to connect to.  This is likely to be similar to <c>{yournamespace}.servicebus.windows.net</c>.
         /// </param>
         /// <param name="tokenCredential">
-        /// The Azure identity credential to use for authorization.  Access controls may be specified by the Event Hubs namespace or the requested Event Hub, depending on Azure configuration.
+        /// The Azure identity credential to use for authorization.  Access controls may be specified by the Event Hubs namespace or the requested Event Hub, depending on
+        /// Azure configuration.
         /// </param>
         void Host(string fullyQualifiedNamespace, TokenCredential tokenCredential);
 
@@ -85,8 +86,9 @@ namespace MassTransit.EventHubIntegration
         /// <summary>
         /// Sets the outbound message serializer
         /// </summary>
-        /// <param name="serializerFactory">The factory to create the message serializer</param>
-        void SetMessageSerializer(SerializerFactory serializerFactory);
+        /// <param name="factory"></param>
+        /// <param name="isSerializer"></param>
+        void AddSerializer(ISerializerFactory factory, bool isSerializer = true);
 
         /// <summary>
         /// Configure Producer options

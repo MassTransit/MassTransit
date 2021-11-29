@@ -4,6 +4,7 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
+    using Logging;
     using NUnit.Framework;
 
 

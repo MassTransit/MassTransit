@@ -1,8 +1,8 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit
 {
     using System;
     using Confluent.Kafka;
-    using Serializers;
+    using KafkaIntegration.Serializers;
 
 
     public interface IKafkaProducerConfigurator

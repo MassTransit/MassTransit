@@ -11,8 +11,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     public class Purging_a_receive_endpoint :
         RabbitMqTestFixture
     {
-        const string QueueName = "connect_input_queue";
-
         [Test]
         public async Task Should_remove_previously_sent_message()
         {
@@ -21,10 +19,8 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             var endpoint = await Bus.GetSendEndpoint(new Uri($"queue:{QueueName}"));
 
-            for (int i = 0; i < 10; i++)
-            {
+            for (var i = 0; i < 10; i++)
                 await endpoint.Send(new PingMessage());
-            }
 
             var handle = Bus.ConnectReceiveEndpoint(QueueName, x =>
             {
@@ -53,6 +49,8 @@ namespace MassTransit.RabbitMqTransport.Tests
                 await handle.StopAsync();
             }
         }
+
+        const string QueueName = "connect_input_queue";
 
         protected override void OnCleanupVirtualHost(IModel model)
         {

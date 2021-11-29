@@ -65,8 +65,8 @@ namespace MassTransit.Tests.Serialization
             _envelope.Headers.Add("Simple", "Value");
             _envelope.Host = new BusHostInfo(true);
 
-            _serializer = JsonMessageSerializer.Serializer;
-            _deserializer = JsonMessageSerializer.Deserializer;
+            _serializer = NewtonsoftJsonMessageSerializer.Serializer;
+            _deserializer = NewtonsoftJsonMessageSerializer.Deserializer;
 
             using (var memoryStream = new MemoryStream())
             using (var writer = new StreamWriter(memoryStream))
@@ -339,9 +339,9 @@ namespace MassTransit.Tests.Serialization
     }
 
 
-    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
-    [TestFixture(typeof(XmlMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftXmlMessageSerializer))]
     public class Using_JsonConverterAttribute_on_a_class :
         SerializationTest
     {
@@ -440,9 +440,9 @@ namespace MassTransit.Tests.Serialization
     }
 
 
-    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
-    [TestFixture(typeof(XmlMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftXmlMessageSerializer))]
     public class Using_JsonConverterAttribute_on_a_property :
         SerializationTest
     {
@@ -531,10 +531,10 @@ namespace MassTransit.Tests.Serialization
             var message = new MessageA {Decimal = decimal.MaxValue};
 
             // act, assert
-            var serializedMessage = JsonConvert.SerializeObject(message, JsonMessageSerializer.SerializerSettings);
+            var serializedMessage = JsonConvert.SerializeObject(message, NewtonsoftJsonMessageSerializer.SerializerSettings);
             serializedMessage.ShouldNotBeNull();
 
-            var deserializedMessage = JsonConvert.DeserializeObject<MessageA>(serializedMessage, JsonMessageSerializer.DeserializerSettings);
+            var deserializedMessage = JsonConvert.DeserializeObject<MessageA>(serializedMessage, NewtonsoftJsonMessageSerializer.DeserializerSettings);
             deserializedMessage.ShouldNotBeNull();
             deserializedMessage.Decimal.ShouldBe(message.Decimal);
         }

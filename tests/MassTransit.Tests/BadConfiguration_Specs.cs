@@ -2,7 +2,6 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework.Messages;
     using Util;
@@ -100,7 +99,7 @@ namespace MassTransit.Tests
         {
             public Task Consume(ConsumeContext<PingMessage> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

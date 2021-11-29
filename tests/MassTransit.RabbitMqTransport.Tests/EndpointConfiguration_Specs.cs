@@ -3,9 +3,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using ConsumeConfigurators;
-    using Definition;
-    using GreenPipes;
     using MassTransit.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -21,67 +18,15 @@ namespace MassTransit.RabbitMqTransport.Tests
         BusTestFixture
     {
         [Test]
-        public void Should_properly_configure_the_prefetch_count()
-        {
-            var busControl = MassTransit.Bus.Factory.CreateUsingRabbitMq(cfg =>
-            {
-                cfg.PrefetchCount = 427;
-            });
-
-            var probe = JObject.Parse(busControl.GetProbeResult().ToJsonString());
-
-            var prefetchCount = GetPrefetchCount(probe, 0);
-
-            Assert.That(prefetchCount, Is.EqualTo(427));
-        }
-
-        [Test]
-        public void Should_use_bus_setting_if_not_specified()
-        {
-            var busControl = MassTransit.Bus.Factory.CreateUsingRabbitMq(cfg =>
-            {
-                cfg.PrefetchCount = 427;
-
-                cfg.ReceiveEndpoint("input-queue", e =>
-                {
-                });
-            });
-
-            var probe = JObject.Parse(busControl.GetProbeResult().ToJsonString());
-
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
-        }
-
-        [Test]
-        public void Should_override_bus_setting_if_specified()
-        {
-            var busControl = MassTransit.Bus.Factory.CreateUsingRabbitMq(cfg =>
-            {
-                cfg.PrefetchCount = 427;
-
-                cfg.ReceiveEndpoint("input-queue", e =>
-                {
-                    e.PrefetchCount = 351;
-                });
-            });
-
-            var jsonString = busControl.GetProbeResult().ToJsonString();
-            var probe = JObject.Parse(jsonString);
-
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
-            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
-        }
-
-        [Test]
-        public async Task Should_include_concurrency_filter_if_specified()
+        public async Task Should_include_concurrency_filter_if_concurrency_limit_overridden()
         {
             var services = new ServiceCollection();
             services.AddSingleton(LoggerFactory);
             services.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             services.AddMassTransit(x =>
             {
-                x.AddConsumer<PingConsumer, EndpointPingConsumerDefinition>();
+                x.AddConsumer<PingConsumer>()
+                    .Endpoint(e => e.ConcurrentMessageLimit = 100);
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -97,7 +42,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
+            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
             Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
             Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
 
@@ -136,15 +81,14 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
         [Test]
-        public async Task Should_include_concurrency_filter_if_concurrency_limit_overridden()
+        public async Task Should_include_concurrency_filter_if_specified()
         {
             var services = new ServiceCollection();
             services.AddSingleton(LoggerFactory);
             services.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             services.AddMassTransit(x =>
             {
-                x.AddConsumer<PingConsumer>()
-                    .Endpoint(e => e.ConcurrentMessageLimit = 100);
+                x.AddConsumer<PingConsumer, EndpointPingConsumerDefinition>();
 
                 x.UsingRabbitMq((context, cfg) =>
                 {
@@ -160,7 +104,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             var jsonString = busControl.GetProbeResult().ToJsonString();
             var probe = JObject.Parse(jsonString);
 
-            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(120));
+            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
             Assert.That(GetConcurrentMessageLimit(probe, 0), Is.EqualTo(100));
             Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
 
@@ -195,6 +139,59 @@ namespace MassTransit.RabbitMqTransport.Tests
             Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
 
             await provider.DisposeAsync();
+        }
+
+        [Test]
+        public void Should_override_bus_setting_if_specified()
+        {
+            var busControl = MassTransit.Bus.Factory.CreateUsingRabbitMq(cfg =>
+            {
+                cfg.PrefetchCount = 427;
+
+                cfg.ReceiveEndpoint("input-queue", e =>
+                {
+                    e.PrefetchCount = 351;
+                });
+            });
+
+            var jsonString = busControl.GetProbeResult().ToJsonString();
+            var probe = JObject.Parse(jsonString);
+
+            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(351));
+            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
+        }
+
+        [Test]
+        public void Should_properly_configure_the_prefetch_count()
+        {
+            var busControl = MassTransit.Bus.Factory.CreateUsingRabbitMq(cfg =>
+            {
+                cfg.PrefetchCount = 427;
+            });
+
+            var probe = JObject.Parse(busControl.GetProbeResult().ToJsonString());
+
+            var prefetchCount = GetPrefetchCount(probe, 0);
+
+            Assert.That(prefetchCount, Is.EqualTo(427));
+        }
+
+        [Test]
+        public void Should_use_bus_setting_if_not_specified()
+        {
+            var busControl = MassTransit.Bus.Factory.CreateUsingRabbitMq(cfg =>
+            {
+                cfg.PrefetchCount = 427;
+
+                cfg.ReceiveEndpoint("input-queue", e =>
+                {
+                });
+            });
+
+            var probe = JObject.Parse(busControl.GetProbeResult().ToJsonString());
+
+            Assert.That(GetPrefetchCount(probe, 0), Is.EqualTo(427));
+            Assert.That(GetPrefetchCount(probe, 1), Is.EqualTo(427));
         }
 
 
@@ -235,10 +232,6 @@ namespace MassTransit.RabbitMqTransport.Tests
         class EmptyPingConsumerDefinition :
             ConsumerDefinition<PingConsumer>
         {
-            public EmptyPingConsumerDefinition()
-            {
-            }
-
             protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
                 IConsumerConfigurator<PingConsumer> consumerConfigurator)
             {
@@ -262,9 +255,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             if (receiveEndpoints.Type == JTokenType.Array)
             {
                 if (index < receiveEndpoints.Count())
-                {
                     return receiveEndpoints[index]["receiveTransport"]["prefetchCount"].ToObject<int>();
-                }
             }
             else if (receiveEndpoints.Type == JTokenType.Object)
             {
@@ -281,9 +272,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             if (receiveEndpoints.Type == JTokenType.Array)
             {
                 if (index < receiveEndpoints.Count())
-                {
                     return receiveEndpoints[index]["receiveTransport"]["concurrentMessageLimit"].ToObject<int>();
-                }
             }
             else if (receiveEndpoints.Type == JTokenType.Object)
             {
@@ -300,9 +289,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             if (receiveEndpoints.Type == JTokenType.Array)
             {
                 if (index < receiveEndpoints.Count())
-                {
                     return receiveEndpoints[index]["filters"][2]["consumePipe"]["filters"]["filters"]["limit"].ToObject<int>();
-                }
             }
             else if (receiveEndpoints.Type == JTokenType.Object)
             {

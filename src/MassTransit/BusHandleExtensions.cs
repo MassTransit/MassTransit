@@ -24,12 +24,11 @@
         /// <param name="stopTimeout">The wait time before throwing an exception</param>
         public static void Stop(this BusHandle handle, TimeSpan stopTimeout)
         {
-            using (var cancellationTokenSource = new CancellationTokenSource(stopTimeout))
-            {
-                var cancellationToken = cancellationTokenSource.Token;
+            using var cancellationTokenSource = new CancellationTokenSource(stopTimeout);
 
-                TaskUtil.Await(() => handle.StopAsync(cancellationToken), cancellationToken);
-            }
+            var cancellationToken = cancellationTokenSource.Token;
+
+            TaskUtil.Await(() => handle.StopAsync(cancellationToken), cancellationToken);
         }
 
         /// <summary>
@@ -39,10 +38,9 @@
         /// <param name="stopTimeout">The wait time before throwing an exception</param>
         public static async Task StopAsync(this BusHandle handle, TimeSpan stopTimeout)
         {
-            using (var cancellationTokenSource = new CancellationTokenSource(stopTimeout))
-            {
-                await handle.StopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
-            }
+            using var cancellationTokenSource = new CancellationTokenSource(stopTimeout);
+
+            await handle.StopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
         }
     }
 }

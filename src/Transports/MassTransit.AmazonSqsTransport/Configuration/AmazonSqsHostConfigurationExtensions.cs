@@ -1,9 +1,7 @@
 namespace MassTransit
 {
     using System;
-    using AmazonSqsTransport;
-    using AmazonSqsTransport.Configurators;
-    using Definition;
+    using AmazonSqsTransport.Configuration;
 
 
     public static class AmazonSqsHostConfigurationExtensions

@@ -1,8 +1,7 @@
 namespace MassTransit
 {
-    using Azure.ServiceBus.Core;
-    using Azure.ServiceBus.Core.Configuration;
-    using Azure.ServiceBus.Core.Saga;
+    using AzureServiceBusTransport;
+    using Configuration;
     using Saga;
 
 

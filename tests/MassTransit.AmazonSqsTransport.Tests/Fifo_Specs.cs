@@ -5,8 +5,6 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Courier;
-    using Definition;
-    using GreenPipes;
     using MassTransit.Testing;
     using MassTransit.Topology;
     using Microsoft.Extensions.DependencyInjection;
@@ -174,6 +172,8 @@ namespace MassTransit.AmazonSqsTransport.Tests
             {
                 _formatter = formatter;
             }
+
+            public string Separator => _formatter.Separator;
 
             public string TemporaryEndpoint(string tag)
             {

@@ -1,9 +1,7 @@
-using BlobServiceClient = Azure.Storage.Blobs.BlobServiceClient;
-
-
 namespace MassTransit
 {
-    using Azure.Storage.MessageData;
+    using Azure.Storage.Blobs;
+    using AzureStorage.MessageData;
 
 
     public static class AzureStorageConfigurationExtensions

@@ -4,7 +4,7 @@ namespace MassTransit.TestFramework
     using System.Threading;
     using System.Threading.Tasks;
     using Testing;
-    using Testing.Observers;
+    using Testing.Implementations;
 
 
     public abstract class AsyncTestFixture
@@ -59,7 +59,7 @@ namespace MassTransit.TestFramework
         /// </summary>
         protected void CancelTest()
         {
-            AsyncTestHarness.CancelTest();
+            AsyncTestHarness.Cancel();
         }
 
         /// <summary>

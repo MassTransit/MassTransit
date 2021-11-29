@@ -1,8 +1,5 @@
 namespace MassTransit
 {
-    using Azure.ServiceBus.Core;
-
-
     public static class ServiceBusMessageContextExtensions
     {
         public static string SessionId(this ConsumeContext context)

@@ -1,7 +1,6 @@
 namespace MassTransit.Transports.Tests.Transports
 {
     using System.Threading.Tasks;
-    using AmazonSqsTransport.Testing;
     using Testing;
 
 

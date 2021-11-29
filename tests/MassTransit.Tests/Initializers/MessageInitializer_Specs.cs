@@ -47,13 +47,13 @@ namespace MassTransit.Tests.Initializers
             InitializeContext<ExceptionInfo> context = await MessageInitializerCache<ExceptionInfo>.Initialize(new
             {
                 Message = "Hello",
-                ExceptionType = TypeMetadataCache<ArgumentException>.ShortName
+                ExceptionType = TypeCache<ArgumentException>.ShortName
             });
 
             var message = context.Message;
 
             Assert.That(message.Message, Is.EqualTo("Hello"));
-            Assert.That(message.ExceptionType, Is.EqualTo(TypeMetadataCache<ArgumentException>.ShortName));
+            Assert.That(message.ExceptionType, Is.EqualTo(TypeCache<ArgumentException>.ShortName));
         }
     }
 
@@ -177,7 +177,7 @@ namespace MassTransit.Tests.Initializers
         public void Should_handle_exception()
         {
             Assert.That(_response.Message.Exception, Is.Not.Null);
-            Assert.That(_response.Message.Exception.ExceptionType, Is.EqualTo(TypeMetadataCache<IntentionalTestException>.ShortName));
+            Assert.That(_response.Message.Exception.ExceptionType, Is.EqualTo(TypeCache<IntentionalTestException>.ShortName));
         }
 
         [Test]

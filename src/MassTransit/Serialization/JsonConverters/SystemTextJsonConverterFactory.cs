@@ -6,9 +6,9 @@
     using System.Text.Json;
     using System.Text.Json.Serialization;
     using Courier.Contracts;
-    using Courier.InternalMessages;
+    using Courier.Messages;
     using Events;
-    using Internals.Extensions;
+    using Internals;
     using Metadata;
     using Scheduling;
 
@@ -16,48 +16,63 @@
     public class SystemTextJsonConverterFactory :
         JsonConverterFactory
     {
-        static readonly IDictionary<Type, Func<JsonConverter>> _converterFactory = new Dictionary<Type, Func<JsonConverter>>
-        {
-            { typeof(Fault), () => new TypeMappingJsonConverter<Fault, FaultEvent>() },
-            { typeof(ReceiveFault), () => new TypeMappingJsonConverter<ReceiveFault, ReceiveFaultEvent>() },
-            { typeof(ExceptionInfo), () => new TypeMappingJsonConverter<ExceptionInfo, FaultExceptionInfo>() },
-            { typeof(HostInfo), () => new TypeMappingJsonConverter<HostInfo, BusHostInfo>() },
-            { typeof(ScheduleMessage), () => new TypeMappingJsonConverter<ScheduleMessage, ScheduleMessageCommand>() },
-            { typeof(MessageEnvelope), () => new TypeMappingJsonConverter<MessageEnvelope, JsonMessageEnvelope>() },
-            { typeof(RoutingSlip), () => new TypeMappingJsonConverter<RoutingSlip, RoutingSlipImpl>() },
-            { typeof(Activity), () => new TypeMappingJsonConverter<Activity, ActivityImpl>() },
-            { typeof(ActivityLog), () => new TypeMappingJsonConverter<ActivityLog, ActivityLogImpl>() },
-            { typeof(CompensateLog), () => new TypeMappingJsonConverter<CompensateLog, CompensateLogImpl>() },
-            { typeof(ActivityException), () => new TypeMappingJsonConverter<ActivityException, ActivityExceptionImpl>() },
-            { typeof(Subscription), () => new TypeMappingJsonConverter<Subscription, SubscriptionImpl>() },
-            { typeof(RoutingSlipCompleted), () => new TypeMappingJsonConverter<RoutingSlipCompleted, RoutingSlipCompletedMessage>() },
-            { typeof(RoutingSlipFaulted), () => new TypeMappingJsonConverter<RoutingSlipFaulted, RoutingSlipFaultedMessage>() },
-            { typeof(RoutingSlipActivityCompleted), () => new TypeMappingJsonConverter<RoutingSlipActivityCompleted, RoutingSlipActivityCompletedMessage>() },
-            { typeof(RoutingSlipActivityFaulted), () => new TypeMappingJsonConverter<RoutingSlipActivityFaulted, RoutingSlipActivityFaultedMessage>() },
-            {
-                typeof(RoutingSlipActivityCompensated),
-                () => new TypeMappingJsonConverter<RoutingSlipActivityCompensated, RoutingSlipActivityCompensatedMessage>()
-            },
-            {
-                typeof(RoutingSlipActivityCompensationFailed),
-                () => new TypeMappingJsonConverter<RoutingSlipActivityCompensationFailed, RoutingSlipActivityCompensationFailedMessage>()
-            },
-            {
-                typeof(RoutingSlipCompensationFailed), () => new TypeMappingJsonConverter<RoutingSlipCompensationFailed, RoutingSlipCompensationFailedMessage>()
-            },
-            { typeof(RoutingSlipTerminated), () => new TypeMappingJsonConverter<RoutingSlipTerminated, RoutingSlipTerminatedMessage>() },
-            { typeof(RoutingSlipRevised), () => new TypeMappingJsonConverter<RoutingSlipRevised, RoutingSlipRevisedMessage>() },
-        };
+        static readonly IDictionary<Type, Func<JsonConverter>> _converterFactory;
 
         static readonly IDictionary<Type, Type> _openTypeFactory = new Dictionary<Type, Type>
         {
             { typeof(Fault<>), typeof(FaultEvent<>) },
-            { typeof(ScheduleMessage<>), typeof(ScheduleMessageCommand<>) }
         };
+
+        static SystemTextJsonConverterFactory()
+        {
+            _converterFactory = new Dictionary<Type, Func<JsonConverter>>()
+                .Add<Fault, FaultEvent>()
+                .Add<ReceiveFault, ReceiveFaultEvent>()
+                .Add<ExceptionInfo, FaultExceptionInfo>()
+                .Add<HostInfo, BusHostInfo>()
+                .Add<ScheduleMessage, ScheduleMessageCommand>()
+                .Add<MessageEnvelope, JsonMessageEnvelope>()
+                .Add<RoutingSlip, RoutingSlipImpl>()
+                .Add<Activity, ActivityImpl>()
+                .Add<ActivityLog, ActivityLogImpl>()
+                .Add<CompensateLog, CompensateLogImpl>()
+                .Add<ActivityException, ActivityExceptionImpl>()
+                .Add<Subscription, SubscriptionImpl>()
+                .Add<RoutingSlipCompleted, RoutingSlipCompletedMessage>()
+                .Add<RoutingSlipFaulted, RoutingSlipFaultedMessage>()
+                .Add<RoutingSlipActivityCompleted, RoutingSlipActivityCompletedMessage>()
+                .Add<RoutingSlipActivityFaulted, RoutingSlipActivityFaultedMessage>()
+                .Add<RoutingSlipActivityCompensated, RoutingSlipActivityCompensatedMessage>()
+                .Add<RoutingSlipActivityCompensationFailed, RoutingSlipActivityCompensationFailedMessage>()
+                .Add<RoutingSlipCompensationFailed, RoutingSlipCompensationFailedMessage>()
+                .Add<RoutingSlipTerminated, RoutingSlipTerminatedMessage>()
+                .Add<RoutingSlipRevised, RoutingSlipRevisedMessage>();
+        }
 
         public override bool CanConvert(Type typeToConvert)
         {
             var typeInfo = typeToConvert.GetTypeInfo();
+
+            if (typeInfo.IsGenericType)
+            {
+                if (typeInfo.ClosesType(typeof(IDictionary<,>), out Type[] elementTypes)
+                    || typeInfo.ClosesType(typeof(IReadOnlyDictionary<,>), out elementTypes)
+                    || typeInfo.ClosesType(typeof(Dictionary<,>), out elementTypes)
+                    || typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType)
+                    && enumerableType[0].ClosesType(typeof(KeyValuePair<,>), out elementTypes))
+                {
+                    var keyType = elementTypes[0];
+                    var valueType = elementTypes[1];
+
+                    if (keyType != typeof(string) && keyType != typeof(Uri))
+                        return false;
+
+                    if (typeInfo.IsFSharpType())
+                        return false;
+
+                    return true;
+                }
+            }
 
             if (!typeInfo.IsInterface)
                 return false;
@@ -68,7 +83,7 @@
             if (_openTypeFactory.TryGetValue(typeInfo, out _))
                 return true;
 
-            if (typeToConvert.IsInterfaceOrConcreteClass() && TypeMetadataCache.IsValidMessageType(typeToConvert) && !typeToConvert.IsValueTypeOrObject())
+            if (typeToConvert.IsInterfaceOrConcreteClass() && MessageTypeCache.IsValidMessageType(typeToConvert) && !typeToConvert.IsValueTypeOrObject())
                 return true;
 
             return false;
@@ -80,6 +95,40 @@
 
             if (_converterFactory.TryGetValue(typeInfo, out Func<JsonConverter> converterFactory))
                 return converterFactory();
+
+            if (typeInfo.IsGenericType)
+            {
+                if (!typeInfo.IsFSharpType())
+                {
+                    if (typeToConvert == typeof(IDictionary<string, object>))
+                        return new CaseInsensitiveDictionaryStringObjectJsonConverter<IDictionary<string, object>>();
+                    if (typeToConvert == typeof(Dictionary<string, object>))
+                        return new CaseInsensitiveDictionaryStringObjectJsonConverter<Dictionary<string, object>>();
+                    if (typeToConvert == typeof(IReadOnlyDictionary<string, object>))
+                        return new CaseInsensitiveDictionaryStringObjectJsonConverter<IReadOnlyDictionary<string, object>>();
+                    if (typeToConvert == typeof(IEnumerable<KeyValuePair<string, object>>))
+                        return new CaseInsensitiveDictionaryStringObjectJsonConverter<IEnumerable<KeyValuePair<string, object>>>();
+
+                    if (typeInfo.ClosesType(typeof(IDictionary<,>), out Type[] elementTypes)
+                        || typeInfo.ClosesType(typeof(IReadOnlyDictionary<,>), out elementTypes)
+                        || typeInfo.ClosesType(typeof(Dictionary<,>), out elementTypes)
+                        || (typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableTypes)
+                            && enumerableTypes[0].ClosesType(typeof(KeyValuePair<,>), out elementTypes)))
+                    {
+                        if (elementTypes[0] == typeof(string))
+                        {
+                            return (JsonConverter)Activator.CreateInstance(typeof(CaseInsensitiveDictionaryJsonConverter<,>)
+                                .MakeGenericType(typeToConvert, elementTypes[1]));
+                        }
+
+                        if (elementTypes[0] == typeof(Uri))
+                        {
+                            return (JsonConverter)Activator.CreateInstance(typeof(UriDictionarySystemTextJsonConverter<,>)
+                                .MakeGenericType(typeToConvert, elementTypes[1]));
+                        }
+                    }
+                }
+            }
 
             if (typeInfo.IsGenericType && !typeInfo.IsGenericTypeDefinition)
             {
@@ -99,13 +148,26 @@
                 }
             }
 
-            if (typeToConvert.IsInterfaceOrConcreteClass() && TypeMetadataCache.IsValidMessageType(typeToConvert) && !typeToConvert.IsValueTypeOrObject())
+            if (typeToConvert.IsInterfaceOrConcreteClass() && MessageTypeCache.IsValidMessageType(typeToConvert) && !typeToConvert.IsValueTypeOrObject())
             {
                 return (JsonConverter)Activator.CreateInstance(
                     typeof(InterfaceJsonConverter<,>).MakeGenericType(typeToConvert, TypeMetadataCache.GetImplementationType(typeToConvert)));
             }
 
-            throw new MassTransitException($"Unsupported type for json serialization {TypeMetadataCache.GetShortName(typeInfo)}");
+            throw new MassTransitException($"Unsupported type for json serialization {TypeCache.GetShortName(typeInfo)}");
+        }
+    }
+
+
+    static class JsonConverterFactoryExtensions
+    {
+        public static IDictionary<Type, Func<JsonConverter>> Add<T, TImplementation>(this IDictionary<Type, Func<JsonConverter>> dictionary)
+            where T : class
+            where TImplementation : class, T
+        {
+            dictionary.Add(typeof(T), () => new TypeMappingJsonConverter<T, TImplementation>());
+
+            return dictionary;
         }
     }
 }

@@ -1,6 +1,5 @@
 namespace MassTransit
 {
-    using GrpcTransport;
     using GrpcTransport.Contracts;
 
 

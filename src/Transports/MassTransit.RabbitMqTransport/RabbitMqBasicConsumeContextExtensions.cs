@@ -1,8 +1,5 @@
 ﻿namespace MassTransit
 {
-    using RabbitMqTransport;
-
-
     public static class RabbitMqBasicConsumeContextExtensions
     {
         public static string RoutingKey(this ConsumeContext context)

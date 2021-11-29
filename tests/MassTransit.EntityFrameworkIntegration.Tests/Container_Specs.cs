@@ -7,12 +7,8 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
         using System.Data.Entity;
         using System.Data.Entity.ModelConfiguration;
         using System.Threading.Tasks;
-        using Automatonymous;
-        using GreenPipes;
-        using Mappings;
         using Microsoft.Extensions.DependencyInjection;
         using NUnit.Framework;
-        using Registration;
         using TestFramework;
         using TestFramework.Sagas;
 
@@ -236,7 +232,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
 
 
         public class PublishTestStartedActivity :
-            Activity<TestInstance>
+            IStateMachineActivity<TestInstance>
         {
             readonly ConsumeContext _context;
 
@@ -255,7 +251,7 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
                 visitor.Visit(this);
             }
 
-            public async Task Execute(BehaviorContext<TestInstance> context, Behavior<TestInstance> next)
+            public async Task Execute(BehaviorContext<TestInstance> context, IBehavior<TestInstance> next)
             {
                 await _context.Publish(new TestStarted
                 {
@@ -266,7 +262,8 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
                 await next.Execute(context).ConfigureAwait(false);
             }
 
-            public async Task Execute<T>(BehaviorContext<TestInstance, T> context, Behavior<TestInstance, T> next)
+            public async Task Execute<T>(BehaviorContext<TestInstance, T> context, IBehavior<TestInstance, T> next)
+                where T : class
             {
                 await _context.Publish(new TestStarted
                 {
@@ -277,14 +274,15 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
                 await next.Execute(context).ConfigureAwait(false);
             }
 
-            public Task Faulted<TException>(BehaviorExceptionContext<TestInstance, TException> context, Behavior<TestInstance> next)
+            public Task Faulted<TException>(BehaviorExceptionContext<TestInstance, TException> context, IBehavior<TestInstance> next)
                 where TException : Exception
             {
                 return next.Faulted(context);
             }
 
-            public Task Faulted<T, TException>(BehaviorExceptionContext<TestInstance, T, TException> context, Behavior<TestInstance, T> next)
+            public Task Faulted<T, TException>(BehaviorExceptionContext<TestInstance, T, TException> context, IBehavior<TestInstance, T> next)
                 where TException : Exception
+                where T : class
             {
                 return next.Faulted(context);
             }

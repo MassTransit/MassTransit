@@ -4,7 +4,6 @@ namespace MassTransit
     using System.Collections.Concurrent;
     using System.Linq;
     using System.Threading;
-    using Metadata;
 
 
     public static class EndpointConventionCache
@@ -45,7 +44,7 @@ namespace MassTransit
             bool CachedConvention.TryGetEndpointAddress(Type messageType, out Uri address)
             {
                 if (!typeof(TMessage).IsAssignableFrom(messageType))
-                    throw new ArgumentException($"Message was not a valid type: {TypeMetadataCache<TMessage>.ShortName}", nameof(messageType));
+                    throw new ArgumentException($"Message was not a valid type: {TypeCache<TMessage>.ShortName}", nameof(messageType));
 
                 return EndpointConventionCache<TMessage>.TryGetEndpointAddress(out address);
             }
@@ -108,7 +107,7 @@ namespace MassTransit
 
         EndpointAddressProvider<TMessage> CreateDefaultConvention()
         {
-            IEndpointConventionCache<TMessage>[] implementedTypes = TypeMetadataCache<TMessage>.MessageTypes
+            IEndpointConventionCache<TMessage>[] implementedTypes = MessageTypeCache<TMessage>.MessageTypes
                 .Where(x => x != typeof(TMessage))
                 .Select(x => Activator.CreateInstance(typeof(TypeAdapter<>).MakeGenericType(typeof(TMessage), x)))
                 .Cast<IEndpointConventionCache<TMessage>>()

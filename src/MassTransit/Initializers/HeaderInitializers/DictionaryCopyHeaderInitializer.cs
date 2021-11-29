@@ -4,8 +4,7 @@ namespace MassTransit.Initializers.HeaderInitializers
     using System.Collections.Generic;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Internals.Reflection;
-    using Util;
+    using Internals;
 
 
     public class DictionaryCopyHeaderInitializer<TMessage, TInput, THeader> :
@@ -30,7 +29,7 @@ namespace MassTransit.Initializers.HeaderInitializers
             if (context.HasInput && context.Input.TryGetValue(_key, out var value))
                 _headerProperty.Set(sendContext, value);
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

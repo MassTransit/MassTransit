@@ -1,8 +1,8 @@
 namespace MassTransit.Transports
 {
     using System.Threading.Tasks;
-    using GreenPipes;
-    using GreenPipes.Agents;
+    using Agents;
+    using Middleware;
 
 
     public class TransportPipeContextSupervisor<T> :

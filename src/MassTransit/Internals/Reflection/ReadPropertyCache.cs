@@ -1,10 +1,9 @@
-﻿namespace MassTransit.Internals.Reflection
+﻿namespace MassTransit.Internals
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Metadata;
 
 
     public class ReadPropertyCache<T> :
@@ -17,7 +16,7 @@
         ReadPropertyCache()
         {
             _properties = new Dictionary<string, IReadProperty<T>>(StringComparer.OrdinalIgnoreCase);
-            _propertyIndex = TypeMetadataCache<T>.Properties
+            _propertyIndex = MessageTypeCache<T>.Properties
                 .ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
         }
 
@@ -45,7 +44,7 @@
                     if (propertyInfo.PropertyType != typeof(TProperty))
                     {
                         throw new ArgumentException(
-                            $"Property type mismatch, {TypeMetadataCache<TProperty>.ShortName} != {TypeMetadataCache.GetShortName(propertyInfo.PropertyType)}");
+                            $"Property type mismatch, {TypeCache<TProperty>.ShortName} != {TypeCache.GetShortName(propertyInfo.PropertyType)}");
                     }
 
                     var readProperty = new ReadProperty<T, TProperty>(propertyInfo);
@@ -56,7 +55,7 @@
                 }
             }
 
-            throw new ArgumentException($"{TypeMetadataCache<T>.ShortName} does not contain the property: {name}", nameof(name));
+            throw new ArgumentException($"{TypeCache<T>.ShortName} does not contain the property: {name}", nameof(name));
         }
 
         public static IReadProperty<T, TProperty> GetProperty<TProperty>(string name)

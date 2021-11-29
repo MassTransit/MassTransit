@@ -4,7 +4,6 @@
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]
@@ -20,7 +19,7 @@
                 {
                     IdentityType = "AAD:Claims",
                     IdentityId = 27,
-                    Claims = new[] {"One", "two", "Three"}
+                    Claims = new[] { "One", "two", "Three" }
                 });
             });
 
@@ -43,7 +42,7 @@
             {
                 _header.TrySetResult(context.Headers.Get<ClaimsIdentity>("Claims-Identity"));
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
         }
 

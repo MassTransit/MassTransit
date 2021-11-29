@@ -2,7 +2,6 @@ namespace MassTransit.Containers.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Automatonymous;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework;
@@ -25,55 +24,13 @@ namespace MassTransit.Containers.Tests
     public class Container_based_tests_with_request_client
     {
         [Test]
-        public async Task Using_DI_should_not_timeout()
-        {
-            var provider = new ServiceCollection()
-                .AddMassTransitInMemoryTestHarness(cfg =>
-                {
-                    cfg.AddSagaStateMachine<TestSagaStateMachine, TestSaga>()
-                        .InMemoryRepository();
-
-                    cfg.AddSagaStateMachineTestHarness<TestSagaStateMachine, TestSaga>();
-                    cfg.AddPublishMessageScheduler();
-                    cfg.AddRequestClient<StartCommand>();
-                })
-                .BuildServiceProvider(true);
-
-            var harness = provider.GetRequiredService<InMemoryTestHarness>();
-            harness.TestTimeout = TimeSpan.FromSeconds(15);
-            harness.OnConfigureBus += x => BusTestFixture.ConfigureBusDiagnostics(x);
-            await harness.Start();
-
-            // Act
-            try
-            {
-                using var scope = provider.CreateScope();
-                IRequestClient<StartCommand> client = scope.ServiceProvider.GetRequiredService<IRequestClient<StartCommand>>();
-                Response<StartCommandResponse> response = await client.GetResponse<StartCommandResponse>(
-                    new
-                    {
-                        CorrelationId = InVar.Id,
-                    });
-
-                // Assert
-                // did the actual saga consume the message
-                var sagaHarness = provider.GetRequiredService<IStateMachineSagaTestHarness<TestSaga, TestSagaStateMachine>>();
-                Assert.True(await sagaHarness.Consumed.Any<StartCommand>());
-            }
-            finally
-            {
-                await harness.Stop();
-            }
-        }
-
-        [Test]
         public async Task Should_not_timeout()
         {
             var harness = new InMemoryTestHarness();
 
             var machine = new TestSagaStateMachine();
 
-            StateMachineSagaTestHarness<TestSaga, TestSagaStateMachine> sagaHarness = harness.StateMachineSaga<TestSaga, TestSagaStateMachine>(machine);
+            ISagaStateMachineTestHarness<TestSagaStateMachine, TestSaga> sagaHarness = harness.StateMachineSaga<TestSaga, TestSagaStateMachine>(machine);
 
             harness.TestTimeout = TimeSpan.FromSeconds(15);
             harness.OnConfigureBus += x => BusTestFixture.ConfigureBusDiagnostics(x);
@@ -97,6 +54,37 @@ namespace MassTransit.Containers.Tests
             {
                 await harness.Stop();
             }
+        }
+
+        [Test]
+        public async Task Using_DI_should_not_timeout()
+        {
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(cfg =>
+                {
+                    cfg.AddSagaStateMachine<TestSagaStateMachine, TestSaga>();
+
+                    cfg.AddPublishMessageScheduler();
+                    cfg.AddRequestClient<StartCommand>();
+                })
+                .BuildServiceProvider(true);
+
+            var harness = provider.GetRequiredService<ITestHarness>();
+
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(1);
+
+            await harness.Start();
+
+            var client = harness.GetRequestClient<StartCommand>();
+            await client.GetResponse<StartCommandResponse>(new
+            {
+                CorrelationId = InVar.Id,
+            });
+
+            // Assert
+            // did the actual saga consume the message
+            var sagaHarness = provider.GetRequiredService<ISagaStateMachineTestHarness<TestSagaStateMachine, TestSaga>>();
+            Assert.True(await sagaHarness.Consumed.Any<StartCommand>());
         }
 
 

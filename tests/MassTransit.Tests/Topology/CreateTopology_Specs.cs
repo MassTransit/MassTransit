@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Context;
     using MassTransit.Testing;
     using NUnit.Framework;
 
@@ -40,21 +39,21 @@
             {
                 var transactionId = NewId.NextGuid();
 
-                await harness.InputQueueSendEndpoint.Send<INewUserEvent>(new {TransactionId = transactionId});
+                await harness.InputQueueSendEndpoint.Send<INewUserEvent>(new { TransactionId = transactionId });
 
                 ConsumeContext<INewUserEvent> context = await handled;
 
                 Assert.IsTrue(context.CorrelationId.HasValue);
                 Assert.That(context.CorrelationId.Value, Is.EqualTo(transactionId));
 
-                await harness.InputQueueSendEndpoint.Send<OtherMessage>(new {CorrelationId = transactionId});
+                await harness.InputQueueSendEndpoint.Send<OtherMessage>(new { CorrelationId = transactionId });
 
                 ConsumeContext<OtherMessage> otherContext = await otherHandled;
 
                 Assert.IsTrue(otherContext.CorrelationId.HasValue);
                 Assert.That(otherContext.CorrelationId.Value, Is.EqualTo(transactionId));
 
-                await harness.InputQueueSendEndpoint.Send<LegacyMessage>(new {TransactionId = transactionId});
+                await harness.InputQueueSendEndpoint.Send<LegacyMessage>(new { TransactionId = transactionId });
 
                 ConsumeContext<LegacyMessage> legacyContext = await legacyHandled;
 

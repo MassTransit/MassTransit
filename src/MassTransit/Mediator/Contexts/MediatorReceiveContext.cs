@@ -2,15 +2,12 @@ namespace MassTransit.Mediator.Contexts
 {
     using System;
     using System.Diagnostics;
-    using System.IO;
     using System.Net.Mime;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using GreenPipes;
-    using Metadata;
+    using Middleware;
     using Serialization;
-    using Topology;
     using Transports;
     using Util;
 
@@ -34,7 +31,8 @@ namespace MassTransit.Mediator.Contexts
         readonly Stopwatch _receiveTimer;
 
         public MediatorReceiveContext(SendContext<TMessage> sendContext, ISendEndpointProvider sendEndpointProvider,
-            IPublishEndpointProvider publishEndpointProvider, IPublishTopology publishTopology, IReceiveObserver observers, CancellationToken cancellationToken,
+            IPublishEndpointProvider publishEndpointProvider, IPublishTopology publishTopology, IReceiveObserver observers,
+            IObjectDeserializer objectDeserializer, CancellationToken cancellationToken,
             params object[] payloads)
             : base(cancellationToken, payloads)
         {
@@ -52,25 +50,23 @@ namespace MassTransit.Mediator.Contexts
 
             _receiveTasks = new PendingTaskCollection(4);
 
-            _consumeContext = new MediatorConsumeContext<TMessage>(this, sendContext);
+            var messageContext = new MediatorSendMessageContext<TMessage>(sendContext);
+
+            var serializationContext = new MediatorSerializationContext<TMessage>(objectDeserializer, messageContext, sendContext.Message,
+                MessageTypeCache<TMessage>.MessageTypeNames);
+
+            _consumeContext = new MediatorConsumeContext<TMessage>(this, serializationContext, sendContext.Message);
 
             AddOrUpdatePayload<ConsumeContext>(() => _consumeContext, existing => _consumeContext);
         }
+
+        public IPublishTopology PublishTopology { get; }
 
         public bool IsDelivered { get; internal set; }
         public bool IsFaulted { get; private set; }
 
         public bool PublishFaults => false;
-
-        public Stream GetBodyStream()
-        {
-            throw new NotImplementedByDesignException("The mediator should not be serializing messages");
-        }
-
-        public byte[] GetBody()
-        {
-            throw new NotImplementedByDesignException("The mediator should not be serializing messages");
-        }
+        public MessageBody Body => new NotSupportedMessageBody();
 
         public Task ReceiveCompleted => _receiveTasks.Completed(CancellationToken);
 
@@ -81,7 +77,6 @@ namespace MassTransit.Mediator.Contexts
 
         public ISendEndpointProvider SendEndpointProvider { get; }
         public IPublishEndpointProvider PublishEndpointProvider { get; }
-        public IPublishTopology PublishTopology { get; }
 
         public bool Redelivered => false;
         public Headers TransportHeaders => _headers;
@@ -103,7 +98,7 @@ namespace MassTransit.Mediator.Contexts
 
             context.LogFaulted(duration, consumerType, exception);
 
-            GetOrAddPayload<ConsumerFaultInfo>(() => new FaultInfo(TypeMetadataCache<T>.ShortName, consumerType));
+            GetOrAddPayload<ConsumerFaultContext>(() => new FaultContext(TypeCache<T>.ShortName, consumerType));
 
             return _observers.ConsumeFault(context, duration, consumerType, exception);
         }
@@ -122,10 +117,10 @@ namespace MassTransit.Mediator.Contexts
         public ContentType ContentType => MediatorReceiveContext.ObjectContentType;
 
 
-        class FaultInfo :
-            ConsumerFaultInfo
+        class FaultContext :
+            ConsumerFaultContext
         {
-            public FaultInfo(string messageType, string consumerType)
+            public FaultContext(string messageType, string consumerType)
             {
                 MessageType = messageType;
                 ConsumerType = consumerType;

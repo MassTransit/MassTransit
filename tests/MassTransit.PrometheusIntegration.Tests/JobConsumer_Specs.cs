@@ -5,9 +5,6 @@ namespace MassTransit.PrometheusIntegration.Tests
     using System.Text;
     using System.Threading.Tasks;
     using Contracts.JobService;
-    using Definition;
-    using JobService;
-    using JobService.Configuration;
     using NUnit.Framework;
     using Prometheus;
     using TestFramework;
@@ -23,7 +20,7 @@ namespace MassTransit.PrometheusIntegration.Tests
             IRequestClient<SubmitJob<TheJob>> requestClient = Bus.CreateRequestClient<SubmitJob<TheJob>>();
 
             var jobId = NewId.NextGuid();
-            Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
+            await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = jobId,
                 Job = new { Duration = TimeSpan.FromSeconds(30) }
@@ -31,7 +28,7 @@ namespace MassTransit.PrometheusIntegration.Tests
 
             await InactivityTask;
 
-            using var stream = new MemoryStream();
+            await using var stream = new MemoryStream();
             await Metrics.DefaultRegistry.CollectAndExportAsTextAsync(stream);
 
             var text = Encoding.UTF8.GetString(stream.ToArray());

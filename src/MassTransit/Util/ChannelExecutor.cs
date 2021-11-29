@@ -4,7 +4,6 @@ namespace MassTransit.Util
     using System.Threading;
     using System.Threading.Channels;
     using System.Threading.Tasks;
-    using Context;
 
 
     public class ChannelExecutor :

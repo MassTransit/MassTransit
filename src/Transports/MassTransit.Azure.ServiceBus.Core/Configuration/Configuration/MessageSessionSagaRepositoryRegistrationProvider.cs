@@ -1,9 +1,5 @@
-namespace MassTransit.Azure.ServiceBus.Core.Configuration
+namespace MassTransit.Configuration
 {
-    using MassTransit.Saga;
-    using Registration;
-
-
     public class MessageSessionSagaRepositoryRegistrationProvider :
         ISagaRepositoryRegistrationProvider
     {

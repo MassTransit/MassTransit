@@ -1,10 +1,9 @@
-namespace MassTransit.Azure.ServiceBus.Core.Topology
+namespace MassTransit
 {
-    using Builders;
-    using Configurators;
-    using global::Azure.Messaging.ServiceBus.Administration;
-    using MassTransit.Topology;
-    using Transport;
+    using Azure.Messaging.ServiceBus.Administration;
+    using AzureServiceBusTransport;
+    using AzureServiceBusTransport.Configuration;
+    using AzureServiceBusTransport.Topology;
 
 
     public interface IServiceBusMessagePublishTopology<TMessage> :
@@ -19,7 +18,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology
 
         SendSettings GetSendSettings();
 
-        SubscriptionConfigurator GetSubscriptionConfigurator(string subscriptionName);
+        ServiceBusSubscriptionConfigurator GetSubscriptionConfigurator(string subscriptionName);
     }
 
 

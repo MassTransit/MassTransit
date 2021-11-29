@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>MassTransit</RootNamespace>
     <AzureFunctionsVersion>v3</AzureFunctionsVersion>
   </PropertyGroup>
 
@@ -15,10 +16,9 @@
 
   <ItemGroup>
       <PackageReference Include="Azure.Identity" Version="1.5.0" />
-      <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.19.0" />
-      <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.0.0" />
-      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-      <ProjectReference Include="..\..\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
+      <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.20.0" />
+      <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.ServiceBus" Version="5.2.0" />
+      <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
       <ProjectReference Include="..\MassTransit.Azure.ServiceBus.Core\MassTransit.Azure.ServiceBus.Core.csproj" />
       <ProjectReference Include="..\..\MassTransit\MassTransit.csproj" />
   </ItemGroup>

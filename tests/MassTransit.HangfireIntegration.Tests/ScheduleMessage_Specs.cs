@@ -3,7 +3,6 @@
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
 
 

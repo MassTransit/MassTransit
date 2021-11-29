@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Internals.Reflection
+﻿namespace MassTransit.Internals
 {
     public interface IReadProperty<in T, out TProperty> :
         IReadProperty<T>

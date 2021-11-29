@@ -1,11 +1,8 @@
-namespace MassTransit.Azure.ServiceBus.Core.Scheduling
+namespace MassTransit.Scheduling
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using MassTransit.Scheduling;
-    using Util;
 
 
     public class ServiceBusScheduleMessageProvider :
@@ -18,24 +15,22 @@ namespace MassTransit.Azure.ServiceBus.Core.Scheduling
             _sendEndpointProvider = sendEndpointProvider;
         }
 
-        public async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, Task<T> message, IPipe<SendContext<T>> pipe,
+        public async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe,
             CancellationToken cancellationToken)
             where T : class
         {
-            var payload = await message.ConfigureAwait(false);
-
             var scheduleMessagePipe = new ScheduleSendPipe<T>(pipe, scheduledTime);
 
             var endpoint = await _sendEndpointProvider.GetSendEndpoint(destinationAddress).ConfigureAwait(false);
 
-            await endpoint.Send(payload, scheduleMessagePipe, cancellationToken).ConfigureAwait(false);
+            await endpoint.Send(message, scheduleMessagePipe, cancellationToken).ConfigureAwait(false);
 
-            return new ScheduledMessageHandle<T>(scheduleMessagePipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress, payload);
+            return new ScheduledMessageHandle<T>(scheduleMessagePipe.ScheduledMessageId ?? NewId.NextGuid(), scheduledTime, destinationAddress, message);
         }
 
         public Task CancelScheduledSend(Guid tokenId)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         public async Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)

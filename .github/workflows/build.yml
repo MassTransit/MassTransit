@@ -1,6 +1,6 @@
 name: MassTransit
 env:
-  MASSTRANSIT_VERSION: 7.3.1
+  MASSTRANSIT_VERSION: 8.0.0
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   DOTNET_SYSTEM_GLOBALIZATION_INVARIANT: true
 on:
@@ -23,6 +23,7 @@ on:
 jobs:
   compile:
     name: Compile and Unit Tests
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -50,6 +51,10 @@ jobs:
         run: dotnet test -c Release --no-build --filter Category!=Flaky
         working-directory: tests/MassTransit.Tests
 
+      - name: Test Abstractions
+        run: dotnet test -c Release --no-build --filter Category!=Flaky
+        working-directory: tests/MassTransit.Abstractions.Tests
+
       - name: Test Analyzers
         run: dotnet test -c Release --no-build --filter Category!=Flaky
         working-directory: tests/MassTransit.Analyzers.Tests
@@ -57,6 +62,7 @@ jobs:
   test-containers:
     name: Container Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -78,6 +84,7 @@ jobs:
         working-directory: tests/MassTransit.Containers.Tests
   test-activemq:
     name: "Transports: ActiveMQ"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     services:
       activemq:
@@ -100,6 +107,7 @@ jobs:
         working-directory: tests/MassTransit.ActiveMqTransport.Tests
   test-grpc:
     name: "Transports: gRPC"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -134,6 +142,7 @@ jobs:
         working-directory: tests/MassTransit.Azure.ServiceBus.Core.Tests
   test-rabbitmq:
     name: "Transports: RabbitMQ"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     services:
       rabbitmq:
@@ -156,6 +165,7 @@ jobs:
         working-directory: tests/MassTransit.RabbitMqTransport.Tests
   test-sqs:
     name: "Transports: SQS"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     services:
       localstack:
@@ -179,7 +189,8 @@ jobs:
         working-directory: tests/MassTransit.AmazonSqsTransport.Tests
   test-azure-table:
     name: "Storage: Azure Table"
-    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') && github.repository == 'MassTransit/MassTransit'
+    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/v8') && github.repository == 'MassTransit/MassTransit'
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -197,8 +208,9 @@ jobs:
         working-directory: tests/MassTransit.Azure.Table.Tests
   test-cosmosdb:
     name: "Storage: CosmosDB"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
-    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') && github.repository == 'MassTransit/MassTransit'
+    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/v8') && github.repository == 'MassTransit/MassTransit'
     steps:
       - name: Check out code
         uses: actions/checkout@v2
@@ -216,6 +228,7 @@ jobs:
         working-directory: tests/MassTransit.Azure.Cosmos.Tests
   test-dapper:
     name: "Storage: Dapper"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     services:
       mssql:
@@ -242,6 +255,7 @@ jobs:
         working-directory: tests/MassTransit.DapperIntegration.Tests
   test-entity-framework:
     name: "Storage: EntityFramework"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     services:
       mssql:
@@ -279,6 +293,7 @@ jobs:
         working-directory: tests/MassTransit.EntityFrameworkIntegration.Tests
   test-marten:
     name: "Storage: Marten"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -302,6 +317,7 @@ jobs:
         working-directory: tests/MassTransit.MartenIntegration.Tests
   test-mongo:
     name: "Storage: MongoDB"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     services:
       mongo:
@@ -322,6 +338,7 @@ jobs:
         working-directory: tests/MassTransit.MongoDbIntegration.Tests
   test-nhibernate:
     name: "Storage: NHibernate"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -337,6 +354,7 @@ jobs:
         working-directory: tests/MassTransit.NHibernateIntegration.Tests
   test-redis:
     name: "Storage: Redis"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     services:
       redis:
@@ -358,6 +376,7 @@ jobs:
         working-directory: tests/MassTransit.RedisIntegration.Tests
   test-hangfire:
     name: "Scheduler: Hangfire"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -373,6 +392,7 @@ jobs:
         working-directory: tests/MassTransit.HangfireIntegration.Tests
   test-quartz:
     name: "Scheduler: Quartz"
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -458,6 +478,7 @@ jobs:
 
   test-signalr:
     name: SignalR
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
@@ -471,6 +492,7 @@ jobs:
       - name: Test SignalR
         run: dotnet test -c Release --filter Category!=Flaky
         working-directory: tests/MassTransit.SignalR.Tests
+        
   calc-version:
     name: Calculate Version
     runs-on: ubuntu-latest
@@ -508,8 +530,9 @@ jobs:
 
   publish:
     name: Build and Publish NuGets
+    timeout-minutes: 60
     runs-on: ubuntu-latest
-    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop') && github.repository == 'MassTransit/MassTransit' && success()
+    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/v8') && github.repository == 'MassTransit/MassTransit' && success()
     needs:
       - calc-version
     steps:
@@ -530,6 +553,15 @@ jobs:
         uses: drusellers/publish-nuget@master
         with:
           project-file-path: src/MassTransit/MassTransit.csproj
+          version: ${{ needs.calc-version.outputs.version }}
+          tag-commit: false
+          nuget-key: ${{secrets.NUGET_API_KEY}}
+          include-symbols: true
+      - name: Build and Publish MassTransit Abstractions
+        # was: brandedoutcast/publish-nuget@v2.5.5
+        uses: drusellers/publish-nuget@master
+        with:
+          project-file-path: src/MassTransit.Abstractions/MassTransit.Abstractions.csproj
           version: ${{ needs.calc-version.outputs.version }}
           tag-commit: false
           nuget-key: ${{secrets.NUGET_API_KEY}}
@@ -570,54 +602,6 @@ jobs:
         uses: drusellers/publish-nuget@master
         with:
           project-file-path: src/MassTransit.TestFramework/MassTransit.TestFramework.csproj
-          version: ${{ needs.calc-version.outputs.version }}
-          tag-commit: false
-          nuget-key: ${{secrets.NUGET_API_KEY}}
-          include-symbols: true
-      - name: Build and Publish MassTransit.AspNetCoreIntegration
-        uses: drusellers/publish-nuget@master
-        with:
-          project-file-path: src/Containers/MassTransit.AspNetCoreIntegration/MassTransit.AspNetCoreIntegration.csproj
-          version: ${{ needs.calc-version.outputs.version }}
-          tag-commit: false
-          nuget-key: ${{secrets.NUGET_API_KEY}}
-          include-symbols: true
-      - name: Build and Publish MassTransit.AutofacIntegration
-        uses: drusellers/publish-nuget@master
-        with:
-          project-file-path: src/Containers/MassTransit.AutofacIntegration/MassTransit.AutofacIntegration.csproj
-          version: ${{ needs.calc-version.outputs.version }}
-          tag-commit: false
-          nuget-key: ${{secrets.NUGET_API_KEY}}
-          include-symbols: true
-      - name: Build and Publish MassTransit.ExtensionsDependencyInjectionIntegration
-        uses: drusellers/publish-nuget@master
-        with:
-          project-file-path: src/Containers/MassTransit.ExtensionsDependencyInjectionIntegration/MassTransit.ExtensionsDependencyInjectionIntegration.csproj
-          version: ${{ needs.calc-version.outputs.version }}
-          tag-commit: false
-          nuget-key: ${{secrets.NUGET_API_KEY}}
-          include-symbols: true
-      - name: Build and Publish MassTransit.SimpleInjectorIntegration
-        uses: drusellers/publish-nuget@master
-        with:
-          project-file-path: src/Containers/MassTransit.SimpleInjectorIntegration/MassTransit.SimpleInjectorIntegration.csproj
-          version: ${{ needs.calc-version.outputs.version }}
-          tag-commit: false
-          nuget-key: ${{secrets.NUGET_API_KEY}}
-          include-symbols: true
-      - name: Build and Publish MassTransit.StructureMapIntegration
-        uses: drusellers/publish-nuget@master
-        with:
-          project-file-path: src/Containers/MassTransit.StructureMapIntegration/MassTransit.StructureMapIntegration.csproj
-          version: ${{ needs.calc-version.outputs.version }}
-          tag-commit: false
-          nuget-key: ${{secrets.NUGET_API_KEY}}
-          include-symbols: true
-      - name: Build and Publish MassTransit.WindsorIntegration
-        uses: drusellers/publish-nuget@master
-        with:
-          project-file-path: src/Containers/MassTransit.WindsorIntegration/MassTransit.WindsorIntegration.csproj
           version: ${{ needs.calc-version.outputs.version }}
           tag-commit: false
           nuget-key: ${{secrets.NUGET_API_KEY}}

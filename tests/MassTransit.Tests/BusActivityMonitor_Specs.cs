@@ -3,18 +3,16 @@
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using GreenPipes;
     using MassTransit.Testing;
-    using MassTransit.Testing.Indicators;
+    using MassTransit.Testing.Implementations;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
-    using Util;
 
 
-    [TestFixture(TypeArgs = new[] {typeof(SuccessConsumer)})]
-    [TestFixture(TypeArgs = new[] {typeof(ThrowConsumer)})]
-    [TestFixture(TypeArgs = new[] {typeof(RandomConsumer)})]
+    [TestFixture(TypeArgs = new[] { typeof(SuccessConsumer) })]
+    [TestFixture(TypeArgs = new[] { typeof(ThrowConsumer) })]
+    [TestFixture(TypeArgs = new[] { typeof(RandomConsumer) })]
     public class BusActivityMonitor_Specs<TConsumer> :
         InMemoryTestFixture
         where TConsumer : class, IConsumer<PingMessage>, new()
@@ -41,7 +39,7 @@
         {
             while (true)
             {
-                foreach (var retryPolicy in new[] {Retry.None, Retry.Interval(3, TimeSpan.FromMilliseconds(50)), Retry.Immediate(3)})
+                foreach (var retryPolicy in new[] { Retry.None, Retry.Interval(3, TimeSpan.FromMilliseconds(50)), Retry.Immediate(3) })
                     yield return retryPolicy;
             }
         }
@@ -89,7 +87,7 @@
     {
         public Task Consume(ConsumeContext<PingMessage> context)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 
@@ -113,7 +111,7 @@
         {
             if (_random.NextBool())
                 throw new ConsumerException("Consumer randomly throws!");
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

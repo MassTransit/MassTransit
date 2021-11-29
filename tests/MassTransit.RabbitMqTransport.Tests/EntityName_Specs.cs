@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Topology;
     using NUnit.Framework;
     using TestFramework;
 
@@ -15,7 +14,7 @@
         [Test]
         public async Task Should_be_received()
         {
-            await Bus.Publish<CustomEntityMessage>(new {Value = "Yawn"});
+            await Bus.Publish<CustomEntityMessage>(new { Value = "Yawn" });
 
             ConsumeContext<CustomEntityMessage> received = await _receivedA;
 
@@ -56,7 +55,7 @@
         [Test]
         public async Task Should_be_received()
         {
-            await Bus.Publish<AttributeSpecifiedEntityMessage>(new {Value = "Yawn"});
+            await Bus.Publish<AttributeSpecifiedEntityMessage>(new { Value = "Yawn" });
 
             ConsumeContext<AttributeSpecifiedEntityMessage> received = await _receivedA;
 
@@ -92,7 +91,7 @@
         {
             Task<ConsumeContext<Fault<AttributeSpecifiedEntityMessage>>> faulted = await ConnectPublishHandler<Fault<AttributeSpecifiedEntityMessage>>();
 
-            await Bus.Publish<AttributeSpecifiedEntityMessage>(new {Value = "Yawn"});
+            await Bus.Publish<AttributeSpecifiedEntityMessage>(new { Value = "Yawn" });
 
             ConsumeContext<Fault<AttributeSpecifiedEntityMessage>> received = await faulted;
 

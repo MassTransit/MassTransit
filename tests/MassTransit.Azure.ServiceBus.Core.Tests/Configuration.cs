@@ -1,9 +1,9 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
-    using Configurators;
     using global::Azure;
     using global::Azure.Messaging.ServiceBus.Administration;
+    using MassTransit.Configuration;
     using NUnit.Framework;
 
 

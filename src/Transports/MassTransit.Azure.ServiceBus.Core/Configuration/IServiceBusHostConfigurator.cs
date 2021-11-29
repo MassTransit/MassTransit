@@ -1,9 +1,9 @@
-﻿namespace MassTransit.Azure.ServiceBus.Core
+﻿namespace MassTransit
 {
     using System;
-    using global::Azure;
-    using global::Azure.Core;
-    using global::Azure.Messaging.ServiceBus;
+    using Azure;
+    using Azure.Core;
+    using Azure.Messaging.ServiceBus;
 
 
     public interface IServiceBusHostConfigurator

@@ -4,12 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Mime;
-    using Automatonymous;
-    using ConsumeConfigurators;
     using Courier;
-    using GreenPipes;
-    using Saga;
-    using SagaConfigurators;
 
 
     public class EndpointConfiguration :
@@ -66,6 +61,16 @@
         {
             get => Transport.PrefetchCount;
             set => Transport.Configurator.PrefetchCount = value;
+        }
+
+        public ContentType DefaultContentType
+        {
+            set => Serialization.DefaultContentType = value;
+        }
+
+        public ContentType SerializerContentType
+        {
+            set => Serialization.SerializerContentType = value;
         }
 
         public bool AutoStart
@@ -233,19 +238,19 @@
         public ISerializationConfiguration Serialization { get; }
         public ITransportConfiguration Transport { get; }
 
-        public void SetMessageSerializer(SerializerFactory serializerFactory)
+        public void AddSerializer(ISerializerFactory factory, bool isSerializer = true)
         {
-            Serialization.SetSerializer(serializerFactory);
+            Serialization.AddSerializer(factory, isSerializer);
         }
 
-        public void AddMessageDeserializer(ContentType contentType, DeserializerFactory deserializerFactory)
+        public void AddDeserializer(ISerializerFactory factory, bool isDefault = false)
         {
-            Serialization.AddDeserializer(contentType, deserializerFactory);
+            Serialization.AddDeserializer(factory, isDefault);
         }
 
-        public void ClearMessageDeserializers()
+        public void ClearSerialization()
         {
-            Serialization.ClearDeserializers();
+            Serialization.Clear();
         }
     }
 }

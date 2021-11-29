@@ -2,18 +2,16 @@ namespace MassTransit.TestFramework.Sagas
 {
     using System;
     using System.Threading.Tasks;
-    using Automatonymous;
-    using GreenPipes;
 
 
     public class PublishTestStartedActivity :
-        Activity<TestInstance>
+        IStateMachineActivity<TestInstance>
     {
-        readonly ConsumeContext _context;
+        readonly IPublishEndpoint _publishEndpoint;
 
-        public PublishTestStartedActivity(ConsumeContext context)
+        public PublishTestStartedActivity(IPublishEndpoint publishEndpoint)
         {
-            _context = context;
+            _publishEndpoint = publishEndpoint;
         }
 
         public void Probe(ProbeContext context)
@@ -26,36 +24,38 @@ namespace MassTransit.TestFramework.Sagas
             visitor.Visit(this);
         }
 
-        public async Task Execute(BehaviorContext<TestInstance> context, Behavior<TestInstance> next)
+        public async Task Execute(BehaviorContext<TestInstance> context, IBehavior<TestInstance> next)
         {
-            await _context.Publish(new TestStarted
+            await context.Publish(new TestStarted
             {
-                CorrelationId = context.Instance.CorrelationId,
-                TestKey = context.Instance.Key
-            }).ConfigureAwait(false);
+                CorrelationId = context.Saga.CorrelationId,
+                TestKey = context.Saga.Key
+            });
 
             await next.Execute(context).ConfigureAwait(false);
         }
 
-        public async Task Execute<T>(BehaviorContext<TestInstance, T> context, Behavior<TestInstance, T> next)
+        public async Task Execute<T>(BehaviorContext<TestInstance, T> context, IBehavior<TestInstance, T> next)
+            where T : class
         {
-            await _context.Publish(new TestStarted
+            await context.Publish(new TestStarted
             {
-                CorrelationId = context.Instance.CorrelationId,
-                TestKey = context.Instance.Key
-            }).ConfigureAwait(false);
+                CorrelationId = context.Saga.CorrelationId,
+                TestKey = context.Saga.Key
+            });
 
             await next.Execute(context).ConfigureAwait(false);
         }
 
-        public Task Faulted<TException>(BehaviorExceptionContext<TestInstance, TException> context, Behavior<TestInstance> next)
+        public Task Faulted<TException>(BehaviorExceptionContext<TestInstance, TException> context, IBehavior<TestInstance> next)
             where TException : Exception
         {
             return next.Faulted(context);
         }
 
-        public Task Faulted<T, TException>(BehaviorExceptionContext<TestInstance, T, TException> context, Behavior<TestInstance, T> next)
+        public Task Faulted<T, TException>(BehaviorExceptionContext<TestInstance, T, TException> context, IBehavior<TestInstance, T> next)
             where TException : Exception
+            where T : class
         {
             return next.Faulted(context);
         }

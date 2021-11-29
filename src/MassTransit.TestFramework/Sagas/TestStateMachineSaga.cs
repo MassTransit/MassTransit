@@ -1,8 +1,5 @@
 namespace MassTransit.TestFramework.Sagas
 {
-    using Automatonymous;
-
-
     public class TestStateMachineSaga :
         MassTransitStateMachine<TestInstance>
     {
@@ -12,7 +9,7 @@ namespace MassTransit.TestFramework.Sagas
 
             Initially(
                 When(Started)
-                    .Then(context => context.Instance.Key = context.Data.TestKey)
+                    .Then(context => context.Saga.Key = context.Message.TestKey)
                     .Activity(x => x.OfInstanceType<PublishTestStartedActivity>())
                     .TransitionTo(Active));
 
@@ -20,8 +17,8 @@ namespace MassTransit.TestFramework.Sagas
                 When(Updated)
                     .Publish(context => new TestUpdated
                     {
-                        CorrelationId = context.Instance.CorrelationId,
-                        TestKey = context.Instance.Key
+                        CorrelationId = context.Saga.CorrelationId,
+                        TestKey = context.Saga.Key
                     })
                     .TransitionTo(Done)
                     .Finalize());

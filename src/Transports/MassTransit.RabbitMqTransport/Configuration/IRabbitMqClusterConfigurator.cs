@@ -1,4 +1,4 @@
-﻿namespace MassTransit.RabbitMqTransport
+﻿namespace MassTransit
 {
     public interface IRabbitMqClusterConfigurator
     {

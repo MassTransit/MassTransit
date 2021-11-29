@@ -2,6 +2,9 @@ namespace MassTransit.MessageData.PropertyProviders
 {
     using System;
     using System.Threading;
+    using Converters;
+    using Metadata;
+    using Serialization;
     using Values;
 
 
@@ -12,7 +15,7 @@ namespace MassTransit.MessageData.PropertyProviders
 
         public ObjectMessageDataReader()
         {
-            _converter = new ObjectMessageDataConverter<T>();
+            _converter = new SystemTextJsonObjectMessageDataConverter<T>(SystemTextJsonMessageSerializer.Options);
         }
 
         public MessageData<T> GetMessageData(IMessageDataRepository repository, Uri address, CancellationToken cancellationToken)

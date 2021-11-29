@@ -1,9 +1,6 @@
 ﻿namespace MassTransit.Transports
 {
     using System.Threading;
-    using GreenPipes;
-    using GreenPipes.Agents;
-    using Pipeline;
 
 
     public interface IReceiveEndpointCollection :
@@ -35,6 +32,6 @@
         /// <returns></returns>
         HostReceiveEndpointHandle Start(string endpointName, CancellationToken cancellationToken = default);
 
-        HealthResult CheckHealth(BusState busState, string healthMessage);
+        BusHealthResult CheckHealth(BusState busState, string healthMessage);
     }
 }

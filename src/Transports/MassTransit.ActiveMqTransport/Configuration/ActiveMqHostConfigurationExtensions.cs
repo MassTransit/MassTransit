@@ -1,8 +1,8 @@
-namespace MassTransit.ActiveMqTransport
+namespace MassTransit
 {
     using System;
-    using Configurators;
-    using Definition;
+    using ActiveMqTransport;
+    using ActiveMqTransport.Configuration;
 
 
     public static class ActiveMqHostConfigurationExtensions

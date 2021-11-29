@@ -4,9 +4,7 @@
     {
         using System;
         using System.Threading.Tasks;
-        using Automatonymous;
         using NUnit.Framework;
-        using Saga;
         using Testing;
 
 
@@ -69,10 +67,10 @@
 
         class MessageRescheduled
         {
-            public MessageRescheduled(Guid correlationId, Guid? scheduleTokenId)
+            public MessageRescheduled(Guid correlationId, Guid? newScheduleTokenId)
             {
                 CorrelationId = correlationId;
-                NewScheduleTokenId = scheduleTokenId;
+                NewScheduleTokenId = newScheduleTokenId;
             }
 
             public Guid CorrelationId { get; set; }

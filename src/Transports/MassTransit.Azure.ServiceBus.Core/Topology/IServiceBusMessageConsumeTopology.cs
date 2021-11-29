@@ -1,8 +1,5 @@
-namespace MassTransit.Azure.ServiceBus.Core.Topology
+namespace MassTransit
 {
-    using MassTransit.Topology;
-
-
     public interface IServiceBusMessageConsumeTopology<TMessage> :
         IMessageConsumeTopology<TMessage>
         where TMessage : class

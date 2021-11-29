@@ -1,12 +1,11 @@
-﻿namespace MassTransit.AmazonSqsTransport
+﻿namespace MassTransit
 {
     using System;
-    using Topology;
 
 
     public interface IAmazonSqsBusFactoryConfigurator :
         IBusFactoryConfigurator<IAmazonSqsReceiveEndpointConfigurator>,
-        IQueueEndpointConfigurator
+        IAmazonSqsQueueEndpointConfigurator
     {
         new IAmazonSqsSendTopologyConfigurator SendTopology { get; }
 

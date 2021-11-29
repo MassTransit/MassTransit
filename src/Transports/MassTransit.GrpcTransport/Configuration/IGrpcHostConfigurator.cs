@@ -1,10 +1,9 @@
-namespace MassTransit.GrpcTransport
+namespace MassTransit
 {
     using System;
 
 
-    public interface IGrpcHostConfigurator :
-        IHostConfigurator
+    public interface IGrpcHostConfigurator
     {
         /// <summary>
         /// Set the port for the http server

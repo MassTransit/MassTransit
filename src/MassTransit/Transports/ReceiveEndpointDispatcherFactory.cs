@@ -2,21 +2,18 @@ namespace MassTransit.Transports
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Configuration;
-    using Configurators;
-    using Context;
     using Courier;
-    using Registration;
-    using Saga;
 
 
     public class ReceiveEndpointDispatcherFactory :
         IReceiveEndpointDispatcherFactory
     {
-        readonly IHostConfiguration _hostConfiguration;
         readonly ConcurrentDictionary<string, Lazy<IReceiveEndpointDispatcher>> _dispatchers;
+        readonly IHostConfiguration _hostConfiguration;
         readonly IBusRegistrationContext _registration;
 
         public ReceiveEndpointDispatcherFactory(IBusRegistrationContext registration, IBusInstance busInstance)
@@ -39,24 +36,33 @@ namespace MassTransit.Transports
         public IReceiveEndpointDispatcher CreateConsumerReceiver<T>(string queueName)
             where T : class, IConsumer
         {
-            return CreateMessageReceiver(queueName, cfg => { cfg.ConfigureConsumer<T>(_registration); });
+            return CreateMessageReceiver(queueName, cfg =>
+            {
+                cfg.ConfigureConsumer<T>(_registration);
+            });
         }
 
         public IReceiveEndpointDispatcher CreateSagaReceiver<T>(string queueName)
             where T : class, ISaga
         {
-            return CreateMessageReceiver(queueName, cfg => { cfg.ConfigureSaga<T>(_registration); });
+            return CreateMessageReceiver(queueName, cfg =>
+            {
+                cfg.ConfigureSaga<T>(_registration);
+            });
         }
 
         public IReceiveEndpointDispatcher CreateExecuteActivityReceiver<T>(string queueName)
             where T : class, IExecuteActivity
         {
-            return CreateMessageReceiver(queueName, cfg => { cfg.ConfigureExecuteActivity(_registration, typeof(T)); });
+            return CreateMessageReceiver(queueName, cfg =>
+            {
+                cfg.ConfigureExecuteActivity(_registration, typeof(T));
+            });
         }
 
         public ValueTask DisposeAsync()
         {
-            var dispatchers = _dispatchers.Values.Where(x => x.IsValueCreated).Select(x => x.Value);
+            IEnumerable<IReceiveEndpointDispatcher> dispatchers = _dispatchers.Values.Where(x => x.IsValueCreated).Select(x => x.Value);
             foreach (var dispatcher in dispatchers)
             {
                 var metrics = dispatcher.GetMetrics();
@@ -79,7 +85,7 @@ namespace MassTransit.Transports
                 var endpointConfiguration = _hostConfiguration.CreateReceiveEndpointConfiguration(queueName);
 
                 var configurator = endpointConfiguration as IReceiveEndpointConfigurator ??
-                                   throw new ConfigurationException("The receive endpoint configuration was not valid");
+                    throw new ConfigurationException("The receive endpoint configuration was not valid");
 
                 configurator.ThrowOnSkippedMessages();
                 configurator.RethrowFaultedMessages();
@@ -92,7 +98,8 @@ namespace MassTransit.Transports
 
                 configure(configurator);
 
-                var result = BusConfigurationResult.CompileResults(endpointConfiguration.Validate());
+                IReadOnlyList<ValidationResult> result = endpointConfiguration.Validate()
+                    .ThrowIfContainsFailure("The endpoint configuration is invalid:");
 
                 try
                 {

@@ -4,14 +4,12 @@ namespace MassTransit.ActiveMqTransport.Tests
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Configurators;
-    using GreenPipes.Internals.Extensions;
+    using Configuration;
+    using Internals;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework.Messages;
-    using Testing;
     using Topology;
-    using Topology.Topologies;
     using Util;
 
 

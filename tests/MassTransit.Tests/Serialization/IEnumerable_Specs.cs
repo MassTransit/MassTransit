@@ -8,10 +8,10 @@
     using Shouldly;
 
 
-    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
     [TestFixture(typeof(SystemTextJsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
-    [TestFixture(typeof(XmlMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftXmlMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializerV2))]
     public class Deserializing_an_enumerable_property :
@@ -34,7 +34,7 @@
     }
 
 
-    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializerV2))]

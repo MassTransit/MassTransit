@@ -4,8 +4,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     {
         using System.Threading.Tasks;
         using Contracts;
-        using Definition;
-        using JobService.Configuration;
         using NUnit.Framework;
 
 
@@ -57,7 +55,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             {
                 IRequestClient<DeployPayload> requestClient = Bus.CreateRequestClient<DeployPayload>();
 
-                Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "Bogey"});
+                Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new { Target = "Bogey" });
 
                 Assert.That(response.Message.Target, Is.EqualTo("Bogey"));
             }
@@ -89,7 +87,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                 {
                     IRequestClient<DeployPayload> requestClient = Bus.CreateRequestClient<DeployPayload>();
 
-                    Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "A"});
+                    Response<PayloadDeployed> response = await requestClient.GetResponse<PayloadDeployed>(new { Target = "A" });
 
                     Assert.That(response.Message.Target, Is.EqualTo("A"));
 
@@ -98,7 +96,7 @@ namespace MassTransit.RabbitMqTransport.Tests
                     {
                         await instanceA.StopAsync();
 
-                        response = await requestClient.GetResponse<PayloadDeployed>(new {Target = "B"});
+                        response = await requestClient.GetResponse<PayloadDeployed>(new { Target = "B" });
 
                         Assert.That(response.Message.Target, Is.EqualTo("B"));
                     }

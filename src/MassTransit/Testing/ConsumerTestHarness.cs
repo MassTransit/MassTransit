@@ -1,9 +1,7 @@
 ﻿namespace MassTransit.Testing
 {
     using System;
-    using ConsumeConfigurators;
-    using Decorators;
-    using MessageObservers;
+    using Implementations;
 
 
     public class ConsumerTestHarness<TConsumer> :

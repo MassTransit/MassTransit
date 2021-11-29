@@ -2,8 +2,8 @@ namespace MassTransit.Testing
 {
     using System;
     using System.Threading.Tasks;
+    using Implementations;
     using Mediator;
-    using Observers;
 
 
     public class MediatorTestHarness :

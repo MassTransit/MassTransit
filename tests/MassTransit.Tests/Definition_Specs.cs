@@ -4,7 +4,6 @@ namespace MassTransit.Tests
     {
         using System;
         using System.Threading.Tasks;
-        using Definition;
         using TestFramework.Messages;
 
 

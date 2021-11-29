@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Azure.ServiceBus.Core
+﻿namespace MassTransit
 {
     using System;
 

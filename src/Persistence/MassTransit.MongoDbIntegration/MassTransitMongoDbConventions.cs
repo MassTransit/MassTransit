@@ -1,15 +1,15 @@
-﻿namespace MassTransit.MongoDbIntegration
+﻿namespace MassTransit
 {
     using System;
     using System.Linq.Expressions;
     using System.Reflection;
-    using Audit;
-    using Courier;
-    using Courier.Documents;
-    using Courier.Events;
-    using MassTransit.Saga;
     using MongoDB.Bson.Serialization;
     using MongoDB.Bson.Serialization.Conventions;
+    using MongoDbIntegration;
+    using MongoDbIntegration.Audit;
+    using MongoDbIntegration.Courier;
+    using MongoDbIntegration.Courier.Documents;
+    using MongoDbIntegration.Courier.Events;
 
 
     public class MassTransitMongoDbConventions

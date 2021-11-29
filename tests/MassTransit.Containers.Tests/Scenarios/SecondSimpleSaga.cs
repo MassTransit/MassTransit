@@ -2,8 +2,6 @@ namespace MassTransit.Containers.Tests.Scenarios
 {
     using System;
     using System.Threading.Tasks;
-    using Definition;
-    using Saga;
     using Util;
 
 

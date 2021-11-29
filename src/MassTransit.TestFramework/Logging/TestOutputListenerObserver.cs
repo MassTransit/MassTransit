@@ -3,7 +3,7 @@ namespace MassTransit.TestFramework.Logging
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using Internals.Extensions;
+    using Internals;
     using NUnit.Framework;
 
 

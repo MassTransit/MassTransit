@@ -2,10 +2,10 @@
 {
     using System;
     using System.Threading.Tasks;
+    using AzureTable.Saga;
     using MassTransit.Saga;
     using NUnit.Framework;
     using Shouldly;
-    using Table.Saga;
     using Testing;
 
 

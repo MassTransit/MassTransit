@@ -11,11 +11,11 @@ namespace MassTransit.Courier.Results
         CompletedExecutionResult<TArguments>
         where TArguments : class
     {
-        readonly Action<ItineraryBuilder> _itineraryBuilder;
+        readonly Action<IItineraryBuilder> _itineraryBuilder;
 
         public ReviseItineraryExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
             RoutingSlip routingSlip,
-            Action<ItineraryBuilder> itineraryBuilder)
+            Action<IItineraryBuilder> itineraryBuilder)
             : base(context, publisher, activity, routingSlip)
         {
             _itineraryBuilder = itineraryBuilder;
@@ -23,7 +23,7 @@ namespace MassTransit.Courier.Results
 
         public ReviseItineraryExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
             RoutingSlip routingSlip,
-            IDictionary<string, object> data, Action<ItineraryBuilder> itineraryBuilder)
+            IDictionary<string, object> data, Action<IItineraryBuilder> itineraryBuilder)
             : base(context, publisher, activity, routingSlip, data)
         {
             _itineraryBuilder = itineraryBuilder;
@@ -59,7 +59,7 @@ namespace MassTransit.Courier.Results
 
         public ReviseItineraryExecutionResult(ExecuteContext<TArguments> context, IRoutingSlipEventPublisher publisher, Activity activity,
             RoutingSlip routingSlip,
-            Uri compensationAddress, TLog log, Action<ItineraryBuilder> itineraryBuilder)
+            Uri compensationAddress, TLog log, Action<IItineraryBuilder> itineraryBuilder)
             : base(context, publisher, activity, routingSlip, RoutingSlipBuilder.GetObjectAsDictionary(log), itineraryBuilder)
         {
             _compensationAddress = compensationAddress;

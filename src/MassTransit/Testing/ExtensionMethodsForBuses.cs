@@ -1,7 +1,7 @@
 namespace MassTransit.Testing
 {
     using System;
-    using Indicators;
+    using Implementations;
 
 
     public static class ExtensionMethodsForBuses

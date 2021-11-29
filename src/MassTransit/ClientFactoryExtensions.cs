@@ -3,8 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Clients;
-    using Clients.Contexts;
-    using Definition;
 
 
     public static class ClientFactoryExtensions

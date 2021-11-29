@@ -4,12 +4,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
     using System.Linq;
     using System.Threading.Tasks;
     using Contracts.JobService;
-    using Definition;
-    using JobService;
-    using JobService.Configuration;
     using NUnit.Framework;
-    using Tests;
-    using Util;
 
 
     [TestFixture]
@@ -28,7 +23,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
                 Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
                 {
                     JobId = _jobIds[i],
-                    Job = new {Duration = TimeSpan.FromSeconds(1)}
+                    Job = new { Duration = TimeSpan.FromSeconds(1) }
                 });
             }
 
@@ -121,7 +116,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
                         _submitted[i].TrySetResult(context);
                 }
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
 
             configurator.Handler<JobStarted>(context =>
@@ -132,7 +127,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
                         _started[i].TrySetResult(context);
                 }
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
 
             configurator.Handler<JobCompleted>(context =>
@@ -143,7 +138,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
                         _completed[i].TrySetResult(context);
                 }
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
         }
     }

@@ -29,7 +29,7 @@
                 Assert.AreEqual(limit, messages.Length);
 
                 Assert.AreEqual(limit,
-                    messages.Select(x => x.Context.Message.Exceptions[0].ExceptionType == TypeMetadataCache<IntentionalTestException>.ShortName).Count());
+                    messages.Select(x => x.Context.Message.Exceptions[0].ExceptionType == TypeCache<IntentionalTestException>.ShortName).Count());
             }
 
             PingConsumer _consumer;

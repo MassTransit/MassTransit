@@ -3,8 +3,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using GreenPipes.Internals.Extensions;
+    using Internals;
     using MassTransit.Testing;
     using NUnit.Framework;
     using Serialization;

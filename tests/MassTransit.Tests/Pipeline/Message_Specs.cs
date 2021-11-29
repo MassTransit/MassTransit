@@ -4,12 +4,10 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using GreenPipes.Specifications;
+    using MassTransit.Configuration;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]
@@ -68,7 +66,7 @@
             {
                 _received.TrySetResult(context.Message);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }
@@ -130,7 +128,7 @@
             {
                 _received.TrySetResult(context.Message);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }
@@ -215,7 +213,7 @@
             {
                 _received.TrySetResult(context.Message);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }
@@ -305,7 +303,7 @@
             {
                 _received.TrySetResult(context.Message);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }
@@ -401,7 +399,7 @@
             {
                 _received.TrySetResult(context.Message);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }
@@ -497,7 +495,7 @@
             {
                 _received.TrySetResult(context.Message);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

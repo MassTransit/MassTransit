@@ -44,7 +44,7 @@
         [Order(2)]
         public async Task Should_include_the_activity_log_data()
         {
-            var activityCompleted = (await _firstActivityCompleted).Message;
+            var activityCompleted = (await _firstActivityCompleted);
 
             Assert.AreEqual("Hello", activityCompleted.GetResult<string>("OriginalValue"));
         }
@@ -53,7 +53,7 @@
         [Order(3)]
         public async Task Should_include_the_variable_set_by_the_activity()
         {
-            var completed = (await _completed).Message;
+            var completed = await _completed;
 
             Assert.AreEqual("Hello, World!", completed.GetVariable<string>("Value"));
         }
@@ -95,21 +95,21 @@
         }
 
         [Test]
-        [Order(9)]
-        public async Task Show_timeline()
-        {
-            var completed = (await _completed).Message;
-
-            await RabbitMqTestHarness.OutputTimeline(TestContext.Out, x => x.Now().IncludeAddress());
-        }
-
-        [Test]
         [Order(2)]
         public async Task Should_receive_the_second_routing_slip_activity_completed_event()
         {
             var activityCompleted = (await _secondActivityCompleted).Message;
 
             Assert.AreEqual(_routingSlip.TrackingNumber, activityCompleted.TrackingNumber);
+        }
+
+        [Test]
+        [Order(9)]
+        public async Task Show_timeline()
+        {
+            var completed = (await _completed).Message;
+
+            await RabbitMqTestHarness.OutputTimeline(TestContext.Out, x => x.Now().IncludeAddress());
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;

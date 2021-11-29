@@ -3,7 +3,6 @@ namespace MassTransit.Tests
     using System;
     using System.Collections.Concurrent;
     using System.Threading.Tasks;
-    using GreenPipes;
     using Metadata;
     using NUnit.Framework;
     using TestFramework;
@@ -33,7 +32,7 @@ namespace MassTransit.Tests
         {
             _observer = new PingObserver();
             configurator.Observer(_observer, x =>
-                x.UseExecute(context => Console.WriteLine($"Observer: {TypeMetadataCache<PingObserver>.ShortName}")));
+                x.UseExecute(context => Console.WriteLine($"Observer: {TypeCache<PingObserver>.ShortName}")));
         }
 
 

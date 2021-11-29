@@ -3,7 +3,6 @@
     using System.Threading.Tasks;
     using NUnit.Framework;
     using RabbitMQ.Client;
-    using Util;
 
 
     [TestFixture]
@@ -11,12 +10,12 @@
     public class Creating_a_service_with_many_queues :
         RabbitMqTestFixture
     {
-        const int Limit = 50;
-
         [Test]
         public void Should_not_exploded()
         {
         }
+
+        const int Limit = 50;
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
@@ -44,7 +43,7 @@
         {
             public Task Consume(ConsumeContext<TestMessage> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

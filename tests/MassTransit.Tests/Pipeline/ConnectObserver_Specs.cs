@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.Tests.Pipeline
 {
     using System.Threading.Tasks;
-    using MassTransit.Testing.Observers;
+    using MassTransit.Testing.Implementations;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;

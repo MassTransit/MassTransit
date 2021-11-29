@@ -11,7 +11,7 @@ namespace MassTransit.KafkaIntegration.Tests
     using System.Threading.Tasks;
     using Confluent.Kafka;
     using Confluent.SchemaRegistry;
-    using Policies;
+    using RetryPolicies;
 
 
     [SetUpFixture]
@@ -29,12 +29,12 @@ namespace MassTransit.KafkaIntegration.Tests
             {
                 using var client = new CachedSchemaRegistryClient(new Dictionary<string, string>
                 {
-                    {"schema.registry.url", "localhost:8081"},
+                    { "schema.registry.url", "localhost:8081" },
                 });
 
                 await client.GetAllSubjectsAsync();
 
-                var clientConfig = new ClientConfig {BootstrapServers = "localhost:9092"};
+                var clientConfig = new ClientConfig { BootstrapServers = "localhost:9092" };
                 using var adminClient = new AdminClientBuilder(clientConfig).Build();
 
                 adminClient.GetMetadata(TimeSpan.FromSeconds(60));

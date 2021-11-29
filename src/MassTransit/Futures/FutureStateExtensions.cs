@@ -1,102 +1,121 @@
-namespace MassTransit.Futures
+namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Automatonymous;
 
 
     public static class FutureStateExtensions
     {
-        public static T GetCommand<T>(this FutureState future)
+        public static T GetCommand<T>(this BehaviorContext<FutureState> context)
             where T : class
         {
-            return future.Command?.ToObject<T>();
+            return context.Saga.Command != null && context.Saga.Command.HasMessageType<T>()
+                ? context.SerializerContext.DeserializeObject<T>(context.Saga.Command.Message)
+                : null;
         }
 
-        public static IEnumerable<T> SelectResults<T>(this FutureConsumeContext context)
+        public static T ToObject<T>(this BehaviorContext<FutureState> context, FutureMessage message)
             where T : class
         {
-            return context.Instance.HasResults()
-                ? context.Instance.Results.Where(x => x.Value.HasMessageType<T>()).Select(x => x.Value.ToObject<T>())
+            return message != null && message.HasMessageType<T>()
+                ? context.SerializerContext.DeserializeObject<T>(message.Message)
+                : null;
+        }
+
+        public static FutureMessage CreateFutureMessage<T>(this BehaviorContext<FutureState> context, T message)
+            where T : class
+        {
+            IDictionary<string, object> dictionary = context.SerializerContext.ToDictionary(message);
+
+            return new FutureMessage(dictionary, MessageTypeCache<T>.MessageTypeNames);
+        }
+
+        public static IEnumerable<T> SelectResults<T>(this BehaviorContext<FutureState> context)
+            where T : class
+        {
+            return context.Saga.HasResults()
+                ? context.Saga.Results.Select(x => context.ToObject<T>(x.Value)).Where(x => x != null)
                 : Enumerable.Empty<T>();
         }
 
-        public static void AddSubscription(this FutureConsumeContext context)
+        public static void AddSubscription(this BehaviorContext<FutureState> context)
         {
             if (context.ResponseAddress == null)
                 return;
 
-            context.Instance.Subscriptions.Add(new FutureSubscription(context.ResponseAddress, context.RequestId));
+            context.Saga.Subscriptions.Add(new FutureSubscription(context.ResponseAddress, context.RequestId));
         }
 
-        public static async Task<TResult> SetResult<T, TResult>(this FutureConsumeContext<T> context, Guid id, AsyncFutureMessageFactory<T, TResult> factory)
+        public static async Task<TResult> SetResult<T, TResult>(this BehaviorContext<FutureState, T> context, Guid id,
+            AsyncEventMessageFactory<FutureState, T, TResult> factory)
             where T : class
             where TResult : class
         {
-            if (!context.Instance.Completed.HasValue)
+            if (!context.Saga.Completed.HasValue)
                 SetCompleted(context, id);
 
             var result = await factory(context).ConfigureAwait(false);
 
-            context.Instance.Results[id] = new FutureMessage<TResult>(result);
+            context.Saga.Results[id] = context.CreateFutureMessage(result);
 
             return result;
         }
 
-        public static async Task<TResult> SetResult<TResult>(this FutureConsumeContext context, Guid id, AsyncFutureMessageFactory<TResult> factory)
+        public static async Task<TResult> SetResult<TResult>(this BehaviorContext<FutureState> context, Guid id,
+            AsyncEventMessageFactory<FutureState, TResult> factory)
             where TResult : class
         {
-            if (!context.Instance.Completed.HasValue)
+            if (!context.Saga.Completed.HasValue)
                 SetCompleted(context, id);
 
             var result = await factory(context).ConfigureAwait(false);
 
-            context.Instance.Results[id] = new FutureMessage<TResult>(result);
+            context.Saga.Results[id] = context.CreateFutureMessage(result);
 
             return result;
         }
 
-        public static void SetResult<T, TResult>(this FutureConsumeContext<T> context, Guid id, FutureMessageFactory<T, TResult> factory)
+        public static void SetResult<T, TResult>(this BehaviorContext<FutureState, T> context, Guid id, EventMessageFactory<FutureState, T, TResult> factory)
             where T : class
             where TResult : class
         {
-            if (!context.Instance.Completed.HasValue)
+            if (!context.Saga.Completed.HasValue)
                 SetCompleted(context, id);
 
             var result = factory(context);
 
-            context.Instance.Results[id] = new FutureMessage<TResult>(result);
+            context.Saga.Results[id] = context.CreateFutureMessage(result);
         }
 
-        public static TResult SetResult<TResult>(this FutureConsumeContext context, Guid id, FutureMessageFactory<TResult> factory)
+        public static TResult SetResult<TResult>(this BehaviorContext<FutureState> context, Guid id, EventMessageFactory<FutureState, TResult> factory)
             where TResult : class
         {
-            if (!context.Instance.Completed.HasValue)
+            if (!context.Saga.Completed.HasValue)
                 SetCompleted(context, id);
 
             var result = factory(context);
 
-            context.Instance.Results[id] = new FutureMessage<TResult>(result);
+            context.Saga.Results[id] = context.CreateFutureMessage(result);
 
             return result;
         }
 
-        public static void SetResult<TResult>(this FutureConsumeContext context, Guid id, TResult result)
+        public static void SetResult<TResult>(this BehaviorContext<FutureState> context, Guid id, TResult result)
             where TResult : class
         {
-            if (!context.Instance.Completed.HasValue)
+            if (!context.Saga.Completed.HasValue)
                 SetCompleted(context, id);
 
-            context.Instance.Results[id] = new FutureMessage<TResult>(result);
+            context.Saga.Results[id] = context.CreateFutureMessage(result);
         }
 
-        public static void SetCompleted(this FutureConsumeContext context, Guid id)
+        public static void SetCompleted(this BehaviorContext<FutureState> context, Guid id)
         {
             var timestamp = context.SentTime ?? DateTime.UtcNow;
 
-            var future = context.Instance;
+            var future = context.Saga;
 
             if (future.HasPending())
             {
@@ -109,11 +128,11 @@ namespace MassTransit.Futures
                 future.Completed = timestamp;
         }
 
-        public static void SetFaulted(this FutureConsumeContext context, Guid id, DateTime? timestamp = default)
+        public static void SetFaulted(this BehaviorContext<FutureState> context, Guid id, DateTime? timestamp = default)
         {
             timestamp ??= context.SentTime ?? DateTime.UtcNow;
 
-            var future = context.Instance;
+            var future = context.Saga;
 
             if (future.HasPending())
                 future.Pending?.Remove(id);
@@ -121,15 +140,15 @@ namespace MassTransit.Futures
             future.Faulted ??= timestamp;
         }
 
-        public static void SetFault<TFault>(this FutureConsumeContext context, Guid id, TFault fault, DateTime? timestamp = default)
+        public static void SetFault<TFault>(this BehaviorContext<FutureState> context, Guid id, TFault fault, DateTime? timestamp = default)
             where TFault : class
         {
             SetFaulted(context, id, timestamp);
 
-            context.Instance.Faults[id] = new FutureMessage<TFault>(fault);
+            context.Saga.Faults[id] = context.CreateFutureMessage(fault);
         }
 
-        public static void SetFault<T, TFault>(this FutureConsumeContext<T> context, Guid id, FutureMessageFactory<T, TFault> factory)
+        public static void SetFault<T, TFault>(this BehaviorContext<FutureState, T> context, Guid id, EventMessageFactory<FutureState, T, TFault> factory)
             where T : class
             where TFault : class
         {
@@ -137,11 +156,11 @@ namespace MassTransit.Futures
 
             var result = factory(context);
 
-            context.Instance.Faults[id] = new FutureMessage<TFault>(result);
+            context.Saga.Faults[id] = context.CreateFutureMessage(result);
         }
 
-        public static async Task<TFault> SetFault<T, TFault>(this FutureState future,
-            ConsumeEventContext<FutureState, T> context, Guid id, AsyncEventMessageFactory<FutureState, T, TFault> factory)
+        public static async Task<TFault> SetFault<T, TFault>(this FutureState future, BehaviorContext<FutureState, T> context, Guid id,
+            AsyncEventMessageFactory<FutureState, T, TFault> factory)
             where T : class
             where TFault : class
         {
@@ -154,17 +173,17 @@ namespace MassTransit.Futures
 
             var fault = await factory(context).ConfigureAwait(false);
 
-            future.Faults[id] = new FutureMessage<TFault>(fault);
+            future.Faults[id] = context.CreateFutureMessage(fault);
 
             return fault;
         }
 
-        public static bool TryGetResult<T>(this FutureState future, Guid id, out T result)
+        public static bool TryGetResult<T>(this BehaviorContext<FutureState> context, Guid id, out T result)
             where T : class
         {
-            if (future.HasResults() && future.Results.TryGetValue(id, out var message))
+            if (context.Saga.HasResults() && context.Saga.Results.TryGetValue(id, out var message))
             {
-                result = message.ToObject<T>();
+                result = context.ToObject<T>(message);
                 return result != default;
             }
 
@@ -172,12 +191,12 @@ namespace MassTransit.Futures
             return false;
         }
 
-        public static bool TryGetFault<T>(this FutureState future, Guid id, out T fault)
+        public static bool TryGetFault<T>(this BehaviorContext<FutureState> context, Guid id, out T fault)
             where T : class
         {
-            if (future.HasFaults() && future.Faults.TryGetValue(id, out var message))
+            if (context.Saga.HasFaults() && context.Saga.Faults.TryGetValue(id, out var message))
             {
-                fault = message.ToObject<T>();
+                fault = context.ToObject<T>(message);
                 return fault != default;
             }
 

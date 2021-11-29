@@ -1,7 +1,6 @@
-namespace MassTransit.AmazonSqsTransport.Topology
+namespace MassTransit
 {
     using System.Collections.Generic;
-    using MassTransit.Topology;
 
 
     public interface IAmazonSqsPublishTopology :

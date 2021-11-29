@@ -1,6 +1,6 @@
-﻿namespace MassTransit.AmazonSqsTransport.Topology
+﻿namespace MassTransit
 {
-    using MassTransit.Topology;
+    using AmazonSqsTransport;
 
 
     public interface IAmazonSqsSendTopology :

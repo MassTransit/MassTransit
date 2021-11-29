@@ -1,8 +1,8 @@
-﻿namespace MassTransit.ActiveMqTransport
+﻿namespace MassTransit
 {
     using System;
     using System.Threading.Tasks;
-    using Transports.Scheduling;
+    using Middleware;
 
 
     public static class ActiveMqDeferMessageExtensions
@@ -18,7 +18,7 @@
         public static Task Defer<T>(this ConsumeContext<T> context, TimeSpan delay, Action<ConsumeContext, SendContext> callback = null)
             where T : class
         {
-            MessageRedeliveryContext redeliveryContext = new DelayedMessageRedeliveryContext<T>(context);
+            MessageRedeliveryContext redeliveryContext = new DelayedMessageRedeliveryContext<T>(context, RedeliveryOptions.None);
 
             return redeliveryContext.ScheduleRedelivery(delay, callback);
         }

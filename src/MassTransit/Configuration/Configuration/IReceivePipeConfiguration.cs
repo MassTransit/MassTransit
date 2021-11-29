@@ -1,8 +1,7 @@
 ﻿namespace MassTransit.Configuration
 {
-    using GreenPipes;
-    using GreenPipes.Builders;
-    using Pipeline;
+    using Serialization;
+    using Transports;
 
 
     public interface IReceivePipeConfiguration
@@ -12,6 +11,6 @@
         IBuildPipeConfigurator<ReceiveContext> DeadLetterConfigurator { get; }
         IBuildPipeConfigurator<ExceptionReceiveContext> ErrorConfigurator { get; }
 
-        IReceivePipe CreatePipe(IConsumePipe consumePipe, IMessageDeserializer messageDeserializer);
+        IReceivePipe CreatePipe(IConsumePipe consumePipe, ISerialization serializers);
     }
 }

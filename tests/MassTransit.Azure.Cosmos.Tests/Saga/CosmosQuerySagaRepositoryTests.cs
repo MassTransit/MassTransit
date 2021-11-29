@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Cosmos.Saga;
+    using AzureCosmos.Saga;
     using Data;
     using MassTransit.Saga;
     using NUnit.Framework;

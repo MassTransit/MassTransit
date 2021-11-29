@@ -232,8 +232,10 @@ namespace MassTransit.Analyzers
 
         public static bool IsInVar(this ITypeSymbol type, out ITypeSymbol inVarType)
         {
-            if (type.TypeKind == TypeKind.Class &&
-                type.ContainingAssembly.Name == "MassTransit")
+            if (type.TypeKind == TypeKind.Class
+                && type.ContainingNamespace.Name == "Variables"
+                && type.ContainingNamespace.ContainingNamespace.Name == "Initializers"
+                && type.ContainingNamespace.ContainingNamespace.ContainingNamespace.Name == "MassTransit")
             {
                 var inVar = type.Interfaces.FirstOrDefault(i => i.Name == "IInitializerVariable");
                 if (inVar != null &&

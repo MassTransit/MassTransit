@@ -3,9 +3,9 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes.Internals.Extensions;
+    using Internals;
+    using MassTransit.Testing;
     using NUnit.Framework;
-    using RabbitMqTransport.Testing;
 
 
     public class ExclusiveConsumer_Specs :
@@ -19,7 +19,7 @@
         [Test]
         public async Task Should_not_be_allowed_twice()
         {
-            var secondHarness = new RabbitMqTestHarness {CleanVirtualHost = false};
+            var secondHarness = new RabbitMqTestHarness { CleanVirtualHost = false };
 
             try
             {

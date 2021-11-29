@@ -1,13 +1,12 @@
 namespace MassTransit
 {
     using System;
-    using Definition;
 
 
     public static class ReceiveEndpointConfigurationExtensions
     {
         /// <summary>
-        /// Creates a management endpoint which can be used by controllable filters on a bus instance
+        /// Creates a temporary endpoint, with a dynamically generated name, that should be removed when the bus is stopped.
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
@@ -38,12 +37,9 @@ namespace MassTransit
         /// <returns></returns>
         public static void ManagementEndpoint(this IBusFactoryConfigurator configurator, Action<IReceiveEndpointConfigurator> configure = null)
         {
-            IReceiveEndpointConfigurator specification = null;
             configurator.ReceiveEndpoint(new ManagementEndpointDefinition(), DefaultEndpointNameFormatter.Instance, x =>
             {
-                specification = x;
-
-                configure?.Invoke(specification);
+                configure?.Invoke(x);
             });
         }
     }

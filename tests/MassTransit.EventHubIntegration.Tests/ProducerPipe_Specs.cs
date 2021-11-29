@@ -3,7 +3,6 @@ namespace MassTransit.EventHubIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using Contracts;
-    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;

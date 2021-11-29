@@ -2,14 +2,8 @@
 {
     using System;
     using System.Threading;
-    using Configurators;
-    using ConsumeConfigurators;
-    using Context;
-    using GreenPipes;
-    using GreenPipes.Configurators;
-    using PipeConfigurators;
-    using Pipeline.Filters;
-    using Saga;
+    using Configuration;
+    using RetryPolicies;
 
 
     public static class DelayedRedeliveryExtensions
@@ -20,20 +14,17 @@
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
-        public static void UseDelayedRedelivery<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Action<IRetryConfigurator> configure)
+        public static void UseDelayedRedelivery<T>(this IPipeConfigurator<ConsumeContext<T>> configurator, Action<IRedeliveryConfigurator> configure)
             where T : class
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
             var redeliverySpecification = new DelayedRedeliveryPipeSpecification<T>();
-
-            configurator.AddPipeSpecification(redeliverySpecification);
-
-            var retrySpecification = new RedeliveryRetryPipeSpecification<T>();
-
+            var retrySpecification = new RedeliveryRetryPipeSpecification<T>(redeliverySpecification);
             configure?.Invoke(retrySpecification);
 
+            configurator.AddPipeSpecification(redeliverySpecification);
             configurator.AddPipeSpecification(retrySpecification);
         }
 
@@ -49,14 +40,12 @@
                 throw new ArgumentNullException(nameof(configurator));
 
             var redeliverySpecification = new DelayedRedeliveryPipeSpecification<T>();
-
-            configurator.AddPipeSpecification(redeliverySpecification);
-
-            var retrySpecification = new RedeliveryRetryPipeSpecification<T>();
+            var retrySpecification = new RedeliveryRetryPipeSpecification<T>(redeliverySpecification);
 
             retrySpecification.SetRetryPolicy(exceptionFilter =>
                 new ConsumeContextRetryPolicy<ConsumeContext<T>, RetryConsumeContext<T>>(retryPolicy, CancellationToken.None, Factory));
 
+            configurator.AddPipeSpecification(redeliverySpecification);
             configurator.AddPipeSpecification(retrySpecification);
         }
 
@@ -72,7 +61,7 @@
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configureRetry"></param>
-        public static void UseDelayedRedelivery(this IConsumePipeConfigurator configurator, Action<IRetryConfigurator> configureRetry)
+        public static void UseDelayedRedelivery(this IConsumePipeConfigurator configurator, Action<IRedeliveryConfigurator> configureRetry)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
@@ -88,7 +77,7 @@
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
-        public static void UseDelayedRedelivery<TConsumer>(this IConsumerConfigurator<TConsumer> configurator, Action<IRetryConfigurator> configure)
+        public static void UseDelayedRedelivery<TConsumer>(this IConsumerConfigurator<TConsumer> configurator, Action<IRedeliveryConfigurator> configure)
             where TConsumer : class
         {
             if (configurator == null)
@@ -103,7 +92,7 @@
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
-        public static void UseDelayedRedelivery<TSaga>(this ISagaConfigurator<TSaga> configurator, Action<IRetryConfigurator> configure)
+        public static void UseDelayedRedelivery<TSaga>(this ISagaConfigurator<TSaga> configurator, Action<IRedeliveryConfigurator> configure)
             where TSaga : class, ISaga
         {
             if (configurator == null)
@@ -118,7 +107,7 @@
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="configure"></param>
-        public static void UseDelayedRedelivery<TMessage>(this IHandlerConfigurator<TMessage> configurator, Action<IRetryConfigurator> configure)
+        public static void UseDelayedRedelivery<TMessage>(this IHandlerConfigurator<TMessage> configurator, Action<IRedeliveryConfigurator> configure)
             where TMessage : class
         {
             if (configurator == null)

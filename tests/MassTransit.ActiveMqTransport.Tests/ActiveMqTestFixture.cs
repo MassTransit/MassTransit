@@ -5,7 +5,6 @@
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
-    using Testing;
 
 
     public class ActiveMqTestFixture :

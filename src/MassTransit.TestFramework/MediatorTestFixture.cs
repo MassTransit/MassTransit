@@ -4,6 +4,7 @@ namespace MassTransit.TestFramework
     using System.Threading.Tasks;
     using Context;
     using Logging;
+    using MassTransit.Logging;
     using Mediator;
     using NUnit.Framework;
     using NUnit.Framework.Internal;
@@ -42,13 +43,13 @@ namespace MassTransit.TestFramework
         [SetUp]
         public Task SetupInMemoryTest()
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         [TearDown]
         public Task TearDownInMemoryTest()
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         protected IRequestClient<TRequest> CreateRequestClient<TRequest>()

@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Internals.Extensions;
+    using Internals;
 
 
     public class AssemblyScanTypeInfo

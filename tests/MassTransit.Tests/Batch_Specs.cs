@@ -6,12 +6,11 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using GreenPipes;
+    using MassTransit.Middleware.InMemoryOutbox;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]
@@ -49,6 +48,13 @@
     public class When_a_batch_consumer_is_being_tested
     {
         [Test]
+        [Order(2)]
+        public async Task Should_have_called_the_consumer_method()
+        {
+            Assert.That(await _consumer.Consumed.SelectAsync<Batch<PingMessage>>().Count(), Is.EqualTo(1));
+        }
+
+        [Test]
         [Order(1)]
         public async Task Should_have_the_goods()
         {
@@ -58,13 +64,6 @@
             Batch<PingMessage> batch = await _batchConsumer.Completed;
 
             Assert.That(batch.Length, Is.EqualTo(2));
-        }
-
-        [Test]
-        [Order(2)]
-        public async Task Should_have_called_the_consumer_method()
-        {
-            Assert.That(await _consumer.Consumed.SelectAsync<Batch<PingMessage>>().Count(), Is.EqualTo(1));
         }
 
         [Test]
@@ -174,13 +173,6 @@
             Batch<PingMessage> batch = await _consumer.Completed;
 
             Assert.That(batch.Length, Is.EqualTo(1));
-        }
-
-        [Test]
-        [Explicit]
-        public async Task Should_show_me_the_pipe()
-        {
-            Console.WriteLine(Bus.GetProbeResult().ToJsonString());
         }
 
         TestBatchConsumer _consumer;
@@ -372,15 +364,6 @@
     public class Processing_a_failing_batch_with_retry_and_delayed_redelivery :
         InMemoryTestFixture
     {
-        public Processing_a_failing_batch_with_retry_and_delayed_redelivery()
-        {
-            TestInactivityTimeout = TimeSpan.FromSeconds(8);
-            _firstFault = GetTask<ConsumeContext<Fault<PingMessage>>>();
-            _secondFault = GetTask<ConsumeContext<Fault<PingMessage>>>();
-            _firstId = NewId.NextGuid();
-            _secondId = NewId.NextGuid();
-        }
-
         [Test]
         public async Task Should_comply_with_retry_policy()
         {
@@ -391,6 +374,15 @@
             await _secondFault.Task;
 
             Assert.That(_consumer.Attempts, Is.EqualTo(4));
+        }
+
+        public Processing_a_failing_batch_with_retry_and_delayed_redelivery()
+        {
+            TestInactivityTimeout = TimeSpan.FromSeconds(8);
+            _firstFault = GetTask<ConsumeContext<Fault<PingMessage>>>();
+            _secondFault = GetTask<ConsumeContext<Fault<PingMessage>>>();
+            _firstId = NewId.NextGuid();
+            _secondId = NewId.NextGuid();
         }
 
         FailingBatchConsumer _consumer;
@@ -424,15 +416,6 @@
     public class Processing_a_failing_batch_with_retry_and_scheduled_redelivery :
         InMemoryTestFixture
     {
-        public Processing_a_failing_batch_with_retry_and_scheduled_redelivery()
-        {
-            TestInactivityTimeout = TimeSpan.FromSeconds(8);
-            _firstFault = GetTask<ConsumeContext<Fault<PingMessage>>>();
-            _secondFault = GetTask<ConsumeContext<Fault<PingMessage>>>();
-            _firstId = NewId.NextGuid();
-            _secondId = NewId.NextGuid();
-        }
-
         [Test]
         public async Task Should_comply_with_retry_policy()
         {
@@ -443,6 +426,15 @@
             await _secondFault.Task;
 
             Assert.That(_consumer.Attempts, Is.EqualTo(4));
+        }
+
+        public Processing_a_failing_batch_with_retry_and_scheduled_redelivery()
+        {
+            TestInactivityTimeout = TimeSpan.FromSeconds(8);
+            _firstFault = GetTask<ConsumeContext<Fault<PingMessage>>>();
+            _secondFault = GetTask<ConsumeContext<Fault<PingMessage>>>();
+            _firstId = NewId.NextGuid();
+            _secondId = NewId.NextGuid();
         }
 
         FailingBatchConsumer _consumer;
@@ -530,7 +522,7 @@
 
             Assert.That(count, Is.EqualTo(6));
 
-            Assert.That(_batches.Select(x => x.Length), Is.EquivalentTo(new[] {1, 2, 3}));
+            Assert.That(_batches.Select(x => x.Length), Is.EquivalentTo(new[] { 1, 2, 3 }));
         }
 
         readonly List<Batch<PingMessage>> _batches = new List<Batch<PingMessage>>();
@@ -572,7 +564,7 @@
             var count = await BusTestHarness.Consumed.SelectAsync<PingMessage>().Take(6).Count();
 
             Assert.That(count, Is.EqualTo(6));
-            Assert.That(_batches.Select(x => x.Length), Is.EquivalentTo(new[] {1, 2, 3}));
+            Assert.That(_batches.Select(x => x.Length), Is.EquivalentTo(new[] { 1, 2, 3 }));
         }
 
         readonly List<Batch<PingMessage>> _batches = new List<Batch<PingMessage>>();
@@ -727,7 +719,7 @@
         {
             _messageTask.TrySetResult(context.Message);
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 
@@ -751,7 +743,7 @@
             else
                 _messageTask.TrySetException(new InvalidOperationException("Outbox context is not available at this point"));
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 
@@ -774,16 +766,14 @@
             if (context.TryGetPayload<InMemoryOutboxConsumeContext>(out var outboxContext))
             {
                 if (Interlocked.Increment(ref _attempt) == 1)
-                {
                     throw new Exception("Force Retry");
-                }
 
                 _messageTask.TrySetResult(context.Message);
             }
             else
                 _messageTask.TrySetException(new InvalidOperationException("Outbox context is not available at this point"));
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 

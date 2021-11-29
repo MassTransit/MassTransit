@@ -4,10 +4,9 @@
     using System.Collections;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using GreenPipes.Caching;
     using MassTransit.Audit;
+    using MassTransit.Caching;
     using Metadata;
-    using Util;
 
 
     public class InMemoryAuditStore :
@@ -39,7 +38,7 @@
         {
             _audits.Add(new AuditRecord<T>(message, metadata));
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
 
@@ -57,7 +56,7 @@
             public AuditRecord(T message, MessageAuditMetadata metadata)
             {
                 Message = message;
-                MessageType = TypeMetadataCache<T>.ShortName;
+                MessageType = TypeCache<T>.ShortName;
                 Metadata = metadata;
             }
 

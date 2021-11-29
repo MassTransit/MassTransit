@@ -1,8 +1,7 @@
 namespace MassTransit.Testing
 {
     using System;
-    using ConsumeConfigurators;
-    using Pipeline.ConsumerFactories;
+    using Consumer;
 
 
     public static class ConsumerTestHarnessExtensions

@@ -96,7 +96,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
                         break;
                 }
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

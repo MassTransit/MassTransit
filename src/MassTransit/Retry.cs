@@ -3,13 +3,10 @@ namespace MassTransit
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Configurators;
-    using GreenPipes;
-    using GreenPipes.Configurators;
-    using GreenPipes.Observers;
-    using GreenPipes.Policies;
-    using GreenPipes.Policies.ExceptionFilters;
-    using GreenPipes.Specifications;
+    using Configuration;
+    using Observables;
+    using RetryPolicies;
+    using RetryPolicies.ExceptionFilters;
 
 
     public static class Retry
@@ -335,7 +332,7 @@ namespace MassTransit
 
             public IRetryPolicy Build()
             {
-                var result = RetryConfigurationResult.CompileResults(Validate());
+                IReadOnlyList<ValidationResult> result = Validate().ThrowIfContainsFailure("The retry configuration is invalid:");
 
                 try
                 {

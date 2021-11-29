@@ -2,7 +2,6 @@ namespace MassTransit.Initializers.Conventions
 {
     using System;
     using System.Collections.Concurrent;
-    using Metadata;
 
 
     public class ConventionTypeCache<TValue> :
@@ -25,7 +24,7 @@ namespace MassTransit.Initializers.Conventions
         {
             var result = _dictionary.GetOrAdd(typeof(T), add => new CachedValue(() => _typeFactory.Create<T>(_convention))).Value as TResult;
             if (result == null)
-                throw new ArgumentException($"The specified result type was invalid: {TypeMetadataCache<TResult>.ShortName}");
+                throw new ArgumentException($"The specified result type was invalid: {TypeCache<TResult>.ShortName}");
 
             return result;
         }

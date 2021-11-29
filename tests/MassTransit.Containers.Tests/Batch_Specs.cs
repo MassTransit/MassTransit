@@ -2,8 +2,6 @@ namespace MassTransit.Containers.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using ConsumeConfigurators;
-    using Definition;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework;
@@ -173,7 +171,7 @@ namespace MassTransit.Containers.Tests
                 Mode = context.Message.Mode
             });
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

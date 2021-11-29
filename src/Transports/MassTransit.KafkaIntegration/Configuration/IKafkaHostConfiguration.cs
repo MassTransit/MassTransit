@@ -1,13 +1,11 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
     using Confluent.Kafka;
-    using Contexts;
-    using GreenPipes;
-    using MassTransit.Registration;
-    using Specifications;
-    using Transport;
+    using KafkaIntegration;
+    using KafkaIntegration.Configuration;
+    using Transports;
 
 
     public interface IKafkaHostConfiguration :

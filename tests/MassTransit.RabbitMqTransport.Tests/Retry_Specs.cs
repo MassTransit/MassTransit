@@ -3,7 +3,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -107,7 +106,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            configurator.UseDelayedExchangeMessageScheduler();
+            configurator.UseDelayedMessageScheduler();
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -155,7 +154,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            configurator.UseDelayedExchangeMessageScheduler();
+            configurator.UseDelayedMessageScheduler();
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)

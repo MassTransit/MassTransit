@@ -2,14 +2,14 @@
 {
     using System;
     using System.Reflection;
-    using Metadata;
 
 
-    public abstract class DefaultRecurringSchedule : RecurringSchedule
+    public abstract class DefaultRecurringSchedule :
+        RecurringSchedule
     {
         protected DefaultRecurringSchedule()
         {
-            ScheduleId = TypeMetadataCache.GetShortName(GetType());
+            ScheduleId = TypeCache.GetShortName(GetType());
             ScheduleGroup = GetType().GetTypeInfo().Assembly.FullName.Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries)[0];
 
             TimeZoneId = TimeZoneInfo.Local.Id;

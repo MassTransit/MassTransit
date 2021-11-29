@@ -2,7 +2,6 @@ namespace MassTransit.GrpcTransport.Tests
 {
     using System.Threading.Tasks;
     using FaultMessages;
-    using GrpcTransport;
     using NUnit.Framework;
     using TestFramework;
 

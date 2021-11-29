@@ -2,7 +2,6 @@ namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
-    using GreenPipes;
 
 
     public class TransportConfiguration :
@@ -21,7 +20,7 @@ namespace MassTransit.Configuration
             _parent = parent;
         }
 
-        internal TransportConfiguration()
+        public TransportConfiguration()
         {
             _parent = new DefaultTransportConfiguration();
         }

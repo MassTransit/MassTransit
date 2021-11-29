@@ -2,7 +2,6 @@ namespace MassTransit.Tests.MessageData
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
     using MassTransit.MessageData.Configuration;
     using NUnit.Framework;
     using TestFramework;

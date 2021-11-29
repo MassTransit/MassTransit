@@ -1,7 +1,6 @@
-namespace MassTransit.GrpcTransport
+namespace MassTransit
 {
     using System;
-    using Topology.Configurators;
 
 
     public interface IGrpcBusFactoryConfigurator :

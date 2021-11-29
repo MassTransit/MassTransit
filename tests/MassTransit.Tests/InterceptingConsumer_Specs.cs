@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
 

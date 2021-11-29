@@ -3,7 +3,6 @@ namespace MassTransit.Scheduling
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
 
 
     public class PublishScheduleMessageProvider :

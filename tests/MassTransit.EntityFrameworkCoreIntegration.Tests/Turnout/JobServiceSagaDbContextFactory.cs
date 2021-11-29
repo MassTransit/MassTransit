@@ -1,6 +1,5 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.Turnout
 {
-    using JobService;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Design;
     using Shared;

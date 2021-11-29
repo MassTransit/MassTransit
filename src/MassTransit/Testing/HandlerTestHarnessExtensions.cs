@@ -1,6 +1,6 @@
 namespace MassTransit.Testing
 {
-    using Util;
+    using System.Threading.Tasks;
 
 
     public static class HandlerTestHarnessExtensions
@@ -14,7 +14,7 @@ namespace MassTransit.Testing
         public static HandlerTestHarness<T> Handler<T>(this BusTestHarness harness)
             where T : class
         {
-            return new HandlerTestHarness<T>(harness, context => TaskUtil.Completed);
+            return new HandlerTestHarness<T>(harness, context => Task.CompletedTask);
         }
     }
 }

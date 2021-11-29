@@ -24,7 +24,7 @@ namespace MassTransit.Initializers.PropertyConverters
             InitializeContext<TProperty> messageContext = MessageFactoryCache<TProperty>.Factory.Create(context);
 
             Task<InitializeContext<TProperty>> initTask = _initializer.Initialize(messageContext, input);
-            if (initTask.IsCompleted)
+            if (initTask.Status == TaskStatus.RanToCompletion)
                 return Task.FromResult(initTask.Result.Message);
 
             async Task<TProperty> ConvertAsync()
@@ -53,7 +53,7 @@ namespace MassTransit.Initializers.PropertyConverters
             IMessageInitializer<TProperty> initializer = MessageInitializerCache<TProperty>.GetInitializer(input.GetType());
 
             Task<InitializeContext<TProperty>> initTask = initializer.Initialize(messageContext, input);
-            if (initTask.IsCompleted)
+            if (initTask.Status == TaskStatus.RanToCompletion)
                 return Task.FromResult(initTask.Result.Message);
 
             async Task<TProperty> ConvertAsync()

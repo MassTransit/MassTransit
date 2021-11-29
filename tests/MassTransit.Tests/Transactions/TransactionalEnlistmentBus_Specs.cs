@@ -3,7 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using System.Transactions;
-    using GreenPipes.Internals.Extensions;
+    using Internals;
     using MassTransit.Transactions;
     using NUnit.Framework;
     using TestFramework;

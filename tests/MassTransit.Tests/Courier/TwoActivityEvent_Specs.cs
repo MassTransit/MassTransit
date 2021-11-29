@@ -2,8 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -18,7 +16,7 @@
         [Test]
         public async Task Should_include_the_activity_log_data()
         {
-            var activityCompleted = (await _firstActivityCompleted).Message;
+            ConsumeContext<RoutingSlipActivityCompleted> activityCompleted = await _firstActivityCompleted;
 
             Assert.AreEqual("Hello", activityCompleted.GetResult<string>("OriginalValue"));
         }
@@ -26,7 +24,7 @@
         [Test]
         public async Task Should_include_the_variable_set_by_the_activity()
         {
-            var completed = (await _completed).Message;
+            ConsumeContext<RoutingSlipCompleted> completed = await _completed;
 
             Assert.AreEqual("Hello, World!", completed.GetVariable<string>("Value"));
         }
@@ -34,17 +32,17 @@
         [Test]
         public async Task Should_include_the_variables_of_the_completed_routing_slip()
         {
-            var completed = (await _completed).Message;
+            ConsumeContext<RoutingSlipCompleted> completed = await _completed;
 
-            Assert.AreEqual("Knife", completed.Variables["Variable"]);
+            Assert.AreEqual("Knife", completed.GetVariable<string>("Variable"));
         }
 
         [Test]
         public async Task Should_include_the_variables_with_the_activity_log()
         {
-            var activityCompleted = (await _firstActivityCompleted).Message;
+            ConsumeContext<RoutingSlipActivityCompleted> activityCompleted = await _firstActivityCompleted;
 
-            Assert.AreEqual("Knife", activityCompleted.Variables["Variable"]);
+            Assert.AreEqual("Knife", activityCompleted.GetVariable<string>("Variable"));
         }
 
         [Test]
@@ -73,15 +71,6 @@
             var activityCompleted = (await _secondActivityCompleted).Message;
 
             Assert.AreEqual(_routingSlip.TrackingNumber, activityCompleted.TrackingNumber);
-        }
-
-        [Test]
-        [Explicit]
-        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;

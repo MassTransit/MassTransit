@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Configuration;
     using Util;
     using Util.Scanning;
 
@@ -22,13 +23,13 @@
 
         Task ISendObserver.PreSend<T>(SendContext<T> context)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         Task ISendObserver.PostSend<T>(SendContext<T> context)
         {
             if (!_filter.Matches(context))
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
 
             var metadata = _metadataFactory.CreateAuditMetadata(context);
 
@@ -37,7 +38,7 @@
 
         Task ISendObserver.SendFault<T>(SendContext<T> context, Exception exception)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

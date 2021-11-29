@@ -1,8 +1,5 @@
 ﻿namespace MassTransit.Serialization
 {
-    using GreenPipes;
-
-
     public class ConstantSecureKeyProvider :
         ISecureKeyProvider
     {
@@ -18,17 +15,7 @@
             context.Add("key", "constant");
         }
 
-        public byte[] GetKey(ReceiveContext receiveContext)
-        {
-            return GetKey();
-        }
-
-        public byte[] GetKey(SendContext sendContext)
-        {
-            return GetKey();
-        }
-
-        byte[] GetKey()
+        public byte[] GetKey(Headers headers)
         {
             return _key;
         }

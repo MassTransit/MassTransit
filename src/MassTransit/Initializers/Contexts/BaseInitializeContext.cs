@@ -1,7 +1,7 @@
 namespace MassTransit.Initializers.Contexts
 {
     using System.Threading;
-    using GreenPipes;
+    using Middleware;
 
 
     public class BaseInitializeContext :

@@ -2,8 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -52,7 +50,7 @@
                 context => context.Message.ActivityName.Equals(testActivity.Name));
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
             builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri, new { });
 
             await Bus.Execute(builder.Build());
@@ -98,7 +96,7 @@
             Task<ConsumeContext<RoutingSlipCompleted>> completed = await ConnectPublishHandler<RoutingSlipCompleted>();
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
             builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri, new { });
 
             await Bus.Execute(builder.Build());

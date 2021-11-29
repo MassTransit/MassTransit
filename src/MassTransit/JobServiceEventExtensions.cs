@@ -1,8 +1,7 @@
+#nullable enable
 namespace MassTransit
 {
-    using System;
     using Contracts.JobService;
-    using Util;
 
 
     public static class JobServiceEventExtensions
@@ -11,75 +10,42 @@ namespace MassTransit
         /// Returns the job from the message
         /// </summary>
         /// <typeparam name="TJob"></typeparam>
-        /// <param name="source"></param>
+        /// <param name="context"></param>
         /// <returns></returns>
-        public static TJob GetJob<TJob>(this StartJob source)
+        public static TJob? GetJob<TJob>(this ConsumeContext<StartJob> context)
             where TJob : class
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            return ObjectTypeDeserializer.Deserialize<TJob>(source.Job);
+            return context.SerializerContext.DeserializeObject<TJob>(context.Message.Job);
         }
 
-        public static TJob GetJob<TJob>(this FaultJob source)
+        public static TJob? GetJob<TJob>(this ConsumeContext<FaultJob> context)
             where TJob : class
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            return ObjectTypeDeserializer.Deserialize<TJob>(source.Job);
+            return context.SerializerContext.DeserializeObject<TJob>(context.Message.Job);
         }
 
-        public static TJob GetJob<TJob>(this CompleteJob source)
+        public static TJob? GetJob<TJob>(this ConsumeContext<CompleteJob> context)
             where TJob : class
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            return ObjectTypeDeserializer.Deserialize<TJob>(source.Job);
+            return context.SerializerContext.DeserializeObject<TJob>(context.Message.Job);
         }
 
-        /// <summary>
-        /// Returns the job from the JobCompleted event
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        public static T GetJob<T>(this JobCompleted source)
+        public static TJob? GetJob<TJob>(this ConsumeContext<JobCompleted> context)
+            where TJob : class
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            return ObjectTypeDeserializer.Deserialize<T>(source.Job);
+            return context.SerializerContext.DeserializeObject<TJob>(context.Message.Job);
         }
 
-        /// <summary>
-        /// Returns the result from the JobCompleted event
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        public static T GetResult<T>(this JobCompleted source)
+        public static TResult? GetResult<TResult>(this ConsumeContext<JobCompleted> context)
+            where TResult : class
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            return ObjectTypeDeserializer.Deserialize<T>(source.Result);
+            return context.SerializerContext.DeserializeObject<TResult>(context.Message.Result);
         }
 
-        /// <summary>
-        /// Returns the job from the JobFaulted event
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="source"></param>
-        /// <returns></returns>
-        public static T GetJob<T>(this JobFaulted source)
+        public static TJob? GetJob<TJob>(this ConsumeContext<JobFaulted> context)
+            where TJob : class
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            return ObjectTypeDeserializer.Deserialize<T>(source.Job);
+            return context.SerializerContext.DeserializeObject<TJob>(context.Message.Job);
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit
 {
     public interface EventHubSendContext :
         SendContext

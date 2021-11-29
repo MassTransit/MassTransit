@@ -1,7 +1,6 @@
-﻿namespace MassTransit.Azure.ServiceBus.Core.Topology
+﻿namespace MassTransit
 {
-    using Builders;
-    using MassTransit.Topology;
+    using AzureServiceBusTransport.Topology;
 
 
     public interface IServiceBusConsumeTopology :

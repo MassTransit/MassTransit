@@ -3,9 +3,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using ConsumeConfigurators;
-    using Definition;
-    using GreenPipes;
     using MassTransit.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;

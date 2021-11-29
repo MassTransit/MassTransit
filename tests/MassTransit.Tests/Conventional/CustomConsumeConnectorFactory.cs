@@ -1,7 +1,7 @@
 namespace MassTransit.Tests.Conventional
 {
     using System;
-    using ConsumeConnectors;
+    using MassTransit.Configuration;
 
 
     public class CustomConsumeConnectorFactory<TConsumer, TMessage> :
@@ -22,20 +22,12 @@ namespace MassTransit.Tests.Conventional
 
         IConsumerMessageConnector<T> IMessageConnectorFactory.CreateConsumerConnector<T>()
         {
-            var result = _consumerConnector as IConsumerMessageConnector<T>;
-            if (result == null)
-                throw new ArgumentException("The consumer type did not match the connector type");
-
-            return result;
+            return _consumerConnector as IConsumerMessageConnector<T> ?? throw new ArgumentException("The consumer type did not match the connector type");
         }
 
         IInstanceMessageConnector<T> IMessageConnectorFactory.CreateInstanceConnector<T>()
         {
-            var result = _instanceConnector as IInstanceMessageConnector<T>;
-            if (result == null)
-                throw new ArgumentException("The consumer type did not match the connector type");
-
-            return result;
+            return _instanceConnector as IInstanceMessageConnector<T> ?? throw new ArgumentException("The consumer type did not match the connector type");
         }
     }
 }

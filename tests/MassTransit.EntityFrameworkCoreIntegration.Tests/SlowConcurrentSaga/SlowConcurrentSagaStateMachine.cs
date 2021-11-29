@@ -1,7 +1,6 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
 {
     using System.Threading.Tasks;
-    using Automatonymous;
     using DataAccess;
     using Events;
 

@@ -26,10 +26,10 @@ namespace MassTransit.Initializers.PropertyProviders
                 return TaskUtil.Default<TProperty>();
 
             Task<Task<TProperty>> propertyTask = _provider.GetProperty(context);
-            if (propertyTask.IsCompleted)
+            if (propertyTask.Status == TaskStatus.RanToCompletion)
             {
                 Task<TProperty> valueTask = propertyTask.Result;
-                if (valueTask.IsCompleted)
+                if (valueTask.Status == TaskStatus.RanToCompletion)
                     return valueTask;
             }
 
@@ -70,10 +70,10 @@ namespace MassTransit.Initializers.PropertyProviders
                 return TaskUtil.Default<TProperty>();
 
             Task<Task<TTask>> propertyTask = _provider.GetProperty(context);
-            if (propertyTask.IsCompleted)
+            if (propertyTask.Status == TaskStatus.RanToCompletion)
             {
                 Task<TTask> valueTask = propertyTask.Result;
-                if (valueTask.IsCompleted)
+                if (valueTask.Status == TaskStatus.RanToCompletion)
                     return _converter.Convert(context, valueTask.Result);
             }
 

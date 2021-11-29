@@ -3,9 +3,8 @@
     using System;
     using System.Net;
     using System.Threading.Tasks;
-    using Cosmos.Saga;
-    using GreenPipes;
-    using MassTransit.Saga;
+    using AzureCosmos;
+    using AzureCosmos.Saga;
     using Microsoft.Azure.Cosmos;
     using NUnit.Framework;
     using TestFramework;
@@ -21,12 +20,12 @@
         {
             var correlationId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling { CorrelationId = correlationId });
 
             var saga = await GetSagaRetry(correlationId, TestTimeout);
             Assert.IsNotNull(saga);
 
-            await InputQueueSendEndpoint.Send(new SodOff {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new SodOff { CorrelationId = correlationId });
 
             saga = await GetNoSagaRetry(correlationId, TestTimeout);
             Assert.IsNull(saga);
@@ -37,13 +36,13 @@
         {
             var correlationId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling { CorrelationId = correlationId });
 
             var saga = await GetSagaRetry(correlationId, TestTimeout);
 
             Assert.IsNotNull(saga);
 
-            await InputQueueSendEndpoint.Send(new GotHitByACar {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new GotHitByACar { CorrelationId = correlationId });
 
             saga = await GetSagaRetry(correlationId, TestTimeout, x => x.CurrentState == _machine.Dead.Name);
 
@@ -79,7 +78,10 @@
             _databaseName = "shoppingChoreSagas";
             _collectionName = "sagas";
             _cosmosClient = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
-                new CosmosClientOptions {Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<ShoppingChore>())});
+                new CosmosClientOptions
+                {
+                    Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<ShoppingChore>())
+                });
 
             _repository = new Lazy<ISagaRepository<ShoppingChore>>(() =>
                 CosmosSagaRepository<ShoppingChore>.Create(_cosmosClient, _databaseName, _collectionName));

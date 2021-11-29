@@ -4,13 +4,12 @@ namespace MassTransit.Testing
     using System.Linq;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using Automatonymous;
-    using Saga;
+    using Implementations;
 
 
     public static class StateMachineSagaTestHarnessExtensions
     {
-        public static StateMachineSagaTestHarness<TInstance, TStateMachine> StateMachineSaga<TInstance, TStateMachine>(this BusTestHarness harness,
+        public static ISagaStateMachineTestHarness<TStateMachine, TInstance> StateMachineSaga<TInstance, TStateMachine>(this BusTestHarness harness,
             TStateMachine stateMachine, string queueName = null)
             where TInstance : class, SagaStateMachineInstance
             where TStateMachine : SagaStateMachine<TInstance>
@@ -23,7 +22,7 @@ namespace MassTransit.Testing
             return new StateMachineSagaTestHarness<TInstance, TStateMachine>(harness, repository, stateMachine, queueName);
         }
 
-        public static StateMachineSagaTestHarness<TInstance, TStateMachine> StateMachineSaga<TInstance, TStateMachine>(this BusTestHarness harness,
+        public static ISagaStateMachineTestHarness<TStateMachine, TInstance> StateMachineSaga<TInstance, TStateMachine>(this BusTestHarness harness,
             TStateMachine stateMachine, ISagaRepository<TInstance> repository, string queueName = null)
             where TInstance : class, SagaStateMachineInstance
             where TStateMachine : SagaStateMachine<TInstance>

@@ -21,21 +21,21 @@
 
         Task IPublishObserver.PrePublish<T>(PublishContext<T> context)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         Task IPublishObserver.PostPublish<T>(PublishContext<T> context)
         {
             MessagePerformanceCounterCache<T>.Counter(_factory).Published();
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         Task IPublishObserver.PublishFault<T>(PublishContext<T> context, Exception exception)
         {
             MessagePerformanceCounterCache<T>.Counter(_factory).PublishFaulted();
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

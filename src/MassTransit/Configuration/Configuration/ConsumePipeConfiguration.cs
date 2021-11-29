@@ -1,10 +1,5 @@
 ﻿namespace MassTransit.Configuration
 {
-    using ConsumePipeSpecifications;
-    using Topology;
-    using Topology.Observers;
-
-
     public class ConsumePipeConfiguration :
         IConsumePipeConfiguration
     {

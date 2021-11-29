@@ -3,7 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using System.Transactions;
-    using GreenPipes.Internals.Extensions;
+    using Internals;
     using MassTransit.Tests.Saga.Messages;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -122,6 +122,7 @@
         {
             using (var dbContext = GetDbContext())
             {
+                dbContext.Database.EnsureDeleted();
                 dbContext.Database.EnsureCreated();
                 //RelationalDatabaseCreator databaseCreator = (RelationalDatabaseCreator)dbContext.Database.GetService<IDatabaseCreator>();
                 //databaseCreator.CreateTables();

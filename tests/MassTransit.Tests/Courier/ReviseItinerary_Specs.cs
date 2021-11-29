@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -36,7 +35,7 @@
                 context => context.Message.TrackingNumber == trackingNumber);
 
             var builder = new RoutingSlipBuilder(trackingNumber);
-            builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new {Value = "Time to add a new item!"});
+            builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new { Value = "Time to add a new item!" });
 
             await Bus.Execute(builder.Build());
 
@@ -66,7 +65,7 @@
                 context => context.Message.TrackingNumber == trackingNumber && context.Message.ActivityName.Equals(reviseActivity.Name));
 
             var builder = new RoutingSlipBuilder(trackingNumber);
-            builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new {Value = "Time to add a new item!"});
+            builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new { Value = "Time to add a new item!" });
 
             await Bus.Execute(builder.Build());
 
@@ -74,7 +73,7 @@
             await reviseActivityCompleted;
             ConsumeContext<RoutingSlipActivityCompleted> testActivityResult = await testActivityCompleted;
 
-            testActivityResult.Message.GetArgument<string>("Value").ShouldBe("Added");
+            testActivityResult.GetArgument<string>("Value").ShouldBe("Added");
         }
 
         [Test]
@@ -98,8 +97,8 @@
                 context => context.Message.TrackingNumber == trackingNumber);
 
             var builder = new RoutingSlipBuilder(trackingNumber);
-            builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new {Value = "Time to remove any remaining items!"});
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
+            builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new { Value = "Time to remove any remaining items!" });
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
 
             await Bus.Execute(builder.Build());
 
@@ -125,7 +124,7 @@
             AddActivityContext<ReviseItineraryActivity, TestArguments, TestLog>(
                 () =>
                     new ReviseItineraryActivity(
-                        x => x.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Added"})));
+                        x => x.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Added" })));
         }
     }
 }

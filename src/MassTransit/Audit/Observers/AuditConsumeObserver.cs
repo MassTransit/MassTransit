@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Configuration;
     using Util;
     using Util.Scanning;
 
@@ -24,7 +25,7 @@
         Task IConsumeObserver.PreConsume<T>(ConsumeContext<T> context)
         {
             if (!_filter.Matches(context))
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
 
             var metadata = _metadataFactory.CreateAuditMetadata(context);
 
@@ -33,12 +34,12 @@
 
         Task IConsumeObserver.PostConsume<T>(ConsumeContext<T> context)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         Task IConsumeObserver.ConsumeFault<T>(ConsumeContext<T> context, Exception exception)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

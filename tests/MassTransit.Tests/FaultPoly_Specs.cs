@@ -13,26 +13,26 @@ namespace MassTransit.Tests
         [Test]
         public void Should_have_the_fault_base_message_class_type()
         {
-            Assert.That(TypeMetadataCache<Fault<MemberAddressUpdated>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<MemberUpdateEvent>))));
+            Assert.That(MessageTypeCache<Fault<MemberAddressUpdated>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<MemberUpdateEvent>))));
         }
 
         [Test]
         public void Should_have_the_fault_base_message_type()
         {
-            Assert.That(TypeMetadataCache<Fault<UpdateMemberAddress>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<MemberUpdateCommand>))));
+            Assert.That(MessageTypeCache<Fault<UpdateMemberAddress>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<MemberUpdateCommand>))));
         }
 
         [Test]
         public void Should_have_the_fault_message_class_type()
         {
-            Assert.That(TypeMetadataCache<Fault<MemberAddressUpdated>>.MessageTypeNames,
+            Assert.That(MessageTypeCache<Fault<MemberAddressUpdated>>.MessageTypeNames,
                 Contains.Item(MessageUrn.ForType(typeof(Fault<MemberAddressUpdated>))));
         }
 
         [Test]
         public void Should_have_the_fault_message_type()
         {
-            Assert.That(TypeMetadataCache<Fault<UpdateMemberAddress>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<UpdateMemberAddress>))));
+            Assert.That(MessageTypeCache<Fault<UpdateMemberAddress>>.MessageTypeNames, Contains.Item(MessageUrn.ForType(typeof(Fault<UpdateMemberAddress>))));
         }
     }
 

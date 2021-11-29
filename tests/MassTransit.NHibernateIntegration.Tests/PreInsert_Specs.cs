@@ -3,18 +3,15 @@
     namespace PreInsert
     {
         using System;
-        using System.Linq.Expressions;
         using System.Threading.Tasks;
-        using Automatonymous;
-        using MassTransit.Saga;
         using NHibernate;
         using NUnit.Framework;
-        using Saga;
         using TestFramework;
         using Testing;
 
 
-        class InstanceMap : SagaClassMapping<Instance>
+        class InstanceMap :
+            SagaClassMapping<Instance>
         {
             public InstanceMap()
             {
@@ -59,9 +56,9 @@
                 Timestamp = DateTime.UtcNow;
             }
 
-            public string Name { get; private set; }
-            public DateTime Timestamp { get; private set; }
-            public Guid CorrelationId { get; private set; }
+            public string Name { get; set; }
+            public DateTime Timestamp { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -79,9 +76,9 @@
                 Timestamp = DateTime.UtcNow;
             }
 
-            public string Name { get; private set; }
-            public DateTime Timestamp { get; private set; }
-            public Guid CorrelationId { get; private set; }
+            public string Name { get; set; }
+            public DateTime Timestamp { get; set; }
+            public Guid CorrelationId { get; set; }
         }
 
 
@@ -156,7 +153,7 @@
 
                     Initially(
                         When(Started)
-                            .Publish(context => new StartupComplete {TransactionId = context.Data.CorrelationId})
+                            .Publish(context => new StartupComplete { TransactionId = context.Data.CorrelationId })
                             .TransitionTo(Running));
                 }
 
@@ -243,7 +240,7 @@
                             {
                             }),
                         When(Started)
-                            .Publish(context => new StartupComplete {TransactionId = context.Data.CorrelationId})
+                            .Publish(context => new StartupComplete { TransactionId = context.Data.CorrelationId })
                             .TransitionTo(Running));
                 }
 

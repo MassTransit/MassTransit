@@ -1,7 +1,7 @@
 namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System.Threading.Tasks;
-    using MassTransit.Azure.ServiceBus.Core.Configurators;
+    using MassTransit.Configuration;
     using NUnit.Framework;
 
 

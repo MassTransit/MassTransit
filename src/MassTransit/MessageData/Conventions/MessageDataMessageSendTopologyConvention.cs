@@ -1,7 +1,8 @@
 namespace MassTransit.MessageData.Conventions
 {
+    using Configuration;
+    using MassTransit.Configuration;
     using Topology;
-    using Transformation.TransformConfigurators;
 
 
     public class MessageDataMessageSendTopologyConvention<TMessage> :

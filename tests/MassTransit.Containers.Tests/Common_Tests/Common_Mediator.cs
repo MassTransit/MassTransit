@@ -2,26 +2,20 @@ namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Context;
-    using GreenPipes;
-    using GreenPipes.Internals.Extensions;
+    using Internals;
     using Mediator;
+    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
-    using Registration;
-    using Saga;
     using Scenarios;
     using Shouldly;
     using TestFramework;
-    using TestFramework.Logging;
     using Testing;
-    using Util;
 
 
-    public abstract class Common_Mediator :
-        InMemoryTestFixture
+    public class Using_mediator_alongside_the_bus<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected abstract IMediator Mediator { get; }
-
         [Test]
         public async Task Should_dispatch_to_the_consumer()
         {
@@ -29,27 +23,32 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             await Mediator.Send(new SimpleMessageClass(name));
 
-            var lastConsumer = await SimplerConsumer.LastConsumer.OrCanceled(TestCancellationToken);
+            var lastConsumer = await SimplerConsumer.LastConsumer.OrCanceled(InMemoryTestHarness.TestCancellationToken);
             lastConsumer.ShouldNotBe(null);
 
-            await lastConsumer.Last.OrCanceled(TestCancellationToken);
+            await lastConsumer.Last.OrCanceled(InMemoryTestHarness.TestCancellationToken);
         }
 
-        protected void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
+        IMediator Mediator => ServiceProvider.GetRequiredService<IMediator>();
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection.AddMediator(ConfigureRegistration);
+        }
+
+        void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<SimplerConsumer>();
         }
     }
 
 
-    public abstract class Common_Mediator_Bus :
-        InMemoryTestFixture
+    public class Publishing_a_message_from_a_mediator_consumer<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected abstract IMediator Mediator { get; }
-        protected abstract IBusRegistrationContext Registration { get; }
-
         [Test]
-        public async Task Should_transfer_message_headers()
+        public async Task Should_not_transfer_message_headers()
         {
             Task<ConsumeContext<OrderSubmitted>> orderSubmitted = await ConnectPublishHandler<OrderSubmitted>();
 
@@ -65,11 +64,14 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(submitted.InitiatorId.HasValue, Is.False);
         }
 
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        IMediator Mediator => ServiceProvider.GetRequiredService<IMediator>();
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
         {
+            return collection.AddMediator(ConfigureRegistration);
         }
 
-        protected void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
+        void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<SubmitOrderConsumer>();
         }
@@ -107,11 +109,10 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public abstract class Common_Mediator_Request :
-        InMemoryTestFixture
+    public class Common_Mediator_Request<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        Guid _correlationId;
-
         [Test]
         public async Task Should_receive_the_response()
         {
@@ -129,10 +130,14 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(response.Message.OriginalInitiatorId, Is.EqualTo(_correlationId));
         }
 
-        protected abstract IRequestClient<T> GetRequestClient<T>()
-            where T : class;
+        Guid _correlationId;
 
-        protected void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection.AddMediator(ConfigureRegistration);
+        }
+
+        void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<InitialConsumer>();
             configurator.AddConsumer<SubsequentConsumer>();
@@ -207,22 +212,22 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public abstract class Common_Mediator_Request_Filter :
-        InMemoryTestFixture
+    public class Common_Mediator_Request_Filter<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
         [Test]
         public async Task Should_receive_the_response()
         {
-
             Response<Pong> response = await GetRequestClient<Ping>().GetResponse<Pong>(new Ping());
 
             Assert.That(response.Message.Message, Is.EqualTo("PONG!"));
         }
 
-        protected abstract IRequestClient<T> GetRequestClient<T>()
-            where T : class;
-
-        protected abstract void ConfigureFilters(IMediatorRegistrationContext context, IMediatorConfigurator configurator);
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection.AddMediator(ConfigureRegistration);
+        }
 
         protected void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
         {
@@ -232,27 +237,8 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             configurator.ConfigureMediator((context, cfg) =>
             {
-                LogContext.ConfigureCurrentLogContext(LoggerFactory);
-                ConfigureFilters(context, cfg);
+                cfg.UseSendFilter(typeof(PongFilter<>), context);
             });
-        }
-
-
-        public class PongFilter<T> :
-            IFilter<SendContext<T>>
-            where T : class
-        {
-            public void Probe(ProbeContext context)
-            {
-            }
-
-            public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
-            {
-                if (context.Message is Pong pong)
-                    pong.Message = pong.Message.ToUpper();
-
-                return next.Send(context);
-            }
         }
 
 
@@ -261,30 +247,45 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             public async Task Consume(ConsumeContext<Ping> context)
             {
-                await context.RespondAsync(new Pong {Message = "Pong!"});
+                await context.RespondAsync(new Pong { Message = "Pong!" });
             }
-        }
-
-
-        public class Ping
-        {
-        }
-
-
-        public class Pong
-        {
-            public string Message { get; set; }
         }
     }
 
 
-    public abstract class Common_Mediator_Saga :
-        InMemoryTestFixture
+    public class PongFilter<T> :
+        IFilter<SendContext<T>>
+        where T : class
     {
-        Guid _correlationId;
+        public void Probe(ProbeContext context)
+        {
+        }
 
-        protected abstract IMediator Mediator { get; }
+        public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
+        {
+            if (context.Message is Pong pong)
+                pong.Message = pong.Message.ToUpper();
 
+            return next.Send(context);
+        }
+    }
+
+
+    public class Ping
+    {
+    }
+
+
+    public class Pong
+    {
+        public string Message { get; set; }
+    }
+
+
+    public class Common_Mediator_Saga<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
+    {
         [Test]
         public async Task Should_receive_the_response()
         {
@@ -301,10 +302,16 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(foundId.HasValue, Is.True);
         }
 
-        protected abstract ISagaRepository<T> GetSagaRepository<T>()
-            where T : class, ISaga;
+        Guid _correlationId;
 
-        protected void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
+        IMediator Mediator => ServiceProvider.GetRequiredService<IMediator>();
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection.AddMediator(ConfigureRegistration);
+        }
+
+        void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<OrderConsumer>();
             configurator.AddSaga<OrderSaga>()
@@ -332,7 +339,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             {
                 OrderNumber = context.Message.OrderNumber;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Guid CorrelationId { get; set; }
@@ -354,32 +361,19 @@ namespace MassTransit.Containers.Tests.Common_Tests
     }
 
 
-    public abstract class Common_Mediator_FilterScope :
-        BusTestFixture
+    public class Common_Mediator_FilterScope<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected readonly TaskCompletionSource<ConsumeContext<EasyA>> EasyASource;
-        protected readonly TaskCompletionSource<ConsumeContext<EasyB>> EasyBSource;
-        protected readonly TaskCompletionSource<ScopedContext> ScopedContextSource;
-
-        protected Common_Mediator_FilterScope()
-            : base(new InMemoryTestHarness())
-        {
-            ScopedContextSource = GetTask<ScopedContext>();
-            EasyASource = GetTask<ConsumeContext<EasyA>>();
-            EasyBSource = GetTask<ConsumeContext<EasyB>>();
-        }
-
-        protected abstract IMediator Mediator { get; }
-
         [Test]
         public async Task Should_use_the_same_scope_for_consume_and_send()
         {
-            await Mediator.Send<EasyA>(new {InVar.CorrelationId});
+            await Mediator.Send<EasyA>(new { InVar.CorrelationId });
 
-            await EasyASource.Task;
-            await EasyBSource.Task;
+            await _easyASource.Task;
+            await _easyBSource.Task;
 
-            var context = await ScopedContextSource.Task.OrTimeout(TimeSpan.FromSeconds(1));
+            var context = await _scopedContextSource.Task.OrTimeout(TimeSpan.FromSeconds(1));
 
             await context.ConsumeContext.Task.OrTimeout(TimeSpan.FromSeconds(1));
 
@@ -390,29 +384,41 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.ThrowsAsync<TimeoutException>(async () => await context.ConsumeContextEasyB.Task.OrTimeout(100));
         }
 
-        protected abstract void ConfigureFilters(IMediatorRegistrationContext context, IMediatorConfigurator configurator);
+        readonly TaskCompletionSource<ConsumeContext<EasyA>> _easyASource;
+        readonly TaskCompletionSource<ConsumeContext<EasyB>> _easyBSource;
+        readonly TaskCompletionSource<ScopedContext> _scopedContextSource;
 
-        protected void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
+        public Common_Mediator_FilterScope()
+        {
+            _scopedContextSource = GetTask<ScopedContext>();
+            _easyASource = GetTask<ConsumeContext<EasyA>>();
+            _easyBSource = GetTask<ConsumeContext<EasyB>>();
+        }
+
+        IMediator Mediator => ServiceProvider.GetRequiredService<IMediator>();
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection
+                .AddMediator(ConfigureRegistration)
+                .AddSingleton(_easyASource)
+                .AddSingleton(_easyBSource)
+                .AddSingleton(_scopedContextSource)
+                .AddScoped<ScopedContext>()
+                .AddScoped(typeof(ScopedConsumeFilter<>))
+                .AddScoped(typeof(ScopedSendFilter<>));
+        }
+
+        void ConfigureRegistration(IMediatorRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<EasyAConsumer>();
             configurator.AddConsumer<EasyBConsumer>();
 
             configurator.ConfigureMediator((context, cfg) =>
             {
-                ConfigureFilters(context, cfg);
+                cfg.UseConsumeFilter(typeof(ScopedConsumeFilter<>), context);
+                cfg.UseSendFilter(typeof(ScopedSendFilter<>), context);
             });
-        }
-
-
-        public class EasyA
-        {
-            public Guid CorrelationId { get; set; }
-        }
-
-
-        public class EasyB
-        {
-            public Guid CorrelationId { get; set; }
         }
 
 
@@ -461,70 +467,82 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 _scopedContext.ConsumeContextEasyB.TrySetResult(context);
             }
         }
+    }
 
 
-        public class ScopedContext
+    public class EasyA
+    {
+        public Guid CorrelationId { get; set; }
+    }
+
+
+    public class EasyB
+    {
+        public Guid CorrelationId { get; set; }
+    }
+
+
+    public class ScopedContext
+    {
+        public ScopedContext(InMemoryTestHarness harness)
         {
-            public ScopedContext(AsyncTestHarness harness)
-            {
-                ConsumeContext = harness.GetTask<ConsumeContext>();
-                ConsumeContextEasyA = harness.GetTask<ConsumeContext<EasyA>>();
-                ConsumeContextEasyB = harness.GetTask<ConsumeContext<EasyB>>();
-                SendContext = harness.GetTask<SendContext>();
-            }
-
-            public TaskCompletionSource<ConsumeContext> ConsumeContext { get; }
-            public TaskCompletionSource<ConsumeContext<EasyA>> ConsumeContextEasyA { get; }
-            public TaskCompletionSource<ConsumeContext<EasyB>> ConsumeContextEasyB { get; }
-            public TaskCompletionSource<SendContext> SendContext { get; }
+            ConsumeContext = harness.GetTask<ConsumeContext>();
+            ConsumeContextEasyA = harness.GetTask<ConsumeContext<EasyA>>();
+            ConsumeContextEasyB = harness.GetTask<ConsumeContext<EasyB>>();
+            SendContext = harness.GetTask<SendContext>();
         }
 
+        public TaskCompletionSource<ConsumeContext> ConsumeContext { get; }
+        public TaskCompletionSource<ConsumeContext<EasyA>> ConsumeContextEasyA { get; }
+        public TaskCompletionSource<ConsumeContext<EasyB>> ConsumeContextEasyB { get; }
+        public TaskCompletionSource<SendContext> SendContext { get; }
+    }
 
-        protected class ScopedConsumeFilter<T> :
-            IFilter<ConsumeContext<T>>
-            where T : class
+
+    class ScopedConsumeFilter<T> :
+        IFilter<ConsumeContext<T>>
+        where T : class
+    {
+        readonly ScopedContext _scopedContext;
+
+        public ScopedConsumeFilter(ScopedContext scopedContext)
         {
-            readonly ScopedContext _scopedContext;
-
-            public ScopedConsumeFilter(ScopedContext scopedContext)
-            {
-                _scopedContext = scopedContext;
-            }
-
-            public Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
-            {
-                _scopedContext.ConsumeContext.TrySetResult(context);
-
-                return next.Send(context);
-            }
-
-            public void Probe(ProbeContext context)
-            {
-            }
+            _scopedContext = scopedContext;
         }
 
-
-        protected class ScopedSendFilter<T> :
-            IFilter<SendContext<T>>
-            where T : class
+        public Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
         {
-            readonly ScopedContext _scopedContext;
+            _scopedContext.ConsumeContext.TrySetResult(context);
 
-            public ScopedSendFilter(ScopedContext scopedContext)
-            {
-                _scopedContext = scopedContext;
-            }
+            return next.Send(context);
+        }
 
-            public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
-            {
-                _scopedContext.SendContext.TrySetResult(context);
+        public void Probe(ProbeContext context)
+        {
+        }
+    }
 
-                return next.Send(context);
-            }
 
-            public void Probe(ProbeContext context)
-            {
-            }
+    class ScopedSendFilter<T> :
+        IFilter<SendContext<T>>
+        where T : class
+    {
+        readonly ScopedContext _scopedContext;
+
+        public ScopedSendFilter(ScopedContext scopedContext)
+        {
+            _scopedContext = scopedContext;
+        }
+
+        public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
+        {
+            _scopedContext.SendContext.TrySetResult(context);
+
+            return next.Send(context);
+        }
+
+        public void Probe(ProbeContext context)
+        {
         }
     }
 }

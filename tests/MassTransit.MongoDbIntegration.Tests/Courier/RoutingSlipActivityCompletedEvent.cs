@@ -17,9 +17,9 @@
             ActivityName = activityName;
             ExecutionId = executionId;
 
-            Variables = new Dictionary<string, object> {{"Content", "Goodbye, cruel world."}};
+            Variables = new Dictionary<string, object> { { "Content", "Goodbye, cruel world." } };
 
-            Data = new Dictionary<string, object> {{"OriginalContent", "Hello, World!"}};
+            Data = new Dictionary<string, object> { { "OriginalContent", "Hello, World!" } };
 
             Arguments = new Dictionary<string, object>();
         }

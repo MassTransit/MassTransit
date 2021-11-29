@@ -1,4 +1,4 @@
-namespace MassTransit.RabbitMqTransport.Topology
+namespace MassTransit
 {
     using System;
 

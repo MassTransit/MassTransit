@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Context;
-    using GreenPipes;
     using NUnit.Framework;
     using Scheduling;
 

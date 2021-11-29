@@ -1,9 +1,8 @@
-namespace MassTransit.Interop.NServiceBus.Serialization
+namespace MassTransit.Serialization
 {
     using System;
-    using MassTransit.Metadata;
     using Metadata;
-    using Transports.InMemory;
+    using Transports;
 
 
     public static class NServiceBusSendContextHeaderExtensions
@@ -21,10 +20,10 @@ namespace MassTransit.Interop.NServiceBus.Serialization
                 context.Headers.Set(NServiceBusMessageHeaders.ConversationId, context.ConversationId.Value.ToString());
 
             if (context.SourceAddress != null)
-                context.Headers.Set(NServiceBusMessageHeaders.OriginatingEndpoint, context.SourceAddress.GetQueueOrExchangeName());
+                context.Headers.Set(NServiceBusMessageHeaders.OriginatingEndpoint, context.SourceAddress.GetEndpointName());
 
             if (context.ResponseAddress != null)
-                context.Headers.Set(NServiceBusMessageHeaders.ReplyToAddress, context.ResponseAddress.GetQueueOrExchangeName());
+                context.Headers.Set(NServiceBusMessageHeaders.ReplyToAddress, context.ResponseAddress.GetEndpointName());
 
             context.Headers.Set(NServiceBusMessageHeaders.ContentType, NServiceBusJsonMessageSerializer.ContentTypeHeaderValue);
             context.Headers.Set(NServiceBusMessageHeaders.EnclosedMessageTypes, string.Join(";", NServiceBusTypeCache<T>.MessageTypeNames));

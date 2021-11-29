@@ -1,4 +1,4 @@
-namespace MassTransit.Interop.NServiceBus.Serialization
+namespace MassTransit.Serialization
 {
     using System;
     using System.Collections;

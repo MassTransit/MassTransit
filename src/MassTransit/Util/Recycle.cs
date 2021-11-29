@@ -2,7 +2,6 @@ namespace MassTransit.Util
 {
     using System;
     using System.Threading;
-    using GreenPipes.Agents;
 
 
     /// <summary>

@@ -3,11 +3,8 @@ namespace MassTransit.Containers.Tests
     using System;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using Automatonymous;
-    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
-    using Saga;
     using Scenarios;
     using TestFramework.Messages;
     using Testing;
@@ -19,32 +16,24 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_support_the_test_harness()
         {
-            var provider = new ServiceCollection()
-                .AddMassTransitInMemoryTestHarness(cfg =>
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(cfg =>
                 {
                     cfg.AddConsumer<PingRequestConsumer>();
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<InMemoryTestHarness>();
+            var harness = provider.GetRequiredService<ITestHarness>();
 
             await harness.Start();
-            try
-            {
-                var bus = provider.GetRequiredService<IBus>();
 
-                IRequestClient<PingMessage> client = bus.CreateRequestClient<PingMessage>();
+            var bus = harness.Bus;
 
-                await client.GetResponse<PongMessage>(new PingMessage());
+            IRequestClient<PingMessage> client = bus.CreateRequestClient<PingMessage>();
 
-                Assert.That(await harness.Consumed.Any<PingMessage>());
-            }
-            finally
-            {
-                await harness.Stop();
+            await client.GetResponse<PongMessage>(new PingMessage());
 
-                await provider.DisposeAsync();
-            }
+            Assert.That(await harness.Consumed.Any<PingMessage>());
         }
     }
 
@@ -55,38 +44,27 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_support_the_consumer_harness()
         {
-            var provider = new ServiceCollection()
-                .AddMassTransitInMemoryTestHarness(cfg =>
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(cfg =>
                 {
                     cfg.AddConsumer<PingRequestConsumer>();
-
-                    cfg.AddConsumerTestHarness<PingRequestConsumer>();
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<InMemoryTestHarness>();
+            var harness = provider.GetRequiredService<ITestHarness>();
 
             await harness.Start();
-            try
-            {
-                var bus = provider.GetRequiredService<IBus>();
+            var bus = harness.Bus;
 
-                IRequestClient<PingMessage> client = bus.CreateRequestClient<PingMessage>();
+            IRequestClient<PingMessage> client = bus.CreateRequestClient<PingMessage>();
 
-                await client.GetResponse<PongMessage>(new PingMessage());
+            await client.GetResponse<PongMessage>(new PingMessage());
 
-                Assert.That(await harness.Consumed.Any<PingMessage>());
+            Assert.That(await harness.Consumed.Any<PingMessage>());
 
-                var consumerHarness = provider.GetRequiredService<IConsumerTestHarness<PingRequestConsumer>>();
+            var consumerHarness = provider.GetRequiredService<IConsumerTestHarness<PingRequestConsumer>>();
 
-                Assert.That(await consumerHarness.Consumed.Any<PingMessage>());
-            }
-            finally
-            {
-                await harness.Stop();
-
-                await provider.DisposeAsync();
-            }
+            Assert.That(await consumerHarness.Consumed.Any<PingMessage>());
         }
     }
 
@@ -97,54 +75,44 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_support_the_saga_harness()
         {
-            var provider = new ServiceCollection()
-                .AddMassTransitInMemoryTestHarness(cfg =>
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(cfg =>
                 {
                     cfg.AddSaga<TestSaga>()
                         .InMemoryRepository();
-
-                    cfg.AddSagaTestHarness<TestSaga>();
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<InMemoryTestHarness>();
+            var harness = provider.GetRequiredService<ITestHarness>();
 
             await harness.Start();
-            try
+
+            _sagaId = Guid.NewGuid();
+            _testValueA = "TestValueA";
+
+            await harness.Bus.Publish(new A
             {
-                _sagaId = Guid.NewGuid();
-                _testValueA = "TestValueA";
+                CorrelationId = _sagaId,
+                Value = _testValueA
+            });
 
-                await harness.Bus.Publish(new A
-                {
-                    CorrelationId = _sagaId,
-                    Value = _testValueA
-                });
+            Assert.That(await harness.Published.Any<A>());
 
-                Assert.That(await harness.Published.Any<A>());
+            Assert.That(await harness.Consumed.Any<A>());
 
-                Assert.That(await harness.Consumed.Any<A>());
+            var sagaHarness = provider.GetRequiredService<ISagaTestHarness<TestSaga>>();
 
-                var sagaHarness = provider.GetRequiredService<ISagaTestHarness<TestSaga>>();
+            Assert.That(await sagaHarness.Consumed.Any<A>());
 
-                Assert.That(await sagaHarness.Consumed.Any<A>());
+            Assert.That(await sagaHarness.Created.Any(x => x.CorrelationId == _sagaId));
 
-                Assert.That(await sagaHarness.Created.Any(x => x.CorrelationId == _sagaId));
+            var saga = sagaHarness.Created.Contains(_sagaId);
+            Assert.That(saga, Is.Not.Null);
+            Assert.That(saga.ValueA, Is.EqualTo(_testValueA));
 
-                var saga = sagaHarness.Created.Contains(_sagaId);
-                Assert.That(saga, Is.Not.Null);
-                Assert.That(saga.ValueA, Is.EqualTo(_testValueA));
+            Assert.That(await harness.Published.Any<Aa>());
 
-                Assert.That(await harness.Published.Any<Aa>());
-
-                Assert.That(await harness.Published.Any<B>(), Is.False);
-            }
-            finally
-            {
-                await harness.Stop();
-
-                await provider.DisposeAsync();
-            }
+            Assert.That(await harness.Published.Any<B>(), Is.False);
         }
 
         Guid _sagaId;
@@ -171,7 +139,7 @@ namespace MassTransit.Containers.Tests
             public async Task Consume(ConsumeContext<A> context)
             {
                 ValueA = context.Message.Value;
-                await context.Publish(new Aa {CorrelationId = CorrelationId});
+                await context.Publish(new Aa { CorrelationId = CorrelationId });
             }
 
             public Guid CorrelationId { get; set; }
@@ -226,46 +194,36 @@ namespace MassTransit.Containers.Tests
         [Test]
         public async Task Should_support_the_saga_harness()
         {
-            var provider = new ServiceCollection()
-                .AddMassTransitInMemoryTestHarness(cfg =>
+            await using var provider = new ServiceCollection()
+                .AddMassTransitTestHarness(cfg =>
                 {
                     cfg.AddSagaStateMachine<TestStateMachine, Instance>()
                         .InMemoryRepository();
-
-                    cfg.AddSagaStateMachineTestHarness<TestStateMachine, Instance>();
                 })
                 .BuildServiceProvider(true);
 
-            var harness = provider.GetRequiredService<InMemoryTestHarness>();
+            var harness = provider.GetRequiredService<ITestHarness>();
 
             await harness.Start();
-            try
-            {
-                var sagaId = Guid.NewGuid();
 
-                await harness.Bus.Publish(new Start {CorrelationId = sagaId});
+            var sagaId = Guid.NewGuid();
 
-                Assert.IsTrue(await harness.Consumed.Any<Start>(), "Message not received");
+            await harness.Bus.Publish(new Start { CorrelationId = sagaId });
 
-                var sagaHarness = provider.GetRequiredService<IStateMachineSagaTestHarness<Instance, TestStateMachine>>();
+            Assert.IsTrue(await harness.Consumed.Any<Start>(), "Message not received");
 
-                Assert.That(await sagaHarness.Consumed.Any<Start>());
+            var sagaHarness = provider.GetRequiredService<ISagaStateMachineTestHarness<TestStateMachine, Instance>>();
 
-                Assert.That(await sagaHarness.Created.Any(x => x.CorrelationId == sagaId));
+            Assert.That(await sagaHarness.Consumed.Any<Start>());
 
-                var machine = provider.GetRequiredService<TestStateMachine>();
+            Assert.That(await sagaHarness.Created.Any(x => x.CorrelationId == sagaId));
 
-                var instance = sagaHarness.Created.ContainsInState(sagaId, machine, machine.Running);
-                Assert.IsNotNull(instance, "Saga instance not found");
+            var machine = provider.GetRequiredService<TestStateMachine>();
 
-                Assert.IsTrue(await harness.Published.Any<Started>(), "Event not published");
-            }
-            finally
-            {
-                await harness.Stop();
+            var instance = sagaHarness.Created.ContainsInState(sagaId, machine, machine.Running);
+            Assert.IsNotNull(instance, "Saga instance not found");
 
-                await provider.DisposeAsync();
-            }
+            Assert.IsTrue(await harness.Published.Any<Started>(), "Event not published");
         }
 
 
@@ -306,7 +264,7 @@ namespace MassTransit.Containers.Tests
 
 
         class StartupActivity :
-            Activity<Instance, Start>
+            IStateMachineActivity<Instance, Start>
         {
             readonly IPublishEndpoint _publishEndpoint;
 
@@ -324,14 +282,14 @@ namespace MassTransit.Containers.Tests
                 visitor.Visit(this);
             }
 
-            public async Task Execute(BehaviorContext<Instance, Start> context, Behavior<Instance, Start> next)
+            public async Task Execute(BehaviorContext<Instance, Start> context, IBehavior<Instance, Start> next)
             {
-                await _publishEndpoint.Publish(new Started {CorrelationId = context.Instance.CorrelationId});
+                await _publishEndpoint.Publish(new Started { CorrelationId = context.Instance.CorrelationId });
 
                 await next.Execute(context);
             }
 
-            public Task Faulted<TException>(BehaviorExceptionContext<Instance, Start, TException> context, Behavior<Instance, Start> next)
+            public Task Faulted<TException>(BehaviorExceptionContext<Instance, Start, TException> context, IBehavior<Instance, Start> next)
                 where TException : Exception
             {
                 return next.Faulted(context);

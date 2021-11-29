@@ -2,21 +2,17 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using Context;
-    using GreenPipes;
-    using GreenPipes.Util;
+    using InMemoryTransport;
+    using InMemoryTransport.Configuration;
     using Logging;
+    using Middleware;
     using Transports;
-    using Transports.InMemory;
-    using Transports.InMemory.Builders;
-    using Transports.InMemory.Configuration;
-    using Transports.InMemory.Contexts;
-    using Transports.InMemory.Topology.Topologies;
+    using Util;
 
 
     public static class TestConsumeContext
@@ -30,7 +26,7 @@
 
             var receiveEndpointConfiguration = busConfiguration.HostConfiguration.CreateReceiveEndpointConfiguration("input-queue");
 
-            var hostTopology = new InMemoryHostTopology(busConfiguration.HostConfiguration, topologyConfiguration);
+            var hostTopology = new InMemoryBusTopology(busConfiguration.HostConfiguration, topologyConfiguration);
             var host = new InMemoryHost(busConfiguration.HostConfiguration, hostTopology);
 
             var builder = new InMemoryReceiveEndpointBuilder(busConfiguration.HostConfiguration, receiveEndpointConfiguration);
@@ -57,6 +53,18 @@
         ConsumeContext<TMessage>
         where TMessage : class
     {
+        public TestConsumeContext(TMessage message, CancellationToken cancellationToken)
+            : base(cancellationToken)
+        {
+            Message = message;
+
+            MessageId = NewId.NextGuid();
+            SourceAddress = new Uri("loopback://localhost/input_queue");
+            DestinationAddress = new Uri("loopback://localhost/input_queue");
+
+            ReceiveContext = new TestReceiveContext(TestConsumeContext.GetContext());
+        }
+
         public TestConsumeContext(TMessage message)
         {
             Message = message;
@@ -146,6 +154,7 @@
         }
 
         public ReceiveContext ReceiveContext { get; }
+        public SerializerContext SerializerContext { get; }
 
         public Task ConsumeCompleted => Task.FromResult(true);
 
@@ -275,18 +284,12 @@
             : base(false, receiveEndpointContext)
         {
             HeaderProvider = new DictionaryHeaderProvider(new Dictionary<string, object>());
+
+            Body = new BytesMessageBody(Array.Empty<byte>());
         }
 
         protected override IHeaderProvider HeaderProvider { get; }
 
-        public override byte[] GetBody()
-        {
-            return new byte[0];
-        }
-
-        public override Stream GetBodyStream()
-        {
-            return new MemoryStream();
-        }
+        public override MessageBody Body { get; }
     }
 }

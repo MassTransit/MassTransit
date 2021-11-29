@@ -1,9 +1,9 @@
 namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Threading.Tasks;
-    using Definition;
+    using MassTransit.Configuration;
+    using MassTransit.Testing;
     using NUnit.Framework;
-    using RabbitMqTransport.Testing;
 
 
     [TestFixture]
@@ -12,7 +12,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_fan_out_published_messages()
         {
-            var endpointSettings = new EndpointSettings<IEndpointDefinition<EventConsumer>> {InstanceId = "27"};
+            var endpointSettings = new EndpointSettings<IEndpointDefinition<EventConsumer>> { InstanceId = "27" };
             var endpointDefinition = new ConsumerEndpointDefinition<EventConsumer>(endpointSettings);
 
             var firstHarness = new RabbitMqTestHarness();
@@ -28,7 +28,7 @@ namespace MassTransit.RabbitMqTransport.Tests
             await firstHarness.Start();
             try
             {
-                endpointSettings = new EndpointSettings<IEndpointDefinition<EventConsumer>> {InstanceId = "42"};
+                endpointSettings = new EndpointSettings<IEndpointDefinition<EventConsumer>> { InstanceId = "42" };
                 endpointDefinition = new ConsumerEndpointDefinition<EventConsumer>(endpointSettings);
 
                 var secondHarness = new RabbitMqTestHarness();

@@ -1,18 +1,17 @@
 namespace MassTransit.Containers.Tests.Common_Tests
 {
+    using System;
     using System.Threading.Tasks;
-    using GreenPipes;
+    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
-    using Saga;
     using TestFramework;
     using TestFramework.Sagas;
 
 
-    public abstract class Common_SagaStateMachine :
-        InMemoryTestFixture
+    public class Common_SagaStateMachine<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected abstract IBusRegistrationContext Registration { get; }
-
         [Test]
         public async Task Should_handle_the_first_event()
         {
@@ -27,38 +26,34 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             await started;
 
-            await InputQueueSendEndpoint.Send(new UpdateTest {TestKey = "Unique"});
+            await InputQueueSendEndpoint.Send(new UpdateTest { TestKey = "Unique" });
 
             await updated;
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection
+                .AddScoped<PublishTestStartedActivity>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
                 .InMemoryRepository();
-
-            configurator.AddBus(provider => BusControl);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureSaga<TestInstance>(Registration);
+            configurator.ConfigureSaga<TestInstance>(BusRegistrationContext);
         }
     }
 
 
-    public abstract class Common_StateMachine_Filter :
-        InMemoryTestFixture
+    public class Common_StateMachine_Filter<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected readonly TaskCompletionSource<MyId> TaskCompletionSource;
-
-        protected Common_StateMachine_Filter()
-        {
-            TaskCompletionSource = GetTask<MyId>();
-        }
-
-        protected abstract IBusRegistrationContext Registration { get; }
-
         [Test]
         public async Task Should_use_scope()
         {
@@ -68,72 +63,47 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 TestKey = "Unique"
             });
 
-            var result = await TaskCompletionSource.Task;
+            var result = await _taskCompletionSource.Task;
             Assert.NotNull(result);
+        }
+
+        readonly TaskCompletionSource<MyId> _taskCompletionSource;
+
+        public Common_StateMachine_Filter()
+        {
+            _taskCompletionSource = GetTask<MyId>();
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection
+                .AddScoped(_ => new MyId(Guid.NewGuid()))
+                .AddSingleton(_taskCompletionSource)
+                .AddScoped(typeof(CommonSendScopedFilter<>));
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
+                .InMemoryRepository();
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            ConfigureFilter(configurator);
+            configurator.UseConsumeFilter(typeof(CommonScopedConsumeFilter<>), BusRegistrationContext);
         }
-
-        protected abstract void ConfigureFilter(IConsumePipeConfigurator configurator);
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureSaga<TestInstance>(Registration);
-        }
-
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
-        {
-            configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
-                .InMemoryRepository();
-            configurator.AddBus(provider => BusControl);
-        }
-
-
-        protected class ScopedFilter<T> :
-            IFilter<ConsumeContext<T>>
-            where T : class
-        {
-            readonly MyId _myId;
-            readonly TaskCompletionSource<MyId> _taskCompletionSource;
-
-            public ScopedFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId)
-            {
-                _taskCompletionSource = taskCompletionSource;
-                _myId = myId;
-            }
-
-            public Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
-            {
-                _taskCompletionSource.TrySetResult(_myId);
-                return next.Send(context);
-            }
-
-            public void Probe(ProbeContext context)
-            {
-            }
+            configurator.ConfigureSaga<TestInstance>(BusRegistrationContext);
         }
     }
 
 
-    public abstract class Common_StateMachine_FilterOrder :
-        InMemoryTestFixture
+    public class Common_StateMachine_FilterOrder<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected readonly TaskCompletionSource<ConsumeContext<StartTest>> MessageCompletion;
-        protected readonly TaskCompletionSource<SagaConsumeContext<TestInstance, StartTest>> SagaMessageCompletion;
-        protected readonly TaskCompletionSource<SagaConsumeContext<TestInstance>> SagaCompletion;
-
-        protected Common_StateMachine_FilterOrder()
-        {
-            MessageCompletion = GetTask<ConsumeContext<StartTest>>();
-            SagaCompletion = GetTask<SagaConsumeContext<TestInstance>>();
-            SagaMessageCompletion = GetTask<SagaConsumeContext<TestInstance, StartTest>>();
-        }
-
-        protected abstract IBusRegistrationContext Registration { get; }
-
         [Test]
         public async Task Should_include_container_scope()
         {
@@ -143,20 +113,58 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 TestKey = "Unique"
             });
 
-            await MessageCompletion.Task;
+            await _messageCompletion.Task;
 
-            await SagaCompletion.Task;
+            await _sagaCompletion.Task;
 
-            await SagaMessageCompletion.Task;
+            await _sagaMessageCompletion.Task;
         }
 
-        protected abstract IFilter<SagaConsumeContext<TestInstance>> CreateSagaFilter();
-        protected abstract IFilter<SagaConsumeContext<TestInstance, StartTest>> CreateSagaMessageFilter();
-        protected abstract IFilter<ConsumeContext<StartTest>> CreateMessageFilter();
+        readonly TaskCompletionSource<ConsumeContext<StartTest>> _messageCompletion;
+        readonly TaskCompletionSource<SagaConsumeContext<TestInstance>> _sagaCompletion;
+        readonly TaskCompletionSource<SagaConsumeContext<TestInstance, StartTest>> _sagaMessageCompletion;
+
+        public Common_StateMachine_FilterOrder()
+        {
+            _messageCompletion = GetTask<ConsumeContext<StartTest>>();
+            _sagaCompletion = GetTask<SagaConsumeContext<TestInstance>>();
+            _sagaMessageCompletion = GetTask<SagaConsumeContext<TestInstance, StartTest>>();
+        }
+
+        IFilter<SagaConsumeContext<TestInstance, StartTest>> CreateSagaMessageFilter()
+        {
+            return ServiceProvider.GetRequiredService<IFilter<SagaConsumeContext<TestInstance, StartTest>>>();
+        }
+
+        IFilter<SagaConsumeContext<TestInstance>> CreateSagaFilter()
+        {
+            return ServiceProvider.GetRequiredService<IFilter<SagaConsumeContext<TestInstance>>>();
+        }
+
+        IFilter<ConsumeContext<StartTest>> CreateMessageFilter()
+        {
+            return ServiceProvider.GetRequiredService<IFilter<ConsumeContext<StartTest>>>();
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection.AddSingleton(_messageCompletion)
+                .AddSingleton(_sagaCompletion)
+                .AddSingleton(_sagaMessageCompletion)
+                .AddSingleton<IFilter<ConsumeContext<StartTest>>, MessageFilter<StartTest, IServiceProvider>>()
+                .AddSingleton<IFilter<SagaConsumeContext<TestInstance>>, SagaFilter<TestInstance, IServiceProvider>>()
+                .AddSingleton<IFilter<SagaConsumeContext<TestInstance, StartTest>>, SagaMessageFilter<TestInstance, StartTest, IServiceProvider>>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
+                .InMemoryRepository();
+        }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureSaga<TestInstance>(Registration, x =>
+            configurator.ConfigureSaga<TestInstance>(BusRegistrationContext, x =>
             {
                 x.Message<StartTest>(m => m.UseFilter(CreateMessageFilter()));
 
@@ -164,13 +172,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
                 x.SagaMessage<StartTest>(m => m.UseFilter(CreateSagaMessageFilter()));
             });
-        }
-
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
-        {
-            configurator.AddSagaStateMachine<TestStateMachineSaga, TestInstance>()
-                .InMemoryRepository();
-            configurator.AddBus(provider => BusControl);
         }
 
 

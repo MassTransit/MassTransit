@@ -3,7 +3,7 @@
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using GreenPipes.Internals.Extensions;
+    using Internals;
     using MassTransit.Scheduling;
     using NUnit.Framework;
 

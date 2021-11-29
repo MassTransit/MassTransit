@@ -1,10 +1,8 @@
 namespace MassTransit
 {
     using System;
-    using Configurators;
-    using DapperIntegration;
-    using DapperIntegration.Configurators;
-    using Saga;
+    using Configuration;
+    using DapperIntegration.Configuration;
 
 
     public static class DapperSagaRepositoryRegistrationExtensions
@@ -25,7 +23,7 @@ namespace MassTransit
 
             configure?.Invoke(repositoryConfigurator);
 
-            BusConfigurationResult.CompileResults(repositoryConfigurator.Validate());
+            repositoryConfigurator.Validate().ThrowIfContainsFailure("The Dapper saga repository configuration is invalid:");
 
             configurator.Repository(x => repositoryConfigurator.Register(x));
 

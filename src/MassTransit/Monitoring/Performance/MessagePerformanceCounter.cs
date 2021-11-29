@@ -28,7 +28,7 @@
 
         public MessagePerformanceCounter(ICounterFactory factory)
         {
-            var messageType = TypeMetadataCache<TMessage>.ShortName;
+            var messageType = TypeCache<TMessage>.ShortName;
             if (messageType.Length > 127)
                 messageType = messageType.Substring(messageType.Length - 127);
 

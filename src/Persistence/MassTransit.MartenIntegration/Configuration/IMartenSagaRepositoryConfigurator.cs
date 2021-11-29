@@ -1,8 +1,7 @@
-namespace MassTransit.MartenIntegration
+namespace MassTransit
 {
     using System;
     using Marten;
-    using MassTransit.Saga;
     using Npgsql;
 
 

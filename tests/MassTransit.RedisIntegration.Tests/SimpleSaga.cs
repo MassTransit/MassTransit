@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Saga;
 
 
     public class SimpleSaga :
@@ -10,10 +9,10 @@
         Orchestrates<CompleteSimpleSaga>,
         ISagaVersion
     {
-        public bool Moved { get; private set; }
-        public bool Initiated { get; private set; }
-        public bool Observed { get; private set; }
-        public string Name { get; private set; }
+        public bool Moved { get; set; }
+        public bool Initiated { get; set; }
+        public bool Observed { get; set; }
+        public string Name { get; set; }
 
         public async Task Consume(ConsumeContext<InitiateSimpleSaga> context)
         {

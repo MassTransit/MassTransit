@@ -4,11 +4,9 @@
     {
         using System;
         using System.Threading.Tasks;
-        using Automatonymous;
-        using Cosmos.Saga;
-        using GreenPipes;
-        using GreenPipes.Internals.Extensions;
-        using MassTransit.Saga;
+        using AzureCosmos;
+        using AzureCosmos.Saga;
+        using Internals;
         using Microsoft.Azure.Cosmos;
         using NUnit.Framework;
         using TestFramework;
@@ -45,7 +43,8 @@
 
                 IRequestClient<CheckStatus> statusClient = Bus.CreateRequestClient<CheckStatus>(InputQueueAddress, TestTimeout);
 
-                (var status, var notFound) = await statusClient.GetResponse<Status, InstanceNotFound>(new CheckStatus("A"), TestCancellationToken);
+                (Task<MassTransit.Response<Status>> status, Task<MassTransit.Response<InstanceNotFound>> notFound) =
+                    await statusClient.GetResponse<Status, InstanceNotFound>(new CheckStatus("A"), TestCancellationToken);
 
                 Assert.That(status.IsCompletedSuccessfully(), Is.True);
 
@@ -61,7 +60,8 @@
             {
                 IRequestClient<CheckStatus> requestClient = Bus.CreateRequestClient<CheckStatus>(InputQueueAddress, TestTimeout);
 
-                (var status, var notFound) = await requestClient.GetResponse<Status, InstanceNotFound>(new CheckStatus("Z"), TestCancellationToken);
+                (Task<MassTransit.Response<Status>> status, Task<MassTransit.Response<InstanceNotFound>> notFound) =
+                    await requestClient.GetResponse<Status, InstanceNotFound>(new CheckStatus("Z"), TestCancellationToken);
 
                 Assert.That(notFound.IsCompletedSuccessfully(), Is.True);
 
@@ -180,9 +180,9 @@
 
             class Status
             {
-                public Status(string status, string serviceName)
+                public Status(string statusDescription, string serviceName)
                 {
-                    StatusDescription = status;
+                    StatusDescription = statusDescription;
                     ServiceName = serviceName;
                 }
 

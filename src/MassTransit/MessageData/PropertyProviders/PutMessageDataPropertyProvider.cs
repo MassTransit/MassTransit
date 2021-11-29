@@ -3,7 +3,6 @@ namespace MassTransit.MessageData.PropertyProviders
     using System;
     using System.IO;
     using System.Threading.Tasks;
-    using GreenPipes;
     using Initializers;
     using Metadata;
     using Util;
@@ -89,7 +88,7 @@ namespace MassTransit.MessageData.PropertyProviders
                     return (MessageData<TValue>)messageData;
                 }
 
-                if (value is { } && MessageDataExtensions.IsValidMessageDataType(value.GetType()))
+                if (value is { } && TypeMetadataCache.IsValidMessageDataType(value.GetType()))
                 {
                     var messageData = await _repository.PutObject(value, value.GetType(), timeToLive, context.CancellationToken).ConfigureAwait(false);
 
@@ -99,10 +98,10 @@ namespace MassTransit.MessageData.PropertyProviders
                     return new StoredMessageData<TValue>(messageData.Address, value);
                 }
 
-                throw new MessageDataException("Unsupported message data type: " + TypeMetadataCache<TValue>.ShortName);
+                throw new MessageDataException("Unsupported message data type: " + TypeCache<TValue>.ShortName);
             }
 
-            throw new MessageDataException("Message data repository was not available: " + TypeMetadataCache<TValue>.ShortName);
+            throw new MessageDataException("Message data repository was not available: " + TypeCache<TValue>.ShortName);
         }
     }
 }

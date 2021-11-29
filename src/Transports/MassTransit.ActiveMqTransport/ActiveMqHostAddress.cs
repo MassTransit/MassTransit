@@ -1,8 +1,8 @@
-namespace MassTransit.ActiveMqTransport
+namespace MassTransit
 {
     using System;
     using System.Diagnostics;
-    using Util;
+    using Internals;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]

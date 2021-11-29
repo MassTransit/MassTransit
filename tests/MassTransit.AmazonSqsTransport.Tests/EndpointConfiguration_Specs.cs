@@ -5,9 +5,6 @@ namespace MassTransit.AmazonSqsTransport.Tests
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
-    using ConsumeConfigurators;
-    using Definition;
-    using GreenPipes;
     using MassTransit.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;

@@ -1,13 +1,11 @@
 namespace MassTransit.EventHubIntegration.Tests
 {
     using System;
-    using System.IO;
     using System.Threading.Tasks;
     using Azure.Messaging.EventHubs;
     using Azure.Messaging.EventHubs.Producer;
     using Context;
     using Contracts;
-    using GreenPipes.Util;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
@@ -63,23 +61,15 @@ namespace MassTransit.EventHubIntegration.Tests
             {
                 await using var producer = new EventHubProducerClient(Configuration.EventHubNamespace, Configuration.EventHubName);
 
-                var serializer = new JsonMessageSerializer();
-
                 var message = new EventHubMessageClass("test");
                 var context = new MessageSendContext<EventHubMessage>(message)
                 {
-                    Serializer = serializer,
+                    Serializer = SystemTextJsonMessageSerializer.Instance,
                     CorrelationId = NewId.NextGuid()
                 };
 
-                await using (var stream = new MemoryStream())
-                {
-                    serializer.Serialize(stream, context);
-                    stream.Flush();
-
-                    var eventData = new EventData(stream.ToArray());
-                    await producer.SendAsync(new[] {eventData});
-                }
+                var eventData = new EventData(SystemTextJsonMessageSerializer.Instance.GetMessageBody(context).GetBytes());
+                await producer.SendAsync(new[] { eventData });
 
                 ConsumeContext<EventHubMessage> result = await taskCompletionSource.Task;
                 ConsumeContext<BusPing> ping = await pingTaskCompletionSource.Task;
@@ -143,7 +133,7 @@ namespace MassTransit.EventHubIntegration.Tests
             public Task Consume(ConsumeContext<BusPing> context)
             {
                 _taskCompletionSource.TrySetResult(context);
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

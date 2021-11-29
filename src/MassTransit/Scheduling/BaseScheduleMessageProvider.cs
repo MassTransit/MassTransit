@@ -3,31 +3,26 @@ namespace MassTransit.Scheduling
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
-    using GreenPipes;
 
 
     public abstract class BaseScheduleMessageProvider :
         IScheduleMessageProvider
     {
-        async Task<ScheduledMessage<T>> IScheduleMessageProvider.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, Task<T> message,
+        async Task<ScheduledMessage<T>> IScheduleMessageProvider.ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message,
             IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
         {
-            var payload = await message.ConfigureAwait(false);
+            var scheduleMessagePipe = new ScheduleMessageContextPipe<T>(message, pipe);
 
-            var scheduleMessagePipe = new ScheduleMessageContextPipe<T>(payload, pipe);
-
-            var tokenId = ScheduleTokenIdCache<T>.GetTokenId(payload);
+            var tokenId = ScheduleTokenIdCache<T>.GetTokenId(message);
 
             scheduleMessagePipe.ScheduledMessageId = tokenId;
 
-            ScheduleMessage<T> command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, payload, tokenId);
+            ScheduleMessage command = new ScheduleMessageCommand<T>(scheduledTime, destinationAddress, message, tokenId);
 
             await ScheduleSend(command, scheduleMessagePipe, cancellationToken).ConfigureAwait(false);
 
             return new ScheduledMessageHandle<T>(scheduleMessagePipe.ScheduledMessageId ?? command.CorrelationId, command.ScheduledTime,
-                command.Destination,
-                command.Payload);
+                command.Destination, message);
         }
 
         Task IScheduleMessageProvider.CancelScheduledSend(Guid tokenId)
@@ -43,5 +38,53 @@ namespace MassTransit.Scheduling
         protected abstract Task ScheduleSend(ScheduleMessage message, IPipe<SendContext<ScheduleMessage>> pipe, CancellationToken cancellationToken);
 
         protected abstract Task CancelScheduledSend(Guid tokenId, Uri destinationAddress);
+    }
+
+
+    /// <summary>
+    /// For remote endpoint schedulers, used to invoke the <see cref="SendContext{T}" /> pipe and
+    /// manage the ScheduledMessageId
+    /// </summary>
+    /// <typeparam name="T">The message type</typeparam>
+    class ScheduleMessageContextPipe<T> :
+        IPipe<SendContext<ScheduleMessage>>
+        where T : class
+    {
+        readonly T _payload;
+        readonly IPipe<SendContext<T>> _pipe;
+        SendContext _context;
+
+        Guid? _scheduledMessageId;
+
+        public ScheduleMessageContextPipe(T payload, IPipe<SendContext<T>> pipe)
+        {
+            _payload = payload;
+            _pipe = pipe;
+        }
+
+        public Guid? ScheduledMessageId
+        {
+            get => _context?.ScheduledMessageId ?? _scheduledMessageId;
+            set => _scheduledMessageId = value;
+        }
+
+        public async Task Send(SendContext<ScheduleMessage> context)
+        {
+            _context = context;
+
+            _context.ScheduledMessageId = _scheduledMessageId;
+
+            if (_pipe.IsNotEmpty())
+            {
+                SendContext<T> proxy = context.CreateProxy(_payload);
+
+                await _pipe.Send(proxy).ConfigureAwait(false);
+            }
+        }
+
+        void IProbeSite.Probe(ProbeContext context)
+        {
+            _pipe?.Probe(context);
+        }
     }
 }

@@ -3,9 +3,6 @@ namespace MassTransit.Containers.Tests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using ConsumeConfigurators;
-    using Definition;
-    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;

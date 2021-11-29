@@ -1,4 +1,4 @@
-namespace MassTransit.Interop.NServiceBus.Metadata
+namespace MassTransit.Metadata
 {
     public interface INServiceBusTypeMetadataCache<out T>
     {

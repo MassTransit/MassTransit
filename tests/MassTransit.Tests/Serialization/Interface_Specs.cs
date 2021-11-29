@@ -4,7 +4,7 @@ namespace MassTransit.Tests.Serialization
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
-    using ConsumePipeSpecifications;
+    using MassTransit.Configuration;
     using MassTransit.Serialization;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -12,10 +12,10 @@ namespace MassTransit.Tests.Serialization
     using TestFramework;
 
 
-    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
     [TestFixture(typeof(SystemTextJsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
-    [TestFixture(typeof(XmlMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftXmlMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializerV2))]
     public class Deserializing_an_interface :

@@ -4,8 +4,8 @@
     {
         using System;
         using System.Threading.Tasks;
-        using Automatonymous;
         using Context;
+        using Logging;
         using MassTransit.Saga;
         using MassTransit.Testing;
         using NUnit.Framework;

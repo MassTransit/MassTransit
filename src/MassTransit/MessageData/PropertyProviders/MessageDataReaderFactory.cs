@@ -17,10 +17,10 @@
             if (typeof(T) == typeof(Stream))
                 return new StreamMessageDataReader<T>();
 
-            if (MessageDataExtensions.IsValidMessageDataType(typeof(T)))
+            if (TypeMetadataCache.IsValidMessageDataType(typeof(T)))
                 return new ObjectMessageDataReader<T>();
 
-            throw new MessageDataException("Unsupported message data type: " + TypeMetadataCache<T>.ShortName);
+            throw new MessageDataException("Unsupported message data type: " + TypeCache<T>.ShortName);
         }
     }
 }

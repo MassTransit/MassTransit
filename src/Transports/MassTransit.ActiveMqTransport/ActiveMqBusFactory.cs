@@ -1,12 +1,11 @@
-﻿namespace MassTransit.ActiveMqTransport
+﻿namespace MassTransit
 {
     using System;
     using System.Threading;
+    using ActiveMqTransport;
+    using ActiveMqTransport.Configuration;
     using Configuration;
-    using Configurators;
-    using MassTransit.Topology;
-    using MassTransit.Topology.EntityNameFormatters;
-    using MassTransit.Topology.Topologies;
+    using Topology;
 
 
     public static class ActiveMqBusFactory

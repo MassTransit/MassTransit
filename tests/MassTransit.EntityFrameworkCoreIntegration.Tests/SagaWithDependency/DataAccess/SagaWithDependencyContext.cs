@@ -1,7 +1,6 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SagaWithDependency.DataAccess
 {
     using System.Collections.Generic;
-    using Mappings;
     using Microsoft.EntityFrameworkCore;
 
 

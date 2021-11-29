@@ -1,10 +1,9 @@
-namespace MassTransit.Interop.NServiceBus.Metadata
+namespace MassTransit.Metadata
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
-    using MassTransit.Metadata;
 
 
     public class NServiceBusTypeCache<T> :
@@ -26,7 +25,7 @@ namespace MassTransit.Interop.NServiceBus.Metadata
 
         static IEnumerable<string> GetMessageTypeNames()
         {
-            foreach (var messageType in TypeMetadataCache<T>.MessageTypes)
+            foreach (var messageType in MessageTypeCache<T>.MessageTypes)
             {
                 switch (messageType.Name)
                 {

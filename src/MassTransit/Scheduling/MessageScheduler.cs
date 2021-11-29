@@ -3,10 +3,7 @@ namespace MassTransit.Scheduling
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
     using Initializers;
-    using Metadata;
-    using Topology;
 
 
     public class MessageScheduler :
@@ -30,7 +27,7 @@ namespace MassTransit.Scheduling
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            return _provider.ScheduleSend(destinationAddress, scheduledTime, Task.FromResult(message), Pipe.Empty<SendContext>(), cancellationToken);
+            return _provider.ScheduleSend(destinationAddress, scheduledTime, message, Pipe.Empty<SendContext>(), cancellationToken);
         }
 
         public Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext<T>> pipe,
@@ -44,7 +41,7 @@ namespace MassTransit.Scheduling
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            return _provider.ScheduleSend(destinationAddress, scheduledTime, Task.FromResult(message), pipe, cancellationToken);
+            return _provider.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
         public Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, T message, IPipe<SendContext> pipe,
@@ -58,7 +55,7 @@ namespace MassTransit.Scheduling
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            return _provider.ScheduleSend(destinationAddress, scheduledTime, Task.FromResult(message), pipe, cancellationToken);
+            return _provider.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
         }
 
         public Task<ScheduledMessage> ScheduleSend(Uri destinationAddress, DateTime scheduledTime, object message,
@@ -116,7 +113,7 @@ namespace MassTransit.Scheduling
             return MessageSchedulerConverterCache.ScheduleSend(this, destinationAddress, scheduledTime, message, messageType, pipe, cancellationToken);
         }
 
-        public Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values,
+        public async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values,
             CancellationToken cancellationToken)
             where T : class
         {
@@ -125,12 +122,12 @@ namespace MassTransit.Scheduling
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            Task<T> message = MessageInitializerCache<T>.InitializeMessage(values, cancellationToken);
+            SendTuple<T> send = await MessageInitializerCache<T>.InitializeMessage(values, cancellationToken).ConfigureAwait(false);
 
-            return _provider.ScheduleSend(destinationAddress, scheduledTime, message, Pipe.Empty<SendContext>(), cancellationToken);
+            return await _provider.ScheduleSend(destinationAddress, scheduledTime, send.Message, send.Pipe, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext<T>> pipe,
+        public async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext<T>> pipe,
             CancellationToken cancellationToken)
             where T : class
         {
@@ -141,12 +138,12 @@ namespace MassTransit.Scheduling
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            Task<T> message = MessageInitializerCache<T>.InitializeMessage(values, cancellationToken);
+            SendTuple<T> send = await MessageInitializerCache<T>.InitializeMessage(values, pipe, cancellationToken).ConfigureAwait(false);
 
-            return _provider.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
+            return await _provider.ScheduleSend(destinationAddress, scheduledTime, send.Message, send.Pipe, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext> pipe,
+        public async Task<ScheduledMessage<T>> ScheduleSend<T>(Uri destinationAddress, DateTime scheduledTime, object values, IPipe<SendContext> pipe,
             CancellationToken cancellationToken)
             where T : class
         {
@@ -157,9 +154,9 @@ namespace MassTransit.Scheduling
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            Task<T> message = MessageInitializerCache<T>.InitializeMessage(values, cancellationToken);
+            SendTuple<T> send = await MessageInitializerCache<T>.InitializeMessage(values, pipe, cancellationToken).ConfigureAwait(false);
 
-            return _provider.ScheduleSend(destinationAddress, scheduledTime, message, pipe, cancellationToken);
+            return await _provider.ScheduleSend(destinationAddress, scheduledTime, send.Message, send.Pipe, cancellationToken).ConfigureAwait(false);
         }
 
         public Task CancelScheduledSend(Uri destinationAddress, Guid tokenId)
@@ -283,7 +280,7 @@ namespace MassTransit.Scheduling
             if (_busTopology.TryGetPublishAddress<T>(out var address))
                 return address;
 
-            throw new ArgumentException($"The publish address for the specified type was not returned: {TypeMetadataCache<T>.ShortName}");
+            throw new ArgumentException($"The publish address for the specified type was not returned: {TypeCache<T>.ShortName}");
         }
 
         Uri GetPublishAddress(Type messageType)
@@ -291,7 +288,7 @@ namespace MassTransit.Scheduling
             if (_busTopology.TryGetPublishAddress(messageType, out var address))
                 return address;
 
-            throw new ArgumentException($"The publish address for the specified type was not returned: {TypeMetadataCache.GetShortName(messageType)}");
+            throw new ArgumentException($"The publish address for the specified type was not returned: {TypeCache.GetShortName(messageType)}");
         }
     }
 }

@@ -4,10 +4,7 @@
     {
         using System;
         using System.Threading.Tasks;
-        using Automatonymous;
-        using MassTransit.Saga;
         using NUnit.Framework;
-        using Saga;
         using TestFramework;
 
 
@@ -22,15 +19,15 @@
 
                 IRequestClient<Start> startClient = Bus.CreateRequestClient<Start>(InputQueueAddress, TestTimeout);
 
-                await startClient.GetResponse<StartupComplete>(new Start {CorrelationId = serviceId}, TestCancellationToken);
+                await startClient.GetResponse<StartupComplete>(new Start { CorrelationId = serviceId }, TestCancellationToken);
 
                 IRequestClient<CheckStatus> requestClient = Bus.CreateRequestClient<CheckStatus>(InputQueueAddress, TestTimeout);
 
-                Response<Status> status = await requestClient.GetResponse<Status>(new CheckStatus {CorrelationId = serviceId}, TestCancellationToken);
+                Response<Status> status = await requestClient.GetResponse<Status>(new CheckStatus { CorrelationId = serviceId }, TestCancellationToken);
 
                 Assert.That(status.Message.StatusText, Is.EqualTo("Started"));
 
-                status = await requestClient.GetResponse<Status>(new CheckStatus {CorrelationId = serviceId}, TestCancellationToken);
+                status = await requestClient.GetResponse<Status>(new CheckStatus { CorrelationId = serviceId }, TestCancellationToken);
 
                 Assert.That(status.Message.StatusText, Is.EqualTo("Started"));
             }
@@ -90,7 +87,7 @@
                 Initially(
                     When(Started)
                         .Then(context => context.Instance.StatusText = "Started")
-                        .Respond(context => new StartupComplete {CorrelationId = context.Instance.CorrelationId})
+                        .Respond(context => new StartupComplete { CorrelationId = context.Instance.CorrelationId })
                         .TransitionTo(Running)
                 );
 

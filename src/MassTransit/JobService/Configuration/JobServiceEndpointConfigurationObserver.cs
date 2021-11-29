@@ -1,7 +1,6 @@
-namespace MassTransit.JobService.Configuration
+namespace MassTransit.Configuration
 {
     using System;
-    using EndpointConfigurators;
 
 
     public class JobServiceEndpointConfigurationObserver :

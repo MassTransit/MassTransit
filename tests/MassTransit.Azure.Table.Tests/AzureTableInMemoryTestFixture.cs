@@ -1,44 +1,32 @@
 namespace MassTransit.Azure.Table.Tests
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.Azure.Cosmos.Table;
     using NUnit.Framework;
-    using Scheduling;
     using TestFramework;
 
 
     public class AzureTableInMemoryTestFixture :
         InMemoryTestFixture
     {
-        readonly Lazy<IMessageScheduler> _messageScheduler;
         protected readonly string ConnectionString;
         protected readonly CloudTable TestCloudTable;
         protected readonly string TestTableName;
 
         public AzureTableInMemoryTestFixture()
         {
-            QuartzAddress = new Uri("loopback://localhost/quartz");
             ConnectionString = Configuration.StorageAccount;
             TestTableName = "azuretabletests";
             var storageAccount = CloudStorageAccount.Parse(ConnectionString);
             var tableClient = storageAccount.CreateCloudTableClient();
             TestCloudTable = tableClient.GetTableReference(TestTableName);
-            _messageScheduler = new Lazy<IMessageScheduler>(() =>
-                new MessageScheduler(new EndpointScheduleMessageProvider(() => GetSendEndpoint(QuartzAddress)), Bus.Topology));
         }
-
-        protected Uri QuartzAddress { get; }
-
-        protected ISendEndpoint QuartzEndpoint { get; set; }
-
-        protected IMessageScheduler Scheduler => _messageScheduler.Value;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.UseInMemoryScheduler();
+            configurator.UseDelayedMessageScheduler();
 
             base.ConfigureInMemoryBus(configurator);
         }
@@ -60,8 +48,6 @@ namespace MassTransit.Azure.Table.Tests
             TestCloudTable.CreateIfNotExists();
 
             IEnumerable<DynamicTableEntity> entities = GetTableEntities();
-
-            QuartzEndpoint = await GetSendEndpoint(QuartzAddress);
 
             foreach (IGrouping<string, DynamicTableEntity> key in entities.GroupBy(x => x.PartitionKey))
             {

@@ -1,11 +1,12 @@
-namespace MassTransit.Azure.ServiceBus.Core
+namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using AzureServiceBusTransport;
     using Initializers;
     using Initializers.TypeConverters;
-    using Util;
+    using Internals;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]

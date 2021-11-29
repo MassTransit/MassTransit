@@ -6,14 +6,12 @@
 
   <ItemGroup>
     <PackageReference Include="Iesi.Collections" Version="4.0.4" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.18" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
     <PackageReference Include="NUnit" Version="3.13.2" />
-    <PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
     <PackageReference Include="Shouldly" Version="4.0.3" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.115" />
-    <ProjectReference Include="..\..\src\Containers\MassTransit.ExtensionsDependencyInjectionIntegration\MassTransit.ExtensionsDependencyInjectionIntegration.csproj" />
     <ProjectReference Include="..\..\src\MassTransit.TestFramework\MassTransit.TestFramework.csproj" />
     <ProjectReference Include="..\..\src\Persistence\MassTransit.NHibernateIntegration\MassTransit.NHibernateIntegration.csproj" />
     <ProjectReference Include="..\MassTransit.Tests\MassTransit.Tests.csproj" />

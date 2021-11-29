@@ -1,4 +1,4 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit
 {
     using System;
     using System.Collections.Generic;

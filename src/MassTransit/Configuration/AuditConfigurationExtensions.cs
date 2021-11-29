@@ -4,8 +4,7 @@ namespace MassTransit
     using Audit;
     using Audit.MetadataFactories;
     using Audit.Observers;
-    using Configurators;
-    using GreenPipes;
+    using Configuration;
     using Util;
 
 
@@ -22,7 +21,7 @@ namespace MassTransit
             Action<IMessageFilterConfigurator> configureFilter = null, ISendMetadataFactory metadataFactory = null)
             where T : ISendObserverConnector, IPublishObserverConnector
         {
-            var specification = new SendMessageFilterSpecification();
+            var specification = new SendMessageFilterConfigurator();
             configureFilter?.Invoke(specification);
 
             var factory = metadataFactory ?? new DefaultSendMetadataFactory();
@@ -48,12 +47,12 @@ namespace MassTransit
             if (store == null)
                 throw new ArgumentNullException(nameof(store));
 
-            var specification = new ConsumeMessageFilterSpecification();
-            configureFilter?.Invoke(specification);
+            var filterConfigurator = new ConsumeMessageFilterConfigurator();
+            configureFilter?.Invoke(filterConfigurator);
 
             var factory = metadataFactory ?? new DefaultConsumeMetadataFactory();
 
-            return connector.ConnectConsumeObserver(new AuditConsumeObserver(store, factory, specification.Filter));
+            return connector.ConnectConsumeObserver(new AuditConsumeObserver(store, factory, filterConfigurator.Filter));
         }
     }
 }

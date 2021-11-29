@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -23,7 +22,7 @@
             var reviseActivity = GetActivityContext<ReviseItineraryActivity>();
 
             var builder = new RoutingSlipBuilder(_trackingNumber);
-            builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new {Value = "Time to add a new item!"});
+            builder.AddActivity(reviseActivity.Name, reviseActivity.ExecuteUri, new { Value = "Time to add a new item!" });
 
             await Bus.Execute(builder.Build());
 
@@ -31,11 +30,11 @@
             await _reviseActivityCompleted;
             ConsumeContext<RoutingSlipActivityCompleted> testActivityResult = await _testActivityCompleted;
 
-            testActivityResult.Message.GetArgument<string>("Value").ShouldBe("Added");
+            testActivityResult.GetArgument<string>("Value").ShouldBe("Added");
 
             ConsumeContext<RoutingSlipActivityCompleted> consumeContext = await _handled;
 
-            Assert.That(consumeContext.Message.GetArgument<string>("Value"), Is.EqualTo("Added"));
+            Assert.That(consumeContext.GetArgument<string>("Value"), Is.EqualTo("Added"));
         }
 
         Task<ConsumeContext<RoutingSlipActivityCompleted>> _handled;
@@ -80,7 +79,7 @@
 
             AddActivityContext<ReviseItineraryActivity, TestArguments, TestLog>(() => new ReviseItineraryActivity(x =>
             {
-                x.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Added"});
+                x.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Added" });
                 x.AddSubscription(InputQueueAddress, RoutingSlipEvents.ActivityCompleted | RoutingSlipEvents.Supplemental, RoutingSlipEventContents.All,
                     testActivity.Name);
             }));

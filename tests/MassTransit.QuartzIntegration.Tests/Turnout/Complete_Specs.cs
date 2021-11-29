@@ -4,9 +4,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     using System.Linq;
     using System.Threading.Tasks;
     using Contracts.JobService;
-    using Definition;
     using JobService;
-    using JobService.Configuration;
     using NUnit.Framework;
     using Util;
 
@@ -300,7 +298,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
                         _submitted[i].TrySetResult(context);
                 }
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
 
             configurator.Handler<JobStarted>(context =>
@@ -311,7 +309,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
                         _started[i].TrySetResult(context);
                 }
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
 
             configurator.Handler<JobCompleted>(context =>
@@ -322,7 +320,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
                         _completed[i].TrySetResult(context);
                 }
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
         }
     }

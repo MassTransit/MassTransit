@@ -1,7 +1,7 @@
 namespace MassTransit.Events
 {
     using System;
-    using Transports.Metrics;
+    using Transports;
 
 
     public class ReceiveTransportCompletedEvent :

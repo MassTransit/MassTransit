@@ -3,7 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using Contracts;
-    using GreenPipes.Internals.Extensions;
+    using Internals;
     using NUnit.Framework;
     using RoutingKeyDirect;
     using Util;
@@ -106,7 +106,7 @@
                 if (context.Message.RoutingKey == "bar")
                     _bar.TrySetResult(context.Message);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

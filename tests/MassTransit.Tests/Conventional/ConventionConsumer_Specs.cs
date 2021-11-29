@@ -1,11 +1,8 @@
 ﻿namespace MassTransit.Tests.Conventional
 {
-    using System;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
-    using Util;
 
 
     [TestFixture]
@@ -15,27 +12,18 @@
         [Test]
         public async Task Should_find_the_message_handlers()
         {
-            await Bus.Publish<MessageA>(new {Value = "Hello"});
-            await Bus.Publish<MessageB>(new {Name = "World"});
+            await Bus.Publish<MessageA>(new { Value = "Hello" });
+            await Bus.Publish<MessageB>(new { Name = "World" });
 
             await _receivedA.Task;
             await _receivedB.Task;
-        }
-
-        [Test]
-        [Explicit]
-        public void Should_wonderful_display()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
         }
 
         [TearDown]
         public Task TearDown()
         {
             ConsumerConvention.Remove<CustomConsumerConvention>();
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         TaskCompletionSource<MessageA> _receivedA;
@@ -101,7 +89,7 @@
         [Test]
         public async Task Should_find_the_message_handlers()
         {
-            await Bus.Publish<MessageA>(new {Value = "Hello"});
+            await Bus.Publish<MessageA>(new { Value = "Hello" });
 
             await _receivedA.Task;
         }

@@ -5,7 +5,6 @@ namespace MassTransit.Analyzers.Tests
     using System.Collections.Immutable;
     using System.Linq;
     using System.Reflection;
-    using GreenPipes;
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.Diagnostics;

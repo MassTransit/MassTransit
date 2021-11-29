@@ -1,8 +1,5 @@
-namespace MassTransit.ActiveMqTransport.Topology
+namespace MassTransit
 {
-    using MassTransit.Topology;
-
-
     public interface IActiveMqMessageConsumeTopology<TMessage> :
         IMessageConsumeTopology<TMessage>
         where TMessage : class

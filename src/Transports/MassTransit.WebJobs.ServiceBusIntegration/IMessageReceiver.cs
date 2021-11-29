@@ -1,10 +1,9 @@
-namespace MassTransit.WebJobs.ServiceBusIntegration
+namespace MassTransit
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using global::Azure.Messaging.ServiceBus;
-    using Saga;
+    using Azure.Messaging.ServiceBus;
 
 
     /// <summary>

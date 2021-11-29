@@ -3,8 +3,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using MassTransit.Testing;
-    using Monitoring.Health;
     using NUnit.Framework;
     using TestFramework;
 

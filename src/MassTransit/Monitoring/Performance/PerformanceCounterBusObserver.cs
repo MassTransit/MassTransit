@@ -28,32 +28,32 @@ namespace MassTransit.Monitoring.Performance
 
         public Task PreStart(IBus bus)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         public Task PostStart(IBus bus, Task<BusReady> busReady)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         public Task StartFaulted(IBus bus, Exception exception)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         public Task PreStop(IBus bus)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         public Task PostStop(IBus bus)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         public Task StopFaulted(IBus bus, Exception exception)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

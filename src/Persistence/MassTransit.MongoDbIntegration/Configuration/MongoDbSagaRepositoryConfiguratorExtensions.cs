@@ -1,11 +1,10 @@
-namespace MassTransit.MongoDbIntegration
+namespace MassTransit
 {
     using System;
-    using MassTransit.Saga;
     using MongoDB.Bson.Serialization;
     using MongoDB.Driver;
-    using Registration;
-    using Saga.CollectionNameFormatters;
+    using MongoDbIntegration;
+    using MongoDbIntegration.Saga;
 
 
     public static class MongoDbSagaRepositoryConfiguratorExtensions
@@ -65,7 +64,7 @@ namespace MassTransit.MongoDbIntegration
         /// <param name="classMapConfigurator"></param>
         /// <typeparam name="TSaga"></typeparam>
         public static void ClassMap<TSaga>(this IMongoDbSagaRepositoryConfigurator<TSaga> configurator,
-            Func<IConfigurationServiceProvider, Action<BsonClassMap<TSaga>>> classMapConfigurator)
+            Func<IServiceProvider, Action<BsonClassMap<TSaga>>> classMapConfigurator)
             where TSaga : class, ISagaVersion
         {
             if (configurator == null)

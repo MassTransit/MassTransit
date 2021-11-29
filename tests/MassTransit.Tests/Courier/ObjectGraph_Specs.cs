@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -34,17 +33,17 @@
 
             var dictionary = new Dictionary<string, object>
             {
-                {"Outer", new OuterObjectImpl(_intValue, _stringValue, _decimalValue)},
-                {"Names", new[] {"Albert", "Chris"}},
-                {"ArgumentsDictionary", _argumentsDictionary}
+                { "Outer", new OuterObjectImpl(_intValue, _stringValue, _decimalValue) },
+                { "Names", new[] { "Albert", "Chris" } },
+                { "ArgumentsDictionary", _argumentsDictionary }
             };
             builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, dictionary);
-            builder.AddActivity(testActivity2.Name, testActivity2.ExecuteUri, new {Value = "Howdy!"});
+            builder.AddActivity(testActivity2.Name, testActivity2.ExecuteUri, new { Value = "Howdy!" });
 
             builder.AddVariable("ArgumentsDictionary", new Dictionary<string, string>
             {
-                {"good_jpath_key", "val3"},
-                {"bad jpath key", "val4"}
+                { "good_jpath_key", "val3" },
+                { "bad jpath key", "val4" }
             });
 
             await Bus.Execute(builder.Build());
@@ -68,14 +67,14 @@
 
         readonly IDictionary<string, string> _argumentsDictionary = new Dictionary<string, string>
         {
-            {"good_jpath_key", "val1"},
-            {"bad jpath key", "val2"}
+            { "good_jpath_key", "val1" },
+            { "bad jpath key", "val2" }
         };
 
         protected override void SetupActivities(BusTestHarness testHarness)
         {
             AddActivityContext<ObjectGraphTestActivity, ObjectGraphActivityArguments, TestLog>(
-                () => new ObjectGraphTestActivity(_intValue, _stringValue, _decimalValue, new[] {"Albert", "Chris"}, _argumentsDictionary));
+                () => new ObjectGraphTestActivity(_intValue, _stringValue, _decimalValue, new[] { "Albert", "Chris" }, _argumentsDictionary));
             AddActivityContext<TestActivity, TestArguments, TestLog>(
                 () => new TestActivity());
         }

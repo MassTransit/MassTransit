@@ -2,8 +2,6 @@ namespace MassTransit.Tests.Saga
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using MassTransit.Saga;
     using MassTransit.Testing;
     using Messages;
     using NUnit.Framework;
@@ -15,15 +13,6 @@ namespace MassTransit.Tests.Saga
     public class When_an_initiating_message_for_a_saga_arrives :
         InMemoryTestFixture
     {
-        [Test]
-        [Explicit]
-        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
-        }
-
         [Test]
         public async Task The_saga_should_be_created_when_an_initiating_message_is_received()
         {
@@ -154,11 +143,11 @@ namespace MassTransit.Tests.Saga
         [Test]
         public async Task The_saga_should_be_loaded()
         {
-            await InputQueueSendEndpoint.Send(new InitiateSimpleSaga(_sagaId) {Name = "Chris"});
+            await InputQueueSendEndpoint.Send(new InitiateSimpleSaga(_sagaId) { Name = "Chris" });
 
             Guid? sagaId = await _repository.ShouldContainSaga(x => x.Initiated, TestTimeout);
 
-            await InputQueueSendEndpoint.Send(new ObservableSagaMessage {Name = "Chris"});
+            await InputQueueSendEndpoint.Send(new ObservableSagaMessage { Name = "Chris" });
 
             sagaId = await _repository.ShouldContainSaga(x => x.Observed, TestTimeout);
 

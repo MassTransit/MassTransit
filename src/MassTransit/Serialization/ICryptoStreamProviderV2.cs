@@ -1,13 +1,13 @@
 ﻿namespace MassTransit.Serialization
 {
     using System.IO;
-    using GreenPipes;
 
 
-    public interface ICryptoStreamProviderV2 : IProbeSite
+    public interface ICryptoStreamProviderV2 :
+        IProbeSite
     {
-        Stream GetDecryptStream(Stream stream, ReceiveContext context);
+        Stream GetDecryptStream(Stream stream, Headers headers);
 
-        Stream GetEncryptStream(Stream stream, SendContext context);
+        Stream GetEncryptStream(Stream stream, Headers headers);
     }
 }

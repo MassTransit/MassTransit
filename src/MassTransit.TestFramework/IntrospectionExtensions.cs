@@ -2,13 +2,10 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
-    using System.Text;
-    using GreenPipes;
-    using GreenPipes.Introspection;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
+    using System.Text.Json;
+    using Introspection;
+    using Serialization;
 
 
     public static class IntrospectionExtensions
@@ -17,36 +14,25 @@
         {
             var probeResult = bus.GetProbeResult();
 
-            var probeJObject = JObject.Parse(probeResult.ToJsonString());
-            JEnumerable<JToken> receiveEndpoints = probeJObject["results"]["bus"]["host"]["receiveEndpoint"].Children();
+            var element = JsonSerializer.SerializeToElement(probeResult, SystemTextJsonMessageSerializer.Options);
 
-            IEnumerable<ReceiveTransportProbeResult> probeResults = receiveEndpoints.Select(result =>
-                    JsonConvert.DeserializeObject<ReceiveTransportProbeResult>(result["receiveTransport"].ToString()))
-                .Where(x => x.Address != null);
+            Uri[] endpoints = element
+                .GetProperty("results")
+                .GetProperty("bus")
+                .GetProperty("host")
+                .GetProperty("receiveEndpoint")
+                .EnumerateArray()
+                .Select(x => x.GetProperty("receiveTransport").TryGetProperty("address", out var property) ? property.GetString() : null)
+                .Where(x => x != null)
+                .Select(x => new Uri(x))
+                .ToArray();
 
-            return probeResults.Select(result => new Uri(result.Address));
+            return endpoints;
         }
 
         public static string ToJsonString(this ProbeResult result)
         {
-            var encoding = new UTF8Encoding(false, true);
-
-            using var stream = new MemoryStream();
-            using var writer = new StreamWriter(stream, encoding, 1024, true);
-            using var jsonWriter = new JsonTextWriter(writer) {Formatting = Formatting.Indented};
-
-            SerializerCache.Serializer.Serialize(jsonWriter, result, typeof(ProbeResult));
-
-            jsonWriter.Flush();
-            writer.Flush();
-
-            return encoding.GetString(stream.ToArray());
-        }
-
-
-        class ReceiveTransportProbeResult
-        {
-            public string Address { get; set; }
+            return JsonSerializer.Serialize(result, typeof(ProbeResult), SystemTextJsonMessageSerializer.Options);
         }
     }
 }

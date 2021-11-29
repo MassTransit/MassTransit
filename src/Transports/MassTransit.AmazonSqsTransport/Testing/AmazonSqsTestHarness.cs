@@ -1,12 +1,12 @@
-﻿namespace MassTransit.AmazonSqsTransport.Testing
+﻿namespace MassTransit.Testing
 {
     using System;
     using System.Threading.Tasks;
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Amazon.SQS.Model;
-    using Configurators;
-    using MassTransit.Testing;
+    using AmazonSqsTransport;
+    using AmazonSqsTransport.Configuration;
 
 
     public class AmazonSqsTestHarness :

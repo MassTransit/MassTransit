@@ -3,8 +3,7 @@ namespace MassTransit.Initializers.HeaderInitializers
     using System;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Internals.Reflection;
-    using Util;
+    using Internals;
 
 
     /// <summary>
@@ -36,7 +35,7 @@ namespace MassTransit.Initializers.HeaderInitializers
 
             sendContext.Headers.Set(_headerName, inputPropertyValue);
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

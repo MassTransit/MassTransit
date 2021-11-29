@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.Serialization
 {
-    using System.IO;
     using System.Net.Mime;
 
 
@@ -10,21 +9,21 @@
     public class CopyBodySerializer :
         IMessageSerializer
     {
-        readonly ReceiveContext _context;
+        readonly MessageBody _body;
 
-        public CopyBodySerializer(ReceiveContext context)
+        public CopyBodySerializer(ContentType contentType, MessageBody body)
         {
-            _context = context;
-            ContentType = context.ContentType;
+            _body = body;
+
+            ContentType = contentType;
         }
 
         public ContentType ContentType { get; }
 
-        void IMessageSerializer.Serialize<T>(Stream stream, SendContext<T> context)
+        public MessageBody GetMessageBody<T>(SendContext<T> context)
+            where T : class
         {
-            using var bodyStream = _context.GetBodyStream();
-
-            bodyStream.CopyTo(stream);
+            return _body;
         }
     }
 }

@@ -2,13 +2,8 @@ namespace MassTransit
 {
     using System;
     using System.Threading;
-    using ConsumeConfigurators;
-    using Context;
-    using GreenPipes;
-    using GreenPipes.Configurators;
-    using PipeConfigurators;
-    using Pipeline.Filters;
-    using Saga;
+    using Configuration;
+    using RetryPolicies;
 
 
     public static class ScheduledRedeliveryConfigurationExtensions
@@ -29,7 +24,7 @@ namespace MassTransit
 
             configurator.AddPipeSpecification(redeliverySpecification);
 
-            var retrySpecification = new RedeliveryRetryPipeSpecification<T>();
+            var retrySpecification = new RedeliveryRetryPipeSpecification<T>(redeliverySpecification);
 
             configure?.Invoke(retrySpecification);
 
@@ -51,7 +46,7 @@ namespace MassTransit
 
             configurator.AddPipeSpecification(redeliverySpecification);
 
-            var retrySpecification = new RedeliveryRetryPipeSpecification<T>();
+            var retrySpecification = new RedeliveryRetryPipeSpecification<T>(redeliverySpecification);
 
             retrySpecification.SetRetryPolicy(exceptionFilter =>
                 new ConsumeContextRetryPolicy<ConsumeContext<T>, RetryConsumeContext<T>>(retryPolicy, CancellationToken.None, Factory));

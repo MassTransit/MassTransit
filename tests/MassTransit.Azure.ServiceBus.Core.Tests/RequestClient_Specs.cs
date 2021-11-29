@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework.Messages;

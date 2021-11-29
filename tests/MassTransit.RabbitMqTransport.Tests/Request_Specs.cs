@@ -2,9 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
-    using Serialization;
     using Shouldly;
     using TestFramework.Messages;
 

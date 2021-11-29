@@ -2,12 +2,8 @@
 {
     using System;
     using System.Threading.Tasks;
-    using ConsumeConfigurators;
-    using GreenPipes;
-    using GreenPipes.Builders;
-    using GreenPipes.Configurators;
-    using GreenPipes.Util;
-    using Pipeline;
+    using Configuration;
+    using Util;
 
 
     /// <summary>
@@ -31,7 +27,7 @@
             _requestTask = requestTask;
 
             _pipeConfigurator = new PipeConfigurator<ConsumeContext<TResponse>>();
-            _completed = Util.TaskUtil.GetTask<ConsumeContext<TResponse>>();
+            _completed = TaskUtil.GetTask<ConsumeContext<TResponse>>();
         }
 
         public void AddPipeSpecification(IPipeSpecification<ConsumeContext<TResponse>> specification)
@@ -80,7 +76,7 @@
                 _completed.TrySetException(ex);
             }
 
-            return Util.TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

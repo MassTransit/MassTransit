@@ -2,10 +2,7 @@ namespace MassTransit.QuartzIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Automatonymous;
-    using GreenPipes;
     using NUnit.Framework;
-    using Saga;
 
 
     [TestFixture]
@@ -25,7 +22,7 @@ namespace MassTransit.QuartzIntegration.Tests
 
             await InputQueueSendEndpoint.Send(message);
 
-            var result = await response;
+            Response<Status, InstanceNotFound> result = await response;
 
             Assert.That(result.Is(out Response<InstanceNotFound> _), Is.False);
             Assert.That(result.Is(out Response<Status> status), Is.True);
@@ -126,9 +123,9 @@ namespace MassTransit.QuartzIntegration.Tests
 
         class Status
         {
-            public Status(string status, string serviceName)
+            public Status(string statusDescription, string serviceName)
             {
-                StatusDescription = status;
+                StatusDescription = statusDescription;
                 ServiceName = serviceName;
             }
 

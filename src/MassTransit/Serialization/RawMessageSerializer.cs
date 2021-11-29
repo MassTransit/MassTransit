@@ -1,5 +1,7 @@
 namespace MassTransit.Serialization
 {
+    using System.Text;
+    using System.Text.Json;
     using Metadata;
 
 
@@ -23,7 +25,7 @@ namespace MassTransit.Serialization
             if (context.RequestId.HasValue)
                 context.Headers.Set(MessageHeaders.RequestId, context.RequestId.Value.ToString());
 
-            context.Headers.Set(MessageHeaders.MessageType, string.Join(";", TypeMetadataCache<T>.MessageTypeNames));
+            context.Headers.Set(MessageHeaders.MessageType, string.Join(";", MessageTypeCache<T>.MessageTypeNames));
 
             if (context.ResponseAddress != null)
                 context.Headers.Set(MessageHeaders.ResponseAddress, context.ResponseAddress);
@@ -33,6 +35,8 @@ namespace MassTransit.Serialization
 
             if (context.SourceAddress != null)
                 context.Headers.Set(MessageHeaders.SourceAddress, context.SourceAddress);
+
+            context.Headers.Set(MessageHeaders.Host.Info, Encoding.UTF8.GetString(JsonSerializer.SerializeToUtf8Bytes(HostMetadataCache.Host)));
         }
     }
 }

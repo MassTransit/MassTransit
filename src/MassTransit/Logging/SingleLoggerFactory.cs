@@ -3,7 +3,7 @@ namespace MassTransit.Logging
     using Microsoft.Extensions.Logging;
 
 
-    class SingleLoggerFactory :
+    public class SingleLoggerFactory :
         ILoggerFactory
     {
         readonly ILogger _logger;

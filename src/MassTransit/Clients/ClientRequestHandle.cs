@@ -4,11 +4,7 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using ConsumeConfigurators;
-    using GreenPipes;
-    using GreenPipes.Builders;
-    using GreenPipes.Configurators;
-    using Metadata;
+    using Configuration;
     using Util;
 
 
@@ -179,7 +175,7 @@
             where T : class
         {
             if (_responseHandlers.ContainsKey(typeof(T)))
-                throw new RequestException($"Only one handler of type {TypeMetadataCache<T>.ShortName} can be registered");
+                throw new RequestException($"Only one handler of type {TypeCache<T>.ShortName} can be registered");
 
             var configurator = new ResponseHandlerConfigurator<T>(_taskScheduler, handler, _send);
 
@@ -217,12 +213,12 @@
         {
             Fail(context.Message);
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         void Fail(Fault message)
         {
-            Fail(new RequestFaultException(TypeMetadataCache<TRequest>.ShortName, message));
+            Fail(new RequestFaultException(TypeCache<TRequest>.ShortName, message));
         }
 
         void Fail(Exception exception)

@@ -1,8 +1,7 @@
-﻿namespace GreenPipes
+﻿namespace MassTransit
 {
     using System;
-    using MassTransit;
-    using MassTransit.PipeConfigurators;
+    using Configuration;
 
 
     public static class ConsumerPipeConfiguratorExtensions

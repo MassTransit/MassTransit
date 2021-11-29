@@ -1,10 +1,9 @@
-﻿namespace MassTransit.Internals.Reflection
+﻿namespace MassTransit.Internals
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Extensions;
     using Metadata;
 
 
@@ -18,7 +17,7 @@
 
         WritePropertyCache()
         {
-            if (TypeMetadataCache<T>.IsValidMessageType && typeof(T).GetTypeInfo().IsInterface)
+            if (MessageTypeCache<T>.IsValidMessageType && typeof(T).GetTypeInfo().IsInterface)
             {
                 _implementationType = TypeMetadataCache<T>.ImplementationType;
                 _propertyIndex = _implementationType.GetAllProperties()
@@ -29,7 +28,7 @@
             else
             {
                 _implementationType = typeof(T);
-                _propertyIndex = TypeMetadataCache<T>.Properties
+                _propertyIndex = MessageTypeCache<T>.Properties
                     .ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
             }
 
@@ -41,7 +40,7 @@
             if (_propertyIndex.TryGetValue(name, out var propertyInfo))
                 return propertyInfo.CanWrite;
 
-            throw new ArgumentException($"{TypeMetadataCache<T>.ShortName} does not contain the property: {name}", nameof(name));
+            throw new ArgumentException($"{TypeCache<T>.ShortName} does not contain the property: {name}", nameof(name));
         }
 
         IWriteProperty<T, TProperty> IWritePropertyCache<T>.GetProperty<TProperty>(string name)
@@ -68,7 +67,7 @@
                     if (propertyInfo.PropertyType != typeof(TProperty))
                     {
                         throw new ArgumentException(
-                            $"Property type mismatch, {TypeMetadataCache<TProperty>.ShortName} != {TypeMetadataCache.GetShortName(propertyInfo.PropertyType)}");
+                            $"Property type mismatch, {TypeCache<TProperty>.ShortName} != {TypeCache.GetShortName(propertyInfo.PropertyType)}");
                     }
 
                     var writeProperty = new WriteProperty<T, TProperty>(_implementationType, propertyInfo);
@@ -79,7 +78,7 @@
                 }
             }
 
-            throw new ArgumentException($"{TypeMetadataCache<T>.ShortName} does not contain the property: {name}", nameof(name));
+            throw new ArgumentException($"{TypeCache<T>.ShortName} does not contain the property: {name}", nameof(name));
         }
 
         public static IWriteProperty<T, TProperty> GetProperty<TProperty>(string name)

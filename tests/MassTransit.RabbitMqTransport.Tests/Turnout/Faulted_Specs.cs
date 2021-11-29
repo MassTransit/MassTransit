@@ -2,14 +2,9 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
 {
     using System;
     using System.Threading.Tasks;
-    using Definition;
-    using JobService;
-    using JobService.Configuration;
     using MassTransit.Contracts.JobService;
     using NUnit.Framework;
-    using RabbitMqTransport;
     using TestFramework;
-    using Tests;
 
 
     public interface GrindTheGears
@@ -84,7 +79,7 @@ namespace MassTransit.RabbitMqTransport.Tests.Turnout
 
         protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
         {
-            configurator.UseDelayedExchangeMessageScheduler();
+            configurator.UseDelayedMessageScheduler();
 
             var options = new ServiceInstanceOptions()
                 .SetEndpointNameFormatter(KebabCaseEndpointNameFormatter.Instance);

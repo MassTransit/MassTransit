@@ -29,7 +29,7 @@ namespace MassTransit.Initializers.PropertyProviders
                 return TaskUtil.Default<TValue>();
 
             Task<TProperty> propertyTask = _provider.GetProperty(context);
-            if (propertyTask.IsCompleted)
+            if (propertyTask.Status == TaskStatus.RanToCompletion)
                 return propertyTask.Result.GetValue(context);
 
             async Task<TValue> GetPropertyAsync()

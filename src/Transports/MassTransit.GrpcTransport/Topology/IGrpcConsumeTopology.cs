@@ -1,6 +1,6 @@
-﻿namespace MassTransit.GrpcTransport.Topology
+﻿namespace MassTransit
 {
-    using MassTransit.Topology;
+    using GrpcTransport.Configuration;
 
 
     public interface IGrpcConsumeTopology :
@@ -13,6 +13,6 @@
         /// Apply the entire topology to the builder
         /// </summary>
         /// <param name="builder"></param>
-        void Apply(GrpcTransport.Builders.IGrpcConsumeTopologyBuilder builder);
+        void Apply(IGrpcConsumeTopologyBuilder builder);
     }
 }

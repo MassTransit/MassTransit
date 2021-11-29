@@ -16,8 +16,8 @@
 
             Variables = new Dictionary<string, object>
             {
-                {"Client", 27},
-                {"Reason", "Because I said so"}
+                { "Client", 27 },
+                { "Reason", "Because I said so" }
             };
         }
 

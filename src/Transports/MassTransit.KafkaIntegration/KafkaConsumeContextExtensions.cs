@@ -1,8 +1,5 @@
 namespace MassTransit
 {
-    using KafkaIntegration;
-
-
     public static class KafkaConsumeContextExtensions
     {
         public static int? Partition(this ConsumeContext context)

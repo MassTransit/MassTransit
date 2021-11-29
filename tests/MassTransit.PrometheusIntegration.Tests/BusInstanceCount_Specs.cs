@@ -15,7 +15,7 @@ namespace MassTransit.PrometheusIntegration.Tests
         [Test]
         public async Task Should_capture_the_bus_instance_metric()
         {
-            using var stream = new MemoryStream();
+            await using var stream = new MemoryStream();
             await Metrics.DefaultRegistry.CollectAndExportAsTextAsync(stream);
 
             var text = Encoding.UTF8.GetString(stream.ToArray());

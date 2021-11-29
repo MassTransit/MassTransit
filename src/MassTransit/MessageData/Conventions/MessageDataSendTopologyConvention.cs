@@ -1,38 +1,38 @@
 namespace MassTransit.MessageData.Conventions
 {
+    using MassTransit.Configuration;
     using Topology;
-    using Topology.Conventions;
 
 
     public class MessageDataSendTopologyConvention :
         ISendTopologyConvention
     {
-        readonly IConventionTypeCache<IMessageSendTopologyConvention> _typeCache;
+        readonly ITopologyConventionCache<IMessageSendTopologyConvention> _cache;
 
         public MessageDataSendTopologyConvention(IMessageDataRepository repository)
         {
-            _typeCache = new ConventionTypeCache<IMessageSendTopologyConvention>(typeof(MessageDataMessageSendTopologyConvention<>),
-                new CacheFactory(repository));
+            _cache = new TopologyConventionCache<IMessageSendTopologyConvention>(typeof(MessageDataMessageSendTopologyConvention<>),
+                new Factory(repository));
         }
 
         public bool TryGetMessageSendTopologyConvention<T>(out IMessageSendTopologyConvention<T> convention)
             where T : class
         {
-            return _typeCache.GetOrAdd<T, IMessageSendTopologyConvention<T>>().TryGetMessageSendTopologyConvention(out convention);
+            return _cache.GetOrAdd<T, IMessageSendTopologyConvention<T>>().TryGetMessageSendTopologyConvention(out convention);
         }
 
 
-        class CacheFactory :
-            IConventionTypeCacheFactory<IMessageSendTopologyConvention>
+        class Factory :
+            IConventionTypeFactory<IMessageSendTopologyConvention>
         {
             readonly IMessageDataRepository _repository;
 
-            public CacheFactory(IMessageDataRepository repository)
+            public Factory(IMessageDataRepository repository)
             {
                 _repository = repository;
             }
 
-            IMessageSendTopologyConvention IConventionTypeCacheFactory<IMessageSendTopologyConvention>.Create<T>()
+            IMessageSendTopologyConvention IConventionTypeFactory<IMessageSendTopologyConvention>.Create<T>()
             {
                 return new MessageDataMessageSendTopologyConvention<T>(_repository);
             }

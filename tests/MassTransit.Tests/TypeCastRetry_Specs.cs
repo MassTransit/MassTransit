@@ -2,7 +2,6 @@ namespace MassTransit.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
 
@@ -15,7 +14,7 @@ namespace MassTransit.Tests
         [Test]
         public async Task Should_receive_the_message()
         {
-            await Bus.Publish(new CreateCommand {Name = "Test"});
+            await Bus.Publish(new CreateCommand { Name = "Test" });
 
             await _received;
         }

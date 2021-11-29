@@ -1,7 +1,6 @@
 namespace MassTransit.TestFramework.Sagas
 {
     using System;
-    using Automatonymous;
 
 
     public class TestInstance :

@@ -3,7 +3,6 @@ namespace MassTransit.KafkaIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using Confluent.Kafka;
-    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;

@@ -10,7 +10,7 @@ services:
     ports:
       - 1433:1433
   postgres:
-    image: "postgres:9.6"
+    image: "postgres:10"
     environment:
       - "POSTGRES_PASSWORD=Password12!"
     ports:

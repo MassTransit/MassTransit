@@ -5,7 +5,6 @@ namespace MassTransit.Tests.Saga.Locator
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using MassTransit.Saga;
-    using MassTransit.Saga.QueryFactories;
     using MassTransit.Testing;
     using Messages;
     using NUnit.Framework;

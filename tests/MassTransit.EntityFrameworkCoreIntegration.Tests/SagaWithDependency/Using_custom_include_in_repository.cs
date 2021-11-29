@@ -3,12 +3,10 @@
     using System;
     using System.Threading.Tasks;
     using DataAccess;
-    using MassTransit.Saga;
     using MassTransit.Tests.Saga.Messages;
     using Messages;
     using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
-    using Saga;
     using Shared;
     using Shouldly;
     using Testing;
@@ -76,7 +74,8 @@
         {
             await using var context = new SagaWithDependencyContextFactory().CreateDbContext(DbContextOptionsBuilder);
 
-            await context.Database.MigrateAsync();
+            await context.Database.EnsureDeletedAsync();
+            await context.Database.EnsureCreatedAsync();
         }
 
         [OneTimeTearDown]

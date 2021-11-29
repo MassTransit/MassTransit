@@ -7,9 +7,6 @@
         using System.Data.Entity;
         using System.Data.Entity.ModelConfiguration;
         using System.Threading.Tasks;
-        using Automatonymous;
-        using GreenPipes;
-        using Mappings;
         using MassTransit.Saga;
         using NUnit.Framework;
         using Saga;

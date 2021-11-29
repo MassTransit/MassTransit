@@ -52,7 +52,7 @@ namespace MassTransit.Initializers.PropertyConverters
             if (input == default)
                 return TaskUtil.Default<TResult>();
 
-            if (input.IsCompleted)
+            if (input.Status == TaskStatus.RanToCompletion)
                 return _converter.Convert(context, input.Result);
 
             async Task<TResult> ConvertAsync()
@@ -60,7 +60,7 @@ namespace MassTransit.Initializers.PropertyConverters
                 var value = await input.ConfigureAwait(false);
 
                 Task<TResult> convertTask = _converter.Convert(context, value);
-                if (convertTask.IsCompleted)
+                if (convertTask.Status == TaskStatus.RanToCompletion)
                     return convertTask.Result;
 
                 return await convertTask.ConfigureAwait(false);

@@ -3,6 +3,7 @@ namespace MassTransit.MessageData.PropertyProviders
     using System;
     using System.IO;
     using System.Threading;
+    using Converters;
     using Values;
 
 

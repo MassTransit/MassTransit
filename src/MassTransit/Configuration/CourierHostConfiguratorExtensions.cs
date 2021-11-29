@@ -1,11 +1,9 @@
 ﻿namespace MassTransit
 {
     using System;
-    using Context;
+    using Configuration;
     using Courier;
     using Courier.Factories;
-    using Metadata;
-    using PipeConfigurators;
 
 
     public static class CourierHostConfiguratorExtensions
@@ -84,10 +82,10 @@
             if (factory == null)
                 throw new ArgumentNullException(nameof(factory));
 
-            LogContext.Debug?.Log("Configuring Execute Activity: {ActivityType}, {ArgumentType}", TypeMetadataCache<TActivity>.ShortName,
-                TypeMetadataCache<TArguments>.ShortName);
+            LogContext.Debug?.Log("Configuring Execute Activity: {ActivityType}, {ArgumentType}", TypeCache<TActivity>.ShortName,
+                TypeCache<TArguments>.ShortName);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, compensateAddress, configurator);
+            var specification = new ExecuteActivityHostConfigurator<TActivity, TArguments>(factory, compensateAddress, configurator);
 
             configure?.Invoke(specification);
 
@@ -105,10 +103,10 @@
             if (factory == null)
                 throw new ArgumentNullException(nameof(factory));
 
-            LogContext.Debug?.Log("Configuring Execute Activity: {ActivityType}, {ArgumentType}", TypeMetadataCache<TActivity>.ShortName,
-                TypeMetadataCache<TArguments>.ShortName);
+            LogContext.Debug?.Log("Configuring Execute Activity: {ActivityType}, {ArgumentType}", TypeCache<TActivity>.ShortName,
+                TypeCache<TArguments>.ShortName);
 
-            var specification = new ExecuteActivityHostSpecification<TActivity, TArguments>(factory, configurator);
+            var specification = new ExecuteActivityHostConfigurator<TActivity, TArguments>(factory, configurator);
 
             configure?.Invoke(specification);
 
@@ -158,10 +156,10 @@
             if (factory == null)
                 throw new ArgumentNullException(nameof(factory));
 
-            LogContext.Debug?.Log("Configuring Compensate Activity: {ActivityType}, {LogType}", TypeMetadataCache<TActivity>.ShortName,
-                TypeMetadataCache<TLog>.ShortName);
+            LogContext.Debug?.Log("Configuring Compensate Activity: {ActivityType}, {LogType}", TypeCache<TActivity>.ShortName,
+                TypeCache<TLog>.ShortName);
 
-            var specification = new CompensateActivityHostSpecification<TActivity, TLog>(factory, configurator);
+            var specification = new CompensateActivityHostConfigurator<TActivity, TLog>(factory, configurator);
 
             configure?.Invoke(specification);
 

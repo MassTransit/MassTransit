@@ -1,10 +1,11 @@
 namespace MassTransit
 {
     using System;
+    using DependencyInjection;
     using EventHubIntegration;
-    using EventHubIntegration.Registration;
-    using Registration;
-    using Scoping;
+    using EventHubIntegration.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
 
 
     public static class EventHubIntegrationExtensions
@@ -18,10 +19,10 @@ namespace MassTransit
             var factory = new EventHubRegistrationRiderFactory(configure);
             configurator.SetRiderFactory(factory);
 
-            configurator.Registrar.Register(GetCurrentProducerProvider);
+            configurator.TryAddScoped(GetCurrentProducerProvider);
         }
 
-        static IEventHubProducerProvider GetCurrentProducerProvider(IConfigurationServiceProvider provider)
+        static IEventHubProducerProvider GetCurrentProducerProvider(IServiceProvider provider)
         {
             var producerProvider = provider.GetRequiredService<IEventHubRider>();
 

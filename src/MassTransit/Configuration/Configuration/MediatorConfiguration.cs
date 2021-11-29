@@ -1,9 +1,5 @@
 namespace MassTransit.Configuration
 {
-    using Context;
-    using GreenPipes;
-
-
     public class MediatorConfiguration :
         ReceivePipeDispatcherConfiguration,
         IMediatorConfigurator

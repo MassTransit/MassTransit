@@ -1,17 +1,8 @@
-build_output/*
-build_artifacts/*
-build_temp/*
 *.suo
 *.user
-packages
 *.dotCover
 
-*.ncrunch*
 .vs
-
-.fake
-
-src/logs/*
 
 bin
 obj
@@ -27,38 +18,16 @@ _ReSharper*
 *.bak
 *.orig
 
-NuGet.exe
-packages
-
-# Tests
-TestResult.xml
-submit.xml
-SolutionVersion.cs
-src/SolutionVersion.cs
-doc/build/*
-*.[lm]df
-*.runsettings
+**/BenchmarkDotNet.Artifacts/**/*
 
 # osx noise
 .DS_Store
-*.DotSettings
-/src/MassTransit.SimpleInjectorIntegration/MassTransit.SimpleInjectorIntegration.csproj.nuspec
 *.DS_Store
+*.DotSettings.user
 
 docs/.vuepress/dist
-_book
 /node_modules
 .vscode
-**/.idea/
+.idea
 appsettings.Development.json
-package-lock.json
 
-
-# Cake
-tools/**
-!tools/packages.config
-
-# Artifacts
-artifacts/**
-artifacts_old/**
-/src/.ionide

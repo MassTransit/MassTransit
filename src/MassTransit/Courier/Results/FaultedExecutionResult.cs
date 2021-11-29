@@ -5,7 +5,7 @@ namespace MassTransit.Courier.Results
     using System.Threading.Tasks;
     using Contracts;
     using Events;
-    using InternalMessages;
+    using Messages;
 
 
     class FaultedExecutionResult<TArguments> :

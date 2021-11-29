@@ -1,23 +1,26 @@
-root=true
+root = true
 # EditorConfig helps developers define and maintain consistent
 # coding styles between different editors and IDEs
 # editorconfig.org
 
 
 [*]
-trim_trailing_whitespace=true
-insert_final_newline=true
-indent_style=space
-indent_size=4
+trim_trailing_whitespace = true
+insert_final_newline = true
+indent_style = space
+indent_size = 4
 
 [*.{config,xml,js,json,html,css,sql,csproj,props,yml,proto}]
-indent_size=2
+indent_size = 2
+
+[*.cs]
+end_of_line = lf
 
 [*.md]
-trim_trailing_whitespace=false
+trim_trailing_whitespace = false
 
 [*.sh]
-end_of_line=lf
+end_of_line = lf
 
 [*.{cmd, bat}]
-end_of_line=crlf
+end_of_line = crlf

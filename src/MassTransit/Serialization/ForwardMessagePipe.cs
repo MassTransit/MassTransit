@@ -3,7 +3,6 @@ namespace MassTransit.Serialization
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using GreenPipes;
 
 
     public class ForwardMessagePipe<T> :
@@ -45,15 +44,13 @@ namespace MassTransit.Serialization
                 await _pipe.Send(context).ConfigureAwait(false);
 
             var forwarderAddress = _context.ReceiveContext.InputAddress ?? _context.DestinationAddress;
-            if (forwarderAddress != null)
+            if (forwarderAddress != null && forwarderAddress != context.DestinationAddress)
                 context.Headers.Set(MessageHeaders.ForwarderAddress, forwarderAddress.ToString());
 
-            if (JsonMessageSerializer.JsonContentType.Equals(_context.ReceiveContext.ContentType))
-                context.Serializer = new ForwardJsonMessageSerializer(_context.ReceiveContext);
-            else if (XmlMessageSerializer.XmlContentType.Equals(_context.ReceiveContext.ContentType))
-                context.Serializer = new ForwardXmlMessageSerializer(_context.ReceiveContext);
+            if (_context.SerializerContext != null)
+                context.Serializer = _context.SerializerContext.GetMessageSerializer();
             else
-                context.Serializer = new CopyBodySerializer(_context.ReceiveContext);
+                context.Serializer = new CopyBodySerializer(_context.ReceiveContext.ContentType, _context.ReceiveContext.Body);
         }
     }
 }

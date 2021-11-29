@@ -1,7 +1,6 @@
 namespace MassTransit.Events
 {
     using System;
-    using Riders;
 
 
     public class HostReadyEvent :

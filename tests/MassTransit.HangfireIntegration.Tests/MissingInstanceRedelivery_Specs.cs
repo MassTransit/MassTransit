@@ -2,10 +2,7 @@ namespace MassTransit.HangfireIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Automatonymous;
-    using GreenPipes;
     using NUnit.Framework;
-    using Saga;
 
 
     [TestFixture]
@@ -122,9 +119,9 @@ namespace MassTransit.HangfireIntegration.Tests
 
         class Status
         {
-            public Status(string status, string serviceName)
+            public Status(string statusDescription, string serviceName)
             {
-                StatusDescription = status;
+                StatusDescription = statusDescription;
                 ServiceName = serviceName;
             }
 

@@ -3,8 +3,7 @@
     using System;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Internals.Reflection;
-    using Util;
+    using Internals;
 
 
     /// <summary>
@@ -36,7 +35,7 @@
 
             _headerProperty.Set(sendContext, inputPropertyValue);
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

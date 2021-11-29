@@ -4,7 +4,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using MassTransit.Testing;
-    using MassTransit.Testing.MessageObservers;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;

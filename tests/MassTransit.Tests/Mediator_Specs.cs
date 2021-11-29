@@ -6,7 +6,6 @@ namespace MassTransit.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using MassTransit.Testing;
-    using MassTransit.Testing.MessageObservers;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -30,7 +29,7 @@ namespace MassTransit.Tests
             {
                 received.SetResult(x);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
 
             await mediator.Publish(new PingMessage());
@@ -178,7 +177,7 @@ namespace MassTransit.Tests
         {
             var mediator = Bus.Factory.CreateMediator(cfg =>
             {
-                cfg.Handler<PingMessage>(context => TaskUtil.Completed);
+                cfg.Handler<PingMessage>(context => Task.CompletedTask);
             });
 
             var message = new PingMessage();

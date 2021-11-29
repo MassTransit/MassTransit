@@ -1,4 +1,4 @@
-namespace MassTransit.WebJobs.ServiceBusIntegration
+namespace MassTransit
 {
     using System;
 

@@ -2,7 +2,6 @@ namespace MassTransit.Transports.Tests.Transports
 {
     using System;
     using System.Threading.Tasks;
-    using Azure.ServiceBus.Core.Testing;
     using global::Azure;
     using NUnit.Framework;
     using Testing;

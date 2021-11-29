@@ -2,20 +2,18 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using ExtensionsDependencyInjectionIntegration;
-    using Futures;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
-    using TestComponents;
-    using TestComponents.ForkJoint.Tests;
-    using TestComponents.Futures.Tests;
+    using TestFramework;
+    using TestFramework.ForkJoint.Tests;
+    using TestFramework.Futures.Tests;
 
 
     class EntityFrameworkFutureTestFixtureConfigurator :
         IFutureTestFixtureConfigurator
     {
-        public void ConfigureFutureSagaRepository(IServiceCollectionBusConfigurator configurator)
+        public void ConfigureFutureSagaRepository(IBusRegistrationConfigurator configurator)
         {
             configurator.AddSagaRepository<FutureState>()
                 .EntityFrameworkRepository(r =>
@@ -41,7 +39,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 
             await using var context = scope.ServiceProvider.GetRequiredService<FutureSagaDbContext>();
 
-            await context.Database.MigrateAsync();
+            await context.Database.EnsureDeletedAsync();
+            await context.Database.EnsureCreatedAsync();
         }
 
         public async Task OneTimeTearDown(IServiceProvider provider)

@@ -1,9 +1,8 @@
 namespace MassTransit.MongoDbIntegration.Tests
 {
     using System;
-    using MongoDbIntegration.Saga.CollectionNameFormatters;
+    using MongoDbIntegration.Saga;
     using NUnit.Framework;
-    using Saga;
     using Saga.Data;
 
 

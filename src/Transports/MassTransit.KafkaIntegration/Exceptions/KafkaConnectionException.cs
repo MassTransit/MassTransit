@@ -1,4 +1,4 @@
-namespace MassTransit.KafkaIntegration.Exceptions
+namespace MassTransit
 {
     using System;
     using System.Runtime.Serialization;

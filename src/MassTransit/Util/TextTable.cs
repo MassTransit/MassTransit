@@ -5,8 +5,7 @@ namespace MassTransit.Util
     using System.IO;
     using System.Linq;
     using System.Text;
-    using GreenPipes.Internals.Extensions;
-    using GreenPipes.Internals.Reflection;
+    using Internals;
 
 
     /// <summary>
@@ -35,7 +34,7 @@ namespace MassTransit.Util
         Type[] _columnTypes;
 
         public TextTable(params string[] columns)
-            : this(new TextTableOptions {Columns = new List<string>(columns)})
+            : this(new TextTableOptions { Columns = new List<string>(columns) })
         {
         }
 
@@ -98,7 +97,7 @@ namespace MassTransit.Util
             Type[] columnTypes = properties.Select(x => x.Property.PropertyType).ToArray();
             var columnNames = properties.Select(x => x.Property.Name).ToArray();
 
-            var table = new TextTable(columnNames) {_columnTypes = columnTypes};
+            var table = new TextTable(columnNames) { _columnTypes = columnTypes };
 
             foreach (IEnumerable<object> propertyValues in rows.Select(value => properties.Select(column => column.GetProperty(value))))
                 table.AddRow(propertyValues.ToArray());
@@ -163,7 +162,7 @@ namespace MassTransit.Util
         {
             List<int> columnLengths = _columns
                 .Select((t, i) => _rows.Select(x => x[i])
-                    .Union(new[] {_columns[i]})
+                    .Union(new[] { _columns[i] })
                     .Where(x => x != null)
                     .Select(x => x.ToString().Length).Max())
                 .ToList();

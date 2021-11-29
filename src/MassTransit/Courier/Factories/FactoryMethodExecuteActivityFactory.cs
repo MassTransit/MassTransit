@@ -2,7 +2,6 @@ namespace MassTransit.Courier.Factories
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
 
 
     public class FactoryMethodExecuteActivityFactory<TActivity, TArguments> :
@@ -32,6 +31,7 @@ namespace MassTransit.Courier.Factories
             {
                 switch (activity)
                 {
+                    // ReSharper disable once SuspiciousTypeConversion.Global
                     case IAsyncDisposable asyncDisposable:
                         await asyncDisposable.DisposeAsync().ConfigureAwait(false);
                         break;

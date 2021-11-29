@@ -1,8 +1,7 @@
-﻿namespace MassTransit.GrpcTransport.Topology
+﻿namespace MassTransit
 {
-    using Builders;
-    using Contracts;
-    using MassTransit.Topology;
+    using GrpcTransport.Contracts;
+    using GrpcTransport.Topology;
 
 
     public interface IGrpcMessagePublishTopology<TMessage> :

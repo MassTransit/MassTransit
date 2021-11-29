@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
     using MassTransit.Courier.Contracts;
     using MongoDB.Driver;
     using MongoDbIntegration.Courier;

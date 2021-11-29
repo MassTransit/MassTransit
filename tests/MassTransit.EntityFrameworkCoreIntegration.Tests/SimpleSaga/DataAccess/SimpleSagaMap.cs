@@ -1,6 +1,5 @@
 ﻿namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SimpleSaga.DataAccess
 {
-    using Mappings;
     using MassTransit.Tests.Saga;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;

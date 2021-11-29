@@ -1,8 +1,7 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit
 {
     using System;
     using Azure.Messaging.EventHubs.Consumer;
-    using MassTransit.Registration;
 
 
     public static class EventHubEndpointConnectorExtensions

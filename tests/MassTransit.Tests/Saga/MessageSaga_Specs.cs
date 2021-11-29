@@ -2,12 +2,10 @@
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
     using MassTransit.Saga;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]
@@ -54,7 +52,7 @@
         {
             public Task Consume(ConsumeContext<PingMessage> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Guid CorrelationId { get; set; }

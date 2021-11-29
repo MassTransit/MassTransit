@@ -19,7 +19,7 @@
             for (var i = 0; i < 512; i++)
                 bytes[i] = (byte)random.Next(255);
 
-            var sent = new A {Contents = bytes};
+            var sent = new A { Contents = bytes };
             await InputQueueSendEndpoint.Send(sent);
 
             ConsumeContext<A> context = await _received;

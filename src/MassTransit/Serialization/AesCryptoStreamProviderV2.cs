@@ -2,24 +2,23 @@
 {
     using System.IO;
     using System.Security.Cryptography;
-    using GreenPipes;
 
 
-    public class AesCryptoStreamProviderV2 : ICryptoStreamProviderV2
+    public class AesCryptoStreamProviderV2 :
+        ICryptoStreamProviderV2
     {
         readonly PaddingMode _paddingMode;
         readonly ISecureKeyProvider _secureKeyProvider;
 
-        public AesCryptoStreamProviderV2(ISecureKeyProvider secureKeyProvider,
-            PaddingMode paddingMode = PaddingMode.PKCS7)
+        public AesCryptoStreamProviderV2(ISecureKeyProvider secureKeyProvider, PaddingMode paddingMode = PaddingMode.PKCS7)
         {
             _secureKeyProvider = secureKeyProvider;
             _paddingMode = paddingMode;
         }
 
-        public Stream GetDecryptStream(Stream stream, ReceiveContext context)
+        public Stream GetDecryptStream(Stream stream, Headers headers)
         {
-            byte[] key = _secureKeyProvider.GetKey(context);
+            var key = _secureKeyProvider.GetKey(headers);
 
             var iv = new byte[16];
             stream.Read(iv, 0, iv.Length);
@@ -29,11 +28,11 @@
             return new DisposingCryptoStream(stream, encryptor, CryptoStreamMode.Read);
         }
 
-        public Stream GetEncryptStream(Stream stream, SendContext context)
+        public Stream GetEncryptStream(Stream stream, Headers headers)
         {
-            byte[] key = _secureKeyProvider.GetKey(context);
+            var key = _secureKeyProvider.GetKey(headers);
 
-            byte[] iv = GenerateIv();
+            var iv = GenerateIv();
 
             stream.Write(iv, 0, iv.Length);
             var encryptor = CreateEncryptor(key, iv);
@@ -52,33 +51,30 @@
 
         ICryptoTransform CreateDecryptor(byte[] key, byte[] iv)
         {
-            using (var provider = CreateAes())
-            {
-                return provider.CreateDecryptor(key, iv);
-            }
+            using var provider = CreateAes();
+
+            return provider.CreateDecryptor(key, iv);
         }
 
         byte[] GenerateIv()
         {
-            using (var aes = CreateAes())
-            {
-                aes.GenerateIV();
+            using var aes = CreateAes();
 
-                return aes.IV;
-            }
+            aes.GenerateIV();
+
+            return aes.IV;
         }
 
         ICryptoTransform CreateEncryptor(byte[] key, byte[] iv)
         {
-            using (var provider = CreateAes())
-            {
-                return provider.CreateEncryptor(key, iv);
-            }
+            using var provider = CreateAes();
+
+            return provider.CreateEncryptor(key, iv);
         }
 
         Aes CreateAes()
         {
-            return new AesCryptoServiceProvider {Padding = _paddingMode};
+            return new AesCryptoServiceProvider { Padding = _paddingMode };
         }
     }
 }

@@ -72,7 +72,8 @@
         {
             await using var context = new SimpleSagaContextFactory().CreateDbContext(DbContextOptionsBuilder);
 
-            await context.Database.MigrateAsync();
+            await context.Database.EnsureDeletedAsync();
+            await context.Database.EnsureCreatedAsync();
         }
 
         [OneTimeTearDown]

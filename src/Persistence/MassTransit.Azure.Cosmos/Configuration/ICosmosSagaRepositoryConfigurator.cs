@@ -1,10 +1,7 @@
-namespace MassTransit.Azure.Cosmos
+namespace MassTransit
 {
     using System;
-    using MassTransit.Saga;
     using Microsoft.Azure.Cosmos;
-    using Registration;
-    using Saga.CollectionIdFormatters;
 
 
     public interface ICosmosSagaRepositoryConfigurator
@@ -25,13 +22,13 @@ namespace MassTransit.Azure.Cosmos
         /// Use CollectionId formatter
         /// </summary>
         /// <param name="collectionIdFormatter"></param>
-        void SetCollectionIdFormatter(ICollectionIdFormatter collectionIdFormatter);
+        void SetCollectionIdFormatter(ICosmosCollectionIdFormatter collectionIdFormatter);
 
         /// <summary>
         /// Use CollectionId formatter
         /// </summary>
         /// <param name="collectionIdFormatterFactory"></param>
-        void SetCollectionIdFormatter(Func<IConfigurationServiceProvider, ICollectionIdFormatter> collectionIdFormatterFactory);
+        void SetCollectionIdFormatter(Func<IServiceProvider, ICosmosCollectionIdFormatter> collectionIdFormatterFactory);
 
         /// <summary>
         /// Configure the ItemRequestOptions

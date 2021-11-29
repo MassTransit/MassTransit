@@ -1,7 +1,7 @@
-﻿namespace MassTransit.DapperIntegration
+﻿namespace MassTransit
 {
     using System.Data;
-    using Context;
+    using DapperIntegration.Saga;
     using Saga;
 
 

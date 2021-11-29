@@ -1,11 +1,10 @@
 ﻿namespace MassTransit.ActiveMqTransport
 {
-    using Topology;
+    using Transports;
 
 
     public interface IActiveMqHost :
         IHost<IActiveMqReceiveEndpointConfigurator>
     {
-        new IActiveMqHostTopology Topology { get; }
     }
 }

@@ -2,13 +2,12 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Testing;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
-    using Registration;
     using TestFramework;
     using TestFramework.Messages;
+    using Testing;
 
 
     [TestFixture]

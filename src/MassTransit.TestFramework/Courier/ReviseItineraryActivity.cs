@@ -8,9 +8,9 @@
     public class ReviseItineraryActivity :
         IActivity<TestArguments, TestLog>
     {
-        readonly Action<ItineraryBuilder> _callback;
+        readonly Action<IItineraryBuilder> _callback;
 
-        public ReviseItineraryActivity(Action<ItineraryBuilder> callback)
+        public ReviseItineraryActivity(Action<IItineraryBuilder> callback)
         {
             _callback = callback;
         }

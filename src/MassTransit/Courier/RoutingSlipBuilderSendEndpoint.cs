@@ -3,12 +3,11 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context.Converters;
+    using Context;
     using Contracts;
-    using GreenPipes;
     using Initializers;
-    using MassTransit.Pipeline.Observables;
-    using Util;
+    using Observables;
+    using Serialization;
 
 
     public class RoutingSlipBuilderSendEndpoint :
@@ -38,11 +37,7 @@
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
 
-            var context = new RoutingSlipSendContext<T>(message, cancellationToken, _destinationAddress);
-
-            _builder.AddSubscription(_destinationAddress, _events, _include, _activityName, context.GetMessageEnvelope());
-
-            return TaskUtil.Completed;
+            return Send(message, Pipe.Empty<SendContext<T>>(), cancellationToken);
         }
 
         public async Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
@@ -50,7 +45,6 @@
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -61,20 +55,15 @@
             _builder.AddSubscription(_destinationAddress, _events, _include, _activityName, context.GetMessageEnvelope());
         }
 
-        public async Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            var context = new RoutingSlipSendContext<T>(message, cancellationToken, _destinationAddress);
-
-            await pipe.Send(context).ConfigureAwait(false);
-
-            _builder.AddSubscription(_destinationAddress, _events, _include, _activityName, context.GetMessageEnvelope());
+            return Send(message, (IPipe<SendContext<T>>)pipe, cancellationToken);
         }
 
         public Task Send(object message, CancellationToken cancellationToken)
@@ -91,7 +80,6 @@
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
@@ -102,7 +90,6 @@
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -115,7 +102,6 @@
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
@@ -125,39 +111,68 @@
             return SendEndpointConverterCache.Send(this, message, messageType, pipe, cancellationToken);
         }
 
-        public Task Send<T>(object values, CancellationToken cancellationToken)
+        public async Task Send<T>(object values, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            return MessageInitializerCache<T>.Send(this, values, cancellationToken);
+            (var message, IPipe<SendContext<T>> sendPipe) =
+                await MessageInitializerCache<T>.InitializeMessage(values, cancellationToken).ConfigureAwait(false);
+
+            await Send(message, sendPipe, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+        public async Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            return MessageInitializerCache<T>.Send(this, values, pipe, cancellationToken);
+            (var message, IPipe<SendContext<T>> sendPipe) =
+                await MessageInitializerCache<T>.InitializeMessage(values, pipe, cancellationToken).ConfigureAwait(false);
+
+            await Send(message, sendPipe, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        public async Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            return MessageInitializerCache<T>.Send(this, values, pipe, cancellationToken);
+            (var message, IPipe<SendContext<T>> sendPipe) =
+                await MessageInitializerCache<T>.InitializeMessage(values, pipe, cancellationToken).ConfigureAwait(false);
+
+            await Send(message, sendPipe, cancellationToken).ConfigureAwait(false);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _observers.Connect(observer);
+        }
+
+
+        class RoutingSlipSendContext<T> :
+            MessageSendContext<T>
+            where T : class
+        {
+            public RoutingSlipSendContext(T message, CancellationToken cancellationToken, Uri destinationAddress)
+                : base(message, cancellationToken)
+            {
+                DestinationAddress = destinationAddress;
+
+                Serializer = SystemTextJsonMessageSerializer.Instance;
+            }
+
+            public MessageEnvelope GetMessageEnvelope()
+            {
+                var envelope = new JsonMessageEnvelope(this, Message, MessageTypeCache<T>.MessageTypeNames);
+
+                return envelope;
+            }
         }
     }
 }

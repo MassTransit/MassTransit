@@ -2,8 +2,7 @@
 {
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using MassTransit.Pipeline;
+    using MassTransit.Middleware;
     using Metadata;
     using Util;
 
@@ -21,7 +20,7 @@
         void IProbeSite.Probe(ProbeContext context)
         {
             var scope = context.CreateScope("consume");
-            scope.Add("method", $"Handle({TypeMetadataCache<TMessage>.ShortName} message)");
+            scope.Add("method", $"Handle({TypeCache<TMessage>.ShortName} message)");
         }
 
         [DebuggerNonUserCode]
@@ -32,14 +31,14 @@
             if (messageConsumer == null)
             {
                 var message =
-                    $"Consumer type {TypeMetadataCache<TConsumer>.ShortName} is not a consumer of message type {TypeMetadataCache<TMessage>.ShortName}";
+                    $"Consumer type {TypeCache<TConsumer>.ShortName} is not a consumer of message type {TypeCache<TMessage>.ShortName}";
 
                 throw new ConsumerMessageException(message);
             }
 
             messageConsumer.Handle(context.Message);
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

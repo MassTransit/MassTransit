@@ -3,12 +3,7 @@ namespace MassTransit.Transports
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
-    using Events;
-    using GreenPipes;
-    using GreenPipes.Agents;
-    using GreenPipes.Internals.Extensions;
-    using Metrics;
+    using Internals;
 
 
     public static class TransportStartExtensions
@@ -43,7 +38,7 @@ namespace MassTransit.Transports
 
             public async Task Send(T context)
             {
-                await _context.TransportObservers.Ready(new ReceiveTransportReadyEvent(_context.InputAddress, false)).ConfigureAwait(false);
+                await _context.TransportObservers.NotifyReady(_context.InputAddress, false).ConfigureAwait(false);
 
                 try
                 {
@@ -51,7 +46,7 @@ namespace MassTransit.Transports
                 }
                 catch (OperationCanceledException ex) when (ex.CancellationToken == _stopping)
                 {
-                    await _context.TransportObservers.Completed(new ReceiveTransportCompletedEvent(_context.InputAddress, Metrics.None)).ConfigureAwait(false);
+                    await _context.TransportObservers.NotifyCompleted(_context.InputAddress, Metrics.None).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {

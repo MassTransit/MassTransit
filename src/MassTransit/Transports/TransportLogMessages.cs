@@ -1,7 +1,7 @@
 namespace MassTransit.Transports
 {
     using System;
-    using Context;
+    using Logging;
     using Microsoft.Extensions.Logging;
 
 

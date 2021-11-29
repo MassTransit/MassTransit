@@ -21,21 +21,21 @@
 
         Task ISendObserver.PreSend<T>(SendContext<T> context)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         Task ISendObserver.PostSend<T>(SendContext<T> context)
         {
             MessagePerformanceCounterCache<T>.Counter(_factory).Sent();
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         Task ISendObserver.SendFault<T>(SendContext<T> context, Exception exception)
         {
             MessagePerformanceCounterCache<T>.Counter(_factory).SendFaulted();
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

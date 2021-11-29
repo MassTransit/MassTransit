@@ -1,18 +1,15 @@
-namespace MassTransit.Azure.Cosmos.Configuration
+namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using GreenPipes;
-    using GreenPipes.Internals.Extensions;
-    using MassTransit.Saga;
-    using Metadata;
+    using AzureCosmos.Saga;
+    using Internals;
     using Microsoft.Azure.Cosmos;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
     using Newtonsoft.Json;
-    using Registration;
     using Saga;
-    using Saga.CollectionIdFormatters;
-    using Saga.Context;
 
 
     public class CosmosSagaRepositoryConfigurator<TSaga> :
@@ -21,10 +18,10 @@ namespace MassTransit.Azure.Cosmos.Configuration
         where TSaga : class, ISaga
     {
         readonly JsonSerializerSettings _serializerSettings;
-        Func<IConfigurationServiceProvider, ICollectionIdFormatter> _collectionIdFormatter;
+        string _clientName;
+        Func<IServiceProvider, ICosmosCollectionIdFormatter> _collectionIdFormatter;
         Action<ItemRequestOptions> _itemRequestOptions;
         Action<QueryRequestOptions> _queryRequestOptions;
-        string _clientName;
 
         public CosmosSagaRepositoryConfigurator()
         {
@@ -34,20 +31,15 @@ namespace MassTransit.Azure.Cosmos.Configuration
 
         public void ConfigureEmulator()
         {
-            EndpointUri = EmulatorConstants.EndpointUri;
-            Key = EmulatorConstants.Key;
+            EndpointUri = AzureCosmosEmulatorConstants.EndpointUri;
+            Key = AzureCosmosEmulatorConstants.Key;
         }
 
-        public void SetCollectionIdFormatter(ICollectionIdFormatter collectionIdFormatter)
+        public void SetCollectionIdFormatter(ICosmosCollectionIdFormatter collectionIdFormatter)
         {
             if (collectionIdFormatter == null)
                 throw new ArgumentNullException(nameof(collectionIdFormatter));
             SetCollectionIdFormatter(_ => collectionIdFormatter);
-        }
-
-        public void SetCollectionIdFormatter(Func<IConfigurationServiceProvider, ICollectionIdFormatter> collectionIdFormatterFactory)
-        {
-            _collectionIdFormatter = collectionIdFormatterFactory ?? throw new ArgumentNullException(nameof(collectionIdFormatterFactory));
         }
 
         public string DatabaseId { get; set; }
@@ -76,6 +68,19 @@ namespace MassTransit.Azure.Cosmos.Configuration
             _queryRequestOptions = cfg ?? throw new ArgumentNullException(nameof(cfg));
         }
 
+        public void UseClientFactory(string clientName)
+        {
+            if (string.IsNullOrWhiteSpace(clientName))
+                throw new ArgumentException(nameof(clientName));
+
+            _clientName = clientName;
+        }
+
+        public void SetCollectionIdFormatter(Func<IServiceProvider, ICosmosCollectionIdFormatter> collectionIdFormatterFactory)
+        {
+            _collectionIdFormatter = collectionIdFormatterFactory ?? throw new ArgumentNullException(nameof(collectionIdFormatterFactory));
+        }
+
         public IEnumerable<ValidationResult> Validate()
         {
             if (string.IsNullOrWhiteSpace(DatabaseId))
@@ -87,9 +92,9 @@ namespace MassTransit.Azure.Cosmos.Configuration
 
         public void Register(ISagaRepositoryRegistrationConfigurator<TSaga> configurator)
         {
-            DatabaseContext<TSaga> DatabaseContextFactory(IConfigurationServiceProvider provider)
+            DatabaseContext<TSaga> DatabaseContextFactory(IServiceProvider provider)
             {
-                bool providerProvidedClient = true;
+                var providerProvidedClient = true;
                 CosmosClient client;
 
                 if (!string.IsNullOrWhiteSpace(_clientName))
@@ -103,9 +108,7 @@ namespace MassTransit.Azure.Cosmos.Configuration
 
                     CosmosClientOptions clientOptions = null;
                     if (_serializerSettings != null)
-                    {
                         clientOptions = new CosmosClientOptions { Serializer = new CosmosJsonDotNetSerializer(_serializerSettings) };
-                    }
 
                     client = new CosmosClient(EndpointUri, Key, clientOptions);
                 }
@@ -118,23 +121,14 @@ namespace MassTransit.Azure.Cosmos.Configuration
                 return new CosmosDatabaseContext<TSaga>(providerProvidedClient ? null : client, container, _itemRequestOptions, _queryRequestOptions);
             }
 
-            configurator.RegisterSingleInstance(DatabaseContextFactory);
-
+            configurator.TryAddSingleton(DatabaseContextFactory);
             configurator.RegisterSagaRepository<TSaga, DatabaseContext<TSaga>, SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>,
                 CosmosSagaRepositoryContextFactory<TSaga>>();
         }
 
-        public void UseClientFactory(string clientName)
-        {
-            if (string.IsNullOrWhiteSpace(clientName))
-                throw new ArgumentException(nameof(clientName));
-
-            _clientName = clientName;
-        }
-
         static JsonSerializerSettings GetSerializerSettingsIfNeeded()
         {
-            var correlationId = TypeMetadataCache<TSaga>.Properties.Single(x => x.Name == nameof(ISaga.CorrelationId));
+            var correlationId = MessageTypeCache<TSaga>.Properties.Single(x => x.Name == nameof(ISaga.CorrelationId));
 
             if (correlationId.GetAttribute<JsonPropertyAttribute>().Any(x => x.PropertyName == "id"))
                 return default;
@@ -142,7 +136,7 @@ namespace MassTransit.Azure.Cosmos.Configuration
             var resolver = new PropertyRenameSerializerContractResolver();
             resolver.RenameProperty(typeof(TSaga), nameof(ISaga.CorrelationId), "id");
 
-            return new JsonSerializerSettings {ContractResolver = resolver};
+            return new JsonSerializerSettings { ContractResolver = resolver };
         }
     }
 }

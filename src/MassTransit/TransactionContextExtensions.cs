@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using System.Transactions;
-    using GreenPipes;
 
 
     public static class TransactionContextExtensions

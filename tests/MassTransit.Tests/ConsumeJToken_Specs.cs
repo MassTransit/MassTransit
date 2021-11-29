@@ -28,6 +28,11 @@
 
         TaskCompletionSource<JToken> _completed;
 
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseNewtonsoftJsonSerializer();
+        }
+
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.Handler<JToken>(async context =>

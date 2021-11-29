@@ -6,13 +6,11 @@ namespace MassTransit.EventHubIntegration.Tests
     using System.Threading;
     using System.Threading.Tasks;
     using Contracts;
-    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
-    using Util;
 
 
     public class BatchProducer_Specs :
@@ -121,7 +119,7 @@ namespace MassTransit.EventHubIntegration.Tests
                     Interlocked.Exchange(ref _consumed, 0);
                 }
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

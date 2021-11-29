@@ -1,8 +1,5 @@
 ﻿namespace MassTransit.Configuration
 {
-    using GreenPipes;
-
-
     public interface IEndpointConfiguration :
         IConsumePipeConfigurator,
         ISendPipelineConfigurator,

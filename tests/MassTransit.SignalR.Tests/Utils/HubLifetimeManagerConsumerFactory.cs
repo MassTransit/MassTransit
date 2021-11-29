@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Context;
-    using GreenPipes;
     using Metadata;
     using Microsoft.AspNetCore.SignalR;
 
@@ -33,7 +32,7 @@
                 consumer = _factoryMethod(HubLifetimeManager);
 
                 if (consumer == null)
-                    throw new ConsumerException($"Unable to resolve consumer type '{TypeMetadataCache<TConsumer>.ShortName}'.");
+                    throw new ConsumerException($"Unable to resolve consumer type '{TypeCache<TConsumer>.ShortName}'.");
 
                 await next.Send(new ConsumerConsumeContextScope<TConsumer, TMessage>(context, consumer)).ConfigureAwait(false);
             }

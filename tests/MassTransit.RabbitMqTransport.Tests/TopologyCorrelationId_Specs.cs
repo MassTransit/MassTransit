@@ -2,7 +2,6 @@ namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Context;
     using NUnit.Framework;
 
 
@@ -15,7 +14,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var transactionId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send<INewUserEvent>(new {TransactionId = transactionId});
+            await InputQueueSendEndpoint.Send<INewUserEvent>(new { TransactionId = transactionId });
 
             ConsumeContext<INewUserEvent> context = await _handled;
 
@@ -28,7 +27,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var transactionId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send<LegacyMessage>(new {TransactionId = transactionId});
+            await InputQueueSendEndpoint.Send<LegacyMessage>(new { TransactionId = transactionId });
 
             ConsumeContext<LegacyMessage> legacyContext = await _legacyHandled;
 
@@ -41,7 +40,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var transactionId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send<OtherMessage>(new {CorrelationId = transactionId});
+            await InputQueueSendEndpoint.Send<OtherMessage>(new { CorrelationId = transactionId });
 
             ConsumeContext<OtherMessage> otherContext = await _otherHandled;
 

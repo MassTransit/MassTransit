@@ -4,7 +4,7 @@
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using Observers;
+    using Implementations;
     using Util;
 
 
@@ -88,9 +88,14 @@
         /// <summary>
         /// Forces the test to be cancelled, aborting any awaiting tasks
         /// </summary>
-        public void CancelTest()
+        public void Cancel()
         {
-            _cancellationTokenSource.Cancel();
+            _cancellationTokenSource?.Cancel();
+        }
+
+        public void ForceInactive()
+        {
+            _inactivityObserver.Value.ForceInactive();
         }
 
         /// <summary>

@@ -69,7 +69,7 @@
             [Test]
             public async Task Verify_consumed_message_contains_property()
             {
-                ITestMessage message = new TestMessage {Data = new TestConcreteClass()};
+                ITestMessage message = new TestMessage { Data = new TestConcreteClass() };
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -79,6 +79,11 @@
             }
 
             Task<ConsumeContext<ITestMessage>> _handled;
+
+            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+            {
+                configurator.UseNewtonsoftJsonSerializer();
+            }
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
@@ -94,7 +99,7 @@
             [Test]
             public async Task Verify_consumed_message_contains_property()
             {
-                ITestArrayMessage message = new TestArrayMessage {Data = new TestBaseClass[] {new TestConcreteClass()}};
+                ITestArrayMessage message = new TestArrayMessage { Data = new TestBaseClass[] { new TestConcreteClass() } };
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -113,6 +118,11 @@
             Task<ConsumeContext<ITestArrayMessage>> _handled;
             Task<ConsumeContext<ReceiveFault>> _faulted;
 
+            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+            {
+                configurator.UseNewtonsoftJsonSerializer();
+            }
+
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
                 _handled = Handled<ITestArrayMessage>(configurator);
@@ -128,7 +138,7 @@
             [Test]
             public async Task Verify_consumed_message_contains_property()
             {
-                ITestListMessage message = new TestListMessage {Data = new List<TestBaseClass> {new TestConcreteClass()}};
+                ITestListMessage message = new TestListMessage { Data = new List<TestBaseClass> { new TestConcreteClass() } };
 
                 await InputQueueSendEndpoint.Send(message);
 
@@ -146,6 +156,11 @@
 
             Task<ConsumeContext<ITestListMessage>> _handled;
             Task<ConsumeContext<ReceiveFault>> _faulted;
+
+            protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+            {
+                configurator.UseNewtonsoftJsonSerializer();
+            }
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {

@@ -6,9 +6,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
         using System.Collections.Generic;
         using System.Linq;
         using System.Threading.Tasks;
-        using Automatonymous;
-        using GreenPipes;
-        using Mappings;
         using Microsoft.EntityFrameworkCore;
         using Microsoft.EntityFrameworkCore.Design;
         using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -57,7 +54,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
             {
                 await using var context = new TestInstanceContextFactory().CreateDbContext(DbContextOptionsBuilder);
 
-                await context.Database.MigrateAsync();
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureCreatedAsync();
             }
 
             [OneTimeTearDown]
@@ -141,7 +139,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
             {
                 await using var context = new TestInstanceContextFactory().CreateDbContext(DbContextOptionsBuilder);
 
-                await context.Database.MigrateAsync();
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureCreatedAsync();
             }
 
             [OneTimeTearDown]
@@ -300,7 +299,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
 
 
         public class PublishTestStartedActivity :
-            Activity<TestInstance>
+            IStateMachineActivity<TestInstance>
         {
             readonly ConsumeContext _context;
 
@@ -319,7 +318,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 visitor.Visit(this);
             }
 
-            public async Task Execute(BehaviorContext<TestInstance> context, Behavior<TestInstance> next)
+            public async Task Execute(BehaviorContext<TestInstance> context, IBehavior<TestInstance> next)
             {
                 await _context.Publish(new TestStarted
                 {
@@ -330,7 +329,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 await next.Execute(context).ConfigureAwait(false);
             }
 
-            public async Task Execute<T>(BehaviorContext<TestInstance, T> context, Behavior<TestInstance, T> next)
+            public async Task Execute<T>(BehaviorContext<TestInstance, T> context, IBehavior<TestInstance, T> next)
+                where T : class
             {
                 await _context.Publish(new TestStarted
                 {
@@ -341,14 +341,15 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
                 await next.Execute(context).ConfigureAwait(false);
             }
 
-            public Task Faulted<TException>(BehaviorExceptionContext<TestInstance, TException> context, Behavior<TestInstance> next)
+            public Task Faulted<TException>(BehaviorExceptionContext<TestInstance, TException> context, IBehavior<TestInstance> next)
                 where TException : Exception
             {
                 return next.Faulted(context);
             }
 
-            public Task Faulted<T, TException>(BehaviorExceptionContext<TestInstance, T, TException> context, Behavior<TestInstance, T> next)
+            public Task Faulted<T, TException>(BehaviorExceptionContext<TestInstance, T, TException> context, IBehavior<TestInstance, T> next)
                 where TException : Exception
+                where T : class
             {
                 return next.Faulted(context);
             }

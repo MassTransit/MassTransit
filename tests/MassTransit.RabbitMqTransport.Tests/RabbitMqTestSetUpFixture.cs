@@ -11,7 +11,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Net.Http.Headers;
     using System.Text;
     using System.Threading.Tasks;
-    using RabbitMqTransport.Testing;
+    using MassTransit.Testing;
 
 
     [SetUpFixture]

@@ -3,11 +3,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
     using System;
     using System.Threading.Tasks;
     using Contracts.JobService;
-    using Definition;
-    using JobService;
-    using JobService.Configuration;
     using NUnit.Framework;
-    using Tests;
 
 
     public interface CrunchTheNumbers
@@ -40,7 +36,7 @@ namespace MassTransit.Azure.Table.Tests.Turnout
             Response<JobSubmissionAccepted> response = await requestClient.GetResponse<JobSubmissionAccepted>(new
             {
                 JobId = _jobId,
-                Job = new {Duration = TimeSpan.FromSeconds(1)}
+                Job = new { Duration = TimeSpan.FromSeconds(1) }
             });
 
             Assert.That(response.Message.JobId, Is.EqualTo(_jobId));

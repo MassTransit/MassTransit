@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -17,7 +16,7 @@
         {
             Task<ConsumeContext<Fault<A>>> faultHandled = SubscribeHandler<Fault<A>>();
 
-            _message = new A {StringA = "ValueA"};
+            _message = new A { StringA = "ValueA" };
 
             await InputQueueSendEndpoint.Send(_message, Pipe.Execute<SendContext>(x => x.FaultAddress = BusAddress));
 

@@ -22,9 +22,10 @@
         public static Task Redeliver<T>(this ConsumeContext<T> context, TimeSpan delay, Action<ConsumeContext, SendContext> callback = null)
             where T : class
         {
-            MessageRedeliveryContext redeliverContext = new ScheduleMessageRedeliveryContext<T>(context);
+            if (!context.TryGetPayload(out MessageRedeliveryContext redeliveryContext))
+                redeliveryContext = new ScheduleMessageRedeliveryContext<T>(context, RedeliveryOptions.ReplaceMessageId);
 
-            return redeliverContext.ScheduleRedelivery(delay, callback);
+            return redeliveryContext.ScheduleRedelivery(delay, callback);
         }
     }
 }

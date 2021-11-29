@@ -1,23 +1,32 @@
-﻿namespace MassTransit.Serialization
+﻿#nullable enable
+namespace MassTransit.Serialization
 {
     using System;
-    using System.IO;
     using System.Net.Mime;
+    using System.Reflection;
     using System.Runtime.Serialization;
     using System.Text.Json;
+    using Initializers;
+    using Initializers.TypeConverters;
     using JsonConverters;
     using Metadata;
 
 
     public class SystemTextJsonMessageSerializer :
-        IMessageSerializer
+        IMessageDeserializer,
+        IMessageSerializer,
+        IObjectDeserializer
     {
-        public static readonly ContentType JsonContentType = new ContentType("application/vnd.masstransit+text-json");
+        public static readonly ContentType JsonContentType = new ContentType("application/vnd.masstransit+json");
 
         public static JsonSerializerOptions Options;
 
+        public static readonly SystemTextJsonMessageSerializer Instance = new SystemTextJsonMessageSerializer();
+
         static SystemTextJsonMessageSerializer()
         {
+            GlobalTopology.MarkMessageTypeNotConsumable(typeof(JsonElement));
+
             Options = new JsonSerializerOptions
             {
                 AllowTrailingCommas = true,
@@ -28,36 +37,122 @@
             };
 
             Options.Converters.Add(new SystemTextJsonTimeSpanConverter());
+            Options.Converters.Add(new SystemTextJsonUriConverter());
             Options.Converters.Add(new SystemTextJsonMessageDataConverter());
             Options.Converters.Add(new SystemTextJsonConverterFactory());
         }
 
-        public SystemTextJsonMessageSerializer(ContentType contentType = null)
+        public SystemTextJsonMessageSerializer(ContentType? contentType = null)
         {
             ContentType = contentType ?? JsonContentType;
         }
 
         public ContentType ContentType { get; }
 
-        public void Serialize<T>(Stream stream, SendContext<T> context)
-            where T : class
+        public void Probe(ProbeContext context)
+        {
+            var scope = context.CreateScope("json");
+            scope.Add("contentType", ContentType.MediaType);
+            scope.Add("provider", "System.Text.Json");
+        }
+
+        public ConsumeContext Deserialize(ReceiveContext receiveContext)
+        {
+            return new BodyConsumeContext(receiveContext, Deserialize(receiveContext.Body, receiveContext.TransportHeaders, receiveContext.InputAddress));
+        }
+
+        public SerializerContext Deserialize(MessageBody body, Headers headers, Uri? destinationAddress = null)
         {
             try
             {
-                context.ContentType = JsonContentType;
+                var envelope = JsonSerializer.Deserialize<MessageEnvelope>(body.GetBytes(), Options);
+                if (envelope == null)
+                    throw new SerializationException("Message envelope not found");
 
-                var envelope = new JsonMessageEnvelope(context, context.Message, TypeMetadataCache<T>.MessageTypeNames);
+                var messageContext = new EnvelopeMessageContext(envelope, this);
 
-                using var writer = new Utf8JsonWriter(stream);
+                var messageTypes = envelope.MessageType ?? Array.Empty<string>();
 
-                JsonSerializer.Serialize(writer, envelope, Options);
+                var serializerContext = new SystemTextJsonSerializerContext(this, Options, ContentType, messageContext, messageTypes, envelope);
 
-                writer.Flush();
+                return serializerContext;
+            }
+            catch (SerializationException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
-                throw new SerializationException("Failed to serialize message", ex);
+                throw new SerializationException("An error occured while deserializing the message envelope", ex);
             }
+        }
+
+        public MessageBody GetMessageBody<T>(SendContext<T> context)
+            where T : class
+        {
+            return new SystemTextJsonMessageBody<T>(context, Options);
+        }
+
+        public T? DeserializeObject<T>(object? value, T? defaultValue = default)
+            where T : class
+        {
+            switch (value)
+            {
+                case null:
+                    return defaultValue;
+                case T returnValue:
+                    return returnValue;
+                case string text:
+                    if (TypeConverterCache.TryGetTypeConverter(out ITypeConverter<T, string>? typeConverter) && typeConverter.TryConvert(text, out var result))
+                        return result;
+                    return GetObject<T>(JsonSerializer.Deserialize<JsonElement>(text));
+                case JsonElement jsonElement:
+                    return GetObject<T>(jsonElement);
+            }
+
+            var element = JsonSerializer.SerializeToElement(value, Options);
+
+            return element.ValueKind == JsonValueKind.Null
+                ? defaultValue
+                : GetObject<T>(element);
+        }
+
+        public T? DeserializeObject<T>(object? value, T? defaultValue = null)
+            where T : struct
+        {
+            switch (value)
+            {
+                case null:
+                    return defaultValue;
+                case T returnValue:
+                    return returnValue;
+                case string text:
+                    if (TypeConverterCache.TryGetTypeConverter(out ITypeConverter<T, string>? typeConverter) && typeConverter.TryConvert(text, out var result))
+                        return result;
+                    return JsonSerializer.Deserialize<T>(text, Options);
+                case JsonElement jsonElement:
+                    return jsonElement.Deserialize<T>(Options);
+            }
+
+            var element = JsonSerializer.SerializeToElement(value, Options);
+
+            return element.ValueKind == JsonValueKind.Null
+                ? defaultValue
+                : element.Deserialize<T>(Options);
+        }
+
+        static T? GetObject<T>(JsonElement jsonElement)
+            where T : class
+        {
+            if (typeof(T).GetTypeInfo().IsInterface && MessageTypeCache<T>.IsValidMessageType)
+            {
+                var messageType = TypeMetadataCache<T>.ImplementationType;
+
+                if (jsonElement.Deserialize(messageType, Options) is T obj)
+                    return obj;
+            }
+
+            return jsonElement.Deserialize<T>(Options);
         }
     }
 }

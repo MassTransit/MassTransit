@@ -10,7 +10,6 @@ namespace MassTransit.KafkaIntegration.Tests
     using NUnit.Framework;
     using Serializers;
     using TestFramework;
-    using Util;
 
 
     public class Publish_Specs :
@@ -61,7 +60,7 @@ namespace MassTransit.KafkaIntegration.Tests
 
             try
             {
-                var config = new ProducerConfig {BootstrapServers = "localhost:9092"};
+                var config = new ProducerConfig { BootstrapServers = "localhost:9092" };
 
                 using IProducer<Null, KafkaMessage> p = new ProducerBuilder<Null, KafkaMessage>(config)
                     .SetValueSerializer(new MassTransitJsonSerializer<KafkaMessage>())
@@ -138,7 +137,7 @@ namespace MassTransit.KafkaIntegration.Tests
             public Task Consume(ConsumeContext<BusPing> context)
             {
                 _taskCompletionSource.TrySetResult(context);
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

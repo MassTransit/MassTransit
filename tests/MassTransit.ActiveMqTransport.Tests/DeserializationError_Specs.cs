@@ -1,10 +1,10 @@
 namespace MassTransit.ActiveMqTransport.Tests
 {
-    using System.Text;
     using System.Threading.Tasks;
     using NUnit.Framework;
     using Serialization;
     using TestMessages;
+    using Transports;
 
 
     [TestFixture]
@@ -23,7 +23,7 @@ namespace MassTransit.ActiveMqTransport.Tests
 
         void ApplyStaticMessageToContext(SendContext<SubmitOrder> context, string body)
         {
-            context.Serializer = new BodySerializer(JsonMessageSerializer.JsonContentType, Encoding.UTF8.GetBytes(body));
+            context.Serializer = new CopyBodySerializer(SystemTextJsonMessageSerializer.JsonContentType, new StringMessageBody(body));
         }
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)

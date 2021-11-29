@@ -2,7 +2,6 @@ namespace MassTransit
 {
     using System;
     using Configuration;
-    using GreenPipes;
 
 
     public interface IBusFactory :

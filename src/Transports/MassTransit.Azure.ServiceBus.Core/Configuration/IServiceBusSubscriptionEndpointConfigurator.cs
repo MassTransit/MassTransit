@@ -1,6 +1,6 @@
-﻿namespace MassTransit.Azure.ServiceBus.Core
+﻿namespace MassTransit
 {
-    using global::Azure.Messaging.ServiceBus.Administration;
+    using Azure.Messaging.ServiceBus.Administration;
 
 
     /// <summary>

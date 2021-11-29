@@ -1,11 +1,12 @@
-namespace MassTransit.RabbitMqTransport
+namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
-    using Topology;
-    using Util;
+    using System.Text;
+    using Internals;
+    using RabbitMqTransport.Topology;
 
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "}")]
@@ -186,6 +187,19 @@ namespace MassTransit.RabbitMqTransport
 
             return new RabbitMqEndpointAddress(Scheme, Host, Port, VirtualHost, name, DelayedMessageExchangeType, Durable, AutoDelete, false,
                 default, ExchangeType, BindExchanges, AlternateExchange);
+        }
+
+        public Uri ToShortAddress()
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append(BindToQueue ? "queue:" : "exchange:");
+            builder.Append(Name);
+
+            string query = string.Join("&", GetQueryStringOptions().Where(x => x != $"{BindQueueKey}=true"));
+            if (!string.IsNullOrWhiteSpace(query))
+                builder.Append('?').Append(query);
+
+            return new Uri(builder.ToString());
         }
 
         static void ParseLeft(Uri address, out string scheme, out string host, out int? port, out string virtualHost)

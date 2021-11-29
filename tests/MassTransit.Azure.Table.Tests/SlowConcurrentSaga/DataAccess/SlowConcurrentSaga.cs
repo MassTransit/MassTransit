@@ -1,7 +1,6 @@
 namespace MassTransit.Azure.Table.Tests.SlowConcurrentSaga.DataAccess
 {
     using System;
-    using Automatonymous;
 
 
     public class SlowConcurrentSaga : SagaStateMachineInstance

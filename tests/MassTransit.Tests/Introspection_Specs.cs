@@ -4,7 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using GreenPipes;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
@@ -29,10 +28,6 @@
             await Bus.Publish(new PingMessage());
 
             await _handled;
-
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
         }
 
         Task<ConsumeContext<PingMessage>> _handled;

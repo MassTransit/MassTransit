@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.Initializers.Contexts
 {
     using System;
-    using GreenPipes;
+    using Middleware;
 
 
     public class DynamicInitializeContext<TMessage> :

@@ -1,9 +1,7 @@
 namespace MassTransit.Configuration
 {
     using System;
-    using Builders;
-    using Configurators;
-    using GreenPipes;
+    using System.Collections.Generic;
     using Transports;
 
 
@@ -28,7 +26,7 @@ namespace MassTransit.Configuration
 
         public IReceivePipeDispatcher Build()
         {
-            var result = BusConfigurationResult.CompileResults(Validate());
+            IReadOnlyList<ValidationResult> result = Validate().ThrowIfContainsFailure($"{GetType().Name} configuration is invalid:");
 
             try
             {

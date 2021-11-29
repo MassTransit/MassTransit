@@ -2,12 +2,8 @@
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using MassTransit.Saga;
     using NUnit.Framework;
-    using NUnit.Framework.Internal;
     using Saga;
-    using TestFramework;
     using TestFramework.Messages;
 
 
@@ -53,8 +49,6 @@
                     e.UseRateLimit(100);
                 });
             });
-
-            TestContext.Out.WriteLine(busControl.GetProbeResult().ToJsonString());
         }
 
         [Test]
@@ -70,8 +64,6 @@
                     //e.Consumer<MyConsumer>();
                 });
             });
-
-            TestContext.Out.WriteLine(busControl.GetProbeResult().ToJsonString());
         }
 
 

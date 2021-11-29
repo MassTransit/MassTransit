@@ -11,7 +11,6 @@
         using System;
         using System.Linq;
         using System.Threading.Tasks;
-        using GreenPipes;
         using MassTransit.Testing;
         using NUnit.Framework;
         using RabbitMQ.Client;
@@ -29,7 +28,7 @@
             {
                 var endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
 
-                var message = new A {Id = Guid.NewGuid()};
+                var message = new A { Id = Guid.NewGuid() };
                 await endpoint.Send(message);
 
                 ConsumeContext<A> received = await _receivedA;
@@ -57,7 +56,7 @@
             {
                 Task<ConsumeContext<A>> receivedA = SubscribeHandler<A>();
 
-                var message = new A {Id = Guid.NewGuid()};
+                var message = new A { Id = Guid.NewGuid() };
                 await BusSendEndpoint.Send(message);
 
                 ConsumeContext<A> received = await receivedA;
@@ -76,7 +75,7 @@
             {
                 var endpoint = await Bus.GetSendEndpoint(InputQueueAddress);
 
-                var message = new A {Id = Guid.NewGuid()};
+                var message = new A { Id = Guid.NewGuid() };
                 await endpoint.Send(message);
 
                 ConsumeContext<A> received = await _receivedA;
@@ -113,7 +112,7 @@
             [Test]
             public async Task Should_be_received()
             {
-                var message = new A {Id = Guid.NewGuid()};
+                var message = new A { Id = Guid.NewGuid() };
                 await Bus.Publish(message);
 
                 ConsumeContext<A> received = await _receivedA;
@@ -140,7 +139,7 @@
             [Test]
             public async Task Should_not_increase_channel_count()
             {
-                var message = new A {Id = Guid.NewGuid()};
+                var message = new A { Id = Guid.NewGuid() };
                 await Bus.Publish(message);
 
                 ConsumeContext<A> received = await _receivedA;
@@ -175,7 +174,7 @@
             [Test]
             public async Task Should_not_increase_channel_count()
             {
-                var message = new A {Id = Guid.NewGuid()};
+                var message = new A { Id = Guid.NewGuid() };
                 await Bus.Publish(message);
 
                 ConsumeContext<Fault<A>> received = await _faultA;
@@ -227,7 +226,7 @@
             [Test]
             public async Task Should_be_received()
             {
-                var message = new A {Id = Guid.NewGuid()};
+                var message = new A { Id = Guid.NewGuid() };
 
                 await Bus.Publish(message);
 
@@ -269,7 +268,7 @@
             [Test]
             public async Task Should_have_the_receive_endpoint_input_address()
             {
-                var message = new A {Id = Guid.NewGuid()};
+                var message = new A { Id = Guid.NewGuid() };
                 await Bus.Publish(message);
 
                 ConsumeContext<A> received = await _receivedA;
@@ -293,7 +292,7 @@
 
                 configurator.PrefetchCount = 16;
 
-                _receivedA = Handler<A>(configurator, context => context.Publish(new GotA {Id = context.Message.Id}));
+                _receivedA = Handler<A>(configurator, context => context.Publish(new GotA { Id = context.Message.Id }));
             }
 
             protected override void ConfigureRabbitMqBus(IRabbitMqBusFactoryConfigurator configurator)
@@ -321,7 +320,7 @@
             [Test]
             public async Task Should_be_received()
             {
-                var message = new B {Id = Guid.NewGuid()};
+                var message = new B { Id = Guid.NewGuid() };
 
                 await Bus.Publish(message);
 
@@ -353,7 +352,7 @@
             [Test]
             public async Task Should_not_throw_an_exception()
             {
-                var message = new UnboundMessage {Id = Guid.NewGuid()};
+                var message = new UnboundMessage { Id = Guid.NewGuid() };
 
                 await Bus.Publish(message);
             }
@@ -373,7 +372,7 @@
             [Test]
             public async Task Should_not_throw_an_exception()
             {
-                var message = new UnboundMessage {Id = Guid.NewGuid()};
+                var message = new UnboundMessage { Id = Guid.NewGuid() };
 
                 await InputQueueSendEndpoint.Send(message);
 

@@ -1,8 +1,7 @@
-﻿namespace MassTransit.Events
+namespace MassTransit.Events
 {
     using System;
     using System.Collections.Generic;
-    using Metadata;
     using Util;
 
 
@@ -19,15 +18,13 @@
             if (exception == null)
                 throw new ArgumentNullException(nameof(exception));
 
-            if (exception is MassTransitApplicationException applicationException)
-            {
-                Data = applicationException.ApplicationData;
+            Data = exception.Data as IDictionary<string, object>;
 
-                if (applicationException.InnerException != null)
-                    exception = applicationException.InnerException;
-            }
+            // TODO clean this up after
+            if (exception.GetType().Name == "MassTransitApplicationException" && exception.InnerException != null)
+                exception = exception.InnerException;
 
-            ExceptionType = TypeMetadataCache.GetShortName(exception.GetType());
+            ExceptionType = TypeCache.GetShortName(exception.GetType());
             InnerException = exception.InnerException != null
                 ? new FaultExceptionInfo(exception.InnerException)
                 : null;

@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.RabbitMqTransport.Tests
 {
     using System;
-    using GreenPipes;
     using NUnit.Framework;
 
 
@@ -30,7 +29,7 @@
             });
 
 
-            Console.WriteLine(string.Join(Environment.NewLine, exception.Result.Results));
+            Console.WriteLine(string.Join(Environment.NewLine, exception.Results));
         }
 
         [Test]
@@ -49,7 +48,7 @@
             });
 
 
-            Console.WriteLine(string.Join(Environment.NewLine, exception.Result.Results));
+            Console.WriteLine(string.Join(Environment.NewLine, exception.Results));
         }
 
         [Test]
@@ -71,7 +70,7 @@
             });
 
 
-            Console.WriteLine(string.Join(Environment.NewLine, exception.Result.Results));
+            Console.WriteLine(string.Join(Environment.NewLine, exception.Results));
         }
 
         [Test]
@@ -95,7 +94,7 @@
             });
 
 
-            Console.WriteLine(string.Join(Environment.NewLine, exception.Result.Results));
+            Console.WriteLine(string.Join(Environment.NewLine, exception.Results));
         }
 
         [Test]
@@ -116,7 +115,7 @@
             });
 
 
-            Console.WriteLine(string.Join(Environment.NewLine, exception.Result.Results));
+            Console.WriteLine(string.Join(Environment.NewLine, exception.Results));
         }
 
         [Test]

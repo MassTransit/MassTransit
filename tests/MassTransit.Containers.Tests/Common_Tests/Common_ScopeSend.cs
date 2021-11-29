@@ -1,38 +1,41 @@
 namespace MassTransit.Containers.Tests.Common_Tests
 {
+    using System;
     using System.Threading.Tasks;
-    using GreenPipes;
+    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Scenarios;
     using TestFramework;
 
 
-    public abstract class Common_ScopeSend<TScope> :
-        InMemoryTestFixture
-        where TScope : class
+    [TestFixture(typeof(DependencyInjectionTestFixtureContainerFactory))]
+    [TestFixture(typeof(LamarTestFixtureContainerFactory))]
+    [TestFixture(typeof(SimpleInjectorTestFixtureContainerFactory))]
+    public class Common_ScopeSend<TContainer> :
+        InMemoryContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        readonly TaskCompletionSource<SendContext> _taskCompletionSource;
-
-        protected Common_ScopeSend()
-        {
-            _taskCompletionSource = GetTask<SendContext>();
-        }
-
         [Test]
         public async Task Should_contains_scope_on_send()
         {
-            var provider = GetSendEndpointProvider();
-            var endpoint = await provider.GetSendEndpoint(InputQueueAddress);
+            var endpoint = await SendEndpointProvider.GetSendEndpoint(InputQueueAddress);
             await endpoint.Send(new SimpleMessageClass("test"));
 
             var sent = await _taskCompletionSource.Task;
 
-            Assert.IsTrue(sent.TryGetPayload<TScope>(out var scope));
-            AssertScopesAreEqual(scope);
+            Assert.IsTrue(sent.TryGetPayload<IServiceScope>(out var scope));
+
+            Assert.AreEqual(scope.ServiceProvider, ServiceScope.ServiceProvider);
         }
 
-        protected abstract ISendEndpointProvider GetSendEndpointProvider();
-        protected abstract void AssertScopesAreEqual(TScope actual);
+        readonly TaskCompletionSource<SendContext> _taskCompletionSource;
+
+        public Common_ScopeSend()
+        {
+            _taskCompletionSource = GetTask<SendContext>();
+        }
+
+        ISendEndpointProvider SendEndpointProvider => ServiceScope.ServiceProvider.GetRequiredService<ISendEndpointProvider>();
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -43,98 +46,102 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             configurator.ConfigureSend(cfg => cfg.UseFilter(new TestScopeFilter(_taskCompletionSource)));
         }
+    }
 
 
-        class TestScopeFilter :
-            IFilter<SendContext>
+    class TestScopeFilter :
+        IFilter<SendContext>
+    {
+        readonly TaskCompletionSource<SendContext> _taskCompletionSource;
+
+        public TestScopeFilter(TaskCompletionSource<SendContext> taskCompletionSource)
         {
-            readonly TaskCompletionSource<SendContext> _taskCompletionSource;
+            _taskCompletionSource = taskCompletionSource;
+        }
 
-            public TestScopeFilter(TaskCompletionSource<SendContext> taskCompletionSource)
-            {
-                _taskCompletionSource = taskCompletionSource;
-            }
+        public async Task Send(SendContext context, IPipe<SendContext> next)
+        {
+            _taskCompletionSource.TrySetResult(context);
+            await next.Send(context);
+        }
 
-            public async Task Send(SendContext context, IPipe<SendContext> next)
-            {
-                _taskCompletionSource.TrySetResult(context);
-                await next.Send(context);
-            }
-
-            public void Probe(ProbeContext context)
-            {
-            }
+        public void Probe(ProbeContext context)
+        {
         }
     }
 
 
-    public abstract class Common_Send_Filter :
-        InMemoryTestFixture
+    public class Common_Send_Filter<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected readonly TaskCompletionSource<MyId> TaskCompletionSource;
-
-        protected Common_Send_Filter()
-        {
-            TaskCompletionSource = GetTask<MyId>();
-        }
-
-        protected abstract IBusRegistrationContext Registration { get; }
-
-        protected abstract MyId MyId { get; }
-
-        protected abstract ISendEndpointProvider SendEndpointProvider { get; }
-
         [Test]
         public async Task Should_use_scope()
         {
             var endpoint = await SendEndpointProvider.GetSendEndpoint(InputQueueAddress);
-            await endpoint.Send<SimpleMessageInterface>(new {Name = "test"});
+            await endpoint.Send<SimpleMessageInterface>(new { Name = "test" });
 
-            var result = await TaskCompletionSource.Task;
+            var result = await _taskCompletionSource.Task;
             Assert.AreEqual(MyId, result);
+        }
+
+        readonly TaskCompletionSource<MyId> _taskCompletionSource;
+
+        public Common_Send_Filter()
+        {
+            _taskCompletionSource = GetTask<MyId>();
+        }
+
+        MyId MyId => ServiceScope.ServiceProvider.GetRequiredService<MyId>();
+
+        ISendEndpointProvider SendEndpointProvider => ServiceScope.ServiceProvider.GetRequiredService<ISendEndpointProvider>();
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<SimplerConsumer>();
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            collection.AddScoped(_ => new MyId(Guid.NewGuid()));
+            collection.AddSingleton(_taskCompletionSource);
+
+            return collection;
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            ConfigureFilter(configurator);
+            configurator.UseSendFilter(typeof(CommonSendScopedFilter<>), BusRegistrationContext);
         }
-
-        protected abstract void ConfigureFilter(ISendPipelineConfigurator sendPipelineConfigurator);
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureConsumer<SimplerConsumer>(Registration);
+            configurator.ConfigureConsumer<SimplerConsumer>(BusRegistrationContext);
+        }
+    }
+
+
+    class CommonSendScopedFilter<T> :
+        IFilter<SendContext<T>>
+        where T : class
+    {
+        readonly MyId _myId;
+        readonly TaskCompletionSource<MyId> _taskCompletionSource;
+
+        public CommonSendScopedFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId)
+        {
+            _taskCompletionSource = taskCompletionSource;
+            _myId = myId;
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
         {
-            configurator.AddConsumer<SimplerConsumer>();
-            configurator.AddBus(provider => BusControl);
+            _taskCompletionSource.TrySetResult(_myId);
+            return next.Send(context);
         }
 
-
-        protected class ScopedFilter<T> :
-            IFilter<SendContext<T>>
-            where T : class
+        public void Probe(ProbeContext context)
         {
-            readonly MyId _myId;
-            readonly TaskCompletionSource<MyId> _taskCompletionSource;
-
-            public ScopedFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId)
-            {
-                _taskCompletionSource = taskCompletionSource;
-                _myId = myId;
-            }
-
-            public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
-            {
-                _taskCompletionSource.TrySetResult(_myId);
-                return next.Send(context);
-            }
-
-            public void Probe(ProbeContext context)
-            {
-            }
         }
     }
 }

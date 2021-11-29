@@ -5,10 +5,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
     using System.Threading.Tasks;
     using DataAccess;
     using Events;
-    using MassTransit.Saga;
-    using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
-    using Saga;
     using Shared;
     using Shouldly;
     using Testing;
@@ -27,7 +24,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
             var activityMonitor = Bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(3000));
 
             var sagaId = NewId.NextGuid();
-            var message = new Begin {CorrelationId = sagaId};
+            var message = new Begin { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -35,7 +32,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
 
             foundId.HasValue.ShouldBe(true);
 
-            var slowMessage = new IncrementCounterSlowly {CorrelationId = sagaId};
+            var slowMessage = new IncrementCounterSlowly { CorrelationId = sagaId };
             await Task.WhenAll(
                 Task.Run(() => InputQueueSendEndpoint.Send(slowMessage)),
                 Task.Run(() => InputQueueSendEndpoint.Send(slowMessage)));
@@ -49,7 +46,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
         }
 
         readonly Lazy<ISagaRepository<SlowConcurrentSaga>> _sagaRepository;
-        readonly SagaTestHarness<SlowConcurrentSaga> _sagaTestHarness;
+        readonly ISagaStateMachineTestHarness<SlowConcurrentSagaStateMachine, SlowConcurrentSaga> _sagaTestHarness;
         readonly SlowConcurrentSagaStateMachine _machine;
 
         public SlowConcurrentSaga_Specs()
@@ -73,7 +70,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga
         {
             await using var context = new SlowConcurrentSagaContextFactory().CreateDbContext(DbContextOptionsBuilder);
 
-            await context.Database.MigrateAsync();
+            await context.Database.EnsureDeletedAsync();
+            await context.Database.EnsureCreatedAsync();
         }
 
         [OneTimeTearDown]

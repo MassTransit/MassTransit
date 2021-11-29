@@ -2,7 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes.Specifications;
+    using Configuration;
 
 
     public static class DelegatePipeConfiguratorExtensions

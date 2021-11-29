@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Internals.Reflection
+﻿namespace MassTransit.Internals
 {
     using System;
     using System.Linq.Expressions;

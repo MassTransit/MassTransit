@@ -2,7 +2,7 @@ namespace MassTransit.Tests
 {
     using System.Linq;
     using System.Reflection;
-    using GreenPipes.Internals.Reflection;
+    using Internals;
     using NUnit.Framework;
 
 

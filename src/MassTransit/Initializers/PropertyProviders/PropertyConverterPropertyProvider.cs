@@ -32,7 +32,7 @@ namespace MassTransit.Initializers.PropertyProviders
                 return TaskUtil.Default<TProperty>();
 
             Task<TInputProperty> inputTask = _inputProvider.GetProperty(context);
-            if (inputTask.IsCompleted)
+            if (inputTask.Status == TaskStatus.RanToCompletion)
                 return _converter.Convert(context, inputTask.Result);
 
             async Task<TProperty> GetPropertyAsync()

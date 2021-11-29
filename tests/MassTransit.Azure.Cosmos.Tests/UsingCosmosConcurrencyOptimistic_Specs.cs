@@ -4,8 +4,8 @@
     using System.Collections.Generic;
     using System.Net;
     using System.Threading.Tasks;
-    using Cosmos.Saga;
-    using GreenPipes;
+    using AzureCosmos;
+    using AzureCosmos.Saga;
     using MassTransit.Saga;
     using Microsoft.Azure.Cosmos;
     using NUnit.Framework;

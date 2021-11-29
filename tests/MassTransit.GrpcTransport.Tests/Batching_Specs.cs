@@ -7,7 +7,6 @@ namespace MassTransit.GrpcTransport.Tests
         using System.Threading.Tasks;
         using NUnit.Framework;
         using TestFramework.Messages;
-        using Util;
 
 
         [TestFixture]
@@ -102,7 +101,7 @@ namespace MassTransit.GrpcTransport.Tests
                 if (_count < _messageTask.Length)
                     _messageTask[_count++].TrySetResult(context.Message);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

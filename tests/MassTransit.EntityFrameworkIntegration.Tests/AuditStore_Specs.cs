@@ -4,7 +4,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Audit;
-    using GreenPipes.Util;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -91,7 +90,7 @@
 
             public Task Consume(ConsumeContext<B> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

@@ -4,10 +4,7 @@ namespace MassTransit.Transports
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
-    using Context;
-    using Events;
-    using GreenPipes;
-    using GreenPipes.Agents;
+    using Middleware;
 
 
     public class ReceiveTransport<TContext> :
@@ -28,7 +25,7 @@ namespace MassTransit.Transports
             _transportPipe = transportPipe;
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             var scope = context.CreateScope("receiveTransport");
 
@@ -45,22 +42,22 @@ namespace MassTransit.Transports
             return new ReceiveTransportAgent(_hostConfiguration.ReceiveTransportRetryPolicy, _context, _supervisorFactory, _transportPipe);
         }
 
-        ConnectHandle IReceiveObserverConnector.ConnectReceiveObserver(IReceiveObserver observer)
+        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
             return _context.ConnectReceiveObserver(observer);
         }
 
-        ConnectHandle IReceiveTransportObserverConnector.ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
+        public ConnectHandle ConnectReceiveTransportObserver(IReceiveTransportObserver observer)
         {
             return _context.ConnectReceiveTransportObserver(observer);
         }
 
-        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
             return _context.ConnectPublishObserver(observer);
         }
 
-        ConnectHandle ISendObserverConnector.ConnectSendObserver(ISendObserver observer)
+        public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
             return _context.ConnectSendObserver(observer);
         }
@@ -91,7 +88,7 @@ namespace MassTransit.Transports
                 SetCompleted(receiver);
             }
 
-            Task ReceiveTransportHandle.Stop(CancellationToken cancellationToken)
+            public Task Stop(CancellationToken cancellationToken)
             {
                 return this.Stop("Stop Receive Transport", cancellationToken);
             }
@@ -213,13 +210,12 @@ namespace MassTransit.Transports
 
             Task NotifyFaulted(Exception exception)
             {
-                return _context.TransportObservers.Faulted(new ReceiveTransportFaultedEvent(_context.InputAddress, exception));
+                return _context.TransportObservers.NotifyFaulted(_context.InputAddress, exception);
             }
 
 
             class TransportStoppingContext :
-                BasePipeContext,
-                PipeContext
+                BasePipeContext
             {
                 public TransportStoppingContext(CancellationToken cancellationToken)
                     : base(cancellationToken)

@@ -1,8 +1,6 @@
-namespace MassTransit.Futures
+namespace MassTransit
 {
     using System;
-    using GreenPipes.Internals.Extensions;
-    using Registration;
 
 
     public class RequestConsumerFuture<TRequest, TResponse> :

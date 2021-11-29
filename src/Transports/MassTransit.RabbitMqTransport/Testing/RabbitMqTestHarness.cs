@@ -1,18 +1,17 @@
-﻿namespace MassTransit.RabbitMqTransport.Testing
+﻿namespace MassTransit.Testing
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Text;
+    using System.Text.Json;
     using System.Threading.Tasks;
-    using Configurators;
-    using MassTransit.Testing;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using RabbitMQ.Client;
+    using RabbitMqTransport;
+    using RabbitMqTransport.Configuration;
+    using Serialization;
     using Transports;
 
 
@@ -128,14 +127,12 @@
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
 
             var requestUri = new UriBuilder("http", HostAddress.Host, 15672, $"api/{element}/{HostAddress.AbsolutePath.Trim('/')}").Uri;
-            using var response = await client.GetStreamAsync(requestUri);
-            using var reader = new StreamReader(response);
-            using var jsonReader = new JsonTextReader(reader);
 
-            var token = await JToken.ReadFromAsync(jsonReader);
+            var bytes = await client.GetByteArrayAsync(requestUri);
 
-            IEnumerable<string> entities = from elements in token.Children()
-                select elements["name"].ToString();
+            var rootElement = JsonSerializer.Deserialize<JsonElement>(bytes, SystemTextJsonMessageSerializer.Options);
+
+            var entities = rootElement.EnumerateArray().Select(x => x.GetProperty("name").GetString()).ToArray();
 
             return entities.Where(x => !string.IsNullOrWhiteSpace(x) && !x.StartsWith("amq.")).ToList();
         }

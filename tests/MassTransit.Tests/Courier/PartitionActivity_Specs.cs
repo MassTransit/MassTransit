@@ -1,9 +1,6 @@
 ﻿namespace MassTransit.Tests.Courier
 {
     using System.Threading.Tasks;
-    using GreenPipes;
-    using GreenPipes.Partitioning;
-    using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -24,7 +21,7 @@
             builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
 
             var testActivity = GetActivityContext<TestActivity>();
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
 
             await Bus.Execute(builder.Build());
 

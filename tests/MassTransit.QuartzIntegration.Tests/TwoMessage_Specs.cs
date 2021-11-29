@@ -2,7 +2,6 @@ namespace MassTransit.QuartzIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Automatonymous;
     using NUnit.Framework;
     using Saga;
 

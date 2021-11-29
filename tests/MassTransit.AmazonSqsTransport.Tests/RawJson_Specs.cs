@@ -58,7 +58,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
             ConsumeContext<Command> context = await _handled;
 
-            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(RawJsonMessageSerializer.RawJsonContentType),
+            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(SystemTextJsonRawMessageSerializer.JsonContentType),
                 $"unexpected content-type {context.ReceiveContext.ContentType}");
 
             Assert.That(context.Message.CommandId, Is.EqualTo(message.CommandId));
@@ -108,17 +108,17 @@ namespace MassTransit.AmazonSqsTransport.Tests
             await InputQueueSendEndpoint.Send(message, x =>
             {
                 x.Headers.Set(headerName, headerValue);
-                x.Serializer = new RawJsonMessageSerializer();
+                x.Serializer = new SystemTextJsonRawMessageSerializer();
             });
 
             ConsumeContext<Command> commandContext = await _handler;
 
-            Assert.That(commandContext.ReceiveContext.ContentType, Is.EqualTo(RawJsonMessageSerializer.RawJsonContentType),
+            Assert.That(commandContext.ReceiveContext.ContentType, Is.EqualTo(SystemTextJsonRawMessageSerializer.JsonContentType),
                 $"unexpected content-type {commandContext.ReceiveContext.ContentType}");
 
             ConsumeContext<CrapConsumed> context = await _handled;
 
-            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(JsonMessageSerializer.JsonContentType),
+            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(SystemTextJsonMessageSerializer.JsonContentType),
                 $"unexpected content-type {context.ReceiveContext.ContentType}");
 
             Assert.That(context.Message.CorrelationId, Is.EqualTo(message.CommandId));
@@ -147,8 +147,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
         protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {
-            configurator.AddMessageDeserializer(RawJsonMessageSerializer.RawJsonContentType,
-                () => new RawJsonMessageDeserializer(RawJsonMessageSerializer.Deserializer));
+            configurator.UseRawJsonDeserializer();
 
             TaskCompletionSource<ConsumeContext<Command>> handler = GetTask<ConsumeContext<Command>>();
             _handler = handler.Task;
@@ -183,17 +182,17 @@ namespace MassTransit.AmazonSqsTransport.Tests
             await InputQueueSendEndpoint.Send(message, x =>
             {
                 x.Headers.Set(headerName, headerValue);
-                x.Serializer = new RawJsonMessageSerializer();
+                x.Serializer = new SystemTextJsonRawMessageSerializer(RawSerializerOptions.All);
             });
 
             ConsumeContext<Command> commandContext = await _handler;
 
-            Assert.That(commandContext.ReceiveContext.ContentType, Is.EqualTo(RawJsonMessageSerializer.RawJsonContentType),
+            Assert.That(commandContext.ReceiveContext.ContentType, Is.EqualTo(SystemTextJsonRawMessageSerializer.JsonContentType),
                 $"unexpected content-type {commandContext.ReceiveContext.ContentType}");
 
             ConsumeContext<CrapConsumed> context = await _handled;
 
-            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(JsonMessageSerializer.JsonContentType),
+            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(SystemTextJsonMessageSerializer.JsonContentType),
                 $"unexpected content-type {context.ReceiveContext.ContentType}");
 
             Assert.That(context.Message.CorrelationId, Is.EqualTo(message.CommandId));
@@ -222,8 +221,7 @@ namespace MassTransit.AmazonSqsTransport.Tests
 
         protected override void ConfigureAmazonSqsReceiveEndpoint(IAmazonSqsReceiveEndpointConfigurator configurator)
         {
-            configurator.AddMessageDeserializer(RawJsonMessageSerializer.RawJsonContentType,
-                () => new RawJsonMessageDeserializer(RawJsonMessageSerializer.Deserializer, RawJsonSerializerOptions.All));
+            configurator.UseRawJsonDeserializer(RawSerializerOptions.All);
 
             TaskCompletionSource<ConsumeContext<Command>> handler = GetTask<ConsumeContext<Command>>();
             _handler = handler.Task;

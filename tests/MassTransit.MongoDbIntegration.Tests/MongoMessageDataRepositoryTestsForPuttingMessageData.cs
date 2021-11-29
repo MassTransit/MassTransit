@@ -6,7 +6,6 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using MassTransit.MessageData;
     using MessageData;
     using MongoDB.Driver;
     using MongoDB.Driver.GridFS;
@@ -29,7 +28,7 @@
         [Test]
         public async Task ThenMessageStoredAsExpected()
         {
-            byte[] result = await _bucket.DownloadAsBytesByNameAsync(_filename);
+            var result = await _bucket.DownloadAsBytesByNameAsync(_filename);
 
             Assert.That(result, Is.EqualTo(_expectedData));
         }

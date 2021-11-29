@@ -1,7 +1,6 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit
 {
     using System;
-    using MassTransit.Registration;
 
 
     public interface IEventHubEndpointConnector

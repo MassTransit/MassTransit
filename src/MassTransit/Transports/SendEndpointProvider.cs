@@ -2,31 +2,27 @@ namespace MassTransit.Transports
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using Pipeline;
-    using Pipeline.Observables;
+    using Observables;
 
 
     public class SendEndpointProvider :
         ISendEndpointProvider
     {
         readonly ISendEndpointCache<Uri> _cache;
+        readonly ReceiveEndpointContext _context;
         readonly SendObservable _observers;
         readonly ISendTransportProvider _provider;
         readonly ISendPipe _sendPipe;
-        readonly IMessageSerializer _serializer;
-        readonly Uri _sourceAddress;
 
-        public SendEndpointProvider(ISendTransportProvider provider, SendObservable observers, IMessageSerializer serializer, Uri sourceAddress,
-            ISendPipe sendPipe)
+        public SendEndpointProvider(ISendTransportProvider provider, SendObservable observers, ReceiveEndpointContext context, ISendPipe sendPipe)
         {
             _provider = provider;
-            _serializer = serializer;
-            _sourceAddress = sourceAddress;
             _sendPipe = sendPipe;
 
-            _cache = new SendEndpointCache<Uri>();
             _observers = observers;
+            _context = context;
+
+            _cache = new SendEndpointCache<Uri>();
         }
 
         public Task<ISendEndpoint> GetSendEndpoint(Uri address)
@@ -47,7 +43,7 @@ namespace MassTransit.Transports
 
             var handle = sendTransport.ConnectSendObserver(_observers);
 
-            return new SendEndpoint(sendTransport, _serializer, address, _sourceAddress, _sendPipe, handle);
+            return new SendEndpoint(sendTransport, _context, address, _sendPipe, handle);
         }
     }
 }

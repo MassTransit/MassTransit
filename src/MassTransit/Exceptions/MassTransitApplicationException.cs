@@ -4,8 +4,7 @@ namespace MassTransit
     using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
-    using Courier;
-    using Newtonsoft.Json.Linq;
+    using Util;
 
 
     /// <summary>
@@ -30,7 +29,7 @@ namespace MassTransit
         public MassTransitApplicationException(Exception innerException, object values)
             : base(innerException.Message, innerException)
         {
-            _data = GetObjectAsDictionary(values);
+            _data = ConvertObject.ToDictionary(values);
 
             ImportExceptionData(innerException);
         }
@@ -52,7 +51,7 @@ namespace MassTransit
         public MassTransitApplicationException(string message, Exception innerException, object values)
             : base(message, innerException)
         {
-            _data = GetObjectAsDictionary(values);
+            _data = ConvertObject.ToDictionary(values);
 
             ImportExceptionData(innerException);
         }
@@ -91,16 +90,6 @@ namespace MassTransit
                     }
                 }
             }
-        }
-
-        static Dictionary<string, object> GetObjectAsDictionary(object values)
-        {
-            if (values == null)
-                return null;
-
-            var dictionary = JObject.FromObject(values, SerializerCache.Serializer);
-
-            return dictionary.ToObject<Dictionary<string, object>>();
         }
     }
 }

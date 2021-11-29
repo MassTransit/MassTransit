@@ -1,8 +1,5 @@
-﻿namespace MassTransit.Configuration
+namespace MassTransit.Configuration
 {
-    using ConsumePipeSpecifications;
-
-
     public interface IConsumePipeConfiguration
     {
         IConsumePipeSpecification Specification { get; }

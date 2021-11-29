@@ -2,6 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
+    using Configuration;
     using Util;
     using Util.Scanning;
 
@@ -22,13 +23,13 @@
 
         Task IPublishObserver.PrePublish<T>(PublishContext<T> context)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         Task IPublishObserver.PostPublish<T>(PublishContext<T> context)
         {
             if (!_filter.Matches(context))
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
 
             var metadata = _metadataFactory.CreateAuditMetadata(context);
 
@@ -37,7 +38,7 @@
 
         Task IPublishObserver.PublishFault<T>(PublishContext<T> context, Exception exception)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

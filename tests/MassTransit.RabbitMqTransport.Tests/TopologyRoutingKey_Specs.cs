@@ -14,7 +14,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var transactionId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send<IRoutedEvent>(new {TransactionId = transactionId});
+            await InputQueueSendEndpoint.Send<IRoutedEvent>(new { TransactionId = transactionId });
 
             ConsumeContext<IRoutedEvent> context = await _handled;
 
@@ -65,7 +65,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var transactionId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send<IRoutedEvent>(new {TransactionId = transactionId});
+            await InputQueueSendEndpoint.Send<IRoutedEvent>(new { TransactionId = transactionId });
 
             ConsumeContext<IRoutedEvent> context = await _handled;
 
@@ -107,7 +107,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var transactionId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send<IRoutedEvent>(new {TransactionId = transactionId});
+            await InputQueueSendEndpoint.Send<IRoutedEvent>(new { TransactionId = transactionId });
 
             ConsumeContext<IRoutedEvent> context = await _handled;
 

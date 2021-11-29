@@ -6,7 +6,7 @@
     using System.Security.Cryptography;
     using System.Threading;
     using System.Threading.Tasks;
-    using Internals.Extensions;
+    using Internals;
     using Serialization;
 
 
@@ -59,7 +59,7 @@
                     if (string.IsNullOrWhiteSpace(parameter))
                         continue;
 
-                    string[] pair = parameter.Split('=');
+                    var pair = parameter.Split('=');
 
                     parameters.Add(pair[0], pair.Length == 2 ? pair[1] : "");
                 }

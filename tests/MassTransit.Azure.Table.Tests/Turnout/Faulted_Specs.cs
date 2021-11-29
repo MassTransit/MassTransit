@@ -3,12 +3,8 @@ namespace MassTransit.Azure.Table.Tests.Turnout
     using System;
     using System.Threading.Tasks;
     using Contracts.JobService;
-    using Definition;
-    using JobService;
-    using JobService.Configuration;
     using NUnit.Framework;
     using TestFramework;
-    using Tests;
 
 
     public interface GrindTheGears
@@ -49,16 +45,16 @@ namespace MassTransit.Azure.Table.Tests.Turnout
 
         [Test]
         [Order(4)]
-        public async Task Should_have_published_the_job_faulted_event()
+        public async Task Should_have_published_the_fault_event()
         {
-            ConsumeContext<JobFaulted> faulted = await _faulted;
+            ConsumeContext<Fault<GrindTheGears>> fault = await _fault;
         }
 
         [Test]
         [Order(4)]
-        public async Task Should_have_published_the_fault_event()
+        public async Task Should_have_published_the_job_faulted_event()
         {
-            ConsumeContext<Fault<GrindTheGears>> fault = await _fault;
+            ConsumeContext<JobFaulted> faulted = await _faulted;
         }
 
         [Test]

@@ -3,10 +3,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using GreenPipes.Util;
+    using AzureTable;
     using NUnit.Framework;
     using Shouldly;
-    using Table.Audit;
 
 
     [TestFixture]
@@ -51,12 +50,12 @@
         {
             public Task Consume(ConsumeContext<A> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task Consume(ConsumeContext<B> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

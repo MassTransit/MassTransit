@@ -2,11 +2,8 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Automatonymous;
-    using MassTransit.Saga;
     using NHibernate;
     using NUnit.Framework;
-    using Saga;
     using TestFramework;
     using Testing;
 
@@ -20,12 +17,12 @@
         {
             var correlationId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling { CorrelationId = correlationId });
 
             Guid? sagaId = await _repository.ShouldContainSaga(correlationId, TestTimeout);
             Assert.IsTrue(sagaId.HasValue);
 
-            await InputQueueSendEndpoint.Send(new SodOff {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new SodOff { CorrelationId = correlationId });
 
             sagaId = await _repository.ShouldNotContainSaga(correlationId, TestTimeout);
             Assert.IsFalse(sagaId.HasValue);
@@ -36,13 +33,13 @@
         {
             var correlationId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling { CorrelationId = correlationId });
 
             Guid? sagaId = await _repository.ShouldContainSaga(correlationId, TestTimeout);
 
             Assert.IsTrue(sagaId.HasValue);
 
-            await InputQueueSendEndpoint.Send(new GotHitByACar {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new GotHitByACar { CorrelationId = correlationId });
 
             sagaId = await _repository.ShouldContainSagaInState(correlationId, _machine, x => x.Dead, TestTimeout);
 
@@ -72,23 +69,6 @@
         public void Teardown()
         {
             _sessionFactory.Dispose();
-        }
-
-        async Task RaiseEvent<T>(Guid id, Event<T> @event, T data)
-        {
-            using (var session = _sessionFactory.OpenSession())
-            using (var transaction = session.BeginTransaction())
-            {
-                var instance = session.Get<ShoppingChore>(id, LockMode.Upgrade);
-                if (instance == null)
-                    instance = new ShoppingChore(id);
-
-                await _machine.RaiseEvent(instance, @event, data);
-
-                session.SaveOrUpdate(instance);
-
-                transaction.Commit();
-            }
         }
 
         Task<ShoppingChore> GetSaga(Guid id)

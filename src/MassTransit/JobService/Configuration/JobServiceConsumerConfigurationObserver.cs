@@ -1,11 +1,10 @@
-namespace MassTransit.JobService.Configuration
+namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
-    using Components;
-    using ConsumeConfigurators;
-    using Internals.Extensions;
-    using Registration;
+    using Internals;
+    using JobService;
+    using Transports;
 
 
     public class JobServiceConsumerConfigurationObserver :
@@ -52,7 +51,7 @@ namespace MassTransit.JobService.Configuration
             {
                 var options = consumerConfigurator.Options<JobOptions<TMessage>>();
 
-                var jobTypeId = JobMetadataCache<T, TMessage>.GenerateJobTypeId(_configurator.InputAddress.GetLastPart());
+                var jobTypeId = JobMetadataCache<T, TMessage>.GenerateJobTypeId(_configurator.InputAddress.GetEndpointName());
 
                 _jobServiceOptions.JobService.RegisterJobType(_configurator, options, jobTypeId);
             }

@@ -1,9 +1,6 @@
 namespace MassTransit.Transports
 {
     using System.Threading.Tasks;
-    using GreenPipes;
-    using Pipeline;
-    using Util;
 
 
     public abstract class SendContextPipeAdapter<TMessage> :
@@ -37,7 +34,7 @@ namespace MassTransit.Transports
 
             return _pipe is ISendContextPipe sendContextPipe
                 ? sendContextPipe.Send(context)
-                : TaskUtil.Completed;
+                : Task.CompletedTask;
         }
 
         protected abstract void Send(SendContext<TMessage> context);

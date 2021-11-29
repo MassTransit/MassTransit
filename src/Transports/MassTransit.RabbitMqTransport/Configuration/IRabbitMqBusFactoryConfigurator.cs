@@ -1,12 +1,13 @@
-﻿namespace MassTransit.RabbitMqTransport
+﻿namespace MassTransit
 {
     using System;
-    using Topology;
+    using RabbitMqTransport;
+    using RabbitMqTransport.Topology;
 
 
     public interface IRabbitMqBusFactoryConfigurator :
         IBusFactoryConfigurator<IRabbitMqReceiveEndpointConfigurator>,
-        IQueueEndpointConfigurator
+        IRabbitMqQueueEndpointConfigurator
     {
         new IRabbitMqSendTopologyConfigurator SendTopology { get; }
 

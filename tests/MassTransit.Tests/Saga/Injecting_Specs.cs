@@ -2,8 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using MassTransit.Saga;
     using MassTransit.Testing;
     using Messages;
     using NUnit.Framework;

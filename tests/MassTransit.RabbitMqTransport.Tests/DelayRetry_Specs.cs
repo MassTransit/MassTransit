@@ -4,12 +4,9 @@
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]
@@ -59,7 +56,7 @@
                 _receivedTimeSpan = _timer.Elapsed;
                 _received.TrySetResult(context);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }, x => x.UseDelayedRedelivery(r => r.Intervals(1000, 2000)));
         }
     }

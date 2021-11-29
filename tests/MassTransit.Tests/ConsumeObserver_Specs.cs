@@ -5,12 +5,11 @@ namespace MassTransit.Tests
         using System.Linq;
         using System.Threading.Tasks;
         using MassTransit.Testing;
-        using MassTransit.Testing.Observers;
+        using MassTransit.Testing.Implementations;
         using NUnit.Framework;
         using Shouldly;
         using TestFramework;
         using TestFramework.Messages;
-        using Util;
 
 
         [TestFixture]
@@ -78,7 +77,7 @@ namespace MassTransit.Tests
                 {
                     received.SetResult(x);
 
-                    return TaskUtil.Completed;
+                    return Task.CompletedTask;
                 });
 
                 await mediator.Publish(new PingMessage());

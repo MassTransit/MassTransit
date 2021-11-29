@@ -21,31 +21,31 @@
 
         Task IReceiveObserver.PreReceive(ReceiveContext context)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         Task IReceiveObserver.PostReceive(ReceiveContext context)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         Task IReceiveObserver.PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
         {
             ConsumerPerformanceCounterCache.GetCounter(_factory, consumerType).Consumed(duration);
             MessagePerformanceCounterCache<T>.Counter(_factory).Consumed(duration);
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
         {
             ConsumerPerformanceCounterCache.GetCounter(_factory, consumerType).Faulted();
             MessagePerformanceCounterCache<T>.Counter(_factory).ConsumeFaulted(duration);
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

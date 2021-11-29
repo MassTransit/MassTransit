@@ -3,7 +3,7 @@ namespace MassTransit.Initializers.PropertyProviders
     using System;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Internals.Reflection;
+    using Internals;
 
 
     /// <summary>

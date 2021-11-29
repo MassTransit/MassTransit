@@ -1,7 +1,6 @@
-﻿namespace MassTransit.Azure.ServiceBus.Core
+﻿namespace MassTransit
 {
     using System;
-    using Topology;
 
 
     /// <summary>
@@ -23,14 +22,14 @@
         /// <param name="topicName">The topic name</param>
         /// <param name="subscriptionName">The name for the subscription</param>
         /// <param name="callback">Configure the exchange and binding</param>
-        void Subscribe(string topicName, string subscriptionName, Action<ISubscriptionConfigurator> callback = null);
+        void Subscribe(string topicName, string subscriptionName, Action<IServiceBusSubscriptionConfigurator> callback = null);
 
         /// <summary>
         /// Create a topic subscription for the message type
         /// </summary>
         /// <param name="subscriptionName">The name for the subscription</param>
         /// <param name="callback">Configure the topic subscription</param>
-        void Subscribe<T>(string subscriptionName, Action<ISubscriptionConfigurator> callback = null)
+        void Subscribe<T>(string subscriptionName, Action<IServiceBusSubscriptionConfigurator> callback = null)
             where T : class;
     }
 }

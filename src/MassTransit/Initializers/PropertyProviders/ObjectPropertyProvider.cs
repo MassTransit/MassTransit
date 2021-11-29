@@ -27,7 +27,7 @@ namespace MassTransit.Initializers.PropertyProviders
             where T : class
         {
             Task<object> propertyTask = _provider.GetProperty(context);
-            if (propertyTask.IsCompleted)
+            if (propertyTask.Status == TaskStatus.RanToCompletion)
             {
                 var propertyValue = propertyTask.Result;
                 if (propertyValue == default)

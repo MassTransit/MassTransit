@@ -6,7 +6,6 @@ namespace MassTransit.Tests.Testing
     using AsyncMessageListTestTypes;
     using Context;
     using MassTransit.Testing;
-    using MassTransit.Testing.MessageObservers;
     using NUnit.Framework;
 
 

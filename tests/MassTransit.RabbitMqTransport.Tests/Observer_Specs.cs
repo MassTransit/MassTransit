@@ -22,7 +22,7 @@
         [Test]
         public async Task Should_be_received()
         {
-            await Bus.Publish(new SomethingHappened {Caption = "System Screw Up"});
+            await Bus.Publish(new SomethingHappened { Caption = "System Screw Up" });
 
             await _observer.Received;
         }

@@ -2,9 +2,8 @@ namespace MassTransit.QuartzIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Automatonymous.Contracts;
-    using Automatonymous.Requests;
-    using GreenPipes;
+    using Components;
+    using Contracts;
     using LongRunningRequestTest;
     using NUnit.Framework;
     using Saga;
@@ -76,7 +75,6 @@ namespace MassTransit.QuartzIntegration.Tests
     namespace LongRunningRequestTest
     {
         using System;
-        using Automatonymous;
 
 
         public interface CreateShortLink

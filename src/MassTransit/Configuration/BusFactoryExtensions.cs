@@ -4,9 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
     using Configuration;
-    using Configurators;
-    using Context;
-    using GreenPipes;
 
 
     public static class BusFactoryExtensions
@@ -29,7 +26,7 @@
 
             busConfiguration.HostConfiguration.LogContext = LogContext.Current;
 
-            var result = BusConfigurationResult.CompileResults(validationResult);
+            IReadOnlyList<ValidationResult> result = validationResult.ThrowIfContainsFailure("The bus configuration is invalid:");
 
             try
             {

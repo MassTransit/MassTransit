@@ -12,7 +12,7 @@
         [Test]
         public async Task Should_create_and_bind_the_exchange_and_properties()
         {
-            await Bus.Publish<TheWorldImploded>(new {Value = "Whoa!"});
+            await Bus.Publish<TheWorldImploded>(new { Value = "Whoa!" });
 
             await _handled;
         }

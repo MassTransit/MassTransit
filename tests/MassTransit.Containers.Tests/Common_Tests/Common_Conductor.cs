@@ -4,14 +4,13 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using System.Threading.Tasks;
     using ConductorComponents;
     using ConductorContracts;
-    using Definition;
-    using JobService.Configuration;
     using NUnit.Framework;
     using TestFramework;
 
 
-    public abstract class Common_Conductor :
-        InMemoryTestFixture
+    public class Common_Conductor<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
         [Test]
         public async Task Should_resolve_an_use_the_service()
@@ -26,27 +25,18 @@ namespace MassTransit.Containers.Tests.Common_Tests
                 InVar.Timestamp
             });
 
-            Assert.That(response.SourceAddress, Is.EqualTo(new Uri(BaseAddress, KebabCaseEndpointNameFormatter.Instance.Consumer<SubmitOrderConsumer>())));
+            Assert.That(response.SourceAddress,
+                Is.EqualTo(new Uri(InMemoryTestHarness.BaseAddress, KebabCaseEndpointNameFormatter.Instance.Consumer<SubmitOrderConsumer>())));
         }
 
-        protected Common_Conductor()
+        public Common_Conductor()
         {
             Options = new ServiceInstanceOptions();
-
         }
 
         protected ServiceInstanceOptions Options { get; private set; }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            ConfigureServiceEndpoints(configurator);
-        }
-
-        protected abstract void ConfigureServiceEndpoints(IBusFactoryConfigurator<IInMemoryReceiveEndpointConfigurator> configurator);
-
-        protected abstract IClientFactory GetClientFactory();
-
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.SetKebabCaseEndpointNameFormatter();
 
@@ -54,8 +44,11 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             configurator.AddRequestClient<SubmitOrder>();
             configurator.AddRequestClient<AuthorizeOrder>();
+        }
 
-            configurator.AddBus(provider => BusControl);
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.ConfigureServiceEndpoints(BusRegistrationContext, Options);
         }
     }
 

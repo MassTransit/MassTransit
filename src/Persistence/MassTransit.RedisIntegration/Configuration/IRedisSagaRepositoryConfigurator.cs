@@ -1,8 +1,6 @@
-namespace MassTransit.RedisIntegration
+namespace MassTransit
 {
     using System;
-    using Registration;
-    using Saga;
     using StackExchange.Redis;
 
 
@@ -42,7 +40,7 @@ namespace MassTransit.RedisIntegration
         /// Use the configuration service provider to resolve the connection
         /// </summary>
         /// <param name="connectionFactory"></param>
-        void ConnectionFactory(Func<IConfigurationServiceProvider, ConnectionMultiplexer> connectionFactory);
+        void ConnectionFactory(Func<IServiceProvider, ConnectionMultiplexer> connectionFactory);
 
         /// <summary>
         /// Select a database other than the default to be used (optional)

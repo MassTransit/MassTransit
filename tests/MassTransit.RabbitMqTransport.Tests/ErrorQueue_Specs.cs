@@ -5,7 +5,6 @@
     using System.Runtime.Serialization;
     using System.Text;
     using System.Threading.Tasks;
-    using GreenPipes;
     using Metadata;
     using NUnit.Framework;
     using RabbitMQ.Client;
@@ -153,7 +152,7 @@
             using (var connection = connectionFactory.CreateConnection())
             using (var model = connection.CreateModel())
             {
-                byte[] bytes = Encoding.UTF8.GetBytes("[]");
+                var bytes = Encoding.UTF8.GetBytes("[]");
 
                 model.BasicPublish("input_queue", "", model.CreateBasicProperties(), bytes);
 

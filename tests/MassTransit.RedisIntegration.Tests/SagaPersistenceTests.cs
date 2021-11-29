@@ -27,7 +27,7 @@
 
             found.ShouldNotBeNull();
 
-            var nextMessage = new CompleteSimpleSaga {CorrelationId = sagaId};
+            var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
@@ -87,7 +87,7 @@
 
             found.ShouldNotBeNull();
 
-            var nextMessage = new CompleteSimpleSaga {CorrelationId = sagaId};
+            var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
@@ -147,7 +147,7 @@
 
             found.ShouldNotBeNull();
 
-            var nextMessage = new CompleteSimpleSaga {CorrelationId = sagaId};
+            var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 

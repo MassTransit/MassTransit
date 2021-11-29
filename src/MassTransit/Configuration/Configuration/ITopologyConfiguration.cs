@@ -1,9 +1,5 @@
-﻿namespace MassTransit.Configuration
+namespace MassTransit.Configuration
 {
-    using GreenPipes;
-    using Topology;
-
-
     public interface ITopologyConfiguration :
         ISpecification
     {

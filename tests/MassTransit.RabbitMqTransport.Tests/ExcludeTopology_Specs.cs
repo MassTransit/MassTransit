@@ -16,7 +16,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         {
             var transactionId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send<TransactionEvent>(new {TransactionId = transactionId});
+            await InputQueueSendEndpoint.Send<TransactionEvent>(new { TransactionId = transactionId });
 
             ConsumeContext<TransactionEvent> context = await _handled;
 
@@ -71,7 +71,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     namespace TopologyTests
     {
         using System;
-        using MassTransit.Topology;
 
 
         [ExcludeFromTopology]

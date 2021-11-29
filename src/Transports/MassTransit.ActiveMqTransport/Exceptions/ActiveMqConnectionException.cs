@@ -1,4 +1,4 @@
-namespace MassTransit.ActiveMqTransport
+namespace MassTransit
 {
     using System;
     using System.Runtime.Serialization;

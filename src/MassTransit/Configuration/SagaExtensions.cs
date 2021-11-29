@@ -1,13 +1,7 @@
 ﻿namespace MassTransit
 {
     using System;
-    using Context;
-    using GreenPipes;
-    using Metadata;
-    using Pipeline;
-    using Saga;
-    using Saga.Connectors;
-    using SagaConfigurators;
+    using Configuration;
 
 
     public static class SagaExtensions
@@ -29,7 +23,7 @@
             if (sagaRepository == null)
                 throw new ArgumentNullException(nameof(sagaRepository));
 
-            LogContext.Debug?.Log("Subscribing Saga: {SagaType}", TypeMetadataCache<T>.ShortName);
+            LogContext.Debug?.Log("Subscribing Saga: {SagaType}", TypeCache<T>.ShortName);
 
             var sagaConfigurator = new SagaConfigurator<T>(sagaRepository, configurator);
 
@@ -54,7 +48,7 @@
             if (sagaRepository == null)
                 throw new ArgumentNullException(nameof(sagaRepository));
 
-            LogContext.Debug?.Log("Connecting Saga: {SagaType}", TypeMetadataCache<T>.ShortName);
+            LogContext.Debug?.Log("Connecting Saga: {SagaType}", TypeCache<T>.ShortName);
 
             ISagaSpecification<T> specification = SagaConnectorCache<T>.Connector.CreateSagaSpecification<T>();
             foreach (IPipeSpecification<SagaConsumeContext<T>> pipeSpecification in pipeSpecifications)

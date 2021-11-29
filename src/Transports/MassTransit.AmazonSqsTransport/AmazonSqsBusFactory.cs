@@ -1,12 +1,11 @@
-﻿namespace MassTransit.AmazonSqsTransport
+﻿namespace MassTransit
 {
     using System;
     using System.Threading;
+    using AmazonSqsTransport;
+    using AmazonSqsTransport.Configuration;
     using Configuration;
-    using Configurators;
-    using MassTransit.Topology;
-    using MassTransit.Topology.EntityNameFormatters;
-    using MassTransit.Topology.Topologies;
+    using Topology;
 
 
     public static class AmazonSqsBusFactory

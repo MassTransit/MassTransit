@@ -2,8 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using GreenPipes.Util;
     using NUnit.Framework;
     using TestFramework;
 
@@ -69,7 +67,7 @@
             {
                 ++Count;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task Consume(ConsumeContext<TestCommand> context)
@@ -143,7 +141,7 @@
             {
                 ++Count;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task Consume(ConsumeContext<TestCommand> context)
@@ -213,7 +211,7 @@
             {
                 ++Count;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task Consume(ConsumeContext<TestCommand> context)

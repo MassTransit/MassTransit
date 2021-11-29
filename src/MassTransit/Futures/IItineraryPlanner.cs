@@ -1,7 +1,6 @@
-namespace MassTransit.Futures
+namespace MassTransit
 {
     using System.Threading.Tasks;
-    using Courier;
 
 
     /// <summary>
@@ -12,6 +11,6 @@ namespace MassTransit.Futures
     public interface IItineraryPlanner<in TInput>
         where TInput : class
     {
-        Task PlanItinerary(FutureConsumeContext<TInput> value, ItineraryBuilder builder);
+        Task PlanItinerary(BehaviorContext<FutureState, TInput> value, IItineraryBuilder builder);
     }
 }

@@ -5,7 +5,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using System.Transactions;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
@@ -36,8 +35,6 @@
             var context = new TestConsumeContext<PingMessage>(new PingMessage());
 
             Assert.That(async () => await pipe.Send(context), Throws.TypeOf<TransactionAbortedException>());
-
-            //Console.WriteLine(exception.Message);
         }
 
         [Test]
@@ -69,8 +66,6 @@
             var context = new TestConsumeContext<PingMessage>(new PingMessage());
 
             Assert.That(async () => await pipe.Send(context), Throws.InvalidOperationException);
-
-            //Console.WriteLine(exception.Message);
         }
 
         [Test]
@@ -129,8 +124,6 @@
             var context = new TestConsumeContext<PingMessage>(new PingMessage());
 
             Assert.That(async () => await pipe.Send(context), Throws.TypeOf<TransactionAbortedException>());
-
-            //Console.WriteLine(exception.Message);
         }
     }
 
@@ -152,7 +145,7 @@
         [OneTimeSetUp]
         public async Task Setup()
         {
-            await InputQueueSendEndpoint.Send(new Message {Id = NewId.NextGuid()});
+            await InputQueueSendEndpoint.Send(new Message { Id = NewId.NextGuid() });
         }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -178,12 +171,9 @@
             {
                 var transactionContext = context.GetPayload<TransactionContext>();
 
-                var isolationLevel = transactionContext.Transaction.IsolationLevel;
+                using var ts = new TransactionScope(transactionContext.Transaction);
 
-                using (var ts = new TransactionScope(transactionContext.Transaction))
-                {
-                    throw new IntentionalTestException("Then, you, shall, die!");
-                }
+                throw new IntentionalTestException("Then, you, shall, die!");
             }
         }
 

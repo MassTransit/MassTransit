@@ -1,10 +1,9 @@
-namespace MassTransit.WebJobs.EventHubsIntegration
+namespace MassTransit
 {
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.Azure.EventHubs;
-    using Saga;
+    using Azure.Messaging.EventHubs;
 
 
     /// <summary>

@@ -1,4 +1,4 @@
-namespace MassTransit.AmazonSqsTransport.Exceptions
+namespace MassTransit
 {
     using System;
     using System.Runtime.Serialization;

@@ -3,7 +3,6 @@ namespace MassTransit.Transports.Tests
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
     using Logging;
     using NUnit.Framework;
     using NUnit.Framework.Internal;

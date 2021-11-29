@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using Marten;
-    using MassTransit.Saga;
     using NUnit.Framework;
     using Saga;
     using Shouldly;
@@ -13,7 +12,8 @@
 
     [TestFixture]
     [Category("Integration")]
-    public class LocatingAnExistingSaga : InMemoryTestFixture
+    public class LocatingAnExistingSaga :
+        InMemoryTestFixture
     {
         [Test]
         public async Task A_correlated_message_should_find_the_correct_saga()
@@ -27,7 +27,7 @@
 
             found.ShouldBe(sagaId);
 
-            var nextMessage = new CompleteSimpleSaga {CorrelationId = sagaId};
+            var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
@@ -52,7 +52,7 @@
         public async Task An_observed_message_should_find_and_update_the_correct_saga()
         {
             var sagaId = NewId.NextGuid();
-            var message = new InitiateSimpleSaga(sagaId) {Name = "MySimpleSaga"};
+            var message = new InitiateSimpleSaga(sagaId) { Name = "MySimpleSaga" };
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -60,7 +60,7 @@
 
             found.ShouldBe(sagaId);
 
-            var nextMessage = new ObservableSagaMessage {Name = "MySimpleSaga"};
+            var nextMessage = new ObservableSagaMessage { Name = "MySimpleSaga" };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
@@ -69,16 +69,21 @@
         }
 
         readonly Lazy<ISagaRepository<SimpleSaga>> _sagaRepository;
+        readonly DocumentStore _store;
+
+        [OneTimeSetUp]
+        public async Task OneTime()
+        {
+            await _store.Schema.ApplyAllConfiguredChangesToDatabaseAsync();
+        }
 
         public LocatingAnExistingSaga()
         {
-            var connectionString =
-                "server=localhost;port=5432;database=MartenTest;user id=postgres;password=Password12!;";
+            var connectionString = "server=localhost;port=5432;database=MartenTest;user id=postgres;password=Password12!;";
 
-            var store = DocumentStore.For(x =>
+            _store = DocumentStore.For(x =>
             {
                 x.Connection(connectionString);
-                x.PLV8Enabled = false;
                 x.CreateDatabasesForTenants(c =>
                 {
                     c.ForTenant()
@@ -88,9 +93,7 @@
                         .ConnectionLimit(-1);
                 });
             });
-            store.Schema.ApplyAllConfiguredChangesToDatabase();
-            store.Schema.AssertDatabaseMatchesConfiguration();
-            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => MartenSagaRepository<SimpleSaga>.Create(store));
+            _sagaRepository = new Lazy<ISagaRepository<SimpleSaga>>(() => MartenSagaRepository<SimpleSaga>.Create(_store));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)

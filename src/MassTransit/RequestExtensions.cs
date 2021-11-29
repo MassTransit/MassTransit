@@ -3,8 +3,6 @@ namespace MassTransit
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using Initializers;
 
 
     public static class RequestExtensions
@@ -26,15 +24,14 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            IRequestClient<TRequest> requestClient = bus.CreateRequestClient<TRequest>(destinationAddress, timeout);
+            using RequestHandle<TRequest> requestHandle = bus
+                .CreateRequestClient<TRequest>(destinationAddress, timeout)
+                .Create(message, cancellationToken);
 
-            using (RequestHandle<TRequest> requestHandle = requestClient.Create(message, cancellationToken))
-            {
-                if (callback != null)
-                    requestHandle.UseExecute(callback);
+            if (callback != null)
+                requestHandle.UseExecute(callback);
 
-                return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
-            }
+            return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -54,9 +51,14 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var message = await MessageInitializerCache<TRequest>.InitializeMessage(values, cancellationToken).ConfigureAwait(false);
+            using RequestHandle<TRequest> requestHandle = bus
+                .CreateRequestClient<TRequest>(destinationAddress, timeout)
+                .Create(values, cancellationToken);
 
-            return await Request<TRequest, TResponse>(bus, destinationAddress, message, cancellationToken, timeout, callback).ConfigureAwait(false);
+            if (callback != null)
+                requestHandle.UseExecute(callback);
+
+            return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -71,20 +73,18 @@ namespace MassTransit
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <returns></returns>
         public static async Task<Response<TResponse>> Request<TRequest, TResponse>(this IBus bus, TRequest message,
-            CancellationToken cancellationToken = default,
-            RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
+            CancellationToken cancellationToken = default, RequestTimeout timeout = default, Action<SendContext<TRequest>> callback = null)
             where TRequest : class
             where TResponse : class
         {
-            IRequestClient<TRequest> requestClient = bus.CreateRequestClient<TRequest>(timeout);
+            using RequestHandle<TRequest> requestHandle = bus
+                .CreateRequestClient<TRequest>(timeout)
+                .Create(message, cancellationToken);
 
-            using (RequestHandle<TRequest> requestHandle = requestClient.Create(message, cancellationToken))
-            {
-                if (callback != null)
-                    requestHandle.UseExecute(callback);
+            if (callback != null)
+                requestHandle.UseExecute(callback);
 
-                return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
-            }
+            return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -103,9 +103,14 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var message = await MessageInitializerCache<TRequest>.InitializeMessage(values, cancellationToken).ConfigureAwait(false);
+            using RequestHandle<TRequest> requestHandle = bus
+                .CreateRequestClient<TRequest>(timeout)
+                .Create(values, cancellationToken);
 
-            return await Request<TRequest, TResponse>(bus, message, cancellationToken, timeout, callback).ConfigureAwait(false);
+            if (callback != null)
+                requestHandle.UseExecute(callback);
+
+            return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -126,15 +131,14 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            IRequestClient<TRequest> requestClient = consumeContext.CreateRequestClient<TRequest>(bus, destinationAddress, timeout);
+            using RequestHandle<TRequest> requestHandle = consumeContext
+                .CreateRequestClient<TRequest>(bus, destinationAddress, timeout)
+                .Create(message, cancellationToken);
 
-            using (RequestHandle<TRequest> requestHandle = requestClient.Create(message, cancellationToken))
-            {
-                if (callback != null)
-                    requestHandle.UseExecute(callback);
+            if (callback != null)
+                requestHandle.UseExecute(callback);
 
-                return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
-            }
+            return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -155,10 +159,14 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var message = await MessageInitializerCache<TRequest>.InitializeMessage(values, cancellationToken).ConfigureAwait(false);
+            using RequestHandle<TRequest> requestHandle = consumeContext
+                .CreateRequestClient<TRequest>(bus, destinationAddress, timeout)
+                .Create(values, cancellationToken);
 
-            return await Request<TRequest, TResponse>(consumeContext, bus, destinationAddress, message, cancellationToken, timeout, callback)
-                .ConfigureAwait(false);
+            if (callback != null)
+                requestHandle.UseExecute(callback);
+
+            return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -178,15 +186,14 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            IRequestClient<TRequest> requestClient = consumeContext.CreateRequestClient<TRequest>(bus, timeout);
+            using RequestHandle<TRequest> requestHandle = consumeContext
+                .CreateRequestClient<TRequest>(bus, timeout)
+                .Create(message, cancellationToken);
 
-            using (RequestHandle<TRequest> requestHandle = requestClient.Create(message, cancellationToken))
-            {
-                if (callback != null)
-                    requestHandle.UseExecute(callback);
+            if (callback != null)
+                requestHandle.UseExecute(callback);
 
-                return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
-            }
+            return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -206,9 +213,14 @@ namespace MassTransit
             where TRequest : class
             where TResponse : class
         {
-            var message = await MessageInitializerCache<TRequest>.InitializeMessage(values, cancellationToken).ConfigureAwait(false);
+            using RequestHandle<TRequest> requestHandle = consumeContext
+                .CreateRequestClient<TRequest>(bus, timeout)
+                .Create(values, cancellationToken);
 
-            return await Request<TRequest, TResponse>(consumeContext, bus, message, cancellationToken, timeout, callback).ConfigureAwait(false);
+            if (callback != null)
+                requestHandle.UseExecute(callback);
+
+            return await requestHandle.GetResponse<TResponse>().ConfigureAwait(false);
         }
     }
 }

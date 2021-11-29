@@ -6,7 +6,8 @@ namespace MassTransit.Util.Scanning
     using System.Linq;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Internals.Extensions;
+    using Configuration;
+    using Internals;
 
 
     public class AssemblyScanner :

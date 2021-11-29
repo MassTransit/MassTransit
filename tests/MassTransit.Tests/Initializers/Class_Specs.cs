@@ -19,7 +19,7 @@ namespace MassTransit.Tests.Initializers
             InitializeContext<Report> context = await MessageInitializerCache<Report>.Initialize(new
             {
                 Fault = new FaultEvent<Top>(topContext.Message, NewId.NextGuid(), HostMetadataCache.Host, new IntentionalTestException(),
-                    TypeMetadataCache<Top>.MessageTypeNames)
+                    MessageTypeCache<Top>.MessageTypeNames)
             });
 
             Assert.That(context.Message, Is.Not.Null);

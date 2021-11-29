@@ -2,10 +2,13 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Context;
-    using GreenPipes;
 
 
+    /// <summary>
+    /// For transport-based schedulers, used to invoke the <see cref="SendContext{T}" /> pipe and
+    /// manage the ScheduledMessageId, as well as set the transport delay property
+    /// </summary>
+    /// <typeparam name="T">The message type</typeparam>
     public class ScheduleSendPipe<T> :
         IPipe<SendContext<T>>
         where T : class
@@ -43,13 +46,10 @@
                 : _scheduledTime - DateTime.UtcNow;
 
             if (delay > TimeSpan.Zero)
-            {
-                var delaySendContext = context.GetPayload<DelaySendContext>();
-                delaySendContext.Delay = delay;
-            }
+                context.Delay = delay;
 
             if (ScheduledMessageId.HasValue)
-                context.Headers.Set(MessageHeaders.SchedulingTokenId, ScheduledMessageId.Value.ToString("N"));
+                context.Headers.Set(MessageHeaders.SchedulingTokenId, ScheduledMessageId.Value.ToString("D"));
 
             if (_pipe.IsNotEmpty())
                 await _pipe.Send(context).ConfigureAwait(false);

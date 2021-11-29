@@ -3,10 +3,8 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context.Converters;
-    using GreenPipes;
+    using Context;
     using Initializers;
-    using Pipeline;
 
 
     public class SendEndpoint :
@@ -17,38 +15,31 @@
         readonly ISendPipe _sendPipe;
         readonly ISendTransport _transport;
 
-        public SendEndpoint(ISendTransport transport, IMessageSerializer serializer, Uri destinationAddress, Uri sourceAddress, ISendPipe sendPipe,
+        public SendEndpoint(ISendTransport transport, ReceiveEndpointContext context, Uri destinationAddress, ISendPipe sendPipe,
             ConnectHandle observerHandle = null)
         {
             _transport = transport;
             _sendPipe = sendPipe;
             _observerHandle = observerHandle;
 
-            Serializer = serializer;
             DestinationAddress = destinationAddress;
-            SourceAddress = sourceAddress;
+            SourceAddress = context.InputAddress;
+            Serialization = context.Serialization;
+            Serializer = context.Serialization.GetMessageSerializer();
         }
 
-        IMessageSerializer Serializer { get; }
-
         Uri DestinationAddress { get; }
-
         Uri SourceAddress { get; }
+
+        IMessageSerializer Serializer { get; }
+        ISerialization Serialization { get; }
 
         public async ValueTask DisposeAsync()
         {
             _observerHandle?.Disconnect();
 
-            switch (_transport)
-            {
-                case IAsyncDisposable disposable:
-                    await disposable.DisposeAsync().ConfigureAwait(false);
-                    break;
-
-                case IDisposable disposable:
-                    disposable.Dispose();
-                    break;
-            }
+            if (_transport is IAsyncDisposable disposable)
+                await disposable.DisposeAsync().ConfigureAwait(false);
         }
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
@@ -96,15 +87,6 @@
             return SendEndpointConverterCache.Send(this, message, messageType, cancellationToken);
         }
 
-        public Task Send<T>(object values, CancellationToken cancellationToken)
-            where T : class
-        {
-            if (values == null)
-                throw new ArgumentNullException(nameof(values));
-
-            return MessageInitializerCache<T>.Send(this, values, cancellationToken);
-        }
-
         public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
             where T : class
         {
@@ -140,25 +122,42 @@
             return SendEndpointConverterCache.Send(this, message, messageType, pipe, cancellationToken);
         }
 
-        public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+        public async Task Send<T>(object values, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            return MessageInitializerCache<T>.Send(this, values, pipe, cancellationToken);
+            (var message, IPipe<SendContext<T>> sendPipe) =
+                await MessageInitializerCache<T>.InitializeMessage(values, new SendEndpointPipe<T>(this), cancellationToken).ConfigureAwait(false);
+
+            await _transport.Send(message, sendPipe, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        public async Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
+            (var message, IPipe<SendContext<T>> sendPipe) =
+                await MessageInitializerCache<T>.InitializeMessage(values, new SendEndpointPipe<T>(this, pipe), cancellationToken).ConfigureAwait(false);
+
+            await _transport.Send(message, sendPipe, cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+            where T : class
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            return MessageInitializerCache<T>.Send(this, values, pipe, cancellationToken);
+            (var message, IPipe<SendContext<T>> sendPipe) =
+                await MessageInitializerCache<T>.InitializeMessage(values, new SendEndpointPipe<T>(this, pipe), cancellationToken).ConfigureAwait(false);
+
+            await _transport.Send(message, sendPipe, cancellationToken).ConfigureAwait(false);
         }
 
 
@@ -185,7 +184,7 @@
                 _sendContextPipe = pipe as ISendContextPipe;
             }
 
-            void IProbeSite.Probe(ProbeContext context)
+            public void Probe(ProbeContext context)
             {
                 _pipe?.Probe(context);
             }
@@ -193,6 +192,7 @@
             public async Task Send(SendContext<T> context)
             {
                 context.Serializer = _endpoint.Serializer;
+                context.Serialization = _endpoint.Serialization;
                 context.DestinationAddress = _endpoint.DestinationAddress;
 
                 if (context.SourceAddress == null)

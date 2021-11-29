@@ -1,8 +1,8 @@
-﻿namespace MassTransit.AmazonSqsTransport
+﻿namespace MassTransit
 {
     using System;
     using Amazon;
-    using Transport;
+    using AmazonSqsTransport;
     using Transports;
 
 

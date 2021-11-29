@@ -4,8 +4,7 @@ namespace MassTransit.Initializers.PropertyInitializers
     using System.Collections.Generic;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Internals.Reflection;
-    using Util;
+    using Internals;
 
 
     /// <summary>
@@ -36,7 +35,7 @@ namespace MassTransit.Initializers.PropertyInitializers
             if (context.HasInput && context.Input.TryGetValue(_key, out var value))
                 _messageProperty.Set(context.Message, value);
 
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
     }
 }

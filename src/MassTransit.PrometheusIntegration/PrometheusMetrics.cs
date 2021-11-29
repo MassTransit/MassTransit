@@ -1,4 +1,4 @@
-namespace MassTransit.PrometheusIntegration
+namespace MassTransit
 {
     using System;
     using System.Collections.Concurrent;
@@ -6,9 +6,7 @@ namespace MassTransit.PrometheusIntegration
     using System.Reflection;
     using System.Text;
     using Courier;
-    using Metadata;
     using Prometheus;
-    using Saga;
 
 
     public static class PrometheusMetrics
@@ -88,7 +86,7 @@ namespace MassTransit.PrometheusIntegration
             where T : class
         {
             var messageType = GetMessageTypeLabel<T>();
-            var cleanConsumerType = GetConsumerTypeLabel(consumerType, TypeMetadataCache<T>.ShortName, messageType);
+            var cleanConsumerType = GetConsumerTypeLabel(consumerType, TypeCache<T>.ShortName, messageType);
 
             _consumeTotal.Labels(_serviceLabel, messageType, cleanConsumerType).Inc();
             _consumeDuration.Labels(_serviceLabel, messageType, cleanConsumerType).Observe(duration.TotalSeconds);
@@ -185,7 +183,7 @@ namespace MassTransit.PrometheusIntegration
             where TMessage : class
         {
             var messageType = GetMessageTypeLabel<TMessage>();
-            var cleanConsumerType = GetConsumerTypeLabel(TypeMetadataCache<TConsumer>.ShortName, TypeMetadataCache<TMessage>.ShortName, messageType);
+            var cleanConsumerType = GetConsumerTypeLabel(TypeCache<TConsumer>.ShortName, TypeCache<TMessage>.ShortName, messageType);
 
             return _consumerInProgress.Labels(_serviceLabel, messageType, cleanConsumerType).TrackInProgress();
         }
@@ -195,7 +193,7 @@ namespace MassTransit.PrometheusIntegration
             where TMessage : class
         {
             var messageType = GetMessageTypeLabel<TMessage>();
-            var cleanConsumerType = GetConsumerTypeLabel(TypeMetadataCache<TSaga>.ShortName, TypeMetadataCache<TMessage>.ShortName, messageType);
+            var cleanConsumerType = GetConsumerTypeLabel(TypeCache<TSaga>.ShortName, TypeCache<TMessage>.ShortName, messageType);
 
             return _sagaInProgress.Labels(_serviceLabel, messageType, cleanConsumerType).TrackInProgress();
         }
@@ -448,13 +446,13 @@ namespace MassTransit.PrometheusIntegration
 
         static string GetArgumentTypeLabel<TArguments>()
         {
-            return _labelCache.GetOrAdd(TypeMetadataCache<TArguments>.ShortName, type => FormatTypeName(new StringBuilder(), typeof(TArguments))
+            return _labelCache.GetOrAdd(TypeCache<TArguments>.ShortName, type => FormatTypeName(new StringBuilder(), typeof(TArguments))
                 .Replace("Arguments", ""));
         }
 
         static string GetLogTypeLabel<TLog>()
         {
-            return _labelCache.GetOrAdd(TypeMetadataCache<TLog>.ShortName, type => FormatTypeName(new StringBuilder(), typeof(TLog)).Replace("Log", ""));
+            return _labelCache.GetOrAdd(TypeCache<TLog>.ShortName, type => FormatTypeName(new StringBuilder(), typeof(TLog)).Replace("Log", ""));
         }
 
         static string GetEndpointLabel(Uri inputAddress)
@@ -464,7 +462,7 @@ namespace MassTransit.PrometheusIntegration
 
         static string GetMessageTypeLabel<TMessage>()
         {
-            return _labelCache.GetOrAdd(TypeMetadataCache<TMessage>.ShortName, type => FormatTypeName(new StringBuilder(), typeof(TMessage)));
+            return _labelCache.GetOrAdd(TypeCache<TMessage>.ShortName, type => FormatTypeName(new StringBuilder(), typeof(TMessage)));
         }
 
         static string FormatTypeName(StringBuilder sb, Type type)

@@ -7,10 +7,10 @@
     using NUnit.Framework;
 
 
-    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
     [TestFixture(typeof(SystemTextJsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
-    [TestFixture(typeof(XmlMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftXmlMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializerV2))]
     public class Serialization_a_message_data_property :

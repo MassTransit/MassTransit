@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Configuration
 {
-    using Pipeline;
-    using SendPipeSpecifications;
+    using Transports;
 
 
     public interface ISendPipeConfiguration

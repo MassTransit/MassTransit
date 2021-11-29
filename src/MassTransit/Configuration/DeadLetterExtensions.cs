@@ -1,8 +1,7 @@
 ﻿namespace MassTransit
 {
     using System;
-    using GreenPipes;
-    using PipeConfigurators;
+    using Configuration;
 
 
     public static class DeadLetterExtensions

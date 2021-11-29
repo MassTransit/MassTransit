@@ -5,7 +5,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Factories;
-    using GreenPipes;
 
 
     public class MessageInitializerCache<TMessage> :
@@ -39,7 +38,7 @@
         {
             var factoryType = typeof(MessageInitializerFactory<,>).MakeGenericType(typeof(TMessage), inputType);
 
-            var factory = (IMessageInitializerFactory<TMessage>)Activator.CreateInstance(factoryType, new object[] {MessageInitializer.Conventions});
+            var factory = (IMessageInitializerFactory<TMessage>)Activator.CreateInstance(factoryType, new object[] { MessageInitializer.Conventions });
 
             return factory.CreateMessageInitializer();
         }
@@ -53,21 +52,6 @@
             return Cached.InitializerCache.GetInitializer(inputType);
         }
 
-        public static Task Send(ISendEndpoint endpoint, object values, CancellationToken cancellationToken)
-        {
-            return GetInitializer(values.GetType()).Send(endpoint, values, cancellationToken);
-        }
-
-        public static Task Send(ISendEndpoint endpoint, object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
-        {
-            return GetInitializer(values.GetType()).Send(endpoint, values, pipe, cancellationToken);
-        }
-
-        public static Task Send(ISendEndpoint endpoint, object values, IPipe<SendContext<TMessage>> pipe, CancellationToken cancellationToken)
-        {
-            return GetInitializer(values.GetType()).Send(endpoint, values, pipe, cancellationToken);
-        }
-
         public static Task<InitializeContext<TMessage>> Initialize(object values, CancellationToken cancellationToken = default)
         {
             if (values == null)
@@ -76,27 +60,56 @@
             return Cached.InitializerCache.GetInitializer(values.GetType()).Initialize(values, cancellationToken);
         }
 
-        public static async Task<TMessage> InitializeMessage(PipeContext context, object values)
+        public static Task<SendTuple<TMessage>> InitializeMessage(PipeContext context, object values)
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
             IMessageInitializer<TMessage> initializer = Cached.InitializerCache.GetInitializer(values.GetType());
 
-            InitializeContext<TMessage> initializeContext = await initializer.Initialize(initializer.Create(context), values).ConfigureAwait(false);
-
-            return initializeContext.Message;
+            return initializer.InitializeMessage(context, values);
         }
 
-        public static async Task<TMessage> InitializeMessage(object values, CancellationToken cancellationToken = default)
+        public static Task<SendTuple<TMessage>> InitializeMessage(PipeContext context, object values, object[] moreValues,
+            IPipe<SendContext<TMessage>> pipe = null)
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            InitializeContext<TMessage> context =
-                await Cached.InitializerCache.GetInitializer(values.GetType()).Initialize(values, cancellationToken).ConfigureAwait(false);
+            IMessageInitializer<TMessage> initializer = Cached.InitializerCache.GetInitializer(values.GetType());
 
-            return context.Message;
+            return initializer.InitializeMessage(context, values, moreValues, pipe);
+        }
+
+        public static Task<SendTuple<TMessage>> InitializeMessage(PipeContext context, object values, IPipe<SendContext<TMessage>> pipe)
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            IMessageInitializer<TMessage> initializer = Cached.InitializerCache.GetInitializer(values.GetType());
+
+            return initializer.InitializeMessage(context, values, pipe.IsNotEmpty() ? pipe : Pipe.Empty<SendContext<TMessage>>());
+        }
+
+        public static Task<SendTuple<TMessage>> InitializeMessage(object values, CancellationToken cancellationToken = default)
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            IMessageInitializer<TMessage> initializer = Cached.InitializerCache.GetInitializer(values.GetType());
+
+            return initializer.InitializeMessage(values, Pipe.Empty<SendContext<TMessage>>(), cancellationToken);
+        }
+
+        public static Task<SendTuple<TMessage>> InitializeMessage(object values, IPipe<SendContext<TMessage>> pipe,
+            CancellationToken cancellationToken = default)
+        {
+            if (values == null)
+                throw new ArgumentNullException(nameof(values));
+
+            IMessageInitializer<TMessage> initializer = Cached.InitializerCache.GetInitializer(values.GetType());
+
+            return initializer.InitializeMessage(values, pipe.IsNotEmpty() ? pipe : Pipe.Empty<SendContext<TMessage>>(), cancellationToken);
         }
 
         public static Task<InitializeContext<TMessage>> Initialize(InitializeContext<TMessage> context, object values)

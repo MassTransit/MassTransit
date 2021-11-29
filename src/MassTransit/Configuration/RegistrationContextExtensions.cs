@@ -1,12 +1,7 @@
 namespace MassTransit
 {
     using System;
-    using ConsumeConfigurators;
-    using Definition;
-    using JobService;
-    using JobService.Configuration;
-    using Registration;
-    using Saga;
+    using DependencyInjection.Registration;
 
 
     public static class RegistrationContextExtensions
@@ -61,7 +56,7 @@ namespace MassTransit
             options ??= new ServiceInstanceOptions();
             if (options.EndpointNameFormatter is DefaultEndpointNameFormatter)
             {
-                var formatter = registration.GetService<IEndpointNameFormatter>();
+                var formatter = registration.EndpointNameFormatter;
                 if (formatter != null)
                     options.SetEndpointNameFormatter(formatter);
             }
@@ -95,7 +90,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="consumerType">The consumer type</param>
-        public static void ConfigureConsumer(this IReceiveEndpointConfigurator configurator, IRegistration registration, Type consumerType)
+        public static void ConfigureConsumer(this IReceiveEndpointConfigurator configurator, IRegistrationContext registration, Type consumerType)
         {
             registration.ConfigureConsumer(consumerType, configurator);
         }
@@ -107,7 +102,7 @@ namespace MassTransit
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="configure"></param>
         /// <typeparam name="T">The consumer type</typeparam>
-        public static void ConfigureConsumer<T>(this IReceiveEndpointConfigurator configurator, IRegistration registration,
+        public static void ConfigureConsumer<T>(this IReceiveEndpointConfigurator configurator, IRegistrationContext registration,
             Action<IConsumerConfigurator<T>> configure = null)
             where T : class, IConsumer
         {
@@ -119,7 +114,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="registration">The registration for this bus instance</param>
-        public static void ConfigureConsumers(this IReceiveEndpointConfigurator configurator, IRegistration registration)
+        public static void ConfigureConsumers(this IReceiveEndpointConfigurator configurator, IRegistrationContext registration)
         {
             registration.ConfigureConsumers(configurator);
         }
@@ -130,7 +125,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="sagaType">The saga type</param>
-        public static void ConfigureSaga(this IReceiveEndpointConfigurator configurator, IRegistration registration, Type sagaType)
+        public static void ConfigureSaga(this IReceiveEndpointConfigurator configurator, IRegistrationContext registration, Type sagaType)
         {
             registration.ConfigureSaga(sagaType, configurator);
         }
@@ -142,7 +137,7 @@ namespace MassTransit
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="configure"></param>
         /// <typeparam name="T">The saga type</typeparam>
-        public static void ConfigureSaga<T>(this IReceiveEndpointConfigurator configurator, IRegistration registration,
+        public static void ConfigureSaga<T>(this IReceiveEndpointConfigurator configurator, IRegistrationContext registration,
             Action<ISagaConfigurator<T>> configure = null)
             where T : class, ISaga
         {
@@ -154,7 +149,7 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="registration">The registration for this bus instance</param>
-        public static void ConfigureSagas(this IReceiveEndpointConfigurator configurator, IRegistration registration)
+        public static void ConfigureSagas(this IReceiveEndpointConfigurator configurator, IRegistrationContext registration)
         {
             registration.ConfigureSagas(configurator);
         }
@@ -167,7 +162,7 @@ namespace MassTransit
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="activityType"></param>
         public static void ConfigureActivity(this IReceiveEndpointConfigurator configurator, IReceiveEndpointConfigurator compensateEndpointConfigurator,
-            IRegistration registration,
+            IRegistrationContext registration,
             Type activityType)
         {
             registration.ConfigureActivity(activityType, configurator, compensateEndpointConfigurator);
@@ -179,7 +174,7 @@ namespace MassTransit
         /// <param name="configurator"></param>
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="activityType"></param>
-        public static void ConfigureExecuteActivity(this IReceiveEndpointConfigurator configurator, IRegistration registration, Type activityType)
+        public static void ConfigureExecuteActivity(this IReceiveEndpointConfigurator configurator, IRegistrationContext registration, Type activityType)
         {
             registration.ConfigureExecuteActivity(activityType, configurator);
         }
@@ -191,7 +186,7 @@ namespace MassTransit
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="activityType"></param>
         /// <param name="compensateAddress"></param>
-        public static void ConfigureActivityExecute(this IReceiveEndpointConfigurator configurator, IRegistration registration, Type activityType,
+        public static void ConfigureActivityExecute(this IReceiveEndpointConfigurator configurator, IRegistrationContext registration, Type activityType,
             Uri compensateAddress)
         {
             registration.ConfigureActivityExecute(activityType, configurator, compensateAddress);
@@ -203,7 +198,7 @@ namespace MassTransit
         /// <param name="configurator">The configurator for the compensate activity endpoint</param>
         /// <param name="registration">The registration for this bus instance</param>
         /// <param name="activityType"></param>
-        public static void ConfigureActivityCompensate(this IReceiveEndpointConfigurator configurator, IRegistration registration, Type activityType)
+        public static void ConfigureActivityCompensate(this IReceiveEndpointConfigurator configurator, IRegistrationContext registration, Type activityType)
         {
             registration.ConfigureActivityCompensate(activityType, configurator);
         }

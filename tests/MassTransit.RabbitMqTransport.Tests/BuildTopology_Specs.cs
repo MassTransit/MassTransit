@@ -3,11 +3,8 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using MassTransit.Topology.EntityNameFormatters;
     using NUnit.Framework;
     using Topology;
-    using Topology.Builders;
-    using Topology.Topologies;
     using TopologyTestTypes;
 
 

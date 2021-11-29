@@ -3,24 +3,34 @@ namespace MassTransit.Azure.Table.Tests.SlowConcurrentSaga
     using System;
     using System.Linq;
     using System.Threading.Tasks;
+    using AzureTable.Saga;
     using DataAccess;
     using Events;
-    using MassTransit.Saga;
     using NUnit.Framework;
     using Shouldly;
-    using Table.Saga;
     using Testing;
 
 
     public class SlowConcurrentSaga_Specs : AzureTableInMemoryTestFixture
     {
+        readonly Lazy<ISagaRepository<SlowConcurrentSaga>> _sagaRepository;
+        readonly ISagaStateMachineTestHarness<SlowConcurrentSagaStateMachine, SlowConcurrentSaga> _sagaTestHarness;
+
+        public SlowConcurrentSaga_Specs()
+        {
+            _sagaRepository = new Lazy<ISagaRepository<SlowConcurrentSaga>>(() =>
+                AzureTableSagaRepository<SlowConcurrentSaga>.Create(() => TestCloudTable));
+
+            _sagaTestHarness = BusTestHarness.StateMachineSaga(new SlowConcurrentSagaStateMachine(), _sagaRepository.Value);
+        }
+
         [Test]
         public async Task Two_Initiating_Messages_Deadlock_Results_In_One_Instance()
         {
             var activityMonitor = Bus.CreateBusActivityMonitor(TimeSpan.FromMilliseconds(3000));
 
             var sagaId = NewId.NextGuid();
-            var message = new Begin {CorrelationId = sagaId};
+            var message = new Begin { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -28,7 +38,7 @@ namespace MassTransit.Azure.Table.Tests.SlowConcurrentSaga
 
             foundId.HasValue.ShouldBe(true);
 
-            var slowMessage = new IncrementCounterSlowly {CorrelationId = sagaId};
+            var slowMessage = new IncrementCounterSlowly { CorrelationId = sagaId };
             await Task.WhenAll(
                 Task.Run(() => InputQueueSendEndpoint.Send(slowMessage)),
                 Task.Run(() => InputQueueSendEndpoint.Send(slowMessage)));
@@ -39,18 +49,6 @@ namespace MassTransit.Azure.Table.Tests.SlowConcurrentSaga
 
             await _sagaRepository.Value.ShouldContainSaga(sagaId, s => s.Counter == 3, TestTimeout);
         }
-
-        readonly Lazy<ISagaRepository<SlowConcurrentSaga>> _sagaRepository;
-        readonly SagaTestHarness<SlowConcurrentSaga> _sagaTestHarness;
-
-        public SlowConcurrentSaga_Specs()
-        {
-            _sagaRepository = new Lazy<ISagaRepository<SlowConcurrentSaga>>(() =>
-                AzureTableSagaRepository<SlowConcurrentSaga>.Create(() => TestCloudTable));
-
-            _sagaTestHarness = BusTestHarness.StateMachineSaga(new SlowConcurrentSagaStateMachine(), _sagaRepository.Value);
-        }
-
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {

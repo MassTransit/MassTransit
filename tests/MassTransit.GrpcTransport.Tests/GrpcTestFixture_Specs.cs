@@ -42,16 +42,16 @@ namespace MassTransit.GrpcTransport.Tests
         GrpcClientTestFixture
     {
         [Test]
+        public void Should_be_successful()
+        {
+        }
+
+        [Test]
         public async Task Should_cross_the_border()
         {
             await ClientBus.Publish(new A());
 
             await _receivedA;
-        }
-
-        [Test]
-        public void Should_be_successful()
-        {
         }
 
         Task<ConsumeContext<A>> _receivedA;

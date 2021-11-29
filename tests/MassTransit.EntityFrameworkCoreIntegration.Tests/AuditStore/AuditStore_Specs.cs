@@ -4,7 +4,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Audit;
-    using GreenPipes.Util;
     using Microsoft.EntityFrameworkCore;
     using NUnit.Framework;
     using Shared;
@@ -66,7 +65,9 @@
         {
             _contextFactory = new AuditContextFactory();
             await using var context = _contextFactory.CreateDbContext(DbContextOptionsBuilder);
-            await context.Database.MigrateAsync();
+
+            await context.Database.EnsureDeletedAsync();
+            await context.Database.EnsureCreatedAsync();
 
             await InputQueueSendEndpoint.Send(new A());
         }
@@ -105,7 +106,7 @@
 
             public Task Consume(ConsumeContext<B> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

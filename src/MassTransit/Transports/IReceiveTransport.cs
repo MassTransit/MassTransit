@@ -1,8 +1,5 @@
 ﻿namespace MassTransit.Transports
 {
-    using GreenPipes;
-
-
     public interface IReceiveTransport :
         IReceiveObserverConnector,
         IPublishObserverConnector,

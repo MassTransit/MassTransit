@@ -5,20 +5,19 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using System.Threading.Tasks;
     using ConsumeContextTestSubjects;
     using Context;
-    using GreenPipes;
+    using Microsoft.Extensions.DependencyInjection;
+    using Middleware.InMemoryOutbox;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
+    using Testing;
+    using UnitOfWorkComponents;
 
 
-    public abstract class Common_ConsumeContext :
-        InMemoryTestFixture
+    public class Common_ConsumeContext<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected abstract IBusRegistrationContext Registration { get; }
-        protected abstract Task<ConsumeContext> ConsumeContext { get; }
-        protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
-        protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
-
         [Test]
         public async Task Should_provide_the_consume_context()
         {
@@ -35,32 +34,39 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(ReferenceEquals(consumeContext, sendEndpointProvider), "ReferenceEquals(messageConsumeContext, sendEndpointProvider)");
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
+        Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
+        Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            TaskCompletionSource<ConsumeContext> pingTask = GetTask<ConsumeContext>();
+            TaskCompletionSource<IPublishEndpoint> sendEndpointProviderTask = GetTask<IPublishEndpoint>();
+            TaskCompletionSource<ISendEndpointProvider> publishEndpointTask = GetTask<ISendEndpointProvider>();
+
+            return collection.AddSingleton(pingTask)
+                .AddSingleton(sendEndpointProviderTask)
+                .AddSingleton(publishEndpointTask)
+                .AddScoped<IService, Service>()
+                .AddScoped<IAnotherService, AnotherService>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<DependentConsumer>();
-            configurator.AddBus(provider => BusControl);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureConsumers(Registration);
+            configurator.ConfigureConsumers(BusRegistrationContext);
         }
     }
 
 
-    public abstract class Common_ConsumeContext_Outbox :
-        InMemoryTestFixture
+    public class Common_ConsumeContext_Outbox<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected Common_ConsumeContext_Outbox()
-        {
-            TestTimeout = TimeSpan.FromSeconds(3);
-        }
-
-        protected abstract IBusRegistrationContext Registration { get; }
-        protected abstract Task<ConsumeContext> ConsumeContext { get; }
-        protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
-        protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
-
         [Test]
         public async Task Should_provide_the_outbox()
         {
@@ -83,34 +89,47 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
+        Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
+        Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
+        protected override void ConfigureInMemoryTestHarness(InMemoryTestHarness harness)
+        {
+            harness.TestTimeout = TimeSpan.FromSeconds(3);
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            TaskCompletionSource<ConsumeContext> pingTask = GetTask<ConsumeContext>();
+            TaskCompletionSource<IPublishEndpoint> sendEndpointProviderTask = GetTask<IPublishEndpoint>();
+            TaskCompletionSource<ISendEndpointProvider> publishEndpointTask = GetTask<ISendEndpointProvider>();
+
+            return collection
+                .AddSingleton(pingTask)
+                .AddSingleton(sendEndpointProviderTask)
+                .AddSingleton(publishEndpointTask)
+                .AddScoped<IService, Service>()
+                .AddScoped<IAnotherService, AnotherService>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<DependentConsumer>();
-            configurator.AddBus(provider => BusControl);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseInMemoryOutbox();
 
-            configurator.ConfigureConsumers(Registration);
+            configurator.ConfigureConsumers(BusRegistrationContext);
         }
     }
 
 
-    public abstract class Common_ConsumeContext_Outbox_Batch :
-        InMemoryTestFixture
+    public class Common_ConsumeContext_Outbox_Batch<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected Common_ConsumeContext_Outbox_Batch()
-        {
-            TestTimeout = TimeSpan.FromSeconds(3);
-        }
-
-        protected abstract IBusRegistrationContext Registration { get; }
-        protected abstract Task<ConsumeContext> ConsumeContext { get; }
-        protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
-        protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
-
         [Test]
         public async Task Should_provide_the_outbox()
         {
@@ -136,44 +155,51 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
+        Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
+        Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
+        protected override void ConfigureInMemoryTestHarness(InMemoryTestHarness harness)
+        {
+            harness.TestTimeout = TimeSpan.FromSeconds(3);
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            TaskCompletionSource<ConsumeContext> pingTask = GetTask<ConsumeContext>();
+            TaskCompletionSource<IPublishEndpoint> sendEndpointProviderTask = GetTask<IPublishEndpoint>();
+            TaskCompletionSource<ISendEndpointProvider> publishEndpointTask = GetTask<ISendEndpointProvider>();
+
+            return collection
+                .AddSingleton(pingTask)
+                .AddSingleton(sendEndpointProviderTask)
+                .AddSingleton(publishEndpointTask)
+                .AddScoped<IService, Service>()
+                .AddScoped<UnitOfWork>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<DependentBatchConsumer>(x =>
                 x.Options<BatchOptions>(b => b.SetTimeLimit(200).SetMessageLimit(4)));
-
-            configurator.AddBus(provider => BusControl);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.UseScheduledRedelivery(r => r.None());
+            configurator.UseDelayedRedelivery(r => r.None());
             configurator.UseMessageRetry(r => r.None());
             configurator.UseInMemoryOutbox();
+            configurator.UseUnitOfWork();
 
-            ConfigureUnitOfWork(configurator);
-
-            configurator.ConfigureConsumers(Registration);
-        }
-
-        protected virtual void ConfigureUnitOfWork(IInMemoryReceiveEndpointConfigurator configurator)
-        {
+            configurator.ConfigureConsumers(BusRegistrationContext);
         }
     }
 
 
-    public abstract class Common_ConsumeContext_Filter_Batch :
-        InMemoryTestFixture
+    public class Common_ConsumeContext_Filter_Batch<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected Common_ConsumeContext_Filter_Batch()
-        {
-            TestTimeout = TimeSpan.FromSeconds(3);
-        }
-
-        protected abstract IBusRegistrationContext Registration { get; }
-        protected abstract Task<ConsumeContext> ConsumeContext { get; }
-        protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
-        protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
-
         [Test]
         public async Task Should_provide_the_outbox()
         {
@@ -199,42 +225,49 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
+        Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
+        Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
+        protected override void ConfigureInMemoryTestHarness(InMemoryTestHarness harness)
+        {
+            harness.TestTimeout = TimeSpan.FromSeconds(3);
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            TaskCompletionSource<ConsumeContext> pingTask = GetTask<ConsumeContext>();
+            TaskCompletionSource<IPublishEndpoint> sendEndpointProviderTask = GetTask<IPublishEndpoint>();
+            TaskCompletionSource<ISendEndpointProvider> publishEndpointTask = GetTask<ISendEndpointProvider>();
+
+            return collection
+                .AddSingleton(pingTask)
+                .AddSingleton(sendEndpointProviderTask)
+                .AddSingleton(publishEndpointTask)
+                .AddScoped<IService, Service>()
+                .AddScoped<UnitOfWork>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<DependentBatchConsumer>(x =>
                 x.Options<BatchOptions>(b => b.SetTimeLimit(200).SetMessageLimit(4)));
-
-            configurator.AddBus(provider => BusControl);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseInMemoryOutbox();
+            configurator.UseUnitOfWork();
 
-            ConfigureUnitOfWork(configurator);
-
-            configurator.ConfigureConsumers(Registration);
-        }
-
-        protected virtual void ConfigureUnitOfWork(IInMemoryReceiveEndpointConfigurator configurator)
-        {
+            configurator.ConfigureConsumers(BusRegistrationContext);
         }
     }
 
 
-    public abstract class Common_ConsumeContext_Outbox_Solo :
-        InMemoryTestFixture
+    public class Common_ConsumeContext_Outbox_Solo<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected Common_ConsumeContext_Outbox_Solo()
-        {
-            TestTimeout = TimeSpan.FromSeconds(3);
-        }
-
-        protected abstract IBusRegistrationContext Registration { get; }
-        protected abstract Task<ConsumeContext> ConsumeContext { get; }
-        protected abstract Task<IPublishEndpoint> PublishEndpoint { get; }
-        protected abstract Task<ISendEndpointProvider> SendEndpointProvider { get; }
-
         [Test]
         public async Task Should_provide_the_outbox_to_the_consumer()
         {
@@ -257,17 +290,39 @@ namespace MassTransit.Containers.Tests.Common_Tests
             Assert.That(InMemoryTestHarness.Published.Select<ServiceDidIt>().Any(), Is.False, "Outbox Did Not Intercept!");
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        Task<ConsumeContext> ConsumeContext => ServiceProvider.GetRequiredService<TaskCompletionSource<ConsumeContext>>().Task;
+        Task<IPublishEndpoint> PublishEndpoint => ServiceProvider.GetRequiredService<TaskCompletionSource<IPublishEndpoint>>().Task;
+        Task<ISendEndpointProvider> SendEndpointProvider => ServiceProvider.GetRequiredService<TaskCompletionSource<ISendEndpointProvider>>().Task;
+
+        protected override void ConfigureInMemoryTestHarness(InMemoryTestHarness harness)
+        {
+            harness.TestTimeout = TimeSpan.FromSeconds(3);
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            TaskCompletionSource<ConsumeContext> pingTask = GetTask<ConsumeContext>();
+            TaskCompletionSource<IPublishEndpoint> sendEndpointProviderTask = GetTask<IPublishEndpoint>();
+            TaskCompletionSource<ISendEndpointProvider> publishEndpointTask = GetTask<ISendEndpointProvider>();
+
+            return collection
+                .AddSingleton(pingTask)
+                .AddSingleton(sendEndpointProviderTask)
+                .AddSingleton(publishEndpointTask)
+                .AddScoped<IService, Service>()
+                .AddScoped<UnitOfWork>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<FlyingSoloConsumer>();
-            configurator.AddBus(provider => BusControl);
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             configurator.UseInMemoryOutbox();
 
-            configurator.ConfigureConsumers(Registration);
+            configurator.ConfigureConsumers(BusRegistrationContext);
         }
     }
 
@@ -326,9 +381,9 @@ namespace MassTransit.Containers.Tests.Common_Tests
         class FlyingSoloConsumer :
             IConsumer<PingMessage>
         {
+            readonly ConsumeContext _consumeContext;
             readonly TaskCompletionSource<ConsumeContext> _consumeContextTask;
             readonly IPublishEndpoint _publishEndpoint;
-            readonly ConsumeContext _consumeContext;
 
             public FlyingSoloConsumer(IPublishEndpoint publishEndpoint, ISendEndpointProvider sendEndpointProvider, ConsumeContext consumeContext,
                 TaskCompletionSource<ConsumeContext> consumeContextTask,
@@ -424,6 +479,79 @@ namespace MassTransit.Containers.Tests.Common_Tests
             public void Add()
             {
                 _consumeContextTask.TrySetResult(_context);
+            }
+        }
+    }
+
+
+    namespace UnitOfWorkComponents
+    {
+        using Configuration;
+
+
+        public class UnitOfWorkFilter<TMessage> :
+            IFilter<ConsumeContext<TMessage>>
+            where TMessage : class
+        {
+            public void Probe(ProbeContext context)
+            {
+                context.CreateFilterScope("uow");
+            }
+
+            public async Task Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
+            {
+                var provider = context.GetPayload<IServiceProvider>();
+                var unitOfWork = provider.GetRequiredService<UnitOfWork>();
+
+                await next.Send(context);
+            }
+        }
+
+
+        public class UnitOfWorkFilter<TContext, TConsumer> :
+            IFilter<TContext>
+            where TConsumer : class
+            where TContext : class, ConsumerConsumeContext<TConsumer>
+        {
+            public void Probe(ProbeContext context)
+            {
+                context.CreateFilterScope("uow");
+            }
+
+            public async Task Send(TContext context, IPipe<TContext> next)
+            {
+                var provider = context.GetPayload<IServiceProvider>();
+                var unitOfWork = provider.GetRequiredService<UnitOfWork>();
+
+                await next.Send(context);
+            }
+        }
+
+
+        public class UnitOfWorkConfigurationObserver :
+            IConsumerConfigurationObserver
+        {
+            public void ConsumerConfigured<TConsumer>(IConsumerConfigurator<TConsumer> configurator)
+                where TConsumer : class
+            {
+                var filter = new UnitOfWorkFilter<ConsumerConsumeContext<TConsumer>, TConsumer>();
+                var specification = new FilterPipeSpecification<ConsumerConsumeContext<TConsumer>>(filter);
+                configurator.AddPipeSpecification(specification);
+            }
+
+            public void ConsumerMessageConfigured<TConsumer, TMessage>(IConsumerMessageConfigurator<TConsumer, TMessage> configurator)
+                where TConsumer : class
+                where TMessage : class
+            {
+            }
+        }
+
+
+        public static class UnitOfWorkMiddlewareConfiguratorExtensions
+        {
+            public static void UseUnitOfWork(this IConsumePipeConfigurator configurator)
+            {
+                configurator.ConnectConsumerConfigurationObserver(new UnitOfWorkConfigurationObserver());
             }
         }
     }

@@ -7,9 +7,6 @@
     using System.Data.Entity.ModelConfiguration;
     using System.Linq;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using Mappings;
-    using MassTransit.Saga;
     using NUnit.Framework;
     using Saga;
     using TestFramework;
@@ -32,7 +29,7 @@
             {
                 var correlationId = Guid.NewGuid();
 
-                tasks.Add(InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId}));
+                tasks.Add(InputQueueSendEndpoint.Send(new GirlfriendYelling { CorrelationId = correlationId }));
 
                 sagaIds[i] = correlationId;
             }
@@ -51,12 +48,12 @@
         {
             var correlationId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling { CorrelationId = correlationId });
 
             Guid? sagaId = await _repository.Value.ShouldContainSaga(correlationId, TestTimeout);
             Assert.IsTrue(sagaId.HasValue);
 
-            await InputQueueSendEndpoint.Send(new SodOff {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new SodOff { CorrelationId = correlationId });
 
             sagaId = await _repository.Value.ShouldNotContainSaga(correlationId, TestTimeout);
             Assert.IsFalse(sagaId.HasValue);
@@ -67,13 +64,13 @@
         {
             var correlationId = Guid.NewGuid();
 
-            await InputQueueSendEndpoint.Send(new GirlfriendYelling {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new GirlfriendYelling { CorrelationId = correlationId });
 
             Guid? sagaId = await _repository.Value.ShouldContainSaga(correlationId, TestTimeout);
 
             Assert.IsTrue(sagaId.HasValue);
 
-            await InputQueueSendEndpoint.Send(new GotHitByACar {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new GotHitByACar { CorrelationId = correlationId });
 
             sagaId = await _repository.Value.ShouldContainSagaInState(correlationId, _machine, _machine.Dead, TestTimeout);
 

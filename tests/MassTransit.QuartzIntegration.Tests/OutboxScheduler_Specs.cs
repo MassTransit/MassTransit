@@ -2,8 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Context;
-    using GreenPipes.Internals.Extensions;
+    using Internals;
     using NUnit.Framework;
     using Scheduling;
     using TestFramework;

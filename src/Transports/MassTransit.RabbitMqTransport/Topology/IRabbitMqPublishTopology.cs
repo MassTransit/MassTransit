@@ -1,6 +1,6 @@
-namespace MassTransit.RabbitMqTransport.Topology
+namespace MassTransit
 {
-    using MassTransit.Topology;
+    using RabbitMqTransport.Topology;
 
 
     public interface IRabbitMqPublishTopology :

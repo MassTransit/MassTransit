@@ -1,7 +1,6 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga.DataAccess
 {
     using System;
-    using Automatonymous;
 
 
     public class SlowConcurrentSaga : SagaStateMachineInstance

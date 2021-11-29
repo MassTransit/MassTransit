@@ -5,12 +5,11 @@
         using System;
         using System.Threading;
         using System.Threading.Tasks;
-        using GreenPipes;
-        using GreenPipes.Internals.Extensions;
-        using MassTransit.Testing;
+        using Internals;
         using NUnit.Framework;
         using TestFramework;
         using TestFramework.Messages;
+        using Testing;
         using Util;
 
 

@@ -4,9 +4,9 @@
     {
         using System;
         using System.Threading.Tasks;
+        using AzureServiceBusTransport;
         using MassTransit.Saga;
         using NUnit.Framework;
-        using Saga;
         using Util;
 
 
@@ -24,7 +24,7 @@
                 JobStatus = JobStatus.Created;
 
                 context.Respond(new JobCreated {JobId = JobId});
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Guid CorrelationId { get; set; }
@@ -37,7 +37,7 @@
                 JobStatus = JobStatus.Running;
                 context.Respond(new JobStarted {JobId = JobId});
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

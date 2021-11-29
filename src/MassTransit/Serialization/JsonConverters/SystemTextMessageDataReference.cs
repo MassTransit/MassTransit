@@ -2,6 +2,7 @@ namespace MassTransit.Serialization.JsonConverters
 {
     using System;
     using System.Text.Json.Serialization;
+    using MessageData;
 
 
     public class SystemTextMessageDataReference :

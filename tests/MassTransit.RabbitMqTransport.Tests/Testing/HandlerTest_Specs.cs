@@ -4,7 +4,6 @@ namespace MassTransit.RabbitMqTransport.Tests.Testing
     using System.Threading.Tasks;
     using MassTransit.Testing;
     using NUnit.Framework;
-    using RabbitMqTransport.Testing;
     using Shouldly;
 
 

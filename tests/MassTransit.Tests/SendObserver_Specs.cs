@@ -6,7 +6,7 @@
         using System.Runtime.Serialization;
         using System.Threading;
         using System.Threading.Tasks;
-        using GreenPipes;
+        using Middleware;
         using NUnit.Framework;
         using Shouldly;
         using TestFramework;
@@ -255,7 +255,7 @@
                 {
                     received.SetResult(x);
 
-                    return TaskUtil.Completed;
+                    return Task.CompletedTask;
                 });
 
                 await mediator.Send(new PingMessage());

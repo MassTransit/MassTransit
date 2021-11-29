@@ -5,8 +5,7 @@ namespace MassTransit.Initializers.Factories
     using System.Linq;
     using System.Linq.Expressions;
     using Conventions;
-    using GreenPipes.Internals.Extensions;
-    using Metadata;
+    using Internals;
 
 
     public class MessageInitializerFactory<TMessage, TInput> :
@@ -64,14 +63,14 @@ namespace MassTransit.Initializers.Factories
 
         static IEnumerable<IPropertyInitializerInspector<TMessage, TInput>> CreatePropertyInspectors()
         {
-            return TypeMetadataCache<TMessage>.Properties.Where(x => x.CanRead)
+            return MessageTypeCache<TMessage>.Properties.Where(x => x.CanRead)
                 .Select(x => (IPropertyInitializerInspector<TMessage, TInput>)Activator.CreateInstance(
                     typeof(PropertyInitializerInspector<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), x.PropertyType), x));
         }
 
         static IEnumerable<IHeaderInitializerInspector<TMessage, TInput>> CreateInputHeaderInspectors()
         {
-            return TypeMetadataCache<TInput>.Properties.Where(x => x.CanRead)
+            return MessageTypeCache<TInput>.Properties.Where(x => x.CanRead)
                 .Select(x => (IHeaderInitializerInspector<TMessage, TInput>)Activator.CreateInstance(
                     typeof(InputHeaderInitializerInspector<,,>).MakeGenericType(typeof(TMessage), typeof(TInput), x.PropertyType), x));
         }

@@ -1,9 +1,8 @@
-namespace MassTransit.RabbitMqTransport.Topology
+namespace MassTransit
 {
     using System;
-    using Builders;
-    using Entities;
-    using MassTransit.Topology;
+    using RabbitMqTransport;
+    using RabbitMqTransport.Topology;
 
 
     public interface IRabbitMqMessagePublishTopology<TMessage> :

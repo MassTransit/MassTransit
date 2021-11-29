@@ -5,8 +5,7 @@ namespace MassTransit.Initializers.Conventions
     using System.Reflection;
     using System.Text;
     using HeaderInitializers;
-    using Internals.Extensions;
-    using Internals.Reflection;
+    using Internals;
     using PropertyInitializers;
     using PropertyProviders;
 

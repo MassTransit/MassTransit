@@ -1,9 +1,7 @@
 ﻿namespace MassTransit
 {
     using System;
-    using ConsumeConfigurators;
-    using ConsumeConnectors;
-    using GreenPipes;
+    using Configuration;
 
 
     public static class ObserverExtensions

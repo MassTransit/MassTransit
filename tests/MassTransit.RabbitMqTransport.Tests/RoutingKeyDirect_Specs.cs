@@ -109,7 +109,7 @@
                 if (context.Message.RoutingKey == "bar")
                     _bar.TrySetResult(context.Message);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

@@ -3,10 +3,7 @@ namespace MassTransit.QuartzIntegration.Tests.Turnout
     using System;
     using System.Threading.Tasks;
     using Contracts.JobService;
-    using Definition;
-    using GreenPipes;
     using JobService;
-    using JobService.Configuration;
     using NUnit.Framework;
     using Scheduling;
     using TestFramework;

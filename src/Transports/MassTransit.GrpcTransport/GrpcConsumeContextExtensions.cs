@@ -1,8 +1,6 @@
 ﻿namespace MassTransit
 {
     using System;
-    using GrpcTransport;
-    using GrpcTransport.Contexts;
 
 
     public static class GrpcConsumeContextExtensions

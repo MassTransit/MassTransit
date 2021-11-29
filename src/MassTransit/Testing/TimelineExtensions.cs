@@ -1,4 +1,4 @@
-namespace MassTransit
+namespace MassTransit.Testing
 {
     using System;
     using System.Collections.Generic;
@@ -6,8 +6,7 @@ namespace MassTransit
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
-    using Registration;
-    using Testing;
+    using Transports;
     using Util;
 
 
@@ -20,7 +19,7 @@ namespace MassTransit
         /// <param name="textWriter"></param>
         /// <param name="configure">Configure the timeout output options</param>
         /// <exception cref="ArgumentNullException"></exception>
-        public static async Task OutputTimeline(this BusTestHarness harness, TextWriter textWriter, Action<OutputTimelineOptions> configure = default)
+        public static async Task OutputTimeline(this IBaseTestHarness harness, TextWriter textWriter, Action<OutputTimelineOptions> configure = default)
         {
             if (harness == null)
                 throw new ArgumentNullException(nameof(harness));
@@ -167,10 +166,10 @@ namespace MassTransit
                 return this;
             }
 
-            internal void Apply(BusTestHarness harness)
+            internal void Apply(IBaseTestHarness harness)
             {
                 if (_now)
-                    harness.InactivityObserver.ForceInactive();
+                    harness.ForceInactive();
             }
 
             string GetTypeName(Type type)
@@ -293,7 +292,7 @@ namespace MassTransit
                 InitiatorId = context.InitiatorId;
                 RequestId = context.RequestId;
 
-                Address = context.DestinationAddress.GetLastPart();
+                Address = context.DestinationAddress.GetEndpointName();
 
                 if (context.TryGetPayload(out ConsumeContext consumeContext))
                     ParentMessageId = consumeContext.MessageId;
@@ -307,7 +306,7 @@ namespace MassTransit
                 InitiatorId = context.InitiatorId;
                 RequestId = context.RequestId;
 
-                Address = context.ReceiveContext.InputAddress.GetLastPart();
+                Address = context.ReceiveContext.InputAddress.GetEndpointName();
             }
 
             public DateTime StartTime { get; }

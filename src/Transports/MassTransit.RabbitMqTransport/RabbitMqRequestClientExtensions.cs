@@ -1,7 +1,6 @@
 ﻿namespace MassTransit
 {
     using System.Threading.Tasks;
-    using Definition;
     using RabbitMqTransport;
 
 

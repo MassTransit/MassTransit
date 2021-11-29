@@ -99,7 +99,7 @@ namespace MassTransit.Initializers.PropertyConverters
             IEnumerable<TInputElement> elements)
         {
             Task<List<TElement>> resultTask = ConvertSync(context, elements);
-            if (resultTask.IsCompleted)
+            if (resultTask.Status == TaskStatus.RanToCompletion)
                 return Task.FromResult<IList<TElement>>(resultTask.Result);
 
             async Task<IList<TElement>> ConvertAsync()
@@ -114,7 +114,7 @@ namespace MassTransit.Initializers.PropertyConverters
             IEnumerable<TInputElement> elements)
         {
             Task<List<TElement>> resultTask = ConvertSync(context, elements);
-            if (resultTask.IsCompleted)
+            if (resultTask.Status == TaskStatus.RanToCompletion)
                 return Task.FromResult<IReadOnlyList<TElement>>(resultTask.Result);
 
             async Task<IReadOnlyList<TElement>> ConvertAsync()
@@ -163,7 +163,7 @@ namespace MassTransit.Initializers.PropertyConverters
                             var current = asyncEnumerator.Current;
 
                             elementTask = _converter.Convert(context, current);
-                            if (elementTask.IsCompleted)
+                            if (elementTask.Status == TaskStatus.RanToCompletion)
                                 results.Add(elementTask.Result);
                             else
                             {
@@ -186,7 +186,7 @@ namespace MassTransit.Initializers.PropertyConverters
                     var current = enumerator.Current;
 
                     Task<TElement> elementTask = _converter.Convert(context, current);
-                    if (elementTask.IsCompleted)
+                    if (elementTask.Status == TaskStatus.RanToCompletion)
                         results.Add(elementTask.Result);
                     else
                     {

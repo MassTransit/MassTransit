@@ -1,8 +1,7 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit
 {
     using System;
     using Confluent.Kafka;
-    using MassTransit.Registration;
 
 
     public static class TopicEndpointConnectorExtensions
@@ -17,7 +16,7 @@ namespace MassTransit.KafkaIntegration
         /// </param>
         /// <param name="configure"></param>
         /// <typeparam name="T">Message value type</typeparam>
-        public static HostReceiveEndpointHandle ConnectTopicEndpoint<T>(this ITopicEndpointConnector connector, string topicName, string groupId,
+        public static HostReceiveEndpointHandle ConnectTopicEndpoint<T>(this IKafkaTopicEndpointConnector connector, string topicName, string groupId,
             Action<IRiderRegistrationContext, IKafkaTopicReceiveEndpointConfigurator<Ignore, T>> configure)
             where T : class
         {
@@ -32,7 +31,8 @@ namespace MassTransit.KafkaIntegration
         /// <param name="consumerConfig">Consumer config</param>
         /// <param name="configure"></param>
         /// <typeparam name="T">Message value type</typeparam>
-        public static HostReceiveEndpointHandle ConnectTopicEndpoint<T>(this ITopicEndpointConnector connector, string topicName, ConsumerConfig consumerConfig,
+        public static HostReceiveEndpointHandle ConnectTopicEndpoint<T>(this IKafkaTopicEndpointConnector connector, string topicName,
+            ConsumerConfig consumerConfig,
             Action<IRiderRegistrationContext, IKafkaTopicReceiveEndpointConfigurator<Ignore, T>> configure)
             where T : class
         {

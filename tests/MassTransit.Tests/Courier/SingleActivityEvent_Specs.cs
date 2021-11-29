@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -27,7 +26,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual("Hello", context.Message.GetResult<string>("OriginalValue"));
+            Assert.AreEqual("Hello", context.GetResult<string>("OriginalValue"));
         }
 
         [Test]
@@ -35,7 +34,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual("Knife", context.Message.GetVariable<string>("Variable"));
+            Assert.AreEqual("Knife", context.GetVariable<string>("Variable"));
         }
 
         [Test]
@@ -62,7 +61,7 @@
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.AreEqual("Knife", context.Message.GetVariable<string>("Variable"));
+            Assert.AreEqual("Knife", context.GetVariable<string>("Variable"));
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
@@ -80,7 +79,7 @@
             builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
 
             var testActivity = GetActivityContext<TestActivity>();
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
 
             builder.AddVariable("Variable", "Knife");
 
@@ -112,7 +111,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual("Hello", context.Message.GetResult<string>("OriginalValue"));
+            Assert.AreEqual("Hello", context.GetResult<string>("OriginalValue"));
         }
 
         [Test]
@@ -120,7 +119,7 @@
         {
             ConsumeContext<RoutingSlipActivityCompleted> context = await _activityCompleted;
 
-            Assert.AreEqual("Knife", context.Message.GetVariable<string>("Variable"));
+            Assert.AreEqual("Knife", context.GetVariable<string>("Variable"));
         }
 
         [Test]
@@ -147,7 +146,7 @@
         {
             ConsumeContext<RoutingSlipCompleted> context = await _completed;
 
-            Assert.AreEqual("Knife", context.Message.GetVariable<string>("Variable"));
+            Assert.AreEqual("Knife", context.GetVariable<string>("Variable"));
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
@@ -172,7 +171,7 @@
             var builder = new RoutingSlipBuilder(_trackingNumber);
             builder.AddSubscription(_harness.BusAddress, RoutingSlipEvents.All);
 
-            builder.AddActivity(_activity.Name, _activity.ExecuteAddress, new {Value = "Hello"});
+            builder.AddActivity(_activity.Name, _activity.ExecuteAddress, new { Value = "Hello" });
 
             builder.AddVariable("Variable", "Knife");
 

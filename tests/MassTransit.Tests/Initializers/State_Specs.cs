@@ -2,8 +2,6 @@ namespace MassTransit.Tests.Initializers
 {
     using System;
     using System.Threading.Tasks;
-    using Automatonymous;
-    using MassTransit.Saga;
     using NUnit.Framework;
     using TestFramework;
 
@@ -19,11 +17,14 @@ namespace MassTransit.Tests.Initializers
 
             Task<ConsumeContext<StateUpdated>> handler = await ConnectPublishHandler<StateUpdated>(x => x.CorrelationId == sagaId);
 
-            await Bus.Publish(new Start {CorrelationId = sagaId});
+            await Bus.Publish(new Start { CorrelationId = sagaId });
 
             ConsumeContext<StateUpdated> stateUpdated = await handler;
 
             Assert.That(stateUpdated.Message.CurrentState, Is.EqualTo(_machine.Running.Name));
+
+            Assert.That(stateUpdated.Headers.TryGetHeader("Custom-Header-Value", out var value), Is.True);
+            Assert.That(value, Is.EqualTo("Frankie Say Relax"));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -44,15 +45,6 @@ namespace MassTransit.Tests.Initializers
         class IntInstance :
             SagaStateMachineInstance
         {
-            public IntInstance(Guid correlationId)
-            {
-                CorrelationId = correlationId;
-            }
-
-            protected IntInstance()
-            {
-            }
-
             public int CurrentState { get; set; }
             public Guid CorrelationId { get; set; }
         }
@@ -74,15 +66,21 @@ namespace MassTransit.Tests.Initializers
                         .PublishAsync(context => context.Init<StateUpdated>(new
                         {
                             context.Instance.CorrelationId,
-                            CurrentState = this.GetState(context.Instance)
+                            CurrentState = this.GetState(context),
+                            __Header_Custom_Header_Value = "Frankie Say Relax",
                         }))
                 );
 
                 During(Running,
                     When(Stopped)
                         .Finalize());
-            } // ReSharper disable UnassignedGetOnlyAutoProperty
+            }
+
+            //
+            // ReSharper disable UnassignedGetOnlyAutoProperty
+            // ReSharper disable MemberCanBePrivate.Local
             public State Running { get; }
+
             public Event<Start> Started { get; }
             public Event<Stop> Stopped { get; }
         }

@@ -1,12 +1,10 @@
-﻿namespace MassTransit.GrpcTransport
+﻿namespace MassTransit
 {
     using System;
     using System.Threading;
     using Configuration;
-    using Configurators;
-    using MassTransit.Topology;
-    using MassTransit.Topology.EntityNameFormatters;
-    using MassTransit.Topology.Topologies;
+    using GrpcTransport.Configuration;
+    using Topology;
 
 
     public static class GrpcBus

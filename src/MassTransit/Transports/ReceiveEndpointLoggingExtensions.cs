@@ -2,8 +2,7 @@ namespace MassTransit.Transports
 {
     using System;
     using System.Runtime.CompilerServices;
-    using Context;
-    using Metadata;
+    using Logging;
     using Microsoft.Extensions.Logging;
 
 
@@ -72,14 +71,14 @@ namespace MassTransit.Transports
         public static void LogConsumed<T>(this ConsumeContext<T> context, TimeSpan duration, string consumerType)
             where T : class
         {
-            _logConsumed(context.ReceiveContext.InputAddress, context.MessageId, TypeMetadataCache<T>.ShortName, consumerType, duration);
+            _logConsumed(context.ReceiveContext.InputAddress, context.MessageId, TypeCache<T>.ShortName, consumerType, duration);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogFaulted<T>(this ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
             where T : class
         {
-            _logConsumeFault(context.ReceiveContext.InputAddress, context.MessageId, TypeMetadataCache<T>.ShortName, consumerType, duration, exception);
+            _logConsumeFault(context.ReceiveContext.InputAddress, context.MessageId, TypeCache<T>.ShortName, consumerType, duration, exception);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -97,35 +96,35 @@ namespace MassTransit.Transports
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogRetry(this ConsumeContext context, Exception exception)
         {
-            _logRetry(context.ReceiveContext.InputAddress, context.MessageId, TypeMetadataCache.GetShortName(context.GetType()), exception);
+            _logRetry(context.ReceiveContext.InputAddress, context.MessageId, TypeCache.GetShortName(context.GetType()), exception);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogRetry<TContext>(this TContext context, Exception exception)
             where TContext : class, ConsumeContext
         {
-            _logRetry(context.ReceiveContext.InputAddress, context.MessageId, TypeMetadataCache<TContext>.ShortName, exception);
+            _logRetry(context.ReceiveContext.InputAddress, context.MessageId, TypeCache<TContext>.ShortName, exception);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogFaulted<T>(this SendContext<T> context, Exception exception)
             where T : class
         {
-            _logSendFault(context.DestinationAddress, context.MessageId, TypeMetadataCache<T>.ShortName);
+            _logSendFault(context.DestinationAddress, context.MessageId, TypeCache<T>.ShortName);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogSent<T>(this SendContext<T> context)
             where T : class
         {
-            _logSent(context.DestinationAddress, context.MessageId, TypeMetadataCache<T>.ShortName);
+            _logSent(context.DestinationAddress, context.MessageId, TypeCache<T>.ShortName);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void LogScheduled<T>(this SendContext<T> context, DateTime deliveryTime)
             where T : class
         {
-            _logScheduled(context.DestinationAddress, context.MessageId, TypeMetadataCache<T>.ShortName, deliveryTime, context.ScheduledMessageId);
+            _logScheduled(context.DestinationAddress, context.MessageId, TypeCache<T>.ShortName, deliveryTime, context.ScheduledMessageId);
         }
 
         static string GetMessageId(ReceiveContext context)

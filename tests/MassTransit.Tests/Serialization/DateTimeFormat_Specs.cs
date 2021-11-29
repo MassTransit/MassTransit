@@ -18,7 +18,7 @@
             using var sw = new StringReader(message);
             using var jsonReader = new JsonTextReader(sw);
 
-            var obj = JsonMessageSerializer.Deserializer.Deserialize(jsonReader, typeof(MessageWithIsoDate));
+            var obj = NewtonsoftJsonMessageSerializer.Deserializer.Deserialize(jsonReader, typeof(MessageWithIsoDate));
             var msg = obj as MessageWithIsoDate;
 
             Assert.That(msg.IsoDate, Is.EqualTo("1994-11-05T13:15:30Z"));

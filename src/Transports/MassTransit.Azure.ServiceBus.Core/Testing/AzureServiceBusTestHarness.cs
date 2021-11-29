@@ -1,14 +1,10 @@
-﻿namespace MassTransit.Azure.ServiceBus.Core.Testing
+﻿namespace MassTransit.Testing
 {
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Configurators;
-    using Context;
-    using global::Azure;
-    using global::Azure.Messaging.ServiceBus.Administration;
-    using Internals.Extensions;
-    using MassTransit.Testing;
+    using Azure;
+    using Azure.Messaging.ServiceBus.Administration;
 
 
     public class AzureServiceBusTestHarness :
@@ -53,8 +49,8 @@
         {
             var managementClient = CreateManagementClient();
 
-            var pageableTopics = managementClient.GetTopicsAsync();
-            var topics = await pageableTopics.ToListAsync();
+            AsyncPageable<TopicProperties> pageableTopics = managementClient.GetTopicsAsync();
+            IList<TopicProperties> topics = await pageableTopics.ToListAsync();
             while (topics.Count > 0)
             {
                 foreach (var topic in topics)
@@ -65,8 +61,8 @@
                 topics = await managementClient.GetTopicsAsync().ToListAsync();
             }
 
-            var pageableQueues = managementClient.GetQueuesAsync();
-            var queues = await pageableQueues.ToListAsync();
+            AsyncPageable<QueueProperties> pageableQueues = managementClient.GetQueuesAsync();
+            IList<QueueProperties> queues = await pageableQueues.ToListAsync();
             while (queues.Count > 0)
             {
                 foreach (var queue in queues)
@@ -80,7 +76,7 @@
 
         ServiceBusAdministrationClient CreateManagementClient()
         {
-            var endpoint = new UriBuilder(HostAddress) {Path = ""}.Uri.ToString();
+            var endpoint = new UriBuilder(HostAddress) { Path = "" }.Uri.ToString();
 
             return new ServiceBusAdministrationClient(endpoint, NamedKeyCredential);
         }

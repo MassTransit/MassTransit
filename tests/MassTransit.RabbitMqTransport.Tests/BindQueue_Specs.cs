@@ -14,7 +14,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_be_allowed()
         {
-            var serviceAddress = new UriBuilder(HostAddress + "/" + ServiceQueue) {Query = "bind=true"}.Uri;
+            var serviceAddress = new UriBuilder(HostAddress + "/" + ServiceQueue) { Query = "bind=true" }.Uri;
 
             var endpoint = await Bus.GetSendEndpoint(serviceAddress);
 

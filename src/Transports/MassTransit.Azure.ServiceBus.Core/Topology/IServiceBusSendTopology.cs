@@ -1,7 +1,6 @@
-namespace MassTransit.Azure.ServiceBus.Core.Topology
+namespace MassTransit
 {
-    using MassTransit.Topology;
-    using Transport;
+    using AzureServiceBusTransport;
 
 
     public interface IServiceBusSendTopology :
@@ -12,7 +11,7 @@ namespace MassTransit.Azure.ServiceBus.Core.Topology
 
         SendSettings GetSendSettings(ServiceBusEndpointAddress address);
 
-        SendSettings GetErrorSettings(IQueueConfigurator configurator);
-        SendSettings GetDeadLetterSettings(IQueueConfigurator configurator);
+        SendSettings GetErrorSettings(IServiceBusQueueConfigurator configurator);
+        SendSettings GetDeadLetterSettings(IServiceBusQueueConfigurator configurator);
     }
 }

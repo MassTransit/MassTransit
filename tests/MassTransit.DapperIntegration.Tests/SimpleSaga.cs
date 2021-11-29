@@ -5,7 +5,6 @@ namespace MassTransit.DapperIntegration.Tests
     using System.Threading.Tasks;
     using Dapper.Contrib.Extensions;
     using MassTransit.Tests.Saga.Messages;
-    using Saga;
 
 
     public class SimpleSaga :

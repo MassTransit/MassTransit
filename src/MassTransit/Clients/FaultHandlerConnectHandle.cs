@@ -2,7 +2,6 @@ namespace MassTransit.Clients
 {
     using System;
     using System.Threading;
-    using GreenPipes;
 
 
     /// <summary>

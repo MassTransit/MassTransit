@@ -1,12 +1,10 @@
-namespace MassTransit.EntityFrameworkIntegration
+namespace MassTransit
 {
     using System;
     using System.Data;
     using System.Data.Entity;
     using System.Linq;
-    using MassTransit.Saga;
-    using Registration;
-    using Saga;
+    using EntityFrameworkIntegration;
 
 
     public interface IEntityFrameworkSagaRepositoryConfigurator
@@ -25,7 +23,7 @@ namespace MassTransit.EntityFrameworkIntegration
         /// Use the configuration service provider to resolve the database factory
         /// </summary>
         /// <param name="databaseFactory"></param>
-        void DatabaseFactory(Func<IConfigurationServiceProvider, Func<DbContext>> databaseFactory);
+        void DatabaseFactory(Func<IServiceProvider, Func<DbContext>> databaseFactory);
     }
 
 

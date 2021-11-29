@@ -11,8 +11,8 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_only_get_the_consumed_message()
         {
-            await Bus.Publish(new MessageOne {Value = "Invalid"});
-            await InputQueueSendEndpoint.Send(new MessageOne {Value = "Valid"});
+            await Bus.Publish(new MessageOne { Value = "Invalid" });
+            await InputQueueSendEndpoint.Send(new MessageOne { Value = "Valid" });
 
             ConsumeContext<MessageOne> handled = await _handled;
 

@@ -14,7 +14,7 @@
         [Test]
         public async Task Should_not_cause_the_message_to_nack()
         {
-            await Bus.Publish(new MyMessage {Value = "Hello, World."});
+            await Bus.Publish(new MyMessage { Value = "Hello, World." });
 
             await _faulted;
 
@@ -29,7 +29,7 @@
             {
                 await Console.Out.WriteLineAsync($"Received: {context.Message.Value}");
 
-                await context.Publish(new MyMessage2 {Value = context.Message.Value + "  2"});
+                await context.Publish(new MyMessage2 { Value = context.Message.Value + "  2" });
                 await context.Publish(new MyMessage2()); // an exception will be caused by this action
             });
         }

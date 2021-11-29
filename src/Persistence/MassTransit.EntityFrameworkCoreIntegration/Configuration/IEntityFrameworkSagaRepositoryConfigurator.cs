@@ -1,11 +1,10 @@
-namespace MassTransit.EntityFrameworkCoreIntegration
+namespace MassTransit
 {
     using System;
     using System.Data;
     using System.Linq;
-    using MassTransit.Saga;
+    using EntityFrameworkCoreIntegration;
     using Microsoft.EntityFrameworkCore;
-    using Registration;
 
 
     public interface IEntityFrameworkSagaRepositoryConfigurator
@@ -20,7 +19,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         /// <param name="optionsAction"></param>
         /// <typeparam name="TContext"></typeparam>
         /// <typeparam name="TImplementation"></typeparam>
-        void AddDbContext<TContext, TImplementation>(Action<IConfigurationServiceProvider, DbContextOptionsBuilder<TImplementation>> optionsAction = null)
+        void AddDbContext<TContext, TImplementation>(Action<IServiceProvider, DbContextOptionsBuilder<TImplementation>> optionsAction = null)
             where TContext : DbContext
             where TImplementation : DbContext, TContext;
 
@@ -34,7 +33,7 @@ namespace MassTransit.EntityFrameworkCoreIntegration
         /// Use the configuration service provider to resolve the database factory
         /// </summary>
         /// <param name="databaseFactory"></param>
-        void DatabaseFactory(Func<IConfigurationServiceProvider, Func<DbContext>> databaseFactory);
+        void DatabaseFactory(Func<IServiceProvider, Func<DbContext>> databaseFactory);
 
         /// <summary>
         /// Use an existing (already configured in the container) DbContext that will be resolved

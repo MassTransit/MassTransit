@@ -6,9 +6,6 @@
     using System.Data.Entity.ModelConfiguration;
     using System.Linq;
     using System.Threading.Tasks;
-    using Automatonymous;
-    using Mappings;
-    using MassTransit.Saga;
     using NUnit.Framework;
     using Saga;
     using TestFramework;

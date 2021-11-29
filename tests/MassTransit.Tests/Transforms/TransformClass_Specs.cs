@@ -1,10 +1,10 @@
 ﻿namespace MassTransit.Tests.Transforms
 {
     using System.Threading.Tasks;
+    using MassTransit.Configuration;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
-    using Transformation.TransformConfigurators;
 
 
     [TestFixture]

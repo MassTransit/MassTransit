@@ -1,4 +1,4 @@
-namespace MassTransit.AmazonSqsTransport
+namespace MassTransit
 {
     using System;
 

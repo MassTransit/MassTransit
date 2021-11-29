@@ -1,19 +1,14 @@
-namespace MassTransit.Futures
+namespace MassTransit
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Automatonymous;
-    using Automatonymous.Binders;
-    using Configurators;
-    using Contracts;
+    using Configuration;
     using Courier.Contracts;
-    using Definition;
-    using Endpoints;
-    using GreenPipes.Internals.Extensions;
-    using Internals;
-    using MassTransit.Configurators;
+    using Futures;
+    using Futures.Contracts;
+    using Serialization;
 
 
     /// <summary>
@@ -74,11 +69,11 @@ namespace MassTransit.Futures
 
             WhenAnyFaulted(x => x.SetFaultedUsingInitializer(context =>
             {
-                var message = context.Instance.GetCommand<TCommand>();
+                var message = context.GetCommand<TCommand>();
 
                 // use supported message types to deserialize results...
 
-                List<Fault> faults = context.Instance.Faults.Select(fault => fault.Value.ToObject<Fault>()).ToList();
+                List<Fault> faults = context.Saga.Faults.Select(fault => context.ToObject<Fault>(fault.Value)).ToList();
 
                 var faulted = faults.First();
 
@@ -88,7 +83,7 @@ namespace MassTransit.Futures
                 {
                     faulted.FaultId,
                     faulted.FaultedMessageId,
-                    Timestamp = context.Instance.Faulted,
+                    Timestamp = context.Saga.Faulted,
                     Exceptions = exceptions,
                     faulted.Host,
                     faulted.FaultMessageTypes,
@@ -163,7 +158,7 @@ namespace MassTransit.Futures
 
             Initially(
                 When(CommandReceived)
-                    .ThenAsync(context => request.Send(context, inputSelector(context.Data)))
+                    .ThenAsync(context => request.Send(context, inputSelector(context.Message)))
             );
 
             return request;
@@ -185,7 +180,7 @@ namespace MassTransit.Futures
 
             Initially(
                 When(CommandReceived)
-                    .ThenAsync(context => request.SendRange(context, inputSelector(context.Data)))
+                    .ThenAsync(context => request.SendRange(context, inputSelector(context.Message)))
             );
 
             return request;
@@ -223,7 +218,7 @@ namespace MassTransit.Futures
 
             configure?.Invoke(request);
 
-            BusConfigurationResult.CompileResults(request.Validate(), $"The future request was not configured correctly: {TypeCache.GetShortName(GetType())}");
+            request.Validate().ThrowIfContainsFailure($"The future request was not configured correctly: {TypeCache.GetShortName(GetType())}");
 
             if (request.PendingRequestIdProvider != null)
                 FaultPendingRequest(requestFaulted, request.PendingRequestIdProvider);
@@ -239,15 +234,17 @@ namespace MassTransit.Futures
         {
             Event<RoutingSlipCompleted> routingSlipCompleted = Event<RoutingSlipCompleted>(FormatEventName<RoutingSlipCompleted>(), x =>
             {
-                x.CorrelateById(m => FutureIdOrFault(m.Message.Variables));
-                x.OnMissingInstance(m => m.Execute(context => throw new FutureNotFoundException(GetType(), FutureIdOrDefault(context.Message.Variables))));
+                x.CorrelateById(m => FutureIdOrFault(m, m.Message.Variables));
+                x.OnMissingInstance(m => m
+                    .Execute(context => throw new FutureNotFoundException(GetType(), FutureIdOrDefault(context, context.Message.Variables))));
                 x.ConfigureConsumeTopology = false;
             });
 
             Event<RoutingSlipFaulted> routingSlipFaulted = Event<RoutingSlipFaulted>(FormatEventName<RoutingSlipFaulted>(), x =>
             {
-                x.CorrelateById(m => FutureIdOrFault(m.Message.Variables));
-                x.OnMissingInstance(m => m.Execute(context => throw new FutureNotFoundException(GetType(), FutureIdOrDefault(context.Message.Variables))));
+                x.CorrelateById(m => FutureIdOrFault(m, m.Message.Variables));
+                x.OnMissingInstance(m => m
+                    .Execute(context => throw new FutureNotFoundException(GetType(), FutureIdOrDefault(context, context.Message.Variables))));
                 x.ConfigureConsumeTopology = false;
             });
 
@@ -255,7 +252,7 @@ namespace MassTransit.Futures
 
             configure?.Invoke(routingSlip);
 
-            BusConfigurationResult.CompileResults(routingSlip.Validate(), $"The future was not configured correctly: {TypeCache.GetShortName(GetType())}");
+            routingSlip.Validate().ThrowIfContainsFailure($"The future routing slip was not configured correctly: {TypeCache.GetShortName(GetType())}");
 
             if (routingSlip.FaultedIdProvider != null)
                 FaultPendingRoutingSlip(routingSlipFaulted);
@@ -269,7 +266,7 @@ namespace MassTransit.Futures
 
             if (routingSlip.CompletedIdProvider != null)
                 CompletePending(routingSlipCompleted, routingSlip.CompletedIdProvider);
-            else if (routingSlip.HasResult(out FutureResult<TCommand, RoutingSlipCompleted, TResult> result))
+            else if (routingSlip.HasResult(out FutureResult<TCommand, TResult, RoutingSlipCompleted> result))
                 SetResult(routingSlipCompleted, result.SetResult);
 
             return routingSlip;
@@ -288,7 +285,7 @@ namespace MassTransit.Futures
             return requestCompleted;
         }
 
-        void IFutureStateMachineConfigurator.CompletePendingRequest<T>(Event<T> requestCompleted, PendingIdProvider<T> pendingIdProvider)
+        void IFutureStateMachineConfigurator.CompletePendingRequest<T>(Event<T> requestCompleted, PendingFutureIdProvider<T> pendingIdProvider)
             where T : class
         {
             CompletePending(requestCompleted, pendingIdProvider);
@@ -305,30 +302,30 @@ namespace MassTransit.Futures
             DuringAny(binder);
         }
 
-        void CompletePending<T>(Event<T> completedEvent, PendingIdProvider<T> pendingIdProvider)
+        void CompletePending<T>(Event<T> completedEvent, PendingFutureIdProvider<T> pendingIdProvider)
             where T : class
         {
             DuringAny(
                 When(completedEvent)
                     .SetResult(x => pendingIdProvider(x.Message), x => x.Message)
-                    .IfElse(context => context.Instance.Completed.HasValue,
+                    .IfElse(context => context.Saga.Completed.HasValue,
                         completed => completed
                             .ThenAsync(context => _result.SetResult(context))
                             .TransitionTo(Completed),
-                        notCompleted => notCompleted.If(context => context.Instance.Faulted.HasValue,
+                        notCompleted => notCompleted.If(context => context.Saga.Faulted.HasValue,
                             faulted => faulted
                                 .ThenAsync(context => _fault.SetFaulted(context))
                                 .TransitionTo(Faulted)))
             );
         }
 
-        public void FaultPendingRequest<T>(Event<Fault<T>> requestFaulted, PendingIdProvider<T> pendingIdProvider)
+        public void FaultPendingRequest<T>(Event<Fault<T>> requestFaulted, PendingFutureIdProvider<T> pendingIdProvider)
             where T : class
         {
             DuringAny(
                 When(requestFaulted)
                     .SetFault(x => pendingIdProvider(x.Message.Message), x => x.Message)
-                    .If(context => context.Instance.Faulted.HasValue,
+                    .If(context => context.Saga.Faulted.HasValue,
                         faulted => faulted
                             .ThenAsync(context => _fault.SetFaulted(context))
                             .TransitionTo(Faulted))
@@ -340,7 +337,7 @@ namespace MassTransit.Futures
             DuringAny(
                 When(requestFaulted)
                     .SetFault(x => x.Message)
-                    .If(context => context.Instance.Faulted.HasValue,
+                    .If(context => context.Saga.Faulted.HasValue,
                         faulted => faulted
                             .ThenAsync(context => _fault.SetFaulted(context))
                             .TransitionTo(Faulted))
@@ -390,17 +387,17 @@ namespace MassTransit.Futures
             return context.RequestId ?? default;
         }
 
-        protected static Guid FutureIdOrFault(IDictionary<string, object> variables)
+        protected static Guid FutureIdOrFault(ConsumeContext context, IDictionary<string, object> variables)
         {
-            if (variables.TryGetValue(nameof(FutureConsumeContext.FutureId), out Guid correlationId))
-                return correlationId;
+            if (context.SerializerContext.TryGetValue(variables, MessageHeaders.FutureId, out Guid? correlationId))
+                return correlationId.Value;
 
             throw new RequestException("CorrelationId not present, define the routing slip using Event");
         }
 
-        protected static Guid FutureIdOrDefault(IDictionary<string, object> variables)
+        protected static Guid FutureIdOrDefault(ConsumeContext context, IDictionary<string, object> variables)
         {
-            return variables.TryGetValue(nameof(FutureConsumeContext.FutureId), out Guid correlationId) ? correlationId : default;
+            return context.SerializerContext.TryGetValue(variables, MessageHeaders.FutureId, out Guid? correlationId) ? correlationId.Value : default;
         }
 
         protected void WhenAllCompleted(Action<IFutureResultConfigurator<TResult>> configure)
@@ -421,17 +418,17 @@ namespace MassTransit.Futures
             configure?.Invoke(configurator);
         }
 
-        static Task<TResult> GetResult(InstanceContext<FutureState> context)
+        static Task<TResult> GetResult(BehaviorContext<FutureState> context)
         {
-            if (context.Instance.TryGetResult(context.Instance.CorrelationId, out TResult completed))
+            if (context.TryGetResult(context.Saga.CorrelationId, out TResult completed))
                 return Task.FromResult(completed);
 
             throw new InvalidOperationException("Completed result not available");
         }
 
-        static Task<TFault> GetFault(InstanceContext<FutureState> context)
+        static Task<TFault> GetFault(BehaviorContext<FutureState> context)
         {
-            if (context.Instance.TryGetFault(context.Instance.CorrelationId, out TFault faulted))
+            if (context.TryGetFault(context.Saga.CorrelationId, out TFault faulted))
                 return Task.FromResult(faulted);
 
             throw new InvalidOperationException("Faulted result not available");

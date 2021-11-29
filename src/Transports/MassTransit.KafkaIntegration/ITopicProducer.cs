@@ -1,8 +1,7 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
 
 
     /// <summary>

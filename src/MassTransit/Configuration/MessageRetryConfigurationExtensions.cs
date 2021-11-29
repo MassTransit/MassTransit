@@ -2,11 +2,8 @@ namespace MassTransit
 {
     using System;
     using System.Threading;
-    using ConsumeConfigurators;
-    using GreenPipes.Configurators;
-    using PipeConfigurators;
-    using Pipeline.Filters;
-    using Saga;
+    using Configuration;
+    using Middleware;
 
 
     public static class MessageRetryConfigurationExtensions

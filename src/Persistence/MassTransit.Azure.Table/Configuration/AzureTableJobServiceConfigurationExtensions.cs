@@ -1,11 +1,9 @@
-﻿namespace MassTransit.Azure.Table
+﻿namespace MassTransit
 {
     using System;
-    using JobService;
-    using JobService.Components.StateMachines;
-    using JobService.Configuration;
+    using AzureTable;
+    using AzureTable.Saga;
     using Microsoft.Azure.Cosmos.Table;
-    using Saga;
 
 
     public static class AzureTableJobServiceConfigurationExtensions
@@ -26,11 +24,10 @@
         public static void UseAzureTableSagaRepository(this IJobServiceConfigurator configurator,
             Func<CloudTable> contextFactory)
         {
-            UseAzureTableSagaRepository(configurator,
-                contextFactory,
-                new ConstPartitionSagaKeyFormatter<JobTypeSaga>(typeof(JobTypeSaga).Name),
-                new ConstPartitionSagaKeyFormatter<JobSaga>(typeof(JobSaga).Name),
-                new ConstPartitionSagaKeyFormatter<JobAttemptSaga>(typeof(JobAttemptSaga).Name));
+            UseAzureTableSagaRepository(configurator, contextFactory,
+                new ConstPartitionSagaKeyFormatter<JobTypeSaga>(nameof(JobTypeSaga)),
+                new ConstPartitionSagaKeyFormatter<JobSaga>(nameof(JobSaga)),
+                new ConstPartitionSagaKeyFormatter<JobAttemptSaga>(nameof(JobAttemptSaga)));
         }
     }
 }

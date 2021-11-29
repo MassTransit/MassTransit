@@ -1,7 +1,6 @@
 namespace MassTransit
 {
-    using GreenPipes;
-    using Pipeline.Filters;
+    using Middleware;
 
 
     public static class ReceivePipeConfigurationExtensions
@@ -25,7 +24,7 @@ namespace MassTransit
         }
 
         /// <summary>
-        /// Generate a <see cref="ReceiveFault"/> event and move the message to the _error transport.
+        /// Generate a <see cref="ReceiveFault" /> event and move the message to the _error transport.
         /// </summary>
         /// <param name="configurator"></param>
         public static void ConfigureDefaultErrorTransport(this IReceivePipelineConfigurator configurator)

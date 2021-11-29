@@ -3,7 +3,6 @@ namespace MassTransit.EventHubIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using Contracts;
-    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
@@ -57,7 +56,7 @@ namespace MassTransit.EventHubIntegration.Tests
                 var conversationId = NewId.NextGuid();
                 var initiatorId = NewId.NextGuid();
                 var messageId = NewId.NextGuid();
-                await producer.Produce<EventHubMessage>(new {Text = "text"}, Pipe.Execute<SendContext>(context =>
+                await producer.Produce<EventHubMessage>(new { Text = "text" }, Pipe.Execute<SendContext>(context =>
                     {
                         context.CorrelationId = correlationId;
                         context.MessageId = messageId;

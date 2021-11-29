@@ -4,9 +4,6 @@ namespace MassTransit.Transports
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using Metrics;
-    using Pipeline;
 
 
     public interface IReceiveEndpointDispatcher :
@@ -29,6 +26,8 @@ namespace MassTransit.Transports
         /// <param name="payloads">One or more payloads to add to the receive context</param>
         /// <returns></returns>
         Task Dispatch(byte[] body, IReadOnlyDictionary<string, object> headers, CancellationToken cancellationToken, params object[] payloads);
+
+        // TODO convert this to use the MessageBody type for nicer integration, also MessageContext
     }
 
 

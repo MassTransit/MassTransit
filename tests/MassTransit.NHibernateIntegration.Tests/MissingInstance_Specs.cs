@@ -4,12 +4,9 @@
     {
         using System;
         using System.Threading.Tasks;
-        using Automatonymous;
-        using GreenPipes.Internals.Extensions;
-        using MassTransit.Saga;
+        using Internals;
         using NHibernate;
         using NUnit.Framework;
-        using Saga;
         using TestFramework;
 
 

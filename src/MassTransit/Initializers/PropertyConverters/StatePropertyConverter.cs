@@ -1,7 +1,6 @@
 namespace MassTransit.Initializers.PropertyConverters
 {
     using System.Threading.Tasks;
-    using Automatonymous;
 
 
     public class StatePropertyConverter<TInstance> :

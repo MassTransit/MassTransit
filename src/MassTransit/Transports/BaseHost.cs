@@ -4,13 +4,6 @@ namespace MassTransit.Transports
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
-    using Context;
-    using EndpointConfigurators;
-    using GreenPipes;
-    using GreenPipes.Agents;
-    using Pipeline;
-    using Riders;
-    using Topology;
 
 
     public abstract class BaseHost :
@@ -19,10 +12,10 @@ namespace MassTransit.Transports
         readonly IHostConfiguration _hostConfiguration;
         HostHandle _handle;
 
-        protected BaseHost(IHostConfiguration hostConfiguration, IHostTopology hostTopology)
+        protected BaseHost(IHostConfiguration hostConfiguration, IBusTopology busTopology)
         {
             _hostConfiguration = hostConfiguration;
-            Topology = hostTopology;
+            Topology = busTopology;
 
             ReceiveEndpoints = new ReceiveEndpointCollection();
             Riders = new RiderCollection();
@@ -33,7 +26,7 @@ namespace MassTransit.Transports
 
         public Uri Address => _hostConfiguration.HostAddress;
 
-        public IHostTopology Topology { get; }
+        public IBusTopology Topology { get; }
 
         public abstract HostReceiveEndpointHandle ConnectReceiveEndpoint(IEndpointDefinition definition, IEndpointNameFormatter endpointNameFormatter,
             Action<IReceiveEndpointConfigurator> configureEndpoint = null);
@@ -113,7 +106,7 @@ namespace MassTransit.Transports
             Riders.Add(name, riderControl);
         }
 
-        public HealthResult CheckHealth(BusState busState, string healthMessage)
+        public BusHealthResult CheckHealth(BusState busState, string healthMessage)
         {
             return ReceiveEndpoints.CheckHealth(busState, healthMessage);
         }

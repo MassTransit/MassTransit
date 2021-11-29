@@ -4,7 +4,6 @@ namespace MassTransit.QuartzIntegration.Tests
     using System.Threading.Tasks;
     using Courier;
     using Courier.Contracts;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework.Courier;
     using Testing;

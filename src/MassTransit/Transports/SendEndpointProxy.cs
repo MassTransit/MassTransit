@@ -3,8 +3,7 @@ namespace MassTransit.Transports
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context.Converters;
-    using GreenPipes;
+    using Context;
     using Initializers;
 
 
@@ -21,7 +20,7 @@ namespace MassTransit.Transports
             _endpoint = endpoint;
         }
 
-        internal ISendEndpoint Endpoint => _endpoint;
+        public ISendEndpoint Endpoint => _endpoint;
 
         public ConnectHandle ConnectSendObserver(ISendObserver observer)
         {
@@ -75,7 +74,6 @@ namespace MassTransit.Transports
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
 
@@ -86,7 +84,6 @@ namespace MassTransit.Transports
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
@@ -99,68 +96,55 @@ namespace MassTransit.Transports
         {
             if (message == null)
                 throw new ArgumentNullException(nameof(message));
-
             if (messageType == null)
                 throw new ArgumentNullException(nameof(messageType));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
             return SendEndpointConverterCache.Send(this, message, messageType, pipe, cancellationToken);
         }
 
-        public Task Send<T>(object values, CancellationToken cancellationToken)
+        public async Task Send<T>(object values, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
 
-            IMessageInitializer<T> initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+            (var message, IPipe<SendContext<T>> sendPipe) =
+                await MessageInitializerCache<T>.InitializeMessage(values, GetPipeProxy<T>(), cancellationToken).ConfigureAwait(false);
 
-            InitializeContext<T> context = GetInitializeContext(initializer, cancellationToken);
-
-            return initializer.Send(this, context, values);
+            await _endpoint.Send(message, sendPipe, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+        public async Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            IMessageInitializer<T> initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+            (var message, IPipe<SendContext<T>> sendPipe) =
+                await MessageInitializerCache<T>.InitializeMessage(values, GetPipeProxy<T>(pipe), cancellationToken).ConfigureAwait(false);
 
-            InitializeContext<T> context = GetInitializeContext(initializer, cancellationToken);
-
-            return initializer.Send(this, context, values, pipe);
+            await _endpoint.Send(message, sendPipe, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        public async Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
             where T : class
         {
             if (values == null)
                 throw new ArgumentNullException(nameof(values));
-
             if (pipe == null)
                 throw new ArgumentNullException(nameof(pipe));
 
-            IMessageInitializer<T> initializer = MessageInitializerCache<T>.GetInitializer(values.GetType());
+            (var message, IPipe<SendContext<T>> sendPipe) =
+                await MessageInitializerCache<T>.InitializeMessage(values, GetPipeProxy<T>(pipe), cancellationToken).ConfigureAwait(false);
 
-            InitializeContext<T> context = GetInitializeContext(initializer, cancellationToken);
-
-            return initializer.Send(this, context, values, pipe);
+            await _endpoint.Send(message, sendPipe, cancellationToken).ConfigureAwait(false);
         }
 
         protected abstract IPipe<SendContext<T>> GetPipeProxy<T>(IPipe<SendContext<T>> pipe = default)
             where T : class;
-
-        protected virtual InitializeContext<T> GetInitializeContext<T>(IMessageInitializer<T> initializer, CancellationToken cancellationToken)
-            where T : class
-        {
-            return initializer.Create(cancellationToken);
-        }
     }
 }

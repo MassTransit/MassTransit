@@ -6,6 +6,7 @@
     using System.Linq;
     using System.Reflection;
     using Context;
+    using Logging;
 
 
     public class AssemblyFinder

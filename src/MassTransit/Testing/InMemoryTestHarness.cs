@@ -5,10 +5,7 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Configuration;
-    using GreenPipes;
-    using Registration;
-    using Transports.InMemory.Configuration;
-    using Transports.InMemory.Configurators;
+    using InMemoryTransport.Configuration;
 
 
     public class InMemoryTestHarness :
@@ -45,6 +42,7 @@
 
         public event Action<IInMemoryBusFactoryConfigurator> OnConfigureInMemoryBus;
         public event Action<IInMemoryReceiveEndpointConfigurator> OnConfigureInMemoryReceiveEndpoint;
+        public event Action<IInMemoryBusFactoryConfigurator> OnInMemoryBusConfigured;
 
         protected virtual void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
@@ -54,6 +52,11 @@
         protected virtual void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             OnConfigureInMemoryReceiveEndpoint?.Invoke(configurator);
+        }
+
+        protected virtual void InMemoryBusConfigured(IInMemoryBusFactoryConfigurator configurator)
+        {
+            OnInMemoryBusConfigured?.Invoke(configurator);
         }
 
         public virtual Task<IRequestClient<TRequest>> ConnectRequestClient<TRequest>()
@@ -82,6 +85,11 @@
 
                 ConfigureInMemoryReceiveEndpoint(e);
             });
+
+            BusConfigured(configurator);
+
+            InMemoryBusConfigured(configurator);
+
             return configurator.Build(_busConfiguration, _specifications ?? Enumerable.Empty<ISpecification>());
         }
     }

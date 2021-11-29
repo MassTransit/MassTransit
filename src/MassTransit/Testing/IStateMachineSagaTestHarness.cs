@@ -4,13 +4,12 @@ namespace MassTransit.Testing
     using System.Collections.Generic;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using Automatonymous;
 
 
-    public interface IStateMachineSagaTestHarness<TInstance, out TStateMachine> :
+    public interface ISagaStateMachineTestHarness<out TStateMachine, TInstance> :
         ISagaTestHarness<TInstance>
-        where TInstance : class, SagaStateMachineInstance
         where TStateMachine : SagaStateMachine<TInstance>
+        where TInstance : class, SagaStateMachineInstance
     {
         /// <summary>
         /// Waits until a saga exists with the specified correlationId in the specified state

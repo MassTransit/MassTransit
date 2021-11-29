@@ -1,7 +1,7 @@
 namespace MassTransit.Tests
 {
     using System.Threading.Tasks;
-    using Definition;
+    using MassTransit.Configuration;
     using NUnit.Framework;
     using TestFramework.Messages;
 

@@ -1,10 +1,11 @@
-﻿namespace MassTransit.MessageData.Values
+namespace MassTransit.MessageData.Values
 {
     using System;
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
-    using PropertyProviders;
+    using Converters;
+    using Metadata;
 
 
     /// <summary>

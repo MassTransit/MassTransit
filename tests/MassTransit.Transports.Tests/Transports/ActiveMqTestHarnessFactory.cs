@@ -1,7 +1,6 @@
 namespace MassTransit.Transports.Tests.Transports
 {
     using System.Threading.Tasks;
-    using ActiveMqTransport.Testing;
     using Testing;
 
 

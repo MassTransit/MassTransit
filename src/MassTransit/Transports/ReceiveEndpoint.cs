@@ -3,13 +3,8 @@ namespace MassTransit.Transports
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Automatonymous;
-    using Context;
-    using EndpointConfigurators;
     using Events;
-    using GreenPipes;
-    using GreenPipes.Util;
-    using Pipeline;
+    using Util;
 
 
     /// <summary>
@@ -20,6 +15,17 @@ namespace MassTransit.Transports
     public class ReceiveEndpoint :
         IReceiveEndpoint
     {
+        public enum State
+        {
+            Initial,
+            Started,
+            Ready,
+            Completed,
+            Faulted,
+            Final
+        }
+
+
         readonly ReceiveEndpointContext _context;
         readonly TaskCompletionSource<ReceiveEndpointReady> _started;
         readonly StartObserver _startObserver;
@@ -31,7 +37,7 @@ namespace MassTransit.Transports
             _context = context;
             _transport = transport;
 
-            _started = Util.TaskUtil.GetTask<ReceiveEndpointReady>();
+            _started = new TaskCompletionSource<ReceiveEndpointReady>(TaskCreationOptions.RunContinuationsAsynchronously);
 
             InputAddress = context.InputAddress;
 
@@ -63,6 +69,16 @@ namespace MassTransit.Transports
 
             _handle.Start();
 
+            switch (CurrentState)
+            {
+                case State.Initial:
+                case State.Completed:
+                case State.Faulted:
+                    Message = "starting";
+                    CurrentState = State.Started;
+                    break;
+            }
+
             return _handle;
         }
 
@@ -78,25 +94,9 @@ namespace MassTransit.Transports
             _context.ReceivePipe.Probe(context);
         }
 
-        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
-        {
-            return _context.ConnectReceiveObserver(observer);
-        }
-
-        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
-        {
-            return _context.ConnectReceiveEndpointObserver(observer);
-        }
-
         public ConnectHandle ConnectConsumeObserver(IConsumeObserver observer)
         {
             return _context.ReceivePipe.ConnectConsumeObserver(observer);
-        }
-
-        public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
-            where T : class
-        {
-            return _context.ReceivePipe.ConnectConsumeMessageObserver(observer);
         }
 
         public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
@@ -138,9 +138,25 @@ namespace MassTransit.Transports
             return _context.PublishEndpointProvider.GetPublishSendEndpoint<T>();
         }
 
-        public EndpointHealthResult CheckHealth()
+        public ConnectHandle ConnectReceiveObserver(IReceiveObserver observer)
         {
-            return HealthResult;
+            return _context.ConnectReceiveObserver(observer);
+        }
+
+        public ConnectHandle ConnectConsumeMessageObserver<T>(IConsumeMessageObserver<T> observer)
+            where T : class
+        {
+            return _context.ReceivePipe.ConnectConsumeMessageObserver(observer);
+        }
+
+        public ConnectHandle ConnectReceiveEndpointObserver(IReceiveEndpointObserver observer)
+        {
+            return _context.ConnectReceiveEndpointObserver(observer);
+        }
+
+        public bool IsStarted()
+        {
+            return State.Started.Equals(CurrentState) || State.Ready.Equals(CurrentState) || State.Faulted.Equals(CurrentState);
         }
 
         public async Task Stop(bool removed, CancellationToken cancellationToken)
@@ -193,16 +209,6 @@ namespace MassTransit.Transports
         }
 
 
-        class ConfiguredObserver :
-            IEndpointConfigurationObserver
-        {
-            public void EndpointConfigured<T>(T configurator)
-                where T : IReceiveEndpointConfigurator
-            {
-            }
-        }
-
-
         class StartObserver :
             IReceiveEndpointObserver
         {
@@ -220,12 +226,12 @@ namespace MassTransit.Transports
 
             public Task Stopping(ReceiveEndpointStopping stopping)
             {
-                return Util.TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             Task IReceiveEndpointObserver.Completed(ReceiveEndpointCompleted completed)
             {
-                return Util.TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             Task IReceiveEndpointObserver.Faulted(ReceiveEndpointFaulted faulted)
@@ -257,7 +263,7 @@ namespace MassTransit.Transports
                 _transport = transport;
 
                 _cancellationToken = cancellationToken;
-                _ready = Util.TaskUtil.GetTask<ReceiveEndpointReady>();
+                _ready = new TaskCompletionSource<ReceiveEndpointReady>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                 if (cancellationToken.CanBeCanceled)
                 {
@@ -297,7 +303,7 @@ namespace MassTransit.Transports
 
                 _ready.TrySetResult(ready);
 
-                return Util.TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task SetFaulted(ReceiveEndpointFaulted faulted)
@@ -312,7 +318,7 @@ namespace MassTransit.Transports
                     _ready.TrySetException(faulted.Exception);
                 }
 
-                return Util.TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             static bool IsUnrecoverable(Exception exception)

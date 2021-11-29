@@ -1,10 +1,8 @@
 ﻿namespace MassTransit
 {
     using System;
-    using Context.SetCorrelationIds;
+    using Configuration;
     using Topology;
-    using Topology.Conventions;
-    using Topology.Conventions.CorrelationId;
 
 
     public static class CorrelationIdConventionExtensions

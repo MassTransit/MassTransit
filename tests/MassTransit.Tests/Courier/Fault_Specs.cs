@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -42,8 +41,8 @@
             var testActivity = GetActivityContext<TestActivity>();
             var faultActivity = GetActivityContext<NastyFaultyActivity>();
 
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello Again!"});
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello Again!"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello Again!" });
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello Again!" });
             builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri);
 
             await Bus.Execute(builder.Build());
@@ -127,8 +126,8 @@
             Task<ConsumeContext<RoutingSlipActivityCompensated>> compensated = await ConnectPublishHandler<RoutingSlipActivityCompensated>(
                 context => context.Message.ActivityName.Equals(testActivity.Name));
 
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
-            builder.AddActivity(secondTestActivity.Name, secondTestActivity.ExecuteUri, new {Value = "Hello Again!"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
+            builder.AddActivity(secondTestActivity.Name, secondTestActivity.ExecuteUri, new { Value = "Hello Again!" });
             builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri, new { });
 
             await Bus.Execute(builder.Build());
@@ -154,7 +153,7 @@
 
             ConsumeContext<RoutingSlipFaulted> context = await handled;
 
-            Assert.AreEqual("Data", context.Message.GetVariable<string>("Test"));
+            Assert.AreEqual("Data", context.GetVariable<string>("Test"));
         }
 
         protected override void SetupActivities(BusTestHarness testHarness)

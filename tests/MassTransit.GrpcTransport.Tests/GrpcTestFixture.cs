@@ -6,7 +6,6 @@ namespace MassTransit.GrpcTransport.Tests
     using NUnit.Framework.Internal;
     using TestFramework;
     using Testing;
-    using Util;
 
 
     public class GrpcTestFixture :
@@ -50,13 +49,13 @@ namespace MassTransit.GrpcTransport.Tests
         [SetUp]
         public Task SetupGrpcTest()
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         [TearDown]
         public Task TearDownGrpcTest()
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         protected virtual IRequestClient<TRequest> CreateRequestClient<TRequest>()

@@ -6,7 +6,6 @@
     using MassTransit.Tests.Saga.Messages;
     using Microsoft.Data.SqlClient;
     using NUnit.Framework;
-    using Saga;
     using Shouldly;
     using TestFramework;
     using Testing;
@@ -29,7 +28,7 @@
 
             foundId.HasValue.ShouldBe(true);
 
-            var nextMessage = new CompleteSimpleSaga {CorrelationId = sagaId};
+            var nextMessage = new CompleteSimpleSaga { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
@@ -55,7 +54,7 @@
         public async Task An_observed_message_should_find_and_update_the_correct_saga()
         {
             var sagaId = NewId.NextGuid();
-            var message = new InitiateSimpleSaga(sagaId) {Name = "MySimpleSaga"};
+            var message = new InitiateSimpleSaga(sagaId) { Name = "MySimpleSaga" };
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -63,7 +62,7 @@
 
             found.ShouldBe(sagaId);
 
-            var nextMessage = new ObservableSagaMessage {Name = "MySimpleSaga"};
+            var nextMessage = new ObservableSagaMessage { Name = "MySimpleSaga" };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 

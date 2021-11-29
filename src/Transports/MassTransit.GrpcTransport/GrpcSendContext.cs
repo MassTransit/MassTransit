@@ -1,4 +1,4 @@
-namespace MassTransit.GrpcTransport
+namespace MassTransit
 {
     public interface GrpcSendContext<out T> :
         SendContext<T>,

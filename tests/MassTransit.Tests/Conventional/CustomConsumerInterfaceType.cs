@@ -1,7 +1,7 @@
 namespace MassTransit.Tests.Conventional
 {
     using System;
-    using ConsumeConnectors;
+    using MassTransit.Configuration;
 
 
     /// <summary>

@@ -66,7 +66,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
             try
             {
-                var messages = Enumerable.Range(0, batchSize).Select(x => new {Index = x}).ToArray();
+                var messages = Enumerable.Range(0, batchSize).Select(x => new { Index = x }).ToArray();
                 await producer.Produce<BatchEventHubMessage>(messages, TestCancellationToken);
 
                 ConsumeContext<Batch<BatchEventHubMessage>> result = await taskCompletionSource.Task;

@@ -1,7 +1,7 @@
-﻿namespace MassTransit.RabbitMqTransport
+﻿namespace MassTransit
 {
     using System;
-    using GreenPipes;
+    using RabbitMqTransport;
 
 
     /// <summary>
@@ -9,7 +9,7 @@
     /// </summary>
     public interface IRabbitMqReceiveEndpointConfigurator :
         IReceiveEndpointConfigurator,
-        IQueueEndpointConfigurator
+        IRabbitMqQueueEndpointConfigurator
     {
         /// <summary>
         /// If false, deploys only exchange, without queue
@@ -32,13 +32,13 @@
         /// </summary>
         /// <param name="exchangeName">The exchange name</param>
         /// <param name="callback">Configure the exchange and binding</param>
-        void Bind(string exchangeName, Action<IExchangeBindingConfigurator> callback = null);
+        void Bind(string exchangeName, Action<IRabbitMqExchangeBindingConfigurator> callback = null);
 
         /// <summary>
         /// Bind an exchange to the receive endpoint exchange
         /// </summary>
         /// <param name="callback">Configure the exchange and binding</param>
-        void Bind<T>(Action<IExchangeBindingConfigurator> callback = null)
+        void Bind<T>(Action<IRabbitMqExchangeBindingConfigurator> callback = null)
             where T : class;
 
         /// <summary>
@@ -47,7 +47,7 @@
         /// <param name="exchangeName"></param>
         /// <param name="queueName"></param>
         /// <param name="configure"></param>
-        void BindDeadLetterQueue(string exchangeName, string queueName = null, Action<IQueueBindingConfigurator> configure = null);
+        void BindDeadLetterQueue(string exchangeName, string queueName = null, Action<IRabbitMqQueueBindingConfigurator> configure = null);
 
         /// <summary>
         /// Add middleware to the model pipe

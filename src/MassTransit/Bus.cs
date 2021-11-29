@@ -1,6 +1,6 @@
 namespace MassTransit
 {
-    using Configurators;
+    using Configuration;
 
 
     /// <summary>

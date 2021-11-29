@@ -3,9 +3,6 @@ namespace MassTransit.GrpcTransport.Tests.JobServiceTests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Definition;
-    using JobService;
-    using JobService.Configuration;
     using MassTransit.Contracts.JobService;
     using NUnit.Framework;
 
@@ -289,7 +286,6 @@ namespace MassTransit.GrpcTransport.Tests.JobServiceTests
                         x.Options<JobOptions<EncodeVideo>>(o => o.SetConcurrentJobLimit(5));
                     });
                 });
-
             });
         }
 

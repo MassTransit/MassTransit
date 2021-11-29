@@ -16,7 +16,10 @@
 
         public override void Write(Utf8JsonWriter writer, TType value, JsonSerializerOptions options)
         {
-            JsonSerializer.Serialize(writer, (TImplementation)value!, options);
+            if (value is TImplementation implementation)
+                JsonSerializer.Serialize(writer, implementation, options);
+            else if (value is object obj)
+                JsonSerializer.Serialize(writer, obj, obj.GetType(), options);
         }
     }
 }

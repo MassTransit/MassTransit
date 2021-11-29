@@ -1,11 +1,8 @@
 namespace MassTransit
 {
     using System;
-    using Configurators;
+    using Configuration;
     using MongoDB.Driver;
-    using MongoDbIntegration;
-    using MongoDbIntegration.Configurators;
-    using Saga;
 
 
     public static class MongoDbSagaRepositoryRegistrationExtensions
@@ -25,7 +22,7 @@ namespace MassTransit
 
             configure?.Invoke(mongoDbConfigurator);
 
-            BusConfigurationResult.CompileResults(mongoDbConfigurator.Validate());
+            mongoDbConfigurator.Validate().ThrowIfContainsFailure("The MongoDB saga repository configuration is invalid:");
 
             configurator.Repository(mongoDbConfigurator.Register);
 

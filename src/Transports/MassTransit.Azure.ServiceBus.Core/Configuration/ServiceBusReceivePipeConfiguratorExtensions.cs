@@ -1,8 +1,7 @@
-namespace MassTransit.Azure.ServiceBus.Core
+namespace MassTransit
 {
-    using GreenPipes;
-    using MassTransit.Pipeline.Filters;
-    using Pipeline;
+    using AzureServiceBusTransport.Middleware;
+    using Middleware;
 
 
     public static class ServiceBusReceivePipeConfiguratorExtensions

@@ -1,10 +1,9 @@
 namespace MassTransit.Containers.Tests
 {
     using System.Collections.Generic;
-    using System.IO;
     using System.Threading.Tasks;
     using Context;
-    using GreenPipes.Internals.Extensions;
+    using Internals;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Hosting;
@@ -40,7 +39,6 @@ namespace MassTransit.Containers.Tests
 
                 x.AddConfigureEndpointsCallback((name, cfg) => cfg.UseRawJsonSerializer());
             });
-            services.AddMassTransitHostedService(true);
 
             await using var provider = services
                 .BuildServiceProvider(true);
@@ -50,7 +48,7 @@ namespace MassTransit.Containers.Tests
             {
                 var receiver = provider.GetRequiredService<IReceiveEndpointDispatcher<SimpleCommandConsumer>>();
 
-                (var bytes, Dictionary<string, object> headers) = Serialize(new SimpleCommand {Value = "Hello"});
+                (var bytes, Dictionary<string, object> headers) = Serialize(new SimpleCommand { Value = "Hello" });
 
                 await receiver.Dispatch(bytes, headers, TestCancellationToken);
 
@@ -65,20 +63,16 @@ namespace MassTransit.Containers.Tests
         static (byte[], Dictionary<string, object>) Serialize<T>(T obj)
             where T : class
         {
-            var serializer = new RawJsonMessageSerializer();
-
-            using var output = new MemoryStream();
+            var serializer = new SystemTextJsonRawMessageSerializer();
 
             var sendContext = new MessageSendContext<T>(obj);
 
-            serializer.Serialize(output, sendContext);
-
-            var bytes = output.ToArray();
+            var bytes = serializer.GetMessageBody(sendContext).GetBytes();
 
             var headers = new Dictionary<string, object>
             {
-                {MessageHeaders.ContentType, RawJsonMessageSerializer.ContentTypeHeaderValue},
-                {MessageHeaders.MessageId, sendContext.MessageId}
+                { MessageHeaders.ContentType, SystemTextJsonRawMessageSerializer.JsonContentType },
+                { MessageHeaders.MessageId, sendContext.MessageId }
             };
 
             headers.Set(sendContext.Headers);
@@ -97,7 +91,7 @@ namespace MassTransit.Containers.Tests
         {
             public Task Consume(ConsumeContext<SimpleCommand> context)
             {
-                return context.Publish(new SimpleEvent {Value = context.Message.Value});
+                return context.Publish(new SimpleEvent { Value = context.Message.Value });
             }
         }
 

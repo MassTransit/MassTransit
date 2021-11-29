@@ -1,14 +1,11 @@
-namespace MassTransit.GrpcTransport.Testing
+namespace MassTransit.Testing
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Configuration;
-    using Configurators;
-    using GreenPipes;
-    using MassTransit.Testing;
-    using Registration;
+    using GrpcTransport.Configuration;
 
 
     public class GrpcTestHarness :

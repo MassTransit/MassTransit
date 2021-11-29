@@ -2,7 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Transports.InMemory.Fabric;
+    using InMemoryTransport.Fabric;
     using NUnit.Framework;
 
 

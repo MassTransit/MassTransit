@@ -1,10 +1,10 @@
 namespace MassTransit.Courier.Results
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
     using Contracts;
-    using Extensions;
 
 
     class CompensatedCompensationResult<TLog> :
@@ -71,7 +71,23 @@ namespace MassTransit.Courier.Results
 
         protected virtual RoutingSlipBuilder CreateRoutingSlipBuilder(RoutingSlip routingSlip)
         {
-            return new RoutingSlipBuilder(routingSlip, routingSlip.CompensateLogs.SkipLast());
+            return new RoutingSlipBuilder(routingSlip, SkipLast(routingSlip.CompensateLogs));
+        }
+
+        static IEnumerable<T> SkipLast<T>(IEnumerable<T> source)
+        {
+            using IEnumerator<T> enumerator = source.GetEnumerator();
+
+            if (enumerator.MoveNext())
+            {
+                var element = enumerator.Current;
+
+                while (enumerator.MoveNext())
+                {
+                    yield return element;
+                    element = enumerator.Current;
+                }
+            }
         }
     }
 }

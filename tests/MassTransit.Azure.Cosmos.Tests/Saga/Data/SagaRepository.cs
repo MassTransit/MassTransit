@@ -3,7 +3,8 @@
     using System;
     using System.Net;
     using System.Threading.Tasks;
-    using MassTransit.Saga;
+    using AzureCosmos;
+    using AzureCosmos.Saga;
     using Microsoft.Azure.Cosmos;
 
 
@@ -23,7 +24,7 @@
         SagaRepository()
         {
             Client = new CosmosClient(Configuration.EndpointUri, Configuration.Key,
-                new CosmosClientOptions {Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<TSaga>())});
+                new CosmosClientOptions { Serializer = new CosmosJsonDotNetSerializer(JsonSerializerSettingsExtensions.GetSagaRenameSettings<TSaga>()) });
         }
 
         public CosmosClient Client { get; }

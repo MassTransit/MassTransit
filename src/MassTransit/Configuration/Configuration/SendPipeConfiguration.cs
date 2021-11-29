@@ -1,10 +1,7 @@
 ﻿namespace MassTransit.Configuration
 {
-    using Pipeline;
-    using Pipeline.Pipes;
-    using SendPipeSpecifications;
-    using Topology;
-    using Topology.Observers;
+    using Middleware;
+    using Transports;
 
 
     public class SendPipeConfiguration :

@@ -4,7 +4,6 @@
     using System.Threading.Tasks;
     using NUnit.Framework;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]
@@ -65,7 +64,7 @@
             {
                 _header.TrySetResult(context.Headers.Get<ClaimsIdentity>("Claims-Identity"));
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
         }
 

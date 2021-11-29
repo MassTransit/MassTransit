@@ -3,12 +3,9 @@
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using MassTransit.Saga;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
-    using Util;
 
 
     [TestFixture]
@@ -24,7 +21,7 @@
             for (var i = 0; i < Limit; i++)
             {
                 var correlationId = NewId.NextGuid();
-                await Bus.Publish(new CreateSaga {CorrelationId = correlationId});
+                await Bus.Publish(new CreateSaga { CorrelationId = correlationId });
                 ids[i] = correlationId;
             }
 
@@ -37,8 +34,6 @@
             timer.Stop();
 
             Console.WriteLine("Total time: {0}", timer.Elapsed);
-
-            //Console.WriteLine(Bus.GetProbeResult().ToJsonString());
         }
 
         InMemorySagaRepository<LegacySaga> _repository;
@@ -62,7 +57,7 @@
         {
             public Task Consume(ConsumeContext<CreateSaga> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Guid CorrelationId { get; set; }

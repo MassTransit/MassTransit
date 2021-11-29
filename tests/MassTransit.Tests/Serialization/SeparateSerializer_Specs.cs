@@ -21,7 +21,7 @@
 
             ConsumeContext<PingMessage> pingContext = await _handled;
 
-            Assert.That(pingContext.ReceiveContext.ContentType, Is.EqualTo(JsonMessageSerializer.JsonContentType),
+            Assert.That(pingContext.ReceiveContext.ContentType, Is.EqualTo(NewtonsoftJsonMessageSerializer.JsonContentType),
                 $"actual ping type is {pingContext.ReceiveContext.ContentType}");
 
             ConsumeContext<PongMessage> pongContext = await ponged;
@@ -31,6 +31,11 @@
         }
 
         Task<ConsumeContext<PingMessage>> _handled;
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseBsonDeserializer();
+        }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
@@ -63,7 +68,7 @@
 
             ConsumeContext<Command> context = await _handled;
 
-            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(RawJsonMessageSerializer.RawJsonContentType),
+            Assert.That(context.ReceiveContext.ContentType, Is.EqualTo(NewtonsoftRawJsonMessageSerializer.RawJsonContentType),
                 $"unexpected content-type {context.ReceiveContext.ContentType}");
 
             Assert.That(context.Message.CommandId, Is.EqualTo(message.CommandId));

@@ -3,7 +3,6 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using MassTransit.Testing;
     using NUnit.Framework;
     using NUnit.Framework.Internal;
     using TestFramework;

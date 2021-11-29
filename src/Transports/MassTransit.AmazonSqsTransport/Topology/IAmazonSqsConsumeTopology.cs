@@ -1,8 +1,7 @@
-﻿namespace MassTransit.AmazonSqsTransport.Topology
+﻿namespace MassTransit
 {
     using System;
-    using Builders;
-    using MassTransit.Topology;
+    using AmazonSqsTransport.Topology;
 
 
     public interface IAmazonSqsConsumeTopology :
@@ -22,6 +21,6 @@
         /// </summary>
         /// <param name="topicName"></param>
         /// <param name="configure"></param>
-        void Bind(string topicName, Action<ITopicSubscriptionConfigurator> configure = null);
+        void Bind(string topicName, Action<IAmazonSqsTopicSubscriptionConfigurator> configure = null);
     }
 }

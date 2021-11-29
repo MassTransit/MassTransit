@@ -2,7 +2,6 @@ namespace MassTransit.Initializers.HeaderInitializers
 {
     using System;
     using System.Threading.Tasks;
-    using Util;
 
 
     /// <summary>
@@ -34,7 +33,7 @@ namespace MassTransit.Initializers.HeaderInitializers
             if (propertyTask.IsCompleted)
             {
                 sendContext.Headers.Set(_headerName, propertyTask.Result);
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             async Task ApplyAsync()

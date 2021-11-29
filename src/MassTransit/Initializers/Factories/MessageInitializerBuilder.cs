@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Metadata;
 
 
     public class MessageInitializerBuilder<TMessage, TInput> :
@@ -18,8 +17,8 @@
 
         public MessageInitializerBuilder(IMessageFactory<TMessage> messageFactory)
         {
-            if (!TypeMetadataCache<TMessage>.IsValidMessageType)
-                throw new ArgumentException(TypeMetadataCache<TMessage>.InvalidMessageTypeReason, nameof(TMessage));
+            if (!MessageTypeCache<TMessage>.IsValidMessageType)
+                throw new ArgumentException(MessageTypeCache<TMessage>.InvalidMessageTypeReason, nameof(TMessage));
 
             _messageFactory = messageFactory;
 

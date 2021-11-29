@@ -6,12 +6,9 @@ namespace MassTransit.Mediator
     using Clients;
     using Configuration;
     using Context;
-    using Context.Converters;
     using Contexts;
-    using Endpoints;
-    using GreenPipes;
-    using Pipeline;
-    using Pipeline.Observables;
+    using Logging;
+    using Observables;
     using Transports;
     using Util;
 
@@ -45,57 +42,63 @@ namespace MassTransit.Mediator
             return _endpoint.ConnectSendObserver(observer);
         }
 
-        Task ISendEndpoint.Send<T>(T message, CancellationToken cancellationToken)
+        public Task Send<T>(T message, CancellationToken cancellationToken)
+            where T : class
         {
             return _endpoint.Send(message, cancellationToken);
         }
 
-        Task ISendEndpoint.Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+        public Task Send<T>(T message, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+            where T : class
         {
             return _endpoint.Send(message, pipe, cancellationToken);
         }
 
-        Task ISendEndpoint.Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        public Task Send<T>(T message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+            where T : class
         {
             return _endpoint.Send(message, pipe, cancellationToken);
         }
 
-        Task ISendEndpoint.Send(object message, CancellationToken cancellationToken)
+        public Task Send(object message, CancellationToken cancellationToken)
         {
             return _endpoint.Send(message, cancellationToken);
         }
 
-        Task ISendEndpoint.Send(object message, Type messageType, CancellationToken cancellationToken)
+        public Task Send(object message, Type messageType, CancellationToken cancellationToken)
         {
             return _endpoint.Send(message, messageType, cancellationToken);
         }
 
-        Task ISendEndpoint.Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        public Task Send(object message, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             return _endpoint.Send(message, pipe, cancellationToken);
         }
 
-        Task ISendEndpoint.Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        public Task Send(object message, Type messageType, IPipe<SendContext> pipe, CancellationToken cancellationToken)
         {
             return _endpoint.Send(message, messageType, pipe, cancellationToken);
         }
 
-        Task ISendEndpoint.Send<T>(object values, CancellationToken cancellationToken)
+        public Task Send<T>(object values, CancellationToken cancellationToken)
+            where T : class
         {
             return _endpoint.Send<T>(values, cancellationToken);
         }
 
-        Task ISendEndpoint.Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+        public Task Send<T>(object values, IPipe<SendContext<T>> pipe, CancellationToken cancellationToken)
+            where T : class
         {
             return _endpoint.Send(values, pipe, cancellationToken);
         }
 
-        Task ISendEndpoint.Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+        public Task Send<T>(object values, IPipe<SendContext> pipe, CancellationToken cancellationToken)
+            where T : class
         {
             return _endpoint.Send<T>(values, pipe, cancellationToken);
         }
 
-        ConnectHandle IPublishObserverConnector.ConnectPublishObserver(IPublishObserver observer)
+        public ConnectHandle ConnectPublishObserver(IPublishObserver observer)
         {
             return _endpoint.ConnectPublishObserver(observer);
         }
@@ -180,23 +183,27 @@ namespace MassTransit.Mediator
             return _clientFactory.DisposeAsync();
         }
 
-        RequestHandle<T> IClientFactory.CreateRequest<T>(T message, CancellationToken cancellationToken, RequestTimeout timeout)
+        public RequestHandle<T> CreateRequest<T>(T message, CancellationToken cancellationToken, RequestTimeout timeout)
+            where T : class
         {
             return _clientFactory.CreateRequest(message, cancellationToken, timeout);
         }
 
-        RequestHandle<T> IClientFactory.CreateRequest<T>(Uri destinationAddress, T message, CancellationToken cancellationToken, RequestTimeout timeout)
+        public RequestHandle<T> CreateRequest<T>(Uri destinationAddress, T message, CancellationToken cancellationToken, RequestTimeout timeout)
+            where T : class
         {
             return _clientFactory.CreateRequest(destinationAddress, message, cancellationToken, timeout);
         }
 
-        RequestHandle<T> IClientFactory.CreateRequest<T>(ConsumeContext consumeContext, T message, CancellationToken cancellationToken, RequestTimeout timeout)
+        public RequestHandle<T> CreateRequest<T>(ConsumeContext consumeContext, T message, CancellationToken cancellationToken, RequestTimeout timeout)
+            where T : class
         {
             return _clientFactory.CreateRequest(consumeContext, message, cancellationToken, timeout);
         }
 
-        RequestHandle<T> IClientFactory.CreateRequest<T>(ConsumeContext consumeContext, Uri destinationAddress, T message, CancellationToken cancellationToken,
+        public RequestHandle<T> CreateRequest<T>(ConsumeContext consumeContext, Uri destinationAddress, T message, CancellationToken cancellationToken,
             RequestTimeout timeout)
+            where T : class
         {
             return _clientFactory.CreateRequest(consumeContext, destinationAddress, message, cancellationToken, timeout);
         }
@@ -229,27 +236,31 @@ namespace MassTransit.Mediator
             return _clientFactory.CreateRequest<T>(consumeContext, destinationAddress, values, cancellationToken, timeout);
         }
 
-        IRequestClient<T> IClientFactory.CreateRequestClient<T>(RequestTimeout timeout)
+        public IRequestClient<T> CreateRequestClient<T>(RequestTimeout timeout)
+            where T : class
         {
             return _clientFactory.CreateRequestClient<T>(timeout);
         }
 
-        IRequestClient<T> IClientFactory.CreateRequestClient<T>(ConsumeContext consumeContext, RequestTimeout timeout)
+        public IRequestClient<T> CreateRequestClient<T>(ConsumeContext consumeContext, RequestTimeout timeout)
+            where T : class
         {
             return _clientFactory.CreateRequestClient<T>(consumeContext, timeout);
         }
 
-        IRequestClient<T> IClientFactory.CreateRequestClient<T>(Uri destinationAddress, RequestTimeout timeout)
+        public IRequestClient<T> CreateRequestClient<T>(Uri destinationAddress, RequestTimeout timeout)
+            where T : class
         {
             return _clientFactory.CreateRequestClient<T>(destinationAddress, timeout);
         }
 
-        IRequestClient<T> IClientFactory.CreateRequestClient<T>(ConsumeContext consumeContext, Uri destinationAddress, RequestTimeout timeout)
+        public IRequestClient<T> CreateRequestClient<T>(ConsumeContext consumeContext, Uri destinationAddress, RequestTimeout timeout)
+            where T : class
         {
             return _clientFactory.CreateRequestClient<T>(consumeContext, destinationAddress, timeout);
         }
 
-        ClientFactoryContext IClientFactory.Context => _clientFactory.Context;
+        public ClientFactoryContext Context => _clientFactory.Context;
 
         public ConnectHandle ConnectConsumePipe<T>(IPipe<ConsumeContext<T>> pipe)
             where T : class

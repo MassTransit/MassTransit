@@ -9,7 +9,7 @@ namespace MassTransit.PrometheusIntegration.Tests
     using TestFramework;
     using TestFramework.Messages;
     using Testing;
-    using Testing.Indicators;
+    using Testing.Implementations;
 
 
     [TestFixture]
@@ -33,7 +33,7 @@ namespace MassTransit.PrometheusIntegration.Tests
 
             await _activityMonitor.AwaitBusInactivity(TestCancellationToken);
 
-            using var stream = new MemoryStream();
+            await using var stream = new MemoryStream();
             await Metrics.DefaultRegistry.CollectAndExportAsTextAsync(stream);
 
             var text = Encoding.UTF8.GetString(stream.ToArray());

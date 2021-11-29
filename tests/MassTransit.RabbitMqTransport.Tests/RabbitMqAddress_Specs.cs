@@ -3,7 +3,6 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System;
     using NUnit.Framework;
     using Shouldly;
-    using Topology;
 
 
     [TestFixture]
@@ -68,6 +67,106 @@ namespace MassTransit.RabbitMqTransport.Tests
         public void WhenParsed()
         {
             _receiveSettings = _uri.GetReceiveSettings();
+        }
+    }
+
+
+    [TestFixture]
+    public class Using_the_short_address
+    {
+        [Test]
+        public void Should_have_the_exchange()
+        {
+            var hostAddress = new RabbitMqHostAddress(new Uri("rabbitmq://localhost/vhost"));
+            var endpointAddress = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://localhost/vhost/queue"));
+
+            Assert.That(endpointAddress.ToShortAddress(), Is.EqualTo(new Uri("exchange:queue")));
+        }
+
+        [Test]
+        public void Should_have_the_queue()
+        {
+            var hostAddress = new RabbitMqHostAddress(new Uri("rabbitmq://localhost/vhost"));
+
+            var expected = new Uri("queue:the-queue");
+            var endpointAddress = new RabbitMqEndpointAddress(hostAddress, expected);
+
+            Assert.That(endpointAddress.ToShortAddress(), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void Should_have_the_queue_name()
+        {
+            var hostAddress = new RabbitMqHostAddress(new Uri("rabbitmq://localhost/vhost"));
+
+            var expected = new Uri("queue:the-exchange?queue=the-queue");
+            var endpointAddress = new RabbitMqEndpointAddress(hostAddress, expected);
+
+            Assert.That(endpointAddress.ToShortAddress(), Is.EqualTo(expected));
+        }
+
+        [Test]
+        public void Should_have_the_queue_name_from_address()
+        {
+            var hostAddress = new RabbitMqHostAddress(new Uri("rabbitmq://localhost/vhost"));
+
+            var expected = new Uri("queue:the-exchange?queue=the-queue");
+            var endpointAddress = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://localhost/vhost/the-exchange?bind=true&queue=the-queue"));
+
+            Assert.That(endpointAddress.ToShortAddress(), Is.EqualTo(expected));
+        }
+    }
+
+
+    [TestFixture]
+    public class Given_a_default_port
+    {
+        [Test]
+        public void Should_not_have_the_zero()
+        {
+            var hostAddress = new RabbitMqHostAddress(new Uri("rabbitmq://localhost/vhost/queue"));
+
+            Uri address = hostAddress;
+
+            Assert.That(address.ToString(), Is.EqualTo("rabbitmq://localhost/vhost"));
+        }
+
+        [Test]
+        public void Should_not_have_the_zero_if_specified()
+        {
+            var hostAddress = new RabbitMqHostAddress(new Uri("rabbitmq://localhost:0/vhost/queue"));
+
+            Uri address = hostAddress;
+
+            Assert.That(address.ToString(), Is.EqualTo("rabbitmq://localhost/vhost"));
+        }
+
+        [Test]
+        public void Should_not_have_the_zero_if_specified_on_endpoint()
+        {
+            var hostAddress = new RabbitMqHostAddress("rabbitmq", 5672, "blueline");
+
+            Uri address = hostAddress;
+
+            Assert.That(address.ToString(), Is.EqualTo("rabbitmq://rabbitmq/blueline"));
+
+            var endpointAddress = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://localhost/vhost/queue"));
+
+            address = endpointAddress;
+
+            Assert.That(address.ToString(), Is.EqualTo("rabbitmq://localhost/vhost/queue"));
+        }
+
+        [Test]
+        public void Should_not_have_the_zero_in_endpoint_address()
+        {
+            var hostAddress = new RabbitMqHostAddress(new Uri("rabbitmq://localhost/vhost/queue"));
+
+            var endpointAddress = new RabbitMqEndpointAddress(hostAddress, new Uri("rabbitmq://localhost/vhost/queue"));
+
+            Uri address = endpointAddress;
+
+            Assert.That(address.ToString(), Is.EqualTo("rabbitmq://localhost/vhost/queue"));
         }
     }
 

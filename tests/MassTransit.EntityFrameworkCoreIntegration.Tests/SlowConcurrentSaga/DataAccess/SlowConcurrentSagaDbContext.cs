@@ -1,7 +1,6 @@
 namespace MassTransit.EntityFrameworkCoreIntegration.Tests.SlowConcurrentSaga.DataAccess
 {
     using System.Collections.Generic;
-    using Mappings;
     using Microsoft.EntityFrameworkCore;
 
 

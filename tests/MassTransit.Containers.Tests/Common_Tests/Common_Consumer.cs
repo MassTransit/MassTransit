@@ -2,23 +2,22 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Definition;
-    using GreenPipes;
-    using GreenPipes.Internals.Extensions;
+    using Configuration;
+    using DependencyInjection.Registration;
+    using Internals;
+    using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using Scenarios;
     using Shouldly;
     using TestFramework;
     using TestFramework.Messages;
     using Testing;
-    using Util;
 
 
-    public abstract class Common_Consumer :
-        InMemoryTestFixture
+    public class Common_Consumer<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected abstract IBusRegistrationContext Registration { get; }
-
         [Test]
         public async Task Should_receive_using_the_first_consumer()
         {
@@ -41,18 +40,127 @@
                 .ShouldBe(true); //Dependency was disposed before consumer executed");
         }
 
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<SimpleConsumer>();
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            collection.AddScoped<ISimpleConsumerDependency, SimpleConsumerDependency>();
+            collection.AddScoped<AnotherMessageConsumer, AnotherMessageConsumerImpl>();
+
+            return collection;
+        }
+
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureConsumer<SimpleConsumer>(Registration);
+            configurator.ConfigureConsumer<SimpleConsumer>(BusRegistrationContext);
+        }
+    }
+
+    public class Common_Consumer_Service_Scope<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
+    {
+        [Test]
+        public async Task Should_receive_using_the_first_consumer()
+        {
+            const string name = "Joe";
+
+            await InputQueueSendEndpoint.Send(new SimpleMessageClass(name));
+
+            var lastConsumer = await SimpleConsumer.LastConsumer.OrCanceled(InMemoryTestHarness.TestCancellationToken);
+            lastConsumer.ShouldNotBe(null);
+
+            var last = await lastConsumer.Last;
+            last.Name
+                .ShouldBe(name);
+
+            var wasDisposed = await lastConsumer.Dependency.WasDisposed;
+            wasDisposed
+                .ShouldBe(true); //Dependency was not disposed");
+
+            lastConsumer.Dependency.SomethingDone
+                .ShouldBe(true); //Dependency was disposed before consumer executed");
+
+            var lasterConsumer = await SimplerConsumer.LastConsumer.OrCanceled(InMemoryTestHarness.TestCancellationToken);
+            lasterConsumer.ShouldNotBe(null);
+
+            var laster = await lasterConsumer.Last.OrCanceled(InMemoryTestHarness.TestCancellationToken);
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<SimpleConsumer>();
+            configurator.AddConsumer<SimplerConsumer>();
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            collection.AddScoped<ISimpleConsumerDependency, SimpleConsumerDependency>();
+            collection.AddScoped<AnotherMessageConsumer, AnotherMessageConsumerImpl>();
+
+            return collection;
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseServiceScope(ServiceProvider);
+
+            configurator.ConfigureConsumer<SimpleConsumer>(BusRegistrationContext);
+            configurator.ConfigureConsumer<SimplerConsumer>(BusRegistrationContext);
         }
     }
 
 
-    public abstract class Common_Consumer_Retry :
-        InMemoryTestFixture
+    public class Registering_a_consumer_directly_in_the_container<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected abstract IBusRegistrationContext Registration { get; }
+        [Test]
+        public async Task Should_receive_using_the_first_consumer()
+        {
+            const string name = "Joe";
 
+            await InputQueueSendEndpoint.Send(new SimpleMessageClass(name));
+
+            var lastConsumer = await SimpleConsumer.LastConsumer;
+            lastConsumer.ShouldNotBe(null);
+
+            var last = await lastConsumer.Last;
+            last.Name
+                .ShouldBe(name);
+
+            var wasDisposed = await lastConsumer.Dependency.WasDisposed;
+            wasDisposed
+                .ShouldBe(true); //Dependency was not disposed");
+
+            lastConsumer.Dependency.SomethingDone
+                .ShouldBe(true); //Dependency was disposed before consumer executed");
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            collection.RegisterConsumer<SimpleConsumer>();
+
+            collection.AddScoped<ISimpleConsumerDependency, SimpleConsumerDependency>();
+            collection.AddScoped<AnotherMessageConsumer, AnotherMessageConsumerImpl>();
+
+            return collection;
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.ConfigureConsumer<SimpleConsumer>(BusRegistrationContext);
+        }
+    }
+
+
+    public class Common_Consumer_Retry<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
+    {
         [Test]
         public async Task Should_only_produce_one_fault()
         {
@@ -61,15 +169,18 @@
             Assert.That(await InMemoryTestHarness.Published.SelectAsync<Fault<PingMessage>>().Count(), Is.EqualTo(1));
         }
 
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
-        {
-            configurator.ConfigureConsumer<PingConsumer>(Registration);
-        }
-
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<PingConsumer>();
-            configurator.AddBus(provider => BusControl);
+        }
+
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            configurator.UseMessageRetry(r => r.Immediate(5));
+            configurator.UseMessageScope(ServiceProvider);
+            configurator.UseInMemoryOutbox();
+
+            configurator.ConfigureConsumer<PingConsumer>(BusRegistrationContext);
         }
 
 
@@ -84,16 +195,10 @@
     }
 
 
-    public abstract class Common_Consumer_ConfigureEndpoint :
-        InMemoryTestFixture
+    public class Common_Consumer_ConfigureEndpoint<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected Common_Consumer_ConfigureEndpoint()
-        {
-            InMemoryTestHarness.TestInactivityTimeout = TimeSpan.FromSeconds(2);
-        }
-
-        protected abstract IBusRegistrationContext Registration { get; }
-
         [Test]
         public async Task Should_only_produce_one_fault()
         {
@@ -102,15 +207,19 @@
             Assert.That(await InMemoryTestHarness.Published.Any<Fault<PingMessage>>(), Is.False);
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override void ConfigureInMemoryTestHarness(InMemoryTestHarness harness)
         {
-            configurator.ConfigureEndpoints(Registration);
+            harness.TestInactivityTimeout = TimeSpan.FromSeconds(2);
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection.AddTransient<IConfigureReceiveEndpoint, DoNotPublishFaults>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<PingConsumer>();
-            configurator.AddBus(provider => BusControl);
         }
 
 
@@ -135,134 +244,131 @@
     }
 
 
-    public abstract class Common_Consume_Filter :
-        InMemoryTestFixture
+    public class Common_Consume_Filter<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected readonly TaskCompletionSource<MyId> TaskCompletionSource;
-
-        protected Common_Consume_Filter()
-        {
-            TaskCompletionSource = GetTask<MyId>();
-        }
-
-        protected abstract IBusRegistrationContext Registration { get; }
-
         [Test]
         public async Task Should_use_scope()
         {
-            await InputQueueSendEndpoint.Send<SimpleMessageInterface>(new {Name = "test"});
+            await InputQueueSendEndpoint.Send<SimpleMessageInterface>(new { Name = "test" });
 
             var result = await TaskCompletionSource.Task;
             Assert.IsNotNull(result);
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected readonly TaskCompletionSource<MyId> TaskCompletionSource;
+
+        public Common_Consume_Filter()
         {
-            ConfigureFilter(configurator);
+            TaskCompletionSource = GetTask<MyId>();
         }
 
-        protected abstract void ConfigureFilter(IConsumePipeConfigurator configurator);
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection.AddScoped(_ => new MyId(Guid.NewGuid()))
+                .AddSingleton(TaskCompletionSource);
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<SimplerConsumer>();
+        }
+
+        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        {
+            configurator.UseConsumeFilter(typeof(CommonScopedConsumeFilter<>), BusRegistrationContext);
+        }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureConsumer<SimplerConsumer>(Registration);
-        }
-
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
-        {
-            configurator.AddConsumer<SimplerConsumer>();
-            configurator.AddBus(provider => BusControl);
-        }
-
-
-        protected class ScopedFilter<T> :
-            IFilter<ConsumeContext<T>>
-            where T : class
-        {
-            readonly MyId _myId;
-            readonly TaskCompletionSource<MyId> _taskCompletionSource;
-
-            public ScopedFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId)
-            {
-                _taskCompletionSource = taskCompletionSource;
-                _myId = myId;
-            }
-
-            public Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
-            {
-                _taskCompletionSource.TrySetResult(_myId);
-                return next.Send(context);
-            }
-
-            public void Probe(ProbeContext context)
-            {
-            }
+            configurator.ConfigureConsumer<SimplerConsumer>(BusRegistrationContext);
         }
     }
 
 
-    public abstract class Common_Consume_FilterScope :
-        InMemoryTestFixture
+    public class CommonScopedConsumeFilter<T> :
+        IFilter<ConsumeContext<T>>
+        where T : class
     {
-        protected readonly TaskCompletionSource<ConsumeContext<EasyA>> EasyASource;
-        protected readonly TaskCompletionSource<ConsumeContext<EasyB>> EasyBSource;
-        protected readonly TaskCompletionSource<ScopedContext> ScopedContextSource;
+        readonly MyId _myId;
+        readonly TaskCompletionSource<MyId> _taskCompletionSource;
 
-        protected Common_Consume_FilterScope()
+        public CommonScopedConsumeFilter(TaskCompletionSource<MyId> taskCompletionSource, MyId myId)
         {
-            ScopedContextSource = GetTask<ScopedContext>();
-            EasyASource = GetTask<ConsumeContext<EasyA>>();
-            EasyBSource = GetTask<ConsumeContext<EasyB>>();
+            _taskCompletionSource = taskCompletionSource;
+            _myId = myId;
         }
 
-        protected abstract IBusRegistrationContext Registration { get; }
+        public Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
+        {
+            _taskCompletionSource.TrySetResult(_myId);
+            return next.Send(context);
+        }
 
+        public void Probe(ProbeContext context)
+        {
+        }
+    }
+
+
+    public class Common_Consume_FilterScope<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
+    {
         [Test]
         public async Task Should_use_the_same_scope_for_consume_and_send()
         {
-            await InputQueueSendEndpoint.Send<EasyA>(new {InVar.CorrelationId});
+            await InputQueueSendEndpoint.Send<EasyA>(new { InVar.CorrelationId });
 
             await EasyASource.Task;
             await EasyBSource.Task;
 
-            var context = await ScopedContextSource.Task.OrCanceled(InactivityToken);
+            var context = await ScopedContextSource.Task.OrCanceled(InMemoryTestHarness.InactivityToken);
 
-            await context.ConsumeContext.Task.OrCanceled(InactivityToken);
+            await context.ConsumeContext.Task.OrCanceled(InMemoryTestHarness.InactivityToken);
 
-            await context.ConsumeContextEasyA.Task.OrCanceled(InactivityToken);
+            await context.ConsumeContextEasyA.Task.OrCanceled(InMemoryTestHarness.InactivityToken);
 
-            await context.SendContext.Task.OrCanceled(InactivityToken);
+            await context.SendContext.Task.OrCanceled(InMemoryTestHarness.InactivityToken);
 
             Assert.ThrowsAsync<TimeoutException>(async () => await context.ConsumeContextEasyB.Task.OrTimeout(s: 2));
         }
 
-        protected abstract void ConfigureFilters(IInMemoryReceiveEndpointConfigurator configurator);
+        protected readonly TaskCompletionSource<ConsumeContext<EasyA>> EasyASource;
+        protected readonly TaskCompletionSource<ConsumeContext<EasyB>> EasyBSource;
+        protected readonly TaskCompletionSource<FilterScopeScopedContext> ScopedContextSource;
 
-        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        public Common_Consume_FilterScope()
         {
-            ConfigureFilters(configurator);
-
-            configurator.ConfigureConsumer<EasyAConsumer>(Registration);
-            configurator.ConfigureConsumer<EasyBConsumer>(Registration);
+            ScopedContextSource = GetTask<FilterScopeScopedContext>();
+            EasyASource = GetTask<ConsumeContext<EasyA>>();
+            EasyBSource = GetTask<ConsumeContext<EasyB>>();
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection.AddSingleton(EasyASource)
+                .AddSingleton(EasyBSource)
+                .AddSingleton(ScopedContextSource)
+                .AddScoped<FilterScopeScopedContext>()
+                .AddScoped(typeof(FilterScopeScopedConsumeFilter<>))
+                .AddScoped(typeof(FilterScopeScopedSendFilter<>));
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<EasyAConsumer>();
             configurator.AddConsumer<EasyBConsumer>();
-            configurator.AddBus(provider => BusControl);
         }
 
-
-        public class EasyA
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            public Guid CorrelationId { get; set; }
-        }
+            configurator.UseConsumeFilter(typeof(FilterScopeScopedConsumeFilter<>), BusRegistrationContext);
+            configurator.UseSendFilter(typeof(FilterScopeScopedSendFilter<>), BusRegistrationContext);
 
-
-        public class EasyB
-        {
-            public Guid CorrelationId { get; set; }
+            configurator.ConfigureConsumer<EasyAConsumer>(BusRegistrationContext);
+            configurator.ConfigureConsumer<EasyBConsumer>(BusRegistrationContext);
         }
 
 
@@ -270,9 +376,9 @@
             IConsumer<EasyA>
         {
             readonly TaskCompletionSource<ConsumeContext<EasyA>> _received;
-            readonly ScopedContext _scopedContext;
+            readonly FilterScopeScopedContext _scopedContext;
 
-            public EasyAConsumer(TaskCompletionSource<ConsumeContext<EasyA>> received, ScopedContext scopedContext)
+            public EasyAConsumer(TaskCompletionSource<ConsumeContext<EasyA>> received, FilterScopeScopedContext scopedContext)
             {
                 _received = received;
                 _scopedContext = scopedContext;
@@ -292,9 +398,9 @@
             IConsumer<EasyB>
         {
             readonly TaskCompletionSource<ConsumeContext<EasyB>> _received;
-            readonly ScopedContext _scopedContext;
+            readonly FilterScopeScopedContext _scopedContext;
 
-            public EasyBConsumer(TaskCompletionSource<ConsumeContext<EasyB>> received, ScopedContext scopedContext)
+            public EasyBConsumer(TaskCompletionSource<ConsumeContext<EasyB>> received, FilterScopeScopedContext scopedContext)
             {
                 _received = received;
                 _scopedContext = scopedContext;
@@ -306,81 +412,80 @@
                 _scopedContext.ConsumeContextEasyB.TrySetResult(context);
             }
         }
+    }
 
 
-        public class ScopedContext
+    public class FilterScopeScopedSendFilter<T> :
+        IFilter<SendContext<T>>
+        where T : class
+    {
+        readonly FilterScopeScopedContext _scopedContext;
+
+        public FilterScopeScopedSendFilter(FilterScopeScopedContext scopedContext)
         {
-            public ScopedContext(TaskCompletionSource<ScopedContext> taskCompletionSource, AsyncTestHarness harness)
-            {
-                ConsumeContext = harness.GetTask<ConsumeContext>();
-                ConsumeContextEasyA = harness.GetTask<ConsumeContext<EasyA>>();
-                ConsumeContextEasyB = harness.GetTask<ConsumeContext<EasyB>>();
-                SendContext = harness.GetTask<SendContext>();
-
-                taskCompletionSource.TrySetResult(this);
-            }
-
-            public TaskCompletionSource<ConsumeContext> ConsumeContext { get; }
-            public TaskCompletionSource<ConsumeContext<EasyA>> ConsumeContextEasyA { get; }
-            public TaskCompletionSource<ConsumeContext<EasyB>> ConsumeContextEasyB { get; }
-            public TaskCompletionSource<SendContext> SendContext { get; }
+            _scopedContext = scopedContext;
         }
 
-
-        protected class ScopedConsumeFilter<T> :
-            IFilter<ConsumeContext<T>>
-            where T : class
+        public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
         {
-            readonly ScopedContext _scopedContext;
+            _scopedContext.SendContext.TrySetResult(context);
 
-            public ScopedConsumeFilter(ScopedContext scopedContext)
-            {
-                _scopedContext = scopedContext;
-            }
-
-            public Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
-            {
-                _scopedContext.ConsumeContext.TrySetResult(context);
-
-                return next.Send(context);
-            }
-
-            public void Probe(ProbeContext context)
-            {
-            }
+            return next.Send(context);
         }
 
-
-        protected class ScopedSendFilter<T> :
-            IFilter<SendContext<T>>
-            where T : class
+        public void Probe(ProbeContext context)
         {
-            readonly ScopedContext _scopedContext;
-
-            public ScopedSendFilter(ScopedContext scopedContext)
-            {
-                _scopedContext = scopedContext;
-            }
-
-            public Task Send(SendContext<T> context, IPipe<SendContext<T>> next)
-            {
-                _scopedContext.SendContext.TrySetResult(context);
-
-                return next.Send(context);
-            }
-
-            public void Probe(ProbeContext context)
-            {
-            }
         }
     }
 
 
-    public abstract class Common_Consumer_Endpoint :
-        InMemoryTestFixture
+    public class FilterScopeScopedContext
     {
-        protected abstract IBusRegistrationContext Registration { get; }
+        public FilterScopeScopedContext(TaskCompletionSource<FilterScopeScopedContext> taskCompletionSource, InMemoryTestHarness harness)
+        {
+            ConsumeContext = harness.GetTask<ConsumeContext>();
+            ConsumeContextEasyA = harness.GetTask<ConsumeContext<EasyA>>();
+            ConsumeContextEasyB = harness.GetTask<ConsumeContext<EasyB>>();
+            SendContext = harness.GetTask<SendContext>();
 
+            taskCompletionSource.TrySetResult(this);
+        }
+
+        public TaskCompletionSource<ConsumeContext> ConsumeContext { get; }
+        public TaskCompletionSource<ConsumeContext<EasyA>> ConsumeContextEasyA { get; }
+        public TaskCompletionSource<ConsumeContext<EasyB>> ConsumeContextEasyB { get; }
+        public TaskCompletionSource<SendContext> SendContext { get; }
+    }
+
+
+    public class FilterScopeScopedConsumeFilter<T> :
+        IFilter<ConsumeContext<T>>
+        where T : class
+    {
+        readonly FilterScopeScopedContext _scopedContext;
+
+        public FilterScopeScopedConsumeFilter(FilterScopeScopedContext scopedContext)
+        {
+            _scopedContext = scopedContext;
+        }
+
+        public Task Send(ConsumeContext<T> context, IPipe<ConsumeContext<T>> next)
+        {
+            _scopedContext.ConsumeContext.TrySetResult(context);
+
+            return next.Send(context);
+        }
+
+        public void Probe(ProbeContext context)
+        {
+        }
+    }
+
+
+    public class Common_Consumer_Endpoint<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
+    {
         [Test]
         public async Task Should_receive_on_the_custom_endpoint()
         {
@@ -390,24 +495,30 @@
 
             await sendEndpoint.Send(new SimpleMessageClass(name));
 
-            var lastConsumer = await SimplerConsumer.LastConsumer.OrCanceled(TestCancellationToken);
+            var lastConsumer = await SimplerConsumer.LastConsumer.OrCanceled(InMemoryTestHarness.InactivityToken);
             lastConsumer.ShouldNotBe(null);
 
-            var last = await lastConsumer.Last.OrCanceled(TestCancellationToken);
+            var last = await lastConsumer.Last.OrCanceled(InMemoryTestHarness.InactivityToken);
         }
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
         {
-            configurator.ConfigureEndpoints(Registration);
+            return collection.AddScoped<ISimpleConsumerDependency, SimpleConsumerDependency>()
+                .AddScoped<AnotherMessageConsumer, AnotherMessageConsumerImpl>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<SimplerConsumer>()
+                .Endpoint(e => e.Name = "custom-endpoint-name");
         }
     }
 
 
-    public abstract class Common_Consumers_Endpoint :
-        InMemoryTestFixture
+    public class Common_Consumers_Endpoint<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected abstract IBusRegistrationContext Registration { get; }
-
         [Test]
         public async Task Should_receive_on_the_custom_endpoint()
         {
@@ -420,7 +531,7 @@
             await clientB.GetResponse<Response>(new Request());
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<ConsumerA>(typeof(ConsumerADefinition))
                 .Endpoint(x => x.Name = "shared");
@@ -429,13 +540,6 @@
                 .Endpoint(x => x.Name = "shared");
 
             configurator.AddConsumer<ConsumerC>(typeof(ConsumerCDefinition));
-
-            configurator.AddBus(provider => BusControl);
-        }
-
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(Registration);
         }
 
 
@@ -444,7 +548,7 @@
         {
             public Task Consume(ConsumeContext<PingMessage> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 
@@ -506,11 +610,10 @@
     }
 
 
-    public abstract class Common_Consumer_ServiceEndpoint :
-        InMemoryTestFixture
+    public class Common_Consumer_ServiceEndpoint<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected abstract IBusRegistrationContext Registration { get; }
-
         [Test]
         public async Task Should_handle_the_request()
         {
@@ -528,25 +631,22 @@
         {
         }
 
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<PingRequestConsumer>();
+        }
+
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            configurator.ServiceInstance(x => x.ConfigureEndpoints(Registration));
+            configurator.ServiceInstance(x => x.ConfigureEndpoints(BusRegistrationContext));
         }
     }
 
 
-    public abstract class Common_Consumer_Connect :
-        InMemoryTestFixture
+    public class Common_Consumer_Connect<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected readonly TaskCompletionSource<ConsumeContext<EasyMessage>> MessageCompletion;
-
-        protected Common_Consumer_Connect()
-        {
-            MessageCompletion = GetTask<ConsumeContext<EasyMessage>>();
-        }
-
-        protected abstract IReceiveEndpointConnector Connector { get; }
-
         [Test]
         public async Task Should_consume_on_connected_receive_endpoint()
         {
@@ -557,54 +657,92 @@
 
             await handle.Ready;
 
-            await Bus.Publish(new EasyMessage {CorrelationId = NewId.NextGuid()});
+            await Bus.Publish(new EasyMessage { CorrelationId = NewId.NextGuid() });
 
             await MessageCompletion.Task;
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        protected readonly TaskCompletionSource<ConsumeContext<EasyMessage>> MessageCompletion;
+
+        public Common_Consumer_Connect()
+        {
+            MessageCompletion = GetTask<ConsumeContext<EasyMessage>>();
+        }
+
+        IReceiveEndpointConnector Connector => ServiceProvider.GetRequiredService<IReceiveEndpointConnector>();
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection.AddSingleton(MessageCompletion);
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddConsumer<EasyConsumer>();
-            configurator.AddBus(provider => BusControl);
         }
     }
 
 
-    public abstract class Common_Consumer_FilterOrder :
-        InMemoryTestFixture
+    public class Common_Consumer_FilterOrder<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer>> ConsumerCompletion;
-        protected readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer, EasyMessage>> ConsumerMessageCompletion;
-        protected readonly TaskCompletionSource<ConsumeContext<EasyMessage>> MessageCompletion;
-
-        protected Common_Consumer_FilterOrder()
-        {
-            MessageCompletion = GetTask<ConsumeContext<EasyMessage>>();
-            ConsumerCompletion = GetTask<ConsumerConsumeContext<EasyConsumer>>();
-            ConsumerMessageCompletion = GetTask<ConsumerConsumeContext<EasyConsumer, EasyMessage>>();
-        }
-
-        protected abstract IBusRegistrationContext Registration { get; }
-
         [Test]
         public async Task Should_include_container_scope()
         {
-            await InputQueueSendEndpoint.Send(new EasyMessage {CorrelationId = NewId.NextGuid()});
+            await InputQueueSendEndpoint.Send(new EasyMessage { CorrelationId = NewId.NextGuid() });
 
-            await MessageCompletion.Task;
+            await _messageCompletion.Task;
 
-            await ConsumerCompletion.Task;
+            await _consumerCompletion.Task;
 
-            await ConsumerMessageCompletion.Task;
+            await _consumerMessageCompletion.Task;
         }
 
-        protected abstract IFilter<ConsumerConsumeContext<EasyConsumer>> CreateConsumerFilter();
-        protected abstract IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>> CreateConsumerMessageFilter();
-        protected abstract IFilter<ConsumeContext<EasyMessage>> CreateMessageFilter();
+        readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer>> _consumerCompletion;
+        readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer, EasyMessage>> _consumerMessageCompletion;
+        readonly TaskCompletionSource<ConsumeContext<EasyMessage>> _messageCompletion;
+
+        public Common_Consumer_FilterOrder()
+        {
+            _messageCompletion = GetTask<ConsumeContext<EasyMessage>>();
+            _consumerCompletion = GetTask<ConsumerConsumeContext<EasyConsumer>>();
+            _consumerMessageCompletion = GetTask<ConsumerConsumeContext<EasyConsumer, EasyMessage>>();
+        }
+
+        IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>> CreateConsumerMessageFilter()
+        {
+            return ServiceProvider.GetRequiredService<IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>>>();
+        }
+
+        IFilter<ConsumerConsumeContext<EasyConsumer>> CreateConsumerFilter()
+        {
+            return ServiceProvider.GetRequiredService<IFilter<ConsumerConsumeContext<EasyConsumer>>>();
+        }
+
+        IFilter<ConsumeContext<EasyMessage>> CreateMessageFilter()
+        {
+            return ServiceProvider.GetRequiredService<IFilter<ConsumeContext<EasyMessage>>>();
+        }
+
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
+        {
+            return collection.AddSingleton(_messageCompletion)
+                .AddSingleton(_consumerCompletion)
+                .AddSingleton(_consumerMessageCompletion)
+                .AddSingleton<IFilter<ConsumeContext<EasyMessage>>, MessageFilter<EasyMessage, IServiceProvider>>()
+                .AddSingleton<IFilter<ConsumerConsumeContext<EasyConsumer>>, ConsumerFilter<EasyConsumer, IServiceProvider>>()
+                .AddSingleton<IFilter<ConsumerConsumeContext<EasyConsumer, EasyMessage>>, ConsumerMessageFilter<EasyConsumer, EasyMessage, IServiceProvider>>();
+        }
+
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<EasyConsumer>();
+        }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureConsumer<EasyConsumer>(Registration, x =>
+            configurator.ConfigureConsumer<EasyConsumer>(BusRegistrationContext, x =>
             {
                 x.Message<EasyMessage>(m => m.UseFilter(CreateMessageFilter()));
 
@@ -612,12 +750,6 @@
 
                 x.ConsumerMessage<EasyMessage>(m => m.UseFilter(CreateConsumerMessageFilter()));
             });
-        }
-
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
-        {
-            configurator.AddConsumer<EasyConsumer>();
-            configurator.AddBus(provider => BusControl);
         }
 
 
@@ -707,52 +839,54 @@
     }
 
 
-    public abstract class Common_Consumer_ScopedFilterOrder<TScope> :
-        InMemoryTestFixture
-        where TScope : class
+    public class Common_Consumer_ScopedFilterOrder<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
+        [Test]
+        public async Task Should_include_container_scope()
+        {
+            await InputQueueSendEndpoint.Send(new EasyMessage { CorrelationId = NewId.NextGuid() });
+
+            ConsumerConsumeContext<EasyConsumer> consumerContext = await _consumerCompletion.Task;
+            var scope = consumerContext.GetPayload<IServiceScope>();
+
+            ConsumerConsumeContext<EasyConsumer, EasyMessage> consumerMessageContext = await _consumerMessageCompletion.Task;
+            Assert.AreEqual(scope, consumerMessageContext.GetPayload<IServiceScope>());
+
+            ConsumeContext<EasyMessage> messageContext = await MessageCompletion.Task;
+            Assert.AreEqual(scope, messageContext.GetPayload<IServiceScope>());
+        }
+
         readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer>> _consumerCompletion;
         readonly TaskCompletionSource<ConsumerConsumeContext<EasyConsumer, EasyMessage>> _consumerMessageCompletion;
         protected readonly TaskCompletionSource<ConsumeContext<EasyMessage>> MessageCompletion;
 
-        protected Common_Consumer_ScopedFilterOrder()
+        public Common_Consumer_ScopedFilterOrder()
         {
             MessageCompletion = GetTask<ConsumeContext<EasyMessage>>();
             _consumerCompletion = GetTask<ConsumerConsumeContext<EasyConsumer>>();
             _consumerMessageCompletion = GetTask<ConsumerConsumeContext<EasyConsumer, EasyMessage>>();
         }
 
-        protected abstract IBusRegistrationContext Registration { get; }
-
-        [Test]
-        public async Task Should_include_container_scope()
+        protected override IServiceCollection ConfigureServices(IServiceCollection collection)
         {
-            await InputQueueSendEndpoint.Send(new EasyMessage {CorrelationId = NewId.NextGuid()});
+            return collection.AddSingleton(MessageCompletion);
+        }
 
-            ConsumerConsumeContext<EasyConsumer> consumerContext = await _consumerCompletion.Task;
-            var scope = consumerContext.GetPayload<TScope>();
-
-            ConsumerConsumeContext<EasyConsumer, EasyMessage> consumerMessageContext = await _consumerMessageCompletion.Task;
-            Assert.AreEqual(scope, consumerMessageContext.GetPayload<TScope>());
-
-            ConsumeContext<EasyMessage> messageContext = await MessageCompletion.Task;
-            Assert.AreEqual(scope, messageContext.GetPayload<TScope>());
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
+        {
+            configurator.AddConsumer<EasyConsumer>();
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureConsumer<EasyConsumer>(Registration, x =>
+            configurator.ConfigureConsumer<EasyConsumer>(BusRegistrationContext, x =>
             {
                 x.UseFilter(new ConsumerFilter<EasyConsumer>(_consumerCompletion));
 
                 x.ConsumerMessage<EasyMessage>(m => m.UseFilter(new ConsumerMessageFilter<EasyConsumer, EasyMessage>(_consumerMessageCompletion)));
             });
-        }
-
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
-        {
-            configurator.AddConsumer<EasyConsumer>();
-            configurator.AddBus(provider => BusControl);
         }
 
 
@@ -769,7 +903,7 @@
 
             public Task Send(ConsumerConsumeContext<TConsumer> context, IPipe<ConsumerConsumeContext<TConsumer>> next)
             {
-                if (context.TryGetPayload(out TScope _))
+                if (context.TryGetPayload(out IServiceScope _))
                     _taskCompletionSource.TrySetResult(context);
                 else
                     _taskCompletionSource.TrySetException(new PayloadException("Service Provider not found"));
@@ -797,7 +931,7 @@
 
             public Task Send(ConsumerConsumeContext<TConsumer, TMessage> context, IPipe<ConsumerConsumeContext<TConsumer, TMessage>> next)
             {
-                if (context.TryGetPayload(out TScope _))
+                if (context.TryGetPayload(out IServiceScope _))
                     _taskCompletionSource.TrySetResult(context);
                 else
                     _taskCompletionSource.TrySetException(new PayloadException("Service Provider not found"));

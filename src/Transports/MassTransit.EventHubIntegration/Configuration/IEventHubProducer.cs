@@ -1,4 +1,4 @@
-namespace MassTransit.EventHubIntegration
+namespace MassTransit
 {
     using System;
     using Azure.Messaging.EventHubs.Producer;
@@ -16,7 +16,8 @@ namespace MassTransit.EventHubIntegration
         /// <summary>
         /// Sets the outbound message serializer
         /// </summary>
-        /// <param name="serializerFactory">The factory to create the message serializer</param>
-        void SetMessageSerializer(SerializerFactory serializerFactory);
+        /// <param name="factory">The factory to create the message serializer</param>
+        /// <param name="isSerializer"></param>
+        void AddSerializer(ISerializerFactory factory, bool isSerializer = true);
     }
 }

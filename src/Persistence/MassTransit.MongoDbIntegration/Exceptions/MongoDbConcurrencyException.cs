@@ -1,29 +1,23 @@
-﻿namespace MassTransit.MongoDbIntegration
+﻿namespace MassTransit
 {
     using System;
-    using System.Runtime.Serialization;
 
 
     [Serializable]
     public class MongoDbConcurrencyException :
-        MassTransitException
+        ConcurrencyException
     {
+        public MongoDbConcurrencyException(string message, Type sagaType, Guid correlationId)
+            : base(message, sagaType, correlationId)
+        {
+        }
+
+        public MongoDbConcurrencyException(string message, Type sagaType, Guid correlationId, Exception innerException)
+            : base(message, sagaType, correlationId, innerException)
+        {
+        }
+
         public MongoDbConcurrencyException()
-        {
-        }
-
-        public MongoDbConcurrencyException(string message)
-            : base(message)
-        {
-        }
-
-        public MongoDbConcurrencyException(string message, Exception inner)
-            : base(message, inner)
-        {
-        }
-
-        public MongoDbConcurrencyException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
         {
         }
     }

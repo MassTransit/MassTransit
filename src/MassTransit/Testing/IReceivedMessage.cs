@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Testing
 {
     using System;
-    using MessageObservers;
 
 
     public interface IReceivedMessage<out T> :

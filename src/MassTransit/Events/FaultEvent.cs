@@ -1,4 +1,4 @@
-﻿namespace MassTransit.Events
+namespace MassTransit.Events
 {
     using System;
     using System.Collections.Generic;

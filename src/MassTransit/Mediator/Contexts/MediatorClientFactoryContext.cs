@@ -1,10 +1,7 @@
 namespace MassTransit.Mediator.Contexts
 {
     using System;
-    using Clients;
-    using Endpoints;
-    using GreenPipes;
-    using Pipeline;
+    using Transports;
 
 
     public class MediatorClientFactoryContext :

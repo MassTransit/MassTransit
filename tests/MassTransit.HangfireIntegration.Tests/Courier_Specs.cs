@@ -2,9 +2,7 @@ namespace MassTransit.HangfireIntegration.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Courier;
     using Courier.Contracts;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework.Courier;
     using Testing;
@@ -25,7 +23,7 @@ namespace MassTransit.HangfireIntegration.Tests
                 context => context.Message.ActivityName.Equals(testActivity.Name));
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
             builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri, new { });
 
             await Bus.Execute(builder.Build());
@@ -44,7 +42,7 @@ namespace MassTransit.HangfireIntegration.Tests
             Task<ConsumeContext<RoutingSlipCompleted>> completed = await ConnectPublishHandler<RoutingSlipCompleted>();
 
             var builder = new RoutingSlipBuilder(Guid.NewGuid());
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
             builder.AddActivity(faultActivity.Name, faultActivity.ExecuteUri, new { });
 
             await Bus.Execute(builder.Build());

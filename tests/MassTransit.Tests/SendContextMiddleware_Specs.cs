@@ -4,14 +4,10 @@ namespace MassTransit.Tests
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using ConsumeConfigurators;
-    using GreenPipes;
-    using GreenPipes.Util;
+    using MassTransit.Configuration;
     using MassTransit.Testing;
-    using MassTransit.Testing.Observers;
+    using MassTransit.Testing.Implementations;
     using NUnit.Framework;
-    using PublishPipeSpecifications;
-    using SendPipeSpecifications;
     using Shouldly;
     using TestFramework;
 
@@ -279,7 +275,7 @@ namespace MassTransit.Tests
         {
             public Task Consume(ConsumeContext<B> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 
@@ -555,7 +551,7 @@ namespace MassTransit.Tests
         {
             public Task Consume(ConsumeContext<B> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

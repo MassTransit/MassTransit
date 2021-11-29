@@ -3,13 +3,9 @@ namespace MassTransit.Tests.Configuration
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Automatonymous;
-    using GreenPipes;
     using MassTransit.Saga;
     using NUnit.Framework;
-    using SagaConfigurators;
     using TestFramework.Messages;
-    using Util;
 
 
     public class SagaConfigurationObserver_Specs
@@ -35,7 +31,7 @@ namespace MassTransit.Tests.Configuration
                         {
                         }));
 
-                        x.UseExecuteAsync(context => TaskUtil.Completed);
+                        x.UseExecuteAsync(context => Task.CompletedTask);
                     });
                 });
             });
@@ -55,14 +51,14 @@ namespace MassTransit.Tests.Configuration
             {
                 CorrelationId = context.Message.CorrelationId;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Guid CorrelationId { get; set; }
 
             public Task Consume(ConsumeContext<PongMessage> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

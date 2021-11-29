@@ -3,7 +3,6 @@ namespace MassTransit.EntityFrameworkIntegration.Tests
     using System.Collections.Generic;
     using System.Data.Entity;
     using System.Data.Entity.ModelConfiguration;
-    using Mappings;
     using MassTransit.Tests.Saga;
 
 

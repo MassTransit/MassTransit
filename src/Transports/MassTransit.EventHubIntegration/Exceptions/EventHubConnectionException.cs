@@ -1,4 +1,4 @@
-namespace MassTransit.EventHubIntegration.Exceptions
+namespace MassTransit
 {
     using System;
     using System.Runtime.Serialization;

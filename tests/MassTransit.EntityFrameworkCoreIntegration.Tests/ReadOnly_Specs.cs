@@ -5,14 +5,10 @@
         using System;
         using System.Collections.Generic;
         using System.Threading.Tasks;
-        using Automatonymous;
-        using Mappings;
-        using MassTransit.Saga;
         using Microsoft.EntityFrameworkCore;
         using Microsoft.EntityFrameworkCore.Design;
         using Microsoft.EntityFrameworkCore.Metadata.Builders;
         using NUnit.Framework;
-        using Saga;
         using Shared;
 
 
@@ -36,7 +32,7 @@
         {
             public ReadOnlySagaDbContext CreateDbContext(string[] args)
             {
-                var optionsBuilder = new SqlServerTestDbParameters()
+                DbContextOptionsBuilder<ReadOnlySagaDbContext> optionsBuilder = new SqlServerTestDbParameters()
                     .GetDbContextOptions<ReadOnlySagaDbContext>();
 
                 return new ReadOnlySagaDbContext(optionsBuilder.Options);
@@ -73,21 +69,23 @@
 
                 IRequestClient<Start> startClient = Bus.CreateRequestClient<Start>(InputQueueAddress, TestTimeout);
 
-                await startClient.GetResponse<StartupComplete>(new Start {CorrelationId = serviceId}, TestCancellationToken);
+                await startClient.GetResponse<StartupComplete>(new Start { CorrelationId = serviceId }, TestCancellationToken);
 
                 IRequestClient<CheckStatus> requestClient = Bus.CreateRequestClient<CheckStatus>(InputQueueAddress, TestTimeout);
 
-                Response<Status> status = await requestClient.GetResponse<Status>(new CheckStatus {CorrelationId = serviceId}, TestCancellationToken);
+                Response<Status> status = await requestClient.GetResponse<Status>(new CheckStatus { CorrelationId = serviceId }, TestCancellationToken);
 
                 Assert.That(status.Message.StatusText, Is.EqualTo("Started"));
 
-                status = await requestClient.GetResponse<Status>(new CheckStatus {CorrelationId = serviceId}, TestCancellationToken);
+                status = await requestClient.GetResponse<Status>(new CheckStatus { CorrelationId = serviceId }, TestCancellationToken);
 
                 Assert.That(status.Message.StatusText, Is.EqualTo("Started"));
             }
 
             protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
             {
+                configurator.UseInMemoryOutbox();
+
                 _machine = new ReadOnlyStateMachine();
 
                 configurator.StateMachineSaga(_machine, CreateSagaRepository());
@@ -95,9 +93,8 @@
 
             ISagaRepository<ReadOnlyInstance> CreateSagaRepository()
             {
-                return EntityFrameworkSagaRepository<ReadOnlyInstance>.CreatePessimistic(
-                    () => new ReadOnlySagaDbContextFactory().CreateDbContext(DbContextOptionsBuilder),
-                    RawSqlLockStatements);
+                return EntityFrameworkSagaRepository<ReadOnlyInstance>
+                    .CreatePessimistic(() => new ReadOnlySagaDbContextFactory().CreateDbContext(DbContextOptionsBuilder), RawSqlLockStatements);
             }
 
             ReadOnlyStateMachine _machine;
@@ -107,7 +104,8 @@
             {
                 await using var context = new ReadOnlySagaDbContextFactory().CreateDbContext(DbContextOptionsBuilder);
 
-                await context.Database.MigrateAsync();
+                await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureCreatedAsync();
             }
 
             [OneTimeTearDown]
@@ -144,7 +142,7 @@
                 Initially(
                     When(Started)
                         .Then(context => context.Instance.StatusText = "Started")
-                        .Respond(context => new StartupComplete {CorrelationId = context.Instance.CorrelationId})
+                        .Respond(context => new StartupComplete { CorrelationId = context.Instance.CorrelationId })
                         .TransitionTo(Running)
                 );
 

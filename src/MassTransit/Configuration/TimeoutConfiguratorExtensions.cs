@@ -1,10 +1,7 @@
 ﻿namespace MassTransit
 {
     using System;
-    using ConsumeConfigurators;
-    using GreenPipes;
-    using PipeConfigurators;
-    using Saga;
+    using Configuration;
 
 
     public static class TimeoutConfiguratorExtensions

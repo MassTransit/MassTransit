@@ -2,7 +2,6 @@ namespace MassTransit.MessageData.Values
 {
     using System;
     using System.Threading.Tasks;
-    using Serialization.JsonConverters;
 
 
     public class StringInlineMessageData :

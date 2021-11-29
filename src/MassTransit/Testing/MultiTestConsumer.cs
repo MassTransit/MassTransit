@@ -4,9 +4,6 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using MessageObservers;
-    using Pipeline;
     using Util;
 
 
@@ -126,7 +123,7 @@
                 Received.Add(context);
                 _multiConsumer._received.Add(context);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

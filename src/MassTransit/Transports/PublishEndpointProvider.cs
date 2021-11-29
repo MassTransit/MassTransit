@@ -2,35 +2,28 @@ namespace MassTransit.Transports
 {
     using System;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using GreenPipes.Internals.Extensions;
-    using Metadata;
-    using Pipeline;
-    using Pipeline.Observables;
-    using Topology;
+    using Observables;
 
 
     public class PublishEndpointProvider :
         IPublishEndpointProvider
     {
         readonly ISendEndpointCache<Type> _cache;
+        readonly ReceiveEndpointContext _context;
         readonly Uri _hostAddress;
         readonly PublishObservable _publishObservers;
         readonly IPublishTopology _publishTopology;
         readonly ISendPipe _sendPipe;
-        readonly IMessageSerializer _serializer;
-        readonly Uri _sourceAddress;
         readonly IPublishTransportProvider _transportProvider;
 
         public PublishEndpointProvider(IPublishTransportProvider transportProvider, Uri hostAddress, PublishObservable publishObservers,
-            IMessageSerializer serializer, Uri sourceAddress, IPublishPipe publishPipe, IPublishTopology publishTopology)
+            ReceiveEndpointContext context, IPublishPipe publishPipe, IPublishTopology publishTopology)
         {
             _transportProvider = transportProvider;
             _hostAddress = hostAddress;
-            _serializer = serializer;
-            _sourceAddress = sourceAddress;
             _publishTopology = publishTopology;
             _publishObservers = publishObservers;
+            _context = context;
 
             _sendPipe = new PipeAdapter(publishPipe);
 
@@ -54,15 +47,14 @@ namespace MassTransit.Transports
             IMessagePublishTopology<T> messageTopology = _publishTopology.GetMessageTopology<T>();
 
             if (!messageTopology.TryGetPublishAddress(_hostAddress, out var publishAddress))
-                throw new PublishException($"An address for publishing message type {TypeMetadataCache<T>.ShortName} was not found.");
+                throw new PublishException($"An address for publishing message type {TypeCache<T>.ShortName} was not found.");
 
             Task<ISendTransport> sendTransportTask = _transportProvider.GetPublishTransport<T>(publishAddress);
-            if (sendTransportTask.IsCompletedSuccessfully())
+            if (sendTransportTask.Status == TaskStatus.RanToCompletion)
             {
                 var sendTransport = sendTransportTask.Result;
 
-                var sendEndpoint = new SendEndpoint(sendTransport, _serializer, publishAddress, _sourceAddress, _sendPipe,
-                    sendTransport.ConnectSendObserver(_publishObservers));
+                var sendEndpoint = new SendEndpoint(sendTransport, _context, publishAddress, _sendPipe, sendTransport.ConnectSendObserver(_publishObservers));
 
                 return Task.FromResult<ISendEndpoint>(sendEndpoint);
             }
@@ -71,9 +63,7 @@ namespace MassTransit.Transports
             {
                 var sendTransport = await sendTransportTask.ConfigureAwait(false);
 
-                var handle = sendTransport.ConnectSendObserver(_publishObservers);
-
-                return new SendEndpoint(sendTransport, _serializer, publishAddress, _sourceAddress, _sendPipe, handle);
+                return new SendEndpoint(sendTransport, _context, publishAddress, _sendPipe, sendTransport.ConnectSendObserver(_publishObservers));
             }
 
             return CreateAsync();

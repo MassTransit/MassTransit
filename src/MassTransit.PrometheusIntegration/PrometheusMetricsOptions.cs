@@ -1,4 +1,4 @@
-namespace MassTransit.PrometheusIntegration
+namespace MassTransit
 {
     public class PrometheusMetricsOptions
     {

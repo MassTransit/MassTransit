@@ -4,7 +4,7 @@ namespace MassTransit.RabbitMqTransport.Tests
     using System.Diagnostics;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes.Internals.Extensions;
+    using Internals;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
@@ -30,7 +30,7 @@ namespace MassTransit.RabbitMqTransport.Tests
 
             using var startTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
-            var startTask = busControl.StartAsync(startTimeout.Token).OrCanceled(TestCancellationToken);
+            Task<BusHandle> startTask = busControl.StartAsync(startTimeout.Token).OrCanceled(TestCancellationToken);
 
             var publishTimer = Stopwatch.StartNew();
             Assert.ThrowsAsync<OperationCanceledException>(async () =>

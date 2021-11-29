@@ -3,8 +3,7 @@ namespace MassTransit.Initializers.PropertyInitializers
     using System;
     using System.Reflection;
     using System.Threading.Tasks;
-    using Internals.Reflection;
-    using Util;
+    using Internals;
 
 
     /// <summary>
@@ -41,7 +40,7 @@ namespace MassTransit.Initializers.PropertyInitializers
             {
                 if (_messageProperty.TargetType == context.MessageType)
                     _messageProperty.Set(context.Message, propertyTask.Result);
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             async Task ApplyAsync()

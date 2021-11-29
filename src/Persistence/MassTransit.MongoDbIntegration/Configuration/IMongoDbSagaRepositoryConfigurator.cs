@@ -1,11 +1,10 @@
-namespace MassTransit.MongoDbIntegration
+namespace MassTransit
 {
     using System;
-    using MassTransit.Saga;
     using MongoDB.Bson.Serialization;
     using MongoDB.Driver;
-    using Registration;
-    using Saga.CollectionNameFormatters;
+    using MongoDbIntegration;
+    using MongoDbIntegration.Saga;
 
 
     public interface IMongoDbSagaRepositoryConfigurator
@@ -29,13 +28,13 @@ namespace MassTransit.MongoDbIntegration
         /// Use the configuration service provider to resolve the collection name formatter <see cref="ICollectionNameFormatter" />
         /// </summary>
         /// <param name="collectionNameFormatterFactory"></param>
-        void CollectionNameFormatter(Func<IConfigurationServiceProvider, ICollectionNameFormatter> collectionNameFormatterFactory);
+        void CollectionNameFormatter(Func<IServiceProvider, ICollectionNameFormatter> collectionNameFormatterFactory);
 
         /// <summary>
         /// Use the configuration service provider to resolve the database <see cref="IMongoDatabase" />
         /// </summary>
         /// <param name="databaseFactory"></param>
-        void DatabaseFactory(Func<IConfigurationServiceProvider, IMongoDatabase> databaseFactory);
+        void DatabaseFactory(Func<IServiceProvider, IMongoDatabase> databaseFactory);
     }
 
 
@@ -47,6 +46,6 @@ namespace MassTransit.MongoDbIntegration
         /// Configure class map using <see cref="BsonClassMap{TClass}" />
         /// </summary>
         /// <param name="classMapFactory"></param>
-        void ClassMap(Func<IConfigurationServiceProvider, BsonClassMap<TSaga>> classMapFactory);
+        void ClassMap(Func<IServiceProvider, BsonClassMap<TSaga>> classMapFactory);
     }
 }

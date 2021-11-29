@@ -12,7 +12,7 @@
         [Test]
         public void When_deserializing_a_json_body_with_types()
         {
-            var serializer = JsonMessageSerializer.Deserializer;
+            var serializer = NewtonsoftJsonMessageSerializer.Deserializer;
 
             var json = "{\"$type\":\"Command.TestCommand, TestDeserializationWithDummyClasses\",\"Id\":1,\"Name\":\"bob\"}";
             using (var reader = new StringReader(json))

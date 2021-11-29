@@ -2,10 +2,8 @@ namespace MassTransit
 {
     using System;
     using Configuration;
-    using MessageData;
     using MessageData.Configuration;
     using MessageData.Conventions;
-    using Transformation.TransformConfigurators;
 
 
     public static class MessageDataConfiguratorExtensions

@@ -1,7 +1,7 @@
 ﻿namespace MassTransit
 {
     using System;
-    using Configurators;
+    using Configuration;
 
 
     public static class AmazonSqsMessageSchedulerExtensions

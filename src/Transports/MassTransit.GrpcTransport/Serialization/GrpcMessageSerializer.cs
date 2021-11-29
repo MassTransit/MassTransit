@@ -1,12 +1,8 @@
-namespace MassTransit.GrpcTransport.Serialization
+namespace MassTransit.Serialization
 {
     using System;
-    using System.IO;
     using System.Net.Mime;
-    using System.Runtime.Serialization;
-    using MassTransit.Serialization;
     using Newtonsoft.Json;
-    using Newtonsoft.Json.Bson;
 
 
     public class GrpcMessageSerializer :
@@ -27,27 +23,10 @@ namespace MassTransit.GrpcTransport.Serialization
         public static JsonSerializer Deserializer => _deserializer.Value;
         public static JsonSerializer Serializer => _serializer.Value;
 
-        public void Serialize<T>(Stream stream, SendContext<T> context)
+        public MessageBody GetMessageBody<T>(SendContext<T> context)
             where T : class
         {
-            try
-            {
-                context.ContentType = GrpcContentType;
-
-                using var jsonWriter = new BsonDataWriter(stream);
-
-                _serializer.Value.Serialize(jsonWriter, context.Message, typeof(T));
-
-                jsonWriter.Flush();
-            }
-            catch (SerializationException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw new SerializationException("Failed to serialize message", ex);
-            }
+            return new NewtonsoftRawBsonMessageBody<T>(context);
         }
 
         public ContentType ContentType => GrpcContentType;

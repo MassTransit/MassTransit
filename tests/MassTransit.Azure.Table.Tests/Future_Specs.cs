@@ -3,14 +3,12 @@ namespace MassTransit.Azure.Table.Tests
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using ExtensionsDependencyInjectionIntegration;
-    using Futures;
     using Microsoft.Azure.Cosmos.Table;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
-    using TestComponents;
-    using TestComponents.ForkJoint.Tests;
-    using TestComponents.Futures.Tests;
+    using TestFramework;
+    using TestFramework.ForkJoint.Tests;
+    using TestFramework.Futures.Tests;
 
 
     class AzureTableFutureTestFixtureConfigurator :
@@ -18,7 +16,7 @@ namespace MassTransit.Azure.Table.Tests
     {
         const string TableName = "futurestate";
 
-        public void ConfigureFutureSagaRepository(IServiceCollectionBusConfigurator configurator)
+        public void ConfigureFutureSagaRepository(IBusRegistrationConfigurator configurator)
         {
             configurator.AddSagaRepository<FutureState>()
                 .AzureTableRepository(r =>

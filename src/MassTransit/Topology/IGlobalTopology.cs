@@ -1,5 +1,8 @@
-﻿namespace MassTransit.Topology
+namespace MassTransit
 {
+    using System;
+
+
     public interface IGlobalTopology
     {
         ISendTopologyConfigurator Send { get; }
@@ -10,5 +13,9 @@
         /// This must be called early, methinks
         /// </summary>
         void SeparatePublishFromSend();
+
+        void MarkMessageTypeNotConsumable(Type type);
+
+        bool IsConsumableMessageType(Type type);
     }
 }

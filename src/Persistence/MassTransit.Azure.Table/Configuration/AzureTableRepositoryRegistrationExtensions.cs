@@ -1,10 +1,7 @@
 namespace MassTransit
 {
     using System;
-    using Azure.Table;
-    using Azure.Table.Configurators;
-    using Configurators;
-    using Saga;
+    using Configuration;
 
 
     public static class AzureTableRepositoryRegistrationExtensions
@@ -20,13 +17,13 @@ namespace MassTransit
             Action<IAzureTableSagaRepositoryConfigurator<T>> configure = null)
             where T : class, ISaga
         {
-            var sagaRepositoryConfigurator = new AzureTableSagaRepositoryConfigurator<T>();
+            var repositoryConfigurator = new AzureTableSagaRepositoryConfigurator<T>();
 
-            configure?.Invoke(sagaRepositoryConfigurator);
+            configure?.Invoke(repositoryConfigurator);
 
-            BusConfigurationResult.CompileResults(sagaRepositoryConfigurator.Validate());
+            repositoryConfigurator.Validate().ThrowIfContainsFailure("The Azure Table saga repository configuration is invalid:");
 
-            configurator.Repository(x => sagaRepositoryConfigurator.Register(x));
+            configurator.Repository(x => repositoryConfigurator.Register(x));
 
             return configurator;
         }

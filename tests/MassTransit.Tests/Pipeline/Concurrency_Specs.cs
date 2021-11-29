@@ -5,7 +5,6 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;

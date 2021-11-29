@@ -2,7 +2,7 @@
 {
     using System.Reflection;
     using Conventions;
-    using Internals.Reflection;
+    using Internals;
 
 
     public class PropertyInitializerInspector<TMessage, TInput, TProperty> :

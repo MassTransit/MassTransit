@@ -41,7 +41,7 @@
 
                 context.Respond(response);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

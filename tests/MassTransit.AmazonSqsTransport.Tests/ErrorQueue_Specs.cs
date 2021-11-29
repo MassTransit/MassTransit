@@ -3,7 +3,6 @@
     using System;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework.Messages;
 

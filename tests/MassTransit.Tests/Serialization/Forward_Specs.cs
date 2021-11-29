@@ -33,7 +33,7 @@ namespace MassTransit.Tests.Serialization
             Assert.That(forwarded.Message.CommandId, Is.EqualTo(message.CommandId));
             Assert.That(forwarded.Message.ItemNumber, Is.EqualTo(message.ItemNumber));
             Assert.That(forwarded.Message.Crap, Is.EqualTo("All"));
-            Assert.That(forwarded.ReceiveContext.ContentType.MediaType, Is.EqualTo(JsonMessageSerializer.ContentTypeHeaderValue));
+            Assert.That(forwarded.ReceiveContext.ContentType.MediaType, Is.EqualTo(NewtonsoftJsonMessageSerializer.ContentTypeHeaderValue));
         }
 
         Task<ConsumeContext<Command>> _handled;
@@ -65,9 +65,9 @@ namespace MassTransit.Tests.Serialization
         public class BagOfCrap :
             Command
         {
+            public string Crap { get; set; }
             public Guid CommandId { get; set; }
             public string ItemNumber { get; set; }
-            public string Crap { get; set; }
         }
     }
 
@@ -98,7 +98,7 @@ namespace MassTransit.Tests.Serialization
             Assert.That(forwarded.Message.CommandId, Is.EqualTo(message.CommandId));
             Assert.That(forwarded.Message.ItemNumber, Is.EqualTo(message.ItemNumber));
             Assert.That(forwarded.Message.Crap, Is.EqualTo("All"));
-            Assert.That(forwarded.ReceiveContext.ContentType.MediaType, Is.EqualTo(JsonMessageSerializer.ContentTypeHeaderValue));
+            Assert.That(forwarded.ReceiveContext.ContentType.MediaType, Is.EqualTo(NewtonsoftJsonMessageSerializer.ContentTypeHeaderValue));
         }
 
         Task<ConsumeContext<Command>> _handled;
@@ -108,8 +108,6 @@ namespace MassTransit.Tests.Serialization
         {
             configurator.ReceiveEndpoint("forward", x =>
             {
-                x.UseSystemTextJsonOnly();
-
                 _forwarded = Handled<BagOfCrap>(x);
             });
         }
@@ -132,9 +130,9 @@ namespace MassTransit.Tests.Serialization
         public class BagOfCrap :
             Command
         {
+            public string Crap { get; set; }
             public Guid CommandId { get; set; }
             public string ItemNumber { get; set; }
-            public string Crap { get; set; }
         }
     }
 
@@ -165,7 +163,7 @@ namespace MassTransit.Tests.Serialization
             Assert.That(forwarded.Message.CommandId, Is.EqualTo(message.CommandId));
             Assert.That(forwarded.Message.ItemNumber, Is.EqualTo(message.ItemNumber));
             Assert.That(forwarded.Message.Crap, Is.EqualTo("All"));
-            Assert.That(forwarded.ReceiveContext.ContentType.MediaType, Is.EqualTo(XmlMessageSerializer.ContentTypeHeaderValue));
+            Assert.That(forwarded.ReceiveContext.ContentType.MediaType, Is.EqualTo(NewtonsoftXmlMessageSerializer.ContentTypeHeaderValue));
         }
 
         Task<ConsumeContext<Command>> _handled;
@@ -199,9 +197,9 @@ namespace MassTransit.Tests.Serialization
         public class BagOfCrap :
             Command
         {
+            public string Crap { get; set; }
             public Guid CommandId { get; set; }
             public string ItemNumber { get; set; }
-            public string Crap { get; set; }
         }
     }
 }

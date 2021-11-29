@@ -1,10 +1,9 @@
-namespace MassTransit.RedisIntegration.Configuration
+namespace MassTransit.Configuration
 {
     using System;
     using System.Collections.Generic;
-    using Contexts;
-    using GreenPipes;
-    using Registration;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
+    using RedisIntegration.Saga;
     using Saga;
     using StackExchange.Redis;
 
@@ -15,7 +14,7 @@ namespace MassTransit.RedisIntegration.Configuration
         where TSaga : class, ISagaVersion
     {
         ConfigurationOptions _configurationOptions;
-        Func<IConfigurationServiceProvider, ConnectionMultiplexer> _connectionFactory;
+        Func<IServiceProvider, ConnectionMultiplexer> _connectionFactory;
         SelectDatabase _databaseSelector;
 
         public RedisSagaRepositoryConfigurator()
@@ -52,7 +51,7 @@ namespace MassTransit.RedisIntegration.Configuration
             _connectionFactory = provider => connectionFactory();
         }
 
-        public void ConnectionFactory(Func<IConfigurationServiceProvider, ConnectionMultiplexer> connectionFactory)
+        public void ConnectionFactory(Func<IServiceProvider, ConnectionMultiplexer> connectionFactory)
         {
             _connectionFactory = connectionFactory;
         }
@@ -75,8 +74,8 @@ namespace MassTransit.RedisIntegration.Configuration
         public void Register<T>(ISagaRepositoryRegistrationConfigurator<T> configurator)
             where T : class, ISagaVersion
         {
-            configurator.RegisterSingleInstance(_connectionFactory);
-            configurator.RegisterSingleInstance(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix, _databaseSelector,
+            configurator.TryAddSingleton(_connectionFactory);
+            configurator.TryAddSingleton(new RedisSagaRepositoryOptions<T>(ConcurrencyMode, LockTimeout, LockSuffix, KeyPrefix, _databaseSelector,
                 Expiry));
             configurator.RegisterSagaRepository<T, DatabaseContext<T>, SagaConsumeContextFactory<DatabaseContext<T>, T>,
                 RedisSagaRepositoryContextFactory<T>>();

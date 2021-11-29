@@ -27,7 +27,7 @@
             });
 
             await bus.StartAsync();
-            await bus.Publish(new DummyMessage {ID = 1}).ConfigureAwait(false);
+            await bus.Publish(new DummyMessage { ID = 1 }).ConfigureAwait(false);
             await bus.StopAsync();
         }
 
@@ -51,7 +51,7 @@
             });
 
             bus.Start();
-            await bus.Publish(new DummyMessage {ID = 1}).ConfigureAwait(false);
+            await bus.Publish(new DummyMessage { ID = 1 }).ConfigureAwait(false);
             bus.Stop();
         }
 

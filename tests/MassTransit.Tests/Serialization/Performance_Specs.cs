@@ -4,19 +4,19 @@ namespace MassTransit.Tests.Serialization
     using System.Diagnostics;
     using System.IO;
     using Context;
+    using InMemoryTransport;
+    using InMemoryTransport.Fabric;
     using MassTransit.Serialization;
-    using MassTransit.Transports.InMemory.Contexts;
-    using MassTransit.Transports.InMemory.Fabric;
     using Messages;
     using Metadata;
     using NUnit.Framework;
     using TestFramework;
 
 
-    [TestFixture(typeof(JsonMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftJsonMessageSerializer))]
     [TestFixture(typeof(SystemTextJsonMessageSerializer))]
     [TestFixture(typeof(BsonMessageSerializer))]
-    [TestFixture(typeof(XmlMessageSerializer))]
+    [TestFixture(typeof(NewtonsoftXmlMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializer))]
     [TestFixture(typeof(EncryptedMessageSerializerV2))]
     [Explicit]
@@ -48,7 +48,7 @@ namespace MassTransit.Tests.Serialization
                 byte[] data = Serialize(sendContext);
 
                 var transportMessage = new InMemoryTransportMessage(Guid.NewGuid(), data, Serializer.ContentType.MediaType,
-                    TypeMetadataCache<SerializationTestMessage>.ShortName);
+                    TypeCache<SerializationTestMessage>.ShortName);
                 receiveContext = new InMemoryReceiveContext(transportMessage, TestConsumeContext.GetContext());
 
                 Deserialize<SerializationTestMessage>(receiveContext);
@@ -88,12 +88,7 @@ namespace MassTransit.Tests.Serialization
         protected byte[] Serialize<T>(SendContext<T> sendContext)
             where T : class
         {
-            using (var output = new MemoryStream())
-            {
-                Serializer.Serialize(output, sendContext);
-
-                return output.ToArray();
-            }
+            return Serializer.GetMessageBody(sendContext).GetBytes();
         }
 
         protected ConsumeContext<T> Deserialize<T>(ReceiveContext receiveContext)

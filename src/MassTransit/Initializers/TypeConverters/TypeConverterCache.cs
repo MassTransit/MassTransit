@@ -4,8 +4,7 @@ namespace MassTransit.Initializers.TypeConverters
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using Internals.Extensions;
-    using Util;
+    using Internals;
 
 
     public class TypeConverterCache :
@@ -19,14 +18,21 @@ namespace MassTransit.Initializers.TypeConverters
             _typeConverters = new ConcurrentDictionary<Type, object>();
             _converters = new List<object>();
 
-            var assembly = typeof(BooleanTypeConverter).Assembly;
-            var ns = typeof(BooleanTypeConverter).Namespace;
-
-            Type[] converterTypes = AssemblyTypeCache.FindTypes(assembly, TypeClassification.Concrete | TypeClassification.Closed,
-                x => x.Namespace.StartsWith(ns) && x.HasInterface(typeof(ITypeConverter<,>))).GetAwaiter().GetResult().ToArray();
-
-            foreach (var converterType in converterTypes)
-                AddSupportedTypes(converterType);
+            AddSupportedTypes(typeof(BooleanTypeConverter));
+            AddSupportedTypes(typeof(ByteTypeConverter));
+            AddSupportedTypes(typeof(DateTimeOffsetTypeConverter));
+            AddSupportedTypes(typeof(DateTimeTypeConverter));
+            AddSupportedTypes(typeof(DecimalTypeConverter));
+            AddSupportedTypes(typeof(DoubleTypeConverter));
+            AddSupportedTypes(typeof(ExceptionTypeConverter));
+            AddSupportedTypes(typeof(GuidTypeConverter));
+            AddSupportedTypes(typeof(IntTypeConverter));
+            AddSupportedTypes(typeof(LongTypeConverter));
+            AddSupportedTypes(typeof(ShortTypeConverter));
+            AddSupportedTypes(typeof(StringTypeConverter));
+            AddSupportedTypes(typeof(TimeSpanTypeConverter));
+            AddSupportedTypes(typeof(UriTypeConverter));
+            AddSupportedTypes(typeof(VersionTypeConverter));
         }
 
         bool ITypeConverterCache.TryGetTypeConverter<TProperty, TInput>(out ITypeConverter<TProperty, TInput> typeConverter)

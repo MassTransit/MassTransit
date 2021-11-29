@@ -1,19 +1,17 @@
-﻿namespace MassTransit.ActiveMqTransport.Testing
+﻿namespace MassTransit.Testing
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Net.Http;
     using System.Net.Http.Headers;
     using System.Text;
+    using System.Text.Json;
     using System.Threading.Tasks;
+    using ActiveMqTransport.Configuration;
     using Apache.NMS;
     using Apache.NMS.Util;
-    using Configurators;
-    using MassTransit.Testing;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
+    using Serialization;
 
 
     public class ActiveMqTestHarness :
@@ -133,49 +131,28 @@
             client.DefaultRequestHeaders.Add("Origin", "localhost");
 
             var requestUri = new UriBuilder("http", HostAddress.Host, AdminPort, "api/jolokia/read/org.apache.activemq:type=Broker,brokerName=localhost").Uri;
-            using var response = await client.GetStreamAsync(requestUri);
-            using var reader = new StreamReader(response);
-            using var jsonReader = new JsonTextReader(reader);
 
-            var queues = new List<string>();
-            var topics = new List<string>();
+            var bytes = await client.GetByteArrayAsync(requestUri);
 
-            var token = await JToken.ReadFromAsync(jsonReader);
+            var element = JsonSerializer.Deserialize<JsonElement>(bytes, SystemTextJsonMessageSerializer.Options).GetProperty("value");
 
-            var value = token["value"] as JContainer;
-            var queue = value["Queues"] as JArray;
+            var queuesElement = element.GetProperty("Queues");
 
-            IEnumerable<string> entities = from elements in queue.Children()
-                select elements["objectName"].ToString();
+            List<string> queues = queuesElement.EnumerateArray().Select(x => GetDestinationName(x.GetProperty("objectName").GetString())).ToList();
 
-            foreach (var entity in entities)
-            {
-                var parts = entity.Split(',');
-                foreach (var part in parts)
-                {
-                    var keyValue = part.Split('=');
-                    if (keyValue[0] == "destinationName")
-                        queues.Add(keyValue[1]);
-                }
-            }
+            var topicsElement = element.GetProperty("Topics");
 
-            var topic = value["Topics"] as JArray;
-
-            entities = from elements in topic.Children()
-                select elements["objectName"].ToString();
-
-            foreach (var entity in entities)
-            {
-                var parts = entity.Split(',');
-                foreach (var part in parts)
-                {
-                    var keyValue = part.Split('=');
-                    if (keyValue[0] == "destinationName")
-                        topics.Add(keyValue[1]);
-                }
-            }
+            List<string> topics = topicsElement.EnumerateArray().Select(x => GetDestinationName(x.GetProperty("objectName").GetString())).ToList();
 
             return (queues, topics);
+        }
+
+        string GetDestinationName(string input)
+        {
+            return input.Split(',').Select(part => part.Split('='))
+                .Where(keyValue => keyValue[0] == "destinationName")
+                .Select(keyValue => keyValue[1])
+                .FirstOrDefault();
         }
 
         protected override IBusControl CreateBus()

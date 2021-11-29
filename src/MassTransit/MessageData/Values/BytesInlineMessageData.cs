@@ -4,7 +4,7 @@ namespace MassTransit.MessageData.Values
     using System.IO;
     using System.Threading;
     using System.Threading.Tasks;
-    using Serialization.JsonConverters;
+    using Metadata;
 
 
     public class BytesInlineMessageData :

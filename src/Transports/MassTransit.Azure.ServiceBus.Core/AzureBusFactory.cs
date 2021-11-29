@@ -1,12 +1,11 @@
-﻿namespace MassTransit.Azure.ServiceBus.Core
+﻿namespace MassTransit
 {
     using System;
     using System.Threading;
+    using AzureServiceBusTransport;
+    using AzureServiceBusTransport.Configuration;
     using Configuration;
-    using Configurators;
-    using MassTransit.Topology;
-    using MassTransit.Topology.EntityNameFormatters;
-    using MassTransit.Topology.Topologies;
+    using Topology;
 
 
     public static class AzureBusFactory

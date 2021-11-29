@@ -1,9 +1,8 @@
-namespace MassTransit.AmazonSqsTransport.Topology
+namespace MassTransit
 {
     using System;
-    using Builders;
-    using Entities;
-    using MassTransit.Topology;
+    using AmazonSqsTransport;
+    using AmazonSqsTransport.Topology;
 
 
     public interface IAmazonSqsMessagePublishTopology<TMessage> :
@@ -19,7 +18,7 @@ namespace MassTransit.AmazonSqsTransport.Topology
         /// <returns></returns>
         PublishSettings GetPublishSettings(Uri hostAddress);
 
-        BrokerTopology GetBrokerTopology(PublishBrokerTopologyOptions options = PublishBrokerTopologyOptions.MaintainHierarchy);
+        BrokerTopology GetBrokerTopology();
     }
 
 

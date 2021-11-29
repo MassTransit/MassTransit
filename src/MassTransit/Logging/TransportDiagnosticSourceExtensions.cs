@@ -1,9 +1,6 @@
 namespace MassTransit.Logging
 {
     using System.Collections.Generic;
-    using System.Linq;
-    using Context;
-    using Newtonsoft.Json.Linq;
 
 
     public static class TransportDiagnosticSourceExtensions
@@ -11,8 +8,8 @@ namespace MassTransit.Logging
         public static void AddSendContextHeadersPostSend<T>(this StartedActivityContext activity, SendContext<T> context)
             where T : class
         {
-            if (context is MessageSendContext<T> messageSendContext && messageSendContext.Serializer != null)
-                activity?.AddTag(DiagnosticHeaders.BodyBytes, messageSendContext.BodyLength.ToString());
+            if (context.BodyLength.HasValue)
+                activity?.AddTag(DiagnosticHeaders.BodyBytes, context.BodyLength.Value.ToString());
         }
 
         public static void AddConsumeContextHeaders(this StartedActivityContext activity, ConsumeContext context)
@@ -35,22 +32,13 @@ namespace MassTransit.Logging
 
             if (context.Headers.TryGetHeader(DiagnosticHeaders.ActivityCorrelationContext, out var correlationHeader))
             {
-                foreach (KeyValuePair<string, string> value in GetValues(correlationHeader))
+                Dictionary<string, object> values = context.SerializerContext.ToDictionary(correlationHeader);
+                foreach (KeyValuePair<string, object> value in values)
                 {
-                    if (!string.IsNullOrWhiteSpace(value.Value))
-                        activity.AddBaggage(value.Key, value.Value);
+                    if (value.Value is string text && !string.IsNullOrWhiteSpace(text))
+                        activity.AddBaggage(value.Key, text);
                 }
             }
-        }
-
-        static IEnumerable<KeyValuePair<string, string>> GetValues(object values)
-        {
-            return values switch
-            {
-                JArray array => array.ToObject<KeyValuePair<string, string>[]>(),
-                IEnumerable<KeyValuePair<string, string>> enumerable => enumerable,
-                _ => Enumerable.Empty<KeyValuePair<string, string>>()
-            };
         }
     }
 }

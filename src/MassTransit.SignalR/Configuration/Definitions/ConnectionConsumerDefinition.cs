@@ -1,7 +1,6 @@
 namespace MassTransit.SignalR.Configuration.Definitions
 {
     using Consumers;
-    using Definition;
     using Microsoft.AspNetCore.SignalR;
 
 

@@ -1,29 +1,23 @@
-﻿namespace MassTransit.Azure.Cosmos
+﻿namespace MassTransit
 {
     using System;
-    using System.Runtime.Serialization;
 
 
     [Serializable]
     public class CosmosConcurrencyException :
-        MassTransitException
+        ConcurrencyException
     {
         public CosmosConcurrencyException()
         {
         }
 
-        public CosmosConcurrencyException(string message)
-            : base(message)
+        public CosmosConcurrencyException(string message, Type sagaType, Guid correlationId)
+            : base(message, sagaType, correlationId)
         {
         }
 
-        public CosmosConcurrencyException(string message, Exception inner)
-            : base(message, inner)
-        {
-        }
-
-        public CosmosConcurrencyException(SerializationInfo info, StreamingContext context)
-            : base(info, context)
+        public CosmosConcurrencyException(string message, Type sagaType, Guid correlationId, Exception innerException)
+            : base(message, sagaType, correlationId, innerException)
         {
         }
     }

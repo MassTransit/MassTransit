@@ -3,13 +3,10 @@ namespace MassTransit.Tests.Configuration
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using ConsumeConfigurators;
-    using GreenPipes;
     using MassTransit.Courier;
     using NUnit.Framework;
     using TestFramework.Courier;
     using TestFramework.Messages;
-    using Util;
 
 
     public class ConfigurationObserver_Specs
@@ -35,7 +32,7 @@ namespace MassTransit.Tests.Configuration
                         {
                         }));
 
-                        x.UseExecuteAsync(context => TaskUtil.Completed);
+                        x.UseExecuteAsync(context => Task.CompletedTask);
                     });
                 });
             });
@@ -164,12 +161,12 @@ namespace MassTransit.Tests.Configuration
         {
             public Task Consume(ConsumeContext<PingMessage> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task Consume(ConsumeContext<PongMessage> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

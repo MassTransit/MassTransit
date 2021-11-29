@@ -4,15 +4,10 @@ namespace MassTransit
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using Automatonymous;
-    using ConsumeConfigurators;
     using Courier;
-    using Definition;
-    using Futures;
-    using Internals.Extensions;
+    using DependencyInjection.Registration;
+    using Internals;
     using Metadata;
-    using Registration;
-    using Saga;
     using Util;
 
 
@@ -54,7 +49,7 @@ namespace MassTransit
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            var types = AssemblyTypeCache.FindTypes(assemblies, TypeMetadataCache.IsConsumerOrDefinition).GetAwaiter().GetResult();
+            var types = AssemblyTypeCache.FindTypes(assemblies, RegistrationMetadata.IsConsumerOrDefinition).GetAwaiter().GetResult();
 
             AddConsumers(configurator, filter, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
@@ -82,20 +77,20 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(type));
 
             if (type.Assembly == null || type.Namespace == null)
-                throw new ArgumentException($"The type {TypeMetadataCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
+                throw new ArgumentException($"The type {TypeCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
 
             IEnumerable<Type> types;
             if (filter != null)
             {
                 bool IsAllowed(Type candidate)
                 {
-                    return TypeMetadataCache.IsConsumerOrDefinition(candidate) && filter(candidate);
+                    return RegistrationMetadata.IsConsumerOrDefinition(candidate) && filter(candidate);
                 }
 
                 types = FindTypesInNamespace(type, IsAllowed);
             }
             else
-                types = FindTypesInNamespace(type, TypeMetadataCache.IsConsumerOrDefinition);
+                types = FindTypesInNamespace(type, RegistrationMetadata.IsConsumerOrDefinition);
 
             AddConsumers(configurator, types.ToArray());
         }
@@ -121,7 +116,7 @@ namespace MassTransit
         {
             filter ??= t => true;
 
-            IEnumerable<Type> consumerTypes = types.Where(TypeMetadataCache.HasConsumerInterfaces);
+            IEnumerable<Type> consumerTypes = types.Where(MessageTypeCache.HasConsumerInterfaces);
             IEnumerable<Type> consumerDefinitionTypes = types.Where(x => x.HasInterface(typeof(IConsumerDefinition<>)));
 
             var consumers = from c in consumerTypes
@@ -164,7 +159,7 @@ namespace MassTransit
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            var types = AssemblyTypeCache.FindTypes(assemblies, TypeMetadataCache.IsSagaOrDefinition).GetAwaiter().GetResult();
+            var types = AssemblyTypeCache.FindTypes(assemblies, RegistrationMetadata.IsSagaOrDefinition).GetAwaiter().GetResult();
 
             AddSagas(configurator, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
@@ -193,20 +188,20 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(type));
 
             if (type.Assembly == null || type.Namespace == null)
-                throw new ArgumentException($"The type {TypeMetadataCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
+                throw new ArgumentException($"The type {TypeCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
 
             IEnumerable<Type> types;
             if (filter != null)
             {
                 bool IsAllowed(Type candidate)
                 {
-                    return TypeMetadataCache.IsSagaOrDefinition(candidate) && filter(candidate);
+                    return RegistrationMetadata.IsSagaOrDefinition(candidate) && filter(candidate);
                 }
 
                 types = FindTypesInNamespace(type, IsAllowed);
             }
             else
-                types = FindTypesInNamespace(type, TypeMetadataCache.IsSagaOrDefinition);
+                types = FindTypesInNamespace(type, RegistrationMetadata.IsSagaOrDefinition);
 
             AddSagas(configurator, types.ToArray());
         }
@@ -264,7 +259,7 @@ namespace MassTransit
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
             var types = AssemblyTypeCache.FindTypes(assemblies,
-                    type => TypeMetadataCache.IsSagaStateMachineOrDefinition(type) && !TypeMetadataCache.IsFutureOrDefinition(type))
+                    type => RegistrationMetadata.IsSagaStateMachineOrDefinition(type) && !RegistrationMetadata.IsFutureOrDefinition(type))
                 .GetAwaiter().GetResult();
 
             configurator.AddSagaStateMachines(types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
@@ -294,22 +289,22 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(type));
 
             if (type.Assembly == null || type.Namespace == null)
-                throw new ArgumentException($"The type {TypeMetadataCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
+                throw new ArgumentException($"The type {TypeCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
 
             IEnumerable<Type> types;
             if (filter != null)
             {
                 bool IsAllowed(Type candidate)
                 {
-                    return TypeMetadataCache.IsSagaStateMachineOrDefinition(candidate)
-                        && !TypeMetadataCache.IsFutureOrDefinition(type)
+                    return RegistrationMetadata.IsSagaStateMachineOrDefinition(candidate)
+                        && !RegistrationMetadata.IsFutureOrDefinition(type)
                         && filter(candidate);
                 }
 
                 types = FindTypesInNamespace(type, IsAllowed);
             }
             else
-                types = FindTypesInNamespace(type, TypeMetadataCache.IsSagaStateMachineOrDefinition);
+                types = FindTypesInNamespace(type, RegistrationMetadata.IsSagaStateMachineOrDefinition);
 
             AddSagaStateMachines(configurator, types.ToArray());
         }
@@ -337,27 +332,6 @@ namespace MassTransit
 
             foreach (var saga in sagas)
                 configurator.AddSagaStateMachine(saga.SagaType, saga.DefinitionType);
-        }
-
-        public static void RegisterSagaStateMachines(this IContainerRegistrar registrar, params Assembly[] assemblies)
-        {
-            if (assemblies.Length == 0)
-                assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-            var types = AssemblyTypeCache.FindTypes(assemblies, x => x.HasInterface(typeof(SagaStateMachine<>))).GetAwaiter().GetResult();
-
-            registrar.RegisterSagaStateMachines(types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
-        }
-
-        public static void RegisterSagaStateMachines(this IContainerRegistrar registrar, params Type[] types)
-        {
-            foreach (var type in types)
-            {
-                if (!type.HasInterface(typeof(SagaStateMachine<>)))
-                    throw new ArgumentException($"The type is not a saga state machine: {TypeMetadataCache.GetShortName(type)}", nameof(types));
-
-                SagaStateMachineRegistrationCache.Register(type, registrar);
-            }
         }
 
         /// <summary>
@@ -411,7 +385,7 @@ namespace MassTransit
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            var types = AssemblyTypeCache.FindTypes(assemblies, TypeMetadataCache.IsActivityOrDefinition).GetAwaiter().GetResult();
+            var types = AssemblyTypeCache.FindTypes(assemblies, RegistrationMetadata.IsActivityOrDefinition).GetAwaiter().GetResult();
 
             AddActivities(configurator, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
@@ -438,20 +412,20 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(type));
 
             if (type.Assembly == null || type.Namespace == null)
-                throw new ArgumentException($"The type {TypeMetadataCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
+                throw new ArgumentException($"The type {TypeCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
 
             IEnumerable<Type> types;
             if (filter != null)
             {
                 bool IsAllowed(Type candidate)
                 {
-                    return TypeMetadataCache.IsActivityOrDefinition(candidate) && filter(candidate);
+                    return RegistrationMetadata.IsActivityOrDefinition(candidate) && filter(candidate);
                 }
 
                 types = FindTypesInNamespace(type, IsAllowed);
             }
             else
-                types = FindTypesInNamespace(type, TypeMetadataCache.IsActivityOrDefinition);
+                types = FindTypesInNamespace(type, RegistrationMetadata.IsActivityOrDefinition);
 
             AddActivities(configurator, types.ToArray());
         }
@@ -492,6 +466,15 @@ namespace MassTransit
 
             foreach (var executeActivity in executeActivities)
                 configurator.AddExecuteActivity(executeActivity.ActivityType, executeActivity.DefinitionType);
+        }
+
+        /// <summary>
+        /// Configure the default endpoint name formatter in the container
+        /// </summary>
+        /// <param name="configurator"></param>
+        public static void SetDefaultEndpointNameFormatter(this IRegistrationConfigurator configurator)
+        {
+            configurator.SetEndpointNameFormatter(DefaultEndpointNameFormatter.Instance);
         }
 
         public static void SetSnakeCaseEndpointNameFormatter(this IRegistrationConfigurator configurator)
@@ -582,7 +565,7 @@ namespace MassTransit
             if (assemblies.Length == 0)
                 assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            var types = AssemblyTypeCache.FindTypes(assemblies, TypeMetadataCache.IsFutureOrDefinition).GetAwaiter().GetResult();
+            var types = AssemblyTypeCache.FindTypes(assemblies, RegistrationMetadata.IsFutureOrDefinition).GetAwaiter().GetResult();
 
             AddFutures(configurator, filter, types.FindTypes(TypeClassification.Concrete | TypeClassification.Closed).ToArray());
         }
@@ -610,20 +593,20 @@ namespace MassTransit
                 throw new ArgumentNullException(nameof(type));
 
             if (type.Assembly == null || type.Namespace == null)
-                throw new ArgumentException($"The type {TypeMetadataCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
+                throw new ArgumentException($"The type {TypeCache.GetShortName(type)} is not in an assembly with a valid namespace", nameof(type));
 
             IEnumerable<Type> types;
             if (filter != null)
             {
                 bool IsAllowed(Type candidate)
                 {
-                    return TypeMetadataCache.IsFutureOrDefinition(candidate) && filter(candidate);
+                    return RegistrationMetadata.IsFutureOrDefinition(candidate) && filter(candidate);
                 }
 
                 types = FindTypesInNamespace(type, IsAllowed);
             }
             else
-                types = FindTypesInNamespace(type, TypeMetadataCache.IsFutureOrDefinition);
+                types = FindTypesInNamespace(type, RegistrationMetadata.IsFutureOrDefinition);
 
             AddFutures(configurator, types.ToArray());
         }

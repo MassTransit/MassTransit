@@ -3,9 +3,7 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Context;
-    using GreenPipes;
-    using Observers;
+    using Implementations;
     using Util;
 
 
@@ -13,7 +11,8 @@
     /// A bus text fixture includes a single bus instance with one or more receiving endpoints.
     /// </summary>
     public abstract class BusTestHarness :
-        AsyncTestHarness
+        AsyncTestHarness,
+        IBaseTestHarness
     {
         BusHandle _busHandle;
         BusTestConsumeObserver _consumed;
@@ -21,8 +20,7 @@
         BusTestReceiveObserver _received;
         BusTestSendObserver _sent;
 
-        public IBus Bus => BusControl;
-        public IBusControl BusControl { get; set; }
+        public IBusControl BusControl { get; private set; }
 
         /// <summary>
         /// The address of the default bus endpoint, used as the SourceAddress for requests and published messages
@@ -49,7 +47,10 @@
         /// </summary>
         public ISendEndpoint InputQueueSendEndpoint { get; private set; }
 
+        public IBus Bus => BusControl;
+
         public ISentMessageList Sent => _sent.Messages;
+        public CancellationToken CancellationToken => TestCancellationToken;
         public IReceivedMessageList Consumed => _consumed.Messages;
         public IPublishedMessageList Published => _published.Messages;
 
@@ -84,14 +85,20 @@
             OnConfigureReceiveEndpoint?.Invoke(configurator);
         }
 
+        protected virtual void BusConfigured(IBusFactoryConfigurator configurator)
+        {
+            OnBusConfigured?.Invoke(configurator);
+        }
+
         public event Action<BusTestHarness> PreCreateBus;
         public event Action<IReceiveEndpointConfigurator> OnConfigureReceiveEndpoint;
         public event Action<IBusFactoryConfigurator> OnConfigureBus;
+        public event Action<IBusFactoryConfigurator> OnBusConfigured;
         public event Action<IBus> OnConnectObservers;
 
         public virtual async Task Start(CancellationToken cancellationToken = default)
         {
-            if(!cancellationToken.CanBeCanceled)
+            if (!cancellationToken.CanBeCanceled)
                 cancellationToken = TestCancellationToken;
 
             _received = new BusTestReceiveObserver(TestInactivityTimeout);
@@ -338,7 +345,7 @@
             {
                 _source.TrySetResult(context);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

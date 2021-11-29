@@ -6,7 +6,8 @@ namespace MassTransit.EntityFrameworkCoreIntegration.Tests
     using Shared;
 
 
-    public class AuditContextFactory : IDesignTimeDbContextFactory<AuditDbContext>
+    public class AuditContextFactory :
+        IDesignTimeDbContextFactory<AuditDbContext>
     {
         public AuditDbContext CreateDbContext(string[] args)
         {

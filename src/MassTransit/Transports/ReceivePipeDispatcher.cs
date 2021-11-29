@@ -4,12 +4,8 @@ namespace MassTransit.Transports
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
-    using Context;
-    using GreenPipes;
     using Logging;
-    using Metrics;
-    using Pipeline;
-    using Pipeline.Observables;
+    using Observables;
 
 
     public class ReceivePipeDispatcher :

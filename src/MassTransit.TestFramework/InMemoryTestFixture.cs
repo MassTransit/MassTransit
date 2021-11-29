@@ -5,7 +5,6 @@ namespace MassTransit.TestFramework
     using NUnit.Framework;
     using NUnit.Framework.Internal;
     using Testing;
-    using Util;
 
 
     public class InMemoryTestFixture :
@@ -46,16 +45,18 @@ namespace MassTransit.TestFramework
 
         protected Uri InputQueueAddress => InMemoryTestHarness.InputQueueAddress;
 
+        protected IServiceProvider ServiceProvider { get; set; } = null;
+
         [SetUp]
         public Task SetupInMemoryTest()
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         [TearDown]
         public Task TearDownInMemoryTest()
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         protected IRequestClient<TRequest> CreateRequestClient<TRequest>()
@@ -99,6 +100,16 @@ namespace MassTransit.TestFramework
             await InMemoryTestHarness.Stop().ConfigureAwait(false);
 
             InMemoryTestHarness.Dispose();
+
+            switch (ServiceProvider)
+            {
+                case IAsyncDisposable asyncDisposable:
+                    await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+                    break;
+                case IDisposable disposable:
+                    disposable.Dispose();
+                    break;
+            }
         }
 
         protected virtual void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)

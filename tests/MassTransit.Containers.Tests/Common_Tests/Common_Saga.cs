@@ -3,24 +3,22 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using System;
     using System.Threading.Tasks;
     using NUnit.Framework;
-    using Saga;
     using Scenarios;
     using Shouldly;
     using TestFramework;
     using Testing;
 
 
-    public abstract class Common_Saga :
-        InMemoryTestFixture
+    public class Common_Saga<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected abstract IBusRegistrationContext Registration { get; }
-
         [Test]
         public async Task Should_handle_first_message()
         {
             var sagaId = NewId.NextGuid();
 
-            var message = new FirstSagaMessage {CorrelationId = sagaId};
+            var message = new FirstSagaMessage { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -34,7 +32,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             var sagaId = NewId.NextGuid();
 
-            var message = new FirstSagaMessage {CorrelationId = sagaId};
+            var message = new FirstSagaMessage { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -42,7 +40,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             foundId.HasValue.ShouldBe(true);
 
-            var nextMessage = new SecondSagaMessage {CorrelationId = sagaId};
+            var nextMessage = new SecondSagaMessage { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
@@ -56,7 +54,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             var sagaId = NewId.NextGuid();
 
-            var message = new FirstSagaMessage {CorrelationId = sagaId};
+            var message = new FirstSagaMessage { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(message);
 
@@ -64,7 +62,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
             foundId.HasValue.ShouldBe(true);
 
-            var nextMessage = new ThirdSagaMessage {CorrelationId = sagaId};
+            var nextMessage = new ThirdSagaMessage { CorrelationId = sagaId };
 
             await InputQueueSendEndpoint.Send(nextMessage);
 
@@ -73,35 +71,29 @@ namespace MassTransit.Containers.Tests.Common_Tests
             foundId.HasValue.ShouldBe(true);
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddSaga<SimpleSaga>()
                 .InMemoryRepository();
-
-            configurator.AddBus(provider => BusControl);
         }
-
-        protected abstract ISagaRepository<T> GetSagaRepository<T>()
-            where T : class, ISaga;
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
-            configurator.ConfigureSaga<SimpleSaga>(Registration);
+            configurator.ConfigureSaga<SimpleSaga>(BusRegistrationContext);
         }
     }
 
 
-    public abstract class Common_Saga_Endpoint :
-        InMemoryTestFixture
+    public class Common_Saga_Endpoint<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
-        protected abstract IBusRegistrationContext Registration { get; }
-
         [Test]
         public async Task Should_handle_the_message()
         {
             var sagaId = NewId.NextGuid();
 
-            var message = new FirstSagaMessage {CorrelationId = sagaId};
+            var message = new FirstSagaMessage { CorrelationId = sagaId };
 
             var sendEndpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/custom-endpoint-name"));
 
@@ -117,7 +109,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             var sagaId = NewId.NextGuid();
 
-            var message = new FirstSagaMessage {CorrelationId = sagaId};
+            var message = new FirstSagaMessage { CorrelationId = sagaId };
 
             var sendEndpoint = await Bus.GetSendEndpoint(new Uri("loopback://localhost/custom-second-saga"));
 
@@ -128,7 +120,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
             foundId.HasValue.ShouldBe(true);
         }
 
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.AddSaga<SimpleSaga>()
                 .Endpoint(e => e.Name = "custom-endpoint-name")
@@ -137,16 +129,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
             configurator.AddSaga<SecondSimpleSaga>(typeof(SecondSimpleSagaDefinition))
                 .Endpoint(e => e.Temporary = true)
                 .InMemoryRepository();
-
-            configurator.AddBus(provider => BusControl);
-        }
-
-        protected abstract ISagaRepository<T> GetSagaRepository<T>()
-            where T : class, ISaga;
-
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            configurator.ConfigureEndpoints(Registration);
         }
     }
 }

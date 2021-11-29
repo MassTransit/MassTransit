@@ -2,8 +2,6 @@ namespace MassTransit.Containers.Tests
 {
     using System;
     using System.Threading.Tasks;
-    using ConsumeConfigurators;
-    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using NUnit.Framework;
     using TestFramework;
@@ -17,14 +15,13 @@ namespace MassTransit.Containers.Tests
 
         public Accessing_a_scope_from_middleware()
         {
-            var collection = new ServiceCollection();
-            collection.AddMassTransit(x =>
-            {
-                x.AddConsumer<Consumer>();
-                x.AddBus(provider => BusControl);
-            });
-
-            _provider = collection.BuildServiceProvider(true);
+            _provider = new ServiceCollection()
+                .AddMassTransit(x =>
+                {
+                    x.AddConsumer<Consumer>();
+                    x.AddBus(provider => BusControl);
+                })
+                .BuildServiceProvider(true);
         }
 
         [Test]

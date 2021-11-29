@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using RabbitMQ.Client;
-    using RabbitMqTransport;
 
 
     public static class RabbitMqSendContextExtensions

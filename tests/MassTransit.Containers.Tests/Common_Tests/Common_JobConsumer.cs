@@ -2,55 +2,43 @@ namespace MassTransit.Containers.Tests.Common_Tests
 {
     using System;
     using System.Threading.Tasks;
-    using Contracts.JobService;
-    using Definition;
     using JobConsumerComponents;
     using JobConsumerContracts;
-    using JobService.Configuration;
+    using MassTransit.Contracts.JobService;
     using NUnit.Framework;
     using TestFramework;
 
 
-    [TestFixture]
-    public abstract class Common_JobConsumer :
-        InMemoryTestFixture
+    public class Common_JobConsumer<TContainer> :
+        CommonContainerTestFixture<TContainer>
+        where TContainer : ITestFixtureContainerFactory, new()
     {
         [Test]
         public async Task Should_resolve_an_use_the_service()
         {
-            IRequestClient<CrunchTheNumbers> client = RequestClient;
+            IRequestClient<CrunchTheNumbers> client = GetRequestClient<CrunchTheNumbers>();
 
-            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new {Duration = TimeSpan.FromSeconds(1)});
+            Response<JobSubmissionAccepted> response = await client.GetResponse<JobSubmissionAccepted>(new { Duration = TimeSpan.FromSeconds(1) });
 
-            Assert.That(response.SourceAddress, Is.EqualTo(new Uri(BaseAddress, KebabCaseEndpointNameFormatter.Instance.Consumer<CrunchTheNumbersConsumer>())));
+            var expected = new Uri(InMemoryTestHarness.BaseAddress, KebabCaseEndpointNameFormatter.Instance.Consumer<CrunchTheNumbersConsumer>());
+            Assert.That(response.SourceAddress, Is.EqualTo(expected));
         }
-
-        protected Common_JobConsumer()
-        {
-            Options = new ServiceInstanceOptions()
-                .EnableJobServiceEndpoints();
-        }
-
-        protected ServiceInstanceOptions Options { get; private set; }
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
-            ConfigureServiceEndpoints(configurator);
+            var options = new ServiceInstanceOptions()
+                .EnableJobServiceEndpoints();
+
+            configurator.ConfigureServiceEndpoints(BusRegistrationContext, options);
         }
 
-        protected abstract void ConfigureServiceEndpoints(IBusFactoryConfigurator<IInMemoryReceiveEndpointConfigurator> configurator);
-
-        protected abstract IRequestClient<CrunchTheNumbers> RequestClient { get; }
-
-        protected void ConfigureRegistration(IBusRegistrationConfigurator configurator)
+        protected override void ConfigureMassTransit(IBusRegistrationConfigurator configurator)
         {
             configurator.SetKebabCaseEndpointNameFormatter();
 
             configurator.AddConsumersFromNamespaceContaining<CrunchTheNumbersConsumer>();
 
             configurator.AddRequestClient<CrunchTheNumbers>();
-
-            configurator.AddBus(provider => BusControl);
         }
     }
 
@@ -69,7 +57,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
 
     namespace JobConsumerComponents
     {
-        using JobService;
+        using JobConsumerContracts;
 
 
         public class CrunchTheNumbersConsumer :

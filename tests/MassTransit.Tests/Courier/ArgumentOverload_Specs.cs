@@ -2,7 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
     using MassTransit.Testing;
     using NUnit.Framework;
@@ -21,7 +20,7 @@
 
             Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
 
-            Assert.AreEqual("Used", context.Message.GetVariable<string>("Test"));
+            Assert.AreEqual("Used", context.GetVariable<string>("Test"));
         }
 
         [Test]
@@ -86,7 +85,7 @@
 
             Assert.AreEqual(_trackingNumber, context.Message.TrackingNumber);
 
-            Assert.AreEqual("Used", context.Message.GetVariable<string>("Test"));
+            Assert.AreEqual("Used", context.GetVariable<string>("Test"));
         }
 
         Task<ConsumeContext<RoutingSlipCompleted>> _completed;
@@ -104,7 +103,7 @@
             builder.AddSubscription(Bus.Address, RoutingSlipEvents.All);
 
             var testActivity = GetActivityContext<SetVariableActivity>();
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Key = "Test"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Key = "Test" });
 
             builder.AddVariable("Value", "Used");
 

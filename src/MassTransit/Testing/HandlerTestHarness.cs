@@ -2,7 +2,6 @@ namespace MassTransit.Testing
 {
     using System;
     using System.Threading.Tasks;
-    using MessageObservers;
 
 
     public class HandlerTestHarness<TMessage>

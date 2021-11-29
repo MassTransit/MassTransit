@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>MassTransit</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -12,10 +13,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MassTransit\MassTransit.csproj"/>
+    <ProjectReference Include="..\MassTransit.Newtonsoft\MassTransit.Newtonsoft.csproj" />
+    <ProjectReference Include="..\MassTransit\MassTransit.csproj" />
   </ItemGroup>
 </Project>

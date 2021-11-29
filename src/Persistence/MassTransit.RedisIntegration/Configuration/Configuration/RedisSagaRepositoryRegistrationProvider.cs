@@ -1,9 +1,7 @@
-namespace MassTransit.RedisIntegration.Configuration
+namespace MassTransit.Configuration
 {
     using System;
-    using GreenPipes.Internals.Extensions;
-    using Registration;
-    using Saga;
+    using Internals;
 
 
     public class RedisSagaRepositoryRegistrationProvider :

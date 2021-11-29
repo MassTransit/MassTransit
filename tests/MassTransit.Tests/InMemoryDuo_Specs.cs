@@ -3,12 +3,10 @@
     using System;
     using System.Linq;
     using System.Threading.Tasks;
-    using Context;
-    using GreenPipes;
+    using MassTransit.Middleware;
     using MassTransit.Testing;
     using NUnit.Framework;
     using Shouldly;
-    using Util;
 
 
     [TestFixture]
@@ -60,11 +58,11 @@
             public Task Consume(ConsumeContext<A> context)
             {
                 if (GetVirtualHost(context.SourceAddress) != GetVirtualHost(context.ReceiveContext.InputAddress))
-                    return TaskUtil.Completed;
+                    return Task.CompletedTask;
 
                 LogContext.Info?.Log("Forwarding message: {MessageId} from {SourceAddress}", context.MessageId, context.SourceAddress);
 
-                IPipe<SendContext> contextPipe = context.CreateCopyContextPipe();
+                IPipe<SendContext> contextPipe = new CopyContextPipe(context);
 
                 return _otherHost.Publish(context.Message, contextPipe);
             }
@@ -82,7 +80,7 @@
         {
             public Task Consume(ConsumeContext<A> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

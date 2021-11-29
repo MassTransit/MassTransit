@@ -3,9 +3,6 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using EndpointConfigurators;
-    using GreenPipes;
-    using Pipeline;
     using Topology;
     using Transports;
 

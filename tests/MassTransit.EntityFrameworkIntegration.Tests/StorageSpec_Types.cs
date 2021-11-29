@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.EntityFrameworkIntegration.Tests
 {
     using System;
-    using Automatonymous;
 
 
     /// <summary>

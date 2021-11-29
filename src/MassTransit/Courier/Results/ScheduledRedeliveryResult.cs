@@ -2,7 +2,6 @@ namespace MassTransit.Courier.Results
 {
     using System;
     using System.Threading.Tasks;
-    using Util;
 
 
     public class ScheduledRedeliveryResult :
@@ -17,7 +16,7 @@ namespace MassTransit.Courier.Results
 
         public Task Evaluate()
         {
-            return TaskUtil.Completed;
+            return Task.CompletedTask;
         }
 
         public bool IsFaulted(out Exception exception)

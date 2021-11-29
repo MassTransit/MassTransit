@@ -3,8 +3,8 @@
     using System;
     using System.Net.Security;
     using System.Security.Authentication;
-    using Configurators;
     using NUnit.Framework;
+    using RabbitMqTransport.Configuration;
     using Shouldly;
     using Shouldly.ShouldlyExtensionMethods;
 
@@ -37,6 +37,15 @@
             });
 
             configurator.Settings.AcceptablePolicyErrors.ShouldNotHaveFlag(SslPolicyErrors.RemoteCertificateChainErrors);
+        }
+
+        [Test]
+        [Description("Should parse vhost with escape characteres %2f")]
+        public void Should_ParseVhost_With_escapes()
+        {
+            var configurator = new RabbitMqHostConfigurator(new Uri("rabbitmq://localhost/%2fv%2fhost"));
+
+            configurator.Settings.VirtualHost.ShouldBe("/v/host");
         }
 
         [Test]
@@ -76,15 +85,6 @@
             });
 
             configurator.Settings.SslProtocol.ShouldBe(SslProtocols.Tls);
-        }
-
-        [Test]
-        [Description("Should parse vhost with escape characteres %2f")]
-        public void Should_ParseVhost_With_escapes()
-        {
-            var configurator = new RabbitMqHostConfigurator(new Uri("rabbitmq://localhost/%2fv%2fhost"));
-
-            configurator.Settings.VirtualHost.ShouldBe("/v/host");
         }
 
         [Test]

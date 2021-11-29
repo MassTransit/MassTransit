@@ -3,9 +3,8 @@
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using MassTransit.Scheduling;
     using NUnit.Framework;
-    using Transports.Scheduling;
+    using Scheduling;
 
 
     public class ScheduleMessage_Specs :
@@ -27,7 +26,7 @@
 
         protected override void ConfigureActiveMqBus(IActiveMqBusFactoryConfigurator configurator)
         {
-            configurator.UseActiveMqMessageScheduler();
+            configurator.UseDelayedMessageScheduler();
         }
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
@@ -73,7 +72,7 @@
 
         protected override void ConfigureActiveMqBus(IActiveMqBusFactoryConfigurator configurator)
         {
-            configurator.UseActiveMqMessageScheduler();
+            configurator.UseDelayedMessageScheduler();
         }
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
@@ -125,7 +124,7 @@
 
         protected override void ConfigureActiveMqBus(IActiveMqBusFactoryConfigurator configurator)
         {
-            configurator.UseActiveMqMessageScheduler();
+            configurator.UseDelayedMessageScheduler();
         }
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)
@@ -179,7 +178,7 @@
 
         protected override void ConfigureActiveMqBus(IActiveMqBusFactoryConfigurator configurator)
         {
-            configurator.UseActiveMqMessageScheduler();
+            configurator.UseDelayedMessageScheduler();
         }
 
         protected override void ConfigureActiveMqReceiveEndpoint(IActiveMqReceiveEndpointConfigurator configurator)

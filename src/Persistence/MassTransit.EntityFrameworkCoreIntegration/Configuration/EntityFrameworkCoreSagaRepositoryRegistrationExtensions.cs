@@ -1,14 +1,11 @@
 namespace MassTransit
 {
     using System;
-    using Configurators;
+    using Configuration;
     using EntityFrameworkCoreIntegration;
-    using EntityFrameworkCoreIntegration.Configurators;
-    using EntityFrameworkCoreIntegration.Mappings;
-    using EntityFrameworkCoreIntegration.Saga.Configuration;
+    using EntityFrameworkCoreIntegration.Configuration;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
-    using Saga;
 
 
     public static class EntityFrameworkCoreSagaRepositoryRegistrationExtensions
@@ -24,13 +21,13 @@ namespace MassTransit
             Action<IEntityFrameworkSagaRepositoryConfigurator<TSaga>> configure)
             where TSaga : class, ISaga
         {
-            var entityFrameworkSagaRepositoryConfigurator = new EntityFrameworkSagaRepositoryConfigurator<TSaga>();
+            var repositoryConfigurator = new EntityFrameworkSagaRepositoryConfigurator<TSaga>();
 
-            configure?.Invoke(entityFrameworkSagaRepositoryConfigurator);
+            configure?.Invoke(repositoryConfigurator);
 
-            BusConfigurationResult.CompileResults(entityFrameworkSagaRepositoryConfigurator.Validate());
+            repositoryConfigurator.Validate().ThrowIfContainsFailure("The Entity Framework saga repository configuration is invalid:");
 
-            configurator.Repository(x => entityFrameworkSagaRepositoryConfigurator.Register(x));
+            configurator.Repository(x => repositoryConfigurator.Register(x));
 
             return configurator;
         }

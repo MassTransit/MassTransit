@@ -3,7 +3,6 @@
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
     using NUnit.Framework;
     using Shouldly;
     using TestFramework;
@@ -29,15 +28,6 @@
             await fault;
 
             _attempts.ShouldBe(1);
-        }
-
-        [Test]
-        [Explicit]
-        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
         }
 
         int _attempts;
@@ -69,21 +59,12 @@
                 context.ResponseAddress = BusAddress;
                 context.FaultAddress = BusAddress;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
 
             await fault;
 
             _attempts.ShouldBe(1);
-        }
-
-        [Test]
-        [Explicit]
-        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
         }
 
         int _attempts;
@@ -113,21 +94,12 @@
                 context.ResponseAddress = BusAddress;
                 context.FaultAddress = BusAddress;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
 
             await fault;
 
             Consumer.Attempts.ShouldBe(6);
-        }
-
-        [Test]
-        [Explicit]
-        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -174,15 +146,6 @@
             _attempts.ShouldBe(2);
         }
 
-        [Test]
-        [Explicit]
-        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
-        }
-
         int _attempts;
 
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
@@ -221,15 +184,6 @@
             await fault;
 
             _attempts.ShouldBe(2);
-        }
-
-        [Test]
-        [Explicit]
-        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
         }
 
         int _attempts;
@@ -286,15 +240,6 @@
             _lastAttempt.ShouldBe(3);
         }
 
-        [Test]
-        [Explicit]
-        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
-        }
-
         int _attempts;
         int _lastAttempt;
         int _lastCount;
@@ -343,15 +288,6 @@
 
             Consumer.LastCount.ShouldBe(2);
             Consumer.LastAttempt.ShouldBe(3);
-        }
-
-        [Test]
-        [Explicit]
-        public void Should_return_a_wonderful_breakdown_of_the_guts_inside_it()
-        {
-            var result = Bus.GetProbeResult();
-
-            Console.WriteLine(result.ToJsonString());
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
@@ -527,7 +463,7 @@
 
                 _completed.TrySetResult(context.Message);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
         }
     }
@@ -588,7 +524,7 @@
 
                 _completed.TrySetResult(context.Message);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
         }
 
@@ -621,7 +557,7 @@
                 var payload = context.Context.GetOrAddPayload(() => new RetryPayload());
                 payload.PostCreateCount++;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task PostFault<T>(RetryContext<T> context)
@@ -630,7 +566,7 @@
                 var payload = context.Context.GetOrAddPayload(() => new RetryPayload());
                 payload.PostFaultCount++;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task PreRetry<T>(RetryContext<T> context)
@@ -639,7 +575,7 @@
                 var payload = context.Context.GetOrAddPayload(() => new RetryPayload());
                 payload.PreRetryCount++;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task RetryFault<T>(RetryContext<T> context)
@@ -648,7 +584,7 @@
                 var payload = context.Context.GetOrAddPayload(() => new RetryPayload());
                 payload.RetryFaultCount++;
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task RetryComplete<T>(RetryContext<T> context)
@@ -664,7 +600,7 @@
                 else
                     _payload.TrySetException(new PayloadNotFoundException());
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }
@@ -715,7 +651,7 @@
 
                 _completed.TrySetResult(context.Message);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
         }
 
@@ -735,7 +671,7 @@
             public Task PostCreate<T>(RetryPolicyContext<T> context)
                 where T : class, PipeContext
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task PostFault<T>(RetryContext<T> context)
@@ -743,25 +679,25 @@
             {
                 _completionSource.TrySetResult(context);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task PreRetry<T>(RetryContext<T> context)
                 where T : class, PipeContext
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task RetryFault<T>(RetryContext<T> context)
                 where T : class, PipeContext
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task RetryComplete<T>(RetryContext<T> context)
                 where T : class, PipeContext
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

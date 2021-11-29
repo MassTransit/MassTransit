@@ -1,9 +1,9 @@
 namespace MassTransit.Tests.Pipeline
 {
-    using ConsumePipeSpecifications;
-    using MassTransit.Pipeline;
-    using MassTransit.Pipeline.ConsumerFactories;
+    using Consumer;
+    using MassTransit.Configuration;
     using MassTransit.Testing;
+    using MassTransit.Transports;
     using TestFramework;
     using TestFramework.Messages;
 

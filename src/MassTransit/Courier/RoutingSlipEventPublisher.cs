@@ -4,13 +4,9 @@ namespace MassTransit.Courier
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Contexts;
     using Contracts;
-    using InternalMessages;
-    using MassTransit.Serialization;
+    using Messages;
     using Metadata;
-    using Newtonsoft.Json;
-    using Serialization;
 
 
     public class RoutingSlipEventPublisher :
@@ -45,7 +41,7 @@ namespace MassTransit.Courier
             _host = HostMetadataCache.Host;
         }
 
-        static IDictionary<string, object> EmptyObject => _emptyObject ??= JsonConvert.DeserializeObject<IDictionary<string, object>>("{}");
+        static IDictionary<string, object> EmptyObject => _emptyObject ??= new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
 
         public Task PublishRoutingSlipCompleted(DateTime timestamp, TimeSpan duration, IDictionary<string, object> variables)
         {
@@ -230,9 +226,9 @@ namespace MassTransit.Courier
 
                     var message = messageFactory(subscription.Include);
 
-                    if (subscription.Message != null)
+                    if (subscription.Message != null && _context?.SerializerContext != null)
                     {
-                        var adapter = new MessageEnvelopeContextAdapter(null, subscription.Message, JsonMessageSerializer.ContentTypeHeaderValue, message);
+                        var adapter = new MessageEnvelopeContextAdapter<T>(_context.SerializerContext, subscription.Message);
 
                         await endpoint.Send(message, adapter).ConfigureAwait(false);
                     }

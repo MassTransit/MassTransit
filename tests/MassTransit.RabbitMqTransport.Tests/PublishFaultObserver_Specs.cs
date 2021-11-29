@@ -21,7 +21,7 @@
                 {
                     await Task.Delay(1000);
 
-                    await Bus.Publish(new TestMessage {Index = i});
+                    await Bus.Publish(new TestMessage { Index = i });
                 }
                 catch (Exception ex)
                 {

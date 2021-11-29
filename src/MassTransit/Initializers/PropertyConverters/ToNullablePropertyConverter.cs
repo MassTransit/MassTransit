@@ -30,7 +30,7 @@ namespace MassTransit.Initializers.PropertyConverters
             where T : class
         {
             Task<TResult> resultTask = _converter.Convert(context, input);
-            if (resultTask.IsCompleted)
+            if (resultTask.Status == TaskStatus.RanToCompletion)
                 return Task.FromResult<TResult?>(resultTask.Result);
 
             async Task<TResult?> ConvertAsync()

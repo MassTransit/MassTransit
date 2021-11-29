@@ -1,7 +1,7 @@
 namespace MassTransit.Tests.Configuration
 {
     using System.Linq;
-    using MassTransit.Saga.Connectors;
+    using MassTransit.Configuration;
     using NUnit.Framework;
     using Saga;
     using Saga.Messages;

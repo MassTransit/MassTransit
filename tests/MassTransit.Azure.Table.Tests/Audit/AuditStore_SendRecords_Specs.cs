@@ -3,9 +3,9 @@
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
+    using AzureTable;
     using NUnit.Framework;
     using Shouldly;
-    using Table.Audit;
 
 
     [TestFixture]

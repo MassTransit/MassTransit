@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using Contracts;
     using Events;
-    using Metadata;
 
 
     public abstract class RoutingSlipResponseProxy<TRequest, TResponse, TFaultResponse> :
@@ -18,15 +17,13 @@
     {
         public virtual async Task Consume(ConsumeContext<RoutingSlipCompleted> context)
         {
-            var request = context.Message.GetVariable<TRequest>("Request");
-            var requestId = context.Message.GetVariable<Guid>("RequestId");
+            var request = context.GetVariable<TRequest>("Request");
 
-            Uri responseAddress = null;
-            if (context.Message.Variables.ContainsKey("ResponseAddress"))
-                responseAddress = context.Message.GetVariable<Uri>("ResponseAddress");
+            Guid? requestId = context.GetVariable<Guid>("RequestId")
+                ?? throw new ArgumentException($"The RequestId variable was not found on the completed routing slip: {context.Message.TrackingNumber}");
 
-            if (responseAddress == null)
-                throw new ArgumentException($"The response address could not be found for the faulted routing slip: {context.Message.TrackingNumber}");
+            var responseAddress = context.GetVariable<Uri>("ResponseAddress")
+                ?? throw new ArgumentException($"The ResponseAddress variable was not found on the completed routing slip: {context.Message.TrackingNumber}");
 
             var endpoint = await context.GetResponseEndpoint<TResponse>(responseAddress, requestId).ConfigureAwait(false);
 
@@ -37,21 +34,17 @@
 
         public virtual async Task Consume(ConsumeContext<RoutingSlipFaulted> context)
         {
-            var request = context.Message.GetVariable<TRequest>("Request");
-            var requestId = context.Message.GetVariable<Guid>("RequestId");
+            var request = context.GetVariable<TRequest>("Request");
 
-            Uri faultAddress = null;
-            if (context.Message.Variables.ContainsKey("FaultAddress"))
-                faultAddress = context.Message.GetVariable<Uri>("FaultAddress");
-            if (faultAddress == null && context.Message.Variables.ContainsKey("ResponseAddress"))
-                faultAddress = context.Message.GetVariable<Uri>("ResponseAddress");
+            Guid? requestId = context.GetVariable<Guid>("RequestId")
+                ?? throw new ArgumentException($"The RequestId variable was not found on the faulted routing slip: {context.Message.TrackingNumber}");
 
-            if (faultAddress == null)
-                throw new ArgumentException($"The fault/response address could not be found for the faulted routing slip: {context.Message.TrackingNumber}");
+            var faultAddress = context.GetVariable<Uri>("FaultAddress") ?? context.GetVariable<Uri>("ResponseAddress")
+                ?? throw new ArgumentException($"The (Fault|Response)Address was not found on the faulted routing slip: {context.Message.TrackingNumber}");
 
             var endpoint = await context.GetFaultEndpoint<TResponse>(faultAddress, requestId).ConfigureAwait(false);
 
-            var response = await CreateFaultedResponseMessage(context, request, requestId);
+            var response = await CreateFaultedResponseMessage(context, request, requestId.Value);
 
             await endpoint.Send(response).ConfigureAwait(false);
         }
@@ -71,7 +64,7 @@
         {
             IEnumerable<ExceptionInfo> exceptions = context.Message.ActivityExceptions.Select(x => x.ExceptionInfo);
 
-            Fault<TRequest> response = new FaultEvent<TRequest>(request, requestId, context.Host, exceptions, TypeMetadataCache<TRequest>.MessageTypeNames);
+            Fault<TRequest> response = new FaultEvent<TRequest>(request, requestId, context.Host, exceptions, MessageTypeCache<TRequest>.MessageTypeNames);
 
             return Task.FromResult(response);
         }

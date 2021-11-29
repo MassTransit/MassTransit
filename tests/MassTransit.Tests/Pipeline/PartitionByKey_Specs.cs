@@ -4,11 +4,8 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
-    using MassTransit.Topology.Topologies;
     using NUnit.Framework;
     using TestFramework;
-    using Util;
 
 
     [TestFixture]
@@ -18,7 +15,7 @@
         [Test]
         public async Task Should_use_a_partitioner_for_consistency()
         {
-            await Task.WhenAll(Enumerable.Range(0, Limit).Select(index => Bus.Publish(new PartitionedMessage {CorrelationId = NewId.NextGuid()})));
+            await Task.WhenAll(Enumerable.Range(0, Limit).Select(index => Bus.Publish(new PartitionedMessage { CorrelationId = NewId.NextGuid() })));
 
             var count = await _completed.Task;
 
@@ -61,7 +58,7 @@
                 if (Interlocked.Increment(ref _count) == Limit)
                     _completed.TrySetResult(Limit);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 
@@ -80,7 +77,7 @@
         [Test]
         public async Task Should_use_a_partitioner_for_consistency()
         {
-            await Task.WhenAll(Enumerable.Range(0, Limit).Select(index => Bus.Publish(new PartitionedMessage {CorrelationId = NewId.NextGuid()})));
+            await Task.WhenAll(Enumerable.Range(0, Limit).Select(index => Bus.Publish(new PartitionedMessage { CorrelationId = NewId.NextGuid() })));
 
             var count = await _completed.Task;
 
@@ -119,7 +116,7 @@
                 if (Interlocked.Increment(ref _count) == Limit)
                     _completed.TrySetResult(Limit);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 
@@ -155,7 +152,7 @@
         {
             public Task Consume(ConsumeContext<UnpartitionedMessage> context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

@@ -7,7 +7,6 @@
         using MassTransit.Testing;
         using NUnit.Framework;
         using RabbitMQ.Client;
-        using Saga;
         using Util;
 
 
@@ -187,7 +186,7 @@
 
                 var saga = _repository[sagaId.Value].Instance;
 
-                await InputQueueSendEndpoint.Send(new B {CorrelationId = _sagaId});
+                await InputQueueSendEndpoint.Send(new B { CorrelationId = _sagaId });
 
                 await saga.B.Task;
             }
@@ -200,7 +199,7 @@
             {
                 _sagaId = NewId.NextGuid();
 
-                await InputQueueSendEndpoint.Send(new A {CorrelationId = _sagaId});
+                await InputQueueSendEndpoint.Send(new A { CorrelationId = _sagaId });
             }
 
             protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)

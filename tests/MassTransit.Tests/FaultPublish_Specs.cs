@@ -4,9 +4,7 @@
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
     using MassTransit.Testing;
-    using MassTransit.Testing.MessageObservers;
     using Metadata;
     using NUnit.Framework;
     using Shouldly;
@@ -54,6 +52,7 @@
             public IReceivedMessageList<Fault<PingMessage>> Faults => _faults;
         }
     }
+
 
     [TestFixture]
     public class A_faulting_consumer_when_fault_publishing_is_disable :
@@ -110,7 +109,7 @@
 
             _consumer.Faults.Select().Count().ShouldBe(1);
 
-            var fault = _consumer.Faults.Select().FirstOrDefault();
+            IReceivedMessage<Fault<BaseMessageType>> fault = _consumer.Faults.Select().FirstOrDefault();
             Assert.That(fault, Is.Not.Null);
 
             await TestContext.Out.WriteLineAsync(string.Join(Environment.NewLine, fault.Context.Message.FaultMessageTypes));
@@ -171,7 +170,7 @@
 
             _consumer.Faults.Select().Count().ShouldBe(1);
 
-            var fault = _consumer.Faults.Select().FirstOrDefault();
+            IReceivedMessage<Fault<BaseMessageType>> fault = _consumer.Faults.Select().FirstOrDefault();
             Assert.That(fault, Is.Not.Null);
 
             await TestContext.Out.WriteLineAsync(string.Join(Environment.NewLine, fault.Context.Message.FaultMessageTypes));
@@ -201,10 +200,8 @@
         {
             public Task Consume(ConsumeContext<BaseMessageType> context)
             {
-                if (context.TryGetMessage<ActualMessageType>(out var actualContext))
-                {
-                    return actualContext.NotifyFaulted(TimeSpan.Zero, TypeMetadataCache<FaultConsumer>.ShortName, new IntentionalTestException());
-                }
+                if (context.TryGetMessage<ActualMessageType>(out ConsumeContext<ActualMessageType> actualContext))
+                    return actualContext.NotifyFaulted(TimeSpan.Zero, TypeCache<FaultConsumer>.ShortName, new IntentionalTestException());
 
                 throw new InvalidOperationException("This was not expected, but gets the job done");
             }

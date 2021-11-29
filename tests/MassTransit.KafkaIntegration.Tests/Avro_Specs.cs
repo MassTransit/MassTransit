@@ -7,8 +7,6 @@ namespace MassTransit.KafkaIntegration.Tests
     using Confluent.Kafka.SyncOverAsync;
     using Confluent.SchemaRegistry;
     using Confluent.SchemaRegistry.Serdes;
-    using GreenPipes;
-    using MassTransit.Registration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
@@ -31,17 +29,17 @@ namespace MassTransit.KafkaIntegration.Tests
 
             services.AddSingleton<ISchemaRegistryClient>(new CachedSchemaRegistryClient(new Dictionary<string, string>
             {
-                {"schema.registry.url", "localhost:8081"},
+                { "schema.registry.url", "localhost:8081" },
             }));
             services.TryAddSingleton<ILoggerFactory>(LoggerFactory);
             services.TryAddSingleton(typeof(ILogger<>), typeof(Logger<>));
 
-            static ISerializer<T> GetSerializer<T>(IConfigurationServiceProvider provider)
+            static ISerializer<T> GetSerializer<T>(IServiceProvider provider)
             {
                 return new AvroSerializer<T>(provider.GetService<ISchemaRegistryClient>()).AsSyncOverAsync();
             }
 
-            static IDeserializer<T> GetDeserializer<T>(IConfigurationServiceProvider provider)
+            static IDeserializer<T> GetDeserializer<T>(IServiceProvider provider)
             {
                 return new AvroDeserializer<T>(provider.GetService<ISchemaRegistryClient>()).AsSyncOverAsync();
             }
@@ -96,7 +94,7 @@ namespace MassTransit.KafkaIntegration.Tests
                 var conversationId = NewId.NextGuid();
                 var initiatorId = NewId.NextGuid();
                 var messageId = NewId.NextGuid();
-                await producer.Produce(new {Test = "text"}, Pipe.Execute<SendContext>(context =>
+                await producer.Produce(new { Test = "text" }, Pipe.Execute<SendContext>(context =>
                     {
                         context.CorrelationId = correlationId;
                         context.MessageId = messageId;

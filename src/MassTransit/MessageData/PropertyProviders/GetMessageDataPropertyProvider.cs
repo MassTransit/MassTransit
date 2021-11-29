@@ -35,7 +35,7 @@
                 if (messageData is IInlineMessageData)
                     return Task.FromResult(messageData);
 
-                if (messageData?.Address != null)
+                if (messageData is { HasValue: true } && messageData.Address != null)
                 {
                     var repository = _repository;
                     if (repository != null || context.TryGetPayload(out repository))

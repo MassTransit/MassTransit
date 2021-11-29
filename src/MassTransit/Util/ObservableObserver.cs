@@ -1,7 +1,7 @@
 ﻿namespace MassTransit.Util
 {
     using System;
-    using GreenPipes.Util;
+    using System.Threading.Tasks;
 
 
     public class ObservableObserver<T> :
@@ -26,7 +26,7 @@
             {
                 x.OnNext(value);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
         }
 
@@ -36,7 +36,7 @@
             {
                 x.OnError(error);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
         }
 
@@ -46,7 +46,7 @@
             {
                 x.OnCompleted();
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             });
         }
     }

@@ -15,12 +15,5 @@ namespace MassTransit.Transports
         public static int Capacity { get; set; }
         public static TimeSpan MinAge { get; set; }
         public static TimeSpan MaxAge { get; set; }
-
-        public static void ApplySendEndpointCacheDefaults(this ICacheConfigurator configurator)
-        {
-            configurator.Capacity = Capacity;
-            configurator.MinAge = MinAge;
-            configurator.MaxAge = MaxAge;
-        }
     }
 }

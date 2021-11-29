@@ -1,4 +1,4 @@
-namespace Automatonymous
+namespace MassTransit
 {
     using System;
 
@@ -11,9 +11,10 @@ namespace Automatonymous
     /// <typeparam name="TData"></typeparam>
     /// <param name="context"></param>
     /// <returns></returns>
-    public delegate string ExceptionEventHubNameProvider<in TInstance, in TData, in TException>(ConsumeExceptionEventContext<TInstance, TData, TException> context)
+    public delegate string ExceptionEventHubNameProvider<TInstance, in TData, in TException>(BehaviorExceptionContext<TInstance, TData, TException> context)
         where TException : Exception
-        where TData : class;
+        where TData : class
+        where TInstance : class, ISaga;
 
 
     /// <summary>
@@ -23,6 +24,7 @@ namespace Automatonymous
     /// <typeparam name="TException"></typeparam>
     /// <param name="context"></param>
     /// <returns></returns>
-    public delegate string ExceptionEventHubNameProvider<in TInstance, in TException>(ConsumeExceptionEventContext<TInstance, TException> context)
-        where TException : Exception;
+    public delegate string ExceptionEventHubNameProvider<TInstance, in TException>(BehaviorExceptionContext<TInstance, TException> context)
+        where TException : Exception
+        where TInstance : class, ISaga;
 }

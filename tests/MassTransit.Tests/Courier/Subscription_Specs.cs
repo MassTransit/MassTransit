@@ -1,18 +1,32 @@
 ﻿namespace MassTransit.Tests.Courier
 {
     using System;
+    using System.Text.Json;
     using System.Threading.Tasks;
-    using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
+    using MassTransit.Serialization;
     using MassTransit.Testing;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;
 
 
+    public static class TestExtensionsForJson
+    {
+        public static string ToJsonString(this RoutingSlip routingSlip)
+        {
+            return JsonSerializer.Serialize(routingSlip);
+        }
+
+        public static RoutingSlip GetRoutingSlip(string json)
+        {
+            return JsonSerializer.Deserialize<RoutingSlip>(json, SystemTextJsonMessageSerializer.Options);
+        }
+    }
+
+
     [TestFixture]
-    public class A_routing_slip_event_subscription :
-        InMemoryTestFixture
+    public class A_routing_slip_event_subscription
     {
         [Test]
         public void Should_serialize_properly()
@@ -26,7 +40,7 @@
 
             var jsonString = routingSlip.ToJsonString();
 
-            var loaded = RoutingSlipExtensions.GetRoutingSlip(jsonString);
+            var loaded = TestExtensionsForJson.GetRoutingSlip(jsonString);
 
             Assert.AreEqual(RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted, loaded.Subscriptions[0].Events);
         }
@@ -73,7 +87,7 @@
 
             var jsonString = routingSlip.ToJsonString();
 
-            var loaded = RoutingSlipExtensions.GetRoutingSlip(jsonString);
+            var loaded = TestExtensionsForJson.GetRoutingSlip(jsonString);
 
             Assert.AreEqual(RoutingSlipEvents.Completed | RoutingSlipEvents.Faulted, loaded.Subscriptions[0].Events);
         }
@@ -93,7 +107,7 @@
             builder.AddSubscription(Bus.Address, RoutingSlipEvents.ActivityCompleted, RoutingSlipEventContents.None);
 
             var testActivity = GetActivityContext<TestActivity>();
-            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new {Value = "Hello"});
+            builder.AddActivity(testActivity.Name, testActivity.ExecuteUri, new { Value = "Hello" });
 
             builder.AddVariable("Variable", "Knife");
 

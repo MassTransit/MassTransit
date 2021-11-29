@@ -1,9 +1,5 @@
 ﻿namespace MassTransit.Configuration
 {
-    using BusConfigurators;
-    using EndpointConfigurators;
-
-
     /// <summary>
     /// The configuration of a bus
     /// </summary>

@@ -3,7 +3,7 @@
     using System;
     using System.Runtime.Serialization;
     using System.Threading.Tasks;
-    using GreenPipes;
+    using Middleware;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;

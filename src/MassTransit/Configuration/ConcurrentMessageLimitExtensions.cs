@@ -1,12 +1,9 @@
 namespace MassTransit
 {
     using System;
-    using ConsumeConfigurators;
+    using Configuration;
     using Contracts;
-    using GreenPipes;
-    using PipeConfigurators;
-    using Pipeline.Filters.ConcurrencyLimit;
-    using Saga;
+    using Middleware;
 
 
     public static class ConcurrentMessageLimitExtensions

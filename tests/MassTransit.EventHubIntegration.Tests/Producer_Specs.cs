@@ -3,13 +3,11 @@ namespace MassTransit.EventHubIntegration.Tests
     using System;
     using System.Threading.Tasks;
     using Contracts;
-    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
     using NUnit.Framework;
     using TestFramework;
-    using Util;
 
 
     public class Producer_Specs :
@@ -62,7 +60,7 @@ namespace MassTransit.EventHubIntegration.Tests
                 var conversationId = NewId.NextGuid();
                 var initiatorId = NewId.NextGuid();
                 var messageId = NewId.NextGuid();
-                await producer.Produce<EventHubMessage>(new {Text = "text"}, Pipe.Execute<SendContext>(context =>
+                await producer.Produce<EventHubMessage>(new { Text = "text" }, Pipe.Execute<SendContext>(context =>
                     {
                         context.CorrelationId = correlationId;
                         context.MessageId = messageId;
@@ -180,7 +178,7 @@ namespace MassTransit.EventHubIntegration.Tests
 
             try
             {
-                await producer.Produce<EventHubMessage>(new {Text = "text"}, TestCancellationToken);
+                await producer.Produce<EventHubMessage>(new { Text = "text" }, TestCancellationToken);
 
                 await preSendCompletionSource.Task;
 
@@ -220,20 +218,20 @@ namespace MassTransit.EventHubIntegration.Tests
                 where T : class
             {
                 _preSend.TrySetResult(context);
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task PostSend<T>(SendContext<T> context)
                 where T : class
             {
                 _postSend.TrySetResult(context);
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             public Task SendFault<T>(SendContext<T> context, Exception exception)
                 where T : class
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
 

@@ -3,7 +3,6 @@ namespace MassTransit.GrpcTransport.Tests
     using System;
     using System.Threading.Tasks;
     using Contracts;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
 
@@ -69,9 +68,9 @@ namespace MassTransit.GrpcTransport.Tests
         {
             var endpoint = await Bus.GetSendEndpoint(new Uri("exchange:test-exchange?type=topic"));
 
-            await endpoint.Send(new A {Value = "Bad"}, x => x.SetRoutingKey("bus.red"));
-            await endpoint.Send(new A {Value = "Bad"}, x => x.SetRoutingKey("bus.green"));
-            await endpoint.Send(new A {Value = "Good"}, x => x.SetRoutingKey("car.blue"));
+            await endpoint.Send(new A { Value = "Bad" }, x => x.SetRoutingKey("bus.red"));
+            await endpoint.Send(new A { Value = "Bad" }, x => x.SetRoutingKey("bus.green"));
+            await endpoint.Send(new A { Value = "Good" }, x => x.SetRoutingKey("car.blue"));
 
             ConsumeContext<A> handled = await _handled;
 
@@ -94,6 +93,7 @@ namespace MassTransit.GrpcTransport.Tests
         }
     }
 
+
     public class Using_a_wildcard_topic_pattern_too :
         GrpcTestFixture
     {
@@ -101,7 +101,7 @@ namespace MassTransit.GrpcTransport.Tests
 
         public Using_a_wildcard_topic_pattern_too()
         {
-           TestTimeout = TimeSpan.FromSeconds(5);
+            TestTimeout = TimeSpan.FromSeconds(5);
         }
 
         [Test]
@@ -109,10 +109,10 @@ namespace MassTransit.GrpcTransport.Tests
         {
             var endpoint = await Bus.GetSendEndpoint(new Uri("exchange:test-exchange?type=topic"));
 
-            await endpoint.Send(new A {Value = "Bad"}, x => x.SetRoutingKey("bus.red.large"));
-            await endpoint.Send(new A {Value = "Bad"}, x => x.SetRoutingKey("car.green.small"));
-            await endpoint.Send(new A {Value = "Bad"}, x => x.SetRoutingKey("bus.green.small"));
-            await endpoint.Send(new A {Value = "Good"}, x => x.SetRoutingKey("car.blue.large"));
+            await endpoint.Send(new A { Value = "Bad" }, x => x.SetRoutingKey("bus.red.large"));
+            await endpoint.Send(new A { Value = "Bad" }, x => x.SetRoutingKey("car.green.small"));
+            await endpoint.Send(new A { Value = "Bad" }, x => x.SetRoutingKey("bus.green.small"));
+            await endpoint.Send(new A { Value = "Good" }, x => x.SetRoutingKey("car.blue.large"));
 
             ConsumeContext<A> handled = await _handled;
 
@@ -135,6 +135,7 @@ namespace MassTransit.GrpcTransport.Tests
         }
     }
 
+
     public class Using_a_wildcard_topic_pattern_too_via_client :
         GrpcClientTestFixture
     {
@@ -142,7 +143,7 @@ namespace MassTransit.GrpcTransport.Tests
 
         public Using_a_wildcard_topic_pattern_too_via_client()
         {
-           TestTimeout = TimeSpan.FromSeconds(5);
+            TestTimeout = TimeSpan.FromSeconds(5);
         }
 
         [Test]
@@ -150,10 +151,10 @@ namespace MassTransit.GrpcTransport.Tests
         {
             var endpoint = await ClientBus.GetSendEndpoint(new Uri("exchange:test-exchange?type=topic"));
 
-            await endpoint.Send(new A {Value = "Bad"}, x => x.SetRoutingKey("bus.red.large"));
-            await endpoint.Send(new A {Value = "Bad"}, x => x.SetRoutingKey("car.green.small"));
-            await endpoint.Send(new A {Value = "Bad"}, x => x.SetRoutingKey("bus.green.small"));
-            await endpoint.Send(new A {Value = "Good"}, x => x.SetRoutingKey("car.blue.large"));
+            await endpoint.Send(new A { Value = "Bad" }, x => x.SetRoutingKey("bus.red.large"));
+            await endpoint.Send(new A { Value = "Bad" }, x => x.SetRoutingKey("car.green.small"));
+            await endpoint.Send(new A { Value = "Bad" }, x => x.SetRoutingKey("bus.green.small"));
+            await endpoint.Send(new A { Value = "Good" }, x => x.SetRoutingKey("car.blue.large"));
 
             ConsumeContext<A> handled = await _handled;
 

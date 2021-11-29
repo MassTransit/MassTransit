@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Tests.Courier
 {
     using System;
-    using GreenPipes;
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Courier;

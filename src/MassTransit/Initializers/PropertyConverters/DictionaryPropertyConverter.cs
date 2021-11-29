@@ -94,7 +94,7 @@ namespace MassTransit.Initializers.PropertyConverters
             Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
         {
             Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
-            if (resultTask.IsCompleted)
+            if (resultTask.Status == TaskStatus.RanToCompletion)
                 return Task.FromResult<IDictionary<TKey, TElement>>(resultTask.Result);
 
             async Task<IDictionary<TKey, TElement>> ConvertAsync()
@@ -110,7 +110,7 @@ namespace MassTransit.Initializers.PropertyConverters
                 InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
         {
             Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
-            if (resultTask.IsCompleted)
+            if (resultTask.Status == TaskStatus.RanToCompletion)
                 return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(resultTask.Result);
 
             async Task<IEnumerable<KeyValuePair<TKey, TElement>>> ConvertAsync()
@@ -125,7 +125,7 @@ namespace MassTransit.Initializers.PropertyConverters
             Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TKey, TInputElement>> input)
         {
             Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
-            if (resultTask.IsCompleted)
+            if (resultTask.Status == TaskStatus.RanToCompletion)
                 return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(resultTask.Result);
 
             async Task<IReadOnlyDictionary<TKey, TElement>> ConvertAsync()
@@ -169,7 +169,7 @@ namespace MassTransit.Initializers.PropertyConverters
                             KeyValuePair<TKey, TInputElement> current = asyncEnumerator.Current;
 
                             elementTask = _converter.Convert(context, current.Value);
-                            if (elementTask.IsCompleted)
+                            if (elementTask.Status == TaskStatus.RanToCompletion)
                                 results.Add(current.Key, elementTask.Result);
                             else
                             {
@@ -192,7 +192,7 @@ namespace MassTransit.Initializers.PropertyConverters
                     KeyValuePair<TKey, TInputElement> current = enumerator.Current;
 
                     Task<TElement> elementTask = _converter.Convert(context, current.Value);
-                    if (elementTask.IsCompleted)
+                    if (elementTask.Status == TaskStatus.RanToCompletion)
                         results.Add(current.Key, elementTask.Result);
                     else
                     {
@@ -252,7 +252,7 @@ namespace MassTransit.Initializers.PropertyConverters
                 InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
         {
             Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
-            if (resultTask.IsCompleted)
+            if (resultTask.Status == TaskStatus.RanToCompletion)
                 return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(resultTask.Result);
 
             async Task<IEnumerable<KeyValuePair<TKey, TElement>>> ConvertAsync()
@@ -267,7 +267,7 @@ namespace MassTransit.Initializers.PropertyConverters
             Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TElement>> input)
         {
             Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
-            if (resultTask.IsCompleted)
+            if (resultTask.Status == TaskStatus.RanToCompletion)
                 return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(resultTask.Result);
 
             async Task<IReadOnlyDictionary<TKey, TElement>> ConvertAsync()
@@ -311,7 +311,7 @@ namespace MassTransit.Initializers.PropertyConverters
                             KeyValuePair<TInputKey, TElement> current = asyncEnumerator.Current;
 
                             keyTask = _converter.Convert(context, current.Key);
-                            if (keyTask.IsCompleted)
+                            if (keyTask.Status == TaskStatus.RanToCompletion)
                                 results.Add(keyTask.Result, current.Value);
                             else
                             {
@@ -334,7 +334,7 @@ namespace MassTransit.Initializers.PropertyConverters
                     KeyValuePair<TInputKey, TElement> current = enumerator.Current;
 
                     Task<TKey> keyTask = _converter.Convert(context, current.Key);
-                    if (keyTask.IsCompleted)
+                    if (keyTask.Status == TaskStatus.RanToCompletion)
                         results.Add(keyTask.Result, current.Value);
                     else
                     {
@@ -381,7 +381,7 @@ namespace MassTransit.Initializers.PropertyConverters
             .Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
         {
             Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
-            if (resultTask.IsCompleted)
+            if (resultTask.Status == TaskStatus.RanToCompletion)
                 return Task.FromResult<IDictionary<TKey, TElement>>(resultTask.Result);
 
             async Task<IDictionary<TKey, TElement>> ConvertAsync()
@@ -397,7 +397,7 @@ namespace MassTransit.Initializers.PropertyConverters
             IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
         {
             Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
-            if (resultTask.IsCompleted)
+            if (resultTask.Status == TaskStatus.RanToCompletion)
                 return Task.FromResult<IEnumerable<KeyValuePair<TKey, TElement>>>(resultTask.Result);
 
             async Task<IEnumerable<KeyValuePair<TKey, TElement>>> ConvertAsync()
@@ -413,7 +413,7 @@ namespace MassTransit.Initializers.PropertyConverters
             Convert<TMessage>(InitializeContext<TMessage> context, IEnumerable<KeyValuePair<TInputKey, TInputElement>> input)
         {
             Task<Dictionary<TKey, TElement>> resultTask = ConvertSync(context, input);
-            if (resultTask.IsCompleted)
+            if (resultTask.Status == TaskStatus.RanToCompletion)
                 return Task.FromResult<IReadOnlyDictionary<TKey, TElement>>(resultTask.Result);
 
             async Task<IReadOnlyDictionary<TKey, TElement>> ConvertAsync()
@@ -449,8 +449,8 @@ namespace MassTransit.Initializers.PropertyConverters
                 {
                     try
                     {
-                        var key = keyTask.IsCompleted ? keyTask.Result : await keyTask.ConfigureAwait(false);
-                        var element = elementTask.IsCompleted ? elementTask.Result : await elementTask.ConfigureAwait(false);
+                        var key = keyTask.Status == TaskStatus.RanToCompletion ? keyTask.Result : await keyTask.ConfigureAwait(false);
+                        var element = elementTask.Status == TaskStatus.RanToCompletion ? elementTask.Result : await elementTask.ConfigureAwait(false);
 
                         results.Add(key, element);
 
@@ -481,7 +481,7 @@ namespace MassTransit.Initializers.PropertyConverters
 
                     Task<TKey> keyTask = _keyConverter.Convert(context, current.Key);
                     Task<TElement> elementTask = _elementConverter.Convert(context, current.Value);
-                    if (keyTask.IsCompleted && elementTask.IsCompleted)
+                    if (keyTask.Status == TaskStatus.RanToCompletion && elementTask.Status == TaskStatus.RanToCompletion)
                         results.Add(keyTask.Result, elementTask.Result);
                     else
                     {

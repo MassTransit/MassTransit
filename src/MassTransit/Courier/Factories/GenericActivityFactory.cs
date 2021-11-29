@@ -1,7 +1,6 @@
 ﻿namespace MassTransit.Courier.Factories
 {
     using System.Threading.Tasks;
-    using GreenPipes;
 
 
     public class GenericActivityFactory<TActivity, TArguments, TLog> :

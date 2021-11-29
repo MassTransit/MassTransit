@@ -2,8 +2,6 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Context;
-    using GreenPipes;
     using NUnit.Framework;
     using Scheduling;
 
@@ -18,7 +16,8 @@
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            ScheduledMessage<A> scheduledMessage = await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(120), new A {Name = "Joe"});
+            ScheduledMessage<A> scheduledMessage =
+                await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(120), new A { Name = "Joe" });
 
             await Task.Delay(2000);
 
@@ -32,7 +31,7 @@
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow, new A {Name = "Joe"});
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow, new A { Name = "Joe" });
 
             await handler;
         }
@@ -42,7 +41,7 @@
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(2), new A {Name = "Joe"});
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromSeconds(2), new A { Name = "Joe" });
 
             await handler;
         }
@@ -56,7 +55,7 @@
             var correlationId = Guid.NewGuid();
             var conversationId = Guid.NewGuid();
             var initiatorId = Guid.NewGuid();
-            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow, new A {Name = "Joe"}, Pipe.Execute<SendContext>(x =>
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow, new A { Name = "Joe" }, Pipe.Execute<SendContext>(x =>
             {
                 x.FaultAddress = Bus.Address;
                 x.ResponseAddress = InputQueueAddress;
@@ -90,7 +89,7 @@
         {
             Task<ConsumeContext<A>> handler = SubscribeHandler<A>();
 
-            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromHours(-1), new A {Name = "Joe"});
+            await Scheduler.ScheduleSend(Bus.Address, DateTime.UtcNow + TimeSpan.FromHours(-1), new A { Name = "Joe" });
 
             await handler;
         }

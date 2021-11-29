@@ -5,7 +5,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]
@@ -51,33 +50,33 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             Task IReceiveObserver.PreReceive(ReceiveContext context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             Task IReceiveObserver.PostReceive(ReceiveContext context)
             {
                 _completed.TrySetResult(context);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             Task IReceiveObserver.PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
                 where T : class
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
                 where T : class
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)
             {
                 _completed.TrySetException(exception);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }
@@ -127,33 +126,33 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
 
             Task IReceiveObserver.PreReceive(ReceiveContext context)
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             Task IReceiveObserver.PostReceive(ReceiveContext context)
             {
                 _completed.TrySetResult(context);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             Task IReceiveObserver.PostConsume<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType)
                 where T : class
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             Task IReceiveObserver.ConsumeFault<T>(ConsumeContext<T> context, TimeSpan duration, string consumerType, Exception exception)
                 where T : class
             {
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
 
             Task IReceiveObserver.ReceiveFault(ReceiveContext context, Exception exception)
             {
                 _completed.TrySetException(exception);
 
-                return TaskUtil.Completed;
+                return Task.CompletedTask;
             }
         }
     }

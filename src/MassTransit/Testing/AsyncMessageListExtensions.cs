@@ -2,7 +2,6 @@ namespace MassTransit.Testing
 {
     using System.Linq;
     using System.Threading;
-    using MessageObservers;
 
 
     public static class AsyncMessageListExtensions

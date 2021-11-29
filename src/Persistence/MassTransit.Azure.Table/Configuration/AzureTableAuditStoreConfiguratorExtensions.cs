@@ -1,7 +1,7 @@
 namespace MassTransit
 {
     using System;
-    using Azure.Table.Audit;
+    using AzureTable;
     using Microsoft.Azure.Cosmos.Table;
 
 

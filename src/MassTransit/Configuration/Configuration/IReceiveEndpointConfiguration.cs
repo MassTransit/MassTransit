@@ -2,9 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Context;
-    using Pipeline;
-    using Pipeline.Observables;
+    using Observables;
     using Transports;
 
 

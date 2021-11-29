@@ -1,8 +1,5 @@
 namespace MassTransit
 {
-    using EventHubIntegration;
-
-
     public static class EventHubConsumeContextExtensions
     {
         public static string PartitionKey(this ConsumeContext context)

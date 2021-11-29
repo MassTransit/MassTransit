@@ -2,75 +2,59 @@ namespace MassTransit.Serialization.JsonConverters
 {
     using System;
     using System.Collections.Generic;
-    using System.Reflection;
-    using Internals.Extensions;
-    using Newtonsoft.Json;
+    using System.Text.Json;
+    using System.Text.Json.Serialization;
 
 
-    public class CaseInsensitiveDictionaryJsonConverter :
-        BaseJsonConverter
+    public class CaseInsensitiveDictionaryJsonConverter<T, TValue> :
+        JsonConverter<T>
+        where T : class, IEnumerable<KeyValuePair<string, TValue>>
     {
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
         {
-            throw new NotSupportedException("This converter should not be used for writing as it can create loops");
-        }
+            writer.WriteStartObject();
 
-        protected override IConverter ValueFactory(Type objectType)
-        {
-            if (CanConvert(objectType, out _, out var valueType) && valueType == typeof(object))
-                return (IConverter)Activator.CreateInstance(typeof(CachedConverter<>).MakeGenericType(valueType));
-
-            return new Unsupported();
-        }
-
-        static bool CanConvert(Type objectType, out Type keyType, out Type valueType)
-        {
-            var typeInfo = objectType.GetTypeInfo();
-            if (typeInfo.IsGenericType)
+            foreach (KeyValuePair<string, TValue> element in value)
             {
-                if (typeInfo.ClosesType(typeof(IDictionary<,>), out Type[] elementTypes)
-                    || typeInfo.ClosesType(typeof(IReadOnlyDictionary<,>), out elementTypes)
-                    || typeInfo.ClosesType(typeof(Dictionary<,>), out elementTypes)
-                    || typeInfo.ClosesType(typeof(IEnumerable<>), out Type[] enumerableType)
-                    && enumerableType[0].ClosesType(typeof(KeyValuePair<,>), out elementTypes))
-                {
-                    keyType = elementTypes[0];
-                    valueType = elementTypes[1];
+                if (element.Key != null)
+                    writer.WritePropertyName(element.Key);
 
-                    if (keyType != typeof(string))
-                        return false;
-
-                    if (typeInfo.IsFSharpType())
-                        return false;
-
-                    return true;
-                }
+                JsonSerializer.Serialize(writer, element.Value, options);
             }
 
-            keyType = default;
-            valueType = default;
-            return false;
+            writer.WriteEndObject();
         }
 
-
-        class CachedConverter<T> :
-            IConverter
+        public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            object IConverter.Deserialize(JsonReader reader, Type objectType, JsonSerializer serializer)
+            return ReadInternal(ref reader, typeToConvert, options);
+        }
+
+        protected T ReadInternal(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType != JsonTokenType.StartObject)
+                throw new JsonException($"Expected StartObject, found: {reader.TokenType}");
+
+            var dictionary = new Dictionary<string, TValue>(StringComparer.OrdinalIgnoreCase);
+            while (reader.Read())
             {
-                if (reader.TokenType == JsonToken.StartObject)
-                {
-                    object result = new CaseInsensitiveDictionary<T>();
+                if (reader.TokenType == JsonTokenType.EndObject)
+                    return dictionary as T;
 
-                    serializer.Populate(reader, result);
+                if (reader.TokenType != JsonTokenType.PropertyName)
+                    throw new JsonException($"Expected PropertyName, found: {reader.TokenType}");
 
-                    return result;
-                }
+                var propertyName = reader.GetString();
 
-                return null;
+                if (string.IsNullOrWhiteSpace(propertyName))
+                    throw new JsonException("Expected non-empty PropertyName");
+
+                reader.Read();
+
+                dictionary.Add(propertyName, JsonSerializer.Deserialize<TValue>(ref reader, options));
             }
 
-            public bool IsSupported => true;
+            return dictionary as T;
         }
     }
 }

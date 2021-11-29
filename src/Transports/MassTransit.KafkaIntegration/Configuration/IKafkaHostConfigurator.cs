@@ -1,4 +1,4 @@
-namespace MassTransit.KafkaIntegration
+namespace MassTransit
 {
     using System;
 

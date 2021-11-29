@@ -5,8 +5,7 @@
         using System;
         using System.Runtime.Serialization;
         using System.Threading.Tasks;
-        using GreenPipes;
-        using GreenPipes.Internals.Extensions;
+        using Internals;
         using NUnit.Framework;
         using Shouldly;
         using TestFramework;

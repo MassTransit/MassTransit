@@ -1,18 +1,14 @@
 namespace MassTransit.Containers.Tests
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using GreenPipes;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Diagnostics.HealthChecks;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
     using NUnit.Framework;
     using TestFramework;
 
@@ -29,29 +25,28 @@ namespace MassTransit.Containers.Tests
             collection.AddSingleton<ILoggerFactory>(_ => LoggerFactory);
             collection.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             collection.AddMassTransit(configurator =>
+            {
+                configurator.UsingInMemory((context, cfg) =>
                 {
-                    configurator.UsingInMemory((context, cfg) =>
+                    cfg.ReceiveEndpoint("input-queue", e =>
                     {
-                        cfg.ReceiveEndpoint("input-queue", e =>
-                        {
-                            e.UseMessageRetry(r => r.Immediate(5));
-                        });
+                        e.UseMessageRetry(r => r.Immediate(5));
                     });
-                })
-                .AddMassTransitHostedService();
+                });
+            });
 
             IServiceProvider provider = collection.BuildServiceProvider(true);
 
             var healthChecks = provider.GetService<HealthCheckService>();
 
-            var hostedServices = provider.GetRequiredService<IEnumerable<IHostedService>>();
+            IHostedService[] hostedServices = provider.GetServices<IHostedService>().ToArray();
 
-            await WaitForHealthStatus(healthChecks, HealthStatus.Unhealthy);
+            await healthChecks.WaitForHealthStatus(HealthStatus.Unhealthy);
 
             await Task.WhenAll(hostedServices.Select(x => x.StartAsync(TestCancellationToken)));
             try
             {
-                await WaitForHealthStatus(healthChecks, HealthStatus.Healthy);
+                await healthChecks.WaitForHealthStatus(HealthStatus.Healthy);
 
                 var busControl = provider.GetRequiredService<IBusControl>();
 
@@ -61,13 +56,13 @@ namespace MassTransit.Containers.Tests
 
                 await endpointHandle.Ready;
 
-                await WaitForHealthStatus(healthChecks, HealthStatus.Healthy);
+                await healthChecks.WaitForHealthStatus(HealthStatus.Healthy);
 
                 using var stop = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
                 await endpointHandle.ReceiveEndpoint.Stop(stop.Token);
 
-                await WaitForHealthStatus(healthChecks, HealthStatus.Degraded);
+                await healthChecks.WaitForHealthStatus(HealthStatus.Degraded);
             }
             finally
             {
@@ -85,29 +80,28 @@ namespace MassTransit.Containers.Tests
             collection.AddSingleton<ILoggerFactory>(_ => LoggerFactory);
             collection.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             collection.AddMassTransit(configurator =>
+            {
+                configurator.UsingInMemory((context, cfg) =>
                 {
-                    configurator.UsingInMemory((context, cfg) =>
+                    cfg.ReceiveEndpoint("input-queue", e =>
                     {
-                        cfg.ReceiveEndpoint("input-queue", e =>
-                        {
-                            e.UseMessageRetry(r => r.Immediate(5));
-                        });
+                        e.UseMessageRetry(r => r.Immediate(5));
                     });
-                })
-                .AddMassTransitHostedService();
+                });
+            });
 
             IServiceProvider provider = collection.BuildServiceProvider(true);
 
             var healthChecks = provider.GetService<HealthCheckService>();
 
-            var hostedServices = provider.GetRequiredService<IEnumerable<IHostedService>>();
+            IHostedService[] hostedServices = provider.GetServices<IHostedService>().ToArray();
 
-            await WaitForHealthStatus(healthChecks, HealthStatus.Unhealthy);
+            await healthChecks.WaitForHealthStatus(HealthStatus.Unhealthy);
 
             await Task.WhenAll(hostedServices.Select(x => x.StartAsync(TestCancellationToken)));
             try
             {
-                await WaitForHealthStatus(healthChecks, HealthStatus.Healthy);
+                await healthChecks.WaitForHealthStatus(HealthStatus.Healthy);
 
                 var busControl = provider.GetRequiredService<IBusControl>();
 
@@ -115,13 +109,13 @@ namespace MassTransit.Containers.Tests
 
                 await busControl.StopAsync(stop.Token);
 
-                await WaitForHealthStatus(healthChecks, HealthStatus.Unhealthy);
+                await healthChecks.WaitForHealthStatus(HealthStatus.Unhealthy);
 
                 using var start = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
                 await busControl.StartAsync(start.Token);
 
-                await WaitForHealthStatus(healthChecks, HealthStatus.Healthy);
+                await healthChecks.WaitForHealthStatus(HealthStatus.Healthy);
             }
             finally
             {
@@ -139,22 +133,27 @@ namespace MassTransit.Containers.Tests
             collection.AddSingleton<ILoggerFactory>(_ => LoggerFactory);
             collection.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
             collection.AddMassTransit(configurator =>
+            {
+                configurator.UsingInMemory((context, cfg) =>
                 {
-                    configurator.UsingInMemory((context, cfg) =>
+                    cfg.ReceiveEndpoint("input-queue", e =>
                     {
-                        cfg.ReceiveEndpoint("input-queue", e =>
-                        {
-                            e.UseMessageRetry(r => r.Immediate(5));
-                        });
+                        e.UseMessageRetry(r => r.Immediate(5));
                     });
-                })
-                .AddMassTransitHostedService();
+                });
+            });
+            collection.AddOptions<MassTransitHostOptions>()
+                .Configure(options =>
+                {
+                    options.WaitUntilStarted = true;
+                    options.StartTimeout = TimeSpan.FromSeconds(10);
+                });
 
             IServiceProvider provider = collection.BuildServiceProvider(true);
 
             var healthChecks = provider.GetService<HealthCheckService>();
 
-            var hostedServices = provider.GetRequiredService<IEnumerable<IHostedService>>();
+            IHostedService[] hostedServices = provider.GetServices<IHostedService>().ToArray();
 
             var result = await healthChecks.CheckHealthAsync(TestCancellationToken);
             Assert.That(result.Status == HealthStatus.Unhealthy);
@@ -162,7 +161,7 @@ namespace MassTransit.Containers.Tests
             await Task.WhenAll(hostedServices.Select(x => x.StartAsync(TestCancellationToken)));
             try
             {
-                await WaitForHealthStatus(healthChecks, HealthStatus.Healthy);
+                await healthChecks.WaitForHealthStatus(HealthStatus.Healthy);
             }
             finally
             {
@@ -172,35 +171,57 @@ namespace MassTransit.Containers.Tests
             }
         }
 
-        async Task WaitForHealthStatus(HealthCheckService healthChecks, HealthStatus expectedStatus)
+        [Test]
+        public async Task Should_be_healthy_with_multiple_bus_instances()
         {
-            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            var collection = new ServiceCollection();
 
-            HealthReport result;
-            do
+            collection.AddSingleton<ILoggerFactory>(_ => LoggerFactory);
+            collection.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
+            collection.AddMassTransit(configurator =>
             {
-                result = await healthChecks.CheckHealthAsync(TestCancellationToken);
+                configurator.UsingInMemory((context, cfg) =>
+                {
+                    cfg.ReceiveEndpoint("input-queue", e =>
+                    {
+                        e.UseMessageRetry(r => r.Immediate(5));
+                    });
+                });
+            });
+            collection.AddMassTransit<IAnotherBus>(configurator =>
+            {
+                configurator.UsingInMemory((context, cfg) =>
+                {
+                    cfg.AutoStart = true;
+                });
+            });
 
-                await Task.Delay(100, TestCancellationToken);
+            IServiceProvider provider = collection.BuildServiceProvider(true);
+
+            var healthChecks = provider.GetService<HealthCheckService>();
+
+            IHostedService[] hostedServices = provider.GetServices<IHostedService>().ToArray();
+
+            var result = await healthChecks.CheckHealthAsync(TestCancellationToken);
+            Assert.That(result.Status == HealthStatus.Unhealthy);
+
+            await Task.WhenAll(hostedServices.Select(x => x.StartAsync(TestCancellationToken)));
+            try
+            {
+                await healthChecks.WaitForHealthStatus(HealthStatus.Healthy);
             }
-            while (result.Status != expectedStatus);
+            finally
+            {
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
 
-            if (result.Status != expectedStatus)
-                await TestContext.Out.WriteLineAsync(FormatHealthCheck(result));
-
-            Assert.That(result.Status, Is.EqualTo(expectedStatus));
+                await Task.WhenAll(hostedServices.Select(x => x.StopAsync(cts.Token)));
+            }
         }
 
-        public string FormatHealthCheck(HealthReport result)
-        {
-            var json = new JObject(
-                new JProperty("status", result.Status.ToString()),
-                new JProperty("results", new JObject(result.Entries.Select(entry => new JProperty(entry.Key, new JObject(
-                    new JProperty("status", entry.Value.Status.ToString()),
-                    new JProperty("description", entry.Value.Description),
-                    new JProperty("data", JObject.FromObject(entry.Value.Data))))))));
 
-            return json.ToString(Formatting.Indented);
+        public interface IAnotherBus :
+            IBus
+        {
         }
     }
 }

@@ -1,9 +1,8 @@
-namespace MassTransit.ActiveMqTransport.Topology
+namespace MassTransit
 {
     using System;
-    using Builders;
-    using Entities;
-    using MassTransit.Topology;
+    using ActiveMqTransport;
+    using ActiveMqTransport.Topology;
 
 
     public interface IActiveMqMessagePublishTopology<TMessage> :

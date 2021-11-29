@@ -2,8 +2,8 @@ namespace MassTransit.GrpcTransport.Tests
 {
     using System.Linq;
     using System.Threading.Tasks;
-    using MassTransit.Testing;
     using NUnit.Framework;
+    using Testing;
 
 
     [TestFixture]

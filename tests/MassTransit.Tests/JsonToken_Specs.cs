@@ -15,7 +15,7 @@
             using (var reader = new StringReader("27"))
             using (var jsonReader = new JsonTextReader(reader))
             {
-                var value = JsonMessageSerializer.Deserializer.Deserialize<int>(jsonReader);
+                var value = NewtonsoftJsonMessageSerializer.Deserializer.Deserialize<int>(jsonReader);
 
                 Assert.AreEqual(27, value);
             }

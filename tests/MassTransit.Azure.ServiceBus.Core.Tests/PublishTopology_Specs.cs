@@ -6,7 +6,6 @@ namespace MassTransit.Azure.ServiceBus.Core.Tests
     using System.Threading.Tasks;
     using DupeDetection;
     using MassTransit.Testing;
-    using MassTransit.Testing.MessageObservers;
     using NUnit.Framework;
 
 
