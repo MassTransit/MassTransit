@@ -27,6 +27,7 @@ Required AWS permissions:
 * _sqs:CreateQueue_
 * _sqs:DeleteMessage_
 * _sqs:SendMessage_
+* _sqs:ChangeMessageVisibility_
 * _sns:GetTopicAttributes_
 * _sns:CreateTopic_
 * _sns:Publish_
