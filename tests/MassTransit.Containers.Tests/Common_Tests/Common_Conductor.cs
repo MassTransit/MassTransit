@@ -32,7 +32,6 @@ namespace MassTransit.Containers.Tests.Common_Tests
         protected Common_Conductor()
         {
             Options = new ServiceInstanceOptions();
-
         }
 
         protected ServiceInstanceOptions Options { get; private set; }

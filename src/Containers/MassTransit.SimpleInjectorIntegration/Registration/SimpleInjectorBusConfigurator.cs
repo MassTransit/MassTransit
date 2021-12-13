@@ -1,6 +1,8 @@
 namespace MassTransit.SimpleInjectorIntegration.Registration
 {
     using System;
+    using System.Collections.Generic;
+    using AutofacIntegration;
     using Context;
     using MassTransit.Registration;
     using Monitoring.Health;
@@ -16,9 +18,12 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         ISimpleInjectorBusConfigurator
     {
         readonly Lifestyle _hybridLifestyle;
+        protected readonly HashSet<Type> RiderTypes;
+
+        static bool _masstransit_components_added = false;
 
         public SimpleInjectorBusConfigurator(Container container)
-            : base(new SimpleInjectorContainerRegistrar(container))
+            : this(container, new SimpleInjectorContainerRegistrar(container))
         {
             IBusRegistrationContext CreateRegistrationContext()
             {
@@ -26,15 +31,20 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
                 return new BusRegistrationContext(provider, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
             }
 
-            Container = container;
-
-            _hybridLifestyle = Lifestyle.CreateHybrid(container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
-
-            AddMassTransitComponents(Container);
-
-            Container.RegisterSingleton(() => CreateRegistrationContext());
+            Container.RegisterSingleton(() => Bind<IBus>.Create(CreateRegistrationContext()));
+            Container.RegisterSingleton(() => Container.GetInstance<Bind<IBus, IBusRegistrationContext>>().Value);
 
             Container.RegisterSingleton(() => ClientFactoryProvider(Container.GetInstance<IConfigurationServiceProvider>(), Container.GetInstance<IBus>()));
+        }
+
+        protected SimpleInjectorBusConfigurator(Container container, SimpleInjectorContainerRegistrar registrar)
+            : base(registrar)
+        {
+            Container = container;
+            RiderTypes = new HashSet<Type>();
+
+            _hybridLifestyle = Lifestyle.CreateHybrid(container.Options.DefaultScopedLifestyle, Lifestyle.Singleton);
+            AddMassTransitComponents(Container);
         }
 
         public Container Container { get; }
@@ -47,12 +57,12 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             AddBus(_ => busFactory());
         }
 
-        public void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
+        public virtual void AddBus(Func<IBusRegistrationContext, IBusControl> busFactory)
         {
             SetBusFactory(new RegistrationBusFactory(busFactory));
         }
 
-        public void SetBusFactory<T>(T busFactory)
+        public virtual void SetBusFactory<T>(T busFactory)
             where T : IRegistrationBusFactory
         {
             if (busFactory == null)
@@ -71,7 +81,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             Container.RegisterSingleton<IBusHealth>(() => new BusHealth(Container.GetInstance<IBusInstance>()));
         }
 
-        public void AddRider(Action<IRiderRegistrationConfigurator> configure)
+        public virtual void AddRider(Action<IRiderRegistrationConfigurator> configure)
         {
             throw new NotSupportedException("Riders are only supported with Microsoft DI and Autofac");
         }
@@ -92,17 +102,22 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         void AddMassTransitComponents(Container container)
         {
-            container.Register<ScopedConsumeContextProvider>(Lifestyle.Scoped);
+            if (_masstransit_components_added)
+                return;
 
+            container.RegisterSingleton<IBusDepot, BusDepot>();
+
+            container.Register<ScopedConsumeContextProvider>(Lifestyle.Scoped);
             container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext(),
                 Lifestyle.Scoped);
 
             container.Register(GetSendEndpointProvider, _hybridLifestyle);
-
             container.Register(GetPublishEndpoint, _hybridLifestyle);
 
             container.RegisterSingleton<IConsumerScopeProvider>(() => new SimpleInjectorConsumerScopeProvider(container));
             container.RegisterSingleton<IConfigurationServiceProvider>(() => new SimpleInjectorConfigurationServiceProvider(container));
+
+            _masstransit_components_added = true;
         }
     }
 }

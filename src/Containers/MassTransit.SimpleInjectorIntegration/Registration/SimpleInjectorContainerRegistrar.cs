@@ -2,6 +2,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 {
     using System;
     using System.Linq;
+    using AutofacIntegration;
     using Automatonymous;
     using Clients;
     using Courier;
@@ -172,6 +173,9 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         public void RegisterScopedClientFactory()
         {
+            var allowOverrides = _container.Options.AllowOverridingRegistrations;
+            _container.Options.AllowOverridingRegistrations = true;
+
             _container.Register<IScopedClientFactory>(() =>
             {
                 var clientFactory = GetClientFactory(_container);
@@ -181,6 +185,8 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
                     ? new ScopedClientFactory(clientFactory, consumeContext)
                     : new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext<Container>(clientFactory, _container)), null);
             }, _hybridLifestyle);
+
+            _container.Options.AllowOverridingRegistrations = allowOverrides;
         }
 
         public void Register<T, TImplementation>()
@@ -235,6 +241,19 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         protected override IClientFactory GetClientFactory(Container container)
         {
             return container.GetInstance<IMediator>();
+        }
+    }
+
+    public class SimpleInjectorContainerRegistrar<TBus> : SimpleInjectorContainerRegistrar
+    {
+        public SimpleInjectorContainerRegistrar(Container container) : base(container)
+        {
+
+        }
+
+        protected override IClientFactory GetClientFactory(Container container)
+        {
+            return container.GetInstance<Bind<TBus, IClientFactory>>().Value;
         }
     }
 }
