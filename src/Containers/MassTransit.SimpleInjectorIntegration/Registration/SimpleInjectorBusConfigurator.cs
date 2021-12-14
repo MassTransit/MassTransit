@@ -86,20 +86,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             throw new NotSupportedException("Riders are only supported with Microsoft DI and Autofac");
         }
 
-        ISendEndpointProvider GetSendEndpointProvider()
-        {
-            return (ISendEndpointProvider)Container.GetConsumeContext()
-                ?? new ScopedSendEndpointProvider<Container>(Container.TryGetInstance<ITransactionalBus>() ?? Container.GetInstance<IBus>(), Container);
-        }
-
-        IPublishEndpoint GetPublishEndpoint()
-        {
-            return (IPublishEndpoint)Container.GetConsumeContext()
-                ?? new PublishEndpoint(new ScopedPublishEndpointProvider<Container>(
-                    Container.TryGetInstance<ITransactionalBus>() ?? Container.GetInstance<IBus>(),
-                    Container));
-        }
-
         void AddMassTransitComponents(Container container)
         {
             if (_masstransit_components_added)
@@ -111,13 +97,35 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext(),
                 Lifestyle.Scoped);
 
-            container.Register(GetSendEndpointProvider, _hybridLifestyle);
-            container.Register(GetPublishEndpoint, _hybridLifestyle);
+            container.Register(GetCurrentSendEndpointProvider, _hybridLifestyle);
+            container.Register(GetCurrentPublishEndpoint, _hybridLifestyle);
 
             container.RegisterSingleton<IConsumerScopeProvider>(() => new SimpleInjectorConsumerScopeProvider(container));
             container.RegisterSingleton<IConfigurationServiceProvider>(() => new SimpleInjectorConfigurationServiceProvider(container));
 
             _masstransit_components_added = true;
         }
+
+        ISendEndpointProvider GetCurrentSendEndpointProvider()
+        {
+            var consumeContextProvider = Container.TryGetInstance<ScopedConsumeContextProvider>();
+            if (consumeContextProvider.HasContext)
+                return consumeContextProvider.GetContext();
+
+            var bus = Container.TryGetInstance<ITransactionalBus>() ?? (ISendEndpointProvider)Container.GetInstance<IBus>();
+            return new ScopedSendEndpointProvider<IServiceProvider>(bus, Container);
+        }
+
+        IPublishEndpoint GetCurrentPublishEndpoint()
+        {
+            var consumeContextProvider = Container.TryGetInstance<ScopedConsumeContextProvider>();
+            if (consumeContextProvider.HasContext)
+                return consumeContextProvider.GetContext();
+
+            var bus = Container.TryGetInstance<ITransactionalBus>() ?? Container.GetInstance<IBus>();
+            return new PublishEndpoint(new ScopedPublishEndpointProvider<IServiceProvider>(bus, Container));
+        }
+
+
     }
 }

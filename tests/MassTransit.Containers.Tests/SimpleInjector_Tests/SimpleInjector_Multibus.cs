@@ -8,6 +8,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
     using NUnit.Framework;
     using Registration;
     using SimpleInjector;
+    using SimpleInjector.Lifestyles;
     using SimpleInjectorIntegration.Multibus;
 
 
@@ -17,6 +18,7 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         readonly Container _container;
 
         protected override IBusOne One => _container.GetInstance<IBusOne>();
+        protected IBusOne t => _container.GetInstance<BusOne>();
 
         protected override IEnumerable<IHostedService> HostedServices => _container.GetAllInstances<IHostedService>();
 
@@ -30,9 +32,12 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         public SimpleInjector_MultiBus()
         {
             var container = new Container();
-            container.SetMassTransitContainerOptions();
-            container.RegisterSingleton(() => LoggerFactory);
-            container.Register(typeof(Logger<>));
+            container.Options.DefaultScopedLifestyle = new AsyncScopedLifestyle();
+            container.Options.EnableAutoVerification = false;
+            container.Options.ResolveUnregisteredConcreteTypes = false;
+
+            container.RegisterSingleton<ILoggerFactory>(() => LoggerFactory);
+            container.Register(typeof(ILogger<>), typeof(Logger<>));
 
             container.AddMassTransit(x =>
             {

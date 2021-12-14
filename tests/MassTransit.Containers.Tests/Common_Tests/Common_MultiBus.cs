@@ -9,6 +9,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
     using NUnit.Framework;
     using Registration;
     using Scenarios;
+    using SimpleInjector;
     using TestFramework;
     using TestFramework.Messages;
 

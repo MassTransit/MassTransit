@@ -32,8 +32,11 @@ namespace MassTransit.SimpleInjectorIntegration.Multibus
             }
 
             Container.RegisterSingleton(() => Bind<TBus, TRider>.Create(CreateRegistrationContext()));
-            Container.RegisterSingleton(() =>
-                Bind<TBus>.Create(riderFactory.CreateRider(Container.GetInstance<Bind<TBus, TRider, IRiderRegistrationContext>>().Value)));
+            Container.Collection.AppendInstance(
+                Lifestyle.Singleton.CreateRegistration(() =>
+                    Bind<TBus>.Create(riderFactory.CreateRider(Container.GetInstance<Bind<TBus, TRider, IRiderRegistrationContext>>().Value)),
+                    Container)
+            );
             Container.RegisterSingleton(() => Bind<TBus>.Create(Container.GetInstance<IBusInstance<TBus>>().GetRider<TRider>()));
         }
     }

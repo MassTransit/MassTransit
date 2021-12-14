@@ -60,7 +60,6 @@ namespace MassTransit.AutofacIntegration.Registration
                 .As<IPublishEndpoint>()
                 .InstancePerLifetimeScope();
 
-
             builder.Register(CreateConsumerScopeProvider)
                 .As<IConsumerScopeProvider>()
                 .SingleInstance()

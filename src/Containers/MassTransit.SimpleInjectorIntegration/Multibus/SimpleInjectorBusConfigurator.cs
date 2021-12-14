@@ -3,7 +3,6 @@ using MassTransit.SimpleInjectorIntegration.Registration;
 using SimpleInjector;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace MassTransit.SimpleInjectorIntegration.Multibus
 {
@@ -27,24 +26,23 @@ namespace MassTransit.SimpleInjectorIntegration.Multibus
         {
             IBusRegistrationContext CreateRegistrationContext()
             {
-                var provider = container.GetInstance<IConfigurationServiceProvider>();
+                var provider = Container.GetInstance<IConfigurationServiceProvider>();
                 return new BusRegistrationContext(provider, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
             }
 
+            Container.Collection.Register(new Bind<TBus, IBusInstanceSpecification>[]{ });
             Container.Register(() => Bind<TBus>.Create(GetSendEndpointProvider(Container)), Lifestyle.Scoped);
 
             Container.Register(() => Bind<TBus>.Create(GetPublishEndpoint(Container)), Lifestyle.Scoped);
 
-            Container.Register(() =>
+            Container.RegisterSingleton(() =>
             {
-                var provider = container.GetInstance<IConfigurationServiceProvider>();
-                var bus = container.GetInstance<TBus>();
+                var provider = Container.GetInstance<IConfigurationServiceProvider>();
+                var bus = Container.GetInstance<TBus>();
                 return Bind<TBus>.Create(ClientFactoryProvider(provider, bus));
             });
 
-            Container.Collection.AppendInstance(
-                Lifestyle.Singleton.CreateRegistration(() => Bind<TBus>.Create(CreateRegistrationContext()), Container)
-            );
+            Container.RegisterSingleton(() => Bind<TBus>.Create(CreateRegistrationContext()));
         }
 
         public override void AddRider(Action<IRiderRegistrationConfigurator> configure)
@@ -65,10 +63,9 @@ namespace MassTransit.SimpleInjectorIntegration.Multibus
 
             ThrowIfAlreadyConfigured(nameof(SetBusFactory));
 
-            var bus = CreateBus(busFactory, Container);
-            Container.RegisterSingleton(() => bus);
+            Container.RegisterSingleton(() => CreateBus(busFactory));
             Container.Collection.AppendInstance(
-                Lifestyle.Singleton.CreateRegistration<IBusInstance>(() => bus, Container)
+                Lifestyle.Singleton.CreateRegistration<IBusInstance>(() => Container.GetInstance<IBusInstance<TBus>>(), Container)
             );
 
             Container.RegisterSingleton(() => Bind<TBus>.Create(Container.GetInstance<IBusInstance<TBus>>()));
@@ -83,15 +80,14 @@ namespace MassTransit.SimpleInjectorIntegration.Multibus
                 Container.RegisterSingleton<IBusHealth>(() => new BusHealth(Container.GetInstance<IBusInstance<TBus>>()));
         }
 
-        static IBusInstance<TBus> CreateBus<T>(T busFactory, Container container)
+        IBusInstance<TBus> CreateBus<T>(T busFactory)
             where T : IRegistrationBusFactory
         {
             IEnumerable<IBusInstanceSpecification> specifications =
-                container.GetInstance<IEnumerable<Bind<TBus, IBusInstanceSpecification>>>().Select(x => x.Value);
+                Container.GetInstance<IEnumerable<Bind<TBus, IBusInstanceSpecification>>>().Select(x => x.Value);
 
-            var instance = busFactory.CreateBus(container.GetInstance<Bind<TBus, IBusRegistrationContext>>().Value, specifications);
-
-            var busInstance = container.TryGetInstance<TBusInstance>() ?? (TBusInstance)Activator.CreateInstance(typeof(TBusInstance), instance.BusControl);
+            var instance = busFactory.CreateBus(Container.GetInstance<Bind<TBus, IBusRegistrationContext>>().Value, specifications);
+            var busInstance = Container.TryGetInstance<TBusInstance>() ?? (TBusInstance)Activator.CreateInstance(typeof(TBusInstance), instance.BusControl);
 
             return new MultiBusInstance<TBus>(busInstance, instance);
         }
