@@ -12,7 +12,7 @@ Additional host properties include:
 
 | Property                |  Description 
 |-------------------------|------------------
-| TokenProvider         | Use a specific token provider, such as a managed identity token provider, to access the namespace
+| TokenCredential       | Use a specific token-based credential, such as a managed identity token, to access the namespace.  You can use the [DefaultAzureCredential](https://docs.microsoft.com/en-us/dotnet/api/azure.identity.defaultazurecredential?view=azure-dotnet) to automatically apply any one of several credential types.
 | TransportType         | Change the transport type from the default (AMQP) to use WebSockets
 
 The following example shows how to configure Azure Service Bus using an Azure Managed Identity:
@@ -22,9 +22,9 @@ namespace ServiceBusConsoleListener
 {
     using System;
     using System.Threading.Tasks;
+    using Azure.Identity;
     using MassTransit;
     using MassTransit.Azure.ServiceBus.Core.Configurators;
-    using Microsoft.Azure.ServiceBus.Primitives;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Program
@@ -38,8 +38,8 @@ namespace ServiceBusConsoleListener
                 {
                     var settings = new HostSettings
                     {
-                        ServiceUri = new Uri("sb://your-service-bus-namespace.servicebus.windows.net"/),
-                        TokenProvider = TokenProvider.CreateManagedIdentityTokenProvider()
+                        ServiceUri = new Uri("sb://your-service-bus-namespace.servicebus.windows.net"),
+                        TokenCredential = new DefaultAzureCredential() // From Azure.Identity.dll
                     };
                     cfg.Host(settings);
                 });
