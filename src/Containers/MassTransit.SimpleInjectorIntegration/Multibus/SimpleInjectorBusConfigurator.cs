@@ -64,8 +64,9 @@ namespace MassTransit.SimpleInjectorIntegration.Multibus
             ThrowIfAlreadyConfigured(nameof(SetBusFactory));
 
             Container.RegisterSingleton(() => CreateBus(busFactory));
-            Container.Collection.AppendInstance(
-                Lifestyle.Singleton.CreateRegistration<IBusInstance>(() => Container.GetInstance<IBusInstance<TBus>>(), Container)
+            Container.Collection.Append(
+                    () => (IBusInstance) Container.GetInstance<IBusInstance<TBus>>()
+                    , Lifestyle.Singleton
             );
 
             Container.RegisterSingleton(() => Bind<TBus>.Create(Container.GetInstance<IBusInstance<TBus>>()));

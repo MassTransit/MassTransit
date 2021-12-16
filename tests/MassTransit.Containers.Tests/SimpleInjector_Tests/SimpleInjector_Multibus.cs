@@ -18,7 +18,6 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
         readonly Container _container;
 
         protected override IBusOne One => _container.GetInstance<IBusOne>();
-        protected IBusOne t => _container.GetInstance<BusOne>();
 
         protected override IEnumerable<IHostedService> HostedServices => _container.GetAllInstances<IHostedService>();
 
@@ -36,8 +35,8 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             container.Options.EnableAutoVerification = false;
             container.Options.ResolveUnregisteredConcreteTypes = false;
 
-            container.RegisterSingleton<ILoggerFactory>(() => LoggerFactory);
-            container.Register(typeof(ILogger<>), typeof(Logger<>));
+            container.RegisterInstance<ILoggerFactory>(LoggerFactory);
+            container.RegisterSingleton(typeof(ILogger<>), typeof(Logger<>));
 
             container.AddMassTransit(x =>
             {
@@ -52,16 +51,11 @@ namespace MassTransit.Containers.Tests.SimpleInjector_Tests
             container.AddMassTransit<IBusOne, BusOne>(ConfigureOne);
             container.AddMassTransit<IBusTwo>(ConfigureTwo);
 
-            container.Collection.Register(new IHostedService[] { });
-            container.Collection.AppendInstance(
-                Lifestyle.Singleton.CreateRegistration<IHostedService>(() =>
-                    {
-                        var busDepot = container.GetInstance<IBusDepot>();
-                        return new MassTransitHostedService(busDepot, true);
-                    },
-                    container
-                )
-            );
+            container.Collection.Append<IHostedService>(() =>
+            {
+                var busDepot = container.GetInstance<IBusDepot>();
+                return new MassTransitHostedService(busDepot, true);
+            }, Lifestyle.Singleton);
 
             _container = container;
         }

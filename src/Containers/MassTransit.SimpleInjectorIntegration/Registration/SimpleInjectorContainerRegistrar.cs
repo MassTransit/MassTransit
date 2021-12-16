@@ -184,7 +184,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
                 return consumeContext != null
                     ? new ScopedClientFactory(clientFactory, consumeContext)
                     : new ScopedClientFactory(new ClientFactory(new ScopedClientFactoryContext<Container>(clientFactory, _container)), null);
-            }, _hybridLifestyle);
+            }, Lifestyle.Scoped);
 
             _container.Options.AllowOverridingRegistrations = allowOverrides;
         }
