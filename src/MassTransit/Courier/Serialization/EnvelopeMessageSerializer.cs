@@ -97,7 +97,7 @@
 
                 if (_useEncryption == false)
                 {
-                    using (var writer = new StreamWriter(stream, Encoding.UTF8, 1024, true))
+                    using (var writer = new StreamWriter(stream, new UTF8Encoding(false, true), 1024, true))
                     using (var jsonWriter = new JsonTextWriter(writer))
                     {
                         jsonWriter.Formatting = Formatting.Indented;
