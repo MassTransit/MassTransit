@@ -24,8 +24,7 @@
             IBusRegistrationContext CreateRegistrationContext(IComponentContext context)
             {
                 var provider = context.Resolve<IConfigurationServiceProvider>();
-                var t = new BusRegistrationContext(provider, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
-                return t;
+                return new BusRegistrationContext(provider, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
             }
 
             Builder.Register(context => Bind<TBus>.Create(GetSendEndpointProvider(context)))
@@ -100,8 +99,7 @@
 
             var instance = busFactory.CreateBus(context.Resolve<Bind<TBus, IBusRegistrationContext>>().Value, specifications);
 
-            var t = context.ResolveOptional<TBusInstance>();
-            var busInstance = t
+            var busInstance = context.ResolveOptional<TBusInstance>()
                 ?? (TBusInstance)Activator.CreateInstance(typeof(TBusInstance), instance.BusControl);
 
             return new MultiBusInstance<TBus>(busInstance, instance);
