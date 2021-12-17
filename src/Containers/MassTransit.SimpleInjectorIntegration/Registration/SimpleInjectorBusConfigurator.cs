@@ -20,7 +20,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         readonly Lifestyle _hybridLifestyle;
         protected readonly HashSet<Type> RiderTypes;
 
-        static bool _masstransit_components_added = false;
+        bool _masstransit_components_added = false;
 
         public SimpleInjectorBusConfigurator(Container container)
             : this(container, new SimpleInjectorContainerRegistrar(container))

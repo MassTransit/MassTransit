@@ -131,10 +131,11 @@
                 using var syncContext = new SingleThreadSynchronizationContext(cancellationToken);
                 SynchronizationContext.SetSynchronizationContext(syncContext);
 
-                if (taskFactory() == null)
+                var t = taskFactory();
+                if (t == null)
                     throw new InvalidOperationException("The taskFactory must return a Task");
 
-                var awaiter = taskFactory().GetAwaiter();
+                var awaiter = t.GetAwaiter();
 
                 while (!awaiter.IsCompleted)
                 {

@@ -53,7 +53,7 @@ namespace MassTransit.Containers.Tests.Common_Tests
         {
             IRequestClient<TwoRequest> client = GetRequestClient<TwoRequest>();
 
-            //await client.GetResponse<TwoResponse>(new TwoRequest());
+            await client.GetResponse<TwoResponse>(new TwoRequest());
         }
 
         [Test]
