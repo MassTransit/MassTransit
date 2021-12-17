@@ -30,6 +30,8 @@ namespace MassTransit.SimpleInjectorIntegration.Multibus
                 return new BusRegistrationContext(provider, Endpoints, Consumers, Sagas, ExecuteActivities, Activities, Futures);
             }
 
+            RegisterBusDepot();
+
             Container.Collection.Register(new Bind<TBus, IBusInstanceSpecification>[]{ });
             Container.Register(() => Bind<TBus>.Create(GetSendEndpointProvider(Container)), Lifestyle.Scoped);
 
@@ -43,6 +45,20 @@ namespace MassTransit.SimpleInjectorIntegration.Multibus
             });
 
             Container.RegisterSingleton(() => Bind<TBus>.Create(CreateRegistrationContext()));
+        }
+
+        void RegisterBusDepot()
+        {
+            try
+            {
+                // there is no way to determine whether a registration already exists in Simple Injector
+                Container.RegisterSingleton<IBusDepot, BusDepot>();
+            }
+            catch (InvalidOperationException e)
+            {
+                if (!e.Message.Contains("Type IBusDepot has already been registered"))
+                    throw;
+            }
         }
 
         public override void AddRider(Action<IRiderRegistrationConfigurator> configure)

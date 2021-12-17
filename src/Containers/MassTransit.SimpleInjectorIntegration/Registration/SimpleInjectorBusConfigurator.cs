@@ -89,15 +89,16 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
             try
             {
                 // there is no way to determine whether a registration already exists in Simple Injector
-                container.RegisterSingleton<IBusDepot, BusDepot>();
+                container.Register<ScopedConsumeContextProvider>(Lifestyle.Scoped);
             }
             catch (InvalidOperationException e)
             {
-                if (e.Message.Contains("Type IBusDepot has already been registered"))
+                if (e.Message.Contains("Type ScopedConsumeContextProvider has already been registered"))
                     return;
+                else
+                    throw;
             }
 
-            container.Register<ScopedConsumeContextProvider>(Lifestyle.Scoped);
             container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext(),
                 Lifestyle.Scoped);
 
