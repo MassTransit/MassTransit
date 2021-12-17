@@ -20,8 +20,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
         readonly Lifestyle _hybridLifestyle;
         protected readonly HashSet<Type> RiderTypes;
 
-        bool _masstransit_components_added = false;
-
         public SimpleInjectorBusConfigurator(Container container)
             : this(container, new SimpleInjectorContainerRegistrar(container))
         {
@@ -88,10 +86,16 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
         void AddMassTransitComponents(Container container)
         {
-            if (_masstransit_components_added)
-                return;
-
-            container.RegisterSingleton<IBusDepot, BusDepot>();
+            try
+            {
+                // there is no way to determine whether a registration already exists in Simple Injector
+                container.RegisterSingleton<IBusDepot, BusDepot>();
+            }
+            catch (InvalidOperationException e)
+            {
+                if (e.Message.Contains("Type IBusDepot has already been registered"))
+                    return;
+            }
 
             container.Register<ScopedConsumeContextProvider>(Lifestyle.Scoped);
             container.Register(() => container.GetInstance<ScopedConsumeContextProvider>().GetContext() ?? new MissingConsumeContext(),
@@ -102,8 +106,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             container.RegisterSingleton<IConsumerScopeProvider>(() => new SimpleInjectorConsumerScopeProvider(container));
             container.RegisterSingleton<IConfigurationServiceProvider>(() => new SimpleInjectorConfigurationServiceProvider(container));
-
-            _masstransit_components_added = true;
         }
 
         ISendEndpointProvider GetCurrentSendEndpointProvider()
