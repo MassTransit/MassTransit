@@ -3,7 +3,6 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageVersion>7.3.0</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup>
