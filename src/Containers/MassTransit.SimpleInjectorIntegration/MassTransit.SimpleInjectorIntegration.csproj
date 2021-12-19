@@ -3,7 +3,6 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageVersion>7.4.0-betadillen</PackageVersion>
   </PropertyGroup>
 
   <PropertyGroup>
