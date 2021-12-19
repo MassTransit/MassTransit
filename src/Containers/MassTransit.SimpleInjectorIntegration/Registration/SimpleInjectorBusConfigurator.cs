@@ -2,7 +2,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 {
     using System;
     using System.Collections.Generic;
-    using AutofacIntegration;
     using Context;
     using MassTransit.Registration;
     using Monitoring.Health;

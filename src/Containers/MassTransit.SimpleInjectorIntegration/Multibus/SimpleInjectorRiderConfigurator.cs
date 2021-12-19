@@ -2,7 +2,6 @@ namespace MassTransit.SimpleInjectorIntegration.Multibus
 {
     using System;
     using System.Collections.Generic;
-    using AutofacIntegration;
     using MassTransit.Registration;
     using Registration;
     using SimpleInjector;

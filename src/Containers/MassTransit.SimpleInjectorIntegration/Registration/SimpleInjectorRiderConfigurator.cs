@@ -2,11 +2,7 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using Autofac.Core;
-    using AutofacIntegration;
     using MassTransit.Registration;
-    using Multibus;
     using Riders;
 
 

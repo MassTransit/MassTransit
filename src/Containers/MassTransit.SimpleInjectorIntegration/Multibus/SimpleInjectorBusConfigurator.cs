@@ -7,8 +7,6 @@ using System.Collections.Generic;
 namespace MassTransit.SimpleInjectorIntegration.Multibus
 {
     using System.Linq;
-    using Autofac;
-    using AutofacIntegration;
     using MassTransit.Registration;
     using Monitoring.Health;
     using Scoping;
@@ -111,12 +109,12 @@ namespace MassTransit.SimpleInjectorIntegration.Multibus
 
         static ISendEndpointProvider GetSendEndpointProvider(Container container)
         {
-            return new ScopedSendEndpointProvider<ILifetimeScope>(container.GetInstance<TBus>(), container.GetInstance<ILifetimeScope>());
+            return new ScopedSendEndpointProvider<IServiceProvider>(container.GetInstance<TBus>(), container);
         }
 
         static IPublishEndpoint GetPublishEndpoint(Container container)
         {
-            return new PublishEndpoint(new ScopedPublishEndpointProvider<ILifetimeScope>(container.GetInstance<TBus>(), container.GetInstance<ILifetimeScope>()));
+            return new PublishEndpoint(new ScopedPublishEndpointProvider<IServiceProvider>(container.GetInstance<TBus>(), container));
         }
     }
 }

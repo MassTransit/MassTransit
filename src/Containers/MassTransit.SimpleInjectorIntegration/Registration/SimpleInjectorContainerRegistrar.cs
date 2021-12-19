@@ -2,7 +2,6 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 {
     using System;
     using System.Linq;
-    using AutofacIntegration;
     using Automatonymous;
     using Clients;
     using Courier;
