@@ -67,7 +67,13 @@ namespace MassTransit.SimpleInjectorIntegration.Registration
 
             ThrowIfAlreadyConfigured(nameof(SetBusFactory));
 
+
             Container.RegisterSingleton(() => busFactory.CreateBus(Container.GetInstance<IBusRegistrationContext>()));
+            Container.Collection.Append(
+                    () => Container.GetInstance<IBusInstance>()
+                    , Lifestyle.Singleton
+            );
+
             Container.RegisterSingleton<IReceiveEndpointConnector>(() => Container.GetInstance<IBusInstance>());
             Container.RegisterSingleton(() => Container.GetInstance<IBusInstance>().BusControl);
             Container.RegisterSingleton(() => Container.GetInstance<IBusInstance>().Bus);
