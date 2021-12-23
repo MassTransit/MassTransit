@@ -16,6 +16,9 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
     public class MessageReceiver :
         IMessageReceiver
     {
+        const string PathDelimiter = @"/";
+        const string SubscriptionsSubPath = "Subscriptions";
+
         readonly IAsyncBusHandle _busHandle;
         readonly IServiceBusHostConfiguration _hostConfiguration;
         readonly ConcurrentDictionary<string, Lazy<IServiceBusMessageReceiver>> _receivers;
@@ -139,7 +142,7 @@ namespace MassTransit.WebJobs.ServiceBusIntegration
             if (configure == null)
                 throw new ArgumentNullException(nameof(configure));
 
-            var subscriptionPath = "abc"; // EntityNameHelper.FormatSubscriptionPath(topicPath, subscriptionName);
+            var subscriptionPath = string.Concat(topicPath, PathDelimiter, SubscriptionsSubPath, PathDelimiter, subscriptionName);
 
             return _receivers.GetOrAdd(subscriptionPath, name => new Lazy<IServiceBusMessageReceiver>(() =>
             {
