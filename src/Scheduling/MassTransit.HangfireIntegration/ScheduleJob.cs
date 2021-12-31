@@ -11,6 +11,7 @@ namespace MassTransit.HangfireIntegration
 
 
     [Queue(SchedulerBusObserver.DefaultQueueName)]
+    [SchedulerJobData]
     class ScheduleJob
     {
         readonly IBus _bus;
@@ -20,7 +21,7 @@ namespace MassTransit.HangfireIntegration
             _bus = bus;
         }
 
-        [SchedulerJobData]
+        [HashCleanup]
         public async Task SendMessage(HangfireScheduledMessageData messageData, PerformContext performContext)
         {
             try
@@ -45,7 +46,6 @@ namespace MassTransit.HangfireIntegration
             }
         }
 
-        [SchedulerJobData]
         [RecurringScheduleDateTimeInterval]
         public async Task SendMessage(HangfireRecurringScheduledMessageData messageData, PerformContext performContext)
         {

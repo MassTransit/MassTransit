@@ -8,10 +8,10 @@ namespace MassTransit.HangfireIntegration
     using System.Xml.Linq;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using Scheduling;
     using Serialization;
 
 
+    //TODO: at some point this class should become abstract (maybe it works now) but better be safe
     class HangfireScheduledMessageData :
         SerializedMessage
     {
@@ -29,15 +29,6 @@ namespace MassTransit.HangfireIntegration
         public string InitiatorId { get; set; }
         public string HeadersAsJson { get; set; }
         public string PayloadMessageHeadersAsJson { get; set; }
-
-        public static HangfireScheduledMessageData Create(ConsumeContext<ScheduleMessage> context)
-        {
-            var message = new HangfireScheduledMessageData();
-
-            SetBaseProperties(message, context, context.Message.Destination, context.Message.CorrelationId);
-
-            return message;
-        }
 
         protected static void SetBaseProperties(HangfireScheduledMessageData message, ConsumeContext context, Uri destination, Guid? tokenId = default)
         {
@@ -70,7 +61,7 @@ namespace MassTransit.HangfireIntegration
                 message.HeadersAsJson = JsonConvert.SerializeObject(headers);
         }
 
-        protected static string ExtractBody(string mediaType, byte[] bytes, Uri destination)
+        static string ExtractBody(string mediaType, byte[] bytes, Uri destination)
         {
             var body = Encoding.UTF8.GetString(bytes);
             if (JsonMessageSerializer.JsonContentType.MediaType.Equals(mediaType, StringComparison.OrdinalIgnoreCase))
