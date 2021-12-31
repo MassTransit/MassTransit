@@ -30,27 +30,36 @@ namespace MassTransit.HangfireIntegration
         public async Task Consume(ConsumeContext<CancelScheduledMessage> context)
         {
             using var connection = _jobStorage.GetConnection();
-            var correlationId = context.Message.TokenId.ToString("N");
-            if (TryRemoveJob(connection, correlationId, out var jobId))
+            using var transaction = connection.CreateWriteTransaction();
+            var id = context.Message.TokenId.ToString("N");
+            if (TryRemoveJob(connection, id, out var jobId))
+            {
                 LogContext.Debug?.Log("Canceled Scheduled Message: {Id} at {Timestamp}", jobId, context.Message.Timestamp);
+                transaction.RemoveHash(id);
+            }
             else
                 LogContext.Debug?.Log("CancelScheduledMessage: no message found for {Id}", jobId);
+
+            transaction.Commit();
         }
 
         public async Task Consume(ConsumeContext<ScheduleMessage> context)
         {
-            var correlationId = context.Message.CorrelationId.ToString("N");
-            var message = HangfireScheduledMessageData.Create(context);
+            var id = context.Message.CorrelationId.ToString("N");
+            var message = HangfireHashableScheduledMessageData.Create(context, id);
 
             using var connection = _jobStorage.GetConnection();
             using var transaction = connection.CreateWriteTransaction();
-            if (TryRemoveJob(connection, correlationId, out var jobId))
+            if (TryRemoveJob(connection, id, out var jobId))
                 LogContext.Debug?.Log("Canceled Scheduled Message: {Id}", jobId);
+
             jobId = _backgroundJobClient.Schedule<ScheduleJob>(
                 x => x.SendMessage(message, null),
                 context.Message.ScheduledTime);
-            connection.SetRangeInHash(correlationId, new[] {new KeyValuePair<string, string>(JobIdKey, jobId)});
+
+            transaction.SetRangeInHash(id, new Dictionary<string, string> { [JobIdKey] = jobId });
             LogContext.Debug?.Log("Scheduled: {Id}", jobId);
+            transaction.Commit();
         }
 
         bool TryRemoveJob(IStorageConnection connection, string id, out string jobId)

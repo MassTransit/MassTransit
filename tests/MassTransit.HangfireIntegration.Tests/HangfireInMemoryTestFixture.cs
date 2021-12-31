@@ -38,6 +38,8 @@
 
         protected IMessageScheduler Scheduler => _scheduler.Value;
 
+        protected JobStorage Storage => JobStorage.Current;
+
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             configurator.UseHangfireScheduler(_queueName, cfg =>
