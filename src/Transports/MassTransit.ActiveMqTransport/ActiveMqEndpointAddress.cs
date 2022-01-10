@@ -158,11 +158,11 @@ namespace MassTransit.ActiveMqTransport
                 Host = address.Host,
                 Port = address.Port.HasValue
                     ? address.Scheme.EndsWith("s", StringComparison.OrdinalIgnoreCase)
-                        ? address.Port.Value == 5671 ? 0 : address.Port.Value
+                        ? address.Port.Value == 5671 ? -1 : address.Port.Value
                         : address.Port.Value == 5672
-                            ? 0
+                            ? -1
                             : address.Port.Value
-                    : 0,
+                    : -1,
                 Path = address.VirtualHost == "/"
                     ? $"/{address.Name}"
                     : $"/{Uri.EscapeDataString(address.VirtualHost)}/{address.Name}"
