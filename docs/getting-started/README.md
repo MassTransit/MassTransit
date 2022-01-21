@@ -299,9 +299,9 @@ The consumer is added, using `AddConsumer`. This adds the consumer to the contai
 
 The `ConfigureEndpoints` method is used to automatically configure the receive endpoints on the bus. In this case, a single receive endpoint will be created for the `MessageConsumer`.
 
-The `AddMassTransitHostedService(true)` adds a hosted service for MassTransit that is responsible for starting and stopping the bus. This is required, as the bus will not operate propertly if it is not started and stopped.
+The `AddMassTransitHostedService(true)` adds a hosted service for MassTransit that is responsible for starting and stopping the bus. This is required, as the bus will not operate properly if it is not started and stopped.
 
-::: warning IMPORTANT
+:: warning IMPORTANT
 This hosted service should be configured _prior_ to any other hosted services that may use the bus.
 :::
 
