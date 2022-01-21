@@ -13,7 +13,7 @@ To create a service using MassTransit, create a worker via the Command Prompt.
 
 ```bash
 $ mkdir GettingStarted
-$ dotnet new worker -n GettingStarted
+$ dotnet new mtworker -n GettingStarted
 ```
 
 ## Using the InMemory Transport
