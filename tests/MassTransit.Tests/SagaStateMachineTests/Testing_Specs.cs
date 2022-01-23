@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using MassTransit.Testing;
     using NUnit.Framework;
+    using TestFramework;
 
 
     [TestFixture]
@@ -47,9 +48,10 @@
             {
                 await harness.InputQueueSendEndpoint.Send(new Start {CorrelationId = sagaId});
 
+                Assert.IsTrue(harness.Consumed.Select<Start>().Any(), "Start not received");
+
                 await harness.InputQueueSendEndpoint.Send(new Stop {CorrelationId = sagaId});
 
-                Assert.IsTrue(harness.Consumed.Select<Start>().Any(), "Start not received");
                 Assert.IsTrue(harness.Consumed.Select<Stop>().Any(), "Stop not received");
 
                 var instance = saga.Created.ContainsInState(sagaId, _machine, _machine.Final);

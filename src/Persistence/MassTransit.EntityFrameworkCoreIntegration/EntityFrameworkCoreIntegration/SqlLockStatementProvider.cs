@@ -4,7 +4,6 @@ namespace MassTransit.EntityFrameworkCoreIntegration
     using System.Collections.Concurrent;
     using System.Linq;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Internal;
     using Microsoft.EntityFrameworkCore.Metadata;
 
 
@@ -38,13 +37,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
             return string.Format(RowLockStatement, schemaTableTrio.Schema, schemaTableTrio.Table, schemaTableTrio.ColumnName);
         }
 
-        #pragma warning disable EF1001
-        SchemaTableColumnTrio GetSchemaAndTableNameAndColumnName(IDbContextDependencies context, Type type)
+        SchemaTableColumnTrio GetSchemaAndTableNameAndColumnName(DbContext context, Type type)
         {
             if (TableNames.TryGetValue(type, out var result) && _enableSchemaCaching)
                 return result;
 
-            var entityType = context.StateManager.Model.FindEntityType(type)
+            var entityType = context.Model.FindEntityType(type)
                 ?? throw new InvalidOperationException($"Entity type not found: {TypeCache.GetShortName(type)}");
 
             var schema = entityType.GetSchema();
@@ -52,8 +50,12 @@ namespace MassTransit.EntityFrameworkCoreIntegration
 
             var property = entityType.GetProperties().Single(x => x.Name.Equals(nameof(ISaga.CorrelationId), StringComparison.OrdinalIgnoreCase));
 
+        #if NETSTANDARD2_0
+            var columnName = property.GetColumnName();
+        #else
             var storeObjectIdentifier = StoreObjectIdentifier.Table(tableName, schema);
             var columnName = property.GetColumnName(storeObjectIdentifier);
+        #endif
 
             if (string.IsNullOrWhiteSpace(tableName))
                 throw new MassTransitException($"Unable to determine saga table name: {TypeCache.GetShortName(type)} (using model metadata).");

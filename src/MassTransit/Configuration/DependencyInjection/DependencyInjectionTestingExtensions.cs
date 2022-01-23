@@ -11,6 +11,7 @@ namespace MassTransit
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Testing;
     using Testing.Implementations;
     using Transports;
@@ -42,6 +43,11 @@ namespace MassTransit
             services.AddBusObserver<ContainerTestHarnessBusObserver>();
             services.TryAddSingleton<ITestHarness>(provider => provider.GetService<ContainerTestHarness>());
             services.TryAddSingleton<ContainerTestHarness>();
+
+            services.AddOptions<MassTransitHostOptions>().Configure(options =>
+            {
+                options.WaitUntilStarted = true;
+            });
 
             return services.AddMassTransit(x =>
             {
@@ -124,7 +130,14 @@ namespace MassTransit
         {
             configurator.AddSingleton<SagaTestHarnessRegistration<TSaga>>();
             configurator.AddSingleton<ISagaRepositoryDecoratorRegistration<TSaga>>(provider => provider.GetService<SagaTestHarnessRegistration<TSaga>>());
-            configurator.AddSingleton<ISagaStateMachineTestHarness<TStateMachine, TSaga>, RegistrationSagaStateMachineTestHarness<TStateMachine, TSaga>>();
+
+            configurator.AddSingleton<RegistrationSagaStateMachineTestHarness<TStateMachine, TSaga>>();
+            configurator.AddSingleton<ISagaStateMachineTestHarness<TStateMachine, TSaga>>(provider =>
+                provider.GetService<RegistrationSagaStateMachineTestHarness<TStateMachine, TSaga>>());
+        #pragma warning disable CS0618
+            configurator.AddSingleton<IStateMachineSagaTestHarness<TSaga, TStateMachine>>(provider =>
+            #pragma warning restore CS0618
+                provider.GetService<RegistrationSagaStateMachineTestHarness<TStateMachine, TSaga>>());
         }
     }
 }

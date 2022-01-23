@@ -1,6 +1,7 @@
-namespace MassTransit.EntityFrameworkCoreIntegration
+namespace MassTransit
 {
     using System;
+    using EntityFrameworkCoreIntegration;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

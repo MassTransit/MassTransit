@@ -2,7 +2,6 @@ namespace MassTransit.Topology
 {
     using System;
     using System.Reflection;
-    using Context;
     using Internals;
 
 

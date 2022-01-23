@@ -27,26 +27,19 @@ MassTransit NuGet Packages
 | ------------ | :-----------: | :----------: |
 | **Main** |
 | [MassTransit][MassTransit.nuget] | 2.0 |
+| [MassTransit.Abstractions][MassTransitAbstractions.nuget] | 2.0 |
 | **Other** |
 | [MassTransit.Analyzers][Analyzers.nuget] | 2.0 |
 | [MassTransit.Templates][Templates.nuget] | 5.0 |
 | [MassTransit.SignalR][SignalR.nuget] | 2.0 |
 | [MassTransit.TestFramework][TestFramework.nuget] | 2.0 |
-| **Containers** |
-| [MassTransit.Autofac][Autofac.nuget] | 2.0 |
-| [MassTransit.Extensions.DependencyInjection][CoreDI.nuget] | 2.0 |
-| [MassTransit.SimpleInjector][SimpleInjector.nuget] | 2.0 |
-| [MassTransit.StructureMap][StructureMap.nuget] | 2.0 |
-| [MassTransit.CastleWindsor][Windsor.nuget] | 2.0 |
-| **ASP.NET Core** |
-| [MassTransit.AspNetCore][AspNetCore.nuget] | - | 3.1 |
 | **Monitoring** |
 | [MassTransit.Prometheus][Prometheus.nuget] | 2.0 |
 | **Persistence** |
 | [MassTransit.Azure.Cosmos][Cosmos.nuget] | 2.0 |
 | [MassTransit.Azure.Storage][AzureStorage.nuget] | 2.0 |
 | [MassTransit.Dapper][Dapper.nuget] | 2.0 |
-| [MassTransit.EntityFrameworkCore][EFCore.nuget] | 2.0 |
+| [MassTransit.EntityFrameworkCore][EFCore.nuget] | 2.0 or 6.0 |
 | [MassTransit.EntityFramework][EF.nuget] | 2.1 |
 | [MassTransit.Marten][Marten.nuget] | 2.0 |
 | [MassTransit.MongoDb][MongoDb.nuget] | 2.0 |
@@ -86,7 +79,7 @@ enhancements and calls for help from people who forget to check back if they get
 
 ## Building from Source
 
- 1. Install the latest [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet-core/3.1) SDK
+ 1. Install the latest [.NET 6 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
  1. Clone the source down to your machine<br/>
     ```bash
     git clone git://github.com/MassTransit/MassTransit.git
@@ -103,24 +96,18 @@ enhancements and calls for help from people who forget to check back if they get
  1. Make a pull request
  
 # REQUIREMENTS
-* .NET Core SDK v3.1
+* .NET 6 SDK
 
 # CREDITS
 Logo Design by _The Agile Badger_
 
 [MassTransit.nuget]: https://www.nuget.org/packages/MassTransit
+[MassTransitAbstractions.nuget]: https://www.nuget.org/packages/MassTransit.Abstractions
 [Analyzers.nuget]: https://www.nuget.org/packages/MassTransit.Analyzers
 [Templates.nuget]: https://www.nuget.org/packages/MassTransit.Templates
 [SignalR.nuget]: https://www.nuget.org/packages/MassTransit.SignalR
 [TestFramework.nuget]: https://www.nuget.org/packages/MassTransit.TestFramework
 
-[Autofac.nuget]: https://www.nuget.org/packages/MassTransit.Autofac
-[CoreDI.nuget]: https://www.nuget.org/packages/MassTransit.Extensions.DependencyInjection
-[SimpleInjector.nuget]: https://www.nuget.org/packages/MassTransit.SimpleInjector
-[StructureMap.nuget]: https://www.nuget.org/packages/MassTransit.StructureMap
-[Windsor.nuget]: https://www.nuget.org/packages/MassTransit.CastleWindsor
-
-[AspNetCore.nuget]: https://www.nuget.org/packages/MassTransit.AspNetCore
 [Prometheus.nuget]: https://www.nuget.org/packages/MassTransit.Prometheus
 
 [Cosmos.nuget]: https://www.nuget.org/packages/MassTransit.Azure.Cosmos

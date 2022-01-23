@@ -110,7 +110,7 @@ namespace MassTransit.Transports
         public static void LogFaulted<T>(this SendContext<T> context, Exception exception)
             where T : class
         {
-            _logSendFault(context.DestinationAddress, context.MessageId, TypeCache<T>.ShortName);
+            _logSendFault(context.DestinationAddress, context.MessageId, TypeCache<T>.ShortName, exception);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -33,12 +33,10 @@ namespace MassTransit.RabbitMqTransport.Tests
         [Test]
         public async Task Should_properly_resolve_within_the_scope()
         {
-            var collection = new ServiceCollection();
-
-            await using var provider = collection
+            await using var provider = new ServiceCollection()
                 .AddMassTransitTestHarness(x =>
                 {
-                    x.AddConsumer<SubmitOrderConsumer>();
+                    x.AddConsumer<TestingHarnessSubmitOrderConsumer>();
 
                     x.UsingRabbitMq((context, cfg) => cfg.ConfigureEndpoints(context));
                 })
@@ -62,7 +60,7 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
 
-        class SubmitOrderConsumer :
+        class TestingHarnessSubmitOrderConsumer :
             IConsumer<SubmitOrder>
         {
             public Task Consume(ConsumeContext<SubmitOrder> context)

@@ -20,7 +20,7 @@ namespace Automatonymous
     /// An activity is part of a behavior that is executed in order
     /// </summary>
     /// <typeparam name="TSaga"></typeparam>
-    [Obsolete("Deprecated, use IStateMachineActivity<TSaga> instead")]
+    [Obsolete("Deprecated, use IStateMachineActivity<TSaga> instead", true)]
     public interface Activity<TSaga> :
         IStateMachineActivity<TSaga>,
         Activity
@@ -29,7 +29,7 @@ namespace Automatonymous
     }
 
 
-    [Obsolete("Deprecated, use IStateMachineActivity<TSaga, TMessage> instead")]
+    [Obsolete("Deprecated, use IStateMachineActivity<TSaga, TMessage> instead", true)]
     public interface Activity<TSaga, TMessage> :
         IStateMachineActivity<TSaga, TMessage>,
         Activity

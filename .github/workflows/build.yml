@@ -37,7 +37,7 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '5.0.x'
+          dotnet-version: '6.0.x'
 
       - name: Restore NuGet packages
         run: dotnet restore
@@ -116,7 +116,7 @@ jobs:
       - name: Install .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '5.0.x'
+          dotnet-version: '6.0.x'
 
       - name: Test gRPC
         run: dotnet test -c Release --filter Category!=Flaky
@@ -284,8 +284,17 @@ jobs:
         with:
           dotnet-version: '3.1.x'
 
-      - name: Test EntityFrameworkCore
-        run: dotnet test -c Release --filter "Category!=Flaky&Category!=Integration"
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Test EntityFrameworkCore 3.1
+        run: dotnet test -c Release -f netcoreapp3.1 --filter "Category!=Flaky&Category!=Integration"
+        working-directory: tests/MassTransit.EntityFrameworkCoreIntegration.Tests
+
+      - name: Test EntityFrameworkCore 6.0
+        run: dotnet test -c Release -f net6.0 --filter "Category!=Flaky&Category!=Integration"
         working-directory: tests/MassTransit.EntityFrameworkCoreIntegration.Tests
 
       - name: Test EntityFramework
@@ -547,6 +556,11 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.x'
+
+      - name: Install .NET Core SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
 
       - name: Build and Publish MassTransit
         # was: brandedoutcast/publish-nuget@v2.5.5

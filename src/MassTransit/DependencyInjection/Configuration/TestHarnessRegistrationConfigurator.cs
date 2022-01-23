@@ -135,7 +135,14 @@ namespace MassTransit.Configuration
 
             _configurator.AddSingleton<SagaContainerTestHarnessRegistration<T>>();
             _configurator.AddSingleton<ISagaRepositoryDecoratorRegistration<T>>(provider => provider.GetService<SagaContainerTestHarnessRegistration<T>>());
-            _configurator.AddSingleton<ISagaStateMachineTestHarness<TStateMachine, T>, RegistrationSagaStateMachineTestHarness<TStateMachine, T>>();
+
+            _configurator.AddSingleton<RegistrationSagaStateMachineTestHarness<TStateMachine, T>>();
+            _configurator.AddSingleton<ISagaStateMachineTestHarness<TStateMachine, T>>(provider =>
+                provider.GetService<RegistrationSagaStateMachineTestHarness<TStateMachine, T>>());
+        #pragma warning disable CS0618
+            _configurator.AddSingleton<IStateMachineSagaTestHarness<T, TStateMachine>>(provider =>
+            #pragma warning restore CS0618
+                provider.GetService<RegistrationSagaStateMachineTestHarness<TStateMachine, T>>());
 
             return registrationConfigurator;
         }

@@ -47,4 +47,13 @@ namespace MassTransit.Testing
         /// <returns></returns>
         Task<IList<Guid>> Exists(Expression<Func<TInstance, bool>> expression, State state, TimeSpan? timeout = default);
     }
+
+
+    [Obsolete("Use ISagaStateMachineTestHarness<TInstance, TStateMachine> instead")]
+    public interface IStateMachineSagaTestHarness<TInstance, out TStateMachine> :
+        ISagaStateMachineTestHarness<TStateMachine, TInstance>
+        where TStateMachine : SagaStateMachine<TInstance>
+        where TInstance : class, SagaStateMachineInstance
+    {
+    }
 }
