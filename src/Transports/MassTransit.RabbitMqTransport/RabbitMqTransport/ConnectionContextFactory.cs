@@ -62,7 +62,9 @@
 
         async Task<ConnectionContext> CreateConnection(ISupervisor supervisor)
         {
-            var description = _hostConfiguration.Settings.ToDescription();
+            await _hostConfiguration.Settings.Refresh(_connectionFactory.Value).ConfigureAwait(false);
+
+            var description = _hostConfiguration.Settings.ToDescription(_connectionFactory.Value);
 
             if (supervisor.Stopping.IsCancellationRequested)
                 throw new RabbitMqConnectionException($"The connection is stopping and cannot be used: {description}");
@@ -79,7 +81,7 @@
                 }
                 else
                 {
-                    var hostNames = new List<string>(1) {_hostConfiguration.Settings.Host};
+                    var hostNames = new List<string>(1) { _hostConfiguration.Settings.Host };
 
                     connection = _connectionFactory.Value.CreateConnection(hostNames, _hostConfiguration.Settings.ClientProvidedName);
                 }

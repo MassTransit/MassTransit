@@ -4,6 +4,7 @@ namespace MassTransit.RabbitMqTransport.Configuration
     using System.Net.Security;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
+    using System.Threading.Tasks;
     using Metadata;
     using RabbitMQ.Client;
 
@@ -33,6 +34,8 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _hostAddress = new Lazy<Uri>(FormatHostAddress);
         }
 
+        public RefreshConnectionFactoryCallback OnRefreshConnectionFactory { get; set; }
+
         public string Host { get; set; }
         public int Port { get; set; }
         public string VirtualHost { get; set; }
@@ -58,6 +61,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
 
         public BatchSettings BatchSettings => _batchSettings;
         public TimeSpan ContinuationTimeout { get; set; }
+
+        public Task Refresh(ConnectionFactory connectionFactory)
+        {
+            return OnRefreshConnectionFactory?.Invoke(connectionFactory) ?? Task.CompletedTask;
+        }
 
         public void ConfigureBatch(Action<ConfigurationBatchSettings> configure)
         {

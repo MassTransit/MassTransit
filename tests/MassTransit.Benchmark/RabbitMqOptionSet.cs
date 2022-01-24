@@ -4,12 +4,14 @@ namespace MassTransitBenchmark
     using System.Net.Security;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
+    using System.Threading.Tasks;
     using MassTransit;
     using MassTransit.Internals;
     using MassTransit.RabbitMqTransport;
     using MassTransit.RabbitMqTransport.Configuration;
     using MassTransit.Transports;
     using NDesk.Options;
+    using RabbitMQ.Client;
 
 
     class RabbitMqOptionSet :
@@ -100,6 +102,11 @@ namespace MassTransitBenchmark
         public BatchSettings BatchSettings => _batchSettings;
 
         public TimeSpan ContinuationTimeout => TimeSpan.FromSeconds(20);
+
+        public Task Refresh(ConnectionFactory connectionFactory)
+        {
+            return Task.CompletedTask;
+        }
 
         Uri FormatHostAddress()
         {

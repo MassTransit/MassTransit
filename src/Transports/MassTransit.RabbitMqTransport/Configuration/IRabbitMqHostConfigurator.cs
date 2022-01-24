@@ -1,6 +1,11 @@
 ﻿namespace MassTransit
 {
     using System;
+    using System.Threading.Tasks;
+    using RabbitMQ.Client;
+
+
+    public delegate Task RefreshConnectionFactoryCallback(ConnectionFactory connectionFactory);
 
 
     public interface IRabbitMqHostConfigurator
@@ -78,5 +83,7 @@
         /// </summary>
         /// <param name="timeout"></param>
         void ContinuationTimeout(TimeSpan timeout);
+
+        RefreshConnectionFactoryCallback OnRefreshConnectionFactory { set; }
     }
 }

@@ -12,6 +12,10 @@
     <NoWarn>$(NoWarn)</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+  
   <PropertyGroup>
     <PackageIcon>mt-logo-small.png</PackageIcon>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>

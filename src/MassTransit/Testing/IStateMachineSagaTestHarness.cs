@@ -49,7 +49,7 @@ namespace MassTransit.Testing
     }
 
 
-    [Obsolete("Use ISagaStateMachineTestHarness<TInstance, TStateMachine> instead")]
+    [Obsolete("Use ISagaStateMachineTestHarness<TStateMachine, TInstance> instead")]
     public interface IStateMachineSagaTestHarness<TInstance, out TStateMachine> :
         ISagaStateMachineTestHarness<TStateMachine, TInstance>
         where TStateMachine : SagaStateMachine<TInstance>

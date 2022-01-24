@@ -101,7 +101,7 @@ namespace MassTransit.RabbitMqTransport
             option.Version = settings.SslProtocol;
             option.AcceptablePolicyErrors = settings.AcceptablePolicyErrors;
             option.ServerName = settings.SslServerName;
-            option.Certs = settings.ClientCertificate == null ? null : new X509Certificate2Collection {settings.ClientCertificate};
+            option.Certs = settings.ClientCertificate == null ? null : new X509Certificate2Collection { settings.ClientCertificate };
             option.CertificateSelectionCallback = settings.CertificateSelectionCallback;
             option.CertificateValidationCallback = settings.CertificateValidationCallback;
 

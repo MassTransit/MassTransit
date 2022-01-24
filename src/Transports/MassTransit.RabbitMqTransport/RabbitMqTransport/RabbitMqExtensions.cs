@@ -76,5 +76,30 @@ namespace MassTransit.RabbitMqTransport
 
             return sb.ToString();
         }
+
+        public static string ToDescription(this RabbitMqHostSettings settings, ConnectionFactory connectionFactory)
+        {
+            var sb = new StringBuilder();
+
+            if (!string.IsNullOrWhiteSpace(connectionFactory.UserName))
+                sb.Append(connectionFactory.UserName).Append('@');
+
+            sb.Append(settings.Host);
+
+            ClusterNode? actualHost = settings.EndpointResolver?.LastHost;
+            if (actualHost != null)
+                sb.Append('(').Append(actualHost).Append(')');
+            if (settings.Port != -1)
+                sb.Append(':').Append(settings.Port);
+
+            if (string.IsNullOrWhiteSpace(settings.VirtualHost))
+                sb.Append('/');
+            else if (settings.VirtualHost.StartsWith("/"))
+                sb.Append(settings.VirtualHost);
+            else
+                sb.Append("/").Append(settings.VirtualHost);
+
+            return sb.ToString();
+        }
     }
 }

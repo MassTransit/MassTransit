@@ -4,6 +4,8 @@
     using System.Net.Security;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
+    using System.Threading.Tasks;
+    using RabbitMQ.Client;
     using RabbitMqTransport;
     using RabbitMqTransport.Configuration;
 
@@ -140,5 +142,13 @@
         /// The confirmation timeout for RPC commands via Models
         /// </summary>
         TimeSpan ContinuationTimeout { get; }
+
+        /// <summary>
+        /// Called prior to the connection factory being used to connect, so that any settings can be updated.
+        /// Typically this would be the username/password in response to an expired token, etc.
+        /// </summary>
+        /// <param name="connectionFactory"></param>
+        /// <returns></returns>
+        Task Refresh(ConnectionFactory connectionFactory);
     }
 }

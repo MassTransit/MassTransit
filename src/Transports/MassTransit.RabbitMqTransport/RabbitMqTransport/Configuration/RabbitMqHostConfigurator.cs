@@ -81,6 +81,11 @@ namespace MassTransit.RabbitMqTransport.Configuration
             _settings.ContinuationTimeout = timeout;
         }
 
+        public RefreshConnectionFactoryCallback OnRefreshConnectionFactory
+        {
+            set => _settings.OnRefreshConnectionFactory = value;
+        }
+
         public void Heartbeat(ushort requestedHeartbeat)
         {
             _settings.Heartbeat = TimeSpan.FromSeconds(requestedHeartbeat);
