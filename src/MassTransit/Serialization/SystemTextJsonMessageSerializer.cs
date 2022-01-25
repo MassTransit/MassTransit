@@ -5,6 +5,7 @@ namespace MassTransit.Serialization
     using System.Net.Mime;
     using System.Reflection;
     using System.Runtime.Serialization;
+    using System.Text.Encodings.Web;
     using System.Text.Json;
     using Initializers;
     using Initializers.TypeConverters;
@@ -34,6 +35,7 @@ namespace MassTransit.Serialization
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 ReadCommentHandling = JsonCommentHandling.Skip,
                 WriteIndented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             };
 
             Options.Converters.Add(new SystemTextJsonTimeSpanConverter());
