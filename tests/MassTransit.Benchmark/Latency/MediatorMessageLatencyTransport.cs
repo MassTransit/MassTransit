@@ -31,7 +31,8 @@ namespace MassTransitBenchmark.Latency
 
         public async ValueTask DisposeAsync()
         {
-            await _mediator.DisposeAsync();
+            if (_mediator is IAsyncDisposable asyncDisposable)
+                await asyncDisposable.DisposeAsync();
         }
     }
 }

@@ -253,7 +253,8 @@
         [OneTimeTearDown]
         public async Task Teardown()
         {
-            await _clientFactory.DisposeAsync();
+            if (_clientFactory is IAsyncDisposable asyncDisposable)
+                await asyncDisposable.DisposeAsync();
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -324,7 +325,8 @@
         [OneTimeTearDown]
         public async Task Teardown()
         {
-            await _clientFactory.DisposeAsync();
+            if (_clientFactory is IAsyncDisposable asyncDisposable)
+                await asyncDisposable.DisposeAsync();
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)
@@ -453,7 +455,8 @@
         [OneTimeTearDown]
         public async Task Teardown()
         {
-            await _clientFactory.DisposeAsync();
+            if (_clientFactory is IAsyncDisposable asyncDisposable)
+                await asyncDisposable.DisposeAsync();
         }
 
         protected override void ConfigureRabbitMqReceiveEndpoint(IRabbitMqReceiveEndpointConfigurator configurator)

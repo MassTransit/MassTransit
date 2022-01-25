@@ -17,7 +17,7 @@ namespace MassTransit.ActiveMqTransport.Tests
         [Explicit]
         public async Task Should_fault_nicely()
         {
-            await Bus.Publish(new ReconnectMessage {Value = "Before"});
+            await Bus.Publish(new ReconnectMessage { Value = "Before" });
 
             var beforeFound = await Task.Run(() => _consumer.Received.Select<ReconnectMessage>(x => x.Context.Message.Value == "Before").Any());
             Assert.IsTrue(beforeFound);
@@ -36,13 +36,14 @@ namespace MassTransit.ActiveMqTransport.Tests
 
                 Response<PongMessage> response = await request.GetResponse<PongMessage>();
 
-                await clientFactory.DisposeAsync();
+                if (clientFactory is IAsyncDisposable asyncDisposable)
+                    await asyncDisposable.DisposeAsync();
             }
 
             Console.WriteLine("");
             Console.WriteLine("Resuming");
 
-            await Bus.Publish(new ReconnectMessage {Value = "After"});
+            await Bus.Publish(new ReconnectMessage { Value = "After" });
 
             var afterFound = await Task.Run(() => _consumer.Received.Select<ReconnectMessage>(x => x.Context.Message.Value == "After").Any());
             Assert.IsTrue(afterFound);

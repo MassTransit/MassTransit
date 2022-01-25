@@ -6,7 +6,8 @@
 
 
     public class ClientFactory :
-        IClientFactory
+        IClientFactory,
+        IAsyncDisposable
     {
         readonly ClientFactoryContext _context;
 
@@ -15,7 +16,15 @@
             _context = context;
         }
 
-        ClientFactoryContext IClientFactory.Context => _context;
+        public ValueTask DisposeAsync()
+        {
+            if (_context is IAsyncDisposable asyncDisposable)
+                return asyncDisposable.DisposeAsync();
+
+            return default;
+        }
+
+        public ClientFactoryContext Context => _context;
 
         public RequestHandle<T> CreateRequest<T>(T message, CancellationToken cancellationToken, RequestTimeout timeout)
             where T : class
@@ -113,14 +122,6 @@
             where T : class
         {
             return new RequestClient<T>(_context, _context.GetRequestEndpoint<T>(destinationAddress, consumeContext), timeout.Or(_context.DefaultTimeout));
-        }
-
-        ValueTask IAsyncDisposable.DisposeAsync()
-        {
-            if (_context is IAsyncDisposable asyncDisposable)
-                return asyncDisposable.DisposeAsync();
-
-            return default;
         }
     }
 }

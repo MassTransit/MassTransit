@@ -109,7 +109,8 @@
         [OneTimeTearDown]
         public async Task Teardown()
         {
-            await _clientFactory.DisposeAsync();
+            if (_clientFactory is IAsyncDisposable asyncDisposable)
+                await asyncDisposable.DisposeAsync();
         }
 
         protected override void ConfigureGrpcReceiveEndpoint(IGrpcReceiveEndpointConfigurator configurator)
@@ -176,7 +177,8 @@
         [OneTimeTearDown]
         public async Task Teardown()
         {
-            await _clientFactory.DisposeAsync();
+            if (_clientFactory is IAsyncDisposable asyncDisposable)
+                await asyncDisposable.DisposeAsync();
         }
 
         protected override void ConfigureGrpcReceiveEndpoint(IGrpcReceiveEndpointConfigurator configurator)

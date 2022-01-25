@@ -17,9 +17,10 @@ namespace MassTransit.Mediator
     /// Sends messages directly to the <see cref="IReceivePipe" />, without serialization
     /// </summary>
     public class MassTransitMediator :
-        IMediator
+        IMediator,
+        IAsyncDisposable
     {
-        readonly IClientFactory _clientFactory;
+        readonly ClientFactory _clientFactory;
         readonly IReceivePipeDispatcher _dispatcher;
         readonly MediatorSendEndpoint _endpoint;
         readonly IReceivePipeDispatcher _responseDispatcher;

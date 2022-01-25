@@ -7,8 +7,7 @@
     /// <summary>
     /// The client factory is used to create request clients
     /// </summary>
-    public interface IClientFactory :
-        IAsyncDisposable
+    public interface IClientFactory
     {
         ClientFactoryContext Context { get; }
 

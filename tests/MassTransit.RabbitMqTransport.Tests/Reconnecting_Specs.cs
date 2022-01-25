@@ -31,12 +31,18 @@
                 Console.Write($"{i}. ");
 
                 var clientFactory = Bus.CreateClientFactory(TestTimeout);
+                try
+                {
+                    RequestHandle<PingMessage> request = clientFactory.CreateRequest(new PingMessage());
 
-                RequestHandle<PingMessage> request = clientFactory.CreateRequest(new PingMessage());
 
-                Response<PongMessage> response = await request.GetResponse<PongMessage>();
-
-                await clientFactory.DisposeAsync();
+                    Response<PongMessage> response = await request.GetResponse<PongMessage>();
+                }
+                finally
+                {
+                    if (clientFactory is IAsyncDisposable asyncDisposable)
+                        await asyncDisposable.DisposeAsync();
+                }
             }
 
             Console.WriteLine("");
