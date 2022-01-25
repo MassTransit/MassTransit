@@ -11,14 +11,14 @@
         /// of using Quartz. A natively supported feature that is highly reliable.
         /// </summary>
         /// <param name="configurator"></param>
-        public static void UseServiceBusMessageScheduler(this IPipeConfigurator<ConsumeContext> configurator)
+        public static void UseServiceBusMessageScheduler(this IBusFactoryConfigurator configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new ServiceBusMessageSchedulerSpecification();
 
-            configurator.AddPipeSpecification(pipeBuilderConfigurator);
+            configurator.AddPrePipeSpecification(pipeBuilderConfigurator);
         }
     }
 }

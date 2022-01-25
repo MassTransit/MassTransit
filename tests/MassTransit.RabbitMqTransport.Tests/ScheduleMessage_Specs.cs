@@ -4,6 +4,7 @@
     using System.Diagnostics;
     using System.Threading.Tasks;
     using NUnit.Framework;
+    using TestFramework;
 
 
     public class ScheduleMessage_Specs :

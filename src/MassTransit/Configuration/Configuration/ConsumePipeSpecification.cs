@@ -1,10 +1,10 @@
 namespace MassTransit.Configuration
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using Courier;
+    using Internals;
     using Middleware;
     using Transports;
 
@@ -14,20 +14,22 @@ namespace MassTransit.Configuration
         IConsumePipeSpecification
     {
         readonly ActivityConfigurationObservable _activityObservers;
-        readonly IBuildPipeConfigurator<ConsumeContext> _consumePipeConfigurator;
+        readonly List<IConsumePipeConfigurator> _consumePipeConfigurators;
         readonly ConsumerConfigurationObservable _consumerObservers;
         readonly HandlerConfigurationObservable _handlerObservers;
         readonly object _lock = new object();
-        readonly ConcurrentDictionary<Type, IMessageConsumePipeSpecification> _messageSpecifications;
+        readonly IDictionary<Type, IMessageConsumePipeSpecification> _messageSpecifications;
         readonly ConsumePipeSpecificationObservable _observers;
+        readonly List<IPipeSpecification<ConsumeContext>> _prePipeSpecifications;
         readonly SagaConfigurationObservable _sagaObservers;
-        readonly IList<IPipeSpecification<ConsumeContext>> _specifications;
+        readonly List<IPipeSpecification<ConsumeContext>> _specifications;
 
         public ConsumePipeSpecification()
         {
+            _prePipeSpecifications = new List<IPipeSpecification<ConsumeContext>>();
             _specifications = new List<IPipeSpecification<ConsumeContext>>();
-            _consumePipeConfigurator = new PipeConfigurator<ConsumeContext>();
-            _messageSpecifications = new ConcurrentDictionary<Type, IMessageConsumePipeSpecification>();
+            _messageSpecifications = new Dictionary<Type, IMessageConsumePipeSpecification>();
+            _consumePipeConfigurators = new List<IConsumePipeConfigurator>();
             _observers = new ConsumePipeSpecificationObservable();
 
             _consumerObservers = new ConsumerConfigurationObservable();
@@ -79,7 +81,13 @@ namespace MassTransit.Configuration
 
         public void AddPrePipeSpecification(IPipeSpecification<ConsumeContext> specification)
         {
-            _consumePipeConfigurator.AddPipeSpecification(specification);
+            lock (_lock)
+            {
+                _prePipeSpecifications.Add(specification);
+
+                foreach (var configurator in _consumePipeConfigurators)
+                    configurator.AddPrePipeSpecification(specification);
+            }
         }
 
         public bool AutoStart { get; set; }
@@ -148,19 +156,25 @@ namespace MassTransit.Configuration
             foreach (var result in _specifications.SelectMany(x => x.Validate()))
                 yield return result;
 
-            foreach (var result in _consumePipeConfigurator.Validate())
+            foreach (var result in _prePipeSpecifications.SelectMany(x => x.Validate()))
                 yield return result;
 
-            foreach (var result in _messageSpecifications.Values.SelectMany(x => x.Validate()))
-                yield return result;
+            lock (_lock)
+            {
+                foreach (var result in _messageSpecifications.Values.SelectMany(x => x.Validate()))
+                    yield return result;
+            }
         }
 
         public IMessageConsumePipeSpecification<T> GetMessageSpecification<T>()
             where T : class
         {
-            var specification = _messageSpecifications.GetOrAdd(typeof(T), CreateMessageSpecification<T>);
+            lock (_lock)
+            {
+                var specification = _messageSpecifications.GetOrAdd(typeof(T), CreateMessageSpecification<T>);
 
-            return specification.GetMessageSpecification<T>();
+                return specification.GetMessageSpecification<T>();
+            }
         }
 
         public ConnectHandle ConnectConsumePipeSpecificationObserver(IConsumePipeSpecificationObserver observer)
@@ -172,9 +186,27 @@ namespace MassTransit.Configuration
         {
             var filter = new DynamicFilter<ConsumeContext, Guid>(new ConsumeContextConverterFactory(), GetRequestId);
 
-            _consumePipeConfigurator.UseFilter(filter);
+            IBuildPipeConfigurator<ConsumeContext> configurator = new PipeConfigurator<ConsumeContext>();
 
-            return new ConsumePipe(this, filter, _consumePipeConfigurator.Build(), AutoStart);
+            for (var index = 0; index < _prePipeSpecifications.Count; index++)
+                configurator.AddPipeSpecification(_prePipeSpecifications[index]);
+
+            configurator.UseFilter(filter);
+
+            return new ConsumePipe(this, filter, configurator.Build(), AutoStart);
+        }
+
+        public IConsumePipeSpecification CreateConsumePipeSpecification()
+        {
+            var specification = new ConsumePipeSpecification();
+
+            for (var index = 0; index < _prePipeSpecifications.Count; index++)
+                specification.AddPrePipeSpecification(_prePipeSpecifications[index]);
+
+            lock (_lock)
+                _consumePipeConfigurators.Add(specification);
+
+            return specification;
         }
 
         static Guid GetRequestId(ConsumeContext context)

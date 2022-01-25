@@ -17,7 +17,7 @@ namespace MassTransit
 
             var specification = new DelayedMessageSchedulerSpecification();
 
-            configurator.AddPipeSpecification(specification);
+            configurator.AddPrePipeSpecification(specification);
         }
     }
 }

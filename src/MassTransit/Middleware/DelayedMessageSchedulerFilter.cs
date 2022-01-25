@@ -9,8 +9,9 @@ namespace MassTransit.Middleware
     public class DelayedMessageSchedulerFilter :
         IFilter<ConsumeContext>
     {
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
+            context.CreateFilterScope("delayedMessageScheduler");
         }
 
         [DebuggerNonUserCode]

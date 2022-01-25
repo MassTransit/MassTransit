@@ -16,12 +16,12 @@ namespace MassTransit
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="serviceProvider"></param>
-        public static void UseServiceScope(this IPipeConfigurator<ConsumeContext> configurator, IServiceProvider serviceProvider)
+        public static void UseServiceScope(this IConsumePipeConfigurator configurator, IServiceProvider serviceProvider)
         {
             var scopeProvider = new ConsumeScopeProvider(serviceProvider);
             var specification = new FilterPipeSpecification<ConsumeContext>(new ScopeConsumeFilter(scopeProvider));
 
-            configurator.AddPipeSpecification(specification);
+            configurator.AddPrePipeSpecification(specification);
         }
 
         /// <summary>

@@ -20,5 +20,7 @@ namespace MassTransit.Configuration
         /// </summary>
         /// <returns></returns>
         IConsumePipe BuildConsumePipe();
+
+        IConsumePipeSpecification CreateConsumePipeSpecification();
     }
 }

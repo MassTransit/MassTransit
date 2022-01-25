@@ -3,21 +3,20 @@
     public class ConsumePipeConfiguration :
         IConsumePipeConfiguration
     {
-        readonly ConsumePipeSpecification _specification;
-
         public ConsumePipeConfiguration(IConsumeTopology consumeTopology)
         {
-            _specification = new ConsumePipeSpecification();
-            _specification.ConnectConsumePipeSpecificationObserver(new TopologyConsumePipeSpecificationObserver(consumeTopology));
+            Specification = new ConsumePipeSpecification();
+            Specification.ConnectConsumePipeSpecificationObserver(new TopologyConsumePipeSpecificationObserver(consumeTopology));
         }
 
         public ConsumePipeConfiguration(IConsumePipeSpecification parentSpecification)
         {
-            _specification = new ConsumePipeSpecification();
-            _specification.ConnectConsumePipeSpecificationObserver(new ParentConsumePipeSpecificationObserver(parentSpecification));
+            Specification = parentSpecification.CreateConsumePipeSpecification();
+            Specification.ConnectConsumePipeSpecificationObserver(new ParentConsumePipeSpecificationObserver(parentSpecification));
         }
 
-        public IConsumePipeSpecification Specification => _specification;
-        public IConsumePipeConfigurator Configurator => _specification;
+        public IConsumePipeSpecification Specification { get; }
+
+        public IConsumePipeConfigurator Configurator => Specification as IConsumePipeConfigurator;
     }
 }

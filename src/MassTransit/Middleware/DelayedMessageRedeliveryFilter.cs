@@ -21,6 +21,8 @@ namespace MassTransit.Middleware
 
         public void Probe(ProbeContext context)
         {
+            var scope = context.CreateFilterScope("delayedMessageRedelivery");
+            scope.Add("messageType", TypeCache<TMessage>.ShortName);
         }
 
         [DebuggerNonUserCode]

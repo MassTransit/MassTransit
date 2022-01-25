@@ -11,14 +11,14 @@
         /// </summary>
         /// <param name="configurator"></param>
         /// <param name="schedulerAddress"></param>
-        public static void UseMessageScheduler(this IPipeConfigurator<ConsumeContext> configurator, Uri schedulerAddress)
+        public static void UseMessageScheduler(this IConsumePipeConfigurator configurator, Uri schedulerAddress)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new MessageSchedulerPipeSpecification(schedulerAddress);
 
-            configurator.AddPipeSpecification(pipeBuilderConfigurator);
+            configurator.AddPrePipeSpecification(pipeBuilderConfigurator);
         }
 
         /// <summary>
@@ -27,14 +27,14 @@
         /// cluster.
         /// </summary>
         /// <param name="configurator"></param>
-        public static void UsePublishMessageScheduler(this IPipeConfigurator<ConsumeContext> configurator)
+        public static void UsePublishMessageScheduler(this IConsumePipeConfigurator configurator)
         {
             if (configurator == null)
                 throw new ArgumentNullException(nameof(configurator));
 
             var pipeBuilderConfigurator = new PublishMessageSchedulerPipeSpecification();
 
-            configurator.AddPipeSpecification(pipeBuilderConfigurator);
+            configurator.AddPrePipeSpecification(pipeBuilderConfigurator);
         }
     }
 }
