@@ -1,7 +1,6 @@
 namespace MassTransit.AzureServiceBusTransport
 {
     using System;
-    using Context;
     using Transports;
 
 

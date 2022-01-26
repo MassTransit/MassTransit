@@ -92,7 +92,7 @@
             }
 
             public IPipe<SessionContext> ConfigureTopologyPipe { get; }
-            public string EntityName { get; }
+            public override string EntityName { get; }
             public DestinationType DestinationType { get; }
             public ISessionContextSupervisor SessionContextSupervisor { get; }
 

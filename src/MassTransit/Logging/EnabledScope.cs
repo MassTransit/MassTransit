@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Logging
 {
     using System;
@@ -17,7 +18,7 @@ namespace MassTransit.Logging
             _scope = logger.BeginScope(_state);
         }
 
-        public void Add(string key, object value)
+        public void Add(string key, object? value)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));

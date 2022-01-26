@@ -88,6 +88,8 @@
 
                 await _pipe.Send(context).ConfigureAwait(false);
 
+                var activityName = _context.ActivityName;
+
                 var exchange = context.Exchange;
                 if (exchange.Equals(RabbitMqExchangeNames.ReplyTo))
                 {
@@ -95,9 +97,10 @@
                         throw new TransportException(context.DestinationAddress, "RoutingKey must be specified when sending to reply-to address");
 
                     exchange = "";
+                    activityName = "reply-to send";
                 }
 
-                StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
+                StartedActivity? activity = LogContext.IfEnabled(activityName)?.StartSendActivity(context);
                 try
                 {
                     if (_context.SendObservers.Count > 0)
@@ -140,13 +143,19 @@
                         exchange = _context.DelayExchange;
                     }
 
-                    var publishTask = modelContext.BasicPublishAsync(exchange, context.RoutingKey ?? "", context.Mandatory, context.BasicProperties, body,
+                    var routingKey = context.RoutingKey ?? "";
+                    if (!string.IsNullOrEmpty(routingKey))
+                        activity?.AddTag(DiagnosticHeaders.Messaging.RabbitMq.RoutingKey, routingKey);
+
+                    activity?.AddTag(DiagnosticHeaders.Messaging.DestinationKind, string.IsNullOrEmpty(exchange) ? "queue" : "topic");
+
+                    var publishTask = modelContext.BasicPublishAsync(exchange, routingKey, context.Mandatory, context.BasicProperties, body,
                         context.AwaitAck);
 
                     await publishTask.OrCanceled(context.CancellationToken).ConfigureAwait(false);
 
+                    activity?.Update(context);
                     context.LogSent();
-                    activity.AddSendContextHeadersPostSend(context);
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PostSend(context).ConfigureAwait(false);

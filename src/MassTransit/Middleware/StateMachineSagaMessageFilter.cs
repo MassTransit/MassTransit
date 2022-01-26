@@ -46,10 +46,12 @@ namespace MassTransit.Middleware
 
         public async Task Send(SagaConsumeContext<TSaga, TMessage> context, IPipe<SagaConsumeContext<TSaga, TMessage>> next)
         {
-            var behaviorContext = new BehaviorContextProxy<TSaga, TMessage>(_machine, context, context, _event);
+            BehaviorContext<TSaga, TMessage> behaviorContext = new BehaviorContextProxy<TSaga, TMessage>(_machine, context, context, _event);
 
-            StartedActivity? activity = LogContext.IfEnabled(OperationName.Saga.RaiseEvent)
-                ?.StartSagaActivity(context, (await _machine.Accessor.Get(behaviorContext).ConfigureAwait(false)).Name);
+            EnabledActivitySource? activitySource = LogContext.IfEnabled(OperationName.Saga.RaiseEvent);
+            StartedActivity? activity = activitySource.HasValue
+                ? await activitySource.Value.StartSagaStateMachineActivity(behaviorContext).ConfigureAwait(false)
+                : null;
             try
             {
                 await _machine.RaiseEvent(behaviorContext).ConfigureAwait(false);

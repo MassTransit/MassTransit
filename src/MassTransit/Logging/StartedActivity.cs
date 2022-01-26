@@ -1,19 +1,16 @@
+#nullable enable
 namespace MassTransit.Logging
 {
-    using System;
     using System.Diagnostics;
 
 
-    public readonly struct StartedActivity :
-        StartedActivityContext
+    public readonly struct StartedActivity
     {
-        public readonly DiagnosticSource Source;
         public readonly Activity Activity;
         public readonly EnabledScope? Scope;
 
-        public StartedActivity(DiagnosticSource source, Activity activity, EnabledScope? scope)
+        public StartedActivity(Activity activity, EnabledScope? scope)
         {
-            Source = source;
             Activity = activity;
             Scope = scope;
         }
@@ -26,42 +23,16 @@ namespace MassTransit.Logging
             Activity.AddTag(key, value);
         }
 
-        public void AddTag(string key, Guid? value)
+        public void Update<T>(SendContext<T> context)
+            where T : class
         {
-            if (value.HasValue)
-                Activity.AddTag(key, value.Value.ToString("D"));
-        }
-
-        public void AddTag(string key, Uri value)
-        {
-            if (value != null)
-                Activity.AddTag(key, value.ToString());
-        }
-
-        public void AddBaggage(string key, string value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-                return;
-
-            Activity.AddBaggage(key, value);
-
-            Scope?.Add(key, value);
-        }
-
-        public void AddBaggage(string key, Guid? value)
-        {
-            if (value.HasValue)
-                Activity.AddBaggage(key, value.Value.ToString("D"));
-        }
-
-        public void SetParentId(string parentId)
-        {
-            Activity.SetParentId(parentId);
+            if (context.BodyLength.HasValue)
+                AddTag(DiagnosticHeaders.Messaging.BodyLength, context.BodyLength.Value.ToString());
         }
 
         public void Stop()
         {
-            Source.StopActivity(Activity, null);
+            Activity.Stop();
 
             Scope?.Dispose();
         }

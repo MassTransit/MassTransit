@@ -72,7 +72,7 @@
 
                 await _pipe.Send(sendContext).ConfigureAwait(false);
 
-                StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(sendContext);
+                StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(sendContext);
                 try
                 {
                     if (_context.SendObservers.Count > 0)
@@ -97,8 +97,8 @@
 
                     await context.SendMessage(_context.EntityName, message, sendContext.CancellationToken).ConfigureAwait(false);
 
+                    activity?.Update(sendContext);
                     sendContext.LogSent();
-                    activity.AddSendContextHeadersPostSend(sendContext);
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PostSend(sendContext).ConfigureAwait(false);

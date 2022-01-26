@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Logging
 {
     using System;
@@ -15,12 +16,12 @@ namespace MassTransit.Logging
             _level = level;
         }
 
-        public void Log(string message, params object[] args)
+        public void Log(string message, params object?[] args)
         {
             _logger.Log(_level, message, args);
         }
 
-        public void Log(Exception exception, string message, params object[] args)
+        public void Log(Exception exception, string message, params object?[] args)
         {
             _logger.Log(_level, exception, message, args);
         }

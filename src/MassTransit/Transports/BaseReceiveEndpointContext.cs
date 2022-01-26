@@ -122,7 +122,7 @@ namespace MassTransit.Transports
 
         public IReceivePipeDispatcher CreateReceivePipeDispatcher()
         {
-            return new ReceivePipeDispatcher(_receivePipe.Value, _receiveObservers, _hostConfiguration);
+            return new ReceivePipeDispatcher(_receivePipe.Value, _receiveObservers, _hostConfiguration, InputAddress);
         }
 
         public void Reset()

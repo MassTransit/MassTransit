@@ -16,5 +16,14 @@ namespace MassTransit.Transports
         {
             return address?.AbsolutePath?.Split('/').LastOrDefault();
         }
+
+        public static string GetDiagnosticEndpointName(this Uri address)
+        {
+            var endpointName = address.GetEndpointName();
+            if (string.IsNullOrWhiteSpace(endpointName))
+                return "";
+
+            return endpointName.Contains("_bus_") ? "bus" : endpointName;
+        }
     }
 }

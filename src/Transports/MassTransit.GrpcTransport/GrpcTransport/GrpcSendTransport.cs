@@ -34,7 +34,7 @@ namespace MassTransit.GrpcTransport
 
             await pipe.Send(context).ConfigureAwait(false);
 
-            StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(context);
+            StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(context);
             try
             {
                 if (_context.SendObservers.Count > 0)
@@ -79,8 +79,8 @@ namespace MassTransit.GrpcTransport
 
                 await _context.Exchange.Send(grpcTransportMessage, cancellationToken).ConfigureAwait(false);
 
+                activity?.Update(context);
                 context.LogSent();
-                activity.AddSendContextHeadersPostSend(context);
 
                 if (_context.SendObservers.Count > 0)
                     await _context.SendObservers.PostSend(context).ConfigureAwait(false);

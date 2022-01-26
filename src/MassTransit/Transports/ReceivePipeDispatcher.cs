@@ -11,6 +11,7 @@ namespace MassTransit.Transports
     public class ReceivePipeDispatcher :
         IReceivePipeDispatcher
     {
+        readonly string _activityName;
         readonly IHostConfiguration _hostConfiguration;
         readonly ReceiveObservable _observers;
         readonly IReceivePipe _receivePipe;
@@ -19,11 +20,13 @@ namespace MassTransit.Transports
         long _dispatchCount;
         int _maxConcurrentDispatchCount;
 
-        public ReceivePipeDispatcher(IReceivePipe receivePipe, ReceiveObservable observers, IHostConfiguration hostConfiguration)
+        public ReceivePipeDispatcher(IReceivePipe receivePipe, ReceiveObservable observers, IHostConfiguration hostConfiguration, Uri inputAddress)
         {
             _receivePipe = receivePipe;
             _observers = observers;
             _hostConfiguration = hostConfiguration;
+
+            _activityName = $"{inputAddress.GetDiagnosticEndpointName()} receive";
         }
 
         public int ActiveDispatchCount => _activeDispatchCount;
@@ -43,7 +46,7 @@ namespace MassTransit.Transports
 
             var active = StartDispatch();
 
-            StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Receive)?.StartReceiveActivity(context);
+            StartedActivity? activity = LogContext.IfEnabled(_activityName)?.StartReceiveActivity(context);
             try
             {
                 if (_observers.Count > 0)

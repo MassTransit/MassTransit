@@ -1,16 +1,18 @@
 #nullable enable
 namespace MassTransit.Transports
 {
+    using System;
     using Configuration;
     using Logging;
     using Middleware;
     using Observables;
 
 
-    public class BaseSendTransportContext :
+    public abstract class BaseSendTransportContext :
         BasePipeContext,
         SendTransportContext
     {
+        readonly Lazy<string> _activityName;
         readonly IHostConfiguration _hostConfiguration;
 
         protected BaseSendTransportContext(IHostConfiguration hostConfiguration, ISerialization serialization)
@@ -20,9 +22,15 @@ namespace MassTransit.Transports
             SendObservers = new SendObservable();
 
             Serialization = serialization;
+
+            _activityName = new Lazy<string>(() => $"{EntityName} send");
         }
 
+        public abstract string EntityName { get; }
+
         public ILogContext LogContext => _hostConfiguration.SendLogContext;
+
+        public string ActivityName => _activityName.Value;
 
         public SendObservable SendObservers { get; }
 

@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Logging
 {
     public static class LogCategoryName

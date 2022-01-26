@@ -72,6 +72,8 @@ namespace MassTransit.KafkaIntegration
             {
                 return _hostConfiguration.Retry(() => _supervisor.Send(pipe, cancellationToken), _supervisor, cancellationToken);
             }
+
+            public override string EntityName => TopicAddress.Topic;
         }
     }
 }

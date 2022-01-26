@@ -118,7 +118,7 @@
             }
 
             public IPipe<ClientContext> ConfigureTopologyPipe { get; }
-            public string EntityName { get; }
+            public override string EntityName { get; }
             public IClientContextSupervisor ClientContextSupervisor { get; }
             public ITransportSetHeaderAdapter<MessageAttributeValue> SqsSetHeaderAdapter { get; }
             public ITransportSetHeaderAdapter<Amazon.SimpleNotificationService.Model.MessageAttributeValue> SnsSetHeaderAdapter { get; }

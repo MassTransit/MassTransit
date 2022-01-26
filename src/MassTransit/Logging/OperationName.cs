@@ -1,14 +1,8 @@
+#nullable enable
 namespace MassTransit.Logging
 {
     public static class OperationName
     {
-        public static class Transport
-        {
-            public const string Send = "MassTransit.Transport.Send";
-            public const string Receive = "MassTransit.Transport.Receive";
-        }
-
-
         public static class Consumer
         {
             public const string Consume = "MassTransit.Consumer.Consume";

@@ -16,5 +16,6 @@ namespace MassTransit.InMemoryTransport
         }
 
         public IInMemoryExchange Exchange { get; }
+        public override string EntityName => Exchange.Name;
     }
 }

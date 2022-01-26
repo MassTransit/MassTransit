@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Logging
 {
     using Microsoft.Extensions.Logging;
@@ -26,7 +27,7 @@ namespace MassTransit.Logging
         /// </summary>
         /// <param name="name"></param>
         /// <returns>A valid source, or null</returns>
-        EnabledDiagnosticSource? IfEnabled(string name);
+        EnabledActivitySource? IfEnabled(string name);
 
         /// <summary>
         /// Creates a new ILogger instance using the full name of the given type.

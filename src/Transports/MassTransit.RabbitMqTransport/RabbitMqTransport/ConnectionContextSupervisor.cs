@@ -4,7 +4,6 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Configuration;
-    using Context;
     using Middleware;
     using Topology;
     using Transports;
@@ -126,6 +125,8 @@
             public void Probe(ProbeContext context)
             {
             }
+
+            public override string EntityName => Exchange;
         }
     }
 }

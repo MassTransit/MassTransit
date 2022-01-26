@@ -88,7 +88,7 @@ namespace MassTransit.AzureServiceBusTransport
 
             var endpointContextSupervisor = CreateSendEndpointContextSupervisor(settings);
 
-            var transportContext = new SendTransportContext(_hostConfiguration, receiveEndpointContext, address, endpointContextSupervisor);
+            var transportContext = new SendTransportContext(_hostConfiguration, receiveEndpointContext, address, endpointContextSupervisor, settings);
 
             var transport = new ServiceBusSendTransport(transportContext);
 
@@ -106,15 +106,19 @@ namespace MassTransit.AzureServiceBusTransport
             readonly ISendEndpointContextSupervisor _supervisor;
 
             public SendTransportContext(IServiceBusHostConfiguration hostConfiguration, ReceiveEndpointContext receiveEndpointContext, Uri address,
-                ISendEndpointContextSupervisor supervisor)
+                ISendEndpointContextSupervisor supervisor, SendSettings settings)
                 : base(hostConfiguration, receiveEndpointContext.Serialization)
             {
                 _hostConfiguration = hostConfiguration;
-                Address = address;
                 _supervisor = supervisor;
+
+                Address = address;
+                EntityName = settings.EntityPath;
             }
 
             public Uri Address { get; }
+
+            public override string EntityName { get; }
 
             public Task Send(IPipe<SendEndpointContext> pipe, CancellationToken cancellationToken)
             {

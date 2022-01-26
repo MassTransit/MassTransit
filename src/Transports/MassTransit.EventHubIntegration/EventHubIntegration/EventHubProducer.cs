@@ -137,7 +137,7 @@ namespace MassTransit.EventHubIntegration
                     PartitionKey = sendContext.PartitionKey
                 };
 
-                StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(sendContext,
+                StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(sendContext,
                     (nameof(sendContext.PartitionId), options.PartitionId), (nameof(sendContext.PartitionKey), options.PartitionKey));
                 try
                 {
@@ -150,8 +150,8 @@ namespace MassTransit.EventHubIntegration
 
                     await context.Produce(new[] { eventData }, options, sendContext.CancellationToken).ConfigureAwait(false);
 
+                    activity?.Update(sendContext);
                     sendContext.LogSent();
-                    activity.AddSendContextHeadersPostSend(sendContext);
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PostSend(sendContext).ConfigureAwait(false);
@@ -233,7 +233,7 @@ namespace MassTransit.EventHubIntegration
                     PartitionKey = sendContext.PartitionKey
                 };
 
-                StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(sendContext,
+                StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(sendContext,
                     (nameof(EventHubMessageSendContext<T>.PartitionId), options.PartitionId),
                     (nameof(EventHubMessageSendContext<T>.PartitionKey), options.PartitionKey));
                 try
@@ -269,8 +269,8 @@ namespace MassTransit.EventHubIntegration
                     if (eventDataBatch.Count > 0)
                         await FlushAsync(eventDataBatch);
 
+                    activity?.Update(sendContext);
                     sendContext.LogSent();
-                    activity.AddSendContextHeadersPostSend(sendContext);
 
                     if (_context.SendObservers.Count > 0)
                         await Task.WhenAll(contexts.Select(c => _context.SendObservers.PostSend(c))).ConfigureAwait(false);

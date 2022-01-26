@@ -14,6 +14,8 @@ namespace MassTransit.Transports
         /// </summary>
         ILogContext LogContext { get; }
 
+        string ActivityName { get; }
+
         SendObservable SendObservers { get; }
 
         ISerialization Serialization { get; }

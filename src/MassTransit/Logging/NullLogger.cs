@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Logging
 {
     using System;

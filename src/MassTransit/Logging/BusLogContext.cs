@@ -1,3 +1,4 @@
+#nullable enable
 namespace MassTransit.Logging
 {
     using System;
@@ -13,9 +14,9 @@ namespace MassTransit.Logging
         readonly bool _enabled;
         readonly ILoggerFactory _loggerFactory;
         readonly ILogContext _messageLogger;
-        readonly DiagnosticListener _source;
+        readonly ActivitySource _source;
 
-        public BusLogContext(ILoggerFactory loggerFactory, DiagnosticListener source)
+        public BusLogContext(ILoggerFactory loggerFactory, ActivitySource source)
         {
             _source = source;
             _loggerFactory = loggerFactory;
@@ -26,7 +27,7 @@ namespace MassTransit.Logging
             _messageLogger = new BusLogContext(source, _enabled, loggerFactory, loggerFactory.CreateLogger("MassTransit.Messages"));
         }
 
-        protected BusLogContext(DiagnosticListener source, bool enabled, ILoggerFactory loggerFactory, ILogContext messageLogger, ILogger logger)
+        protected BusLogContext(ActivitySource source, bool enabled, ILoggerFactory loggerFactory, ILogContext messageLogger, ILogger logger)
         {
             _source = source;
             _enabled = enabled;
@@ -35,7 +36,7 @@ namespace MassTransit.Logging
             Logger = logger;
         }
 
-        BusLogContext(DiagnosticListener source, bool enabled, ILoggerFactory loggerFactory, ILogger logger)
+        BusLogContext(ActivitySource source, bool enabled, ILoggerFactory loggerFactory, ILogger logger)
         {
             _source = source;
             _enabled = enabled;
@@ -47,11 +48,11 @@ namespace MassTransit.Logging
 
         ILogContext ILogContext.Messages => _messageLogger;
 
-        public EnabledDiagnosticSource? IfEnabled(string name)
+        public EnabledActivitySource? IfEnabled(string name)
         {
-            return _enabled && (Activity.Current != null || _source.IsEnabled(name))
-                ? new EnabledDiagnosticSource(_source, name)
-                : default(EnabledDiagnosticSource?);
+            return _enabled && (Activity.Current != null || _source.HasListeners())
+                ? new EnabledActivitySource(_source, name)
+                : default(EnabledActivitySource?);
         }
 
         public ILogContext<T> CreateLogContext<T>()
@@ -110,7 +111,7 @@ namespace MassTransit.Logging
         BusLogContext,
         ILogContext<T>
     {
-        public BusLogContext(DiagnosticListener source, bool enabled, ILoggerFactory loggerFactory, ILogContext messageLogger, ILogger<T> logger)
+        public BusLogContext(ActivitySource source, bool enabled, ILoggerFactory loggerFactory, ILogContext messageLogger, ILogger<T> logger)
             : base(source, enabled, loggerFactory, messageLogger, logger)
         {
         }

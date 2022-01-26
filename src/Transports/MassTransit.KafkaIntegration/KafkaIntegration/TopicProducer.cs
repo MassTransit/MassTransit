@@ -85,7 +85,7 @@ namespace MassTransit.KafkaIntegration
                 sendContext.SourceAddress ??= _context.HostAddress;
                 sendContext.ConversationId ??= NewId.NextGuid();
 
-                StartedActivity? activity = LogContext.IfEnabled(OperationName.Transport.Send)?.StartSendActivity(sendContext,
+                StartedActivity? activity = LogContext.IfEnabled(_context.ActivityName)?.StartSendActivity(sendContext,
                     (nameof(sendContext.Partition), sendContext.Partition.ToString()));
                 try
                 {
@@ -107,8 +107,8 @@ namespace MassTransit.KafkaIntegration
 
                     await context.Produce(topic, message, sendContext.CancellationToken).ConfigureAwait(false);
 
+                    activity?.Update(sendContext);
                     sendContext.LogSent();
-                    activity.AddSendContextHeadersPostSend(sendContext);
 
                     if (_context.SendObservers.Count > 0)
                         await _context.SendObservers.PostSend(sendContext).ConfigureAwait(false);

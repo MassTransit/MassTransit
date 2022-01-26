@@ -3,8 +3,6 @@ namespace MassTransit.Middleware
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Logging;
-    using Serialization;
-    using Transports;
 
 
     /// <summary>
@@ -37,9 +35,7 @@ namespace MassTransit.Middleware
             if (!context.TryGetPayload(out ConsumeContext consumeContext))
                 consumeContext = _serializers.GetMessageDeserializer(context.ContentType).Deserialize(context);
 
-            // TODO this will always be true once we force ActivitySource for all calls
-            if (context.TryGetPayload<StartedActivityContext>(out var activityContext))
-                activityContext.AddConsumeContextHeaders(consumeContext);
+            Activity.Current?.AddConsumeContextTags(consumeContext);
 
             await _output.Send(consumeContext).ConfigureAwait(false);
 

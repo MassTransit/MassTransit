@@ -35,7 +35,8 @@ namespace MassTransit.Configuration
                 foreach (var specification in Specifications)
                     specification.Configure(builder);
 
-                return new ReceivePipeDispatcher(_endpointConfiguration.CreateReceivePipe(), _endpointConfiguration.ReceiveObservers, _hostConfiguration);
+                return new ReceivePipeDispatcher(_endpointConfiguration.CreateReceivePipe(), _endpointConfiguration.ReceiveObservers, _hostConfiguration,
+                    _endpointConfiguration.InputAddress);
             }
             catch (Exception ex)
             {

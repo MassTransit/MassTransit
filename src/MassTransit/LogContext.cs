@@ -35,7 +35,7 @@ namespace MassTransit
 
         public static void ConfigureCurrentLogContext(ILoggerFactory loggerFactory = null)
         {
-            Current = new BusLogContext(loggerFactory ?? NullLoggerFactory.Instance, Cached.Default.Value);
+            Current = new BusLogContext(loggerFactory ?? NullLoggerFactory.Instance, Cached.Source.Value);
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace MassTransit
         /// <param name="logger">An existing logger</param>
         public static void ConfigureCurrentLogContext(ILogger logger)
         {
-            Current = new BusLogContext(new SingleLoggerFactory(logger), Cached.Default.Value);
+            Current = new BusLogContext(new SingleLoggerFactory(logger), Cached.Source.Value);
         }
 
         public static EnabledScope? BeginScope()
@@ -137,14 +137,14 @@ namespace MassTransit
 
         static ILogContext CreateDefaultLogContext()
         {
-            var source = Cached.Default.Value;
+            var source = Cached.Source.Value;
 
             var loggerFactory = NullLoggerFactory.Instance;
 
             return new BusLogContext(loggerFactory, source);
         }
 
-        public static EnabledDiagnosticSource? IfEnabled(string name)
+        public static EnabledActivitySource? IfEnabled(string name)
         {
             return Current?.IfEnabled(name);
         }
@@ -152,8 +152,8 @@ namespace MassTransit
 
         static class Cached
         {
-            internal static readonly Lazy<DiagnosticListener> Default =
-                new Lazy<DiagnosticListener>(() => new DiagnosticListener(DiagnosticHeaders.DefaultListenerName));
+            internal static readonly Lazy<ActivitySource> Source =
+                new Lazy<ActivitySource>(() => new ActivitySource(DiagnosticHeaders.DefaultListenerName));
         }
     }
 }
