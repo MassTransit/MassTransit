@@ -4,7 +4,6 @@
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Internals;
-    using MassTransit.Scheduling;
     using NUnit.Framework;
 
 
@@ -357,7 +356,7 @@
 
             _first = Handler<FirstMessage>(configurator, async context =>
             {
-                ScheduledMessage<SecondMessage> scheduledMessage = await context.ScheduleSend(TimeSpan.FromSeconds(15), new SecondMessage {Id = _testId});
+                ScheduledMessage<SecondMessage> scheduledMessage = await context.ScheduleSend(TimeSpan.FromSeconds(15), new SecondMessage { Id = _testId });
 
                 await Task.Delay(1000);
 

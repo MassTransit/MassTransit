@@ -32,13 +32,6 @@ namespace MassTransit.QuartzIntegration.Tests
         int _count;
         DateTime[] _timestamps;
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            base.ConfigureInMemoryBus(configurator);
-
-            configurator.UseMessageScheduler(QuartzAddress);
-        }
-
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _count = 0;

@@ -6,7 +6,6 @@
     using NUnit.Framework;
     using TestFramework;
     using TestFramework.Messages;
-    using Util;
 
 
     [TestFixture]
@@ -80,13 +79,6 @@
 
         MyConsumer _consumer;
 
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            base.ConfigureInMemoryBus(configurator);
-
-            configurator.UseMessageScheduler(QuartzAddress);
-        }
-
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _consumer = new MyConsumer(GetTask<ConsumeContext<PingMessage>>());
@@ -158,18 +150,90 @@
 
         MyConsumer _consumer;
 
+        protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
+        {
+            _consumer = new MyConsumer(GetTask<ConsumeContext<PingMessage>>());
+
+            configurator.UseScheduledRedelivery(r => r.Intervals(1000, 2000));
+            configurator.Consumer(() => _consumer);
+        }
+
+
+        class MyConsumer :
+            IConsumer<PingMessage>
+        {
+            readonly TaskCompletionSource<ConsumeContext<PingMessage>> _received;
+            int _count;
+            TimeSpan _receivedTimeSpan;
+            Stopwatch _timer;
+
+            public MyConsumer(TaskCompletionSource<ConsumeContext<PingMessage>> taskCompletionSource)
+            {
+                _received = taskCompletionSource;
+            }
+
+            public Task<ConsumeContext<PingMessage>> Received => _received.Task;
+
+            public IComparable ReceivedTimeSpan => _receivedTimeSpan;
+
+            public int RedeliveryCount { get; set; }
+
+            public Task Consume(ConsumeContext<PingMessage> context)
+            {
+                if (_timer == null)
+                    _timer = Stopwatch.StartNew();
+
+                if (_count++ < 2)
+                {
+                    Console.WriteLine("{0} now is not a good time", DateTime.UtcNow);
+                    throw new IntentionalTestException("I'm so not ready for this jelly.");
+                }
+
+                _timer.Stop();
+
+                Console.WriteLine("{0} okay, now is good (retried {1} times)", DateTime.UtcNow, context.Headers.Get("MT-Redelivery-Count", default(int?)));
+
+                // okay, ready.
+                _receivedTimeSpan = _timer.Elapsed;
+                RedeliveryCount = context.GetRedeliveryCount();
+                _received.TrySetResult(context);
+
+                return Task.CompletedTask;
+            }
+        }
+    }
+
+
+    [TestFixture]
+    public class Using_scheduled_redelivery_configured_via_the_bus :
+        QuartzInMemoryTestFixture
+    {
+        [Test]
+        public async Task Should_properly_order_the_middleware()
+        {
+            await InputQueueSendEndpoint.Send(new PingMessage());
+
+            ConsumeContext<PingMessage> context = await _consumer.Received;
+
+            Assert.GreaterOrEqual(_consumer.ReceivedTimeSpan, TimeSpan.FromSeconds(1));
+
+            Assert.That(_consumer.RedeliveryCount, Is.EqualTo(2));
+            Assert.That(context.GetRedeliveryCount(), Is.EqualTo(2));
+        }
+
+        MyConsumer _consumer;
+
         protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
         {
             base.ConfigureInMemoryBus(configurator);
 
-            configurator.UseMessageScheduler(QuartzAddress);
+            configurator.UseScheduledRedelivery(r => r.Intervals(1000, 2000));
         }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
             _consumer = new MyConsumer(GetTask<ConsumeContext<PingMessage>>());
 
-            configurator.UseScheduledRedelivery(r => r.Intervals(1000, 2000));
             configurator.Consumer(() => _consumer);
         }
 
@@ -287,7 +351,7 @@
             ConsumeContext<PingMessage> context = await _received.Task;
 
             Assert.GreaterOrEqual(_receivedTimeSpan, TimeSpan.FromSeconds(1));
-            int? customHeaderValue = context.Headers.Get(customHeader, default(int?));
+            var customHeaderValue = context.Headers.Get(customHeader, default(int?));
             Assert.AreEqual(2, customHeaderValue);
         }
 
@@ -296,13 +360,6 @@
         Stopwatch _timer;
         int _count;
         readonly string customHeader = "Custom-Header";
-
-        protected override void ConfigureInMemoryBus(IInMemoryBusFactoryConfigurator configurator)
-        {
-            base.ConfigureInMemoryBus(configurator);
-
-            configurator.UseMessageScheduler(QuartzAddress);
-        }
 
         protected override void ConfigureInMemoryReceiveEndpoint(IInMemoryReceiveEndpointConfigurator configurator)
         {
