@@ -11,7 +11,8 @@
             _binder = binder;
         }
 
-        EventActivityBinder<TSaga> IStateMachineActivitySelector<TSaga>.OfType<TActivity>()
+        public EventActivityBinder<TSaga> OfType<TActivity>()
+            where TActivity : class, IStateMachineActivity<TSaga>
         {
             var activity = new ContainerFactoryActivity<TSaga, TActivity>();
 
@@ -32,14 +33,16 @@
             _binder = binder;
         }
 
-        EventActivityBinder<TSaga, TMessage> IStateMachineActivitySelector<TSaga, TMessage>.OfType<TActivity>()
+        public EventActivityBinder<TSaga, TMessage> OfType<TActivity>()
+            where TActivity : class, IStateMachineActivity<TSaga, TMessage>
         {
             var activity = new ContainerFactoryActivity<TSaga, TMessage, TActivity>();
 
             return _binder.Add(activity);
         }
 
-        EventActivityBinder<TSaga, TMessage> IStateMachineActivitySelector<TSaga, TMessage>.OfInstanceType<TActivity>()
+        public EventActivityBinder<TSaga, TMessage> OfInstanceType<TActivity>()
+            where TActivity : class, IStateMachineActivity<TSaga>
         {
             var activity = new ContainerFactoryActivity<TSaga, TActivity>();
 
