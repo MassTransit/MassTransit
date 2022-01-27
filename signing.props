@@ -1,9 +1,7 @@
 <Project>
   <!-- These properties will be used only by projects that sign the assemblies -->
 
-  <!-- <PropertyGroup Condition="'$(MSBuildProjectName.Contains(Tests))' == false OR $(MSBuildProjectName) == 'MassTransit.RedisIntegration'"> -->
   <PropertyGroup>
-    <!-- Assembly Signing -->
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)MassTransit.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
