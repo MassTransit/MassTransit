@@ -8,6 +8,7 @@ namespace MassTransit.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class KillSwitch_Specs :
         InMemoryTestFixture
     {

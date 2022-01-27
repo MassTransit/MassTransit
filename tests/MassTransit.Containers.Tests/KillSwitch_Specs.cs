@@ -15,6 +15,7 @@ namespace MassTransit.Containers.Tests
 
 
     [TestFixture]
+    [Category("Flaky")]
     public class KillSwitch_Specs :
         BusTestFixture
     {
