@@ -23,7 +23,15 @@ namespace MassTransit.Transports
 
             Serialization = serialization;
 
-            _activityName = new Lazy<string>(() => $"{EntityName} send");
+            _activityName = new Lazy<string>(() =>
+            {
+                var endpointName = EntityName;
+
+                if (endpointName.Contains("_bus_"))
+                    endpointName = "bus";
+
+                return $"{endpointName} send";
+            });
         }
 
         public abstract string EntityName { get; }

@@ -25,7 +25,7 @@ namespace MassTransit.Middleware
             _getCorrelationId = getCorrelationId;
         }
 
-        void IProbeSite.Probe(ProbeContext context)
+        public void Probe(ProbeContext context)
         {
             context.CreateFilterScope("correlationId");
         }

@@ -33,7 +33,6 @@ namespace MassTransit.Courier
 
                 try
                 {
-                    await Task.Yield();
                     await _compensatePipe.Send(compensateContext).ConfigureAwait(false);
 
                     var result = compensateContext.Result

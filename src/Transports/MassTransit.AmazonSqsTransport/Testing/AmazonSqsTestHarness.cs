@@ -5,7 +5,6 @@
     using Amazon.SimpleNotificationService;
     using Amazon.SQS;
     using Amazon.SQS.Model;
-    using AmazonSqsTransport;
     using AmazonSqsTransport.Configuration;
 
 

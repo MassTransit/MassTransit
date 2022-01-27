@@ -57,7 +57,6 @@
 
             _name = GetType().Name;
 
-
             _eventCorrelations = new Dictionary<Event, EventCorrelation>();
             _isCompleted = NotCompletedByDefault;
 

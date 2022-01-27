@@ -35,7 +35,6 @@ namespace MassTransit.Courier
 
                 try
                 {
-                    await Task.Yield();
                     await _executePipe.Send(executeContext).ConfigureAwait(false);
 
                     var result = executeContext.Result

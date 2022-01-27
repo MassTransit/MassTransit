@@ -19,6 +19,19 @@ namespace MassTransit.RabbitMqTransport.Tests
         }
 
 
+        public interface SubmitActivity
+        {
+            string Value { get; }
+        }
+
+
+        public interface ActivityCompleted
+        {
+            string Value { get; }
+            string Variable { get; }
+        }
+
+
         public interface OrderSubmitted
         {
             Guid OrderId { get; }

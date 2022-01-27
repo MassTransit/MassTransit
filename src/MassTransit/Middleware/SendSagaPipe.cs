@@ -43,9 +43,7 @@ namespace MassTransit.Middleware
                     await _policy.Existing(sagaConsumeContext, _next).ConfigureAwait(false);
 
                     if (_policy.IsReadOnly)
-                    {
                         await context.Undo(sagaConsumeContext).ConfigureAwait(false);
-                    }
                     else
                     {
                         if (sagaConsumeContext.IsCompleted)

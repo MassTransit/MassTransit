@@ -43,8 +43,6 @@ namespace MassTransit.Middleware
             var timer = Stopwatch.StartNew();
             try
             {
-                await Task.Yield();
-
                 await _consumerFactory.Send(context, _consumerPipe).ConfigureAwait(false);
 
                 await context.NotifyConsumed(timer.Elapsed, TypeCache<TConsumer>.ShortName).ConfigureAwait(false);

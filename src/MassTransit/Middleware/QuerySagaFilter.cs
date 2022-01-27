@@ -3,7 +3,6 @@ namespace MassTransit.Middleware
     using System;
     using System.Diagnostics;
     using System.Threading.Tasks;
-    using Logging;
 
 
     /// <summary>
@@ -43,8 +42,6 @@ namespace MassTransit.Middleware
 
         async Task IFilter<ConsumeContext<TMessage>>.Send(ConsumeContext<TMessage> context, IPipe<ConsumeContext<TMessage>> next)
         {
-            StartedActivity? activity = LogContext.IfEnabled(OperationName.Saga.SendQuery)?.StartSagaActivity<TSaga, TMessage>(context);
-
             var timer = Stopwatch.StartNew();
             try
             {
@@ -72,10 +69,6 @@ namespace MassTransit.Middleware
             {
                 await context.NotifyFaulted(timer.Elapsed, TypeCache<TSaga>.ShortName, ex).ConfigureAwait(false);
                 throw;
-            }
-            finally
-            {
-                activity?.Stop();
             }
         }
     }

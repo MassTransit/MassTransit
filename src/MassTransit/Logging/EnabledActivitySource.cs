@@ -1,12 +1,13 @@
 #nullable enable
 namespace MassTransit.Logging
 {
+    using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Threading.Tasks;
     using Courier;
     using Courier.Contracts;
-    using Metadata;
     using Transports;
 
 
@@ -24,32 +25,15 @@ namespace MassTransit.Logging
         public StartedActivity? StartSendActivity<T>(SendContext<T> context, params (string Key, object Value)[] tags)
             where T : class
         {
-            var initialTags = new ActivityTagsCollection { [DiagnosticHeaders.Messaging.Destination] = context.DestinationAddress.GetDiagnosticEndpointName() };
-
-            if (context.MessageId.HasValue)
-                initialTags[DiagnosticHeaders.Messaging.MessageId] = context.MessageId.Value.ToString("D");
-
-            var conversationId = context.ConversationId?.ToString("D");
-            if (conversationId != null)
-                initialTags[DiagnosticHeaders.Messaging.ConversationId] = conversationId;
-
-            if (context.CorrelationId.HasValue)
-                initialTags[DiagnosticHeaders.CorrelationId] = context.CorrelationId.Value.ToString("D");
-            if (context.InitiatorId.HasValue)
-                initialTags[DiagnosticHeaders.InitiatorId] = context.InitiatorId.Value.ToString("D");
-            if (context.SourceAddress != null)
-                initialTags[DiagnosticHeaders.SourceAddress] = context.SourceAddress.ToString();
-            if (context.DestinationAddress != null)
-                initialTags[DiagnosticHeaders.DestinationAddress] = context.DestinationAddress.ToString();
-
-            for (var i = 0; i < tags.Length; i++)
-                initialTags[tags[i].Key] = tags[i].Value;
-
             var parentActivityContext = System.Diagnostics.Activity.Current?.Context ?? default;
 
-            var activity = _source.CreateActivity(_name, ActivityKind.Producer, parentActivityContext, initialTags);
+            var activity = _source.CreateActivity(_name, ActivityKind.Producer, parentActivityContext);
             if (activity == null)
                 return null;
+
+            activity.AddTag(DiagnosticHeaders.Messaging.Destination, _name.Substring(0, _name.Length - 5));
+
+            var conversationId = context.ConversationId?.ToString("D");
 
             if (context.CorrelationId.HasValue)
                 activity.AddBaggage(DiagnosticHeaders.CorrelationId, context.CorrelationId.Value.ToString("D"));
@@ -57,6 +41,28 @@ namespace MassTransit.Logging
                 activity.AddBaggage(DiagnosticHeaders.Messaging.ConversationId, conversationId);
 
             activity.Start();
+
+            if (activity.IsAllDataRequested)
+            {
+                if (context.MessageId.HasValue)
+                    activity.AddTag(DiagnosticHeaders.MessageId, context.MessageId.Value.ToString("D"));
+                if (conversationId != null)
+                    activity.AddTag(DiagnosticHeaders.Messaging.ConversationId, conversationId);
+                if (context.CorrelationId.HasValue)
+                    activity.AddTag(DiagnosticHeaders.CorrelationId, context.CorrelationId.Value.ToString("D"));
+                if (context.InitiatorId.HasValue)
+                    activity.AddTag(DiagnosticHeaders.InitiatorId, context.InitiatorId.Value.ToString("D"));
+                if (context.SourceAddress != null)
+                    activity.AddTag(DiagnosticHeaders.SourceAddress, context.SourceAddress.ToString());
+                if (context.DestinationAddress != null)
+                    activity.AddTag(DiagnosticHeaders.DestinationAddress, context.DestinationAddress.ToString());
+
+                for (var i = 0; i < tags.Length; i++)
+                {
+                    if (tags[i].Value != null)
+                        activity.AddTag(tags[i].Key, tags[i].Value?.ToString());
+                }
+            }
 
             context.Headers.Set(DiagnosticHeaders.ActivityId, activity.Id);
 
@@ -84,25 +90,29 @@ namespace MassTransit.Logging
         public StartedActivity? StartReceiveActivity(ReceiveContext context, params (string Key, string Value)[] tags)
         {
             var parentActivityContext = GetParentActivityContext(context.TransportHeaders);
-
-            var initialTags = new ActivityTagsCollection
-            {
-                [DiagnosticHeaders.Messaging.Destination] = context.InputAddress.GetEndpointName(),
-                [DiagnosticHeaders.Messaging.Operation] = "receive",
-                [DiagnosticHeaders.InputAddress] = context.InputAddress.ToString()
-            };
-
-            if (context.TransportHeaders.TryGetHeader(MessageHeaders.MessageId, out var messageIdHeader) && messageIdHeader is string text)
-                initialTags[DiagnosticHeaders.Messaging.MessageId] = text;
-
-            for (var i = 0; i < tags.Length; i++)
-                initialTags[tags[i].Key] = tags[i].Value;
-
-            var activity = _source.CreateActivity(_name, ActivityKind.Consumer, parentActivityContext, initialTags);
+            var activity = _source.CreateActivity(_name, ActivityKind.Consumer, parentActivityContext);
             if (activity == null)
                 return null;
 
             activity.Start();
+
+            if (activity.IsAllDataRequested)
+            {
+                activity.AddTag(DiagnosticHeaders.Messaging.Destination, context.InputAddress.GetEndpointName());
+                activity.AddTag(DiagnosticHeaders.Messaging.Operation, "receive");
+                activity.AddTag(DiagnosticHeaders.InputAddress, context.InputAddress.ToString());
+
+                if ((context.TransportHeaders.TryGetHeader(MessageHeaders.TransportMessageId, out var messageIdHeader)
+                        || context.TransportHeaders.TryGetHeader(MessageHeaders.MessageId, out messageIdHeader))
+                    && messageIdHeader is string text)
+                    activity.AddTag(DiagnosticHeaders.Messaging.TransportMessageId, text);
+
+                for (var i = 0; i < tags.Length; i++)
+                {
+                    if (tags[i].Value != null)
+                        activity.AddTag(tags[i].Key, tags[i].Value);
+                }
+            }
 
             EnabledScope? scope = BeginScope(activity);
 
@@ -112,53 +122,33 @@ namespace MassTransit.Logging
         public StartedActivity? StartConsumerActivity<TConsumer, T>(ConsumeContext<T> context)
             where T : class
         {
-            var initialTags = new ActivityTagsCollection
+            return StartActivity(activity =>
             {
-                [DiagnosticHeaders.ServiceName] = TypeCache<TConsumer>.ShortName,
-                [DiagnosticHeaders.PeerService] = "Consumer",
-                [DiagnosticHeaders.PeerAddress] = MessageTypeCache<T>.DiagnosticAddress,
-            };
-
-            return StartActivity(context, initialTags);
+                activity.AddTag(DiagnosticHeaders.ServiceName, TypeCache<TConsumer>.ShortName);
+                activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
+            });
         }
 
         public StartedActivity? StartHandlerActivity<T>(ConsumeContext<T> context)
             where T : class
         {
-            var initialTags = new ActivityTagsCollection
+            return StartActivity(activity =>
             {
-                [DiagnosticHeaders.PeerService] = "Handler",
-                [DiagnosticHeaders.PeerAddress] = MessageTypeCache<T>.DiagnosticAddress,
-            };
-
-            return StartActivity(context, initialTags);
-        }
-
-        public StartedActivity? StartSagaActivity<TSaga, T>(ConsumeContext<T> context)
-            where TSaga : ISaga
-            where T : class
-        {
-            var initialTags = new ActivityTagsCollection
-            {
-                [DiagnosticHeaders.PeerService] = "Repository",
-                [DiagnosticHeaders.PeerAddress] = MessageTypeCache<T>.DiagnosticAddress,
-            };
-
-            return StartActivity(context, initialTags);
+                activity.AddTag(DiagnosticHeaders.ServiceName, "Handler");
+                activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
+            });
         }
 
         public StartedActivity? StartSagaActivity<TSaga, T>(SagaConsumeContext<TSaga, T> context)
             where TSaga : class, ISaga
             where T : class
         {
-            var initialTags = new ActivityTagsCollection
+            return StartActivity(activity =>
             {
-                [DiagnosticHeaders.SagaId] = context.Saga.CorrelationId.ToString("D"),
-                [DiagnosticHeaders.PeerService] = TypeCache<TSaga>.ShortName,
-                [DiagnosticHeaders.PeerAddress] = MessageTypeCache<T>.DiagnosticAddress,
-            };
-
-            return StartActivity(context, initialTags);
+                activity.AddTag(DiagnosticHeaders.SagaId, context.Saga.CorrelationId.ToString("D"));
+                activity.AddTag(DiagnosticHeaders.ServiceName, TypeCache<TSaga>.ShortName);
+                activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
+            });
         }
 
         public async ValueTask<StartedActivity?> StartSagaStateMachineActivity<TSaga, T>(BehaviorContext<TSaga, T> context)
@@ -167,84 +157,81 @@ namespace MassTransit.Logging
         {
             State<TSaga>? beginState = await context.StateMachine.Accessor.Get(context).ConfigureAwait(false);
 
-            var initialTags = new ActivityTagsCollection
+            return StartActivity(activity =>
             {
-                [DiagnosticHeaders.SagaId] = context.Saga.CorrelationId.ToString("D"),
-                [DiagnosticHeaders.ServiceName] = TypeCache<TSaga>.ShortName,
-                [DiagnosticHeaders.PeerAddress] = MessageTypeCache<T>.DiagnosticAddress,
-            };
+                activity.AddTag(DiagnosticHeaders.SagaId, context.Saga.CorrelationId.ToString("D"));
+                activity.AddTag(DiagnosticHeaders.ServiceName, context.StateMachine.Name);
+                activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<T>.DiagnosticAddress);
 
-            if (beginState != null)
-                initialTags[DiagnosticHeaders.BeginState] = beginState.Name;
-
-            return StartActivity(context, initialTags);
+                if (beginState != null)
+                    activity.AddTag(DiagnosticHeaders.BeginState, beginState.Name);
+            });
         }
 
         public StartedActivity? StartExecuteActivity<TActivity, TArguments>(ConsumeContext<RoutingSlip> context)
             where TActivity : IExecuteActivity<TArguments>
             where TArguments : class
         {
-            var initialTags = new ActivityTagsCollection
+            return StartActivity(activity =>
             {
-                [DiagnosticHeaders.TrackingNumber] = context.Message.TrackingNumber.ToString("D"),
-                [DiagnosticHeaders.ServiceName] = TypeCache<TActivity>.ShortName,
-                [DiagnosticHeaders.PeerAddress] = MessageTypeCache<TArguments>.DiagnosticAddress,
-            };
-
-            return StartActivity(context, initialTags);
+                activity.AddTag(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber.ToString("D"));
+                activity.AddTag(DiagnosticHeaders.ServiceName, TypeCache<TActivity>.ShortName);
+                activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<TArguments>.DiagnosticAddress);
+            });
         }
 
         public StartedActivity? StartCompensateActivity<TActivity, TLog>(ConsumeContext<RoutingSlip> context)
             where TActivity : ICompensateActivity<TLog>
             where TLog : class
         {
-            var initialTags = new ActivityTagsCollection
+            return StartActivity(activity =>
             {
-                [DiagnosticHeaders.TrackingNumber] = context.Message.TrackingNumber.ToString("D"),
-                [DiagnosticHeaders.ServiceName] = TypeCache<TActivity>.ShortName,
-                [DiagnosticHeaders.PeerAddress] = MessageTypeCache<TLog>.DiagnosticAddress,
-            };
-
-            return StartActivity(context, initialTags);
+                activity.AddTag(DiagnosticHeaders.TrackingNumber, context.Message.TrackingNumber.ToString("D"));
+                activity.AddTag(DiagnosticHeaders.ServiceName, TypeCache<TActivity>.ShortName);
+                activity.AddTag(DiagnosticHeaders.PeerAddress, MessageTypeCache<TLog>.DiagnosticAddress);
+            });
         }
 
-        StartedActivity? StartActivity(ConsumeContext context, ActivityTagsCollection initialTags)
+        StartedActivity? StartActivity(Action<System.Diagnostics.Activity> started)
         {
             var operationName = _name;
 
             var currentActivity = System.Diagnostics.Activity.Current;
             if (currentActivity != null)
             {
-                if (currentActivity.OperationName.EndsWith(" receive"))
-                    operationName = currentActivity.OperationName.Substring(0, currentActivity.OperationName.Length - 8) + " process";
-
-                foreach (KeyValuePair<string, string?> tag in currentActivity.Tags)
+                operationName = Cached.OperationNames.GetOrAdd(currentActivity.OperationName, add =>
                 {
-                    switch (tag.Key)
-                    {
-                        case DiagnosticHeaders.Messaging.Destination:
-                            initialTags[DiagnosticHeaders.Messaging.Destination] = tag.Value;
-                            break;
-                    }
-                }
+                    if (add.EndsWith(" receive"))
+                        return add.Substring(0, add.Length - 8) + " process";
+                    if (add.EndsWith(" process"))
+                        return add;
+
+                    return operationName;
+                });
             }
-            else
-                initialTags[DiagnosticHeaders.Messaging.Destination] = context.ReceiveContext.InputAddress.GetDiagnosticEndpointName();
 
-            initialTags[DiagnosticHeaders.Messaging.Operation] = "process";
-
-            initialTags[DiagnosticHeaders.PeerHost] = HostMetadataCache.Host.MachineName;
-
-            var activity = _source.CreateActivity(operationName, ActivityKind.Consumer, currentActivity?.Context ?? default, initialTags);
+            var activity = _source.CreateActivity(operationName, ActivityKind.Consumer, currentActivity?.Context ?? default);
             if (activity == null)
                 return null;
 
             activity.Start();
 
+            activity.AddTag(DiagnosticHeaders.Messaging.Operation, "process");
+
+            if (activity.IsAllDataRequested)
+                started(activity);
+
             EnabledScope? scope = BeginScope(activity);
 
             return new StartedActivity(activity, scope);
         }
+
+
+        static class Cached
+        {
+            internal static readonly ConcurrentDictionary<string, string> OperationNames = new ConcurrentDictionary<string, string>();
+        }
+
 
         static ActivityContext GetParentActivityContext(Headers headers)
         {
@@ -257,20 +244,20 @@ namespace MassTransit.Logging
         static EnabledScope? BeginScope(System.Diagnostics.Activity activity)
         {
             EnabledScope? scope = LogContext.BeginScope();
-            if (scope.HasValue)
-            {
-                var spanId = activity.GetSpanId();
-                if (!string.IsNullOrWhiteSpace(spanId))
-                    scope.Value.Add("SpanId", spanId);
+            if (!scope.HasValue)
+                return scope;
 
-                var traceId = activity.GetTraceId();
-                if (!string.IsNullOrWhiteSpace(traceId))
-                    scope.Value.Add("TraceId", traceId);
+            var spanId = activity.GetSpanId();
+            if (!string.IsNullOrWhiteSpace(spanId))
+                scope.Value.Add("SpanId", spanId);
 
-                var parentId = activity.GetParentId();
-                if (!string.IsNullOrWhiteSpace(parentId))
-                    scope.Value.Add("ParentId", parentId);
-            }
+            var traceId = activity.GetTraceId();
+            if (!string.IsNullOrWhiteSpace(traceId))
+                scope.Value.Add("TraceId", traceId);
+
+            var parentId = activity.GetParentId();
+            if (!string.IsNullOrWhiteSpace(parentId))
+                scope.Value.Add("ParentId", parentId);
 
             return scope;
         }

@@ -147,8 +147,6 @@
                     if (!string.IsNullOrEmpty(routingKey))
                         activity?.AddTag(DiagnosticHeaders.Messaging.RabbitMq.RoutingKey, routingKey);
 
-                    activity?.AddTag(DiagnosticHeaders.Messaging.DestinationKind, string.IsNullOrEmpty(exchange) ? "queue" : "topic");
-
                     var publishTask = modelContext.BasicPublishAsync(exchange, routingKey, context.Mandatory, context.BasicProperties, body,
                         context.AwaitAck);
 

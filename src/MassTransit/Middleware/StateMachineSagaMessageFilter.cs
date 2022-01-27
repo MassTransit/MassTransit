@@ -18,6 +18,7 @@ namespace MassTransit.Middleware
         where TSaga : class, ISaga, SagaStateMachineInstance
         where TMessage : class
     {
+        readonly string _activityName;
         readonly Event<TMessage> _event;
         readonly SagaStateMachine<TSaga> _machine;
 
@@ -25,6 +26,8 @@ namespace MassTransit.Middleware
         {
             _machine = machine;
             _event = @event;
+
+            _activityName = $"{_machine.Name} process";
         }
 
         void IProbeSite.Probe(ProbeContext context)
@@ -48,7 +51,7 @@ namespace MassTransit.Middleware
         {
             BehaviorContext<TSaga, TMessage> behaviorContext = new BehaviorContextProxy<TSaga, TMessage>(_machine, context, context, _event);
 
-            EnabledActivitySource? activitySource = LogContext.IfEnabled(OperationName.Saga.RaiseEvent);
+            EnabledActivitySource? activitySource = LogContext.IfEnabled(_activityName);
             StartedActivity? activity = activitySource.HasValue
                 ? await activitySource.Value.StartSagaStateMachineActivity(behaviorContext).ConfigureAwait(false)
                 : null;
