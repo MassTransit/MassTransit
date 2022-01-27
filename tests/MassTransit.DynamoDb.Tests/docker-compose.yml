@@ -1,0 +1,9 @@
+﻿# this compose file will start local services the same as those running on appveyor CI for testing.
+
+version: '2.3'
+services:
+  redis:
+    image: amazon/dynamodb-local:latest
+    container_name: dynamodb
+    ports:
+      - '8000:8000'
