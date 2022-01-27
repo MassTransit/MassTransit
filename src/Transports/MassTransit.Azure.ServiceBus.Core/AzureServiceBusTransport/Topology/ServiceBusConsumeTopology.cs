@@ -52,7 +52,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 
             var createTopicOptions = Defaults.GetCreateTopicOptions(topicName);
 
-            var subscriptionConfigurator = new ServiceBusSubscriptionConfigurator(createTopicOptions.Name, subscriptionName);
+            var subscriptionConfigurator = new ServiceBusSubscriptionConfigurator(subscriptionName, createTopicOptions.Name);
 
             callback?.Invoke(subscriptionConfigurator);
 

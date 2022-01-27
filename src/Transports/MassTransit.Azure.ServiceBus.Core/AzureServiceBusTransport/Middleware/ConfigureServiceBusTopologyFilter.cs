@@ -18,7 +18,8 @@
         readonly TSettings _settings;
         CancellationToken _cancellationToken;
 
-        public ConfigureServiceBusTopologyFilter(TSettings settings, BrokerTopology brokerTopology, bool removeSubscriptions, CancellationToken cancellationToken)
+        public ConfigureServiceBusTopologyFilter(TSettings settings, BrokerTopology brokerTopology, bool removeSubscriptions,
+            CancellationToken cancellationToken)
         {
             _settings = settings;
             _brokerTopology = brokerTopology;
@@ -120,8 +121,7 @@
 
         Task Delete(ConnectionContext context, QueueSubscription subscription)
         {
-            return context.DeleteTopicSubscription(subscription.Subscription.CreateSubscriptionOptions.TopicName,
-                subscription.Subscription.CreateSubscriptionOptions.SubscriptionName);
+            return context.DeleteTopicSubscription(subscription.Subscription.CreateSubscriptionOptions);
         }
 
         Task Create(ConnectionContext context, TopicSubscription subscription)

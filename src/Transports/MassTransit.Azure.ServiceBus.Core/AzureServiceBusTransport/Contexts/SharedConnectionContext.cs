@@ -64,9 +64,9 @@
             return _context.CreateTopicSubscription(createSubscriptionOptions, rule, filter);
         }
 
-        public Task DeleteTopicSubscription(string topicName, string subscriptionName)
+        public Task DeleteTopicSubscription(CreateSubscriptionOptions subscriptionOptions)
         {
-            return _context.DeleteTopicSubscription(topicName, subscriptionName);
+            return _context.DeleteTopicSubscription(subscriptionOptions);
         }
 
         Uri ConnectionContext.Endpoint => _context.Endpoint;

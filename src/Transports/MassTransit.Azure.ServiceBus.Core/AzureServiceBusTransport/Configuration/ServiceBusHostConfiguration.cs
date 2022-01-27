@@ -153,8 +153,7 @@
         {
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
             var settings = new SubscriptionEndpointSettings(endpointConfiguration,
-                _busConfiguration.Topology.Publish.GetMessageTopology<T>().CreateTopicOptions,
-                subscriptionName);
+                subscriptionName, _busConfiguration.Topology.Publish.GetMessageTopology<T>().CreateTopicOptions);
 
             CreateSubscriptionEndpointConfiguration(settings, endpointConfiguration, configure);
         }
@@ -162,7 +161,7 @@
         public void SubscriptionEndpoint(string subscriptionName, string topicPath, Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
-            var settings = new SubscriptionEndpointSettings(endpointConfiguration, topicPath, subscriptionName);
+            var settings = new SubscriptionEndpointSettings(endpointConfiguration, subscriptionName, topicPath);
 
             CreateSubscriptionEndpointConfiguration(settings, endpointConfiguration, configure);
         }
@@ -191,8 +190,7 @@
         {
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
             var settings = new SubscriptionEndpointSettings(endpointConfiguration,
-                _busConfiguration.Topology.Publish.GetMessageTopology<T>().CreateTopicOptions,
-                subscriptionName);
+                subscriptionName, _busConfiguration.Topology.Publish.GetMessageTopology<T>().CreateTopicOptions);
 
             return CreateSubscriptionEndpointConfiguration(settings, endpointConfiguration, configure);
         }
@@ -201,7 +199,7 @@
             Action<IServiceBusSubscriptionEndpointConfigurator> configure)
         {
             var endpointConfiguration = _busConfiguration.CreateEndpointConfiguration();
-            var settings = new SubscriptionEndpointSettings(endpointConfiguration, topicPath, subscriptionName);
+            var settings = new SubscriptionEndpointSettings(endpointConfiguration, subscriptionName, topicPath);
 
             return CreateSubscriptionEndpointConfiguration(settings, endpointConfiguration, configure);
         }

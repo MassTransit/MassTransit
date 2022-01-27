@@ -10,7 +10,7 @@
         ServiceBusEndpointEntityConfigurator,
         IServiceBusSubscriptionConfigurator
     {
-        public ServiceBusSubscriptionConfigurator(string topicPath, string subscriptionName)
+        public ServiceBusSubscriptionConfigurator(string subscriptionName, string topicPath)
         {
             TopicPath = topicPath;
             SubscriptionName = subscriptionName;

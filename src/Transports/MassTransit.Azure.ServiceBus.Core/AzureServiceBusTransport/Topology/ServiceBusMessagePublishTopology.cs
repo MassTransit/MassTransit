@@ -50,7 +50,7 @@ namespace MassTransit.AzureServiceBusTransport.Topology
 
         public ServiceBusSubscriptionConfigurator GetSubscriptionConfigurator(string subscriptionName)
         {
-            return new ServiceBusSubscriptionConfigurator(CreateTopicOptions.Name, _publishTopology.FormatSubscriptionName(subscriptionName));
+            return new ServiceBusSubscriptionConfigurator(_publishTopology.FormatSubscriptionName(subscriptionName), CreateTopicOptions.Name);
         }
 
         string IServiceBusMessageEntityConfigurator.Path => _topicConfigurator.Path;

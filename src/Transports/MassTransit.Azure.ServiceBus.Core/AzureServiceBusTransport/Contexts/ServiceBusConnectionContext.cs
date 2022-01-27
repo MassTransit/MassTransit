@@ -229,21 +229,21 @@
             return subscriptionProperties;
         }
 
-        public async Task DeleteTopicSubscription(string topicName, string subscriptionName)
+        public async Task DeleteTopicSubscription(CreateSubscriptionOptions subscriptionOptions)
         {
             try
             {
-                await DeleteSubscriptionAsync(topicName, subscriptionName).ConfigureAwait(false);
+                await DeleteSubscriptionAsync(subscriptionOptions).ConfigureAwait(false);
 
-                LogContext.Debug?.Log("Subscription Deleted: {Subscription} {Topic}", subscriptionName, topicName);
+                LogContext.Debug?.Log("Subscription Deleted: {Subscription} {Topic}", subscriptionOptions.SubscriptionName, subscriptionOptions.TopicName);
             }
             catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityNotFound)
             {
             }
             catch (Exception ex)
             {
-                LogContext.Error?.Log(ex, "Subscription Delete Faulted: {Subscription} {Topic}", subscriptionName,
-                    topicName);
+                LogContext.Error?.Log(ex, "Subscription Delete Faulted: {Subscription} {Topic}", subscriptionOptions.SubscriptionName,
+                    subscriptionOptions.TopicName);
             }
         }
 
@@ -318,9 +318,9 @@
             return RunOperation(async () => (await _administrationClient.GetSubscriptionAsync(topicPath, subscriptionName)).Value);
         }
 
-        Task DeleteSubscriptionAsync(string topicPath, string subscriptionName)
+        Task DeleteSubscriptionAsync(CreateSubscriptionOptions subscriptionOptions)
         {
-            return RunOperation(() => _administrationClient.DeleteSubscriptionAsync(topicPath, subscriptionName));
+            return RunOperation(() => _administrationClient.DeleteSubscriptionAsync(subscriptionOptions.TopicName, subscriptionOptions.SubscriptionName));
         }
 
         Task<SubscriptionProperties> UpdateSubscriptionAsync(SubscriptionProperties subscriptionProperties)

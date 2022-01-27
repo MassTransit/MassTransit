@@ -51,9 +51,8 @@ namespace MassTransit.AzureServiceBusTransport
         /// <summary>
         /// Delete a subscription from the topic
         /// </summary>
-        /// <param name="topicName"></param>
-        /// <param name="subscriptionName"></param>
+        /// <param name="subscriptionOptions"></param>
         /// <returns></returns>
-        Task DeleteTopicSubscription(string topicName, string subscriptionName);
+        Task DeleteTopicSubscription(CreateSubscriptionOptions subscriptionOptions);
     }
 }

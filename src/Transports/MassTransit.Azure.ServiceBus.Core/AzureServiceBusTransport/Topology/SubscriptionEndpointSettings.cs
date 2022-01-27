@@ -13,13 +13,13 @@ namespace MassTransit.AzureServiceBusTransport.Topology
         readonly CreateTopicOptions _createTopicOptions;
         readonly ServiceBusSubscriptionConfigurator _subscriptionConfigurator;
 
-        public SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, string topicName, string subscriptionName)
-            : this(configuration, Defaults.GetCreateTopicOptions(topicName), subscriptionName)
+        public SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, string subscriptionName, string topicName)
+            : this(configuration, subscriptionName, Defaults.GetCreateTopicOptions(topicName))
         {
         }
 
-        public SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, CreateTopicOptions createTopicOptions, string subscriptionName)
-            : this(configuration, createTopicOptions, new ServiceBusSubscriptionConfigurator(createTopicOptions.Name, subscriptionName))
+        public SubscriptionEndpointSettings(IServiceBusEndpointConfiguration configuration, string subscriptionName, CreateTopicOptions createTopicOptions)
+            : this(configuration, createTopicOptions, new ServiceBusSubscriptionConfigurator(subscriptionName, createTopicOptions.Name))
         {
         }
 

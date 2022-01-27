@@ -74,7 +74,7 @@ namespace MassTransit.AzureServiceBusTransport
         {
             LogContext.SetCurrentIfNull(_hostConfiguration.LogContext);
 
-            var endpointConfiguration = _hostConfiguration.CreateSubscriptionEndpointConfiguration(topicName, subscriptionName, configure);
+            var endpointConfiguration = _hostConfiguration.CreateSubscriptionEndpointConfiguration(subscriptionName, topicName, configure);
 
             return ConnectSubscriptionEndpoint(endpointConfiguration);
         }
