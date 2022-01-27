@@ -5,12 +5,8 @@ namespace MassTransit
 
     [Serializable]
     public class RedisSagaConcurrencyException :
-        SagaException
+        ConcurrencyException
     {
-        public RedisSagaConcurrencyException()
-        {
-        }
-
         public RedisSagaConcurrencyException(string message, Type sagaType, Guid correlationId)
             : base(message, sagaType, correlationId)
         {
@@ -18,6 +14,10 @@ namespace MassTransit
 
         public RedisSagaConcurrencyException(string message, Type sagaType, Guid correlationId, Exception innerException)
             : base(message, sagaType, correlationId, innerException)
+        {
+        }
+
+        public RedisSagaConcurrencyException()
         {
         }
     }

@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using AzureCosmos;
     using AzureCosmos.Saga;
-    using MassTransit.Saga;
     using Microsoft.Azure.Cosmos;
     using NUnit.Framework;
     using TestFramework;
@@ -29,7 +28,7 @@
             {
                 var correlationId = NewId.NextGuid();
 
-                await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
+                await InputQueueSendEndpoint.Send(new RehersalBegins { CorrelationId = correlationId });
 
                 sagaIds[i] = correlationId;
             }
@@ -84,7 +83,7 @@
         {
             var correlationId = NewId.NextGuid();
 
-            await InputQueueSendEndpoint.Send(new RehersalBegins {CorrelationId = correlationId});
+            await InputQueueSendEndpoint.Send(new RehersalBegins { CorrelationId = correlationId });
 
             var saga = await GetSagaRetry(correlationId, TestTimeout);
 
