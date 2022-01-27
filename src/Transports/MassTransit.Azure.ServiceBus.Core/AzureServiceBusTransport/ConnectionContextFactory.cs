@@ -4,6 +4,7 @@ namespace MassTransit.AzureServiceBusTransport
     using System.Threading;
     using System.Threading.Tasks;
     using Agents;
+    using Azure.Identity;
     using Azure.Messaging.ServiceBus;
     using Azure.Messaging.ServiceBus.Administration;
     using Configuration;
@@ -83,11 +84,29 @@ namespace MassTransit.AzureServiceBusTransport
             }
             else
             {
-                client ??= new ServiceBusClient(settings.ConnectionString, clientOptions);
-                managementClient ??= new ServiceBusAdministrationClient(settings.ConnectionString);
+                if (HasSharedAccess(settings.ConnectionString))
+                {
+                    client ??= new ServiceBusClient(settings.ConnectionString, clientOptions);
+                    managementClient ??= new ServiceBusAdministrationClient(settings.ConnectionString);
+                }
+                else
+                {
+                    var defaultAzureCredential = new DefaultAzureCredential();
+
+                    client ??= new ServiceBusClient(endpoint, defaultAzureCredential, clientOptions);
+                    managementClient ??= new ServiceBusAdministrationClient(endpoint, defaultAzureCredential);
+                }
             }
 
             return new ServiceBusConnectionContext(client, managementClient, supervisor.Stopped);
+        }
+
+        static bool HasSharedAccess(string connectionString)
+        {
+            var connectionStringProperties = ServiceBusConnectionStringProperties.Parse(connectionString);
+
+            return !string.IsNullOrEmpty(connectionStringProperties.SharedAccessKeyName)
+                && !string.IsNullOrEmpty(connectionStringProperties.SharedAccessKey) || !string.IsNullOrEmpty(connectionStringProperties.SharedAccessSignature);
         }
     }
 }
