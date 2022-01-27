@@ -20,7 +20,7 @@
         public LocatingAnExistingSaga()
         {
             var dynamoDb = new AmazonDynamoDBClient(new AmazonDynamoDBConfig {ServiceURL = "http://localhost:8000"});
-            _sagaRepository = DynamoDbSagaRepository<SimpleSaga>.Create(() => new DynamoDBContext(dynamoDb), "MassTransitDynamoDb2");
+            _sagaRepository = DynamoDbSagaRepository<SimpleSaga>.Create(() => new DynamoDBContext(dynamoDb), "Mass", TimeSpan.FromDays(1));
         }
 
         [Test]

@@ -1,11 +1,16 @@
 namespace MassTransit.DynamoDb.Contexts
 {
     using System;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Amazon.DynamoDBv2;
     using Amazon.DynamoDBv2.DataModel;
+    using Context;
     using DynamoDb;
     using Exceptions;
+    using Metadata;
     using Models;
+    using Policies;
     using Saga;
 
 
@@ -13,6 +18,8 @@ namespace MassTransit.DynamoDb.Contexts
         DatabaseContext<TSaga>
         where TSaga : class, ISagaVersion
     {
+        IAsyncDisposable _lock;
+
         readonly IDynamoDBContext _database;
         readonly DynamoDbSagaRepositoryOptions<TSaga> _options;
 
@@ -41,13 +48,13 @@ namespace MassTransit.DynamoDb.Contexts
                 CorrelationId = _options.FormatSagaKey(instance.CorrelationId),
                 VersionNumber = instance.Version,
                 Properties = DynamoDb.SagaSerializer.Serialize(instance),
-                ExpirationEpochSeconds = _options.Expiry.HasValue ? DateTimeOffset.UtcNow.Add(_options.Expiry.Value).ToUnixTimeSeconds() : (long?)null
+                ExpirationEpochSeconds = _options.Expiration.HasValue ? DateTimeOffset.UtcNow.Add(_options.Expiration.Value).ToUnixTimeSeconds() : (long?)null
             }, _options.DefaultConfig());
         }
 
         public async Task<TSaga> Load(Guid correlationId)
         {
-            var value = await _database.LoadAsync<DynamoDbSaga>(_options.FormatSagaKey(correlationId),
+            var value = await _database.LoadAsync<DynamoDbSaga>(_options.FormatSagaKey(correlationId), DynamoDbSaga.DefaultEntityType,
                 _options.DefaultConfig());
             return value == null ? null : DynamoDb.SagaSerializer.Deserialize<TSaga>(value.Properties);
         }
@@ -55,6 +62,7 @@ namespace MassTransit.DynamoDb.Contexts
         public async Task Update(SagaConsumeContext<TSaga> context)
         {
             var instance = context.Saga;
+            var updateLock = await Lock(instance, context.CancellationToken).ConfigureAwait(false);
             try
             {
                 instance.Version++;
@@ -69,18 +77,92 @@ namespace MassTransit.DynamoDb.Contexts
             {
                 throw new SagaException("Saga update failed", typeof(TSaga), instance.CorrelationId, exception);
             }
+            finally
+            {
+                updateLock?.DisposeAsync().ConfigureAwait(false);
+            }
         }
 
         public Task Delete(SagaConsumeContext<TSaga> context)
         {
-            return _database.DeleteAsync(_options.FormatSagaKey(context.Saga.CorrelationId),
+            return _database.DeleteAsync(new DynamoDbSaga {CorrelationId = _options.FormatSagaKey(context.Saga.CorrelationId)},
                 _options.DefaultConfig());
         }
 
         public ValueTask DisposeAsync()
         {
-            _database.Dispose();
-            return new ValueTask(Task.CompletedTask);
+            _database?.Dispose();
+            return _lock?.DisposeAsync() ?? default;
+        }
+
+        public async Task Lock(Guid correlationId, CancellationToken cancellationToken)
+        {
+            if (_lock != null)
+                throw new InvalidOperationException("The database context is already locked");
+
+            var sagaLock = new DynamoDbLock(_database, _options, correlationId);
+
+            _lock = await sagaLock.Lock(cancellationToken).ConfigureAwait(false);
+        }
+
+        Task<IAsyncDisposable> Lock(TSaga instance, CancellationToken cancellationToken)
+        {
+            var sagaLock = new DynamoDbLock(_database, _options, instance.CorrelationId);
+
+            return sagaLock.Lock(cancellationToken);
+        }
+
+
+        class DynamoDbLock : IAsyncDisposable
+        {
+            readonly IDynamoDBContext _db;
+            readonly DynamoDbSagaRepositoryOptions<TSaga> _options;
+            readonly string _key;
+            readonly string _token;
+
+            public DynamoDbLock(IDynamoDBContext db, DynamoDbSagaRepositoryOptions<TSaga> options, Guid correlationId)
+            {
+                _db = db;
+                _options = options;
+                _key = _options.FormatLockKey(correlationId);
+                _token = $"{HostMetadataCache.Host.MachineName}:{NewId.NextGuid()}";
+            }
+
+            public async ValueTask DisposeAsync()
+            {
+                try
+                {
+                    await _db.DeleteAsync<Models.DynamoDbLock>(_key, Models.DynamoDbLock.DefaultEntityType, _options.DefaultConfig()).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    LogContext.Warning?.Log(ex, $"Failed to release lock: {_key}");
+                }
+            }
+
+            public Task<IAsyncDisposable> Lock(CancellationToken cancellationToken)
+            {
+                async Task<IAsyncDisposable> LockAsync()
+                {
+                    var result = await _db
+                        .LoadAsync<Models.DynamoDbLock>(_key, Models.DynamoDbLock.DefaultEntityType, _options.DefaultConfig(), cancellationToken)
+                        .ConfigureAwait(false);
+
+                    if (result != null && result.GetLockedUntilEpoch() > DateTimeOffset.UtcNow)
+                        throw new MassTransitException($"Unable to lock saga: {TypeMetadataCache<TSaga>.ShortName}({_key})");
+
+                    await _db.SaveAsync(new Models.DynamoDbLock
+                    {
+                        CorrelationId = _key,
+                        Token = _token,
+                        LockedUntilEpoch = DateTimeOffset.UtcNow.Add(_options.LockTimeout).ToUnixTimeSeconds()
+                    }, _options.DefaultConfig(), cancellationToken);
+
+                    return this;
+                }
+
+                return _options.RetryPolicy.Retry(LockAsync, cancellationToken);
+            }
         }
     }
 }

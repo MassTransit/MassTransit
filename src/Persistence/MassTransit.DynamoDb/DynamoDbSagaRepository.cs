@@ -9,9 +9,9 @@
     public static class DynamoDbSagaRepository<TSaga>
         where TSaga : class, ISagaVersion
     {
-        public static ISagaRepository<TSaga> Create(Func<IDynamoDBContext> dynamoDbFactory,string tableName,string lockSuffix = null, TimeSpan? expiry = null)
+        public static ISagaRepository<TSaga> Create(Func<IDynamoDBContext> dynamoDbFactory,string tableName,TimeSpan lockTimeout,string lockSuffix = null, TimeSpan? sagaExpiration = null)
         {
-            var options = new DynamoDbSagaRepositoryOptions<TSaga>(tableName,lockSuffix, expiry);
+            var options = new DynamoDbSagaRepositoryOptions<TSaga>(tableName,lockSuffix, lockTimeout, sagaExpiration);
 
             var consumeContextFactory = new SagaConsumeContextFactory<DatabaseContext<TSaga>, TSaga>();
 
