@@ -7,11 +7,12 @@ namespace MassTransit.SagaStateMachine
     public class Vertex :
         IEquatable<Vertex>
     {
-        public Vertex(Type type, Type targetType, string title)
+        public Vertex(Type type, Type targetType, string title, bool isComposite)
         {
             VertexType = type;
             TargetType = targetType;
             Title = title;
+            IsComposite = isComposite;
         }
 
         public string Title { get; }
@@ -19,6 +20,8 @@ namespace MassTransit.SagaStateMachine
         public Type VertexType { get; }
 
         public Type TargetType { get; }
+
+        public bool IsComposite { get; }
 
         public bool Equals(Vertex other)
         {

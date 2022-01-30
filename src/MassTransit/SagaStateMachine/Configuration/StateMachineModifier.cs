@@ -79,31 +79,35 @@
             return this;
         }
 
-        public IStateMachineModifier<TSaga> CompositeEvent(Event @event,
+        public IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event,
             Expression<Func<TSaga, CompositeEventStatus>> trackingPropertyExpression, params Event[] events)
         {
+            Event(name, out @event);
             _machine.CompositeEvent(@event, trackingPropertyExpression, events);
             return this;
         }
 
-        public IStateMachineModifier<TSaga> CompositeEvent(Event @event,
+        public IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event,
             Expression<Func<TSaga, CompositeEventStatus>> trackingPropertyExpression, CompositeEventOptions options,
             params Event[] events)
         {
+            Event(name, out @event);
             _machine.CompositeEvent(@event, trackingPropertyExpression, options, events);
             return this;
         }
 
-        public IStateMachineModifier<TSaga> CompositeEvent(Event @event, Expression<Func<TSaga, int>> trackingPropertyExpression,
+        public IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event, Expression<Func<TSaga, int>> trackingPropertyExpression,
             params Event[] events)
         {
+            Event(name, out @event);
             _machine.CompositeEvent(@event, trackingPropertyExpression, events);
             return this;
         }
 
-        public IStateMachineModifier<TSaga> CompositeEvent(Event @event, Expression<Func<TSaga, int>> trackingPropertyExpression,
+        public IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event, Expression<Func<TSaga, int>> trackingPropertyExpression,
             CompositeEventOptions options, params Event[] events)
         {
+            Event(name, out @event);
             _machine.CompositeEvent(@event, trackingPropertyExpression, options, events);
             return this;
         }

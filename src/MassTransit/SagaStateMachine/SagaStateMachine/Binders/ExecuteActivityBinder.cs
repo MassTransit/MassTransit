@@ -9,23 +9,23 @@ namespace MassTransit.SagaStateMachine
         where TInstance : class, ISaga
     {
         readonly IStateMachineActivity<TInstance> _activity;
-        readonly Event _event;
+        public Event Event { get; }
 
         public ExecuteActivityBinder(Event @event, IStateMachineActivity<TInstance> activity)
         {
-            _event = @event;
+            Event = @event;
             _activity = activity;
         }
 
         public bool IsStateTransitionEvent(State state)
         {
-            return Equals(_event, state.Enter) || Equals(_event, state.BeforeEnter)
-                || Equals(_event, state.AfterLeave) || Equals(_event, state.Leave);
+            return Equals(Event, state.Enter) || Equals(Event, state.BeforeEnter)
+                || Equals(Event, state.AfterLeave) || Equals(Event, state.Leave);
         }
 
         public void Bind(State<TInstance> state)
         {
-            state.Bind(_event, _activity);
+            state.Bind(Event, _activity);
         }
 
         public void Bind(IBehaviorBuilder<TInstance> builder)

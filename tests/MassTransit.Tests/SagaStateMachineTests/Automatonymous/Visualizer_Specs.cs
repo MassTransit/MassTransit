@@ -29,6 +29,20 @@
             Assert.AreEqual(expected, dots);
         }
 
+        [Test]
+        public void Should_show_the_differences()
+        {
+            var dotsAssigned = new StateMachineGraphvizGenerator(new TestStateMachine().GetGraph()).CreateDotFile();
+
+            Console.WriteLine(dotsAssigned);
+
+            var expectedAssigned = ExpectedAssigned.Replace("\r", "").Replace("\n", Environment.NewLine);
+            var expectedNotAssigned = ExpectedNotAssigned.Replace("\r", "").Replace("\n", Environment.NewLine);
+
+            Assert.AreEqual(expectedAssigned, dotsAssigned);
+            Assert.AreNotEqual(expectedNotAssigned, dotsAssigned);
+        }
+
         InstanceStateMachine _machine;
         StateMachineGraph _graph;
 
@@ -66,9 +80,44 @@
 10 -> 1;
 }";
 
+        const string ExpectedNotAssigned = @"digraph G {
+0 [shape=ellipse, label=""Initial""];
+1 [shape=ellipse, label=""Waiting""];
+2 [shape=ellipse, label=""Final""];
+3 [shape=rectangle, label=""Start""];
+4 [shape=rectangle, label=""First""];
+5 [shape=rectangle, label=""Third""];
+6 [shape=rectangle, label=""Second""];
+0 -> 3;
+1 -> 4;
+1 -> 6;
+2 -> 4;
+2 -> 6;
+3 -> 1;
+4 -> 5;
+5 -> 2;
+6 -> 5;
+}";
+
+        const string ExpectedAssigned = @"digraph G {
+0 [shape=ellipse, label=""Initial""];
+1 [shape=ellipse, label=""Waiting""];
+2 [shape=ellipse, label=""Final""];
+3 [shape=rectangle, label=""Start""];
+4 [shape=rectangle, label=""First""];
+5 [shape=rectangle, label=""Third""];
+6 [shape=rectangle, label=""Second""];
+0 -> 3;
+1 -> 4;
+1 -> 6;
+3 -> 1;
+4 -> 5;
+5 -> 2;
+6 -> 5;
+}";
 
         class Instance :
-SagaStateMachineInstance
+            SagaStateMachineInstance
         {
             public Guid CorrelationId { get; set; }
             public State CurrentState { get; set; }
@@ -117,6 +166,64 @@ SagaStateMachineInstance
         class RestartData
         {
             public string Name { get; set; }
+        }
+
+        class CompositeInstance :
+            SagaStateMachineInstance
+        {
+            public Guid CorrelationId { get; set; }
+            public CompositeEventStatus CompositeStatus { get; set; }
+            public bool Called { get; set; }
+            public bool CalledAfterAll { get; set; }
+            public State CurrentState { get; set; }
+            public bool SecondFirst { get; set; }
+            public bool First { get; set; }
+            public bool Second { get; set; }
+        }
+
+
+        sealed class TestStateMachine :
+            MassTransitStateMachine<CompositeInstance>
+        {
+            public TestStateMachine()
+            {
+                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
+
+                Initially(
+                    When(Start)
+                        .TransitionTo(Waiting));
+
+                During(Waiting,
+                    When(First)
+                        .Then(context =>
+                        {
+                            context.Instance.First = true;
+                            context.Instance.CalledAfterAll = false;
+                        }),
+                    When(Second)
+                        .Then(context =>
+                        {
+                            context.Instance.SecondFirst = !context.Instance.First;
+                            context.Instance.Second = true;
+                            context.Instance.CalledAfterAll = false;
+                        }),
+                    When(Third, context => context.Instance.SecondFirst)
+                        .Then(context =>
+                        {
+                            context.Instance.Called = true;
+                            context.Instance.CalledAfterAll = true;
+                        })
+                        .Finalize()
+                );
+            }
+
+            public State Waiting { get; private set; }
+
+            public Event Start { get; private set; }
+
+            public Event First { get; private set; }
+            public Event Second { get; private set; }
+            public Event Third { get; private set; }
         }
     }
 }

@@ -12,12 +12,15 @@
     {
         readonly HashSet<Edge> _edges;
         readonly Dictionary<Event, Vertex> _events;
+        readonly StateMachine<TSaga> _machine;
         readonly Dictionary<State, Vertex> _states;
         Vertex _currentEvent;
         Vertex _currentState;
 
-        public GraphStateMachineVisitor()
+        public GraphStateMachineVisitor(StateMachine<TSaga> machine)
         {
+            _machine = machine;
+
             _edges = new HashSet<Edge>();
             _states = new Dictionary<State, Vertex>();
             _events = new Dictionary<Event, Vertex>();
@@ -53,7 +56,8 @@
         {
             _currentEvent = GetEventVertex(@event);
 
-            _edges.Add(new Edge(_currentState, _currentEvent, _currentEvent.Title));
+            if (!_currentEvent.IsComposite)
+                _edges.Add(new Edge(_currentState, _currentEvent, _currentEvent.Title));
 
             next(@event);
         }
@@ -63,7 +67,8 @@
         {
             _currentEvent = GetEventVertex(@event);
 
-            _edges.Add(new Edge(_currentState, _currentEvent, _currentEvent.Title));
+            if (!_currentEvent.IsComposite)
+                _edges.Add(new Edge(_currentState, _currentEvent, _currentEvent.Title));
 
             next(@event);
         }
@@ -208,10 +213,10 @@
 
         static Vertex CreateStateVertex(State state)
         {
-            return new Vertex(typeof(State), typeof(State), state.Name);
+            return new Vertex(typeof(State), typeof(State), state.Name, false);
         }
 
-        static Vertex CreateEventVertex(Event @event)
+        Vertex CreateEventVertex(Event @event)
         {
             var targetType = @event
                 .GetType()
@@ -222,12 +227,12 @@
                 .DefaultIfEmpty(typeof(Event))
                 .Single();
 
-            return new Vertex(typeof(Event), targetType, @event.Name);
+            return new Vertex(typeof(Event), targetType, @event.Name, _machine.IsCompositeEvent(@event));
         }
 
         static Vertex CreateEventVertex(Type exceptionType)
         {
-            return new Vertex(typeof(Event), exceptionType, exceptionType.Name);
+            return new Vertex(typeof(Event), exceptionType, exceptionType.Name, false);
         }
     }
 }

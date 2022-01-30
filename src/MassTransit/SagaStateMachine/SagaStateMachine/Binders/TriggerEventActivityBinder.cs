@@ -10,13 +10,13 @@ namespace MassTransit.SagaStateMachine
         where TInstance : class, ISaga
     {
         readonly IActivityBinder<TInstance>[] _activities;
-        readonly Event _event;
         readonly StateMachineCondition<TInstance> _filter;
         readonly StateMachine<TInstance> _machine;
+        public Event Event { get; }
 
         public TriggerEventActivityBinder(StateMachine<TInstance> machine, Event @event, params IActivityBinder<TInstance>[] activities)
         {
-            _event = @event;
+            Event = @event;
             _machine = machine;
             _activities = activities ?? Array.Empty<IActivityBinder<TInstance>>();
         }
@@ -24,7 +24,7 @@ namespace MassTransit.SagaStateMachine
         public TriggerEventActivityBinder(StateMachine<TInstance> machine, Event @event, StateMachineCondition<TInstance> filter,
             params IActivityBinder<TInstance>[] activities)
         {
-            _event = @event;
+            Event = @event;
             _filter = filter;
             _machine = machine;
             _activities = activities ?? Array.Empty<IActivityBinder<TInstance>>();
@@ -34,7 +34,7 @@ namespace MassTransit.SagaStateMachine
             IActivityBinder<TInstance>[] activities,
             params IActivityBinder<TInstance>[] appendActivity)
         {
-            _event = @event;
+            Event = @event;
             _filter = filter;
             _machine = machine;
 
@@ -43,25 +43,25 @@ namespace MassTransit.SagaStateMachine
             Array.Copy(appendActivity, 0, _activities, activities.Length, appendActivity.Length);
         }
 
-        Event EventActivityBinder<TInstance>.Event => _event;
+        Event EventActivityBinder<TInstance>.Event => Event;
 
         EventActivityBinder<TInstance> EventActivityBinder<TInstance>.Add(IStateMachineActivity<TInstance> activity)
         {
-            IActivityBinder<TInstance> activityBinder = new ExecuteActivityBinder<TInstance>(_event, activity);
+            IActivityBinder<TInstance> activityBinder = new ExecuteActivityBinder<TInstance>(Event, activity);
 
-            return new TriggerEventActivityBinder<TInstance>(_machine, _event, _filter, _activities, activityBinder);
+            return new TriggerEventActivityBinder<TInstance>(_machine, Event, _filter, _activities, activityBinder);
         }
 
         EventActivityBinder<TInstance> EventActivityBinder<TInstance>.Catch<T>(
             Func<ExceptionActivityBinder<TInstance, T>, ExceptionActivityBinder<TInstance, T>> activityCallback)
         {
-            ExceptionActivityBinder<TInstance, T> binder = new CatchExceptionActivityBinder<TInstance, T>(_machine, _event);
+            ExceptionActivityBinder<TInstance, T> binder = new CatchExceptionActivityBinder<TInstance, T>(_machine, Event);
 
             binder = activityCallback(binder);
 
-            IActivityBinder<TInstance> activityBinder = new CatchActivityBinder<TInstance, T>(_event, binder);
+            IActivityBinder<TInstance> activityBinder = new CatchActivityBinder<TInstance, T>(Event, binder);
 
-            return new TriggerEventActivityBinder<TInstance>(_machine, _event, _filter, _activities, activityBinder);
+            return new TriggerEventActivityBinder<TInstance>(_machine, Event, _filter, _activities, activityBinder);
         }
 
         EventActivityBinder<TInstance> EventActivityBinder<TInstance>.If(StateMachineCondition<TInstance> condition,
@@ -83,9 +83,9 @@ namespace MassTransit.SagaStateMachine
             EventActivityBinder<TInstance> thenBinder = GetBinder(thenActivityCallback);
             EventActivityBinder<TInstance> elseBinder = GetBinder(elseActivityCallback);
 
-            var conditionBinder = new ConditionalActivityBinder<TInstance>(_event, condition, thenBinder, elseBinder);
+            var conditionBinder = new ConditionalActivityBinder<TInstance>(Event, condition, thenBinder, elseBinder);
 
-            return new TriggerEventActivityBinder<TInstance>(_machine, _event, _filter, _activities, conditionBinder);
+            return new TriggerEventActivityBinder<TInstance>(_machine, Event, _filter, _activities, conditionBinder);
         }
 
         public EventActivityBinder<TInstance> IfElseAsync(StateMachineAsyncCondition<TInstance> condition,
@@ -95,9 +95,9 @@ namespace MassTransit.SagaStateMachine
             EventActivityBinder<TInstance> thenBinder = GetBinder(thenActivityCallback);
             EventActivityBinder<TInstance> elseBinder = GetBinder(elseActivityCallback);
 
-            var conditionBinder = new ConditionalActivityBinder<TInstance>(_event, condition, thenBinder, elseBinder);
+            var conditionBinder = new ConditionalActivityBinder<TInstance>(Event, condition, thenBinder, elseBinder);
 
-            return new TriggerEventActivityBinder<TInstance>(_machine, _event, _filter, _activities, conditionBinder);
+            return new TriggerEventActivityBinder<TInstance>(_machine, Event, _filter, _activities, conditionBinder);
         }
 
         StateMachine<TInstance> EventActivityBinder<TInstance>.StateMachine => _machine;
@@ -112,16 +112,16 @@ namespace MassTransit.SagaStateMachine
 
         EventActivityBinder<TInstance> GetBinder(Func<EventActivityBinder<TInstance>, EventActivityBinder<TInstance>> activityCallback)
         {
-            EventActivityBinder<TInstance> binder = new TriggerEventActivityBinder<TInstance>(_machine, _event);
+            EventActivityBinder<TInstance> binder = new TriggerEventActivityBinder<TInstance>(_machine, Event);
             return activityCallback(binder);
         }
 
         IActivityBinder<TInstance> CreateConditionalActivityBinder()
         {
-            EventActivityBinder<TInstance> thenBinder = new TriggerEventActivityBinder<TInstance>(_machine, _event, _activities);
-            EventActivityBinder<TInstance> elseBinder = new TriggerEventActivityBinder<TInstance>(_machine, _event);
+            EventActivityBinder<TInstance> thenBinder = new TriggerEventActivityBinder<TInstance>(_machine, Event, _activities);
+            EventActivityBinder<TInstance> elseBinder = new TriggerEventActivityBinder<TInstance>(_machine, Event);
 
-            var conditionBinder = new ConditionalActivityBinder<TInstance>(_event, context => _filter(context), thenBinder, elseBinder);
+            var conditionBinder = new ConditionalActivityBinder<TInstance>(Event, context => _filter(context), thenBinder, elseBinder);
 
             return conditionBinder;
         }

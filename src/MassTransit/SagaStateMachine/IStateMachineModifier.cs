@@ -24,20 +24,20 @@
             where TProperty : class
             where T : class;
 
-        IStateMachineModifier<TSaga> CompositeEvent(Event @event,
+        IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event,
             Expression<Func<TSaga, CompositeEventStatus>> trackingPropertyExpression,
             params Event[] events);
 
-        IStateMachineModifier<TSaga> CompositeEvent(Event @event,
+        IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event,
             Expression<Func<TSaga, CompositeEventStatus>> trackingPropertyExpression,
             CompositeEventOptions options,
             params Event[] events);
 
-        IStateMachineModifier<TSaga> CompositeEvent(Event @event,
+        IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event,
             Expression<Func<TSaga, int>> trackingPropertyExpression,
             params Event[] events);
 
-        IStateMachineModifier<TSaga> CompositeEvent(Event @event,
+        IStateMachineModifier<TSaga> CompositeEvent(string name, out Event @event,
             Expression<Func<TSaga, int>> trackingPropertyExpression,
             CompositeEventOptions options,
             params Event[] events);
