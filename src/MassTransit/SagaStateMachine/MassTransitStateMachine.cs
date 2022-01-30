@@ -37,6 +37,9 @@
         string _name;
         UnhandledEventCallback<TInstance> _unhandledEventCallback;
 
+        Func<State<TInstance>, CompositeEventOptions, bool> DefaultCompositeStateFilter => (state, options) =>
+            options.HasFlag(CompositeEventOptions.IncludeInitial) || !Equals(state, Initial);
+
         protected MassTransitStateMachine()
         {
             _registrations = new Lazy<ConfigurationHelpers.StateMachineRegistration[]>(() => ConfigurationHelpers.GetRegistrations(this));
@@ -489,15 +492,11 @@
         /// <param name="propertyExpression">The composite event</param>
         /// <param name="trackingPropertyExpression">The property in the instance used to track the state of the composite event</param>
         /// <param name="events">The events that must be raised before the composite event is raised</param>
-        protected internal virtual void CompositeEvent(Expression<Func<Event>> propertyExpression,
+        protected internal virtual Event CompositeEvent(Expression<Func<Event>> propertyExpression,
             Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
             params Event[] events)
         {
-            var trackingPropertyInfo = trackingPropertyExpression.GetPropertyInfo();
-
-            var accessor = new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyInfo);
-
-            CompositeEvent(propertyExpression, accessor, CompositeEventOptions.None, events);
+            return CompositeEvent(propertyExpression, trackingPropertyExpression, CompositeEventOptions.None, events);
         }
 
         /// <summary>
@@ -509,7 +508,7 @@
         /// <param name="trackingPropertyExpression">The property in the instance used to track the state of the composite event</param>
         /// <param name="options">Options on the composite event</param>
         /// <param name="events">The events that must be raised before the composite event is raised</param>
-        protected internal virtual void CompositeEvent(Expression<Func<Event>> propertyExpression,
+        protected internal virtual Event CompositeEvent(Expression<Func<Event>> propertyExpression,
             Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
             CompositeEventOptions options,
             params Event[] events)
@@ -518,7 +517,62 @@
 
             var accessor = new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyInfo);
 
-            CompositeEvent(propertyExpression, accessor, options, events);
+            return CompositeEvent(propertyExpression, accessor, options, events);
+        }
+
+        /// <summary>
+        /// Adds a composite event to the state machine. A composite event is triggered when all
+        /// off the required events have been raised. Note that required events cannot be in the initial
+        /// state since it would cause extra instances of the state machine to be created.
+        /// Using the assignToStatesFilter allows one to assign the composite event to one or more specific states in stead of the composite
+        /// event being assigned to every state in the state machine.
+        /// </summary>
+        /// <param name="propertyExpression">The composite event</param>
+        /// <param name="assignToStatesFilter">Filter to apply on the state machine states</param>
+        /// <param name="trackingPropertyExpression">The property in the instance used to track the state of the composite event</param>
+        /// <param name="events">The events that must be raised before the composite event is raised</param>
+        protected internal virtual Event CompositeEvent(Expression<Func<Event>> propertyExpression,
+            Func<State<TInstance>, bool> assignToStatesFilter,
+            Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
+            params Event[] events)
+        {
+            Event CreateEvent()
+            {
+                var eventProperty = propertyExpression.GetPropertyInfo();
+
+                var @event = new TriggerEvent(eventProperty.Name, true);
+
+                ConfigurationHelpers.InitializeEvent(this, eventProperty, @event);
+
+                return @event;
+            }
+
+            return CompositeEvent(() => CreateEvent(), new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), assignToStatesFilter, events);
+        }
+
+        protected internal virtual Event CompositeEvent(string name,
+            Func<State<TInstance>, bool> assignToStatesFilter,
+            Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
+            params Event[] events)
+        {
+            Event CreateEvent()
+            {
+                var @event = new TriggerEvent(name, true);
+
+                _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
+
+                return @event;
+            }
+
+            return CompositeEvent(() => CreateEvent(), new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), assignToStatesFilter, events);
+        }
+
+        protected internal virtual Event CompositeEvent(Event @event,
+            Func<State<TInstance>, bool> assignToStatesFilter,
+            Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
+            params Event[] events)
+        {
+            return CompositeEvent(() => @event, new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), assignToStatesFilter, events);
         }
 
         /// <summary>
@@ -529,15 +583,11 @@
         /// <param name="propertyExpression">The composite event</param>
         /// <param name="trackingPropertyExpression">The property in the instance used to track the state of the composite event</param>
         /// <param name="events">The events that must be raised before the composite event is raised</param>
-        protected internal virtual void CompositeEvent(Expression<Func<Event>> propertyExpression,
+        protected internal virtual Event CompositeEvent(Expression<Func<Event>> propertyExpression,
             Expression<Func<TInstance, int>> trackingPropertyExpression,
             params Event[] events)
         {
-            var trackingPropertyInfo = trackingPropertyExpression.GetPropertyInfo();
-
-            var accessor = new IntCompositeEventStatusAccessor<TInstance>(trackingPropertyInfo);
-
-            CompositeEvent(propertyExpression, accessor, CompositeEventOptions.None, events);
+            return CompositeEvent(propertyExpression, trackingPropertyExpression, CompositeEventOptions.None, events);
         }
 
         /// <summary>
@@ -549,7 +599,7 @@
         /// <param name="trackingPropertyExpression">The property in the instance used to track the state of the composite event</param>
         /// <param name="options">Options on the composite event</param>
         /// <param name="events">The events that must be raised before the composite event is raised</param>
-        protected internal virtual void CompositeEvent(Expression<Func<Event>> propertyExpression,
+        protected internal virtual Event CompositeEvent(Expression<Func<Event>> propertyExpression,
             Expression<Func<TInstance, int>> trackingPropertyExpression,
             CompositeEventOptions options,
             params Event[] events)
@@ -558,60 +608,69 @@
 
             var accessor = new IntCompositeEventStatusAccessor<TInstance>(trackingPropertyInfo);
 
-            CompositeEvent(propertyExpression, accessor, options, events);
+            return CompositeEvent(propertyExpression, accessor, options, events);
         }
 
-        void CompositeEvent(Expression<Func<Event>> propertyExpression, ICompositeEventStatusAccessor<TInstance> accessor,
-            CompositeEventOptions options, Event[] events)
+        /// <summary>
+        /// Adds a composite event to the state machine. A composite event is triggered when all
+        /// off the required events have been raised. Note that required events cannot be in the initial
+        /// state since it would cause extra instances of the state machine to be created.
+        /// Using the assignToStatesFilter allows one to assign the composite event to one or more specific states in stead of the composite
+        /// event being assigned to every state in the state machine.
+        /// </summary>
+        /// <param name="propertyExpression">The composite event</param>
+        /// <param name="assignToStatesFilter">Filter to apply on the state machine states</param>
+        /// <param name="trackingPropertyExpression">The property in the instance used to track the state of the composite event</param>
+        /// <param name="events">The events that must be raised before the composite event is raised</param>
+        protected internal virtual Event CompositeEvent(Expression<Func<Event>> propertyExpression,
+            Func<State<TInstance>, bool> assignToStatesFilter,
+            Expression<Func<TInstance, int>> trackingPropertyExpression,
+            params Event[] events)
         {
-            if (events == null)
-                throw new ArgumentNullException(nameof(events));
-            if (events.Length > 31)
-                throw new ArgumentException("No more than 31 events can be combined into a single event");
-            if (events.Length == 0)
-                throw new ArgumentException("At least one event must be specified for a composite event");
-            if (events.Any(x => x == null))
-                throw new ArgumentException("One or more events specified has not yet been initialized");
-
-            var eventProperty = propertyExpression.GetPropertyInfo();
-
-            var name = eventProperty.Name;
-
-            var @event = new TriggerEvent(name);
-
-            ConfigurationHelpers.InitializeEvent(this, eventProperty, @event);
-
-            _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
-
-            var complete = new CompositeEventStatus(Enumerable.Range(0, events.Length)
-                .Aggregate(0, (current, x) => current | (1 << x)));
-
-            for (var i = 0; i < events.Length; i++)
+            Event CreateEvent()
             {
-                var flag = 1 << i;
+                var eventProperty = propertyExpression.GetPropertyInfo();
 
-                var activity = new CompositeEventActivity<TInstance>(accessor, flag, complete, @event);
+                var @event = new TriggerEvent(eventProperty.Name, true);
 
-                bool Filter(State<TInstance> x)
-                {
-                    return options.HasFlag(CompositeEventOptions.IncludeInitial) || !Equals(x, Initial);
-                }
+                ConfigurationHelpers.InitializeEvent(this, eventProperty, @event);
 
-                foreach (State<TInstance> state in _stateCache.Values.Where(Filter))
-                {
-                    During(state,
-                        When(events[i])
-                            .Execute(activity));
-                }
+                return @event;
             }
+
+            return CompositeEvent(() => CreateEvent(), new IntCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), assignToStatesFilter, events);
         }
 
-        internal virtual void CompositeEvent(string name,
+        protected internal virtual Event CompositeEvent(string name,
+            Func<State<TInstance>, bool> assignToStatesFilter,
+            Expression<Func<TInstance, int>> trackingPropertyExpression,
+            params Event[] events)
+        {
+            Event CreateEvent()
+            {
+                var @event = new TriggerEvent(name, true);
+
+                _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
+
+                return @event;
+            }
+
+            return CompositeEvent(() => CreateEvent(), new IntCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), assignToStatesFilter, events);
+        }
+
+        protected internal virtual Event CompositeEvent(Event @event,
+            Func<State<TInstance>, bool> assignToStatesFilter,
+            Expression<Func<TInstance, int>> trackingPropertyExpression,
+            params Event[] events)
+        {
+            return CompositeEvent(() => @event, new IntCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), assignToStatesFilter, events);
+        }
+
+        internal virtual Event CompositeEvent(string name,
             Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
             params Event[] events)
         {
-            CompositeEvent(name, new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()),
-                CompositeEventOptions.None, events);
+            return CompositeEvent(name, trackingPropertyExpression, CompositeEventOptions.None, events);
         }
 
         internal virtual Event CompositeEvent(string name,
@@ -619,16 +678,14 @@
             CompositeEventOptions options,
             params Event[] events)
         {
-            return CompositeEvent(name, new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()),
-                options, events);
+            return CompositeEvent(name, new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), options, events);
         }
 
         internal virtual Event CompositeEvent(string name,
             Expression<Func<TInstance, int>> trackingPropertyExpression,
             params Event[] events)
         {
-            return CompositeEvent(name, new IntCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()),
-                CompositeEventOptions.None, events);
+            return CompositeEvent(name, trackingPropertyExpression, CompositeEventOptions.None, events);
         }
 
         internal virtual Event CompositeEvent(string name,
@@ -640,53 +697,11 @@
                 options, events);
         }
 
-        Event CompositeEvent(string name, ICompositeEventStatusAccessor<TInstance> accessor,
-            CompositeEventOptions options, Event[] events)
-        {
-            if (events == null)
-                throw new ArgumentNullException(nameof(events));
-            if (events.Length > 31)
-                throw new ArgumentException("No more than 31 events can be combined into a single event");
-            if (events.Length == 0)
-                throw new ArgumentException("At least one event must be specified for a composite event");
-            if (events.Any(x => x == null))
-                throw new ArgumentException("One or more events specified has not yet been initialized");
-
-            var @event = new TriggerEvent(name);
-
-            _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
-
-            var complete = new CompositeEventStatus(Enumerable.Range(0, events.Length)
-                .Aggregate(0, (current, x) => current | (1 << x)));
-
-            for (var i = 0; i < events.Length; i++)
-            {
-                var flag = 1 << i;
-
-                var activity = new CompositeEventActivity<TInstance>(accessor, flag, complete, @event);
-
-                bool Filter(State<TInstance> x)
-                {
-                    return options.HasFlag(CompositeEventOptions.IncludeInitial) || !Equals(x, Initial);
-                }
-
-                foreach (State<TInstance> state in _stateCache.Values.Where(Filter))
-                {
-                    During(state,
-                        When(events[i])
-                            .Execute(activity));
-                }
-            }
-
-            return @event;
-        }
-
-        protected internal virtual void CompositeEvent(Event @event,
+        protected internal virtual Event CompositeEvent(Event @event,
             Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
             params Event[] events)
         {
-            CompositeEvent(@event, new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()),
-                CompositeEventOptions.None, events);
+            return CompositeEvent(@event, trackingPropertyExpression, CompositeEventOptions.None, events);
         }
 
         protected internal virtual Event CompositeEvent(Event @event,
@@ -702,8 +717,7 @@
             Expression<Func<TInstance, int>> trackingPropertyExpression,
             params Event[] events)
         {
-            return CompositeEvent(@event, new IntCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()),
-                CompositeEventOptions.None, events);
+            return CompositeEvent(@event, trackingPropertyExpression, CompositeEventOptions.None, events);
         }
 
         protected internal virtual Event CompositeEvent(Event @event,
@@ -715,8 +729,48 @@
                 options, events);
         }
 
+        Event CompositeEvent(Expression<Func<Event>> propertyExpression, ICompositeEventStatusAccessor<TInstance> accessor,
+            CompositeEventOptions options, Event[] events)
+        {
+            Event CreateEvent()
+            {
+                var eventProperty = propertyExpression.GetPropertyInfo();
+
+                var @event = new TriggerEvent(eventProperty.Name, true);
+
+                ConfigurationHelpers.InitializeEvent(this, eventProperty, @event);
+
+                _eventCache[eventProperty.Name] = new StateMachineEvent<TInstance>(@event, false);
+
+                return @event;
+            }
+
+            return CompositeEvent(() => CreateEvent(), accessor, x => DefaultCompositeStateFilter(x, options), events);
+        }
+
+        Event CompositeEvent(string name, ICompositeEventStatusAccessor<TInstance> accessor,
+            CompositeEventOptions options, Event[] events)
+        {
+            Event CreateEvent()
+            {
+                var @event = new TriggerEvent(name, true);
+
+                _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
+
+                return @event;
+            }
+
+            return CompositeEvent(() => CreateEvent(), accessor, x => DefaultCompositeStateFilter(x, options), events);
+        }
+
         Event CompositeEvent(Event @event, ICompositeEventStatusAccessor<TInstance> accessor,
             CompositeEventOptions options, Event[] events)
+        {
+            return CompositeEvent(() => @event, accessor, x => DefaultCompositeStateFilter(x, options), events);
+        }
+
+        Event CompositeEvent(Func<Event> getEvent, ICompositeEventStatusAccessor<TInstance> accessor,
+            Func<State<TInstance>, bool> filter, Event[] events)
         {
             if (events == null)
                 throw new ArgumentNullException(nameof(events));
@@ -730,19 +784,27 @@
             var complete = new CompositeEventStatus(Enumerable.Range(0, events.Length)
                 .Aggregate(0, (current, x) => current | (1 << x)));
 
+
+            var @event = getEvent();
+
+            // Set the IsComposite flag just to make sure it is really set.
+            @event.IsComposite = true;
+
+            _eventCache[@event.Name].Event = @event;
+
             for (var i = 0; i < events.Length; i++)
             {
                 var flag = 1 << i;
 
                 var activity = new CompositeEventActivity<TInstance>(accessor, flag, complete, @event);
 
-                bool Filter(State<TInstance> x)
+                foreach (State<TInstance> state in _stateCache.Values.Where(filter))
                 {
-                    return options.HasFlag(CompositeEventOptions.IncludeInitial) || !Equals(x, Initial);
-                }
+                    // Set the IsComposite flag just to make sure it is really set.
+                    var currentEvent = state.Events.FirstOrDefault(x => Equals(x, @event));
+                    if (currentEvent != null)
+                        currentEvent.IsComposite = true;
 
-                foreach (State<TInstance> state in _stateCache.Values.Where(Filter))
-                {
                     During(state,
                         When(events[i])
                             .Execute(activity));
@@ -1573,8 +1635,7 @@
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="requestIdExpression">The property where the requestId is stored</param>
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
-        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
-            Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
+        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression,
             Action<IRequestConfigurator> configureRequest = default)
             where TRequest : class
@@ -1601,8 +1662,7 @@
         /// <typeparam name="TResponse3"></typeparam>
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="configureRequest">Allow the request settings to be specified inline</param>
-        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
-            Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
+        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
             Action<IRequestConfigurator> configureRequest = default)
             where TRequest : class
             where TResponse : class
@@ -1628,8 +1688,7 @@
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="requestIdExpression">The property where the requestId is stored</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
-        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
-            Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
+        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
             where TRequest : class
             where TResponse : class
@@ -1676,8 +1735,7 @@
         /// <typeparam name="TResponse3"></typeparam>
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
-        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
-            Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
+        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
             RequestSettings settings)
             where TRequest : class
             where TResponse : class

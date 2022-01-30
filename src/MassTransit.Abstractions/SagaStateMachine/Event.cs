@@ -8,6 +8,7 @@ namespace MassTransit
         IComparable<Event>
     {
         string Name { get; }
+        bool IsComposite { get; set; }
     }
 
 

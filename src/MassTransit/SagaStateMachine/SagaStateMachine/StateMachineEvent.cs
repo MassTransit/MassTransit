@@ -9,6 +9,6 @@ namespace MassTransit.SagaStateMachine
         }
 
         public bool IsTransitionEvent { get; }
-        public Event Event { get; }
+        public Event Event { get; internal set; }
     }
 }

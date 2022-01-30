@@ -53,7 +53,8 @@
         {
             _currentEvent = GetEventVertex(@event);
 
-            _edges.Add(new Edge(_currentState, _currentEvent, _currentEvent.Title));
+            if (!_currentEvent.IsComposite)
+                _edges.Add(new Edge(_currentState, _currentEvent, _currentEvent.Title));
 
             next(@event);
         }
@@ -63,7 +64,8 @@
         {
             _currentEvent = GetEventVertex(@event);
 
-            _edges.Add(new Edge(_currentState, _currentEvent, _currentEvent.Title));
+            if (!_currentEvent.IsComposite)
+                _edges.Add(new Edge(_currentState, _currentEvent, _currentEvent.Title));
 
             next(@event);
         }
@@ -208,7 +210,7 @@
 
         static Vertex CreateStateVertex(State state)
         {
-            return new Vertex(typeof(State), typeof(State), state.Name);
+            return new Vertex(typeof(State), typeof(State), state.Name, false);
         }
 
         static Vertex CreateEventVertex(Event @event)
@@ -222,12 +224,12 @@
                 .DefaultIfEmpty(typeof(Event))
                 .Single();
 
-            return new Vertex(typeof(Event), targetType, @event.Name);
+            return new Vertex(typeof(Event), targetType, @event.Name, @event.IsComposite);
         }
 
         static Vertex CreateEventVertex(Type exceptionType)
         {
-            return new Vertex(typeof(Event), exceptionType, exceptionType.Name);
+            return new Vertex(typeof(Event), exceptionType, exceptionType.Name, false);
         }
     }
 }
