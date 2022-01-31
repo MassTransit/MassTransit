@@ -13,7 +13,7 @@ namespace MassTransit.DynamoDbIntegration.Saga
     public class DynamoDbSagaRepositoryContext<TSaga, TMessage> :
         ConsumeContextScope<TMessage>,
         SagaRepositoryContext<TSaga, TMessage>,
-        IAsyncDisposable
+        IDisposable
         where TSaga : class, ISagaVersion
         where TMessage : class
     {
@@ -30,9 +30,9 @@ namespace MassTransit.DynamoDbIntegration.Saga
             _factory = factory;
         }
 
-        public ValueTask DisposeAsync()
+        public void Dispose()
         {
-            return _context.DisposeAsync();
+            _context.Dispose();
         }
 
         public Task<SagaConsumeContext<TSaga, TMessage>> Add(TSaga instance)
@@ -103,7 +103,7 @@ namespace MassTransit.DynamoDbIntegration.Saga
     public class DynamoDbSagaRepositoryContext<TSaga> :
         BasePipeContext,
         SagaRepositoryContext<TSaga>,
-        IAsyncDisposable
+        IDisposable
         where TSaga : class, ISagaVersion
     {
         readonly DatabaseContext<TSaga> _context;
@@ -114,9 +114,9 @@ namespace MassTransit.DynamoDbIntegration.Saga
             _context = context;
         }
 
-        public ValueTask DisposeAsync()
+        public void Dispose()
         {
-            return _context.DisposeAsync();
+            _context.Dispose();
         }
 
         public Task<SagaRepositoryQueryContext<TSaga>> Query(ISagaQuery<TSaga> query, CancellationToken cancellationToken)

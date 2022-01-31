@@ -5,7 +5,7 @@ namespace MassTransit.DynamoDbIntegration.Saga
 
 
     public interface DatabaseContext<TSaga> :
-        IAsyncDisposable
+        IDisposable
         where TSaga : class, ISagaVersion
     {
         Task Add(SagaConsumeContext<TSaga> context);
