@@ -46,16 +46,13 @@ namespace MassTransit.DynamoDbIntegration.Saga
             var databaseContext = new DynamoDbDatabaseContext<TSaga>(database, _options);
             try
             {
-                //       if (_options.ConcurrencyMode == ConcurrencyMode.Pessimistic)
-                //         await databaseContext.Lock(context.CorrelationId.Value, context.CancellationToken).ConfigureAwait(false);
-
                 var repositoryContext = new DynamoDbSagaRepositoryContext<TSaga, T>(databaseContext, context, _factory);
 
                 await next.Send(repositoryContext).ConfigureAwait(false);
             }
             finally
             {
-                await databaseContext.DisposeAsync().ConfigureAwait(false);
+                databaseContext.Dispose();
             }
         }
 
@@ -79,7 +76,7 @@ namespace MassTransit.DynamoDbIntegration.Saga
             }
             finally
             {
-                await databaseContext.DisposeAsync().ConfigureAwait(false);
+                databaseContext.Dispose();
             }
         }
     }
