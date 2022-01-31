@@ -23,7 +23,7 @@
         SagaStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
-        readonly Dictionary<string, StateMachineEvent> _eventCache;
+        readonly Dictionary<string, StateMachineEvent<TInstance>> _eventCache;
 
         readonly Dictionary<Event, EventCorrelation> _eventCorrelations;
         readonly EventObservable<TInstance> _eventObservers;
@@ -41,7 +41,7 @@
         {
             _registrations = new Lazy<ConfigurationHelpers.StateMachineRegistration[]>(() => ConfigurationHelpers.GetRegistrations(this));
             _stateCache = new Dictionary<string, State<TInstance>>();
-            _eventCache = new Dictionary<string, StateMachineEvent>();
+            _eventCache = new Dictionary<string, StateMachineEvent<TInstance>>();
 
             _eventObservers = new EventObservable<TInstance>();
             _stateObservers = new StateObservable<TInstance>();
@@ -143,7 +143,7 @@
 
         Event StateMachine.GetEvent(string name)
         {
-            if (_eventCache.TryGetValue(name, out StateMachineEvent result))
+            if (_eventCache.TryGetValue(name, out StateMachineEvent<TInstance> result))
                 return result.Event;
 
             throw new UnknownEventException(_name, name);
@@ -333,7 +333,7 @@
             where TEvent : Event
         {
             var @event = ctor(name);
-            _eventCache[name] = new StateMachineEvent(@event, false);
+            _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
             return @event;
         }
 
@@ -416,7 +416,7 @@
 
             ConfigurationHelpers.InitializeEventProperty<TProperty, T>(eventProperty, propertyValue, @event);
 
-            _eventCache[name] = new StateMachineEvent(@event, false);
+            _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
         }
 
         /// <summary>
@@ -627,7 +627,7 @@
 
                 ConfigurationHelpers.InitializeEvent(this, eventProperty, @event);
 
-                _eventCache[eventProperty.Name] = new StateMachineEvent(@event, false);
+                _eventCache[eventProperty.Name] = new StateMachineEvent<TInstance>(@event, false, events, accessor);
 
                 return @event;
             }
@@ -642,7 +642,7 @@
             {
                 var @event = new TriggerEvent(name, true);
 
-                _eventCache[name] = new StateMachineEvent(@event, false);
+                _eventCache[name] = new StateMachineEvent<TInstance>(@event, false, events, accessor);
 
                 return @event;
             }
@@ -677,7 +677,9 @@
                         options.HasFlag(CompositeEventOptions.IncludeInitial) && Equals(state, Initial);
                 }
 
-                foreach (State<TInstance> state in _stateCache.Values.Where(Filter))
+                var states = _stateCache.Values.Where(Filter).ToList();
+
+                foreach (State<TInstance> state in states)
                 {
                     // Set the IsComposite flag just to make sure it is really set.
                     var currentEvent = state.Events.FirstOrDefault(x => Equals(x, @event));
@@ -869,10 +871,10 @@
         {
             _stateCache[name] = state;
 
-            _eventCache[state.BeforeEnter.Name] = new StateMachineEvent(state.BeforeEnter, true);
-            _eventCache[state.Enter.Name] = new StateMachineEvent(state.Enter, true);
-            _eventCache[state.Leave.Name] = new StateMachineEvent(state.Leave, true);
-            _eventCache[state.AfterLeave.Name] = new StateMachineEvent(state.AfterLeave, true);
+            _eventCache[state.BeforeEnter.Name] = new StateMachineEvent<TInstance>(state.BeforeEnter, true);
+            _eventCache[state.Enter.Name] = new StateMachineEvent<TInstance>(state.Enter, true);
+            _eventCache[state.Leave.Name] = new StateMachineEvent<TInstance>(state.Leave, true);
+            _eventCache[state.AfterLeave.Name] = new StateMachineEvent<TInstance>(state.AfterLeave, true);
         }
 
         /// <summary>
@@ -1023,7 +1025,14 @@
         /// <returns></returns>
         protected internal EventActivityBinder<TInstance> When(Event @event, StateMachineCondition<TInstance> filter)
         {
-            return new TriggerEventActivityBinder<TInstance>(this, @event, filter);
+            var binder =  new TriggerEventActivityBinder<TInstance>(this, @event, filter);
+            if (@event.IsComposite)
+            {
+                var events = _eventCache[@event.Name].Events;
+                var accessor = _eventCache[@event.Name].Accessor;
+                CompositeEvent(@event, accessor, CompositeEventOptions.None, events);
+            }
+            return binder;
         }
 
         /// <summary>

@@ -73,6 +73,7 @@
                 InstanceState(x => x.CurrentState);
 
                 Event(() => Second, x => x.CorrelateById(m => m.Message.CorrelationId));
+                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
 
                 Initially(
                     When(Start)
@@ -86,8 +87,6 @@
                     When(Third)
                         .Publish(context => new CompleteMessage(context.Instance.CorrelationId))
                         .Finalize());
-
-                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
             }
 
             public State Waiting { get; private set; }
