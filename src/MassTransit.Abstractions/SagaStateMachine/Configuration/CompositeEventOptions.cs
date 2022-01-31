@@ -11,11 +11,6 @@
         /// <summary>
         /// Include the composite event in the initial state
         /// </summary>
-        IncludeInitial = 1,
-
-        /// <summary>
-        /// Composite bound to all events
-        /// </summary>
-        All = 2
+        IncludeInitial = 1
     }
 }

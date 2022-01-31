@@ -671,11 +671,11 @@
                 var activity = new CompositeEventActivity<TInstance>(accessor, flag, complete, @event);
 
                 var states = _stateCache
-                    .Select(kvp => Tuple.Create(kvp.Value, kvp.Value.Events))
-                    .Where(t => t.Item2.Contains(@event) ||
-                        options.HasFlag(CompositeEventOptions.All) ||
-                        options.HasFlag(CompositeEventOptions.IncludeInitial) && Equals(t.Item1, Initial))
-                    .Select(t => t.Item1)
+                    .Where(kvp =>
+                        kvp.Value.Events.Contains(@event) ||
+                        kvp.Value.Events.Any(x => events.Contains(x)) ||
+                        options.HasFlag(CompositeEventOptions.IncludeInitial) && Equals(kvp.Value, Initial))
+                    .Select(t => t.Value)
                     .ToList();
 
                 foreach (State<TInstance> state in states)
@@ -955,10 +955,7 @@
             State<TInstance> activityState = GetState(state.Name);
 
             foreach (IActivityBinder<TInstance> activity in eventActivities)
-            {
-
                 activity.Bind(activityState);
-            }
         }
 
         /// <summary>

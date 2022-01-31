@@ -87,7 +87,7 @@
                         .Publish(context => new CompleteMessage(context.Instance.CorrelationId))
                         .Finalize());
 
-                CompositeEvent(() => Third, x => x.CompositeStatus, CompositeEventOptions.All, First, Second);
+                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
             }
 
             public State Waiting { get; private set; }
