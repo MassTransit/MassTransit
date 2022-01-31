@@ -670,15 +670,14 @@
 
                 var activity = new CompositeEventActivity<TInstance>(accessor, flag, complete, @event);
 
-                var states = _stateCache
-                    .Where(kvp =>
-                        kvp.Value.Events.Contains(@event) ||
-                        kvp.Value.Events.Any(x => events.Contains(x)) ||
-                        options.HasFlag(CompositeEventOptions.IncludeInitial) && Equals(kvp.Value, Initial))
-                    .Select(t => t.Value)
-                    .ToList();
+                bool Filter(State<TInstance> state)
+                {
+                    return state.Events.Contains(@event) ||
+                        state.Events.Any(evt => events.Contains(evt)) ||
+                        options.HasFlag(CompositeEventOptions.IncludeInitial) && Equals(state, Initial);
+                }
 
-                foreach (State<TInstance> state in states)
+                foreach (State<TInstance> state in _stateCache.Values.Where(Filter))
                 {
                     // Set the IsComposite flag just to make sure it is really set.
                     var currentEvent = state.Events.FirstOrDefault(x => Equals(x, @event));
