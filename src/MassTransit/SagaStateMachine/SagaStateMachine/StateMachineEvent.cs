@@ -1,6 +1,6 @@
 namespace MassTransit.SagaStateMachine
 {
-    public class StateMachineEvent<TInstance>
+    public class StateMachineEvent
     {
         public StateMachineEvent(Event @event, bool isTransitionEvent)
         {

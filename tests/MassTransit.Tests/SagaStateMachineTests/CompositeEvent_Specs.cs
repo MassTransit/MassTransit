@@ -82,12 +82,12 @@
                     When(First)
                         .TransitionTo(WaitingForSecond));
 
-                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
-
                 During(WaitingForSecond,
                     When(Third)
                         .Publish(context => new CompleteMessage(context.Instance.CorrelationId))
                         .Finalize());
+
+                CompositeEvent(() => Third, x => x.CompositeStatus, CompositeEventOptions.All, First, Second);
             }
 
             public State Waiting { get; private set; }

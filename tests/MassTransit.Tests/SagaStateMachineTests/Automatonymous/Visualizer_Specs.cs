@@ -32,23 +32,15 @@
         [Test]
         public void Should_show_the_differences()
         {
-            var dotsNotAssigned = new StateMachineGraphvizGenerator(new TestStateMachine(false).GetGraph()).CreateDotFile();
-
-            Console.WriteLine(dotsNotAssigned);
-
-            var expectedNotAssigned = ExpectedNotAssigned.Replace("\r", "").Replace("\n", Environment.NewLine);
-
-            Assert.AreEqual(expectedNotAssigned, dotsNotAssigned);
-
-            var dotsAssigned = new StateMachineGraphvizGenerator(new TestStateMachine(true).GetGraph()).CreateDotFile();
+            var dotsAssigned = new StateMachineGraphvizGenerator(new TestStateMachine().GetGraph()).CreateDotFile();
 
             Console.WriteLine(dotsAssigned);
 
             var expectedAssigned = ExpectedAssigned.Replace("\r", "").Replace("\n", Environment.NewLine);
+            var expectedNotAssigned = ExpectedNotAssigned.Replace("\r", "").Replace("\n", Environment.NewLine);
 
             Assert.AreEqual(expectedAssigned, dotsAssigned);
-
-            Assert.AreNotEqual(dotsNotAssigned, dotsAssigned);
+            Assert.AreNotEqual(expectedNotAssigned, dotsAssigned);
         }
 
         InstanceStateMachine _machine;
@@ -193,13 +185,8 @@
         sealed class TestStateMachine :
             MassTransitStateMachine<CompositeInstance>
         {
-            public TestStateMachine(bool specificallyAssignedToWaiting)
+            public TestStateMachine()
             {
-                if (specificallyAssignedToWaiting)
-                    CompositeEvent(() => Third, x => Equals(x, Waiting), x => x.CompositeStatus, First, Second);
-                else
-                    CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
-
                 Initially(
                     When(Start)
                         .TransitionTo(Waiting));
@@ -226,6 +213,9 @@
                         })
                         .Finalize()
                 );
+
+                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
+
             }
 
             public State Waiting { get; private set; }

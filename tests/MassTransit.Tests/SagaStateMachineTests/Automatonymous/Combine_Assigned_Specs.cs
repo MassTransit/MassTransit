@@ -95,7 +95,7 @@ SagaStateMachineInstance
                         .Then(context => context.Instance.Called = true)
                         .Finalize());
 
-                CompositeEvent(() => Third, x => Equals(x, Waiting), x => x.CompositeStatus, First, Second);
+                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
             }
 
             public State Waiting { get; private set; }
@@ -188,13 +188,14 @@ SagaStateMachineInstance
         Instance _instance;
 
 
-        class Instance :
-SagaStateMachineInstance
+        class Instance : SagaStateMachineInstance
         {
             public Guid CorrelationId { get; set; }
             public int CompositeStatus { get; set; }
             public bool Called { get; set; }
             public int CurrentState { get; set; }
+
+            public bool CalledFirst { get; set; }
         }
 
 
@@ -205,16 +206,18 @@ SagaStateMachineInstance
             {
                 InstanceState(x => x.CurrentState);
 
-                CompositeEvent(() => Third, x => Equals(x, Waiting), x => x.CompositeStatus, First, Second);
-
                 Initially(
                     When(Start)
                         .TransitionTo(Waiting));
 
                 During(Waiting,
+                    When(First)
+                        .Then(context => context.Instance.CalledFirst = true),
                     When(Third)
-                        .Then(context => context.Instance.Called = true)
+                        .Then(context => context.Instance.Called = context.Instance.CalledFirst)
                         .Finalize());
+
+                CompositeEvent(() => Third, x => x.CompositeStatus, First, Second);
             }
 
             public State Waiting { get; private set; }

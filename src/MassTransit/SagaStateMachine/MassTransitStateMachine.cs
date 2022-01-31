@@ -23,7 +23,7 @@
         SagaStateMachine<TInstance>
         where TInstance : class, SagaStateMachineInstance
     {
-        readonly Dictionary<string, StateMachineEvent<TInstance>> _eventCache;
+        readonly Dictionary<string, StateMachineEvent> _eventCache;
 
         readonly Dictionary<Event, EventCorrelation> _eventCorrelations;
         readonly EventObservable<TInstance> _eventObservers;
@@ -37,14 +37,11 @@
         string _name;
         UnhandledEventCallback<TInstance> _unhandledEventCallback;
 
-        Func<State<TInstance>, CompositeEventOptions, bool> DefaultCompositeStateFilter => (state, options) =>
-            options.HasFlag(CompositeEventOptions.IncludeInitial) || !Equals(state, Initial);
-
         protected MassTransitStateMachine()
         {
             _registrations = new Lazy<ConfigurationHelpers.StateMachineRegistration[]>(() => ConfigurationHelpers.GetRegistrations(this));
             _stateCache = new Dictionary<string, State<TInstance>>();
-            _eventCache = new Dictionary<string, StateMachineEvent<TInstance>>();
+            _eventCache = new Dictionary<string, StateMachineEvent>();
 
             _eventObservers = new EventObservable<TInstance>();
             _stateObservers = new StateObservable<TInstance>();
@@ -146,7 +143,7 @@
 
         Event StateMachine.GetEvent(string name)
         {
-            if (_eventCache.TryGetValue(name, out StateMachineEvent<TInstance> result))
+            if (_eventCache.TryGetValue(name, out StateMachineEvent result))
                 return result.Event;
 
             throw new UnknownEventException(_name, name);
@@ -336,7 +333,7 @@
             where TEvent : Event
         {
             var @event = ctor(name);
-            _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
+            _eventCache[name] = new StateMachineEvent(@event, false);
             return @event;
         }
 
@@ -419,7 +416,7 @@
 
             ConfigurationHelpers.InitializeEventProperty<TProperty, T>(eventProperty, propertyValue, @event);
 
-            _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
+            _eventCache[name] = new StateMachineEvent(@event, false);
         }
 
         /// <summary>
@@ -523,61 +520,6 @@
         /// <summary>
         /// Adds a composite event to the state machine. A composite event is triggered when all
         /// off the required events have been raised. Note that required events cannot be in the initial
-        /// state since it would cause extra instances of the state machine to be created.
-        /// Using the assignToStatesFilter allows one to assign the composite event to one or more specific states in stead of the composite
-        /// event being assigned to every state in the state machine.
-        /// </summary>
-        /// <param name="propertyExpression">The composite event</param>
-        /// <param name="assignToStatesFilter">Filter to apply on the state machine states</param>
-        /// <param name="trackingPropertyExpression">The property in the instance used to track the state of the composite event</param>
-        /// <param name="events">The events that must be raised before the composite event is raised</param>
-        protected internal virtual Event CompositeEvent(Expression<Func<Event>> propertyExpression,
-            Func<State<TInstance>, bool> assignToStatesFilter,
-            Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
-            params Event[] events)
-        {
-            Event CreateEvent()
-            {
-                var eventProperty = propertyExpression.GetPropertyInfo();
-
-                var @event = new TriggerEvent(eventProperty.Name, true);
-
-                ConfigurationHelpers.InitializeEvent(this, eventProperty, @event);
-
-                return @event;
-            }
-
-            return CompositeEvent(() => CreateEvent(), new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), assignToStatesFilter, events);
-        }
-
-        protected internal virtual Event CompositeEvent(string name,
-            Func<State<TInstance>, bool> assignToStatesFilter,
-            Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
-            params Event[] events)
-        {
-            Event CreateEvent()
-            {
-                var @event = new TriggerEvent(name, true);
-
-                _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
-
-                return @event;
-            }
-
-            return CompositeEvent(() => CreateEvent(), new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), assignToStatesFilter, events);
-        }
-
-        protected internal virtual Event CompositeEvent(Event @event,
-            Func<State<TInstance>, bool> assignToStatesFilter,
-            Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
-            params Event[] events)
-        {
-            return CompositeEvent(() => @event, new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), assignToStatesFilter, events);
-        }
-
-        /// <summary>
-        /// Adds a composite event to the state machine. A composite event is triggered when all
-        /// off the required events have been raised. Note that required events cannot be in the initial
         /// state since it would cause extra instances of the state machine to be created
         /// </summary>
         /// <param name="propertyExpression">The composite event</param>
@@ -609,61 +551,6 @@
             var accessor = new IntCompositeEventStatusAccessor<TInstance>(trackingPropertyInfo);
 
             return CompositeEvent(propertyExpression, accessor, options, events);
-        }
-
-        /// <summary>
-        /// Adds a composite event to the state machine. A composite event is triggered when all
-        /// off the required events have been raised. Note that required events cannot be in the initial
-        /// state since it would cause extra instances of the state machine to be created.
-        /// Using the assignToStatesFilter allows one to assign the composite event to one or more specific states in stead of the composite
-        /// event being assigned to every state in the state machine.
-        /// </summary>
-        /// <param name="propertyExpression">The composite event</param>
-        /// <param name="assignToStatesFilter">Filter to apply on the state machine states</param>
-        /// <param name="trackingPropertyExpression">The property in the instance used to track the state of the composite event</param>
-        /// <param name="events">The events that must be raised before the composite event is raised</param>
-        protected internal virtual Event CompositeEvent(Expression<Func<Event>> propertyExpression,
-            Func<State<TInstance>, bool> assignToStatesFilter,
-            Expression<Func<TInstance, int>> trackingPropertyExpression,
-            params Event[] events)
-        {
-            Event CreateEvent()
-            {
-                var eventProperty = propertyExpression.GetPropertyInfo();
-
-                var @event = new TriggerEvent(eventProperty.Name, true);
-
-                ConfigurationHelpers.InitializeEvent(this, eventProperty, @event);
-
-                return @event;
-            }
-
-            return CompositeEvent(() => CreateEvent(), new IntCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), assignToStatesFilter, events);
-        }
-
-        protected internal virtual Event CompositeEvent(string name,
-            Func<State<TInstance>, bool> assignToStatesFilter,
-            Expression<Func<TInstance, int>> trackingPropertyExpression,
-            params Event[] events)
-        {
-            Event CreateEvent()
-            {
-                var @event = new TriggerEvent(name, true);
-
-                _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
-
-                return @event;
-            }
-
-            return CompositeEvent(() => CreateEvent(), new IntCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), assignToStatesFilter, events);
-        }
-
-        protected internal virtual Event CompositeEvent(Event @event,
-            Func<State<TInstance>, bool> assignToStatesFilter,
-            Expression<Func<TInstance, int>> trackingPropertyExpression,
-            params Event[] events)
-        {
-            return CompositeEvent(() => @event, new IntCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), assignToStatesFilter, events);
         }
 
         internal virtual Event CompositeEvent(string name,
@@ -740,12 +627,12 @@
 
                 ConfigurationHelpers.InitializeEvent(this, eventProperty, @event);
 
-                _eventCache[eventProperty.Name] = new StateMachineEvent<TInstance>(@event, false);
+                _eventCache[eventProperty.Name] = new StateMachineEvent(@event, false);
 
                 return @event;
             }
 
-            return CompositeEvent(() => CreateEvent(), accessor, x => DefaultCompositeStateFilter(x, options), events);
+            return CompositeEvent(CreateEvent(), accessor, options, events);
         }
 
         Event CompositeEvent(string name, ICompositeEventStatusAccessor<TInstance> accessor,
@@ -755,22 +642,15 @@
             {
                 var @event = new TriggerEvent(name, true);
 
-                _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
+                _eventCache[name] = new StateMachineEvent(@event, false);
 
                 return @event;
             }
 
-            return CompositeEvent(() => CreateEvent(), accessor, x => DefaultCompositeStateFilter(x, options), events);
+            return CompositeEvent(CreateEvent(), accessor, options, events);
         }
 
-        Event CompositeEvent(Event @event, ICompositeEventStatusAccessor<TInstance> accessor,
-            CompositeEventOptions options, Event[] events)
-        {
-            return CompositeEvent(() => @event, accessor, x => DefaultCompositeStateFilter(x, options), events);
-        }
-
-        Event CompositeEvent(Func<Event> getEvent, ICompositeEventStatusAccessor<TInstance> accessor,
-            Func<State<TInstance>, bool> filter, Event[] events)
+        Event CompositeEvent(Event @event, ICompositeEventStatusAccessor<TInstance> accessor, CompositeEventOptions options, Event[] events)
         {
             if (events == null)
                 throw new ArgumentNullException(nameof(events));
@@ -784,21 +664,21 @@
             var complete = new CompositeEventStatus(Enumerable.Range(0, events.Length)
                 .Aggregate(0, (current, x) => current | (1 << x)));
 
-
-            var @event = getEvent();
-
-            // Set the IsComposite flag just to make sure it is really set.
-            @event.IsComposite = true;
-
-            _eventCache[@event.Name].Event = @event;
-
             for (var i = 0; i < events.Length; i++)
             {
                 var flag = 1 << i;
 
                 var activity = new CompositeEventActivity<TInstance>(accessor, flag, complete, @event);
 
-                foreach (State<TInstance> state in _stateCache.Values.Where(filter))
+                var states = _stateCache
+                    .Select(kvp => Tuple.Create(kvp.Value, kvp.Value.Events))
+                    .Where(t => t.Item2.Contains(@event) ||
+                        options.HasFlag(CompositeEventOptions.All) ||
+                        options.HasFlag(CompositeEventOptions.IncludeInitial) && Equals(t.Item1, Initial))
+                    .Select(t => t.Item1)
+                    .ToList();
+
+                foreach (State<TInstance> state in states)
                 {
                     // Set the IsComposite flag just to make sure it is really set.
                     var currentEvent = state.Events.FirstOrDefault(x => Equals(x, @event));
@@ -990,10 +870,10 @@
         {
             _stateCache[name] = state;
 
-            _eventCache[state.BeforeEnter.Name] = new StateMachineEvent<TInstance>(state.BeforeEnter, true);
-            _eventCache[state.Enter.Name] = new StateMachineEvent<TInstance>(state.Enter, true);
-            _eventCache[state.Leave.Name] = new StateMachineEvent<TInstance>(state.Leave, true);
-            _eventCache[state.AfterLeave.Name] = new StateMachineEvent<TInstance>(state.AfterLeave, true);
+            _eventCache[state.BeforeEnter.Name] = new StateMachineEvent(state.BeforeEnter, true);
+            _eventCache[state.Enter.Name] = new StateMachineEvent(state.Enter, true);
+            _eventCache[state.Leave.Name] = new StateMachineEvent(state.Leave, true);
+            _eventCache[state.AfterLeave.Name] = new StateMachineEvent(state.AfterLeave, true);
         }
 
         /// <summary>
@@ -1075,7 +955,10 @@
             State<TInstance> activityState = GetState(state.Name);
 
             foreach (IActivityBinder<TInstance> activity in eventActivities)
+            {
+
                 activity.Bind(activityState);
+            }
         }
 
         /// <summary>

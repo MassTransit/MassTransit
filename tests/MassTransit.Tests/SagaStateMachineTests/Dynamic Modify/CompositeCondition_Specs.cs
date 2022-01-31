@@ -82,7 +82,6 @@ SagaStateMachineInstance
                                 context.Instance.Second = true;
                                 context.Instance.CalledAfterAll = false;
                             }))
-                    .CompositeEvent(Third, b => b.CompositeStatus, First, Second)
                     .During(Waiting)
                         .When(Third, context => context.Instance.SecondFirst, b => b
                             .Then(context =>
@@ -92,6 +91,7 @@ SagaStateMachineInstance
                             })
                             .Finalize()
                         )
+                    .CompositeEvent(Third, b => b.CompositeStatus, First, Second)
                 );
         }
     }
