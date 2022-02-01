@@ -8,12 +8,12 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DebugSymbols>True</DebugSymbols>
-    <DebugType>embedded</DebugType>
     <NoWarn>$(NoWarn)</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
   
   <PropertyGroup>
