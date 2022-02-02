@@ -211,7 +211,7 @@
             return _stateObservers.Connect(stateObserver);
         }
 
-        public bool TryGetState(string name, out State<TInstance> state)
+        bool TryGetState(string name, out State<TInstance> state)
         {
             return _stateCache.TryGetValue(name, out state);
         }
@@ -278,12 +278,12 @@
         /// Declares an event, and initializes the event property
         /// </summary>
         /// <param name="propertyExpression"></param>
-        protected internal virtual void Event(Expression<Func<Event>> propertyExpression)
+        protected internal void Event(Expression<Func<Event>> propertyExpression)
         {
             DeclarePropertyBasedEvent(prop => DeclareTriggerEvent(prop.Name), propertyExpression.GetPropertyInfo());
         }
 
-        protected internal virtual Event Event(string name)
+        protected internal Event Event(string name)
         {
             return DeclareTriggerEvent(name);
         }
@@ -379,7 +379,7 @@
         /// <param name="propertyExpression">The containing property</param>
         /// <param name="eventPropertyExpression">The event property expression</param>
         /// <param name="configureEventCorrelation">Configuration callback for the event</param>
-        protected void Event<TProperty, T>(Expression<Func<TProperty>> propertyExpression, Expression<Func<TProperty, Event<T>>> eventPropertyExpression,
+        protected internal void Event<TProperty, T>(Expression<Func<TProperty>> propertyExpression, Expression<Func<TProperty, Event<T>>> eventPropertyExpression,
             Action<IEventCorrelationConfigurator<TInstance, T>> configureEventCorrelation)
             where TProperty : class
             where T : class
@@ -406,7 +406,7 @@
         /// </summary>
         /// <param name="propertyExpression">The property</param>
         /// <param name="eventPropertyExpression">The event property on the property</param>
-        protected internal virtual void Event<TProperty, T>(Expression<Func<TProperty>> propertyExpression,
+        protected internal void Event<TProperty, T>(Expression<Func<TProperty>> propertyExpression,
             Expression<Func<TProperty, Event<T>>> eventPropertyExpression)
             where TProperty : class
             where T : class
@@ -497,8 +497,7 @@
         /// <param name="propertyExpression">The composite event</param>
         /// <param name="trackingPropertyExpression">The property in the instance used to track the state of the composite event</param>
         /// <param name="events">The events that must be raised before the composite event is raised</param>
-        protected internal virtual Event CompositeEvent(Expression<Func<Event>> propertyExpression,
-            Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
+        protected internal Event CompositeEvent(Expression<Func<Event>> propertyExpression, Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
             params Event[] events)
         {
             return CompositeEvent(propertyExpression, trackingPropertyExpression, CompositeEventOptions.None, events);
@@ -513,10 +512,8 @@
         /// <param name="trackingPropertyExpression">The property in the instance used to track the state of the composite event</param>
         /// <param name="options">Options on the composite event</param>
         /// <param name="events">The events that must be raised before the composite event is raised</param>
-        protected internal virtual Event CompositeEvent(Expression<Func<Event>> propertyExpression,
-            Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
-            CompositeEventOptions options,
-            params Event[] events)
+        protected internal Event CompositeEvent(Expression<Func<Event>> propertyExpression, Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
+            CompositeEventOptions options, params Event[] events)
         {
             var trackingPropertyInfo = trackingPropertyExpression.GetPropertyInfo();
 
@@ -533,8 +530,7 @@
         /// <param name="propertyExpression">The composite event</param>
         /// <param name="trackingPropertyExpression">The property in the instance used to track the state of the composite event</param>
         /// <param name="events">The events that must be raised before the composite event is raised</param>
-        protected internal virtual Event CompositeEvent(Expression<Func<Event>> propertyExpression,
-            Expression<Func<TInstance, int>> trackingPropertyExpression,
+        protected internal Event CompositeEvent(Expression<Func<Event>> propertyExpression, Expression<Func<TInstance, int>> trackingPropertyExpression,
             params Event[] events)
         {
             return CompositeEvent(propertyExpression, trackingPropertyExpression, CompositeEventOptions.None, events);
@@ -549,10 +545,8 @@
         /// <param name="trackingPropertyExpression">The property in the instance used to track the state of the composite event</param>
         /// <param name="options">Options on the composite event</param>
         /// <param name="events">The events that must be raised before the composite event is raised</param>
-        protected internal virtual Event CompositeEvent(Expression<Func<Event>> propertyExpression,
-            Expression<Func<TInstance, int>> trackingPropertyExpression,
-            CompositeEventOptions options,
-            params Event[] events)
+        protected internal Event CompositeEvent(Expression<Func<Event>> propertyExpression, Expression<Func<TInstance, int>> trackingPropertyExpression,
+            CompositeEventOptions options, params Event[] events)
         {
             var trackingPropertyInfo = trackingPropertyExpression.GetPropertyInfo();
 
@@ -561,61 +555,50 @@
             return CompositeEvent(propertyExpression, accessor, options, events);
         }
 
-        internal virtual Event CompositeEvent(string name,
-            Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
-            params Event[] events)
+        internal Event CompositeEvent(string name, Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression, params Event[] events)
         {
             return CompositeEvent(name, trackingPropertyExpression, CompositeEventOptions.None, events);
         }
 
-        internal virtual Event CompositeEvent(string name,
-            Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
-            CompositeEventOptions options,
+        protected internal Event CompositeEvent(string name, Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression, CompositeEventOptions options,
             params Event[] events)
         {
             return CompositeEvent(name, new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), options, events);
         }
 
-        internal virtual Event CompositeEvent(string name,
-            Expression<Func<TInstance, int>> trackingPropertyExpression,
-            params Event[] events)
+        internal Event CompositeEvent(string name, Expression<Func<TInstance, int>> trackingPropertyExpression, params Event[] events)
         {
             return CompositeEvent(name, trackingPropertyExpression, CompositeEventOptions.None, events);
         }
 
-        internal virtual Event CompositeEvent(string name,
-            Expression<Func<TInstance, int>> trackingPropertyExpression,
-            CompositeEventOptions options,
+        protected internal Event CompositeEvent(string name, Expression<Func<TInstance, int>> trackingPropertyExpression, CompositeEventOptions options,
             params Event[] events)
         {
-            return CompositeEvent(name, new IntCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()),
-                options, events);
+            return CompositeEvent(name, new IntCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), options, events);
         }
 
-        protected internal virtual Event CompositeEvent(Event @event,
-            Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
+        protected internal Event CompositeEvent(Event @event, Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
             params Event[] events)
         {
             return CompositeEvent(@event, trackingPropertyExpression, CompositeEventOptions.None, events);
         }
 
-        protected internal virtual Event CompositeEvent(Event @event,
+        protected internal Event CompositeEvent(Event @event,
             Expression<Func<TInstance, CompositeEventStatus>> trackingPropertyExpression,
             CompositeEventOptions options,
             params Event[] events)
         {
-            return CompositeEvent(@event, new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()),
-                options, events);
+            return CompositeEvent(@event, new StructCompositeEventStatusAccessor<TInstance>(trackingPropertyExpression.GetPropertyInfo()), options, events);
         }
 
-        protected internal virtual Event CompositeEvent(Event @event,
+        protected internal Event CompositeEvent(Event @event,
             Expression<Func<TInstance, int>> trackingPropertyExpression,
             params Event[] events)
         {
             return CompositeEvent(@event, trackingPropertyExpression, CompositeEventOptions.None, events);
         }
 
-        protected internal virtual Event CompositeEvent(Event @event,
+        protected internal Event CompositeEvent(Event @event,
             Expression<Func<TInstance, int>> trackingPropertyExpression,
             CompositeEventOptions options,
             params Event[] events)
@@ -633,11 +616,9 @@
 
                 var @event = new TriggerEvent(eventProperty.Name);
 
-                _compositeEvents.Add(@event.Name);
-
                 ConfigurationHelpers.InitializeEvent(this, eventProperty, @event);
 
-                _eventCache[eventProperty.Name] = new StateMachineEvent<TInstance>(@event, false, events, accessor);
+                _eventCache[eventProperty.Name] = new StateMachineEvent<TInstance>(@event, false);
 
                 return @event;
             }
@@ -645,15 +626,13 @@
             return CompositeEvent(CreateEvent(), accessor, options, events);
         }
 
-        Event CompositeEvent(string name, ICompositeEventStatusAccessor<TInstance> accessor,
-            CompositeEventOptions options, Event[] events)
+        Event CompositeEvent(string name, ICompositeEventStatusAccessor<TInstance> accessor, CompositeEventOptions options, Event[] events)
         {
             Event CreateEvent()
             {
                 var @event = new TriggerEvent(name);
-                _compositeEvents.Add(@event.Name);
 
-                _eventCache[name] = new StateMachineEvent<TInstance>(@event, false, events, accessor);
+                _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
 
                 return @event;
             }
@@ -684,8 +663,13 @@
 
                 bool Filter(State<TInstance> state)
                 {
-                    return (options.HasFlag(CompositeEventOptions.IncludeInitial) || !Equals(state, Initial)) &&
-                        (options.HasFlag(CompositeEventOptions.IncludeFinal) || !Equals(state, Final));
+                    if (Equals(state, Initial))
+                        return options.HasFlag(CompositeEventOptions.IncludeInitial);
+
+                    if (Equals(state, Final))
+                        return options.HasFlag(CompositeEventOptions.IncludeFinal);
+
+                    return true;
                 }
 
                 List<State<TInstance>> states = _stateCache.Values.Where(Filter).ToList();
@@ -719,14 +703,14 @@
         /// Declares a state on the state machine, and initialized the property
         /// </summary>
         /// <param name="propertyExpression">The state property</param>
-        protected internal virtual void State(Expression<Func<State>> propertyExpression)
+        protected internal void State(Expression<Func<State>> propertyExpression)
         {
             var property = propertyExpression.GetPropertyInfo();
 
             DeclareState(property);
         }
 
-        protected internal virtual State<TInstance> State(string name)
+        protected internal State<TInstance> State(string name)
         {
             if (TryGetState(name, out State<TInstance> foundState))
                 return foundState;
@@ -760,7 +744,7 @@
         /// </summary>
         /// <param name="propertyExpression">The property containing the state</param>
         /// <param name="statePropertyExpression">The state property</param>
-        protected internal virtual void State<TProperty>(Expression<Func<TProperty>> propertyExpression,
+        protected internal void State<TProperty>(Expression<Func<TProperty>> propertyExpression,
             Expression<Func<TProperty, State>> statePropertyExpression)
             where TProperty : class
         {
@@ -803,7 +787,7 @@
         /// </summary>
         /// <param name="propertyExpression">The state property expression</param>
         /// <param name="superState">The superstate of which this state is a substate</param>
-        protected internal virtual void SubState(Expression<Func<State>> propertyExpression, State superState)
+        protected internal void SubState(Expression<Func<State>> propertyExpression, State superState)
         {
             if (superState == null)
                 throw new ArgumentNullException(nameof(superState));
@@ -828,7 +812,7 @@
             SetState(name, state);
         }
 
-        protected internal virtual State<TInstance> SubState(string name, State superState)
+        protected internal State<TInstance> SubState(string name, State superState)
         {
             if (superState == null)
                 throw new ArgumentNullException(nameof(superState));
@@ -853,7 +837,7 @@
         /// <param name="propertyExpression">The property containing the state</param>
         /// <param name="statePropertyExpression">The state property</param>
         /// <param name="superState">The superstate of which this state is a substate</param>
-        protected internal virtual void SubState<TProperty>(Expression<Func<TProperty>> propertyExpression,
+        protected internal void SubState<TProperty>(Expression<Func<TProperty>> propertyExpression,
             Expression<Func<TProperty, State>> statePropertyExpression, State superState)
             where TProperty : class
         {
@@ -971,7 +955,7 @@
                 BindActivitiesToState(state, activitiesBinder);
         }
 
-        void BindActivitiesToState(State state, IEnumerable<IActivityBinder<TInstance>> eventActivities)
+        void BindActivitiesToState(State state, IActivityBinder<TInstance>[] eventActivities)
         {
             State<TInstance> activityState = GetState(state.Name);
 
@@ -1010,12 +994,19 @@
         /// <param name="activities">The event and activities</param>
         protected internal void DuringAny(params EventActivities<TInstance>[] activities)
         {
+            IActivityBinder<TInstance>[] activitiesBinder = activities.SelectMany(x => x.GetStateActivityBinders()).ToArray();
+
             IEnumerable<State<TInstance>> states = _stateCache.Values.Where(x => !Equals(x, Initial) && !Equals(x, Final));
 
-            // we only add DuringAny event handlers to non-initial and non-final states to avoid
+            // We only add DuringAny event handlers to non-initial and non-final states to avoid
             // reviving finalized state machine instances or creating new ones accidentally.
             foreach (State<TInstance> state in states)
-                During(state, activities);
+                BindActivitiesToState(state, activitiesBinder);
+
+            // Specifically bind CompositeEvents to Initial and Final states to avoid them not being able to be fired.
+            IActivityBinder<TInstance>[] compositeEvents = activitiesBinder.Where(binder => IsCompositeEvent(binder.Event)).ToArray();
+            BindActivitiesToState(_initial, compositeEvents);
+            BindActivitiesToState(_final, compositeEvents);
 
             BindTransitionEvents(_initial, activities);
             BindTransitionEvents(_final, activities);
@@ -1387,7 +1378,7 @@
         /// <typeparam name="TResponse">The response type</typeparam>
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
-        protected void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
+        protected internal void Request<TRequest, TResponse>(Expression<Func<Request<TInstance, TRequest, TResponse>>> propertyExpression,
             RequestSettings settings)
             where TRequest : class
             where TResponse : class
@@ -1471,7 +1462,7 @@
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="requestIdExpression">The property where the requestId is stored</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
-        protected void Request<TRequest, TResponse, TResponse2>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
+        protected internal void Request<TRequest, TResponse, TResponse2>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
             where TRequest : class
             where TResponse : class
@@ -1512,7 +1503,7 @@
         /// <typeparam name="TResponse2">The alternate response type</typeparam>
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
-        protected void Request<TRequest, TResponse, TResponse2>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
+        protected internal void Request<TRequest, TResponse, TResponse2>(Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2>>> propertyExpression,
             RequestSettings settings)
             where TRequest : class
             where TResponse : class
@@ -1607,7 +1598,7 @@
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="requestIdExpression">The property where the requestId is stored</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
-        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
+        protected internal void Request<TRequest, TResponse, TResponse2, TResponse3>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> requestIdExpression, RequestSettings settings)
             where TRequest : class
@@ -1655,7 +1646,7 @@
         /// <typeparam name="TResponse3"></typeparam>
         /// <param name="propertyExpression">The request property on the state machine</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
-        protected void Request<TRequest, TResponse, TResponse2, TResponse3>(
+        protected internal void Request<TRequest, TResponse, TResponse2, TResponse3>(
             Expression<Func<Request<TInstance, TRequest, TResponse, TResponse2, TResponse3>>> propertyExpression,
             RequestSettings settings)
             where TRequest : class
@@ -1714,7 +1705,7 @@
         /// <param name="propertyExpression">The schedule property on the state machine</param>
         /// <param name="tokenIdExpression">The property where the tokenId is stored</param>
         /// <param name="settings">The request settings (which can be read from configuration, etc.)</param>
-        protected void Schedule<TMessage>(Expression<Func<Schedule<TInstance, TMessage>>> propertyExpression,
+        protected internal void Schedule<TMessage>(Expression<Func<Schedule<TInstance, TMessage>>> propertyExpression,
             Expression<Func<TInstance, Guid?>> tokenIdExpression,
             ScheduleSettings<TInstance, TMessage> settings)
             where TMessage : class
@@ -1997,7 +1988,7 @@
             }
 
 
-            public class StateRegistration<TStateMachine> :
+            class StateRegistration<TStateMachine> :
                 StateMachineRegistration
                 where TStateMachine : MassTransitStateMachine<TInstance>
             {
@@ -2020,7 +2011,7 @@
             }
 
 
-            public class TriggerEventRegistration<TStateMachine> :
+            class TriggerEventRegistration<TStateMachine> :
                 StateMachineRegistration
                 where TStateMachine : MassTransitStateMachine<TInstance>
             {
@@ -2043,7 +2034,7 @@
             }
 
 
-            public class DataEventRegistration<TStateMachine, TData> :
+            class DataEventRegistration<TStateMachine, TData> :
                 StateMachineRegistration
                 where TStateMachine : MassTransitStateMachine<TInstance>
                 where TData : class
