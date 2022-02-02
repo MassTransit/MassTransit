@@ -283,14 +283,14 @@
             DeclarePropertyBasedEvent(prop => DeclareTriggerEvent(prop.Name), propertyExpression.GetPropertyInfo());
         }
 
-        protected internal virtual Event Event(string name, bool isComposite = false)
+        protected internal virtual Event Event(string name)
         {
-            return DeclareTriggerEvent(name, isComposite);
+            return DeclareTriggerEvent(name);
         }
 
-        Event DeclareTriggerEvent(string name, bool isComposite = false)
+        Event DeclareTriggerEvent(string name)
         {
-            return DeclareEvent(_ => new TriggerEvent(name, isComposite), name);
+            return DeclareEvent(_ => new TriggerEvent(name), name);
         }
 
         /// <summary>
@@ -633,11 +633,9 @@
 
                 var @event = new TriggerEvent(eventProperty.Name);
 
-                _compositeEvents.Add(@event.Name);
-
                 ConfigurationHelpers.InitializeEvent(this, eventProperty, @event);
 
-                _eventCache[eventProperty.Name] = new StateMachineEvent<TInstance>(@event, false, events, accessor);
+                _eventCache[eventProperty.Name] = new StateMachineEvent<TInstance>(@event, false);
 
                 return @event;
             }
@@ -651,9 +649,8 @@
             Event CreateEvent()
             {
                 var @event = new TriggerEvent(name);
-                _compositeEvents.Add(@event.Name);
 
-                _eventCache[name] = new StateMachineEvent<TInstance>(@event, false, events, accessor);
+                _eventCache[name] = new StateMachineEvent<TInstance>(@event, false);
 
                 return @event;
             }
@@ -1012,10 +1009,16 @@
         {
             IEnumerable<State<TInstance>> states = _stateCache.Values.Where(x => !Equals(x, Initial) && !Equals(x, Final));
 
-            // we only add DuringAny event handlers to non-initial and non-final states to avoid
+            // We only add DuringAny event handlers to non-initial and non-final states to avoid
             // reviving finalized state machine instances or creating new ones accidentally.
+            IActivityBinder<TInstance>[] activitiesBinder = activities.SelectMany(x => x.GetStateActivityBinders()).ToArray();
             foreach (State<TInstance> state in states)
                 During(state, activities);
+
+            // Specifically bind CompositeEvents to Initial and Final states to avoid them not being able to be fired.
+            IActivityBinder<TInstance>[] compositeEvents = activitiesBinder.Where(binder => IsCompositeEvent(binder.Event)).ToArray();
+            BindActivitiesToState(_initial, compositeEvents);
+            BindActivitiesToState(_final, compositeEvents);
 
             BindTransitionEvents(_initial, activities);
             BindTransitionEvents(_final, activities);

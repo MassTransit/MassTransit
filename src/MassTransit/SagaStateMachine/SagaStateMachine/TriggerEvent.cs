@@ -7,12 +7,10 @@
         Event
     {
         readonly string _name;
-        public bool IsComposite { get; set; }
 
-        public TriggerEvent(string name, bool isComposite = false)
+        public TriggerEvent(string name)
         {
             _name = name;
-            IsComposite = isComposite;
         }
 
         public string Name => _name;
